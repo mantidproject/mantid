@@ -66,7 +66,7 @@ Output:
     :options: +NORMALIZE_WHITESPACE
 
     The result file has the following python recorded
-    CreateSampleWorkspace(OutputWorkspace='ws',WorkspaceType='Event',Function='Multiple Peaks',UserDefinedFunction='',NumBanks='2',NumMonitors='0',BankPixelWidth='10',NumEvents='1000',Random='0',XUnit='TOF',XMin='0',XMax='20000',BinWidth='200',PixelSpacing='0.0080000000000000002',BankDistanceFromSample='5',SourceDistanceFromSample='10')
+    CreateSampleWorkspace(OutputWorkspace='ws',WorkspaceType='Event',Function='Multiple Peaks',UserDefinedFunction='',NumBanks='2',NumMonitors='0',BankPixelWidth='10',NumEvents='1000',Random='0',XUnit='TOF',XMin='0',XMax='20000',BinWidth='200',PixelSpacing='0.0080000000000000002',BankDistanceFromSample='5',SourceDistanceFromSample='10',NumScanPoints='1')
     CreateFlatEventWorkspace(InputWorkspace='ws',RangeStart='15000',RangeEnd='18000',OutputWorkspace='wsOut')
     RebinToWorkspace(WorkspaceToRebin='wsOut',WorkspaceToMatch='ws',OutputWorkspace='wsOut',PreserveEvents='1')
 

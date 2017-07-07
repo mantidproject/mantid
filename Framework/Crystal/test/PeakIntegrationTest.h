@@ -1,18 +1,19 @@
 #ifndef MANTID_CRYSTAL_PeakIntegrationTEST_H_
 #define MANTID_CRYSTAL_PeakIntegrationTEST_H_
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidCrystal/PeakIntegration.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/Axis.h"
 
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>

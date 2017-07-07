@@ -4,8 +4,10 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
-#include <MantidKernel/StringTokenizer.h>
 #include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/StringTokenizer.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Geometry {

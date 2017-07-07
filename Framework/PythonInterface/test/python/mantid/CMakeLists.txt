@@ -20,4 +20,4 @@ if ( MAKE_VATES )
 endif ()
 
 # Prefix for test=PythonInterface
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterface ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python. ${TEST_PY_FILES} )

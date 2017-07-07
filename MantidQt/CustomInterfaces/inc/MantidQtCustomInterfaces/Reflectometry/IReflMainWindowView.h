@@ -39,18 +39,13 @@ public:
   /// Destructor
   virtual ~IReflMainWindowView(){};
 
-  /// Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) = 0;
-  virtual bool askUserYesNo(const std::string &prompt,
-                            const std::string &title) = 0;
-  virtual void giveUserWarning(const std::string &prompt,
-                               const std::string &title) = 0;
+  /// Dialog to show an error message
   virtual void giveUserCritical(const std::string &prompt,
                                 const std::string &title) = 0;
+  /// Dialog to show information
   virtual void giveUserInfo(const std::string &prompt,
                             const std::string &title) = 0;
+  /// Run a python algorithm
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
 };
 }

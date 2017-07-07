@@ -53,7 +53,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QUrl>
 #include <QWebHistory>
 #include <QWebView>
-#include <iostream>
 
 using MantidQt::API::MantidDesktopServices;
 
@@ -305,7 +304,7 @@ void pqHelpWindow::errorMissingPage(const QUrl& url)
 //-----------------------------------------------------------------------------
 void pqHelpWindow::showPage(const QString& url)
 {
-  this->showPage(QUrl(url));
+  this->showPage(QUrl::fromUserInput(url));
 }
 
 //-----------------------------------------------------------------------------

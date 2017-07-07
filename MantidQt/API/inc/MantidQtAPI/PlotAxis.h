@@ -5,7 +5,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/ClassMacros.h"
 
 #include <QString>
 #include <string>
@@ -49,12 +48,13 @@ public:
   PlotAxis(const bool plottingDistribution,
            const Mantid::API::MatrixWorkspace &workspace);
 
+  /// Disable default constructor
+  PlotAxis() = delete;
+
   /// Create a new axis title
   QString title() const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(PlotAxis)
-
   /// Creates a title suitable for an axis attached to the given index
   void titleFromIndex(const Mantid::API::IMDWorkspace &workspace,
                       const size_t index);

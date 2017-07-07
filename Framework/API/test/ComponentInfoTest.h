@@ -37,10 +37,11 @@ public:
 
   void test_size() {
 
-    std::vector<size_t> detectorIndices{}; // No detectors in this example
-    std::vector<std::pair<size_t, size_t>> ranges;
-    ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
-    ranges.push_back(
+    auto detectorIndices = boost::make_shared<
+        std::vector<size_t>>(); // No detectors in this example
+    auto ranges = boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+    ranges->push_back(std::make_pair(0, 0)); // One component with no detectors
+    ranges->push_back(
         std::make_pair(0, 0)); // Another component with no detectors
     Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
     Mantid::Geometry::ObjComponent comp1("component1");
@@ -56,10 +57,11 @@ public:
 
   void test_equality() {
 
-    std::vector<size_t> detectorIndices{}; // No detectors in this example
-    std::vector<std::pair<size_t, size_t>> ranges;
-    ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
-    ranges.push_back(
+    auto detectorIndices = boost::make_shared<
+        std::vector<size_t>>(); // No detectors in this example
+    auto ranges = boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+    ranges->push_back(std::make_pair(0, 0)); // One component with no detectors
+    ranges->push_back(
         std::make_pair(0, 0)); // Another component with no detectors
     Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
     Mantid::Geometry::ObjComponent comp1("component1");
@@ -85,10 +87,11 @@ public:
 
   void test_indexOf() {
 
-    std::vector<size_t> detectorIndices{}; // No detectors in this example
-    std::vector<std::pair<size_t, size_t>> ranges;
-    ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
-    ranges.push_back(
+    auto detectorIndices = boost::make_shared<
+        std::vector<size_t>>(); // No detectors in this example
+    auto ranges = boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+    ranges->push_back(std::make_pair(0, 0)); // One component with no detectors
+    ranges->push_back(
         std::make_pair(0, 0)); // Another component with no detectors
     Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
     Mantid::Geometry::ObjComponent comp1("component1");
@@ -114,10 +117,11 @@ public:
     | 0  | 2
     */
 
-    std::vector<size_t> detectorIndices{0, 2, 1};
-    std::vector<std::pair<size_t, size_t>> ranges;
-    ranges.push_back(std::make_pair(0, 3));
-    ranges.push_back(std::make_pair(2, 3));
+    auto detectorIndices = boost::make_shared<std::vector<size_t>>(
+        std::vector<size_t>{0, 2, 1}); // No detectors in this example
+    auto ranges = boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+    ranges->push_back(std::make_pair(0, 3));
+    ranges->push_back(std::make_pair(2, 3));
     Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
     Mantid::Geometry::ObjComponent fakeComposite1("fakeComp1");
     Mantid::Geometry::ObjComponent fakeComposite2("fakeComp2");

@@ -1,23 +1,32 @@
 #include "MantidAlgorithms/CreateWorkspace.h"
 
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/InvisibleProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidIndexing/GlobalSpectrumIndex.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
+#include "MantidHistogramData/HistogramBuilder.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 using namespace HistogramData;
+using namespace Indexing;
 
 DECLARE_ALGORITHM(CreateWorkspace)
 
@@ -61,6 +70,16 @@ void CreateWorkspace::init() {
                                                    Direction::Input,
                                                    PropertyMode::Optional),
                   "Name of a parent workspace.");
+  std::vector<std::string> propOptions{
+      Parallel::toString(Parallel::StorageMode::Cloned),
+      Parallel::toString(Parallel::StorageMode::Distributed),
+      Parallel::toString(Parallel::StorageMode::MasterOnly)};
+  declareProperty(
+      "ParallelStorageMode", Parallel::toString(Parallel::StorageMode::Cloned),
+      boost::make_shared<StringListValidator>(propOptions),
+      "The parallel storage mode of the output workspace for MPI builds");
+  setPropertySettings("ParallelStorageMode",
+                      Kernel::make_unique<InvisibleProperty>());
 }
 
 /// Input validation
@@ -128,21 +147,20 @@ void CreateWorkspace::exec() {
   // every spectrum
   const bool commonX(dataX.size() == ySize || dataX.size() == ySize + 1);
 
-  std::size_t xSize;
-  Kernel::cow_ptr<HistogramX> XValues(nullptr);
+  std::size_t xSize{dataX.size()};
+  HistogramBuilder histogramBuilder;
   if (commonX) {
-    xSize = dataX.size();
-    XValues = Kernel::make_cow<HistogramX>(dataX);
+    histogramBuilder.setX(dataX);
   } else {
-    if (dataX.size() % nSpec != 0) {
+    if (xSize % nSpec != 0) {
       throw std::invalid_argument("Length of DataX must be divisible by NSpec");
     }
-
-    xSize = static_cast<int>(dataX.size()) / nSpec;
-    if (xSize < ySize || xSize > ySize + 1) {
-      throw std::runtime_error("DataX width must be as DataY or +1");
-    }
+    xSize /= nSpec;
+    histogramBuilder.setX(xSize);
   }
+  histogramBuilder.setY(ySize);
+  histogramBuilder.setDistribution(getProperty("Distribution"));
+  auto histogram = histogramBuilder.build();
 
   const bool dataE_provided = !dataE.empty();
   if (dataE_provided && dataY.size() != dataE.size()) {
@@ -154,39 +172,51 @@ void CreateWorkspace::exec() {
   MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
   MatrixWorkspace_sptr outputWS;
   if (parentWS) {
-    // if parent is defined use it to initialise the workspace
-    outputWS =
-        WorkspaceFactory::Instance().create(parentWS, nSpec, xSize, ySize);
+    outputWS = create<HistoWorkspace>(*parentWS, nSpec, histogram);
   } else {
-    // otherwise create a blank workspace
-    outputWS =
-        WorkspaceFactory::Instance().create("Workspace2D", nSpec, xSize, ySize);
+    auto storageMode = Parallel::fromString(getProperty("ParallelStorageMode"));
+    IndexInfo indexInfo(nSpec, storageMode, communicator());
+    outputWS = create<Workspace2D>(indexInfo, histogram);
   }
 
-  Progress progress(this, 0, 1, nSpec);
+  Progress progress(this, 0.0, 1.0, nSpec);
+  const auto &indexInfo = outputWS->indexInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < nSpec; i++) {
     PARALLEL_START_INTERUPT_REGION
 
+    // In an MPI run the global index i is not necessarily on this rank, i.e.,
+    // there might not be a corrsponding workspace index.
+    const auto localIndices =
+        indexInfo.makeIndexSet({static_cast<GlobalSpectrumIndex>(i)});
+    if (localIndices.empty())
+      continue;
+
     const std::vector<double>::difference_type xStart = i * xSize;
     const std::vector<double>::difference_type xEnd = xStart + xSize;
     const std::vector<double>::difference_type yStart = i * ySize;
     const std::vector<double>::difference_type yEnd = yStart + ySize;
+    auto local_i = localIndices[0];
+
+    if (!parentWS) {
+      // There is no instrument so setting detector IDs makes no sense, but if
+      // we don't we break quite a few unit tests relying on this legacy
+      // behavior.
+      outputWS->getSpectrum(local_i).setDetectorID(i + 1);
+    }
 
     // Just set the pointer if common X bins. Otherwise, copy in the right chunk
     // (as we do for Y).
-    if (commonX) {
-      outputWS->setSharedX(i, XValues);
-    } else {
-      outputWS->mutableX(i)
+    if (!commonX)
+      outputWS->mutableX(local_i)
           .assign(dataX.begin() + xStart, dataX.begin() + xEnd);
-    }
 
-    outputWS->mutableY(i).assign(dataY.begin() + yStart, dataY.begin() + yEnd);
+    outputWS->mutableY(local_i)
+        .assign(dataY.begin() + yStart, dataY.begin() + yEnd);
 
     if (dataE_provided)
-      outputWS->mutableE(i)
+      outputWS->mutableE(local_i)
           .assign(dataE.begin() + yStart, dataE.begin() + yEnd);
 
     progress.report();
@@ -238,9 +268,6 @@ void CreateWorkspace::exec() {
     }
   }
 
-  // Set distribution flag
-  outputWS->setDistribution(getProperty("Distribution"));
-
   // Set Y Unit label
   if (!parentWS || !getPropertyValue("YUnitLabel").empty()) {
     outputWS->setYUnitLabel(getProperty("YUnitLabel"));
@@ -253,6 +280,25 @@ void CreateWorkspace::exec() {
 
   // Set OutputWorkspace property
   setProperty("OutputWorkspace", outputWS);
+}
+
+Parallel::ExecutionMode CreateWorkspace::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  const auto storageMode =
+      Parallel::fromString(getProperty("ParallelStorageMode"));
+  if (!storageModes.empty())
+    if (storageModes.begin()->second != storageMode)
+      throw std::invalid_argument("Input workspace storage mode differs from "
+                                  "requested output workspace storage mode.");
+  return Parallel::getCorrespondingExecutionMode(storageMode);
+}
+
+void CreateWorkspace::execNonMaster() {
+  MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
+  if (parentWS)
+    return Algorithm::execNonMaster();
+  setProperty("OutputWorkspace", Kernel::make_unique<Workspace2D>(
+                                     Parallel::StorageMode::MasterOnly));
 }
 
 } // Algorithms

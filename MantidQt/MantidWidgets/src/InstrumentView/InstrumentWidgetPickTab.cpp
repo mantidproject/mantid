@@ -575,10 +575,9 @@ void InstrumentWidgetPickTab::initSurface() {
     connect(p3d, SIGNAL(finishedMove()), this,
             SLOT(updatePlotMultipleDetectors()));
   }
-  m_infoController = new ComponentInfoController(
-      this, m_instrWidget->getInstrumentActor(), m_selectionInfoDisplay);
-  m_plotController = new DetectorPlotController(
-      this, m_instrWidget->getInstrumentActor(), m_plot);
+  m_infoController =
+      new ComponentInfoController(this, m_instrWidget, m_selectionInfoDisplay);
+  m_plotController = new DetectorPlotController(this, m_instrWidget, m_plot);
   m_plotController->setTubeXUnits(
       static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache));
   m_plotController->setPlotType(
@@ -797,13 +796,13 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
 /**
 * Create and setup iteself.
 * @param tab :: QObject parent - the tab.
-* @param instrActor :: A pointer to the InstrumentActor instance.
+* @param instrWidget :: A pointer to an InstrumentWidget instance.
 * @param infoDisplay :: Widget on which to display the information.
 */
-ComponentInfoController::ComponentInfoController(InstrumentWidgetPickTab *tab,
-                                                 InstrumentActor *instrActor,
-                                                 QTextEdit *infoDisplay)
-    : QObject(tab), m_tab(tab), m_instrActor(instrActor),
+ComponentInfoController::ComponentInfoController(
+    InstrumentWidgetPickTab *tab, const InstrumentWidget *instrWidget,
+    QTextEdit *infoDisplay)
+    : QObject(tab), m_tab(tab), m_instrWidget(instrWidget),
       m_selectionInfoDisplay(infoDisplay), m_freezePlot(false),
       m_instrWidgetBlocked(false), m_currentPickID(-1) {}
 
@@ -817,11 +816,12 @@ void ComponentInfoController::displayInfo(size_t pickID) {
     pickID = m_currentPickID;
   }
 
+  const auto &actor = m_instrWidget->getInstrumentActor();
   QString text = "";
-  int detid = m_instrActor->getDetID(pickID);
+  int detid = actor.getDetID(pickID);
   if (detid >= 0) {
     text += displayDetectorInfo(detid);
-  } else if (auto componentID = m_instrActor->getComponentID(pickID)) {
+  } else if (auto componentID = actor.getComponentID(pickID)) {
     text += displayNonDetectorInfo(componentID);
   } else {
     clear();
@@ -849,13 +849,14 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
   QString text;
   if (detid >= 0) {
     // collect info about selected detector and add it to text
-    auto &det = m_instrActor->getDetectorByDetID(detid);
+    const auto &actor = m_instrWidget->getInstrumentActor();
+    auto &det = actor.getDetectorByDetID(detid);
 
     text = "Selected detector: " + QString::fromStdString(det.getName()) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
     QString wsIndex;
     try {
-      wsIndex = QString::number(m_instrActor->getWorkspaceIndex(detid));
+      wsIndex = QString::number(actor.getWorkspaceIndex(detid));
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       // Detector doesn't have a workspace index relating to it
       wsIndex = "None";
@@ -882,7 +883,7 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
       text += "Component path:" + textpath + "/" +
               QString::fromStdString(det.getName()) + '\n';
     }
-    const double integrated = m_instrActor->getIntegratedCounts(detid);
+    const double integrated = actor.getIntegratedCounts(detid);
     const QString counts =
         integrated == -1.0 ? "N/A" : QString::number(integrated);
     text += "Counts: " + counts + '\n';
@@ -899,17 +900,19 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
 */
 QString ComponentInfoController::displayNonDetectorInfo(
     Mantid::Geometry::ComponentID compID) {
-  auto &component = *m_instrActor->getInstrument()->getComponentByID(compID);
+  auto component =
+      m_instrWidget->getInstrumentActor().getInstrument()->getComponentByID(
+          compID);
   QString text = "Selected component: ";
-  text += QString::fromStdString(component.getName()) + '\n';
-  Mantid::Kernel::V3D pos = component.getPos();
+  text += QString::fromStdString(component->getName()) + '\n';
+  Mantid::Kernel::V3D pos = component->getPos();
   text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) +
           "," + QString::number(pos.Z()) + '\n';
   double r, t, p;
   pos.getSpherical(r, t, p);
   text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
           QString::number(p) + '\n';
-  text += getParameterInfo(component);
+  text += getParameterInfo(*component);
   return text;
 }
 
@@ -1112,13 +1115,13 @@ void ComponentInfoController::clear() { m_selectionInfoDisplay->clear(); }
 /**
 * Constructor.
 * @param tab :: The parent tab.
-* @param instrActor :: A pointer to the InstrumentActor.
+* @param instrWidget :: A pointer to a InstrumentWidget instance.
 * @param plot :: The plot widget.
 */
 DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
-                                               InstrumentActor *instrActor,
+                                               InstrumentWidget *instrWidget,
                                                OneCurvePlot *plot)
-    : QObject(tab), m_tab(tab), m_instrActor(instrActor), m_plot(plot),
+    : QObject(tab), m_tab(tab), m_instrWidget(instrWidget), m_plot(plot),
       m_plotType(Single), m_enabled(true), m_tubeXUnits(DETECTOR_ID),
       m_currentDetID(-1) {
   connect(m_plot, SIGNAL(clickedAt(double, double)), this,
@@ -1137,7 +1140,7 @@ void DetectorPlotController::setPlotData(size_t pickID) {
     m_plotType = Single;
   }
 
-  int detid = m_instrActor->getDetID(pickID);
+  const int detid = m_instrWidget->getInstrumentActor().getDetID(pickID);
 
   if (!m_enabled) {
     m_plot->clearCurve();
@@ -1167,12 +1170,12 @@ void DetectorPlotController::setPlotData(QList<int> detIDs) {
   clear();
   std::vector<double> x, y;
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  m_instrActor->sumDetectors(detIDs, x, y,
-                             static_cast<size_t>(m_plot->width()));
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  actor.sumDetectors(detIDs, x, y, static_cast<size_t>(m_plot->width()));
   QApplication::restoreOverrideCursor();
   if (!x.empty()) {
     m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                    m_instrActor->getWorkspace()->getAxis(0)->unit()->unitID());
+                    actor.getWorkspace()->getAxis(0)->unit()->unitID());
   }
   m_plot->setLabel("multiple");
 }
@@ -1207,7 +1210,11 @@ void DetectorPlotController::plotSingle(int detid) {
 
   // set the data
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  m_instrActor->getWorkspace()->getAxis(0)->unit()->unitID());
+                  m_instrWidget->getInstrumentActor()
+                      .getWorkspace()
+                      ->getAxis(0)
+                      ->unit()
+                      ->unitID());
   m_plot->setLabel("Detector " + QString::number(detid));
 
   // find any markers
@@ -1235,8 +1242,8 @@ void DetectorPlotController::plotSingle(int detid) {
 *   with this id.
 */
 void DetectorPlotController::plotTube(int detid) {
-  auto ws = m_instrActor->getWorkspace();
-  auto &det = m_instrActor->getDetectorByDetID(detid);
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  auto &det = actor.getDetectorByDetID(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent =
       det.getParent();
   Mantid::Geometry::ICompAssembly_const_sptr ass =
@@ -1270,12 +1277,13 @@ void DetectorPlotController::plotTubeSums(int detid) {
     clear();
     return;
   }
-  auto &det = m_instrActor->getDetectorByDetID(detid);
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  auto &det = actor.getDetectorByDetID(detid);
   auto parent = det.getParent();
   QString label = QString::fromStdString(parent->getName()) + " (" +
                   QString::number(detid) + ") Sum";
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  m_instrActor->getWorkspace()->getAxis(0)->unit()->unitID());
+                  actor.getWorkspace()->getAxis(0)->unit()->unitID());
   m_plot->setLabel(label);
 }
 
@@ -1292,7 +1300,7 @@ void DetectorPlotController::plotTubeSums(int detid) {
 *   with this id.
 */
 void DetectorPlotController::plotTubeIntegrals(int detid) {
-  auto &det = m_instrActor->getDetectorByDetID(detid);
+  auto &det = m_instrWidget->getInstrumentActor().getDetectorByDetID(detid);
   std::vector<double> x, y;
   prepareDataForIntegralsPlot(detid, x, y);
   if (x.empty() || y.empty()) {
@@ -1324,10 +1332,11 @@ void DetectorPlotController::plotTubeIntegrals(int detid) {
 void DetectorPlotController::prepareDataForSinglePlot(
     int detid, std::vector<double> &x, std::vector<double> &y,
     std::vector<double> *err) {
-  Mantid::API::MatrixWorkspace_const_sptr ws = m_instrActor->getWorkspace();
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
   size_t wi;
   try {
-    wi = m_instrActor->getWorkspaceIndex(detid);
+    wi = actor.getWorkspaceIndex(detid);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     return; // Detector doesn't have a workspace index relating to it
   }
@@ -1338,7 +1347,7 @@ void DetectorPlotController::prepareDataForSinglePlot(
 
   // find min and max for x
   size_t imin, imax;
-  m_instrActor->getBinMinMaxIndex(wi, imin, imax);
+  actor.getBinMinMaxIndex(wi, imin, imax);
 
   x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
   y.assign(Y.begin() + imin, Y.begin() + imax);
@@ -1360,19 +1369,20 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
                                                     std::vector<double> &x,
                                                     std::vector<double> &y,
                                                     std::vector<double> *err) {
-  auto ws = m_instrActor->getWorkspace();
-  auto &det = m_instrActor->getDetectorByDetID(detid);
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  auto ws = actor.getWorkspace();
+  auto &det = actor.getDetectorByDetID(detid);
   auto parent = det.getParent();
   auto ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
       parent);
   size_t wi;
   try {
-    wi = m_instrActor->getWorkspaceIndex(detid);
+    wi = actor.getWorkspaceIndex(detid);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     return; // Detector doesn't have a workspace index relating to it
   }
   size_t imin, imax;
-  m_instrActor->getBinMinMaxIndex(wi, imin, imax);
+  actor.getBinMinMaxIndex(wi, imin, imax);
 
   const auto &XPoints = ws->points(wi);
   x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
@@ -1386,7 +1396,7 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
         boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
     if (idet) {
       try {
-        size_t index = m_instrActor->getWorkspaceIndex(idet->getID());
+        size_t index = actor.getWorkspaceIndex(idet->getID());
         const auto &Y = ws->y(index);
         std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
                        std::plus<double>());
@@ -1437,7 +1447,8 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
     err->clear();                                                              \
   return;
 
-  Mantid::API::MatrixWorkspace_const_sptr ws = m_instrActor->getWorkspace();
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
 
   // Does the instrument definition specify that psi should be offset.
   std::vector<std::string> parameters =
@@ -1446,22 +1457,21 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
                           std::find(parameters.begin(), parameters.end(),
                                     "Always") != parameters.end();
 
-  auto &det = m_instrActor->getDetectorByDetID(detid);
+  auto &det = actor.getDetectorByDetID(detid);
   auto parent = det.getParent();
   auto ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
       parent);
   size_t wi;
   try {
-    wi = m_instrActor->getWorkspaceIndex(detid);
+    wi = actor.getWorkspaceIndex(detid);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     return; // Detector doesn't have a workspace index relating to it
   }
   // imin and imax give the bin integration range
   size_t imin, imax;
-  m_instrActor->getBinMinMaxIndex(wi, imin, imax);
+  actor.getBinMinMaxIndex(wi, imin, imax);
 
-  Mantid::Kernel::V3D samplePos =
-      m_instrActor->getInstrument()->getSample()->getPos();
+  Mantid::Kernel::V3D samplePos = actor.getInstrument()->getSample()->getPos();
 
   const int n = ass->nelements();
   if (n == 0) {
@@ -1507,7 +1517,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         default:
           xvalue = static_cast<double>(id);
         }
-        size_t index = m_instrActor->getWorkspaceIndex(id);
+        size_t index = actor.getWorkspaceIndex(id);
         // get the y-value for detector idet
         const auto &Y = ws->y(index);
         double sum = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
@@ -1558,8 +1568,9 @@ void DetectorPlotController::savePlotToWorkspace() {
     // nothing to save
     return;
   }
+  const auto &actor = m_instrWidget->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr parentWorkspace =
-      m_instrActor->getWorkspace();
+      actor.getWorkspace();
   // interpret curve labels and reconstruct the data to be saved
   QStringList labels = m_plot->getLabels();
   if (m_plot->hasCurve()) {
@@ -1581,7 +1592,7 @@ void DetectorPlotController::savePlotToWorkspace() {
         // only the current curve can be saved
         QList<int> dets;
         m_tab->getSurface()->getMaskedDetectors(dets);
-        m_instrActor->sumDetectors(dets, x, y);
+        actor.sumDetectors(dets, x, y);
         unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       } else {
         QMessageBox::warning(NULL, "MantidPlot - Warning",
@@ -1743,8 +1754,9 @@ void DetectorPlotController::addPeak(double x, double y) {
     auto surface = m_tab->getSurface();
     if (!surface)
       return;
+    const auto &actor = m_instrWidget->getInstrumentActor();
     Mantid::API::IPeaksWorkspace_sptr tw = surface->getEditPeaksWorkspace();
-    Mantid::API::MatrixWorkspace_const_sptr ws = m_instrActor->getWorkspace();
+    Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
     std::string peakTableName;
     bool newPeaksWorkspace = false;
     if (tw) {
@@ -1790,8 +1802,7 @@ void DetectorPlotController::addPeak(double x, double y) {
     alg->setPropertyValue("PeaksWorkspace", peakTableName);
     alg->setProperty("DetectorID", m_currentDetID);
     alg->setProperty("TOF", x);
-    alg->setProperty("Height",
-                     m_instrActor->getIntegratedCounts(m_currentDetID));
+    alg->setProperty("Height", actor.getIntegratedCounts(m_currentDetID));
     alg->setProperty("BinCount", y);
     alg->execute();
 

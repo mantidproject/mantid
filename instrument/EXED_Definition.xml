@@ -22,7 +22,7 @@ last-modified="2017-04-21 14:58:37">
 </defaults>
 
 <!-- Detector components -->
-<component type="monitors" idlist="monitors"><location/></component>
+<!--<component type="monitors" idlist="monitors"><location/></component>-->
 <component type="panel02" idlist="panel02"><location y="-0.447"/></component>
 <component type="panel04" idlist="panel04"><location y="-0.4466"/></component>
 <component type="Tank">

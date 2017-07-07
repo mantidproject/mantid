@@ -46,8 +46,8 @@ def string_convertible(cls):
                @serializable_enum
                class MyClass(object):
                 ...
-    @param cls: a reference to the class
-    @return: the class
+    :param cls: a reference to the class
+    :return: the class
     """
     def to_string(elements, convert_to_string):
         for key, value in list(elements.items()):

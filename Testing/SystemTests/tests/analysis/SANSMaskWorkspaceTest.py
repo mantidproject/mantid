@@ -78,8 +78,8 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
     def _do_assert(self, workspace, expected_spectra):
         # Remove duplicate masks from expected
         expected_spectra = list(set(expected_spectra))
-
         masked_spectra = list(get_masked_spectrum_numbers(workspace))
+
         self.assertTrue(len(expected_spectra) == len(masked_spectra))
         for expected, actual in zip(sorted(expected_spectra), sorted(masked_spectra)):
             self.assertTrue(expected == actual)
@@ -144,9 +144,8 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
             expected_spectra.extend(((start_elem + 9) + y * 512 for start_elem in range(start, stop + 1)
                                      for y in range(0, 120)))
 
-        mask_builder.set_single_spectra(single_spectra)
-        mask_builder.set_spectrum_range_start(spectrum_range_start)
-        mask_builder.set_spectrum_range_stop(spectrum_range_stop)
+        mask_builder.set_single_spectra_on_detector(single_spectra)
+        mask_builder.set_spectrum_range_on_detector(spectrum_range_start, spectrum_range_stop)
         mask_builder.set_LAB_single_horizontal_strip_mask(single_horizontal_strip_masks)
         mask_builder.set_LAB_range_horizontal_strip_start(range_horizontal_strip_start)
         mask_builder.set_LAB_range_horizontal_strip_stop(range_horizontal_strip_stop)
@@ -494,7 +493,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         self._do_assert(workspace, expected_spectra)
 
 
-class SANSLoadDataRunnerTest(stresstesting.MantidStressTest):
+class SANSMaskWorkspaceRunnerTest(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
         self._success = False

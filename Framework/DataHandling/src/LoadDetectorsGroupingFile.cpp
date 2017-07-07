@@ -1,16 +1,17 @@
 #include <sstream>
 
-#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -53,7 +54,7 @@ void LoadDetectorsGroupingFile::exec() {
 
   // The number of steps depends on the type of input file
   // Set them to zero for the moment
-  Progress progress(this, 0, 1, 0);
+  Progress progress(this, 0.0, 1.0, 0);
 
   if (ext == "xml") {
     // Deal with file as xml

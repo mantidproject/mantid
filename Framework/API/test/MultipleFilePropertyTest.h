@@ -77,6 +77,7 @@ private:
   std::string m_dirWithWhitespace;
   std::unordered_set<std::string> m_tempDirs;
   std::vector<std::string> m_exts;
+  std::string m_oldArchiveSearchSetting;
 
   Mantid::Kernel::ConfigServiceImpl &g_config;
 
@@ -97,6 +98,7 @@ public:
       : m_multiFileLoadingSetting(), m_oldDataSearchDirectories(),
         m_oldDefaultFacility(), m_oldDefaultInstrument(), m_dummyFilesDir(),
         m_dirWithWhitespace(), m_tempDirs(), m_exts{".raw", ".nxs"},
+        m_oldArchiveSearchSetting(),
         g_config(Mantid::Kernel::ConfigService::Instance()) {
     m_dummyFilesDir =
         createAbsoluteDirectory("_MultipleFilePropertyTestDummyFiles");
@@ -157,11 +159,13 @@ public:
     m_oldDataSearchDirectories = g_config.getString("datasearch.directories");
     m_oldDefaultFacility = g_config.getString("default.facilities");
     m_oldDefaultInstrument = g_config.getString("default.instrument");
+    m_oldArchiveSearchSetting = g_config.getString("datasearch.searcharchive");
 
     g_config.setString("datasearch.directories",
                        m_dummyFilesDir + ";" + m_dirWithWhitespace + ";");
     g_config.setString("default.facility", "ISIS");
     g_config.setString("default.instrument", "TOSCA");
+    g_config.setString("datasearch.searcharchive", "Off");
 
     // Make sure that multi file loading is enabled for each test.
     m_multiFileLoadingSetting =
@@ -173,6 +177,7 @@ public:
     g_config.setString("datasearch.directories", m_oldDataSearchDirectories);
     g_config.setString("default.facility", m_oldDefaultFacility);
     g_config.setString("default.instrument", m_oldDefaultInstrument);
+    g_config.setString("datasearch.searcharchive", m_oldArchiveSearchSetting);
 
     // Replace user's preference after the test has run.
     Kernel::ConfigService::Instance().setString("loading.multifile",

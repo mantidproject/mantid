@@ -632,7 +632,7 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
 void InstrumentWidgetMaskTab::applyMask() {
   storeMask();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  m_instrWidget->getInstrumentActor()->applyMaskWorkspace();
+  m_instrWidget->getInstrumentActor().applyMaskWorkspace();
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
 }
@@ -650,7 +650,7 @@ void InstrumentWidgetMaskTab::applyMaskToView() {
 */
 void InstrumentWidgetMaskTab::clearMask() {
   clearShapes();
-  m_instrWidget->getInstrumentActor()->clearMasks();
+  m_instrWidget->getInstrumentActor().clearMasks();
   m_instrWidget->updateInstrumentView();
   enableApplyButtons();
 }
@@ -666,7 +666,7 @@ Mantid::API::MatrixWorkspace_sptr
 InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
   Mantid::API::MatrixWorkspace_sptr inputWS =
-      m_instrWidget->getInstrumentActor()->getMaskMatrixWorkspace();
+      m_instrWidget->getInstrumentActor().getMaskMatrixWorkspace();
   Mantid::API::MatrixWorkspace_sptr outputWS;
   const std::string outputWorkspaceName = generateMaskWorkspaceName(temp);
 
@@ -785,8 +785,8 @@ void InstrumentWidgetMaskTab::saveExcludeGroupToFile() {
   if (!fname.isEmpty()) {
     QList<int> dets;
     m_instrWidget->getSurface()->getMaskedDetectors(dets);
-    DetXMLFile mapFile(m_instrWidget->getInstrumentActor()->getAllDetIDs(),
-                       dets, fname);
+    DetXMLFile mapFile(m_instrWidget->getInstrumentActor().getAllDetIDs(), dets,
+                       fname);
   }
 }
 
@@ -931,11 +931,11 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
 
   // Apply the view (no workspace) to a buffered mask workspace
   Mantid::API::MatrixWorkspace_sptr inputWS =
-      m_instrWidget->getInstrumentActor()->getMaskMatrixWorkspace();
+      m_instrWidget->getInstrumentActor().getMaskMatrixWorkspace();
 
   // Extract from MaskWorkspace to a TableWorkspace
-  double xmin = m_instrWidget->getInstrumentActor()->minBinValue();
-  double xmax = m_instrWidget->getInstrumentActor()->maxBinValue();
+  double xmin = m_instrWidget->getInstrumentActor().minBinValue();
+  double xmax = m_instrWidget->getInstrumentActor().maxBinValue();
   // std::cout << "[DB] Selected x-range: " << xmin << ", " << xmax << ".\n";
 
   // Always use the same name
@@ -1020,13 +1020,13 @@ InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const {
 * enables/disables the apply and clear buttons.
 */
 void InstrumentWidgetMaskTab::enableApplyButtons() {
-  auto instrActor = m_instrWidget->getInstrumentActor();
+  const auto &instrActor = m_instrWidget->getInstrumentActor();
   auto mode = getMode();
 
-  m_maskBins = !m_instrWidget->getInstrumentActor()->wholeRange();
+  m_maskBins = !instrActor.wholeRange();
   bool hasMaskShapes = m_instrWidget->getSurface()->hasMasks();
-  bool hasMaskWorkspace = instrActor->hasMaskWorkspace();
-  bool hasBinMask = instrActor->hasBinMask();
+  bool hasMaskWorkspace = instrActor.hasMaskWorkspace();
+  bool hasBinMask = instrActor.hasBinMask();
   bool hasDetectorMask = hasMaskShapes || hasMaskWorkspace;
   bool hasMask = hasDetectorMask || hasBinMask;
 
@@ -1113,7 +1113,7 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
   // get detectors covered by the shapes
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
   if (!dets.isEmpty()) {
-    auto wsMask = m_instrWidget->getInstrumentActor()->getMaskWorkspace();
+    auto wsMask = m_instrWidget->getInstrumentActor().getMaskWorkspace();
     // have to cast up to the MaskWorkspace to get access to clone()
 
     std::set<Mantid::detid_t> detList;
@@ -1122,8 +1122,8 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
       // but not if the mask is fresh and empty
       if (wsMask->getNumberMasked() > 0) {
         wsFresh = boost::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(
-            m_instrWidget->getInstrumentActor()->extractCurrentMask());
-        m_instrWidget->getInstrumentActor()->invertMaskWorkspace();
+            m_instrWidget->getInstrumentActor().extractCurrentMask());
+        m_instrWidget->getInstrumentActor().invertMaskWorkspace();
       }
     }
     foreach (int id, dets) { detList.insert(id); }
@@ -1143,14 +1143,14 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
       }
       if (isROI) {
         if (wsFresh)
-          m_instrWidget->getInstrumentActor()->setMaskMatrixWorkspace(
+          m_instrWidget->getInstrumentActor().setMaskMatrixWorkspace(
               boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                   wsFresh));
         // need to invert the mask before displaying
-        m_instrWidget->getInstrumentActor()->invertMaskWorkspace();
+        m_instrWidget->getInstrumentActor().invertMaskWorkspace();
       }
       // update detector colours
-      m_instrWidget->getInstrumentActor()->updateColors();
+      m_instrWidget->getInstrumentActor().updateColors();
       m_instrWidget->updateInstrumentDetectors();
     }
   }
@@ -1164,7 +1164,7 @@ void InstrumentWidgetMaskTab::storeBinMask() {
   // get detectors covered by the shapes
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
   // mask some bins
-  m_instrWidget->getInstrumentActor()->addMaskBinsData(dets);
+  m_instrWidget->getInstrumentActor().addMaskBinsData(dets);
   // remove masking shapes
   clearShapes();
   enableApplyButtons();
@@ -1245,9 +1245,9 @@ void InstrumentWidgetMaskTab::loadMaskViewFromProject(const std::string &name) {
   if (!maskWS)
     return; // if we couldn't load it then just fail silently
 
-  auto actor = m_instrWidget->getInstrumentActor();
-  actor->setMaskMatrixWorkspace(maskWS);
-  actor->updateColors();
+  auto &actor = m_instrWidget->getInstrumentActor();
+  actor.setMaskMatrixWorkspace(maskWS);
+  actor.updateColors();
   m_instrWidget->updateInstrumentDetectors();
   m_instrWidget->updateInstrumentView();
 }
@@ -1266,8 +1266,8 @@ InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
   using namespace Mantid::API;
 
   // build path and input properties etc.
-  auto actor = m_instrWidget->getInstrumentActor();
-  auto workspace = actor->getWorkspace();
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  auto workspace = actor.getWorkspace();
   auto instrument = workspace->getInstrument();
   auto instrumentName = instrument->getName();
   auto tempName = "__" + workspace->getName() + "MaskView";
@@ -1349,8 +1349,8 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
 
   try {
     // get masked detector workspace from actor
-    auto actor = m_instrWidget->getInstrumentActor();
-    auto outputWS = actor->getMaskMatrixWorkspace();
+    const auto &actor = m_instrWidget->getInstrumentActor();
+    auto outputWS = actor.getMaskMatrixWorkspace();
 
     if (!outputWS)
       return false; // no mask workspace was found

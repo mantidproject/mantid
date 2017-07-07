@@ -8,15 +8,16 @@
 #include "MantidAPI/Sample.h"
 
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/LoadIsawUB.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using Mantid::Geometry::OrientedLattice;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 
 class FindUBUsingIndexedPeaksTest : public CxxTest::TestSuite {
@@ -30,10 +31,10 @@ public:
   void test_exec() {
     // Name of the output workspace.
     std::string WSName("peaks");
-    LoadIsawPeaks loader;
+    LoadNexusProcessed loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
+    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
     loader.setPropertyValue("OutputWorkspace", WSName);
 
     TS_ASSERT(loader.execute());

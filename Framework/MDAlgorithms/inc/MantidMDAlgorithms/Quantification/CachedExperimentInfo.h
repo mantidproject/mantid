@@ -25,7 +25,6 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {
@@ -45,6 +44,15 @@ public:
   /// Constructor
   CachedExperimentInfo(const API::ExperimentInfo &exptInfo,
                        const detid_t detID);
+
+  /// Disable default constructor
+  CachedExperimentInfo() = delete;
+
+  /// Disable copy operator
+  CachedExperimentInfo(const CachedExperimentInfo &) = delete;
+
+  /// Disable assignment operator
+  CachedExperimentInfo &operator=(const CachedExperimentInfo &) = delete;
 
   /// Return the experiment info
   inline const API::ExperimentInfo &experimentInfo() const {
@@ -82,9 +90,6 @@ public:
   const Kernel::DblMatrix &sampleToDetectorTransform() const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(CachedExperimentInfo)
-  DISABLE_COPY_AND_ASSIGN(CachedExperimentInfo)
-
   /// Cache frequently used values
   void initCaches(const Geometry::Instrument_const_sptr &instrument,
                   const detid_t detID);

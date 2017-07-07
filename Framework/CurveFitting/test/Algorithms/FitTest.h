@@ -17,6 +17,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidTestHelpers/FunctionCreationHelper.h"
 #include "MantidTestHelpers/MultiDomainFunctionHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -2030,6 +2031,101 @@ public:
       }
       TS_ASSERT_DIFFERS(y[26], 0.0);
       TS_ASSERT_DIFFERS(y[26], 0.0);
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_size_change() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double x, int) { return 2 * exp(-(5 * x + x * x - 3 * x * x * x)); },
+        1, 0, 1, 0.1);
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 1.9936, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(1), -9.4991, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(2), 19.1074, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(3), -17.8434, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(4), 6.3465, 0.1);
+    }
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 1.9936, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(1), -9.4991, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(2), 19.1074, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(3), -17.8434, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(4), 6.3465, 0.1);
+      std::string status = fit.getProperty("OutputStatus");
+      TS_ASSERT_EQUALS(status, "success");
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_size_change_1() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double x, int) { return 2 + x - 0.1 * x * x; }, 1, 0, 1, 0.1);
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 2.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(1), 1.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(2), -0.1, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(3), 0.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(4), 0.0, 0.0001);
+      std::string status = fit.getProperty("OutputStatus");
+      TS_ASSERT_EQUALS(status, "success");
+    }
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 2.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(1), 1.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(2), -0.1, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(3), 0.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(4), 0.0, 0.0001);
+      std::string status = fit.getProperty("OutputStatus");
+      TS_ASSERT_EQUALS(status, "success");
     }
 
     AnalysisDataService::Instance().clear();

@@ -822,7 +822,7 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(
   vector<bool> vecFix(parnames.size(), false);
 
   for (size_t i = 0; i < parnames.size(); ++i) {
-    bool fixed = function->isFixed(i);
+    bool fixed = !function->isActive(i);
     vecFix[i] = fixed;
     if (!fixed)
       function->fix(i);

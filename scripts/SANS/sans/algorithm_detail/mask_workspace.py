@@ -161,24 +161,24 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
 
     total_spectra = []
 
+    # All masks are detector-specific, hence we pull out only the relevant part
+    detector = mask_info.detectors[DetectorType.to_string(detector_type)]
+
     # ----------------------
     # Single spectra
     # -----------------------
-    single_spectra = mask_info.single_spectra
+    single_spectra = detector.single_spectra
     if single_spectra:
         total_spectra.extend(single_spectra)
 
     # ----------------------
     # Spectrum range
     # -----------------------
-    spectrum_range_start = mask_info.spectrum_range_start
-    spectrum_range_stop = mask_info.spectrum_range_stop
+    spectrum_range_start = detector.spectrum_range_start
+    spectrum_range_stop = detector.spectrum_range_stop
     if spectrum_range_start and spectrum_range_stop:
         for start, stop in zip(spectrum_range_start, spectrum_range_stop):
             total_spectra.extend(list(range(start, stop + 1)))
-
-    # Detector specific masks
-    detector = mask_info.detectors[DetectorType.to_string(detector_type)]
 
     # ---------------------------
     # Horizontal single spectrum

@@ -1,6 +1,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
@@ -8,6 +10,7 @@
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 
 #include <algorithm>
 #include <numeric>
@@ -56,7 +59,7 @@ Run &Run::operator=(const Run &other) {
 
 boost::shared_ptr<Run> Run::clone() {
   auto clone = boost::make_shared<Run>();
-  for (auto property : this->m_manager.getProperties()) {
+  for (auto property : this->m_manager->getProperties()) {
     clone->addProperty(property->clone());
   }
   clone->m_goniometer =
@@ -93,23 +96,23 @@ void Run::filterByTime(const Kernel::DateAndTime start,
  */
 Run &Run::operator+=(const Run &rhs) {
   // merge and copy properties where there is no risk of corrupting data
-  mergeMergables(m_manager, rhs.m_manager);
+  mergeMergables(*m_manager, *rhs.m_manager);
 
   // Other properties are added together if they are on the approved list
   for (const auto &name : ADDABLE) {
-    if (rhs.m_manager.existsProperty(name)) {
+    if (rhs.m_manager->existsProperty(name)) {
       // get a pointer to the property on the right-hand side workspace
-      Property *right = rhs.m_manager.getProperty(name);
+      Property *right = rhs.m_manager->getProperty(name);
 
       // now deal with the left-hand side
-      if (m_manager.existsProperty(name)) {
-        Property *left = m_manager.getProperty(name);
+      if (m_manager->existsProperty(name)) {
+        Property *left = m_manager->getProperty(name);
         left->operator+=(right);
       } else
         // no property on the left-hand side, create one and copy the
         // right-hand side across verbatim
-        m_manager.declareProperty(std::unique_ptr<Property>(right->clone()),
-                                  "");
+        m_manager->declareProperty(std::unique_ptr<Property>(right->clone()),
+                                   "");
     }
   }
   return *this;
@@ -164,11 +167,11 @@ void Run::setProtonCharge(const double charge) {
  */
 double Run::getProtonCharge() const {
   double charge = 0.0;
-  if (!m_manager.existsProperty(PROTON_CHARGE_LOG_NAME)) {
+  if (!m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
     integrateProtonCharge();
   }
-  if (m_manager.existsProperty(PROTON_CHARGE_LOG_NAME)) {
-    charge = m_manager.getProperty(PROTON_CHARGE_LOG_NAME);
+  if (m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
+    charge = m_manager->getProperty(PROTON_CHARGE_LOG_NAME);
   } else {
     g_log.warning() << PROTON_CHARGE_LOG_NAME
                     << " log was not found. Proton Charge set to 0.0\n";
@@ -387,10 +390,13 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
  */
 void Run::loadNexus(::NeXus::File *file, const std::string &group,
                     bool keepOpen) {
-  LogManager::loadNexus(file, group, true);
 
+  if (!group.empty()) {
+    file->openGroup(group, "NXgroup");
+  }
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
+  LogManager::loadNexus(file, entries);
   for (const auto &name_class : entries) {
     if (name_class.second == "NXpositioner") {
       // Goniometer class

@@ -120,7 +120,11 @@ public:
   void setOverwrite(bool enabled) { m_overwrite = enabled; }
   /// Updates label to avoid overwriting existing results
   void checkAndUpdateFitLabel(bool sequentialFit);
-
+  /// Generate names of workspaces to be created
+  std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
+signals:
+  void setChosenGroupSignal(const QString &group);
+  void setChosenPeriodSignal(const QString &period);
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
   void handleFitFinished(const QString &status = QString("success")) const;
@@ -140,8 +144,6 @@ public slots:
   void doPreFitChecks(bool sequentialFit);
 
 private:
-  /// Generate names of workspaces to be created
-  std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
   /// Create analysis workspace
   Mantid::API::Workspace_sptr createWorkspace(const std::string &name,
                                               std::string &groupLabel) const;

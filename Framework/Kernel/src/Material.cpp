@@ -4,6 +4,7 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/StringTokenizer.h"
+#include <NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>

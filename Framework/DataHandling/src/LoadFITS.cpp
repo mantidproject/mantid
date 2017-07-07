@@ -492,7 +492,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   size_t totalWS = headers.size();
   // Create a progress reporting object
-  API::Progress progress(this, 0, 1, totalWS + 1);
+  API::Progress progress(this, 0.0, 1.0, totalWS + 1);
   progress.report(0, "Loading file(s) into workspace(s)");
 
   // Create first workspace (with instrument definition). This is also used as

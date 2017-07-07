@@ -108,7 +108,7 @@ void GetDetectorOffsets::exec() {
       maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // Fit all the spectra with a gaussian
-  Progress prog(this, 0, 1.0, nspec);
+  Progress prog(this, 0.0, 1.0, nspec);
   auto &spectrumInfo = maskWS->mutableSpectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputW))
   for (int64_t wi = 0; wi < nspec; ++wi) {

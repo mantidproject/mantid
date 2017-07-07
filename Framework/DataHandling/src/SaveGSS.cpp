@@ -89,7 +89,7 @@ void SaveGSS::init() {
   declareProperty(
       "UseSpectrumNumberAsBankID", false,
       "If true, then each bank's bank ID is equal to the spectrum number; "
-      "otherwise, the continous bank IDs are applied. ");
+      "otherwise, the continuous bank IDs are applied. ");
 }
 
 /** Execute the algorithm

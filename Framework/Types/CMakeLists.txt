@@ -14,5 +14,7 @@ if (COVERALLS)
   endforeach(loop_var)
 endif()
 
+add_library ( Types INTERFACE )
+
 # Add the unit tests directory
 add_subdirectory ( test )

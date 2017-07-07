@@ -117,7 +117,7 @@ The detectors dictionary above maps to a mask state object for the individual de
 +-----------------------------+-----------------+--------------------------------------+------------+---------------+
 
 
-Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.
+**Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.**
 
 
 Mask options for the detector: *LAB*, *HAB*

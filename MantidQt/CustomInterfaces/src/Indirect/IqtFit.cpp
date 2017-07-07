@@ -730,7 +730,7 @@ void IqtFit::constrainIntensities(CompositeFunction_sptr func) {
   switch (m_uiForm.cbFitType->currentIndex()) {
   case 0: // 1 Exp
   case 2: // 1 Str
-    if (!func->isFixed(index)) {
+    if (func->isActive(index)) {
       func->tie(paramName, "1-f0.A0");
     } else {
       std::string paramValue =
@@ -741,7 +741,7 @@ void IqtFit::constrainIntensities(CompositeFunction_sptr func) {
     break;
   case 1: // 2 Exp
   case 3: // 1 Exp & 1 Str
-    if (!func->isFixed(index)) {
+    if (func->isActive(index)) {
       func->tie(paramName, "1-f2.Height-f0.A0");
     } else {
       std::string paramValue =

@@ -221,10 +221,10 @@ void PDCalibration::init() {
   declareProperty("HighBackground", true,
                   "Relatively weak peak in high background");
   declareProperty(
-      "MinGuessedPeakWidth", 4, min,
+      "MinGuessedPeakWidth", 2, min,
       "Minimum guessed peak width for fit. It is in unit of number of pixels.");
   declareProperty(
-      "MaxGuessedPeakWidth", 4, min,
+      "MaxGuessedPeakWidth", 10, min,
       "Maximum guessed peak width for fit. It is in unit of number of pixels.");
   declareProperty("MinimumPeakHeight", 2., "Minimum allowed peak height. ");
   declareProperty(
@@ -381,7 +381,7 @@ void PDCalibration::exec() {
   setProperty("MaskWorkspace", maskWS);
 
   int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
-  API::Progress prog(this, 0, 1.0, NUMHIST);
+  API::Progress prog(this, 0.0, 1.0, NUMHIST);
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )

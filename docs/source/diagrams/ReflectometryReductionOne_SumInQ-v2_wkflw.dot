@@ -1,0 +1,37 @@
+digraph ReflectometryReductionOne {
+label = "\n"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWorkspace     [label="OutputWorkspaceWavelength", group=g1]
+  outputWorkspaceWav [label="OutputWorkspaceWavelength"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkSumInQ        [label="Sum in Q and input X axis was not in &lambda;?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+}
+
+subgraph processes {
+ $process_style
+  projectCounts      [label=<Project input counts to &lambda;<sub>v</sub> at 2&theta;<sub>R</sub>>]
+  sumInQ             [label=<Sum in &lambda;<sub>v</sub>>]
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWorkspace     -> checkSumInQ
+checkSumInQ        -> projectCounts      [label="Yes"]
+checkSumInQ        -> outputWorkspaceWav [label="No"]
+projectCounts      -> sumInQ
+sumInQ             -> outputWorkspaceWav
+
+}
+

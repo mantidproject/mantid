@@ -30,6 +30,7 @@ DECLARE_FUNCMINIMIZER(DampedGaussNewtonMinimizer, Damped GaussNewton)
 DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol)
     : IFuncMinimizer(), m_relTol(relTol) {
   declareProperty("Damping", 0.0, "The damping parameter.");
+  declareProperty("Verbose", false, "Make output more verbose.");
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.
@@ -47,8 +48,7 @@ void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function,
 
 /// Do one iteration.
 bool DampedGaussNewtonMinimizer::iterate(size_t) {
-  const bool debug = false;
-
+  const bool verbose = getProperty("Verbose");
   const double damping = getProperty("Damping");
 
   if (!m_leastSquares) {
@@ -70,37 +70,52 @@ bool DampedGaussNewtonMinimizer::iterate(size_t) {
 
   for (size_t i = 0; i < n; ++i) {
     double tmp = H.get(i, i) + damping;
+    if (tmp == 0.0) {
+      m_errorString = "Function doesn't depend on parameter " +
+                      m_leastSquares->parameterName(i);
+      return false;
+    }
     H.set(i, i, tmp);
   }
 
-  if (debug) {
-    std::cerr << "H:\n" << H;
-    std::cerr << "-----------------------------\n";
+  if (verbose) {
+    g_log.warning() << "H:\n" << H;
+    g_log.warning() << "-----------------------------\n";
     for (size_t j = 0; j < n; ++j) {
-      std::cerr << dd.get(j) << ' ';
+      g_log.warning() << dd.get(j) << ' ';
     }
-    std::cerr << '\n';
+    g_log.warning() << '\n';
   }
 
   /// Parameter corrections
   GSLVector dx(n);
   // To find dx solve the system of linear equations   H * dx == -m_der
   dd *= -1.0;
-  H.solve(dd, dx);
+  try {
+    H.solve(dd, dx);
+  } catch (std::runtime_error &e) {
+    m_errorString = e.what();
+    return false;
+  }
 
-  if (debug) {
+  if (verbose) {
     for (size_t j = 0; j < n; ++j) {
-      std::cerr << dx.get(j) << ' ';
+      g_log.warning() << dx.get(j) << ' ';
     }
-    std::cerr << "\n\n";
+    g_log.warning() << "\n\n";
   }
 
   // Update the parameters of the cost function.
   for (size_t i = 0; i < n; ++i) {
+    if (!std::isfinite(dx[i])) {
+      m_errorString = "Encountered an infinite number or NaN.";
+      return false;
+    }
     double d = m_leastSquares->getParameter(i) + dx.get(i);
     m_leastSquares->setParameter(i, d);
-    if (debug) {
-      std::cerr << "P" << i << ' ' << d << '\n';
+    if (verbose) {
+      g_log.warning() << i << " Parameter " << m_leastSquares->parameterName(i)
+                      << ' ' << d << '\n';
     }
   }
   m_leastSquares->getFittingFunction()->applyTies();

@@ -92,13 +92,16 @@ double Detector::getSignedTwoTheta(const V3D &observer, const V3D &axis,
   return angle;
 }
 
-/// Get the phi angle between the detector with reference to the origin
-///@return The angle
+/** Get the phi angle between the detector with reference to the origin
+ * This function will not be supported in Instrument-2.0 due to its ambiguity.
+ * DO NOT USE IN NEW CODE
+ * @return The angle
+ */
 double Detector::getPhi() const {
-  double phi = 0.0, dummy;
-  this->getPos().getSpherical(dummy, dummy, phi);
-  return phi * M_PI / 180.0;
+  const Kernel::V3D pos = this->getPos();
+  return std::atan2(pos[1], pos[0]);
 }
+
 /**
  * Calculate the phi angle between detector and beam, and then offset.
  * @param offset in radians

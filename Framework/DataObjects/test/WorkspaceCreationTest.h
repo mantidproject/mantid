@@ -8,15 +8,83 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidParallel/Communicator.h"
+#include "MantidParallel/StorageMode.h"
 #include "MantidTypes/SpectrumDefinition.h"
+#include "MantidAPI/Run.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 
 using namespace Mantid;
 using namespace API;
 using namespace DataObjects;
 using namespace HistogramData;
 using namespace Indexing;
+using namespace ParallelTestHelpers;
+
+namespace {
+void run_create_partitioned(const Parallel::Communicator &comm) {
+  IndexInfo indices(47, Parallel::StorageMode::Distributed, comm);
+  indices.setSpectrumDefinitions(
+      std::vector<SpectrumDefinition>(indices.size()));
+  const auto ws = create<Workspace2D>(indices, Histogram(BinEdges{1, 2, 4}));
+  const auto &i = ws->indexInfo();
+  TS_ASSERT_EQUALS(i.globalSize(), 47);
+  size_t expectedSize = 0;
+  for (size_t globalIndex = 0; globalIndex < i.globalSize(); ++globalIndex) {
+    // Current default is RoundRobinPartitioner
+    if (static_cast<int>(globalIndex) % comm.size() == comm.rank()) {
+      TS_ASSERT_EQUALS(i.spectrumNumber(expectedSize),
+                       static_cast<int>(globalIndex) + 1);
+      ++expectedSize;
+    }
+  }
+  TS_ASSERT_EQUALS(i.size(), expectedSize);
+}
+
+void run_create_partitioned_with_instrument(
+    const Parallel::Communicator &comm,
+    boost::shared_ptr<Geometry::Instrument> instrument) {
+  IndexInfo indices(4, Parallel::StorageMode::Distributed, comm);
+  // should a nullptr spectrum definitions vector indicate building default
+  // defs?
+  // - same length -> build
+  // - different length -> fail (cannot create default mapping)
+  // same for setIndexInfo?
+  const auto ws =
+      create<Workspace2D>(instrument, indices, Histogram(BinEdges{1, 2, 4}));
+  const auto &i = ws->indexInfo();
+  TS_ASSERT_EQUALS(i.globalSize(), 4);
+  size_t expectedSize = 0;
+  for (size_t globalIndex = 0; globalIndex < i.globalSize(); ++globalIndex) {
+    // Current default is RoundRobinPartitioner
+    if (static_cast<int>(globalIndex) % comm.size() == comm.rank()) {
+      TS_ASSERT_EQUALS(i.spectrumNumber(expectedSize),
+                       static_cast<int>(globalIndex) + 1);
+      ++expectedSize;
+    }
+  }
+  TS_ASSERT_EQUALS(i.size(), expectedSize);
+}
+
+void run_indexInfo_legacy_compatibility_partitioned_workspace_failure(
+    const Parallel::Communicator &comm) {
+  IndexInfo indices(3, Parallel::StorageMode::Distributed, comm);
+  indices.setSpectrumDefinitions(
+      std::vector<SpectrumDefinition>(indices.size()));
+  const auto ws = create<Workspace2D>(indices, Histogram(BinEdges{1, 2}));
+  if (comm.size() > 1) {
+    TS_ASSERT_THROWS_EQUALS(ws->getSpectrum(0).setSpectrumNo(7),
+                            const std::logic_error &e, std::string(e.what()),
+                            "Setting spectrum numbers in MatrixWorkspace via "
+                            "ISpectrum::setSpectrumNo is not possible in MPI "
+                            "runs for distributed workspaces. Use IndexInfo.");
+  } else {
+    TS_ASSERT_THROWS_NOTHING(ws->getSpectrum(0).setSpectrumNo(7));
+  }
+}
+}
 
 class WorkspaceCreationTest : public CxxTest::TestSuite {
 public:
@@ -172,6 +240,40 @@ public:
     check_instrument(*ws);
   }
 
+  void test_create_parent_distribution_flag() {
+    Histogram hist(BinEdges{1, 2}, Counts{1});
+    Histogram dist(BinEdges{1, 2}, Frequencies{1});
+    const auto wsHist = create<Workspace2D>(m_instrument, make_indices(), hist);
+    const auto wsDist = create<Workspace2D>(m_instrument, make_indices(), dist);
+    // Distribution flag inherited from parent if not explicitly specified
+    TS_ASSERT(!create<Workspace2D>(*wsHist)->isDistribution());
+    TS_ASSERT(create<Workspace2D>(*wsDist)->isDistribution());
+    TS_ASSERT(!create<Workspace2D>(*wsHist, BinEdges{1, 2})->isDistribution());
+    TS_ASSERT(create<Workspace2D>(*wsDist, BinEdges{1, 2})->isDistribution());
+    // Passing a full Histogram explicitly specifies the YMode, i.e.,
+    // distribution flag.
+    TS_ASSERT(!create<Workspace2D>(*wsHist, hist)->isDistribution());
+    TS_ASSERT(!create<Workspace2D>(*wsDist, hist)->isDistribution());
+    TS_ASSERT(create<Workspace2D>(*wsHist, dist)->isDistribution());
+    TS_ASSERT(create<Workspace2D>(*wsDist, dist)->isDistribution());
+  }
+
+  void test_create_parent_without_logs() {
+    const auto parent = create<Workspace2D>(m_instrument, make_indices(),
+                                            Histogram(BinEdges{1, 2, 4}));
+
+    const std::string &name0 = "Log2";
+    parent->mutableRun().addProperty(name0, 3.2);
+    const std::string &name1 = "Log4";
+    const std::string &value1 = "6.4a";
+    parent->mutableRun().addProperty(name1, value1);
+    const auto ws = createWithoutLogs<Workspace2D>(*parent);
+    check_indices(*ws);
+    check_zeroed_data(*ws);
+    check_instrument(*ws);
+    TS_ASSERT_EQUALS(ws->run().getProperties().size(), 0);
+  }
+
   void test_create_parent_varying_bins() {
     auto parent = create<Workspace2D>(make_indices_no_detectors(), make_data());
     const double binShift = -0.54;
@@ -314,50 +416,58 @@ public:
     check_zeroed_data(*ws);
   }
 
+  void test_default_StorageMode_is_Cloned() {
+    IndexInfo indices(2);
+    indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2));
+    TS_ASSERT_EQUALS(
+        create<Workspace2D>(indices, BinEdges{1, 2, 4})->storageMode(),
+        Parallel::StorageMode::Cloned);
+  }
+
+  void test_create_with_StorageMode() {
+    IndexInfo indices(2, Parallel::StorageMode::Distributed);
+    indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2));
+    std::unique_ptr<Workspace2D> ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = create<Workspace2D>(indices, BinEdges{1, 2, 4}));
+    TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
+  }
+
+  void test_storageMode_propagated() {
+    IndexInfo indices(2, Parallel::StorageMode::Distributed);
+    indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2));
+    const auto parent = create<Workspace2D>(indices, BinEdges{1, 2, 4});
+    const auto ws = create<Workspace2D>(*parent);
+    TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
+  }
+
   void test_create_partitioned() {
-    IndexInfo indices({1, 2, 3, 4, 5}, IndexInfo::StorageMode::Distributed,
-                      IndexInfo::Communicator{2, 0});
-    indices.setSpectrumDefinitions(
-        std::vector<SpectrumDefinition>(indices.size()));
-    const auto ws = create<Workspace2D>(indices, Histogram(BinEdges{1, 2, 4}));
-    const auto &indexInfo = ws->indexInfo();
-    // Default round-robin partitioning with 2 ranks -> we get every other
-    // spectrum number on this rank.
-    TS_ASSERT_EQUALS(indexInfo.size(), 3);
-    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), 3);
-    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), 5);
+    run_create_partitioned(Parallel::Communicator{});
+    runParallel(run_create_partitioned);
   }
 
   void test_create_partitioned_with_instrument() {
-    IndexInfo i({1, 2, 3, 4}, IndexInfo::StorageMode::Distributed,
-                IndexInfo::Communicator{2, 0});
-    // should a nullptr spectrum definitions vector indicate building default
-    // defs?
-    // - same length -> build
-    // - different length -> fail (cannot create default mapping)
-    // same for setIndexInfo?
-    const auto ws =
-        create<Workspace2D>(m_instrument, i, Histogram(BinEdges{1, 2, 4}));
-    const auto &indexInfo = ws->indexInfo();
-    // Default round-robin partitioning with 2 ranks -> we get every other
-    // spectrum number on this rank.
-    TS_ASSERT_EQUALS(indexInfo.size(), 2);
-    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), 3);
+    run_create_partitioned_with_instrument(Parallel::Communicator{},
+                                           m_instrument);
+    // Currently having 0 spectra on a rank is not supported by MatrixWorkspace
+    // so we must make sure to use fewer threads than detectors here:
+    int n_thread = 3;
+    ParallelRunner runner(n_thread);
+    runner.run(run_create_partitioned_with_instrument, m_instrument);
   }
 
   void test_indexInfo_legacy_compatibility_partitioned_workspace_failure() {
     // Sibling of MatrixWorkspace::test_indexInfo_legacy_compatibility().
     // Setting spectrum numbers via legacy interface should fail for partitioned
     // workspace.
-    IndexInfo indices({1, 2, 3}, IndexInfo::StorageMode::Distributed,
-                      IndexInfo::Communicator{2, 0});
-    indices.setSpectrumDefinitions(
-        std::vector<SpectrumDefinition>(indices.size()));
-    const auto ws = create<Workspace2D>(indices, Histogram(BinEdges{1, 2}));
-    ws->getSpectrum(0).setSpectrumNo(7);
-    TS_ASSERT_THROWS(ws->indexInfo(), std::runtime_error);
+    run_indexInfo_legacy_compatibility_partitioned_workspace_failure(
+        Parallel::Communicator{});
+    // Currently having 0 spectra on a rank is not supported by MatrixWorkspace
+    // so we must make sure to use fewer threads than detectors here:
+    int n_thread = 3;
+    ParallelRunner runner(n_thread);
+    runner.run(
+        run_indexInfo_legacy_compatibility_partitioned_workspace_failure);
   }
 
 private:

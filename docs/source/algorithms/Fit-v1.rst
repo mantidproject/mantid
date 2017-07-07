@@ -285,6 +285,21 @@ off diagonal elements as percentages of correlation between parameter
 
 .. math:: 100 \cdot c_{ij} / \sqrt{c_{ii} \cdot c_{jj}}.
 
+
+Multiple Fit
+############
+
+It is possible to fit to multiple data sets using the fit algorithm. This
+can be either simultaneously or sequentially. There are a few differences
+to a single fit. Firstly is that the :ref:`CompositeFunction <func-CompositeFunction>`
+must be a :code:`MultiDomainFunction` and each of the individual fitting functions must include 
+:code:`$domain=i`. The extra workspaces can be added by placing an :code:`_i` after :code:`InputWorkspace` and
+:code:`InputWorkspaceIndex` starting with :math:`i=1` for the second workspace. It is also possible to 
+set the fitting range for each data set individually in the same way as the :code:`InputWorkspace`. 
+If a variable is to be fitted using data from multiple data sets then a :code:`tie` has 
+to be used. The values that are tied will have the same value and be calculated from multiple
+data sets. 
+ 
 Examples
 --------
 
@@ -410,6 +425,125 @@ Output:
    Number of spectra in fitWorkspace is: 3
    The 20th y-value of the calculated pattern: 0.2361
 
+**Example - Fit to two data sets simultaneously:**
+
+.. testcode:: simFit
+
+	import math
+	import numpy as np
+
+	# create data
+	xData=np.linspace(start=0,stop=10,num=22)
+	yData=[]
+	for x in xData:
+		yData.append(2.0)
+	yData2=[]
+	for x in xData:
+		yData2.append(5.0)
+	# create workspaces
+	input = CreateWorkspace(xData,yData)
+	input2 = CreateWorkspace(xData,yData2)
+	# create function
+	myFunc=';name=FlatBackground,$domains=i,A0=0'
+	multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+";"
+	# do fit
+	fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit( Function=multiFunc,\
+				InputWorkspace=input, WorkspaceIndex=0, \
+				InputWorkspace_1=input2, WorkspaceIndex_1=0, \
+				StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit' )
+	# print results	
+	print "Constant 1: {0:.2f}".format(paramTable.column(1)[0])
+	print "Constant 2: {0:.2f}".format(paramTable.column(1)[1])
+
+
+Output:
+
+.. testoutput:: simFit
+
+	Constant 1: 2.00
+	Constant 2: 5.00
+   
+**Example - Fit to two data sets with shared parameter:**
+
+.. testcode:: shareFit
+   
+	import math
+	import numpy as np
+
+	# create data
+	xData=np.linspace(start=0,stop=10,num=22)
+	yData=[]
+	for x in xData:
+		yData.append(2.0)
+	yData2=[]
+	for x in xData:
+		yData2.append(5.0)
+	# create workspaces
+	input = CreateWorkspace(xData,yData)
+	input2 = CreateWorkspace(xData,yData2)
+	# create function
+	myFunc=';name=FlatBackground,$domains=i,A0=0'
+	multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+';ties=(f0.A0=f1.A0)'
+	# do fit
+	fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit( Function=multiFunc,\
+				InputWorkspace=input, WorkspaceIndex=0, \
+				InputWorkspace_1=input2, WorkspaceIndex_1=0, \
+				StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit' )
+	# print results
+	print "Constant 1: {0:.2f}".format(paramTable.column(1)[0])
+	print "Constant 2: {0:.2f}".format(paramTable.column(1)[1])
+   
+Output:
+
+.. testoutput:: shareFit
+
+	Constant 1: 3.50
+	Constant 2: 3.50
+	
+**Example - Fit to two data sets with one shared parameter:**
+
+.. testcode:: shareFit2
+	
+	import math
+	import numpy as np
+
+	# create data
+	xData=np.linspace(start=0,stop=10,num=22)
+	yData=[]
+	for x in xData:
+		yData.append(2.0*x+10.)
+	yData2=[]
+	for x in xData:
+		yData2.append(5.0*x+7.)
+	# create workspaces
+	input = CreateWorkspace(xData,yData)
+	input2 = CreateWorkspace(xData,yData2)
+	# create function
+	myFunc=';name=LinearBackground,$domains=i,A0=0,A1=0'
+	multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+';ties=(f0.A1=f1.A1)'
+	# do fit
+	fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit( Function=multiFunc,\
+				InputWorkspace=input, WorkspaceIndex=0, \
+				InputWorkspace_1=input2, WorkspaceIndex_1=0, \
+				StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit' )
+	# print results
+	print 'Gradients (shared):'
+	print "Gradient 1: {0:.2f}".format(paramTable.column(1)[3])
+	print "Gradient 2: {0:.2f}".format(paramTable.column(1)[1])
+	print 'offsets:'
+	print "Constant 1: {0:.2f}".format(paramTable.column(1)[0])
+	print "Constant 2: {0:.2f}".format(paramTable.column(1)[2])
+	   
+Output:
+
+.. testoutput:: shareFit2
+
+	Gradients (shared):
+	Gradient 1: 3.50
+	Gradient 2: 3.50
+	offsets:
+	Constant 1: 2.86
+	Constant 2: 14.14
 
 .. categories::
 

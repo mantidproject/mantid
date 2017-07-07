@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -196,14 +197,17 @@ void ReflSaveTabPresenter::suggestSaveDir() {
 */
 std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
   auto allNames = AnalysisDataService::Instance().getObjectNames();
-  // Exclude workspace groups as they cannot be saved to ascii
-  std::vector<std::string> validNames(allNames.size());
-  auto it = std::copy_if(
-      allNames.begin(), allNames.end(), validNames.begin(), [](std::string s) {
-        return (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(s) ==
-                NULL);
+  // Exclude workspace groups and table workspaces as they cannot be saved to
+  // ascii
+  std::vector<std::string> validNames;
+  std::remove_copy_if(
+      allNames.begin(), allNames.end(), std::back_inserter(validNames),
+      [](const std::string &wsName) {
+        return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+                   wsName) ||
+               AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+                   wsName);
       });
-  validNames.resize(std::distance(validNames.begin(), it));
 
   return validNames;
 }

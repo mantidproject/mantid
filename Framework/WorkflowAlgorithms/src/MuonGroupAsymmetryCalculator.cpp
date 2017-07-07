@@ -132,6 +132,7 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
     asym->setProperty("OutputWorkspace", "__NotUsed__");
     asym->setProperty("StartX", m_startX);
     asym->setProperty("EndX", m_endX);
+    asym->setProperty("NormalizationIn", getStoredNorm());
     asym->execute();
     outWS = asym->getProperty("OutputWorkspace");
     auto tmp = asym->getPropertyValue("NormalizationConstant");
@@ -150,5 +151,22 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
   }
   return outWS;
 }
+/*
+* Reads in the stored normalization
+* if >0 then it is used instead of
+* estimating the norm.
+*/
+double getStoredNorm() {
+  if (!API::AnalysisDataService::Instance().doesExist("__keepNorm__")) {
+    return 0.0;
+  } else {
+    API::ITableWorkspace_sptr table =
+        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+            API::AnalysisDataService::Instance().retrieve("__keepNorm__"));
+    auto colNorm = table->getColumn("norm");
+    return (*colNorm)[0];
+  }
+}
+
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

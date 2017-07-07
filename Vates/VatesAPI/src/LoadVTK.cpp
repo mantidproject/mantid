@@ -305,7 +305,7 @@ void LoadVTK::exec() {
   const std::string errorSQArrayName = getProperty("ErrorSQArrayName");
   const bool adaptiveBinned = getProperty("AdaptiveBinned");
 
-  Progress prog(this, 0, 1, 102);
+  Progress prog(this, 0.0, 1.0, 102);
   prog.report("Loading vtkFile");
   auto reader = vtkStructuredPointsReader::New();
   reader->SetFileName(filename.c_str());

@@ -349,8 +349,8 @@ public:
 
     TS_ASSERT(fun1->isFixed(0));
     TS_ASSERT(fun1->isFixed(1));
-    TS_ASSERT(fun1->isFixed(2));
-    TS_ASSERT(!fun1->isFixed(3));
+    TS_ASSERT(!fun1->isActive(2));
+    TS_ASSERT(fun1->isActive(3));
   }
 };
 

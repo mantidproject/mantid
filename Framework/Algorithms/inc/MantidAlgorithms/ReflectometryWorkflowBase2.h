@@ -35,6 +35,8 @@ namespace Algorithms {
 class DLLExport ReflectometryWorkflowBase2
     : public API::DataProcessorAlgorithm {
 protected:
+  /// Initialize reduction-type properties
+  void initReductionProperties();
   /// Initialize monitor properties
   void initMonitorProperties();
   /// Initialize direct beam properties
@@ -47,6 +49,8 @@ protected:
   void initAlgorithmicProperties(bool autodetect = false);
   /// Initialize momentum transfer properties
   void initMomentumTransferProperties();
+  /// Validate reduction-type properties
+  std::map<std::string, std::string> validateReductionProperties() const;
   /// Validate direct beam properties
   std::map<std::string, std::string> validateDirectBeamProperties() const;
   /// Validate transmission properties
@@ -61,7 +65,8 @@ protected:
   cropWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
   // Create a detector workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
-  makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS);
+  makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
+                 const bool convert = true);
   // Create a monitor workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeMonitorWS(Mantid::API::MatrixWorkspace_sptr inputWS,

@@ -5,16 +5,29 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessMap.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterThread.h"
+#include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
-#include <set>
+#include <QSet>
+#include <queue>
 
-using GroupData = std::map<int, std::vector<std::string>>;
+#include <QObject>
+
+using RowData = std::vector<std::string>;
+using GroupData = std::map<int, RowData>;
+using RowItem = std::pair<int, RowData>;
+using RowQueue = std::queue<RowItem>;
+using GroupQueue = std::queue<std::pair<int, RowQueue>>;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -22,6 +35,7 @@ namespace MantidWidgets {
 class ProgressableView;
 class DataProcessorView;
 class DataProcessorTreeManager;
+class GenericDataProcessorPresenterThread;
 
 /** @class GenericDataProcessorPresenter
 
@@ -51,8 +65,15 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
-    : public DataProcessorPresenter,
+    : public QObject,
+      public DataProcessorPresenter,
       public MantidQt::API::WorkspaceObserver {
+  // Q_OBJECT for 'connect' with thread/worker
+  Q_OBJECT
+
+  friend class GenericDataProcessorPresenterRowReducerWorker;
+  friend class GenericDataProcessorPresenterGroupReducerWorker;
+
 public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
@@ -79,6 +100,17 @@ public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
       const DataProcessorProcessingAlgorithm &processor);
+  // Delegating constructor: pre-processing, no post-processing
+  GenericDataProcessorPresenter(
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorPreprocessMap &preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor);
+  // Delegating Constructor: pre-processing and post-processing
+  GenericDataProcessorPresenter(
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorPreprocessMap &preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor);
   virtual ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
@@ -102,9 +134,12 @@ public:
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(const GroupData &groupData,
                                             const std::string &prefix = "");
+  // Set the state of whether a new selection has been made
+  void setNewSelectionState(bool newSelectionMade);
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
+  bool newSelectionMade() const override;
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) const override;
   void giveUserWarning(const std::string &prompt,
@@ -121,14 +156,18 @@ protected:
   std::unique_ptr<DataProcessorTreeManager> m_manager;
   // Loader
   std::string m_loader;
+  // The list of selected items to reduce
+  TreeData m_selectedData;
 
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Reduce a row
-  std::vector<std::string> reduceRow(const std::vector<std::string> &data);
+  void reduceRow(RowData *data);
   // Finds a run in the AnalysisDataService
   std::string findRunInADS(const std::string &run, const std::string &prefix,
                            bool &runFound);
+  // Sets whether to prompt user when getting selected runs
+  void setPromptUser(bool allowPrompt);
 
   // Process selected rows
   virtual void process();
@@ -136,6 +175,10 @@ protected:
   virtual void plotRow();
   virtual void plotGroup();
   void plotWorkspaces(const std::set<std::string> &workspaces);
+
+protected slots:
+  void reductionError(std::exception ex);
+  void threadFinished(const int exitCode);
 
 private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
@@ -150,14 +193,34 @@ private:
   DataProcessorPostprocessingAlgorithm m_postprocessor;
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
+  // The current queue of groups to be reduced
+  GroupQueue m_gqueue;
+  // The current group we are reducing row data for
+  GroupData m_groupData;
+  // The current row item being reduced
+  RowItem m_rowItem;
+  // The progress reporter
+  ProgressPresenter *m_progressReporter;
   // A boolean indicating whether a post-processing algorithm has been defined
   bool m_postprocess;
   // The number of columns
   int m_columns;
+  // A boolean indicating whether to prompt the user when getting selected runs
+  bool m_promptUser;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
+  // stores whether a new table selection has been made before processing
+  bool m_newSelection;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
+  // Thread to run reducer worker in
+  std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
+  // A boolean indicating whether or not data reduction has been paused
+  mutable bool m_reductionPaused;
+  // Enumeration of the reduction actions that can be taken
+  enum class ReductionFlag { ReduceRowFlag, ReduceGroupFlag, StopReduceFlag };
+  // A flag of the next action due to be carried out
+  ReductionFlag m_nextActionFlag;
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr getRun(const std::string &run,
                                      const std::string &instrument,
@@ -210,8 +273,27 @@ private:
   // actions/commands
   void addCommands();
 
+  // decide between processing next row or group
+  void doNextAction();
+
+  // process next row/group
+  void nextRow();
+  void nextGroup();
+
+  // start thread for performing reduction on current row/group asynchronously
+  virtual void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex);
+  virtual void startAsyncGroupReduceThread(GroupData &groupData,
+                                           int groupIndex);
+
+  // end reduction
+  void endReduction();
+
+  // pause/resume reduction
+  void pause();
+  void resume();
+
   // List of workspaces the user can open
-  std::set<std::string> m_workspaceList;
+  QSet<QString> m_workspaceList;
 
   void addHandle(const std::string &name,
                  Mantid::API::Workspace_sptr workspace) override;

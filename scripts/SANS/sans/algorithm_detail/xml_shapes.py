@@ -5,8 +5,8 @@ from math import (pi, cos, sin)
 def add_xml_shape(xml, complete_xml_element):
     """
         Add an arbitrary shape to region to be masked
-        @param xml: a list of shapes to which we append here
-        @param complete_xml_element: description of the shape to add
+        :param xml: a list of shapes to which we append here
+        :param complete_xml_element: description of the shape to add
     """
     if not complete_xml_element.startswith('<'):
         raise ValueError('Excepted xml string but found: ' + str(complete_xml_element))
@@ -16,10 +16,10 @@ def add_xml_shape(xml, complete_xml_element):
 def infinite_plane(shape_id, plane_pt, normal_pt):
     """
         Generates xml code for an infinite plane
-        @param shape_id: a string to refer to the shape by
-        @param plane_pt: a point in the plane
-        @param normal_pt: the direction of a normal to the plane
-        @return the xml string
+        :param shape_id: a string to refer to the shape by
+        :param plane_pt: a point in the plane
+        :param normal_pt: the direction of a normal to the plane
+        :return the xml string
     """
     return '<infinite-plane id="' + str(shape_id) + '">' + \
            '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + \
@@ -32,11 +32,11 @@ def infinite_plane(shape_id, plane_pt, normal_pt):
 def infinite_cylinder(centre, radius, axis, shape_id='shape'):
     """
         Generates xml code for an infintely long cylinder
-        @param centre: a tupple for a point on the axis
-        @param radius: cylinder radius
-        @param axis: cylinder orientation
-        @param shape_id: a string to refer to the shape by
-        @return the xml string
+        :param centre: a tupple for a point on the axis
+        :param radius: cylinder radius
+        :param axis: cylinder orientation
+        :param shape_id: a string to refer to the shape by
+        :return the xml string
     """
     return '<infinite-cylinder id="' + str(shape_id) + '">' + \
            '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
@@ -47,12 +47,12 @@ def infinite_cylinder(centre, radius, axis, shape_id='shape'):
 def finite_cylinder(centre, radius, height, axis, shape_id='shape'):
     """
         Generates xml code for an infintely long cylinder
-        @param centre: a tuple for a point on the axis
-        @param radius: cylinder radius
-        @param height: cylinder height
-        @param axis: cylinder orientation
-        @param shape_id: a string to refer to the shape by
-        @return the xml string
+        :param centre: a tuple for a point on the axis
+        :param radius: cylinder radius
+        :param height: cylinder height
+        :param axis: cylinder orientation
+        :param shape_id: a string to refer to the shape by
+        :return the xml string
     """
     return '<cylinder id="' + str(shape_id) + '">' + \
            '<centre-of-bottom-base x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + \

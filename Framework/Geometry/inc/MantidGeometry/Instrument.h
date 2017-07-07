@@ -20,11 +20,10 @@ namespace Mantid {
 typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
 
 namespace Beamline {
-class ComponentInfo;
 class DetectorInfo;
 }
 namespace Geometry {
-
+class InfoComponentVisitor;
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
@@ -245,29 +244,18 @@ public:
 
   bool hasDetectorInfo() const;
   const Beamline::DetectorInfo &detectorInfo() const;
-  bool hasComponentInfo() const;
-  const Beamline::ComponentInfo &componentInfo() const;
+  bool hasInfoVisitor() const;
 
   size_t detectorIndex(const detid_t detID) const;
   void
-  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo,
-                  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-                      detIdToIndexMap);
-  void setComponentInfo(
-      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-      boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds,
-      boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
-          componentIdToIndexMap);
+  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
+  void setInfoVisitor(const InfoComponentVisitor &visitor);
 
-  boost::shared_ptr<const std::vector<Geometry::ComponentID>>
-  componentIds() const;
+  const InfoComponentVisitor &infoVisitor() const;
+
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
-  boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
-  componentIdToIndexMap() const;
-
-  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-  detIdToIndexMap() const;
+  bool isEmptyInstrument() const;
 
 private:
   /// Save information about a set of detectors to Nexus
@@ -348,21 +336,10 @@ private:
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
 
-  /// Pointer to the ComponentInfo object. NULL unless the instrument is
-  /// associated with an ExperimentInfo oject.
-  boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
-  /// Component ID store for the instrument. NULL unless the instrument is
-  /// associated with an ExperimentInfo oject.
-  boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentIds;
-  /// Component ID to component index map. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
-      m_componentIdToIndexMap;
-  /// Detector ID to detector index map. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-      m_detIdToIndexMap;
+  /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};
+  /// Component and Detector info relevant cache
+  std::unique_ptr<const InfoComponentVisitor> m_infoVisitor;
 };
 namespace Conversion {
 

@@ -5,7 +5,11 @@
 #ifndef Q_MOC_RUN
 #include <boost/date_time/posix_time/posix_time.hpp>
 #endif
+#include <time.h>
 #include <iosfwd>
+#include <stdint.h>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

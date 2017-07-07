@@ -1778,7 +1778,7 @@ public:
     std::vector<int64_t> vec_splitTimes{1000000, 2000000, 3000000, 4000000,
                                         5000000, 6000000, 7000000, 8000000,
                                         9000000, 10000000};
-    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1, -1};
+    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1};
     // Do the splitting
     el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
                                      false, 1.0, 0.0);
