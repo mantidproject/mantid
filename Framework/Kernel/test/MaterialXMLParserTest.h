@@ -69,7 +69,7 @@ public:
     auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
                              "massdensity=\"4\" />");
 
-    TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252, 1e-07);
+    TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252 * 5, 1e-07);
   }
 
   void test_TotalScattering_Attribute() {
