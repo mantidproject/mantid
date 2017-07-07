@@ -1556,12 +1556,16 @@ void GenericDataProcessorPresenter::setModel(std::string name) {
 }
 
 /**
-* Removes the index corresponding to a group in the table from the list of
-* processed groups
+* Takes the index corresponding to table group and either adds or removes it
+* from the list of processed group indexes
 * @param index : [input] The index of the group to be removed
+* @param processed : [input] True to add index, false to remove it
 */
-void GenericDataProcessorPresenter::setIndexUnprocessed(int index) {
-  m_processedGroupIndexes.erase(index);
+void GenericDataProcessorPresenter::setIndexProcessed(int index, bool processed) {
+  if (processed)
+    m_processedGroupIndexes.insert(index);
+  else
+    m_processedGroupIndexes.erase(index);
 }
 
 /**

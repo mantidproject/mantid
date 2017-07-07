@@ -124,7 +124,7 @@ public:
                    ProgressableView *progressView) override;
   void accept(DataProcessorMainPresenter *mainPresenter) override;
   void setModel(std::string name) override;
-  void setIndexUnprocessed(int index) override;
+  void setIndexProcessed(int index, bool processed) override;
 
   // The following methods are public only for testing purposes
   // Get the whitelist
