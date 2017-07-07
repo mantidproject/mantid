@@ -133,13 +133,37 @@ public:
     boost::scoped_array<double> testDataValues(new double[testDataSize]);
 
     setupCubicSpline(cspline, nData, 1);
-    generateDerviTestData(testDataSize, refSet, x, 1, 1);
+    generateDerivTestData(testDataSize, refSet, x, 1, 1);
 
     cspline->derivative1D(testDataValues.get(), x.get(), nData, 1);
 
     // compare reference data with output data
     for (int i = 0; i < testDataSize; ++i) {
       TS_ASSERT_DELTA(refSet[i], testDataValues[i], 1e-2);
+    }
+  }
+
+  void testUnorderedX() {
+    CubicSpline_sptr cspline = boost::make_shared<CubicSpline>();
+    cspline->initialize();
+    int nData = 5;
+    int testDataSize = 5;
+    boost::scoped_array<double> x(new double[nData]);
+    boost::scoped_array<double> refSet(new double[testDataSize]);
+
+    setupCubicSpline(cspline, nData, -0.5);
+
+    // generate descending data with negative xModify
+    generateTestData(testDataSize, refSet, x, -0.5);
+
+    FunctionDomain1DView view(x.get(), nData);
+    FunctionValues testDataValues(view);
+
+    cspline->function(view, testDataValues);
+
+    // compare reference data with output data
+    for (int i = 0; i < testDataSize; ++i) {
+      TS_ASSERT_DELTA(refSet[i], testDataValues[i], 1e-4);
     }
   }
 
@@ -153,7 +177,7 @@ private:
     }
   }
 
-  void generateDerviTestData(int numTests, boost::scoped_array<double> &refSet,
+  void generateDerivTestData(int numTests, boost::scoped_array<double> &refSet,
                              boost::scoped_array<double> &xValues,
                              double xModify, double h) {
     for (int i = 0; i < numTests; ++i) {

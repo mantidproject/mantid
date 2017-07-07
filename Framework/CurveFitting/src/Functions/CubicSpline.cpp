@@ -79,6 +79,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
     std::string yName = "y" + num;
 
     x[i] = getAttribute(xName).asDouble();
+    y[i] = getParameter(yName);
 
     if (!xSortFlag) {
       // if x[i] is out of order with its neighbours
@@ -86,16 +87,27 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
         xSortFlag = true;
       }
     }
-
-    y[i] = getParameter(yName);
   }
 
   // sort the data points if necessary
   if (xSortFlag) {
     g_log.warning() << "Spline x parameters are not in ascending order. Values "
                        "will be sorted.\n";
-    std::sort(x.get(), x.get() + n);
-    std::sort(y.get(), y.get() + n);
+
+    using point = std::pair<double, double>;
+    std::vector<point> pairs;
+    for (int i = 0; i < n; ++i) {
+      pairs.push_back(std::make_pair(x[i], y[i]));
+    }
+    std::sort(pairs.begin(), pairs.end(),
+              [](const point &xy1, const point &xy2) {
+                return xy1.first <= xy2.first;
+              });
+
+    for (int i = 0; i < n; ++i) {
+      x[i] = pairs[i].first;
+      y[i] = pairs[i].second;
+    }
   }
 
   // pass values to GSL objects
