@@ -170,6 +170,12 @@ row highlighted green. Any groups that have been post-processed successfully
 will also be highlighted. Starting a new reduction will clear all highlighted
 rows and groups.
 
+If reduction is paused and then resumed again, the interface will check if any
+of the data in previously processed rows has been manually changed. If so, the
+whole group contained the altered row will be processed again, while groups
+whose rows data has been unchanged will be ignored. In addition, any new
+selected rows / groups will be processed while deselected ones will be ignored.
+
 Next to the **Process** button there is a checkbox which allows enabling and
 disabling output to an ipython notebook. If the checkbox is enabled, a dialog
 window will ask for a save location for the notebook after processing is

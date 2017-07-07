@@ -237,7 +237,7 @@ void QDataProcessorWidget::tableUpdated(const QModelIndex &topLeft,
   Q_UNUSED(bottomRight);
   auto pIndex = m_model->parent(topLeft);
   if (pIndex.isValid())
-    m_presenter->setIndexProcessed(pIndex.row(), true);
+    m_presenter->setIndexProcessed(pIndex.row(), false);
   m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
 }
 

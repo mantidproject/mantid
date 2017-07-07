@@ -325,7 +325,6 @@ void GenericDataProcessorPresenter::process() {
 }
 
 /**
-        m_view->giveUserCritical(ex.what(), "Error");
 Decide which processing action to take next
 */
 void GenericDataProcessorPresenter::doNextAction() {
