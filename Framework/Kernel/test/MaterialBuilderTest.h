@@ -90,7 +90,7 @@ public:
                    .setMassDensity(4)
                    .build();
 
-    TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252, 0.001);
+    TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252 * 5, 0.001);
   }
 
   void test_Number_Density_Set_By_AtomicNumber_MassDensity() {

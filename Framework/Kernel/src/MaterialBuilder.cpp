@@ -261,7 +261,8 @@ double MaterialBuilder::getOrCalculateRho(
     for (const auto &formulaUnit : formula) {
       rmm += formulaUnit.atom->mass * formulaUnit.multiplicity;
     }
-    return (m_massDensity.get() / rmm) * PhysicalConstants::N_A * 1e-24;
+    return (m_massDensity.get() * totalNumAtoms / rmm) *
+           PhysicalConstants::N_A * 1e-24;
   } else if (m_formula && m_formula->size() == 1) {
     return m_formula->at(0).atom->number_density;
   } else {
