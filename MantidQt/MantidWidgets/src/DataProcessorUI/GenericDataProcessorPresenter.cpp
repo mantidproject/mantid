@@ -293,6 +293,10 @@ void GenericDataProcessorPresenter::process() {
   // Clear the group queue
   m_gqueue = GroupQueue();
 
+  // Progress: each group and each row within count as a progress step.
+  int progress = 0;
+  int maxProgress = 0;
+
   for (const auto &item : m_selectedData) {
     // Loop over each group
 
@@ -300,6 +304,8 @@ void GenericDataProcessorPresenter::process() {
     if (m_processedGroupIndexes.find(item.first) !=
         m_processedGroupIndexes.end())
       continue;
+
+    maxProgress += (int)(item.second.size()) + 1;
 
     RowQueue rowQueue;
 
@@ -310,12 +316,7 @@ void GenericDataProcessorPresenter::process() {
     m_gqueue.emplace(item.first, rowQueue);
   }
 
-  // Progress: each group and each row within count as a progress step.
-  int progress = 0;
-  int maxProgress = (int)(m_gqueue.size());
-  for (const auto &subitem : m_gqueue._Get_container()) {
-    maxProgress += (int)(subitem.second.size());
-  }
+  // Create progress reporter bar
   m_progressReporter =
       new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
 
