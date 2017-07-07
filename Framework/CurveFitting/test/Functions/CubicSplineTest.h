@@ -151,10 +151,13 @@ public:
     boost::scoped_array<double> x(new double[nData]);
     boost::scoped_array<double> refSet(new double[testDataSize]);
 
-    setupCubicSpline(cspline, nData, -0.5);
+    setupCubicSpline(cspline, nData, 1.7);
 
-    // generate descending data with negative xModify
-    generateTestData(testDataSize, refSet, x, -0.5);
+    generateTestData(testDataSize, refSet, x, 1.7);
+
+    // introduce disorder in x
+    std::swap(x[0], x[3]);
+    std::swap(refSet[0], refSet[3]);
 
     FunctionDomain1DView view(x.get(), nData);
     FunctionValues testDataValues(view);
