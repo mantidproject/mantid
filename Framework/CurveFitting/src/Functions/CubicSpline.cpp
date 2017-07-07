@@ -70,6 +70,8 @@ void CubicSpline::function1D(double *out, const double *xValues,
 void CubicSpline::setupInput(boost::scoped_array<double> &x,
                              boost::scoped_array<double> &y, int n) const {
   // Populate data points from the input attributes and parameters
+  bool xSortFlag = false;
+
   for (int i = 0; i < n; ++i) {
     std::string num = std::to_string(i);
 
@@ -78,15 +80,22 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
 
     x[i] = getAttribute(xName).asDouble();
 
-    // if x[i] is out of order with its neighbours
-    if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
-      g_log.warning() << "Spline x parameters are not in ascending order. "
-                         "Only x values will be sorted.\n";
-      std::sort(x.get(), x.get() + n);
-      break;
+    if (!xSortFlag) {
+      // if x[i] is out of order with its neighbours
+      if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
+        xSortFlag = true;
+      }
     }
 
     y[i] = getParameter(yName);
+  }
+
+  // sort the data points if necessary
+  if (xSortFlag) {
+    g_log.warning() << "Spline x parameters are not in ascending order. Values "
+                       "will be sorted.\n";
+    std::sort(x.get(), x.get() + n);
+    std::sort(y.get(), y.get() + n);
   }
 
   // pass values to GSL objects
