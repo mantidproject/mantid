@@ -96,7 +96,9 @@ private:
   void resolveInstrument();
   void resolveScanType();
 
-  size_t m_numberDetectorsRead;   ///< number of cells read from file
+  size_t m_sizeDim1;            ///< size of dim1, either tubes or detectors
+  size_t m_sizeDim2;            ///< size of dim2, used for pixels within tubes
+  size_t m_numberDetectorsRead; ///< number of cells read from file
   size_t m_numberDetectorsActual; ///< number of cells actually active
   size_t m_numberScanPoints;      ///< number of scan points
   size_t m_resolutionMode;        ///< resolution mode; 1:low, 2:nominal, 3:high

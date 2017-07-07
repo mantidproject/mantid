@@ -153,8 +153,9 @@ void LoadILLDiffraction::loadDataScan() {
   twoTheta0.load();
 
   // figure out the dimensions
-  m_numberDetectorsRead =
-      static_cast<size_t>(data.dim1()) * static_cast<size_t>(data.dim2());
+  m_sizeDim1 = static_cast<size_t>(data.dim1());
+  m_sizeDim2 = static_cast<size_t>(data.dim2());
+  m_numberDetectorsRead = m_sizeDim1 * m_sizeDim2;
   m_numberScanPoints = static_cast<size_t>(data.dim0());
   g_log.debug() << "Read " << m_numberDetectorsRead << " detectors and "
                 << m_numberScanPoints << "\n";
@@ -338,13 +339,17 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
     }
   }
 
+  // Dead pixel offset, should be zero except for D20
+  size_t deadOffset = (m_numberDetectorsRead - m_numberDetectorsActual) / 2;
+
   // Then load the detector spectra
   for (size_t i = NUMBER_MONITORS;
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      unsigned int y = data(static_cast<int>(j),
-                            static_cast<int>((i - NUMBER_MONITORS) / 128),
-                            static_cast<int>((i - NUMBER_MONITORS) % 128));
+      unsigned int y = data(
+          static_cast<int>(j),
+          static_cast<int>((i - NUMBER_MONITORS + deadOffset) / m_sizeDim1),
+          static_cast<int>((i - NUMBER_MONITORS) % m_sizeDim2));
       m_outWorkspace->mutableY(j + i * m_numberScanPoints) = y;
       m_outWorkspace->mutableE(j + i * m_numberScanPoints) = sqrt(y);
       m_outWorkspace->mutableX(j + i * m_numberScanPoints) = axis;
@@ -376,12 +381,15 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
 
   // Assign detector counts
   size_t deadOffset = (m_numberDetectorsRead - m_numberDetectorsActual) / 2;
-  for (size_t i = 1; i <= m_numberDetectorsActual; ++i) {
+  for (size_t i = NUMBER_MONITORS;
+       i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      unsigned int y =
-          data(static_cast<int>(j), static_cast<int>(i - 1 + deadOffset));
+      unsigned int y = data(
+          static_cast<int>(j),
+          static_cast<int>((i - NUMBER_MONITORS + deadOffset) / m_sizeDim1),
+          static_cast<int>((i - NUMBER_MONITORS) % m_sizeDim2));
       spectrum[j] = y;
       errors[j] = sqrt(y);
     }
