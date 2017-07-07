@@ -300,7 +300,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
     def _generate_UBList(self):
         CreateSingleValuedWorkspace(OutputWorkspace='__ub')
         LoadIsawUB('__ub',self.getProperty("UBMatrix").value)
-        ub=mtd['__ub'].sample().getOrientedLattice().getUB()
+        ub=mtd['__ub'].sample().getOrientedLattice().getUB().copy()
         DeleteWorkspace(Workspace='__ub')
 
         symOps = self.getProperty("SymmetryOps").value
