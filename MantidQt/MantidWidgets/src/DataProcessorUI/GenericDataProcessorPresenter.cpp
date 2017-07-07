@@ -317,7 +317,7 @@ void GenericDataProcessorPresenter::process() {
     maxProgress += (int)(subitem.second.size());
   }
   m_progressReporter =
-    new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
+      new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
 
   // Start processing the first group
   m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
@@ -1560,7 +1560,8 @@ void GenericDataProcessorPresenter::setModel(std::string name) {
 * @param index : [input] The index of the group to be removed
 * @param processed : [input] True to add index, false to remove it
 */
-void GenericDataProcessorPresenter::setIndexProcessed(int index, bool processed) {
+void GenericDataProcessorPresenter::setIndexProcessed(int index,
+                                                      bool processed) {
   if (processed)
     m_processedGroupIndexes.insert(index);
   else
