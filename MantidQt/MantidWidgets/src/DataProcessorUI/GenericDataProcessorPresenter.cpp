@@ -269,22 +269,23 @@ void GenericDataProcessorPresenter::process() {
 
   m_newSelection = false;
 
+  // Set the global settings. If any have been changed, clear list of processed
+  // group indexes
   std::string newPreprocessingOptions =
       m_mainPresenter->getPreprocessingOptionsAsString().toStdString();
   std::string newProcessingOptions =
       m_mainPresenter->getProcessingOptions().toStdString();
   std::string newPostprocessingOptions =
       m_mainPresenter->getPostprocessingOptions().toStdString();
-  
-  // If global settings have been changed, clear list of processed group indexes
-  if (m_preProcessingOptions != newPreprocessingOptions ||
+
+  if (m_preprocessingOptions != newPreprocessingOptions ||
       m_processingOptions != newProcessingOptions ||
-      m_postProcessingOptions != newPostprocessingOptions)
+      m_postprocessingOptions != newPostprocessingOptions)
     m_processedGroupIndexes.clear();
 
-  m_preProcessingOptions = newPreprocessingOptions;
+  m_preprocessingOptions = newPreprocessingOptions;
   m_processingOptions = newProcessingOptions;
-  m_postProcessingOptions = newPostprocessingOptions;
+  m_postprocessingOptions = newPostprocessingOptions;
 
   // Clear any highlighted rows
   m_manager->clearHighlighted();
@@ -481,20 +482,13 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 
   // Global pre-processing options as a map where keys are column
   // name and values are pre-processing options as a string
-  const std::map<std::string, std::string> preprocessingOptionsMap =
-      convertStringToMap(
-          m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
-  // Global processing options as a string
-  const std::string processingOptions =
-      m_mainPresenter->getProcessingOptions().toStdString();
-  // Global post-processing options as a string
-  const std::string postprocessingOptions =
-      m_mainPresenter->getPostprocessingOptions().toStdString();
+  const auto preprocessingOptionsMap =
+      convertStringToMap(m_preprocessingOptions);
 
   auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
       m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
-      m_processor, m_postprocessor, preprocessingOptionsMap, processingOptions,
-      postprocessingOptions);
+      m_processor, m_postprocessor, preprocessingOptionsMap,
+      m_processingOptions, m_postprocessingOptions);
   std::string generatedNotebook = notebook->generateNotebook(data);
 
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
@@ -546,11 +540,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
   alg->setProperty(m_postprocessor.inputProperty(), inputWSNames);
   alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
 
-  // Global post-processing options
-  const std::string options =
-      m_mainPresenter->getPostprocessingOptions().toStdString();
-
-  auto optionsMap = parseKeyValueString(options);
+  auto optionsMap = parseKeyValueString(m_postprocessingOptions);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       alg->setProperty(kvp->first, kvp->second);
@@ -861,8 +851,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // Global pre-processing options as a map
   std::map<std::string, std::string> globalOptions;
   if (!m_preprocessMap.empty())
-    globalOptions = convertStringToMap(
-        m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
+    globalOptions = convertStringToMap(m_preprocessingOptions);
 
   // Pre-processing properties
   auto preProcessPropMap = convertStringToMapWithSet(
@@ -922,11 +911,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
     }
   }
 
-  // Global processing options as a string
-  std::string options = m_mainPresenter->getProcessingOptions().toStdString();
-
   // Parse and set any user-specified options
-  auto optionsMap = parseKeyValueString(options);
+  auto optionsMap = parseKeyValueString(m_processingOptions);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       if (restrictedProps.find(kvp->first) == restrictedProps.end())
@@ -938,10 +924,10 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   }
 
   /* Now deal with 'Options' column */
-  options = data->back();
+  const auto userOptions = data->back();
 
   // Parse and set any user-specified options
-  optionsMap = parseKeyValueString(options);
+  optionsMap = parseKeyValueString(userOptions);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       alg->setProperty(kvp->first, kvp->second);
