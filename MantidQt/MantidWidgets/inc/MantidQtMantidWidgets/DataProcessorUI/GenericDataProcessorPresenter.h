@@ -159,6 +159,12 @@ protected:
   std::string m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
+  // Pre-processing options
+  std::string m_preprocessingOptions;
+  // Data processor options
+  std::string m_processingOptions;
+  // Post-processing options
+  std::string m_postprocessingOptions;
 
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
@@ -194,12 +200,6 @@ private:
   DataProcessorPostprocessingAlgorithm m_postprocessor;
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
-  // Pre-processing options
-  std::string m_preprocessingOptions;
-  // Data processor options
-  std::string m_processingOptions;
-  // Post-processing options
-  std::string m_postprocessingOptions;
   // The current queue of groups to be reduced
   GroupQueue m_gqueue;
   // The current group we are reducing row data for

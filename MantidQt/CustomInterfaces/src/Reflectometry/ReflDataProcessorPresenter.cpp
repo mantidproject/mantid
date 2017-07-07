@@ -70,6 +70,13 @@ void ReflDataProcessorPresenter::process() {
   if (!proceedIfWSTypeInADS(m_selectedData, false))
     return;
 
+  // Get global settings
+  m_preprocessingOptions =
+      m_mainPresenter->getPreprocessingOptionsAsString().toStdString();
+  m_processingOptions = m_mainPresenter->getProcessingOptions().toStdString();
+  m_postprocessingOptions =
+      m_mainPresenter->getPostprocessingOptions().toStdString();
+
   // Get time slicing type
   auto timeSlicingType = m_mainPresenter->getTimeSlicingType().toStdString();
 
