@@ -54,12 +54,12 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                              "of the solid angle). See :ref:`MDnormSCD <algm-MDnormSCD>` for details")
         self.declareProperty(FileProperty(name="Flux",defaultValue="",action=FileAction.Load,
                                           extensions=[".nxs"]),
-                             "An input workspace containing momentum dependent flux. See :ref:``MDnormSCD <algm-MDnormSCD>` for details")
+                             "An input workspace containing momentum dependent flux. See :ref:`MDnormSCD <algm-MDnormSCD>` for details")
 
         # UBMatrix
         self.declareProperty(FileProperty(name="UBMatrix",defaultValue="",action=FileAction.Load,
                                           extensions=[".mat", ".ub", ".txt"]),
-                             doc="Path to an ISAW-style UB matrix text file. See :ref:`LoadIsawUB`")
+                             doc="Path to an ISAW-style UB matrix text file. See :ref:`LoadIsawUB <algm-LoadIsawUB>`")
         # Goniometer
         self.declareProperty('SetGoniometer', False, "Set which Goniometer to use. See :ref:`SetGoniometer <algm-SetGoniometer>`")
         condition = VisibleWhenProperty("SetGoniometer", PropertyCriterion.IsNotDefault)

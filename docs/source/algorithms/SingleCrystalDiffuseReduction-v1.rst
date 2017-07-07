@@ -9,11 +9,11 @@
 Description
 -----------
 
-Developed for CORELLI and TOPAZ but should work on any
-instrument. This workflow algorithm loops over a series of runs
-combining them with correct normalisation, subtract the background and
-apply symmetry. The resulting workspace is a :ref:`MDHistoWorkspace
-<MDHistoWorkspace>` containing a volume of scattering.
+Developed for CORELLI but should work on any instrument. This workflow
+algorithm loops over a series of runs combining them with correct
+normalisation, subtract the background and apply symmetry. The
+resulting workspace is a :ref:`MDHistoWorkspace <MDHistoWorkspace>`
+containing a volume of scattering.
 
 The input filename follows the syntax from
 :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`
@@ -74,7 +74,7 @@ Workflow
 Usage
 -----
 
-**Corelli, single file**
+**Single file**
 
 .. code-block:: python
 
@@ -89,11 +89,13 @@ Usage
 				 BinningDim1='-10.05,10.05,201',
 				 BinningDim2='-0.1,0.1,1')
 
-**Corelli, multiple files**
+.. figure:: /images/SingleCrystalDiffuseReduction_corelli_single.png
+
+**Multiple files**
 
 .. code-block:: python
 
-   SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:5',
+   SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:10',
                                  SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
 				 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
 				 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
@@ -105,7 +107,9 @@ Usage
 				 BinningDim2='-0.1,0.1,1')
 
 
-**Corelli, single file with symmetry**
+.. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple.png
+
+**Single file with symmetry**
 
 .. code-block:: python
 
@@ -121,11 +125,13 @@ Usage
 				 BinningDim2='-0.1,0.1,1',
 				 SymmetryOps="P 31 2 1")
 
-**Corelli, multiple files with symmetry**
+.. figure:: /images/SingleCrystalDiffuseReduction_corelli_single_sym.png
+
+**Multiple files with symmetry**
 
 .. code-block:: python
 
-   SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:5',
+   SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:10',
                                  SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
 				 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
 				 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
@@ -138,11 +144,13 @@ Usage
 				 SymmetryOps="P 31 2 1")
 
 
-**Corelli, multiple files with symmetry and background substraction**
+.. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym.png
+
+**Multiple files with symmetry and background substraction**
 
 .. code-block:: python
 
-   SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:5',
+   SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:10',
                                  Background='CORELLI_28124',
 				 BackgroundScale=0.95,
 				 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
@@ -156,11 +164,13 @@ Usage
 				 BinningDim2='-0.1,0.1,1',
 				 SymmetryOps="P 31 2 1")
 
+.. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg.png
+
 **Reading in elastic Corelli autoreduced data**
 
 .. code-block:: python
 
-   SingleCrystalDiffuseReduction(Filename=','.join('/SNS/CORELLI/IPTS-15526/shared/autoreduce/CORELLI_'+str(run)+'_elastic.nxs' for run in range(29782,29818,5)),
+   SingleCrystalDiffuseReduction(Filename=','.join('/SNS/CORELLI/IPTS-15526/shared/autoreduce/CORELLI_'+str(run)+'_elastic.nxs' for run in range(29782,29818,10)),
                                  Background='/SNS/CORELLI/IPTS-15796/shared/autoreduce/CORELLI_28124_elastic.nxs',
 				 BackgroundScale=0.95,
 				 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
@@ -174,11 +184,13 @@ Usage
 				 BinningDim2='-0.1,0.1,1',
 				 SymmetryOps="P 31 2 1")
 
+.. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg_elastic.png
+
 **Defining the axis to be [H,H,0], [H,-H,0], [0,0,L]**
 
 .. code-block:: python
 
-   SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:5',
+   SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:10',
                                  Background='CORELLI_28124',
 				 BackgroundScale=0.95,
 				 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
@@ -190,29 +202,12 @@ Usage
 				 Uproj='1,1,0',
 				 Vproj='1,-1,0',
 				 Wproj='0,0,1',
-				 BinningDim0='-10.05,10.05,201',
-				 BinningDim1='-17.5875,17.5875,201',
+				 BinningDim0='-7.5375,7.5375,201',
+				 BinningDim1='-13.165625,13.165625,201',
 				 BinningDim2='-0.1,0.1,1',
 				 SymmetryOps="P 31 2 1")
 
-**TOPAZ example using TOF filter and DetCal**
-
-.. code-block:: python
-
-   SingleCrystalDiffuseReduction(Filename='TOPAZ_23567:23582:2',
-                                 Background='TOPAZ_23195',
-				 FilterByTofMin=500,
-				 FilterByTofMax=16600,
-				 SolidAngle='/SNS/TOPAZ/IPTS-15526/shared/calibration/solidAngle23189.nxs',
-				 Flux='/SNS/TOPAZ/IPTS-15526/shared/calibration/spectra23189.nxs',
-				 UBMatrix='/SNS/TOPAZ/IPTS-15526/shared/2017A-data/100K_fe_0p10/100K_Hexagonal_P.mat',
-				 OutputWorkspace='output',
-				 DetCal='/SNS/TOPAZ/IPTS-15526/shared/calibration/TOPAZ_2017A.DetCal',
-				 BinningDim0='-10.05,10.05,201',
-				 BinningDim1='-10.05,10.05,201',
-				 BinningDim2='-0.1,0.1,1',
-				 SymmetryOps="P 31 2 1")
-
+.. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg_HH0.png
 
 Related Algorithms
 ------------------
