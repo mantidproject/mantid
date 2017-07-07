@@ -34,8 +34,7 @@ Usage
 
    # Run Algorithm 
    result = GoniometerAnglesFromPhiRotation(ws1,ws2,Tolerance=0.5,MIND=0,MAXD=2)
-
-   print "Chi: %.1f, Omega: %.1f, Indexed: %i, AvErrIndex: %.4f AvErrAll: %.4f" % (  result[0], result[1], result[2], result[3], result[4] )
+   print("Chi: {:.1f}, Omega: {:.1f}, Indexed: {}, AvErrIndex: {:.2f} AvErrAll: {:.2f}".format(*result))
 
 Output:
 
