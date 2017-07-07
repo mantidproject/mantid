@@ -180,6 +180,9 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
     return false;
 
   const std::string valueStr = value.toString().toStdString();
+  if (m_tWS->String(index.row(), index.column()) == valueStr)
+    return false;
+
   m_tWS->String(index.row(), index.column()) = valueStr;
 
   emit dataChanged(index, index);
