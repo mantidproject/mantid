@@ -9,6 +9,8 @@ ISIS Powder Diffraction Scripts Workflows
 
 .. _todo-powder-diffraction-workflow-ref:
 
+.. diagram:: ISISPowderNormaliseWorkspace_wkflw.dot
+
 .. diagram:: ISISPowderSavePearlFmodes_wkflw.dot
 
 .. diagram:: ISISPowderSaveFocusedBanks_wkflw.dot
