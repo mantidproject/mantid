@@ -2,9 +2,10 @@
 #define MANTID_KERNEL_MATRIX_H_
 
 #include "MantidKernel/DllConfig.h"
-#include <vector>
 #include <cfloat>
 #include <iosfwd>
+#include <memory>
+#include <vector>
 
 namespace Mantid {
 
@@ -41,15 +42,23 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename T> class DLLExport Matrix {
 public:
-  /// Enable users to retrive the element type
+  /// Enable users to retrieve the element type
   typedef T value_type;
 
 private:
   size_t m_numRowsX;    ///< Number of rows    (x coordinate)
   size_t m_numColumnsY; ///< Number of columns (y coordinate)
 
-  T **m_rawDataArrayPtr;     ///< Raw data
-  void deleteMem();          ///< Helper function to delete memory
+  /// 1D memory allocation to be wrapped with pointers to the rows
+  template <class U> using CMemoryArray = std::unique_ptr<U[]>;
+  /// Pointers to rows in the raw data array to make it appear 2D
+  template <typename U> using MatrixMemoryPtrs = std::unique_ptr<U*[]>;
+
+  /// Pointer to allocated memory
+  CMemoryArray<T> m_rawDataAlloc;
+  /// Representation of 2D data
+  MatrixMemoryPtrs<T> m_rawData;
+
   void lubcmp(int *, int &); ///< starts inversion process
   void lubksb(int const *, double *);
   void rotate(double const, double const, int const, int const, int const,
@@ -62,7 +71,7 @@ public:
    * (assuming that we have columns x row vector. */
   Matrix(const std::vector<T> &, const std::vector<T> &);
   /// Build square matrix from a linear vector. Throw if the vector.size() !=
-  /// nx*nx;
+  /// m_numRowsX * m_numRowsX;
   Matrix(const std::vector<T> &);
   /// Build a non-square matrix from vector and dimensions
   Matrix(const std::vector<T> &, const size_t nrow, const size_t ncol);
@@ -73,12 +82,12 @@ public:
   Matrix<T> &operator=(const Matrix<T> &);
   Matrix(Matrix<T> &&) noexcept;
   Matrix<T> &operator=(Matrix<T> &&) noexcept;
-  ~Matrix();
 
-  /// const Array accessor
-  const T *operator[](const size_t A) const { return m_rawDataArrayPtr[A]; }
+  /// const Array accessor. Use, e.g. Matrix[row][col]
+  const T *operator[](const size_t row) const { return m_rawData[row]; }
+
   /// Array accessor. Use, e.g. Matrix[row][col]
-  T *operator[](const size_t A) { return m_rawDataArrayPtr[A]; }
+  T *operator[](const size_t row) { return m_rawData[row]; };
 
   Matrix<T> &operator+=(const Matrix<T> &);     ///< Basic addition operator
   Matrix<T> operator+(const Matrix<T> &) const; ///< Basic addition operator
@@ -86,12 +95,12 @@ public:
   Matrix<T> &operator-=(const Matrix<T> &);     ///< Basic subtraction operator
   Matrix<T> operator-(const Matrix<T> &) const; ///< Basic subtraction operator
 
-  Matrix<T> operator*(const Matrix<T> &) const; ///< Basic matrix multiply
-  std::vector<T> operator*(const std::vector<T> &) const; ///< Multiply M*Vec
+  Matrix<T> operator*(const Matrix<T> &)const; ///< Basic matrix multiply
+  std::vector<T> operator*(const std::vector<T> &)const; ///< Multiply M*Vec
   void multiplyPoint(const std::vector<T> &in,
                      std::vector<T> &out) const; ///< Multiply M*Vec
-  V3D operator*(const V3D &) const;              ///< Multiply M*Vec
-  Matrix<T> operator*(const T &) const;          ///< Multiply by constant
+  V3D operator*(const V3D &)const;               ///< Multiply M*Vec
+  Matrix<T> operator*(const T &)const;           ///< Multiply by constant
 
   Matrix<T> &operator*=(const Matrix<T> &); ///< Basic matrix multipy
   Matrix<T> &operator*=(const T &);         ///< Multiply by constant
@@ -103,8 +112,8 @@ public:
   bool operator==(const Matrix<T> &) const;
   bool equals(const Matrix<T> &A, const double Tolerance = FLT_EPSILON) const;
   T item(const int a, const int b) const {
-    return m_rawDataArrayPtr[a][b];
-  } ///< disallows access
+    return m_rawData[a][b]; ///< disallows access
+  }
 
   void print() const;
   void write(std::ostream &, int const = 0) const;
@@ -204,6 +213,6 @@ template <typename T>
 DLLExport std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
 template <typename T>
 DLLExport void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 #endif // MANTID_KERNEL_MATRIX_H_

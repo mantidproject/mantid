@@ -186,7 +186,7 @@ void SLSQPMinimizer::initializeConstraints(const DblMatrix &equality,
       constrMatrix = &inequality;
 
     for (size_t i = 0; i < constrMatrix->numRows(); ++i, ++constrCounter) {
-      const double *matrixRow = (*constrMatrix)[i];
+      const auto matrixRow = (*constrMatrix)[i];
       for (size_t j = 0; j < constrMatrix->numCols(); ++j) {
         m_constraintNorms[j * totalNumConstr + constrCounter] = matrixRow[j];
       }
