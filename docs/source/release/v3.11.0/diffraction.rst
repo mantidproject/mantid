@@ -11,6 +11,10 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
+Powder Diffraction
+-------------------
+- Added new diagrams showing the algorithms used in ISIS Powder scripts. These can be found at: :ref:`isis-powder-diffraction-workflow-ref`
+
 |
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.11%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
