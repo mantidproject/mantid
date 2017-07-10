@@ -616,11 +616,11 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
   // array so we can expose the memory to Python APIs via numpy which expects
   // this
   // style of memory layout.
-  auto allocatedMemory = std::make_unique<T[]>((m_numRowsX * m_numColumnsY));
+  auto allocatedMemory = Kernel::make_unique<T[]>((m_numRowsX * m_numColumnsY));
 
   // Next allocate an array of pointers for the rows (X). This partitions
   // the 1D array into a 2D array for callers.
-  auto rowPtrs = std::make_unique<T *[]>(m_numRowsX);
+  auto rowPtrs = Kernel::make_unique<T *[]>(m_numRowsX);
 
   for (size_t i = 0; i < m_numRowsX; i++) {
     // Calculate offsets into the allocated memory array (Y)
@@ -841,12 +841,8 @@ Has a in place transpose for a square matrix case.
   // irregular matrix
   // get some memory
 
-  // Note: Don't change these to a 'auto'. By strongly typing here we know
-  // that the move at the end can be done (and we get nice clean compiler
-  // error messages at this point if it cannot).
-  CMemoryArray<T> allocatedMemory =
-      std::make_unique<T[]>((m_numRowsX * m_numColumnsY));
-  MatrixMemoryPtrs<T> transposePtrs = std::make_unique<T *[]>(m_numRowsX);
+  auto allocatedMemory = Kernel::make_unique<T[]>((m_numRowsX * m_numColumnsY));
+  auto transposePtrs = Kernel::make_unique<T *[]>(m_numRowsX);
 
   for (size_t i = 0; i < m_numColumnsY; i++) {
     // Notice how this partitions using Rows (X) instead of Cols(Y)
