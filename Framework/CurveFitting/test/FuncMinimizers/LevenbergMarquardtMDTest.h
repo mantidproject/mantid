@@ -227,7 +227,7 @@ public:
     TS_ASSERT_EQUALS(s.getError(), "success");
   }
 
-  void xtest_Linear_constrained1() {
+  void test_Linear_constrained1() {
     API::FunctionDomain1D_sptr domain(
         new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);

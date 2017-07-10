@@ -124,6 +124,7 @@ public:
                    ProgressableView *progressView) override;
   void accept(DataProcessorMainPresenter *mainPresenter) override;
   void setModel(std::string name) override;
+  void setIndexProcessed(int index, bool processed) override;
 
   // The following methods are public only for testing purposes
   // Get the whitelist
@@ -158,6 +159,12 @@ protected:
   std::string m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
+  // Pre-processing options
+  std::string m_preprocessingOptions;
+  // Data processor options
+  std::string m_processingOptions;
+  // Post-processing options
+  std::string m_postprocessingOptions;
 
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
@@ -211,6 +218,8 @@ private:
   bool m_tableDirty;
   // stores whether a new table selection has been made before processing
   bool m_newSelection;
+  // list of indexes of processed groups
+  std::set<int> m_processedGroupIndexes;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Thread to run reducer worker in
@@ -284,7 +293,8 @@ private:
 
   // start thread for performing reduction on current row/group asynchronously
   virtual void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex);
-  virtual void startAsyncGroupReduceThread(GroupData &groupData);
+  virtual void startAsyncGroupReduceThread(GroupData &groupData,
+                                           int groupIndex);
 
   // end reduction
   void endReduction();

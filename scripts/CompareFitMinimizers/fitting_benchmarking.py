@@ -267,11 +267,11 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
         if 'WISH17701' in prob.name:
             ignore_invalid = False
 
-        status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(function, wks, Output='ws_fitting_test',
-                                                                Minimizer=minimizer,
-                                                                CostFunction=cost_function,
-                                                                IgnoreInvalidData=ignore_invalid,
-                                                                StartX=prob.start_x, EndX=prob.end_x)
+        status, chi2, covar_tbl, param_tbl, fit_wks, niter = msapi.Fit(function, wks, Output='ws_fitting_test',
+                                                                       Minimizer=minimizer,
+                                                                       CostFunction=cost_function,
+                                                                       IgnoreInvalidData=ignore_invalid,
+                                                                       StartX=prob.start_x, EndX=prob.end_x)
 
         calc_chi2 = msapi.CalculateChiSquared(Function=function,
                                               InputWorkspace=wks, IgnoreInvalidData=ignore_invalid)

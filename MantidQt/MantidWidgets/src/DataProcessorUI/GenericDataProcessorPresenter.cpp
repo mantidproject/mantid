@@ -269,20 +269,44 @@ void GenericDataProcessorPresenter::process() {
 
   m_newSelection = false;
 
-  // Progress: each group and each row within count as a progress step.
-  int progress = 0;
-  int maxProgress = (int)(m_selectedData.size());
-  for (const auto &subitem : m_selectedData) {
-    maxProgress += (int)(subitem.second.size());
-  }
-  m_progressReporter =
-      new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
+  // Set the global settings. If any have been changed, clear list of processed
+  // group indexes
+  std::string newPreprocessingOptions =
+      m_mainPresenter->getPreprocessingOptionsAsString().toStdString();
+  std::string newProcessingOptions =
+      m_mainPresenter->getProcessingOptions().toStdString();
+  std::string newPostprocessingOptions =
+      m_mainPresenter->getPostprocessingOptions().toStdString();
+
+  if (m_preprocessingOptions != newPreprocessingOptions ||
+      m_processingOptions != newProcessingOptions ||
+      m_postprocessingOptions != newPostprocessingOptions)
+    m_processedGroupIndexes.clear();
+
+  m_preprocessingOptions = newPreprocessingOptions;
+  m_processingOptions = newProcessingOptions;
+  m_postprocessingOptions = newPostprocessingOptions;
+
+  // Clear any highlighted rows
+  m_manager->clearHighlighted();
 
   // Clear the group queue
   m_gqueue = GroupQueue();
 
+  // Progress: each group and each row within count as a progress step.
+  int progress = 0;
+  int maxProgress = 0;
+
   for (const auto &item : m_selectedData) {
     // Loop over each group
+
+    // Ignore any groups that are already processed
+    if (m_processedGroupIndexes.find(item.first) !=
+        m_processedGroupIndexes.end())
+      continue;
+
+    maxProgress += (int)(item.second.size()) + 1;
+
     RowQueue rowQueue;
 
     for (const auto &data : item.second) {
@@ -292,13 +316,16 @@ void GenericDataProcessorPresenter::process() {
     m_gqueue.emplace(item.first, rowQueue);
   }
 
+  // Create progress reporter bar
+  m_progressReporter =
+      new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
+
   // Start processing the first group
   m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
   resume();
 }
 
 /**
-        m_view->giveUserCritical(ex.what(), "Error");
 Decide which processing action to take next
 */
 void GenericDataProcessorPresenter::doNextAction() {
@@ -331,6 +358,7 @@ void GenericDataProcessorPresenter::nextRow() {
   // Add processed row data to the group
   int rowIndex = m_rowItem.first;
   m_groupData[rowIndex] = m_rowItem.second;
+  int groupIndex = m_gqueue.front().first;
   auto &rqueue = m_gqueue.front().second;
 
   if (!rqueue.empty()) {
@@ -339,7 +367,7 @@ void GenericDataProcessorPresenter::nextRow() {
     // Reduce next row
     m_rowItem = rqueue.front();
     rqueue.pop();
-    startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
+    startAsyncRowReduceThread(&m_rowItem, groupIndex);
   } else {
     m_gqueue.pop();
     // Set next action flag
@@ -347,7 +375,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
     if (m_groupData.size() > 1) {
       // Multiple rows in containing group, do post-processing on the group
-      startAsyncGroupReduceThread(m_groupData);
+      startAsyncGroupReduceThread(m_groupData, groupIndex);
     } else {
       // Single row in containing group, skip to next group
       nextGroup();
@@ -398,10 +426,10 @@ void GenericDataProcessorPresenter::startAsyncRowReduceThread(RowItem *rowItem,
 Reduce the current group asynchronously
 */
 void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
-    GroupData &groupData) {
+    GroupData &groupData, int groupIndex) {
 
-  auto *worker =
-      new GenericDataProcessorPresenterGroupReducerWorker(this, groupData);
+  auto *worker = new GenericDataProcessorPresenterGroupReducerWorker(
+      this, groupData, groupIndex);
   m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
   m_workerThread->start();
 }
@@ -454,20 +482,13 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 
   // Global pre-processing options as a map where keys are column
   // name and values are pre-processing options as a string
-  const std::map<std::string, std::string> preprocessingOptionsMap =
-      convertStringToMap(
-          m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
-  // Global processing options as a string
-  const std::string processingOptions =
-      m_mainPresenter->getProcessingOptions().toStdString();
-  // Global post-processing options as a string
-  const std::string postprocessingOptions =
-      m_mainPresenter->getPostprocessingOptions().toStdString();
+  const auto preprocessingOptionsMap =
+      convertStringToMap(m_preprocessingOptions);
 
   auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
       m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
-      m_processor, m_postprocessor, preprocessingOptionsMap, processingOptions,
-      postprocessingOptions);
+      m_processor, m_postprocessor, preprocessingOptionsMap,
+      m_processingOptions, m_postprocessingOptions);
   std::string generatedNotebook = notebook->generateNotebook(data);
 
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
@@ -519,11 +540,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
   alg->setProperty(m_postprocessor.inputProperty(), inputWSNames);
   alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
 
-  // Global post-processing options
-  const std::string options =
-      m_mainPresenter->getPostprocessingOptions().toStdString();
-
-  auto optionsMap = parseKeyValueString(options);
+  auto optionsMap = parseKeyValueString(m_postprocessingOptions);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       alg->setProperty(kvp->first, kvp->second);
@@ -834,8 +851,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // Global pre-processing options as a map
   std::map<std::string, std::string> globalOptions;
   if (!m_preprocessMap.empty())
-    globalOptions = convertStringToMap(
-        m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
+    globalOptions = convertStringToMap(m_preprocessingOptions);
 
   // Pre-processing properties
   auto preProcessPropMap = convertStringToMapWithSet(
@@ -895,11 +911,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
     }
   }
 
-  // Global processing options as a string
-  std::string options = m_mainPresenter->getProcessingOptions().toStdString();
-
   // Parse and set any user-specified options
-  auto optionsMap = parseKeyValueString(options);
+  auto optionsMap = parseKeyValueString(m_processingOptions);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       if (restrictedProps.find(kvp->first) == restrictedProps.end())
@@ -911,10 +924,10 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   }
 
   /* Now deal with 'Options' column */
-  options = data->back();
+  const auto userOptions = data->back();
 
   // Parse and set any user-specified options
-  optionsMap = parseKeyValueString(options);
+  optionsMap = parseKeyValueString(userOptions);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       alg->setProperty(kvp->first, kvp->second);
@@ -1548,6 +1561,20 @@ void GenericDataProcessorPresenter::resume() {
 */
 void GenericDataProcessorPresenter::setModel(std::string name) {
   m_view->setModel(name);
+}
+
+/**
+* Takes the index corresponding to table group and either adds or removes it
+* from the list of processed group indexes
+* @param index : [input] The index of the group to be removed
+* @param processed : [input] True to add index, false to remove it
+*/
+void GenericDataProcessorPresenter::setIndexProcessed(int index,
+                                                      bool processed) {
+  if (processed)
+    m_processedGroupIndexes.insert(index);
+  else
+    m_processedGroupIndexes.erase(index);
 }
 
 /**

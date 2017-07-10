@@ -205,6 +205,23 @@ double CompositeFunction::getParameter(size_t i) const {
 }
 
 /**
+ * Check if function has a parameter with a particular name.
+ * @param name :: A name of a parameter.
+ * @return True if the parameter exists.
+*/
+bool CompositeFunction::hasParameter(const std::string &name) const {
+  try {
+    std::string pname;
+    size_t index;
+    parseName(name, index, pname);
+    return index < m_functions.size() ? m_functions[index]->hasParameter(pname)
+                                      : false;
+  } catch (std::invalid_argument &) {
+    return false;
+  }
+}
+
+/**
  * Sets a new value to a parameter by name.
  * @param name :: The name of the parameter.
  * @param value :: The new value

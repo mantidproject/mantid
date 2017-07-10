@@ -50,6 +50,7 @@ private slots:
       m_presenter->reduceRow(&m_rowItem->second);
       m_presenter->m_manager->update(m_groupIndex, m_rowItem->first,
                                      m_rowItem->second);
+      m_presenter->m_manager->addHighlighted(m_rowItem->first, m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
       emit reductionErrorSignal(ex);

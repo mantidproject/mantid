@@ -127,6 +127,7 @@ public:
 
   MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
   MOCK_METHOD1(setModel, void(std::string name));
+  MOCK_METHOD2(setIndexProcessed, void(int index, bool processed));
   MOCK_METHOD1(accept, void(DataProcessorMainPresenter *));
   MOCK_CONST_METHOD0(selectedParents, std::set<int>());
   MOCK_CONST_METHOD0(selectedChildren, std::map<int, std::set<int>>());
