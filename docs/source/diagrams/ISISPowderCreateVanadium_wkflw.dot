@@ -23,6 +23,7 @@ digraph isisPowderCreateVanadium{
         param_groupingCalFile           [label="Adv config: Grouping cal file name"]
         param_rawTOFCropValues          [label="Adv config: Raw TOF cropping values"]
         param_vanadiumTOFCropValues     [label="Adv config: Vanadium TOF cropping values"]
+        param_vanadiumSplineCoefficient [label="Adv config: Vanadium Spline Coefficient"]
 
     }
 
@@ -35,7 +36,7 @@ digraph isisPowderCreateVanadium{
 
         // Bespoke
         proc_InstApplyAbsorbCorr        [label="Inst specific: Apply absorption corrections"]
-        proc_InstCreateVanSplines       [label="Inst specific: Create vanadium splines"]
+        proc_InstMaskPeaks              [label="Inst specific: Mask peaks in Vanadium data"]
         proc_InstSaveFocused            [label="Inst specific: Save focused banks"]
     }
 
@@ -49,6 +50,7 @@ digraph isisPowderCreateVanadium{
         alg_DiffractionFocusing         [label="Diffraction Focusing"]
         alg_ExtractWsSpectra            [label="Extract spectra into individual banks"]
         alg_SaveNexusProcessed          [label="Save Nexus file"]
+        alg_SplineVanadium              [label="Spline Background"]
         alg_Subtract_van_empty          [label="Subtract: vanadium - empty"]
     }
 
@@ -99,8 +101,12 @@ digraph isisPowderCreateVanadium{
         alg_DiffractionFocusing         ->      alg_ExtractWsSpectra        [label="Creating vanadium splines"]
         param_vanadiumTOFCropValues     ->      alg_CropVanTOF
         alg_ExtractWsSpectra            ->      alg_CropVanTOF
-        alg_CropVanTOF                  ->      proc_InstCreateVanSplines
-        proc_InstCreateVanSplines       ->      alg_SaveNexusProcessed
+        alg_CropVanTOF                  ->      proc_InstMaskPeaks
+        
+        // Spline the vanadium
+        param_vanadiumSplineCoefficient ->      alg_SplineVanadium
+        proc_InstMaskPeaks              ->      alg_SplineVanadium
+        alg_SplineVanadium              ->      alg_SaveNexusProcessed
 
     }
 
