@@ -292,9 +292,26 @@ Collapse all currently expanded groups
 void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
 
 /**
-Select all groups
+Select all groups and deselect their children
 */
-void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
+void QDataProcessorWidget::selectAll() { 
+
+  // Deselect everything
+  for (auto &index : ui.viewTable->selectionModel()->selectedRows())
+    ui.viewTable->selectionModel()->select(
+      index, QItemSelectionModel::Deselect);
+
+  auto model = ui.viewTable->model();
+
+  // Select only groups
+  for (int i = 0; i < model->rowCount(); i++) {
+    auto modelIndex = model->index(i, 0);
+    if (!modelIndex.parent().isValid()) {
+      ui.viewTable->selectionModel()->select(
+          modelIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
+  }
+}
 
 /**
 Handle interface when data reduction paused

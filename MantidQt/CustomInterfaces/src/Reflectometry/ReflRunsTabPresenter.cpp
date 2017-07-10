@@ -47,7 +47,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenters(tablePresenters), m_mainPresenter(),
-      m_searcher(searcher) {
+      m_searcher(searcher), m_instrumentChanged(false) {
 
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenters will notify this
@@ -217,6 +217,7 @@ void ReflRunsTabPresenter::search() {
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+    m_instrumentChanged = false;
     m_currentTransferMethod = m_view->getTransferMethod();
     m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
         *getTransferStrategy(), results, m_view->getSearchInstrument()));
@@ -469,7 +470,7 @@ void ReflRunsTabPresenter::resume() const {
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
-* either the search number or transfer method
+* either the search number, transfer method or instrument has changed
 * @return : Boolean on whether to start a new autoreduction
 */
 bool ReflRunsTabPresenter::startNewAutoreduction() const {
@@ -478,7 +479,7 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
   bool transferMethodChanged =
       m_currentTransferMethod != m_view->getTransferMethod();
 
-  return searchNumChanged || transferMethodChanged;
+  return searchNumChanged || transferMethodChanged || m_instrumentChanged;
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
@@ -507,6 +508,7 @@ void ReflRunsTabPresenter::changeInstrument() {
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;
+  m_instrumentChanged = true;
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

@@ -104,6 +104,8 @@ private:
   static const std::string MeasureTransferMethod;
   /// The current search string used for autoreduction
   std::string m_autoSearchString;
+  /// Whether the instrument has been changed before a search was made with it
+  bool m_instrumentChanged;
 
   /// searching
   void search();
