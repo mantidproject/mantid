@@ -437,9 +437,12 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   ub_alg->executeAsChildAlg();
 
   // Reindex peaks with new UB
-  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
+  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("OptimizeCrystalPlacement");
   alg->setPropertyValue("PeaksWorkspace", peaksWs->getName());
-  alg->setProperty("Tolerance", 0.15);
+  alg->setPropertyValue("ModifiedPeaksWorkspace", peaksWs->getName());
+  alg->setProperty("AdjustSampleOffsets", true);
+  alg->setProperty("MaxAngularChange", 0.0);
+  alg->setProperty("MaxIndexingError", 0.15);
   alg->executeAsChildAlg();
   g_log.notice() << peaksWs->sample().getOrientedLattice().getUB() << "\n";
 }
