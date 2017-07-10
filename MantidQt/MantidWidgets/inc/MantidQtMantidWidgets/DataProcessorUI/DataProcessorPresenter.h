@@ -73,7 +73,6 @@ public:
     ExpandAllGroupsFlag,
     CollapseAllGroupsFlag,
     SelectAllFlag,
-    DeselectAllFlag,
     PauseFlag,
     SelectionChangedFlag
   };

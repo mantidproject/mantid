@@ -469,15 +469,16 @@ void ReflRunsTabPresenter::resume() const {
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
-* either the search number or selection model has changed
+* either the search number or transfer method
 * @return : Boolean on whether to start a new autoreduction
 */
 bool ReflRunsTabPresenter::startNewAutoreduction() const {
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
   bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
-  bool selectionChanged = tablePresenter->newSelectionMade();
+  bool transferMethodChanged =
+      m_currentTransferMethod != m_view->getTransferMethod();
 
-  return searchNumChanged || selectionChanged;
+  return searchNumChanged || transferMethodChanged;
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
@@ -506,8 +507,6 @@ void ReflRunsTabPresenter::changeInstrument() {
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;
-  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
-  tablePresenter->notify(DataProcessorPresenter::DeselectAllFlag);
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

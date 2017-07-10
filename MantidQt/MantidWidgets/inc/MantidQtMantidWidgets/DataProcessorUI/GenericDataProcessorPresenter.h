@@ -260,8 +260,6 @@ private:
   void collapseAll();
   // select all rows / groups
   void selectAll();
-  // deselect all rows / groups
-  void deselectAll();
   // table io methods
   void newTable();
   void openTable();

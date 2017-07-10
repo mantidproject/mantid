@@ -1022,11 +1022,6 @@ Select all rows / groups
 void GenericDataProcessorPresenter::selectAll() { m_view->selectAll(); }
 
 /**
-Deselect all rows / groups
-*/
-void GenericDataProcessorPresenter::deselectAll() { m_view->deselectAll(); }
-
-/**
 Used by the view to tell the presenter something has changed
 */
 void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
@@ -1103,9 +1098,6 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::SelectAllFlag:
     selectAll();
-    break;
-  case DataProcessorPresenter::DeselectAllFlag:
-    deselectAll();
     break;
   case DataProcessorPresenter::PauseFlag:
     pause();

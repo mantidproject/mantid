@@ -295,16 +295,6 @@ Select all groups
 void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 
 /**
-Deselect all rows / groups
-*/
-void QDataProcessorWidget::deselectAll() {
-  for (auto &index : ui.viewTable->selectionModel()->selectedIndexes()) {
-    ui.viewTable->selectionModel()->select(index,
-                                           QItemSelectionModel::Deselect);
-  }
-}
-
-/**
 Handle interface when data reduction paused
 */
 void QDataProcessorWidget::pause() {
