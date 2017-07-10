@@ -11,6 +11,7 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/StorageMode.h"
 #include "MantidTypes/SpectrumDefinition.h"
+#include "MantidAPI/Run.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/ParallelRunner.h"
@@ -260,10 +261,17 @@ public:
   void test_create_parent_without_logs() {
     const auto parent = create<Workspace2D>(m_instrument, make_indices(),
                                             Histogram(BinEdges{1, 2, 4}));
+
+    const std::string &name0 = "Log2";
+    parent->mutableRun().addProperty(name0, 3.2);
+    const std::string &name1 = "Log4";
+    const std::string &value1 = "6.4a";
+    parent->mutableRun().addProperty(name1, value1);
     const auto ws = createWithoutLogs<Workspace2D>(*parent);
     check_indices(*ws);
     check_zeroed_data(*ws);
     check_instrument(*ws);
+    TS_ASSERT_EQUALS(ws->run().getProperties().size(), 0);
   }
 
   void test_create_parent_varying_bins() {

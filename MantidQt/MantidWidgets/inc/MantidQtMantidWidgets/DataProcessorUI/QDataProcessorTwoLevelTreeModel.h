@@ -2,9 +2,8 @@
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
-#include <QAbstractItemModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
@@ -45,7 +44,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorTwoLevelTreeModel
-    : public QAbstractItemModel {
+    : public AbstractDataProcessorTreeModel {
   Q_OBJECT
 public:
   QDataProcessorTwoLevelTreeModel(
@@ -55,8 +54,6 @@ public:
 
   // Functions to read data from the model
 
-  // Get flags for a cell
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
   // Get data for a cell
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -65,8 +62,6 @@ public:
                       int role) const override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  // Column count
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent
   QModelIndex index(int row, int column,
                     const QModelIndex &parent = QModelIndex()) const override;
@@ -88,6 +83,14 @@ public:
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
 
+  // Miscellaneous model functions
+
+  // Add a row / group to the list of items to be highlighted
+  bool addHighlighted(int position,
+                      const QModelIndex &parent = QModelIndex()) override;
+  // Clear the list of highlighted items
+  virtual void clearHighlighted() override;
+
 private:
   void setupModelData(Mantid::API::ITableWorkspace_sptr table);
   bool insertGroups(int position, int count);
@@ -95,16 +98,14 @@ private:
   bool removeGroups(int position, int count);
   bool removeRows(int position, int count, int parent);
 
-  /// Collection of data for viewing.
-  Mantid::API::ITableWorkspace_sptr m_tWS;
-
-  /// Map of column indexes to names and viceversa
-  DataProcessorWhiteList m_whitelist;
-
   /// Vector containing group names
   std::vector<std::string> m_groupName;
   /// Vector containing the (absolute) row indices for a given group
   std::vector<std::vector<int>> m_rowsOfGroup;
+  /// Map of row indexes for each group index that should be highlighted
+  std::map<int, std::vector<int>> m_highlightRows;
+  /// List of group indexes that should be highlighted
+  std::vector<int> m_highlightGroups;
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorTwoLevelTreeModel

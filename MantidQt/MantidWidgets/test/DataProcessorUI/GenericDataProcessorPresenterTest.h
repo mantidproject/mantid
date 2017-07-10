@@ -62,6 +62,7 @@ private:
     try {
       reduceRow(&rowItem->second);
       m_manager->update(groupIndex, rowItem->first, rowItem->second);
+      m_manager->addHighlighted(rowItem->first, groupIndex);
     } catch (std::exception &ex) {
       reductionError(ex);
       threadFinished(1);
@@ -70,9 +71,11 @@ private:
   }
 
   // non-async group reduce
-  void startAsyncGroupReduceThread(GroupData &groupData) override {
+  void startAsyncGroupReduceThread(GroupData &groupData,
+                                   int groupIndex) override {
     try {
       postProcessGroup(groupData);
+      m_manager->addHighlighted(groupIndex);
     } catch (std::exception &ex) {
       reductionError(ex);
       threadFinished(1);

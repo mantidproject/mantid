@@ -34,6 +34,12 @@ Scripting Window
 Documentation
 #############
 
+Custom Interfaces
+#################
+
+- General > Multi dataset fitting interface and the general fitting dock now display the status string returned by the `Fit` algorithm. If an error occured during fitting it will be reported in this string.
+
+
 Bugs Resolved
 -------------
 
