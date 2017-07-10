@@ -62,15 +62,15 @@ class FunctionWrapper:
     for a in args:
         if isinstance(a, dict):
           for key in a:
-            self.fun.tie(key, str(a[key]), False)
+            self.fun.tie(key, str(a[key]))
 
     for key in kwargs:
-        self.fun.tie(key, str(kwargs[key]), False)
+        self.fun.tie(key, str(kwargs[key]))
         
   def fix(self, name):
       """ Fix a parameter.
       """
-      self.fun.fix(name, False)
+      self.fun.fixParameter(name)
       
   def fixAllParameters(self):
        """ Fix all parameters.
@@ -81,7 +81,7 @@ class FunctionWrapper:
   def untie(self, name):
       """ Remove tie from parameter.
       """
-      self.fun.untie(name)
+      self.fun.removeTie(name)
       
   def untieAllParameters(self):
       """ Remove ties from all parameters.
@@ -92,18 +92,18 @@ class FunctionWrapper:
   def constrain(self, expressions):
       """ Add constraints 
       """
-      self.fun.constrain( expressions, False )
+      self.fun.addConstraints( expressions )
       
   def unconstrain(self, name):
       """ Remove constraints from a parameter
       """
-      self.fun.unconstrain(name)
+      self.fun.removeConstraint(name)
            
   def free(self, name):
       """ Free a parameter from tie or constraint
       """
-      self.fun.untie(name)
-      self.fun.unconstrain(name)
+      self.fun.removeTie(name)
+      self.fun.removeConstraint(name)
       
   def getParameterName(self, index):
       """ Get the name of the parameter of given index

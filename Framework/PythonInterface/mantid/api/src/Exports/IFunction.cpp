@@ -213,23 +213,6 @@ void export_IFunction() {
            "Split this function (if needed) into a list of "
            "independent functions")
 
-      .def("tie", &IFunction::tie,
-           (arg("self"), arg("parName"), arg("expr"), arg("isDefault")),
-           "Tie a parameter to an expression")
-
-      .def("fix", &IFunction::fixParameter, (arg("self"), arg("parName"), arg("isDefault") ),
-           "Fix a parameter")
-
-      .def("untie", (removeTieByName)&IFunction::removeTie,
-           (arg("self"), arg("parName")),
-           "Remove any tie or fix from the given parameter")
-
-      .def("constrain", &IFunction::addConstraints,
-           (arg("self"), arg("str"), arg("isDefault")), "Add constraints")
-
-      .def("unconstrain", &IFunction::removeConstraint,
-           (arg("self"), arg("parname")), "Remove constraint from parameter")
-
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),
            "Returns a list of the categories for an algorithm")
