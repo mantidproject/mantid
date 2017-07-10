@@ -1,5 +1,9 @@
 ﻿.. _FittingMinimizers:
 
+==================
+Fitting Minimizers
+==================
+
 Which minimizers to use with Mantid
 ===================================
 
