@@ -27,7 +27,8 @@ DECLARE_FUNCTION(CubicSpline)
  */
 CubicSpline::CubicSpline()
     : m_min_points(3), m_acc(gsl_interp_accel_alloc(), m_gslFree),
-      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree) {
+      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree),
+      m_recalculateSpline(true) {
   // setup class with a default set of attributes
   declareAttribute("n", Attribute(m_min_points));
 
@@ -56,7 +57,8 @@ void CubicSpline::function1D(double *out, const double *xValues,
   boost::scoped_array<double> y(new double[n]);
 
   // setup the reference points and calculate
-  setupInput(x, y, n);
+  if (m_recalculateSpline)
+    setupInput(x, y, n);
 
   calculateSpline(out, xValues, nData);
 }
@@ -79,7 +81,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
     std::string yName = "y" + num;
 
     x[i] = getAttribute(xName).asDouble();
-    y[i] = getParameter(yName);
+    y[i] = getParameter(i);
 
     if (!xSortFlag) {
       // if x[i] is out of order with its neighbours
@@ -95,7 +97,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
                        "will be sorted.\n";
 
     using point = std::pair<double, double>;
-    std::vector<point> pairs;
+    std::vector<point> pairs(n);
     for (int i = 0; i < n; ++i) {
       pairs.push_back(std::make_pair(x[i], y[i]));
     }
@@ -112,6 +114,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
 
   // pass values to GSL objects
   initGSLObjects(x, y, n);
+  m_recalculateSpline = false;
 }
 
 /** Calculate the derivatives for a set of points on the spline
@@ -129,7 +132,8 @@ void CubicSpline::derivative1D(double *out, const double *xValues, size_t nData,
   boost::scoped_array<double> y(new double[n]);
 
   // setup the reference points and calculate
-  setupInput(x, y, n);
+  if (m_recalculateSpline)
+    setupInput(x, y, n);
   calculateDerivative(out, xValues, nData, order);
 }
 
@@ -223,6 +227,21 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
   }
 }
 
+/** Set a parameter for the function and flags the spline for re-calculation
+ *
+ * @param i :: index of parameter
+ * @param value :: value of parameter
+ * @param explicitlySet :: whether it's value was explicitly set or not
+ */
+void CubicSpline::setParameter(size_t i, const double &value,
+                               bool explicitlySet) {
+  // Call parent setParameter implementation
+  ParamFunction::setParameter(i, value, explicitlySet);
+
+  // recalculate if necessary
+  m_recalculateSpline = true;
+}
+
 /** Set an attribute for the function
  *
  * @param attName :: The name of the attribute to set
@@ -257,6 +276,9 @@ void CubicSpline::setAttribute(const std::string &attName,
         declareParameter(newYName, 0);
       }
 
+      // flag that the spline + derivatives will now need to be recalculated
+      m_recalculateSpline = true;
+
     } else if (n < oldN) {
       throw std::invalid_argument(
           "Cubic Spline: Can't decrease the number of attributes");
@@ -264,6 +286,26 @@ void CubicSpline::setAttribute(const std::string &attName,
   }
 
   storeAttributeValue(attName, att);
+}
+
+/** Set an x attribute for the spline
+ *
+ * @param index :: index of x attribute to set
+ * @param x :: The value of the x attribute
+ */
+void CubicSpline::setXAttribute(const size_t index, double x) {
+  size_t n = static_cast<size_t>(getAttribute("n").asInt());
+
+  // check that setting the x attribute is within our range
+  if (index < n) {
+    std::string xName = "x" + std::to_string(index);
+    setAttributeValue(xName, x);
+
+    // attributes updated, flag for recalculation
+    m_recalculateSpline = true;
+  } else {
+    throw std::range_error("Cubic Spline: x index out of range.");
+  }
 }
 
 /** Checks if a call to a GSL function produced a given error or not
@@ -275,6 +317,7 @@ void CubicSpline::setAttribute(const std::string &attName,
 void CubicSpline::checkGSLError(const int status, const int errorType) const {
   // check GSL functions didn't return an error
   if (status == errorType) {
+    m_recalculateSpline = true;
 
     std::string message("CubicSpline: ");
     message.append(gsl_strerror(errorType));
