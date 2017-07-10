@@ -613,19 +613,14 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
   m_numColumnsY = b;
 
   // Allocate memory first - this has to be a flat 1d array masquerading as a 2d
-  // array
-  // so we can expose the memory to Python APIs via numpy which expects this
+  // array so we can expose the memory to Python APIs via numpy which expects
+  // this
   // style of memory layout.
-
-  // Note: Don't change these to a 'auto'. By strongly typing here we know
-  // that the move at the end can be done (and we get nice clean compiler
-  // error messages at this point if it cannot).
-  CMemoryArray<T> allocatedMemory =
-      std::make_unique<T[]>((m_numRowsX * m_numColumnsY));
+  auto allocatedMemory = std::make_unique<T[]>((m_numRowsX * m_numColumnsY));
 
   // Next allocate an array of pointers for the rows (X). This partitions
   // the 1D array into a 2D array for callers.
-  MatrixMemoryPtrs<T> rowPtrs = std::make_unique<T *[]>(m_numRowsX);
+  auto rowPtrs = std::make_unique<T *[]>(m_numRowsX);
 
   for (size_t i = 0; i < m_numRowsX; i++) {
     // Calculate offsets into the allocated memory array (Y)
