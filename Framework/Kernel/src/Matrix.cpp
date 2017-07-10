@@ -246,7 +246,7 @@ Matrix<T>::Matrix(Matrix<T> &&other) noexcept
     : m_numRowsX(other.m_numRowsX),
       m_numColumnsY(other.m_numColumnsY),
       m_rawData(std::move(other.m_rawData)),
-	  m_rawDataAlloc(std::move(other.m_rawDataAlloc)){
+      m_rawDataAlloc(std::move(other.m_rawDataAlloc)) {
   other.m_numRowsX = 0;
   other.m_numColumnsY = 0;
 }
@@ -603,8 +603,8 @@ template <typename T> bool Matrix<T>::operator>=(const Matrix<T> &A) const {
   @param b :: number of columns
 */
 template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
-	if (a == m_numRowsX && b == m_numColumnsY && m_rawData != nullptr)
-	return;
+  if (a == m_numRowsX && b == m_numColumnsY && m_rawData != nullptr)
+    return;
 
   if (a <= 0 || b <= 0)
     return;
@@ -612,22 +612,24 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
   m_numRowsX = a;
   m_numColumnsY = b;
 
-  // Allocate memory first - this has to be a flat 1d array masquerading as a 2d array
-  // so we can expose the memory to Python APIs via numpy which expects this 
+  // Allocate memory first - this has to be a flat 1d array masquerading as a 2d
+  // array
+  // so we can expose the memory to Python APIs via numpy which expects this
   // style of memory layout.
 
   // Note: Don't change these to a 'auto'. By strongly typing here we know
   // that the move at the end can be done (and we get nice clean compiler
   // error messages at this point if it cannot).
-  CMemoryArray<T> allocatedMemory = std::make_unique <T[]> ((m_numRowsX * m_numColumnsY));
+  CMemoryArray<T> allocatedMemory =
+      std::make_unique<T[]>((m_numRowsX * m_numColumnsY));
 
   // Next allocate an array of pointers for the rows (X). This partitions
-  // the 1D array into a 2D array for callers. 
-  MatrixMemoryPtrs<T> rowPtrs = std::make_unique<T*[]>(m_numRowsX);
+  // the 1D array into a 2D array for callers.
+  MatrixMemoryPtrs<T> rowPtrs = std::make_unique<T *[]>(m_numRowsX);
 
   for (size_t i = 0; i < m_numRowsX; i++) {
-	  // Calculate offsets into the allocated memory array (Y)
-	  rowPtrs[i] = &allocatedMemory[i * m_numColumnsY];
+    // Calculate offsets into the allocated memory array (Y)
+    rowPtrs[i] = &allocatedMemory[i * m_numColumnsY];
   }
 
   m_rawDataAlloc = std::move(allocatedMemory);
@@ -828,45 +830,46 @@ Has a in place transpose for a square matrix case.
 @return this^T
 */
 {
-	if (!m_numRowsX * m_numColumnsY)
-		return *this;
+  if (!m_numRowsX * m_numColumnsY)
+    return *this;
 
-	if (m_numRowsX == m_numColumnsY) // in place transpose
-	{
-		for (size_t i = 0; i < m_numRowsX; i++) {
-			for (size_t j = i + 1; j < m_numColumnsY; j++) {
-				std::swap(m_rawData[i][j], m_rawData[j][i]);
-			}
-		}
-		return *this;
-	}
+  if (m_numRowsX == m_numColumnsY) // in place transpose
+  {
+    for (size_t i = 0; i < m_numRowsX; i++) {
+      for (size_t j = i + 1; j < m_numColumnsY; j++) {
+        std::swap(m_rawData[i][j], m_rawData[j][i]);
+      }
+    }
+    return *this;
+  }
 
-	// irregular matrix
-	// get some memory
+  // irregular matrix
+  // get some memory
 
-	// Note: Don't change these to a 'auto'. By strongly typing here we know
-	// that the move at the end can be done (and we get nice clean compiler
-	// error messages at this point if it cannot).
-	CMemoryArray<T> allocatedMemory = std::make_unique <T[]>((m_numRowsX * m_numColumnsY));
-	MatrixMemoryPtrs<T> transposePtrs = std::make_unique<T*[]>(m_numRowsX);
+  // Note: Don't change these to a 'auto'. By strongly typing here we know
+  // that the move at the end can be done (and we get nice clean compiler
+  // error messages at this point if it cannot).
+  CMemoryArray<T> allocatedMemory =
+      std::make_unique<T[]>((m_numRowsX * m_numColumnsY));
+  MatrixMemoryPtrs<T> transposePtrs = std::make_unique<T *[]>(m_numRowsX);
 
-	for (size_t i = 0; i < m_numColumnsY; i++) {
-		// Notice how this partitions using Rows (X) instead of Cols(Y)
-		transposePtrs[i] = &allocatedMemory[i * m_numRowsX];
-	}
+  for (size_t i = 0; i < m_numColumnsY; i++) {
+    // Notice how this partitions using Rows (X) instead of Cols(Y)
+    transposePtrs[i] = &allocatedMemory[i * m_numRowsX];
+  }
 
-	for (size_t i = 0; i < m_numRowsX; i++) {
-		for (size_t j = 0; j < m_numColumnsY; j++) {
-			transposePtrs[j][i] = m_rawData[i][j];
-		}
-	}
-	// remove old memory
-	std::swap(m_numRowsX, m_numColumnsY);
-	
-	m_rawDataAlloc = std::move(allocatedMemory);
-	m_rawData = std::move(transposePtrs);
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      transposePtrs[j][i] = m_rawData[i][j];
+    }
+  }
+  // remove old memory
+  std::swap(m_numRowsX, m_numColumnsY);
 
-	return *this;
+  m_rawDataAlloc = std::move(allocatedMemory);
+  m_rawData = std::move(transposePtrs);
+
+  return *this;
 }
 
 template <>
@@ -985,12 +988,15 @@ T Matrix<T>::Invert()
       m_rawData[0][0] = static_cast<T>(1.) / m_rawData[0][0];
     return det;
   }
-  auto indx = new int[m_numRowsX]; // Set in lubcmp
+  std::vector<int> indx;
+  indx.resize(m_numRowsX); // Set in lubcmp
 
-  auto col = new double[m_numRowsX];
+  std::vector<double> col;
+  col.resize(m_numRowsX);
+
   int d;
   Matrix<T> Lcomp(*this);
-  Lcomp.lubcmp(indx, d);
+  Lcomp.lubcmp(indx.data(), d);
 
   double det = static_cast<double>(d);
   for (size_t j = 0; j < m_numRowsX; j++)
@@ -1000,12 +1006,10 @@ T Matrix<T>::Invert()
     for (size_t i = 0; i < m_numRowsX; i++)
       col[i] = 0.0;
     col[j] = 1.0;
-    Lcomp.lubksb(indx, col);
+    Lcomp.lubksb(indx.data(), col.data());
     for (size_t i = 0; i < m_numRowsX; i++)
       m_rawData[i][j] = static_cast<T>(col[i]);
   }
-  delete[] indx;
-  delete[] col;
   return static_cast<T>(det);
 }
 
@@ -1127,7 +1131,8 @@ divide by pivot.
     std::cerr << "Error with lubcmp\n";
     return;
   }
-  auto vv = new double[m_numRowsX];
+  std::vector<double> result;
+  result.resize(m_numRowsX);
   interchange = 1;
   for (int i = 0; i < static_cast<int>(m_numRowsX); i++) {
     big = 0.0;
@@ -1136,13 +1141,12 @@ divide by pivot.
         big = temp;
 
     if (big == 0.0) {
-      delete[] vv;
       for (int j = 0; j < static_cast<int>(m_numRowsX); j++) {
         rowperm[j] = j;
       }
       return;
     }
-    vv[i] = 1.0 / big;
+    result[i] = 1.0 / big;
   }
 
   for (int j = 0; j < static_cast<int>(m_numRowsX); j++) {
@@ -1159,7 +1163,7 @@ divide by pivot.
       for (int k = 0; k < j; k++)
         sum -= m_rawData[i][k] * m_rawData[k][j];
       m_rawData[i][j] = static_cast<T>(sum);
-      if ((dum = vv[i] * fabs(sum)) >= big) {
+      if ((dum = result[i] * fabs(sum)) >= big) {
         big = dum;
         imax = i;
       }
@@ -1173,7 +1177,7 @@ divide by pivot.
         m_rawData[j][k] = static_cast<T>(dum);
       }
       interchange *= -1;
-      vv[imax] = static_cast<T>(vv[j]);
+      result[imax] = static_cast<T>(result[j]);
     }
     rowperm[j] = imax;
 
@@ -1185,14 +1189,13 @@ divide by pivot.
         m_rawData[i][j] *= static_cast<T>(dum);
     }
   }
-  delete[] vv;
 }
 
 template <typename T>
 void Matrix<T>::lubksb(const int *rowperm, double *b)
 /**
-  Impliments a separation of the Matrix
-  into a triangluar matrix
+  Implements a separation of the Matrix
+  into a triangular matrix
 */
 {
   int ii = -1;

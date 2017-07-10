@@ -52,7 +52,7 @@ private:
   /// 1D memory allocation to be wrapped with pointers to the rows
   template <class U> using CMemoryArray = std::unique_ptr<U[]>;
   /// Pointers to rows in the raw data array to make it appear 2D
-  template <typename U> using MatrixMemoryPtrs = std::unique_ptr<U*[]>;
+  template <typename U> using MatrixMemoryPtrs = std::unique_ptr<U *[]>;
 
   /// Pointer to allocated memory
   CMemoryArray<T> m_rawDataAlloc;
@@ -95,12 +95,12 @@ public:
   Matrix<T> &operator-=(const Matrix<T> &);     ///< Basic subtraction operator
   Matrix<T> operator-(const Matrix<T> &) const; ///< Basic subtraction operator
 
-  Matrix<T> operator*(const Matrix<T> &)const; ///< Basic matrix multiply
-  std::vector<T> operator*(const std::vector<T> &)const; ///< Multiply M*Vec
+  Matrix<T> operator*(const Matrix<T> &) const; ///< Basic matrix multiply
+  std::vector<T> operator*(const std::vector<T> &) const; ///< Multiply M*Vec
   void multiplyPoint(const std::vector<T> &in,
                      std::vector<T> &out) const; ///< Multiply M*Vec
-  V3D operator*(const V3D &)const;               ///< Multiply M*Vec
-  Matrix<T> operator*(const T &)const;           ///< Multiply by constant
+  V3D operator*(const V3D &) const;              ///< Multiply M*Vec
+  Matrix<T> operator*(const T &) const;          ///< Multiply by constant
 
   Matrix<T> &operator*=(const Matrix<T> &); ///< Basic matrix multipy
   Matrix<T> &operator*=(const T &);         ///< Multiply by constant
