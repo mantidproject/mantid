@@ -245,8 +245,8 @@ template <typename T>
 Matrix<T>::Matrix(Matrix<T> &&other) noexcept
     : m_numRowsX(other.m_numRowsX),
       m_numColumnsY(other.m_numColumnsY),
-      m_rawData(std::move(other.m_rawData)),
-      m_rawDataAlloc(std::move(other.m_rawDataAlloc)) {
+      m_rawDataAlloc(std::move(other.m_rawDataAlloc)),
+      m_rawData(std::move(other.m_rawData)) {
   other.m_numRowsX = 0;
   other.m_numColumnsY = 0;
 }
