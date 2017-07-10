@@ -122,6 +122,8 @@ public:
   void buildTargetFunction() const;
   /// Get number of the number of spectra (excluding phys prop data).
   size_t nSpectra() const;
+  /// Get the i-th spectrum
+  API::CompositeFunction_sptr getSpectrum(size_t spectrumIndex);
 
 protected:
   /// Declare a new parameter
@@ -170,7 +172,7 @@ private:
   API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en,
                                     const ComplexFortranMatrix &wf,
                                     double temperature, double fwhm,
-                                    size_t i) const;
+                                    size_t i, bool addBackground) const;
   /// Update a function for a single spectrum.
   void updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,
@@ -204,10 +206,25 @@ private:
   Attribute getSpectrumAttribute(size_t iSpec, const std::string &attName) const;
   /// Set a value to a spectrum-specific attribute
   void setSpectrumAttribute(size_t iSpec, const std::string &name, const Attribute &);
+
   /// Get a reference to an attribute
   std::pair<API::IFunction*, std::string> getAttributeReference(const std::string& attName) const;
   /// Get a reference to a parameter
   API::ParameterReference getParameterReference(const std::string &paramName) const;
+
+  /// Get a reference to the control function
+  API::IFunction *getControl() const;
+  /// Get a reference to a spectrum control function
+  API::IFunction *getSpectrumControl(size_t spectrumIndex) const;
+  /// Get a reference to a function with ion parameters
+  API::IFunction *getIon(size_t ionIndex) const;
+  /// Get a reference to a spectrum function
+  API::CompositeFunction *getCompositeFor(size_t ionIndex, size_t spectrumIndex,
+                                      size_t peakIndex) const;
+  /// Get a reference to a function with background parameters
+  API::IFunction *getBackground(size_t spectrumIndex) const;
+  /// Get a reference to a function with peak parameters
+  API::IFunction *getPeak(size_t ionIndex, size_t spectrumIndex, size_t peakIndex) const;
 
   /// Function that creates the source function.
   mutable CrystalFieldControl m_control;

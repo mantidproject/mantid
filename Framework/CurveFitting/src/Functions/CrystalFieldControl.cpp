@@ -84,12 +84,19 @@ void CrystalFieldControl::cacheAttributes() {
   const auto nSpec = m_temperatures.size();
   m_fwhmX.clear();
   m_fwhmY.clear();
-  for (size_t i = 0; i < nSpec; ++i) {
-    auto &control = *getFunction(i);
-    auto fwhmX = control.getAttribute("FWHMX").asVector();
-    auto fwhmY = control.getAttribute("FWHMY").asVector();
+  if (nSpec == 1) {
+    auto fwhmX = getAttribute("FWHMX").asVector();
+    auto fwhmY = getAttribute("FWHMY").asVector();
     m_fwhmX.push_back(fwhmX);
     m_fwhmY.push_back(fwhmY);
+  } else {
+    for (size_t i = 0; i < nSpec; ++i) {
+      auto &control = *getFunction(i);
+      auto fwhmX = control.getAttribute("FWHMX").asVector();
+      auto fwhmY = control.getAttribute("FWHMY").asVector();
+      m_fwhmX.push_back(fwhmX);
+      m_fwhmY.push_back(fwhmY);
+    }
   }
 }
 
@@ -108,7 +115,7 @@ void CrystalFieldControl::checkConsistent()  {
     // FWHMs attribute or FWHMX and FWHMY attributes of the spectrum
     // control functions.
     const auto nSpec = m_temperatures.size();
-    if (nSpec > nFunctions()) {
+    if (nSpec > 1 && nSpec > nFunctions()) {
       // Some of the member control funtions must be spectra
       throw std::logic_error("Too few spectrum functions.");
     }
@@ -117,9 +124,12 @@ void CrystalFieldControl::checkConsistent()  {
     bool allXYEmpty = true;
     bool someXYEmpty = false;
     for(size_t i = 0; i < nSpec; ++i) {
-      auto specFun = getFunction(i).get();
-      if (!dynamic_cast<CrystalFieldSpectrumControl*>(specFun)) {
-        throw std::logic_error("CrystalFieldSpectrumControl function expected");
+      if (nSpec > 1) {
+        auto specFun = getFunction(i).get();
+        if (!dynamic_cast<CrystalFieldSpectrumControl *>(specFun)) {
+          throw std::logic_error(
+              "CrystalFieldSpectrumControl function expected");
+        }
       }
       if (m_fwhmX[i].size() != m_fwhmY[i].size()) {
         throw std::runtime_error("Vectors in each pair of (FWHMX, FWHMY) attributes must have the same size");
@@ -170,6 +180,13 @@ void CrystalFieldControl::buildControls() {
   //  throw std::runtime_error("No temperatures were defined.");
   //}
   const auto nSpec = m_temperatures.size();
+
+  if (nSpec == 1) {
+    declareAttribute("FWHMX", Attribute(std::vector<double>()));
+    declareAttribute("FWHMY", Attribute(std::vector<double>()));
+    return;
+  }
+
   const auto nFunc = nFunctions();
   for(size_t i = 0; i < nSpec; ++i) {
     if (i >= nFunc) {
@@ -188,7 +205,6 @@ void CrystalFieldControl::buildControls() {
     }
   }
 }
-
 
 /// Check if the function is set up for a multi-site calculations.
 /// (Multiple ions defined)
@@ -268,7 +284,7 @@ API::IFunction_sptr CrystalFieldControl::buildMultiSiteSingleSpectrum() {
   auto temperatures = getAttribute("Temperatures").asVector();
   auto temperature = temperatures[0];
   for(size_t i = 0; i < nSites; ++i) {
-    auto peakSource = (IFunction_sptr(new CrystalFieldPeaks));
+    auto peakSource = IFunction_sptr(new CrystalFieldPeaks);
     source->addFunction(peakSource);
     peakSource->setAttributeValue("Ion", m_ions[i]);
     peakSource->setAttributeValue("Symmetry", m_symmetries[i]);
@@ -284,7 +300,7 @@ API::IFunction_sptr CrystalFieldControl::buildMultiSiteMultiSpectrum() {
   auto source = CompositeFunction_sptr(new CompositeFunction);
   auto nSites = m_ions.size();
   for(size_t i = 0; i < nSites; ++i) {
-    auto peakSource = (IFunction_sptr(new CrystalFieldPeaks));
+    auto peakSource = IFunction_sptr(new CrystalFieldPeaks);
     source->addFunction(peakSource);
     peakSource->setAttributeValue("Ion", m_ions[i]);
     peakSource->setAttributeValue("Symmetry", m_symmetries[i]);
