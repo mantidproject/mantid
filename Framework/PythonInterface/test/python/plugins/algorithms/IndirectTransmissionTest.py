@@ -127,7 +127,6 @@ class IndirectTransmissionTest(unittest.TestCase):
         mass_values = ws.column(1)
         np.testing.assert_array_almost_equal(mass_values, ref_result, decimal=4)
 
-        # mass density 1.0 = number density 0.033424 for water
         density = 0.100272
         ws = IndirectTransmission(Instrument=instrument, Analyser=analyser, Reflection=reflection,
                                   ChemicalFormula=formula, DensityType='Number Density', Density=density, Thickness=thickness)
