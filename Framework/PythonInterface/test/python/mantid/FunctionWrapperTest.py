@@ -294,6 +294,7 @@ class FunctionWrapperTest(unittest.TestCase):
         
         c = lb + g0 + g1
         
+        self.assertTrue( isinstance( c, CompositeFunctionWrapper) )
         c_str = str(c)
         self.assertEqual(c_str.count("("),0)
         self.assertEqual(c_str.count("LinearBackground"),1)
@@ -323,6 +324,7 @@ class FunctionWrapperTest(unittest.TestCase):
         
         p = lb * g0 * g1
         
+        self.assertTrue( isinstance( p, ProductFunctionWrapper) )
         p_str = str(p)
         self.assertEqual(p_str.count("("),0)
         self.assertEqual(p_str.count("LinearBackground"),1)
