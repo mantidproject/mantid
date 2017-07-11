@@ -6,7 +6,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import testhelpers
 import platform
-from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, MultiDomainFunctionWrapper, Gaussian, LinearBackground
+from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit, FitDialog 
+from mantid.simpleapi import FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, MultiDomainFunctionWrapper 
+from mantid.simpleapi import Gaussian, LinearBackground
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -360,6 +362,28 @@ class FunctionWrapperTest(unittest.TestCase):
         g = Gaussian(Height=7.5, Sigma=1.2, PeakCentre=10)
         s = lb + g
         self.assertTrue( isinstance( s, CompositeFunctionWrapper) )
+    
+    def test_evaluation_and_arithmetic(self):
+        l0 = FunctionWrapper( "LinearBackground", A0=0, A1=2)
+        l1 = FunctionWrapper( "LinearBackground", A0=5, A1=-1)
+
+        ws = CreateWorkspace(DataX=[0,1,2,3,4], DataY=[5,5,5,5])
+        
+        c = CompositeFunctionWrapper(l0, l1)
+        cws = EvaluateFunction(c,"ws", OutputWorkspace='out')
+        cvals = cws.readY(1)
+        self.assertAlmostEqual(cvals[0], 5.5)
+        self.assertAlmostEqual(cvals[1], 6.5)
+        self.assertAlmostEqual(cvals[2], 7.5)
+        self.assertAlmostEqual(cvals[3], 8.5)
+        
+        p = ProductFunctionWrapper(l0, l1)
+        pws = EvaluateFunction(p,"ws", OutputWorkspace='out')
+        pvals = pws.readY(1)
+        self.assertAlmostEqual(pvals[0], 4.5)
+        self.assertAlmostEqual(pvals[1], 10.5)
+        self.assertAlmostEqual(pvals[2], 12.5)
+        self.assertAlmostEqual(pvals[3], 10.5)
        
 if __name__ == '__main__':
     unittest.main()
