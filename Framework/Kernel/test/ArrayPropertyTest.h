@@ -305,9 +305,9 @@ public:
     const std::vector<std::string> inputList{
         "1,2,3", "-1,0,1", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
         "1-9998, 9999, 2000, 20002-29999"};
-    const std::vector<std::string> resultList{"1-3", "-1-1",
-                                        "356,366-368,370-372,375", "7,6,5-8,10",
-                                        "1-9999,2000,20002-29999"};
+    const std::vector<std::string> resultList{
+        "1-3", "-1-1", "356,366-368,370-372,375", "7,6,5-8,10",
+        "1-9999,2000,20002-29999"};
 
     TSM_ASSERT("Test Failed for vectors of int",
                listShorteningwithType<int>(inputList, resultList));

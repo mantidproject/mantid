@@ -101,12 +101,12 @@ DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
   ITERATOR_TYPE i = begin;
   // Always include the first value
   result << *begin;
-  //move on to the next value
+  // move on to the next value
   ITERATOR_TYPE previousValue = i;
   ++i;
 
   std::string currentSeparator = separator;
-  for (; i != end;++i) {
+  for (; i != end; ++i) {
     // if it is one higher than the last value
     if (*i == (*previousValue + 1)) {
       currentSeparator = listSeparator;

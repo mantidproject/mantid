@@ -15,9 +15,9 @@ class PropertyHistoryTest : public CxxTest::TestSuite {
 public:
   void testPopulate() {
     std::string correctOutput = "Name: arg1_param, ";
-    correctOutput +=  "Value: 20, ";
-    correctOutput +=  "Default?: Yes, ";
-    correctOutput +=  "Direction: Input\n";
+    correctOutput += "Value: 20, ";
+    correctOutput += "Default?: Yes, ";
+    correctOutput += "Direction: Input\n";
 
     // Not really much to test
     PropertyHistory AP("arg1_param", "20", "argument", true, Direction::Input);
