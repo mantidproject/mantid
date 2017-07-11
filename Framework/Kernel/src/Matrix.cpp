@@ -126,15 +126,15 @@ Matrix<T>::Matrix(const std::vector<T> &A, const std::vector<T> &B)
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &data)
     : m_numRows(0), m_numColumns(0) {
-  size_t numel = data.size();
-  size_t numRowst = static_cast<size_t>(sqrt(double(numel)));
-  size_t test = numRowst * numRowst;
-  if (test != numel) {
+  size_t numElements = data.size();
+  size_t numRows = static_cast<size_t>(sqrt(double(numElements)));
+  size_t numRowsSquare = numRows * numRows;
+  if (numElements != numRowsSquare) {
     throw(std::invalid_argument(
         "number of elements in input vector have to be square of some value"));
   }
 
-  setMem(numRowst, numRowst);
+  setMem(numRows, numRows);
 
   size_t ic(0);
   for (size_t i = 0; i < m_numRows; i++) {
