@@ -8,7 +8,7 @@ using Mantid::API::CompositeFunction;
 using Mantid::API::IFunction;
 using namespace boost::python;
 
-GET_POINTER_SPECIALIZATION(CompositeFunction);
+GET_POINTER_SPECIALIZATION(CompositeFunction)
 
 namespace {
 
