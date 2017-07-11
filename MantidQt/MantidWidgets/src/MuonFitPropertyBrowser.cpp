@@ -681,14 +681,7 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
       // transform data back to Asymm
       // rescale WS:
       rescaleWS(norms, tmpWSNameNoRaw, -1.0);   
-
-	  auto tttttt = outputFunction->getParameterNames();
-	 paramName = "f" + std::to_string(j);
-	 paramName += ".f1.f1.Frequency";
-	 ttt.push_back(outputFunction->getParameter(paramName));
-
 	}	 
-	auto a = 1.;
 
     updateMultipleNormalization(norms);
   } catch (const std::exception &e) {
@@ -757,7 +750,22 @@ Mantid::API::IFunction_sptr MuonFitPropertyBrowser::getTFAsymmFitFunction(
     product->addFunction(inBrace);
     multi->addFunction(product);
   }
-  auto tmppp = multi->asString();
+  //add ties
+  for (size_t j = 0; j < original->getParameterNames().size(); j++) {
+	  auto originalTie = original->getTie(j);
+	  if (originalTie) {
+		  auto name = original->getParameterNames()[j];
+		  auto stringTie = originalTie->asString();
+		  // change name to reflect new postion
+		  auto insertPosition = stringTie.find_first_of(".");
+		  stringTie.insert(insertPosition + 1, "f1.f1.");
+		  //need to change the other side of =
+		  insertPosition = stringTie.find_first_of("=");
+		  insertPosition = stringTie.find_first_of(".", insertPosition );
+		  stringTie.insert(insertPosition + 1, "f1.f1.");
+		  multi->addTies(stringTie); 
+	  }
+  }
   return boost::dynamic_pointer_cast<IFunction>(multi);
 }
 
