@@ -594,7 +594,7 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
   // rescale WS to normalized counts:
   const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
   emit functionUpdateRequested();
-  
+
   for (int i = 0; i < nWorkspaces; i++) {
     rescaleWS(norms, m_workspacesToFit[i], 1.0);
     std::string tmp = m_workspacesToFit[i];
@@ -603,15 +603,14 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     // as the order of the workspace list
     // create a vec of norms in the same order
     auto it = norms.find(tmp);
-	if (it != norms.end()) {
-		normVec.push_back(it->second);
-	}
-	else {// if raw data cannot be found
-		// use the binned data as initial norm
-		tmp = tmp.substr(0, tmp.size() - 4);
-		it = norms.find(tmp);
-		normVec.push_back(it->second);
-	}
+    if (it != norms.end()) {
+      normVec.push_back(it->second);
+    } else { // if raw data cannot be found
+      // use the binned data as initial norm
+      tmp = tmp.substr(0, tmp.size() - 4);
+      it = norms.find(tmp);
+      normVec.push_back(it->second);
+    }
   }
   try {
     m_initialParameters.resize(compositeFunction()->nParams());
@@ -665,10 +664,10 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     // get norms
     std::vector<double> newNorms;
     IFunction_sptr outputFunction = alg->getProperty("Function");
-	std::vector<double> ttt;
+    std::vector<double> ttt;
     for (int j = 0; j < nWorkspaces; j++) {
       std::string paramName = "f" + std::to_string(j);
-	  paramName += ".f0.f0.A0";
+      paramName += ".f0.f0.A0";
       newNorms.push_back(outputFunction->getParameter(paramName));
       std::string tmpWSName = m_workspacesToFit[j];
       if (rawData()) { // store norms without the raw
@@ -680,15 +679,15 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
       it->second = newNorms[newNorms.size() - 1];
       // transform data back to Asymm
       // rescale WS:
-      rescaleWS(norms, tmpWSNameNoRaw, -1.0);   
-	}	 
+      rescaleWS(norms, tmpWSNameNoRaw, -1.0);
+    }
 
     updateMultipleNormalization(norms);
   } catch (const std::exception &e) {
     QString msg = "TF Asymmetry Fit failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }
-  //runFit();
+   runFit();
 }
 /**
 * Updates the normalization in the table WS
@@ -750,21 +749,21 @@ Mantid::API::IFunction_sptr MuonFitPropertyBrowser::getTFAsymmFitFunction(
     product->addFunction(inBrace);
     multi->addFunction(product);
   }
-  //add ties
+  // add ties
   for (size_t j = 0; j < original->getParameterNames().size(); j++) {
-	  auto originalTie = original->getTie(j);
-	  if (originalTie) {
-		  auto name = original->getParameterNames()[j];
-		  auto stringTie = originalTie->asString();
-		  // change name to reflect new postion
-		  auto insertPosition = stringTie.find_first_of(".");
-		  stringTie.insert(insertPosition + 1, "f1.f1.");
-		  //need to change the other side of =
-		  insertPosition = stringTie.find_first_of("=");
-		  insertPosition = stringTie.find_first_of(".", insertPosition );
-		  stringTie.insert(insertPosition + 1, "f1.f1.");
-		  multi->addTies(stringTie); 
-	  }
+    auto originalTie = original->getTie(j);
+    if (originalTie) {
+      auto name = original->getParameterNames()[j];
+      auto stringTie = originalTie->asString();
+      // change name to reflect new postion
+      auto insertPosition = stringTie.find_first_of(".");
+      stringTie.insert(insertPosition + 1, "f1.f1.");
+      // need to change the other side of =
+      insertPosition = stringTie.find_first_of("=");
+      insertPosition = stringTie.find_first_of(".", insertPosition);
+      stringTie.insert(insertPosition + 1, "f1.f1.");
+      multi->addTies(stringTie);
+    }
   }
   return boost::dynamic_pointer_cast<IFunction>(multi);
 }
