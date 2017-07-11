@@ -237,7 +237,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
            Every member function must have a parameter of this name.
        """
        for i in range(0, len(self)):
-          self[i].untie(name)
+          self.untie(self.getCompositeParameterName(name, i))
 
     def flatten (self):
        """ Return composite function, equal to self, but with 
