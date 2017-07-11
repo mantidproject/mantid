@@ -1,4 +1,5 @@
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
@@ -25,8 +26,6 @@
 
 #include <functional>
 #include <numeric>
-
-#include "MantidAPI/Algorithm.tcc"
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
