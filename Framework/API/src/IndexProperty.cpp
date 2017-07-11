@@ -4,7 +4,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
 
-
 namespace Mantid {
 using namespace Kernel;
 
