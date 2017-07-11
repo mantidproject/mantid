@@ -75,10 +75,10 @@ template void indexSort(const std::vector<int> &, std::vector<int> &);
 } // End of Anonymous name space
 
 template <typename T> std::vector<T> Matrix<T>::getVector() const {
-  std::vector<T> rez(m_numRowsX * m_numColumnsY);
+  std::vector<T> rez(m_numRows * m_numColumns);
   size_t ic(0);
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       rez[ic] = m_rawData[i][j];
       ic++;
     }
@@ -88,7 +88,7 @@ template <typename T> std::vector<T> Matrix<T>::getVector() const {
 //
 template <typename T>
 Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
-    : m_numRowsX(0), m_numColumnsY(0)
+    : m_numRows(0), m_numColumns(0)
 /**
   Constructor with pre-set sizes. Matrix is zeroed
   @param nrow :: number of rows
@@ -96,7 +96,7 @@ Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
   @param makeIdentity :: flag for the constructor to return an identity matrix
 */
 {
-  // Note:: m_numRowsX, m_numColumnsY zeroed so setMem always works
+  // Note:: m_numRows, m_numColumns zeroed so setMem always works
   setMem(nrow, ncol);
   zeroMatrix();
   if (makeIdentity)
@@ -105,7 +105,7 @@ Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
 
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &A, const std::vector<T> &B)
-    : m_numRowsX(0), m_numColumnsY(0)
+    : m_numRows(0), m_numColumns(0)
 /**
   Constructor to take two vectors and multiply them to
   construct a matrix. (assuming that we have columns x row
@@ -114,10 +114,10 @@ Matrix<T>::Matrix(const std::vector<T> &A, const std::vector<T> &B)
   @param B :: Row vector to multiply
 */
 {
-  // Note:: m_numRowsX,m_numColumnsY zeroed so setMem always works
+  // Note:: m_numRows,m_numColumns zeroed so setMem always works
   setMem(A.size(), B.size());
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       m_rawData[i][j] = A[i] * B[j];
     }
   }
@@ -125,20 +125,20 @@ Matrix<T>::Matrix(const std::vector<T> &A, const std::vector<T> &B)
 //
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &data)
-    : m_numRowsX(0), m_numColumnsY(0) {
+    : m_numRows(0), m_numColumns(0) {
   size_t numel = data.size();
-  size_t m_numRowsXt = static_cast<size_t>(sqrt(double(numel)));
-  size_t test = m_numRowsXt * m_numRowsXt;
+  size_t numRowst = static_cast<size_t>(sqrt(double(numel)));
+  size_t test = numRowst * numRowst;
   if (test != numel) {
     throw(std::invalid_argument(
         "number of elements in input vector have to be square of some value"));
   }
 
-  setMem(m_numRowsXt, m_numRowsXt);
+  setMem(numRowst, numRowst);
 
   size_t ic(0);
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       m_rawData[i][j] = data[ic];
       ic++;
     }
@@ -148,7 +148,7 @@ Matrix<T>::Matrix(const std::vector<T> &data)
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
                   const size_t ncol)
-    : m_numRowsX(0), m_numColumnsY(0) {
+    : m_numRows(0), m_numColumns(0) {
   size_t numel = data.size();
   size_t test = nrow * ncol;
   if (test != numel) {
@@ -160,8 +160,8 @@ Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
   setMem(nrow, ncol);
 
   size_t ic(0);
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       m_rawData[i][j] = data[ic];
       ic++;
     }
@@ -170,7 +170,7 @@ Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
 
 template <typename T>
 Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
-    : m_numRowsX(A.m_numRowsX - 1), m_numColumnsY(A.m_numColumnsY - 1)
+    : m_numRows(A.m_numRows - 1), m_numColumns(A.m_numColumns - 1)
 /**
   Constructor with for a missing row/column.
   @param A :: The input matrix
@@ -178,20 +178,19 @@ Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
   @param ncol :: number of column to miss
 */
 {
-  if (nrow > m_numRowsX)
-    throw Kernel::Exception::IndexError(nrow, A.m_numRowsX,
+  if (nrow > m_numRows)
+    throw Kernel::Exception::IndexError(nrow, A.m_numRows,
+                                        "Matrix::Constructor without row");
+  if (ncol > m_numColumns)
+    throw Kernel::Exception::IndexError(ncol, A.m_numColumns,
                                         "Matrix::Constructor without col");
-  if (ncol > m_numColumnsY)
-    throw Kernel::Exception::IndexError(ncol, A.m_numColumnsY,
-                                        "Matrix::Constructor without col");
-  setMem(m_numRowsX, m_numColumnsY);
+  setMem(m_numRows, m_numColumns);
   size_t iR(0);
-  for (size_t i = 0; i <= m_numRowsX; i++) {
+  for (size_t i = 0; i <= m_numRows; i++) {
     if (i != nrow) {
       size_t jR(0);
-      for (size_t j = 0; j <= m_numColumnsY; j++) {
+      for (size_t j = 0; j <= m_numColumns; j++) {
         if (j != ncol) {
-
           m_rawData[iR][jR] = A.m_rawData[i][j];
           jR++;
         }
@@ -203,17 +202,17 @@ Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
 
 template <typename T>
 Matrix<T>::Matrix(const Matrix<T> &A)
-    : m_numRowsX(0), m_numColumnsY(0)
+    : m_numRows(0), m_numColumns(0)
 /**
   Simple copy constructor
   @param A :: Object to copy
 */
 {
-  // Note:: m_numRowsX,m_numColumnsY zeroed so setMem always works
-  setMem(A.m_numRowsX, A.m_numColumnsY);
-  if (m_numRowsX * m_numColumnsY) {
-    for (size_t i = 0; i < m_numRowsX; i++) {
-      for (size_t j = 0; j < m_numColumnsY; j++) {
+  // Note:: m_numRows,m_numColumns zeroed so setMem always works
+  setMem(A.m_numRows, A.m_numColumns);
+  if (m_numRows * m_numColumns) {
+    for (size_t i = 0; i < m_numRows; i++) {
+      for (size_t j = 0; j < m_numColumns; j++) {
         m_rawData[i][j] = A.m_rawData[i][j];
       }
     }
@@ -229,10 +228,10 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &A)
 */
 {
   if (&A != this) {
-    setMem(A.m_numRowsX, A.m_numColumnsY);
-    if (m_numRowsX * m_numColumnsY) {
-      for (size_t i = 0; i < m_numRowsX; i++) {
-        for (size_t j = 0; j < m_numColumnsY; j++) {
+    setMem(A.m_numRows, A.m_numColumns);
+    if (m_numRows * m_numColumns) {
+      for (size_t i = 0; i < m_numRows; i++) {
+        for (size_t j = 0; j < m_numColumns; j++) {
           m_rawData[i][j] = A.m_rawData[i][j];
         }
       }
@@ -243,23 +242,23 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &A)
 
 template <typename T>
 Matrix<T>::Matrix(Matrix<T> &&other) noexcept
-    : m_numRowsX(other.m_numRowsX),
-      m_numColumnsY(other.m_numColumnsY),
+    : m_numRows(other.m_numRows),
+      m_numColumns(other.m_numColumns),
       m_rawDataAlloc(std::move(other.m_rawDataAlloc)),
       m_rawData(std::move(other.m_rawData)) {
-  other.m_numRowsX = 0;
-  other.m_numColumnsY = 0;
+  other.m_numRows = 0;
+  other.m_numColumns = 0;
 }
 
 template <typename T>
 Matrix<T> &Matrix<T>::operator=(Matrix<T> &&other) noexcept {
-  m_numRowsX = other.m_numRowsX;
-  m_numColumnsY = other.m_numColumnsY;
+  m_numRows = other.m_numRows;
+  m_numColumns = other.m_numColumns;
   m_rawData = std::move(other.m_rawData);
   m_rawDataAlloc = std::move(other.m_rawDataAlloc);
 
-  other.m_numRowsX = 0;
-  other.m_numColumnsY = 0;
+  other.m_numRows = 0;
+  other.m_numColumns = 0;
 
   return *this;
 }
@@ -274,9 +273,9 @@ Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &A)
   @return Matrix(this + A)
 */
 {
-  const size_t Xpt((m_numRowsX > A.m_numRowsX) ? A.m_numRowsX : m_numRowsX);
-  const size_t Ypt((m_numColumnsY > A.m_numColumnsY) ? A.m_numColumnsY
-                                                     : m_numColumnsY);
+  const size_t Xpt((m_numRows > A.m_numRows) ? A.m_numRows : m_numRows);
+  const size_t Ypt((m_numColumns > A.m_numColumns) ? A.m_numColumns
+                                                   : m_numColumns);
   for (size_t i = 0; i < Xpt; i++) {
     for (size_t j = 0; j < Ypt; j++) {
       m_rawData[i][j] += A.m_rawData[i][j];
@@ -296,9 +295,9 @@ Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &A)
   @return Ma
 */
 {
-  const size_t Xpt((m_numRowsX > A.m_numRowsX) ? A.m_numRowsX : m_numRowsX);
-  const size_t Ypt((m_numColumnsY > A.m_numColumnsY) ? A.m_numColumnsY
-                                                     : m_numColumnsY);
+  const size_t Xpt((m_numRows > A.m_numRows) ? A.m_numRows : m_numRows);
+  const size_t Ypt((m_numColumns > A.m_numColumns) ? A.m_numColumns
+                                                   : m_numColumns);
   for (size_t i = 0; i < Xpt; i++) {
     for (size_t j = 0; j < Ypt; j++) {
       m_rawData[i][j] -= A.m_rawData[i][j];
@@ -345,13 +344,13 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &A) const
   @return Matrix(This * A)
 */
 {
-  if (m_numColumnsY != A.m_numRowsX)
-    throw Kernel::Exception::MisMatch<size_t>(m_numColumnsY, A.m_numRowsX,
+  if (m_numColumns != A.m_numRows)
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, A.m_numRows,
                                               "Matrix::operator*(Matrix)");
-  Matrix<T> X(m_numRowsX, A.m_numColumnsY);
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < A.m_numColumnsY; j++) {
-      for (size_t kk = 0; kk < m_numColumnsY; kk++) {
+  Matrix<T> X(m_numRows, A.m_numColumns);
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < A.m_numColumns; j++) {
+      for (size_t kk = 0; kk < m_numColumns; kk++) {
         X.m_rawData[i][j] += m_rawData[i][kk] * A.m_rawData[kk][j];
       }
     }
@@ -368,13 +367,13 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
   @return Matrix(This * Vec)
 */
 {
-  if (m_numColumnsY > Vec.size())
-    throw Kernel::Exception::MisMatch<size_t>(m_numColumnsY, Vec.size(),
+  if (m_numColumns > Vec.size())
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, Vec.size(),
                                               "Matrix::operator*(m_rawDataec)");
 
-  std::vector<T> Out(m_numRowsX);
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  std::vector<T> Out(m_numRows);
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       Out[i] += m_rawData[i][j] * Vec[j];
     }
   }
@@ -390,13 +389,13 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
 template <typename T>
 void Matrix<T>::multiplyPoint(const std::vector<T> &in,
                               std::vector<T> &out) const {
-  out.resize(m_numRowsX);
+  out.resize(m_numRows);
   std::fill(std::begin(out), std::end(out), static_cast<T>(0.0));
-  if (m_numColumnsY > in.size())
-    throw Kernel::Exception::MisMatch<size_t>(m_numColumnsY, in.size(),
+  if (m_numColumns > in.size())
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, in.size(),
                                               "Matrix::multiplyPoint(in,out)");
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       out[i] += m_rawData[i][j] * in[j];
     }
   }
@@ -411,12 +410,12 @@ V3D Matrix<T>::operator*(const V3D &Vx) const
   @return Matrix(This * A)
 */
 {
-  if (m_numColumnsY != 3 || m_numRowsX > 3)
-    throw Kernel::Exception::MisMatch<size_t>(m_numColumnsY, 3,
+  if (m_numColumns != 3 || m_numRows > 3)
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, 3,
                                               "Matrix::operator*(m_rawData3D)");
 
   V3D v;
-  for (size_t i = 0; i < m_numRowsX; ++i) {
+  for (size_t i = 0; i < m_numRows; ++i) {
     v[i] = m_rawData[i][0] * Vx.X() + m_rawData[i][1] * Vx.Y() +
            m_rawData[i][2] * Vx.Z();
   }
@@ -433,8 +432,8 @@ Matrix<T> Matrix<T>::operator*(const T &Value) const
 */
 {
   Matrix<T> X(*this);
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       X.m_rawData[i][j] *= Value;
     }
   }
@@ -449,8 +448,8 @@ Matrix<T> Matrix<T>::operator*(const T &Value) const
  @return This *= A
 */
 template <typename T> Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &A) {
-  if (m_numColumnsY != A.m_numRowsX)
-    throw Kernel::Exception::MisMatch<size_t>(m_numColumnsY, A.m_numRowsX,
+  if (m_numColumns != A.m_numRows)
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, A.m_numRows,
                                               "Matrix*=(Matrix<T>)");
   // This construct to avoid the problem of changing size
   *this = this->operator*(A);
@@ -465,8 +464,8 @@ Matrix<T> &Matrix<T>::operator*=(const T &Value)
   @return *this
 */
 {
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       m_rawData[i][j] *= Value;
     }
   }
@@ -481,8 +480,8 @@ Matrix<T> &Matrix<T>::operator/=(const T &Value)
   @return *this
 */
 {
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       m_rawData[i][j] /= Value;
     }
   }
@@ -532,13 +531,13 @@ Always returns 0 if the Matrix have different sizes
 {
   if (&A != this) // this == A == always true
   {
-    if (A.m_numRowsX != m_numRowsX || A.m_numColumnsY != m_numColumnsY)
+    if (A.m_numRows != m_numRows || A.m_numColumns != m_numColumns)
       return false;
 
     double maxS(0.0);
     double maxDiff(0.0); // max di
-    for (size_t i = 0; i < m_numRowsX; i++)
-      for (size_t j = 0; j < m_numColumnsY; j++) {
+    for (size_t i = 0; i < m_numRows; i++)
+      for (size_t j = 0; j < m_numColumns; j++) {
         const T diff = (m_rawData[i][j] - A.m_rawData[i][j]);
         if (fabs(diff) > maxDiff)
           maxDiff = fabs(diff);
@@ -565,11 +564,11 @@ template <typename T> bool Matrix<T>::operator<(const Matrix<T> &A) const {
   if (&A == this) // this < A == always false
     return false;
 
-  if (A.m_numRowsX != m_numRowsX || A.m_numColumnsY != m_numColumnsY)
+  if (A.m_numRows != m_numRows || A.m_numColumns != m_numColumns)
     return false;
 
-  for (size_t i = 0; i < m_numRowsX; i++)
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++)
+    for (size_t j = 0; j < m_numColumns; j++) {
       if (m_rawData[i][j] >= A.m_rawData[i][j])
         return false;
     }
@@ -586,11 +585,11 @@ template <typename T> bool Matrix<T>::operator>=(const Matrix<T> &A) const {
   if (&A == this)
     return true;
 
-  if (A.m_numRowsX != m_numRowsX || A.m_numColumnsY != m_numColumnsY)
+  if (A.m_numRows != m_numRows || A.m_numColumns != m_numColumns)
     return false;
 
-  for (size_t i = 0; i < m_numRowsX; i++)
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++)
+    for (size_t j = 0; j < m_numColumns; j++) {
       if (m_rawData[i][j] < A.m_rawData[i][j])
         return false;
     }
@@ -603,28 +602,28 @@ template <typename T> bool Matrix<T>::operator>=(const Matrix<T> &A) const {
   @param b :: number of columns
 */
 template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
-  if (a == m_numRowsX && b == m_numColumnsY && m_rawData != nullptr)
+  if (a == m_numRows && b == m_numColumns && m_rawData != nullptr)
     return;
 
   if (a <= 0 || b <= 0)
     return;
 
-  m_numRowsX = a;
-  m_numColumnsY = b;
+  m_numRows = a;
+  m_numColumns = b;
 
   // Allocate memory first - this has to be a flat 1d array masquerading as a 2d
   // array so we can expose the memory to Python APIs via numpy which expects
   // this
   // style of memory layout.
-  auto allocatedMemory = Kernel::make_unique<T[]>((m_numRowsX * m_numColumnsY));
+  auto allocatedMemory = Kernel::make_unique<T[]>((m_numRows * m_numColumns));
 
   // Next allocate an array of pointers for the rows (X). This partitions
   // the 1D array into a 2D array for callers.
-  auto rowPtrs = Kernel::make_unique<T *[]>(m_numRowsX);
+  auto rowPtrs = Kernel::make_unique<T *[]>(m_numRows);
 
-  for (size_t i = 0; i < m_numRowsX; i++) {
+  for (size_t i = 0; i < m_numRows; i++) {
     // Calculate offsets into the allocated memory array (Y)
-    rowPtrs[i] = &allocatedMemory[i * m_numColumnsY];
+    rowPtrs[i] = &allocatedMemory[i * m_numColumns];
   }
 
   m_rawDataAlloc = std::move(allocatedMemory);
@@ -638,9 +637,9 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
 */
 template <typename T>
 void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
-  if (m_numRowsX * m_numColumnsY && RowI < m_numRowsX && RowJ < m_numRowsX &&
+  if (m_numRows * m_numColumns && RowI < m_numRows && RowJ < m_numRows &&
       RowI != RowJ) {
-    for (size_t k = 0; k < m_numColumnsY; k++) {
+    for (size_t k = 0; k < m_numColumns; k++) {
       T tmp = m_rawData[RowI][k];
       m_rawData[RowI][k] = m_rawData[RowJ][k];
       m_rawData[RowJ][k] = tmp;
@@ -655,9 +654,9 @@ void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
 */
 template <typename T>
 void Matrix<T>::swapCols(const size_t colI, const size_t colJ) {
-  if (m_numRowsX * m_numColumnsY && colI < m_numColumnsY &&
-      colJ < m_numColumnsY && colI != colJ) {
-    for (size_t k = 0; k < m_numRowsX; k++) {
+  if (m_numRows * m_numColumns && colI < m_numColumns && colJ < m_numColumns &&
+      colI != colJ) {
+    for (size_t k = 0; k < m_numRows; k++) {
       T tmp = m_rawData[k][colI];
       m_rawData[k][colI] = m_rawData[k][colJ];
       m_rawData[k][colJ] = tmp;
@@ -671,9 +670,9 @@ void Matrix<T>::zeroMatrix()
   Zeros all elements of the matrix
 */
 {
-  if (m_numRowsX * m_numColumnsY) {
-    for (size_t i = 0; i < m_numRowsX; i++) {
-      for (size_t j = 0; j < m_numColumnsY; j++) {
+  if (m_numRows * m_numColumns) {
+    for (size_t i = 0; i < m_numRows; i++) {
+      for (size_t j = 0; j < m_numColumns; j++) {
         m_rawData[i][j] = static_cast<T>(0);
       }
     }
@@ -687,9 +686,9 @@ void Matrix<T>::identityMatrix()
   Zeros all the terms outside of the square
 */
 {
-  if (m_numRowsX * m_numColumnsY) {
-    for (size_t i = 0; i < m_numRowsX; i++) {
-      for (size_t j = 0; j < m_numColumnsY; j++) {
+  if (m_numRows * m_numColumns) {
+    for (size_t i = 0; i < m_numRows; i++) {
+      for (size_t j = 0; j < m_numColumns; j++) {
         m_rawData[i][j] = static_cast<T>(j == i);
       }
     }
@@ -697,25 +696,25 @@ void Matrix<T>::identityMatrix()
 }
 template <typename T>
 void Matrix<T>::setColumn(const size_t nCol, const std::vector<T> &newCol) {
-  if (nCol >= this->m_numColumnsY) {
+  if (nCol >= this->m_numColumns) {
     throw(std::invalid_argument("nCol requested> nCol availible"));
   }
-  size_t m_numRowsXM = newCol.size();
-  if (m_numRowsX < m_numRowsXM)
-    m_numRowsXM = m_numRowsX;
-  for (size_t i = 0; i < m_numRowsXM; i++) {
+  size_t m_numRowsM = newCol.size();
+  if (m_numRows < m_numRowsM)
+    m_numRowsM = m_numRows;
+  for (size_t i = 0; i < m_numRowsM; i++) {
     m_rawData[i][nCol] = newCol[i];
   }
 }
 template <typename T>
 void Matrix<T>::setRow(const size_t nRow, const std::vector<T> &newRow) {
-  if (nRow >= this->m_numRowsX) {
+  if (nRow >= this->m_numRows) {
     throw(std::invalid_argument("nRow requested> nRow availible"));
   }
-  size_t m_numColumnsYM = newRow.size();
-  if (m_numColumnsY < m_numColumnsYM)
-    m_numColumnsYM = m_numColumnsY;
-  for (size_t j = 0; j < m_numColumnsYM; j++) {
+  size_t m_numColumnsM = newRow.size();
+  if (m_numColumns < m_numColumnsM)
+    m_numColumnsM = m_numColumns;
+  for (size_t j = 0; j < m_numColumnsM; j++) {
     m_rawData[nRow][j] = newRow[j];
   }
 }
@@ -750,15 +749,15 @@ Matrix<T> Matrix<T>::preMultiplyByDiagonal(const std::vector<T> &Dvec) const
   @return D*this
 */
 {
-  if (Dvec.size() != m_numRowsX) {
+  if (Dvec.size() != m_numRows) {
     std::ostringstream cx;
     cx << "Matrix::preMultiplyByDiagonal Size: " << Dvec.size() << " "
-       << m_numRowsX << " " << m_numColumnsY;
+       << m_numRows << " " << m_numColumns;
     throw std::runtime_error(cx.str());
   }
-  Matrix<T> X(Dvec.size(), m_numColumnsY);
+  Matrix<T> X(Dvec.size(), m_numColumns);
   for (size_t i = 0; i < Dvec.size(); i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       X.m_rawData[i][j] = Dvec[i] * m_rawData[i][j];
     }
   }
@@ -774,15 +773,15 @@ Matrix<T> Matrix<T>::postMultiplyByDiagonal(const std::vector<T> &Dvec) const
   @return this*D
 */
 {
-  if (Dvec.size() != m_numColumnsY) {
+  if (Dvec.size() != m_numColumns) {
     std::ostringstream cx;
-    cx << "Error Matrix::bDiaognal size:: " << Dvec.size() << " " << m_numRowsX
-       << " " << m_numColumnsY;
+    cx << "Error Matrix::bDiaognal size:: " << Dvec.size() << " " << m_numRows
+       << " " << m_numColumns;
     throw std::runtime_error(cx.str());
   }
 
-  Matrix<T> X(m_numRowsX, Dvec.size());
-  for (size_t i = 0; i < m_numRowsX; i++) {
+  Matrix<T> X(m_numRows, Dvec.size());
+  for (size_t i = 0; i < m_numRows; i++) {
     for (size_t j = 0; j < Dvec.size(); j++) {
       X.m_rawData[i][j] = Dvec[j] * m_rawData[i][j];
     }
@@ -798,10 +797,10 @@ Matrix<T> Matrix<T>::Tprime() const
   @return M^T
 */
 {
-  if (!m_numRowsX * m_numColumnsY)
+  if (!m_numRows * m_numColumns)
     return *this;
 
-  if (m_numRowsX == m_numColumnsY) // inplace transpose
+  if (m_numRows == m_numColumns) // inplace transpose
   {
     Matrix<T> MT(*this);
     MT.Transpose();
@@ -809,9 +808,9 @@ Matrix<T> Matrix<T>::Tprime() const
   }
 
   // irregular matrix
-  Matrix<T> MT(m_numColumnsY, m_numRowsX);
-  for (size_t i = 0; i < m_numRowsX; i++)
-    for (size_t j = 0; j < m_numColumnsY; j++)
+  Matrix<T> MT(m_numColumns, m_numRows);
+  for (size_t i = 0; i < m_numRows; i++)
+    for (size_t j = 0; j < m_numColumns; j++)
       MT.m_rawData[j][i] = m_rawData[i][j];
 
   return MT;
@@ -825,13 +824,13 @@ Has a in place transpose for a square matrix case.
 @return this^T
 */
 {
-  if (!m_numRowsX * m_numColumnsY)
+  if (!m_numRows * m_numColumns)
     return *this;
 
-  if (m_numRowsX == m_numColumnsY) // in place transpose
+  if (m_numRows == m_numColumns) // in place transpose
   {
-    for (size_t i = 0; i < m_numRowsX; i++) {
-      for (size_t j = i + 1; j < m_numColumnsY; j++) {
+    for (size_t i = 0; i < m_numRows; i++) {
+      for (size_t j = i + 1; j < m_numColumns; j++) {
         std::swap(m_rawData[i][j], m_rawData[j][i]);
       }
     }
@@ -841,21 +840,21 @@ Has a in place transpose for a square matrix case.
   // irregular matrix
   // get some memory
 
-  auto allocatedMemory = Kernel::make_unique<T[]>((m_numRowsX * m_numColumnsY));
-  auto transposePtrs = Kernel::make_unique<T *[]>(m_numRowsX);
+  auto allocatedMemory = Kernel::make_unique<T[]>((m_numRows * m_numColumns));
+  auto transposePtrs = Kernel::make_unique<T *[]>(m_numRows);
 
-  for (size_t i = 0; i < m_numColumnsY; i++) {
+  for (size_t i = 0; i < m_numColumns; i++) {
     // Notice how this partitions using Rows (X) instead of Cols(Y)
-    transposePtrs[i] = &allocatedMemory[i * m_numRowsX];
+    transposePtrs[i] = &allocatedMemory[i * m_numRows];
   }
 
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       transposePtrs[j][i] = m_rawData[i][j];
     }
   }
   // remove old memory
-  std::swap(m_numRowsX, m_numColumnsY);
+  std::swap(m_numRows, m_numColumns);
 
   m_rawDataAlloc = std::move(allocatedMemory);
   m_rawData = std::move(transposePtrs);
@@ -886,25 +885,25 @@ void Matrix<T>::GaussJordan(Matrix<T> &B)
  */
 {
   // check for input errors
-  if (m_numRowsX != m_numColumnsY || B.m_numRowsX != m_numRowsX) {
+  if (m_numRows != m_numColumns || B.m_numRows != m_numRows) {
     throw std::invalid_argument("Matrix not square, or sizes do not match");
   }
 
   // pivoted rows
-  std::vector<int> pivoted(m_numRowsX);
+  std::vector<int> pivoted(m_numRows);
   fill(pivoted.begin(), pivoted.end(), 0);
 
-  std::vector<int> indxcol(m_numRowsX); // Column index
-  std::vector<int> indxrow(m_numRowsX); // row index
+  std::vector<int> indxcol(m_numRows); // Column index
+  std::vector<int> indxrow(m_numRows); // row index
 
   size_t irow(0), icol(0);
-  for (size_t i = 0; i < m_numRowsX; i++) {
+  for (size_t i = 0; i < m_numRows; i++) {
     // Get Biggest non-pivoted item
     double bigItem = 0.0; // get point to pivot over
-    for (size_t j = 0; j < m_numRowsX; j++) {
+    for (size_t j = 0; j < m_numRows; j++) {
       if (pivoted[j] != 1) // check only non-pivots
       {
-        for (size_t k = 0; k < m_numRowsX; k++) {
+        for (size_t k = 0; k < m_numRows; k++) {
           if (!pivoted[k]) {
             if (fabs(m_rawData[j][k]) >= bigItem) {
               bigItem = fabs(m_rawData[j][k]);
@@ -931,21 +930,21 @@ void Matrix<T>::GaussJordan(Matrix<T> &B)
     }
     const T pivDiv = T(1.0) / m_rawData[icol][icol];
     m_rawData[icol][icol] = 1;
-    for (size_t l = 0; l < m_numRowsX; l++) {
+    for (size_t l = 0; l < m_numRows; l++) {
       m_rawData[icol][l] *= pivDiv;
     }
-    for (size_t l = 0; l < B.m_numColumnsY; l++) {
+    for (size_t l = 0; l < B.m_numColumns; l++) {
       B.m_rawData[icol][l] *= pivDiv;
     }
 
-    for (size_t ll = 0; ll < m_numRowsX; ll++) {
+    for (size_t ll = 0; ll < m_numRows; ll++) {
       if (ll != icol) {
         const T div_num = m_rawData[ll][icol];
         m_rawData[ll][icol] = 0.0;
-        for (size_t l = 0; l < m_numRowsX; l++) {
+        for (size_t l = 0; l < m_numRows; l++) {
           m_rawData[ll][l] -= m_rawData[icol][l] * div_num;
         }
-        for (size_t l = 0; l < B.m_numColumnsY; l++) {
+        for (size_t l = 0; l < B.m_numColumns; l++) {
           B.m_rawData[ll][l] -= B.m_rawData[icol][l] * div_num;
         }
       }
@@ -953,8 +952,8 @@ void Matrix<T>::GaussJordan(Matrix<T> &B)
   }
 
   // Un-roll interchanges
-  if (m_numRowsX > 0) {
-    for (int l = static_cast<int>(m_numRowsX) - 1; l >= 0; l--) {
+  if (m_numRows > 0) {
+    for (int l = static_cast<int>(m_numRows) - 1; l >= 0; l--) {
       if (indxrow[l] != indxcol[l]) {
         swapCols(indxrow[l], indxcol[l]);
       }
@@ -970,35 +969,32 @@ T Matrix<T>::Invert()
   @return Determinant (0 if the matrix is singular)
 */
 {
-  if (m_numRowsX != m_numColumnsY && m_numRowsX < 1)
+  if (m_numRows != m_numColumns && m_numRows < 1)
     return 0;
 
-  if (m_numRowsX == 1) {
+  if (m_numRows == 1) {
     T det = m_rawData[0][0];
     if (m_rawData[0][0] != static_cast<T>(0.))
       m_rawData[0][0] = static_cast<T>(1.) / m_rawData[0][0];
     return det;
   }
-  std::vector<int> indx;
-  indx.resize(m_numRowsX); // Set in lubcmp
+  std::vector<int> indx(m_numRows); // Set in lubcmp
+  std::vector<double> col(m_numRows);
 
-  std::vector<double> col;
-  col.resize(m_numRowsX);
-
-  int d;
+  int determinant = 0;
   Matrix<T> Lcomp(*this);
-  Lcomp.lubcmp(indx.data(), d);
+  Lcomp.lubcmp(indx.data(), determinant);
 
-  double det = static_cast<double>(d);
-  for (size_t j = 0; j < m_numRowsX; j++)
+  double det = static_cast<double>(determinant);
+  for (size_t j = 0; j < m_numRows; j++)
     det *= Lcomp.m_rawData[j][j];
 
-  for (size_t j = 0; j < m_numRowsX; j++) {
-    for (size_t i = 0; i < m_numRowsX; i++)
+  for (size_t j = 0; j < m_numRows; j++) {
+    for (size_t i = 0; i < m_numRows; i++)
       col[i] = 0.0;
     col[j] = 1.0;
     Lcomp.lubksb(indx.data(), col.data());
-    for (size_t i = 0; i < m_numRowsX; i++)
+    for (size_t i = 0; i < m_numRows; i++)
       m_rawData[i][j] = static_cast<T>(col[i]);
   }
   return static_cast<T>(det);
@@ -1011,10 +1007,9 @@ T Matrix<T>::determinant() const
   @return Determinant of matrix.
 */
 {
-  if (m_numRowsX != m_numColumnsY)
+  if (m_numRows != m_numColumns)
     throw Kernel::Exception::MisMatch<size_t>(
-        m_numRowsX, m_numColumnsY,
-        "Determinant error :: Matrix is not m_numRowsXN");
+        m_numRows, m_numColumns, "Determinant error :: Matrix is not square");
 
   Matrix<T> Mt(*this); // temp copy
   T D = Mt.factor();
@@ -1030,16 +1025,16 @@ T Matrix<T>::factor()
    @return the factored matrix
 */
 {
-  if (m_numRowsX != m_numColumnsY || m_numRowsX < 1)
-    throw std::runtime_error("Matrix::factor Matrix is not m_numRowsXN");
+  if (m_numRows != m_numColumns || m_numRows < 1)
+    throw std::runtime_error("Matrix::factor Matrix is not square");
 
   double deter = 1.0;
-  for (int i = 0; i < static_cast<int>(m_numRowsX) - 1;
+  for (int i = 0; i < static_cast<int>(m_numRows) - 1;
        i++) // loop over each row
   {
     int jmax = i;
     double Pmax = fabs(m_rawData[i][i]);
-    for (int j = i + 1; j < static_cast<int>(m_numRowsX);
+    for (int j = i + 1; j < static_cast<int>(m_numRows);
          j++) // find max in Row i
     {
       if (fabs(m_rawData[i][j]) > Pmax) {
@@ -1060,15 +1055,15 @@ T Matrix<T>::factor()
     // zero all rows below diagonal
     Pmax = m_rawData[i][i];
     deter *= Pmax;
-    for (int k = i + 1; k < static_cast<int>(m_numRowsX); k++) // row index
+    for (int k = i + 1; k < static_cast<int>(m_numRows); k++) // row index
     {
       const double scale = m_rawData[k][i] / Pmax;
       m_rawData[k][i] = static_cast<T>(0);
-      for (int q = i + 1; q < static_cast<int>(m_numRowsX); q++) // column index
+      for (int q = i + 1; q < static_cast<int>(m_numRows); q++) // column index
         m_rawData[k][q] -= static_cast<T>(scale * m_rawData[i][q]);
     }
   }
-  deter *= m_rawData[m_numRowsX - 1][m_numRowsX - 1];
+  deter *= m_rawData[m_numRows - 1][m_numRows - 1];
   return static_cast<T>(deter);
 }
 
@@ -1079,13 +1074,13 @@ void Matrix<T>::normVert()
   Assumes that they have already been calculated
 */
 {
-  for (size_t i = 0; i < m_numRowsX; i++) {
+  for (size_t i = 0; i < m_numRows; i++) {
     T sum = 0;
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       sum += m_rawData[i][j] * m_rawData[i][j];
     }
     sum = static_cast<T>(std::sqrt(static_cast<double>(sum)));
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       m_rawData[i][j] /= sum;
     }
   }
@@ -1099,8 +1094,8 @@ T Matrix<T>::compSum() const
  */
 {
   T sum(0);
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       sum += m_rawData[i][j] * m_rawData[i][j];
     }
   }
@@ -1113,26 +1108,25 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
 Find biggest pivot and move to top row. Then
 divide by pivot.
 @param interchange :: odd/even nterchange (+/-1)
-@param rowperm :: row permutations [m_numRowsX values]
+@param rowperm :: row permutations [m_numRows values]
 */
 {
   double sum, dum, big, temp;
 
-  if (m_numRowsX != m_numColumnsY || m_numRowsX < 2) {
+  if (m_numRows != m_numColumns || m_numRows < 2) {
     std::cerr << "Error with lubcmp\n";
     return;
   }
-  std::vector<double> result;
-  result.resize(m_numRowsX);
+  std::vector<double> result(m_numRows);
   interchange = 1;
-  for (int i = 0; i < static_cast<int>(m_numRowsX); i++) {
+  for (int i = 0; i < static_cast<int>(m_numRows); i++) {
     big = 0.0;
-    for (int j = 0; j < static_cast<int>(m_numRowsX); j++)
+    for (int j = 0; j < static_cast<int>(m_numRows); j++)
       if ((temp = fabs(m_rawData[i][j])) > big)
         big = temp;
 
     if (big == 0.0) {
-      for (int j = 0; j < static_cast<int>(m_numRowsX); j++) {
+      for (int j = 0; j < static_cast<int>(m_numRows); j++) {
         rowperm[j] = j;
       }
       return;
@@ -1140,7 +1134,7 @@ divide by pivot.
     result[i] = 1.0 / big;
   }
 
-  for (int j = 0; j < static_cast<int>(m_numRowsX); j++) {
+  for (int j = 0; j < static_cast<int>(m_numRows); j++) {
     for (int i = 0; i < j; i++) {
       sum = m_rawData[i][j];
       for (int k = 0; k < i; k++)
@@ -1149,7 +1143,7 @@ divide by pivot.
     }
     big = 0.0;
     int imax = j;
-    for (int i = j; i < static_cast<int>(m_numRowsX); i++) {
+    for (int i = j; i < static_cast<int>(m_numRows); i++) {
       sum = m_rawData[i][j];
       for (int k = 0; k < j; k++)
         sum -= m_rawData[i][k] * m_rawData[k][j];
@@ -1161,7 +1155,7 @@ divide by pivot.
     }
 
     if (j != imax) {
-      for (int k = 0; k < static_cast<int>(m_numRowsX);
+      for (int k = 0; k < static_cast<int>(m_numRows);
            k++) { // Interchange rows
         dum = m_rawData[imax][k];
         m_rawData[imax][k] = m_rawData[j][k];
@@ -1174,9 +1168,9 @@ divide by pivot.
 
     if (m_rawData[j][j] == 0.0)
       m_rawData[j][j] = static_cast<T>(1e-14);
-    if (j != static_cast<int>(m_numRowsX) - 1) {
+    if (j != static_cast<int>(m_numRows) - 1) {
       dum = 1.0 / (m_rawData[j][j]);
-      for (int i = j + 1; i < static_cast<int>(m_numRowsX); i++)
+      for (int i = j + 1; i < static_cast<int>(m_numRows); i++)
         m_rawData[i][j] *= static_cast<T>(dum);
     }
   }
@@ -1191,7 +1185,7 @@ void Matrix<T>::lubksb(const int *rowperm, double *b)
 {
   int ii = -1;
 
-  for (int i = 0; i < static_cast<int>(m_numRowsX); i++) {
+  for (int i = 0; i < static_cast<int>(m_numRows); i++) {
     int ip = rowperm[i];
     double sum = b[ip];
     b[ip] = b[i];
@@ -1203,9 +1197,9 @@ void Matrix<T>::lubksb(const int *rowperm, double *b)
     b[i] = sum;
   }
 
-  for (int i = static_cast<int>(m_numRowsX) - 1; i >= 0; i--) {
+  for (int i = static_cast<int>(m_numRows) - 1; i >= 0; i--) {
     double sum = static_cast<T>(b[i]);
-    for (int j = i + 1; j < static_cast<int>(m_numRowsX); j++)
+    for (int j = i + 1; j < static_cast<int>(m_numRows); j++)
       sum -= m_rawData[i][j] * b[j];
     b[i] = sum / m_rawData[i][i];
   }
@@ -1218,8 +1212,7 @@ void Matrix<T>::averSymmetric()
   out of the Matrix
 */
 {
-  const size_t minSize =
-      (m_numRowsX > m_numColumnsY) ? m_numColumnsY : m_numRowsX;
+  const size_t minSize = (m_numRows > m_numColumns) ? m_numColumns : m_numRows;
   for (size_t i = 0; i < minSize; i++) {
     for (size_t j = i + 1; j < minSize; j++) {
       m_rawData[i][j] = (m_rawData[i][j] + m_rawData[j][i]) / 2;
@@ -1235,8 +1228,7 @@ std::vector<T> Matrix<T>::Diagonal() const
   @return Diagonal elements
 */
 {
-  const size_t Msize =
-      (m_numColumnsY > m_numRowsX) ? m_numRowsX : m_numColumnsY;
+  const size_t Msize = (m_numColumns > m_numRows) ? m_numRows : m_numColumns;
   std::vector<T> Diag(Msize);
   for (size_t i = 0; i < Msize; i++) {
     Diag[i] = m_rawData[i][i];
@@ -1251,8 +1243,7 @@ T Matrix<T>::Trace() const
   @return Trace of matrix
 */
 {
-  const size_t Msize =
-      (m_numColumnsY > m_numRowsX) ? m_numRowsX : m_numColumnsY;
+  const size_t Msize = (m_numColumns > m_numRows) ? m_numRows : m_numColumns;
   T Trx = 0;
   for (size_t i = 0; i < Msize; i++) {
     Trx += m_rawData[i][i];
@@ -1268,8 +1259,8 @@ void Matrix<T>::sortEigen(Matrix<T> &DiagMatrix)
   @param DiagMatrix :: matrix of the EigenValues
 */
 {
-  if (m_numColumnsY != m_numRowsX || m_numRowsX != DiagMatrix.m_numRowsX ||
-      m_numRowsX != DiagMatrix.m_numColumnsY) {
+  if (m_numColumns != m_numRows || m_numRows != DiagMatrix.m_numRows ||
+      m_numRows != DiagMatrix.m_numColumns) {
     std::cerr << "Matrix not Eigen Form\n";
     throw(std::invalid_argument(" Matrix is not in an eigenvalue format"));
   }
@@ -1277,8 +1268,8 @@ void Matrix<T>::sortEigen(Matrix<T> &DiagMatrix)
   std::vector<T> X = DiagMatrix.Diagonal();
   indexSort(X, index);
   Matrix<T> EigenVec(*this);
-  for (size_t Icol = 0; Icol < m_numRowsX; Icol++) {
-    for (size_t j = 0; j < m_numRowsX; j++) {
+  for (size_t Icol = 0; Icol < m_numRows; Icol++) {
+    for (size_t j = 0; j < m_numRows; j++) {
       m_rawData[j][Icol] = EigenVec[j][index[Icol]];
     }
     DiagMatrix[Icol][Icol] = X[index[Icol]];
@@ -1294,12 +1285,12 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
   @return :: 1  on success 0 on failure
 */
 {
-  if (m_numRowsX != m_numColumnsY || m_numRowsX < 1) {
+  if (m_numRows != m_numColumns || m_numRows < 1) {
     std::cerr << "Matrix not square\n";
     return 0;
   }
-  for (size_t i = 0; i < m_numRowsX; i++)
-    for (size_t j = i + 1; j < m_numRowsX; j++)
+  for (size_t i = 0; i < m_numRows; i++)
+    for (size_t j = i + 1; j < m_numRows; j++)
       if (fabs(m_rawData[i][j] - m_rawData[j][i]) > 1e-6) {
         std::cerr << "Matrix not symmetric\n";
         std::cerr << (*this);
@@ -1308,16 +1299,16 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
 
   Matrix<T> A(*this);
   // Make V an identity matrix
-  EigenVec.setMem(m_numRowsX, m_numRowsX);
+  EigenVec.setMem(m_numRows, m_numRows);
   EigenVec.identityMatrix();
-  DiagMatrix.setMem(m_numRowsX, m_numRowsX);
+  DiagMatrix.setMem(m_numRows, m_numRows);
   DiagMatrix.zeroMatrix();
 
-  std::vector<double> Diag(m_numRowsX);
-  std::vector<double> B(m_numRowsX);
-  std::vector<double> ZeroComp(m_numRowsX);
+  std::vector<double> Diag(m_numRows);
+  std::vector<double> B(m_numRows);
+  std::vector<double> ZeroComp(m_numRows);
   // set b and d to the diagonal elements o A
-  for (size_t i = 0; i < m_numRowsX; i++) {
+  for (size_t i = 0; i < m_numRows; i++) {
     Diag[i] = B[i] = A.m_rawData[i][i];
     ZeroComp[i] = 0;
   }
@@ -1326,25 +1317,25 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
   for (int i = 0; i < 100; i++) // max 50 iterations
   {
     double sm = 0.0; // sum of off-diagonal terms
-    for (size_t ip = 0; ip < m_numRowsX - 1; ip++)
-      for (size_t iq = ip + 1; iq < m_numRowsX; iq++)
+    for (size_t ip = 0; ip < m_numRows - 1; ip++)
+      for (size_t iq = ip + 1; iq < m_numRows; iq++)
         sm += fabs(A.m_rawData[ip][iq]);
 
     if (sm == 0.0) // Nothing to do return...
     {
       // Make OUTPUT -- D + A
       // sort Output::
-      for (size_t ix = 0; ix < m_numRowsX; ix++)
+      for (size_t ix = 0; ix < m_numRows; ix++)
         DiagMatrix.m_rawData[ix][ix] = static_cast<T>(Diag[ix]);
       return 1;
     }
 
     // Threshold large for first 5 sweeps
     double tresh =
-        (i < 6) ? 0.2 * sm / static_cast<int>(m_numRowsX * m_numRowsX) : 0.0;
+        (i < 6) ? 0.2 * sm / static_cast<int>(m_numRows * m_numRows) : 0.0;
 
-    for (int ip = 0; ip < static_cast<int>(m_numRowsX) - 1; ip++) {
-      for (int iq = ip + 1; iq < static_cast<int>(m_numRowsX); iq++) {
+    for (int ip = 0; ip < static_cast<int>(m_numRows) - 1; ip++) {
+      for (int iq = ip + 1; iq < static_cast<int>(m_numRows); iq++) {
         double g = 100.0 * fabs(A.m_rawData[ip][iq]);
         // After 4 sweeps skip if off diagonal small
         if (i > 6 &&
@@ -1379,15 +1370,15 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
             A.rotate(tau, sinAngle, j, ip, j, iq);
           for (int j = ip + 1; j < iq; j++)
             A.rotate(tau, sinAngle, ip, j, j, iq);
-          for (int j = iq + 1; j < static_cast<int>(m_numRowsX); j++)
+          for (int j = iq + 1; j < static_cast<int>(m_numRows); j++)
             A.rotate(tau, sinAngle, ip, j, iq, j);
-          for (int j = 0; j < static_cast<int>(m_numRowsX); j++)
+          for (int j = 0; j < static_cast<int>(m_numRows); j++)
             EigenVec.rotate(tau, sinAngle, j, ip, j, iq);
           iteration++;
         }
       }
     }
-    for (size_t j = 0; j < m_numRowsX; j++) {
+    for (size_t j = 0; j < m_numRows; j++) {
       B[j] += ZeroComp[j];
       Diag[j] = B[j];
       ZeroComp[j] = 0.0;
@@ -1403,15 +1394,15 @@ bool Matrix<T>::isRotation() const
 @ return :: true/false
 */
 {
-  if (this->m_numRowsX != this->m_numColumnsY)
+  if (this->m_numRows != this->m_numColumns)
     throw(std::invalid_argument("matrix is not square"));
   //  std::cout << "Matrix determinant-1 is " << (this->determinant()-1) <<
   //  '\n';
   if (fabs(this->determinant() - 1) > 1e-5) {
     return false;
   } else {
-    Matrix<T> prod(m_numRowsX, m_numColumnsY),
-        ident(m_numRowsX, m_numColumnsY, true);
+    Matrix<T> prod(m_numRows, m_numColumns),
+        ident(m_numRows, m_numColumns, true);
     prod = this->operator*(this->Tprime());
     //    std::cout << "Matrix * Matrix' = " << std::endl << prod << '\n';
     return prod.equals(ident, 1e-5);
@@ -1425,13 +1416,13 @@ to be -1
 @ return :: true/false
 */
 {
-  if (this->m_numRowsX != this->m_numColumnsY)
+  if (this->m_numRows != this->m_numColumns)
     throw(std::invalid_argument("matrix is not square"));
   if (fabs(fabs(this->determinant()) - 1.) > 1e-5) {
     return false;
   } else {
-    Matrix<T> prod(m_numRowsX, m_numColumnsY),
-        ident(m_numRowsX, m_numColumnsY, true);
+    Matrix<T> prod(m_numRows, m_numColumns),
+        ident(m_numRows, m_numColumns, true);
     prod = this->operator*(this->Tprime());
     return prod.equals(ident, 1e-7);
   }
@@ -1446,38 +1437,38 @@ std::vector<T> Matrix<T>::toRotation()
   less then 1e-10 or not square matrix
 */
 {
-  if (this->m_numRowsX != this->m_numColumnsY)
+  if (this->m_numRows != this->m_numColumns)
     throw(std::invalid_argument("matrix is not square"));
   if (fabs(this->determinant()) < 1e-10)
     throw(std::invalid_argument("Determinant is too small"));
   // step 1: orthogonalize the matrix
-  for (size_t i = 0; i < this->m_numColumnsY; ++i) {
+  for (size_t i = 0; i < this->m_numColumns; ++i) {
     double spself = 0.;
-    for (size_t j = 0; j < this->m_numRowsX; ++j)
+    for (size_t j = 0; j < this->m_numRows; ++j)
       spself += (m_rawData[j][i] * m_rawData[j][i]);
-    for (size_t k = i + 1; k < this->m_numColumnsY; ++k) {
+    for (size_t k = i + 1; k < this->m_numColumns; ++k) {
       double spother = 0;
-      for (size_t j = 0; j < this->m_numRowsX; ++j)
+      for (size_t j = 0; j < this->m_numRows; ++j)
         spother += (m_rawData[j][i] * m_rawData[j][k]);
-      for (size_t j = 0; j < this->m_numRowsX; ++j)
+      for (size_t j = 0; j < this->m_numRows; ++j)
         m_rawData[j][k] -= static_cast<T>(m_rawData[j][i] * spother / spself);
     }
   }
   // step 2: get scales and rescsale the matrix
-  std::vector<T> scale(this->m_numRowsX);
+  std::vector<T> scale(this->m_numRows);
   T currentScale;
-  for (size_t i = 0; i < this->m_numColumnsY; ++i) {
+  for (size_t i = 0; i < this->m_numColumns; ++i) {
     currentScale = T(0.);
-    for (size_t j = 0; j < this->m_numRowsX; ++j)
+    for (size_t j = 0; j < this->m_numRows; ++j)
       currentScale += (m_rawData[j][i] * m_rawData[j][i]);
     currentScale = static_cast<T>(sqrt(static_cast<double>(currentScale)));
     if (currentScale < 1e-10)
       throw(std::invalid_argument("Scale is too small"));
     scale[i] = currentScale;
   }
-  Matrix<T> scalingMatrix(m_numRowsX, m_numColumnsY),
-      change(m_numRowsX, m_numColumnsY, true);
-  for (size_t i = 0; i < this->m_numColumnsY; ++i)
+  Matrix<T> scalingMatrix(m_numRows, m_numColumns),
+      change(m_numRows, m_numColumns, true);
+  for (size_t i = 0; i < this->m_numColumns; ++i)
     scalingMatrix[i][i] = static_cast<T>(1.0 / scale[i]);
   *this = this->operator*(scalingMatrix);
   if (this->determinant() < 0.) {
@@ -1502,8 +1493,8 @@ template <typename T>
 void Matrix<T>::setRandom(size_t seed, double rMin, double rMax) {
   MersenneTwister rng(seed, rMin, rMax);
 
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       m_rawData[i][j] = static_cast<T>(rng.nextValue());
     }
   }
@@ -1519,25 +1510,25 @@ void Matrix<T>::write(std::ostream &Fh, const int blockCnt) const
 {
   std::ios::fmtflags oldFlags = Fh.flags();
   Fh.setf(std::ios::floatfield, std::ios::scientific);
-  const size_t blockNumber((blockCnt > 0) ? blockCnt : m_numColumnsY);
+  const size_t blockNumber((blockCnt > 0) ? blockCnt : m_numColumns);
   size_t BCnt(0);
   do {
     const size_t ACnt = BCnt;
     BCnt += blockNumber;
-    if (BCnt > m_numColumnsY) {
-      BCnt = m_numColumnsY;
+    if (BCnt > m_numColumns) {
+      BCnt = m_numColumns;
     }
 
     if (ACnt) {
       Fh << " ----- " << ACnt << " " << BCnt << " ------ \n";
     }
-    for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t i = 0; i < m_numRows; i++) {
       for (size_t j = ACnt; j < BCnt; j++) {
         Fh << std::setw(10) << m_rawData[i][j] << "  ";
       }
       Fh << '\n';
     }
-  } while (BCnt < m_numColumnsY);
+  } while (BCnt < m_numColumns);
 
   Fh.flags(oldFlags);
 }
@@ -1550,8 +1541,8 @@ std::string Matrix<T>::str() const
 */
 {
   std::ostringstream cx;
-  for (size_t i = 0; i < m_numRowsX; i++) {
-    for (size_t j = 0; j < m_numColumnsY; j++) {
+  for (size_t i = 0; i < m_numRows; i++) {
+    for (size_t j = 0; j < m_numColumns; j++) {
       cx << std::setprecision(6) << m_rawData[i][j] << " ";
     }
   }

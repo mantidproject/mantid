@@ -46,8 +46,8 @@ public:
   typedef T value_type;
 
 private:
-  size_t m_numRowsX;    ///< Number of rows    (x coordinate)
-  size_t m_numColumnsY; ///< Number of columns (y coordinate)
+  size_t m_numRows;    ///< Number of rows    (x coordinate)
+  size_t m_numColumns; ///< Number of columns (y coordinate)
 
   /// 1D memory allocation to be wrapped with pointers to the rows
   template <class U> using CMemoryArray = std::unique_ptr<U[]>;
@@ -71,7 +71,7 @@ public:
    * (assuming that we have columns x row vector. */
   Matrix(const std::vector<T> &, const std::vector<T> &);
   /// Build square matrix from a linear vector. Throw if the vector.size() !=
-  /// m_numRowsX * m_numRowsX;
+  /// m_numRows * m_numRows;
   Matrix(const std::vector<T> &);
   /// Build a non-square matrix from vector and dimensions
   Matrix(const std::vector<T> &, const size_t nrow, const size_t ncol);
@@ -111,9 +111,7 @@ public:
   bool operator!=(const Matrix<T> &) const;
   bool operator==(const Matrix<T> &) const;
   bool equals(const Matrix<T> &A, const double Tolerance = FLT_EPSILON) const;
-  T item(const int a, const int b) const {
-    return m_rawData[a][b]; ///< disallows access
-  }
+  T item(size_t row, size_t col) const { return m_rawData[row][col]; }
 
   void print() const;
   void write(std::ostream &, int const = 0) const;
@@ -146,18 +144,18 @@ public:
 
   /// Access matrix sizes
   std::pair<size_t, size_t> size() const {
-    return std::pair<size_t, size_t>(m_numRowsX, m_numColumnsY);
+    return std::pair<size_t, size_t>(m_numRows, m_numColumns);
   }
 
   /// Return the number of rows in the matrix
-  size_t numRows() const { return m_numRowsX; }
+  size_t numRows() const { return m_numRows; }
 
   /// Return the number of columns in the matrix
-  size_t numCols() const { return m_numColumnsY; }
+  size_t numCols() const { return m_numColumns; }
 
   /// Return the smallest matrix size
   size_t Ssize() const {
-    return (m_numRowsX > m_numColumnsY) ? m_numColumnsY : m_numRowsX;
+    return (m_numRows > m_numColumns) ? m_numColumns : m_numRows;
   }
 
   void swapRows(const size_t, const size_t); ///< Swap rows (first V index)
