@@ -320,9 +320,9 @@ public:
       e[i] = 1.0;
     }
     const double sqrh = 0.70710678; // cos( 45 degrees )
-    y = {1.e-4 * sqrh,  0.00,  -1.2e-2 * sqrh,  -5.6e-2, -18.2e-2 * sqrh,  0.0,
-         0.8008 * sqrh, 1.144, 1.287 * sqrh, 0.0,  -0.8008 * sqrh, -0.4368,
-         -0.182 * sqrh, 0.0,   1.2e-2 * sqrh,   0.16e-2, 1.e-4 * sqrh,   0.00};
+    y = {1.e-4 * sqrh, 0.00, -1.2e-2 * sqrh, -5.6e-2, -18.2e-2 * sqrh, 0.0,
+         0.8008 * sqrh, 1.144, 1.287 * sqrh, 0.0, -0.8008 * sqrh, -0.4368,
+         -0.182 * sqrh, 0.0, 1.2e-2 * sqrh, 0.16e-2, 1.e-4 * sqrh, 0.00};
 
     Fit fit;
     fit.initialize();
