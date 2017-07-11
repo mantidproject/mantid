@@ -1,7 +1,5 @@
-#include "MantidKernel/ArrayProperty.h"
-
 // PropertyWithValue implementation
-#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace Kernel {

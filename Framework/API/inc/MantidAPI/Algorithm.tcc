@@ -2,7 +2,9 @@
 #include "MantidAPI/IndexProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
+#ifdef _WIN32
 #include "MantidKernel/ArrayProperty.tcc"
+#endif
 
 namespace {
 template <typename T1, typename T2>

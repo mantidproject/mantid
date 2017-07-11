@@ -32,9 +32,6 @@
 
 #include <map>
 
-// Index property handling template definitions
-#include "MantidAPI/Algorithm.tcc"
-
 using namespace Mantid::Kernel;
 
 namespace Mantid {

@@ -1,11 +1,13 @@
 #include "MantidKernel/ArrayProperty.h"
 
+// PropertyWithValue implementation
+#include "MantidKernel/PropertyWithValue.tcc"
 // ArrayProperty Definition
 #include "MantidKernel/ArrayProperty.tcc"
+
 namespace Mantid {
 namespace Kernel {
 /// @cond
-
 template class DLLExport ArrayProperty<int32_t>;
 template class DLLExport ArrayProperty<uint32_t>;
 template class DLLExport ArrayProperty<int64_t>;

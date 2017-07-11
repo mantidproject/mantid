@@ -1,5 +1,4 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
@@ -26,6 +25,8 @@
 
 #include <functional>
 #include <numeric>
+
+#include "MantidAPI/Algorithm.tcc"
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
@@ -118,8 +119,8 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
                                 "workspace");
 
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
-    getSpectrum(i)
-        .setSpectrumNo(static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
+    getSpectrum(i).setSpectrumNo(
+        static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
   }
   setStorageMode(indexInfo.storageMode());
   *m_indexInfo = indexInfo;
@@ -525,8 +526,8 @@ std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
       int index = det + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
-                         "): detector ID found (" << det
-                      << " at workspace index " << workspaceIndex
+                         "): detector ID found ("
+                      << det << " at workspace index " << workspaceIndex
                       << ") is invalid.\n";
       } else
         // Save it at that point.

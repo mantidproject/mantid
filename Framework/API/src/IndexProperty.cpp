@@ -4,9 +4,10 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
 
-#include "MantidKernel/ArrayProperty.tcc"
 
 namespace Mantid {
+using namespace Kernel;
+
 namespace API {
 IndexProperty::IndexProperty(const std::string &name,
                              const IWorkspaceProperty &workspaceProp,

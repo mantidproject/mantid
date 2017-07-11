@@ -5,7 +5,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/IndexTypeProperty.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
-#include "MantidKernel/ArrayProperty.h"
+#include <MantidKernel/ArrayProperty.h>
 
 namespace Mantid {
 namespace API {
@@ -33,7 +33,7 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IndexProperty : public Kernel::ArrayProperty<int> {
+class DLLExport IndexProperty : public Kernel::ArrayProperty<int> {
 public:
   IndexProperty(const std::string &name,
                 const IWorkspaceProperty &workspaceProp,
