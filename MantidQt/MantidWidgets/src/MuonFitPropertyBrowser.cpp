@@ -687,7 +687,7 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     QString msg = "TF Asymmetry Fit failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }
-   runFit();
+  runFit();
 }
 /**
 * Updates the normalization in the table WS
