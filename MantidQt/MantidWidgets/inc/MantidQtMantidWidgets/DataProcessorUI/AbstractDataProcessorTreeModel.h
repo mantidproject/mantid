@@ -55,11 +55,12 @@ public:
 
   // Miscellaneous model functions
 
-  // Add a data item to the list of items to be highlighted
+  // Add a data item to the list of highlighted items
   virtual bool addHighlighted(int position,
                               const QModelIndex &parent = QModelIndex()) = 0;
-  // Clear the list of highlighted items
-  virtual void clearHighlighted() = 0;
+  // Remove a data item from the list of highlighted items
+  virtual bool clearHighlighted(int position,
+                                const QModelIndex &parent = QModelIndex()) = 0;
 
 protected:
   /// Collection of data for viewing.

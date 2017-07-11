@@ -508,12 +508,40 @@ bool QDataProcessorTwoLevelTreeModel::addHighlighted(
   return true;
 }
 
-/** Clear the lists of highlighted rows and groups
-*/
-void QDataProcessorTwoLevelTreeModel::clearHighlighted() {
 
-  m_highlightRows.clear();
-  m_highlightGroups.clear();
+/** Remove a data item from being highlighted
+* @param position : The position of the row to be un-highlighted
+* @param parent : The parent of this row
+* @return : Boolean indicating whether the row was successfully un-highlighted
+*/
+bool QDataProcessorTwoLevelTreeModel::clearHighlighted(
+    int position, const QModelIndex &parent) {
+
+  if (!parent.isValid()) {
+    // We have a group item (no parent)
+
+    auto posIt = std::find(m_highlightGroups.begin(), m_highlightGroups.begin(),
+                           position);
+
+    // Item not found
+    if (posIt == m_highlightGroups.end())
+      return false;
+
+    m_highlightGroups.erase(posIt);
+  } else {
+    // We have a row item (parent exists)
+
+    auto posIt = std::find(m_highlightRows[parent.row()].begin(),
+                           m_highlightRows[parent.row()].begin(), position);
+
+    // Item not found
+    if (posIt == m_highlightRows[parent.row()].end())
+      return false;
+
+    m_highlightRows[parent.row()].erase(posIt);
+  }
+
+  return true;
 }
 
 } // namespace MantidWidgets

@@ -88,6 +88,9 @@ public:
   /// Highlight a new data item
   void addHighlighted(int position) override;
   void addHighlighted(int position, int parent) override;
+  /// Un-highlight a data item
+  void clearHighlighted(int position) override;
+  void clearHighlighted(int position, int parent) override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,

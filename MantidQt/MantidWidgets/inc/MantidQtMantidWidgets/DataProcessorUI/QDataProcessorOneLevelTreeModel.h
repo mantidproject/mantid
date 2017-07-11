@@ -82,11 +82,12 @@ public:
 
   // Miscellaneous model functions
 
-  // Add a row to the list of rows to be highlighted
+  // Add a row to the list of highlighted rows
   bool addHighlighted(int position,
                       const QModelIndex &parent = QModelIndex()) override;
-  // Clear the list of highlighted items
-  void clearHighlighted() override;
+  // Remove a row from the list of highlighted rows
+  bool clearHighlighted(int position,
+                        const QModelIndex &parent = QModelIndex()) override;
 
 private:
   /// List of row indexes that should be highlighted

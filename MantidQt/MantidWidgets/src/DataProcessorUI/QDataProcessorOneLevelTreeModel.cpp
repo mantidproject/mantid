@@ -190,7 +190,7 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
   return true;
 }
 
-/** Sets the currently highlighted row
+/** Add a new data item to be highlighted
 * @param position : The position of the row to be highlighted
 * @param parent : The parent of this row
 * @return : Boolean indicating whether the row was successfully highlighted
@@ -211,11 +211,28 @@ bool QDataProcessorOneLevelTreeModel::addHighlighted(
   return true;
 }
 
-/** Clear the list of highlighted rows
+/** Remove a data item from being highlighted
+* @param position : The position of the row to be un-highlighted
+* @param parent : The parent of this row
+* @return : Boolean indicating whether the row was successfully un-highlighted
 */
-void QDataProcessorOneLevelTreeModel::clearHighlighted() {
+bool QDataProcessorOneLevelTreeModel::clearHighlighted(
+    int position, const QModelIndex &parent) {
 
-  m_highlightRows.clear();
+  // No parent items exists, this should not be possible
+  if (parent.isValid())
+    return false;
+
+  auto posIt =
+      std::find(m_highlightRows.begin(), m_highlightRows.begin(), position);
+
+  // Item not found
+  if (posIt == m_highlightRows.end())
+    return false;
+
+  m_highlightRows.erase(posIt);
+
+  return true;
 }
 
 /** Return the underlying data structure, i.e. the table workspace this model is

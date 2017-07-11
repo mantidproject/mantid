@@ -287,9 +287,6 @@ void GenericDataProcessorPresenter::process() {
   m_processingOptions = newProcessingOptions;
   m_postprocessingOptions = newPostprocessingOptions;
 
-  // Clear any highlighted rows
-  m_manager->clearHighlighted();
-
   // Clear the group queue
   m_gqueue = GroupQueue();
 
@@ -305,13 +302,18 @@ void GenericDataProcessorPresenter::process() {
         m_processedGroupIndexes.end())
       continue;
 
+    // Increment progress by group + number of child rows
     maxProgress += (int)(item.second.size()) + 1;
+    // Un-highlight unprocessed groups
+    m_manager->clearHighlighted(item.first);
 
     RowQueue rowQueue;
 
     for (const auto &data : item.second) {
       // Add all row items to queue
       rowQueue.push(data);
+      // Un-highlight unprocessed rows
+      m_manager->clearHighlighted(data.first, item.first);
     }
     m_gqueue.emplace(item.first, rowQueue);
   }

@@ -405,6 +405,23 @@ void DataProcessorOneLevelTreeManager::addHighlighted(int position,
   addHighlighted(position);
 }
 
+/** Sets a row to be un-highlighted
+* @param position : The index of the row to be un-highlighted
+*/
+void DataProcessorOneLevelTreeManager::clearHighlighted(int position) {
+  m_model->clearHighlighted(position);
+}
+
+/** Sets a row to be un-highlighted
+* @param position : The index of the row to be highlighted
+* @param parent : The parent of the row
+*/
+void DataProcessorOneLevelTreeManager::clearHighlighted(int position,
+                                                        int parent) {
+  UNUSED_ARG(parent);
+  clearHighlighted(position);
+}
+
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model
 */
