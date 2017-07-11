@@ -593,9 +593,8 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
   // TFAsymm calculation -> there is already some estimated data
   // rescale WS to normalized counts:
   const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
-  if (nWorkspaces > 1) {
-    emit functionUpdateRequested();
-  }
+  emit functionUpdateRequested();
+  
   for (int i = 0; i < nWorkspaces; i++) {
     rescaleWS(norms, m_workspacesToFit[i], 1.0);
     std::string tmp = m_workspacesToFit[i];
@@ -604,7 +603,15 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     // as the order of the workspace list
     // create a vec of norms in the same order
     auto it = norms.find(tmp);
-    normVec.push_back(it->second);
+	if (it != norms.end()) {
+		normVec.push_back(it->second);
+	}
+	else {// if raw data cannot be found
+		// use the binned data as initial norm
+		tmp = tmp.substr(0, tmp.size() - 4);
+		it = norms.find(tmp);
+		normVec.push_back(it->second);
+	}
   }
   try {
     m_initialParameters.resize(compositeFunction()->nParams());
@@ -658,9 +665,10 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     // get norms
     std::vector<double> newNorms;
     IFunction_sptr outputFunction = alg->getProperty("Function");
+	std::vector<double> ttt;
     for (int j = 0; j < nWorkspaces; j++) {
       std::string paramName = "f" + std::to_string(j);
-      paramName += ".f0.f0.A0";
+	  paramName += ".f0.f0.A0";
       newNorms.push_back(outputFunction->getParameter(paramName));
       std::string tmpWSName = m_workspacesToFit[j];
       if (rawData()) { // store norms without the raw
@@ -672,14 +680,22 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
       it->second = newNorms[newNorms.size() - 1];
       // transform data back to Asymm
       // rescale WS:
-      rescaleWS(norms, tmpWSNameNoRaw, -1.0);
-    }
+      rescaleWS(norms, tmpWSNameNoRaw, -1.0);   
+
+	  auto tttttt = outputFunction->getParameterNames();
+	 paramName = "f" + std::to_string(j);
+	 paramName += ".f1.f1.Frequency";
+	 ttt.push_back(outputFunction->getParameter(paramName));
+
+	}	 
+	auto a = 1.;
+
     updateMultipleNormalization(norms);
   } catch (const std::exception &e) {
     QString msg = "TF Asymmetry Fit failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }
-  runFit();
+  //runFit();
 }
 /**
 * Updates the normalization in the table WS
@@ -741,6 +757,7 @@ Mantid::API::IFunction_sptr MuonFitPropertyBrowser::getTFAsymmFitFunction(
     product->addFunction(inBrace);
     multi->addFunction(product);
   }
+  auto tmppp = multi->asString();
   return boost::dynamic_pointer_cast<IFunction>(multi);
 }
 
