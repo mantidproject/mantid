@@ -236,7 +236,7 @@ public:
         alg.setPropertyValue("PeakDistanceThreshold", "0.7"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxPeaks", int64_t(10)));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("UseNumberOfEventsNormalization", true));
+        alg.setProperty("PeakFindingStrategy", "NumberOfEventsNormalization"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SignalThresholdFactor", 1.3));
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
 
