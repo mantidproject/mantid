@@ -86,52 +86,53 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
 * @param end :: iterator at the end
 * @param separator :: string to append between items.
 * @param listSeparator :: string to append between list items.
-* @return
+* @return A string with contiguous values compressed using the list syntax
 */
 template <typename ITERATOR_TYPE>
 DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
                                    const std::string &separator = ",",
                                    const std::string &listSeparator = "-") {
 
+  if (begin == end) {
+    return "";
+  }
   std::stringstream result;
 
-  ITERATOR_TYPE i;
-  ITERATOR_TYPE previousValue;
+  ITERATOR_TYPE i = begin;
+  // Always include the first value
+  result << *begin;
+  //move on to the next value
+  ITERATOR_TYPE previousValue = i;
+  ++i;
+
   std::string currentSeparator = separator;
-  for (i = begin; i != end;) {
-    // was this one higher than the last value
-    if (i == begin) {
-      // Special case, always include the first value
-      result << *i;
+  for (; i != end;++i) {
+    // if it is one higher than the last value
+    if (*i == (*previousValue + 1)) {
+      currentSeparator = listSeparator;
     } else {
-      // if it is one higher than the last value
-      if (*i == (*previousValue + 1)) {
-        currentSeparator = listSeparator;
-      } else {
-        if (currentSeparator == listSeparator) {
-          // add the last value that was the end of the list
-          result << currentSeparator;
-          result << *previousValue;
-          currentSeparator = separator;
-        }
-        // add the current value
+      if (currentSeparator == listSeparator) {
+        // add the last value that was the end of the list
         result << currentSeparator;
-        result << *i;
+        result << *previousValue;
+        currentSeparator = separator;
       }
+      // add the current value
+      result << currentSeparator;
+      result << *i;
     }
     previousValue = i;
-    i++;
-    // if we have got to the end and part of a list output the last value
-    if ((i == end) && (currentSeparator == listSeparator)) {
-      result << currentSeparator;
-      result << *previousValue;
-    }
+  }
+  // if we have got to the end and part of a list output the last value
+  if (currentSeparator == listSeparator) {
+    result << currentSeparator;
+    result << *previousValue;
   }
   return result.str();
 }
 /// Converts long strings into "start ... end"
 MANTID_KERNEL_DLL std::string shorten(const std::string &input,
-                                      const size_t &max_length);
+                                      const size_t max_length);
 
 /// Return a string with all matching occurence-strings
 MANTID_KERNEL_DLL std::string replace(const std::string &input,

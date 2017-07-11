@@ -49,7 +49,7 @@ std::string loadFile(const std::string &filename) {
 *string)
 * @return the modified string.
 */
-std::string shorten(const std::string &input, const size_t &max_length) {
+std::string shorten(const std::string &input, const size_t max_length) {
   const std::string ellipsis = " ... ";
   const size_t ellipsisSize = ellipsis.size();
   // limit too small or input too small, return input string

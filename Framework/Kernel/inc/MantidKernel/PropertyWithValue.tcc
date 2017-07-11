@@ -118,8 +118,8 @@ template <typename TYPE> std::string PropertyWithValue<TYPE>::value() const {
 /** Get the value of the property as a string
  *  @return The property's value
  */
-template <typename TYPE> std::string PropertyWithValue<TYPE>::valueAsPrettyStr(size_t maxLength,
-    bool collapseLists) const {
+template <typename TYPE> std::string PropertyWithValue<TYPE>::valueAsPrettyStr(
+    const size_t maxLength, const bool collapseLists) const {
   std::string retVal;
   try {
     retVal = toPrettyString(m_value, maxLength, collapseLists);

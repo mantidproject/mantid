@@ -15,9 +15,9 @@ class PropertyHistoryTest : public CxxTest::TestSuite {
 public:
   void testPopulate() {
     std::string correctOutput = "Name: arg1_param, ";
-    correctOutput = correctOutput + "Value: 20, ";
-    correctOutput = correctOutput + "Default?: Yes, ";
-    correctOutput = correctOutput + "Direction: Input\n";
+    correctOutput +=  "Value: 20, ";
+    correctOutput +=  "Default?: Yes, ";
+    correctOutput +=  "Direction: Input\n";
 
     // Not really much to test
     PropertyHistory AP("arg1_param", "20", "argument", true, Direction::Input);
@@ -30,9 +30,9 @@ public:
 
   void testOutputWithShortenedValue() {
     std::string correctOutput = "Name: arg1_param, ";
-    correctOutput = correctOutput + "Value: 1234567 ... 4567890, ";
-    correctOutput = correctOutput + "Default?: Yes, ";
-    correctOutput = correctOutput + "Direction: Input\n";
+    correctOutput += "Value: 1234567 ... 4567890, ";
+    correctOutput += "Default?: Yes, ";
+    correctOutput += "Direction: Input\n";
 
     // a long property that should get shortened
     PropertyHistory propHistory("arg1_param", "123456798012345678901234567890",

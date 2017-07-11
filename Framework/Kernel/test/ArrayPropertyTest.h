@@ -302,10 +302,10 @@ public:
   }
 
   void testPrettyPrinting() {
-    std::vector<std::string> inputList{
+    const std::vector<std::string> inputList{
         "1,2,3", "-1,0,1", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
         "1-9998, 9999, 2000, 20002-29999"};
-    std::vector<std::string> resultList{"1-3", "-1-1",
+    const std::vector<std::string> resultList{"1-3", "-1-1",
                                         "356,366-368,370-372,375", "7,6,5-8,10",
                                         "1-9999,2000,20002-29999"};
 
@@ -318,10 +318,10 @@ public:
                listShorteningwithType<int32_t>(inputList, resultList));
 
     // unsigned types
-    std::vector<std::string> inputListUnsigned{
+    const std::vector<std::string> inputListUnsigned{
         "1,2,3", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
         "1-9998, 9999, 2000, 20002-29999"};
-    std::vector<std::string> resultListUnsigned{
+    const std::vector<std::string> resultListUnsigned{
         "1-3", "356,366-368,370-372,375", "7,6,5-8,10",
         "1-9999,2000,20002-29999"};
     TSM_ASSERT("Test Failed for vectors of unsigned int",
@@ -332,10 +332,10 @@ public:
         listShorteningwithType<size_t>(inputListUnsigned, resultListUnsigned));
 
     // check shortening does not happen for floating point types
-    std::vector<std::string> inputListFloat{
+    const std::vector<std::string> inputListFloat{
         "1.0,2.0,3.0", "1.0,1.5,2.0,3.0", "-1,0,1",
     };
-    std::vector<std::string> resultListFloat{
+    const std::vector<std::string> resultListFloat{
         "1,2,3", "1,1.5,2,3", "-1,0,1",
     };
     TSM_ASSERT("Test Failed for vectors of float",
