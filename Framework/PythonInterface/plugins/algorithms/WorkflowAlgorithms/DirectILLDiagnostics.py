@@ -5,8 +5,8 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 import mantid
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
-                        ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, Progress, PropertyMode, WorkspaceProperty,
-                        WorkspaceUnitValidator)
+                        ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, Progress, PropertyMode, WorkspaceFactory,
+                        WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, StringArrayProperty, StringListValidator)
 from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, CreateWorkspace, Divide,
@@ -231,6 +231,27 @@ def _maskedListToStr(masked):
     return string
 
 
+def _beamStopRanges(ws):
+    """Parse beam stop ranges from the instrument parameters of ws."""
+    instrument = ws.getInstrument()
+    definition = instrument.getStringParameter('beam_stop_diagnostics_spectra')[0]
+    ranges = definition.split(',')
+    begins = list()
+    ends = list()
+    for r in ranges:
+        (begin, end) = r.split('-')
+        begin = int(begin)
+        end = int(end)
+        if (begin >= end):
+            raise RuntimeError("While parsing 'beam_stop_diagnostics_spectra' instrument parameter: "
+                               + "begin spectrum number greater than the end number.")
+        begin = common.convertToWorkspaceIndex(begin, ws, common.INDEX_TYPE_SPECTRUM_NUMBER)
+        end = common.convertToWorkspaceIndex(end, ws, common.INDEX_TYPE_SPECTRUM_NUMBER)
+        begins.append(begin)
+        ends.append(end)
+    return (begins, ends)
+
+
 def _reportBkgDiagnostics(reportWS, bkgWS, diagnosticsWS):
     """Return masked spectrum numbers and add background diagnostics information to a report workspace."""
     return _reportDiagnostics(reportWS, bkgWS, diagnosticsWS, 'FlatBkg', 'BkgDiagnosed')
@@ -303,7 +324,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
-        progress = Progress(self, 0.0, 1.0, 5)
+        progress = Progress(self, 0.0, 1.0, 6)
         report = common.Report()
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
@@ -324,6 +345,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         # Apply user mask.
         progress.report('Applying hard mask')
         maskWS = self._applyUserMask(maskWS, wsNames, wsCleanup, subalgLogging)
+
+        progress.report('Diagnosing beam stop')
+        maskWS = self._beamStopDiagnostics(mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging)
 
         # Detector diagnostics, if requested.
         progress.report('Diagnosing detectors')
@@ -457,6 +481,21 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                  'test in the noisy background diagnostics.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
                               common.PROPGROUP_BKG_DIAGNOSTICS)
+        self.declareProperty(name=common.PROP_BEAM_STOP_DIAGNOSTICS,
+                             defaultValue=common.BEAM_STOP_DIAGNOSTICS_AUTO,
+                             validator=StringListValidator([
+                                 common.BEAM_STOP_DIAGNOSTICS_AUTO,
+                                 common.BEAM_STOP_DIAGNOSTICS_ON,
+                                 common.BEAM_STOP_DIAGNOSTICS_OFF]),
+                             direction=Direction.Input,
+                             doc='Control the beam stop diagnostics.')
+        self.setPropertyGroup(common.PROP_BEAM_STOP_DIAGNOSTICS, common.PROPGROUP_BEAM_STOP_DIAGNOSTICS)
+        self.declareProperty(name=common.PROP_BEAM_STOP_THRESHOLD,
+                             defaultValue=0.67,
+                             validator=scalingFactor,
+                             direction=Direction.Input,
+                             doc='Multiplier for the lower acceptance limit for beam stop diagnostics.')
+        self.setPropertyGroup(common.PROP_BEAM_STOP_THRESHOLD, common.PROPGROUP_BEAM_STOP_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_DEFAULT_MASK,
                              defaultValue=common.DEFAULT_MASK_ON,
                              validator=StringListValidator([
@@ -537,6 +576,65 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                       EnableLogging=algorithmLogging)
         return maskWS
 
+    def _beamStopDiagnosticsEnabled(self, mainWS, report):
+        """Return true if beam stop diagnostics are enabled, false otherwise."""
+        beamStopDiagnostics = self.getProperty(common.PROP_BEAM_STOP_DIAGNOSTICS).value
+        if beamStopDiagnostics == common.BEAM_STOP_DIAGNOSTICS_AUTO:
+            instrument = mainWS.getInstrument()
+            if instrument.hasParameter('beam_stop_diagnostics_spectra'):
+                return True
+            return False
+        elif beamStopDiagnostics == common.BEAM_STOP_DIAGNOSTICS_ON:
+            instrument = mainWS.getInstrument()
+            if not instrument.hasParameter('beam_stop_diagnostics_spectra'):
+                report.error("'beam_stop_diagnostics_spectra' missing from instrument parameters. "
+                             + "Beam stop diagnostics disabled.")
+                return False
+            return True
+        return False
+
+    def _beamStopDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, report, algorithmLogging):
+        """Diagnose beam stop and return a sum of diagnostics mask and maskWS."""
+        if not self._beamStopDiagnosticsEnabled(mainWS, report):
+            return maskWS
+        import operator
+        def thresholdIndex(ws, begin, end, threshold):
+            step = -1 if begin < end else 1
+            comp = operator.ge if begin < end else operator.le
+            Ys = numpy.empty(abs(end - begin))
+            i = end + step
+            indexShift = -min(begin, end + 1)
+            while comp(i, begin):
+                index = i + indexShift
+                Ys[index] = numpy.sum(ws.dataY(i))
+                i += step
+            maxIndex = numpy.argmax(Ys)
+            thresholdVal = threshold * Ys[maxIndex]
+            i = maxIndex - indexShift + step
+            while comp(i, begin):
+                index = i + indexShift
+                if Ys[index] < thresholdVal:
+                    return i
+                i += step
+            return i
+        beamStopDiagnosticsWS = WorkspaceFactory.Instance().create(maskWS)
+        beamStopDiagnosticsWSName = wsNames.withSuffix('beam_stop_diagnostics')
+        mtd.addOrReplace(beamStopDiagnosticsWSName, beamStopDiagnosticsWS)
+        ClearMaskFlag(Workspace=beamStopDiagnosticsWS)
+        threshold = self.getProperty(common.PROP_BEAM_STOP_THRESHOLD).value
+        beginIndices, endIndices = _beamStopRanges(mainWS)
+        for i in range(len(beginIndices)):
+            begin = beginIndices[i]
+            end = endIndices[i]
+            mid = int((end + begin) / 2)
+            lowerIdx = thresholdIndex(mainWS, mid, begin, threshold)
+            upperIdx = thresholdIndex(mainWS, mid, end, threshold)
+            for j in range(upperIdx - lowerIdx):
+                ys = beamStopDiagnosticsWS.dataY(lowerIdx + j)
+                ys[0] = 1.0
+        wsCleanup.cleanup(beamStopDiagnosticsWS)
+        return maskWS
+
     def _bkgDiagnosticsEnabled(self, mainWS, report):
         """Return true if background diagnostics are enabled, false otherwise."""
         bkgDiagnostics = self.getProperty(common.PROP_BKG_DIAGNOSTICS).value
@@ -561,7 +659,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         return False
 
     def _detDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging):
-        """Perform and apply detector diagnostics."""
+        """Diagnose detectors and return a sum of diagnostics mask and maskWS."""
         reportWS = None
         if not self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).isDefault:
             reportWSName = self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).valueAsStr

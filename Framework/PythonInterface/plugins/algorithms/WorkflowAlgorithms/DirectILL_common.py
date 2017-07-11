@@ -9,6 +9,10 @@ from mantid.simpleapi import DeleteWorkspace
 ABSOLUTE_UNITS_OFF = 'Absolute Units OFF'
 ABSOLUTE_UNITS_ON = 'Absolute Units ON'
 
+BEAM_STOP_DIAGNOSTICS_AUTO = 'Beam Stop Diagnostics AUTO'
+BEAM_STOP_DIAGNOSTICS_OFF = 'Beam Stop Diagnostics OFF'
+BEAM_STOP_DIAGNOSTICS_ON = 'Beam Stop Diagnostics ON'
+
 BKG_DIAGNOSTICS_AUTO = 'Bkg Diagnostics AUTO'
 BKG_DIAGNOSTICS_OFF = 'Bkg Diagnostics OFF'
 BKG_DIAGNOSTICS_ON = 'Bkg Diagnostics ON'
@@ -46,6 +50,8 @@ NORM_METHOD_OFF = 'Normalisation OFF'
 NORM_METHOD_TIME = 'Normalisation Time'
 
 PROP_ABSOLUTE_UNITS = 'AbsoluteUnitsNormalisation'
+PROP_BEAM_STOP_DIAGNOSTICS = 'BeamStopDiagnostics'
+PROP_BEAM_STOP_THRESHOLD = 'BeamStopThreshold'
 PROP_BINNING_PARAMS_Q = 'QBinningParams'
 PROP_BKG_DIAGNOSTICS = 'BkgDiagnostics'
 PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgHighThreshold'
@@ -100,6 +106,7 @@ PROP_USER_MASK = 'MaskedDetectors'
 PROP_USER_MASK_COMPONENTS = 'MaskedComponents'
 PROP_VANA_WS = 'IntegratedVanadiumWorkspace'
 
+PROPGROUP_BEAM_STOP_DIAGNOSTICS = 'Beam Stop Diagnostics'
 PROPGROUP_BKG_DIAGNOSTICS = 'Background Diagnostics'
 PROPGROUP_INCIDENT_ENERGY_CALIBRATION = 'Indicent Energy Calibration'
 PROPGROUP_FLAT_BKG = 'Flat Time-Independent Background'
