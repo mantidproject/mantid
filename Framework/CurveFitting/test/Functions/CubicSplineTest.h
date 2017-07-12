@@ -126,7 +126,7 @@ public:
   void testOutOfOrderInterploationPoints() {
     CubicSpline cspline;
 
-    setupCubicSpline(cspline, 10, 1);
+    setupCubicSpline(cspline, 10, 1.);
 
     // swap the values of some points
     cspline.setXAttribute(3, 1);
@@ -138,6 +138,9 @@ public:
     boost::scoped_array<double> refSet(new double[testDataSize]);
 
     generateTestData(testDataSize, refSet, x, 1);
+
+    // swap ref values
+    std::swap(refSet[1], refSet[3]);
 
     FunctionDomain1DView view(x.get(), testDataSize);
     FunctionValues testDataValues(view);
