@@ -28,6 +28,9 @@
 		<parameter name="scaling_after_monitor_normalisation">
 			<value val="100000" />
 		</parameter>
+		<parameter name="enable_flat_background_subtraction" type="bool">
+			<value val="false" />
+		</parameter>
 		<parameter name="enable_background_diagnostics" type="bool">
 			<value val="false" />
 		</parameter>

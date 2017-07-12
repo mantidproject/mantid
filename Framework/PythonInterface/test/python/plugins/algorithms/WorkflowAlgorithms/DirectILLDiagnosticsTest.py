@@ -25,6 +25,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': DirectILLDiagnosticsTest._TEST_WS,
             'OutputWorkspace': self._TEST_WS_NAME,
             'EPPCreationMethod': 'Fit EPP',
+            'FlatBkg': 'Flat Bkg ON',
             'OutputEPPWorkspace': self._EPP_WS_NAME,
             'OutputRawWorkspace': self._RAW_WS_NAME
         }
@@ -109,6 +110,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': self._RAW_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
+            'ElasticPeakDiagnostics': 'Peak Diagnostics ON',
             'ElasticPeakLowThreshold': 0.2,
             'ElasticPeakHighThreshold': 9.7,
             'BkgDiagnostics': 'Bkg Diagnostics OFF',
@@ -142,6 +144,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': self._RAW_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
+            'ElasticPeakDiagnostics': 'Peak Diagnostics ON',
             'ElasticPeakLowThreshold': 0.2,
             'ElasticPeakHighThreshold': 9.7,
             'BkgDiagnostics': 'Bkg Diagnostics OFF',

@@ -382,7 +382,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             wsCleanup.cleanup(bkgWS)
 
         peakMaskedSpectra = list()
-        if self._peakDiagnosticsEnabled(mainWS):
+        if self._peakDiagnosticsEnabled(mainWS, report):
             progress.report('Diagnosing peaks')
             peakMaskWS, peakIntensityWS = self._peakDiagnostics(mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging)
             peakMaskedSpectra = _reportPeakDiagnostics(reportWS, peakIntensityWS, peakMaskWS)
@@ -664,7 +664,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                     return False
             report.notice('Background diagnostics enabled.')
             return True
-        return bkgDiagnostics == common.BKG_DIAGNOSTICS_ON:
+        return bkgDiagnostics == common.BKG_DIAGNOSTICS_ON
 
     def _defaultMask(self, mainWS, wsNames, wsCleanup, report, algorithmLogging):
         """Load instrument specific default mask or return None if not available."""

@@ -319,7 +319,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
         # Time-independent background.
         progress.report('Calculating backgrounds')
-        mainWS, bkgWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS, bkgWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
         wsCleanup.cleanupLater(bkgWS)
 
         # Find elastic peak positions.
@@ -451,6 +451,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             doc='A single-valued workspace holding the calibrated ' +
                 'incident energy.')
         self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_WS, common.PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
+        self.declareProperty(name=common.PROP_FLAT_BKG,
+                             defaultValue=common.BKG_AUTO,
+                             validator=StringListValidator([
+                                 common.BKG_AUTO,
+                                 common.BKG_ON,
+                                 common.BKG_OFF]),
+                             direction=Direction.Input,
+                             doc='Control flat background subtraction.')
         self.declareProperty(name=common.PROP_FLAT_BKG_SCALING,
                              defaultValue=1.0,
                              validator=positiveFloat,
@@ -698,16 +706,17 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                     return False
             report.notice('Incident energy calibration enabled.')
             return True
-        return eppMethod == common.INCIDENT_ENERGY_CALIBRATION_ON:
+        return eppMethod == common.INCIDENT_ENERGY_CALIBRATION_ON
 
-    def _flatBkgDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _flatBkgDet(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Subtract flat background from a detector workspace."""
-        bkgInWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
+        if not self._flatBgkEnabled(mainWS, report):
+            return mainWS, None
         windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
-        if not bkgInWS:
+        if self.getProperty(common.PROP_FLAT_BKG_WS).isDefault:
             bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, wsNames, subalgLogging)
         else:
-            bkgWS = bkgInWS
+            bkgWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
             wsCleanup.protect(bkgWS)
         if not self.getProperty(common.PROP_OUTPUT_FLAT_BKG_WS).isDefault:
             self.setProperty(common.PROP_OUTPUT_FLAT_BKG_WS, bkgWS)
@@ -716,6 +725,20 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                            wsCleanup, subalgLogging)
         wsCleanup.cleanup(mainWS)
         return bkgSubtractedWS, bkgWS
+
+    def _flatBgkEnabled(self, mainWS, report):
+        """Returns true if flat background subtraction is enabled, false otherwise."""
+        flatBkgOption = self.getProperty(common.PROP_FLAT_BKG).value
+        if flatBkgOption == common.BKG_AUTO:
+            instrument = mainWS.getInstrument()
+            if instrument.hasParameter('enable_flat_background_subtraction'):
+                enabled = instrument.getBoolParameter('enable_flat_background_subtraction')[0]
+                if not enabled:
+                    report.notice('Flat background subtraction disabled by the IPF.')
+                    return False
+            report.notice('Flat background subtraction enabled.')
+            return True
+        return flatBkgOption == common.BKG_ON
 
     def _flatBkgMon(self, monWS, wsNames, wsCleanup, subalgLogging):
         """Subtract flat background from a monitor workspace."""

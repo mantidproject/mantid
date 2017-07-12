@@ -28,6 +28,7 @@ class DirectILLCollectDataTest(unittest.TestCase):
         algProperties = {
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
+            'FlatBkg': 'Flat Bkg ON',
             'FlatBkgScaling': 1.0,
             'IncidentEnergyCalibration': 'Energy Calibration OFF',
             'Normalisation': 'Normalisation OFF',
@@ -49,6 +50,7 @@ class DirectILLCollectDataTest(unittest.TestCase):
         algProperties = {
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
+            'FlatBkg': 'Flat Bkg ON',
             'FlatBkgScaling': bkgScaling,
             'IncidentEnergyCalibration': 'Energy Calibration OFF',
             'Normalisation': 'Normalisation OFF',
@@ -67,7 +69,7 @@ class DirectILLCollectDataTest(unittest.TestCase):
         algProperties = {
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
-            'FlatBkgScaling': 0.0,
+            'FlatBkg': 'Flat Bkg OFF',
             'IncidentEnergyCalibration': 'Energy Calibration OFF',
             'Normalisation': 'Normalisation Time',
             'rethrow': True
@@ -119,7 +121,7 @@ class DirectILLCollectDataTest(unittest.TestCase):
         algProperties = {
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
-            'FlatBkgScaling': 0.0,
+            'FlatBkg': 'Flat Bkg OFF',
             'IncidentEnergyCalibration': 'Energy Calibration OFF',
             'Normalisation': 'Normalisation OFF',
             'ElasticChannel': 'Default Elastic Channel',
