@@ -44,14 +44,14 @@ void SetSampleMaterial::init() {
                       "InputWorkspace", "", Direction::InOut),
                   "The workspace with which to associate the sample ");
   declareProperty("ChemicalFormula", "",
-                  "ChemicalFormula or AtomicNumber must be given.");
-  declareProperty("AtomicNumber", 0,
-                  "ChemicalFormula or AtomicNumber must be given");
-  declareProperty("MassNumber", 0, "Mass number if ion (default is 0)");
+                  "The chemical formula, see examples in documentation");
+  declareProperty("AtomicNumber", 0, "The atomic number");
+  declareProperty("MassNumber", 0,
+                  "Mass number if ion (use 0 for default mass sensity)");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-                  "Optional:  This number density of the sample in number of "
+                  "This number density of the sample in number of "
                   "atoms per cubic angstrom will be used instead of "
                   "calculated");
   declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
@@ -73,7 +73,7 @@ void SetSampleMaterial::init() {
                   "incoherent) for the sample material in barns will be used "
                   "instead of tabulated");
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
-                  "Optional: Measured mass density in g/cubic cm of the sample "
+                  "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
 
   // Perform Group Associations.
@@ -95,21 +95,14 @@ void SetSampleMaterial::init() {
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
 
   // Extra property settings
+  setPropertySettings("ChemicalFormula",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "AtomicNumber", Kernel::IS_DEFAULT));
   setPropertySettings("AtomicNumber",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "ChemicalFormula", Kernel::IS_DEFAULT));
   setPropertySettings("MassNumber", make_unique<Kernel::EnabledWhenProperty>(
                                         "ChemicalFormula", Kernel::IS_DEFAULT));
-
-  setPropertySettings("UnitCellVolume",
-                      make_unique<Kernel::EnabledWhenProperty>(
-                          "SampleNumberDensity", Kernel::IS_DEFAULT));
-  setPropertySettings("ZParameter",
-                      make_unique<Kernel::EnabledWhenProperty>(
-                          "SampleNumberDensity", Kernel::IS_DEFAULT));
-  setPropertySettings("SampleMassDensity",
-                      make_unique<Kernel::EnabledWhenProperty>(
-                          "SampleNumberDensity", Kernel::IS_DEFAULT));
 }
 
 std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
@@ -129,6 +122,36 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
 
   if (a_number > 0 && z_number <= 0)
     result["AtomicNumber"] = "Specified MassNumber without AtomicNumber";
+
+  const double sampleNumberDensity = getProperty("SampleNumberDensity");
+  const double zParameter = getProperty("ZParameter");
+  const double unitCellVolume = getProperty("UnitCellVolume");
+  const double sampleMassDensity = getProperty("SampleMassDensity");
+
+  if (isEmpty(sampleNumberDensity) && isEmpty(zParameter) &&
+      isEmpty(sampleMassDensity)) {
+    result["SampleNumberDensity"] = "Either SampleNumberDensity, ZParameter "
+                                    "and UnitCellVolume, or SampleMassDensity "
+                                    "must be specified.";
+  } else if (!isEmpty(zParameter)) {
+    if (isEmpty(unitCellVolume)) {
+      result["UnitCellVolume"] =
+          "UnitCellVolume must be provided with ZParameter";
+    }
+    if (!isEmpty(sampleNumberDensity)) {
+      result["ZParameter"] =
+          "Can not give ZParameter with SampleNumberDensity set";
+    }
+    if (!isEmpty(sampleMassDensity)) {
+      result["SampleMassDensity"] =
+          "Can not give SampleMassDensity with ZParameter set";
+    }
+  } else if (!isEmpty(sampleNumberDensity)) {
+    if (!isEmpty(sampleMassDensity)) {
+      result["SampleMassDensity"] =
+          "Can not give SampleMassDensity with SampleNumberDensity set";
+    }
+  }
 
   return result;
 }
