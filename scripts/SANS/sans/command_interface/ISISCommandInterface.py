@@ -528,7 +528,7 @@ def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
     if mode == "LINEAR" or mode == "STRAIGHT" or mode == "LIN":
         fit_type = FitType.Linear
     elif mode == "LOGARITHMIC" or mode == "LOG" or mode == "YLOG":
-        fit_type = FitType.Log
+        fit_type = FitType.Logarithmic
     elif does_pattern_match(polynomial_pattern, mode):
         fit_type = FitType.Polynomial
         polynomial_order = extract_polynomial_order(mode)

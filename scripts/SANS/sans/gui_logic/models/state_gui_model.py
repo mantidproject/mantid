@@ -1,8 +1,10 @@
-from sans.user_file.user_file_common import (OtherId, DetectorId, LimitsId, SetId, SampleId, MonId, TransId,
-                                             event_binning_string_values, set_scales_entry, monitor_spectrum,
-                                             simple_range, monitor_file, det_fit_range)
+from __future__ import (absolute_import, division, print_function)
+from sans.user_file.user_file_common import (OtherId, DetectorId, LimitsId, SetId, SampleId, MonId, TransId, GravityId,
+                                             QResolutionId, FitId, event_binning_string_values, set_scales_entry,
+                                             monitor_spectrum, simple_range, monitor_file, det_fit_range,
+                                             q_rebin_values, fit_general, mask_angle_entry, range_entry)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
-                               DetectorType)
+                               DetectorType, DataType, FitType)
 
 
 class StateGuiModel(object):
@@ -120,10 +122,6 @@ class StateGuiModel(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Reduction Mode
     # ------------------------------------------------------------------------------------------------------------------
-    def _remove_merged_fit(self, element_id):
-        if element_id in self._user_file_items:
-            del self._user_file_items[element_id]
-
     def _update_merged_fit(self, element_id, use_fit=None, use_q_range=None, q_start=None, q_stop=None):
         # If the setting is not in there, then add, else all is good
         if element_id in self._user_file_items:
@@ -134,8 +132,8 @@ class StateGuiModel(object):
         new_settings = []
         for setting in settings:
             new_use_fit = use_fit if use_fit is not None else setting.use_fit
-            new_q_start = q_start if q_start is not None else settings.start
-            new_q_stop = q_stop if q_stop is not None else settings.stop
+            new_q_start = q_start if q_start is not None else setting.start
+            new_q_stop = q_stop if q_stop is not None else setting.stop
 
             # If we don't want to use a custom q range, then we need to set the start and stop values to None
             if use_q_range is not None and use_q_range is False:
@@ -144,6 +142,27 @@ class StateGuiModel(object):
 
             new_settings.append(det_fit_range(start=new_q_start, stop=new_q_stop, use_fit=new_use_fit))
         self._user_file_items.update({element_id: new_settings})
+
+    def get_merge_range(self, default_value):
+        q_start = []
+        q_stop = []
+
+        settings = []
+        if DetectorId.rescale_fit in self._user_file_items:
+            settings.extend(self._user_file_items[DetectorId.rescale_fit])
+        if DetectorId.shift_fit in self._user_file_items:
+            settings.extend(self._user_file_items[DetectorId.shift_fit])
+
+        for setting in settings:
+            if setting.start is not None:
+                q_start.append(setting.start)
+
+            if setting.stop is not None:
+                q_stop.append(setting.stop)
+
+        q_range_start = min(q_start) if q_start else default_value
+        q_range_stop = max(q_stop) if q_stop else default_value
+        return q_range_start, q_range_stop
 
     @property
     def reduction_mode(self):
@@ -198,17 +217,9 @@ class StateGuiModel(object):
         self._update_merged_fit(element_id=DetectorId.shift_fit, use_fit=value)
 
     @property
-    def merge_use_q_range(self):
-        # There can be a q range setting for
-        pass
-
-    @merge_use_q_range.setter
-    def merge_use_q_range(self, value):
-        pass
-
-    @property
     def merge_q_range_start(self):
-        pass
+        q_range_start, _ = self.get_merge_range(default_value="")
+        return q_range_start
 
     @merge_q_range_start.setter
     def merge_q_range_start(self, value):
@@ -219,7 +230,8 @@ class StateGuiModel(object):
 
     @property
     def merge_q_range_stop(self):
-        pass
+        _, q_range_stop = self.get_merge_range(default_value="")
+        return q_range_stop
 
     @merge_q_range_stop.setter
     def merge_q_range_stop(self, value):
@@ -227,6 +239,17 @@ class StateGuiModel(object):
         self._update_merged_fit(element_id=DetectorId.shift_fit, q_stop=value)
         # Update for the scale
         self._update_merged_fit(element_id=DetectorId.rescale_fit, q_stop=value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Event binning for compatibility mode
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def event_binning(self):
+        return self.get_simple_element(element_id=LimitsId.events_binning, default_value="")
+
+    @event_binning.setter
+    def event_binning(self, value):
+        self.set_simple_element(element_id=LimitsId.events_binning, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength properties
@@ -480,6 +503,137 @@ class StateGuiModel(object):
         self.set_simple_element(element_id=TransId.spec_shift, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Fit
+    # ------------------------------------------------------------------------------------------------------------------
+    def _get_transmission_fit(self, data_type, attribute, default_value):
+        if FitId.general in self._user_file_items:
+            settings = self._user_file_items[FitId.general]
+            # Check first if there are data type specific settings, else check if there are general settings
+            extracted_settings = [setting for setting in settings if setting.data_type is data_type]
+            if not extracted_settings:
+                extracted_settings = [setting for setting in settings if setting.data_type is None]
+            if extracted_settings:
+                setting = extracted_settings[-1]
+                return getattr(setting, attribute)
+        return default_value
+
+    def _set_transmission_fit(self, data_type, start=None, stop=None, fit_type=None, polynomial_order=None):
+        if FitId.general in self._user_file_items:
+            # Gather all settings which correspond to the data type and where the data type is none
+            settings = self._user_file_items[FitId.general]
+            settings_general = [setting for setting in settings if setting.data_type is None]
+            settings_for_data_type = [setting for setting in settings if setting.data_type is data_type]
+            # We check if there are data-type specific settings.
+            # 1. There are data type specific settings. Then we are good.
+            # 2. There are no data type specific settings. We create one data type specific setting and populate it
+            #    with a general setting if it exists else we create a new entry
+            if not settings_for_data_type:
+                if settings_general:
+                    setting_general = settings_general[-1]
+                    settings.append(fit_general(start=setting_general.start, stop=setting_general.stop,
+                                                data_type=data_type, fit_type=setting_general.fit_type,
+                                                polynomial_order=setting_general.polynomial_order))
+                else:
+                    settings.append(fit_general(start=None, stop=None, data_type=data_type,
+                                                fit_type=FitType.NoFit, polynomial_order=2))
+        else:
+            settings = [fit_general(start=None, stop=None, data_type=data_type,
+                                    fit_type=FitType.NoFit, polynomial_order=2)]
+
+        new_settings = []
+        for setting in settings:
+            # We only want to modify the settings which are either the data type specific ones or the ones which
+            # don't have a specific data type
+            if setting.data_type is data_type and setting.data_type is not None:
+                new_start = start if start is not None else setting.start
+                new_stop = stop if stop is not None else setting.stop
+                new_fit_type = fit_type if fit_type is not None else setting.fit_type
+                new_polynomial_order = polynomial_order if polynomial_order is not None else setting.polynomial_order
+                new_settings.append(fit_general(start=new_start, stop=new_stop, fit_type=new_fit_type,
+                                                data_type=setting.data_type, polynomial_order=new_polynomial_order))
+            else:
+                new_settings.append(setting)
+        self._user_file_items.update({FitId.general: new_settings})
+        a = self._user_file_items
+
+    def has_transmission_fit_got_separate_settings_for_sample_and_can(self):
+        if FitId.general in self._user_file_items:
+            settings = self._user_file_items[FitId.general]
+            if settings:
+                settings_sample = [setting for setting in settings if setting.data_type is DataType.Sample]
+                settings_can = [setting for setting in settings if setting.data_type is DataType.Can]
+                # If we have either one or the other
+                if settings_sample or settings_can:
+                    return True
+        return False
+
+    @property
+    def transmission_sample_fit_type(self):
+        return self._get_transmission_fit(data_type=DataType.Sample, attribute="fit_type", default_value=FitType.NoFit)
+
+    @transmission_sample_fit_type.setter
+    def transmission_sample_fit_type(self, value):
+        self._set_transmission_fit(data_type=DataType.Sample, fit_type=value)
+
+    @property
+    def transmission_can_fit_type(self):
+        return self._get_transmission_fit(data_type=DataType.Can, attribute="fit_type", default_value=FitType.NoFit)
+
+    @transmission_can_fit_type.setter
+    def transmission_can_fit_type(self, value):
+        self._set_transmission_fit(data_type=DataType.Can, fit_type=value)
+
+    @property
+    def transmission_sample_polynomial_order(self):
+        return self._get_transmission_fit(data_type=DataType.Sample, attribute="polynomial_order",
+                                          default_value=2)
+
+    @transmission_sample_polynomial_order.setter
+    def transmission_sample_polynomial_order(self, value):
+        self._set_transmission_fit(data_type=DataType.Sample, polynomial_order=value)
+
+    @property
+    def transmission_can_polynomial_order(self):
+        return self._get_transmission_fit(data_type=DataType.Can, attribute="polynomial_order",
+                                          default_value=2)
+
+    @transmission_can_polynomial_order.setter
+    def transmission_can_polynomial_order(self, value):
+        self._set_transmission_fit(data_type=DataType.Can, polynomial_order=value)
+
+    @property
+    def transmission_sample_wavelength_min(self):
+        return self._get_transmission_fit(data_type=DataType.Sample, attribute="start", default_value="")
+
+    @transmission_sample_wavelength_min.setter
+    def transmission_sample_wavelength_min(self, value):
+        self._set_transmission_fit(data_type=DataType.Sample, start=value)
+
+    @property
+    def transmission_sample_wavelength_max(self):
+        return self._get_transmission_fit(data_type=DataType.Sample, attribute="stop", default_value="")
+
+    @transmission_sample_wavelength_max.setter
+    def transmission_sample_wavelength_max(self, value):
+        self._set_transmission_fit(data_type=DataType.Sample, stop=value)
+
+    @property
+    def transmission_can_wavelength_min(self):
+        return self._get_transmission_fit(data_type=DataType.Can, attribute="start", default_value="")
+
+    @transmission_can_wavelength_min.setter
+    def transmission_can_wavelength_min(self, value):
+        self._set_transmission_fit(data_type=DataType.Can, start=value)
+
+    @property
+    def transmission_can_wavelength_max(self):
+        return self._get_transmission_fit(data_type=DataType.Can, attribute="stop", default_value="")
+
+    @transmission_can_wavelength_max.setter
+    def transmission_can_wavelength_max(self, value):
+        self._set_transmission_fit(data_type=DataType.Can, stop=value)
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Wavelength- and pixel-adjustment files
     # ------------------------------------------------------------------------------------------------------------------
     def _get_adjustment_file_setting(self, element_id, detector_type, default_value):
@@ -548,3 +702,279 @@ class StateGuiModel(object):
     @wavelength_adjustment_det_2.setter
     def wavelength_adjustment_det_2(self, value):
         self._set_adjustment_file_setting(element_id=MonId.direct, detector_type=DetectorType.HAB, file_path=value)
+
+    # ==================================================================================================================
+    # ==================================================================================================================
+    # Q TAB
+    # ==================================================================================================================
+    # ==================================================================================================================
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Q Limits
+    # ------------------------------------------------------------------------------------------------------------------
+    def _set_q_1d_limits(self, min_value=None, max_value=None, rebin_string=None):
+        element_id = LimitsId.q
+        if element_id in self._user_file_items:
+            settings = self._user_file_items[element_id]
+        else:
+            settings = [q_rebin_values(min=None, max=None, rebin_string=None)]
+
+        # At this point we have settings with the desired detector type
+        new_settings = []
+        for setting in settings:
+            new_min = min_value if min_value is not None else setting.min
+            new_max = max_value if max_value is not None else setting.max
+            new_rebin_string = rebin_string if rebin_string is not None else setting.rebin_string
+            new_settings.append(q_rebin_values(min=new_min, max=new_max, rebin_string=new_rebin_string))
+        self._user_file_items.update({element_id: new_settings})
+
+    def _set_q_xy_limits(self, stop_value=None, step_value=None, step_type_value=None):
+        element_id = LimitsId.qxy
+        if element_id in self._user_file_items:
+            settings = self._user_file_items[element_id]
+        else:
+            settings = [simple_range(start=None, stop=None, step=None, step_type=None)]
+
+        # At this point we have settings with the desired detector type
+        new_settings = []
+        for setting in settings:
+            new_stop = stop_value if stop_value is not None else setting.stop
+            new_step = step_value if step_value is not None else setting.step
+            new_step_type_value = step_type_value if step_type_value is not None else setting.step_type
+            new_settings.append(simple_range(start=None, stop=new_stop, step=new_step, step_type=new_step_type_value))
+        self._user_file_items.update({element_id: new_settings})
+
+    @property
+    def q_1d_min(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
+                                                      attribute="min")
+
+    @q_1d_min.setter
+    def q_1d_min(self, value):
+        self._set_q_1d_limits(min_value=value)
+
+    @property
+    def q_1d_max(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
+                                                      attribute="max")
+
+    @q_1d_max.setter
+    def q_1d_max(self, value):
+        self._set_q_1d_limits(max_value=value)
+
+    @property
+    def q_1d_rebin_string(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
+                                                      attribute="rebin_string")
+
+    @q_1d_rebin_string.setter
+    def q_1d_rebin_string(self, value):
+        self._set_q_1d_limits(rebin_string=value)
+
+    @property
+    def q_xy_max(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.qxy, default_value="",
+                                                      attribute="stop")
+
+    @q_xy_max.setter
+    def q_xy_max(self, value):
+        self._set_q_xy_limits(stop_value=value)
+
+    @property
+    def q_xy_step(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.qxy, default_value="",
+                                                      attribute="step")
+
+    @q_xy_step.setter
+    def q_xy_step(self, value):
+        self._set_q_xy_limits(step_value=value)
+
+    @property
+    def q_xy_step_type(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.qxy, default_value=None,
+                                                      attribute="step_type")
+
+    @q_xy_step_type.setter
+    def q_xy_step_type(self, value):
+        self._set_q_xy_limits(step_type_value=value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Gravity
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def gravity_on_off(self):
+        return self.get_simple_element(element_id=GravityId.on_off, default_value=True)
+
+    @gravity_on_off.setter
+    def gravity_on_off(self, value):
+        self.set_simple_element(element_id=GravityId.on_off, value=value)
+
+    @property
+    def gravity_extra_length(self):
+        return self.get_simple_element(element_id=GravityId.extra_length, default_value="")
+
+    @gravity_extra_length.setter
+    def gravity_extra_length(self, value):
+        self.set_simple_element(element_id=GravityId.extra_length, value=value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # QResolution
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def use_q_resolution(self):
+        return self.get_simple_element(element_id=QResolutionId.on, default_value=False)
+
+    @use_q_resolution.setter
+    def use_q_resolution(self, value):
+        self.set_simple_element(element_id=QResolutionId.on, value=value)
+
+    @property
+    def q_resolution_source_a(self):
+        return self.get_simple_element(element_id=QResolutionId.a1, default_value="")
+
+    @q_resolution_source_a.setter
+    def q_resolution_source_a(self, value):
+        self.set_simple_element(element_id=QResolutionId.a1, value=value)
+
+    @property
+    def q_resolution_sample_a(self):
+        return self.get_simple_element(element_id=QResolutionId.a2, default_value="")
+
+    @q_resolution_sample_a.setter
+    def q_resolution_sample_a(self, value):
+        self.set_simple_element(element_id=QResolutionId.a2, value=value)
+
+    @property
+    def q_resolution_source_h(self):
+        return self.get_simple_element(element_id=QResolutionId.h1, default_value="")
+
+    @q_resolution_source_h.setter
+    def q_resolution_source_h(self, value):
+        self.set_simple_element(element_id=QResolutionId.h1, value=value)
+
+    @property
+    def q_resolution_sample_h(self):
+        return self.get_simple_element(element_id=QResolutionId.h2, default_value="")
+
+    @q_resolution_sample_h.setter
+    def q_resolution_sample_h(self, value):
+        self.set_simple_element(element_id=QResolutionId.h2, value=value)
+
+    @property
+    def q_resolution_source_w(self):
+        return self.get_simple_element(element_id=QResolutionId.w1, default_value="")
+
+    @q_resolution_source_w.setter
+    def q_resolution_source_w(self, value):
+        self.set_simple_element(element_id=QResolutionId.w1, value=value)
+
+    @property
+    def q_resolution_sample_w(self):
+        return self.get_simple_element(element_id=QResolutionId.w2, default_value="")
+
+    @q_resolution_sample_w.setter
+    def q_resolution_sample_w(self, value):
+        self.set_simple_element(element_id=QResolutionId.w2, value=value)
+
+    @property
+    def q_resolution_delta_r(self):
+        return self.get_simple_element(element_id=QResolutionId.delta_r, default_value="")
+
+    @q_resolution_delta_r.setter
+    def q_resolution_delta_r(self, value):
+        self.set_simple_element(element_id=QResolutionId.delta_r, value=value)
+
+    @property
+    def q_resolution_moderator_file(self):
+        return self.get_simple_element(element_id=QResolutionId.moderator, default_value="")
+
+    @q_resolution_moderator_file.setter
+    def q_resolution_moderator_file(self, value):
+        self.set_simple_element(element_id=QResolutionId.moderator, value=value)
+
+    @property
+    def q_resolution_collimation_length(self):
+        return self.get_simple_element(element_id=QResolutionId.collimation_length, default_value="")
+
+    @q_resolution_collimation_length.setter
+    def q_resolution_collimation_length(self, value):
+        self.set_simple_element(element_id=QResolutionId.collimation_length, value=value)
+
+    # ==================================================================================================================
+    # ==================================================================================================================
+    # MASK TAB
+    # ==================================================================================================================
+    # ==================================================================================================================
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Phi limit
+    # ------------------------------------------------------------------------------------------------------------------
+    def _set_phi_limit(self, min_value=None, max_value=None, use_mirror=None):
+        if LimitsId.angle in self._user_file_items:
+            settings = self._user_file_items[LimitsId.angle]
+        else:
+            settings = [mask_angle_entry(min=None, max=None, use_mirror=False)]
+
+        new_settings = []
+        for setting in settings:
+            new_min = min_value if min_value is not None else setting.min
+            new_max = max_value if max_value is not None else setting.max
+            new_use_mirror = use_mirror if use_mirror is not None else setting.use_mirror
+            new_settings.append(mask_angle_entry(min=new_min, max=new_max, use_mirror=new_use_mirror))
+        self._user_file_items.update({LimitsId.angle: new_settings})
+
+    @property
+    def phi_limit_min(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="min", default_value="")
+
+    @phi_limit_min.setter
+    def phi_limit_min(self, value):
+        self._set_phi_limit(min_value=value)
+
+    @property
+    def phi_limit_max(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="max", default_value="")
+
+    @phi_limit_max.setter
+    def phi_limit_max(self, value):
+        self._set_phi_limit(max_value=value)
+
+    @property
+    def phi_limit_use_mirror(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="use_mirror", default_value=False)  # noqa
+
+    @phi_limit_use_mirror.setter
+    def phi_limit_use_mirror(self, value):
+        self._set_phi_limit(use_mirror=value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Radius limit
+    # ------------------------------------------------------------------------------------------------------------------
+    def _set_radius_limit(self, min_value=None, max_value=None):
+        if LimitsId.radius in self._user_file_items:
+            settings = self._user_file_items[LimitsId.radius]
+        else:
+            settings = [range_entry(start=None, stop=None)]
+
+        new_settings = []
+        for setting in settings:
+            new_min = min_value if min_value is not None else setting.start
+            new_max = max_value if max_value is not None else setting.stop
+            new_settings.append(range_entry(start=new_min, stop=new_max))
+        self._user_file_items.update({LimitsId.radius: new_settings})
+
+    @property
+    def radius_limit_min(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.radius, attribute="start", default_value="")
+
+    @radius_limit_min.setter
+    def radius_limit_min(self, value):
+        self._set_radius_limit(min_value=value)
+
+    @property
+    def radius_limit_max(self):
+        return self.get_simple_element_with_attribute(element_id=LimitsId.radius, attribute="stop", default_value="")
+
+    @radius_limit_max.setter
+    def radius_limit_max(self, value):
+        self._set_radius_limit(max_value=value)

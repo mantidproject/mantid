@@ -16,7 +16,8 @@ from sans.gui_logic.presenter.property_manager_service import PropertyManagerSer
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_reduction_mode_strings_for_gui,
                                        OPTIONS_SEPARATOR, OPTIONS_INDEX, OPTIONS_EQUAL)
 
-from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RebinType, RangeStepType, SampleShape)
+from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RebinType, RangeStepType, SampleShape,
+                               FitType)
 from sans.common.file_information import (find_sans_file, SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
@@ -75,12 +76,13 @@ class RunTabPresenter(object):
 
     def _default_gui_setup(self):
         # Set the possible reduction modes
-        reduction_mode = get_reduction_mode_strings_for_gui()
-        self._view.reduction_mode = reduction_mode
+        reduction_mode_list = get_reduction_mode_strings_for_gui()
+        self._view.set_reduction_modes(reduction_mode_list)
 
         # Set the step type options for wavelength
-        wavelength_step_type = [RangeStepType.to_string(RangeStepType.Lin), RangeStepType.to_string(RangeStepType.Log)]
-        self._view.wavelength_step_type = wavelength_step_type
+        range_step_types = [RangeStepType.to_string(RangeStepType.Lin),
+                            RangeStepType.to_string(RangeStepType.Log)]
+        self._view.wavelength_step_type = range_step_types
 
         # Set the geometry options. This needs to include the option to read the sample shape from file.
         sample_shape = ["Read from file",
@@ -89,12 +91,22 @@ class RunTabPresenter(object):
                         SampleShape.to_string(SampleShape.CylinderAxisAlong)]
         self._view.sample_shape = sample_shape
 
+        # Set the q range
+        self._view.q_1d_step_type = range_step_types
+        self._view.q_xy_step_type = range_step_types
+
+        # Set the fit options
+        fit_types = [FitType.to_string(FitType.Linear),
+                     FitType.to_string(FitType.Logarithmic),
+                     FitType.to_string(FitType.Polynomial)]
+        self._view.transmission_sample_fit_type = fit_types
+        self._view.transmission_can_fit_type = fit_types
+
     # ------------------------------------------------------------------------------------------------------------------
     # Table + Actions
     # ------------------------------------------------------------------------------------------------------------------
     def set_view(self, view):
         if view is not None:
-            pass
             self._view = view
 
             # Add a listener to the view
@@ -111,33 +123,33 @@ class RunTabPresenter(object):
         """
         Loads the user file. Populates the models and the view.
         """
-        try:
-            # 1. Get the user file path from the view
-            user_file_path = self._view.get_user_file_path()
+        # try:
+        # 1. Get the user file path from the view
+        user_file_path = self._view.get_user_file_path()
 
-            if not user_file_path:
-                return
+        if not user_file_path:
+            return
 
-            # 2. Get the full file path
-            user_file_path = FileFinder.getFullPath(user_file_path)
-            if not os.path.exists(user_file_path):
-                raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
-                                   " has been specified.".format(user_file_path))
+        # 2. Get the full file path
+        user_file_path = FileFinder.getFullPath(user_file_path)
+        if not os.path.exists(user_file_path):
+            raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
+                               " has been specified.".format(user_file_path))
 
-            # Clear out the current view
-            self._view.reset_all_fields_to_default()
+        # Clear out the current view
+        self._view.reset_all_fields_to_default()
 
-            # 3. Read and parse the user file
-            user_file_reader = UserFileReader(user_file_path)
-            user_file_items = user_file_reader.read_user_file()
+        # 3. Read and parse the user file
+        user_file_reader = UserFileReader(user_file_path)
+        user_file_items = user_file_reader.read_user_file()
 
-            # 4. Populate the model
-            self._state_model = StateGuiModel(user_file_items)
+        # 4. Populate the model
+        self._state_model = StateGuiModel(user_file_items)
 
-            # 5. Update the views.
-            self._update_view_from_state_model()
-        except Exception as e:
-            sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
+        # 5. Update the views.
+        self._update_view_from_state_model()
+        # except Exception as e:
+        #     sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
 
     def on_batch_file_load(self):
         """
@@ -328,10 +340,18 @@ class RunTabPresenter(object):
         self._set_on_view("save_types")
         self._set_on_view("compatibility_mode")
 
+        self._set_on_view("merge_scale")
+        self._set_on_view("merge_shift")
+        self._set_on_view("merge_scale_fit")
+        self._set_on_view("merge_shift_fit")
+        self._set_on_view("merge_q_range_start")
+        self._set_on_view("merge_q_range_stop")
+
         # Settings tab view
         self._set_on_view("reduction_dimensionality")
         self._set_on_view("reduction_mode")
         self._set_on_view("event_slices")
+        self._set_on_view("event_binning")
 
         self._set_on_view("wavelength_step_type")
         self._set_on_view("wavelength_min")
@@ -357,14 +377,124 @@ class RunTabPresenter(object):
         self._set_on_view("transmission_monitor")
         self._set_on_view("transmission_m4_shift")
 
+        self._set_on_view_transmission_fit()
+
         self._set_on_view("pixel_adjustment_det_1")
         self._set_on_view("pixel_adjustment_det_2")
         self._set_on_view("wavelength_adjustment_det_1")
         self._set_on_view("wavelength_adjustment_det_2")
 
+        # Q tab
+        self._set_on_view("q_1d_min")
+        self._set_on_view("q_1d_max")
+        self._set_on_view_q_rebin_string()
+        self._set_on_view("q_xy_max")
+        self._set_on_view("q_xy_step")
+        self._set_on_view("q_xy_step_type")
+
+        self._set_on_view("gravity_on_off")
+        self._set_on_view("gravity_extra_length")
+
+        self._set_on_view("use_q_resolution")
+        self._set_on_view_q_resolution_aperture()
+        self._set_on_view("q_resolution_delta_r")
+        self._set_on_view("q_resolution_collimation_length")
+        self._set_on_view("q_resolution_moderator_file")
+
+        # Mask
+        self._set_on_view("phi_limit_min")
+        self._set_on_view("phi_limit_max")
+        self._set_on_view("phi_limit_use_mirror")
+        self._set_on_view("radius_limit_min")
+        self._set_on_view("radius_limit_max")
+
+    def _set_on_view_transmission_fit_sample_settings(self):
+        # Set transmission_sample_use_fit
+        fit_type = self._state_model.transmission_sample_fit_type
+        use_fit = fit_type is not FitType.NoFit
+        self._view.transmission_sample_use_fit = use_fit
+
+        # Set the polynomial order for sample
+        polynomial_order = self._state_model.transmission_sample_polynomial_order if fit_type is FitType.Polynomial else 2  # noqa
+        self._view.transmission_sample_polynomial_order = polynomial_order
+
+        # Set the fit type for the sample
+        fit_type = fit_type if fit_type is not FitType.NoFit else FitType.Linear
+        self._view.transmission_sample_fit_type = fit_type
+
+        # Set the wavelength
+        wavelength_min = self._state_model.transmission_sample_wavelength_min
+        wavelength_max = self._state_model.transmission_sample_wavelength_max
+        if wavelength_min and wavelength_max:
+            self._view.transmission_sample_use_wavelength = True
+            self._view.transmission_sample_wavelength_min = wavelength_min
+            self._view.transmission_sample_wavelength_max = wavelength_max
+
+    def _set_on_view_transmission_fit(self):
+        # Steps for adding the transmission fit to the view
+        # 1. Check if individual settings exist. If so then set the view to separate, else set them to both
+        # 2. Apply the settings
+        separate_settings = self._state_model.has_transmission_fit_got_separate_settings_for_sample_and_can()
+        self._view.set_fit_selection(use_separate=separate_settings)
+
+        if separate_settings:
+            self._set_on_view_transmission_fit_sample_settings()
+
+            # Set transmission_sample_can_fit
+            fit_type_can = self._state_model.transmission_can_fit_type()
+            use_can_fit = fit_type_can is FitType.NoFit
+            self._view.transmission_can_use_fit = use_can_fit
+
+            # Set the polynomial order for can
+            polynomial_order_can = self._state_model.transmission_can_polynomial_order if fit_type_can is FitType.Polynomial else 2  # noqa
+            self._view.transmission_can_polynomial_order = polynomial_order_can
+
+            # Set the fit type for the can
+            fit_type_can = fit_type_can if fit_type_can is not FitType.NoFit else FitType.Linear
+            self.transmission_can_fit_type = fit_type_can
+
+            # Set the wavelength
+            wavelength_min = self._state_model.transmission_can_wavelength_min
+            wavelength_max = self._state_model.transmission_can_wavelength_max
+            if wavelength_min and wavelength_max:
+                self._view.transmission_can_use_wavelength = True
+                self._view.transmission_can_wavelength_min = wavelength_min
+                self._view.transmission_can_wavelength_max = wavelength_max
+        else:
+            self._set_on_view_transmission_fit_sample_settings()
+
+    def _set_on_view_q_resolution_aperture(self):
+        self._set_on_view("q_resolution_source_a")
+        self._set_on_view("q_resolution_sample_a")
+        self._set_on_view("q_resolution_source_h")
+        self._set_on_view("q_resolution_sample_h")
+        self._set_on_view("q_resolution_source_w")
+        self._set_on_view("q_resolution_sample_w")
+
+        # If we have h1, h2, w1, and w2 selected then we want to select the rectangular aperture.
+        is_rectangular = self._state_model.q_resolution_source_h and self._state_model.q_resolution_sample_h and \
+                         self._state_model.q_resolution_source_w and self._state_model.q_resolution_sample_w  # noqa
+        self._view.set_q_resolution_shape_to_rectangular(is_rectangular)
+
+    def _set_on_view_q_rebin_string(self):
+        """
+        Maps the q_1d_rebin_string of the model to the q_1d_step and q_1d_step_type property of the view.
+        """
+        rebin_string = self._state_model.q_1d_rebin_string
+        # Extract the min, max and step and step type from the rebin string
+        elements = rebin_string.split(",")
+        if len(elements) == 3:
+            step_element = float(elements[1])
+            step = abs(step_element)
+            step_type = RangeStepType.Lin if step_element >= 0 else RangeStepType.Log
+
+            # Set on the view
+            self._view.q_1d_step = step
+            self._view.q_1d_step_type = step_type
+
     def _set_on_view(self, attribute_name):
         attribute = getattr(self._state_model, attribute_name)
-        if attribute:
+        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(self._view, attribute_name, attribute)
 
     def _get_state_model_with_view_update(self):
@@ -380,11 +510,18 @@ class RunTabPresenter(object):
         self._set_on_state_model("zero_error_free", state_model)
         self._set_on_state_model("save_types", state_model)
         self._set_on_state_model("compatibility_mode", state_model)
+        self._set_on_state_model("merge_scale", state_model)
+        self._set_on_state_model("merge_shift", state_model)
+        self._set_on_state_model("merge_scale_fit", state_model)
+        self._set_on_state_model("merge_shift_fit", state_model)
+        self._set_on_state_model("merge_q_range_start", state_model)
+        self._set_on_state_model("merge_q_range_stop", state_model)
 
         # Settings tab
         self._set_on_state_model("reduction_dimensionality", state_model)
         self._set_on_state_model("reduction_mode", state_model)
         self._set_on_state_model("event_slices", state_model)
+        self._set_on_state_model("event_binning", state_model)
 
         self._set_on_state_model("wavelength_step_type", state_model)
         self._set_on_state_model("wavelength_min", state_model)
@@ -410,16 +547,107 @@ class RunTabPresenter(object):
         self._set_on_state_model("transmission_monitor", state_model)
         self._set_on_state_model("transmission_m4_shift", state_model)
 
+        self._set_on_state_model_transmission_fit(state_model)
+
         self._set_on_state_model("pixel_adjustment_det_1", state_model)
         self._set_on_state_model("pixel_adjustment_det_2", state_model)
         self._set_on_state_model("wavelength_adjustment_det_1", state_model)
         self._set_on_state_model("wavelength_adjustment_det_2", state_model)
 
+        # Q tab
+        self._set_on_state_model("q_1d_min", state_model)
+        self._set_on_state_model("q_1d_max", state_model)
+        self._set_on_state_model_q_1d_rebin_string(state_model)
+        self._set_on_state_model("q_xy_max", state_model)
+        self._set_on_state_model("q_xy_step", state_model)
+        self._set_on_state_model("q_xy_step_type", state_model)
+
+        self._set_on_state_model("gravity_on_off", state_model)
+        self._set_on_state_model("gravity_extra_length", state_model)
+
+        self._set_on_state_model("use_q_resolution", state_model)
+        self._set_on_state_model("q_resolution_source_a", state_model)
+        self._set_on_state_model("q_resolution_sample_a", state_model)
+        self._set_on_state_model("q_resolution_source_h", state_model)
+        self._set_on_state_model("q_resolution_sample_h", state_model)
+        self._set_on_state_model("q_resolution_source_w", state_model)
+        self._set_on_state_model("q_resolution_sample_w", state_model)
+        self._set_on_state_model("q_resolution_delta_r", state_model)
+        self._set_on_state_model("q_resolution_collimation_length", state_model)
+        self._set_on_state_model("q_resolution_moderator_file", state_model)
+
+        # Mask
+        self._set_on_state_model("phi_limit_min", state_model)
+        self._set_on_state_model("phi_limit_max", state_model)
+        self._set_on_state_model("phi_limit_use_mirror", state_model)
+        self._set_on_state_model("radius_limit_min", state_model)
+        self._set_on_state_model("radius_limit_max", state_model)
+
         return state_model
+
+    def _set_on_state_model_transmission_fit(self, state_model):
+        # Behaviour depends on the selection of the fit
+        if self._view.use_same_transmission_fit_setting_for_sample_and_can():
+            use_fit = self._view.transmission_sample_use_fit
+            fit_type = self._view.transmission_sample_fit_type
+            polynomial_order = self._view.transmission_sample_polynomial_order
+            state_model.transmission_sample_fit_type = fit_type if use_fit else FitType.NoFit
+            state_model.transmission_can_fit_type = fit_type if use_fit else FitType.NoFit
+            state_model.transmission_sample_polynomial_order = polynomial_order
+            state_model.transmission_can_polynomial_order = polynomial_order
+
+            # Wavelength settings
+            if self._view.transmission_sample_use_wavelength:
+                wavelength_min = self._view.transmission_sample_wavelength_min
+                wavelength_max = self._view.transmission_sample_wavelength_max
+                state_model.transmission_sample_wavelength_min = wavelength_min
+                state_model.transmission_sample_wavelength_max = wavelength_max
+                state_model.transmission_can_wavelength_min = wavelength_min
+                state_model.transmission_can_wavelength_max = wavelength_max
+        else:
+            # Sample
+            use_fit_sample = self._view.transmission_sample_use_fit
+            fit_type_sample = self._view.transmission_sample_fit_type
+            polynomial_order_sample = self._view.transmission_sample_polynomial_order
+            state_model.transmission_sample_fit_type = fit_type_sample if use_fit_sample else FitType.NoFit
+            state_model.transmission_sample_polynomial_order = polynomial_order_sample
+
+            # Wavelength settings
+            if self._view.transmission_sample_use_wavelength:
+                wavelength_min = self._view.transmission_sample_wavelength_min
+                wavelength_max = self._view.transmission_sample_wavelength_max
+                state_model.transmission_sample_wavelength_min = wavelength_min
+                state_model.transmission_sample_wavelength_max = wavelength_max
+
+            # Can
+            use_fit_can = self._view.transmission_can_use_fit
+            fit_type_can = self._view.transmission_can_fit_type
+            polynomial_order_can = self._view.transmission_can_polynomial_order
+            state_model.transmission_can_fit_type = fit_type_can if use_fit_can else FitType.NoFit
+            state_model.transmission_can_polynomial_order = polynomial_order_can
+
+            # Wavelength settings
+            if self._view.transmission_can_use_wavelength:
+                wavelength_min = self._view.transmission_can_wavelength_min
+                wavelength_max = self._view.transmission_can_wavelength_max
+                state_model.transmission_can_wavelength_min = wavelength_min
+                state_model.transmission_can_wavelength_max = wavelength_max
+
+    def _set_on_state_model_q_1d_rebin_string(self, state_model):
+        q_1d_min = self._view.q_1d_min
+        q_1d_max = self._view.q_1d_max
+        q_1d_step = self._view.q_1d_step
+        q_1d_step_type = self._view.q_1d_step_type
+        if q_1d_min and q_1d_max and q_1d_step and q_1d_step_type:
+            q_1d_rebin_string = str(q_1d_min) + ","
+            q_1d_step_type_factor = -1. if q_1d_step_type is RangeStepType.Log else 1.
+            q_1d_rebin_string += str(q_1d_step_type_factor*q_1d_step) + ","
+            q_1d_rebin_string += str(q_1d_max)
+            state_model.q_1d_rebin_string = q_1d_rebin_string
 
     def _set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
-        if attribute:
+        if attribute or isinstance(attribute, bool):
             setattr(state_model, attribute_name, attribute)
 
     def _get_table_model(self):
@@ -463,7 +691,7 @@ class RunTabPresenter(object):
                     state = gui_state_director.create_state(row)
                     states.update({row: state})
                 except ValueError as e:
-                    sans_logger.error("There was a bad entry for row {}. See here for more details: {}".format(row, str(e)))
+                    sans_logger.error("There was a bad entry for row {}. See here for more details: {}".format(row, str(e)))  # noqa
                     raise RuntimeError("There was a bad entry for row {}. "
                                        "See here for more details: {}".format(row, str(e)))
         return states
@@ -516,15 +744,15 @@ class RunTabPresenter(object):
         if self._file_information:
             # Set the instrument on the table
             instrument = self._file_information.get_instrument()
-            self._view.set_instrument_settings(SANSInstrument.to_string(instrument))
+            self._view.set_instrument_settings(instrument)
 
             # Set the reduction mode
-            reduction_mode = get_reduction_mode_strings_for_gui(instrument=instrument)
-            self._view.reduction_mode = reduction_mode
+            reduction_mode_list = get_reduction_mode_strings_for_gui(instrument=instrument)
+            self._view.set_reduction_modes(reduction_mode_list)
         else:
-            self._view.set_instrument_settings(SANSInstrument.to_string(SANSInstrument.NoInstrument))
-            reduction_mode = get_reduction_mode_strings_for_gui()
-            self._view.reduction_mode = reduction_mode
+            self._view.set_instrument_settings(SANSInstrument.NoInstrument)
+            reduction_mode_list = get_reduction_mode_strings_for_gui()
+            self._view.set_reduction_modes(reduction_mode_list)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Setting workaround for state in DataProcessorWidget

@@ -95,6 +95,7 @@ class MockRunTabView(object):
     def zero_error_free(self, value):
         pass
 
+
 class MockStateModel(object):
     def __init__(self):
         super(MockStateModel, self).__init__()

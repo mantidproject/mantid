@@ -1682,7 +1682,7 @@ class FitParser(UserFileComponentParser):
 
     def _get_fit_type(self, line):
         if re.search(self._log, line) is not None:
-            fit_type = FitType.Log
+            fit_type = FitType.Logarithmic
         elif re.search(self._lin, line) is not None:
             fit_type = FitType.Linear
         elif re.search(self._polynomial, line) is not None:

@@ -259,7 +259,7 @@ class SaveType(object):
 # Fit type for the transmission calculation
 # ------------------------------------------
 @string_convertible
-@serializable_enum("Linear", "Log", "Polynomial", "NoFit")
+@serializable_enum("Linear", "Logarithmic", "Polynomial", "NoFit")
 class FitType(object):
     """
     Defines possible fit types

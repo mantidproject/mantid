@@ -2,8 +2,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.user_file.user_file_common import (OtherId, event_binning_string_values, DetectorId)
-from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType)
+from sans.user_file.user_file_common import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
+from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
+                               FitType)
 
 
 class StateGuiModelTest(unittest.TestCase):
@@ -93,6 +94,18 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.reduction_dimensionality is ReductionDimensionality.TwoDim)
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Event binning for compatibility mode
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_event_binning_default_settings_are_emtpy(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.event_binning == "")
+
+    def test_that_event_binning_can_be_set(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.event_binning = "1,-1,10"
+        self.assertTrue(state_gui_model.event_binning == "1,-1,10")
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Reduction mode
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_is_set_to_lab_by_default(self):
@@ -115,6 +128,44 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.reduction_mode is ISISReductionMode.HAB)
         state_gui_model.reduction_mode = ISISReductionMode.All
         self.assertTrue(state_gui_model.reduction_mode is ISISReductionMode.All)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Reduction dimensionality
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_defaults_for_merge_are_empty_and_false(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.merge_scale == "")
+        self.assertTrue(state_gui_model.merge_shift == "")
+        self.assertFalse(state_gui_model.merge_scale_fit)
+        self.assertFalse(state_gui_model.merge_shift_fit)
+        self.assertTrue(state_gui_model.merge_q_range_start == "")
+        self.assertTrue(state_gui_model.merge_q_range_stop == "")
+
+    def test_that_can_set_and_reset_merged_settings(self):
+        state_gui_model = StateGuiModel({DetectorId.shift_fit: [det_fit_range(start=1., stop=2., use_fit=True)],
+                                         DetectorId.rescale_fit: [det_fit_range(start=1.4, stop=7., use_fit=False)],
+                                         DetectorId.rescale: [12.],
+                                         DetectorId.shift: [234.]})
+        self.assertTrue(state_gui_model.merge_scale == 12.)
+        self.assertTrue(state_gui_model.merge_shift == 234.)
+        self.assertFalse(state_gui_model.merge_scale_fit)
+        self.assertTrue(state_gui_model.merge_shift_fit)
+        self.assertTrue(state_gui_model.merge_q_range_start == 1.)
+        self.assertTrue(state_gui_model.merge_q_range_stop == 7.)
+
+        state_gui_model.merge_scale = 12.3
+        state_gui_model.merge_shift = 3.
+        state_gui_model.merge_scale_fit = True
+        state_gui_model.merge_shift_fit = False
+        state_gui_model.merge_q_range_start = 2.
+        state_gui_model.merge_q_range_stop = 8.
+
+        self.assertTrue(state_gui_model.merge_scale == 12.3)
+        self.assertTrue(state_gui_model.merge_shift == 3.)
+        self.assertTrue(state_gui_model.merge_scale_fit)
+        self.assertFalse(state_gui_model.merge_shift_fit)
+        self.assertTrue(state_gui_model.merge_q_range_start == 2.)
+        self.assertTrue(state_gui_model.merge_q_range_stop == 8.)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength
@@ -272,6 +323,172 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.wavelength_adjustment_det_2 == "wav2.txt")
         self.assertTrue(state_gui_model.pixel_adjustment_det_1 == "pix1.txt")
         self.assertTrue(state_gui_model.pixel_adjustment_det_2 == "pix2.txt")
+
+    def test_transmission_fit_defaults(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.transmission_sample_fit_type is FitType.NoFit)
+        self.assertTrue(state_gui_model.transmission_can_fit_type is FitType.NoFit)
+        self.assertTrue(state_gui_model.transmission_sample_polynomial_order == 2)
+        self.assertTrue(state_gui_model.transmission_can_polynomial_order == 2)
+
+    def test_that_can_set_transmission_fit_options(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.transmission_sample_fit_type = FitType.Logarithmic
+        state_gui_model.transmission_can_fit_type = FitType.Linear
+        state_gui_model.transmission_sample_polynomial_order = 2
+        state_gui_model.transmission_can_polynomial_order = 2
+        self.assertTrue(state_gui_model.transmission_sample_fit_type is FitType.Logarithmic)
+        self.assertTrue(state_gui_model.transmission_can_fit_type is FitType.Linear)
+        self.assertTrue(state_gui_model.transmission_sample_polynomial_order == 2)
+        self.assertTrue(state_gui_model.transmission_can_polynomial_order == 2)
+
+    def test_that_transmission_fit_wavelength_defaults_to_empty(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.transmission_sample_wavelength_min == "")
+        self.assertTrue(state_gui_model.transmission_sample_wavelength_max == "")
+        self.assertTrue(state_gui_model.transmission_can_wavelength_min == "")
+        self.assertTrue(state_gui_model.transmission_can_wavelength_max == "")
+
+    def test_that_transmission_fit_wavelength_can_be_set(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.transmission_sample_wavelength_min = 1.3
+        state_gui_model.transmission_sample_wavelength_max = 10.3
+        state_gui_model.transmission_can_wavelength_min = 1.3
+        state_gui_model.transmission_can_wavelength_max = 10.3
+
+        self.assertTrue(state_gui_model.transmission_sample_wavelength_min == 1.3)
+        self.assertTrue(state_gui_model.transmission_sample_wavelength_max == 10.3)
+        self.assertTrue(state_gui_model.transmission_can_wavelength_min == 1.3)
+        self.assertTrue(state_gui_model.transmission_can_wavelength_max == 10.3)
+
+    # ==================================================================================================================
+    # ==================================================================================================================
+    # Q TAB
+    # ==================================================================================================================
+    # ==================================================================================================================
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Q limits
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_q_limits_default_to_empty(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.q_1d_min == "")
+        self.assertTrue(state_gui_model.q_1d_max == "")
+        self.assertTrue(state_gui_model.q_1d_rebin_string == "")
+
+        self.assertTrue(state_gui_model.q_xy_max == "")
+        self.assertTrue(state_gui_model.q_xy_step == "")
+        self.assertTrue(state_gui_model.q_xy_step_type is None)
+
+    def test_that_can_set_the_q_limits(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.q_1d_min = 11.2
+        state_gui_model.q_1d_max = 123.3
+        state_gui_model.q_1d_rebin_string = "test"
+        state_gui_model.q_xy_max = 1.
+        state_gui_model.q_xy_step = 122.
+        state_gui_model.q_xy_step_type = RangeStepType.Log
+
+        self.assertTrue(state_gui_model.q_1d_min == 11.2)
+        self.assertTrue(state_gui_model.q_1d_max == 123.3)
+        self.assertTrue(state_gui_model.q_1d_rebin_string == "test")
+        self.assertTrue(state_gui_model.q_xy_max == 1.)
+        self.assertTrue(state_gui_model.q_xy_step == 122.)
+        self.assertTrue(state_gui_model.q_xy_step_type is RangeStepType.Log)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Gravity
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_gravity_extra_length_empty_by_default_and_usage_true_by_default(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.gravity_on_off)
+        self.assertTrue(state_gui_model.gravity_extra_length == "")
+
+    def test_that_can_set_gravity(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.gravity_on_off = False
+        state_gui_model.gravity_extra_length = 1.
+        self.assertFalse(state_gui_model.gravity_on_off)
+        self.assertTrue(state_gui_model.gravity_extra_length == 1.)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Q resolution
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_q_resolution_settings_show_empty_defaults(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertFalse(state_gui_model.use_q_resolution)
+        self.assertTrue(state_gui_model.q_resolution_source_a == "")
+        self.assertTrue(state_gui_model.q_resolution_sample_a == "")
+        self.assertTrue(state_gui_model.q_resolution_source_h == "")
+        self.assertTrue(state_gui_model.q_resolution_sample_h == "")
+        self.assertTrue(state_gui_model.q_resolution_source_w == "")
+        self.assertTrue(state_gui_model.q_resolution_sample_w == "")
+        self.assertTrue(state_gui_model.q_resolution_collimation_length == "")
+        self.assertTrue(state_gui_model.q_resolution_delta_r == "")
+        self.assertTrue(state_gui_model.q_resolution_moderator_file == "")
+
+    def test_that_q_resolution_can_be_set_correctly(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.use_q_resolution = True
+        state_gui_model.q_resolution_source_a = 1.5
+        state_gui_model.q_resolution_sample_a = 2.5
+        state_gui_model.q_resolution_source_h = 1.5
+        state_gui_model.q_resolution_sample_h = 2.5
+        state_gui_model.q_resolution_source_w = 1.5
+        state_gui_model.q_resolution_sample_w = 2.5
+        state_gui_model.q_resolution_collimation_length = 1.7
+        state_gui_model.q_resolution_delta_r = 12.4
+        state_gui_model.q_resolution_moderator_file = "test.txt"
+
+        self.assertTrue(state_gui_model.use_q_resolution)
+        self.assertTrue(state_gui_model.q_resolution_source_a == 1.5)
+        self.assertTrue(state_gui_model.q_resolution_sample_a == 2.5)
+        self.assertTrue(state_gui_model.q_resolution_source_h == 1.5)
+        self.assertTrue(state_gui_model.q_resolution_sample_h == 2.5)
+        self.assertTrue(state_gui_model.q_resolution_source_w == 1.5)
+        self.assertTrue(state_gui_model.q_resolution_sample_w == 2.5)
+        self.assertTrue(state_gui_model.q_resolution_collimation_length == 1.7)
+        self.assertTrue(state_gui_model.q_resolution_delta_r == 12.4)
+        self.assertTrue(state_gui_model.q_resolution_moderator_file == "test.txt")
+
+    # ==================================================================================================================
+    # ==================================================================================================================
+    # MASK TAB
+    # ==================================================================================================================
+    # ==================================================================================================================
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Phi mask
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_phi_mask_defaults_to_empty_and_false_for_use_mirror(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.phi_limit_min == "")
+        self.assertTrue(state_gui_model.phi_limit_max == "")
+        self.assertFalse(state_gui_model.phi_limit_use_mirror)
+
+    def test_that_phi_mask_can_be_set(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.phi_limit_min = 12.
+        state_gui_model.phi_limit_max = 13.
+        state_gui_model.phi_limit_use_mirror = True
+        self.assertTrue(state_gui_model.phi_limit_min == 12.)
+        self.assertTrue(state_gui_model.phi_limit_max == 13.)
+        self.assertTrue(state_gui_model.phi_limit_use_mirror)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Radius mask
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_radius_mask_defaults_to_empty(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.radius_limit_min == "")
+        self.assertTrue(state_gui_model.radius_limit_max == "")
+
+    def test_that_radius_mask_can_be_set(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.radius_limit_min = 12.
+        state_gui_model.radius_limit_max = 13.
+        self.assertTrue(state_gui_model.radius_limit_min == 12.)
+        self.assertTrue(state_gui_model.radius_limit_max == 13.)
 
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@ from six import with_metaclass
 from inspect import isclass
 from mantidqtpython import MantidQt
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument, RebinType,
-                               RangeStepType, SampleShape, ReductionMode)
+                               RangeStepType, SampleShape, ReductionMode, FitType)
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_string_for_gui_from_reduction_mode, OPTIONS_SEPARATOR)
 canMantidPlot = True
@@ -23,6 +23,7 @@ canMantidPlot = True
 # Globals
 # ----------------------------------------------------------------------------------------------------------------------
 gui_logger = Logger("SANS GUI LOGGER")
+BAD_POLYNOMAIL = -1
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -163,8 +164,26 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.wavelength_adjustment_det_2_push_button.clicked.connect(self._on_load_wavelength_adjustment_det_2)
 
         # Set the merge settings
-        self.reduction_mode_combo_box.currentIndexChanged .connect(self._on_reduction_mode_selection_has_changed)
+        self.reduction_mode_combo_box.currentIndexChanged.connect(self._on_reduction_mode_selection_has_changed)
         self._on_reduction_mode_selection_has_changed()  # Disable the merge settings initially
+
+        # Set the q resolution aperture shape settings
+        self.q_resolution_shape_combo_box.currentIndexChanged.connect(self._on_q_resolution_shape_has_changed)
+        self.q_resolution_group_box.toggled.connect(self._on_q_resolution_shape_has_changed)
+        self._on_q_resolution_shape_has_changed()
+
+        # Set the transmission fit selection
+        self.fit_selection_combo_box.currentIndexChanged.connect(self._on_fit_selection_has_changed)
+        self._on_fit_selection_has_changed()
+
+        # Set the transmission polynomial order
+        self.fit_sample_fit_type_combo_box.currentIndexChanged.connect(self._on_transmission_fit_type_has_changed)
+        self.fit_can_fit_type_combo_box.currentIndexChanged.connect(self._on_transmission_fit_type_has_changed)
+        self._on_transmission_fit_type_has_changed()
+
+        # Set the transmission target
+        self.transmission_target_combo_box.currentIndexChanged.connect(self._on_transmission_target_has_changed)
+        self._on_transmission_target_has_changed()
 
         return True
 
@@ -279,13 +298,98 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
         self.merged_settings.setEnabled(is_merged)
 
+    def _on_q_resolution_shape_has_changed(self):
+        shape_selection = self.q_resolution_shape_combo_box.currentIndex()
+        use_q_resolution = self.q_resolution_group_box.isChecked()
+        has_circular_aperture_been_selected = shape_selection == 0
+
+        enable_circular = has_circular_aperture_been_selected and use_q_resolution
+        enable_rectangular = not has_circular_aperture_been_selected and use_q_resolution
+
+        self.q_resolution_source_a_line_edit.setEnabled(enable_circular)
+        self.q_resolution_sample_a_line_edit.setEnabled(enable_circular)
+        self.q_resolution_source_a_label.setEnabled(enable_circular)
+        self.q_resolution_sample_a_label.setEnabled(enable_circular)
+
+        self.q_resolution_source_h_line_edit.setEnabled(enable_rectangular)
+        self.q_resolution_sample_h_line_edit.setEnabled(enable_rectangular)
+        self.q_resolution_source_w_line_edit.setEnabled(enable_rectangular)
+        self.q_resolution_sample_w_line_edit.setEnabled(enable_rectangular)
+        self.q_resolution_source_h_label.setEnabled(enable_rectangular)
+        self.q_resolution_sample_h_label.setEnabled(enable_rectangular)
+        self.q_resolution_source_w_label.setEnabled(enable_rectangular)
+        self.q_resolution_sample_w_label.setEnabled(enable_rectangular)
+
+    def set_q_resolution_shape_to_rectangular(self, is_rectangular):
+        index = 1 if is_rectangular else 0
+        self.q_resolution_shape_combo_box.setCurrentIndex(index)
+
+    def _on_fit_selection_has_changed(self):
+        fit_selection = self.fit_selection_combo_box.currentIndex()
+        use_settings_for_sample_and_can = fit_selection == 0
+        # If we use the same settings for the sample and the can, then we don't need the inputs for the can, hence
+        # we can hide them, else we need to make sure they are shown.
+        if use_settings_for_sample_and_can:
+            self.fit_sample_label.setText("Sample and Can")
+        else:
+            self.fit_sample_label.setText("Sample               ")
+
+        show_can = not use_settings_for_sample_and_can
+        self.fit_can_label.setVisible(show_can)
+        self.fit_can_use_fit_check_box.setVisible(show_can)
+        self.fit_can_fit_type_combo_box.setVisible(show_can)
+        self.fit_can_wavelength_combo_box.setVisible(show_can)
+        self.fit_can_polynomial_order_spin_box.setVisible(show_can)
+
+    def set_fit_selection(self, use_separate):
+        index = 1 if use_separate else 0
+        self.fit_selection_combo_box.setCurrentIndex(index)
+
+    def use_same_transmission_fit_setting_for_sample_and_can(self):
+        return self.fit_selection_combo_box.currentIndex() == 0
+
+    def _on_transmission_fit_type_has_changed(self):
+        # Check the sample settings
+        fit_type_sample_as_string = self.fit_sample_fit_type_combo_box.currentText().encode('utf-8')
+        fit_type_sample = FitType.from_string(fit_type_sample_as_string)
+        is_sample_polynomial = fit_type_sample is FitType.Polynomial
+        self.fit_sample_polynomial_order_spin_box.setEnabled(is_sample_polynomial)
+
+        # Check the can settings
+        fit_type_can_as_string = self.fit_can_fit_type_combo_box.currentText().encode('utf-8')
+        fit_type_can = FitType.from_string(fit_type_can_as_string)
+        is_can_polynomial = fit_type_can is FitType.Polynomial
+        self.fit_can_polynomial_order_spin_box.setEnabled(is_can_polynomial)
+
+    def _on_transmission_target_has_changed(self):
+        use_monitor = self.transmission_target_combo_box.currentIndex() == 0
+        use_roi = not use_monitor
+
+        self.transmission_monitor_label.setEnabled(use_monitor)
+        self.transmission_m3_radio_button.setEnabled(use_monitor)
+        self.transmission_m4_radio_button.setEnabled(use_monitor)
+        self.transmission_m4_shift_label.setEnabled(use_monitor)
+        self.transmission_m4_shift_line_edit.setEnabled(use_monitor)
+
+        self.transmission_radius_label.setEnabled(use_roi)
+        self.transmission_radius_line_edit.setEnabled(use_roi)
+        self.transmission_roi_files_label.setEnabled(use_roi)
+        self.transmission_roi_files_line_edit.setEnabled(use_roi)
+        self.transmission_roi_files_push_button(use_roi)
+        self.transmission_mask_files_label.setEnabled(use_roi)
+        self.transmission_mask_files_line_edit.setEnabled(use_roi)
+        self.transmission_mask_files_push_button(use_roi)
+
+
+
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
     # ------------------------------------------------------------------------------------------------------------------
     def set_instrument_settings(self, instrument):
         if instrument:
             self._instrument = instrument
-            self.data_processor_table.setInstrumentList(instrument, instrument)
+            instrument_string = SANSInstrument.to_string(instrument)
+            self.data_processor_table.setInstrumentList(instrument_string, instrument_string)
 
     def update_gui_combo_box(self, value, expected_type, combo_box):
         # There are two types of values that can be passed:
@@ -412,11 +516,11 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     @property
     def compatibility_mode(self):
-        return self.compatibility_mode_check_box.isChecked()
+        return self.event_binning_group_box.isChecked()
 
     @compatibility_mode.setter
     def compatibility_mode(self, value):
-        self.compatibility_mode_check_box.setChecked(value)
+        self.event_binning_group_box.setChecked(value)
 
     # ==================================================================================================================
     # ==================================================================================================================
@@ -446,19 +550,72 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @reduction_mode.setter
     def reduction_mode(self, value):
         # There are two types of values that can be passed:
-        # Lists: we set the combo box to the values in the list
         # String: we look for string and we set it
-        if isinstance(value, list):
-            self.reduction_mode_combo_box.clear()
-            for element in value:
-                self.reduction_mode_combo_box.addItem(element)
-        else:
-            # Convert the value to the correct GUI string
-            reduction_mode_as_string = get_string_for_gui_from_reduction_mode(value, self._instrument)
-            if reduction_mode_as_string:
-                index = self.reduction_mode_combo_box.findText(reduction_mode_as_string)
-                if index != -1:
-                    self.reduction_mode_combo_box.setCurrentIndex(index)
+
+        # Convert the value to the correct GUI string
+        reduction_mode_as_string = get_string_for_gui_from_reduction_mode(value, self._instrument)
+        if reduction_mode_as_string:
+            index = self.reduction_mode_combo_box.findText(reduction_mode_as_string)
+            if index != -1:
+                self.reduction_mode_combo_box.setCurrentIndex(index)
+
+    def set_reduction_modes(self, reduction_mode_list):
+        current_index = self.reduction_mode_combo_box.currentIndex()
+        self.reduction_mode_combo_box.clear()
+        for element in reduction_mode_list:
+            self.reduction_mode_combo_box.addItem(element)
+        if current_index != -1:
+            self.reduction_mode_combo_box.setCurrentIndex(current_index)
+
+    @property
+    def merge_scale(self):
+        return self.get_simple_line_edit_field(line_edit="merged_scale_line_edit", expected_type=float)
+
+    @merge_scale.setter
+    def merge_scale(self, value):
+        pass
+
+    @property
+    def merge_shift(self):
+        return self.get_simple_line_edit_field(line_edit="merged_shift_line_edit", expected_type=float)
+
+    @merge_shift.setter
+    def merge_shift(self, value):
+        pass
+
+    @property
+    def merge_scale_fit(self):
+        return self.merged_scale_use_fit_check_box.isChecked()
+
+    @merge_scale_fit.setter
+    def merge_scale_fit(self, value):
+        self.merged_scale_use_fit_check_box.setChecked(value)
+
+    @property
+    def merge_shift_fit(self):
+        return self.merged_shift_use_fit_check_box.isChecked()
+
+    @merge_shift_fit.setter
+    def merge_shift_fit(self, value):
+        self.merged_shift_use_fit_check_box.setChecked(value)
+
+    @property
+    def merge_q_range_start(self):
+        return self.get_simple_line_edit_field(line_edit="merged_q_range_start_line_edit", expected_type=float)
+
+    @merge_q_range_start.setter
+    def merge_q_range_start(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_q_range_start_line_edit", value=value)
+
+    @property
+    def merge_q_range_stop(self):
+        return self.get_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit", expected_type=float)
+
+    @merge_q_range_stop.setter
+    def merge_q_range_stop(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event slices group
@@ -470,6 +627,17 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @event_slices.setter
     def event_slices(self, value):
         self.slice_event_line_edit.setText(value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Event slices group
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def event_binning(self):
+        return str(self.event_binning_line_edit.text())
+
+    @event_binning.setter
+    def event_binning(self, value):
+        self.event_binning_line_edit.setText(value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength Group
@@ -655,6 +823,122 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.update_simple_line_edit_field(line_edit="transmission_m4_shift_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Transmission fit
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def transmission_sample_use_fit(self):
+        return self.fit_sample_use_fit_check_box.isChecked()
+
+    @transmission_sample_use_fit.setter
+    def transmission_sample_use_fit(self, value):
+        self.fit_sample_use_fit_check_box.setChecked(value)
+
+    @property
+    def transmission_can_use_fit(self):
+        return self.fit_can_use_fit_check_box.isChecked()
+
+    @transmission_can_use_fit.setter
+    def transmission_can_use_fit(self, value):
+        self.fit_can_use_fit_check_box.setChecked(value)
+
+    @property
+    def transmission_sample_fit_type(self):
+        fit_type_as_string = self.fit_sample_fit_type_combo_box.currentText().encode('utf-8')
+        return FitType.from_string(fit_type_as_string)
+
+    @transmission_sample_fit_type.setter
+    def transmission_sample_fit_type(self, value):
+        if value is None:
+            self.fit_sample_fit_type_combo_box.setCurrentIndex(0)
+        else:
+            self.update_gui_combo_box(value=value, expected_type=FitType, combo_box="fit_sample_fit_type_combo_box")
+
+    @property
+    def transmission_can_fit_type(self):
+        fit_type_as_string = self.fit_can_fit_type_combo_box.currentText().encode('utf-8')
+        return FitType.from_string(fit_type_as_string)
+
+    @transmission_can_fit_type.setter
+    def transmission_can_fit_type(self, value):
+        if value is None:
+            self.fit_sample_fit_type_combo_box.setCurrentIndex(0)
+        else:
+            self.update_gui_combo_box(value=value, expected_type=FitType, combo_box="fit_can_fit_type_combo_box")
+
+    @staticmethod
+    def _set_polynomial_order(spin_box, value):
+        minimum = spin_box.minimum()
+        maximum = spin_box.maximum()
+        if value < minimum or value > maximum:
+            raise ValueError("The value for the polynomial order {} has "
+                             "to be in the range of {} and {}".format(value, minimum, maximum))
+        spin_box.setValue(value)
+
+    @property
+    def transmission_sample_polynomial_order(self):
+        return self.fit_sample_polynomial_order_spin_box.value()
+
+    @transmission_sample_polynomial_order.setter
+    def transmission_sample_polynomial_order(self, value):
+        self._set_polynomial_order(spin_box=self.fit_sample_polynomial_order_spin_box, value=value)
+
+    @property
+    def transmission_can_polynomial_order(self):
+        return self.fit_can_polynomial_order_spin_box.value()
+
+    @transmission_can_polynomial_order.setter
+    def transmission_can_polynomial_order(self, value):
+        self._set_polynomial_order(spin_box=self.fit_can_polynomial_order_spin_box, value=value)
+
+    @property
+    def transmission_sample_wavelength_min(self):
+        return self.get_simple_line_edit_field(line_edit="fit_sample_wavelength_min_line_edit", expected_type=float)
+
+    @transmission_sample_wavelength_min.setter
+    def transmission_sample_wavelength_min(self, value):
+        self.update_simple_line_edit_field(line_edit="fit_sample_wavelength_min_line_edit", value=value)
+
+    @property
+    def transmission_sample_wavelength_max(self):
+        return self.get_simple_line_edit_field(line_edit="fit_sample_wavelength_max_line_edit", expected_type=float)
+
+    @transmission_sample_wavelength_max.setter
+    def transmission_sample_wavelength_max(self, value):
+        self.update_simple_line_edit_field(line_edit="fit_sample_wavelength_max_line_edit", value=value)
+
+    @property
+    def transmission_can_wavelength_min(self):
+        return self.get_simple_line_edit_field(line_edit="fit_can_wavelength_min_line_edit", expected_type=float)
+
+    @transmission_can_wavelength_min.setter
+    def transmission_can_wavelength_min(self, value):
+        self.update_simple_line_edit_field(line_edit="fit_can_wavelength_min_line_edit", value=value)
+
+    @property
+    def transmission_can_wavelength_max(self):
+        return self.get_simple_line_edit_field(line_edit="fit_can_wavelength_max_line_edit", expected_type=float)
+
+    @transmission_can_wavelength_max.setter
+    def transmission_can_wavelength_max(self, value):
+        self.update_simple_line_edit_field(line_edit="fit_can_wavelength_max_line_edit", value=value)
+
+    @property
+    def transmission_sample_use_wavelength(self):
+        return self.fit_sample_wavelength_combo_box.isChecked()
+
+    @transmission_sample_use_wavelength.setter
+    def transmission_sample_use_wavelength(self, value):
+        self.fit_sample_wavelength_combo_box.setChecked(value)
+
+    @property
+    def transmission_can_use_wavelength(self):
+        return self.fit_can_wavelength_combo_box.isChecked()
+
+    @transmission_can_use_wavelength.setter
+    def transmission_can_use_wavelength(self, value):
+        self.fit_can_wavelength_combo_box.setChecked(value)
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Wavelength- and pixel-adjustment files
     # ------------------------------------------------------------------------------------------------------------------
     @property
@@ -689,6 +973,250 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def wavelength_adjustment_det_2(self, value):
         self.update_simple_line_edit_field(line_edit="wavelength_adjustment_det_2_line_edit", value=value)
 
+    # ==================================================================================================================
+    # ==================================================================================================================
+    # Q TAB
+    # ==================================================================================================================
+    # ==================================================================================================================
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Q limit
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def q_1d_min(self):
+        return self.get_simple_line_edit_field(line_edit="q_1d_min_line_edit", expected_type=float)
+
+    @q_1d_min.setter
+    def q_1d_min(self, value):
+        self.update_simple_line_edit_field(line_edit="q_1d_min_line_edit", value=value)
+
+    @property
+    def q_1d_max(self):
+        return self.get_simple_line_edit_field(line_edit="q_1d_max_line_edit", expected_type=float)
+
+    @q_1d_max.setter
+    def q_1d_max(self, value):
+        self.update_simple_line_edit_field(line_edit="q_1d_max_line_edit", value=value)
+
+    @property
+    def q_1d_step(self):
+        return self.get_simple_line_edit_field(line_edit="q_1d_step_line_edit", expected_type=float)
+
+    @q_1d_step.setter
+    def q_1d_step(self, value):
+        self.update_simple_line_edit_field(line_edit="q_1d_step_line_edit", value=value)
+
+    @property
+    def q_1d_step_type(self):
+        q_1d_step_type_as_string = self.q_1d_step_type_combo_box.currentText().encode('utf-8')
+        # Either the selection is something that can be converted to a SampleShape or we need to read from file
+        try:
+            return RangeStepType.from_string(q_1d_step_type_as_string)
+        except RuntimeError:
+            return None
+
+    @q_1d_step_type.setter
+    def q_1d_step_type(self, value):
+        if value is None:
+            # Set to the default
+            self.q_1d_step_type_combo_box.setCurrentIndex(0)
+        else:
+            self.update_gui_combo_box(value=value, expected_type=RangeStepType, combo_box="q_1d_step_type_combo_box")
+
+    @property
+    def q_xy_max(self):
+        return self.get_simple_line_edit_field(line_edit="q_xy_max_line_edit", expected_type=float)
+
+    @q_xy_max.setter
+    def q_xy_max(self, value):
+        self.update_simple_line_edit_field(line_edit="q_xy_max_line_edit", value=value)
+
+    @property
+    def q_xy_step(self):
+        return self.get_simple_line_edit_field(line_edit="q_xy_step_line_edit", expected_type=float)
+
+    @q_xy_step.setter
+    def q_xy_step(self, value):
+        self.update_simple_line_edit_field(line_edit="q_xy_step_line_edit", value=value)
+
+    @property
+    def q_xy_step_type(self):
+        q_xy_step_type_as_string = self.q_xy_step_type_combo_box.currentText().encode('utf-8')
+        # Either the selection is something that can be converted to a SampleShape or we need to read from file
+        try:
+            return RangeStepType.from_string(q_xy_step_type_as_string)
+        except RuntimeError:
+            return None
+
+    @q_xy_step_type.setter
+    def q_xy_step_type(self, value):
+        if value is None:
+            # Set to the default
+            self.q_xy_step_type_combo_box.setCurrentIndex(0)
+        else:
+            self.update_gui_combo_box(value=value, expected_type=RangeStepType, combo_box="q_xy_step_type_combo_box")
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Gravity
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def gravity_extra_length(self):
+        return self.get_simple_line_edit_field(line_edit="gravity_extra_length_line_edit", expected_type=float)
+
+    @gravity_extra_length.setter
+    def gravity_extra_length(self, value):
+        self.update_simple_line_edit_field(line_edit="gravity_extra_length_line_edit", value=value)
+
+    @property
+    def gravity_on_off(self):
+        return self.gravity_group_box.isChecked()
+
+    @gravity_on_off.setter
+    def gravity_on_off(self, value):
+        self.gravity_group_box.setChecked(value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Q Resolution
+    # ------------------------------------------------------------------------------------------------------------------
+    def _get_q_resolution_aperture(self, current_index, line_edit):
+        if self.q_resolution_shape_combo_box.currentIndex() == current_index:
+            return self.get_simple_line_edit_field(line_edit=line_edit, expected_type=float)
+        else:
+            return ""
+
+    @property
+    def use_q_resolution(self):
+        return self.q_resolution_group_box.isChecked()
+
+    @use_q_resolution.setter
+    def use_q_resolution(self, value):
+        self.q_resolution_group_box.setChecked(value)
+
+    @property
+    def q_resolution_source_a(self):
+        # We expected a current index 0 (since this is a circular aperture)
+        return self._get_q_resolution_aperture(current_index=0, line_edit="q_resolution_source_a_line_edit")
+
+    @q_resolution_source_a.setter
+    def q_resolution_source_a(self, value):
+        self.update_simple_line_edit_field(line_edit="q_resolution_source_a_line_edit", value=value)
+
+    @property
+    def q_resolution_sample_a(self):
+        return self._get_q_resolution_aperture(current_index=0, line_edit="q_resolution_sample_a_line_edit")
+
+    @q_resolution_sample_a.setter
+    def q_resolution_sample_a(self, value):
+        self.update_simple_line_edit_field(line_edit="q_resolution_sample_a_line_edit", value=value)
+
+    @property
+    def q_resolution_source_h(self):
+        return self._get_q_resolution_aperture(current_index=1, line_edit="q_resolution_source_h_line_edit")
+
+    @q_resolution_source_h.setter
+    def q_resolution_source_h(self, value):
+        self.update_simple_line_edit_field(line_edit="q_resolution_source_h_line_edit", value=value)
+
+    @property
+    def q_resolution_sample_h(self):
+        return self._get_q_resolution_aperture(current_index=1, line_edit="q_resolution_sample_h_line_edit")
+
+    @q_resolution_sample_h.setter
+    def q_resolution_sample_h(self, value):
+        self.update_simple_line_edit_field(line_edit="q_resolution_sample_h_line_edit", value=value)
+
+    @property
+    def q_resolution_source_w(self):
+        return self._get_q_resolution_aperture(current_index=1, line_edit="q_resolution_source_w_line_edit")
+
+    @q_resolution_source_w.setter
+    def q_resolution_source_w(self, value):
+        self.update_simple_line_edit_field(line_edit="q_resolution_source_w_line_edit", value=value)
+
+    @property
+    def q_resolution_sample_w(self):
+        return self._get_q_resolution_aperture(current_index=1, line_edit="q_resolution_sample_w_line_edit")
+
+    @q_resolution_sample_w.setter
+    def q_resolution_sample_w(self, value):
+        self.update_simple_line_edit_field(line_edit="q_resolution_sample_w_line_edit", value=value)
+
+    @property
+    def q_resolution_delta_r(self):
+        return self.get_simple_line_edit_field(line_edit="q_resolution_delta_r_line_edit", expected_type=float)
+
+    @q_resolution_delta_r.setter
+    def q_resolution_delta_r(self, value):
+        self.update_simple_line_edit_field(line_edit="q_resolution_delta_r_line_edit", value=value)
+
+    @property
+    def q_resolution_collimation_length(self):
+        return self.get_simple_line_edit_field(line_edit="q_resolution_collimation_length_line_edit",
+                                               expected_type=float)
+
+    @q_resolution_collimation_length.setter
+    def q_resolution_collimation_length(self, value):
+        self.update_simple_line_edit_field(line_edit="q_resolution_collimation_length_line_edit", value=value)
+
+    @property
+    def q_resolution_moderator_file(self):
+        return self.get_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit", expected_type=str)
+
+    @q_resolution_moderator_file.setter
+    def q_resolution_moderator_file(self, value):
+        self.update_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit", value=value)
+
+    # ==================================================================================================================
+    # ==================================================================================================================
+    # MASK TAB
+    # ==================================================================================================================
+    # ==================================================================================================================
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Phi Limit
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def phi_limit_min(self):
+        return self.get_simple_line_edit_field(line_edit="phi_limit_min_line_edit", expected_type=float)
+
+    @phi_limit_min.setter
+    def phi_limit_min(self, value):
+        self.update_simple_line_edit_field(line_edit="phi_limit_min_line_edit", value=value)
+
+    @property
+    def phi_limit_max(self):
+        return self.get_simple_line_edit_field(line_edit="phi_limit_max_line_edit", expected_type=float)
+
+    @phi_limit_max.setter
+    def phi_limit_max(self, value):
+        self.update_simple_line_edit_field(line_edit="phi_limit_max_line_edit", value=value)
+
+    @property
+    def phi_limit_use_mirror(self):
+        return self.phi_limit_use_mirror_check_box.isChecked()
+
+    @phi_limit_use_mirror.setter
+    def phi_limit_use_mirror(self, value):
+        self.phi_limit_use_mirror_check_box.setChecked(value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Radius Limit
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def radius_limit_min(self):
+        return self.get_simple_line_edit_field(line_edit="radius_limit_min_line_edit", expected_type=float)
+
+    @radius_limit_min.setter
+    def radius_limit_min(self, value):
+        self.update_simple_line_edit_field(line_edit="radius_limit_min_line_edit", value=value)
+
+    @property
+    def radius_limit_max(self):
+        return self.get_simple_line_edit_field(line_edit="radius_limit_max_line_edit", expected_type=float)
+
+    @radius_limit_max.setter
+    def radius_limit_max(self, value):
+        self.update_simple_line_edit_field(line_edit="radius_limit_max_line_edit", value=value)
 
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -707,6 +1235,11 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # -------------------------------
         # General tab
         # -------------------------------
+        self.merged_shift_line_edit.setValidator(double_validator)
+        self.merged_scale_line_edit.setValidator(double_validator)
+        self.merged_q_range_start_line_edit.setValidator(double_validator)
+        self.merged_q_range_stop_line_edit.setValidator(double_validator)
+
         self.wavelength_min_line_edit.setValidator(positive_double_validator)
         self.wavelength_max_line_edit.setValidator(positive_double_validator)
         self.wavelength_step_line_edit.setValidator(positive_double_validator)
@@ -725,6 +1258,31 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.transmission_radius_line_edit.setValidator(positive_double_validator)
         self.transmission_m4_shift_line_edit.setValidator(double_validator)
 
+        #self.fit_sample_wavelength_min_line_edit.setValidator(positive_double_validator)
+        #self.fit_sample_wavelength_max_line_edit.setValidator(positive_double_validator)
+        #self.fit_can_wavelength_min_line_edit.setValidator(positive_double_validator)
+        #self.fit_can_wavelength_max_line_edit.setValidator(positive_double_validator)
+
+        # --------------------------------
+        # Q tab
+        # --------------------------------
+        self.q_1d_min_line_edit.setValidator(double_validator)
+        self.q_1d_max_line_edit.setValidator(double_validator)
+        self.q_1d_step_line_edit.setValidator(positive_double_validator)
+        self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
+        self.q_xy_step_line_edit.setValidator(positive_double_validator)
+
+        self.gravity_extra_length_line_edit.setValidator(double_validator)
+
+        self.q_resolution_source_a_line_edit.setValidator(positive_double_validator)
+        self.q_resolution_sample_a_line_edit.setValidator(positive_double_validator)
+        self.q_resolution_source_h_line_edit.setValidator(positive_double_validator)
+        self.q_resolution_sample_h_line_edit.setValidator(positive_double_validator)
+        self.q_resolution_source_w_line_edit.setValidator(positive_double_validator)
+        self.q_resolution_sample_w_line_edit.setValidator(positive_double_validator)
+        self.q_resolution_delta_r_line_edit.setValidator(positive_double_validator)
+        self.q_resolution_collimation_length_line_edit.setValidator(double_validator)
+
     def reset_all_fields_to_default(self):
         # ------------------------------
         # General tab
@@ -738,9 +1296,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.merged_shift_line_edit.setText("")
         self.merged_shift_use_fit_check_box.setChecked(False)
         self.merged_scale_use_fit_check_box.setChecked(False)
-        self.merged_use_q_range_check_box.setChecked(False)
 
         self.slice_event_line_edit.setText("")
+        self.event_binning_line_edit.setText("")
 
         self.wavelength_min_line_edit.setText("")
         self.wavelength_max_line_edit.setText("")
@@ -774,6 +1332,33 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.wavelength_adjustment_det_1_line_edit.setText("")
         self.wavelength_adjustment_det_2_line_edit.setText("")
+
+        # --------------------------------
+        # Q tab
+        # --------------------------------
+        self.q_1d_min_line_edit.setText("")
+        self.q_1d_max_line_edit.setText("")
+        self.q_1d_step_line_edit.setText("")
+        self.q_1d_step_type_combo_box.setCurrentIndex(0)
+
+        self.q_xy_max_line_edit.setText("")
+        self.q_xy_step_line_edit.setText("")
+        self.q_xy_step_type_combo_box.setCurrentIndex(0)
+
+        self.gravity_group_box.setChecked(True)
+        self.gravity_extra_length_line_edit.setText("")
+
+        self.q_resolution_group_box.setChecked(False)
+        self.q_resolution_shape_combo_box.setCurrentIndex(0)
+        self.q_resolution_source_a_line_edit.setText("")
+        self.q_resolution_sample_a_line_edit.setText("")
+        self.q_resolution_source_h_line_edit.setText("")
+        self.q_resolution_sample_h_line_edit.setText("")
+        self.q_resolution_source_w_line_edit.setText("")
+        self.q_resolution_sample_w_line_edit.setText("")
+        self.q_resolution_delta_r_line_edit.setText("")
+        self.q_resolution_collimation_length_line_edit.setText("")
+        self.q_resolution_moderator_file_line_edit.setText("")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Table interaction

@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, BoolParameter, StringListParameter, StringParameter,
-                                   PositiveFloatParameter, FloatParameter, FloatListParameter,
+                                   PositiveFloatParameter, FloatParameter, FloatListParameter, FloatWithNoneParameter,
                                    DictParameter, PositiveIntegerListParameter, rename_descriptor_names)
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message, set_detector_names)
 from sans.state.automatic_setters import (automatic_setters)
@@ -178,8 +178,8 @@ class StateMask(StateBase):
     mask_files = StringListParameter()
 
     # Angle masking
-    phi_min = FloatParameter()
-    phi_max = FloatParameter()
+    phi_min = FloatWithNoneParameter()
+    phi_max = FloatWithNoneParameter()
     use_mask_phi_mirror = BoolParameter()
 
     # Beam stop
