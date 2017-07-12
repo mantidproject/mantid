@@ -9,7 +9,6 @@
 
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_multifit.h>
-#include <gsl/gsl_statistics.h>
 
 namespace Mantid {
 namespace CurveFitting {

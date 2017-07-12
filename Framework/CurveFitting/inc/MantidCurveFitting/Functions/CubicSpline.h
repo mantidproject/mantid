@@ -9,11 +9,13 @@
 #include <boost/scoped_array.hpp>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
-#include <valarray>
 
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
+
+using namespace Mantid::CurveFitting::Functions;
+
 /**
 
 A wrapper around GSL functions implementing cubic spline interpolation.
@@ -110,9 +112,6 @@ private:
 
   /// Check if an x value falls within the range of the spline
   bool checkXInRange(double x) const;
-
-  /// Evaluate a point on the spline, with basic error handling
-  double splineEval(const double x) const;
 };
 
 typedef boost::shared_ptr<CubicSpline> CubicSpline_sptr;

@@ -111,6 +111,8 @@ CurveFitting
 Improved
 ########
 
+- :ref:`SplineInterpolation <algm-SplineInterpolation>` treats the input WorkspacesToInterpolate containing two points if desired: the user has the option to do a linear interpolation. Furthermore, a new option ReferenceWorkspace defines from which InputWorkspace properties will be copied. Sorting improved for workspaces containing point data, i.e. not only x values will be sorted like for histogram workspaces.
+
 - :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
 
 - :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.

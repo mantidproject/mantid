@@ -6,6 +6,7 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include <gsl/gsl_version.h>
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {

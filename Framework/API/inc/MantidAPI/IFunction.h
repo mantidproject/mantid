@@ -133,7 +133,7 @@ class FunctionHandler;
     IFunction::AttributeVisitor can be used. It provides alternative virtual
    methods to access
     attributes of each type. When creating a function from a string (using
-   FunctionFactory::creaeInitialized(...))
+   FunctionFactory::createInitialized(...))
     the attributes must be set first, before any fitting parameter, as the
    number and names of the parameters
     can depend on the attributes.

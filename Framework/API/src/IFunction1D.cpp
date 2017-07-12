@@ -2,27 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/Jacobian.h"
-#include "MantidAPI/IFunctionWithLocation.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Expression.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/FitParameter.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/muParser_Silent.h"
-#include <boost/lexical_cast.hpp>
-
-#include <sstream>
 
 namespace Mantid {
 namespace API {

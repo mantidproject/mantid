@@ -1,14 +1,8 @@
 #include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
-
-#include <algorithm>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -115,7 +109,6 @@ void SplineSmoothing::exec() {
  * @param index :: index of the spectrum to smooth
  */
 void SplineSmoothing::smoothSpectrum(const int index) {
-  m_cspline = boost::make_shared<BSpline>();
   m_cspline->setAttributeValue("Uniform", false);
 
   // choose some smoothing points from input workspace

@@ -71,7 +71,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         self.assertEquals(x_unit, 'Wavelength')
 
         # Sample logs should contain correction type
-        logs = ws.getSampleDetails()
+        logs = ws.getRun()
         self.assertTrue('corrections_type' in logs)
 
         # Ensure value from sample log is correct

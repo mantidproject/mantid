@@ -28,7 +28,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(cats = lin.categories());
     TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
     TS_ASSERT_EQUALS(cats.front(), "Background");
-    // This would enfonce one and only one category:
+    // This would enforce one and only one category:
     // TS_ASSERT(cfn.category() == "Background");
   }
 

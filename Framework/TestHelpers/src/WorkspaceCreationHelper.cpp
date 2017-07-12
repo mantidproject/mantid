@@ -35,11 +35,9 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
-
-#include <cmath>
-#include <sstream>
 
 namespace WorkspaceCreationHelper {
 using namespace Mantid;

@@ -250,7 +250,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/InelasticDiffSphere.h
 	inc/MantidCurveFitting/Functions/InelasticIsoRotDiff.h
 	inc/MantidCurveFitting/Functions/IsoRotDiff.h
-	inc/MantidCurveFitting/Functions/Keren.h
+        inc/MantidCurveFitting/Functions/Keren.h
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h

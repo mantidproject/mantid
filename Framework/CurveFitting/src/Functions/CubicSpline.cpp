@@ -4,11 +4,7 @@
 #include "MantidCurveFitting/Functions/CubicSpline.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/Logger.h"
-
-#include <algorithm>
-#include <boost/lexical_cast.hpp>
-#include <stdexcept>
-#include <vector>
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -85,20 +81,35 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
     std::string yName = "y" + num;
 
     x[i] = getAttribute(xName).asDouble();
+    y[i] = getParameter(i);
 
-    // if x[i] is out of order with its neighbours
-    if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
-      xSortFlag = true;
+    if (!xSortFlag) {
+      // if x[i] is out of order with its neighbours
+      if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
+        xSortFlag = true;
+      }
     }
-
-    y[i] = getParameter(yName);
   }
 
   // sort the data points if necessary
   if (xSortFlag) {
     g_log.warning() << "Spline x parameters are not in ascending order. Values "
                        "will be sorted.\n";
-    std::sort(x.get(), x.get() + n);
+
+    using point = std::pair<double, double>;
+    std::vector<point> pairs(n);
+    for (int i = 0; i < n; ++i) {
+      pairs.push_back(std::make_pair(x[i], y[i]));
+    }
+    std::sort(pairs.begin(), pairs.end(),
+              [](const point &xy1, const point &xy2) {
+                return xy1.first <= xy2.first;
+              });
+
+    for (int i = 0; i < n; ++i) {
+      x[i] = pairs[i].first;
+      y[i] = pairs[i].second;
+    }
   }
 
   // pass values to GSL objects
@@ -143,46 +154,33 @@ bool CubicSpline::checkXInRange(double x) const {
  */
 void CubicSpline::calculateSpline(double *out, const double *xValues,
                                   const size_t nData) const {
+  int errorCode = 0;
+
   // calculate spline for given input set
-  double y(0);
-  bool outOfRange(false);
   for (size_t i = 0; i < nData; ++i) {
     if (checkXInRange(xValues[i])) {
-      // calculate the y value
-      y = splineEval(xValues[i]);
-      out[i] = y;
+      out[i] = gsl_spline_eval(m_spline.get(), xValues[i], m_acc.get());
+      errorCode =
+          gsl_spline_eval_e(m_spline.get(), xValues[i], m_acc.get(), &out[i]);
     } else {
-      // if out of range, set it to constant of fringe values
-      outOfRange = true;
       if (xValues[i] < m_spline->interp->xmin) {
-        out[i] = splineEval(m_spline->interp->xmin);
+        out[i] = gsl_spline_eval(m_spline.get(), m_spline->interp->xmin,
+                                 m_acc.get());
+        errorCode = gsl_spline_eval_e(m_spline.get(), m_spline->interp->xmin,
+                                      m_acc.get(), &out[i]);
       } else {
-        out[i] = splineEval(m_spline->interp->xmax);
+        out[i] = gsl_spline_eval(m_spline.get(), m_spline->interp->xmax,
+                                 m_acc.get());
+        errorCode = gsl_spline_eval_e(m_spline.get(), m_spline->interp->xmax,
+                                      m_acc.get(), &out[i]);
       }
+      g_log.warning()
+          << "Some x values where out of range and will not be calculated.\n";
     }
+
+    // check if GSL function returned an error
+    checkGSLError(errorCode, GSL_EDOM);
   }
-
-  // warn user than some values wern't calculated
-  if (outOfRange) {
-    g_log.warning()
-        << "Some x values where out of range and will not be calculated.\n";
-  }
-}
-
-/**Evaluate a point on the spline. Includes basic error handling
- *
- * @param x :: Point to evaluate
- * @return :: the value of the spline at the given point
- */
-double CubicSpline::splineEval(const double x) const {
-  // calculate the y value
-  double y = gsl_spline_eval(m_spline.get(), x, m_acc.get());
-  int errorCode = gsl_spline_eval_e(m_spline.get(), x, m_acc.get(), &y);
-
-  // check if GSL function returned an error
-  checkGSLError(errorCode, GSL_EDOM);
-
-  return y;
 }
 
 /** Calculate the derivatives of each of the supplied points
@@ -197,12 +195,10 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
                                       const size_t order) const {
   double xDeriv = 0;
   int errorCode = 0;
-  bool outOfRange(false);
 
   // throw error if the order is not the 1st or 2nd derivative
   if (order < 1)
-    throw std::invalid_argument(
-        "CubicSpline: order of derivative must be 1 or greater");
+    g_log.warning() << "CubicSpline: order of derivative must be 1 or greater";
 
   for (size_t i = 0; i < nData; ++i) {
     if (checkXInRange(xValues[i])) {
@@ -218,9 +214,9 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
                                              m_acc.get(), &xDeriv);
       }
     } else {
-      // if out of range, just set it to zero
-      outOfRange = true;
       xDeriv = 0;
+      g_log.warning()
+          << "Some x values where out of range and will not be calculated.\n";
     }
 
     // check GSL functions didn't return an error
@@ -228,12 +224,6 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
 
     // record the value
     out[i] = xDeriv;
-  }
-
-  // warn user that some values weren't calculated
-  if (outOfRange) {
-    g_log.warning()
-        << "Some x values where out of range and will not be calculated.\n";
   }
 }
 
@@ -288,6 +278,7 @@ void CubicSpline::setAttribute(const std::string &attName,
 
       // flag that the spline + derivatives will now need to be recalculated
       m_recalculateSpline = true;
+
     } else if (n < oldN) {
       throw std::invalid_argument(
           "Cubic Spline: Can't decrease the number of attributes");

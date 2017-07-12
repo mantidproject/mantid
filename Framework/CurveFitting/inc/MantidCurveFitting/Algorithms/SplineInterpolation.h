@@ -1,7 +1,6 @@
 #ifndef MANTID_CURVEFITTING_SPLINEINTERPOLATION_H_
 #define MANTID_CURVEFITTING_SPLINEINTERPOLATION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/Functions/CubicSpline.h"
 
@@ -9,11 +8,17 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
 
+using namespace Mantid::API;
+using namespace Mantid::CurveFitting::Functions;
+
 /** Takes two workspaces as input. One contain a set of points which define a
   spline,
   and one which contains a number of spectra to be interpolated against spline.
 
   Produces an output workspace containing the interpolated points
+
+  Optionally, the algorithm can perform a linear interpolation, if the
+  WorkspaceToMatch contains two points exactly.
 
   Optionally the algorithm will also produce a grouped workspace of derivatives
   of up to order 2
@@ -45,50 +50,64 @@ namespace Algorithms {
 */
 class DLLExport SplineInterpolation : public API::Algorithm {
 public:
-  SplineInterpolation();
+  SplineInterpolation() = default;
 
+  /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override;
+  /// Algorithm's version for identification. @see Algorithm::version
   int version() const override;
+  /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override;
-  /// Summary of algorithms purpose
+  /// Summary of algorithm's purpose. @see Algorithm::summary
   const std::string summary() const override {
     return "Interpolates a set of spectra onto a spline defined by a second "
            "input workspace. Optionally, this algorithm can also calculate "
-           "derivatives up to order 2 as a side product";
+           "derivatives of order 1 or 2 as a side product or performs a "
+           "linear interpolation if the WorkspaceToInterpolate has only two "
+           "points. If X-values are not strictly ascending, then the X-, Y-, "
+           "and E- values of the workspaces will be sorted accordingly. "
+           "Some workspace properties like the instrument (not its size or "
+           "vertical axis description) will be copied from the "
+           "ReferenceWorkspace.";
   }
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
   void exec() override;
 
-  /// CubicSpline member used to perform interpolation
-  boost::shared_ptr<Functions::CubicSpline> m_cspline;
-
-  /// setup an output workspace using meta data from inws and taking a number of
-  /// spectra
-  API::MatrixWorkspace_sptr
-  setupOutputWorkspace(API::MatrixWorkspace_sptr mws,
-                       API::MatrixWorkspace_sptr iws) const;
+  boost::shared_ptr<BackgroundFunction> m_cspline;
 
   /// convert a binned workspace to point data. Uses mean of the bins as point
-  API::MatrixWorkspace_sptr
-  convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
+  MatrixWorkspace_sptr convertBinnedData(MatrixWorkspace_sptr workspace) const;
+
+  /// set the points that define the linear bspline used for interpolation of a
+  /// workspace
+  void setInterpolationPointsLinear(MatrixWorkspace_const_sptr inputWorkspace,
+                                    const int row) const;
 
   /// set the points that define the spline used for interpolation of a
   /// workspace
-  void setInterpolationPoints(API::MatrixWorkspace_const_sptr inputWorkspace,
+  void setInterpolationPoints(MatrixWorkspace_const_sptr inputWorkspace,
                               const int row) const;
 
   /// Calculate the interpolation of the input workspace against the spline and
   /// store it in outputWorkspace
-  void calculateSpline(API::MatrixWorkspace_const_sptr inputWorkspace,
-                       API::MatrixWorkspace_sptr outputWorkspace,
-                       int row) const;
+  void calculateSpline(MatrixWorkspace_const_sptr inputWorkspace,
+                       MatrixWorkspace_sptr outputWorkspace, int row) const;
 
   /// Calculate the derivatives of the input workspace from the spline.
-  void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
-                            API::MatrixWorkspace_sptr outputWorkspace,
+  void calculateDerivatives(MatrixWorkspace_const_sptr inputWorkspace,
+                            MatrixWorkspace_sptr outputWorkspace,
                             int order) const;
+
+  /// Check if an x value falls within the range of the spline
+  void setXRange(MatrixWorkspace_sptr inputWorkspace,
+                 MatrixWorkspace_const_sptr interpolationWorkspace) const;
+
+  /// Check increasing x-values and sort x, y, e-values if needed
+  MatrixWorkspace_sptr ensureXIncreasing(MatrixWorkspace_sptr inputWorkspace);
 };
 
 } // namespace Algorithms
