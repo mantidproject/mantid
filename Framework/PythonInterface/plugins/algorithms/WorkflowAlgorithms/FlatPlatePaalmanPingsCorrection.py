@@ -140,16 +140,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         if self._emode != 'Efixed':
             # require both sample and can ws have wavelenght as x-axis
             if mtd[sample_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
-                issues['SampleWorkspace'] = 'Workspace must have units of wavelenght.'
+                issues['SampleWorkspace'] = 'Workspace must have units of wavelength.'
 
             if use_can and mtd[can_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
                 issues['CanWorkspace'] = 'Workspace must have units of wavelength.'
 
-        # Orientation angle restricted to range between -90 and 90 degrees
-        sample_angle = self.getProperty('SampleAngle').value
-        if sample_angle < -90.0 or sample_angle > 90.0:
-            issues['SampleAngle'] = 'Angle defining sample orientation must be between -90 and 90 degrees'
-        
         return issues
 
     # ------------------------------------------------------------------------------
@@ -299,13 +294,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._emode = self.getPropertyValue('Emode')
         self._efixed = self.getProperty('Efixed').value
 
-        if self._emode == 'Efixed' and self._efixed == 0.:
+        if (self._emode == 'Efixed' or self._emode == 'Direct' or self._emode == 'Indirect') and self._efixed == 0.:
             # Efixed mode requested with default efixed, try to read from Instrument Parameters
             try:
                 self._efixed = self._getEfixed()
                 logger.information('Found Efixed = {0}'.format(self._efixed))
             except ValueError:
-                raise RuntimeError('Efixed mode requested with the default value,'
+                raise RuntimeError('Efixed, Direct or Indirect mode requested with the default value,'
                                    'but could not find the Efixed parameter in the instrument.')
 
         if self._emode == 'Efixed':
@@ -384,19 +379,22 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     # ------------------------------------------------------------------------------
 
     def _getEfixed(self):
+        return_eFixed = 0.
         inst = mtd[self._sample_ws_name].getInstrument()
 
         if inst.hasParameter('Efixed'):
-            return inst.getNumberParameter('EFixed')[0]
-
-        if inst.hasParameter('analyser'):
+            return_eFixed = inst.getNumberParameter('EFixed')[0]
+        elif inst.hasParameter('analyser'):
             analyser_name = inst.getStringParameter('analyser')[0]
             analyser_comp = inst.getComponentByName(analyser_name)
 
             if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
-                return analyser_comp.getNumberParameter('EFixed')[0]
+                return_eFixed = analyser_comp.getNumberParameter('EFixed')[0]
 
-        raise ValueError('No Efixed parameter found')
+        if return_eFixed > 0:
+            return return_eFixed
+        else:
+            raise ValueError('No non-zero Efixed parameter found')
 
     # ------------------------------------------------------------------------------
 
@@ -449,10 +447,18 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         The current implementation is based on:
           - J. Wuttke: 'Absorption-Correction Factors for Scattering from Flat or Tubular Samples:
             Open-Source Implementation libabsco, and Why it Should be Used with Caution',
-            http://apps.jcns.fz-juelich.de/doku/sc/_media/abs00.pdf            
+            http://apps.jcns.fz-juelich.de/doku/sc/_media/abs00.pdf
+
+        @return: A tuple containing the attenuations;
+            1) scattering and absorption in sample,
+            2) scattering in sample and absorption in sample and container
+            3) scattering in container and absorption in sample and container,
+            4) scattering and absorption in container.
         """
 
         PICONV = math.pi / 180.0
+        TABULATED_WAVELENGTH = 1.798
+        TABULATED_ENERGY = 25.305
 
         # self._sample_angle is the normal to the sample surface, i.e. 
         # self._sample_angle = 0 means that the sample is perpendicular
@@ -487,15 +493,15 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         # Sample cross section (value for each of the wavelengths and for E = Efixed)
         sample_x_section = (sam_material.totalScatterXSection() + 
-                            sam_material.absorbXSection() * waves / 1.798) * self._sample_density
+                            sam_material.absorbXSection() * waves / TABULATED_WAVELENGTH) * self._sample_density
 
         if self._efixed > 0:
             sample_x_section_efixed = (sam_material.totalScatterXSection() + 
-                                       sam_material.absorbXSection() * np.sqrt(25.305/self._efixed)) * self._sample_density
-        else:
+                                       sam_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._sample_density
+        elif self._emode == 'Elastic':
             sample_x_section_efixed = 0
 
-        # Sample --> Ass 
+        # Sample --> Ass
         if self._emode == 'Efixed':
             ki_s = sample_x_section_efixed * self._sample_thickness / salpha
             kf_s = sample_x_section_efixed * self._sample_thickness / stha
@@ -519,12 +525,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
             # Calculate can cross section (value for each of the wavelengths and for E = Efixed)
             can_x_section = (can_material.totalScatterXSection() + 
-                             can_material.absorbXSection() * waves / 1.798) * self._can_density
+                             can_material.absorbXSection() * waves / TABULATED_WAVELENGTH) * self._can_density
 
             if self._efixed > 0:
                 can_x_section_efixed = (can_material.totalScatterXSection() + 
-                                       can_material.absorbXSection() * np.sqrt(25.305/self._efixed)) * self._can_density
-            else:
+                                       can_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._can_density
+            elif self._emode == 'Elastic':
                 can_x_section_efixed = 0
 
             # Front container --> Acc1
