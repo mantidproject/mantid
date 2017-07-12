@@ -618,9 +618,10 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             mid = int((end + begin) / 2)
             lowerIdx = thresholdIndex(mainWS, mid, begin, threshold)
             upperIdx = thresholdIndex(mainWS, mid, end, threshold)
-            for j in range(upperIdx - lowerIdx):
-                ys = beamStopDiagnosticsWS.dataY(lowerIdx + j)
-                ys[0] = 1.0
+            if lowerIdx != upperIdx:
+                for j in range(upperIdx - lowerIdx + 1):
+                    ys = beamStopDiagnosticsWS.dataY(lowerIdx + j)
+                    ys[0] = 1.0
         return beamStopDiagnosticsWS
 
     def _beamStopDiagnosticsEnabled(self, mainWS, report):

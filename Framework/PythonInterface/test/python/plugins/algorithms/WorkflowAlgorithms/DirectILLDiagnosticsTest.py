@@ -94,6 +94,55 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             else:
                 self.assertEquals(ys[0], 0)
 
+    def testDirectBeamMasking(self):
+        beamWSName = 'beam_masking_ws'
+        kwargs = {
+            'OutputWorkspace': beamWSName,
+            'Function': 'One Peak',
+            'rethrow': True
+        }
+        run_algorithm('CreateSampleWorkspace', **kwargs)
+        kwargs = {
+            'Workspace': beamWSName,
+            'ParameterName': 'beam_stop_diagnostics_spectra',
+            'ParameterType': 'String',
+            'Value': '43-57, 90-110, 145-155', # Spectrum numbers.
+            'rethrow': True
+        }
+        run_algorithm('SetInstrumentParameter', **kwargs)
+        beamWS = mtd[beamWSName]
+        # From now on, we work on workspace indices.
+        # First range is fully covered by the beam stop.
+        for i in range(42, 57):
+            ys = beamWS.dataY(i)
+            ys *= 0.0
+        # Second range is partially covered by the beam stop.
+        # Actually, only this range will be recongnized as beam stop's shadow.
+        for i in range(92, 105):
+            ys = beamWS.dataY(i)
+            ys *= 0.0
+        # The third range is not covered by the beam stop at all.
+        outWSName = 'diagnosticsWS'
+        kwargs = {
+            'InputWorkspace': beamWSName,
+            'OutputWorkspace': outWSName,
+            'ElasticPeakDiagnostics': 'Peak Diagnostics OFF',
+            'BkgDiagnostics': 'Bkg Diagnostics OFF',
+            'DefaultMask': 'Default Mask OFF',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLDiagnostics', **kwargs)
+        self.assertTrue(mtd.doesExist(outWSName))
+        outWS = mtd[outWSName]
+        self.assertEquals(outWS.getNumberHistograms(), beamWS.getNumberHistograms())
+        self.assertEquals(outWS.blocksize(), 1)
+        for i in range(outWS.getNumberHistograms()):
+            ys = outWS.readY(i)
+            if i >= 92 and i < 105:
+                self.assertEquals(ys[0], 1)
+            else:
+                self.assertEquals(ys[0], 0)
+
     def testElasticPeakDiagnostics(self):
         inWS = mtd[self._RAW_WS_NAME]
         spectraCount = inWS.getNumberHistograms()
