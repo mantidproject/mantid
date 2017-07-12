@@ -464,9 +464,8 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
 
   m_status = new QLabel("Status:", w);
   m_status->hide();
-  connect(this, SIGNAL(fitResultsChanged(const QString &)),
-          this, SLOT(showFitResultStatus(const QString &)),
-          Qt::QueuedConnection);
+  connect(this, SIGNAL(fitResultsChanged(const QString &)), this,
+          SLOT(showFitResultStatus(const QString &)), Qt::QueuedConnection);
 
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
@@ -1658,8 +1657,7 @@ void FitPropertyBrowser::showFitResultStatus(const QString &status) {
     color = "red";
   }
   m_status->setText(
-      QString("Status: <span style='color:%2'>%1</span>")
-          .arg(text, color));
+      QString("Status: <span style='color:%2'>%1</span>").arg(text, color));
   m_status->show();
 }
 

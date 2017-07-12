@@ -420,9 +420,8 @@ void MultiDatasetFit::setFitStatusInfo(const QString &status,
   if (status != "success") {
     color = "red";
   }
-  m_fitStatus =
-      QString("Status: <span style='color:%2'>%1</span>"
-              "<br>Chi Squared: %4").arg(text, color, chiSquared);
+  m_fitStatus = QString("Status: <span style='color:%2'>%1</span>"
+                        "<br>Chi Squared: %4").arg(text, color, chiSquared);
   showInfo("");
 }
 
