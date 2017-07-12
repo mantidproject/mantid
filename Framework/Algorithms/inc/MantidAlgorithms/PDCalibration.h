@@ -55,6 +55,7 @@ private:
   API::MatrixWorkspace_sptr load(const std::string filename);
   void loadOldCalibration();
   void createNewCalTable();
+  void createInformationWorkspaces();
   std::function<double(double)> getDSpacingToTof(const detid_t detid);
   std::vector<double> dSpacingWindows(const std::vector<double> &centres,
                                       const double widthMax);
@@ -67,6 +68,7 @@ private:
                         double &t0, double &difa);
   API::MatrixWorkspace_sptr m_uncalibratedWS;
   API::ITableWorkspace_sptr m_calibrationTable;
+  API::ITableWorkspace_sptr m_peakPositionTable;
   std::vector<double> m_peaksInDspacing;
   std::string calParams;
   std::map<detid_t, size_t> m_detidToRow;

@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -99,6 +100,8 @@ public:
         inTofPos.push_back(peaksInD[i]);
         inTofWindows.push_back(peaksInDWindows[2 * i]);
         inTofWindows.push_back(peaksInDWindows[2 * i + 1]);
+      } else if (centre < tofMax) {
+        badPeakOffset = i;
       }
     }
     std::transform(inTofPos.begin(), inTofPos.end(), inTofPos.begin(), toTof);
@@ -113,6 +116,7 @@ public:
   std::vector<double> inTofPos;
   std::vector<double> inTofWindows;
   std::vector<double> inDPos;
+  std::size_t badPeakOffset{0}; ///< positions that will not be fit
 };
 
 //----------------------------------------------------------------------------------------------
@@ -247,6 +251,10 @@ void PDCalibration::init() {
                       "OutputCalibrationTable", "", Direction::Output),
                   "An output workspace containing the Calibration Table");
 
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
+                      "DiagnosticWorkspaces", "", Direction::Output),
+                  "Workspaces to promote understanding of calibration results");
+
   // make group for Input properties
   std::string inputGroup("Input Options");
   setPropertyGroup("SignalWorkspace", inputGroup);
@@ -369,6 +377,7 @@ void PDCalibration::exec() {
   } else {
     createNewCalTable();
   }
+  createInformationWorkspaces();
 
   std::string maskWSName = getPropertyValue("OutputCalibrationTable");
   maskWSName += "_mask";
@@ -422,6 +431,8 @@ void PDCalibration::exec() {
     alg->executeAsChildAlg();
     API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
 
+    // includes peaks that aren't used in the fit
+    std::vector<double> tof_vec_full(m_peaksInDspacing.size(), std::nan(""));
     std::vector<double> d_vec;
     std::vector<double> tof_vec;
     for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
@@ -431,7 +442,7 @@ void PDCalibration::exec() {
       double chi2 = fittedTable->getRef<double>("chi2", i);
 
       // check chi-square
-      if (chi2 > maxChiSquared || chi2 < 0) {
+      if (chi2 > maxChiSquared || chi2 < 0.) {
         continue;
       }
 
@@ -460,6 +471,7 @@ void PDCalibration::exec() {
 
       d_vec.push_back(peaks.inDPos[i]);
       tof_vec.push_back(centre);
+      tof_vec_full[i + peaks.badPeakOffset] = centre;
     }
 
     if (d_vec.empty()) {
@@ -468,6 +480,17 @@ void PDCalibration::exec() {
     } else {
       double difc = 0., t0 = 0., difa = 0.;
       fitDIFCtZeroDIFA(d_vec, tof_vec, difc, t0, difa);
+
+      const auto rowNum = m_detidToRow[peaks.detid];
+      auto converter =
+          Kernel::Diffraction::getTofToDConversionFunc(difc, difa, t0);
+      for (std::size_t i = 0; i < tof_vec_full.size(); ++i) {
+        if (std::isnan(tof_vec_full[i]))
+          continue;
+        const double dspacing = converter(tof_vec_full[i]);
+        m_peakPositionTable->cell<double>(rowNum, i + 1) = dspacing;
+      }
+
       setCalibrationValues(peaks.detid, difc, difa, t0);
     }
     prog.report();
@@ -475,6 +498,22 @@ void PDCalibration::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  // fix-up the diagnostic workspaces
+  auto alg = createChildAlgorithm("SortTableWorkspace");
+  alg->setProperty("InputWorkspace", m_peakPositionTable);
+  alg->setProperty("OutputWorkspace", m_peakPositionTable);
+  alg->setProperty("Columns", "detid");
+  alg->executeAsChildAlg();
+  m_peakPositionTable = alg->getProperty("OutputWorkspace");
+
+  // set the diagnostic workspaces out
+  const std::string partials_prefix = getPropertyValue("DiagnosticWorkspaces");
+  auto diagnosticGroup = boost::make_shared<API::WorkspaceGroup>();
+  API::AnalysisDataService::Instance().addOrReplace(
+      partials_prefix + "_dspacing", m_peakPositionTable);
+  diagnosticGroup->addWorkspace(m_peakPositionTable);
+  setProperty("DiagnosticWorkspaces", diagnosticGroup);
 }
 
 void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
@@ -846,7 +885,7 @@ void PDCalibration::createNewCalTable() {
   auto alg = createChildAlgorithm("CalculateDIFC");
   alg->setProperty("InputWorkspace", m_uncalibratedWS);
   alg->executeAsChildAlg();
-  API::MatrixWorkspace_sptr difcWS = alg->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_const_sptr difcWS = alg->getProperty("OutputWorkspace");
 
   // create a new workspace
   m_calibrationTable = boost::make_shared<DataObjects::TableWorkspace>();
@@ -877,6 +916,33 @@ void PDCalibration::createNewCalTable() {
     newRow << 0.;      // tzero
     newRow << 0.;      // tofmin
     newRow << DBL_MAX; // tofmax
+  }
+}
+
+void PDCalibration::createInformationWorkspaces() {
+  // table for the fitted location of the various peaks
+  m_peakPositionTable = boost::make_shared<DataObjects::TableWorkspace>();
+  m_peakPositionTable->addColumn("int", "detid");
+  for (double dSpacing : m_peaksInDspacing) {
+    std::stringstream namess;
+    namess << "@" << std::setprecision(5) << dSpacing;
+    m_peakPositionTable->addColumn("double", namess.str());
+  }
+
+  // convert the map of m_detidToRow to be a vector of detector ids
+  std::vector<detid_t> detIds(m_detidToRow.size());
+  for (const auto &it : m_detidToRow) {
+    detIds[it.second] = it.first;
+  }
+
+  // copy the detector ids from the main table and add lots of NaNs
+  for (const auto &detId : detIds) {
+    API::TableRow newRow = m_peakPositionTable->appendRow();
+    newRow << detId;
+    for (double dSpacing : m_peaksInDspacing) {
+      UNUSED_ARG(dSpacing);
+      newRow << std::nan("");
+    }
   }
 }
 
