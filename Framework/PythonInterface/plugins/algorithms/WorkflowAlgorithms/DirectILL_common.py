@@ -30,6 +30,7 @@ ELASTIC_CHANNEL_AUTO = 'Elastic Channel AUTO'
 ELASTIC_CHANNEL_FIT = 'Fit Elastic Channel'
 ELASTIC_CHANNEL_SAMPLE_LOG = 'Default Elastic Channel'
 
+ELASTIC_PEAK_DIAGNOSTICS_AUTO = 'Peak Diagnostics AUTO'
 ELASTIC_PEAK_DIAGNOSTICS_OFF = 'Peak Diagnostics OFF'
 ELASTIC_PEAK_DIAGNOSTICS_ON = 'Peak Diagnostics ON'
 

@@ -693,21 +693,12 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             instrument = mainWS.getInstrument()
             if instrument.hasParameter('enable_incident_energy_calibration'):
                 enabled = instrument.getBoolParameter('enable_incident_energy_calibration')[0]
-                if enabled:
-                    report.notice(common.PROP_INCIDENT_ENERGY_CALIBRATION + ' set to '
-                                  + common.INCIDENT_ENERGY_CALIBRATION_ON + ' by the IPF.')
-                    return True
-                else:
-                    report.notice(common.PROP_INCIDENT_ENERGY_CALIBRATION + ' set to '
-                                  + common.INCIDENT_ENERGY_CALIBRATION_OFF + ' by the IPF.')
+                if not enabled:
+                    report.notice('Inciden energy calibration disabled by the IPF.')
                     return False
-            else:
-                report.notice('Defaulted ' + common.PROP_INCIDENT_ENERGY_CALIBRATION + ' to '
-                              + common.INCIDENT_ENERGY_CALIBRATION_ON + '.')
-                return True
-        elif eppMethod == common.INCIDENT_ENERGY_CALIBRATION_ON:
+            report.notice('Incident energy calibration enabled.')
             return True
-        return False
+        return eppMethod == common.INCIDENT_ENERGY_CALIBRATION_ON:
 
     def _flatBkgDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Subtract flat background from a detector workspace."""

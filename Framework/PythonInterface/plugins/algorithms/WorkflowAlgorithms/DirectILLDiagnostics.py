@@ -382,7 +382,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             wsCleanup.cleanup(bkgWS)
 
         peakMaskedSpectra = list()
-        if self._peakDiagnosticsEnabled():
+        if self._peakDiagnosticsEnabled(mainWS):
             progress.report('Diagnosing peaks')
             peakMaskWS, peakIntensityWS = self._peakDiagnostics(mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging)
             peakMaskedSpectra = _reportPeakDiagnostics(reportWS, peakIntensityWS, peakMaskWS)
@@ -442,8 +442,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='Table workspace containing results from the FindEPP algorithm.')
         self.declareProperty(name=common.PROP_ELASTIC_PEAK_DIAGNOSTICS,
-                             defaultValue=common.ELASTIC_PEAK_DIAGNOSTICS_ON,
+                             defaultValue=common.ELASTIC_PEAK_DIAGNOSTICS_AUTO,
                              validator=StringListValidator([
+                                 common.ELASTIC_PEAK_DIAGNOSTICS_AUTO,
                                  common.ELASTIC_PEAK_DIAGNOSTICS_ON,
                                  common.ELASTIC_PEAK_DIAGNOSTICS_OFF]),
                              direction=Direction.Input,
@@ -658,21 +659,12 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             instrument = mainWS.getInstrument()
             if instrument.hasParameter('enable_background_diagnostics'):
                 enabled = instrument.getBoolParameter('enable_background_diagnostics')[0]
-                if enabled:
-                    report.notice(common.PROP_BKG_DIAGNOSTICS + ' set to '
-                                  + common.BKG_DIAGNOSTICS_ON + ' by the IPF.')
-                    return True
-                else:
-                    report.notice(common.PROP_BKG_DIAGNOSTICS + ' set to '
-                                  + common.BKG_DIAGNOSTICS_OFF + ' by the IPF.')
+                if not enabled:
+                    report.notice('Background diagnostics disable by the IPF.')
                     return False
-            else:
-                report.notice('Defaulted ' + common.PROP_BKG_DIAGNOSTICS + ' to '
-                              + common.BKG_DIAGNOSTICS_ON + '.')
-                return True
-        elif bkgDiagnostics == common.BKG_DIAGNOSTICS_ON:
+            report.notice('Background diagnostics enabled.')
             return True
-        return False
+        return bkgDiagnostics == common.BKG_DIAGNOSTICS_ON:
 
     def _defaultMask(self, mainWS, wsNames, wsCleanup, report, algorithmLogging):
         """Load instrument specific default mask or return None if not available."""
@@ -737,9 +729,19 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         peakDiagnosticsWS = _elasticPeakDiagnostics(integratedPeaksWS, settings, wsNames, subalgLogging)
         return (peakDiagnosticsWS, integratedPeaksWS)
 
-    def _peakDiagnosticsEnabled(self):
+    def _peakDiagnosticsEnabled(self, mainWS, report):
         """Return true if elastic peak diagnostics are enabled, false otherwise."""
-        return self.getProperty(common.PROP_ELASTIC_PEAK_DIAGNOSTICS).value == common.ELASTIC_PEAK_DIAGNOSTICS_ON
+        peakDiagnostics = self.getProperty(common.PROP_ELASTIC_PEAK_DIAGNOSTICS).value
+        if peakDiagnostics == common.ELASTIC_PEAK_DIAGNOSTICS_AUTO:
+            instrument = mainWS.getInstrument()
+            if instrument.hasParameter('enable_elastic_peak_diagnostics'):
+                enabled = instrument.getBoolParameter('enable_elastic_peak_diagnostics')[0]
+                if not enabled:
+                    report.notice('Elastic peak diagnostics disabled by the IPF.')
+                    return False
+            report.notice('Elastic peak diagnostics enabled.')
+            return True
+        return peakDiagnostics == common.ELASTIC_PEAK_DIAGNOSTICS_ON
 
     def _userMask(self, mainWS, wsNames, wsCleanup, algorithmLogging):
         """Return combined masked spectra and components."""
