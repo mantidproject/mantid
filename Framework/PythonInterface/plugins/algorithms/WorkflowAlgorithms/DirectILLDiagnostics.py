@@ -599,7 +599,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                 index = i + indexShift
                 Ys[index] = numpy.sum(ws.dataY(i))
                 i += step
-            maxIndex = numpy.argmax(Ys)
+            maxIndex = int(numpy.argmax(Ys))
             thresholdVal = threshold * Ys[maxIndex]
             i = maxIndex - indexShift + step
             while comp(i, begin):
