@@ -73,7 +73,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Sample thickness in cm')
 
         self.declareProperty(name='SampleAngle', defaultValue=0.0,
-                             doc='Sample angle in degrees')
+                             doc='Angle between incident beam and normal to flat plate surface')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
                                                      direction=Direction.Input,
@@ -108,8 +108,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(name='Emode', defaultValue='Elastic',
                              validator=StringListValidator(['Elastic', 'Indirect', 'Direct', 'Efixed']),
-                             doc='Energy transfer mode. Only Efixed behaves differently. '
-                                 'Others are equivalent for this algorithm, and are left only for legacy access.')
+                             doc='Energy transfer mode.')
 
         self.declareProperty(name='Efixed', defaultValue=0.,
                              doc='Analyser energy (mev). By default will be read from the instrument parameters. '
