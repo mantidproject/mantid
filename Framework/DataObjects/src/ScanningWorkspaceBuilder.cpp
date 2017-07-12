@@ -32,10 +32,12 @@ ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(
     const size_t nTimeIndexes, const size_t nBins, const bool isPointData)
     : m_nDetectors(instrument->getNumberDetectors()),
       m_nTimeIndexes(nTimeIndexes), m_nBins(nBins), m_instrument(instrument),
-      m_histogram(isPointData ? BinEdges(nBins + 1, LinearGenerator(1.0, 1.0))
-                              : Points(nBins),
+      m_histogram(BinEdges(nBins + 1, LinearGenerator(1.0, 1.0)),
                   Counts(nBins, 0.0)),
-      m_indexingType(IndexingType::Default) {}
+      m_indexingType(IndexingType::Default) {
+  if (isPointData)
+    m_histogram = HistogramData::Histogram(Points(nBins), Counts(nBins, 0.0));
+}
 
 /**
  * Set a histogram to be used for all the workspace spectra. This can be used to
