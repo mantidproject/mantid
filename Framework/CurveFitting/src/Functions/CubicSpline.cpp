@@ -9,7 +9,6 @@
 #include <boost/lexical_cast.hpp>
 #include <stdexcept>
 #include <vector>
-#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -82,7 +81,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
   for (int i = 0; i < n; ++i) {
 
     x[i] = getAttribute("x" + std::to_string(i)).asDouble();
-    y[i] = getParameter("y" + std::to_string(i));
+    y[i] = getParameter(i);
 
     if (!xSortFlag) {
       // if x[i] is out of order with its neighbours

@@ -126,7 +126,7 @@ public:
   void testOutOfOrderInterploationPoints() {
     CubicSpline cspline;
 
-    setupCubicSpline(cspline, 10, 1.);
+    setupCubicSpline(cspline, 10, 1);
 
     // swap the values of some points
     cspline.setXAttribute(3, 1);
