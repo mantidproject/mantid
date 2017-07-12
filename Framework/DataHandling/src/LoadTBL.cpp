@@ -293,7 +293,7 @@ void LoadTBL::exec() {
   boost::split(columnHeadings, line, boost::is_any_of(","),
                boost::token_compress_off);
   for (auto entry = columnHeadings.begin(); entry != columnHeadings.end();) {
-    if (std::string(*entry).compare("") == 0) {
+    if (entry->empty()) {
       // erase the empty values
       entry = columnHeadings.erase(entry);
     } else {
@@ -400,7 +400,7 @@ void LoadTBL::exec() {
       // the columns vector to the TableWorkspace
       for (auto heading = columnHeadings.begin();
            heading != columnHeadings.end();) {
-        if (std::string(*heading).compare("") == 0) {
+        if (heading->empty()) {
           // there is no need to have empty column headings.
           heading = columnHeadings.erase(heading);
         } else {

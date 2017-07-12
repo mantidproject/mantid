@@ -12,17 +12,17 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/IndexPeaks.h"
 #include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidAPI/FrameworkManager.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 
 class PredictFractionalPeaksTest : public CxxTest::TestSuite {
@@ -35,12 +35,12 @@ public:
   }
 
   void test_exec() {
-    LoadIsawPeaks loader;
+    LoadNexusProcessed loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
 
     std::string WSName("peaks");
-    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
+    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
     loader.setPropertyValue("OutputWorkspace", WSName);
     TS_ASSERT(loader.execute());
     TS_ASSERT(loader.isExecuted());

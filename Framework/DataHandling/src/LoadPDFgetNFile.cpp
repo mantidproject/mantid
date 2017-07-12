@@ -40,10 +40,8 @@ int LoadPDFgetNFile::confidence(Kernel::FileDescriptor &descriptor) const {
   // check the file extension
   const std::string &extn = descriptor.extension();
   // Only allow known file extensions
-  if (extn.compare("sq") != 0 && extn.compare("sqa") != 0 &&
-      extn.compare("sqb") != 0 && extn.compare("gr") != 0 &&
-      extn.compare("ain") != 0 && extn.compare("braw") != 0 &&
-      extn.compare("bsmo") != 0) {
+  if (extn != "sq" && extn != "sqa" && extn != "sqb" && extn != "gr" &&
+      extn != "ain" && extn != "braw" && extn != "bsmo") {
     return 0;
   }
 
@@ -190,7 +188,7 @@ void LoadPDFgetNFile::parseColumnNameLine(std::string line) {
   }
 
   string header = terms[0];
-  if (header.compare("#L") != 0) {
+  if (header != "#L") {
     stringstream errmsg;
     errmsg << "Expecting header as #L.  Input line has header as " << header
            << ". Unable to proceed. ";
@@ -236,11 +234,11 @@ void LoadPDFgetNFile::parseDataLine(string line) {
   for (size_t i = 0; i < numcols; ++i) {
     string temps = terms[i];
     double tempvalue;
-    if (temps.compare("NaN") == 0) {
+    if (temps == "NaN") {
       // FIXME:  Need to discuss with Peter about how to treat NaN value
       // tempvalue = DBL_MAX-1.0;
       tempvalue = 0.0;
-    } else if (temps.compare("-NaN") == 0) {
+    } else if (temps == "-NaN") {
       // tempvalue = -DBL_MAX+1.0;
       // FIXME:  Need to discuss with Peter about how to treat NaN value
       tempvalue = 0.0;
@@ -257,10 +255,10 @@ void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws) {
   // 1. Set X
   string xcolname = mColumnNames[0];
 
-  if (xcolname.compare("Q") == 0) {
+  if (xcolname == "Q") {
     string unit = "MomentumTransfer";
     ws->getAxis(0)->setUnit(unit);
-  } else if (xcolname.compare("r") == 0) {
+  } else if (xcolname == "r") {
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
     Unit_sptr unit = ws->getAxis(0)->unit();
     boost::shared_ptr<Units::Label> label =
@@ -275,9 +273,9 @@ void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws) {
   // 2. Set Y
   string ycolname = mColumnNames[1];
   string ylabel;
-  if (ycolname.compare("G(r)") == 0) {
+  if (ycolname == "G(r)") {
     ylabel = "PDF";
-  } else if (ycolname.compare("S") == 0) {
+  } else if (ycolname == "S") {
     ylabel = "S";
   } else {
     ylabel = "Intensity";

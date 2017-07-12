@@ -37,12 +37,6 @@ Output:
 
    ... files were removed
 
-Related Algorithms
-------------------
-
-:ref:`CreateCacheFilename <algm-CreateCacheFilename>` will create
-filenames that this will delete.
-
 .. categories::
 
 .. sourcelink::

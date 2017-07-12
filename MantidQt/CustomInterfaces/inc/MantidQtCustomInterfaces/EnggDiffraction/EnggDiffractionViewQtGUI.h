@@ -171,6 +171,8 @@ public:
 
   int currentMultiRunMode() const override { return g_currentRunMode; }
 
+  void updateTabsInstrument(const std::string &newInstrument) override;
+
 signals:
   void getBanks();
   void setBank();

@@ -25,7 +25,7 @@
 #include <boost/python/detail/prefix.hpp>
 #include <boost/python/to_python_value.hpp>
 #include <boost/mpl/and.hpp>
-#include <boost/type_traits/is_convertible.hpp>
+#include <type_traits>
 
 /**
  * Policy that can convert to return type to a super type
@@ -74,7 +74,7 @@ template <class ReturnType> struct AsType {
     // Deduce if type is correct for policy, needs to be convertible to
     // ReturnType
     typedef typename boost::mpl::if_c<
-        boost::is_convertible<InputType, ReturnType>::value,
+        std::is_convertible<InputType, ReturnType>::value,
         AsTypeImpl<ReturnType, InputType>,
         AsType_Requires_New_Type_Automatically_Convertible_To_Original<
             InputType>>::type type;

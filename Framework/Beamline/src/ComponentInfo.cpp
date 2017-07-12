@@ -13,13 +13,11 @@ ComponentInfo::ComponentInfo()
       m_size(0) {}
 
 ComponentInfo::ComponentInfo(
-    const std::vector<size_t> &assemblySortedDetectorIndices,
-    const std::vector<std::pair<size_t, size_t>> &ranges)
-    : m_assemblySortedDetectorIndices(boost::make_shared<std::vector<size_t>>(
-          assemblySortedDetectorIndices)),
-      m_ranges(boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-          ranges)),
-      m_size(m_assemblySortedDetectorIndices->size() + ranges.size()) {}
+    boost::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
+    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> ranges)
+    : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
+      m_ranges(std::move(ranges)),
+      m_size(m_assemblySortedDetectorIndices->size() + m_ranges->size()) {}
 
 std::vector<size_t>
 ComponentInfo::detectorIndices(const size_t componentIndex) const {
@@ -41,5 +39,13 @@ ComponentInfo::detectorIndices(const size_t componentIndex) const {
 
 size_t ComponentInfo::size() const { return m_size; }
 
+bool ComponentInfo::operator==(const ComponentInfo &other) const {
+  return m_size == other.m_size && m_ranges == other.m_ranges &&
+         *m_assemblySortedDetectorIndices ==
+             *other.m_assemblySortedDetectorIndices;
+}
+bool ComponentInfo::operator!=(const ComponentInfo &other) const {
+  return !(this->operator==(other));
+}
 } // namespace Beamline
 } // namespace Mantid

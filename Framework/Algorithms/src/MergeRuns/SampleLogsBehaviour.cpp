@@ -344,7 +344,7 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForList(
   // See if property exists already - merging an output of MergeRuns
   returnProp.reset(ws.getLog(item)->clone());
 
-  if (returnProp->type().compare("string") != 0) {
+  if (returnProp->type() != "string") {
     ws.mutableRun().addProperty(item, value, true);
     returnProp.reset(ws.getLog(item)->clone());
   }
@@ -584,7 +584,7 @@ bool SampleLogsBehaviour::isWithinTolerance(const SampleLogBehaviour &behaviour,
  */
 bool SampleLogsBehaviour::stringPropertiesMatch(
     const SampleLogBehaviour &behaviour, const Property *addeeWSProperty) {
-  return behaviour.property->value().compare(addeeWSProperty->value()) == 0;
+  return behaviour.property->value() == addeeWSProperty->value();
 }
 
 /**

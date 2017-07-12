@@ -320,6 +320,22 @@ void MuonAnalysis::initLayout() {
           SLOT(openDirectoryDialog()));
 }
 
+void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
+  const auto wsParams =
+      MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
+
+  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
+  const QString &periodToSet = QString::fromStdString(wsParams.periods);
+  const auto &groups = m_dataSelector->getChosenGroups();
+  const auto &periods = m_dataSelector->getPeriodSelections();
+  if (!groups.contains(groupToSet)) {
+    m_uiForm.fitBrowser->setChosenGroup(groupToSet);
+  }
+  if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
+    m_uiForm.fitBrowser->setChosenPeriods(periodToSet);
+  }
+}
+
 /**
 * Muon Analysis help (slot)
 */
@@ -361,13 +377,13 @@ void MuonAnalysis::runFrontPlotButton() {
     return;
   }
 
-  plotSelectedItem();
+  plotSelectedGroupPair();
 }
 
 /**
  * Creates a plot of selected group/pair.
  */
-void MuonAnalysis::plotSelectedItem() {
+void MuonAnalysis::plotSelectedGroupPair() {
   ItemType itemType;
   int tableRow;
 
@@ -398,7 +414,9 @@ void MuonAnalysis::plotSelectedItem() {
 void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
                             PlotType plotType) {
   m_updating = true;
-  m_dataSelector->clearChosenGroups();
+  m_uiForm.fitBrowser->clearChosenGroups();
+  m_uiForm.fitBrowser->clearChosenPeriods();
+
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
   try {
@@ -513,7 +531,14 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
   const auto *table =
       itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
   options.groupPairName = table->item(tableRow, 0)->text().toStdString();
-
+  m_groupPairName = table->item(tableRow, 0)->text().toStdString();
+  if (plotType == Muon::PlotType::Asymmetry &&
+      m_dataLoader.isContainedIn(options.groupPairName,
+                                 options.grouping.groupNames)) {
+    setTFAsymm(Muon::TFAsymmState::Enabled); // turn TFAsymm on
+  } else {
+    setTFAsymm(Muon::TFAsymmState::Disabled); // turn TFAsymm off
+  }
   return m_dataLoader.createAnalysisWorkspace(loadedWS, options);
 }
 
@@ -886,8 +911,13 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
     }
   }
 
-  // Put this call after grouping so that correct data is replotted
-  updateFrontAndCombo();
+  // Put this call after grouping. Don't update the current index
+  // or replot though (false flag).
+  // Note: A bug current exists where if we are re-plotting
+  // and the user calls the table changed method before plotting finishes
+  // (by clicking the table again) Qt will later crash.
+  // This false flag also prevents this (issue: #19701)
+  updateFrontAndCombo(false);
 }
 
 /**
@@ -915,7 +945,8 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
       }
     }
     m_pairToRow = m_groupingHelper.whichPairToWhichRow();
-    updateFrontAndCombo();
+    // Don't replot if the pair table has been modified
+    updateFrontAndCombo(false);
   }
 
   // pair name been modified
@@ -947,7 +978,7 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
     }
 
     m_pairToRow = m_groupingHelper.whichPairToWhichRow();
-    updateFrontAndCombo();
+    updateFrontAndCombo(false);
 
     // check to see if alpha is specified (if name!="") and if not
     // assign a default of 1.0
@@ -977,7 +1008,7 @@ void MuonAnalysis::updatePairTable() {
       m_uiForm.pairTable->setCellWidget(i, 1, new QComboBox);
       m_uiForm.pairTable->setCellWidget(i, 2, new QComboBox);
     }
-    updateFrontAndCombo();
+    updateFrontAndCombo(false);
     return;
   } else if (numGroups() < 2 && numPairs() <= 0) {
     return;
@@ -1314,7 +1345,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
   m_currentLabel = loadResult->label;
 
   if (m_uiForm.frontPlotButton->isEnabled())
-    plotSelectedItem();
+    plotSelectedGroupPair();
 }
 
 /**
@@ -1460,8 +1491,11 @@ void MuonAnalysis::updateFront() {
 
 /**
  * Update front including first re-populate pair list combo box
+ * Also update multiple fitting
+ * Plots changes if requested
+ * @param updateIndexAndPlot :: If true updates and plots the current group/pair
  */
-void MuonAnalysis::updateFrontAndCombo() {
+void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
   // for now brute force clearing and adding new context
   // could go for softer approach and check if is necessary
   // to completely reset this combo box
@@ -1473,19 +1507,33 @@ void MuonAnalysis::updateFrontAndCombo() {
 
   int numG = numGroups();
   int numP = numPairs();
-  for (int i = 0; i < numG; i++)
+  QStringList groupsAndPairs;
+  for (int i = 0; i < numG; i++) {
     m_uiForm.frontGroupGroupPairComboBox->addItem(
         m_uiForm.groupTable->item(m_groupToRow[i], 0)->text());
-  for (int i = 0; i < numP; i++)
+    auto groupName = m_uiForm.groupTable->item(m_groupToRow[i], 0)->text();
+    if (groupName.toStdString() != "") {
+      groupsAndPairs << groupName;
+    }
+  }
+  for (int i = 0; i < numP; i++) {
     m_uiForm.frontGroupGroupPairComboBox->addItem(
         m_uiForm.pairTable->item(m_pairToRow[i], 0)->text());
-
+    auto pairName = m_uiForm.groupTable->item(m_pairToRow[i], 0)->text();
+    if (pairName.toStdString() != "") {
+      groupsAndPairs << pairName;
+    }
+  }
   // If it doesn't match then reset
   if (currentI >= m_uiForm.frontGroupGroupPairComboBox->count()) {
     currentI = 0;
   }
+  m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
 
-  setGroupOrPairAndReplot(currentI);
+  if (updateIndexAndPlot) {
+    setGroupOrPairIndexToPlot(currentI);
+    plotCurrentGroupAndPairs();
+  }
 }
 
 /**
@@ -1663,7 +1711,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "def plot_data(ws_name,errors, connect, window_to_use):";
   if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry) {
     // clang-format off
-    s << "w = plotSpectrum(source = ws_name,"
+    s << "  w = plotSpectrum(source = ws_name,"
          "indices = 0,"
          "distribution = mantidqtpython.MantidQt.DistributionFalse,"
          "error_bars = errors," 
@@ -1672,7 +1720,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
     // clang-format on
   } else {
     // clang-format off
-    s << "w = plotSpectrum(source = ws_name,"
+    s << "  w = plotSpectrum(source = ws_name,"
          "indices = 0,"
          "distribution = mantidqtpython.MantidQt.DistributionDefault,"
          "error_bars = errors,"
@@ -1837,11 +1885,12 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
-    m_dataSelector->setAvailableGroups(groupsAndPairs);
-    m_dataSelector->setNumPeriods(m_numPeriods);
+    m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
+    m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
     m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
+    setChosenGroupAndPeriods(wsName);
   }
 
   QString code;
@@ -2111,20 +2160,60 @@ void MuonAnalysis::loadFittings() {
       Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(
           nullptr, m_uiForm.fitBrowser, m_functionBrowser);
   // Connect signals
-  connect(m_dataSelector, SIGNAL(selectedGroupsChanged()), this,
-          SLOT(dataToFitChanged()));
-  connect(m_dataSelector, SIGNAL(selectedPeriodsChanged()), this,
-          SLOT(dataToFitChanged()));
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataToFitChanged()));
   connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this,
           SLOT(updateDataPresenterOverwrite(int)));
+  connect(m_uiForm.fitBrowser, SIGNAL(groupBoxClicked()), this,
+          SLOT(handleGroupBox()));
+  connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked()), this,
+          SLOT(handlePeriodBox()));
+
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
   const auto &multiFitState = m_optionTab->getMultiFitState();
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+  // Set TF Asymmetry mode on/off as appropriate
+  const auto &TFAsymmState = m_optionTab->getTFAsymmState();
+  setTFAsymm(TFAsymmState);
 }
-
+/**
+* Handle "groups" selected/deselected
+* Update stored value
+*/
+void MuonAnalysis::handleGroupBox() {
+  // send the group to dataselector
+  m_dataSelector->setGroupsSelected(m_uiForm.fitBrowser->getChosenGroups());
+  // update labels for single fit
+  auto names = m_fitDataPresenter->generateWorkspaceNames(true);
+  if (names.size() == 1) {
+    updateLabels(names[0]);
+  }
+  m_fitDataPresenter->handleSelectedDataChanged(true);
+}
+/**
+* Handle"periods" selected/deselected
+* Update stored value
+*/
+void MuonAnalysis::handlePeriodBox() {
+  // send the group to dataselector
+  m_dataSelector->setPeriodsSelected(m_uiForm.fitBrowser->getChosenPeriods());
+  // update labels for single fit
+  auto names = m_fitDataPresenter->generateWorkspaceNames(true);
+  if (names.size() == 1) {
+    updateLabels(names[0]);
+  }
+  m_fitDataPresenter->handleSelectedDataChanged(true);
+}
+/**
+* Updates the labels (legend and ws) for
+* a single fit when within the mulit-
+* fit GUI.
+* @param name :: the name for the label.
+*/
+void MuonAnalysis::updateLabels(std::string &name) {
+  m_uiForm.fitBrowser->setOutputName(name);
+}
 /**
  * Allow/disallow loading.
  */
@@ -2414,8 +2503,11 @@ void MuonAnalysis::changeTab(int newTabIndex) {
   if (newTab == m_uiForm.DataAnalysis) // Entering DA tab
   {
     // Save last fitting range
-    auto xmin = m_dataSelector->getStartTime();
-    auto xmax = m_dataSelector->getEndTime();
+    auto xmin = m_uiForm.fitBrowser->startX();
+    auto xmax = m_uiForm.fitBrowser->endX();
+    // make sure data selector has same values
+    m_dataSelector->setStartTime(xmin);
+    m_dataSelector->setEndTime(xmax);
 
     // Say MantidPlot to use Muon Analysis fit prop. browser
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
@@ -2435,6 +2527,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       const boost::optional<QString> filePath =
           m_uiForm.mwRunFiles->getUserInput().toString();
       m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
+      setChosenGroupAndPeriods(m_currentDataName);
       selectMultiPeak(m_currentDataName, filePath);
     }
 
@@ -2446,6 +2539,17 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // repeat setting the fitting ranges as the above code can set them to an
     // unwanted default value
     setFittingRanges(xmin, xmax);
+    // make sure groups are not on if single fit
+    if (m_optionTab->getMultiFitState() == Muon::MultiFitState::Disabled) {
+      m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
+    } else {
+      Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
+      m_uiForm.fitBrowser->setGroupNames(options.grouping.groupNames);
+      auto isItGroup = m_dataLoader.isContainedIn(m_groupPairName,
+                                                  options.grouping.groupNames);
+      m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
+      m_uiForm.fitBrowser->setAllPeriods();
+    }
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
@@ -2492,6 +2596,8 @@ void MuonAnalysis::connectAutoUpdate() {
           SLOT(updateCurrentPlotStyle()));
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
+  connect(m_optionTab, SIGNAL(TFAsymmStateChanged(int)), this,
+          SLOT(changedTFAsymmCheckbox(int)));
 }
 
 /**
@@ -2641,7 +2747,8 @@ void MuonAnalysis::syncGroupTablePlotTypeWithHome() {
     // This is not the best solution, but I don't have anything brighter at the
     // moment and it
     // was working like that for some time without anybody complaining.
-    setGroupOrPairAndReplot(0);
+    setGroupOrPairIndexToPlot(0);
+    plotCurrentGroupAndPairs();
   }
 
   m_uiForm.frontPlotFuncs->setCurrentIndex(plotTypeIndex);
@@ -2837,6 +2944,9 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
         m_dataTimeZero); // won't be used, but property is mandatory
     groupAlg->setPropertyValue("DetectorGroupingTable", groupingName);
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
+    groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
+    groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
+
     groupAlg->execute();
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
@@ -2921,8 +3031,11 @@ void MuonAnalysis::openDirectoryDialog() {
  * The point of using this function is so that the UI is never out of sync
  * @param index :: [input] Index of which group/pair to plot
  */
-void MuonAnalysis::setGroupOrPairAndReplot(int index) {
+void MuonAnalysis::setGroupOrPairIndexToPlot(int index) {
   m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(index);
+}
+
+void MuonAnalysis::plotCurrentGroupAndPairs() {
   // Replot, whichever tab we're currently on
   if (m_loaded && isAutoUpdateEnabled()) {
     runFrontPlotButton();
@@ -2943,7 +3056,8 @@ int MuonAnalysis::getGroupOrPairToPlot() const {
  */
 void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
   int defaultIndex = m_groupingHelper.fillGroupingTable(grouping);
-  setGroupOrPairAndReplot(defaultIndex);
+  setGroupOrPairIndexToPlot(defaultIndex);
+  plotCurrentGroupAndPairs();
 }
 
 /**
@@ -3039,12 +3153,59 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   const Muon::MultiFitState multiFitState = state == Qt::CheckState::Checked
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
-  m_fitFunctionPresenter->setMultiFitState(multiFitState);
-  if (multiFitState == Muon::MultiFitState::Disabled) {
-    m_dataSelector->clearChosenGroups();
+  // If both multiFit and TFAsymm are checked
+  // uncheck the TFAsymm
+  if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
+    // uncheck the box
+    m_uiForm.chkTFAsymm->setChecked(false);
+    changedTFAsymmCheckbox(0);
+    // reset the view
+    setTFAsymm(Muon::TFAsymmState::Disabled);
   }
+  m_fitFunctionPresenter->setMultiFitState(multiFitState);
 }
-
+/**
+* Called when the "TF Asymmetry" checkbox is changed (settings tab.)
+* Forward this to the fit function presenter.
+*/
+void MuonAnalysis::changedTFAsymmCheckbox(int state) {
+  const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
+                                              ? Muon::TFAsymmState::Enabled
+                                              : Muon::TFAsymmState::Disabled;
+  // If both multiFit and TFAsymm are checked
+  // uncheck the multiFit
+  if (m_uiForm.chkTFAsymm->isChecked() && state != 0) {
+    // uncheck the box
+    m_uiForm.chkEnableMultiFit->setChecked(false);
+    multiFitCheckboxChanged(0);
+    // reset the view
+    m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
+  }
+  setTFAsymm(TFAsymmState);
+}
+/**
+* Called when the "TF Asymmetry" is needed (from home tab)
+* Forward this to the fit function presenter.
+*/
+void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
+  // check the TFAsymm box
+  if (TFAsymmState == Muon::TFAsymmState::Enabled) {
+    m_uiForm.chkTFAsymm->setChecked(true);
+  } else {
+    m_uiForm.chkTFAsymm->setChecked(false);
+  }
+  // If both multiFit and TFAsymm are checked
+  // uncheck the multiFit
+  if (m_uiForm.chkEnableMultiFit->isChecked() &&
+      TFAsymmState == Muon::TFAsymmState::Enabled) {
+    // uncheck the box
+    m_uiForm.chkEnableMultiFit->setChecked(false);
+    multiFitCheckboxChanged(0);
+    // reset the view
+    m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
+  }
+  m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
+}
 /**
  * Update the fit data presenter with current overwrite setting
  * @param state :: [input] (not used) Setting of combo box

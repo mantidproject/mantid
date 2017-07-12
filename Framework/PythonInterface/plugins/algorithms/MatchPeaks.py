@@ -157,17 +157,17 @@ class MatchPeaks(PythonAlgorithm):
 
         # Find peak positions in input workspace
         peak_bins1 = self._get_peak_position(output_ws)
-        self.log().notice('Peak bins {0}: {1}'.format(self._input_ws, peak_bins1))
+        self.log().information('Peak bins {0}: {1}'.format(self._input_ws, peak_bins1))
 
         # Find peak positions in second input workspace
         if self._input_2_ws:
             peak_bins2 = self._get_peak_position(mtd[self._input_2_ws])
-            self.log().notice('Peak bins {0}: {1}'.format(self._input_2_ws, peak_bins2))
+            self.log().information('Peak bins {0}: {1}'.format(self._input_2_ws, peak_bins2))
 
         # Find peak positions in third input workspace
         if self._input_3_ws:
             peak_bins3 = self._get_peak_position(mtd[self._input_3_ws])
-            self.log().notice('Peak bins {0}: {1}'.format(self._input_3_ws, peak_bins3))
+            self.log().information('Peak bins {0}: {1}'.format(self._input_3_ws, peak_bins3))
 
         # All bins must be positive and larger than zero
         if not self._input_2_ws:
@@ -228,8 +228,10 @@ class MatchPeaks(PythonAlgorithm):
         @return          :: bin numbers of the peak positions
         """
 
+        fit_table_name = input_ws.getName() + '_epp'
+
         if isinstance(input_ws, MatrixWorkspace):
-            fit_table = FindEPP(InputWorkspace=input_ws)
+            fit_table = FindEPP(InputWorkspace=input_ws, OutputWorkspace=fit_table_name)
         elif isinstance(input_ws, ITableWorkspace):
             fit_table = input_ws
         else:
@@ -277,12 +279,7 @@ class MatchPeaks(PythonAlgorithm):
 
             logger.debug('Spectrum {0} will be shifted to bin {1}'.format(i,peak_bin[i]))
 
-        # Clean-up unused TableWorkspaces in try-catch
-        # Direct deletion causes problems when running in parallel for too many workspaces
-        try:
-            DeleteWorkspace(fit_table)
-        except ValueError:
-            logger.debug('Fit table already deleted')
+        DeleteWorkspace(fit_table)
 
         return peak_bin
 

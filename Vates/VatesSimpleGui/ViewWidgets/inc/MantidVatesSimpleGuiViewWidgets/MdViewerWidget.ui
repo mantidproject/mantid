@@ -73,7 +73,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="pqCameraToolbar" name="cameraWidget" native="true"/>
+      <widget class="pqCameraToolbarNonOrthogonalAxes" name="cameraWidget" native="true"/>
      </item>
      <item>
       <widget class="QToolButton" name="parallelProjButton">
@@ -332,9 +332,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>pqCameraToolbar</class>
+   <class>pqCameraToolbarNonOrthogonalAxes</class>
    <extends>QWidget</extends>
-   <header>pqCameraToolbar.h</header>
+   <header>MantidVatesSimpleGuiViewWidgets/pqCameraToolbarNonOrthogonalAxes.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

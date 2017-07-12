@@ -3,7 +3,9 @@
 
 #include "MantidParallel/DllConfig.h"
 
+#ifdef MPI_EXPERIMENTAL
 #include <boost/mpi/request.hpp>
+#endif
 #include <thread>
 
 namespace Mantid {
@@ -42,13 +44,17 @@ class ThreadingBackend;
 class MANTID_PARALLEL_DLL Request {
 public:
   Request() = default;
+#ifdef MPI_EXPERIMENTAL
   Request(const boost::mpi::request &request);
+#endif
 
   void wait();
 
 private:
   template <class Function> explicit Request(Function &&f);
+#ifdef MPI_EXPERIMENTAL
   boost::mpi::request m_request;
+#endif
   std::thread m_thread;
   const bool m_threadingBackend{false};
   // For accessing constructor based on callable.

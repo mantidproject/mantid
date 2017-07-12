@@ -4,6 +4,8 @@ from mantid.api import *
 from mantid.simpleapi import *
 from mantid import config
 
+from IndirectCommon import formatRuns
+
 
 class IndirectDiffScan(DataProcessorAlgorithm):
     _data_files = None
@@ -78,7 +80,7 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         process_prog = Progress(self, start=0.1, end=0.9, nreports=len(self._workspace_names))
         process_prog.report("Running diffraction")
         scan_alg = self.createChildAlgorithm("ISISIndirectDiffractionReduction", 0.05, 0.95)
-        scan_alg.setProperty('InputFiles', self._data_files)
+        scan_alg.setProperty('InputFiles', formatRuns(self._data_files, self._instrument_name))
         scan_alg.setProperty('ContainerFiles', self._can_files)
         scan_alg.setProperty('ContainerScaleFactor', self._can_scale)
         scan_alg.setProperty('CalFile', self._calib_file)

@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+
 #include "MantidAlgorithms/CalculateMuonAsymmetry.h"
 #include "MantidAlgorithms/MuonAsymmetryHelper.h"
 

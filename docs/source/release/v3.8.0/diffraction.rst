@@ -95,7 +95,7 @@ Powder Diffraction
   look at the signal as well when looking at the ``Q``-range to use
   for the transform.
 
-- :ref:`cry-powder-diffraction-ref`: S-Empty option has been enabled for
+- `Crystallography Powder Diffraction Script <http://docs.mantidproject.org/v3.8.0/api/python/techniques/CryPowderDiffractionISIS-v1.html>`_: S-Empty option has been enabled for
    the Crystallography Powder Diffraction Script. In order to use the
    S-Empty option, simply provide the S-Empty run number within the
    ``.pref`` file.
@@ -104,8 +104,8 @@ Powder Diffraction
   weights applied to events have changed by a factor of the duty cycle
   (:math:`c\approx0.498`) as requested by the instrument scientists.
 
-- :ref:`pearl-powder-diffraction-ref`: A workflow diagram for
-  ``pearl_run_focus`` function has been created.
+- `Pearl Powder Diffraction Script <http://docs.mantidproject.org/v3.8.0/api/python/techniques/PearlPowderDiffractionISIS-v1.html>`_: 
+  A workflow diagram for ``pearl_run_focus`` function has been created.
 
 - :ref:`CalibrateRectangularDetectors
   <algm-CalibrateRectangularDetectors>` has been modified to output

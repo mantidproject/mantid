@@ -278,6 +278,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             DeleteWorkspace(self._container_workspace)
             DeleteWorkspace(self._container_workspace + '_mon')
 
+        if self._vanadium_ws:
+            for van_ws in self._vanadium_ws:
+                DeleteWorkspace(van_ws)
+                DeleteWorkspace(van_ws+'_mon')
+
         # Rename output workspaces
         output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
 

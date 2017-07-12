@@ -1,19 +1,34 @@
 #include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
 #include <QPalette>
 #include <QPushButton>
 #include <QRegExp>
 #include <QtAlgorithms>
+#include <QMessageBox>
 #include <boost/lexical_cast.hpp>
 #include <exception>
 #include <stdlib.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
+/// The string "Workspace index"
+const QString MantidWSIndexWidget::WORKSPACE_NAME = "Workspace name";
+const QString MantidWSIndexWidget::WORKSPACE_INDEX = "Workspace index";
+
+/// The string "Custom"
+const QString MantidWSIndexWidget::CUSTOM = "Custom";
+
+// String for plot types
+const QString MantidWSIndexWidget::SIMPLE_PLOT = "1D Plot";
+const QString MantidWSIndexWidget::WATERFALL_PLOT = "Waterfall Plot";
+const QString MantidWSIndexWidget::SURFACE_PLOT = "Surface Plot";
+const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot";
+
 //----------------------------------
 // MantidWSIndexWidget methods
 //----------------------------------
@@ -24,15 +39,18 @@ namespace MantidWidgets {
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: true if waterfall plot enabled
  * @param showTiledOption :: true if tiled plot enabled
+ * @param isAdvanced :: true if advanced plotting has been selected
  */
 MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
-                                         QList<QString> wsNames,
+                                         const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
-                                         const bool showTiledOption)
+                                         const bool showTiledOption,
+                                         const bool isAdvanced)
     : QWidget(parent, flags), m_spectra(false),
       m_waterfall(showWaterfallOption), m_tiled(showTiledOption),
-      m_plotOptions(), m_wsNames(wsNames), m_wsIndexIntervals(),
-      m_spectraNumIntervals(), m_wsIndexChoice(), m_spectraIdChoice() {
+      m_advanced(isAdvanced), m_plotOptions(), m_wsNames(wsNames),
+      m_wsIndexIntervals(), m_spectraNumIntervals(), m_wsIndexChoice(),
+      m_spectraNumChoice() {
   checkForSpectraAxes();
   // Generate the intervals allowed to be plotted by the user.
   generateWsIndexIntervals();
@@ -46,12 +64,122 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
  * Returns the user-selected options
  * @returns Struct containing user options
  */
-MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() const {
+MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
   UserInput options;
   options.plots = getPlots();
+  options.simple = is1DPlotSelected();
   options.waterfall = isWaterfallPlotSelected();
   options.tiled = isTiledPlotSelected();
+  if (m_advanced) {
+    options.surface = isSurfacePlotSelected();
+    options.errors = isErrorBarsSelected();
+    options.contour = isContourPlotSelected();
+  } else {
+    options.surface = false;
+    options.errors = false;
+    options.contour = false;
+  }
+
+  // Advanced options
+  if (m_advanced && (options.simple || options.waterfall || options.surface ||
+                     options.contour)) {
+    UserInputAdvanced userInputAdvanced;
+    if (options.surface || options.contour) {
+      userInputAdvanced.accepted = true;
+      userInputAdvanced.plotIndex = getPlotIndex();
+      userInputAdvanced.axisName = getAxisName();
+    }
+    userInputAdvanced.logName = getLogName();
+    if (userInputAdvanced.logName == WORKSPACE_NAME ||
+        userInputAdvanced.logName == WORKSPACE_INDEX) {
+      // We want default names in legend, if log is workspace name or index
+      userInputAdvanced.logName = "";
+    }
+    userInputAdvanced.workspaceNames = m_wsNames;
+    if (userInputAdvanced.logName == CUSTOM) {
+      userInputAdvanced.customLogValues = getCustomLogValues();
+      if (userInputAdvanced.customLogValues.empty()) {
+        userInputAdvanced.accepted = false;
+      }
+    }
+    options.isAdvanced = true;
+    options.advanced = userInputAdvanced;
+  } else {
+    options.isAdvanced =
+        false; // We don't want the view to look at options.advanced.
+  }
   return options;
+}
+
+/**
+* Returns the workspace index to be plotted
+* @returns Workspace index to be plotted
+*/
+int MantidWSIndexWidget::getPlotIndex() const {
+  int spectrumIndex = 0; // default to 0
+  const auto userInput = getPlots();
+
+  if (!userInput.empty()) {
+    const auto indexList = userInput.values();
+    if (!indexList.empty()) {
+      const auto spectrumIndexes = indexList.at(0);
+      if (!spectrumIndexes.empty()) {
+        spectrumIndex = *spectrumIndexes.begin();
+      }
+    }
+  }
+  return spectrumIndex;
+}
+
+/**
+* Displays a message box with the supplied error string.
+* @param message :: [input] Error message to display
+*/
+void MantidWSIndexWidget::showPlotOptionsError(const QString &message) {
+  if (!message.isEmpty()) {
+    QMessageBox errorMessage;
+    errorMessage.setText(message);
+    errorMessage.setIcon(QMessageBox::Critical);
+    errorMessage.exec();
+  }
+}
+
+/**
+* If "Custom" is selected as log, returns the list of values the user has input
+* into the edit box, otherwise returns an empty set.
+* Note that the set is ordered by definition, and values are only added if they
+* are successfully converted to a double.
+* @returns Set of numerical log values
+*/
+const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
+  std::set<double> logValues;
+  if (m_logSelector->currentText() == CUSTOM) {
+    QStringList values = m_logValues->lineEdit()->text().split(',');
+    foreach (QString value, values) {
+      bool ok = false;
+      double number = value.toDouble(&ok);
+      if (ok) {
+        logValues.insert(number);
+      }
+    }
+  }
+  return logValues;
+}
+
+/**
+* Gets the name that the user gave for the Y axis of the surface plot
+* @returns Name input by user for axis
+*/
+const QString MantidWSIndexWidget::getAxisName() const {
+  return m_axisNameEdit->lineEdit()->text();
+}
+
+/**
+* Gets the log that user selected to plot against
+* @returns Name of log, or "Workspace index"
+*/
+const QString MantidWSIndexWidget::getLogName() const {
+  return m_logSelector->currentText();
 }
 
 /**
@@ -71,7 +199,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
     }
   }
   // Else if the user typed in the spectraField ...
-  else if (m_spectraIdChoice.getList().size() > 0) {
+  else if (m_spectraNumChoice.getList().size() > 0) {
     for (int i = 0; i < m_wsNames.size(); i++) {
       // Convert the spectra choices of the user into workspace indices for us
       // to use.
@@ -85,7 +213,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
       const Mantid::spec2index_map spec2index =
           ws->getSpectrumToWorkspaceIndexMap();
 
-      std::set<int> origSet = m_spectraIdChoice.getIntSet();
+      std::set<int> origSet = m_spectraNumChoice.getIntSet();
       std::set<int>::iterator it = origSet.begin();
       std::set<int> convertedSet;
 
@@ -103,15 +231,23 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
 }
 
 /**
- * Whether the user checked the "waterfall" box
- * @returns True if waterfall plot selected
- */
-bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
-  return (m_plotOptions->currentText() == "Waterfall Plot");
+* Whether the user selected "1D plot"
+* @returns True if 1D plot selected
+*/
+bool MantidWSIndexWidget::is1DPlotSelected() const {
+  return (m_plotOptions->currentText() == SIMPLE_PLOT);
 }
 
 /**
- * Whether the user checked the "tiled" box
+ * Whether the user selected "waterfall"
+ * @returns True if waterfall plot selected
+ */
+bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
+  return (m_plotOptions->currentText() == WATERFALL_PLOT);
+}
+
+/**
+ * Whether the user selected "tiled"
  * @returns True if tiled plot selected
  */
 bool MantidWSIndexWidget::isTiledPlotSelected() const {
@@ -119,13 +255,35 @@ bool MantidWSIndexWidget::isTiledPlotSelected() const {
 }
 
 /**
+* Whether the user selected surface plot
+* @returns True if surfarce plot selected
+*/
+bool MantidWSIndexWidget::isSurfacePlotSelected() const {
+  return (m_plotOptions->currentText() == SURFACE_PLOT);
+}
+
+/**
+* Whether the user selected contour plot
+* @returns True if surfarce plot selected
+*/
+bool MantidWSIndexWidget::isContourPlotSelected() const {
+  return (m_plotOptions->currentText() == CONTOUR_PLOT);
+}
+
+/**
+* Whether the user has selected plot with error bars
+* @returns True if error bars are selected
+*/
+bool MantidWSIndexWidget::isErrorBarsSelected() const {
+  return m_showErrorBars->checkState();
+}
+
+/**
  * Called when user edits workspace field
  */
 void MantidWSIndexWidget::editedWsField() {
-  if (usingSpectraNumbers()) {
-    m_spectraField->lineEdit()->clear();
-    m_spectraField->setError("");
-  }
+  m_spectraField->lineEdit()->clear();
+  m_spectraField->setError("");
 }
 
 /**
@@ -144,34 +302,138 @@ bool MantidWSIndexWidget::plotRequested() {
   bool acceptable = false;
   int npos = 0;
   QString wsText = m_wsField->lineEdit()->text();
-  QString spectraTest = m_spectraField->lineEdit()->text();
+  QString spectraText = m_spectraField->lineEdit()->text();
   QValidator::State wsState =
       m_wsField->lineEdit()->validator()->validate(wsText, npos);
   QValidator::State spectraState =
-      m_spectraField->lineEdit()->validator()->validate(spectraTest, npos);
+      m_spectraField->lineEdit()->validator()->validate(spectraText, npos);
   if (wsState == QValidator::Acceptable) {
     m_wsIndexChoice.addIntervals(m_wsField->lineEdit()->text());
+    m_usingWsIndexChoice = true;
+    m_usingSprectraNumChoice = false;
     acceptable = true;
   }
   // Else if the user typed in the spectraField ...
   else if (spectraState == QValidator::Acceptable) {
-    m_spectraIdChoice.addIntervals(m_spectraField->lineEdit()->text());
+    m_spectraNumChoice.addIntervals(m_spectraField->lineEdit()->text());
+    m_usingSprectraNumChoice = true;
+    m_usingWsIndexChoice = false;
     acceptable = true;
   } else {
+    m_usingSprectraNumChoice = false;
+    m_usingWsIndexChoice = false;
     QString error_message("Invalid input. It is not in the range available");
     if (!wsText.isEmpty())
       m_wsField->setError(error_message);
-    if (!spectraTest.isEmpty())
+    if (!spectraText.isEmpty())
       m_spectraField->setError(error_message);
+    if (wsText.isEmpty() && spectraText.isEmpty()) {
+      m_wsField->setError("Workspace indices or spectra numbers are needed");
+      m_spectraField->setError(
+          "Spectra numbers or workspace indices are needed");
+    }
   }
-  return acceptable;
+  // To give maximum feedback to user, we validate plot options,
+  // even if intervals are not acceptable
+  return validatePlotOptions() && acceptable;
 }
 
 /**
  * Called when dialog requests to plot all
  */
-void MantidWSIndexWidget::plotAllRequested() {
+bool MantidWSIndexWidget::plotAllRequested() {
   m_wsIndexChoice = m_wsIndexIntervals;
+  m_usingWsIndexChoice = true;
+  m_usingSprectraNumChoice = false;
+  return validatePlotOptions();
+}
+
+/**
+ * Validate plot options when a plot is requested
+ * set appropriate error if not valid
+ */
+bool MantidWSIndexWidget::validatePlotOptions() {
+
+  // Only bother is plotting is advanced
+  if (!m_advanced)
+    return true;
+
+  bool validOptions = true;
+
+  // We only validate the custom log values and
+  // only if custom logs are selected, else it's OK.
+  if (m_logSelector->currentText() == CUSTOM) {
+    QStringList values = m_logValues->lineEdit()->text().split(',');
+    bool firstValue = true;
+    double previousValue = 0.0;
+    foreach (QString value, values) {
+      bool ok = false;
+      double currentValue = value.toDouble(&ok);
+      // Check for non-numeric value
+      if (!ok) {
+        m_logValues->setError("A custom log value is not valid: " + value);
+        validOptions = false;
+        break;
+      }
+      // Check for order
+      if (firstValue) {
+        firstValue = false;
+        previousValue = currentValue;
+      } else {
+        if (previousValue < currentValue) {
+          previousValue = currentValue;
+        } else {
+          m_logValues->setError(
+              "The custom log values must be in numerical order and distinct.");
+          validOptions = false;
+          break;
+        }
+      }
+    }
+
+    if (validOptions) {
+      int numCustomLogValues = values.size();
+      QString nCustomLogValues;
+      nCustomLogValues.setNum(numCustomLogValues);
+      int numWorkspaces = m_wsNames.size();
+      if (m_plotOptions->currentText() == SURFACE_PLOT ||
+          m_plotOptions->currentText() == CONTOUR_PLOT) {
+        QString nWorkspaces;
+        nWorkspaces.setNum(numWorkspaces);
+
+        if (numCustomLogValues != numWorkspaces) {
+          m_logValues->setError("The number of custom log values (" +
+                                nCustomLogValues +
+                                ") is not equal to the number of workspaces (" +
+                                nWorkspaces + ").");
+          validOptions = false;
+        }
+      } else {
+        int numSpectra = 0;
+        if (m_usingWsIndexChoice)
+          numSpectra = m_wsIndexChoice.totalIntervalLength();
+        if (m_usingSprectraNumChoice)
+          numSpectra = m_spectraNumChoice.totalIntervalLength();
+        QString nPlots;
+        nPlots.setNum(numWorkspaces * numSpectra);
+
+        if (numCustomLogValues != numWorkspaces * numSpectra) {
+          m_logValues->setError(
+              "The number of custom log values (" + nCustomLogValues +
+              ") is not equal to the number of plots (" + nPlots + ").");
+          validOptions = false;
+        }
+      }
+    }
+  }
+
+  if (!validOptions) {
+    // Clear record of user choices, because they may change.
+    m_wsIndexChoice.clear();
+    m_spectraNumChoice.clear();
+  }
+
+  return validOptions;
 }
 
 /**
@@ -182,6 +444,9 @@ void MantidWSIndexWidget::init() {
   initSpectraBox();
   initWorkspaceBox();
   initOptionsBoxes();
+  if (m_advanced) {
+    initLogs();
+  }
   setLayout(m_outer);
 }
 
@@ -241,21 +506,174 @@ void MantidWSIndexWidget::initSpectraBox() {
  * Set up Options boxes UI
  */
 void MantidWSIndexWidget::initOptionsBoxes() {
-  m_optionsBox = new QHBoxLayout;
+  m_optionsBox = new QVBoxLayout;
 
+  m_plotOptionLabel = new QLabel(tr("Plot Type:"));
   if (m_waterfall || m_tiled) {
     m_plotOptions = new QComboBox();
-    m_plotOptions->addItem(tr("1D Plot"));
+    m_plotOptions->addItem(SIMPLE_PLOT);
     if (m_waterfall) {
-      m_plotOptions->addItem(tr("Waterfall Plot"));
+      m_plotOptions->addItem(WATERFALL_PLOT);
     }
     if (m_tiled) {
       m_plotOptions->addItem(tr("Tiled Plot"));
     }
+    if (m_advanced && isSuitableForContourOrSurfacePlot()) {
+      m_plotOptions->addItem(SURFACE_PLOT);
+      m_plotOptions->addItem(CONTOUR_PLOT);
+      connect(m_plotOptions, SIGNAL(currentIndexChanged(const QString &)), this,
+              SLOT(onPlotOptionChanged(const QString &)));
+    }
+    m_optionsBox->addWidget(m_plotOptionLabel);
     m_optionsBox->addWidget(m_plotOptions);
   }
 
+  if (m_advanced) {
+    int spacingAboveShowErrorBars = 10;
+    m_optionsBox->addSpacing(spacingAboveShowErrorBars);
+    m_showErrorBars = new QCheckBox("Show Error Bars");
+    m_optionsBox->addWidget(m_showErrorBars);
+  }
+
   m_outer->addItem(m_optionsBox);
+}
+
+void MantidWSIndexWidget::initLogs() {
+  m_logOptionsGroup = new QGroupBox(tr("Log Options"));
+  m_logBox = new QVBoxLayout;
+
+  m_logLabel = new QLabel(tr("Log value to plot against:"));
+  m_logSelector = new QComboBox();
+  populateLogComboBox();
+
+  m_customLogLabel = new QLabel(tr("<br>Custom log values:"));
+  m_logValues = new QLineEditWithErrorMark();
+
+  m_axisLabel = new QLabel(tr("<br>Label for plot axis:"));
+  m_axisNameEdit = new QLineEditWithErrorMark();
+  m_axisNameEdit->lineEdit()->setText(m_logSelector->currentText());
+
+  m_logBox->addWidget(m_logLabel);
+  m_logBox->addWidget(m_logSelector);
+  m_logBox->addWidget(m_customLogLabel);
+  m_logBox->addWidget(m_logValues);
+  m_logBox->addWidget(m_axisLabel);
+  m_logBox->addWidget(m_axisNameEdit);
+
+  m_logSelector->setEnabled(true);
+  m_logValues->setEnabled(false);
+  m_axisNameEdit->setEnabled(false);
+
+  m_logOptionsGroup->setLayout(m_logBox);
+
+  m_outer->addWidget(m_logOptionsGroup);
+
+  connect(m_logSelector, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(onLogSelected(const QString &)));
+}
+
+/**
+* Called when log selection changed
+* If "Custom" selected, enable the custom log input box.
+* Otherwise, it is read-only.
+* Also put the log name into the axis name box as a default choice.
+* @param logName :: [input] Text selected in combo box
+*/
+void MantidWSIndexWidget::onLogSelected(const QString &logName) {
+  m_logValues->setEnabled(logName == CUSTOM);
+  m_logValues->lineEdit()->clear();
+  m_axisNameEdit->lineEdit()->setText(logName);
+}
+
+/**
+* Called when plot option is changed
+* @param plotOption :: [input] New plot option
+*/
+void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
+  auto useLogNames = m_advanced && isSuitableForLogValues(plotOption);
+  auto isLogSelectorCustom = m_logSelector->currentText() == CUSTOM;
+  auto isSurfaceOrContourPlot = m_plotOptions->currentText() == SURFACE_PLOT ||
+                                m_plotOptions->currentText() == CONTOUR_PLOT;
+  // Enable widgets as appropriate
+  m_showErrorBars->setEnabled(!isSurfaceOrContourPlot);
+  m_logSelector->setEnabled(useLogNames);
+  m_logValues->setEnabled(useLogNames && isLogSelectorCustom);
+  m_axisNameEdit->setEnabled(isSurfaceOrContourPlot);
+  if (useLogNames) {
+    // Make sure an appropriate name is shown for the default log option.
+    if (m_plotOptions->currentText() == SURFACE_PLOT ||
+        m_plotOptions->currentText() == CONTOUR_PLOT) {
+      m_logSelector->setItemText(0, WORKSPACE_INDEX);
+      if (m_axisNameEdit->lineEdit()->text() == WORKSPACE_NAME) {
+        m_axisNameEdit->lineEdit()->setText(WORKSPACE_INDEX);
+      }
+    } else {
+      m_logSelector->setItemText(0, WORKSPACE_NAME);
+    }
+  }
+}
+
+/**
+* Populate the log combo box with all log names that
+* have single numeric value per workspace (and occur
+* in every workspace)
+*/
+void MantidWSIndexWidget::populateLogComboBox() {
+  // First item should be "Workspace index"
+  m_logSelector->addItem(WORKSPACE_NAME);
+
+  // Create a table of all single-value numeric log names versus
+  // how many workspaces they appear in
+  std::map<std::string, int> logCounts;
+  for (auto &wsName : m_wsNames) {
+    auto ws = getWorkspace(wsName);
+    if (ws) {
+      const std::vector<Mantid::Kernel::Property *> &logData =
+          ws->run().getLogData();
+      for (auto &log : logData) {
+        // If this is a single-value numeric log, add it to the list of counts
+        if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
+            dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
+          const std::string name = log->name();
+          if (logCounts.find(name) != logCounts.end()) {
+            logCounts[name]++;
+          } else {
+            logCounts[name] = 1;
+          }
+        }
+      }
+    }
+  }
+
+  // Add the log names to the combo box if they appear in all workspaces
+  const int nWorkspaces = m_wsNames.size();
+  for (auto &logCount : logCounts) {
+    if (logCount.second == nWorkspaces) {
+      m_logSelector->addItem(logCount.first.c_str());
+    }
+  }
+
+  // Add "Custom" at the end of the list
+  m_logSelector->addItem(CUSTOM);
+}
+
+Mantid::API::MatrixWorkspace_const_sptr
+MantidWSIndexWidget::getWorkspace(const QString &workspaceName) const {
+  return boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(
+          workspaceName.toStdString()));
+}
+
+// True if selected plot is suitable for plotting as contour of surface plot
+bool MantidWSIndexWidget::isSuitableForContourOrSurfacePlot() const {
+  return (m_wsNames.size() > 2);
+}
+
+// True if selected plot is suitable for putting log values in
+bool MantidWSIndexWidget::isSuitableForLogValues(
+    const QString &plotOption) const {
+  return (plotOption == SIMPLE_PLOT || plotOption == WATERFALL_PLOT ||
+          plotOption == SURFACE_PLOT || plotOption == CONTOUR_PLOT);
 }
 
 /**
@@ -367,25 +785,28 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: If true the waterfall checkbox is created
  * @param showPlotAll :: If true the "Plot all" button is created
- * @param showTiledOption :: If true the "Tiled" checkbox is created
+ * @param showTiledOption :: If true the "Tiled" option is created
+ * @param isAdvanced :: true if adanced plotting dialog is created
  */
 MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
-                                         QList<QString> wsNames,
+                                         const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
                                          const bool showPlotAll,
-                                         const bool showTiledOption)
+                                         const bool showTiledOption,
+                                         const bool isAdvanced)
     : QDialog(parent, flags),
-      m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption),
+      m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption,
+               isAdvanced),
       m_plotAll(showPlotAll) {
   // Set up UI.
-  init();
+  init(isAdvanced);
 }
 
 /**
  * Returns the user-selected options
  * @returns Struct containing user options
  */
-MantidWSIndexWidget::UserInput MantidWSIndexDialog::getSelections() const {
+MantidWSIndexWidget::UserInput MantidWSIndexDialog::getSelections() {
   return m_widget.getSelections();
 }
 
@@ -399,7 +820,15 @@ QMultiMap<QString, std::set<int>> MantidWSIndexDialog::getPlots() const {
 }
 
 /**
- * Whether the user checked the "waterfall" box
+* Whether the user selected the simple 1D plot
+* @returns True if waterfall plot selected
+*/
+bool MantidWSIndexDialog::is1DPlotSelected() const {
+  return m_widget.is1DPlotSelected();
+}
+
+/**
+ * Whether the user selected the "waterfall" plot
  * @returns True if waterfall plot selected
  */
 bool MantidWSIndexDialog::isWaterfallPlotSelected() const {
@@ -407,11 +836,35 @@ bool MantidWSIndexDialog::isWaterfallPlotSelected() const {
 }
 
 /**
- * Whether the user checked the "tiled" box
+ * Whether the user selected the "tiled" plot
  * @returns True if tiled plot selected
  */
 bool MantidWSIndexDialog::isTiledPlotSelected() const {
   return m_widget.isTiledPlotSelected();
+}
+
+/**
+* Whether the user selected the surface plot
+* @returns True if surface plot selected
+*/
+bool MantidWSIndexDialog::isSurfacePlotSelected() const {
+  return m_widget.isSurfacePlotSelected();
+}
+
+/**
+* Whether the user selected the surface plot
+* @returns True if surface plot selected
+*/
+bool MantidWSIndexDialog::isContourPlotSelected() const {
+  return m_widget.isContourPlotSelected();
+}
+
+/**
+* Whether the user selected error bars
+* @returns True if error bars selected
+*/
+bool MantidWSIndexDialog::isErrorBarsSelected() const {
+  return m_widget.isErrorBarsSelected();
 }
 
 //----------------------------------
@@ -430,17 +883,22 @@ void MantidWSIndexDialog::plot() {
  * Called when "Plot all" button pressed
  */
 void MantidWSIndexDialog::plotAll() {
-  m_widget.plotAllRequested();
-  accept();
+  if (m_widget.plotAllRequested()) {
+    accept();
+  }
 }
 
 //----------------------------------
 // MantidWSIndexDialog private methods
 //----------------------------------
-void MantidWSIndexDialog::init() {
+void MantidWSIndexDialog::init(bool isAdvanced) {
   m_outer = new QVBoxLayout;
 
-  setWindowTitle(tr("MantidPlot"));
+  if (isAdvanced) {
+    setWindowTitle(tr("Plot Advanced"));
+  } else {
+    setWindowTitle(tr("Plot Spectrum"));
+  }
   m_outer->insertWidget(1, &m_widget);
   initButtons();
   setLayout(m_outer);
@@ -736,6 +1194,8 @@ void IntervalList::addIntervalList(const IntervalList &intervals) {
 void IntervalList::setIntervalList(const IntervalList &intervals) {
   m_list = QList<Interval>(intervals.getList());
 }
+
+void IntervalList::clear() { m_list = QList<Interval>(); }
 
 std::set<int> IntervalList::getIntSet() const {
   std::set<int> intSet;

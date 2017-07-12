@@ -22,6 +22,7 @@ class AbstractInst(object):
         self._calibration_dir = calibration_dir
         self._inst_prefix = inst_prefix
         self._output_dir = output_dir
+        self._is_vanadium = None
 
     @property
     def calibration_dir(self):
@@ -35,25 +36,29 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, run_details, do_absorb_corrections=True):
+    def _create_vanadium(self, run_number_string, do_absorb_corrections):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
-        :param run_details: The run details for the run to process
+        :param run_number_string : The user input string for any run within the cycle
+        to help us determine the correct vanadium to create later
         :param do_absorb_corrections: Set to true if absorption corrections should be applied
         :return: d_spacing focused vanadium group
         """
+        self._is_vanadium = True
+        run_details = self._get_run_details(run_number_string)
         return calibrate.create_van(instrument=self, run_details=run_details,
                                     absorb=do_absorb_corrections)
 
-    def _focus(self, run_number_string, do_van_normalisation):
+    def _focus(self, run_number_string, do_van_normalisation, do_absorb_corrections):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
         :param do_van_normalisation: True to divide by the vanadium run, false to not.
         :return:
         """
+        self._is_vanadium = False
         return focus.focus(run_number_string=run_number_string, perform_vanadium_norm=do_van_normalisation,
-                           instrument=self)
+                           instrument=self, absorb=do_absorb_corrections)
 
     # Mandatory overrides
 
@@ -73,6 +78,15 @@ class AbstractInst(object):
         :return: A filename that will allow Mantid to find the correct run for that instrument.
         """
         raise NotImplementedError("generate_input_file_name must be implemented per instrument")
+
+    def _apply_absorb_corrections(self, run_details, ws_to_correct):
+        """
+                Generates absorption corrections to compensate for the container. The overriding instrument
+                should handle the difference between a vanadium workspace and regular workspace
+                :param ws_to_correct: A reference vanadium workspace to match the binning of or correct
+                :return: A workspace containing the corrections
+                """
+        raise NotImplementedError("apply_absorb_corrections Not implemented for this instrument yet")
 
     def _generate_output_file_name(self, run_number_string):
         """
@@ -94,14 +108,6 @@ class AbstractInst(object):
         raise NotImplementedError("spline_vanadium_ws must be implemented per instrument")
 
     # Optional overrides
-    def _apply_absorb_corrections(self, run_details, van_ws):
-        """
-        Generates vanadium absorption corrections to compensate for the container
-        :param van_ws: A reference vanadium workspace to match the binning of or correct
-        :return: A workspace containing the corrections
-        """
-        raise NotImplementedError("apply_absorb_corrections Not implemented for this instrument yet")
-
     def _attenuate_workspace(self, input_workspace):
         """
         Applies an attenuation correction to the workspace
@@ -146,18 +152,20 @@ class AbstractInst(object):
         """
         return van_ws_to_crop
 
-    def _get_sample_empty(self):
-        """
-        Returns the sample empty number to subtract. If one is not specified it returns None
-        :return: Sample empty run number(s), else None
-        """
-        return None
-
     def _get_unit_to_keep(self):
         """
         Returns the unit to keep once focusing has completed. E.g. a setting of
         TOF would keep TOF units and remove d_spacing units
         :return: Unit to keep, if one isn't specified none
+        """
+        return None
+
+    def _get_instrument_bin_widths(self):
+        """
+        Returns the bin widths to rebin the focused workspace to. If
+        the instrument does not want this step a value of None should
+        not rebin the workspace
+        :return: List of bin widths or None if no rebinning should take place
         """
         return None
 
@@ -188,6 +196,14 @@ class AbstractInst(object):
         """
         return str()
 
+    def _get_current_tt_mode(self):
+        """
+        Returns the current tt_mode this is only applicable
+        to PEARL. Otherwise returns None
+        :return: Current tt_mode on PEARL, otherwise None
+        """
+        return None
+
     def _normalise_ws_current(self, ws_to_correct, run_details=None):
         """
         Normalises the workspace by the beam current at the time it was taken using
@@ -213,11 +229,18 @@ class AbstractInst(object):
 
         common_output.save_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                         output_paths=output_paths, inst_prefix=self._inst_prefix,
-                                        run_number_string=run_details.user_input_run_number)
+                                        run_number_string=run_details.output_run_string)
 
         return d_spacing_group, tof_group
 
     # Steps applicable to all instruments
+
+    @staticmethod
+    def _generate_run_details_fingerprint(*args):
+        out_key = ""
+        for arg in args:
+            out_key += str(arg)
+        return out_key
 
     def _generate_out_file_paths(self, run_details):
         """
@@ -227,7 +250,10 @@ class AbstractInst(object):
         """
         output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
         output_directory = os.path.abspath(os.path.expanduser(output_directory))
-        file_name = str(self._generate_output_file_name(run_number_string=run_details.user_input_run_number))
+        file_name = str(self._generate_output_file_name(run_number_string=run_details.output_run_string))
+        # Prepend the file extension used if it was set, this groups the files nicely in the file browser
+        # Also remove the dot at the start so we don't make hidden files in *nix systems
+        file_name = run_details.file_extension[1:] + file_name if run_details.file_extension else file_name
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
         tof_xye_file = os.path.join(output_directory, (file_name + "_tof_xye.dat"))

@@ -302,7 +302,7 @@ void Peak::setDetectorID(int id) {
   // Use the grand-parent whenever possible
   m_bankName = parent->getName();
   // For CORELLI, one level above sixteenpack
-  if (m_bankName.compare("sixteenpack") == 0) {
+  if (m_bankName == "sixteenpack") {
     parent = parent->getParent();
     m_bankName = parent->getName();
   }

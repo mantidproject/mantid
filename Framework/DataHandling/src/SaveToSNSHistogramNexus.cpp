@@ -36,7 +36,8 @@ using namespace Geometry;
 
 /// Empty default constructor
 SaveToSNSHistogramNexus::SaveToSNSHistogramNexus()
-    : Algorithm(), prog(), m_compress(false), links_count(0), inId(), outId() {}
+    : Algorithm(), m_progress(), m_compress(false), links_count(0), inId(),
+      outId() {}
 
 /** Initialisation method.
  *
@@ -193,7 +194,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
   // Dimension 1 = the Y pixels
   dataDimensions[1] = det->ypixels();
   // Dimension 2 = time of flight bins
-  dataDimensions[2] = static_cast<int>(inputWorkspace->blocksize());
+  dataDimensions[2] = static_cast<int>(m_inputWorkspace->blocksize());
 
   // ---- Determine slab size -----
   // Number of pixels to collect in X before slabbing
@@ -287,13 +288,13 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     Timer tim1;
     int ypixels = static_cast<int>(det->ypixels());
 
-    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace))
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
     for (int y = 0; y < ypixels; y++) {
       PARALLEL_START_INTERUPT_REGION
       // Get the workspace index for the detector ID at this spot
       size_t wi = 0;
       try {
-        wi = map.find(det->getAtXY(x, y)->getID())->second;
+        wi = m_map.find(det->getAtXY(x, y)->getID())->second;
       } catch (...) {
         std::cout << "Error finding " << bank << " x " << x << " y " << y
                   << "\n";
@@ -304,8 +305,8 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
                          size_t(dataDimensions[2]) +
                      size_t(y) * size_t(dataDimensions[2]);
 
-      const auto &Y = inputWorkspace->y(wi);
-      const auto &E = inputWorkspace->e(wi);
+      const auto &Y = m_inputWorkspace->y(wi);
+      const auto &E = m_inputWorkspace->e(wi);
 
       for (size_t i = 0; i < Y.size(); ++i) {
         if (doErrors) {
@@ -339,7 +340,8 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
       std::ostringstream mess;
       mess << det->getName() << ", " << field_name << " slab " << slabnum
            << " of " << det->xpixels() / x_pixel_slab;
-      this->prog->reportIncrement(x_pixel_slab * det->ypixels(), mess.str());
+      this->m_progress->reportIncrement(x_pixel_slab * det->ypixels(),
+                                        mess.str());
     }
 
   } // X loop
@@ -355,8 +357,8 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     else if (NXclosedata(outId) != NX_OK)
       returnerror = true;
     else {
-      this->prog->reportIncrement(det->xpixels() * det->ypixels() * 1,
-                                  det->getName() + " data");
+      this->m_progress->reportIncrement(det->xpixels() * det->ypixels() * 1,
+                                        det->getName() + " data");
 
       if (NXopendata(outId, errors_field_name) != NX_OK)
         returnerror = true;
@@ -365,8 +367,8 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
       else if (NXclosedata(outId) != NX_OK)
         returnerror = true;
       else {
-        this->prog->reportIncrement(det->xpixels() * det->ypixels() * 1,
-                                    det->getName() + " errors");
+        this->m_progress->reportIncrement(det->xpixels() * det->ypixels() * 1,
+                                          det->getName() + " errors");
         saveTime += tim2.elapsed();
       }
     }
@@ -415,7 +417,7 @@ int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank,
 
   // Get the rectangular detector
   IComponent_const_sptr det_comp =
-      inputWorkspace->getInstrument()->getComponentByName(std::string(bank));
+      m_inputWorkspace->getInstrument()->getComponentByName(std::string(bank));
   RectangularDetector_const_sptr det =
       boost::dynamic_pointer_cast<const RectangularDetector>(det_comp);
   if (!det) {
@@ -445,7 +447,7 @@ int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank,
 
     // --- Memory requirements ----
     size_t memory_required = size_t(det->xpixels() * det->ypixels()) *
-                             size_t(inputWorkspace->blocksize()) * 2 *
+                             size_t(m_inputWorkspace->blocksize()) * 2 *
                              sizeof(float);
     Kernel::MemoryStats mem;
     mem.update();
@@ -464,7 +466,7 @@ int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank,
       int x_slab;
       x_slab = static_cast<int>(
           memory_available /
-          (det->ypixels() * inputWorkspace->blocksize() * 2 * sizeof(float)));
+          (det->ypixels() * m_inputWorkspace->blocksize() * 2 * sizeof(float)));
       if (x_slab <= 0)
         x_slab = 1;
       // Look for a slab size that evenly divides the # of pixels.
@@ -570,7 +572,7 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
               return NX_ERROR;
 
             // Get the X bins
-            const auto &X = inputWorkspace->y(0);
+            const auto &X = m_inputWorkspace->y(0);
             // 1 dimension, with that number of bin boundaries
             dataDimensions[0] = static_cast<int>(X.size());
             // The output TOF axis will be whatever size in the workspace.
@@ -711,18 +713,19 @@ void SaveToSNSHistogramNexus::exec() {
   m_outputFilename = getPropertyValue("OutputFileName");
   m_compress = getProperty("Compress");
 
-  inputWorkspace = getProperty("InputWorkspace");
+  m_inputWorkspace = getProperty("InputWorkspace");
 
   // We'll need to get workspace indices
-  map = inputWorkspace->getDetectorIDToWorkspaceIndexMap();
+  m_map = m_inputWorkspace->getDetectorIDToWorkspaceIndexMap();
 
   // Start the progress bar. 3 reports per histogram.
-  prog = new Progress(this, 0, 1.0, inputWorkspace->getNumberHistograms() * 3);
+  m_progress = make_unique<Progress>(
+      this, 0.0, 1.0, m_inputWorkspace->getNumberHistograms() * 3);
 
   EventWorkspace_const_sptr eventWorkspace =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace);
+      boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWorkspace);
   if (eventWorkspace) {
-    eventWorkspace->sortAll(TOF_SORT, prog);
+    eventWorkspace->sortAll(TOF_SORT, m_progress.get());
   }
 
   int ret;

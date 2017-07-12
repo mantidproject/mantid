@@ -3,6 +3,7 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -10,7 +11,6 @@
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -256,8 +256,7 @@ void Qxy::exec() {
         // in an equivalent bin to where the data was stored
 
         // first take into account the product of contributions to the weight
-        // which have
-        // no errors
+        // which have no errors
         double weight = 0.0;
         if (doSolidAngle)
           weight = maskFraction * angle;
@@ -354,14 +353,16 @@ void Qxy::exec() {
 }
 
 /**
-Same as scipy:
-# Example: Qmin = 0.1 ; Qmax=1; 10 bins
-In [4]: np.logspace(np.log10(0.1), np.log10(1), 10, base=10)
-Out[4]:
-array([ 0.1       ,  0.12915497,  0.16681005,  0.21544347,  0.27825594,
+ * This function calculates a logarithm binning
+ * It gives the same result as scipy:
+ * # Example: Qmin = 0.1 ; Qmax=1; 10 bins
+   In [4]: np.logspace(np.log10(0.1), np.log10(1), 10, base=10)
+   Out[4]:
+   array([ 0.1       ,  0.12915497,  0.16681005,  0.21544347,  0.27825594,
         0.35938137,  0.46415888,  0.59948425,  0.77426368,  1.        ])
-Same here returns:
-0.1 0.129155 0.16681 0.215443 0.278256 0.359381 0.464159 0.599484 0.774264 1
+
+ * Same input in this function here returns:
+   0.1 0.129155 0.16681 0.215443 0.278256 0.359381 0.464159 0.599484 0.774264 1
 */
 std::vector<double> Qxy::logBinning(double min, double max, int num) {
   if (min < 0 || max < 0)
@@ -372,10 +373,24 @@ std::vector<double> Qxy::logBinning(double min, double max, int num) {
   min = log10(min);
   max = log10(max);
   double binWidth = fabs((max - min) / (num - 1));
-  for (int i = 0; i <= num; ++i) {
+  for (int i = 0; i < num; ++i) {
     outBins[i] = pow(10, min + i * binWidth);
   }
   return outBins;
+}
+
+double Qxy::getQminFromWs(const API::MatrixWorkspace &inputWorkspace) {
+  // get qmin from the run properties
+  double qmin = 0;
+  const API::Run &run = inputWorkspace.run();
+  if (run.hasProperty("qmin")) {
+    Kernel::Property *prop = run.getProperty("Qmin");
+    qmin = boost::lexical_cast<double, std::string>(prop->value());
+  } else {
+    g_log.warning() << "Could not retrieve Qmin from run object.\n";
+  }
+  g_log.notice() << "QxQy: Using logarithm binning with qmin=" << qmin << ".\n";
+  return qmin;
 }
 
 /** Creates the output workspace, setting the X vector to the bins boundaries in
@@ -394,19 +409,18 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   HistogramData::BinEdges axis;
   double startVal;
   if (log_binning) {
-    std::vector<double> totalBinning;
-    std::vector<double> positiveBinning = logBinning(0, max, nBins);
+    // get qmin from the run properties
+    double qmin = getQminFromWs(*inputWorkspace);
+    std::vector<double> positiveBinning = logBinning(qmin, max, nBins);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
-    totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
-                        std::end(positiveBinning));
+    std::vector<double> totalBinning = positiveBinning;
     std::for_each(std::begin(totalBinning), std::end(totalBinning),
                   [](double &n) { n = -1 * n; });
-    totalBinning.push_back(0);
+    totalBinning.push_back(0.0);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
     totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
                         std::end(positiveBinning));
     nBins = nBins * 2 + 1;
-    startVal = totalBinning[0];
     axis = totalBinning;
 
   } else {
@@ -433,9 +447,8 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   // Create a numeric axis to replace the vertical one
   Axis *verticalAxis = new BinEdgeAxis(nBins);
   outputWorkspace->replaceAxis(1, verticalAxis);
-
   for (int i = 0; i < nBins; ++i) {
-    const double currentVal = startVal + i * delta;
+    const double currentVal = axis[i];
     // Set the Y value on the axis
     verticalAxis->setValue(i, currentVal);
   }

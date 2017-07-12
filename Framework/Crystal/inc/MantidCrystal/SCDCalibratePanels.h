@@ -63,9 +63,6 @@ private:
                       boost::container::flat_set<std::string> &AllBankName,
                       double T0, std::string filename);
 
-  /// Function to find peaks near detector edge
-  bool edgePixel(const DataObjects::PeaksWorkspace &ws,
-                 const std::string &bankName, int col, int row, int Edge);
   /// Function to calculate U
   void findU(DataObjects::PeaksWorkspace_sptr peaksWs);
   /// save workspaces

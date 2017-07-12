@@ -45,7 +45,7 @@ min_wavenumber = 0.0  # minimal wavenumber in cm^-1 taken into account while cre
 acoustic_phonon_threshold = 0.0  # frequencies below this value are treated as acoustic and neglected.
 
 # threshold expressed as a fraction of max S intensity below which S values are treated as zero
-s_relative_threshold = 0.001
+s_relative_threshold = 0.01
 
 # values of S below that value are considered to be zero (to be use in case threshold calculated from
 # s_relative_threshold is larger than s_absolute_threshold)
@@ -57,7 +57,3 @@ optimal_size = 5000000  # this is used to create optimal size of chunk energies 
 atoms_threads = 3  # number of threads used in parallel calculations over atoms
 q_threads = 1  # number of threads used in parallel calculations over q
 # Abins internal parameters end ###########################
-
-q_start = 0.0  # beginning of q interval
-q_end = 30  # end of q interval
-q_step = 0.1  # sampling of q

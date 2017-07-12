@@ -2,6 +2,7 @@
 #define MANTID_CURVEFITTING_GSLFUNCTIONS_H_
 
 #include "MantidAPI/Jacobian.h"
+#include "MantidKernel/Exception.h"
 #include <gsl/gsl_matrix.h>
 
 #include <vector>
@@ -74,7 +75,7 @@ public:
       throw std::out_of_range("Data index in Jacobian is out of range");
     }
     if (iP >= m_np) {
-      throw std::out_of_range("Parameter index in Jacobian is out of range");
+      throw Kernel::Exception::FitSizeWarning(m_np);
     }
     m_data[iY * m_np + iP] = value;
   }
@@ -84,7 +85,7 @@ public:
       throw std::out_of_range("Data index in Jacobian is out of range");
     }
     if (iP >= m_np) {
-      throw std::out_of_range("Parameter index in Jacobian is out of range");
+      throw Kernel::Exception::FitSizeWarning(m_np);
     }
     return m_data[iY * m_np + iP];
   }

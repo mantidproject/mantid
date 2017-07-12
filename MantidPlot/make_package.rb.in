@@ -42,6 +42,7 @@ ParaView_dir = Pathname.new("@ParaView_DIR@")
 library_filenames = ["libboost_regex-mt.dylib",
                      "libboost_date_time-mt.dylib",
                      "libboost_python-mt.dylib",
+                     "libboost_serialization-mt.dylib",
                      "libgsl.dylib",
                      "libgslcblas.dylib",
                      "libjsoncpp.dylib",

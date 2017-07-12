@@ -34,9 +34,10 @@ struct DatasetParams {
   std::string periods;
   size_t version;
 };
-
 /// Whether multiple fitting is enabled or disabled
 enum class MultiFitState { Enabled, Disabled };
+/// Whether TF Asymmetry is enabled or disabled
+enum class TFAsymmState { Enabled, Disabled };
 }
 
 namespace MuonAnalysisHelper {

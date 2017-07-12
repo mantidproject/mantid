@@ -11,6 +11,7 @@
 
 #include <algorithm>
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -423,6 +424,12 @@ public:
     auto ws2 = makeWorkspace(2);
     TS_ASSERT_THROWS(ws2->mutableDetectorInfo() = ws1->detectorInfo(),
                      std::runtime_error);
+  }
+
+  void test_fetch_mappings() {
+    const auto &detectorInfo = m_workspace.detectorInfo();
+    auto mappings = detectorInfo.detIdToIndexMap();
+    TS_ASSERT_EQUALS(mappings->size(), detectorInfo.size());
   }
 
 private:

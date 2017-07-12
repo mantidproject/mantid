@@ -50,7 +50,6 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX);
 size_t endIndexFromTime(const HistogramData::BinEdges &xData,
                         const double endX);
-
 } // namespace Mantid
 
 #endif /*MANTID_MUONASYMMETRYHELPER_H_*/

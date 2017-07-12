@@ -32,16 +32,17 @@ void export_IEventWorkspace() {
   class_<IEventWorkspace, bases<Mantid::API::MatrixWorkspace>,
          boost::noncopyable>("IEventWorkspace", no_init)
       .def("getNumberEvents", &IEventWorkspace::getNumberEvents, args("self"),
-           "Returns the number of events in the workspace")
+           "Returns the number of events in the :class:`~mantid.api.Workspace`")
       .def("getTofMin", &IEventWorkspace::getTofMin, args("self"),
            "Returns the minimum TOF value (in microseconds) held by the "
-           "workspace")
+           ":class:`~mantid.api.Workspace`")
       .def("getTofMax", &IEventWorkspace::getTofMax, args("self"),
            "Returns the maximum TOF value (in microseconds) held by the "
-           "workspace")
+           ":class:`~mantid.api.Workspace`")
       .def("getEventList", &deprecatedGetEventList,
            return_internal_reference<>(), args("self", "workspace_index"),
-           "Return the event list managing the events at the given workspace "
+           "Return the :class:`~mantid.api.IEventList` managing the events at "
+           "the given :class:`~mantid.api.Workspace` "
            "index")
       .def("clearMRU", &IEventWorkspace::clearMRU, args("self"),
            "Clear the most-recently-used lists");

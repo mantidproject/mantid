@@ -1,16 +1,18 @@
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidBeamline/DetectorInfo.h"
-#include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/make_unique.h"
 
+#include <nexus/NeXusFile.hpp>
 #include <boost/make_shared.hpp>
 #include <queue>
 
@@ -51,9 +53,11 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
       m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
-      m_detectorInfo(instr->m_detectorInfo),
-      m_componentInfo(instr->m_componentInfo) {
-  m_map_nonconst->setInstrument(m_instr.get());
+      m_detectorInfo(instr->m_detectorInfo) {
+  bool isPhysicalInstrument =
+      m_map ? m_instr->m_isPhysicalInstrument : m_isPhysicalInstrument;
+  if (!isPhysicalInstrument)
+    m_map_nonconst->setInstrument(m_instr.get());
 }
 
 /** Copy constructor
@@ -71,10 +75,7 @@ Instrument::Instrument(const Instrument &instr)
       m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
       m_referenceFrame(instr.m_referenceFrame),
-      m_detectorInfo(instr.m_detectorInfo),
-      m_componentInfo(instr.m_componentInfo)
-
-{
+      m_detectorInfo(instr.m_detectorInfo) {
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
@@ -162,9 +163,12 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
   if (m_map) {
     if (m_instr->getPhysicalInstrument()) {
       // A physical instrument should use the same parameter map as the 'main'
-      // instrument
-      return Instrument_const_sptr(
-          new Instrument(m_instr->getPhysicalInstrument(), m_map_nonconst));
+      // instrument. This constructor automatically sets the instrument as the
+      // owning instrument in the ParameterMap. We need to undo this immediately
+      // since the ParameterMap must always be owned by the neutronic
+      // instrument.
+      return boost::make_shared<Instrument>(m_instr->getPhysicalInstrument(),
+                                            m_map_nonconst);
     } else {
       return Instrument_const_sptr();
     }
@@ -178,11 +182,11 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
  * algorithms.
  *  @param physInst A pointer to the physical instrument object.
  */
-void Instrument::setPhysicalInstrument(
-    boost::shared_ptr<const Instrument> physInst) {
-  if (!m_map)
-    m_physicalInstrument = physInst;
-  else
+void Instrument::setPhysicalInstrument(std::unique_ptr<Instrument> physInst) {
+  if (!m_map) {
+    physInst->m_isPhysicalInstrument = true;
+    m_physicalInstrument = std::move(physInst);
+  } else
     throw std::runtime_error("Instrument::setPhysicalInstrument() called on a "
                              "parametrized instrument.");
 }
@@ -1239,55 +1243,33 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
 }
 
 /**
- * @brief Instrument::hasComponentInfo
- * @return True only if a ComponentInfo has been set
+ * Only for use by ExperimentInfo
+ * @return True only if a InfoComponentVisitor has been set.
  */
-bool Instrument::hasComponentInfo() const {
-  return static_cast<bool>(m_componentInfo);
+bool Instrument::hasInfoVisitor() const {
+  return static_cast<bool>(m_infoVisitor);
 }
 
-/**
- * @brief Instrument::componentInfo
- * @return const ref to a ComponentInfo. Throws a std::runtime_error if
- * not set.
- */
-const Beamline::ComponentInfo &Instrument::componentInfo() const {
-  if (!hasComponentInfo()) {
-    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
-  }
-  return *m_componentInfo;
-}
+bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
 
-/**
- * @brief Instrument::componentIds
- * @return const ref to a vector of ComponentIds. Throws a std::runtime_error if
- * Component Info not set.
- */
-boost::shared_ptr<const std::vector<Geometry::ComponentID>>
-Instrument::componentIds() const {
-  if (!hasComponentInfo()) {
-    throw std::runtime_error(
-        "Cannot return component ids with a NULL ComponentInfo");
-  }
-  return m_componentIds;
-}
-
-/// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
+/* Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
+ * Sets the pointer to the detector id -> index map
+*/
 void Instrument::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
   m_detectorInfo = std::move(detectorInfo);
 }
 
-/**
- * @brief Instrument::setComponentInfo
- * @param componentInfo : ComponentInfo to store
- * @param componentIds : ComponentIds to store
- */
-void Instrument::setComponentInfo(
-    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds) {
-  m_componentInfo = std::move(componentInfo);
-  m_componentIds = std::move(componentIds);
+void Instrument::setInfoVisitor(const InfoComponentVisitor &visitor) {
+  m_infoVisitor.reset(new InfoComponentVisitor(visitor));
+}
+
+const InfoComponentVisitor &Instrument::infoVisitor() const {
+  if (!m_infoVisitor) {
+    throw std::runtime_error(
+        "Instrument::infoVisitor InfoComponentVisitor never set");
+  }
+  return *m_infoVisitor;
 }
 
 /// Returns the index for a detector ID. Used for accessing DetectorInfo.

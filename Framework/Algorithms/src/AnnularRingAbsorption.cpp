@@ -178,13 +178,15 @@ AnnularRingAbsorption::createSampleShapeXML(const V3D &upAxis) const {
   const double lowRadiusMtr = (wallMidPtCM - 0.5 * sampleThickCM) / 100.;
   const double uppRadiusMtr = (wallMidPtCM + 0.5 * sampleThickCM) / 100.;
 
-  // Cylinders oriented along Y, with origin at centre of bottom base
+  // Cylinders oriented along Y, with origin at the centre as expected by
+  // the MonteCarloAbsorption algorithm.
+  const V3D bottomCentre{0.0, -sampleHeightCM / 2.0 / 100.0, 0.0}; // in metres.
   const std::string innerCylID = std::string("inner-cyl");
-  const std::string innerCyl = cylinderXML(innerCylID, V3D(), lowRadiusMtr,
-                                           upAxis, sampleHeightCM / 100.0);
+  const std::string innerCyl = cylinderXML(
+      innerCylID, bottomCentre, lowRadiusMtr, upAxis, sampleHeightCM / 100.0);
   const std::string outerCylID = std::string("outer-cyl");
-  const std::string outerCyl = cylinderXML(outerCylID, V3D(), uppRadiusMtr,
-                                           upAxis, sampleHeightCM / 100.0);
+  const std::string outerCyl = cylinderXML(
+      outerCylID, bottomCentre, uppRadiusMtr, upAxis, sampleHeightCM / 100.0);
 
   // Combine shapes
   boost::format algebra("<algebra val=\"(%1% (# %2%))\" />");

@@ -25,7 +25,7 @@ class UnitFactoryTest(unittest.TestCase):
         core_units = ['Empty', 'Label', 'TOF', 'Wavelength','Energy',
                       'Energy_inWavenumber', 'dSpacing', 'MomentumTransfer',
                       'QSquared', 'DeltaE', 'DeltaE_inWavenumber',
-                      'DeltaE_inFrequency', 'Momentum']
+                      'DeltaE_inFrequency', 'Momentum', 'dSpacingPerpendicular']
         self.assertTrue(len(core_units) <= len(known_units))
 
         for unit in core_units:

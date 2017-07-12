@@ -12,6 +12,8 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include <boost/algorithm/string/trim.hpp>
 
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;
@@ -36,7 +38,7 @@ using namespace Mantid::Geometry;
 int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
   // If the extension is peaks or integrate then give it a go
-  if (extn.compare(".peaks") != 0 && extn.compare(".integrate") != 0)
+  if (extn != ".peaks" && extn != ".integrate")
     return 0;
 
   int confidence(0);
@@ -49,7 +51,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
     if (r.length() < 1)
       throw std::logic_error(std::string("No first line of Peaks file"));
 
-    if (r.compare("Version:") != 0)
+    if (r != "Version:")
       throw std::logic_error(
           std::string("No Version: on first line of Peaks file"));
 
@@ -99,6 +101,8 @@ void LoadIsawPeaks::init() {
 void LoadIsawPeaks::exec() {
   // Create the workspace
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
+  std::string outputwsName = getPropertyValue("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(outputwsName, ws);
 
   // This loads (appends) the peaks
   this->appendFile(ws, getPropertyValue("Filename"));
@@ -124,7 +128,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   if (r.length() < 1)
     throw std::logic_error(std::string("No first line of Peaks file"));
 
-  if (r.compare(std::string("Version:")) != 0)
+  if (r != "Version:")
     throw std::logic_error(
         std::string("No Version: on first line of Peaks file"));
 
@@ -180,11 +184,62 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // Now skip all lines on L1, detector banks, etc. until we get to a block of
   // peaks. They start with 0.
   std::string s;
+  std::vector<int> det;
   while (s != "0" && in.good()) {
     readToEndOfLine(in, true);
     s = getWord(in, false);
+    int bank = 0;
+    // Save all bank numbers in header lines
+    Strings::convert(getWord(in, false), bank);
+    if (s == "5")
+      det.push_back(bank);
+  }
+  // Find bank numbers in instument that are not in header lines
+  std::string maskBanks;
+  if (!instr)
+    throw std::runtime_error(
+        "No instrument in the Workspace. Cannot save DetCal file.");
+  // We cannot assume the peaks have bank type detector modules, so we have a
+  // string to check this
+  std::string bankPart = "bank";
+  if (instr->getName().compare("WISH") == 0)
+    bankPart = "WISHpanel";
+  // Get all children
+  std::vector<IComponent_const_sptr> comps;
+  instr->getChildren(comps, true);
+  for (auto &comp : comps) {
+    std::string bankName = comp->getName();
+    boost::trim(bankName);
+    boost::erase_all(bankName, bankPart);
+    int bank = 0;
+    Strings::convert(bankName, bank);
+    for (size_t j = 0; j < det.size(); j++) {
+      if (bank == det[j]) {
+        bank = 0;
+        continue;
+      }
+    }
+    if (bank == 0)
+      continue;
+    // Track unique bank numbers
+    maskBanks += bankName + ",";
   }
 
+  if (!maskBanks.empty()) {
+    // remove last comma
+    maskBanks.resize(maskBanks.size() - 1);
+    // Mask banks that are not in header lines
+    try {
+      Algorithm_sptr alg = createChildAlgorithm("MaskBTP");
+      alg->setProperty<Workspace_sptr>("Workspace", outWS);
+      alg->setProperty("Bank", maskBanks);
+      if (!alg->execute())
+        throw std::runtime_error(
+            "MaskDetectors Child Algorithm has not executed successfully");
+    } catch (...) {
+      g_log.error("Can't execute MaskBTP algorithm");
+    }
+  }
   return s;
 }
 
@@ -226,7 +281,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (s.length() < 1)
     throw std::runtime_error("Empty peak line encountered.");
 
-  if (s.compare("2") == 0) {
+  if (s == "2") {
     readToEndOfLine(in, true);
     for (s = getWord(in, false); s.length() < 1 && in.good();
          s = getWord(in, true)) {
@@ -237,7 +292,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (s.length() < 1)
     throw std::runtime_error("Empty peak line encountered.");
 
-  if (s.compare("3") != 0)
+  if (s != "3")
     throw std::runtime_error("Empty peak line encountered.");
 
   seqNum = std::stoi(getWord(in, false));
@@ -289,7 +344,7 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
   boost::shared_ptr<const IComponent> parent =
       getCachedBankByName(bankName, inst);
 
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -300,7 +355,7 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();
@@ -340,7 +395,7 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
   if (s.length() < 1)
     return std::string();
 
-  if (s.compare("0") == 0) {
+  if (s == "0") {
     readToEndOfLine(in, true);
     s = getWord(in, false);
     while (s.length() < 1) {
@@ -349,7 +404,7 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
     }
   }
 
-  if (s.compare(std::string("1")) != 0)
+  if (s != "1")
     return s;
 
   run = std::stoi(getWord(in, false));
@@ -396,7 +451,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
   if (!in.good() || s.length() < 1)
     throw std::runtime_error("End of Peaks file before peaks");
 
-  if (s.compare(std::string("0")) != 0)
+  if (s != "0")
     throw std::logic_error("No header for Peak segments");
 
   readToEndOfLine(in, true);

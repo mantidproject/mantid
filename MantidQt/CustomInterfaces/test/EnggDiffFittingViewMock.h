@@ -143,6 +143,12 @@ public:
 
   // virtual void resetCanvas
   MOCK_METHOD0(resetCanvas, void());
+
+  // virtual std::string getCurrentInstrument() const = 0;
+  MOCK_CONST_METHOD0(getCurrentInstrument, std::string());
+
+  // virtual void setCurrentInstrument(const std::string &newInstrument) = 0;
+  MOCK_METHOD1(setCurrentInstrument, void(const std::string &newInstrument));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

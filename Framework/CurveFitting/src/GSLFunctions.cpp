@@ -135,8 +135,6 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   for (size_t iY = 0; iY < p->n; iY++)
     for (size_t iP = 0; iP < p->p; iP++) {
       J->data[iY * p->p + iP] *= values->getFitWeight(iY);
-      // std::cerr << iY << ' ' << iP << ' ' << J->data[iY*p->p + iP] <<
-      // '\n';
     }
 
   return GSL_SUCCESS;

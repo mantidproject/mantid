@@ -5,9 +5,10 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
@@ -297,7 +298,7 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
   const size_t numberOfTubes = data.dim1();
   const size_t numberOfPixelsPerTube = data.dim0();
 
-  Progress progress(this, 0, 1, data.dim0() * data.dim1());
+  Progress progress(this, 0.0, 1.0, data.dim0() * data.dim1());
 
   size_t spec = firstIndex;
 
@@ -339,7 +340,7 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
   const size_t numberOfTubes = data.dim0();
   const size_t numberOfPixelsPerTube = data.dim1();
 
-  Progress progress(this, 0, 1, data.dim0() * data.dim1());
+  Progress progress(this, 0.0, 1.0, data.dim0() * data.dim1());
 
   const HistogramData::BinEdges binEdges(timeBinning);
   size_t spec = firstIndex;

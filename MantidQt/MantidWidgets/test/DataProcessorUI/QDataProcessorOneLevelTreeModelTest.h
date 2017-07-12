@@ -219,6 +219,67 @@ public:
     TS_ASSERT_EQUALS(model.rowCount(), 3);
   }
 
+  void testHighlightFourRowTable() {
+    auto ws = fourRowTable();
+    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+
+    // Non-existent row
+    TS_ASSERT_EQUALS(model.addHighlighted(10), false);
+    TS_ASSERT_EQUALS(model.addHighlighted(-1), false);
+
+    // Highlight the 1st and 3rd rows
+    TS_ASSERT_EQUALS(model.addHighlighted(0), true);
+    TS_ASSERT_EQUALS(model.addHighlighted(2), true);
+
+    // Only 1st and 3rd rows are highlighted
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "#00b300");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "");
+    TS_ASSERT_EQUALS(model.data(model.index(2, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "#00b300");
+    TS_ASSERT_EQUALS(model.data(model.index(3, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "");
+  }
+
+  void testClearHighlightFourRowTable() {
+    auto ws = fourRowTable();
+    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+
+    // Highlight the 1st and 3rd rows
+    TS_ASSERT_EQUALS(model.addHighlighted(0), true);
+    TS_ASSERT_EQUALS(model.addHighlighted(2), true);
+
+    // Clear all highlighted rows
+    model.clearHighlighted();
+
+    // No rows should be highlighted
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "");
+    TS_ASSERT_EQUALS(model.data(model.index(2, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "");
+    TS_ASSERT_EQUALS(model.data(model.index(3, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "");
+  }
+
 private:
   DataProcessorWhiteList m_whitelist;
 };

@@ -3,7 +3,6 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/LogManager.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidKernel/TimeSplitter.h"
 
 #include <vector>
@@ -13,6 +12,10 @@ class File;
 }
 
 namespace Mantid {
+
+namespace Kernel {
+template <class T> class Matrix;
+}
 
 namespace Geometry {
 class Goniometer;
@@ -98,7 +101,7 @@ public:
   inline Geometry::Goniometer &mutableGoniometer() { return *m_goniometer; }
 
   // Retrieve the goniometer rotation matrix
-  const Kernel::DblMatrix &getGoniometerMatrix() const;
+  const Kernel::Matrix<double> &getGoniometerMatrix() const;
 
   /// Save the run to a NeXus file with a given group name
   void saveNexus(::NeXus::File *file, const std::string &group,

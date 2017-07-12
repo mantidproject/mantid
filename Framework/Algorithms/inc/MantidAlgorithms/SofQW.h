@@ -69,8 +69,6 @@ public:
   /// Energy to K constant
   static double energyToK();
 
-  boost::shared_ptr<API::Progress> m_progress;
-
 private:
   /// Initialization code
   void init() override;

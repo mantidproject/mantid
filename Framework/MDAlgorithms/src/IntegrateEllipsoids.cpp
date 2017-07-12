@@ -24,6 +24,7 @@
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 #include <boost/math/special_functions/round.hpp>
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
@@ -175,6 +176,8 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
         if (hkl_integ)
           qVec = UBinv * qVec;
 
+        if (std::isnan(qVec[0]) || std::isnan(qVec[1]) || std::isnan(qVec[2]))
+          continue;
         // Account for counts in histograms by increasing the qList with the
         // same q-point
         qList.emplace_back(yVal, qVec);

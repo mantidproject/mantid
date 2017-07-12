@@ -83,7 +83,7 @@ Usage
 Related Algorithms
 ------------------
 
-:ref:`ClearCache <algm-ClearCache>` will delete files using this naming scheme.
+:ref:`CleanFileCache <algm-CleanFileCache>` will delete files using this naming scheme.
 
 .. categories::
 

@@ -11,6 +11,8 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/pqCameraToolbarNonOrthogonalAxes.h
+  inc/MantidVatesSimpleGuiViewWidgets/pqCameraReactionNonOrthogonalAxes.h
   inc/MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
@@ -18,6 +20,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
+  inc/MantidVatesSimpleGuiViewWidgets/VisibleAxesColor.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.h
@@ -40,8 +43,11 @@ set( SOURCE_FILES
   src/PeaksTableControllerVsi.cpp
   src/PeaksTabWidget.cpp
   src/PeaksWidget.cpp
+  src/pqCameraToolbarNonOrthogonalAxes.cpp
+  src/pqCameraReactionNonOrthogonalAxes.cpp
   src/SaveScreenshotReaction.cpp
   src/RebinnedSourcesManager.cpp
+  src/VisibleAxesColor.cpp
   src/StandardView.cpp
   src/SplatterPlotView.cpp
   src/ThreesliceView.cpp
@@ -64,6 +70,8 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/pqCameraToolbarNonOrthogonalAxes.h
+  inc/MantidVatesSimpleGuiViewWidgets/pqCameraReactionNonOrthogonalAxes.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
@@ -84,6 +92,7 @@ qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.ui
   inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.ui
+  inc/MantidVatesSimpleGuiViewWidgets/pqCameraToolbarNonOrthogonalAxes.ui
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.ui
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.ui
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.ui

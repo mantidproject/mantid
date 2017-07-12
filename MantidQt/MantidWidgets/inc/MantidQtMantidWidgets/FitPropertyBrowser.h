@@ -253,7 +253,7 @@ public slots:
   void clearBrowser();
   void setPeakToolOn(bool on);
   void findPeaks();
-  void executeFitMenu(const QString &);
+  virtual void executeFitMenu(const QString &);
   void executeDisplayMenu(const QString &);
   void executeSetupMenu(const QString &);
   void executeSetupManageMenu(const QString &);
@@ -292,6 +292,7 @@ signals:
   void errorsEnabled(bool enabled);
   void fitUndone();
   void functionLoaded(const QString &);
+  void fitResultsChanged(const QString &status, const QString &iterations);
 
 protected slots:
   /// Get the registered function names
@@ -299,9 +300,9 @@ protected slots:
   /// Called when a bool property is changed
   virtual void boolChanged(QtProperty *prop);
 
+  virtual void enumChanged(QtProperty *prop);
 private slots:
 
-  void enumChanged(QtProperty *prop);
   void intChanged(QtProperty *prop);
   virtual void doubleChanged(QtProperty *prop);
   /// Called when one of the parameter values gets changed
@@ -361,8 +362,15 @@ private slots:
 
   /// Update structure tooltips for all functions
   void updateStructureTooltips();
+  /// Display the status string returned from Fit
+  void showFitResultStatus(const QString &status, const QString &iterations);
+  /// Clear the Fit status display
+  void clearFitResultStatus();
 
 protected:
+  void modifyFitMenu(QAction *fitAction, bool enabled);
+  virtual void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu);
+  bool getShouldBeNormalised() { return m_shouldBeNormalised; };
   /// actions to do before the browser made visible
   void showEvent(QShowEvent *e) override;
   /// actions to do before the browser is hidden
@@ -373,6 +381,8 @@ protected:
   void createEditors(QWidget *w);
   ///
   void initLayout(QWidget *w);
+  ///
+  void initBasicLayout(QWidget *w);
   ///
   void updateDecimals();
   /// Sets the workspace to a function
@@ -476,6 +486,8 @@ protected:
   std::vector<double> m_initialParameters;
 
 private:
+  ///
+  QPushButton *createFitMenuButton(QWidget *w);
   /// load and save function
   void loadFunction(const QString &funcString);
   void saveFunction(const QString &fnName);
@@ -531,6 +543,8 @@ private:
 
   /// To display a tip text
   QLabel *m_tip;
+  /// To display fit status
+  QLabel *m_status;
 
   // The widget for choosing the fit function.
   QDialog *m_fitSelector;

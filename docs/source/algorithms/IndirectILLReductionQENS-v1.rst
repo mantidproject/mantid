@@ -20,8 +20,8 @@ needs to be specified following the syntax in :py:obj:`MultipleFileProperty <man
 When ``SumRuns=True``, all the runs will be merged while loading.
 Note, for **Range** and **Stepped Range**, ``SumRuns`` will be
 ignored.  Use **Added Range** and **Added Stepped Range** instead (see
-:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`).  For ``BackgroundRun``, ``CalibrationRun``
-and ``AlignmentRun`` all the runs will be automatically summed.
+:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`).  For ``BackgroundRun``,
+``CalibrationRun``, ``CalibrationBackgroundRun`` and ``AlignmentRun`` all the runs will be automatically summed.
 
 Unmirror Options
 ~~~~~~~~~~~~~~~~

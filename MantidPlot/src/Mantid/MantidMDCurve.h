@@ -90,7 +90,8 @@ private:
   using PlotCurve::draw; // Avoid Intel compiler warning
 
   /// Init the curve
-  void init(Graph *g, bool distr, GraphOptions::CurveType style) override;
+  void init(Graph *g, bool distr, GraphOptions::CurveType style,
+            bool multipleSpectra = false) override;
 
   /// Handles delete notification
   void postDeleteHandle(const std::string &wsName) override {

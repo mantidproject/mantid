@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <iosfwd>
+#include <iterator>
 #include <string>
 
 namespace FileComparisonHelper {

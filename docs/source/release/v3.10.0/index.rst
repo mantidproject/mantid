@@ -2,21 +2,19 @@
 Mantid 3.10.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ReleaseUnderConstruction.jpg
+.. figure::  ../../images/ArtSurfacePlotT1.PNG
    :class: screenshot
    :width: 550px
    :align: right
 
-   Release image
+   Surface plot of a temperature ramp from 1.5 to 293 Kelvin, recorded on WISH
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
+We are proud to announce version 3.10.0 of Mantid. This release includes some new plotting functionality within MantidPlot to aid in the creation of advanced plot types, such as the one shown in the image. There have also been some significant performance enhancements for various algorithms with the framework.
 
-**TODO: Add paragraph summarizing big changes**
-
-This is just one of many improvements in this release, so please take a
+These are just some of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
@@ -37,6 +35,10 @@ Citation
 
 Please cite any usage of Mantid as follows:
 
+- *O. Arnold, et al., Mantid—Data analysis and visualization package for neutron scattering and μSR experiments, Nuclear Instruments and Methods in Physics Research Section A, Volume 764, 11 November 2014, Pages 156-166*, doi: `10.1016/j.nima.2014.07.029 <http://dx.doi.org/10.1016/j.nima.2014.07.029>`_
+
+If you want to cite this specific release please use:
+
 - *Mantid 3.10: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.10
 
 Changes
@@ -53,6 +55,7 @@ Changes
    Diffraction <diffraction>
    Muon Analysis <muon>
    Reflectometry <reflectometry>
+   Imaging <imaging>
 
 Full Change Listings
 --------------------

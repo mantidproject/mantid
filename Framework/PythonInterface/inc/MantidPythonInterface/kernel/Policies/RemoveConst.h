@@ -29,10 +29,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/is_convertible.hpp>
-#include <boost/type_traits/is_pointer.hpp>
-#include <boost/type_traits/remove_const.hpp>
+#include <type_traits>
 
 /**
  * A bug in earlier boost versions, <= boost 1.41, means that
@@ -58,13 +55,13 @@ namespace {
 // MPL helper structs
 //-----------------------------------------------------------------------
 /// MPL struct to figure out if a type is a boost::shared_ptr<const T>
-/// The general one inherits from boost::false_type
-template <typename T> struct IsConstSharedPtr : boost::false_type {};
+/// The general one inherits from std::false_type
+template <typename T> struct IsConstSharedPtr : std::false_type {};
 
 /// Specialization for boost::shared_ptr<const T> types to inherit from
-/// boost::true_type
+/// std::true_type
 template <typename T>
-struct IsConstSharedPtr<boost::shared_ptr<const T>> : boost::true_type {};
+struct IsConstSharedPtr<boost::shared_ptr<const T>> : std::true_type {};
 
 //-----------------------------------------------------------------------
 // Polciy implementations
@@ -75,9 +72,9 @@ struct IsConstSharedPtr<boost::shared_ptr<const T>> : boost::true_type {};
 // call to this struct
 template <typename ConstPtrType> struct RemoveConstImpl {
   // Remove the pointer type to leave value type
-  typedef typename boost::remove_pointer<ConstPtrType>::type ValueType;
+  typedef typename std::remove_pointer<ConstPtrType>::type ValueType;
   // Remove constness
-  typedef typename boost::remove_const<ValueType>::type NonConstValueType;
+  typedef typename std::remove_const<ValueType>::type NonConstValueType;
 
   inline PyObject *operator()(const ConstPtrType &p) const {
     using namespace boost::python;
@@ -104,7 +101,7 @@ template <typename T> struct RemoveConst_Requires_Pointer_Return_Value {};
 template <typename ConstSharedPtr> struct RemoveConstSharedPtrImpl {
   typedef typename ConstSharedPtr::element_type ConstElementType;
   typedef
-      typename boost::remove_const<ConstElementType>::type NonConstElementType;
+      typename std::remove_const<ConstElementType>::type NonConstElementType;
   typedef typename boost::shared_ptr<NonConstElementType> NonConstSharedPtr;
 
   inline PyObject *operator()(const ConstSharedPtr &p) const {
@@ -134,7 +131,7 @@ struct RemoveConst {
   template <class T> struct apply {
     // Deduce if type is correct for policy, needs to be a "T*"
     typedef typename boost::mpl::if_c<
-        boost::is_pointer<T>::value, RemoveConstImpl<T>,
+        std::is_pointer<T>::value, RemoveConstImpl<T>,
         RemoveConst_Requires_Pointer_Return_Value<T>>::type type;
   };
 };

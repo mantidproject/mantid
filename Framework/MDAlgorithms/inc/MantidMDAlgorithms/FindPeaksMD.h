@@ -5,11 +5,11 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -73,6 +73,9 @@ private:
   /// Max # of peaks
   int64_t m_maxPeaks;
 
+  /// Number of edge pixels with no peaks
+  int m_edge;
+
   /// Flag to include the detectors within the peak
   bool m_addDetectors;
 
@@ -81,7 +84,7 @@ private:
   signal_t m_densityScaleFactor;
 
   /// Progress reporter.
-  Mantid::API::Progress *prog;
+  std::unique_ptr<Mantid::API::Progress> prog = nullptr;
 
   /** Enum describing which type of dimensions in the MDEventWorkspace */
   enum eDimensionType { HKL, QLAB, QSAMPLE };

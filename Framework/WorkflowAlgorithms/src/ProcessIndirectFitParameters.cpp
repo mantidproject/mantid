@@ -172,7 +172,7 @@ void ProcessIndirectFitParameters::exec() {
 
   workflowProg.report("Setting unit");
   // Set units for the xAxis
-  if (xUnit.compare("") != 0) {
+  if (!xUnit.empty()) {
     outputWs->getAxis(0)->setUnit(xUnit);
   }
 

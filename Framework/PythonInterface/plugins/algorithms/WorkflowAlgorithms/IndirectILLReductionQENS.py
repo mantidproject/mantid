@@ -1,10 +1,13 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import *  # noqa
-from mantid.kernel import *  # noqa
-from mantid.api import *  # noqa
-from mantid import mtd
+import os
 import numpy
+from mantid import mtd
+from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator, \
+    FloatArrayMandatoryValidator, IntBoundedValidator
+from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
+    FileAction, WorkspaceGroupProperty, Progress
+from mantid.simpleapi import *  # noqa
 
 
 class IndirectILLReductionQENS(PythonAlgorithm):
@@ -13,18 +16,21 @@ class IndirectILLReductionQENS(PythonAlgorithm):
     _alignment_files = None
     _background_files = None
     _calibration_files = None
+    _background_calib_files = None
     _sum_all_runs = None
     _unmirror_option = None
     _back_scaling = None
+    _back_calib_scaling = None
     _criteria = None
     _progress = None
     _red_ws = None
     _common_args = {}
     _peak_range = []
     _runs = None
+    _spectrum_axis = None
 
     def category(self):
-        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
+        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
 
     def summary(self):
         return 'Performs quasi-elastic neutron scattering (QENS) multiple file reduction ' \
@@ -47,6 +53,11 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
                              doc='Run number(s) of vanadium calibration run(s).')
+
+        self.declareProperty(MultipleFileProperty('CalibrationBackgroundRun',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
+                             doc='Run number(s) of background (empty can) run(s) for vanadium run.')
 
         self.declareProperty(MultipleFileProperty('AlignmentRun',
                                                   action=FileAction.OptionalLoad,
@@ -77,6 +88,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self.declareProperty(name='BackgroundScalingFactor', defaultValue=1.,
                              validator=FloatBoundedValidator(lower=0),
                              doc='Scaling factor for background subtraction')
+
+        self.declareProperty(name='CalibrationBackgroundScalingFactor', defaultValue=1.,
+                             validator=FloatBoundedValidator(lower=0),
+                             doc='Scaling factor for background subtraction for vanadium calibration')
 
         self.declareProperty(name='CalibrationPeakRange', defaultValue=[-0.003,0.003],
                              validator=FloatArrayMandatoryValidator(),
@@ -110,6 +125,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='Group name for the reduced workspace(s).')
 
+        self.declareProperty(name='SpectrumAxis', defaultValue='SpectrumNumber',
+                             validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
+                             doc='The spectrum axis conversion target.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -128,6 +147,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 issues['CalibrationPeakRange'] = 'Please provide valid calibration range. ' \
                                                  'Start energy is bigger than end energy.'
 
+        if self.getPropertyValue('CalibrationBackgroundRun') and not self.getPropertyValue('CalibrationRun'):
+            issues['CalibrationRun'] = 'Calibration run is required when calibration background is given.'
+
         return issues
 
     def setUp(self):
@@ -136,12 +158,27 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._alignment_file = self.getPropertyValue('AlignmentRun').replace(',', '+') # automatic summing
         self._background_file = self.getPropertyValue('BackgroundRun').replace(',', '+') # automatic summing
         self._calibration_file = self.getPropertyValue('CalibrationRun').replace(',', '+') # automatic summing
+        self._background_calib_files = self.getPropertyValue('CalibrationBackgroundRun').replace(',', '+') # automatic summing
         self._sum_all_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
+        self._back_calib_scaling = self.getProperty('CalibrationBackgroundScalingFactor').value
         self._peak_range = self.getProperty('CalibrationPeakRange').value
+        self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
 
-        self._red_ws = self.getPropertyValue('OutputWorkspace') + '_red'
+        self._red_ws = self.getPropertyValue('OutputWorkspace')
+
+        suffix = ''
+        if self._spectrum_axis == 'SpectrumNumber':
+            suffix = '_red'
+        elif self._spectrum_axis == '2Theta':
+            suffix = '_2theta'
+        elif self._spectrum_axis == 'Q':
+            suffix = '_q'
+        elif self._spectrum_axis == 'Q2':
+            suffix = '_q2'
+
+        self._red_ws += suffix
 
         # arguments to pass to IndirectILLEnergyTransfer
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')
@@ -149,6 +186,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._common_args['Reflection'] = self.getPropertyValue('Reflection')
         self._common_args['ManualPSDIntegrationRange'] = self.getProperty('ManualPSDIntegrationRange').value
         self._common_args['CropDeadMonitorChannels'] = self.getProperty('CropDeadMonitorChannels').value
+        self._common_args['SpectrumAxis'] = self._spectrum_axis
 
         if self._sum_all_runs is True:
             self.log().notice('All the sample runs will be summed')
@@ -210,6 +248,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         if self._calibration_file:
             self._calibration_file = self._filter_files(self._calibration_file, 'calibration')
 
+        if self._background_calib_files:
+            self._background_calib_files = self._filter_files(self._background_calib_files, 'calibration background')
+
         if self._alignment_file:
             self._alignment_file = self._filter_files(self._alignment_file, 'alignment')
 
@@ -245,6 +286,13 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         if self._calibration_file:
             calibration = '__calibration_'+self._red_ws
             IndirectILLEnergyTransfer(Run = self._calibration_file, OutputWorkspace = calibration, **self._common_args)
+
+            if self._background_calib_files:
+                back_calibration = '__calibration_back_'+self._red_ws
+                IndirectILLEnergyTransfer(Run = self._background_calib_files, OutputWorkspace = back_calibration, **self._common_args)
+                Scale(InputWorkspace=back_calibration, Factor=self._back_calib_scaling, OutputWorkspace=back_calibration)
+                Minus(LHSWorkspace=calibration, RHSWorkspace=back_calibration, OutputWorkspace=calibration)
+
             MatchPeaks(InputWorkspace=calibration,OutputWorkspace=calibration,MaskBins=True)
             Integration(InputWorkspace=calibration,RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
                         OutputWorkspace=calibration)
@@ -266,6 +314,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         if self._calibration_file:
             DeleteWorkspace(calibration)
+
+        if self._background_calib_files:
+            DeleteWorkspace(back_calibration)
 
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             DeleteWorkspace(alignment)

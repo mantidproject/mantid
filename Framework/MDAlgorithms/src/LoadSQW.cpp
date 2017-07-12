@@ -62,7 +62,7 @@ int LoadSQW::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // only .sqw can be considered
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".sqw") != 0)
+  if (extn != ".sqw")
     return 0;
 
   if (descriptor.isAscii()) {

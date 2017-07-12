@@ -42,7 +42,6 @@ public:
   const std::string category() const override;
 
 private:
-  std::map<std::string, std::string> validateInputs() override;
   void init() override;
   void exec() override;
 };

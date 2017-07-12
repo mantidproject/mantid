@@ -19,7 +19,7 @@ EndTime filtering is inclusive of the limits provided.
 
 The Method allows you to create quick statistics on the filtered array
 returned in the FilteredResult output argument. Therefore the return
-value from Method=mean is equivalent to running numpy.mean on the output
+value from Method=mean is equivalent to running :func:`numpy.mean` on the output
 from the FilteredResult property. All the Method options map directly to
 python numpy functions with the same name. These are documented
 `here <http://docs.scipy.org/doc/numpy/reference/routines.statistics.html>`__

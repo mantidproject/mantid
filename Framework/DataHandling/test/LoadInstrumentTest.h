@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -423,6 +424,19 @@ public:
     // ...but is not the same object
     TS_ASSERT_DIFFERS(physicalInst->getDetector(1).get(),
                       neutronicInst->getDetector(1).get());
+
+    // Physical instrument obtained via workspace: Make sure we do *not* get
+    // positions from DetectorInfo.
+    auto physInstFromWS = ws->getInstrument()->getPhysicalInstrument();
+    TS_ASSERT(physInstFromWS->isParametrized());
+    TS_ASSERT_DIFFERS(physInstFromWS->getDetector(1003)->getPos(),
+                      detectorInfo.position(detectorInfo.indexOf(1003)));
+    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1000)->getPos(), V3D(0, 0, 0));
+    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1001)->getPos(), V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1002)->getPos(), V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1003)->getPos(), V3D(1, 1, 0));
+    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1004)->getPos(), V3D(2, 0, 0));
+    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1005)->getPos(), V3D(2, 1, 0));
 
     // Clean up
     IDS.clear();

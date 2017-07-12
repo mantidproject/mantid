@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>pqCameraToolbarNonOrthogonalAxes</class>
+ <widget class="QToolBar" name="pqCameraToolbarNonOrthogonalAxes">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>336</width>
+    <height>44</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Camera Controls</string>
+  </property>
+  <property name="orientation">
+   <enum>Qt::Horizontal</enum>
+  </property>
+  <action name="actionResetCamera">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqResetCamera.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqResetCamera.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Reset</string>
+   </property>
+   <property name="iconText">
+    <string>Reset Camera</string>
+   </property>
+   <property name="statusTip">
+    <string>Reset Camera</string>
+   </property>
+  </action>
+  <action name="actionPositiveU">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqXPlus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqXPlus.png</iconset>
+   </property>
+   <property name="text">
+    <string>+U</string>
+   </property>
+   <property name="toolTip">
+    <string>Set view direction to +U</string>
+   </property>
+   <property name="statusTip">
+    <string>Set view direction to +U</string>
+   </property>
+   <property name="whatsThis">
+    <string>Set view direction to +U</string>
+   </property>
+  </action>
+  <action name="actionNegativeU">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqXMinus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqXMinus.png</iconset>
+   </property>
+   <property name="text">
+    <string>-U</string>
+   </property>
+   <property name="toolTip">
+    <string>Set view direction to -U</string>
+   </property>
+   <property name="statusTip">
+    <string>Set view direction to -U</string>
+   </property>
+   <property name="whatsThis">
+    <string>Set view direction to -U</string>
+   </property>
+  </action>
+  <action name="actionPositiveV">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqYPlus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqYPlus.png</iconset>
+   </property>
+   <property name="text">
+    <string>+V</string>
+   </property>
+   <property name="toolTip">
+    <string>Set view direction to +V</string>
+   </property>
+   <property name="statusTip">
+    <string>Set view direction to +V</string>
+   </property>
+   <property name="whatsThis">
+    <string>Set view direction to +V</string>
+   </property>
+  </action>
+  <action name="actionNegativeV">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqYMinus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqYMinus.png</iconset>
+   </property>
+   <property name="text">
+    <string>-V</string>
+   </property>
+   <property name="toolTip">
+    <string>Set view direction to -V</string>
+   </property>
+   <property name="statusTip">
+    <string>Set view direction to -V</string>
+   </property>
+   <property name="whatsThis">
+    <string>Set view direction to -V</string>
+   </property>
+  </action>
+  <action name="actionPositiveW">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZPlus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZPlus.png</iconset>
+   </property>
+   <property name="text">
+    <string>+W</string>
+   </property>
+   <property name="toolTip">
+    <string>Set view direction to +W</string>
+   </property>
+   <property name="statusTip">
+    <string>Set view direction to +W</string>
+   </property>
+   <property name="whatsThis">
+    <string>Set view direction to +W</string>
+   </property>
+  </action>
+  <action name="actionNegativeW">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZMinus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZMinus.png</iconset>
+   </property>
+   <property name="text">
+    <string>-W</string>
+   </property>
+   <property name="toolTip">
+    <string>Set view direction to -W</string>
+   </property>
+   <property name="statusTip">
+    <string>Set view direction to -W</string>
+   </property>
+   <property name="whatsThis">
+    <string>Set view direction to -W</string>
+   </property>
+  </action>
+  <action name="actionRotate90degCW">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqRotateCameraCW.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqRotateCameraCW.png</iconset>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="toolTip">
+    <string>Rotate 90° clockwise</string>
+   </property>
+   <property name="statusTip">
+    <string>Rotate 90° clockwise</string>
+   </property>
+   <property name="whatsThis">
+    <string>Rotate 90° clockwise</string>
+   </property>
+  </action>
+  <action name="actionRotate90degCCW">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqRotateCameraCCW.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqRotateCameraCCW.png</iconset>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="toolTip">
+    <string>Rotate 90° counterclockwise</string>
+   </property>
+   <property name="statusTip">
+    <string>Rotate 90° counterclockwise</string>
+   </property>
+   <property name="whatsThis">
+    <string>Rotate 90° counterclockwise</string>
+   </property>
+  </action>
+  <action name="actionZoomToBox">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZoomToSelection.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZoomToSelection.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom to Box</string>
+   </property>
+   <property name="statusTip">
+    <string>Zoom to Box</string>
+   </property>
+  </action>
+  <action name="actionZoomToData">
+   <property name="icon">
+    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZoomToData.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZoomToData.png</iconset>
+   </property>
+   <property name="text">
+    <string>ZTD</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom To Data</string>
+   </property>
+  </action>
+  <addaction name="actionResetCamera"/>
+  <addaction name="actionZoomToData"/>
+  <addaction name="actionZoomToBox"/>
+  <addaction name="actionPositiveU"/>
+  <addaction name="actionNegativeU"/>
+  <addaction name="actionPositiveV"/>
+  <addaction name="actionNegativeV"/>
+  <addaction name="actionPositiveW"/>
+  <addaction name="actionNegativeW"/>
+  <addaction name="actionRotate90degCW"/>
+  <addaction name="actionRotate90degCCW"/>
+ </widget>
+ <resources>
+  <include location="../../icons/ViewWidgetsIcons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

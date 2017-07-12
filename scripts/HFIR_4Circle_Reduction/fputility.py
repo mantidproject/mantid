@@ -230,7 +230,11 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
         # END-IF-ELSE
 
         # peak intensity and sigma
-        part3 = '%8.2f%8.2f%4d' % (peak_dict['intensity'], peak_dict['sigma'], 1)
+        try:
+            part3 = '%8.2f%8.2f%4d' % (peak_dict['intensity'], peak_dict['sigma'], 1)
+        except TypeError as type_err:
+            raise RuntimeError('In writing Fullprof file, unable to convert intensity {0} and/or sigma {1} to '
+                               'floats. FYI: {2}'.format(peak_dict['intensity'], peak_dict['sigma'], type_err))
 
         peak_line = part1 + part2 + part3
 
@@ -275,7 +279,7 @@ def main(argv):
     """
     # get input
     if len(argv) < 4:
-        print 'Calculate the difference of two measuremnts:\n'
+        print 'Calculate the difference of two measurements:\n'
         print '> %s [intensity file 1]  [intensity file 2]  [output intensity file]' % argv[0]
         return
     else:

@@ -37,7 +37,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         ws_basename = str(self._sample_ws_in)
 
-        trans_prog = Progress(self, start=0.05, end=0.04, nreports=2)
+        trans_prog = Progress(self, start=0.05, end=0.4, nreports=2)
         trans_prog.report('Transforming monitor for Sample')
         self._trans_mon(ws_basename, 'Sam', self._sample_ws_in)
         trans_prog.report('Transforming monitor for Container')
