@@ -1,26 +1,28 @@
 set ( SRC_FILES
-  src/Communicator.cpp
-  src/ExecutionMode.cpp
-  src/Request.cpp
-  src/StorageMode.cpp
-  src/ThreadingBackend.cpp
+	src/Communicator.cpp
+	src/ExecutionMode.cpp
+	src/Request.cpp
+	src/StorageMode.cpp
+	src/ThreadingBackend.cpp
 )
 
 set ( INC_FILES
-  inc/MantidParallel/Communicator.h
-  inc/MantidParallel/ExecutionMode.h
-  inc/MantidParallel/Request.h
-  inc/MantidParallel/StorageMode.h
-  inc/MantidParallel/ThreadingBackend.h
+	inc/MantidParallel/Collectives.h
+	inc/MantidParallel/Communicator.h
+	inc/MantidParallel/ExecutionMode.h
+	inc/MantidParallel/Request.h
+	inc/MantidParallel/StorageMode.h
+	inc/MantidParallel/ThreadingBackend.h
 )
 
 set ( TEST_FILES
-  CommunicatorTest.h
-  ExecutionModeTest.h
-  ParallelRunnerTest.h
-  RequestTest.h
-  StorageModeTest.h
-  ThreadingBackendTest.h
+	CollectivesTest.h
+	CommunicatorTest.h
+	ExecutionModeTest.h
+	ParallelRunnerTest.h
+	RequestTest.h
+	StorageModeTest.h
+	ThreadingBackendTest.h
 )
 
 if (COVERALLS)

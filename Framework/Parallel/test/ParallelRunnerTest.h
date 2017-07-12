@@ -5,6 +5,7 @@
 
 #include "MantidTestHelpers/ParallelRunner.h"
 
+#include <algorithm>
 #include <mutex>
 #include <vector>
 
@@ -12,8 +13,10 @@ using namespace Mantid::Parallel;
 using ParallelTestHelpers::ParallelRunner;
 
 namespace {
-void check_size(const Communicator &comm, const int expected) {
-  TS_ASSERT_EQUALS(comm.size(), expected);
+void get_sizes(const Communicator &comm, std::mutex &mutex,
+               std::vector<int> &sizes) {
+  std::lock_guard<std::mutex> lock(mutex);
+  sizes.push_back(comm.size());
 }
 
 void get_ranks(const Communicator &comm, std::mutex &mutex,
@@ -31,9 +34,15 @@ public:
   static void destroySuite(ParallelRunnerTest *suite) { delete suite; }
 
   void test_size() {
+    std::mutex mutex;
     ParallelRunner parallel;
     TS_ASSERT(parallel.size() > 1);
-    parallel.run(check_size, parallel.size());
+    std::vector<int> sizes;
+    parallel.run(get_sizes, std::ref(mutex), std::ref(sizes));
+    // Currently ParallelRunner also runs the callable with a single rank.
+    TS_ASSERT_EQUALS(std::count(sizes.begin(), sizes.end(), 1), 1);
+    TS_ASSERT_EQUALS(std::count(sizes.begin(), sizes.end(), parallel.size()),
+                     parallel.size());
   }
 
   void test_rank() {
