@@ -172,7 +172,7 @@ private:
   API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en,
                                     const ComplexFortranMatrix &wf,
                                     double temperature, double fwhm,
-                                    size_t i, bool addBackground) const;
+                                    size_t i, bool addBackground, double intensityScaling) const;
   /// Update a function for a single spectrum.
   void updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,
@@ -182,8 +182,8 @@ private:
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
                        const ComplexFortranMatrix &wf, double temperature,
-                       API::FunctionValues &values, size_t iSpec) const;
-
+                       API::FunctionValues &values, size_t iSpec,
+                       double intensityScaling) const;
 
   void setIonsAttribute(const std::string &name, const Attribute &attr);
   void setSymmetriesAttribute(const std::string &name, const Attribute &attr);
