@@ -89,6 +89,9 @@ private:
   void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
                             API::MatrixWorkspace_sptr outputWorkspace,
                             int order) const;
+
+  /// Validates inputs @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms

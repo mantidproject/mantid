@@ -64,6 +64,47 @@ void SplineInterpolation::init() {
   auto validator = boost::make_shared<BoundedValidator<int>>(0, 2);
   declareProperty("DerivOrder", 2, validator,
                   "Order to derivatives to calculate.");
+
+  declareProperty("Linear2Points", false, "Set to true to perform linear "
+                                          "interpolation if only 2 points are "
+                                          "present.");
+}
+
+//----------------------------------------------------------------------------------------------
+/** Input validation for the WorkspaceToInterpolate
+  */
+std::map<std::string, std::string> SplineInterpolation::validateInputs() {
+  // initialise map (result)
+  std::map<std::string, std::string> result;
+
+  // get inputs that need validation
+  const bool linear = getProperty("Linear2Points");
+
+  MatrixWorkspace_const_sptr iwsValid = getProperty("WorkspaceToInterpolate");
+  const size_t binsNo = iwsValid->blocksize();
+
+  // The minimum number of points for cubic splines is 3
+  if (binsNo < 2) {
+    result["WorkspaceToInterpolate"] = "Workspace must have minimum 2 points.";
+  } else if (binsNo == 2) {
+    if (!linear) {
+      result["WorkspaceToInterpolate"] =
+          "Workspace has only 2 points, "
+          "you can enable linear interpolation by "
+          "setting the property Linear2Points. Otherwise "
+          "provide a minimum of 3 points.";
+    }
+  }
+
+  const int derivOrder = getProperty("DerivOrder");
+  const std::string derivName = getProperty("OutputWorkspaceDeriv");
+  if (derivName.empty() && (derivOrder > 0)) {
+    result["OutputWorkspaceDeriv"] =
+        "Enter a name for the OutputWorkspaceDeriv "
+        "or set DerivOrder to zero.";
+  }
+
+  return result;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -71,13 +112,13 @@ void SplineInterpolation::init() {
  */
 void SplineInterpolation::exec() {
   // read in algorithm parameters
-  int order = static_cast<int>(getProperty("DerivOrder"));
+  const int order = static_cast<int>(getProperty("DerivOrder"));
 
   // set input workspaces
   MatrixWorkspace_sptr mws = getProperty("WorkspaceToMatch");
   MatrixWorkspace_sptr iws = getProperty("WorkspaceToInterpolate");
 
-  int histNo = static_cast<int>(iws->getNumberHistograms());
+  const int histNo = static_cast<int>(iws->getNumberHistograms());
 
   // vector of multiple derivative workspaces
   std::vector<MatrixWorkspace_sptr> derivs(histNo);
@@ -86,7 +127,7 @@ void SplineInterpolation::exec() {
   if (mws->getNumberHistograms() > 1) {
     g_log.warning()
         << "Algorithm can only interpolate against a single data set. "
-           "Only the first data set will be used.\n";
+           "Only the x-axis of the first spectrum will be used.\n";
   }
 
   // convert data to binned data as required
