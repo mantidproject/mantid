@@ -137,9 +137,8 @@ ComponentInfo::relativePosition(const size_t componentIndex) const {
     return position(componentIndex);
   } else {
     const auto parentPos = position(parentIndex);
-    Eigen::Affine3d transformation;
-    transformation =
-        rotation(parentIndex).conjugate(); // Inverse parent rotation
+    auto transformation = Eigen::Affine3d(
+        rotation(parentIndex).conjugate()); // Inverse parent rotation
     transformation.translate(-parentPos);
     return transformation * position(componentIndex);
   }

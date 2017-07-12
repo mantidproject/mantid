@@ -435,13 +435,13 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
 
   if (componentInfo.hasParent(componentIndex)) {
     const auto parentIndex = componentInfo.parent(componentIndex);
-    Quat rot0 = componentInfo.relativeRotation(parentIndex);
+    auto rot0 = componentInfo.relativeRotation(parentIndex);
     rot0.inverse();
     Rot *= rot0;
 
     if (componentInfo.hasParent(parentIndex)) {
       const auto grandParentIndex = componentInfo.parent(parentIndex);
-      Quat rot0 = componentInfo.relativeRotation(grandParentIndex);
+      auto rot0 = componentInfo.relativeRotation(grandParentIndex);
       rot0.inverse();
       Rot *= rot0;
     }
