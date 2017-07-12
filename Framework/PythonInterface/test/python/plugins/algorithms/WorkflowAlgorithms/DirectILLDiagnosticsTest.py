@@ -40,6 +40,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': self._RAW_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
+            'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF',
             'DefaultMask': 'Default Mask OFF',
             'rethrow': True
         }
@@ -74,6 +75,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'BkgDiagnostics': 'Bkg Diagnostics ON',
             'NoisyBkgLowThreshold': 0.01,
             'NoisyBkgHighThreshold': 9.99,
+            'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF',
             'DefaultMask': 'Default Mask OFF',
             'rethrow': True
         }
@@ -110,6 +112,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'ElasticPeakLowThreshold': 0.2,
             'ElasticPeakHighThreshold': 9.7,
             'BkgDiagnostics': 'Bkg Diagnostics OFF',
+            'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF',
             'DefaultMask': 'Default Mask OFF',
             'rethrow': True
         }
@@ -126,6 +129,44 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
                 self.assertEquals(ys[0], 1)
             else:
                 self.assertEquals(ys[0], 0)
+
+    def testOutputIsUsable(self):
+        inWS = mtd[self._RAW_WS_NAME]
+        spectraCount = inWS.getNumberHistograms()
+        maskedIndices = [0, int(spectraCount / 3), spectraCount - 1]
+        for i in maskedIndices:
+            ys = inWS.dataY(i)
+            ys *= 10.0
+        outWSName = 'diagnosticsWS'
+        kwargs = {
+            'InputWorkspace': self._RAW_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'EPPWorkspace': self._EPP_WS_NAME,
+            'ElasticPeakLowThreshold': 0.2,
+            'ElasticPeakHighThreshold': 9.7,
+            'BkgDiagnostics': 'Bkg Diagnostics OFF',
+            'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF',
+            'DefaultMask': 'Default Mask OFF',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLDiagnostics', **kwargs)
+        self.assertTrue(mtd.doesExist(outWSName))
+        outWS = mtd[outWSName]
+        self.assertEquals(outWS.getNumberHistograms(), spectraCount)
+        self.assertEquals(outWS.blocksize(), 1)
+        kwargs = {
+            'Workspace': self._RAW_WS_NAME,
+            'MaskedWorkspace': outWSName,
+            'rethrow': True
+        }
+        run_algorithm('MaskDetectors', **kwargs)
+        maskedWS = mtd[self._RAW_WS_NAME]
+        spectrumInfo = maskedWS.spectrumInfo()
+        for i in range(spectraCount):
+            if i in maskedIndices:
+                self.assertTrue(spectrumInfo.isMasked(i))
+            else:
+                self.assertFalse(spectrumInfo.isMasked(i))
 
 
 if __name__ == '__main__':

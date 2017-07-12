@@ -4,6 +4,7 @@ digraph DirectILLDiagnostics {
 
   subgraph params {
     $param_style
+    beamStopThreshold [label="BeamStopThreshold"]
     bkgExcludeWidth [label="NonBkgRegionInSigmas"]
     bkgThresholds [label="Bkg thresholds"]
     elasticPeakWidth [label="ElasticPeakWidthInSigmas"]
@@ -19,15 +20,20 @@ digraph DirectILLDiagnostics {
     $algorithm_style
     DiagnoseBkg [label="Diagnose flat backgrounds"]
     DiagnosePeaks [label="Diagnose elastic peaks"]
-    IntegrateBkg [label="Integrate backgrounds"]
-    IntegratePeaks [label="Integrate elastic peak"]
+    DefineBeamStop [label="Define beam\nstop shadow"]
+    IntegrateBkg [label="Integrate\nbackgrounds"]
+    IntegrateIntensities [label="Integrate"]
+    IntegratePeaks [label="Integrate\nelastic peak"]
     Plus [label="Plus"]
   }
 
   subgraph values {
     $value_style
-    bkgDiagnostics [label="Background diagnostics workspace"]
-    peakDiagnostics [label="Peak diagnostics workspace"]
+    beamStopMask [label="Beam stop\nmask"]
+    beamStopSpectra [label="Beam stop spectra"]
+    bkgDiagnostics [label="Background diagnostics\nworkspace"]
+    defaultMask [label="Default mask\nfrom file"]
+    peakDiagnostics [label="Peak diagnostics\nworkspace"]
   }
 
   subgraph decisions {
@@ -48,7 +54,14 @@ digraph DirectILLDiagnostics {
   DiagnoseBkg -> bkgDiagnostics
   peakDiagnostics -> Plus
   bkgDiagnostics -> Plus
+  beamStopSpectra -> IntegrateIntensities
+  inputWS -> IntegrateIntensities
+  IntegrateIntensities -> DefineBeamStop
+  beamStopThreshold -> DefineBeamStop
+  DefineBeamStop -> beamStopMask
+  beamStopMask -> Plus
   maskIndices -> Plus
   maskComponents -> Plus
+  defaultMask -> Plus
   Plus -> outputDiagnostics
 }
