@@ -385,10 +385,15 @@ class FunctionWrapperTest(unittest.TestCase):
         self.assertAlmostEqual(pvals[2], 12.5)
         self.assertAlmostEqual(pvals[3], 10.5)
         
-        s = c + p
-        sws = EvaluateFunction(s,"ws", OutputWorkspace='out')
-        svals = sws.readY(1)
-        self.assertAlmostEqual(svals[0], 10.0)
+        s1 = c + p
+        s1ws = EvaluateFunction(s1,"ws", OutputWorkspace='out')
+        s1vals = s1ws.readY(1)
+        self.assertAlmostEqual(s1vals[0], 10.0)
+        
+        s2 = p + c
+        s2ws = EvaluateFunction(s2,"ws", OutputWorkspace='out')
+        s2vals = s2ws.readY(1)
+        self.assertAlmostEqual(s2vals[0], 10.0)
        
 if __name__ == '__main__':
     unittest.main()
