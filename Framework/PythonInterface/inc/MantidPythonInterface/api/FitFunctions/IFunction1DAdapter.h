@@ -57,6 +57,13 @@ public:
   /// A constructor that looks like a Python __init__ method
   IFunction1DAdapter(PyObject *self);
 
+  /// Disable copy operator - The PyObject must be supplied to construct the
+  /// object
+  IFunction1DAdapter(const IFunction1DAdapter &) = delete;
+
+  /// Disable assignment operator
+  IFunction1DAdapter &operator=(const IFunction1DAdapter &) = delete;
+
   /** @name Virtual methods */
   ///@{
   /// Base-class method
@@ -71,9 +78,6 @@ public:
   ///@}
 
 private:
-  /// The PyObject must be supplied to construct the object
-  DISABLE_COPY_AND_ASSIGN(IFunction1DAdapter)
-
   /// Flag if the functionDeriv1D method is overridden (avoids multiple checks)
   bool m_derivOveridden;
 };

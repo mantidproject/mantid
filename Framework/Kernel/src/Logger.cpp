@@ -2,8 +2,11 @@
 
 #include "MantidKernel/ThreadSafeLogStream.h"
 
+#include <Poco/Logger.h>
 #include <Poco/NullStream.h>
 
+#include <algorithm>
+#include <exception>
 #include <iostream>
 #include <sstream>
 

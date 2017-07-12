@@ -34,18 +34,20 @@ class DataProcessorOptionsCommand : public DataProcessorCommandBase {
 public:
   DataProcessorOptionsCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorOptionsCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorOptionsCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::OptionsDialogFlag);
   };
-  std::string name() override { return std::string("Options"); }
-  std::string icon() override { return std::string("://configure.png"); }
-  std::string tooltip() override { return std::string("Options"); }
-  std::string whatsthis() override {
-    return std::string("Opens a dialog with some options for the table");
+  QString name() override { return QString("Options"); }
+  QString icon() override { return QString("://configure.png"); }
+  QString tooltip() override { return QString("Options"); }
+  QString whatsthis() override {
+    return QString("Opens a dialog with some options for the table");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

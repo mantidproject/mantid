@@ -6,6 +6,8 @@ from mantid import config
 import os
 import numpy as np
 
+from IndirectCommon import formatRuns
+
 
 class SofQWMomentsScan(DataProcessorAlgorithm):
     _data_files = None
@@ -110,7 +112,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
 
         progress.report('Energy transfer')
         scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransfer", 0.05, 0.95)
-        scan_alg.setProperty('InputFiles', self._data_files)
+        scan_alg.setProperty('InputFiles', formatRuns(self._data_files, self._instrument_name))
         scan_alg.setProperty('SumFiles', self._sum_files)
         scan_alg.setProperty('LoadLogFiles', self._load_logs)
         scan_alg.setProperty('CalibrationWorkspace', self._calibration_ws)
@@ -161,7 +163,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             sofqw_alg.setProperty("QAxisBinning", self._q_range)
             sofqw_alg.setProperty("EMode", 'Indirect')
             sofqw_alg.setProperty("ReplaceNaNs", True)
-            sofqw_alg.setProperty("Method", 'Polygon')
+            sofqw_alg.setProperty("Method", 'NormalisedPolygon')
             sofqw_alg.setProperty("OutputWorkspace", input_ws + '_sqw')
             sofqw_alg.execute()
             mtd.addOrReplace(input_ws + '_sqw', sofqw_alg.getProperty("OutputWorkspace").value)

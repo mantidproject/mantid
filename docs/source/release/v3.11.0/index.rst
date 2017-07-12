@@ -2,17 +2,19 @@
 Mantid 3.11.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ReleaseUnderConstruction.jpg
+.. figure:: ../../images/Mantid_10_years.png
    :class: screenshot
-   :width: 550px
+   :width: 385px
    :align: right
 
-   Release image
+   Mantid celebrates 10 years of supporting Neutron and Muon research
 
 .. contents:: Table of Contents
    :local:
 
 .. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
+
+We are proud to announce version 3.11.0 of Mantid. This release celebrates 10 years of the Mantid project supporting Neutron and Muon research.
 
 **TODO: Add paragraph summarizing big changes**
 

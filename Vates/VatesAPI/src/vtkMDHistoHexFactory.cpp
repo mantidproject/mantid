@@ -144,7 +144,7 @@ static void InitializevtkMDHWSignalArray(
  *
  * @param timestep :: index of the time step (4th dimension) in the workspace.
  *        Set to 0 for a 3D workspace.
- * @param progressUpdate: Progress updating. passes progress information up the
+ * @param progress: Progress updating. passes progress information up the
  *stack.
  * @return the vtkDataSet created
  */

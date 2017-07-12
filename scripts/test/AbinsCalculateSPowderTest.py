@@ -45,7 +45,6 @@ class AbinsCalculateSPowderTest(unittest.TestCase):
     _sample_form = "Powder"
     _instrument = AbinsModules.InstrumentProducer().produce_instrument("TOSCA")
     _order_event = AbinsModules.AbinsConstants.FUNDAMENTALS
-    _squaricn = "squaricn_sum_CalculateSPowder"
     _si2 = "Si2-sc_CalculateSPowder"
 
     def setUp(self):
@@ -99,7 +98,6 @@ class AbinsCalculateSPowderTest(unittest.TestCase):
     #  main test
     def test_good_case(self):
         self._good_case(name=self._si2)
-        self._good_case(name=self._squaricn)
 
     # helper functions
     def _good_case(self, name=None):

@@ -62,7 +62,6 @@ void IndirectSqw::run() {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   QString sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
   QString eRebinWsName = sampleWsName.left(sampleWsName.length() - 4) + "_r";
-  QString method = m_uiForm.cbMethod->currentText();
 
   QString rebinString = m_uiForm.spQLow->text() + "," +
                         m_uiForm.spQWidth->text() + "," +
@@ -101,7 +100,7 @@ void IndirectSqw::run() {
   sqwAlg->setProperty("QAxisBinning", rebinString.toStdString());
   sqwAlg->setProperty("EMode", "Indirect");
   sqwAlg->setProperty("EFixed", eFixed.toStdString());
-  sqwAlg->setProperty("Method", method.toStdString());
+  sqwAlg->setProperty("Method", "NormalisedPolygon");
 
   m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
 
@@ -112,7 +111,7 @@ void IndirectSqw::run() {
 
   sampleLogAlg->setProperty("LogName", "rebin_type");
   sampleLogAlg->setProperty("LogType", "String");
-  sampleLogAlg->setProperty("LogText", method.toStdString());
+  sampleLogAlg->setProperty("LogText", "NormalisedPolygon");
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputToAddSampleLogProps;
   inputToAddSampleLogProps["Workspace"] = sqwWsName.toStdString();

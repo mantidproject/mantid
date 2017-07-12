@@ -1,17 +1,17 @@
 #include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -44,7 +44,7 @@ SmoothNeighbours::SmoothNeighbours()
     : API::Algorithm(), AdjX(0), AdjY(0), Edge(0), Radius(0.), nNeighbours(0),
       WeightedSum(new NullWeighting), PreserveEvents(false),
       expandSumAllPixels(false), outWI(0), inWS(), m_neighbours(),
-      m_prog(nullptr) {}
+      m_progress(nullptr) {}
 
 /** Initialisation method.
  *
@@ -135,19 +135,24 @@ void SmoothNeighbours::init() {
   declareProperty(
       "RadiusUnits", "Meters",
       boost::make_shared<StringListValidator>(radiusPropOptions),
-      "Units used to specify the radius?\n"
+      "Units used to specify the radius.\n"
       "  Meters : Radius is in meters.\n"
       "  NumberOfPixels : Radius is in terms of the number of pixels.");
 
   declareProperty(
       "Radius", 0.0, mustBePositiveDouble,
-      "The radius around a pixel to look for nearest neighbours to average. \n"
+      "The radius cut-off around a pixel to look for nearest neighbours to "
+      "average. \n"
+      "This radius cut-off is applied to a set of nearest neighbours whose "
+      "number is "
+      "defined in the NumberOfNeighbours property. See below for more details. "
+      "\n"
       "If 0, will use the AdjX and AdjY parameters for rectangular detectors "
       "instead.");
 
   declareProperty("NumberOfNeighbours", 8, mustBePositive,
                   "Number of nearest neighbouring pixels.\n"
-                  "Alternative to providing the radius. The default is 8.");
+                  "The default is 8.");
 
   declareProperty("SumNumberOfNeighbours", 1,
                   "Sum nearest neighbouring pixels with same parent.\n"
@@ -171,7 +176,7 @@ void SmoothNeighbours::init() {
 void SmoothNeighbours::findNeighboursRectangular() {
   g_log.debug("SmoothNeighbours processing assuming rectangular detectors.");
 
-  m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
+  m_progress->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
 
   Instrument_const_sptr inst = inWS->getInstrument();
 
@@ -304,7 +309,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
           m_neighbours[outWI] = neighbours;
           outWI++;
 
-          m_prog->report("Finding Neighbours");
+          m_progress->report("Finding Neighbours");
         }
       }
     }
@@ -319,7 +324,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   g_log.debug(
       "SmoothNeighbours processing NOT assuming rectangular detectors.");
 
-  m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
+  m_progress->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
   this->progress(0.2, "Building Neighbour Map");
 
   Instrument_const_sptr inst = inWS->getInstrument();
@@ -434,7 +439,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     m_neighbours[outWI] = neighbours;
     outWI++;
 
-    m_prog->report("Finding Neighbours");
+    m_progress->report("Finding Neighbours");
   } // each workspace index
 
   delete[] used;
@@ -568,7 +573,8 @@ void SmoothNeighbours::exec() {
   nNeighbours = getProperty("NumberOfNeighbours");
 
   // Progress reporting, first for the sorting
-  m_prog = new Progress(this, 0.0, 0.2, inWS->getNumberHistograms());
+  m_progress =
+      make_unique<Progress>(this, 0.0, 0.2, inWS->getNumberHistograms());
 
   // Run the appropriate method depending on the type of the instrument
   if (inWS->getInstrument()->containsRectDetectors() ==
@@ -580,7 +586,7 @@ void SmoothNeighbours::exec() {
   EventWorkspace_sptr wsEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(inWS);
   if (wsEvent)
-    wsEvent->sortAll(TOF_SORT, m_prog);
+    wsEvent->sortAll(TOF_SORT, m_progress.get());
 
   if (!wsEvent || !PreserveEvents)
     this->execWorkspace2D();
@@ -594,7 +600,7 @@ void SmoothNeighbours::exec() {
 //--------------------------------------------------------------------------------------------
 /** Execute the algorithm for a Workspace2D/don't preserve events input */
 void SmoothNeighbours::execWorkspace2D() {
-  m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
+  m_progress->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
 
   // Get some stuff from the input workspace
   const size_t numberOfSpectra = outWI;
@@ -670,7 +676,7 @@ void SmoothNeighbours::execWorkspace2D() {
     // input workspace
     // outSpec->copyInfoFrom(*inWS->getSpectrum(outWIi));
 
-    m_prog->report("Summing");
+    m_progress->report("Summing");
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -751,7 +757,7 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
  * @param ws :: EventWorkspace
  */
 void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
-  m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
+  m_progress->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
 
   // Get some stuff from the input workspace
   const size_t numberOfSpectra = outWI;
@@ -797,7 +803,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
     // input workspace
     // if (!sum) outEL.copyInfoFrom(*ws->getSpectrum(outWIi));
 
-    m_prog->report("Summing");
+    m_progress->report("Summing");
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION

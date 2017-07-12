@@ -36,18 +36,20 @@ class DataProcessorExportTableCommand : public DataProcessorCommandBase {
 public:
   DataProcessorExportTableCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorExportTableCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorExportTableCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ExportTableFlag);
   };
-  std::string name() override { return std::string("Export .TBL"); }
-  std::string icon() override { return std::string("://save_template.png"); }
-  std::string tooltip() override { return std::string("Export .TBL file"); }
-  std::string whatsthis() override {
-    return std::string("Opens a dialog to export a table as .TBL file");
+  QString name() override { return QString("Export .TBL"); }
+  QString icon() override { return QString("://save_template.png"); }
+  QString tooltip() override { return QString("Export .TBL file"); }
+  QString whatsthis() override {
+    return QString("Opens a dialog to export a table as .TBL file");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

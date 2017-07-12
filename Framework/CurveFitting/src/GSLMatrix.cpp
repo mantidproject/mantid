@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLMatrix.h"
 #include <gsl/gsl_eigen.h>
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -12,6 +13,27 @@ namespace CurveFitting {
 /// @param ny :: Second dimension
 GSLMatrix::GSLMatrix(const size_t nx, const size_t ny)
     : m_data(nx * ny), m_view(gsl_matrix_view_array(m_data.data(), nx, ny)) {}
+
+/// Construct from an initialisation list
+/// @param ilist :: Initialisation list as a list of rows:
+///      {{M00, M01, M02, ...},
+///       {M10, M11, M12, ...},
+///             ...
+///       {Mn0, Mn1, Mn2, ...}}
+GSLMatrix::GSLMatrix(std::initializer_list<std::initializer_list<double>> ilist)
+    : GSLMatrix(ilist.size(), ilist.begin()->size()) {
+  for (auto row = ilist.begin(); row != ilist.end(); ++row) {
+    if (row->size() != size2()) {
+      throw std::runtime_error(
+          "All rows in initializer list must have the same size.");
+    }
+    auto i = static_cast<size_t>(std::distance(ilist.begin(), row));
+    for (auto cell = row->begin(); cell != row->end(); ++cell) {
+      auto j = static_cast<size_t>(std::distance(row->begin(), cell));
+      set(i, j, *cell);
+    }
+  }
+}
 
 /// Copy constructor
 /// @param M :: The other matrix.
@@ -155,6 +177,29 @@ GSLMatrix &GSLMatrix::operator*=(const double &d) {
   return *this;
 }
 
+/// Matrix by vector multiplication
+/// @param v :: A vector to multiply by. Must have the same size as size2().
+/// @returns A vector - the result of the multiplication. Size of the returned
+/// vector equals size1().
+/// @throws std::invalid_argument if the input vector has a wrong size.
+/// @throws std::runtime_error if the underlying GSL routine fails.
+GSLVector GSLMatrix::operator*(const GSLVector &v) const {
+  if (v.size() != size2()) {
+    throw std::invalid_argument(
+        "Matrix by vector multiplication: wrong size of vector.");
+  }
+  GSLVector res(size1());
+  auto status =
+      gsl_blas_dgemv(CblasNoTrans, 1.0, gsl(), v.gsl(), 0.0, res.gsl());
+  if (status != GSL_SUCCESS) {
+    std::string message = "Failed to multiply matrix by a vector.\n"
+                          "Error message returned by the GSL:\n" +
+                          std::string(gsl_strerror(status));
+    throw std::runtime_error(message);
+  }
+  return res;
+}
+
 /// Assign this matrix to a product of two other matrices
 /// @param mult2 :: Matrix multiplication helper object.
 GSLMatrix &GSLMatrix::operator=(const GSLMatrixMult2 &mult2) {
@@ -203,22 +248,30 @@ GSLMatrix &GSLMatrix::operator=(const GSLMatrixMult3 &mult3) {
 /// This matrix is destroyed.
 /// @param rhs :: The right-hand-side vector
 /// @param x :: The solution vector
+/// @throws std::invalid_argument if the input vectors have wrong sizes.
+/// @throws std::runtime_error if the GSL fails to solve the equations.
 void GSLMatrix::solve(const GSLVector &rhs, GSLVector &x) {
   if (size1() != size2()) {
-    throw std::runtime_error(
+    throw std::invalid_argument(
         "System of linear equations: the matrix must be square.");
   }
   size_t n = size1();
   if (rhs.size() != n) {
-    throw std::runtime_error(
+    throw std::invalid_argument(
         "System of linear equations: right-hand side vector has wrong size.");
   }
   x.resize(n);
   int s;
   gsl_permutation *p = gsl_permutation_alloc(n);
   gsl_linalg_LU_decomp(gsl(), p, &s); // matrix is modified at this moment
-  gsl_linalg_LU_solve(gsl(), p, rhs.gsl(), x.gsl());
+  int res = gsl_linalg_LU_solve(gsl(), p, rhs.gsl(), x.gsl());
   gsl_permutation_free(p);
+  if (res != GSL_SUCCESS) {
+    std::string message = "Failed to solve system of linear equations.\n"
+                          "Error message returned by the GSL:\n" +
+                          std::string(gsl_strerror(res));
+    throw std::runtime_error(message);
+  }
 }
 
 /// Invert this matrix

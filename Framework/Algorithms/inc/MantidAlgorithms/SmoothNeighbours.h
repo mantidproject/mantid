@@ -155,7 +155,7 @@ private:
   std::vector<std::vector<weightedNeighbour>> m_neighbours;
 
   /// Progress reporter
-  Mantid::API::Progress *m_prog;
+  std::unique_ptr<Mantid::API::Progress> m_progress = nullptr;
 };
 
 } // namespace Algorithm

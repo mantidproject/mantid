@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------
 #include "DllOption.h"
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Logger.h" // So we can match the Logger priority
 
 #include <QMetaType>
