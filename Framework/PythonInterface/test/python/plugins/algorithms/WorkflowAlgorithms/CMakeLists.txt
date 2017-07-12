@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   BayesStretchTest.py
+  CylinderMonteCarloAbsorptionTest.py
   DetectorFloodWeightingTest.py
   EnergyWindowScanTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
