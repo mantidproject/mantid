@@ -11,6 +11,7 @@ set ( TEST_PY_FILES
   CylinderMonteCarloAbsorptionTest.py
   DetectorFloodWeightingTest.py
   EnergyWindowScanTest.py
+  FlatPlateMonteCarloAbsorptionTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   ILLIN16BCalibrationTest.py
   IndirectAnnulusAbsorptionTest.py
