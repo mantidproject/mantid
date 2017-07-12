@@ -46,8 +46,8 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "SCDPanelErrors"; }
   const std::string category() const override { return "General"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const
+      override;
   ///  function derivatives
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
                        const size_t nData) override;
@@ -77,7 +77,8 @@ private:
   /// Evaluate the function for a list of arguments and given scaling factor
   void eval(double xshift, double yshift, double zshift, double xrotate,
             double yrotate, double zrotate, double scalex, double scaley,
-            double *out, const double *xValues, const size_t nData) const;
+            double *out, const double *xValues, const size_t nData,
+            double tShift) const;
 
   /// Fill in the workspace and bank names
   void setupData() const;
