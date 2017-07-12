@@ -85,12 +85,12 @@ public:
   /// Update row with new data
   void update(int parent, int child,
               const std::vector<std::string> &data) override;
-  /// Highlight a specific row
-  void addHighlighted(int position) override;
-  void addHighlighted(int position, int parent) override;
-  /// Un-highlight a data item
-  void clearHighlighted(int position) override;
-  void clearHighlighted(int position, int parent) override;
+  /// Get the 'processed' status of a data item
+  virtual bool isProcessed(int position) const override;
+  virtual bool isProcessed(int position, int parent) const override;
+  /// Set the 'processed' status of a data item
+  void setProcessed(bool processed, int position) override;
+  void setProcessed(bool processed, int position, int parent) override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,

@@ -269,8 +269,8 @@ void GenericDataProcessorPresenter::process() {
 
   m_newSelection = false;
 
-  // Set the global settings. If any have been changed, clear list of processed
-  // group indexes
+  // Set the global settings. If any have been changed, set all groups and rows
+  // as unprocessed
   std::string newPreprocessingOptions =
       m_mainPresenter->getPreprocessingOptionsAsString().toStdString();
   std::string newProcessingOptions =
@@ -278,10 +278,9 @@ void GenericDataProcessorPresenter::process() {
   std::string newPostprocessingOptions =
       m_mainPresenter->getPostprocessingOptions().toStdString();
 
-  if (m_preprocessingOptions != newPreprocessingOptions ||
-      m_processingOptions != newProcessingOptions ||
-      m_postprocessingOptions != newPostprocessingOptions)
-    m_processedGroupIndexes.clear();
+  bool settingsChanged = m_preprocessingOptions != newPreprocessingOptions ||
+                         m_processingOptions != newProcessingOptions ||
+                         m_postprocessingOptions != newPostprocessingOptions;
 
   m_preprocessingOptions = newPreprocessingOptions;
   m_processingOptions = newProcessingOptions;
@@ -297,30 +296,34 @@ void GenericDataProcessorPresenter::process() {
   for (const auto &item : m_selectedData) {
     // Loop over each group
 
-    // Ignore any groups that are already processed
-    if (m_processedGroupIndexes.find(item.first) !=
-        m_processedGroupIndexes.end())
+    // Un-highlight all groups and their rows if settings have changed
+    if (settingsChanged)
+      m_manager->setProcessed(false, item.first);
+
+    // Ignore groups that have already been processed
+    if (m_manager->isProcessed(item.first))
       continue;
 
     // Increment progress by group + number of child rows
     maxProgress += (int)(item.second.size()) + 1;
-    // Un-highlight unprocessed groups
-    m_manager->clearHighlighted(item.first);
+    // Set group as unprocessed 
+    m_manager->setProcessed(false, item.first);
 
     RowQueue rowQueue;
 
     for (const auto &data : item.second) {
       // Add all row items to queue
       rowQueue.push(data);
-      // Un-highlight unprocessed rows
-      m_manager->clearHighlighted(data.first, item.first);
+      // Constituent rows are set as unprocessed
+      m_manager->setProcessed(false, data.first, item.first);
     }
     m_gqueue.emplace(item.first, rowQueue);
   }
 
   // Create progress reporter bar
-  m_progressReporter =
-      new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
+  if (maxProgress > 0)
+    m_progressReporter = new ProgressPresenter(progress, maxProgress,
+                                               maxProgress, m_progressView);
 
   // Start processing the first group
   m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
@@ -1558,20 +1561,6 @@ void GenericDataProcessorPresenter::setModel(std::string name) {
 }
 
 /**
-* Takes the index corresponding to table group and either adds or removes it
-* from the list of processed group indexes
-* @param index : [input] The index of the group to be removed
-* @param processed : [input] True to add index, false to remove it
-*/
-void GenericDataProcessorPresenter::setIndexProcessed(int index,
-                                                      bool processed) {
-  if (processed)
-    m_processedGroupIndexes.insert(index);
-  else
-    m_processedGroupIndexes.erase(index);
-}
-
-/**
 * Sets whether to prompt user when getting selected runs
 * @param allowPrompt : [input] Enable setting user prompt
 */
@@ -1664,6 +1653,13 @@ void GenericDataProcessorPresenter::giveUserWarning(
     const std::string &prompt, const std::string &title) const {
 
   m_view->giveUserWarning(prompt, title);
+}
+
+/** Checks whether data reduction is still in progress or not
+* @return :: the reduction state
+*/
+bool GenericDataProcessorPresenter::isProcessing() const {
+  return !m_reductionPaused;
 }
 }
 }

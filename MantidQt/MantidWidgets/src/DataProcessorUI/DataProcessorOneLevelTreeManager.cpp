@@ -388,38 +388,41 @@ void DataProcessorOneLevelTreeManager::update(
                      QString::fromStdString(data[col]));
 }
 
-/** Sets a new row to be highlighted
-* @param position : The index of the row to be highlighted
+/** Gets the 'process' status of a row
+* @param position : The row index
 */
-void DataProcessorOneLevelTreeManager::addHighlighted(int position) {
-  m_model->addHighlighted(position);
+bool DataProcessorOneLevelTreeManager::isProcessed(int position) const {
+  return m_model->isProcessed(position);
 }
 
-/** Sets a new row to be highlighted
-* @param position : The index of the row to be highlighted
+/** Gets the 'process' status of a row
+* @param position : The row index
 * @param parent : The parent of the row
 */
-void DataProcessorOneLevelTreeManager::addHighlighted(int position,
-                                                      int parent) {
+bool DataProcessorOneLevelTreeManager::isProcessed(int position,
+                                                   int parent) const {
   UNUSED_ARG(parent);
-  addHighlighted(position);
+  return m_model->isProcessed(position);
 }
 
-/** Sets a row to be un-highlighted
-* @param position : The index of the row to be un-highlighted
+/** Sets the 'process' status of a row
+* @param processed : True to set row as processed, false to set unprocessed
+* @param position : The index of the row to be set
 */
-void DataProcessorOneLevelTreeManager::clearHighlighted(int position) {
-  m_model->clearHighlighted(position);
+void DataProcessorOneLevelTreeManager::setProcessed(bool processed,
+                                                    int position) {
+  m_model->setProcessed(processed, position);
 }
 
-/** Sets a row to be un-highlighted
-* @param position : The index of the row to be highlighted
+/** Sets the 'process' status of a row
+* @param processed : True to set row as processed, false to set unprocessed
+* @param position : The index of the row to be set
 * @param parent : The parent of the row
 */
-void DataProcessorOneLevelTreeManager::clearHighlighted(int position,
-                                                        int parent) {
+void DataProcessorOneLevelTreeManager::setProcessed(bool processed,
+                                                    int position, int parent) {
   UNUSED_ARG(parent);
-  clearHighlighted(position);
+  m_model->setProcessed(processed, position);
 }
 
 /** Return a shared ptr to the model

@@ -9,7 +9,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-class QAbstractItemModel;
+class AbstractDataProcessorTreeModel;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -56,7 +56,8 @@ public:
   addActions(std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
 
   // Connect the model
-  virtual void showTable(boost::shared_ptr<QAbstractItemModel> model) = 0;
+  virtual void
+  showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) = 0;
 
   // Dialog/Prompt methods
   virtual std::string requestNotebookPath() = 0;

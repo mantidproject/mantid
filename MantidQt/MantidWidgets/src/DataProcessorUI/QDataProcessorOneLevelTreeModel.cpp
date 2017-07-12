@@ -40,9 +40,8 @@ QVariant QDataProcessorOneLevelTreeModel::data(const QModelIndex &index,
   if (role == Qt::DisplayRole || role == Qt::EditRole) {
     return QString::fromStdString(m_tWS->String(index.row(), index.column()));
   } else if (role == Qt::BackgroundRole) {
-    // Highlight if this is in the lists of rows to be highlighted
-    if (std::find(m_highlightRows.begin(), m_highlightRows.end(),
-                  index.row()) != m_highlightRows.end())
+    // Highlight if the process status for this row is set
+    if (m_rows.at(index.row()))
       return QColor("#00b300");
   }
 
@@ -78,6 +77,28 @@ QDataProcessorOneLevelTreeModel::index(int row, int column,
   return createIndex(row, column);
 }
 
+/** Gets the 'processed' status of a row
+* @param position : The position of the item
+* @param parent : The parent of this item
+* @return : The 'processed' status
+*/
+bool QDataProcessorOneLevelTreeModel::isProcessed(
+    int position, const QModelIndex &parent) const {
+
+  // No parent items exists, this should not be possible
+  if (parent.isValid())
+    throw std::invalid_argument(
+        "Invalid parent index, there are no parent data items in this model.");
+
+  // Incorrect position
+  if (position < 0 || position >= rowCount())
+    throw std::invalid_argument("Invalid position. Position index must be "
+                                "within the range of the number of rows in "
+                                "this model");
+
+  return m_rows[position];
+}
+
 /** Returns the parent of a given index
 * @param index : The index
 * @return : Its parent
@@ -110,9 +131,10 @@ bool QDataProcessorOneLevelTreeModel::insertRows(int position, int count,
 
   beginInsertRows(QModelIndex(), position, position + count - 1);
 
-  // Update the table workspace
+  // Update the table workspace and row process status vector
   for (int pos = position; pos < position + count; pos++) {
     m_tWS->insertRow(position);
+    m_rows.insert(m_rows.begin() + position, false);
   }
 
   endInsertRows();
@@ -143,9 +165,10 @@ bool QDataProcessorOneLevelTreeModel::removeRows(int position, int count,
 
   beginRemoveRows(QModelIndex(), position, position + count - 1);
 
-  // Update the table workspace
+  // Update the table workspace and row process status vector
   for (int pos = position; pos < position + count; pos++) {
     m_tWS->removeRow(position);
+    m_rows.erase(m_rows.begin() + position);
   }
 
   endRemoveRows();
@@ -190,13 +213,14 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
   return true;
 }
 
-/** Add a new data item to be highlighted
-* @param position : The position of the row to be highlighted
+/** Sets the 'processed' status of a row
+* @param processed : True to set processed, false to set unprocessed
+* @param position : The position of the row to be set
 * @param parent : The parent of this row
-* @return : Boolean indicating whether the row was successfully highlighted
+* @return : Boolean indicating whether process status was set successfully
 */
-bool QDataProcessorOneLevelTreeModel::addHighlighted(
-    int position, const QModelIndex &parent) {
+bool QDataProcessorOneLevelTreeModel::setProcessed(bool processed, int position,
+                                                   const QModelIndex &parent) {
 
   // No parent items exists, this should not be possible
   if (parent.isValid())
@@ -206,31 +230,7 @@ bool QDataProcessorOneLevelTreeModel::addHighlighted(
   if (position < 0 || position >= rowCount())
     return false;
 
-  m_highlightRows.push_back(position);
-
-  return true;
-}
-
-/** Remove a data item from being highlighted
-* @param position : The position of the row to be un-highlighted
-* @param parent : The parent of this row
-* @return : Boolean indicating whether the row was successfully un-highlighted
-*/
-bool QDataProcessorOneLevelTreeModel::clearHighlighted(
-    int position, const QModelIndex &parent) {
-
-  // No parent items exists, this should not be possible
-  if (parent.isValid())
-    return false;
-
-  auto posIt =
-      std::find(m_highlightRows.begin(), m_highlightRows.begin(), position);
-
-  // Item not found
-  if (posIt == m_highlightRows.end())
-    return false;
-
-  m_highlightRows.erase(posIt);
+  m_rows[position] = processed;
 
   return true;
 }

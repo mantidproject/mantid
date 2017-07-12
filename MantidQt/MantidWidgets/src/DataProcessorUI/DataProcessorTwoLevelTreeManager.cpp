@@ -588,36 +588,39 @@ void DataProcessorTwoLevelTreeManager::update(
                      QString::fromStdString(data[col]));
 }
 
-/** Sets a new group to be highlighted
-* @param position : The position of the group
+/** Gets the 'process' status of a group
+* @param position : The row index
 */
-void DataProcessorTwoLevelTreeManager::addHighlighted(int position) {
-  m_model->addHighlighted(position);
+bool DataProcessorTwoLevelTreeManager::isProcessed(int position) const {
+  return m_model->isProcessed(position);
 }
 
-/** Sets a row to be highlighted
-* @param position : The position of the row
-* @param parent : Parent of the row
+/** Gets the 'process' status of a row
+* @param position : The row index
+* @param parent : The parent of the row
 */
-void DataProcessorTwoLevelTreeManager::addHighlighted(int position,
-                                                      int parent) {
-  m_model->addHighlighted(position, m_model->index(parent, 0));
+bool DataProcessorTwoLevelTreeManager::isProcessed(int position,
+                                                   int parent) const {
+  return m_model->isProcessed(position, m_model->index(parent, 0));
 }
 
-/** Sets a group to be un-highlighted
-* @param position : The position of the group
+/** Sets the 'process' status of a group
+* @param processed : True to set group as processed, false to set unprocessed
+* @param position : The index of the group to be set
 */
-void DataProcessorTwoLevelTreeManager::clearHighlighted(int position) {
-  m_model->clearHighlighted(position);
+void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
+                                                    int position) {
+  m_model->setProcessed(processed, position);
 }
 
-/** Sets a row to be un-highlighted
-* @param position : The position of the row
-* @param parent : Parent of the row
+/** Sets the 'process' status of a row
+* @param processed : True to set row as processed, false to set unprocessed
+* @param position : The index of the row to be set
+* @param parent : The parent of the row
 */
-void DataProcessorTwoLevelTreeManager::clearHighlighted(int position,
-                                                        int parent) {
-  m_model->clearHighlighted(position, m_model->index(parent, 0));
+void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
+                                                    int position, int parent) {
+  m_model->setProcessed(processed, position, m_model->index(parent, 0));
 }
 
 /** Return a shared ptr to the model

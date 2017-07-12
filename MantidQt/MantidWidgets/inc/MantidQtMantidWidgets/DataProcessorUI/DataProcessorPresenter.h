@@ -90,7 +90,6 @@ public:
   virtual void acceptViews(DataProcessorView *tableView,
                            ProgressableView *progressView) = 0;
   virtual void setModel(std::string name) = 0;
-  virtual void setIndexProcessed(int index, bool processed) = 0;
   virtual ParentItems selectedParents() const = 0;
   virtual ChildItems selectedChildren() const = 0;
   virtual bool newSelectionMade() const = 0;
@@ -98,6 +97,7 @@ public:
                             const std::string &title) const = 0;
   virtual void giveUserWarning(const std::string &prompt,
                                const std::string &title) const = 0;
+  virtual bool isProcessing() const = 0;
 };
 }
 }

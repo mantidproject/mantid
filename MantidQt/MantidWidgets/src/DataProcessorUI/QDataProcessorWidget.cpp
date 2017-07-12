@@ -6,7 +6,6 @@
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
-#include <qabstractitemmodel.h>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -187,7 +186,7 @@ Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
 void QDataProcessorWidget::showTable(
-    boost::shared_ptr<QAbstractItemModel> model) {
+    boost::shared_ptr<AbstractDataProcessorTreeModel> model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
@@ -235,9 +234,18 @@ user
 void QDataProcessorWidget::tableUpdated(const QModelIndex &topLeft,
                                         const QModelIndex &bottomRight) {
   Q_UNUSED(bottomRight);
-  auto pIndex = m_model->parent(topLeft);
-  if (pIndex.isValid())
-    m_presenter->setIndexProcessed(pIndex.row(), false);
+  if (!m_presenter->isProcessing()) {
+    // Manual changes made to rows outside of processing will set the containing
+    // group and all constituent rows unprocessed
+    auto pIndex = m_model->parent(topLeft);
+    if (pIndex.isValid()) {
+      m_model->setProcessed(false, pIndex.row());
+      for (int i = 0; i < m_model->rowCount(pIndex); i++) {
+        m_model->setProcessed(false, i, pIndex);
+      }
+    }
+  }
+
   m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
 }
 

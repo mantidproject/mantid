@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/MantidWidget.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
@@ -75,7 +76,7 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
 
   // Connect the model
-  void showTable(boost::shared_ptr<QAbstractItemModel> model) override;
+  void showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) override;
 
   // Dialog/Prompt methods
   std::string requestNotebookPath() override;
@@ -143,7 +144,7 @@ private:
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
-  boost::shared_ptr<QAbstractItemModel> m_model;
+  boost::shared_ptr<AbstractDataProcessorTreeModel> m_model;
   // the interface
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open

@@ -52,15 +52,12 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get flags for a cell
   Qt::ItemFlags flags(const QModelIndex &index) const override;
-
-  // Miscellaneous model functions
-
-  // Add a data item to the list of highlighted items
-  virtual bool addHighlighted(int position,
-                              const QModelIndex &parent = QModelIndex()) = 0;
-  // Remove a data item from the list of highlighted items
-  virtual bool clearHighlighted(int position,
-                                const QModelIndex &parent = QModelIndex()) = 0;
+  // Get the 'processed' status of a data item
+  virtual bool isProcessed(int position,
+                           const QModelIndex &parent = QModelIndex()) const = 0;
+  // Set the 'processed' status of a data item
+  virtual bool setProcessed(bool processed, int position,
+                            const QModelIndex &parent = QModelIndex()) = 0;
 
 protected:
   /// Collection of data for viewing.
