@@ -85,6 +85,9 @@ public:
   /// Update row with new data
   void update(int parent, int child,
               const std::vector<std::string> &data) override;
+  /// Highlight a new data item
+  void addHighlighted(int position) override;
+  void addHighlighted(int position, int parent) override;
   void setCell(int row, int column, int parentRow, int parentColumn,
                const std::string &value) override;
   std::string getCell(int row, int column, int parentRow,
@@ -96,7 +99,7 @@ public:
                     size_t whitelistColumns) const override;
 
   /// Return the model
-  boost::shared_ptr<QAbstractItemModel> getModel() override;
+  boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() override;
   /// Return the table workspace
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 

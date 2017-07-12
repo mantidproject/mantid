@@ -390,7 +390,11 @@
                     <xs:element name="handedness">
                       <xs:complexType>
                         <xs:attribute name="val"/>
-                        <!--<xs:attribute name="axis" />-->
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="theta-sign">
+                      <xs:complexType>
+                        <xs:attribute name="axis"/>
                       </xs:complexType>
                     </xs:element>
                   </xs:choice>

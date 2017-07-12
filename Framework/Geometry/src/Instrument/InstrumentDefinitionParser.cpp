@@ -958,6 +958,8 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     Element *handednessElement =
         referenceFrameElement->getChildElement("handedness");
     Element *originElement = referenceFrameElement->getChildElement("origin");
+    Element *thetaSignElement =
+        referenceFrameElement->getChildElement("theta-sign");
 
     // Defaults
     XMLString s_alongBeam("z");
@@ -979,14 +981,21 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
       s_origin = originElement->getAttribute("val");
     }
 
+    // Extract theta sign axis if specified.
+    XMLString s_thetaSign(s_pointingUp);
+    if (thetaSignElement) {
+      s_thetaSign = thetaSignElement->getAttribute("axis");
+    }
+
     // Convert to input types
     PointingAlong alongBeam = axisNameToAxisType(s_alongBeam);
     PointingAlong pointingUp = axisNameToAxisType(s_pointingUp);
+    PointingAlong thetaSign = axisNameToAxisType(s_thetaSign);
     Handedness handedness = s_handedness == "right" ? Right : Left;
 
     // Overwrite the default reference frame.
     m_instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
-        pointingUp, alongBeam, handedness, s_origin));
+        pointingUp, alongBeam, thetaSign, handedness, s_origin));
   }
 }
 
