@@ -15,9 +15,9 @@ class PropertyHistoryTest : public CxxTest::TestSuite {
 public:
   void testPopulate() {
     std::string correctOutput = "Name: arg1_param, ";
-    correctOutput = correctOutput + "Value: 20, ";
-    correctOutput = correctOutput + "Default?: Yes, ";
-    correctOutput = correctOutput + "Direction: Input\n";
+    correctOutput += "Value: 20, ";
+    correctOutput += "Default?: Yes, ";
+    correctOutput += "Direction: Input\n";
 
     // Not really much to test
     PropertyHistory AP("arg1_param", "20", "argument", true, Direction::Input);
@@ -25,6 +25,22 @@ public:
     // dump output to sting
     std::ostringstream output;
     TS_ASSERT_THROWS_NOTHING(output << AP);
+    TS_ASSERT_EQUALS(output.str(), correctOutput);
+  }
+
+  void testOutputWithShortenedValue() {
+    std::string correctOutput = "Name: arg1_param, ";
+    correctOutput += "Value: 1234567 ... 4567890, ";
+    correctOutput += "Default?: Yes, ";
+    correctOutput += "Direction: Input\n";
+
+    // a long property that should get shortened
+    PropertyHistory propHistory("arg1_param", "123456798012345678901234567890",
+                                "argument", true, Direction::Input);
+
+    // dump output to sting
+    std::ostringstream output;
+    TS_ASSERT_THROWS_NOTHING(propHistory.printSelf(output, 0, 20));
     TS_ASSERT_EQUALS(output.str(), correctOutput);
   }
 

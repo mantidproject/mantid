@@ -320,7 +320,7 @@ example of specifying a Source and SamplePos is shown below
 
 
 Using detector/monitor IDs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Any component that is either a detector or monitor must be assigned a
 unique detector/monitor ID numbers (note this is *not* spectrum
@@ -1405,6 +1405,8 @@ this component relative to its parent component.
 Reference frame in which instrument is described. The author/reader of
 an IDF can chose the reference coordinate system in which the instrument
 is described. The default reference system is the one shown below.
+The direction here means the direction of the beam if it was not
+modified by any mirrors etc.
 
 .. code-block:: xml
 
@@ -1419,8 +1421,16 @@ is described. The default reference system is the one shown below.
 
 This reference frame is e.g. used when a signed theta detector values
 are calculated where it is needed to know which direction is defined as
-up. The direction here means the direction of the beam if it was not
-modified by any mirrors etc.
+up. By default, the axis defining the sign of the scattering angle is the one pointing up.
+Optionally this can be customized by inserting the following line into the reference-frame node:
+
+.. code-block:: xml
+
+      <theta-sign axis="x"/>
+
+In this case, negative x will correspond to negative theta.
+Note that both the pointing-up and theta-sign axes cannot be the same as the along-beam axis.
+
 
 .. _default-view:
 

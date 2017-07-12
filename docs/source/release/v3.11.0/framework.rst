@@ -5,6 +5,10 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+Concepts
+--------
+- The reference frame in :ref:`IDF <InstrumentDefinitionFile>` can now be customized in terms of setting the axis defining the 2theta sign.
+
 Algorithms
 ----------
 

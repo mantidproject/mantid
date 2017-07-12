@@ -7,7 +7,10 @@
 #endif
 
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+
+#include <type_traits>
 
 namespace Mantid {
 namespace Kernel {
@@ -25,7 +28,7 @@ template <typename T> std::string toString(const boost::shared_ptr<T> &value) {
   throw boost::bad_lexical_cast();
 }
 
-/// Specialisation for a property of type std::vector.
+/// Specialization for a property of type std::vector.
 template <typename T>
 std::string toString(const std::vector<T> &value,
                      const std::string &delimiter = ",") {
@@ -39,7 +42,7 @@ std::string toString(const std::vector<T> &value,
   return result.str();
 }
 
-/// Specialisation for a property of type std::vector<std::vector>.
+/// Specialization for a property of type std::vector<std::vector>.
 template <typename T>
 std::string toString(const std::vector<std::vector<T>> &value,
                      const std::string &outerDelimiter = ",",
@@ -60,11 +63,105 @@ std::string toString(const std::vector<std::vector<T>> &value,
   return result.str();
 }
 
-/// Specialisation for any type, should be appropriate for properties with a
+// --------------------- convert values to pretty strings
+/// Convert values to pretty strings.
+template <typename T>
+std::string toPrettyString(const T &value, size_t maxLength = 0,
+                           bool collapseLists = true) {
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(boost::lexical_cast<std::string>(value), maxLength);
+}
+
+/// Throw an exception if a shared pointer is converted to a pretty string.
+template <typename T>
+std::string toPrettyString(const boost::shared_ptr<T> &value,
+                           size_t maxLength = 0, bool collapseLists = true) {
+  UNUSED_ARG(value);
+  UNUSED_ARG(maxLength);
+  UNUSED_ARG(collapseLists);
+  throw boost::bad_lexical_cast();
+}
+
+/** Specialization for a property of type std::vector of non integral types.
+*   This will catch Vectors of char, double, float etc.
+*   This simply concatenates the values using a delimiter
+*/
+template <typename T>
+std::string toPrettyString(
+    const std::vector<T> &value, size_t maxLength = 0,
+    bool collapseLists = true, const std::string &delimiter = ",",
+    const std::string &unusedDelimiter = "+",
+    typename std::enable_if<!(std::is_integral<T>::value &&
+                              std::is_arithmetic<T>::value)>::type * = 0) {
+  UNUSED_ARG(unusedDelimiter);
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),
+                          maxLength);
+}
+
+/** Specialization for a property of type std::vector of integral types.
+*   This will catch Vectors of int, long, long long etc
+*   including signed and unsigned types of these.
+*   This concatenates the values using a delimiter,
+*   adjacent items that are precisely 1 away from each other
+*   will be compressed into a list syntax e.g. 1-5.
+*/
+template <typename T>
+std::string toPrettyString(
+    const std::vector<T> &value, size_t maxLength = 0,
+    bool collapseLists = true, const std::string &delimiter = ",",
+    const std::string &listDelimiter = "-",
+    typename std::enable_if<std::is_integral<T>::value &&
+                            std::is_arithmetic<T>::value>::type * = 0) {
+  std::string retVal;
+  if (collapseLists) {
+    retVal = Strings::joinCompress(value.begin(), value.end(), delimiter,
+                                   listDelimiter);
+  } else {
+    retVal = Strings::join(value.begin(), value.end(), delimiter);
+  }
+  return Strings::shorten(retVal, maxLength);
+}
+
+// AppleClang gives warning if the result is unused.
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+/** Explicit specialization for a property of type std::vector<bool>.
+*   This will catch Vectors of char, double, float etc.
+*   This simply concatenates the values using a delimiter
+*/
+template <>
+std::string toPrettyString(
+    const std::vector<bool> &value, size_t maxLength, bool collapseLists,
+    const std::string &delimiter, const std::string &unusedDelimiter,
+    typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
+  UNUSED_ARG(unusedDelimiter);
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),
+                          maxLength);
+}
+#if __clang__
+#pragma clang diagnostic pop
+#endif
+
+/// Specialization for a property of type std::vector<std::vector>.
+template <typename T>
+std::string toPrettyString(const std::vector<std::vector<T>> &value,
+                           size_t maxLength = 0, bool collapseLists = true,
+                           const std::string &outerDelimiter = ",",
+                           const std::string &innerDelimiter = "+") {
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(toString<T>(value, outerDelimiter, innerDelimiter),
+                          maxLength);
+}
+
+/// Specialization for any type, should be appropriate for properties with a
 /// single value.
 template <typename T> int findSize(const T &) { return 1; }
 
-/// Specialisation for properties that are of type vector.
+/// Specialization for properties that are of type vector.
 template <typename T> int findSize(const std::vector<T> &value) {
   return static_cast<int>(value.size());
 }
