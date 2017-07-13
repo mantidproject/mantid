@@ -37,9 +37,8 @@ class FlatPlatePaalmanPingsCorrectionTest(stresstesting.MantidStressTest):
                                                       CanDensity=0.0567, CanDensityType='Number Density',
                                                       CanFrontThickness=0.05, CanBackThickness=0.05)
 
-        self.params = {'Tolerance':1e-3, 'CheckInstrument':False}
         LoadNexusProcessed(Filename="FlatPlatePaalmanPings_" + mode + ".nxs", OutputWorkspace='ref')
-        result = CompareWorkspaces(Workspace1=FPPP_Result, Workspace2='ref', **self.params)
+        result = CompareWorkspaces(Workspace1=FPPP_Result, Workspace2='ref', Tolerance=1e-6)
         if not result[0]:
             self.assertTrue(result[0], "Mismatch in " + mode + ": " + result[1].row(0)['Message'])
 
