@@ -22,11 +22,18 @@ class FunctionWrapper:
              
   def __getitem__ (self, name):
       """ Called from array-like access on RHS
+          It should not be called directly.
+      
+          :param name: name that appears in the []
       """
       return self.fun.getParameterValue(name)
       
   def __setitem__ (self, name, value):
       """ Called from array-like access on LHS
+          It should not be called directly.
+      
+          :param name: name that appears in the []
+          :param value: new value of this item
       """
       self.fun.setParameter(name, value)
       
@@ -38,6 +45,8 @@ class FunctionWrapper:
                  
   def __add__ (self, other):
       """ Implement + operator for composite function
+      
+          :param other: functionWrapper to be added to self
       """
       if isinstance(self,CompositeFunctionWrapper):
         self.fun.add(other.fun)
@@ -48,6 +57,8 @@ class FunctionWrapper:
         
   def __mul__ (self, other):
       """ Implement * operator for product function
+      
+          :param other: functionWrapper to multiply self by
       """
       if isinstance(self,ProductFunctionWrapper):
         self.fun.add(other.fun)
@@ -69,6 +80,8 @@ class FunctionWrapper:
         
   def fix(self, name):
       """ Fix a parameter.
+      
+          :param name: name of parameter to be fixed
       """
       self.fun.fixParameter(name)
       
@@ -80,6 +93,8 @@ class FunctionWrapper:
       
   def untie(self, name):
       """ Remove tie from parameter.
+      
+          :param name: name of parameter to be untied
       """
       self.fun.removeTie(name)
       
@@ -90,23 +105,31 @@ class FunctionWrapper:
           self.untie(self.getParameterName(i))
           
   def constrain(self, expressions):
-      """ Add constraints 
+      """ Add constraints
+      
+          :param expressions: string of tie expressions      
       """
       self.fun.addConstraints( expressions )
       
   def unconstrain(self, name):
       """ Remove constraints from a parameter
+      
+          :param name: name of parameter to be unconstrained
       """
       self.fun.removeConstraint(name)
            
   def free(self, name):
       """ Free a parameter from tie or constraint
+      
+          :param name: name of parameter to be freed
       """
       self.fun.removeTie(name)
       self.fun.removeConstraint(name)
       
   def getParameterName(self, index):
       """ Get the name of the parameter of given index
+      
+          :param index: index of parameter
       """
       return self.fun.getParamName(index)
       
@@ -121,12 +144,19 @@ class CompositeFunctionWrapper(FunctionWrapper):
     """
     def __init__ (self, *args):
        """ Called when creating an instance
+           It should not be called directly
        """
        return self.initByName("CompositeFunction", *args)
 
     def initByName(self, name, *args):
        """ intialise composite function of named type.
            E.g. "ProductFunction"
+           This function would be protected in c++
+           and should not be called directly except
+           by __init__ functions of this class and
+           subclasses.
+           
+          :param name: name of class calling this.
        """
        if len(args) == 1 and hasattr(args[0],'nFunctions'):
           # We have a composite function to wrap
@@ -143,7 +173,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
                 self.fun.add(a.fun)    
       
     def getParameter(self, name):
-        """ get parameter of specified name
+        """ get value of parameter of specified name
+      
+            :param name: name of parameter
         """
         return self.fun.getParameterValue(name)
         
@@ -156,6 +188,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
     def __getitem__ (self, nameorindex):
         """ get function of specified index or parameter of specified name
             called for array-like access on RHS.
+            It should not be called directly.
+      
+            :param name: name or index in the []
         """
         item = self.fun[nameorindex]
         if isinstance(item, float):
@@ -168,23 +203,34 @@ class CompositeFunctionWrapper(FunctionWrapper):
 
     def __setitem__ (self, name, newValue):
         """ Called from array-like access on LHS
+            It should not be called directly.
+      
+            :param name: name or index in the []
+            :param newValue: new value for item
         """
         self.fun[name] = newValue
                     
     def __iadd__ (self, other):
        """ Implement += operator.
+           It should not be called directly.
+           
+           :param other: object to add
        """
        self.fun.add(other.fun)
        return self
        
     def __delitem__ (self, index):
        """ Delete item of given index from composite function.
+           It should not be called directly.
+           
+           :param index: index of item
        """
        self.fun.__delitem__(index)
        
     def __len__ (self):
        """ Return number of items in composite function.
            Implement len() function.
+           It should not be called directly.
        """
        return self.fun.__len__()
        
@@ -197,6 +243,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
        """ For each member function, tie the parameter of the given name 
            to the parameter of that name in the first member function.
            The named parameter must occur in all the member functions.
+           
+           :param name: name of parameter
        """
        expr = self.getCompositeParameterName(name, 0)
        self.tie({self.getCompositeParameterName(name, i): expr for i in range(1,len(self)) }) 
@@ -204,12 +252,16 @@ class CompositeFunctionWrapper(FunctionWrapper):
     def fixAll (self, name):
        """ Fix all parameters with the given local name.
            Every member function must have a parameter of this name.
+           
+           :param name: name of parameter
        """
        for i in range(0, len(self)):
           self[i].fix(name)
           
     def constrainAll (self, expressions):
        """ Constrain all parameters according local names in expressions.
+                  
+           :param expressions: string of expressions
        """
        for i in range(0, len(self)):
           if isinstance( self[i], CompositeFunctionWrapper ):
@@ -221,7 +273,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
                 pass
           
     def unconstrainAll (self, name):
-       """ Constrain all parameters according local names in expressions.
+       """ Constrain all parameters of given local name.
+           
+           :param name: local name of parameter
        """
        for i in range(0, len(self)):
           if isinstance( self[i], CompositeFunctionWrapper ):
@@ -235,6 +289,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
     def untieAll (self, name):
        """ Untie all parameters with the given local name.
            Every member function must have a parameter of this name.
+           
+           :param name: local name of parameter
        """
        for i in range(0, len(self)):
           self.untie(self.getCompositeParameterName(name, i))
@@ -269,18 +325,27 @@ class ProductFunctionWrapper(CompositeFunctionWrapper):
     """ Wrapper class for Product Fitting Function
     """
     def __init__ (self, *args):
+       """ Called when creating an instance
+           It should not be called directly.
+       """
        return self.initByName("ProductFunction", *args)
        
 class ConvolutionWrapper(CompositeFunctionWrapper):
     """ Wrapper class for Convolution Fitting Function
     """
     def __init__ (self, *args):
+       """ Called when creating an instance
+           It should not be called directly.
+       """
        return self.initByName("Convolution", *args)
        
 class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
     """ Wrapper class for Product Fitting Function
     """
     def __init__ (self, *args):
+       """ Called when creating an instance
+           It should not be called directly
+       """
        self.initByName("MultiDomainFunction", *args)
        for i in range(0, len(self)):
           self.fun.setDomainIndex(i, i)
@@ -294,6 +359,9 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
         
 def _create_wrapper_function(name):
     """Create fake functions for the given name
+       It should not be called directly
+                  
+       :param name: name of fake function
     """
     # ------------------------------------------------------------------------------------------------
     def wrapper_function(*args, **kwargs):
