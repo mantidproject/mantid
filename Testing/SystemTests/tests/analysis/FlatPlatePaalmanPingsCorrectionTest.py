@@ -14,7 +14,6 @@ class FlatPlatePaalmanPingsCorrectionTest(stresstesting.MantidStressTest):
         for i in range(18):
             ws.setX(i, val[i, :])
 
-
     def do_FlatPlatePaalmanPingsTest(self, ws, ws_can, mode):
         """
         The output workspaces in the system tests were verified by Miguel Gonzalez gonzalezm@ill.fr.
@@ -41,7 +40,6 @@ class FlatPlatePaalmanPingsCorrectionTest(stresstesting.MantidStressTest):
         result = CompareWorkspaces(Workspace1=FPPP_Result, Workspace2='ref', Tolerance=1e-6)
         if not result[0]:
             self.assertTrue(result[0], "Mismatch in " + mode + ": " + result[1].row(0)['Message'])
-
 
     def runTest(self):
         self.create_input_workspace('ws')

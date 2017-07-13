@@ -177,7 +177,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._get_angles()
         num_angles = len(self._angles)
         workflow_prog = Progress(self, start=0.2, end=0.8, nreports=num_angles * 2)
-        
+
         for angle_idx in range(num_angles):
             workflow_prog.report('Running flat correction for angle %s' % angle_idx)
             angle = self._angles[angle_idx]
@@ -442,7 +442,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         For more information See:
           - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf
           - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
-          
+
         The current implementation is based on:
           - J. Wuttke: 'Absorption-Correction Factors for Scattering from Flat or Tubular Samples:
             Open-Source Implementation libabsco, and Why it Should be Used with Caution',
@@ -459,7 +459,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         TABULATED_WAVELENGTH = 1.798
         TABULATED_ENERGY = 25.305
 
-        # self._sample_angle is the normal to the sample surface, i.e. 
+        # self._sample_angle is the normal to the sample surface, i.e.
         # self._sample_angle = 0 means that the sample is perpendicular
         # to the incident beam
         alpha = (90.0 + self._sample_angle) * PICONV
@@ -469,7 +469,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             stha = np.sin(abs(theta-alpha-np.pi))
         else:
             stha = np.sin(abs(theta-alpha))
-        
 
         nlam = len(self._waves)
 
@@ -477,7 +476,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         assc = np.ones(nlam)
         acsc = np.ones(nlam)
         acc = np.ones(nlam)
-        
+
         # Scattering in direction of slab --> calculation is not reliable
         # Default to 1 for everything
         # Tolerance is 0.001 rad ~ 0.06 deg
@@ -491,11 +490,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         waves = np.array(self._waves)
 
         # Sample cross section (value for each of the wavelengths and for E = Efixed)
-        sample_x_section = (sam_material.totalScatterXSection() + 
+        sample_x_section = (sam_material.totalScatterXSection() +
                             sam_material.absorbXSection() * waves / TABULATED_WAVELENGTH) * self._sample_density
 
         if self._efixed > 0:
-            sample_x_section_efixed = (sam_material.totalScatterXSection() + 
+            sample_x_section_efixed = (sam_material.totalScatterXSection() +
                                        sam_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._sample_density
         elif self._emode == 'Elastic':
             sample_x_section_efixed = 0
@@ -505,17 +504,17 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             ki_s = sample_x_section_efixed * self._sample_thickness / salpha
             kf_s = sample_x_section_efixed * self._sample_thickness / stha
         else:
-            ki_s, kf_s = self._calc_ki_kf(waves, self._sample_thickness, salpha, stha, 
-                                          sample_x_section, sample_x_section_efixed)        
-                
+            ki_s, kf_s = self._calc_ki_kf(waves, self._sample_thickness, salpha, stha,
+                                          sample_x_section, sample_x_section_efixed)
+
         sst = np.vectorize(self._self_shielding_transmission)
-        ssr = np.vectorize(self._self_shielding_reflection)       
-        if theta < alpha or theta > (alpha + np.pi):  
+        ssr = np.vectorize(self._self_shielding_reflection)
+        if theta < alpha or theta > (alpha + np.pi):
             # transmission case
             ass = sst(ki_s, kf_s)
-        else:                                         
+        else:
             # reflection case
-            ass = ssr(ki_s, kf_s) 
+            ass = ssr(ki_s, kf_s)
 
         # Container --> Acc, Assc, Acsc
         if self._use_can:
@@ -523,65 +522,65 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             can_material = can_sample.getMaterial()
 
             # Calculate can cross section (value for each of the wavelengths and for E = Efixed)
-            can_x_section = (can_material.totalScatterXSection() + 
+            can_x_section = (can_material.totalScatterXSection() +
                              can_material.absorbXSection() * waves / TABULATED_WAVELENGTH) * self._can_density
 
             if self._efixed > 0:
-                can_x_section_efixed = (can_material.totalScatterXSection() + 
-                                       can_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._can_density
+                can_x_section_efixed = (can_material.totalScatterXSection() +
+                                        can_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._can_density
             elif self._emode == 'Elastic':
                 can_x_section_efixed = 0
 
             # Front container --> Acc1
-            if self._emode == 'Efixed':    
+            if self._emode == 'Efixed':
                 ki_c1 = can_x_section_efixed * self._can_front_thickness / salpha
                 kf_c1 = can_x_section_efixed * self._can_front_thickness / stha
             else:
-                ki_c1, kf_c1 = self._calc_ki_kf(waves, self._can_front_thickness, salpha, stha, 
+                ki_c1, kf_c1 = self._calc_ki_kf(waves, self._can_front_thickness, salpha, stha,
                                                 can_x_section, can_x_section_efixed)
 
-            if theta < alpha or theta > (alpha + np.pi):  
+            if theta < alpha or theta > (alpha + np.pi):
                 # transmission case
                 acc1 = sst(ki_c1, kf_c1)
-            else:                                         
+            else:
                 # reflection case
-                acc1 = ssr(ki_c1, kf_c1) 
+                acc1 = ssr(ki_c1, kf_c1)
 
-            # Back container --> Acc2   
-            if self._emode == 'Efixed':    
+            # Back container --> Acc2
+            if self._emode == 'Efixed':
                 ki_c2 = can_x_section_efixed * self._can_back_thickness / salpha
                 kf_c2 = can_x_section_efixed * self._can_back_thickness / stha
             else:
-                ki_c2, kf_c2 = self._calc_ki_kf(waves, self._can_back_thickness, salpha, stha, 
+                ki_c2, kf_c2 = self._calc_ki_kf(waves, self._can_back_thickness, salpha, stha,
                                                 can_x_section, can_x_section_efixed)
 
-            if theta < alpha or theta > (alpha + np.pi):  
+            if theta < alpha or theta > (alpha + np.pi):
                 # transmission case
                 acc2 = sst(ki_c2, kf_c2)
-            else:                                         
+            else:
                 # reflection case
-                acc2 = ssr(ki_c2, kf_c2) 
+                acc2 = ssr(ki_c2, kf_c2)
 
             # Attenuation due to passage by other layers (sample or container)
             if theta < alpha or theta > (alpha + np.pi):                  # transmission case
                 acc = self._can_front_thickness * acc1 * np.exp(-kf_c2)
-                acc += self._can_back_thickness * acc2 * np.exp(-ki_c1) 
+                acc += self._can_back_thickness * acc2 * np.exp(-ki_c1)
                 acc /= (self._can_front_thickness + self._can_back_thickness)
-                
+
                 acsc = self._can_front_thickness * acc1 * np.exp(-kf_s-kf_c2)
                 acsc += self._can_back_thickness * acc2 * np.exp(-ki_c1-ki_s)
                 acsc /= (self._can_front_thickness + self._can_back_thickness)
-                
+
                 assc = ass * np.exp(-ki_c1-kf_c2)
             else:                                                          # reflection case
                 acc = self._can_front_thickness * acc1
                 acc += self._can_back_thickness * acc2 * np.exp(-ki_c1-kf_c1)
                 acc /= (self._can_front_thickness + self._can_back_thickness)
-                
-                acsc = self._can_front_thickness * acc1 
+
+                acsc = self._can_front_thickness * acc1
                 acsc += self._can_back_thickness * acc2 * np.exp(-ki_c1-ki_s-kf_s-kf_c1)
                 acsc /= (self._can_front_thickness + self._can_back_thickness)
-                
+
                 assc = ass * np.exp(-ki_c1-kf_c1)
 
         return ass, assc, acsc, acc
@@ -591,7 +590,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     def _self_shielding_transmission(self, ki, kf):
         if abs(ki-kf) < 1.0e-3:
             return np.exp(-ki) * ( 1.0 - 0.5*(kf-ki) + (kf-ki)**2/12.0 )
-        else:    
+        else:
             return (np.exp(-kf)-np.exp(-ki)) / (ki-kf)
 
     # ------------------------------------------------------------------------------
@@ -600,7 +599,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         return (1.0 - np.exp(-ki-kf)) / (ki+kf)
 
     # ------------------------------------------------------------------------------
-        
+
     def _calc_ki_kf(self, waves, thickness, sinangle1, sinangle2, x_section, x_section_efixed = 0):
         ki = np.ones(waves.size)
         kf = np.ones(waves.size)
@@ -610,11 +609,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         elif self._emode == 'Direct':
             ki *= x_section_efixed
             kf = np.copy(x_section)
-        elif self._emode == 'Indirect':   
+        elif self._emode == 'Indirect':
             ki = np.copy(x_section)
             kf *= x_section_efixed
         ki *= (thickness / sinangle1)
-        kf *= (thickness / sinangle2)      
+        kf *= (thickness / sinangle2)
         return ki, kf
 
     # ------------------------------------------------------------------------------
