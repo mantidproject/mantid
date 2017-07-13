@@ -668,7 +668,7 @@ public:
     }
   }
 
-  void test_nexus_intrument_info() {
+  void test_nexus_instrument_info() {
     ExperimentInfo ei;
 
     // We get an instrument group from a test file in the form that would occur

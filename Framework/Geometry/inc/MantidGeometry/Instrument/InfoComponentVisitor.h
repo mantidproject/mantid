@@ -24,6 +24,7 @@ class ComponentInfo;
 
 namespace Geometry {
 
+class Instrument;
 /** InfoComponentVisitor : Visitor for components with access to Info wrapping
   features.
 
@@ -57,6 +58,9 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL InfoComponentVisitor
     : public Mantid::Geometry::ComponentVisitor {
 private:
+  /// Detector indices
+  boost::shared_ptr<std::vector<detid_t>> m_orderedDetectorIds;
+
   /// Detectors components always specified first
   boost::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
 
@@ -86,17 +90,17 @@ private:
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
       m_detectorIdToIndexMap;
 
-  /// Detector indices
-  boost::shared_ptr<std::vector<detid_t>> m_orderedDetectorIds;
-
   /// Positions
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_positions;
 
   /// Rotations
   boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
 
+  /// Instrument to build around
+  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
+
   /// Parameter map to purge.
-  Mantid::Geometry::ParameterMap &m_pmap;
+  Mantid::Geometry::ParameterMap *m_pmap;
 
   /// Source id to look for
   Mantid::Geometry::IComponent *m_sourceId;
@@ -114,10 +118,9 @@ private:
                             const size_t componentIndex);
 
 public:
-  InfoComponentVisitor(std::vector<detid_t> orderedDetectorIds,
-                       ParameterMap &pmap,
-                       Mantid::Geometry::IComponent *source = nullptr,
-                       Mantid::Geometry::IComponent *sample = nullptr);
+  InfoComponentVisitor(boost::shared_ptr<const Instrument> instrument);
+
+  void walkInstrument();
 
   virtual size_t registerComponentAssembly(
       const Mantid::Geometry::ICompAssembly &assembly) override;

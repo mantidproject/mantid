@@ -72,16 +72,15 @@ ExperimentInfo::ExperimentInfo()
       sptr_instrument(new Instrument()),
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
       m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()),
-      m_infoVisitor(Kernel::make_unique<InfoComponentVisitor>(
-          sptr_instrument->getDetectorIDs(false /*Do not skip monitors*/),
-          *m_parmap)) {
+      m_infoVisitor(
+          Kernel::make_unique<InfoComponentVisitor>(sptr_instrument)) {
   auto parInstrument = makeParameterizedInstrument();
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<Geometry::DetectorInfo>(
       *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
       m_parmap.get(), m_infoVisitor->detectorIdToIndexMap());
 
-  sptr_instrument->registerContents(*m_infoVisitor);
+  m_infoVisitor->walkInstrument();
   makeAPIComponentInfo(*m_infoVisitor, *sptr_instrument);
   m_parmap->setComponentInfo(m_componentInfoWrapper);
   m_componentInfo->setDetectorInfo(m_detectorInfo.get());
@@ -255,6 +254,21 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
         std::move(positions), std::move(rotations), monitors);
   }
 }
+
+std::unique_ptr<Geometry::InfoComponentVisitor>
+makeOrRetrieveVisitor(boost::shared_ptr<const Instrument> parInstrument,
+                      const Instrument &newInstrument) {
+  if (!newInstrument.hasInfoVisitor() || newInstrument.isEmptyInstrument()) {
+
+    auto visitor = Kernel::make_unique<InfoComponentVisitor>(parInstrument);
+    // Collect everything
+    visitor->walkInstrument();
+    return visitor;
+  } else {
+    return Kernel::make_unique<InfoComponentVisitor>(
+        newInstrument.infoVisitor());
+  }
+}
 }
 
 /**
@@ -287,40 +301,7 @@ void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor,
       visitor.componentIdToIndexMap());
 }
 
-/**
- * Take the visitor from the instrument if it's already there or make from
- * scratch.
- * @param parInstrument : Parameterised instrument.
- * @param newInstrument : unparameterised new instrument
- * @return InfoComponentVisitor
- */
-std::unique_ptr<Geometry::InfoComponentVisitor>
-ExperimentInfo::makeOrRetrieveVisitor(const Instrument &parInstrument,
-                                      const Instrument &newInstrument) const {
 
-  if (!newInstrument.hasInfoVisitor() || newInstrument.isEmptyInstrument()) {
-
-    ComponentID sourceId = parInstrument.getSource()
-                               ? parInstrument.getSource()->getComponentID()
-                               : nullptr;
-    ComponentID sampleId = parInstrument.getSample()
-                               ? parInstrument.getSample()->getComponentID()
-                               : nullptr;
-
-    auto visitor = Kernel::make_unique<InfoComponentVisitor>(
-        parInstrument.getDetectorIDs(false /*do not skip monitors*/),
-        *parInstrument.getParameterMap(), sourceId, sampleId);
-    // Essential that this happens on the Parameterised, not the bare instrument
-    if (parInstrument.getParameterMap()->empty())
-      parInstrument.baseInstrument()->registerContents(*visitor);
-    else
-      parInstrument.registerContents(*visitor);
-    return visitor;
-  } else {
-    return Kernel::make_unique<InfoComponentVisitor>(
-        newInstrument.infoVisitor());
-  }
-}
 
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
@@ -342,7 +323,8 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
       sptr_instrument, m_parmap);
 
   // Make the ComponentInfo first
-  m_infoVisitor = makeOrRetrieveVisitor(*parInstrument, *instr);
+  m_infoVisitor = makeOrRetrieveVisitor(parInstrument, *instr);
+
   makeAPIComponentInfo(*m_infoVisitor, *instr);
   m_parmap->setComponentInfo(m_componentInfoWrapper);
 

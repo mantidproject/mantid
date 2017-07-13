@@ -8,6 +8,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include <set>
@@ -18,6 +19,15 @@ using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using namespace ComponentCreationHelper;
 using Mantid::detid_t;
+
+namespace {
+
+boost::shared_ptr<const Instrument>
+makeParameterized(boost::shared_ptr<const Instrument> baseInstrument) {
+  return boost::make_shared<const Instrument>(
+      baseInstrument, boost::make_shared<ParameterMap>());
+}
+}
 
 class InfoComponentVisitorTest : public CxxTest::TestSuite {
 public:
@@ -35,12 +45,8 @@ public:
                                            V3D(10, 0, 0) /*sample pos*/
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
-    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
-
+    InfoComponentVisitor visitor(makeParameterized(visitee));
     // Visit everything
     visitee->registerContents(visitor);
 
@@ -60,26 +66,25 @@ public:
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
                                            V3D(10, 0, 0) /*sample pos*/,
                                            V3D(11, 0, 0) /*detector position*/);
-    Mantid::Geometry::ParameterMap pmap;
+    auto pmap = boost::make_shared<ParameterMap>();
     auto detector = visitee->getDetector(visitee->getDetectorIDs()[0]);
-    pmap.addV3D(detector->getComponentID(), "pos",
-                Mantid::Kernel::V3D{12, 0, 0});
-    pmap.addV3D(visitee->getComponentID(), "pos",
-                Mantid::Kernel::V3D{13, 0, 0});
+    pmap->addV3D(detector->getComponentID(), "pos",
+                 Mantid::Kernel::V3D{12, 0, 0});
+    pmap->addV3D(visitee->getComponentID(), "pos",
+                 Mantid::Kernel::V3D{13, 0, 0});
 
-    TS_ASSERT_EQUALS(pmap.size(), 2);
+    TS_ASSERT_EQUALS(pmap->size(), 2);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{0}, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(
+        boost::make_shared<const Instrument>(visitee, pmap));
 
     // Visit everything. Purging should happen.
     visitee->registerContents(visitor);
 
     TSM_ASSERT_EQUALS(
-        "Detectors positions are NOT purged by visitor at present", pmap.size(),
-        1);
+        "Detectors positions are NOT purged by visitor at present",
+        pmap->size(), 1);
   }
 
   void test_visitor_purges_parameter_map_safely() {
@@ -121,10 +126,7 @@ public:
     TSM_ASSERT_EQUALS("Expect 2 items in the parameter map", paramMap->size(),
                       2);
 
-    const detid_t detectorId = 0;
-    InfoComponentVisitor visitor(std::vector<detid_t>{detectorId}, *paramMap,
-                                 parInstrument->getSource()->getComponentID(),
-                                 parInstrument->getSample()->getComponentID());
+    InfoComponentVisitor visitor(parInstrument);
     parInstrument->registerContents(visitor);
 
     TSM_ASSERT_EQUALS("Expect 0 items in the purged parameter map",
@@ -148,14 +150,11 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
     const size_t detectorIndex =
         0; // Internally we expect detector index to start at 0
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
 
+    InfoComponentVisitor visitor(makeParameterized(visitee));
     // Visit everything
     visitee->registerContents(visitor);
 
@@ -175,11 +174,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -230,11 +225,8 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -268,12 +260,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
-
+    InfoComponentVisitor visitor(makeParameterized(visitee));
     // Visit everything
     visitee->registerContents(visitor);
 
@@ -306,11 +293,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
-
+    InfoComponentVisitor visitor(makeParameterized(visitee));
     // Visit everything
     visitee->registerContents(visitor);
 
@@ -336,22 +319,23 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    // Create the visitor. Note any access to the indexOf lambda will throw for
-    // detectors.
-    InfoComponentVisitor visitor(
-        std::vector<detid_t>{
-            0 /*sized just 1 to invoke out of range exception*/},
-        pmap);
+    // Create an add a duplicate detector
+    Detector *det =
+        new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
+    visitee->add(det);
+    visitee->markAsDetector(det);
+
+    InfoComponentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
     visitee->registerContents(visitor);
 
     size_t expectedSize = 0;
+    ++expectedSize; // only detector
     ++expectedSize; // source
     ++expectedSize; // sample
     ++expectedSize; // instrument
-    // Note no detector counted
+    // Note no second detector counted
     TS_ASSERT_EQUALS(visitor.size(), expectedSize);
   }
 
@@ -361,8 +345,7 @@ public:
     const int nPixelsWide = 10; // Gives 10*10 detectors in total
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
         1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
-    Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(instrument->getDetectorIDs(), pmap);
+    InfoComponentVisitor visitor(makeParameterized(instrument));
     instrument->registerContents(visitor);
 
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
@@ -375,11 +358,7 @@ public:
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
         1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(instrument->getDetectorIDs() /*detector ids*/,
-                                 pmap,
-                                 instrument->getSource()->getComponentID(),
-                                 instrument->getSample()->getComponentID());
+    InfoComponentVisitor visitor(makeParameterized(instrument));
 
     // Visit everything
     instrument->registerContents(visitor);
@@ -409,10 +388,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -426,7 +402,7 @@ public:
 class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {
 private:
   const int m_nPixels = 1000;
-  boost::shared_ptr<Mantid::Geometry::Instrument> m_instrument;
+  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -439,15 +415,13 @@ public:
   }
 
   InfoComponentVisitorTestPerformance() {
-    m_instrument = ComponentCreationHelper::createTestInstrumentRectangular(
-        1 /*n banks*/, m_nPixels, 1 /*sample-bank distance*/);
+    m_instrument = makeParameterized(
+        ComponentCreationHelper::createTestInstrumentRectangular(
+            1 /*n banks*/, m_nPixels, 1 /*sample-bank distance*/));
   }
 
   void test_process_rectangular_instrument() {
-    Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(m_instrument->getDetectorIDs(), pmap,
-                                 m_instrument->getSource()->getComponentID(),
-                                 m_instrument->getSample()->getComponentID());
+    InfoComponentVisitor visitor(m_instrument);
     m_instrument->registerContents(visitor);
     TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
   }
