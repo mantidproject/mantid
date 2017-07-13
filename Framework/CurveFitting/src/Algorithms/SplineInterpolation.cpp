@@ -38,6 +38,13 @@ const std::string SplineInterpolation::category() const {
   return "Optimization;CorrectionFunctions\\BackgroundCorrections";
 }
 
+/// Algorithm's summary description. @see Algorithm::summary
+const std::string SplineInterpolation::summary() const {
+  return "Interpolates a set of spectra onto a spline defined by a second "
+         "input workspace. Optionally, this algorithm can also calculate "
+         "derivatives up to order 2 as a side product";
+}
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
@@ -79,6 +86,7 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
 
   // get inputs that need validation
   const bool linear = getProperty("Linear2Points");
+  const int derivOrder = getProperty("DerivOrder");
 
   MatrixWorkspace_const_sptr iwsValid = getProperty("WorkspaceToInterpolate");
   const size_t binsNo = iwsValid->blocksize();
@@ -93,12 +101,14 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
           "you can enable linear interpolation by "
           "setting the property Linear2Points. Otherwise "
           "provide a minimum of 3 points.";
+    } else if (derivOrder == 2) {
+      result["DerivOrder"] = "Linear interpolation is requested, hence "
+                             "derivative order can be maximum 1.";
     }
   }
 
-  const int derivOrder = getProperty("DerivOrder");
   const std::string derivName = getProperty("OutputWorkspaceDeriv");
-  if (derivName.empty() && (derivOrder > 0)) {
+  if (derivName.empty() && derivOrder > 0) {
     result["OutputWorkspaceDeriv"] =
         "Enter a name for the OutputWorkspaceDeriv "
         "or set DerivOrder to zero.";
@@ -112,19 +122,22 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
  */
 void SplineInterpolation::exec() {
   // read in algorithm parameters
-  const int order = static_cast<int>(getProperty("DerivOrder"));
+  const int derivOrder = getProperty("DerivOrder");
+  const size_t order = static_cast<size_t>(derivOrder);
 
   // set input workspaces
   MatrixWorkspace_sptr mws = getProperty("WorkspaceToMatch");
   MatrixWorkspace_sptr iws = getProperty("WorkspaceToInterpolate");
 
-  const int histNo = static_cast<int>(iws->getNumberHistograms());
+  const size_t histNo = iws->getNumberHistograms();
+  const size_t binsNo = iws->blocksize();
+  const size_t histNoToMatch = mws->getNumberHistograms();
 
   // vector of multiple derivative workspaces
   std::vector<MatrixWorkspace_sptr> derivs(histNo);
 
   // warn user that we only use first spectra in matching workspace
-  if (mws->getNumberHistograms() > 1) {
+  if (histNoToMatch > 1) {
     g_log.warning()
         << "Algorithm can only interpolate against a single data set. "
            "Only the x-axis of the first spectrum will be used.\n";
@@ -138,46 +151,75 @@ void SplineInterpolation::exec() {
 
   Progress pgress(this, 0.0, 1.0, histNo);
 
-  // for each histogram in workspace, calculate interpolation and derivatives
-  for (int i = 0; i < histNo; ++i) {
-    // Create and instance of the cubic spline function
-    m_cspline = boost::make_shared<CubicSpline>();
-    // set the interpolation points
-    setInterpolationPoints(iwspt, i);
-
-    // compare the data set against our spline
-    calculateSpline(mwspt, outputWorkspace, i);
-    outputWorkspace->setSharedX(i, mws->sharedX(0));
-
-    // check if we want derivatives
-    if (order > 0) {
+  // first prepare the derivatives if needed
+  if (order > 0) {
+    for (size_t i = 0; i < histNo; ++i) {
       derivs[i] = WorkspaceFactory::Instance().create(mws, order);
-      auto vAxis = new API::NumericAxis(order);
-
-      // calculate the derivatives for each order chosen
-      for (int j = 0; j < order; ++j) {
+      NumericAxis* vAxis = new NumericAxis(order);
+      for (size_t j = 0; j < order; ++j) {
         vAxis->setValue(j, j + 1);
         derivs[i]->setSharedX(j, mws->sharedX(0));
-        calculateDerivatives(mwspt, derivs[i], j + 1);
       }
-
       derivs[i]->replaceAxis(1, vAxis);
     }
-
-    pgress.report();
   }
 
+  if (binsNo > 2) {
+    // perform cubic spline interpolation
+    // for each histogram in workspace, calculate interpolation and derivatives
+    for (size_t i = 0; i < histNo; ++i) {
+      // Create and instance of the cubic spline function
+      m_cspline = boost::make_shared<CubicSpline>();
+      // set the interpolation points
+      setInterpolationPoints(iwspt, i);
+      // compare the data set against our spline
+      calculateSpline(mwspt, outputWorkspace, i);
+      // calculate derivatives for each order
+      for (size_t j = 0; j < order; ++j) {
+        calculateDerivatives(mwspt, derivs[i], j + 1);
+      }
+      pgress.report();
+    }
+  } else {
+    // perform linear interpolation
+    // figure out the interpolation range
+    const std::pair<size_t, size_t> range =
+        findExtrapolationRange(iwspt, outputWorkspace);
+    for (size_t i = 0; i < histNo; ++i) {
+      // set up the function that needs to be interpolated
+      std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)> acc(
+          gsl_interp_accel_alloc(), gsl_interp_accel_free);
+      std::unique_ptr<gsl_interp, void (*)(gsl_interp *)> linear(
+          gsl_interp_alloc(gsl_interp_linear, binsNo), gsl_interp_free);
+      gsl_interp_linear->init(linear.get(), &(iwspt->x(i)[0]),
+                              &(iwspt->y(i)[0]), binsNo);
+      // perform interpolation in the range
+      for (size_t k = range.first; k <= range.second; ++k) {
+        gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]),
+                                &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k],
+                                acc.get(), &(outputWorkspace->mutableY(i)[k]));
+        // calculate derivatives, if order > 0
+        if (order > 0) {
+          gsl_interp_linear->eval_deriv(
+              linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo,
+              mwspt->x(0)[k], acc.get(), &(derivs[i]->mutableY(0)[k]));
+        }
+      }
+      // flat extrapolation outside the range
+      extrapolateFlat(outputWorkspace, iwspt, range, derivs);
+      pgress.report();
+    }
+  }
   // Store the output workspaces
   std::string derivWsName = getPropertyValue("OutputWorkspaceDeriv");
   if (order > 0 && derivWsName != "") {
     // Store derivatives in a grouped workspace
     WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
-    for (int i = 0; i < histNo; ++i) {
+    for (size_t i = 0; i < histNo; ++i) {
       wsg->addWorkspace(derivs[i]);
     }
     setProperty("OutputWorkspaceDeriv", wsg);
   }
-
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
@@ -192,49 +234,36 @@ void SplineInterpolation::exec() {
 API::MatrixWorkspace_sptr
 SplineInterpolation::setupOutputWorkspace(API::MatrixWorkspace_sptr mws,
                                           API::MatrixWorkspace_sptr iws) const {
-  size_t numSpec = iws->getNumberHistograms();
+  const size_t numSpec = iws->getNumberHistograms();
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create(mws, numSpec);
-
-  // Use the vertical axis form the workspace to interpolate on the output WS
+  // share x-axes with the first spectrum of mws
+  for (size_t i = 0; i < numSpec; ++i) {
+    outputWorkspace->setSharedX(i, mws->sharedX(0));
+  }
+  // use the vertical (spectrum) axis form the iws
   Axis *vAxis = iws->getAxis(1)->clone(mws.get());
   outputWorkspace->replaceAxis(1, vAxis);
-
   return outputWorkspace;
 }
 
-/**Convert a binned workspace to point data
+/** Convert a binned workspace to point data
  *
  * @param workspace :: The input workspace
- * @return the converted workspace containing point data
+ * @return The converted workspace containing point data
  */
 MatrixWorkspace_sptr
-SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) const {
+SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) {
   if (workspace->isHistogramData()) {
-    const size_t histNo = workspace->getNumberHistograms();
-    const size_t size = workspace->y(0).size();
-
-    // make a new workspace for the point data
-    MatrixWorkspace_sptr pointWorkspace =
-        WorkspaceFactory::Instance().create(workspace, histNo, size, size);
-
-    // loop over each histogram
-    for (size_t i = 0; i < histNo; ++i) {
-      const auto &xValues = workspace->x(i);
-      pointWorkspace->setSharedY(i, workspace->sharedY(i));
-
-      auto &newXValues = pointWorkspace->mutableX(i);
-
-      // set x values to be average of bin bounds
-      for (size_t j = 0; j < size; ++j) {
-        newXValues[j] = (xValues[j] + xValues[j + 1]) / 2;
-      }
-    }
-
-    return pointWorkspace;
+    g_log.warning("Histogram data provided, converting to point data");
+    Algorithm_sptr converter = createChildAlgorithm("ConvertToPointData");
+    converter->initialize();
+    converter->setProperty("InputWorkspace", workspace);
+    converter->execute();
+    return converter->getProperty("OutputWorkspace");
+  } else {
+    return workspace;
   }
-
-  return workspace;
 }
 
 /** Sets the points defining the spline
@@ -244,15 +273,15 @@ SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) const {
  * @param row :: The row of spectra to use
  */
 void SplineInterpolation::setInterpolationPoints(
-    MatrixWorkspace_const_sptr inputWorkspace, const int row) const {
+    MatrixWorkspace_const_sptr inputWorkspace, const size_t row) const {
   const auto &xIn = inputWorkspace->x(row);
   const auto &yIn = inputWorkspace->y(row);
-  int size = static_cast<int>(xIn.size());
+  const size_t size = xIn.size();
 
   // pass x attributes and y parameters to CubicSpline
-  m_cspline->setAttributeValue("n", size);
+  m_cspline->setAttributeValue("n", static_cast<int>(size));
 
-  for (int i = 0; i < size; ++i) {
+  for (size_t i = 0; i < size; ++i) {
     m_cspline->setXAttribute(i, xIn[i]);
     m_cspline->setParameter(i, yIn[i]);
   }
@@ -266,7 +295,7 @@ void SplineInterpolation::setInterpolationPoints(
  */
 void SplineInterpolation::calculateDerivatives(
     API::MatrixWorkspace_const_sptr inputWorkspace,
-    API::MatrixWorkspace_sptr outputWorkspace, int order) const {
+    API::MatrixWorkspace_sptr outputWorkspace, const size_t order) const {
   // get x and y parameters from workspaces
   const size_t nData = inputWorkspace->y(0).size();
   const double *xValues = &(inputWorkspace->x(0)[0]);
@@ -284,7 +313,7 @@ void SplineInterpolation::calculateDerivatives(
  */
 void SplineInterpolation::calculateSpline(
     MatrixWorkspace_const_sptr inputWorkspace,
-    MatrixWorkspace_sptr outputWorkspace, int row) const {
+    MatrixWorkspace_sptr outputWorkspace, const size_t row) const {
   // setup input parameters
   const size_t nData = inputWorkspace->y(0).size();
   const double *xValues = &(inputWorkspace->x(0)[0]);
@@ -292,6 +321,61 @@ void SplineInterpolation::calculateSpline(
 
   // calculate the interpolation
   m_cspline->function1D(yValues, xValues, nData);
+}
+
+/** Extrapolates flat for the points outside the x-range
+ * This is used for linear case only, to be consistent with cubic spline case
+ * @param ows : output workspace
+ * @param iwspt : workspace to interpolate
+ * @param indices : the pair of x-axis indices defining the extrapolation range
+ * @param deriv : the vector of derivative workspaces
+*/
+void SplineInterpolation::extrapolateFlat(
+    MatrixWorkspace_sptr ows, MatrixWorkspace_const_sptr iwspt,
+    const std::pair<size_t, size_t> &indices,
+    std::vector<MatrixWorkspace_sptr> &derivs) const {
+
+  for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
+    const double yFirst = iwspt->y(i).front();
+    const double yLast = iwspt->y(i).back();
+    for (size_t bin = 0; bin < indices.first; ++bin) {
+      ows->mutableY(i)[bin] = yFirst;
+      derivs[i]->mutableY(0)[bin] = 0.;
+    }
+    for (size_t bin = indices.second + 1; bin < ows->blocksize(); ++bin) {
+      ows->mutableY(i)[bin] = yLast;
+      derivs[i]->mutableY(0)[bin] = 0.;
+    }
+  }
+}
+
+/** Find the region that has to extrapolated flat
+ * E.g. iws x-axis is from 50-100, while mws x-axis is 0-200, this will return
+ * the pair of the indices of mws, that are just below 50, and just above 100
+ * This is used for linear case only, to be consistent with cubic spline case
+ * @param iwspt : workspace to interpolate
+ * @param ows : output workspace
+*/
+std::pair<size_t, size_t>
+SplineInterpolation::findExtrapolationRange(MatrixWorkspace_const_sptr iwspt,
+                                            MatrixWorkspace_sptr ows) const {
+  const auto &xAxisIn = iwspt->x(0).rawData();
+  const auto &xAxisOut = ows->x(0).rawData();
+
+  // identify the x-range that is outside iws
+  const auto firstIt =
+      std::upper_bound(xAxisOut.cbegin(), xAxisOut.cend(), xAxisIn.front());
+  const size_t firstIndex = firstIt - xAxisOut.cbegin() - 1;
+
+  const auto lastIt =
+      std::lower_bound(xAxisOut.cbegin(), xAxisOut.cend(), xAxisIn.back());
+  const size_t lastIndex = xAxisOut.cend() - lastIt + 1;
+
+  g_log.information("Will perform extrapolation outside bin range " +
+                    std::to_string(firstIndex) + " to " +
+                    std::to_string(lastIndex));
+
+  return std::make_pair(firstIndex, lastIndex);
 }
 
 } // namespace Algorithms
