@@ -76,23 +76,23 @@ void CubicSpline::function1D(double *out, const double *xValues,
 void CubicSpline::setupInput(boost::scoped_array<double> &x,
                              boost::scoped_array<double> &y, int n) const {
   // Populate data points from the input attributes and parameters
-  bool xSortFlag = false;
+  bool isSorted = true;
 
   for (int i = 0; i < n; ++i) {
 
     x[i] = getAttribute("x" + std::to_string(i)).asDouble();
     y[i] = getParameter(i);
 
-    if (!xSortFlag) {
+    if (isSorted) {
       // if x[i] is out of order with its neighbours
       if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
-        xSortFlag = true;
+        isSorted = false;
       }
     }
   }
 
   // sort the data points if necessary
-  if (xSortFlag) {
+  if (!isSorted) {
     g_log.warning() << "Spline x parameters are not in ascending order. Values "
                        "will be sorted.\n";
 
