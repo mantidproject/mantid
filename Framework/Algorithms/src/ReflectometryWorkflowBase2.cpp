@@ -197,6 +197,15 @@ void ReflectometryWorkflowBase2::initMomentumTransferProperties() {
                   "Factor you wish to scale Q workspace by.", Direction::Input);
 }
 
+
+/** Initialize properties for diagnostics
+*/
+void ReflectometryWorkflowBase2::initDebugProperties() {
+  // Diagnostics
+  declareProperty("Diagnostics", false,
+                  "Whether to enable the output of interim workspaces for debugging purposes.");
+}
+
 /** Validate reduction properties, if given
 *
 * @return :: A map with results of validation

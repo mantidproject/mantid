@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ReflectometryReductionOne2.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -386,6 +387,9 @@ void ReflectometryReductionOne2::init() {
   // Init properties for algorithmic corrections
   initAlgorithmicProperties();
 
+  // Init properties for diagnostics
+  initDebugProperties();
+
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Output Workspace IvsQ.");
@@ -460,6 +464,60 @@ void ReflectometryReductionOne2::exec() {
 }
 
 /**
+* Utility function to create a unique workspace name for diagnostic outputs
+* based on a given input workspace name
+*
+* @param inputName [in] : the input name
+* @return : the output name
+*/
+std::string ReflectometryReductionOne2::createDebugWorkspaceName(
+    const std::string &inputName) {
+  std::string result = inputName;
+
+  if (summingInQ()) {
+    if (getPropertyValue("ReductionType") == "DivergentBeam")
+      result += "_QSD"; // Q-summed divergent beam
+    else
+      result += "_QSB"; // Q-summed bent (non-flat) sample
+  } else {
+    result += "_LS"; // lambda-summed
+  }
+
+  return result;
+}
+
+/**
+* Utility function to add the given workspace to the ADS if debugging is
+* enabled.
+*
+* @param ws [in] : the workspace to add to the ADS
+* @param wsName [in] : the name to output the workspace as
+* @param wsSuffix [in] : a suffix to apply to the wsName
+* @param debug [in] : true if the workspace should be added to the ADS (the
+* function does nothing if this is false)
+* @param step [inout] : the current step number, which is added to the wsSuffix
+* and is incremented after the workspace is output
+*/
+void ReflectometryReductionOne2::outputDebugWorkspace(
+    MatrixWorkspace_sptr ws, const std::string &wsName,
+    const std::string &wsSuffix, const bool debug, int &step) {
+  // Nothing to do if debug is not enabled
+  if (debug) {
+    // Clone the workspace because otherwise we can end up outputting the same
+    // workspace twice with different names, which is confusing.
+    auto cloneAlg = this->createChildAlgorithm("CloneWorkspace");
+    cloneAlg->initialize();
+    cloneAlg->setProperty("InputWorkspace", ws);
+    cloneAlg->execute();
+    auto cloneWS = cloneAlg->getProperty("OutputWorkspace");
+
+    AnalysisDataService::Instance().addOrReplace(
+        wsName + "_" + std::to_string(step) + wsSuffix, cloneWS);
+    ++step;
+  }
+}
+
+/**
 * Creates the output 1D array in wavelength from an input 2D workspace in
 * TOF. Summation is done over lambda or over lines of constant Q depending on
 * the type of reduction. For the latter, the output is projected to "virtual
@@ -470,48 +528,65 @@ void ReflectometryReductionOne2::exec() {
 MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   MatrixWorkspace_sptr result = m_runWS;
 
+  std::string wsName =
+      createDebugWorkspaceName(getPropertyValue("InputWorkspace"));
+  const bool debug = getProperty("Diagnostics");
+  int step = 1;
+
   if (summingInQ()) {
     if (m_convertUnits) {
       g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);
       findWavelengthMinMax(result);
+      outputDebugWorkspace(result, wsName, "_lambda", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
     findWavelengthMinMax(result);
     if (m_normaliseMonitors) {
       g_log.debug("Normalising input workspace by monitors\n");
       result = directBeamCorrection(result);
+      outputDebugWorkspace(result, wsName, "_norm_db", debug, step);
       result = monitorCorrection(result);
+      outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
     }
     if (m_normaliseTransmission) {
       g_log.debug("Normalising input workspace by transmission run\n");
       result = transOrAlgCorrection(result, false);
+      outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
     }
     if (m_sum) {
       g_log.debug("Summing in Q\n");
       result = sumInQ(result);
+      outputDebugWorkspace(result, wsName, "_summed", debug, step);
     }
     // Crop to wavelength limits
     g_log.debug("Cropping output workspace\n");
     result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
+    outputDebugWorkspace(result, wsName, "_cropped", debug, step);
   } else {
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
       result = makeDetectorWS(result, m_convertUnits);
+      outputDebugWorkspace(result, wsName, "_summed", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
     findWavelengthMinMax(result);
     if (m_normaliseMonitors) {
       g_log.debug("Normalising output workspace by monitors\n");
       result = directBeamCorrection(result);
+      outputDebugWorkspace(result, wsName, "_norm_db", debug, step);
+
       result = monitorCorrection(result);
+      outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
     }
     // Crop to wavelength limits
     g_log.debug("Cropping output workspace\n");
     result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
+    outputDebugWorkspace(result, wsName, "_cropped", debug, step);
     if (m_normaliseTransmission) {
       g_log.debug("Normalising output workspace by transmission run\n");
       result = transOrAlgCorrection(result, true);
+      outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
     }
   }
 
@@ -852,7 +927,8 @@ size_t ReflectometryReductionOne2::twoThetaRDetectorIdx(
   return detectors.front() + (detectors.back() - detectors.front()) / 2;
 }
 
-void ReflectometryReductionOne2::findWavelengthMinMax(MatrixWorkspace_sptr inputWS) {
+void ReflectometryReductionOne2::findWavelengthMinMax(
+    MatrixWorkspace_sptr inputWS) {
 
   // Get the max/min wavelength of region of interest
   const double lambdaMin = getProperty("WavelengthMin");
@@ -877,7 +953,8 @@ void ReflectometryReductionOne2::findWavelengthMinMax(MatrixWorkspace_sptr input
     double projectedMin = 0;
     double projectedMax = 0;
     // Get the projected lambda for this detector group
-    findIvsLamRange(inputWS, detectors, lambdaMin, lambdaMax, projectedMin, projectedMax);
+    findIvsLamRange(inputWS, detectors, lambdaMin, lambdaMax, projectedMin,
+                    projectedMax);
     // Set the overall min/max
     if (first) {
       m_wavelengthMin = projectedMin;
@@ -898,8 +975,8 @@ void ReflectometryReductionOne2::findWavelengthMinMax(MatrixWorkspace_sptr input
 */
 void ReflectometryReductionOne2::findIvsLamRange(
     MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
-    const double lambdaMin, const double lambdaMax,
-    double &projectedMin, double &projectedMax) {
+    const double lambdaMin, const double lambdaMax, double &projectedMin,
+    double &projectedMax) {
 
   // Get the new max and min X values of the projected (virtual) lambda range
   double dummy = 0.0;
@@ -929,7 +1006,8 @@ void ReflectometryReductionOne2::findIvsLamRange(
     throw std::runtime_error(
         "Error projecting lambda range to reference line at twoTheta=" +
         std::to_string(twoThetaR(detectors)) + "; projected range (" +
-        std::to_string(projectedMin) + "," + std::to_string(projectedMax) + ") is negative.");
+        std::to_string(projectedMin) + "," + std::to_string(projectedMax) +
+        ") is negative.");
   }
 }
 
@@ -948,13 +1026,14 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   // Calculate the number of bins based on the min/max wavelength, using
   // the same bin width as the input workspace
   const double binWidth = (detectorWS->x(0).back() - detectorWS->x(0).front()) /
-    detectorWS->blocksize();
-  const int numBins = static_cast<int>(std::ceil((wavelengthMax() - wavelengthMin()) / binWidth));
+                          static_cast<double>(detectorWS->blocksize());
+  const int numBins = static_cast<int>(
+      std::ceil((wavelengthMax() - wavelengthMin()) / binWidth));
   // Construct the histogram with these X values. Y and E values are zero.
   const BinEdges xValues(numBins, LinearGenerator(wavelengthMin(), binWidth));
   // Create the output workspace
-  MatrixWorkspace_sptr outputWS =
-    WorkspaceFactory::Instance().create(detectorWS, numGroups, numBins, numBins - 1);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
+      detectorWS, numGroups, numBins, numBins - 1);
 
   // Loop through each detector group in the input
   for (size_t groupIdx = 0; groupIdx < numGroups; ++groupIdx) {

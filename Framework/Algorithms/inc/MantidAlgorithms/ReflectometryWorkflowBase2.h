@@ -49,6 +49,8 @@ protected:
   void initAlgorithmicProperties(bool autodetect = false);
   /// Initialize momentum transfer properties
   void initMomentumTransferProperties();
+  /// Initialize properties for diagnostics
+  void initDebugProperties();
   /// Validate reduction-type properties
   std::map<std::string, std::string> validateReductionProperties() const;
   /// Validate direct beam properties

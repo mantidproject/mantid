@@ -88,6 +88,12 @@ private:
   // convert to momentum transfer
   Mantid::API::MatrixWorkspace_sptr
   convertToQ(Mantid::API::MatrixWorkspace_sptr inputWS);
+  // Utility function to create name for diagnostic workspaces
+  std::string createDebugWorkspaceName(const std::string &inputName);
+  // Utility function to output a diagnostic workspace to the ADS
+  void ReflectometryReductionOne2::outputDebugWorkspace(
+      API::MatrixWorkspace_sptr ws, const std::string &wsName,
+      const std::string &wsSuffix, const bool debug, int &step);
   // Create the output workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr makeIvsLam();
   // Do the reduction by summation in Q
