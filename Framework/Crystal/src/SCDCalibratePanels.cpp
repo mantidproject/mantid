@@ -15,6 +15,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/Peak.h"
 #include <fstream>
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -75,10 +76,11 @@ void SCDCalibratePanels::exec() {
   bool changeT0 = getProperty("ChangeT0");
   bool changeSize = getProperty("ChangePanelSize");
 
-  if (changeL1)
-    findL1(nPeaks, peaksWs);
   if (changeT0)
     findT0(nPeaks, peaksWs);
+  if (changeL1)
+    findL1(nPeaks, peaksWs);
+
   boost::container::flat_set<string> MyBankNames;
   for (int i = 0; i < nPeaks; ++i) {
     MyBankNames.insert(peaksWs->getPeak(i).getBankName());
@@ -227,9 +229,8 @@ void SCDCalibratePanels::exec() {
     parameter_workspaces.push_back("params_L1");
     fit_workspaces.push_back("fit_L1");
   }
-  // Try again to optimize T0
+  // Add T0 files to groups
   if (changeT0) {
-    findT0(nPeaks, peaksWs);
     parameter_workspaces.push_back("params_T0");
     fit_workspaces.push_back("fit_T0");
   }
@@ -425,6 +426,9 @@ void SCDCalibratePanels::findT0(int nPeaks,
   fitT0_alg->setProperty("InputWorkspace", T0WS);
   fitT0_alg->setProperty("CreateOutput", true);
   fitT0_alg->setProperty("Output", "fit");
+  // Does not converge with derviative minimizers
+  fitT0_alg->setProperty("Minimizer", "Simplex");
+  fitT0_alg->setProperty("MaxIterations", 1000);
   fitT0_alg->executeAsChildAlg();
   std::string fitT0Status = fitT0_alg->getProperty("OutputStatus");
   double chisqT0 = fitT0_alg->getProperty("OutputChi2overDoF");
@@ -432,12 +436,25 @@ void SCDCalibratePanels::findT0(int nPeaks,
   AnalysisDataService::Instance().addOrReplace("fit_T0", fitT0);
   ITableWorkspace_sptr paramsT0 = fitT0_alg->getProperty("OutputParameters");
   AnalysisDataService::Instance().addOrReplace("params_T0", paramsT0);
-  mT0 = paramsT0->getRef<double>("Value", 0);
+  mT0 = paramsT0->getRef<double>("Value", 8);
   API::Run &run = peaksWs->mutableRun();
-  // set T0 in the run parameters
-  run.addProperty<double>("T0", mT0, true);
+  // set T0 in the run parameters adding to value in peaks file
+  double oldT0 = 0.0;
+  if (run.hasProperty("T0")) {
+    oldT0 = run.getPropertyValueAsType<double>("T0");
+  }
+  run.addProperty<double>("T0", mT0 + oldT0, true);
   g_log.notice() << "T0 = " << mT0 << "  " << fitT0Status << " Chi2overDoF "
                  << chisqT0 << "\n";
+  for (int i = 0; i < peaksWs->getNumberPeaks(); i++) {
+    DataObjects::Peak &peak = peaksWs->getPeak(i);
+
+    Units::Wavelength wl;
+
+    wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0,
+                  peak.getInitialEnergy(), 0.0);
+    peak.setWavelength(wl.singleFromTOF(peak.getTOF() + mT0));
+  }
 }
 
 void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {

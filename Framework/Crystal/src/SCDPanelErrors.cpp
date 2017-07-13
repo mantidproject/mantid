@@ -45,7 +45,7 @@ SCDPanelErrors::SCDPanelErrors() : m_setupFinished(false) {
   declareParameter("ZRotate", 0.0, "Rotate angle in Z");
   declareParameter("ScaleWidth", 1.0, "Scale width of detector");
   declareParameter("ScaleHeight", 1.0, "Scale height of detector");
-  declareParameter("T0Shift", 0.0, "Scale height of detector");
+  declareParameter("T0Shift", 0.0, "Shift for TOF");
   declareAttribute("FileName", Attribute("", true));
   declareAttribute("Workspace", Attribute(""));
   declareAttribute("Bank", Attribute(""));
@@ -194,8 +194,7 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
     Units::Wavelength wl;
 
     wl.initialize(peak2.getL1(), peak2.getL2(), peak2.getScattering(), 0,
-                  peak.getInitialEnergy(), 0.0);
-    std::cout << peak.getTOF() << "  " << tShift << "\n";
+                  peak2.getInitialEnergy(), 0.0);
     peak2.setWavelength(wl.singleFromTOF(peak.getTOF() + tShift));
     V3D Q3 = peak2.getQSampleFrame();
     out[i * 3] = Q3[0] - Q2[0];
