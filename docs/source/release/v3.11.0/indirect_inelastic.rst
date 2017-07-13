@@ -20,6 +20,7 @@ Jump Fit
 Improvements
 ------------
 
+- :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` now supports `Direct` and `Indirect` modes.
 
 Bugfixes
 --------
