@@ -8,6 +8,7 @@
 #include <vector>
 #include <unordered_map>
 #include <boost/shared_ptr.hpp>
+#include <Eigen/Geometry>
 
 namespace Mantid {
 using detid_t = int32_t;
@@ -15,6 +16,7 @@ namespace Geometry {
 class IComponent;
 class ICompAssembly;
 class IDetector;
+class ParameterMap;
 }
 namespace Beamline {
 class ComponentInfo;
@@ -58,11 +60,20 @@ private:
   /// Detectors components always specified first
   boost::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
 
-  /// Detector indexes
+  /// Detector indexes sorted by assembly
   boost::shared_ptr<std::vector<size_t>> m_assemblySortedDetectorIndices;
 
-  /// Only Assemblies and other NON-detectors yield ranges
-  boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_ranges;
+  /// Component indexes sorted by assembly
+  boost::shared_ptr<std::vector<size_t>> m_assemblySortedComponentIndices;
+
+  /// Index of the parent component
+  boost::shared_ptr<std::vector<size_t>> m_parentComponentIndices;
+
+  /// Only Assemblies and other NON-detectors yield detector ranges
+  boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_detectorRanges;
+
+  /// Component ranges.
+  boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_componentRanges;
 
   /// Component ID -> Component Index map
   boost::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
@@ -78,15 +89,42 @@ private:
   /// Detector indices
   boost::shared_ptr<std::vector<detid_t>> m_orderedDetectorIds;
 
-public:
-  InfoComponentVisitor(std::vector<detid_t> orderedDetectorIds);
+  /// Positions
+  boost::shared_ptr<std::vector<Eigen::Vector3d>> m_positions;
 
-  virtual void registerComponentAssembly(
+  /// Rotations
+  boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
+
+  /// Parameter map to purge.
+  Mantid::Geometry::ParameterMap &m_pmap;
+
+  /// Source id to look for
+  Mantid::Geometry::IComponent *m_sourceId;
+
+  /// Sample id to look for
+  Mantid::Geometry::IComponent *m_sampleId;
+
+  /// Source index to set
+  int64_t m_sourceIndex = -1;
+
+  /// Sample index to set
+  int64_t m_sampleIndex = -1;
+
+  void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
+                            const size_t componentIndex);
+
+public:
+  InfoComponentVisitor(std::vector<detid_t> orderedDetectorIds,
+                       ParameterMap &pmap,
+                       Mantid::Geometry::IComponent *source = nullptr,
+                       Mantid::Geometry::IComponent *sample = nullptr);
+
+  virtual size_t registerComponentAssembly(
       const Mantid::Geometry::ICompAssembly &assembly) override;
 
-  virtual void registerGenericComponent(
+  virtual size_t registerGenericComponent(
       const Mantid::Geometry::IComponent &component) override;
-  virtual void
+  virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
@@ -95,8 +133,16 @@ public:
   boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
   componentDetectorRanges() const;
 
+  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+  componentChildComponentRanges() const;
+
   boost::shared_ptr<const std::vector<size_t>>
   assemblySortedDetectorIndices() const;
+
+  boost::shared_ptr<const std::vector<size_t>>
+  assemblySortedComponentIndices() const;
+
+  boost::shared_ptr<const std::vector<size_t>> parentComponentIndices() const;
 
   boost::shared_ptr<
       const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
@@ -111,6 +157,14 @@ public:
   std::unique_ptr<Beamline::ComponentInfo> componentInfo() const;
 
   boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
+
+  boost::shared_ptr<std::vector<Eigen::Vector3d>> positions() const;
+
+  boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations() const;
+
+  int64_t sample() const;
+
+  int64_t source() const;
 };
 } // namespace Geometry
 } // namespace Mantid

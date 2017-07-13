@@ -1,4 +1,5 @@
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/make_cow.h"
 
 #include <algorithm>
@@ -88,23 +89,6 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
                   }))
     return false;
   return true;
-}
-
-/** Returns the number of detectors in the instrument.
- *
- * If a detector is moving, i.e., has more than one associated position, it is
- * nevertheless only counted as a single detector. */
-size_t DetectorInfo::size() const {
-  if (!m_isMonitor)
-    return 0;
-  return m_isMonitor->size();
-}
-
-/// Returns true if the beamline has scanning detectors.
-bool DetectorInfo::isScanning() const {
-  if (!m_positions)
-    return false;
-  return size() != m_positions->size();
 }
 
 /// Returns true if the detector with given detector index is a monitor.
@@ -261,6 +245,41 @@ void DetectorInfo::merge(const DetectorInfo &other) {
     m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
   }
   m_scanCounts = std::move(scanCounts);
+  if (hasComponentInfo()) {
+    m_componentInfo->setDetectorInfo(this); // TODO this needs more thought!
+  }
+}
+
+void DetectorInfo::setComponentInfo(ComponentInfo *componentInfo) {
+  m_componentInfo = componentInfo;
+}
+
+bool DetectorInfo::hasComponentInfo() const {
+  return m_componentInfo != nullptr;
+}
+
+double DetectorInfo::l1() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error(
+        "DetectorInfo has no valid ComponentInfo thus cannot determine l1");
+  }
+  return m_componentInfo->l1();
+}
+
+Eigen::Vector3d DetectorInfo::sourcePosition() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
+                             "cannot determine sourcePosition");
+  }
+  return m_componentInfo->sourcePosition();
+}
+
+Eigen::Vector3d DetectorInfo::samplePosition() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
+                             "cannot determine samplePosition");
+  }
+  return m_componentInfo->samplePosition();
 }
 
 /// Returns the linear index for a pair of detector index and time index.
@@ -272,13 +291,6 @@ size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   if (index.second == 0)
     return index.first;
   return (*m_indexMap)[index.first][index.second];
-}
-
-/// Throws if this has time-dependent data.
-void DetectorInfo::checkNoTimeDependence() const {
-  if (isScanning())
-    throw std::runtime_error("DetectorInfo accessed without time index but the "
-                             "beamline has time-dependent (moving) detectors.");
 }
 
 void DetectorInfo::initScanCounts() {

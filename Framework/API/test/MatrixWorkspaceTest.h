@@ -1,6 +1,7 @@
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -1641,9 +1642,18 @@ public:
     // Moving parent not possible since non-detector components do not have time
     // indices and thus DetectorInfo cannot tell which set of detector positions
     // to adjust.
-    TS_ASSERT_THROWS(detInfo.setPosition(*det.getParent(), V3D(1, 2, 3)),
+
+    auto &compInfo = merged->mutableComponentInfo();
+
+    // Try to move the parent
+    TS_ASSERT_THROWS(compInfo.setPosition(compInfo.parent(compInfo.indexOf(
+                                              det.getComponentID())),
+                                          V3D(1, 2, 3)),
                      std::runtime_error);
-    TS_ASSERT_THROWS(detInfo.setRotation(*det.getParent(), Quat(1, 2, 3, 4)),
+    // Try to rotate the parent
+    TS_ASSERT_THROWS(compInfo.setRotation(compInfo.parent(compInfo.indexOf(
+                                              det.getComponentID())),
+                                          Quat(1, 2, 3, 4)),
                      std::runtime_error);
   }
 

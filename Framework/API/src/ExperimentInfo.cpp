@@ -1,6 +1,6 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
@@ -73,14 +73,19 @@ ExperimentInfo::ExperimentInfo()
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
       m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()),
       m_infoVisitor(Kernel::make_unique<InfoComponentVisitor>(
-          sptr_instrument->getDetectorIDs(false /*Do not skip monitors*/))) {
+          sptr_instrument->getDetectorIDs(false /*Do not skip monitors*/),
+          *m_parmap)) {
   auto parInstrument = makeParameterizedInstrument();
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
       m_parmap.get(), m_infoVisitor->detectorIdToIndexMap());
 
-  makeAPIComponentInfo(*m_infoVisitor);
+  sptr_instrument->registerContents(*m_infoVisitor);
+  makeAPIComponentInfo(*m_infoVisitor, *sptr_instrument);
+  m_parmap->setComponentInfo(m_componentInfoWrapper);
+  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
+  m_detectorInfo->setComponentInfo(m_componentInfo.get());
 }
 
 /**
@@ -256,14 +261,28 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
  * Make the beamline and API ComponentInfo
  * @param visitor : Component visitor to query. Visitor MUST have been filled
  * via registerContents.
+ * @param newInstrument : unparametrised new instrument
  */
-void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor) {
+void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor,
+                                          const Instrument &newInstrument) {
 
-  // Internal Beamline ComponentInfo
-  m_componentInfo = visitor.componentInfo();
+  if (newInstrument.hasComponentInfo()) {
+    /*
+     * Copy existing ComponentInfo. That way we take updates to positions
+     * rotation etc that have happened on newInstrument. These are lost when
+     * we go back to the infoComponentVisitor.
+    */
+    // TODO checkComponentInfo compatibility like is done for DetectorInfo.
+    m_componentInfo = Kernel::make_unique<Beamline::ComponentInfo>(
+        newInstrument.componentInfo());
+
+  } else {
+    // We have to make the internal Beamline ComponentInfo
+    m_componentInfo = visitor.componentInfo();
+  }
 
   // Wrapper API ComponentInfo
-  m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
+  m_componentInfoWrapper = boost::make_shared<Geometry::ComponentInfo>(
       *m_componentInfo, visitor.componentIds(),
       visitor.componentIdToIndexMap());
 }
@@ -271,19 +290,35 @@ void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor) {
 /**
  * Take the visitor from the instrument if it's already there or make from
  * scratch.
- * @param instrument : Instrument which might carry a visitor.
+ * @param parInstrument : Parameterised instrument.
+ * @param newInstrument : unparameterised new instrument
  * @return InfoComponentVisitor
  */
 std::unique_ptr<Geometry::InfoComponentVisitor>
-ExperimentInfo::makeOrRetrieveVisitor(const Instrument &instrument) const {
+ExperimentInfo::makeOrRetrieveVisitor(const Instrument &parInstrument,
+                                      const Instrument &newInstrument) const {
 
-  if (!instrument.hasInfoVisitor() || instrument.isEmptyInstrument()) {
+  if (!newInstrument.hasInfoVisitor() || newInstrument.isEmptyInstrument()) {
+
+    ComponentID sourceId = parInstrument.getSource()
+                               ? parInstrument.getSource()->getComponentID()
+                               : nullptr;
+    ComponentID sampleId = parInstrument.getSample()
+                               ? parInstrument.getSample()->getComponentID()
+                               : nullptr;
+
     auto visitor = Kernel::make_unique<InfoComponentVisitor>(
-        instrument.getDetectorIDs(false /*do not skip monitors*/));
-    instrument.registerContents(*visitor);
+        parInstrument.getDetectorIDs(false /*do not skip monitors*/),
+        *parInstrument.getParameterMap(), sourceId, sampleId);
+    // Essential that this happens on the Parameterised, not the bare instrument
+    if (parInstrument.getParameterMap()->empty())
+      parInstrument.baseInstrument()->registerContents(*visitor);
+    else
+      parInstrument.registerContents(*visitor);
     return visitor;
   } else {
-    return Kernel::make_unique<InfoComponentVisitor>(instrument.infoVisitor());
+    return Kernel::make_unique<InfoComponentVisitor>(
+        newInstrument.infoVisitor());
   }
 }
 
@@ -306,16 +341,24 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   const auto parInstrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
 
-  m_infoVisitor = makeOrRetrieveVisitor(*instr);
+  // Make the ComponentInfo first
+  m_infoVisitor = makeOrRetrieveVisitor(*parInstrument, *instr);
+  makeAPIComponentInfo(*m_infoVisitor, *instr);
+  m_parmap->setComponentInfo(m_componentInfoWrapper);
 
+  // Make the DetectorInfo. ComponentInfo needs to be set
+  // on the Parameter map before doing this.
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
+
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, makeParameterizedInstrument(),
       m_infoVisitor->detectorIds(), m_parmap.get(),
       m_infoVisitor->detectorIdToIndexMap());
 
-  makeAPIComponentInfo(*m_infoVisitor);
+  // Cross link Component and Detector info objects
+  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
+  m_detectorInfo->setComponentInfo(m_componentInfo.get());
 
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
@@ -339,7 +382,9 @@ Instrument_sptr ExperimentInfo::makeParameterizedInstrument() const {
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
   auto instrument = makeParameterizedInstrument();
   instrument->setDetectorInfo(m_detectorInfo);
-  instrument->setInfoVisitor(*m_infoVisitor);
+  instrument->setInfoVisitor(*m_infoVisitor); // TODO. We actually only need the
+                                              // ID->index part of this mapping
+  instrument->setComponentInfo(m_componentInfo, m_infoVisitor->componentIds());
   return instrument;
 }
 
@@ -437,58 +482,42 @@ T getParam(const std::string &paramType, const std::string &paramValue) {
   return param->value<T>();
 }
 
-void updatePosition(DetectorInfo &detectorInfo, const Instrument &instrument,
-                    const IComponent *component, const V3D &newRelPos) {
-  // Important: Get component WITH ParameterMap so we see correct parent
-  // positions and rotations and DetectorInfo updates correctly.
-  if (!instrument.isParametrized())
-    throw std::runtime_error(
-        "Need parametrized instrument for updating positions");
-  const auto &parComp = instrument.getComponentByID(component);
-  auto position = newRelPos;
-  if (auto parent = parComp->getParent()) {
-    parent->getRotation().rotate(position);
-    position += parent->getPos();
+void updatePosition(ComponentInfo &componentInfo, const IComponent *component,
+                    const V3D &newRelPos) {
+  const auto compIndex = componentInfo.indexOf(component->getComponentID());
+  V3D position = newRelPos;
+  if (componentInfo.hasParent(compIndex)) {
+    const auto parentIndex = componentInfo.parent(compIndex);
+    componentInfo.rotation(parentIndex).rotate(position);
+    position += componentInfo.position(parentIndex);
   }
-  detectorInfo.setPosition(*parComp, position);
+  componentInfo.setPosition(compIndex, position);
 }
 
-void updateRotation(DetectorInfo &detectorInfo, const Instrument &instrument,
-                    const IComponent *component, const Quat &newRelRot) {
-  // Important: Get component WITH ParameterMap so we see correct parent
-  // positions and rotations and DetectorInfo updates correctly.
-  if (!instrument.isParametrized())
-    throw std::runtime_error(
-        "Need parametrized instrument for updating rotations");
-  const auto &parComp = instrument.getComponentByID(component);
+void updateRotation(ComponentInfo &componentInfo, const IComponent *component,
+                    const Quat &newRelRot) {
+  const auto compIndex = componentInfo.indexOf(component->getComponentID());
+
   auto rotation = newRelRot;
-  if (auto parent = parComp->getParent()) {
-    // Note the unusual order. This is what Component::getRotation does.
-    rotation = parent->getRotation() * newRelRot;
+  if (componentInfo.hasParent(compIndex)) {
+    const auto parentIndex = componentInfo.parent(compIndex);
+    rotation = componentInfo.rotation(parentIndex) * newRelRot;
   }
-  detectorInfo.setRotation(*parComp, rotation);
+  componentInfo.setRotation(compIndex, rotation);
 }
 
-void adjustPositionsFromScaleFactor(DetectorInfo &detectorInfo,
-                                    const Instrument &instrument,
+void adjustPositionsFromScaleFactor(ComponentInfo &componentInfo,
                                     const IComponent *component,
                                     const std::string &paramName,
                                     double factor) {
-  // Important: Get component WITH ParameterMap so we see correct parent
-  // positions and rotations and DetectorInfo updates correctly.
-  if (!instrument.isParametrized())
-    throw std::runtime_error("Need parametrized instrument for updating "
-                             "positions from scale factors");
-  const auto &parComp = instrument.getComponentByID(component);
-  const auto &det = dynamic_cast<const RectangularDetector &>(*parComp);
   double ScaleX = 1.0;
   double ScaleY = 1.0;
   if (paramName == "scalex")
     ScaleX = factor;
   else
     ScaleY = factor;
-  applyRectangularDetectorScaleToDetectorInfo(detectorInfo, det, ScaleX,
-                                              ScaleY);
+  applyRectangularDetectorScaleToComponentInfo(
+      componentInfo, component->getComponentID(), ScaleX, ScaleY);
 }
 }
 
@@ -511,7 +540,7 @@ void ExperimentInfo::populateInstrumentParameters() {
   Geometry::ParameterMap paramMapForPosAndRot;
 
   // Get instrument and sample
-  auto &detectorInfo = mutableDetectorInfo();
+  auto &componentInfo = mutableComponentInfo();
   const auto parInstrument = getInstrument();
   const auto instrument = parInstrument->baseInstrument();
   const auto &paramInfoFromIDF = instrument->getLogfileCache();
@@ -566,10 +595,10 @@ void ExperimentInfo::populateInstrumentParameters() {
   for (const auto &item : paramMapForPosAndRot) {
     if (isPositionParameter(item.second->name())) {
       const auto newRelPos = item.second->value<V3D>();
-      updatePosition(detectorInfo, *parInstrument, item.first, newRelPos);
+      updatePosition(componentInfo, item.first, newRelPos);
     } else if (isRotationParameter(item.second->name())) {
       const auto newRelRot = item.second->value<Quat>();
-      updateRotation(detectorInfo, *parInstrument, item.first, newRelRot);
+      updateRotation(componentInfo, item.first, newRelRot);
     }
     // Parameters for individual components (x,y,z) are ignored. ParameterMap
     // did compute the correct compound positions and rotations internally.
@@ -578,7 +607,7 @@ void ExperimentInfo::populateInstrumentParameters() {
   // positions.
   for (const auto &item : paramMap) {
     if (isScaleParameter(item.second->name()))
-      adjustPositionsFromScaleFactor(detectorInfo, *parInstrument, item.first,
+      adjustPositionsFromScaleFactor(componentInfo, item.first,
                                      item.second->name(),
                                      item.second->value<double>());
   }
@@ -1259,7 +1288,11 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
       static_cast<const ExperimentInfo &>(*this).spectrumInfo());
 }
 
-const API::ComponentInfo &ExperimentInfo::componentInfo() const {
+const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const {
+  return *m_componentInfoWrapper;
+}
+
+ComponentInfo &ExperimentInfo::mutableComponentInfo() {
   return *m_componentInfoWrapper;
 }
 
@@ -1567,6 +1600,7 @@ void ExperimentInfo::loadInstrumentParametersNexus(::NeXus::File *file,
  */
 void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Geometry::ParameterMap &pmap = this->instrumentParameters();
+  auto &componentInfo = mutableComponentInfo();
   auto &detectorInfo = mutableDetectorInfo();
   const auto parInstrument = getInstrument();
   const auto instr = parInstrument->baseInstrument();
@@ -1614,12 +1648,15 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       bool value = getParam<bool>(paramType, paramValue);
       if (value) {
         // Do not add masking to ParameterMap, it is stored in DetectorInfo
-        const auto det = dynamic_cast<const Detector *const>(comp);
-        if (!det) {
+        const auto componentIndex =
+            componentInfo.indexOf(comp->getComponentID());
+        if (!componentInfo.isDetector(componentIndex)) {
           throw std::runtime_error("Found masking for a non-detector "
                                    "component. This is not possible");
         } else
-          detectorInfo.setMasked(detectorInfo.indexOf(det->getID()), value);
+          detectorInfo.setMasked(componentIndex, value); // all detector indexes
+                                                         // have same component
+                                                         // index (guarantee)
       }
     } else if (isPositionParameter(paramName)) {
       // We are parsing a string obtained from a ParameterMap. The map may
@@ -1627,20 +1664,19 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // component wise positions are set, 'pos' is updated accordingly. We are
       // thus ignoring position components below.
       const auto newRelPos = getParam<V3D>(paramType, paramValue);
-      updatePosition(detectorInfo, *parInstrument, comp, newRelPos);
+      updatePosition(componentInfo, comp, newRelPos);
     } else if (isRotationParameter(paramName)) {
       // We are parsing a string obtained from a ParameterMap. The map may
       // contain rotx, roty, and rotz (in addition to rot). However, when these
       // component wise rotations are set, 'rot' is updated accordingly. We are
       // thus ignoring rotation components below.
       const auto newRelRot = getParam<Quat>(paramType, paramValue);
-      updateRotation(detectorInfo, *parInstrument, comp, newRelRot);
+      updateRotation(componentInfo, comp, newRelRot);
     } else if (!isRedundantPosOrRot(paramName)) {
       // Special case RectangularDetector: Parameters scalex and scaley affect
       // pixel positions, but we must also add the parameter below.
       if (isScaleParameter(paramName))
-        adjustPositionsFromScaleFactor(detectorInfo, *parInstrument, comp,
-                                       paramName,
+        adjustPositionsFromScaleFactor(componentInfo, comp, paramName,
                                        getParam<double>(paramType, paramValue));
       pmap.add(paramType, comp, paramName, paramValue);
     }
@@ -1674,13 +1710,15 @@ void ExperimentInfo::populateWithParameter(
     bool value(paramValue);
     if (value) {
       // Do not add masking to ParameterMap, it is stored in DetectorInfo
-      const auto det =
-          dynamic_cast<const Detector *const>(paramInfo.m_component);
-      if (!det)
+
+      const auto componentIndex =
+          componentInfo().indexOf(paramInfo.m_component->getComponentID());
+      if (!componentInfo().isDetector(componentIndex))
         throw std::runtime_error(
             "Found masking for a non-detector component. This is not possible");
-      m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()),
-                                paramValue);
+      m_detectorInfo->setMasked(componentIndex,
+                                paramValue); // all detector indexes have same
+                                             // component index (guarantee)
     }
   } else if (name == "x" || name == "y" || name == "z") {
     paramMapForPosAndRot.addPositionCoordinate(paramInfo.m_component, name,

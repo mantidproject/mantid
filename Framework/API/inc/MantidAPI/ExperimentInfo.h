@@ -24,6 +24,7 @@ class DetectorInfo;
 class SpectrumInfo;
 }
 namespace Geometry {
+class ComponentInfo;
 class IDetector;
 class InfoComponentVisitor;
 class ParameterMap;
@@ -32,7 +33,6 @@ class XMLInstrumentParameter;
 
 namespace API {
 class ChopperModel;
-class ComponentInfo;
 class DetectorInfo;
 class ModeratorModel;
 class Run;
@@ -167,7 +167,8 @@ public:
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
 
-  const ComponentInfo &componentInfo() const;
+  const Geometry::ComponentInfo &componentInfo() const;
+  Geometry::ComponentInfo &mutableComponentInfo();
 
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
@@ -196,7 +197,8 @@ protected:
   Geometry::Instrument_const_sptr sptr_instrument;
 
 private:
-  void makeAPIComponentInfo(const Geometry::InfoComponentVisitor &visitor);
+  void makeAPIComponentInfo(const Geometry::InfoComponentVisitor &visitor,
+                            const Geometry::Instrument &newInstrument);
 
   boost::shared_ptr<Geometry::Instrument> makeParameterizedInstrument() const;
   /// Fill with given instrument parameter
@@ -225,7 +227,8 @@ private:
   void cacheDefaultDetectorGrouping() const; // Not thread-safe
   void invalidateAllSpectrumDefinitions();
   std::unique_ptr<Geometry::InfoComponentVisitor>
-  makeOrRetrieveVisitor(const Geometry::Instrument &instrument) const;
+  makeOrRetrieveVisitor(const Geometry::Instrument &parInstrument,
+                        const Geometry::Instrument &newInstrument) const;
   mutable std::once_flag m_defaultDetectorGroupingCached;
 
   /// Mutex to protect against cow_ptr copying
@@ -235,7 +238,7 @@ private:
   std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
 
   boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
-  std::unique_ptr<API::ComponentInfo> m_componentInfoWrapper;
+  boost::shared_ptr<Geometry::ComponentInfo> m_componentInfoWrapper;
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;

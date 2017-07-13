@@ -9,6 +9,7 @@
 namespace Mantid {
 namespace Beamline {
 
+class ComponentInfo;
 /** Beamline::DetectorInfo provides easy access to commonly used parameters of
   individual detectors (pixels) in a beamline, such as mask and monitor flags,
   positions, L2, and 2-theta.
@@ -94,6 +95,11 @@ public:
                        const std::pair<int64_t, int64_t> &interval);
 
   void merge(const DetectorInfo &other);
+  void setComponentInfo(ComponentInfo *componentInfo);
+  bool hasComponentInfo() const;
+  double l1() const;
+  Eigen::Vector3d sourcePosition() const;
+  Eigen::Vector3d samplePosition() const;
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
@@ -113,7 +119,25 @@ private:
       nullptr};
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
   Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
+  ComponentInfo *m_componentInfo = nullptr;
 };
+
+/** Returns the number of detectors in the instrument.
+ *
+ * If a detector is moving, i.e., has more than one associated position, it is
+ * nevertheless only counted as a single detector. */
+inline size_t DetectorInfo::size() const {
+  if (!m_isMonitor)
+    return 0;
+  return m_isMonitor->size();
+}
+
+/// Returns true if the beamline has scanning detectors.
+inline bool DetectorInfo::isScanning() const {
+  if (!m_positions)
+    return false;
+  return size() != m_positions->size();
+}
 
 /** Returns the position of the detector with given detector index.
  *
@@ -151,6 +175,13 @@ inline void DetectorInfo::setRotation(const size_t index,
                                       const Eigen::Quaterniond &rotation) {
   checkNoTimeDependence();
   m_rotations.access()[index] = rotation.normalized();
+}
+
+/// Throws if this has time-dependent data.
+inline void DetectorInfo::checkNoTimeDependence() const {
+  if (isScanning())
+    throw std::runtime_error("DetectorInfo accessed without time index but the "
+                             "beamline has time-dependent (moving) detectors.");
 }
 
 } // namespace Beamline

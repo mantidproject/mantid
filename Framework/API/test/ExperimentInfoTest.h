@@ -1,7 +1,7 @@
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
@@ -780,7 +780,7 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
 
     size_t nComponents = nPixels * nPixels;
     nComponents += nPixels; // One additional CompAssembly per row.
@@ -806,7 +806,7 @@ public:
     auto bank = inst->getComponentByName("bank1");
     auto bankID = bank->getComponentID();
     auto allBankDetectorIndexes =
-        compInfo.detectorIndices(compInfo.indexOf(bankID));
+        compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
 
     TSM_ASSERT_EQUALS("Should have all detectors under this bank",
                       allBankDetectorIndexes.size(),
@@ -818,7 +818,7 @@ public:
             ->getChild(0)
             ->getComponentID();
     auto allRowDetectorIndexes =
-        compInfo.detectorIndices(compInfo.indexOf(bankRowID));
+        compInfo.detectorsInSubtree(compInfo.indexOf(bankRowID));
 
     TSM_ASSERT_EQUALS("Should have all detectors under this row",
                       allRowDetectorIndexes.size(),
@@ -833,7 +833,7 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
     const Mantid::API::DetectorInfo &detInfo = expInfo.detectorInfo();
     // Test one of the detectors
     const auto targetDetectorIndex = 0;
@@ -841,19 +841,20 @@ public:
         detInfo.detector(targetDetectorIndex).getComponentID();
     TSM_ASSERT_EQUALS(
         "Detector should report the detector index of itself",
-        compInfo.detectorIndices(compInfo.indexOf(detCompId)).size(), 1);
-    TS_ASSERT_EQUALS(compInfo.detectorIndices(compInfo.indexOf(detCompId))[0],
-                     targetDetectorIndex);
+        compInfo.detectorsInSubtree(compInfo.indexOf(detCompId)).size(), 1);
+    TS_ASSERT_EQUALS(
+        compInfo.detectorsInSubtree(compInfo.indexOf(detCompId))[0],
+        targetDetectorIndex);
 
     size_t detectorIndex =
         0; // interchangeable as either component or detector index
     TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
-                      compInfo.detectorIndices(detectorIndex),
+                      compInfo.detectorsInSubtree(detectorIndex),
                       std::vector<size_t>{detectorIndex});
 
     detectorIndex = 99; // interchangeable as either component or detector index
     TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
-                      compInfo.detectorIndices(detectorIndex),
+                      compInfo.detectorsInSubtree(detectorIndex),
                       std::vector<size_t>{detectorIndex});
   }
 
@@ -865,18 +866,18 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
 
     // Test non-detector, non-assembly components
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
     TSM_ASSERT_EQUALS(
         "Sample should not report any nested detector indexes",
-        compInfo.detectorIndices(compInfo.indexOf(sampleId)).size(), 0);
+        compInfo.detectorsInSubtree(compInfo.indexOf(sampleId)).size(), 0);
 
     auto sourceId = inst->getComponentByName("source")->getComponentID();
     TSM_ASSERT_EQUALS(
         "Source should not report any nested detector indexes",
-        compInfo.detectorIndices(compInfo.indexOf(sourceId)).size(), 0);
+        compInfo.detectorsInSubtree(compInfo.indexOf(sourceId)).size(), 0);
   }
 
   void test_component_info_stripped_of_invalid_detectors() {
@@ -908,6 +909,65 @@ public:
 
     ExperimentInfo expInfo;
     TS_ASSERT_THROWS_NOTHING(expInfo.setInstrument(instrument));
+  }
+
+  void test_component_info_source_sample_l1() {
+
+    auto inst = ComponentCreationHelper::createMinimalInstrument(
+        V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+        V3D{12, 0, 0} /*detector*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    TS_ASSERT_EQUALS((V3D{-2, 0, 0}), compInfo.sourcePosition());
+
+    TS_ASSERT_EQUALS((V3D{10, 0, 0}), compInfo.samplePosition());
+
+    TS_ASSERT_DELTA(12, compInfo.l1(), 1e-12);
+  }
+
+  void test_component_info_component_index_tree() {
+
+    const int nPixels = 10;
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    // Test non-detector, non-assembly components
+    auto sampleId = inst->getComponentByName("sample")->getComponentID();
+    TS_ASSERT_EQUALS(
+        compInfo.componentsInSubtree(compInfo.indexOf(sampleId)).size(), 1);
+
+    auto sourceId = inst->getComponentByName("source")->getComponentID();
+    TS_ASSERT_EQUALS(
+        compInfo.componentsInSubtree(compInfo.indexOf(sourceId)).size(), 1);
+
+    auto bankId = inst->getComponentByName("bank1")->getComponentID();
+    TSM_ASSERT_EQUALS(
+        "Bank should yield entire sub-tree of component indices",
+        compInfo.componentsInSubtree(compInfo.indexOf(bankId)).size(),
+        (nPixels * nPixels) + nPixels + 1);
+
+    auto instrumentId = inst->getComponentID();
+    size_t nComponents = nPixels * nPixels;
+    nComponents += nPixels; // One additional CompAssembly per row.
+    nComponents += 1;       // Rectangular Detector (bank)
+    nComponents += 1;       // source
+    nComponents += 1;       // sample
+    nComponents += 1;       // self
+    TSM_ASSERT_EQUALS(
+        "Instrument should yield entire tree of component indices",
+        compInfo.componentsInSubtree(compInfo.indexOf(instrumentId)).size(),
+        nComponents);
+
+    TS_ASSERT_EQUALS(compInfo.indexOf(inst->getComponentID()),
+                     compInfo.parent(compInfo.indexOf(bankId)));
   }
 
 private:

@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
@@ -1241,6 +1242,12 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
   return *m_detectorInfo;
 }
+/// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
+const Beamline::ComponentInfo &Instrument::componentInfo() const {
+  if (!hasComponentInfo())
+    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
+  return *m_componentInfo;
+}
 
 /**
  * Only for use by ExperimentInfo
@@ -1250,7 +1257,20 @@ bool Instrument::hasInfoVisitor() const {
   return static_cast<bool>(m_infoVisitor);
 }
 
+/**
+ * Only for use by ExperimentInfo
+ * @return True only if a ComponentInfo has been set.
+ */
+bool Instrument::hasComponentInfo() const {
+  return static_cast<bool>(m_componentInfo);
+}
+
 bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
+
+int Instrument::add(IComponent *component) {
+  // invalidate cache
+  return CompAssembly::add(component);
+}
 
 /* Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
  * Sets the pointer to the detector id -> index map
@@ -1258,6 +1278,18 @@ bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
 void Instrument::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
   m_detectorInfo = std::move(detectorInfo);
+}
+
+void Instrument::setComponentInfo(
+    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
+    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds) {
+  if (componentInfo->size() != componentIds->size()) {
+    throw std::runtime_error("Instrument::setInstrument requires that the same "
+                             "number of component ids are provided as the size "
+                             "of the ComponentInfo");
+  }
+  m_componentInfo = std::move(componentInfo);
+  m_componentCache = std::move(componentIds);
 }
 
 void Instrument::setInfoVisitor(const InfoComponentVisitor &visitor) {
@@ -1283,12 +1315,14 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
 /// DetectorInfo (masking, positions, rotations).
 boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
-  // Information will be stored directly in pmap so we do not need DetectorInfo.
+  // Information will be stored directly in pmap so we do not need DetectorInfo
+  // or ComponentInfo.
   pmap->setDetectorInfo(nullptr);
+  pmap->setComponentInfo(nullptr);
   // Instrument is only needed for DetectorInfo access so it is not needed.
   pmap->setInstrument(nullptr);
 
-  if (!hasDetectorInfo())
+  if (!hasDetectorInfo() && !hasComponentInfo())
     return pmap;
 
   const auto &baseInstr = m_map ? *m_instr : *this;
@@ -1300,54 +1334,77 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   constexpr double safety_factor = 2.0;
   const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
 
-  const IComponent *oldParent{nullptr};
-  Eigen::Quaterniond invParentRot;
   Eigen::Affine3d transformation;
-  for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
-    const auto &det = std::get<1>(baseInstr.m_detectorCache[i]);
-    if (m_detectorInfo->isMasked(i)) {
-      pmap->forceUnsafeSetMasked(det.get(), true);
-    }
+  int64_t oldParentIndex = -1;
 
-    // Obtain parent position/rotation/scale.
-    const auto parent = det->getParent();
-    if (parent.get() != oldParent) {
-      oldParent = parent.get();
-      const auto parParent = ParComponentFactory::create(parent, pmap.get());
-      const auto parentPos = toVector3d(parParent->getPos());
-      invParentRot = toQuaterniond(parParent->getRotation()).conjugate();
+  for (size_t i = 0; i < m_componentInfo->size(); ++i) {
+
+    const int64_t parentIndex = m_componentInfo->parent(i);
+    const bool makeTransform = parentIndex != oldParentIndex;
+    bool isRectangularDetectorPixel = false;
+
+    if (makeTransform) {
+      oldParentIndex = parentIndex;
+      const auto parentPos = m_componentInfo->position(parentIndex);
+      const auto invParentRot =
+          m_componentInfo->rotation(parentIndex).conjugate();
+
       transformation = invParentRot;
       transformation.translate(-parentPos);
-      // Special case: scaling for RectangularDetectorPixel
-      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(det)) {
-        const auto *panel = det->getParent()->getParent().get();
-        Eigen::Vector3d scale(1, 1, 1);
-        if (auto scalex = pmap->get(panel, "scalex"))
-          scale[0] = 1.0 / scalex->value<double>();
-        if (auto scaley = pmap->get(panel, "scaley"))
-          scale[1] = 1.0 / scaley->value<double>();
-        transformation.prescale(scale);
+    }
+
+    if (m_componentInfo->isDetector(i)) {
+
+      const boost::shared_ptr<const IDetector> &baseDet =
+          std::get<1>(baseInstr.m_detectorCache[i]);
+
+      isRectangularDetectorPixel = bool(
+          boost::dynamic_pointer_cast<const RectangularDetectorPixel>(baseDet));
+      if (m_detectorInfo->isMasked(i)) {
+        pmap->forceUnsafeSetMasked(baseDet.get(), true);
+      }
+
+      if (makeTransform) {
+        // Special case: scaling for RectangularDetectorPixel.
+        if (isRectangularDetectorPixel) {
+
+          size_t panelIndex = m_componentInfo->parent(parentIndex);
+          ComponentID panelID = m_componentCache->operator[](panelIndex);
+
+          Eigen::Vector3d scale(1, 1, 1);
+          if (auto scalex = pmap->get(panelID, "scalex"))
+            scale[0] = 1.0 / scalex->value<double>();
+          if (auto scaley = pmap->get(panelID, "scaley"))
+            scale[1] = 1.0 / scaley->value<double>();
+          transformation.prescale(scale);
+        }
       }
     }
 
     // Undo parent transformation to obtain relative position/rotation.
-    auto relPos = transformation * m_detectorInfo->position(i);
-    auto relRot = invParentRot * m_detectorInfo->rotation(i);
+    Eigen::Vector3d relPos = transformation * m_componentInfo->position(i);
+    Eigen::Quaterniond relRot = m_componentInfo->relativeRotation(i);
 
+    const IComponent *baseComponent =
+        m_componentCache->operator[](i)->getBaseComponent();
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
-    if ((relPos - toVector3d(det->getRelativePos())).norm() >= 1e-9) {
-      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(det))
+    if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
+      if (isRectangularDetectorPixel) {
         throw std::runtime_error("Cannot create legacy ParameterMap: Position "
                                  "parameters for RectangularDetectorPixel are "
                                  "not supported");
-      pmap->addV3D(det->getComponentID(), ParameterMap::pos(), toV3D(relPos));
+      }
+      pmap->addV3D(m_componentCache->operator[](i), ParameterMap::pos(),
+                   Kernel::toV3D(relPos));
     }
-
-    if ((relRot * toQuaterniond(det->getRelativeRot()).conjugate())
+    if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate())
             .vec()
-            .norm() >= imag_norm_max)
-      pmap->addQuat(det->getComponentID(), ParameterMap::rot(), toQuat(relRot));
+            .norm() >= imag_norm_max) {
+      pmap->addQuat(m_componentCache->operator[](i), ParameterMap::rot(),
+                    Kernel::toQuat(relRot));
+    }
   }
+
   return pmap;
 }
 

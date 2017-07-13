@@ -20,6 +20,7 @@ namespace Mantid {
 typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
 
 namespace Beamline {
+class ComponentInfo;
 class DetectorInfo;
 }
 namespace Geometry {
@@ -246,9 +247,16 @@ public:
   const Beamline::DetectorInfo &detectorInfo() const;
   bool hasInfoVisitor() const;
 
+  bool hasComponentInfo() const;
+  const Beamline::ComponentInfo &componentInfo() const;
+
   size_t detectorIndex(const detid_t detID) const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
+  void setComponentInfo(
+      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
+      boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds);
+
   void setInfoVisitor(const InfoComponentVisitor &visitor);
 
   const InfoComponentVisitor &infoVisitor() const;
@@ -256,6 +264,9 @@ public:
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
   bool isEmptyInstrument() const;
+
+  /// Add a component to the instrument
+  virtual int add(IComponent *component) override;
 
 private:
   /// Save information about a set of detectors to Nexus
@@ -272,6 +283,9 @@ private:
   /// Map which holds detector-IDs and pointers to detector components, and
   /// monitor flags.
   std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
+
+  /// Mappings to obtain component index
+  boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentCache;
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component
@@ -335,6 +349,10 @@ private:
   /// Pointer to the DetectorInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+
+  /// Pointer to the ComponentInfo object. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};

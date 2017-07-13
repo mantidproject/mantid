@@ -22,6 +22,7 @@ class DetectorInfo;
 }
 namespace Geometry {
 class BoundingBox;
+class ComponentInfo;
 class Instrument;
 
 /** @class ParameterMap ParameterMap.h
@@ -344,11 +345,16 @@ public:
   pmap_cit end() const { return m_map.end(); }
 
   bool hasDetectorInfo(const Instrument *instrument) const;
+  bool hasComponentInfo(const Instrument *instrument) const;
   const Beamline::DetectorInfo &detectorInfo() const;
+  const Geometry::ComponentInfo &componentInfo() const;
   size_t detectorIndex(const detid_t detID) const;
+  size_t componentIndex(const Geometry::ComponentID componentId) const;
   const std::vector<Geometry::ComponentID> &componentIds() const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
+  void setComponentInfo(
+      boost::shared_ptr<const Geometry::ComponentInfo> componentInfo);
   void setInstrument(const Instrument *instrument);
 
 private:
@@ -381,6 +387,11 @@ private:
   /// Pointer to the DetectorInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+
+  /// Pointer to the ComponentInfo object. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  boost::shared_ptr<const Geometry::ComponentInfo> m_componentInfo{nullptr};
+
   /// Pointer to the owning instrument for translating detector IDs into
   /// detector indices when accessing the DetectorInfo object. If the workspace
   /// distinguishes between a neutronic instrument and a physical instrument

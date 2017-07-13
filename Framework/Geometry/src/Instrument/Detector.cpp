@@ -169,8 +169,8 @@ const ParameterMap &Detector::parameterMap() const { return *m_map; }
 /// Helper for legacy access mode. Returns the index of the detector.
 size_t Detector::index() const { return m_map->detectorIndex(m_id); }
 
-void Detector::registerContents(ComponentVisitor &componentVisitor) const {
-  componentVisitor.registerDetector(*this);
+size_t Detector::registerContents(ComponentVisitor &componentVisitor) const {
+  return componentVisitor.registerDetector(*this);
 }
 
 bool Detector::hasDetectorInfo() const {

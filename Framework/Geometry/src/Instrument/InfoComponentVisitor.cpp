@@ -2,8 +2,10 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidBeamline/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidBeamline/ComponentInfo.h"
 
 #include <numeric>
 #include <algorithm>
@@ -27,73 +29,141 @@ makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
   }
   return std::move(detIdToIndex);
 }
+
+void clearPositionAndRotationParameters(ParameterMap &pmap,
+                                        const IComponent &comp) {
+  pmap.clearParametersByName(ParameterMap::pos(), &comp);
+  pmap.clearParametersByName(ParameterMap::posx(), &comp);
+  pmap.clearParametersByName(ParameterMap::posy(), &comp);
+  pmap.clearParametersByName(ParameterMap::posz(), &comp);
+  pmap.clearParametersByName(ParameterMap::rot(), &comp);
+  pmap.clearParametersByName(ParameterMap::rotx(), &comp);
+  pmap.clearParametersByName(ParameterMap::roty(), &comp);
+  pmap.clearParametersByName(ParameterMap::rotz(), &comp);
+}
 }
 
 InfoComponentVisitor::InfoComponentVisitor(
-    std::vector<detid_t> orderedDetectorIds)
+    std::vector<detid_t> orderedDetectorIds, ParameterMap &pmap,
+    ComponentID sourceId, ComponentID sampleId)
     : m_componentIds(boost::make_shared<std::vector<ComponentID>>(
           orderedDetectorIds.size(), nullptr)),
       m_assemblySortedDetectorIndices(
           boost::make_shared<std::vector<size_t>>()),
-      m_ranges(boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
+      m_assemblySortedComponentIndices(
+          boost::make_shared<std::vector<size_t>>()),
+      m_parentComponentIndices(boost::make_shared<std::vector<size_t>>(
+          orderedDetectorIds.size(), 0)),
+      m_detectorRanges(
+          boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
+      m_componentRanges(
+          boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentIdToIndexMap(boost::make_shared<
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(orderedDetectorIds)),
       m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(
-          std::move(orderedDetectorIds))) {
+          std::move(orderedDetectorIds))),
+      m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
+      m_rotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
+      m_pmap(pmap), m_sourceId(sourceId), m_sampleId(sampleId) {
   const auto nDetectors = m_orderedDetectorIds->size();
-  m_assemblySortedDetectorIndices->reserve(nDetectors);
-  m_componentIdToIndexMap->reserve(nDetectors);
+  m_assemblySortedDetectorIndices->reserve(nDetectors);  // Exact
+  m_assemblySortedComponentIndices->reserve(nDetectors); // Approximation
+  // m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
 }
 
 /**
  * @brief InfoComponentVisitor::registerComponentAssembly
  * @param assembly : ICompAssembly being visited
+ * @return Component index of this component
  */
-void InfoComponentVisitor::registerComponentAssembly(
-    const ICompAssembly &assembly) {
+size_t
+InfoComponentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
 
   std::vector<IComponent_const_sptr> assemblyChildren;
   assembly.getChildren(assemblyChildren, false /*is recursive*/);
 
   const size_t detectorStart = m_assemblySortedDetectorIndices->size();
-  for (const auto &child : assemblyChildren) {
+  const size_t componentStart = m_assemblySortedComponentIndices->size();
+  std::vector<size_t> children(assemblyChildren.size());
+  for (size_t i = 0; i < assemblyChildren.size(); ++i) {
     // register everything under this assembly
-    child->registerContents(*this);
+    children[i] = assemblyChildren[i]->registerContents(*this);
   }
   const size_t detectorStop = m_assemblySortedDetectorIndices->size();
+  const size_t componentIndex = m_componentIds->size();
+  m_assemblySortedComponentIndices->push_back(componentIndex);
+  // Unless this is the root component this parent is not correct and will be
+  // updated later in the register call of the parent.
+  m_parentComponentIndices->push_back(componentIndex);
+  const size_t componentStop = m_assemblySortedComponentIndices->size();
 
-  m_ranges->emplace_back(std::make_pair(detectorStart, detectorStop));
+  m_detectorRanges->emplace_back(std::make_pair(detectorStart, detectorStop));
+  m_componentRanges->emplace_back(
+      std::make_pair(componentStart, componentStop));
 
   // Record the ID -> index mapping
-  (*m_componentIdToIndexMap)[assembly.getComponentID()] =
-      m_componentIds->size();
-  // For any non-detector we extend the m_componetIds from the back
+  (*m_componentIdToIndexMap)[assembly.getComponentID()] = componentIndex;
+  // For any non-detector we extend the m_componentIds from the back
   m_componentIds->emplace_back(assembly.getComponentID());
+  m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
+  m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
+  clearPositionAndRotationParameters(m_pmap, assembly);
+  // Now that we know what the index of the parent is we can apply it to the
+  // children
+  for (const auto &child : children) {
+    (*m_parentComponentIndices)[child] = componentIndex;
+  }
+  markAsSourceOrSample(assembly.getComponentID(), componentIndex);
+  return componentIndex;
 }
 
 /**
  * @brief InfoComponentVisitor::registerGenericComponent
  * @param component : IComponent being visited
+ * @return Component index of this component
  */
-void InfoComponentVisitor::registerGenericComponent(
-    const IComponent &component) {
+size_t
+InfoComponentVisitor::registerGenericComponent(const IComponent &component) {
   /*
    * For a generic leaf component we extend the component ids list, but
    * the detector indexes entries will of course be empty
    */
-  m_ranges->emplace_back(std::make_pair(0, 0)); // Represents an empty range
+  m_detectorRanges->emplace_back(
+      std::make_pair(0, 0)); // Represents an empty range
   // Record the ID -> index mapping
-  (*m_componentIdToIndexMap)[component.getComponentID()] =
-      m_componentIds->size();
+  const size_t componentIndex = m_componentIds->size();
+  (*m_componentIdToIndexMap)[component.getComponentID()] = componentIndex;
   m_componentIds->emplace_back(component.getComponentID());
+  m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
+  m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
+  const size_t componentStart = m_assemblySortedComponentIndices->size();
+  m_componentRanges->emplace_back(
+      std::make_pair(componentStart, componentStart + 1));
+  m_assemblySortedComponentIndices->push_back(componentIndex);
+  // Unless this is the root component this parent is not correct and will be
+  // updated later in the register call of the parent.
+  m_parentComponentIndices->push_back(componentIndex);
+  clearPositionAndRotationParameters(m_pmap, component);
+  markAsSourceOrSample(component.getComponentID(), componentIndex);
+  return componentIndex;
+}
+
+void InfoComponentVisitor::markAsSourceOrSample(ComponentID componentId,
+                                                const size_t componentIndex) {
+  if (componentId == m_sampleId) {
+    m_sampleIndex = componentIndex;
+  } else if (componentId == m_sourceId) {
+    m_sourceIndex = componentIndex;
+  }
 }
 
 /**
  * @brief InfoComponentVisitor::registerDetector
  * @param detector : IDetector being visited
+ * @return Component index of this component
  */
-void InfoComponentVisitor::registerDetector(const IDetector &detector) {
+size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
 
   size_t detectorIndex = 0;
   try {
@@ -104,7 +174,7 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
      the index, we cannot register it in the right place!
     */
     ++m_droppedDetectors;
-    return;
+    return detectorIndex;
   }
   if (m_componentIds->at(detectorIndex) == nullptr) {
 
@@ -120,7 +190,19 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
     (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
     (*m_componentIds)[detectorIndex] = detector.getComponentID();
     m_assemblySortedDetectorIndices->push_back(detectorIndex);
+    m_assemblySortedComponentIndices->push_back(detectorIndex);
   }
+  /* Note that positions and rotations for detectors are currently
+  NOT stored! These go into DetectorInfo at present. push_back works for other
+  Component types because Detectors are always come first in the resultant
+  component list
+  forming a contiguous block.
+  */
+  markAsSourceOrSample(detector.getComponentID(),
+                       detectorIndex); // TODO. Optimisation. Cannot have a
+                                       // detector that is either source or
+                                       // sample. So delete this.
+  return detectorIndex;
 }
 
 /**
@@ -130,7 +212,12 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
  */
 boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
 InfoComponentVisitor::componentDetectorRanges() const {
-  return m_ranges;
+  return m_detectorRanges;
+}
+
+boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+InfoComponentVisitor::componentChildComponentRanges() const {
+  return m_componentRanges;
 }
 
 /**
@@ -141,6 +228,16 @@ InfoComponentVisitor::componentDetectorRanges() const {
 boost::shared_ptr<const std::vector<size_t>>
 InfoComponentVisitor::assemblySortedDetectorIndices() const {
   return m_assemblySortedDetectorIndices;
+}
+
+boost::shared_ptr<const std::vector<size_t>>
+InfoComponentVisitor::assemblySortedComponentIndices() const {
+  return m_assemblySortedComponentIndices;
+}
+
+boost::shared_ptr<const std::vector<size_t>>
+InfoComponentVisitor::parentComponentIndices() const {
+  return m_parentComponentIndices;
 }
 
 /**
@@ -180,13 +277,30 @@ InfoComponentVisitor::detectorIdToIndexMap() const {
 std::unique_ptr<Beamline::ComponentInfo>
 InfoComponentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
-      m_assemblySortedDetectorIndices, m_ranges);
+      m_assemblySortedDetectorIndices, m_detectorRanges,
+      m_assemblySortedComponentIndices, m_componentRanges,
+      m_parentComponentIndices, m_positions, m_rotations, m_sourceIndex,
+      m_sampleIndex);
 }
 
 boost::shared_ptr<std::vector<detid_t>>
 InfoComponentVisitor::detectorIds() const {
   return m_orderedDetectorIds;
 }
+
+boost::shared_ptr<std::vector<Eigen::Vector3d>>
+InfoComponentVisitor::positions() const {
+  return m_positions;
+}
+
+boost::shared_ptr<std::vector<Eigen::Quaterniond>>
+InfoComponentVisitor::rotations() const {
+  return m_rotations;
+}
+
+int64_t InfoComponentVisitor::sample() const { return m_sampleIndex; }
+
+int64_t InfoComponentVisitor::source() const { return m_sourceIndex; }
 
 } // namespace Geometry
 } // namespace Mantid

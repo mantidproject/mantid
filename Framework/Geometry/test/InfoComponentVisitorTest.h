@@ -4,13 +4,17 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include <set>
 #include <algorithm>
+#include <boost/make_shared.hpp>
 
-using Mantid::Geometry::InfoComponentVisitor;
+using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using namespace ComponentCreationHelper;
 using Mantid::detid_t;
@@ -31,9 +35,11 @@ public:
                                            V3D(10, 0, 0) /*sample pos*/
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
-
+    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/);
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -48,6 +54,92 @@ public:
                       expectedSize);
   }
 
+  void test_visitor_purges_parameter_map_basic_check() {
+
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/,
+                                           V3D(11, 0, 0) /*detector position*/);
+    Mantid::Geometry::ParameterMap pmap;
+    auto detector = visitee->getDetector(visitee->getDetectorIDs()[0]);
+    pmap.addV3D(detector->getComponentID(), "pos",
+                Mantid::Kernel::V3D{12, 0, 0});
+    pmap.addV3D(visitee->getComponentID(), "pos",
+                Mantid::Kernel::V3D{13, 0, 0});
+
+    TS_ASSERT_EQUALS(pmap.size(), 2);
+
+    // Create the visitor.
+    InfoComponentVisitor visitor(std::vector<detid_t>{0}, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
+
+    // Visit everything. Purging should happen.
+    visitee->registerContents(visitor);
+
+    TSM_ASSERT_EQUALS(
+        "Detectors positions are NOT purged by visitor at present", pmap.size(),
+        1);
+  }
+
+  void test_visitor_purges_parameter_map_safely() {
+    /* We need to check that the purging process does not actually result in
+     *things
+     * that are subsequently read being misoriented or mislocated.
+     *
+     * In detail: Purging must be depth-first because of the way that lower
+     *level
+     * components calculate their positions/rotations from their parents.
+     */
+    using namespace ComponentHelper;
+
+    const V3D sourcePos(0, 0, 0);
+    const V3D samplePos(10, 0, 0);
+    const V3D detectorPos(11, 0, 0);
+    // Create a very basic instrument to visit
+    auto baseInstrument = ComponentCreationHelper::createMinimalInstrument(
+        sourcePos, samplePos, detectorPos);
+    auto paramMap = boost::make_shared<Mantid::Geometry::ParameterMap>();
+    auto parInstrument = boost::make_shared<Mantid::Geometry::Instrument>(
+        baseInstrument, paramMap);
+
+    TSM_ASSERT_EQUALS("Expect 0 items in the parameter map to start with",
+                      paramMap->size(), 0);
+    auto source = parInstrument->getComponentByName("source");
+    const V3D newInstrumentPos(-10, 0, 0);
+    ComponentHelper::moveComponent(*parInstrument, *paramMap, newInstrumentPos,
+                                   TransformType::Absolute);
+    const V3D newSourcePos(-1, 0, 0);
+    ComponentHelper::moveComponent(*source, *paramMap, newSourcePos,
+                                   TransformType::Absolute);
+
+    // Test the moved things are where we expect them to be an that the
+    // parameter map is populated.
+    TS_ASSERT_EQUALS(newSourcePos,
+                     parInstrument->getComponentByName("source")->getPos());
+    TS_ASSERT_EQUALS(newInstrumentPos, parInstrument->getPos());
+    TSM_ASSERT_EQUALS("Expect 2 items in the parameter map", paramMap->size(),
+                      2);
+
+    const detid_t detectorId = 0;
+    InfoComponentVisitor visitor(std::vector<detid_t>{detectorId}, *paramMap,
+                                 parInstrument->getSource()->getComponentID(),
+                                 parInstrument->getSample()->getComponentID());
+    parInstrument->registerContents(visitor);
+
+    TSM_ASSERT_EQUALS("Expect 0 items in the purged parameter map",
+                      paramMap->size(), 0);
+
+    // Now we check that thing are located where we expect them to be.
+    auto positions = visitor.positions();
+    TSM_ASSERT(
+        "Check source position",
+        (*positions)[0].isApprox(Mantid::Kernel::toVector3d(newSourcePos)));
+    TSM_ASSERT(
+        "Check instrument position",
+        (*positions)[2].isApprox(Mantid::Kernel::toVector3d(newInstrumentPos)));
+  }
+
   void test_visitor_detector_indexes_check() {
 
     // Create a very basic instrument to visit
@@ -56,10 +148,13 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
+    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
     const size_t detectorIndex =
         0; // Internally we expect detector index to start at 0
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/);
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -80,8 +175,11 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
+    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/);
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -125,21 +223,25 @@ public:
         componentIds.size() - 1);
   }
 
-  void test_visitor_ranges_check() {
+  void test_visitor_detector_ranges_check() {
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
                                            V3D(10, 0, 0) /*sample pos*/
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
+    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/);
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
 
-    auto ranges = visitor.componentDetectorRanges();
-    TSM_ASSERT_EQUALS("There are 3 non-detector components", ranges->size(), 3);
+    auto detectorRanges = visitor.componentDetectorRanges();
+    TSM_ASSERT_EQUALS("There are 3 non-detector components",
+                      detectorRanges->size(), 3);
 
     /*
      * In this instrument there is only a single assembly (the instrument
@@ -149,16 +251,53 @@ public:
      * working on ComponentInfo.
      */
     // Source has no detectors
-    TS_ASSERT_EQUALS((*ranges)[0].first, 0);
-    TS_ASSERT_EQUALS((*ranges)[0].second, 0);
+    TS_ASSERT_EQUALS((*detectorRanges)[0].first, 0);
+    TS_ASSERT_EQUALS((*detectorRanges)[0].second, 0);
     // Sample has no detectors
-    TS_ASSERT_EQUALS((*ranges)[1].first, 0);
-    TS_ASSERT_EQUALS((*ranges)[1].second, 0);
-    // Instrument has 1 detector.
-    TS_ASSERT_EQUALS((*ranges)[2].first, 0);
-    TS_ASSERT_EQUALS((*ranges)[2].second, 1);
+    TS_ASSERT_EQUALS((*detectorRanges)[1].first, 0);
+    TS_ASSERT_EQUALS((*detectorRanges)[1].second, 0);
+    // Instrument has 1 detector
+    TS_ASSERT_EQUALS((*detectorRanges)[2].first, 0);
+    TS_ASSERT_EQUALS((*detectorRanges)[2].second, 1);
   }
 
+  void test_visitor_component_ranges_check() {
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/
+                                           ,
+                                           V3D(11, 0, 0) /*detector position*/);
+
+    Mantid::Geometry::ParameterMap pmap;
+    // Create the visitor.
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
+
+    // Visit everything
+    visitee->registerContents(visitor);
+
+    auto componentRanges = visitor.componentChildComponentRanges();
+    TSM_ASSERT_EQUALS("There are 3 non-detector components",
+                      componentRanges->size(), 3);
+
+    /*
+     * In this instrument there is only a single assembly (the instrument
+     * itself). We therefore EXPECT that the ranges provided are all from 0 to 0
+     * for
+     * those non-assembly components. This is important for subsequent correct
+     * working on ComponentInfo.
+     */
+    // Source has no sub-components, range includes only itself
+    TS_ASSERT_EQUALS((*componentRanges)[0].first, 0);
+    TS_ASSERT_EQUALS((*componentRanges)[0].second, 1);
+    // Sample has no sub-components, range includes only itself
+    TS_ASSERT_EQUALS((*componentRanges)[1].first, 1);
+    TS_ASSERT_EQUALS((*componentRanges)[1].second, 2);
+    // Instrument has 1 detector.
+    TS_ASSERT_EQUALS((*componentRanges)[2].first, 0);
+    TS_ASSERT_EQUALS((*componentRanges)[2].second, 4);
+  }
   void test_visitor_collects_detector_id_to_index_mappings() {
 
     // Create a very basic instrument to visit
@@ -167,7 +306,10 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/);
+    Mantid::Geometry::ParameterMap pmap;
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -194,10 +336,13 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
+    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor. Note any access to the indexOf lambda will throw for
     // detectors.
-    InfoComponentVisitor visitor(std::vector<detid_t>{
-        0 /*sized just 1 to invoke out of range exception*/});
+    InfoComponentVisitor visitor(
+        std::vector<detid_t>{
+            0 /*sized just 1 to invoke out of range exception*/},
+        pmap);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -208,6 +353,73 @@ public:
     ++expectedSize; // instrument
     // Note no detector counted
     TS_ASSERT_EQUALS(visitor.size(), expectedSize);
+  }
+
+  void test_visitation_of_rectangular_detector() {
+
+    // Need confidence that this works properly for RectangularDetectors
+    const int nPixelsWide = 10; // Gives 10*10 detectors in total
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
+    Mantid::Geometry::ParameterMap pmap;
+    InfoComponentVisitor visitor(instrument->getDetectorIDs(), pmap);
+    instrument->registerContents(visitor);
+
+    TSM_ASSERT_EQUALS("Wrong number of detectors registered",
+                      visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
+  }
+
+  void test_parent_indices() {
+
+    const int nPixelsWide = 10; // Gives 10*10 detectors in total
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
+
+    Mantid::Geometry::ParameterMap pmap;
+    InfoComponentVisitor visitor(instrument->getDetectorIDs() /*detector ids*/,
+                                 pmap,
+                                 instrument->getSource()->getComponentID(),
+                                 instrument->getSample()->getComponentID());
+
+    // Visit everything
+    instrument->registerContents(visitor);
+
+    const auto parentComponentIndices = visitor.parentComponentIndices();
+
+    size_t testIndex =
+        visitor.size() -
+        2; // One component down from root. (Has parent of the root itself)
+    TS_ASSERT_EQUALS((*parentComponentIndices)[testIndex], visitor.size() - 1);
+    size_t root = visitor.size() - 1;
+    TS_ASSERT_EQUALS((*parentComponentIndices)[root], root);
+
+    testIndex = 0; // Check a detector
+    const auto rowAssemblyIndex = (*parentComponentIndices)[testIndex];
+    const auto bankIndex = (*parentComponentIndices)[rowAssemblyIndex];
+    const auto instrumentIndex = (*parentComponentIndices)[bankIndex];
+    // Walk all the way up to the instrument
+    TS_ASSERT_EQUALS(instrumentIndex, visitor.size() - 1);
+  }
+
+  void test_source_and_sample() {
+
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/
+                                           ,
+                                           V3D(11, 0, 0) /*detector position*/);
+
+    Mantid::Geometry::ParameterMap pmap;
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
+
+    // Visit everything
+    visitee->registerContents(visitor);
+
+    // Detector has component index of 0
+    TS_ASSERT_EQUALS(1, visitor.source());
+    TS_ASSERT_EQUALS(2, visitor.sample());
   }
 };
 
@@ -232,7 +444,10 @@ public:
   }
 
   void test_process_rectangular_instrument() {
-    InfoComponentVisitor visitor(m_instrument->getDetectorIDs());
+    Mantid::Geometry::ParameterMap pmap;
+    InfoComponentVisitor visitor(m_instrument->getDetectorIDs(), pmap,
+                                 m_instrument->getSource()->getComponentID(),
+                                 m_instrument->getSample()->getComponentID());
     m_instrument->registerContents(visitor);
     TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
   }

@@ -1,12 +1,17 @@
-#ifndef MANTID_API_COMPONENTINFO_H_
-#define MANTID_API_COMPONENTINFO_H_
+#ifndef MANTID_GEOMETRY_COMPONENTINFO_H_
+#define MANTID_GEOMETRY_COMPONENTINFO_H_
 
-#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/DllConfig.h"
 #include <unordered_map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
+
+namespace Kernel {
+class Quat;
+class V3D;
+}
 
 namespace Geometry {
 
@@ -17,7 +22,7 @@ namespace Beamline {
 class ComponentInfo;
 }
 
-namespace API {
+namespace Geometry {
 
 /** ComponentInfo : Provides a component centric view on to the instrument.
   Indexes are per component.
@@ -43,10 +48,10 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL ComponentInfo {
+class MANTID_GEOMETRY_DLL ComponentInfo {
 private:
   /// Reference to the actual ComponentInfo object (non-wrapping part).
-  const Beamline::ComponentInfo &m_componentInfo;
+  Beamline::ComponentInfo &m_componentInfo;
   /// Collection of component ids
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
       m_componentIds;
@@ -56,19 +61,33 @@ private:
 
 public:
   ComponentInfo(
-      const Mantid::Beamline::ComponentInfo &componentInfo,
+      Mantid::Beamline::ComponentInfo &componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds,
       boost::shared_ptr<const std::unordered_map<
           Geometry::IComponent *, size_t>> componentIdToIndexMap);
-  std::vector<size_t> detectorIndices(size_t componentIndex) const;
+  std::vector<size_t> detectorsInSubtree(size_t componentIndex) const;
+  std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
-  bool operator==(const ComponentInfo &other) const;
-  bool operator!=(const ComponentInfo &other) const;
+  bool isDetector(const size_t componentIndex) const;
+  Kernel::V3D position(const size_t componentIndex) const;
+  Kernel::Quat rotation(const size_t componentIndex) const;
+  Kernel::V3D relativePosition(const size_t componentIndex) const;
+  Kernel::Quat relativeRotation(const size_t componentIndex) const;
+  void setPosition(size_t componentIndex, const Kernel::V3D &newPosition);
+  void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
+  size_t parent(const size_t componentIndex) const;
+  bool hasParent(const size_t componentIndex) const;
+  Kernel::V3D sourcePosition() const;
+  Kernel::V3D samplePosition() const;
+  size_t source() const;
+  size_t sample() const;
+  double l1() const;
+  size_t root();
 };
 
-} // namespace API
+} // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_API_COMPONENTINFO_H_ */
+#endif /* MANTID_GEOMETRY_COMPONENTINFO_H_ */

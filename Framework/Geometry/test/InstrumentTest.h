@@ -5,6 +5,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -12,6 +13,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid;
@@ -39,6 +41,21 @@ makeDetectorInfo(const Instrument &instrument) {
   return boost::make_shared<Beamline::DetectorInfo>(
       std::move(positions), std::move(rotations), monitors);
 }
+}
+
+std::tuple<boost::shared_ptr<Beamline::ComponentInfo>,
+           boost::shared_ptr<const std::vector<Geometry::ComponentID>>,
+           boost::shared_ptr<const std::unordered_map<
+               Mantid::Geometry::IComponent *, size_t>>>
+makeComponentInfo(const Instrument &parInstrument) {
+  InfoComponentVisitor visitor(parInstrument.getDetectorIDs(),
+                               *parInstrument.getParameterMap(),
+                               parInstrument.getSource()->getComponentID(),
+                               parInstrument.getSample()->getComponentID());
+  parInstrument.registerContents(visitor);
+  return std::make_tuple(
+      boost::shared_ptr<Beamline::ComponentInfo>(visitor.componentInfo()),
+      visitor.componentIds(), visitor.componentIdToIndexMap());
 }
 
 class InstrumentTest : public CxxTest::TestSuite {
@@ -550,9 +567,18 @@ public:
     Instrument instrument(baseInstrument, pmap);
 
     // Extract information from instrument to create DetectorInfo
-    auto detInfo = makeDetectorInfo(instrument);
+    auto componentTuple = makeComponentInfo(instrument);
+    auto componentInfo = std::get<0>(componentTuple);
+    auto componentIds = std::get<1>(componentTuple);
+    auto componentIdToIndexMap = std::get<2>(componentTuple);
+    instrument.setComponentInfo(componentInfo, componentIds);
+    pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
+        *componentInfo, componentIds, componentIdToIndexMap));
 
+    auto detInfo = makeDetectorInfo(instrument);
     instrument.setDetectorInfo(detInfo);
+    detInfo->setComponentInfo(componentInfo.get());
+    componentInfo->setDetectorInfo(detInfo.get());
     // bank 1
     TS_ASSERT(detInfo->position(0).isApprox(
         toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}), 1e-12));
@@ -578,8 +604,8 @@ public:
     detInfo->setPosition(1, detInfo->position(1) + toVector3d(detEpsilon));
     detInfo->setPosition(9, detInfo->position(9) + toVector3d(detEpsilon));
     detInfo->setRotation(19, toQuaterniond(detRotEps) * detInfo->rotation(19));
-    // 3 bank parameters, det pos/rot is in DetectorInfo
-    TS_ASSERT_EQUALS(pmap->size(), 3);
+    // All position information should be purged
+    TS_ASSERT_EQUALS(pmap->size(), 0);
 
     const auto legacyMap = instrument.makeLegacyParameterMap();
     // 3 bank parameters + 2 det parameters
@@ -614,9 +640,19 @@ public:
     Instrument instrument(baseInstrument, pmap);
 
     // Extract information from instrument to create DetectorInfo
-    auto detInfo = makeDetectorInfo(instrument);
+    auto componentTuple = makeComponentInfo(instrument);
+    auto componentInfo = std::get<0>(componentTuple);
+    auto componentIds = std::get<1>(componentTuple);
+    auto componentIdToIndexMap = std::get<2>(componentTuple);
+    instrument.setComponentInfo(componentInfo, componentIds);
+    pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
+        *componentInfo, componentIds, componentIdToIndexMap));
 
+    auto detInfo = makeDetectorInfo(instrument);
     instrument.setDetectorInfo(detInfo);
+    detInfo->setComponentInfo(componentInfo.get());
+    componentInfo->setDetectorInfo(detInfo.get());
+
     // bank 1
     double pitch = 0.008;
     TS_ASSERT(
@@ -685,7 +721,8 @@ public:
   void test_set_InfoVisitor() {
     Instrument instrument;
     TS_ASSERT(!instrument.hasInfoVisitor());
-    InfoComponentVisitor visitor(std::vector<detid_t>{});
+    Geometry::ParameterMap paramMap;
+    InfoComponentVisitor visitor(std::vector<detid_t>{}, paramMap);
     instrument.setInfoVisitor(visitor);
     TS_ASSERT(instrument.hasInfoVisitor());
   }
