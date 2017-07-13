@@ -32,6 +32,7 @@ class NewMCAbsorption(DataProcessorAlgorithm):
     # flat plate variables
     _width = None
     _thickness = None
+    _center=None
     _angle = None
 
     def category(self):
@@ -84,6 +85,50 @@ class NewMCAbsorption(DataProcessorAlgorithm):
 
         # -------------------------------------------------------------------------------------------
 
+
+        # set up shape options
+
+        self.declareProperty(name="Shape", defaultValue="FlatPlate",
+                             validator=StringListValidator(["FlatPlate", "Cylinder", "Annulus"]),
+                             doc="Geometry of sample environment. Options are: FlatPlate, Cylinder, Annulus")
+
+        flatPlateCondition = VisibleWhenProperty("Shape", PropertyCriterion.IsEqualTo, "FlatPlate")
+        cylinderCondition = VisibleWhenProperty("Shape", PropertyCriterion.IsEqualTo, "Cylinder")
+        annulusCondition = VisibleWhenProperty("Shape", PropertyCriterion.IsEqualTo, "Annulus")
+
+        # height is common to all options
+
+        self.declareProperty(name="Height", defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc="Height of the sample environment")
+
+        # Flat Plate options
+
+        self.declareProperty(name='Width', defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Width of the FlatPlate sample environment')
+        self.setPropertySettings("Width", flatPlateCondition)
+
+        self.declareProperty(name='Thickness', defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Thickness of the FlatPlate sample environment')
+        self.setPropertySettings("Thickness", flatPlateCondition)
+
+        self.declareProperty(name='Center', defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Center of the FlatPlate sample environment')
+        self.setPropertySettings("Center", flatPlateCondition)
+
+        self.declareProperty(name='Angle', defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Angle of the FlatPlate sample environment')
+        self.setPropertySettings("Angle", flatPlateCondition)
+
+
+
+
+    def PyExec(self):
+        pass
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(NewMCAbsorption)
