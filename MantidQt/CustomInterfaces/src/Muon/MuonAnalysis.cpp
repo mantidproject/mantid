@@ -183,7 +183,6 @@ void MuonAnalysis::initLayout() {
 
   m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
   m_fitDataTab->init();
-
   m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
   connect(m_resultTableTab, SIGNAL(runPythonCode(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
@@ -1098,7 +1097,6 @@ void MuonAnalysis::handleInputFileChanges() {
     inputFileChanged(m_uiForm.mwRunFiles->getFilenames());
 
     m_textToDisplay = m_uiForm.mwRunFiles->getText();
-
     // save selected browse file directory to be reused next time interface is
     // started up
     m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
@@ -1226,7 +1224,6 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
     return;
   }
-
   // At this point we are sure that new data was loaded successfully, so we can
   // safely overwrite
   // previous one.
@@ -1794,6 +1791,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   runPythonCode(pyS);
+  // store the norm
+  m_fitDataPresenter->storeNorm(safeWSName.toStdString());
 }
 
 /**
@@ -2168,6 +2167,8 @@ void MuonAnalysis::loadFittings() {
           SLOT(handleGroupBox()));
   connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked()), this,
           SLOT(handlePeriodBox()));
+  connect(m_dataSelector, SIGNAL(nameChanged(QString)), this,
+          SLOT(updateNorm(QString)));
 
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
@@ -2555,6 +2556,9 @@ void MuonAnalysis::changeTab(int newTabIndex) {
   }
 
   m_currentTab = newTab;
+}
+void MuonAnalysis::updateNorm(QString name) {
+  m_uiForm.fitBrowser->setNormalization(name.toStdString());
 }
 
 /**
@@ -2948,11 +2952,12 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
 
     groupAlg->execute();
+    m_fitDataPresenter->storeNorm(wsName);
+
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
                              std::string(e.what()));
   }
-
   return outputEntry.retrieve();
 }
 
@@ -3153,15 +3158,6 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   const Muon::MultiFitState multiFitState = state == Qt::CheckState::Checked
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
-  // If both multiFit and TFAsymm are checked
-  // uncheck the TFAsymm
-  if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
-    // uncheck the box
-    m_uiForm.chkTFAsymm->setChecked(false);
-    changedTFAsymmCheckbox(0);
-    // reset the view
-    setTFAsymm(Muon::TFAsymmState::Disabled);
-  }
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
 }
 /**
@@ -3172,14 +3168,10 @@ void MuonAnalysis::changedTFAsymmCheckbox(int state) {
   const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
                                               ? Muon::TFAsymmState::Enabled
                                               : Muon::TFAsymmState::Disabled;
-  // If both multiFit and TFAsymm are checked
-  // uncheck the multiFit
-  if (m_uiForm.chkTFAsymm->isChecked() && state != 0) {
-    // uncheck the box
-    m_uiForm.chkEnableMultiFit->setChecked(false);
-    multiFitCheckboxChanged(0);
-    // reset the view
-    m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
+  if (TFAsymmState == Muon::TFAsymmState::Enabled) {
+    m_fitDataPresenter->setTFAsymmState(true);
+  } else {
+    m_fitDataPresenter->setTFAsymmState(false);
   }
   setTFAsymm(TFAsymmState);
 }
@@ -3193,16 +3185,6 @@ void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
     m_uiForm.chkTFAsymm->setChecked(true);
   } else {
     m_uiForm.chkTFAsymm->setChecked(false);
-  }
-  // If both multiFit and TFAsymm are checked
-  // uncheck the multiFit
-  if (m_uiForm.chkEnableMultiFit->isChecked() &&
-      TFAsymmState == Muon::TFAsymmState::Enabled) {
-    // uncheck the box
-    m_uiForm.chkEnableMultiFit->setChecked(false);
-    multiFitCheckboxChanged(0);
-    // reset the view
-    m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
   }
   m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
 }

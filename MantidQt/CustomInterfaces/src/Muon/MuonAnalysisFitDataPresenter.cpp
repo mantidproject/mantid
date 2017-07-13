@@ -13,6 +13,8 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include <boost/lexical_cast.hpp>
 
+#include "MantidAPI/ITableWorkspace.h"
+
 using MantidQt::MantidWidgets::IMuonFitDataModel;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
@@ -176,6 +178,7 @@ void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
  */
 void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
   const auto names = generateWorkspaceNames(overwrite);
+
   if (!names.empty()) {
     createWorkspacesToFit(names);
     updateWorkspaceNames(names);
@@ -356,9 +359,59 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
       }
     }
   }
+
   return workspaceNames;
 }
+/**
+* Stores the normalization into the table WS
+* If the workspace is already in the table
+* do nothing.
+* @param name :: the name of the workspace to add.
+*/
+void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
+  if (m_isItTFAsymm) {
+    if (!Mantid::API::AnalysisDataService::Instance().doesExist(
+            "MuonAnalysisTFNormalizations")) {
+      Mantid::API::ITableWorkspace_sptr table =
+          Mantid::API::WorkspaceFactory::Instance().createTable();
+      AnalysisDataService::Instance().addOrReplace(
+          "MuonAnalysisTFNormalizations", table);
+      table->addColumn("double", "norm");
+      table->addColumn("str", "name");
+      table->addColumn("str", "method");
+    }
+    Mantid::API::ITableWorkspace_sptr table =
+        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                "MuonAnalysisTFNormalizations"));
+    auto colName = table->getColumn("name");
+    if (table->rowCount() > 1) {
+      std::string tmp = name;
+      // stored with ; instead of spaces
+      std::replace(tmp.begin(), tmp.end(), ' ', ';');
+      for (size_t j = 0; j < table->rowCount(); j++) {
+        if (colName->cell<std::string>(j) == tmp) { // already exists
+          return;
+        }
+      }
+    }
 
+    Mantid::API::TableRow row = table->appendRow();
+    std::string tmp = name;
+    // spaces stop the string being written
+    std::replace(tmp.begin(), tmp.end(), ' ', ';');
+    // get data
+    if (Mantid::API::AnalysisDataService::Instance().doesExist("__norm__")) {
+      Mantid::API::ITableWorkspace_sptr tmpNorm =
+          boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+              Mantid::API::AnalysisDataService::Instance().retrieve(
+                  "__norm__"));
+      auto colNorm = tmpNorm->getColumn("norm");
+      // saves data
+      row << (*colNorm)[0] << tmp << "Estimate";
+    }
+  }
+}
 /**
  * Create an analysis workspace given the required name.
  * @param name :: [input] Name of workspace to create (in format INST0001234;
@@ -390,7 +443,6 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     // This will sum multiple runs together
     const auto loadedData = m_dataLoader.loadFiles(filenames);
     groupLabel = loadedData.label;
-
     // correct and group the data
     const auto correctedData =
         m_dataLoader.correctAndGroup(loadedData, m_grouping);
@@ -410,7 +462,6 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
             params.periods.substr(minus + 1, std::string::npos);
       }
     }
-
     // Rebin params: use the same as MuonAnalysis uses, UNLESS this is raw data
     analysisOptions.rebinArgs =
         isRawData(name) ? "" : getRebinParams(correctedData);
@@ -422,11 +473,13 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     analysisOptions.plotType = params.plotType;
     outputWS =
         m_dataLoader.createAnalysisWorkspace(correctedData, analysisOptions);
+
   } catch (const std::exception &ex) {
     std::ostringstream err;
     err << "Failed to create analysis workspace " << name << ": " << ex.what();
     g_log.error(err.str());
   }
+  storeNorm(name);
 
   return outputWS;
 }

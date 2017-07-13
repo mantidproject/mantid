@@ -105,7 +105,7 @@ public slots:
   void fitTypeChanged(bool state);
   /// Called when group/period box selection changes
   void checkForMultiGroupPeriodSelection();
-
+  void updateNormFromDropDown(int);
 signals:
   /// Edited the start or end fields
   void dataPropertiesChanged();
@@ -115,6 +115,7 @@ signals:
   void simulLabelChanged();
   /// Dataset index changed
   void datasetIndexChanged(int index);
+  void nameChanged(QString name);
 
 private:
   /// Set default values in some input controls
