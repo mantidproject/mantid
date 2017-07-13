@@ -291,8 +291,7 @@ void SCDPanelErrors::load(const std::string &fname) {
     loadAlg->setPropertyValue("Filename", fname);
     loadAlg->setPropertyValue("OutputWorkspace", "_SCDPanelErrors_fit_data_");
     loadAlg->execute();
-  }
-  catch (std::runtime_error &) {
+  } catch (std::runtime_error &) {
     throw std::runtime_error(
         "Unable to load Nexus file for SCDPanelErrors function.");
   }

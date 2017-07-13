@@ -8,6 +8,7 @@ Diffraction Changes
 Crystal Improvements
 --------------------
 
+- SCDCalibratePanels now uses sample displacement and optimized T0 for the calibration.  :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` 
 Engineering Diffraction
 -----------------------
 
