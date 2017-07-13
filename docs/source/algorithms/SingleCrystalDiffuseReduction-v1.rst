@@ -79,15 +79,15 @@ Usage
 .. code-block:: python
 
    SingleCrystalDiffuseReduction(Filename='CORELLI_29782',
-		                 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
-				 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
-				 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
-				 OutputWorkspace='output',
-				 SetGoniometer=True,
-				 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-				 BinningDim0='-10.05,10.05,201',
-				 BinningDim1='-10.05,10.05,201',
-				 BinningDim2='-0.1,0.1,1')
+                                 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
+                                 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
+                                 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
+                                 OutputWorkspace='output',
+                                 SetGoniometer=True,
+                                 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
+                                 BinningDim0='-10.05,10.05,201',
+                                 BinningDim1='-10.05,10.05,201',
+                                 BinningDim2='-0.1,0.1,1')
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_single.png
 
@@ -97,14 +97,14 @@ Usage
 
    SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:10',
                                  SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
-				 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
-				 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
-				 OutputWorkspace='output',
-				 SetGoniometer=True,
-				 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-				 BinningDim0='-10.05,10.05,201',
-				 BinningDim1='-10.05,10.05,201',
-				 BinningDim2='-0.1,0.1,1')
+                                 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
+                                 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
+                                 OutputWorkspace='output',
+                                 SetGoniometer=True,
+                                 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
+                                 BinningDim0='-10.05,10.05,201',
+                                 BinningDim1='-10.05,10.05,201',
+                                 BinningDim2='-0.1,0.1,1')
 
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple.png
@@ -115,15 +115,15 @@ Usage
 
    SingleCrystalDiffuseReduction(Filename='CORELLI_29782',
                                  SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
-				 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
-				 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
-				 OutputWorkspace='output',
-				 SetGoniometer=True,
-				 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-				 BinningDim0='-10.05,10.05,201',
-				 BinningDim1='-10.05,10.05,201',
-				 BinningDim2='-0.1,0.1,1',
-				 SymmetryOps="P 31 2 1")
+                                 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
+                                 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
+                                 OutputWorkspace='output',
+                                 SetGoniometer=True,
+                                 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
+                                 BinningDim0='-10.05,10.05,201',
+                                 BinningDim1='-10.05,10.05,201',
+                                 BinningDim2='-0.1,0.1,1',
+                                 SymmetryOps="P 31 2 1")
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_single_sym.png
 
@@ -133,15 +133,15 @@ Usage
 
    SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:10',
                                  SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
-				 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
-				 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
-				 OutputWorkspace='output',
-				 SetGoniometer=True,
-				 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-				 BinningDim0='-10.05,10.05,201',
-				 BinningDim1='-10.05,10.05,201',
-				 BinningDim2='-0.1,0.1,1',
-				 SymmetryOps="P 31 2 1")
+                                 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
+                                 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
+                                 OutputWorkspace='output',
+                                 SetGoniometer=True,
+                                 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
+                                 BinningDim0='-10.05,10.05,201',
+                                 BinningDim1='-10.05,10.05,201',
+                                 BinningDim2='-0.1,0.1,1',
+                                 SymmetryOps="P 31 2 1")
 
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym.png
@@ -152,17 +152,17 @@ Usage
 
    SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:10',
                                  Background='CORELLI_28124',
-				 BackgroundScale=0.95,
-				 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
-				 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
-				 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
-				 OutputWorkspace='output',
-				 SetGoniometer=True,
-				 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-				 BinningDim0='-10.05,10.05,201',
-				 BinningDim1='-10.05,10.05,201',
-				 BinningDim2='-0.1,0.1,1',
-				 SymmetryOps="P 31 2 1")
+                                 BackgroundScale=0.95,
+                                 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
+                                 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
+                                 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
+                                 OutputWorkspace='output',
+                                 SetGoniometer=True,
+                                 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
+                                 BinningDim0='-10.05,10.05,201',
+                                 BinningDim1='-10.05,10.05,201',
+                                 BinningDim2='-0.1,0.1,1',
+                                 SymmetryOps="P 31 2 1")
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg.png
 
@@ -172,17 +172,17 @@ Usage
 
    SingleCrystalDiffuseReduction(Filename=','.join('/SNS/CORELLI/IPTS-15526/shared/autoreduce/CORELLI_'+str(run)+'_elastic.nxs' for run in range(29782,29818,10)),
                                  Background='/SNS/CORELLI/IPTS-15796/shared/autoreduce/CORELLI_28124_elastic.nxs',
-				 BackgroundScale=0.95,
-				 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
-				 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
-				 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
-				 OutputWorkspace='output',
-				 SetGoniometer=True,
-				 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-				 BinningDim0='-10.05,10.05,201',
-				 BinningDim1='-10.05,10.05,201',
-				 BinningDim2='-0.1,0.1,1',
-				 SymmetryOps="P 31 2 1")
+                                 BackgroundScale=0.95,
+                                 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
+                                 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
+                                 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
+                                 OutputWorkspace='output',
+                                 SetGoniometer=True,
+                                 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
+                                 BinningDim0='-10.05,10.05,201',
+                                 BinningDim1='-10.05,10.05,201',
+                                 BinningDim2='-0.1,0.1,1',
+                                 SymmetryOps="P 31 2 1")
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg_elastic.png
 
@@ -192,20 +192,20 @@ Usage
 
    SingleCrystalDiffuseReduction(Filename='CORELLI_29782:29817:10',
                                  Background='CORELLI_28124',
-				 BackgroundScale=0.95,
-				 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
-				 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
-				 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
-				 OutputWorkspace='output',
-				 SetGoniometer=True,
-				 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-				 Uproj='1,1,0',
-				 Vproj='1,-1,0',
-				 Wproj='0,0,1',
-				 BinningDim0='-7.5375,7.5375,201',
-				 BinningDim1='-13.165625,13.165625,201',
-				 BinningDim2='-0.1,0.1,1',
-				 SymmetryOps="P 31 2 1")
+                                 BackgroundScale=0.95,
+                                 SolidAngle='/SNS/CORELLI/shared/Vanadium/2016B/SolidAngle20160720NoCC.nxs',
+                                 Flux='/SNS/CORELLI/shared/Vanadium/2016B/Spectrum20160720NoCC.nxs',
+                                 UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
+                                 OutputWorkspace='output',
+                                 SetGoniometer=True,
+                                 Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
+                                 Uproj='1,1,0',
+                                 Vproj='1,-1,0',
+                                 Wproj='0,0,1',
+                                 BinningDim0='-7.5375,7.5375,201',
+                                 BinningDim1='-13.165625,13.165625,201',
+                                 BinningDim2='-0.1,0.1,1',
+                                 SymmetryOps="P 31 2 1")
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg_HH0.png
 
