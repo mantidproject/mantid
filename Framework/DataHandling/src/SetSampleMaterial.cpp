@@ -128,12 +128,7 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   const double unitCellVolume = getProperty("UnitCellVolume");
   const double sampleMassDensity = getProperty("SampleMassDensity");
 
-  if (isEmpty(sampleNumberDensity) && isEmpty(zParameter) &&
-      isEmpty(sampleMassDensity)) {
-    result["SampleNumberDensity"] = "Either SampleNumberDensity, ZParameter "
-                                    "and UnitCellVolume, or SampleMassDensity "
-                                    "must be specified.";
-  } else if (!isEmpty(zParameter)) {
+  if (!isEmpty(zParameter)) {
     if (isEmpty(unitCellVolume)) {
       result["UnitCellVolume"] =
           "UnitCellVolume must be provided with ZParameter";

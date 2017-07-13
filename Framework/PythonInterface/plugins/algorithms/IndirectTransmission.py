@@ -114,7 +114,7 @@ class IndirectTransmission(PythonAlgorithm):
 
         logger.notice('Analyser : ' + analyser + reflection + ' with energy = ' + str(efixed))
 
-        SetSampleMaterial(InputWorkspace=workspace, ChemicalFormula=formula)
+        SetSampleMaterial(InputWorkspace=workspace, ChemicalFormula=formula, SampleNumberDensity=density)
 
         # Elastic wavelength
         wave = 1.8 * math.sqrt(25.2429 / efixed)

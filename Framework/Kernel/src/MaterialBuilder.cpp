@@ -267,7 +267,9 @@ double MaterialBuilder::getOrCalculateRho(
   } else if (m_formula && m_formula->size() == 1) {
     return m_formula->at(0).atom->number_density;
   } else {
-    return EMPTY_DBL();
+    throw std::runtime_error("The number density could be determined. Please "
+                             "provide the number density, ZParameter and unit "
+                             "cell volume or mass density.");
   }
 }
 

@@ -332,10 +332,10 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             mat = builder.setFormula(chemical_formula).setMassDensity(density).build()
             number_density = mat.numberDensity
         else:
+            set_material_alg.setProperty('SampleNumberDensity', density)
             number_density = density
         set_material_alg.setProperty('InputWorkspace', ws_name)
         set_material_alg.setProperty('ChemicalFormula', chemical_formula)
-        set_material_alg.setProperty('SampleNumberDensity', number_density)
         set_material_alg.execute()
         return number_density
 
