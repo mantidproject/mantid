@@ -482,14 +482,21 @@ void PDCalibration::exec() {
       fitDIFCtZeroDIFA(d_vec, tof_vec, difc, t0, difa);
 
       const auto rowNum = m_detidToRow[peaks.detid];
+      double chisq = 0.;
       auto converter =
           Kernel::Diffraction::getTofToDConversionFunc(difc, difa, t0);
       for (std::size_t i = 0; i < tof_vec_full.size(); ++i) {
         if (std::isnan(tof_vec_full[i]))
           continue;
         const double dspacing = converter(tof_vec_full[i]);
+        const double temp = m_peaksInDspacing[i] - dspacing;
+        chisq += (temp * temp);
         m_peakPositionTable->cell<double>(rowNum, i + 1) = dspacing;
       }
+      m_peakPositionTable->cell<double>(rowNum, m_peaksInDspacing.size() + 1) =
+          chisq;
+      m_peakPositionTable->cell<double>(rowNum, m_peaksInDspacing.size() + 2) =
+          chisq / static_cast<double>(d_vec.size() - 1);
 
       setCalibrationValues(peaks.detid, difc, difa, t0);
     }
@@ -928,6 +935,8 @@ void PDCalibration::createInformationWorkspaces() {
     namess << "@" << std::setprecision(5) << dSpacing;
     m_peakPositionTable->addColumn("double", namess.str());
   }
+  m_peakPositionTable->addColumn("double", "chisq");
+  m_peakPositionTable->addColumn("double", "normchisq");
 
   // convert the map of m_detidToRow to be a vector of detector ids
   std::vector<detid_t> detIds(m_detidToRow.size());
