@@ -106,6 +106,7 @@ public:
   QStringList getChosenGroups() const;
   QStringList getChosenPeriods() const;
 
+  void setTFAsymm(bool state);
   /// Clear list of selected groups
   void clearChosenGroups() const;
   void setAllGroups();

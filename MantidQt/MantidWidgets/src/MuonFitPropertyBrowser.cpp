@@ -282,6 +282,9 @@ void MuonFitPropertyBrowser::init() {
   // Update tooltips when function structure is (or might've been) changed in
   // any way
   connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
+  //disable TFAsymm mode by default
+  setTFAsymmMode(TFAsymmMode);
+
 }
 // Set up the execution of the muon fit menu
 void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
@@ -1637,6 +1640,10 @@ void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
 void MuonFitPropertyBrowser::setGroupNames(
     std::vector<std::string> groupNames) {
   m_groupsList = groupNames;
+}
+void MuonFitPropertyBrowser::setTFAsymm(bool state) {
+	m_boolManager->setValue(m_TFAsymmMode, state);
+
 }
 
 } // MantidQt
