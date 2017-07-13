@@ -494,9 +494,9 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
         if (info.dims.size() == 1) {
           name = file.getStrData();
         } else { // something special for 2-d array
-          const int64_t total_length =
-              std::accumulate(info.dims.begin(), info.dims.end(), 1,
-                              std::multiplies<int64_t>());
+          const int64_t total_length = std::accumulate(
+              info.dims.begin(), info.dims.end(), static_cast<int64_t>(1),
+              std::multiplies<int64_t>());
           boost::scoped_array<char> val_array(new char[total_length]);
           file.getData(val_array.get());
           file.closeData();
