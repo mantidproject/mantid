@@ -101,8 +101,7 @@ class FunctionWrapper:
   def untieAllParameters(self):
       """ Remove ties from all parameters.
       """
-      for i in range(0, self.fun.numParams()):
-          self.untie(self.getParameterName(i))
+      self.fun.freeAll()
           
   def constrain(self, expressions):
       """ Add constraints
@@ -234,11 +233,6 @@ class CompositeFunctionWrapper(FunctionWrapper):
        """
        return self.fun.__len__()
        
-    def __iter__ (self):
-       """ Implement iteration
-       """
-       return self
-       
     def tieAll (self, name):
        """ For each member function, tie the parameter of the given name 
            to the parameter of that name in the first member function.
@@ -255,8 +249,11 @@ class CompositeFunctionWrapper(FunctionWrapper):
            
            :param name: name of parameter
        """
-       for i in range(0, len(self)):
-          self[i].fix(name)
+       #for i in range(0, len(self)):
+       #   self[i].fix(name)
+       for f in self:
+         f.fix(name)
+
           
     def constrainAll (self, expressions):
        """ Constrain all parameters according local names in expressions.
