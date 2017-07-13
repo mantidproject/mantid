@@ -195,7 +195,7 @@ private:
   QtProperty *m_normalization;
   QStringList m_normalizationValue;
   QtProperty *m_keepNorm;
-
+  QtProperty *m_TFAsymmMode;
   QtBrowserItem *m_multiFitSettingsGroup;
   QtProperty *m_groupsToFit;
   QStringList m_groupsToFitOptions;

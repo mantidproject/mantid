@@ -236,7 +236,12 @@ void MuonFitPropertyBrowser::init() {
   m_boolManager->setValue(m_showParamErrors, showParamErrors);
   m_parameterManager->setErrorsEnabled(showParamErrors);
 
+  m_TFAsymmMode = m_boolManager->addProperty("TF Asymmetry Mode");
+  bool TFAsymmMode = settings.value("TF Asymmetry Mode", QVariant(false)).toBool();
+  m_boolManager->setValue(m_TFAsymmMode, TFAsymmMode);
+
   customSettingsGroup->addSubProperty(m_minimizer);
+  customSettingsGroup->addSubProperty(m_TFAsymmMode);
   customSettingsGroup->addSubProperty(m_plotDiff);
   customSettingsGroup->addSubProperty(m_rawData);
   customSettingsGroup->addSubProperty(m_showParamErrors);
@@ -468,6 +473,10 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_rawData) {
     const bool val = m_boolManager->value(prop);
     emit fitRawDataClicked(val);
+  }
+  if (prop == m_TFAsymmMode) {
+	  const bool val = m_boolManager->value(prop);
+	  setTFAsymmMode(val);
   }
   if (prop == m_keepNorm) {
     const bool val = m_boolManager->value(prop);

@@ -532,13 +532,13 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
       itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
   options.groupPairName = table->item(tableRow, 0)->text().toStdString();
   m_groupPairName = table->item(tableRow, 0)->text().toStdString();
-  if (plotType == Muon::PlotType::Asymmetry &&
+ /* if (plotType == Muon::PlotType::Asymmetry &&
       m_dataLoader.isContainedIn(options.groupPairName,
                                  options.grouping.groupNames)) {
     setTFAsymm(Muon::TFAsymmState::Enabled); // turn TFAsymm on
   } else {
     setTFAsymm(Muon::TFAsymmState::Disabled); // turn TFAsymm off
-  }
+  }*/
   return m_dataLoader.createAnalysisWorkspace(loadedWS, options);
 }
 
@@ -2174,8 +2174,8 @@ void MuonAnalysis::loadFittings() {
   const auto &multiFitState = m_optionTab->getMultiFitState();
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
   // Set TF Asymmetry mode on/off as appropriate
-  const auto &TFAsymmState = m_optionTab->getTFAsymmState();
-  setTFAsymm(TFAsymmState);
+ // const auto &TFAsymmState = m_optionTab->getTFAsymmState();
+  //setTFAsymm(TFAsymmState);
 }
 /**
 * Handle "groups" selected/deselected
@@ -2596,8 +2596,8 @@ void MuonAnalysis::connectAutoUpdate() {
           SLOT(updateCurrentPlotStyle()));
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
-  connect(m_optionTab, SIGNAL(TFAsymmStateChanged(int)), this,
-          SLOT(changedTFAsymmCheckbox(int)));
+ // connect(m_optionTab, SIGNAL(TFAsymmStateChanged(int)), this,
+  //        SLOT(changedTFAsymmCheckbox(int)));
 }
 
 /**

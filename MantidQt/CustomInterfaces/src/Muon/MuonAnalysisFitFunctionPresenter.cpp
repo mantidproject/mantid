@@ -259,7 +259,7 @@ void MuonAnalysisFitFunctionPresenter::setMultiFitState(
 */
 void MuonAnalysisFitFunctionPresenter::setTFAsymmState(
     Muon::TFAsymmState state) {
-  m_fitBrowser->setTFAsymmMode(state == Muon::TFAsymmState::Enabled);
+  //m_fitBrowser->setTFAsymmMode(state == Muon::TFAsymmState::Enabled);
   m_TFAsymmState = state;
 }
 /**
