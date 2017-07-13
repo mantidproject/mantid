@@ -474,15 +474,15 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     if (m_convertUnits) {
       g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);
+      findWavelengthMinMax(result);
     }
+    // Now the workspace is in wavelength, find the min/max wavelength
+    findWavelengthMinMax(result);
     if (m_normaliseMonitors) {
       g_log.debug("Normalising input workspace by monitors\n");
       result = directBeamCorrection(result);
       result = monitorCorrection(result);
     }
-    // Crop to wavelength limits
-    g_log.debug("Cropping output workspace\n");
-    result = cropWavelength(result);
     if (m_normaliseTransmission) {
       g_log.debug("Normalising input workspace by transmission run\n");
       result = transOrAlgCorrection(result, false);
@@ -491,11 +491,16 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
       g_log.debug("Summing in Q\n");
       result = sumInQ(result);
     }
+    // Crop to wavelength limits
+    g_log.debug("Cropping output workspace\n");
+    result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
   } else {
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
       result = makeDetectorWS(result, m_convertUnits);
     }
+    // Now the workspace is in wavelength, find the min/max wavelength
+    findWavelengthMinMax(result);
     if (m_normaliseMonitors) {
       g_log.debug("Normalising output workspace by monitors\n");
       result = directBeamCorrection(result);
@@ -503,7 +508,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     }
     // Crop to wavelength limits
     g_log.debug("Cropping output workspace\n");
-    result = cropWavelength(result);
+    result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
     if (m_normaliseTransmission) {
       g_log.debug("Normalising output workspace by transmission run\n");
       result = transOrAlgCorrection(result, true);
@@ -847,21 +852,54 @@ size_t ReflectometryReductionOne2::twoThetaRDetectorIdx(
   return detectors.front() + (detectors.back() - detectors.front()) / 2;
 }
 
+void ReflectometryReductionOne2::findWavelengthMinMax(MatrixWorkspace_sptr inputWS) {
+
+  // Get the max/min wavelength of region of interest
+  const double lambdaMin = getProperty("WavelengthMin");
+  const double lambdaMax = getProperty("WavelengthMax");
+
+  // If summing in lambda, the min/max wavelength is the same as the input
+  if (!summingInQ()) {
+    m_wavelengthMin = lambdaMin;
+    m_wavelengthMax = lambdaMax;
+    return;
+  }
+
+  // If summing in Q, we need to do a projection the input min/max for each
+  // detector group and take the overall min/max of the projected range
+  const size_t numGroups = detectorGroups().size();
+
+  // Find the projected min/max wavelength for all detector groups
+  double first = true;
+  for (size_t groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
+    // Get the detectors in this group
+    auto &detectors = detectorGroups()[groupIdx];
+    double projectedMin = 0;
+    double projectedMax = 0;
+    // Get the projected lambda for this detector group
+    findIvsLamRange(inputWS, detectors, lambdaMin, lambdaMax, projectedMin, projectedMax);
+    // Set the overall min/max
+    if (first) {
+      m_wavelengthMin = projectedMin;
+      m_wavelengthMax = projectedMax;
+      first = false;
+    } else {
+      m_wavelengthMin = std::min(m_wavelengthMax, projectedMin);
+      m_wavelengthMax = std::max(m_wavelengthMax, projectedMax);
+    }
+  }
+}
+
 /**
 * Find the range of the projected lambda range when summing in Q
 *
 * @param detectorWS [in] : the workspace containing the values to project
 * @param detectors [in] : the workspace indices of the detectors of interest
-* @param xMin [out] : the start of the projected lambda range
-* @param xMax [out] : the end of the projected lambda range
 */
 void ReflectometryReductionOne2::findIvsLamRange(
     MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
-    double &xMin, double &xMax) {
-
-  // Get the max/min wavelength of region of interest
-  const double lambdaMin = getProperty("WavelengthMin");
-  const double lambdaMax = getProperty("WavelengthMax");
+    const double lambdaMin, const double lambdaMax,
+    double &projectedMin, double &projectedMax) {
 
   // Get the new max and min X values of the projected (virtual) lambda range
   double dummy = 0.0;
@@ -875,7 +913,7 @@ void ReflectometryReductionOne2::findIvsLamRange(
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
                    static_cast<int>(xValues.size());
   getProjectedLambdaRange(lambdaMax, twoThetaMin, bLambda, bTwoThetaMin,
-                          detectors, dummy, xMax);
+                          detectors, dummy, projectedMax);
 
   const size_t spIdxMax = detectors.back();
   const double twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spIdxMax);
@@ -885,13 +923,13 @@ void ReflectometryReductionOne2::findIvsLamRange(
   bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
             static_cast<int>(xValues.size());
   getProjectedLambdaRange(lambdaMin, twoThetaMax, bLambda, bTwoThetaMax,
-                          detectors, xMin, dummy);
+                          detectors, projectedMin, dummy);
 
-  if (xMin > xMax) {
+  if (projectedMin > projectedMax) {
     throw std::runtime_error(
         "Error projecting lambda range to reference line at twoTheta=" +
         std::to_string(twoThetaR(detectors)) + "; projected range (" +
-        std::to_string(xMin) + "," + std::to_string(xMax) + ") is negative.");
+        std::to_string(projectedMin) + "," + std::to_string(projectedMax) + ") is negative.");
   }
 }
 
@@ -906,36 +944,24 @@ MatrixWorkspace_sptr
 ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
 
   // There is one output spectrum for each detector group
-  MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create(detectorWS, detectorGroups().size());
-
   const size_t numGroups = detectorGroups().size();
-  const size_t numHist = outputWS->getNumberHistograms();
-  if (numHist != numGroups) {
-    throw std::runtime_error(
-        "Error constructing IvsLam: number of output histograms " +
-        std::to_string(numHist) +
-        " does not equal the number of input detector groups " +
-        std::to_string(numGroups));
-  }
+  // Calculate the number of bins based on the min/max wavelength, using
+  // the same bin width as the input workspace
+  const double binWidth = (detectorWS->x(0).back() - detectorWS->x(0).front()) /
+    detectorWS->blocksize();
+  const int numBins = static_cast<int>(std::ceil((wavelengthMax() - wavelengthMin()) / binWidth));
+  // Construct the histogram with these X values. Y and E values are zero.
+  const BinEdges xValues(numBins, LinearGenerator(wavelengthMin(), binWidth));
+  // Create the output workspace
+  MatrixWorkspace_sptr outputWS =
+    WorkspaceFactory::Instance().create(detectorWS, numGroups, numBins, numBins - 1);
 
   // Loop through each detector group in the input
   for (size_t groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
     // Get the detectors in this group
     auto &detectors = detectorGroups()[groupIdx];
-
-    // Find the X values. These are the projected lambda values for this
-    // detector group
-    double xMin = 0.0;
-    double xMax = 0.0;
-    findIvsLamRange(detectorWS, detectors, xMin, xMax);
-    // Use the same number of bins as the input
-    const int numBins = static_cast<int>(detectorWS->blocksize());
-    const double binWidth = (xMax - xMin) / (numBins + 1);
-    // Construct the histogram with these X values. Y and E values are zero.
-    const BinEdges xValues(numBins + 1, LinearGenerator(xMin, binWidth));
+    // Set the x values for this spectrum
     outputWS->setBinEdges(groupIdx, xValues);
-
     // Set the detector ID from the twoThetaR detector.
     const size_t twoThetaRIdx = twoThetaRDetectorIdx(detectors);
     auto &outSpec = outputWS->getSpectrum(groupIdx);
@@ -1006,7 +1032,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
       }
 
       // Sum errors in quadrature
-      const int eSize = static_cast<int>(inputE.size());
+      const int eSize = static_cast<int>(outputE.size());
       for (int outIdx = 0; outIdx < eSize; ++outIdx) {
         outputE[outIdx] += projectedE[outIdx] * projectedE[outIdx];
       }

@@ -109,10 +109,12 @@ private:
                          const double lambdaMax, const size_t outSpecIdx,
                          API::MatrixWorkspace_sptr IvsLam,
                          std::vector<double> &outputE);
+  void findWavelengthMinMax(API::MatrixWorkspace_sptr inputWS);
   // Construct the output workspace
   void findIvsLamRange(API::MatrixWorkspace_sptr detectorWS,
-                       const std::vector<size_t> &detectors, double &xMin,
-                       double &xMax);
+                       const std::vector<size_t> &detectors,
+                       const double lambdaMin, const double lambdaMax,
+                       double &projectedMin, double &projectedMax);
   // Construct the output workspace
   Mantid::API::MatrixWorkspace_sptr
   constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS);
@@ -138,6 +140,8 @@ private:
   double theta0() { return m_theta0; }
   double twoThetaR(const std::vector<size_t> &detectors);
   size_t twoThetaRDetectorIdx(const std::vector<size_t> &detectors);
+  double wavelengthMin() { return m_wavelengthMin; };
+  double wavelengthMax() { return m_wavelengthMax; };
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
@@ -148,6 +152,11 @@ private:
   double m_theta0;              // horizon angle
   // groups of spectrum indices of the detectors of interest
   std::vector<std::vector<size_t>> m_detectorGroups;
+  // Store the min/max wavelength we're interested in. These will be the
+  // input Wavelength min/max if summing in lambda, or the projected
+  // versions of these if summing in Q
+  double m_wavelengthMin;
+  double m_wavelengthMax;
 };
 
 } // namespace Algorithms

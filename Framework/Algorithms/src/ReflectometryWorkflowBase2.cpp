@@ -342,14 +342,28 @@ ReflectometryWorkflowBase2::convertToWavelength(MatrixWorkspace_sptr inputWS) {
 
 /** Crops a workspace in wavelength to specified limits
 * @param inputWS :: the workspace to crop
+* @param useArgs :: if true, use the given args as the min and max;
+* otherwise, use the input properties to the algorithm
+* @param argMin :: the minimum wavelength to crop to if useArgs is true
+* @param argMax :: the maximum wavelength to crop to if useArgs is true
 * @return :: the cropped workspace
 */
 MatrixWorkspace_sptr
-ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS) {
+ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS,
+    const bool useArgs, const double argMin, const double argMax) {
 
-  // Crop out the lambda x-ranges now that the workspace is in wavelength.
-  double wavelengthMin = getProperty("WavelengthMin");
-  double wavelengthMax = getProperty("WavelengthMax");
+  double wavelengthMin = 0.0;
+  double wavelengthMax = 0.0;
+
+  if (useArgs) {
+    // Use the given args
+    wavelengthMin = argMin;
+    wavelengthMax = argMax;
+  } else {
+    // Use the input properties to the algorithm
+    wavelengthMin = getProperty("WavelengthMin");
+    wavelengthMax = getProperty("WavelengthMax");
+  }
 
   auto cropWorkspaceAlg = createChildAlgorithm("CropWorkspace");
   cropWorkspaceAlg->initialize();
