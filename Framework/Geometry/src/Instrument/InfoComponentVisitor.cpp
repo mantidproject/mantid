@@ -2,6 +2,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
@@ -30,53 +31,74 @@ makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
   return std::move(detIdToIndex);
 }
 
-void clearPositionAndRotationParameters(ParameterMap &pmap,
+void clearPositionAndRotationParameters(ParameterMap *pmap,
                                         const IComponent &comp) {
-  pmap.clearParametersByName(ParameterMap::pos(), &comp);
-  pmap.clearParametersByName(ParameterMap::posx(), &comp);
-  pmap.clearParametersByName(ParameterMap::posy(), &comp);
-  pmap.clearParametersByName(ParameterMap::posz(), &comp);
-  pmap.clearParametersByName(ParameterMap::rot(), &comp);
-  pmap.clearParametersByName(ParameterMap::rotx(), &comp);
-  pmap.clearParametersByName(ParameterMap::roty(), &comp);
-  pmap.clearParametersByName(ParameterMap::rotz(), &comp);
+  if (!pmap)
+    return;
+  pmap->clearParametersByName(ParameterMap::pos(), &comp);
+  pmap->clearParametersByName(ParameterMap::posx(), &comp);
+  pmap->clearParametersByName(ParameterMap::posy(), &comp);
+  pmap->clearParametersByName(ParameterMap::posz(), &comp);
+  pmap->clearParametersByName(ParameterMap::rot(), &comp);
+  pmap->clearParametersByName(ParameterMap::rotx(), &comp);
+  pmap->clearParametersByName(ParameterMap::roty(), &comp);
+  pmap->clearParametersByName(ParameterMap::rotz(), &comp);
 }
 }
 
+/**
+ * @brief InfoComponentVisitor::registerComponentAssembly
+ * @param instrument : Instrument being visited
+ * @return Component index of this component
+ */
 InfoComponentVisitor::InfoComponentVisitor(
-    std::vector<detid_t> orderedDetectorIds, ParameterMap &pmap,
-    ComponentID sourceId, ComponentID sampleId)
-    : m_componentIds(boost::make_shared<std::vector<ComponentID>>(
-          orderedDetectorIds.size(), nullptr)),
+    boost::shared_ptr<const Instrument> instrument)
+    : m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(std::move(
+          instrument->getDetectorIDs(false /*Do not skip monitors*/)))),
+      m_componentIds(boost::make_shared<std::vector<ComponentID>>(
+          m_orderedDetectorIds->size(), nullptr)),
       m_assemblySortedDetectorIndices(
           boost::make_shared<std::vector<size_t>>()),
       m_assemblySortedComponentIndices(
           boost::make_shared<std::vector<size_t>>()),
       m_parentComponentIndices(boost::make_shared<std::vector<size_t>>(
-          orderedDetectorIds.size(), 0)),
+          m_orderedDetectorIds->size(), 0)),
       m_detectorRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentIdToIndexMap(boost::make_shared<
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
-      m_detectorIdToIndexMap(makeDetIdToIndexMap(orderedDetectorIds)),
-      m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(
-          std::move(orderedDetectorIds))),
+      m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_rotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
-      m_pmap(pmap), m_sourceId(sourceId), m_sampleId(sampleId) {
+      m_instrument(std::move(instrument)), m_pmap(nullptr) {
+
+  if (m_instrument->isParametrized()) {
+    m_pmap = m_instrument->getParameterMap().get();
+  }
+
+  m_sourceId = m_instrument->getSource()
+                   ? m_instrument->getSource()->getComponentID()
+                   : nullptr;
+  m_sampleId = m_instrument->getSample()
+                   ? m_instrument->getSample()->getComponentID()
+                   : nullptr;
+
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors);  // Exact
   m_assemblySortedComponentIndices->reserve(nDetectors); // Approximation
-  // m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
+  m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
 }
 
-/**
- * @brief InfoComponentVisitor::registerComponentAssembly
- * @param assembly : ICompAssembly being visited
- * @return Component index of this component
- */
+void InfoComponentVisitor::walkInstrument() {
+  if (m_pmap && m_pmap->empty()) {
+    // Go through the base instrument for speed.
+    m_instrument->baseInstrument()->registerContents(*this);
+  } else
+    m_instrument->registerContents(*this);
+}
+
 size_t
 InfoComponentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
 

@@ -47,12 +47,9 @@ std::tuple<boost::shared_ptr<Beamline::ComponentInfo>,
            boost::shared_ptr<const std::vector<Geometry::ComponentID>>,
            boost::shared_ptr<const std::unordered_map<
                Mantid::Geometry::IComponent *, size_t>>>
-makeComponentInfo(const Instrument &parInstrument) {
-  InfoComponentVisitor visitor(parInstrument.getDetectorIDs(),
-                               *parInstrument.getParameterMap(),
-                               parInstrument.getSource()->getComponentID(),
-                               parInstrument.getSample()->getComponentID());
-  parInstrument.registerContents(visitor);
+makeComponentInfo(boost::shared_ptr<const Instrument> parInstrument) {
+  InfoComponentVisitor visitor(parInstrument);
+  parInstrument->registerContents(visitor);
   return std::make_tuple(
       boost::shared_ptr<Beamline::ComponentInfo>(visitor.componentInfo()),
       visitor.componentIds(), visitor.componentIdToIndexMap());
@@ -564,10 +561,10 @@ public:
     pmap->addV3D(bank1->getComponentID(), ParameterMap::pos(), bankOffset);
     pmap->addV3D(bank2->getComponentID(), ParameterMap::pos(), bankEpsilon);
     pmap->addQuat(bank3->getComponentID(), ParameterMap::rot(), bankRot);
-    Instrument instrument(baseInstrument, pmap);
 
     // Extract information from instrument to create DetectorInfo
-    auto componentTuple = makeComponentInfo(instrument);
+    auto componentTuple =
+        makeComponentInfo(boost::make_shared<Instrument>(baseInstrument, pmap));
     auto componentInfo = std::get<0>(componentTuple);
     auto componentIds = std::get<1>(componentTuple);
     auto componentIdToIndexMap = std::get<2>(componentTuple);
@@ -637,10 +634,10 @@ public:
     double scaley = 1.3;
     pmap->addDouble(bank1->getComponentID(), "scalex", scalex);
     pmap->addDouble(bank1->getComponentID(), "scaley", scaley);
-    Instrument instrument(baseInstrument, pmap);
 
     // Extract information from instrument to create DetectorInfo
-    auto componentTuple = makeComponentInfo(instrument);
+    auto componentTuple =
+        makeComponentInfo(boost::make_shared<Instrument>(baseInstrument, pmap));
     auto componentInfo = std::get<0>(componentTuple);
     auto componentIds = std::get<1>(componentTuple);
     auto componentIdToIndexMap = std::get<2>(componentTuple);
@@ -721,8 +718,8 @@ public:
   void test_set_InfoVisitor() {
     Instrument instrument;
     TS_ASSERT(!instrument.hasInfoVisitor());
-    Geometry::ParameterMap paramMap;
-    InfoComponentVisitor visitor(std::vector<detid_t>{}, paramMap);
+    InfoComponentVisitor visitor(boost::make_shared<Instrument>(
+        boost::make_shared<Instrument>(), boost::make_shared<ParameterMap>()));
     instrument.setInfoVisitor(visitor);
     TS_ASSERT(instrument.hasInfoVisitor());
   }
