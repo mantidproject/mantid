@@ -22,18 +22,18 @@ class NewMCAbsorption(DataProcessorAlgorithm):
     _beam_height = None
     _beam_width = None
 
-    # annulus variables
-    _inner_radius = None
-    _outer_radius = None
+    # flat plate variables
+    _width = None
+    _thickness = None
+    _center = None
+    _angle = None
 
     # cylinder variables
     _radius = None
 
-    # flat plate variables
-    _width = None
-    _thickness = None
-    _center=None
-    _angle = None
+    # annulus variables
+    _inner_radius = None
+    _outer_radius = None
 
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
@@ -98,37 +98,58 @@ class NewMCAbsorption(DataProcessorAlgorithm):
 
         # height is common to all options
 
-        self.declareProperty(name="Height", defaultValue=1.0,
+        self.declareProperty(name="Height", defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc="Height of the sample environment")
 
-        # Flat Plate options
+        # flat plate options
 
-        self.declareProperty(name='Width', defaultValue=1.0,
+        self.declareProperty(name='Width', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the FlatPlate sample environment')
         self.setPropertySettings("Width", flatPlateCondition)
 
-        self.declareProperty(name='Thickness', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
+        self.declareProperty(name='Thickness', defaultValue=0.0,
+                             validator=FloatBoundedValidator(),
                              doc='Thickness of the FlatPlate sample environment')
         self.setPropertySettings("Thickness", flatPlateCondition)
 
-        self.declareProperty(name='Center', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
+        self.declareProperty(name='Center', defaultValue=0.0,
                              doc='Center of the FlatPlate sample environment')
         self.setPropertySettings("Center", flatPlateCondition)
 
-        self.declareProperty(name='Angle', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
+        self.declareProperty(name='Angle', defaultValue=0.0,
                              doc='Angle of the FlatPlate sample environment')
         self.setPropertySettings("Angle", flatPlateCondition)
 
+        # cylinder options
 
+        self.declareProperty(name='Radius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Radius of the Cylinder sample environment')
+        self.setPropertySettings("Radius", cylinderCondition)
 
+        # annulus options
+
+        self.declareProperty(name='OuterRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Outer radius of the Annulus sample environment')
+        self.setPropertySettings("OuterRadius", annulusCondition)
+
+        self.declareProperty(name='InnerRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Inner radius of the Annulus sample environment')
+        self.setPropertySettings("InnerRadius", annulusCondition)
+
+        # -------------------------------------------------------------------------------------------
+
+        # Output options
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
+                             doc='The output corrected workspace.')
 
     def PyExec(self):
         pass
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(NewMCAbsorption)
