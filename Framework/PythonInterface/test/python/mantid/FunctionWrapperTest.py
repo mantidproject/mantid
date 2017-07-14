@@ -314,6 +314,31 @@ class FunctionWrapperTest(unittest.TestCase):
         c2_str = str(c[2])
         self.assertEqual(c2_str, g1_str)
         
+    def test_incremental_add(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)  
+        lb = FunctionWrapper("LinearBackground")
+        
+        c = CompositeFunctionWrapper( lb, g0)
+        c += g1
+        c_str = str(c)
+        self.assertEqual(c_str.count("("),0)
+        self.assertEqual(c_str.count("LinearBackground"),1)
+        self.assertEqual(c_str.count("Gaussian"),2)
+        
+        lb_str = str(lb)
+        c0_str = str(c[0])
+        self.assertEqual(c0_str, lb_str)
+           
+        g0_str = str(g0)
+        c1_str = str(c[1])
+        self.assertEqual(c1_str, g0_str)
+        
+        g1_str = str(g1)
+        c2_str = str(c[2])
+        self.assertEqual(c2_str, g1_str)
+
+        
     def test_productfunction_creation(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
