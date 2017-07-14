@@ -55,6 +55,7 @@ std::map<std::string, std::string> EvaluateFunction::validateInputs() {
     bool endOutOfRange = endX > workspaceEndX ||
       endX < workspaceStartX;
 
+    // Build error message from out of range checks.
     if (startOutOfRange && endOutOfRange) {
       errorMsg = "StartX and EndX are not within the workspace X range.";
     }
@@ -65,6 +66,7 @@ std::map<std::string, std::string> EvaluateFunction::validateInputs() {
       errorMsg = "EndX is not within the workspace X range.";
     }
 
+    // Check if there was an out of range error.
     if (!errorMsg.empty()) {
       errors["InputWorkspace"] = errorMsg;
     }
