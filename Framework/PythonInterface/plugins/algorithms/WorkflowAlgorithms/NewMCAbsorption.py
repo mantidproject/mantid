@@ -154,11 +154,22 @@ class NewMCAbsorption(DataProcessorAlgorithm):
 
         prog.report('Setting up sample environment')
 
+        # set the beam shape
         SetBeam(self._input_ws_name,
                 Geometry={'Shape': 'Slit',
                           'Width': self._beam_width,
                           'Height': self._beam_height})
 
+        # set the sample material
+        sample_material = dict()
+        sample_material['ChemicalFormula'] = self._chemical_formula
+
+        if self._density_type == 'Mass Density':
+            sample_material['SampleMassDensity'] = self._density
+        if self._density_type == 'Number Density':
+            sample_material['SampleNumberDensity'] = self._density
+
+        # set the sample geometry
         sample_geometry = dict()
         sample_geometry['Height'] = self._height
 
