@@ -11,6 +11,7 @@ class NewMCAbsorption(DataProcessorAlgorithm):
     _chemical_formula = None
     _density_type = None
     _density = None
+    _shape=None
     _height = None
 
     # general variables
@@ -149,6 +150,46 @@ class NewMCAbsorption(DataProcessorAlgorithm):
 
     def PyExec(self):
         pass
+
+
+    def _setup(self):
+
+        # basic options
+        self._input_ws_name = self.getPropertyValue("InputWorkspace")
+        self._chemical_formula = self.getPropertyValue("ChemicalFormula")
+        self._density_type=self.getPropertyValue("DensityType")
+        self._density=self.getProperty("Density").value
+        self._shape = self.getPropertyValue("Shape")
+
+        self._number_wavelengths = self.getProperty('NumberOfWavelengthPoints').value
+        self._events = self.getProperty('EventsPerPoint').value
+        self._interpolation = self.getProperty('Interpolation').value
+
+        # beam options
+        self._beam_height = self.getProperty('BeamHeight').value
+        self._beam_width = self.getProperty('BeamWidth').value
+
+        # shape options
+        self._height = self.getProperty("Height").value
+        
+        # flat plate
+        self._width = self.getProperty('Width').value
+        self._thickness = self.getProperty('Thickness').value
+        self._center = self.getProperty('Center').value
+        self._angle = self.getProperty('Angle').value
+
+        # cylinder
+        self._radius = self.getProperty('Radius').value
+        
+        # annulus
+        self._inner_radius = self.getProperty('InnerRadius').value
+        self._outer_radius = self.getProperty('OuterRadius').value
+
+        # output
+        self._output_ws = self.getPropertyValue('OutputWorkspace')
+
+
+        
 
 
 # Register algorithm with Mantid
