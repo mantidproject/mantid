@@ -88,7 +88,7 @@ public:
     tester.setWorkspaceRange(40, 50);
     tester.setWorkspaceIndex();
     tester.runAlgorithm();
-    tester.checkResult();
+    tester.checkResult(true);
   }
 
   void test_MD_histo() {
@@ -283,7 +283,13 @@ private:
       AnalysisDataService::Instance().clear();
     }
 
-    void checkResult() {
+    void checkResult(bool shouldFail=false) {
+
+      if (shouldFail) {
+        TS_ASSERT(!isExecuted);
+        return;
+      }
+
       TS_ASSERT(isExecuted);
       if (!isExecuted)
         return;
