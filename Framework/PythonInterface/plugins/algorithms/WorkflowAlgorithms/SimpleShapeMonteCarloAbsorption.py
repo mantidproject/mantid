@@ -48,15 +48,23 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='Input workspace')
 
-        self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='MaterialAlreadyDefined', defaultValue=False,
+                             doc="Select this option if the material has already been defined")
+
+        materialDefinedProp = EnabledWhenProperty('MaterialAlreadyDefined',PropertyCriterion.IsDefault)
+
+        self.declareProperty(name='ChemicalFormula', defaultValue='',
                              doc='Chemical formula of sample')
+        self.setPropertySettings('ChemicalFormula', materialDefinedProp)
 
         self.declareProperty(name='DensityType', defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density')
+        self.setPropertySettings('DensityType', materialDefinedProp)
 
         self.declareProperty(name='Density', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
+        self.setPropertySettings('Density', materialDefinedProp)
 
         # -------------------------------------------------------------------------------------------
 
