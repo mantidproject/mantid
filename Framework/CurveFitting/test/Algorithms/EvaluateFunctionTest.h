@@ -283,7 +283,7 @@ private:
       AnalysisDataService::Instance().clear();
     }
 
-    void checkResult(bool shouldFail=false) {
+    void checkResult(bool shouldFail = false) {
 
       if (shouldFail) {
         TS_ASSERT(!isExecuted);
