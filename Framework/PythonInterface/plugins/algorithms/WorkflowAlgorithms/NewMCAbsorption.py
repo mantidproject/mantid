@@ -149,7 +149,8 @@ class NewMCAbsorption(DataProcessorAlgorithm):
                              doc='The output corrected workspace.')
 
     def PyExec(self):
-        pass
+        self._output_ws = CreateSampleWorkspace()
+        self.setProperty("OutputWorkspace", self._output_ws)
 
 
     def _setup(self):
@@ -189,7 +190,35 @@ class NewMCAbsorption(DataProcessorAlgorithm):
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
 
-        
+    def validateInputs(self):
+
+        self._setup()
+        issues = dict()
+
+        if not self._height:
+            issues["Height"] = "Please enter a non-zero number for height"
+
+        if self._shape == "FlatPlate":
+            if not self._width:
+                issues["Width"] = "Please enter a non-zero number for width"
+            if not self._thickness:
+                issues["Thickness"] = "Please enter a non-zero number for thickness"
+
+        if self._shape == "Cylinder":
+            if not self._radius:
+                issues["Radius"] = "Please enter a non-zero number for radius"
+
+        if self._shape == "Annulus":
+            if not self._inner_radius:
+                issues["InnerRadius"] = "Please enter a non-zero number for inner radius"
+            if not self._outer_radius:
+                issues["OuterRadius"] = "Please enter a non-zero number for outer radius"
+
+            # Geometry validation: outer radius > inner radius
+            if not self._outer_radius > self._inner_radius:
+                issues['OuterRadius'] = 'Must be greater than InnerRadius'
+
+        return issues
 
 
 # Register algorithm with Mantid
