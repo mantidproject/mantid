@@ -49,9 +49,9 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
                              doc='Input workspace')
 
         self.declareProperty(name='MaterialAlreadyDefined', defaultValue=False,
-                             doc="Select this option if the material has already been defined")
+                             doc='Select this option if the material has already been defined')
 
-        materialDefinedProp = EnabledWhenProperty('MaterialAlreadyDefined',PropertyCriterion.IsDefault)
+        materialDefinedProp = EnabledWhenProperty('MaterialAlreadyDefined', PropertyCriterion.IsDefault)
 
         self.declareProperty(name='ChemicalFormula', defaultValue='',
                              doc='Chemical formula of sample')
@@ -167,15 +167,6 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
                           'Width': self._beam_width,
                           'Height': self._beam_height})
 
-        # set the sample material
-        sample_material = dict()
-        sample_material['ChemicalFormula'] = self._chemical_formula
-
-        if self._density_type == 'Mass Density':
-            sample_material['SampleMassDensity'] = self._density
-        if self._density_type == 'Number Density':
-            sample_material['SampleNumberDensity'] = self._density
-
         # set the sample geometry
         sample_geometry = dict()
         sample_geometry['Height'] = self._height
@@ -200,9 +191,24 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
             sample_geometry['Axis'] = 1
 
         # set sample
-        SetSample(InputWorkspace=self._input_ws_name,
-                  Geometry=sample_geometry,
-                  Material=sample_material)
+        if self._material_defined:
+            # set sample without sample material
+            SetSample(InputWorkspace=self._input_ws_name,
+                      Geometry=sample_geometry)
+
+        else:
+            # set the sample material
+            sample_material = dict()
+            sample_material['ChemicalFormula'] = self._chemical_formula
+
+            if self._density_type == 'Mass Density':
+                sample_material['SampleMassDensity'] = self._density
+            if self._density_type == 'Number Density':
+                sample_material['SampleNumberDensity'] = self._density
+
+            SetSample(InputWorkspace=self._input_ws_name,
+                      Geometry=sample_geometry,
+                      Material=sample_material)
 
         prog.report('Calculating sample corrections')
 
@@ -234,6 +240,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # basic options
         self._input_ws_name = self.getPropertyValue('InputWorkspace')
+        self._material_defined = self.getPropertyValue('MaterialAlreadyDefined')
         self._chemical_formula = self.getPropertyValue('ChemicalFormula')
         self._density_type = self.getPropertyValue('DensityType')
         self._density = self.getProperty('Density').value
