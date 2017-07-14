@@ -7,6 +7,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 
 #include <numeric>
 #include <algorithm>
@@ -71,7 +72,10 @@ InfoComponentVisitor::InfoComponentVisitor(
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
+      m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_rotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
+      m_detectorRotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
+      m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr) {
 
   if (m_instrument->isParametrized()) {
@@ -87,6 +91,8 @@ InfoComponentVisitor::InfoComponentVisitor(
 
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors);  // Exact
+  m_detectorPositions->reserve(nDetectors);// Exact
+  m_detectorRotations->reserve(nDetectors);// Exact
   m_assemblySortedComponentIndices->reserve(nDetectors); // Approximation
   m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
 }
@@ -213,6 +219,12 @@ size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
     (*m_componentIds)[detectorIndex] = detector.getComponentID();
     m_assemblySortedDetectorIndices->push_back(detectorIndex);
     m_assemblySortedComponentIndices->push_back(detectorIndex);
+    m_detectorPositions->emplace_back(Kernel::toVector3d(detector.getPos()));
+    m_detectorRotations->emplace_back(Kernel::toQuaterniond(detector.getRotation()));
+    if(m_instrument->isMonitorViaIndex(detectorIndex)){
+        m_monitorIndices->push_back(detectorIndex);
+    }
+    clearPositionAndRotationParameters(m_pmap, detector);
   }
   /* Note that positions and rotations for detectors are currently
   NOT stored! These go into DetectorInfo at present. push_back works for other
@@ -303,6 +315,12 @@ InfoComponentVisitor::componentInfo() const {
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_positions, m_rotations, m_sourceIndex,
       m_sampleIndex);
+}
+
+std::unique_ptr<Beamline::DetectorInfo>
+InfoComponentVisitor::detectorInfo() const {
+  return Kernel::make_unique<Mantid::Beamline::DetectorInfo>(
+      *m_detectorPositions, *m_detectorRotations, *m_monitorIndices);
 }
 
 boost::shared_ptr<std::vector<detid_t>>

@@ -198,61 +198,19 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
-void clearPositionAndRotationsParameters(ParameterMap &pmap,
-                                         const IDetector &det) {
-  pmap.clearParametersByName(ParameterMap::pos(), &det);
-  pmap.clearParametersByName(ParameterMap::posx(), &det);
-  pmap.clearParametersByName(ParameterMap::posy(), &det);
-  pmap.clearParametersByName(ParameterMap::posz(), &det);
-  pmap.clearParametersByName(ParameterMap::rot(), &det);
-  pmap.clearParametersByName(ParameterMap::rotx(), &det);
-  pmap.clearParametersByName(ParameterMap::roty(), &det);
-  pmap.clearParametersByName(ParameterMap::rotz(), &det);
-}
-
 std::unique_ptr<Beamline::DetectorInfo>
-makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
-  if (newInstr.hasDetectorInfo()) {
-    // We allocate a new DetectorInfo in case there is an Instrument holding a
-    // reference to our current DetectorInfo.
-    const auto &detInfo = newInstr.detectorInfo();
-    checkDetectorInfoSize(oldInstr, detInfo);
-    return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
-  } else {
-    // If there is no DetectorInfo in the instrument we create a default one.
-    const auto numDets = oldInstr.getNumberDetectors();
-    const auto pmap = oldInstr.getParameterMap();
-    // Currently monitors flags are stored in the detector cache of the base
-    // instrument. The copy being made here is strictly speaking duplicating
-    // that data, but with future refactoring this will no longer be the case.
-    // Note that monitors will not change after creating a workspace.
-    // Instrument::markAsMonitor works only for the base instrument and it is
-    // not possible to obtain a non-const reference to the base instrument in a
-    // workspace. Thus we do not need to worry about the two copies of monitor
-    // flags running out of sync.
-    std::vector<size_t> monitors;
-    for (size_t i = 0; i < numDets; ++i)
-      if (newInstr.isMonitorViaIndex(i))
-        monitors.push_back(i);
-    std::vector<Eigen::Vector3d> positions;
-    std::vector<Eigen::Quaterniond> rotations;
-    const auto &detIDs = newInstr.getDetectorIDs();
-    for (const auto &id : detIDs) {
-      const auto &det = newInstr.getDetector(id);
-      // In the case of RectangularDetectorPixel the position is also affected
-      // by the parameters scalex and scaly, but `getPos()` takes that into
-      // account (if no DetectorInfo is set in the ParameterMap).
-      positions.emplace_back(toVector3d(det->getPos()));
-      rotations.emplace_back(toQuaterniond(det->getRotation()));
-      clearPositionAndRotationsParameters(*pmap, *det);
-      // Note that scalex and scaley also affect positions when set for a
-      // RectangularDetector, but those are not parameters of the detector
-      // itself so they are not cleared.
-    }
+makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr, const InfoComponentVisitor& visitor) {
 
-    return Kernel::make_unique<Beamline::DetectorInfo>(
-        std::move(positions), std::move(rotations), monitors);
-  }
+    if (newInstr.hasDetectorInfo()) {
+      // We allocate a new DetectorInfo in case there is an Instrument holding a
+      // reference to our current DetectorInfo.
+      const auto &detInfo = newInstr.detectorInfo();
+      checkDetectorInfoSize(oldInstr, detInfo);
+      // Implicit copy constructor ensures that all other info. Masking, etc, is copied.
+      return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
+    } else {
+        return visitor.detectorInfo();
+    }
 }
 
 std::unique_ptr<Geometry::InfoComponentVisitor>
@@ -330,7 +288,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 
   // Make the DetectorInfo. ComponentInfo needs to be set
   // on the Parameter map before doing this.
-  m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
+  m_detectorInfo = makeDetectorInfo(*parInstrument, *instr, *m_infoVisitor);
   m_parmap->setDetectorInfo(m_detectorInfo);
 
   m_detectorInfoWrapper = Kernel::make_unique<Geometry::DetectorInfo>(

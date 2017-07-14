@@ -83,8 +83,8 @@ public:
     visitee->registerContents(visitor);
 
     TSM_ASSERT_EQUALS(
-        "Detectors positions are NOT purged by visitor at present",
-        pmap->size(), 1);
+        "Detectors positions are purged by visitor at present",
+        pmap->size(), 0);
   }
 
   void test_visitor_purges_parameter_map_safely() {

@@ -20,6 +20,7 @@ class ParameterMap;
 }
 namespace Beamline {
 class ComponentInfo;
+class DetectorInfo;
 }
 
 namespace Geometry {
@@ -90,11 +91,20 @@ private:
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
       m_detectorIdToIndexMap;
 
-  /// Positions
+  /// Positions for non-detectors
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_positions;
 
-  /// Rotations
+  /// Positions for detectors
+  boost::shared_ptr<std::vector<Eigen::Vector3d>> m_detectorPositions;
+
+  /// Rotations for non-detectors
   boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
+
+  /// Rotations for detectors
+  boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_detectorRotations;
+
+  /// Monitor indexes for detectors
+  boost::shared_ptr<std::vector<size_t>> m_monitorIndices;
 
   /// Instrument to build around
   boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
@@ -158,6 +168,8 @@ public:
   bool isEmpty() const;
 
   std::unique_ptr<Beamline::ComponentInfo> componentInfo() const;
+
+  std::unique_ptr<Beamline::DetectorInfo> detectorInfo() const;
 
   boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
 
