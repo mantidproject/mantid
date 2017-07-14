@@ -5,13 +5,10 @@
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
   AnnulusMonteCarloAbsorptionTest.py
-  ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   BayesStretchTest.py
-  CylinderMonteCarloAbsorptionTest.py
   DetectorFloodWeightingTest.py
   EnergyWindowScanTest.py
-  FlatPlateMonteCarloAbsorptionTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   ILLIN16BCalibrationTest.py
   IndirectAnnulusAbsorptionTest.py
