@@ -41,7 +41,7 @@ public:
   const std::string summary() const override;
 
 protected:
-	std::map<std::string, std::string> validateInputs() override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void initConcrete() override;

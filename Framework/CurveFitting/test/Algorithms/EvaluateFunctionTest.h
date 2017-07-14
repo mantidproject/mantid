@@ -83,12 +83,12 @@ public:
   }
 
   void test_1D_range_outside_workspace_fails() {
-	  Tester1D tester;
-	  tester.setRange(0, 30);
-	  tester.setWorkspaceRange(40, 50);
-	  tester.setWorkspaceIndex();
-	  tester.runAlgorithm();
-	  tester.checkResult();
+    Tester1D tester;
+    tester.setRange(0, 30);
+    tester.setWorkspaceRange(40, 50);
+    tester.setWorkspaceIndex();
+    tester.runAlgorithm();
+    tester.checkResult();
   }
 
   void test_MD_histo() {
@@ -244,15 +244,15 @@ private:
       EndX = 10;
     }
 
-	void setRange(double newStartX, double newEndX) {
-		StartX = newStartX;
-		EndX = newEndX;
-	}
+    void setRange(double newStartX, double newEndX) {
+      StartX = newStartX;
+      EndX = newEndX;
+    }
 
-	void setWorkspaceRange(double newXMin, double newXMax) {
-		xMin = newXMin;
-		xMax = newXMax;
-	}
+    void setWorkspaceRange(double newXMin, double newXMax) {
+      xMin = newXMin;
+      xMax = newXMax;
+    }
 
     void setWorkspaceIndex() { workspaceIndex = 1; }
 

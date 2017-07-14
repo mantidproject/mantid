@@ -38,8 +38,7 @@ void EvaluateFunction::initConcrete() {
 */
 std::map<std::string, std::string> EvaluateFunction::validateInputs() {
   API::Workspace_const_sptr ws = getProperty("InputWorkspace");
-  auto wsMatrix =
-         boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  auto wsMatrix = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   std::map<std::string, std::string> errors = Algorithm::validateInputs();
 
   if (wsMatrix != nullptr) {
@@ -50,19 +49,15 @@ std::map<std::string, std::string> EvaluateFunction::validateInputs() {
     const double workspaceStartX = xData[0];
     const double workspaceEndX = xData[xData.size() - 1];
     std::string errorMsg = "";
-    bool startOutOfRange = startX < workspaceStartX ||
-      startX > workspaceEndX;
-    bool endOutOfRange = endX > workspaceEndX ||
-      endX < workspaceStartX;
+    bool startOutOfRange = startX < workspaceStartX || startX > workspaceEndX;
+    bool endOutOfRange = endX > workspaceEndX || endX < workspaceStartX;
 
     // Build error message from out of range checks.
     if (startOutOfRange && endOutOfRange) {
       errorMsg = "StartX and EndX are not within the workspace X range.";
-    }
-    else if (startOutOfRange) {
+    } else if (startOutOfRange) {
       errorMsg = "StartX is not within the workspace X range.";
-    }
-    else if (endOutOfRange) {
+    } else if (endOutOfRange) {
       errorMsg = "EndX is not within the workspace X range.";
     }
 
