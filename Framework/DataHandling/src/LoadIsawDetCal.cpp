@@ -280,6 +280,28 @@ void LoadIsawDetCal::exec() {
       detScaling.scaleX = CM_TO_M * width / det->xsize();
       detScaling.scaleY = CM_TO_M * height / det->ysize();
       detScaling.componentName = detname;
+      // Scaling will need both scale factors if LoadIsawPeaks or LoadIsawDetCal
+      // has already
+      // applied a calibration
+      if (inputW) {
+        Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+        auto oldscalex = pmap.getDouble(detname, std::string("scalex"));
+        auto oldscaley = pmap.getDouble(detname, std::string("scaley"));
+        if (!oldscalex.empty())
+          detScaling.scaleX *= oldscalex[0];
+        if (!oldscaley.empty())
+          detScaling.scaleY *= oldscaley[0];
+      }
+      if (inputP) {
+        Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+        auto oldscalex = pmap.getDouble(detname, std::string("scalex"));
+        auto oldscaley = pmap.getDouble(detname, std::string("scaley"));
+        if (!oldscalex.empty())
+          detScaling.scaleX *= oldscalex[0];
+        if (!oldscaley.empty())
+          detScaling.scaleY *= oldscaley[0];
+      }
+
       rectangularDetectorScalings.push_back(detScaling);
 
       doRotation(rX, rY, detectorInfo, det);
