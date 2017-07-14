@@ -1,10 +1,10 @@
 #include "MantidQtRefDetectorViewer/RefMatrixWSImageView.h"
-#include "MantidQtSpectrumViewer/ArrayDataSource.h"
-#include "MantidQtRefDetectorViewer/RefIVConnections.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidQtRefDetectorViewer/RefIVConnections.h"
+#include "MantidQtSpectrumViewer/ArrayDataSource.h"
 
 using Mantid::API::MatrixWorkspace_sptr;
 using namespace MantidQt;
@@ -36,8 +36,8 @@ RefMatrixWSImageView::RefMatrixWSImageView(QString wpsName, int peakMin,
       wpsName.toStdString());
 
   const double totalYMin = 0.0;
-  const double totalYMax = 255.0; // 303
-  const size_t totalRows = 256;   // 304
+  const size_t totalYMax = 255; // 303
+  const size_t totalRows = 256; // 304
 
   const auto &xAxis = ws->x(0);
   const size_t sz = xAxis.size() - 1;
@@ -46,19 +46,18 @@ RefMatrixWSImageView::RefMatrixWSImageView(QString wpsName, int peakMin,
   double totalXMin = xAxis[0];
   double totalXMax = xAxis[sz];
 
-  std::vector<float> data(static_cast<size_t>(totalYMax) * sz);
+  std::vector<float> data(totalYMax * sz);
 
-  for (size_t px = 0; px < totalYMax; px++) {
+  for (size_t px = 0; px < totalYMax; ++px) {
     // Retrieve data now
     const auto &yAxis = ws->y(px);
     for (size_t tof = 0; tof < sz; tof++)
       data[px * sz + tof] = static_cast<float>(yAxis[tof]);
   }
 
-  SpectrumView::ArrayDataSource_sptr source =
-      SpectrumView::ArrayDataSource_sptr(new SpectrumView::ArrayDataSource(
-          totalXMin, totalXMax, totalYMin, totalYMax, totalRows, totalCols,
-          data));
+  auto source = boost::make_shared<SpectrumView::ArrayDataSource>(
+      totalXMin, totalXMax, totalYMin, static_cast<double>(totalYMax),
+      totalRows, totalCols, data);
 
   m_imageView = new RefImageView(source, peakMin, peakMax, backMin, backMax,
                                  tofMin, tofMax);
@@ -69,5 +68,5 @@ RefIVConnections *RefMatrixWSImageView::getConnections() {
 }
 
 RefMatrixWSImageView::~RefMatrixWSImageView() {
-  // nothing to do here, since image_view is deleted when the window closes
+  // nothing to do here, since m_imageView is deleted when the window closes
 }
