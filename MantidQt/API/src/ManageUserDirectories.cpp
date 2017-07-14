@@ -125,7 +125,8 @@ void ManageUserDirectories::saveProperties() {
 }
 
 /**
- * Appends a forward slash to the end of a path if there is no slash (forward or back) there already
+ * Appends a forward slash to the end of a path if there is no slash (forward or 
+ * back) there already, and strip whitespace from the path.
  *
  * @param path :: A reference to the path
 */
