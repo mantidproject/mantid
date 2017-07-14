@@ -338,6 +338,27 @@ class FunctionWrapperTest(unittest.TestCase):
         c2_str = str(c[2])
         self.assertEqual(c2_str, g1_str)
 
+    def test_del(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)  
+        lb = FunctionWrapper("LinearBackground")
+        
+        c = CompositeFunctionWrapper( lb, g0, g1)
+        del c[1]
+        
+        c_str = str(c)
+        self.assertEqual(c_str.count("("),0)
+        self.assertEqual(c_str.count("LinearBackground"),1)
+        self.assertEqual(c_str.count("Gaussian"),1)
+        self.assertEqual(c_str.count("Height=8.5"),1)
+        
+    def test_len(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)  
+        lb = FunctionWrapper("LinearBackground")
+        
+        c = CompositeFunctionWrapper( lb, g0, g1)
+        self.assertEqual( len(c), 3)
         
     def test_productfunction_creation(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
