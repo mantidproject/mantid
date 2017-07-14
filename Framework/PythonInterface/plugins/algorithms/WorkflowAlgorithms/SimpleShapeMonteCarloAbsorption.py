@@ -5,7 +5,7 @@ from mantid.api import *
 from mantid.kernel import *
 
 
-class NewMCAbsorption(DataProcessorAlgorithm):
+class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
     # basic sample variables
     _input_ws_name = None
     _chemical_formula = None
@@ -290,4 +290,4 @@ class NewMCAbsorption(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(NewMCAbsorption)
+AlgorithmFactory.subscribe(SimpleShapeMonteCarloAbsorption)
