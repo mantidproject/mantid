@@ -22,7 +22,7 @@ class FunctionWrapperTest(unittest.TestCase):
         
     def test_creation(self):
         testhelpers.assertRaisesNothing(self, FunctionWrapper, "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
-
+        
     def test_read_array_elements(self):
         g = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
         self.assertAlmostEqual(g["Height"],7.5,10)
@@ -39,6 +39,16 @@ class FunctionWrapperTest(unittest.TestCase):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
         testhelpers.assertRaisesNothing(self, CompositeFunctionWrapper, g0, g1)  
+        
+    def test_copy_on_compositefunction_creation(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
+        c = CompositeFunctionWrapper( g0, g1 )
+        g0["Height"] = 10.0
+        g1["Height"] = 10.0
+        # Check that the composite function remains unmodified.
+        self.assertAlmostEqual( c["f0.Height"],7.5)
+        self.assertAlmostEqual( c["f1.Height"],8.5)
 
     def test_compositefunction_read_array_elements(self):
         lb = FunctionWrapper("LinearBackground", A0=0.5, A1=1.5)
