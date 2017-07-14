@@ -249,8 +249,6 @@ class CompositeFunctionWrapper(FunctionWrapper):
            
            :param name: name of parameter
        """
-       #for i in range(0, len(self)):
-       #   self[i].fix(name)
        for f in self:
          f.fix(name)
 
