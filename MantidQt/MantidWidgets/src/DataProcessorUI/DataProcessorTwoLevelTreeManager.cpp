@@ -447,8 +447,7 @@ TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
 
   if (groups.empty() && rows.empty()) {
 
-    if (options["WarnProcessAll"].toBool() && prompt &&
-        m_presenter->newSelectionMade()) {
+    if (options["WarnProcessAll"].toBool() && prompt) {
       if (!m_presenter->askUserYesNo(
               "This will process all rows in the table. Continue?",
               "Process all rows?"))
@@ -588,8 +587,24 @@ void DataProcessorTwoLevelTreeManager::update(
                      QString::fromStdString(data[col]));
 }
 
+/** Gets the number of groups in the table
+* @return : Number of groups
+*/
+int DataProcessorTwoLevelTreeManager::rowCount() const {
+  return m_model->rowCount();
+}
+
+/** Gets the number of rows of a parent group in the table
+* @param : Index of the parent group
+* @return : Number of rows of a group
+*/
+int DataProcessorTwoLevelTreeManager::rowCount(int parent) const {
+  return m_model->rowCount(m_model->index(parent, 0));
+}
+
 /** Gets the 'process' status of a group
 * @param position : The row index
+* @return : 'process' status
 */
 bool DataProcessorTwoLevelTreeManager::isProcessed(int position) const {
   return m_model->isProcessed(position);
@@ -598,6 +613,7 @@ bool DataProcessorTwoLevelTreeManager::isProcessed(int position) const {
 /** Gets the 'process' status of a row
 * @param position : The row index
 * @param parent : The parent of the row
+* @return : 'process' status
 */
 bool DataProcessorTwoLevelTreeManager::isProcessed(int position,
                                                    int parent) const {

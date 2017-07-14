@@ -150,16 +150,6 @@ void QDataProcessorWidget::processClicked() {
   m_presenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
-/** This slot notifies the presenter that the selection has changed
-*/
-void QDataProcessorWidget::newSelection(const QItemSelection &selected,
-                                        const QItemSelection &deselected) {
-
-  Q_UNUSED(selected);
-  Q_UNUSED(deselected);
-  m_presenter->notify(DataProcessorPresenter::SelectionChangedFlag);
-}
-
 /**
 This slot loads a table workspace model and changes to a LoadedMainView
 presenter
@@ -193,8 +183,6 @@ void QDataProcessorWidget::showTable(
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
   ui.viewTable->setModel(m_model.get());
-  // Reset selection model connections
-  setSelectionModelConnections();
 }
 
 /**
@@ -234,11 +222,12 @@ user
 void QDataProcessorWidget::tableUpdated(const QModelIndex &topLeft,
                                         const QModelIndex &bottomRight) {
   Q_UNUSED(bottomRight);
+
   if (!m_presenter->isProcessing()) {
-    // Manual changes made to rows outside of processing will set the containing
-    // group and all constituent rows unprocessed
     auto pIndex = m_model->parent(topLeft);
     if (pIndex.isValid()) {
+      // Changes made to rows outside of processing will set the containing
+      // group and all constituent rows unprocessed
       m_model->setProcessed(false, pIndex.row());
       for (int i = 0; i < m_model->rowCount(pIndex); i++) {
         m_model->setProcessed(false, i, pIndex);
@@ -395,17 +384,6 @@ void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
   }
-}
-
-/**
-Set up the connections from the table selection model
-*/
-void QDataProcessorWidget::setSelectionModelConnections() {
-  // Emit a signal when selection has changed
-  connect(
-      ui.viewTable->selectionModel(),
-      SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-      this, SLOT(newSelection(const QItemSelection &, const QItemSelection &)));
 }
 
 /**

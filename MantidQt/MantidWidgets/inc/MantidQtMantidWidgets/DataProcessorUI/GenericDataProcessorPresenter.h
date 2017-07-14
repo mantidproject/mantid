@@ -40,8 +40,7 @@ class GenericDataProcessorPresenterThread;
 /** @class GenericDataProcessorPresenter
 
 GenericDataProcessorPresenter is a presenter class for the Data Processor
-Interface. It
-handles any interface functionality and model manipulation.
+Interface. It handles any interface functionality and model manipulation.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -134,12 +133,9 @@ public:
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(const GroupData &groupData,
                                             const std::string &prefix = "");
-  // Set the state of whether a new selection has been made
-  void setNewSelectionState(bool newSelectionMade);
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
-  bool newSelectionMade() const override;
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) const override;
   void giveUserWarning(const std::string &prompt,
@@ -216,13 +212,13 @@ private:
   bool m_promptUser;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
-  // stores whether a new table selection has been made before processing
-  bool m_newSelection;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Thread to run reducer worker in
   std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
-  // A boolean indicating whether or not data reduction has been paused
+  // A boolean that can be set to pause reduction of the current item
+  mutable bool m_pauseReduction;
+  // A boolean indicating whether data reduction is confirmed paused
   mutable bool m_reductionPaused;
   // Enumeration of the reduction actions that can be taken
   enum class ReductionFlag { ReduceRowFlag, ReduceGroupFlag, StopReduceFlag };

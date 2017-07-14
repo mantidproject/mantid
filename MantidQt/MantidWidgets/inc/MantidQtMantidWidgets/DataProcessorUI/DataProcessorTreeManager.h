@@ -90,6 +90,9 @@ public:
   /// Update row with new data
   virtual void update(int parent, int child,
                       const std::vector<std::string> &data) = 0;
+  /// Get the number of rows of a given parent
+  virtual int rowCount() const = 0;
+  virtual int rowCount(int parent) const = 0;
   /// Get the 'processed' status of a data item
   virtual bool isProcessed(int position) const = 0;
   virtual bool isProcessed(int position, int parent) const = 0;

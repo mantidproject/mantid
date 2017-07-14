@@ -91,7 +91,6 @@ public:
   virtual void setInstrumentList(const QString &instruments,
                                  const QString &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &groups) = 0;
-  virtual void setSelectionModelConnections() = 0;
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;

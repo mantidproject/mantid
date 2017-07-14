@@ -113,7 +113,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_preprocessMap(preprocessMap), m_processor(processor),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
       m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
-      m_tableDirty(false), m_newSelection(true), m_reductionPaused(true),
+      m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
       m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
   // Column Options must be added to the whitelist
@@ -244,9 +244,6 @@ void GenericDataProcessorPresenter::acceptViews(
 
   // The view should currently be in the paused state
   m_view->pause();
-
-  // Setup table selection model connections
-  m_view->setSelectionModelConnections();
 }
 
 /**
@@ -254,20 +251,11 @@ Process selected data
 */
 void GenericDataProcessorPresenter::process() {
 
-  // If selection unchanged, resume processing the old selection
-  if (!m_newSelection) {
-    resume();
-    return;
-  }
-
-  // Otherwise obtain new runs
   m_selectedData = m_manager->selectedData(m_promptUser);
 
-  // Don't continue if there are no items to process
+  // Don't continue if there are no items selected
   if (m_selectedData.size() == 0)
     return;
-
-  m_newSelection = false;
 
   // Set the global settings. If any have been changed, set all groups and rows
   // as unprocessed
@@ -296,26 +284,23 @@ void GenericDataProcessorPresenter::process() {
   for (const auto &item : m_selectedData) {
     // Loop over each group
 
-    // Un-highlight all groups and their rows if settings have changed
+    // Set all groups and their rows as unprocessed if settings have changed
     if (settingsChanged)
       m_manager->setProcessed(false, item.first);
 
-    // Ignore groups that have already been processed
-    if (m_manager->isProcessed(item.first))
-      continue;
-
-    // Increment progress by group + number of child rows
-    maxProgress += (int)(item.second.size()) + 1;
-    // Set group as unprocessed 
-    m_manager->setProcessed(false, item.first);
+    // Groups that are already processed or cannot be post-processed (only 1
+    // child row selected) do not count in progress
+    if (!m_manager->isProcessed(item.first) && item.second.size() > 1)
+      maxProgress++;
 
     RowQueue rowQueue;
 
     for (const auto &data : item.second) {
       // Add all row items to queue
       rowQueue.push(data);
-      // Constituent rows are set as unprocessed
-      m_manager->setProcessed(false, data.first, item.first);
+      // Rows that are already processed do not count in progress
+      if (!m_manager->isProcessed(data.first, item.first))
+        maxProgress++;
     }
     m_gqueue.emplace(item.first, rowQueue);
   }
@@ -343,6 +328,7 @@ void GenericDataProcessorPresenter::doNextAction() {
     nextGroup();
     break;
   case ReductionFlag::StopReduceFlag:
+    endReduction();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -354,9 +340,10 @@ Process a new row
 */
 void GenericDataProcessorPresenter::nextRow() {
 
-  if (m_reductionPaused) {
+  if (m_pauseReduction) {
     // Notify presenter that reduction is paused
     m_mainPresenter->confirmReductionPaused();
+    m_reductionPaused = true;
     return;
   }
 
@@ -372,20 +359,26 @@ void GenericDataProcessorPresenter::nextRow() {
     // Reduce next row
     m_rowItem = rqueue.front();
     rqueue.pop();
-    startAsyncRowReduceThread(&m_rowItem, groupIndex);
+    // Skip reducing rows that are already processed
+    if (!m_manager->isProcessed(m_rowItem.first, groupIndex)) {
+      startAsyncRowReduceThread(&m_rowItem, groupIndex);
+      return;
+    }
   } else {
     m_gqueue.pop();
     // Set next action flag
     m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
 
-    if (m_groupData.size() > 1) {
-      // Multiple rows in containing group, do post-processing on the group
+    // Skip post-processing groups that are already processed or only contain a
+    // single row
+    if (!m_manager->isProcessed(groupIndex) && m_groupData.size() > 1) {
       startAsyncGroupReduceThread(m_groupData, groupIndex);
-    } else {
-      // Single row in containing group, skip to next group
-      nextGroup();
+      return;
     }
   }
+
+  // Row / group skipped, perform next action
+  doNextAction();
 }
 
 /**
@@ -393,11 +386,15 @@ Process a new group
 */
 void GenericDataProcessorPresenter::nextGroup() {
 
-  if (m_reductionPaused) {
+  if (m_pauseReduction) {
     // Notify presenter that reduction is paused
     m_mainPresenter->confirmReductionPaused();
+    m_reductionPaused = true;
     return;
   }
+
+  // Clear group data from any previously processed groups
+  m_groupData.clear();
 
   if (!m_gqueue.empty()) {
     // Set next action flag
@@ -406,7 +403,11 @@ void GenericDataProcessorPresenter::nextGroup() {
     auto &rqueue = m_gqueue.front().second;
     m_rowItem = rqueue.front();
     rqueue.pop();
-    startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
+    // Skip reducing rows that are already processed
+    if (!m_manager->isProcessed(m_rowItem.first, m_gqueue.front().first))
+      startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
+    else
+      doNextAction();
   } else {
     // If "Output Notebook" checkbox is checked then create an ipython notebook
     if (m_view->getEnableNotebook())
@@ -445,8 +446,8 @@ End reduction
 void GenericDataProcessorPresenter::endReduction() {
 
   pause();
+  m_reductionPaused = true;
   m_mainPresenter->confirmReductionPaused();
-  m_newSelection = true; // Allow same selection to be processed again
 }
 
 /**
@@ -730,16 +731,6 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     outputNames.push_back(getReducedWorkspaceName(data.second));
   }
   return prefix + boost::join(outputNames, "_");
-}
-
-/**
-Sets the state of whether a new table selection has been made
-@param newSelectionMade : Boolean on setting new table selection state
-*/
-void GenericDataProcessorPresenter::setNewSelectionState(
-    bool newSelectionMade) {
-
-  m_newSelection = newSelectionMade;
 }
 
 /** Loads a run found from disk or AnalysisDataService
@@ -1111,9 +1102,6 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::PauseFlag:
     pause();
-    break;
-  case DataProcessorPresenter::SelectionChangedFlag:
-    m_newSelection = true;
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -1536,7 +1524,7 @@ void GenericDataProcessorPresenter::pause() {
   m_view->pause();
   m_mainPresenter->pause();
 
-  m_reductionPaused = true;
+  m_pauseReduction = true;
 }
 
 /** Resumes reduction if currently paused
@@ -1546,6 +1534,7 @@ void GenericDataProcessorPresenter::resume() {
   m_view->resume();
   m_mainPresenter->resume();
 
+  m_pauseReduction = false;
   m_reductionPaused = false;
   m_mainPresenter->confirmReductionResumed();
 
@@ -1625,13 +1614,6 @@ ParentItems GenericDataProcessorPresenter::selectedParents() const {
  */
 ChildItems GenericDataProcessorPresenter::selectedChildren() const {
   return m_view->getSelectedChildren();
-}
-
-/** Checks if the selected runs have changed
-* @return :: selection changed bool
-*/
-bool GenericDataProcessorPresenter::newSelectionMade() const {
-  return m_newSelection;
 }
 
 /** Ask user for Yes/No

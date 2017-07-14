@@ -85,9 +85,12 @@ public:
   /// Update row with new data
   void update(int parent, int child,
               const std::vector<std::string> &data) override;
+  /// Get the number of rows of a given parent
+  int rowCount() const override;
+  int rowCount(int parent) const override;
   /// Get the 'processed' status of a data item
-  virtual bool isProcessed(int position) const override;
-  virtual bool isProcessed(int position, int parent) const override;
+  bool isProcessed(int position) const override;
+  bool isProcessed(int position, int parent) const override;
   /// Set the 'process' status of a data item
   void setProcessed(bool processed, int position) override;
   void setProcessed(bool processed, int position, int parent) override;
