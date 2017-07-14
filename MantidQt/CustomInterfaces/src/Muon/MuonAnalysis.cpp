@@ -2555,7 +2555,6 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 		m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
 		m_uiForm.fitBrowser->setAllPeriods();
 	}
-	const int plotType = m_uiForm.frontPlotFuncs->currentIndex();
 	if(parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry && isItGroup ){
 		m_uiForm.fitBrowser->setTFAsymm(true);
 	}

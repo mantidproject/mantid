@@ -86,7 +86,6 @@ public:
   }
   /// Set multiple fitting mode on or off
   void setMultiFittingMode(bool enabled) override;
-  void setTFAsymmMode(bool enabled) override;
 
   /// After fit checks done, continue
   void continueAfterChecks(bool sequential) override;
@@ -183,6 +182,7 @@ private:
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
 
+  void setTFAsymmMode(bool state);
   void clearGroupCheckboxes();
   void addGroupCheckbox(const QString &name);
   void genGroupWindow();
