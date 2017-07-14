@@ -153,17 +153,17 @@ public:
   }
 
   void testMismatchedEventWorkspace() {
-	  auto ws1 = setupMismatchedWorkspace(0, 2, "100,200,700");
-	  auto ws2 = setupMismatchedWorkspace(3, 5, "100,200,1000");
+    auto ws1 = setupMismatchedWorkspace(0, 2, "100,200,700");
+    auto ws2 = setupMismatchedWorkspace(3, 5, "100,200,1000");
 
-	  ConjoinWorkspaces conj;
-	  conj.initialize();
-	  conj.setRethrows(true);
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    conj.setRethrows(true);
 
-	  conj.setProperty("InputWorkspace1", ws1);
-	  conj.setProperty("InputWorkspace2", ws2);
-	  TS_ASSERT_THROWS(conj.execute(), std::invalid_argument);
-	  TS_ASSERT(!conj.isExecuted());
+    conj.setProperty("InputWorkspace1", ws1);
+    conj.setProperty("InputWorkspace2", ws2);
+    TS_ASSERT_THROWS(conj.execute(), std::invalid_argument);
+    TS_ASSERT(!conj.isExecuted());
   }
 
   void testDoCheckForOverlap() {
@@ -260,35 +260,35 @@ private:
   const std::string ws1Name;
   const std::string ws2Name;
 
-  MatrixWorkspace_sptr setupMismatchedWorkspace(int startIndex, int endIndex, const std::string& rebinParams) const {
-	  MatrixWorkspace_sptr ews =
-		  WorkspaceCreationHelper::createEventWorkspace(10, 10);
+  MatrixWorkspace_sptr
+  setupMismatchedWorkspace(int startIndex, int endIndex,
+                           const std::string &rebinParams) const {
+    MatrixWorkspace_sptr ews =
+        WorkspaceCreationHelper::createEventWorkspace(10, 10);
 
-	  // Crop ews to have first 3 spectra, ews2 to have second 3
-	  CropWorkspace crop;
-	  crop.setChild(true);
-	  crop.initialize();
-	  crop.setProperty("InputWorkspace", ews);
-	  crop.setProperty("StartWorkspaceIndex", startIndex);
-	  crop.setProperty("EndWorkspaceIndex", endIndex);
-	  crop.setProperty("OutputWorkspace", "out");
-	  crop.execute();
+    // Crop ews to have first 3 spectra, ews2 to have second 3
+    CropWorkspace crop;
+    crop.setChild(true);
+    crop.initialize();
+    crop.setProperty("InputWorkspace", ews);
+    crop.setProperty("StartWorkspaceIndex", startIndex);
+    crop.setProperty("EndWorkspaceIndex", endIndex);
+    crop.setProperty("OutputWorkspace", "out");
+    crop.execute();
 
-	  MatrixWorkspace_sptr cropped = crop.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr cropped = crop.getProperty("OutputWorkspace");
 
-	  Rebin rebin;
-	  rebin.setChild(true);
-	  rebin.initialize();
-	  rebin.setProperty("InputWorkspace", cropped);
-	  rebin.setProperty("Params", rebinParams);
-	  rebin.setProperty("OutputWorkspace", "out");
-	  rebin.execute();
+    Rebin rebin;
+    rebin.setChild(true);
+    rebin.initialize();
+    rebin.setProperty("InputWorkspace", cropped);
+    rebin.setProperty("Params", rebinParams);
+    rebin.setProperty("OutputWorkspace", "out");
+    rebin.execute();
 
-	  MatrixWorkspace_sptr out = rebin.getProperty("OutputWorkspace");
-	  return out;
-
+    MatrixWorkspace_sptr out = rebin.getProperty("OutputWorkspace");
+    return out;
   }
-
 };
 
 #endif /*CONJOINWORKSPACESTEST_H_*/

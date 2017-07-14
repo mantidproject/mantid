@@ -74,22 +74,22 @@ void ConjoinWorkspaces::exec() {
     // Set the result workspace to the first input
     setProperty("InputWorkspace1", output);
   } else {
-	  // Check that the input workspaces meet the requirements for this algorithm
-	  this->validateInputs(*ws1, *ws2);
+    // Check that the input workspaces meet the requirements for this algorithm
+    this->validateInputs(*ws1, *ws2);
 
-	  if (this->getProperty("CheckOverlapping")) {
-		  this->checkForOverlap(*ws1, *ws2, true);
-		  m_overlapChecked = true;
-	  }
+    if (this->getProperty("CheckOverlapping")) {
+      this->checkForOverlap(*ws1, *ws2, true);
+      m_overlapChecked = true;
+    }
 
-	  MatrixWorkspace_sptr output = execWS2D(*ws1, *ws2);
-	  // Copy the history from the original workspace
-	  output->history().addHistory(ws1->getHistory());
+    MatrixWorkspace_sptr output = execWS2D(*ws1, *ws2);
+    // Copy the history from the original workspace
+    output->history().addHistory(ws1->getHistory());
 
-	  // Delete the second input workspace from the ADS
-	  AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
-	  // Set the result workspace to the first input
-	  setProperty("InputWorkspace1", output);
+    // Delete the second input workspace from the ADS
+    AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
+    // Set the result workspace to the first input
+    setProperty("InputWorkspace1", output);
   }
 }
 
