@@ -94,15 +94,15 @@ void ManageUserDirectories::saveProperties() {
   QStringList userDirs;
 
   for (int i = 0; i < m_uiForm.lwDataSearchDirs->count(); i++) {
-	  QString dir = m_uiForm.lwDataSearchDirs->item(i)->text();
-	  appendSlashIfNone(dir);
-	  dataDirs.append(dir);
+    QString dir = m_uiForm.lwDataSearchDirs->item(i)->text();
+    appendSlashIfNone(dir);
+    dataDirs.append(dir);
   }
 
   for (int i = 0; i < m_uiForm.lwUserSearchDirs->count(); i++) {
-	  QString dir = m_uiForm.lwUserSearchDirs->item(i)->text();
-	  appendSlashIfNone(dir);
-      userDirs.append(dir);
+    QString dir = m_uiForm.lwUserSearchDirs->item(i)->text();
+    appendSlashIfNone(dir);
+    userDirs.append(dir);
   }
 
   newDataDirs = dataDirs.join(";");
@@ -125,19 +125,18 @@ void ManageUserDirectories::saveProperties() {
 }
 
 /**
- * Appends a forward slash to the end of a path if there is no slash (forward or 
+ * Appends a forward slash to the end of a path if there is no slash (forward or
  * back) there already, and strip whitespace from the path.
  *
  * @param path :: A reference to the path
 */
 void ManageUserDirectories::appendSlashIfNone(QString &path) const {
-	path = path.trimmed();
-	if (path.endsWith("/") || path.endsWith("\\") || path.isEmpty()) {
-		return;
-	}
-	else {
-		path.append("/");
-	}
+  path = path.trimmed();
+  if (path.endsWith("/") || path.endsWith("\\") || path.isEmpty()) {
+    return;
+  } else {
+    path.append("/");
+  }
 }
 
 QListWidget *ManageUserDirectories::listWidget() {
