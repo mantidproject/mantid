@@ -45,7 +45,7 @@ class FunctionWrapperTest(unittest.TestCase):
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
         c = CompositeFunctionWrapper( g0, g1 )
         g0["Height"] = 10.0
-        g1["Height"] = 10.0
+        g1["Height"] = 11.0
         # Check that the composite function remains unmodified.
         self.assertAlmostEqual( c["f0.Height"],7.5)
         self.assertAlmostEqual( c["f1.Height"],8.5)
