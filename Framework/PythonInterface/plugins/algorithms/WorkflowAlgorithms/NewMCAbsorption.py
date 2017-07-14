@@ -86,7 +86,6 @@ class NewMCAbsorption(DataProcessorAlgorithm):
 
         # -------------------------------------------------------------------------------------------
 
-
         # set up shape options
 
         self.declareProperty(name='Shape', defaultValue='FlatPlate',
@@ -150,7 +149,7 @@ class NewMCAbsorption(DataProcessorAlgorithm):
 
     def PyExec(self):
         # setup progress reporting
-        prog = Progress(self, 0.0, 1.0, 2)
+        prog = Progress(self, 0.0, 1.0, 3)
 
         prog.report('Setting up sample environment')
 
@@ -185,14 +184,43 @@ class NewMCAbsorption(DataProcessorAlgorithm):
             sample_geometry['Radius'] = self._radius
             sample_geometry['Center'] = [0.0, 0.0, 0.0]
 
-        if self.shape == 'Annulus':
+        if self._shape == 'Annulus':
             sample_geometry['Shape'] = 'HollowCylinder'
             sample_geometry['InnerRadius'] = self._inner_radius
             sample_geometry['OuterRadius'] = self._outer_radius
             sample_geometry['Center'] = [0.0, 0.0, 0.0]
             sample_geometry['Axis'] = 1
 
+        # set sample
+        SetSample(InputWorkspace=self._input_ws_name,
+                  Geometry=sample_geometry,
+                  Material=sample_material)
+
         prog.report('Calculating sample corrections')
+
+        MonteCarloAbsorption(InputWorkspace=self._input_ws_name,
+                             OutputWorkspace=self._output_ws,
+                             EventsPerPoint=self._events,
+                             NumberOfWavelengthPoints=self._number_wavelengths,
+                             Interpolation=self._interpolation)
+
+        prog.report('Recording Sample Logs')
+
+        log_names = ['beam_height', 'beam_width']
+        log_values = [self._beam_height, self._beam_width]
+
+        # add sample geometry to sample logs
+        for key, value in sample_geometry.items():
+            log_names.append('sample_' + key.lower())
+            log_values.append(value)
+
+        add_sample_log_alg = self.createChildAlgorithm('AddSampleLogMultiple', enableLogging=False)
+        add_sample_log_alg.setProperty('Workspace', self._output_ws)
+        add_sample_log_alg.setProperty('LogNames', log_names)
+        add_sample_log_alg.setProperty('LogValues', log_values)
+        add_sample_log_alg.execute()
+
+        self.setProperty('OutputWorkspace', self._output_ws)
 
     def _setup(self):
 
