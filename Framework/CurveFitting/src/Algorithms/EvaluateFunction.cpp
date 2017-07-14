@@ -1,5 +1,6 @@
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -30,6 +31,46 @@ void EvaluateFunction::initConcrete() {
   declareProperty(make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
+}
+
+/** Cross property validation
+* @return A map containing property as keys and errors as values.
+*/
+std::map<std::string, std::string> EvaluateFunction::validateInputs() {
+  API::Workspace_const_sptr ws = getProperty("InputWorkspace");
+  auto wsMatrix =
+         boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  std::map<std::string, std::string> errors = Algorithm::validateInputs();
+
+  if (wsMatrix != nullptr) {
+    const double startX = getProperty("StartX");
+    const double endX = getProperty("EndX");
+    auto &xData = wsMatrix->getSpectrum(0).x();
+
+    const double workspaceStartX = xData[0];
+    const double workspaceEndX = xData[xData.size() - 1];
+    std::string errorMsg = "";
+    bool startOutOfRange = startX < workspaceStartX ||
+      startX > workspaceEndX;
+    bool endOutOfRange = endX > workspaceEndX ||
+      endX < workspaceStartX;
+
+    if (startOutOfRange && endOutOfRange) {
+      errorMsg = "StartX and EndX are not within the workspace X range.";
+    }
+    else if (startOutOfRange) {
+      errorMsg = "StartX is not within the workspace X range.";
+    }
+    else if (endOutOfRange) {
+      errorMsg = "EndX is not within the workspace X range.";
+    }
+
+    if (!errorMsg.empty()) {
+      errors["InputWorkspace"] = errorMsg;
+    }
+  }
+
+  return errors;
 }
 
 //----------------------------------------------------------------------------------------------
