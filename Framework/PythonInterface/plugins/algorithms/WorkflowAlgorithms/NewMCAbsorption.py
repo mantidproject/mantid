@@ -11,7 +11,7 @@ class NewMCAbsorption(DataProcessorAlgorithm):
     _chemical_formula = None
     _density_type = None
     _density = None
-    _shape=None
+    _shape = None
     _height = None
 
     # general variables
@@ -37,19 +37,19 @@ class NewMCAbsorption(DataProcessorAlgorithm):
     _outer_radius = None
 
     def category(self):
-        return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
+        return 'Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS'
 
     def summary(self):
-        return "Calculates absorption corrections for a given sample shape."
+        return 'Calculates absorption corrections for a given sample shape.'
 
     def PyInit(self):
         # basic sample options
 
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", '', direction=Direction.Input),
-                             doc="Input workspace")
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
+                             doc='Input workspace')
 
-        self.declareProperty(name="ChemicalFormula", defaultValue='', validator=StringMandatoryValidator(),
-                             doc="Chemical formula of sample")
+        self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
+                             doc='Chemical formula of sample')
 
         self.declareProperty(name='DensityType', defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
@@ -89,58 +89,58 @@ class NewMCAbsorption(DataProcessorAlgorithm):
 
         # set up shape options
 
-        self.declareProperty(name="Shape", defaultValue="FlatPlate",
-                             validator=StringListValidator(["FlatPlate", "Cylinder", "Annulus"]),
-                             doc="Geometry of sample environment. Options are: FlatPlate, Cylinder, Annulus")
+        self.declareProperty(name='Shape', defaultValue='FlatPlate',
+                             validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
+                             doc='Geometry of sample environment. Options are: FlatPlate, Cylinder, Annulus')
 
-        flatPlateCondition = VisibleWhenProperty("Shape", PropertyCriterion.IsEqualTo, "FlatPlate")
-        cylinderCondition = VisibleWhenProperty("Shape", PropertyCriterion.IsEqualTo, "Cylinder")
-        annulusCondition = VisibleWhenProperty("Shape", PropertyCriterion.IsEqualTo, "Annulus")
+        flatPlateCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
+        cylinderCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
+        annulusCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
 
         # height is common to all options
 
-        self.declareProperty(name="Height", defaultValue=0.0,
+        self.declareProperty(name='Height', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc="Height of the sample environment")
+                             doc='Height of the sample environment')
 
         # flat plate options
 
         self.declareProperty(name='Width', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the FlatPlate sample environment')
-        self.setPropertySettings("Width", flatPlateCondition)
+        self.setPropertySettings('Width', flatPlateCondition)
 
         self.declareProperty(name='Thickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(),
                              doc='Thickness of the FlatPlate sample environment')
-        self.setPropertySettings("Thickness", flatPlateCondition)
+        self.setPropertySettings('Thickness', flatPlateCondition)
 
         self.declareProperty(name='Center', defaultValue=0.0,
                              doc='Center of the FlatPlate sample environment')
-        self.setPropertySettings("Center", flatPlateCondition)
+        self.setPropertySettings('Center', flatPlateCondition)
 
         self.declareProperty(name='Angle', defaultValue=0.0,
                              doc='Angle of the FlatPlate sample environment')
-        self.setPropertySettings("Angle", flatPlateCondition)
+        self.setPropertySettings('Angle', flatPlateCondition)
 
         # cylinder options
 
         self.declareProperty(name='Radius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Radius of the Cylinder sample environment')
-        self.setPropertySettings("Radius", cylinderCondition)
+        self.setPropertySettings('Radius', cylinderCondition)
 
         # annulus options
 
         self.declareProperty(name='OuterRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the Annulus sample environment')
-        self.setPropertySettings("OuterRadius", annulusCondition)
+        self.setPropertySettings('OuterRadius', annulusCondition)
 
         self.declareProperty(name='InnerRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Inner radius of the Annulus sample environment')
-        self.setPropertySettings("InnerRadius", annulusCondition)
+        self.setPropertySettings('InnerRadius', annulusCondition)
 
         # -------------------------------------------------------------------------------------------
 
@@ -149,18 +149,48 @@ class NewMCAbsorption(DataProcessorAlgorithm):
                              doc='The output corrected workspace.')
 
     def PyExec(self):
-        self._output_ws = CreateSampleWorkspace()
-        self.setProperty("OutputWorkspace", self._output_ws)
+        # setup progress reporting
+        prog = Progress(self, 0.0, 1.0, 2)
 
+        prog.report('Setting up sample environment')
+
+        SetBeam(self._input_ws_name,
+                Geometry={'Shape': 'Slit',
+                          'Width': self._beam_width,
+                          'Height': self._beam_height})
+
+        sample_geometry = dict()
+        sample_geometry['Height'] = self._height
+
+        if self._shape == 'FlatPlate':
+            sample_geometry['Shape'] = 'FlatPlate'
+            sample_geometry['Width'] = self._width
+            sample_geometry['Thick'] = self._thickness
+            sample_geometry['Center'] = [0.0, 0.0, self._center]
+            sample_geometry['Angle'] = self._angle
+
+        if self._shape == 'Cylinder':
+            sample_geometry['Shape'] = 'Cylinder'
+            sample_geometry['Radius'] = self._radius
+            sample_geometry['Center'] = [0.0, 0.0, 0.0]
+
+        if self.shape == 'Annulus':
+            sample_geometry['Shape'] = 'HollowCylinder'
+            sample_geometry['InnerRadius'] = self._inner_radius
+            sample_geometry['OuterRadius'] = self._outer_radius
+            sample_geometry['Center'] = [0.0, 0.0, 0.0]
+            sample_geometry['Axis'] = 1
+
+        prog.report('Calculating sample corrections')
 
     def _setup(self):
 
         # basic options
-        self._input_ws_name = self.getPropertyValue("InputWorkspace")
-        self._chemical_formula = self.getPropertyValue("ChemicalFormula")
-        self._density_type=self.getPropertyValue("DensityType")
-        self._density=self.getProperty("Density").value
-        self._shape = self.getPropertyValue("Shape")
+        self._input_ws_name = self.getPropertyValue('InputWorkspace')
+        self._chemical_formula = self.getPropertyValue('ChemicalFormula')
+        self._density_type = self.getPropertyValue('DensityType')
+        self._density = self.getProperty('Density').value
+        self._shape = self.getPropertyValue('Shape')
 
         self._number_wavelengths = self.getProperty('NumberOfWavelengthPoints').value
         self._events = self.getProperty('EventsPerPoint').value
@@ -171,8 +201,8 @@ class NewMCAbsorption(DataProcessorAlgorithm):
         self._beam_width = self.getProperty('BeamWidth').value
 
         # shape options
-        self._height = self.getProperty("Height").value
-        
+        self._height = self.getProperty('Height').value
+
         # flat plate
         self._width = self.getProperty('Width').value
         self._thickness = self.getProperty('Thickness').value
@@ -181,7 +211,7 @@ class NewMCAbsorption(DataProcessorAlgorithm):
 
         # cylinder
         self._radius = self.getProperty('Radius').value
-        
+
         # annulus
         self._inner_radius = self.getProperty('InnerRadius').value
         self._outer_radius = self.getProperty('OuterRadius').value
@@ -189,30 +219,29 @@ class NewMCAbsorption(DataProcessorAlgorithm):
         # output
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
-
     def validateInputs(self):
 
         self._setup()
         issues = dict()
 
         if not self._height:
-            issues["Height"] = "Please enter a non-zero number for height"
+            issues['Height'] = 'Please enter a non-zero number for height'
 
-        if self._shape == "FlatPlate":
+        if self._shape == 'FlatPlate':
             if not self._width:
-                issues["Width"] = "Please enter a non-zero number for width"
+                issues['Width'] = 'Please enter a non-zero number for width'
             if not self._thickness:
-                issues["Thickness"] = "Please enter a non-zero number for thickness"
+                issues['Thickness'] = 'Please enter a non-zero number for thickness'
 
-        if self._shape == "Cylinder":
+        if self._shape == 'Cylinder':
             if not self._radius:
-                issues["Radius"] = "Please enter a non-zero number for radius"
+                issues['Radius'] = 'Please enter a non-zero number for radius'
 
-        if self._shape == "Annulus":
+        if self._shape == 'Annulus':
             if not self._inner_radius:
-                issues["InnerRadius"] = "Please enter a non-zero number for inner radius"
+                issues['InnerRadius'] = 'Please enter a non-zero number for inner radius'
             if not self._outer_radius:
-                issues["OuterRadius"] = "Please enter a non-zero number for outer radius"
+                issues['OuterRadius'] = 'Please enter a non-zero number for outer radius'
 
             # Geometry validation: outer radius > inner radius
             if not self._outer_radius > self._inner_radius:
