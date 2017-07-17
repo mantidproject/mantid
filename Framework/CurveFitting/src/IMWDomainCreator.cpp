@@ -187,8 +187,8 @@ std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
   }
 
   if (to - from == 0) {
-    throw std::invalid_argument(
-      "StartX and EndX values do no capture a range within the workspace interval.");
+    throw std::invalid_argument("StartX and EndX values do no capture a range "
+                                "within the workspace interval.");
   }
 
   if (m_matrixWorkspace->isHistogramData()) {
