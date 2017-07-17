@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -29,6 +31,10 @@ void ConjoinWorkspaces::init() {
   declareProperty(make_unique<PropertyWithValue<bool>>("CheckOverlapping", true,
                                                        Direction::Input),
                   "Verify that the supplied data do not overlap");
+  declareProperty(make_unique<PropertyWithValue<std::string>>("YAxisLabel", "", Direction::Input),
+	  "The label to set the Y axis to");
+  declareProperty(make_unique<PropertyWithValue<std::string>>("YAxisUnit", "", Direction::Input),
+	  "The unit to set the Y axis to");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -55,40 +61,16 @@ void ConjoinWorkspaces::exec() {
   }
 
   if (event_ws1 && event_ws2) {
-    this->validateInputs(*event_ws1, *event_ws2);
-
-    // Check there is no overlap
-    if (this->getProperty("CheckOverlapping")) {
-      this->checkForOverlap(*event_ws1, *event_ws2, false);
-      m_overlapChecked = true;
-    }
-
-    // Both are event workspaces. Use the special method
-    MatrixWorkspace_sptr output = this->execEvent();
-    // Copy the history from the original workspace
-    output->history().addHistory(ws1->getHistory());
-    // Delete the second input workspace from the ADS
-    AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
-    // Set the result workspace to the first input
-    setProperty("InputWorkspace1", output);
+	  auto output = conjoinEvents(*event_ws1, *event_ws2);
+	  // Set the result workspace to the first input
+	  setProperty("InputWorkspace1", output);
   } else {
-    // Check that the input workspaces meet the requirements for this algorithm
-    this->validateInputs(*ws1, *ws2);
-
-    if (this->getProperty("CheckOverlapping")) {
-      this->checkForOverlap(*ws1, *ws2, true);
-      m_overlapChecked = true;
-    }
-
-    MatrixWorkspace_sptr output = execWS2D(*ws1, *ws2);
-    // Copy the history from the original workspace
-    output->history().addHistory(ws1->getHistory());
-
-    // Delete the second input workspace from the ADS
-    AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
-    // Set the result workspace to the first input
-    setProperty("InputWorkspace1", output);
+	  auto output = conjoinHistograms(*ws1, *ws2);
+	  // Set the result workspace to the first input
+	  setProperty("InputWorkspace1", output);
   }
+  // Delete the second input workspace from the ADS
+  AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -143,6 +125,54 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
       }
     }
   }
+}
+
+
+/**
+ * Conjoin two event workspaces together, including the history
+ *
+ * @param ws1:: The first workspace
+ * @param ws2:: The second workspace
+ * @return :: A new workspace containing the conjoined workspaces
+*/
+API::MatrixWorkspace_sptr ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace & ws1, const DataObjects::EventWorkspace & ws2){
+	this->validateInputs(ws1, ws2);
+
+	// Check there is no overlap
+	if (this->getProperty("CheckOverlapping")) {
+		this->checkForOverlap(ws1, ws2, false);
+		m_overlapChecked = true;
+	}
+
+	// Both are event workspaces. Use the special method
+	auto output = this->execEvent();
+
+	// Copy the history from the original workspace
+	output->history().addHistory(ws1.getHistory());
+	return output;
+}
+
+/**
+* Conjoin two histogram workspaces together, including the history
+*
+* @param ws1:: The first workspace
+* @param ws2:: The second workspace
+* @return :: A new workspace containing the conjoined workspaces
+*/
+API::MatrixWorkspace_sptr ConjoinWorkspaces::conjoinHistograms(const API::MatrixWorkspace & ws1, const API::MatrixWorkspace & ws2){
+	// Check that the input workspaces meet the requirements for this algorithm
+	this->validateInputs(ws1, ws2);
+
+	if (this->getProperty("CheckOverlapping")) {
+		this->checkForOverlap(ws1, ws2, true);
+		m_overlapChecked = true;
+	}
+
+	auto output = execWS2D(ws1, ws2);
+
+	// Copy the history from the original workspace
+	output->history().addHistory(ws1.getHistory());
+	return output;
 }
 
 /***
