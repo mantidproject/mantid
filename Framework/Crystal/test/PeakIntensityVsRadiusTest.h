@@ -70,7 +70,7 @@ public:
   /** Check the validateInputs() calls */
   void doTestValid(bool pass, double BackgroundInnerFactor,
                    double BackgroundOuterFactor, double BackgroundInnerRadius,
-                   double BackgroundOuterRadius, int NumSteps = 16) {
+                   double BackgroundOuterRadius, int NumSteps) {
     PeakIntensityVsRadius alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -98,17 +98,32 @@ public:
     }
   }
 
-  void test_validateInputs() {
-    doTestValid(true, 1.0, 2.0, 0, 0);
-    doTestValid(true, 0, 0, 0.12, 0.15);
-    doTestValid(true, 1.0, 0, 0, 0.15);
-    doTestValid(true, 0, 1.5, 0.15, 0);
+  void doTestThrowsForInvalid(double BackgroundInnerFactor,
+    double BackgroundOuterFactor, double BackgroundInnerRadius,
+    double BackgroundOuterRadius, int NumSteps = 16) {
+    doTestValid(false, BackgroundInnerFactor, BackgroundOuterFactor, BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
+  }
+
+  void doTestNoThrowForValid(double BackgroundInnerFactor,
+    double BackgroundOuterFactor, double BackgroundInnerRadius,
+    double BackgroundOuterRadius, int NumSteps = 16) {
+    doTestValid(true, BackgroundInnerFactor, BackgroundOuterFactor, BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
+  }
+
+  void test_validateForValidInputs() {
+    doTestNoThrowForValid(1.0, 2.0, 0, 0);
+    doTestNoThrowForValid(0, 0, 0.12, 0.15);
+    doTestNoThrowForValid(1.0, 0, 0, 0.15);
+    doTestNoThrowForValid(0, 1.5, 0.15, 0);
     // Can't specify fixed and variable
-    doTestValid(false, 1.0, 0, 0.15, 0);
-    doTestValid(false, 0, 1.0, 0, 0.15);
-    doTestValid(false, 1.0, 0, 0.15, 0);
-    doTestValid(false, 1.0, 1.0, 0.12, 0.15);
-    doTestValid(true, 1.0, 2.0, 0, 0, -8);
+  }
+
+  void test_validateForInvalidInputs() {
+    doTestThrowsForInvalid(1.0, 0, 0.15, 0);
+    doTestThrowsForInvalid(0, 1.0, 0, 0.15);
+    doTestThrowsForInvalid(1.0, 0, 0.15, 0);
+    doTestThrowsForInvalid(1.0, 1.0, 0.12, 0.15);
+    doTestThrowsForInvalid(1.0, 2.0, 0, 0, -8);
   }
 
   MatrixWorkspace_sptr doTest(double BackgroundInnerFactor,
@@ -194,7 +209,6 @@ public:
     TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
   }
 
-  void test
 };
 
 #endif /* MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_ */
