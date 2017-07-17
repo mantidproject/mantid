@@ -50,7 +50,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
     def test_cylinder(self):
         """
-        Test flat plate shape
+        Test cylinder shape
         """
         kwargs = self._arguments
         corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
@@ -62,7 +62,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
     def test_annulus(self):
         """
-        Test flat plate shape
+        Test annulus shape
         """
         kwargs = self._arguments
         corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
@@ -72,6 +72,31 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                     **kwargs)
 
         self._test_corrections_workspace(corrected)
+
+    def test_number_density(self):
+        """
+        Mass Density for water is 1.0
+        Number Density for water is 0.033
+        These should give similar results
+        """
+
+        kwargs = self._arguments
+        corrected_mass = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
+                                                         Shape='FlatPlate',
+                                                         Width=2.0,
+                                                         Thickness=2.0,
+                                                         **kwargs)
+
+        kwargs['DensityType'] = 'Number Density'
+        kwargs['Density'] = 0.033
+
+        corrected_num = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
+                                                        Shape='FlatPlate',
+                                                        Width=2.0,
+                                                        Thickness=2.0,
+                                                        **kwargs)
+
+        self.assertEquals(corrected_mass.readY(0)[1], corrected_num.readY(0)[1])
 
 
 if __name__ == "__main__":
