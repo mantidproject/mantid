@@ -370,6 +370,17 @@ class FunctionWrapperTest(unittest.TestCase):
         c = CompositeFunctionWrapper( lb, g0, g1)
         self.assertEqual( len(c), 3)
         
+    def test_iteration(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)  
+        lb = FunctionWrapper("LinearBackground")
+        
+        c = CompositeFunctionWrapper( lb, g0, g1)
+        count = 0
+        for f in c:
+           count += 1
+        self.assertEqual( count, 3)
+        
     def test_productfunction_creation(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
