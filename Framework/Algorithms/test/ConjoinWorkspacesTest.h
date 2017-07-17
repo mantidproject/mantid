@@ -32,6 +32,13 @@ public:
       : ws1Name("ConjoinWorkspacesTest_grp1"),
         ws2Name("ConjoinWorkspacesTest_grp2") {}
 
+  MatrixWorkspace_sptr getWSFromADS(std::string wsName) {
+	  auto out = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		  AnalysisDataService::Instance().retrieve(wsName));
+	  TS_ASSERT(out);
+	  return out;
+  }
+
   void setupWS() {
     IAlgorithm *loader;
     loader = new Mantid::DataHandling::LoadRaw3;
@@ -102,9 +109,9 @@ public:
     TS_ASSERT(conj.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("top")));
+	TS_ASSERT_THROWS_NOTHING(
+		output = getWSFromADS("top");
+	);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 25);
     // Check a few values
     TS_ASSERT_EQUALS(output->readX(0)[0], in1->readX(0)[0]);
@@ -171,14 +178,14 @@ public:
     int numPixels = 10;
     int numBins = 20;
     ws1 = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins);
-    const std::string ws1_name = "ConjoinWorkspaces_testDoCheckForOverlap";
-    AnalysisDataService::Instance().add(ws1_name, ws1);
+
+	AnalysisDataService::Instance().add(ws1Name, ws1);
     ws2 = WorkspaceCreationHelper::createEventWorkspace(5, numBins);
 
     ConjoinWorkspaces conj;
     conj.initialize();
     TS_ASSERT_THROWS_NOTHING(
-        conj.setPropertyValue("InputWorkspace1", ws1_name));
+        conj.setPropertyValue("InputWorkspace1", ws1Name));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace2", ws2));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckOverlapping", true));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
@@ -200,9 +207,7 @@ public:
     TS_ASSERT(conj.isExecuted());
 
     // Test output
-    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(ws1_name));
-    TS_ASSERT(output);
+    MatrixWorkspace_sptr output = getWSFromADS(ws1Name);
     // Check the first spectrum has the correct ID
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 15);
     TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(),
@@ -211,7 +216,7 @@ public:
     TS_ASSERT_EQUALS(output->getSpectrum(10).getSpectrumNo(), start);
     TS_ASSERT(!output->getSpectrum(11).getDetectorIDs().empty());
 
-    AnalysisDataService::Instance().remove(ws1_name);
+    AnalysisDataService::Instance().remove(ws1Name);
   }
 
   void performTestNoOverlap(bool event) {
@@ -237,10 +242,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(conj.execute();)
     TS_ASSERT(conj.isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(ws1Name));)
-    TS_ASSERT(out);
+	TS_ASSERT_THROWS_NOTHING(
+		out = getWSFromADS(ws1Name);
+	);
     if (!out)
       return;
 
@@ -270,13 +274,6 @@ public:
 	  conj.setPropertyValue("InputWorkspace1", ws1Name);
 	  conj.setPropertyValue("InputWorkspace2", ws2Name);
 	  conj.setProperty("CheckOverlapping", false);
-  }
-
-  MatrixWorkspace_sptr getWSFromADS(std::string wsName) {
-	  auto out = boost::dynamic_pointer_cast<MatrixWorkspace>(
-		  AnalysisDataService::Instance().retrieve(wsName));
-	  TS_ASSERT(out);
-	  return out;
   }
 
   void test_setYUnitAndLabel() {
