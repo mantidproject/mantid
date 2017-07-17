@@ -278,6 +278,9 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self._setup()
         issues = dict()
 
+        if self._material_defined and (not self._chemical_formula):
+            issues['ChemicalFormula'] = 'Please enter a chemical formula'
+
         if not self._height:
             issues['Height'] = 'Please enter a non-zero number for height'
 

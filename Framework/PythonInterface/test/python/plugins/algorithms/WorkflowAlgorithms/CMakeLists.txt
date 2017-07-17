@@ -4,7 +4,6 @@
 
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
-  AnnulusMonteCarloAbsorptionTest.py
   BayesQuasiTest.py
   BayesStretchTest.py
   DetectorFloodWeightingTest.py
@@ -38,6 +37,7 @@ set ( TEST_PY_FILES
   SANSFitShiftScaleTest.py
   SANSStitchTest.py
   SavePlot1DTest.py
+  SimpleShapeMonteCarloAbsorptionTest.py
   SimulatedDensityOfStatesTest.py
   SofQWMomentsTest.py
   SofQWMomentsScanTest.py
