@@ -14,8 +14,8 @@ Engineering Diffraction
 -----------------------
 
 Powder Diffraction
-------------------
 
+- Added new diagrams showing the algorithms used in ISIS Powder scripts. These can be found at: :ref:`isis-powder-diffraction-workflow-ref`
 - LoadILLAscii, which could be used to load D2B ASCII data into an MD workspace, has been removed. :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` should be used instead.
 
 |
