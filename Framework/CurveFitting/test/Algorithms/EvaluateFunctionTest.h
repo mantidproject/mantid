@@ -273,7 +273,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndX", EndX));
       TS_ASSERT_THROWS_NOTHING(
           alg.setProperty("OutputWorkspace", "EvaluateFunction_outWS"));
-       TS_ASSERT_THROWS_NOTHING(alg.execute());
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
 
       isExecuted = alg.isExecuted();
       if (isExecuted) {
