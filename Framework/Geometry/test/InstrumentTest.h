@@ -20,30 +20,8 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace {
-boost::shared_ptr<Beamline::DetectorInfo>
-makeDetectorInfo(const Instrument &instrument) {
-  const auto numDets = instrument.getNumberDetectors();
-  std::vector<size_t> monitors;
-  for (size_t i = 0; i < numDets; ++i)
-    if (instrument.isMonitorViaIndex(i))
-      monitors.push_back(i);
-  std::vector<Eigen::Vector3d> positions;
-  std::vector<Eigen::Quaterniond> rotations;
-  const auto &detIDs = instrument.getDetectorIDs();
-  for (const auto &id : detIDs) {
-    const auto &det = instrument.getDetector(id);
-    const auto &pos = det->getPos();
-    positions.emplace_back(pos[0], pos[1], pos[2]);
-    const auto &rot = det->getRotation();
-    rotations.emplace_back(rot.real(), rot.imagI(), rot.imagJ(), rot.imagK());
-  }
-  return boost::make_shared<Beamline::DetectorInfo>(
-      std::move(positions), std::move(rotations), monitors);
-}
-}
-
 std::tuple<boost::shared_ptr<Beamline::ComponentInfo>,
+           boost::shared_ptr<Beamline::DetectorInfo>,
            boost::shared_ptr<const std::vector<Geometry::ComponentID>>,
            boost::shared_ptr<const std::unordered_map<
                Mantid::Geometry::IComponent *, size_t>>>
@@ -52,6 +30,7 @@ makeComponentInfo(boost::shared_ptr<const Instrument> parInstrument) {
   parInstrument->registerContents(visitor);
   return std::make_tuple(
       boost::shared_ptr<Beamline::ComponentInfo>(visitor.componentInfo()),
+      boost::shared_ptr<Beamline::DetectorInfo>(visitor.detectorInfo()),
       visitor.componentIds(), visitor.componentIdToIndexMap());
 }
 
@@ -563,17 +542,17 @@ public:
     pmap->addQuat(bank3->getComponentID(), ParameterMap::rot(), bankRot);
 
     // Extract information from instrument to create DetectorInfo
-    auto componentTuple =
-        makeComponentInfo(boost::make_shared<Instrument>(baseInstrument, pmap));
+    auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
+    auto componentTuple = makeComponentInfo(instr);
     auto componentInfo = std::get<0>(componentTuple);
-    auto componentIds = std::get<1>(componentTuple);
-    auto componentIdToIndexMap = std::get<2>(componentTuple);
-    instrument.setComponentInfo(componentInfo, componentIds);
+    auto detInfo = std::get<1>(componentTuple);
+    auto componentIds = std::get<2>(componentTuple);
+    auto componentIdToIndexMap = std::get<3>(componentTuple);
+    instr->setComponentInfo(componentInfo, componentIds);
     pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
         *componentInfo, componentIds, componentIdToIndexMap));
 
-    auto detInfo = makeDetectorInfo(instrument);
-    instrument.setDetectorInfo(detInfo);
+    instr->setDetectorInfo(detInfo);
     detInfo->setComponentInfo(componentInfo.get());
     componentInfo->setDetectorInfo(detInfo.get());
     // bank 1
@@ -604,7 +583,7 @@ public:
     // All position information should be purged
     TS_ASSERT_EQUALS(pmap->size(), 0);
 
-    const auto legacyMap = instrument.makeLegacyParameterMap();
+    const auto legacyMap = instr->makeLegacyParameterMap();
     // 3 bank parameters + 2 det parameters
     TS_ASSERT_EQUALS(legacyMap->size(), 5);
     Instrument legacyInstrument(baseInstrument, legacyMap);
@@ -635,18 +614,19 @@ public:
     pmap->addDouble(bank1->getComponentID(), "scalex", scalex);
     pmap->addDouble(bank1->getComponentID(), "scaley", scaley);
 
+    auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
+
     // Extract information from instrument to create DetectorInfo
-    auto componentTuple =
-        makeComponentInfo(boost::make_shared<Instrument>(baseInstrument, pmap));
+    auto componentTuple = makeComponentInfo(instr);
     auto componentInfo = std::get<0>(componentTuple);
-    auto componentIds = std::get<1>(componentTuple);
-    auto componentIdToIndexMap = std::get<2>(componentTuple);
-    instrument.setComponentInfo(componentInfo, componentIds);
+    auto detInfo = std::get<1>(componentTuple);
+    auto componentIds = std::get<2>(componentTuple);
+    auto componentIdToIndexMap = std::get<3>(componentTuple);
+    instr->setComponentInfo(componentInfo, componentIds);
     pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
         *componentInfo, componentIds, componentIdToIndexMap));
 
-    auto detInfo = makeDetectorInfo(instrument);
-    instrument.setDetectorInfo(detInfo);
+    instr->setDetectorInfo(detInfo);
     detInfo->setComponentInfo(componentInfo.get());
     componentInfo->setDetectorInfo(detInfo.get());
 
@@ -668,13 +648,13 @@ public:
     // 2 bank parameters, det pos/rot is in DetectorInfo
     TS_ASSERT_EQUALS(pmap->size(), 2);
 
-    const auto legacyMap = instrument.makeLegacyParameterMap();
+    const auto legacyMap = instr->makeLegacyParameterMap();
 
     // Legacy instrument does not support positions in ParameterMap for
     // RectangularDetectorPixel (parameters ignored by
     // RectangularDetectorPixel::getRelativePos), so we cannot support this.
     detInfo->setPosition(3, detInfo->position(3) + toVector3d(detOffset));
-    TS_ASSERT_THROWS(instrument.makeLegacyParameterMap(), std::runtime_error);
+    TS_ASSERT_THROWS(instr->makeLegacyParameterMap(), std::runtime_error);
 
     // 2 bank parameters + 0 det parameters
     TS_ASSERT_EQUALS(legacyMap->size(), 2);
