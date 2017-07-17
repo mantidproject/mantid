@@ -411,10 +411,8 @@ void MultiDatasetFit::editLocalParameterValues(const QString &parName) {
 
 /// Set the fit status info string after a fit is finished.
 /// @param status :: The Fit's status property.
-/// @param iterations :: The number of iterations completed.
 /// @param chiSquared :: The chi squared value returned by Fit.
 void MultiDatasetFit::setFitStatusInfo(const QString &status,
-                                       const QString &iterations,
                                        const QString &chiSquared) {
   auto text(status);
   text.replace("\n", "<br>");
@@ -422,9 +420,8 @@ void MultiDatasetFit::setFitStatusInfo(const QString &status,
   if (status != "success") {
     color = "red";
   }
-  m_fitStatus =
-      QString("Status: <span style='color:%2'>%1</span><br>Iterations: "
-              "%3<br>Chi Squared: %4").arg(text, color, iterations, chiSquared);
+  m_fitStatus = QString("Status: <span style='color:%2'>%1</span>"
+                        "<br>Chi Squared: %4").arg(text, color, chiSquared);
   showInfo("");
 }
 
@@ -449,11 +446,9 @@ void MultiDatasetFit::finishFit(bool error) {
       updateParameters(*fun);
       auto status =
           QString::fromStdString(algorithm->getPropertyValue("OutputStatus"));
-      auto iterations = QString::fromStdString(
-          algorithm->getPropertyValue("OutputNIterations"));
       auto chiSquared = QString::fromStdString(
           algorithm->getPropertyValue("OutputChi2overDoF"));
-      setFitStatusInfo(status, iterations, chiSquared);
+      setFitStatusInfo(status, chiSquared);
     } else {
       // After a sequential fit
       auto paramsWSName =
