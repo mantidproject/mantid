@@ -57,9 +57,7 @@ void ConjoinWorkspaces::exec() {
   if (event_ws1 && event_ws2) {
     this->validateInputs(*event_ws1, *event_ws2);
 
-    // We do not need to check that binning is compatible, just that there is no
-    // overlap
-    // make sure we should bother checking
+    // Check there is no overlap
     if (this->getProperty("CheckOverlapping")) {
       this->checkForOverlap(*event_ws1, *event_ws2, false);
       m_overlapChecked = true;
