@@ -11,11 +11,10 @@ using namespace Mantid::DataObjects;
 
 class EventWorkspaceMRUTest : public CxxTest::TestSuite {
 public:
-  void test_emptyList() 
-  {
-      EventWorkspaceMRU mru;
-      TS_ASSERT_THROWS_NOTHING(mru.MRUSize());
-      TS_ASSERT_EQUALS(mru.MRUSize(), 0);
+  void test_emptyList() {
+    EventWorkspaceMRU mru;
+    TS_ASSERT_THROWS_NOTHING(mru.MRUSize());
+    TS_ASSERT_EQUALS(mru.MRUSize(), 0);
   }
 };
 
