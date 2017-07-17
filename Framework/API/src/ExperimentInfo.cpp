@@ -199,18 +199,20 @@ void checkDetectorInfoSize(const Instrument &instr,
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
-makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr, const InfoComponentVisitor& visitor) {
+makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr,
+                 const InfoComponentVisitor &visitor) {
 
-    if (newInstr.hasDetectorInfo()) {
-      // We allocate a new DetectorInfo in case there is an Instrument holding a
-      // reference to our current DetectorInfo.
-      const auto &detInfo = newInstr.detectorInfo();
-      checkDetectorInfoSize(oldInstr, detInfo);
-      // Implicit copy constructor ensures that all other info. Masking, etc, is copied.
-      return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
-    } else {
-        return visitor.detectorInfo();
-    }
+  if (newInstr.hasDetectorInfo()) {
+    // We allocate a new DetectorInfo in case there is an Instrument holding a
+    // reference to our current DetectorInfo.
+    const auto &detInfo = newInstr.detectorInfo();
+    checkDetectorInfoSize(oldInstr, detInfo);
+    // Implicit copy constructor ensures that all other info. Masking, etc, is
+    // copied.
+    return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
+  } else {
+    return visitor.detectorInfo();
+  }
 }
 
 std::unique_ptr<Geometry::InfoComponentVisitor>
@@ -258,8 +260,6 @@ void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor,
       *m_componentInfo, visitor.componentIds(),
       visitor.componentIdToIndexMap());
 }
-
-
 
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.

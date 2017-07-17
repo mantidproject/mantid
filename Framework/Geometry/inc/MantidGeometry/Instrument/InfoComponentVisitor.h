@@ -143,20 +143,6 @@ public:
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
   componentIds() const;
 
-  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-  componentDetectorRanges() const;
-
-  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-  componentChildComponentRanges() const;
-
-  boost::shared_ptr<const std::vector<size_t>>
-  assemblySortedDetectorIndices() const;
-
-  boost::shared_ptr<const std::vector<size_t>>
-  assemblySortedComponentIndices() const;
-
-  boost::shared_ptr<const std::vector<size_t>> parentComponentIndices() const;
-
   boost::shared_ptr<
       const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
   componentIdToIndexMap() const;
@@ -172,14 +158,6 @@ public:
   std::unique_ptr<Beamline::DetectorInfo> detectorInfo() const;
 
   boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
-
-  boost::shared_ptr<std::vector<Eigen::Vector3d>> positions() const;
-
-  boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations() const;
-
-  int64_t sample() const;
-
-  int64_t source() const;
 };
 } // namespace Geometry
 } // namespace Mantid
