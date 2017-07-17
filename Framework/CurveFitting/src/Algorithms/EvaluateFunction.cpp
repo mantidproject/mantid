@@ -44,26 +44,23 @@ std::map<std::string, std::string> EvaluateFunction::validateInputs() {
   if (wsMatrix != nullptr) {
     const double startX = getProperty("StartX");
     const double endX = getProperty("EndX");
-    auto &xData = wsMatrix->getSpectrum(0).x();
+    auto &xData = wsMatrix->x(0);
 
     const double workspaceStartX = xData[0];
     const double workspaceEndX = xData[xData.size() - 1];
     std::string errorMsg = "";
-    bool startOutOfRange = startX < workspaceStartX || startX > workspaceEndX;
-    bool endOutOfRange = endX > workspaceEndX || endX < workspaceStartX;
+    bool doesNotCaptureWs = !(startX == EMPTY_DBL() && endX == EMPTY_DBL()) &&
+      ((startX < workspaceStartX && endX < workspaceStartX)
+      || (startX > workspaceEndX && endX > workspaceEndX));
 
     // Build error message from out of range checks.
-    if (startOutOfRange && endOutOfRange) {
-      errorMsg = "StartX and EndX are not within the workspace X range.";
-    } else if (startOutOfRange) {
-      errorMsg = "StartX is not within the workspace X range.";
-    } else if (endOutOfRange) {
-      errorMsg = "EndX is not within the workspace X range.";
+    if (doesNotCaptureWs) {
+      errorMsg = "StartX and EndX do not capture a section of the workspace X range.";
     }
 
     // Check if there was an out of range error.
     if (!errorMsg.empty()) {
-      errors["InputWorkspace"] = errorMsg;
+     errors["InputWorkspace"] = errorMsg;
     }
   }
 

@@ -256,7 +256,7 @@ private:
 
     void setWorkspaceIndex() { workspaceIndex = 1; }
 
-    void runAlgorithm() {
+    void runAlgorithm(bool shouldFail = false) {
       makeXValues();
       makeWorkspace();
       makeFunction();
@@ -273,7 +273,14 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndX", EndX));
       TS_ASSERT_THROWS_NOTHING(
           alg.setProperty("OutputWorkspace", "EvaluateFunction_outWS"));
-      TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+      if (shouldFail) {
+        TS_ASSERT_THROWS_ANYTHING(alg.execute());
+      }
+      else {
+        TS_ASSERT_THROWS_NOTHING(alg.execute());
+      }
+
       isExecuted = alg.isExecuted();
       if (isExecuted) {
         outputWorkspace =
