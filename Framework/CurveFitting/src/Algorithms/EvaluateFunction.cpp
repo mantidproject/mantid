@@ -33,42 +33,6 @@ void EvaluateFunction::initConcrete() {
                   "An output workspace.");
 }
 
-/** Cross property validation
-* @return A map containing property as keys and errors as values.
-*/
-std::map<std::string, std::string> EvaluateFunction::validateInputs() {
-  API::Workspace_const_sptr ws = getProperty("InputWorkspace");
-  auto wsMatrix = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
-  std::map<std::string, std::string> errors = Algorithm::validateInputs();
-
-  if (wsMatrix != nullptr) {
-    const double startX = getProperty("StartX");
-    const double endX = getProperty("EndX");
-    auto &xData = wsMatrix->x(0);
-
-    const double workspaceStartX = xData[0];
-    const double workspaceEndX = xData[xData.size() - 1];
-    std::string errorMsg = "";
-    bool doesNotCaptureWs =
-        !(startX == EMPTY_DBL() && endX == EMPTY_DBL()) &&
-        ((startX < workspaceStartX && endX < workspaceStartX) ||
-         (startX > workspaceEndX && endX > workspaceEndX));
-
-    // Build error message from out of range checks.
-    if (doesNotCaptureWs) {
-      errorMsg =
-          "StartX and EndX do not capture a section of the workspace X range.";
-    }
-
-    // Check if there was an out of range error.
-    if (!errorMsg.empty()) {
-      errors["InputWorkspace"] = errorMsg;
-    }
-  }
-
-  return errors;
-}
-
 //----------------------------------------------------------------------------------------------
 /// Execute the algorithm.
 void EvaluateFunction::execConcrete() {
