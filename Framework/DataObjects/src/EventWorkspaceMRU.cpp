@@ -164,5 +164,18 @@ void EventWorkspaceMRU::deleteIndex(const EventList *index) {
   }
 }
 
+size_t EventWorkspaceMRU::MRUSize() const
+{
+    if (m_bufferedDataY.empty())
+    {
+        return 0;
+    }
+    else
+    {
+        return this->m_bufferedDataY.front()->size();
+    }
+       
+}
+
 } // namespace Mantid
 } // namespace DataObjects
