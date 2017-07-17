@@ -85,13 +85,13 @@ private:
 
   /// Find the the extrapolation range
   std::pair<size_t, size_t>
-      findExtrapolationRange(API::MatrixWorkspace_const_sptr,
-                             API::MatrixWorkspace_sptr) const;
+      findInterpolationRange(API::MatrixWorkspace_const_sptr,
+                             API::MatrixWorkspace_sptr, const size_t);
 
   /// Extrapolates flat for the points outside the x-range
   void extrapolateFlat(API::MatrixWorkspace_sptr,
-                       API::MatrixWorkspace_const_sptr,
-                       const std::pair<size_t, size_t> &,
+                       API::MatrixWorkspace_const_sptr, const size_t,
+                       const std::pair<size_t, size_t> &, const bool,
                        std::vector<API::MatrixWorkspace_sptr> &) const;
 };
 

@@ -1,3 +1,5 @@
+#include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
+
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -5,7 +7,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
+
+#include <algorithm>
+#include <stdexcept>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -143,10 +147,6 @@ void SplineInterpolation::exec() {
            "Only the x-axis of the first spectrum will be used.\n";
   }
 
-  // convert data to binned data as required
-  MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
-  MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
-
   MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(mws, iws);
 
   Progress pgress(this, 0.0, 1.0, histNo);
@@ -163,6 +163,13 @@ void SplineInterpolation::exec() {
       derivs[i]->replaceAxis(1, vAxis);
     }
   }
+
+  // convert data to binned data if initially histogrammed, do not alter the
+  // original inputs; these should be used in subsequent processing, however,
+  // note that the parent of the output workspace is still mws, and not mwspt!
+  // meaning that it can be either histogram or point data dependent on the mws
+  MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
+  MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
 
   if (binsNo > 2) {
     // perform cubic spline interpolation
@@ -182,9 +189,14 @@ void SplineInterpolation::exec() {
     }
   } else {
     // perform linear interpolation
-    // figure out the interpolation range
-    const std::pair<size_t, size_t> range =
-        findExtrapolationRange(iwspt, outputWorkspace);
+
+    // first check that the x-axis (first spectrum) is sorted ascending
+    if (!std::is_sorted(mwspt->x(0).rawData().begin(),
+                        mwspt->x(0).rawData().end())) {
+      throw std::runtime_error("X-axis of the workspace to match is not sorted. "
+                               "Consider calling SortXAxis before.");
+    }
+
     for (size_t i = 0; i < histNo; ++i) {
       // set up the function that needs to be interpolated
       std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)> acc(
@@ -193,12 +205,17 @@ void SplineInterpolation::exec() {
           gsl_interp_alloc(gsl_interp_linear, binsNo), gsl_interp_free);
       gsl_interp_linear->init(linear.get(), &(iwspt->x(i)[0]),
                               &(iwspt->y(i)[0]), binsNo);
+
+      // figure out the interpolation range
+      const std::pair<size_t, size_t> range =
+          findInterpolationRange(iwspt, mwspt, i);
+
       // perform interpolation in the range
       for (size_t k = range.first; k <= range.second; ++k) {
         gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]),
                                 &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k],
                                 acc.get(), &(outputWorkspace->mutableY(i)[k]));
-        // calculate derivatives, if order > 0
+        // calculate only 1st order derivative if needed
         if (order > 0) {
           gsl_interp_linear->eval_deriv(
               linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo,
@@ -206,7 +223,7 @@ void SplineInterpolation::exec() {
         }
       }
       // flat extrapolation outside the range
-      extrapolateFlat(outputWorkspace, iwspt, range, derivs);
+      extrapolateFlat(outputWorkspace, iwspt, i, range, order > 0, derivs);
       pgress.report();
     }
   }
@@ -223,7 +240,7 @@ void SplineInterpolation::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-/**Copy the meta data for the input workspace to an output workspace and create
+/** Copy the meta data for the input workspace to an output workspace and create
  *it with the desired number of spectra.
  * Also labels the axis of each spectra with Yi, where i is the index
  *
@@ -327,57 +344,65 @@ void SplineInterpolation::calculateSpline(
  * This is used for linear case only, to be consistent with cubic spline case
  * @param ows : output workspace
  * @param iwspt : workspace to interpolate
+ * @param row : the workspace index
  * @param indices : the pair of x-axis indices defining the extrapolation range
+ * @param doDerivs : whether derivatives are requested
  * @param deriv : the vector of derivative workspaces
 */
 void SplineInterpolation::extrapolateFlat(
     MatrixWorkspace_sptr ows, MatrixWorkspace_const_sptr iwspt,
-    const std::pair<size_t, size_t> &indices,
-    std::vector<MatrixWorkspace_sptr> &derivs) const {
+    const size_t row, const std::pair<size_t, size_t> &indices,
+    const bool doDerivs, std::vector<MatrixWorkspace_sptr> &derivs) const {
 
-  for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
-    const double yFirst = iwspt->y(i).front();
-    const double yLast = iwspt->y(i).back();
-    for (size_t bin = 0; bin < indices.first; ++bin) {
-      ows->mutableY(i)[bin] = yFirst;
-      derivs[i]->mutableY(0)[bin] = 0.;
+  const double yFirst = iwspt->y(row).front();
+  const double yLast = iwspt->y(row).back();
+  for (size_t bin = 0; bin < indices.first; ++bin) {
+    ows->mutableY(row)[bin] = yFirst;
+    if (doDerivs) {
+      // if derivatives are requested
+      derivs[row]->mutableY(0)[bin] = 0.;
     }
-    for (size_t bin = indices.second + 1; bin < ows->blocksize(); ++bin) {
-      ows->mutableY(i)[bin] = yLast;
-      derivs[i]->mutableY(0)[bin] = 0.;
+  }
+  for (size_t bin = indices.second + 1; bin < ows->blocksize(); ++bin) {
+    ows->mutableY(row)[bin] = yLast;
+    if (doDerivs) {
+      // if derivatives are requested
+      derivs[row]->mutableY(0)[bin] = 0.;
     }
   }
 }
 
-/** Find the region that has to extrapolated flat
- * E.g. iws x-axis is from 50-100, while mws x-axis is 0-200, this will return
- * the pair of the indices of mws, that are just below 50, and just above 100
+/** Find the region that has to be interpolated
+ * E.g. iwspt x-axis is from 50-100, while mwspt x-axis is 0-200, this will return
+ * the pair of the indices of mws, that are just above 50, and just below 100
  * This is used for linear case only, to be consistent with cubic spline case
  * @param iwspt : workspace to interpolate
- * @param ows : output workspace
+ * @param mwspt : workspace to match
+ * @param row : the workspace index
+ * @return : pair of indices for representing the interpolation range
 */
 std::pair<size_t, size_t>
-SplineInterpolation::findExtrapolationRange(MatrixWorkspace_const_sptr iwspt,
-                                            MatrixWorkspace_sptr ows) const {
-  const auto &xAxisIn = iwspt->x(0).rawData();
-  const auto &xAxisOut = ows->x(0).rawData();
+SplineInterpolation::findInterpolationRange(MatrixWorkspace_const_sptr iwspt,
+                                            MatrixWorkspace_sptr mwspt, const size_t row) {
+
+  auto xAxisIn = iwspt->x(row).rawData();
+  std::sort(xAxisIn.begin(), xAxisIn.end());
+  const auto &xAxisOut = mwspt->x(0).rawData();
 
   // identify the x-range that is outside iws
   const auto firstIt =
       std::upper_bound(xAxisOut.cbegin(), xAxisOut.cend(), xAxisIn.front());
-  const size_t firstIndex = firstIt - xAxisOut.cbegin() - 1;
+  size_t firstIndex = firstIt - xAxisOut.cbegin();
 
   const auto lastIt =
       std::lower_bound(xAxisOut.cbegin(), xAxisOut.cend(), xAxisIn.back());
-  const size_t lastIndex = xAxisOut.cend() - lastIt + 1;
+  size_t lastIndex = xAxisOut.cend() - lastIt - 2;
 
-  g_log.information("Will perform extrapolation outside bin range " +
-                    std::to_string(firstIndex) + " to " +
-                    std::to_string(lastIndex));
+  g_log.debug("Will perform flat extrapolation outside bin range " +
+              std::to_string(firstIndex) + " to " + std::to_string(lastIndex));
 
   return std::make_pair(firstIndex, lastIndex);
 }
-
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid

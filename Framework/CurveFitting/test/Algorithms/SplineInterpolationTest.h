@@ -64,6 +64,24 @@ public:
     checkOutput(alg);
   }
 
+  void testLinearHistogram() {
+
+    MatrixWorkspace_sptr iws =
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+            SplineFunc(), 1, 2.1, 4.9, 1.4, true);
+
+    MatrixWorkspace_sptr mws =
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+            SplineFunc(), 1, 1.6, 5.6, 0.4, true);
+
+    SplineInterpolation alg;
+    runAlgorithm(alg, 1, iws, mws, true);
+
+    const MatrixWorkspace_sptr ows = alg.getProperty("OutputWorkspace");
+
+    const auto &y = ows->y(0);
+  }
+
   void testExecMultipleSpectra() {
     int order(2), spectra(3);
 
@@ -146,7 +164,8 @@ public:
 
   void runAlgorithm(SplineInterpolation &alg, int order,
                     const Mantid::API::MatrixWorkspace_sptr &iws,
-                    const Mantid::API::MatrixWorkspace_sptr &mws) const {
+                    const Mantid::API::MatrixWorkspace_sptr &mws,
+                    const bool linear = false) const {
     alg.initialize();
     alg.isInitialized();
     alg.setChild(true);
@@ -157,6 +176,7 @@ public:
 
     alg.setProperty("WorkspaceToInterpolate", iws);
     alg.setProperty("WorkspaceToMatch", mws);
+    alg.setProperty("Linear2Points", linear);
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
