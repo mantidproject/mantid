@@ -276,8 +276,7 @@ private:
 
       if (shouldFail) {
         TS_ASSERT_THROWS_ANYTHING(alg.execute());
-      }
-      else {
+      } else {
         TS_ASSERT_THROWS_NOTHING(alg.execute());
       }
 
