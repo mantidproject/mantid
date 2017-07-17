@@ -74,7 +74,8 @@ InfoComponentVisitor::InfoComponentVisitor(
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_rotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
-      m_detectorRotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
+      m_detectorRotations(
+          boost::make_shared<std::vector<Eigen::Quaterniond>>()),
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr) {
 
@@ -91,8 +92,8 @@ InfoComponentVisitor::InfoComponentVisitor(
 
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors);  // Exact
-  m_detectorPositions->reserve(nDetectors);// Exact
-  m_detectorRotations->reserve(nDetectors);// Exact
+  m_detectorPositions->reserve(nDetectors);              // Exact
+  m_detectorRotations->reserve(nDetectors);              // Exact
   m_assemblySortedComponentIndices->reserve(nDetectors); // Approximation
   m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
 }
@@ -220,9 +221,10 @@ size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
     m_assemblySortedDetectorIndices->push_back(detectorIndex);
     m_assemblySortedComponentIndices->push_back(detectorIndex);
     m_detectorPositions->emplace_back(Kernel::toVector3d(detector.getPos()));
-    m_detectorRotations->emplace_back(Kernel::toQuaterniond(detector.getRotation()));
-    if(m_instrument->isMonitorViaIndex(detectorIndex)){
-        m_monitorIndices->push_back(detectorIndex);
+    m_detectorRotations->emplace_back(
+        Kernel::toQuaterniond(detector.getRotation()));
+    if (m_instrument->isMonitorViaIndex(detectorIndex)) {
+      m_monitorIndices->push_back(detectorIndex);
     }
     clearPositionAndRotationParameters(m_pmap, detector);
   }
@@ -237,41 +239,6 @@ size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
                                        // detector that is either source or
                                        // sample. So delete this.
   return detectorIndex;
-}
-
-/**
- * @brief InfoComponentVisitor::componentDetectorRanges
- * @return index ranges into the detectorIndices vector. Gives the
- * intervals of detectors indices for non-detector components such as banks
- */
-boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-InfoComponentVisitor::componentDetectorRanges() const {
-  return m_detectorRanges;
-}
-
-boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-InfoComponentVisitor::componentChildComponentRanges() const {
-  return m_componentRanges;
-}
-
-/**
- * @brief InfoComponentVisitor::detectorIndices
- * @return detector indices in the order in which they have been visited
- * thus grouped by assembly to form a contiguous range for levels of assemblies.
- */
-boost::shared_ptr<const std::vector<size_t>>
-InfoComponentVisitor::assemblySortedDetectorIndices() const {
-  return m_assemblySortedDetectorIndices;
-}
-
-boost::shared_ptr<const std::vector<size_t>>
-InfoComponentVisitor::assemblySortedComponentIndices() const {
-  return m_assemblySortedComponentIndices;
-}
-
-boost::shared_ptr<const std::vector<size_t>>
-InfoComponentVisitor::parentComponentIndices() const {
-  return m_parentComponentIndices;
 }
 
 /**
@@ -327,20 +294,6 @@ boost::shared_ptr<std::vector<detid_t>>
 InfoComponentVisitor::detectorIds() const {
   return m_orderedDetectorIds;
 }
-
-boost::shared_ptr<std::vector<Eigen::Vector3d>>
-InfoComponentVisitor::positions() const {
-  return m_positions;
-}
-
-boost::shared_ptr<std::vector<Eigen::Quaterniond>>
-InfoComponentVisitor::rotations() const {
-  return m_rotations;
-}
-
-int64_t InfoComponentVisitor::sample() const { return m_sampleIndex; }
-
-int64_t InfoComponentVisitor::source() const { return m_sourceIndex; }
 
 } // namespace Geometry
 } // namespace Mantid

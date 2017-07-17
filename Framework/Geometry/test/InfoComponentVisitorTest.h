@@ -9,6 +9,8 @@
 #include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include <set>
@@ -80,11 +82,10 @@ public:
         boost::make_shared<const Instrument>(visitee, pmap));
 
     // Visit everything. Purging should happen.
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
-    TSM_ASSERT_EQUALS(
-        "Detectors positions are purged by visitor at present",
-        pmap->size(), 0);
+    TSM_ASSERT_EQUALS("Detectors positions are purged by visitor at present",
+                      pmap->size(), 0);
   }
 
   void test_visitor_purges_parameter_map_safely() {
@@ -127,22 +128,26 @@ public:
                       2);
 
     InfoComponentVisitor visitor(parInstrument);
-    parInstrument->registerContents(visitor);
+    visitor.walkInstrument();
 
     TSM_ASSERT_EQUALS("Expect 0 items in the purged parameter map",
                       paramMap->size(), 0);
 
     // Now we check that thing are located where we expect them to be.
-    auto positions = visitor.positions();
-    TSM_ASSERT(
-        "Check source position",
-        (*positions)[0].isApprox(Mantid::Kernel::toVector3d(newSourcePos)));
-    TSM_ASSERT(
-        "Check instrument position",
-        (*positions)[2].isApprox(Mantid::Kernel::toVector3d(newInstrumentPos)));
+    auto compInfo = visitor.componentInfo();
+    auto detInfo = visitor.detectorInfo();
+    compInfo->setDetectorInfo(detInfo.get());
+    detInfo->setComponentInfo(compInfo.get());
+
+    TSM_ASSERT("Check source position",
+               compInfo->position(1)
+                   .isApprox(Mantid::Kernel::toVector3d(newSourcePos)));
+    TSM_ASSERT("Check instrument position",
+               compInfo->position(3)
+                   .isApprox(Mantid::Kernel::toVector3d(newInstrumentPos)));
   }
 
-  void test_visitor_detector_indexes_check() {
+  void test_visitor_detector_sanity_check() {
 
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
@@ -154,16 +159,21 @@ public:
     const size_t detectorIndex =
         0; // Internally we expect detector index to start at 0
 
+    const size_t instrumentIndex = 3; // Instrument is always hightest index.
+
     InfoComponentVisitor visitor(makeParameterized(visitee));
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
-    /*
-     * Now lets check the cached contents of our visitor to check
-     * it did the job correctly.
-    */
-    TSM_ASSERT_EQUALS("Single detector should have index of 0",
-                      *visitor.assemblySortedDetectorIndices(),
+    auto compInfo = visitor.componentInfo();
+    auto detInfo = visitor.detectorInfo();
+    compInfo->setDetectorInfo(detInfo.get());
+    detInfo->setComponentInfo(compInfo.get());
+
+    TSM_ASSERT_EQUALS("Detector has parent of instrument",
+                      compInfo->parent(detectorIndex), instrumentIndex);
+    TSM_ASSERT_EQUALS("Instrument has single detector",
+                      compInfo->detectorsInSubtree(instrumentIndex),
                       std::vector<size_t>{detectorIndex});
   }
 
@@ -177,7 +187,7 @@ public:
     InfoComponentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
     std::set<Mantid::Geometry::ComponentID> componentIds(
         visitor.componentIds()->begin(), visitor.componentIds()->end());
@@ -229,28 +239,14 @@ public:
     InfoComponentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
-    auto detectorRanges = visitor.componentDetectorRanges();
-    TSM_ASSERT_EQUALS("There are 3 non-detector components",
-                      detectorRanges->size(), 3);
+    auto compInfo = visitor.componentInfo();
+    auto detInfo = visitor.detectorInfo();
+    compInfo->setDetectorInfo(detInfo.get());
+    detInfo->setComponentInfo(compInfo.get());
 
-    /*
-     * In this instrument there is only a single assembly (the instrument
-     * itself). All other non-detectors are also non-assembly components.
-     * We therefore EXPECT that the ranges provided are all from 0 to 0 for
-     * those generic components. This is important for subsequent correct
-     * working on ComponentInfo.
-     */
-    // Source has no detectors
-    TS_ASSERT_EQUALS((*detectorRanges)[0].first, 0);
-    TS_ASSERT_EQUALS((*detectorRanges)[0].second, 0);
-    // Sample has no detectors
-    TS_ASSERT_EQUALS((*detectorRanges)[1].first, 0);
-    TS_ASSERT_EQUALS((*detectorRanges)[1].second, 0);
-    // Instrument has 1 detector
-    TS_ASSERT_EQUALS((*detectorRanges)[2].first, 0);
-    TS_ASSERT_EQUALS((*detectorRanges)[2].second, 1);
+    TS_ASSERT_EQUALS(compInfo->detectorsInSubtree(3), std::vector<size_t>{0});
   }
 
   void test_visitor_component_ranges_check() {
@@ -262,28 +258,25 @@ public:
 
     InfoComponentVisitor visitor(makeParameterized(visitee));
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
-    auto componentRanges = visitor.componentChildComponentRanges();
-    TSM_ASSERT_EQUALS("There are 3 non-detector components",
-                      componentRanges->size(), 3);
+    auto compInfo = visitor.componentInfo();
+    auto detInfo = visitor.detectorInfo();
+    compInfo->setDetectorInfo(detInfo.get());
+    detInfo->setComponentInfo(compInfo.get());
 
-    /*
-     * In this instrument there is only a single assembly (the instrument
-     * itself). We therefore EXPECT that the ranges provided are all from 0 to 0
-     * for
-     * those non-assembly components. This is important for subsequent correct
-     * working on ComponentInfo.
-     */
-    // Source has no sub-components, range includes only itself
-    TS_ASSERT_EQUALS((*componentRanges)[0].first, 0);
-    TS_ASSERT_EQUALS((*componentRanges)[0].second, 1);
-    // Sample has no sub-components, range includes only itself
-    TS_ASSERT_EQUALS((*componentRanges)[1].first, 1);
-    TS_ASSERT_EQUALS((*componentRanges)[1].second, 2);
-    // Instrument has 1 detector.
-    TS_ASSERT_EQUALS((*componentRanges)[2].first, 0);
-    TS_ASSERT_EQUALS((*componentRanges)[2].second, 4);
+    TS_ASSERT_EQUALS(compInfo->size(), 4); // 4 components in total
+    TS_ASSERT_EQUALS(detInfo->size(), 1);  // 1 component is a detector
+
+    auto subTreeOfRoot = compInfo->componentsInSubtree(3);
+    TS_ASSERT_EQUALS(
+        std::set<size_t>(subTreeOfRoot.begin(), subTreeOfRoot.end()),
+        (std::set<size_t>({0, 1, 2, 3})));
+
+    auto subTreeOfNonRoot = compInfo->componentsInSubtree(1);
+    TS_ASSERT_EQUALS(
+        std::set<size_t>(subTreeOfNonRoot.begin(), subTreeOfNonRoot.end()),
+        (std::set<size_t>({1})));
   }
   void test_visitor_collects_detector_id_to_index_mappings() {
 
@@ -295,7 +288,7 @@ public:
 
     InfoComponentVisitor visitor(makeParameterized(visitee));
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
     TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap()->size(), 1);
     TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap()->at(1),
@@ -328,7 +321,7 @@ public:
     InfoComponentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
     size_t expectedSize = 0;
     ++expectedSize; // only detector
@@ -346,7 +339,7 @@ public:
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
         1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
     InfoComponentVisitor visitor(makeParameterized(instrument));
-    instrument->registerContents(visitor);
+    visitor.walkInstrument();
 
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
                       visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
@@ -361,41 +354,16 @@ public:
     InfoComponentVisitor visitor(makeParameterized(instrument));
 
     // Visit everything
-    instrument->registerContents(visitor);
+    visitor.walkInstrument();
 
-    const auto parentComponentIndices = visitor.parentComponentIndices();
+    auto compInfo = visitor.componentInfo();
+    auto detInfo = visitor.detectorInfo();
+    compInfo->setDetectorInfo(detInfo.get());
+    detInfo->setComponentInfo(compInfo.get());
 
-    size_t testIndex =
-        visitor.size() -
-        2; // One component down from root. (Has parent of the root itself)
-    TS_ASSERT_EQUALS((*parentComponentIndices)[testIndex], visitor.size() - 1);
-    size_t root = visitor.size() - 1;
-    TS_ASSERT_EQUALS((*parentComponentIndices)[root], root);
-
-    testIndex = 0; // Check a detector
-    const auto rowAssemblyIndex = (*parentComponentIndices)[testIndex];
-    const auto bankIndex = (*parentComponentIndices)[rowAssemblyIndex];
-    const auto instrumentIndex = (*parentComponentIndices)[bankIndex];
-    // Walk all the way up to the instrument
-    TS_ASSERT_EQUALS(instrumentIndex, visitor.size() - 1);
-  }
-
-  void test_source_and_sample() {
-
-    // Create a very basic instrument to visit
-    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
-                                           V3D(10, 0, 0) /*sample pos*/
-                                           ,
-                                           V3D(11, 0, 0) /*detector position*/);
-
-    InfoComponentVisitor visitor(makeParameterized(visitee));
-
-    // Visit everything
-    visitee->registerContents(visitor);
-
-    // Detector has component index of 0
-    TS_ASSERT_EQUALS(1, visitor.source());
-    TS_ASSERT_EQUALS(2, visitor.sample());
+    TS_ASSERT_EQUALS(compInfo->parent(compInfo->source()), compInfo->root());
+    TS_ASSERT_EQUALS(compInfo->parent(compInfo->sample()), compInfo->root());
+    TS_ASSERT_EQUALS(compInfo->parent(compInfo->root()), compInfo->root());
   }
 };
 
@@ -422,7 +390,7 @@ public:
 
   void test_process_rectangular_instrument() {
     InfoComponentVisitor visitor(m_instrument);
-    m_instrument->registerContents(visitor);
+    visitor.walkInstrument();
     TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
   }
 };
