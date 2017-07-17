@@ -30,7 +30,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         self.assertEquals(x_unit, 'Wavelength')
 
         y_unit = corr_ws.YUnitLabel()
-        self.assertEquals(y_unit, 'Attenuation Factor')
+        self.assertEquals(y_unit, 'Attenuation factor')
 
         num_hists = corr_ws.getNumberHistograms()
         self.assertEquals(num_hists, 10)
@@ -44,6 +44,31 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                     Shape='FlatPlate',
                                                     Width=2.0,
                                                     Thickness=2.0,
+                                                    **kwargs)
+
+        self._test_corrections_workspace(corrected)
+
+    def test_cylinder(self):
+        """
+        Test flat plate shape
+        """
+        kwargs = self._arguments
+        corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
+                                                    Shape='Cylinder',
+                                                    Radius=2.0,
+                                                    **kwargs)
+
+        self._test_corrections_workspace(corrected)
+
+    def test_annulus(self):
+        """
+        Test flat plate shape
+        """
+        kwargs = self._arguments
+        corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
+                                                    Shape='Annulus',
+                                                    InnerRadius=1.0,
+                                                    OuterRadius=2.0,
                                                     **kwargs)
 
         self._test_corrections_workspace(corrected)
