@@ -79,6 +79,7 @@ private:
                           const API::MatrixWorkspace &ws2,
                           API::MatrixWorkspace &output) override;
   bool processGroups() override;
+  void setYUnitAndLabel(API::MatrixWorkspace &ws) const;
 
   /// True if spectra overlap
   bool m_overlapChecked = false;

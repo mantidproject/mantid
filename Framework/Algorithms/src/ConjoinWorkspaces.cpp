@@ -62,13 +62,16 @@ void ConjoinWorkspaces::exec() {
 
   if (event_ws1 && event_ws2) {
 	  auto output = conjoinEvents(*event_ws1, *event_ws2);
+	  setYUnitAndLabel(*output);
 	  // Set the result workspace to the first input
 	  setProperty("InputWorkspace1", output);
   } else {
 	  auto output = conjoinHistograms(*ws1, *ws2);
+	  setYUnitAndLabel(*output);
 	  // Set the result workspace to the first input
 	  setProperty("InputWorkspace1", output);
   }
+  
   // Delete the second input workspace from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
 }
@@ -236,6 +239,17 @@ bool ConjoinWorkspaces::processGroups() {
     AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
 
   return retval;
+}
+
+void ConjoinWorkspaces::setYUnitAndLabel(API::MatrixWorkspace & ws) const{
+	const std::string yLabel = getPropertyValue("YAXisLabel");
+	const std::string yUnit = getPropertyValue("YAxisUnit");
+
+	if (!yUnit.empty())
+		ws.setYUnit(std::move(yUnit));
+
+	if (!yLabel.empty())
+		ws.setYUnitLabel(std::move(yLabel));
 }
 
 } // namespace Algorithm
