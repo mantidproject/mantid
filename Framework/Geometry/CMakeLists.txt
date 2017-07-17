@@ -47,16 +47,16 @@ set ( SRC_FILES
 	src/Instrument/CompAssembly.cpp
 	src/Instrument/Component.cpp
 	src/Instrument/ComponentHelper.cpp
-        src/Instrument/ComponentInfo.cpp
-        src/Instrument/Container.cpp
+	src/Instrument/ComponentInfo.cpp
+	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
 	src/Instrument/DetectorInfo.cpp
 	src/Instrument/DetectorGroup.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
 	src/Instrument/IDFObject.cpp
-        src/Instrument/InfoComponentVisitor.cpp
-        src/Instrument/InstrumentDefinitionParser.cpp
+	src/Instrument/InstrumentDefinitionParser.cpp
+	src/Instrument/InstrumentVisitor.cpp
 	src/Instrument/ObjCompAssembly.cpp
 	src/Instrument/ObjComponent.cpp
 	src/Instrument/ParComponentFactory.cpp
@@ -202,8 +202,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
-        inc/MantidGeometry/Instrument/ComponentInfo.h
-        inc/MantidGeometry/Instrument/ComponentHelper.h
+	inc/MantidGeometry/Instrument/ComponentHelper.h
+	inc/MantidGeometry/Instrument/ComponentInfo.h
 	inc/MantidGeometry/Instrument/ComponentVisitor.h
 	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/Detector.h
@@ -212,8 +212,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
 	inc/MantidGeometry/Instrument/IDFObject.h
-        inc/MantidGeometry/Instrument/InfoComponentVisitor.h
-        inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
+	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
+	inc/MantidGeometry/Instrument/InstrumentVisitor.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
 	inc/MantidGeometry/Instrument/ObjComponent.h
 	inc/MantidGeometry/Instrument/ParComponentFactory.h
@@ -311,8 +311,8 @@ set ( TEST_FILES
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentHelperTest.h
-        ComponentInfoTest.h
-        ComponentParserTest.h
+	ComponentInfoTest.h
+	ComponentParserTest.h
 	ComponentTest.h
 	CompositeBraggScattererTest.h
 	CompositeImplicitFunctionTest.h
@@ -340,10 +340,10 @@ set ( TEST_FILES
 	IMDDimensionFactoryTest.h
 	IMDDimensionTest.h
 	IndexingUtilsTest.h
-	InfoComponentVisitorTest.h
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
 	InstrumentTest.h
+	InstrumentVisitorTest.h
 	IsotropicAtomBraggScattererTest.h
 	LineIntersectVisitTest.h
 	LineTest.h

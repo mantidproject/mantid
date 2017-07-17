@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_INFOCOMPONENTVISITOR_H_
-#define MANTID_GEOMETRY_INFOCOMPONENTVISITOR_H_
+#ifndef MANTID_GEOMETRY_INSTRUMENTVISITOR_H_
+#define MANTID_GEOMETRY_INSTRUMENTVISITOR_H_
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
@@ -26,12 +26,12 @@ class DetectorInfo;
 namespace Geometry {
 
 class Instrument;
-/** InfoComponentVisitor : Visitor for components with access to Info wrapping
+/** InstrumentVisitor : Visitor for components with access to Info wrapping
   features.
 
   This visitor ensures only minimal changes are required to any of the
   IComponent/Instrument1.0 hierachy in order to fully process it. It also
-  eliminates the need for any dynamic casting. Note that InfoComponentVisitor
+  eliminates the need for any dynamic casting. Note that InstrumentVisitor
   provides accessors for the client to extract visited information such as
   ComponentIDs.
 
@@ -56,7 +56,7 @@ class Instrument;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL InfoComponentVisitor
+class MANTID_GEOMETRY_DLL InstrumentVisitor
     : public Mantid::Geometry::ComponentVisitor {
 private:
   /// Detector indices
@@ -128,7 +128,7 @@ private:
                             const size_t componentIndex);
 
 public:
-  InfoComponentVisitor(boost::shared_ptr<const Instrument> instrument);
+  InstrumentVisitor(boost::shared_ptr<const Instrument> instrument);
 
   void walkInstrument();
 
@@ -162,4 +162,4 @@ public:
 } // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_INFOCOMPONENTVISITOR_H_ */
+#endif /* MANTID_GEOMETRY_INSTRUMENTVISITOR_H_ */

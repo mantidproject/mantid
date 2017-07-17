@@ -12,11 +12,10 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
@@ -72,8 +71,7 @@ ExperimentInfo::ExperimentInfo()
       sptr_instrument(new Instrument()),
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
       m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()),
-      m_infoVisitor(
-          Kernel::make_unique<InfoComponentVisitor>(sptr_instrument)) {
+      m_infoVisitor(Kernel::make_unique<InstrumentVisitor>(sptr_instrument)) {
   auto parInstrument = makeParameterizedInstrument();
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<Geometry::DetectorInfo>(
@@ -200,7 +198,7 @@ void checkDetectorInfoSize(const Instrument &instr,
 
 std::unique_ptr<Beamline::DetectorInfo>
 makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr,
-                 const InfoComponentVisitor &visitor) {
+                 const InstrumentVisitor &visitor) {
 
   if (newInstr.hasDetectorInfo()) {
     // We allocate a new DetectorInfo in case there is an Instrument holding a
@@ -215,18 +213,17 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr,
   }
 }
 
-std::unique_ptr<Geometry::InfoComponentVisitor>
+std::unique_ptr<Geometry::InstrumentVisitor>
 makeOrRetrieveVisitor(boost::shared_ptr<const Instrument> parInstrument,
                       const Instrument &newInstrument) {
   if (!newInstrument.hasInfoVisitor() || newInstrument.isEmptyInstrument()) {
 
-    auto visitor = Kernel::make_unique<InfoComponentVisitor>(parInstrument);
+    auto visitor = Kernel::make_unique<InstrumentVisitor>(parInstrument);
     // Collect everything
     visitor->walkInstrument();
     return visitor;
   } else {
-    return Kernel::make_unique<InfoComponentVisitor>(
-        newInstrument.infoVisitor());
+    return Kernel::make_unique<InstrumentVisitor>(newInstrument.infoVisitor());
   }
 }
 }
@@ -237,7 +234,7 @@ makeOrRetrieveVisitor(boost::shared_ptr<const Instrument> parInstrument,
  * via registerContents.
  * @param newInstrument : unparametrised new instrument
  */
-void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor,
+void ExperimentInfo::makeAPIComponentInfo(const InstrumentVisitor &visitor,
                                           const Instrument &newInstrument) {
 
   if (newInstrument.hasComponentInfo()) {

@@ -1,4 +1,4 @@
-#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
@@ -48,11 +48,11 @@ void clearPositionAndRotationParameters(ParameterMap *pmap,
 }
 
 /**
- * @brief InfoComponentVisitor::registerComponentAssembly
+ * @brief InstrumentVisitor::registerComponentAssembly
  * @param instrument : Instrument being visited
  * @return Component index of this component
  */
-InfoComponentVisitor::InfoComponentVisitor(
+InstrumentVisitor::InstrumentVisitor(
     boost::shared_ptr<const Instrument> instrument)
     : m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(std::move(
           instrument->getDetectorIDs(false /*Do not skip monitors*/)))),
@@ -97,7 +97,7 @@ InfoComponentVisitor::InfoComponentVisitor(
   m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
 }
 
-void InfoComponentVisitor::walkInstrument() {
+void InstrumentVisitor::walkInstrument() {
   if (m_pmap && m_pmap->empty()) {
     // Go through the base instrument for speed.
     m_instrument->baseInstrument()->registerContents(*this);
@@ -106,7 +106,7 @@ void InfoComponentVisitor::walkInstrument() {
 }
 
 size_t
-InfoComponentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
+InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
 
   std::vector<IComponent_const_sptr> assemblyChildren;
   assembly.getChildren(assemblyChildren, false /*is recursive*/);
@@ -147,12 +147,12 @@ InfoComponentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
 }
 
 /**
- * @brief InfoComponentVisitor::registerGenericComponent
+ * @brief InstrumentVisitor::registerGenericComponent
  * @param component : IComponent being visited
  * @return Component index of this component
  */
 size_t
-InfoComponentVisitor::registerGenericComponent(const IComponent &component) {
+InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   /*
    * For a generic leaf component we extend the component ids list, but
    * the detector indexes entries will of course be empty
@@ -177,8 +177,8 @@ InfoComponentVisitor::registerGenericComponent(const IComponent &component) {
   return componentIndex;
 }
 
-void InfoComponentVisitor::markAsSourceOrSample(ComponentID componentId,
-                                                const size_t componentIndex) {
+void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId,
+                                             const size_t componentIndex) {
   if (componentId == m_sampleId) {
     m_sampleIndex = componentIndex;
   } else if (componentId == m_sourceId) {
@@ -187,11 +187,11 @@ void InfoComponentVisitor::markAsSourceOrSample(ComponentID componentId,
 }
 
 /**
- * @brief InfoComponentVisitor::registerDetector
+ * @brief InstrumentVisitor::registerDetector
  * @param detector : IDetector being visited
  * @return Component index of this component
  */
-size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
+size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
 
   size_t detectorIndex = 0;
   try {
@@ -242,41 +242,41 @@ size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
 }
 
 /**
- * @brief InfoComponentVisitor::componentIds
+ * @brief InstrumentVisitor::componentIds
  * @return  component ids in the order in which they have been visited.
  * Note that the number of component ids will be >= the number of detector
  * indices
  * since all detectors are components but not all components are detectors
  */
 boost::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>>
-InfoComponentVisitor::componentIds() const {
+InstrumentVisitor::componentIds() const {
   return m_componentIds;
 }
 
 /**
- * @brief InfoComponentVisitor::size
+ * @brief InstrumentVisitor::size
  * @return The total size of the components visited.
  * This will be the same as the number of IDs.
  */
-size_t InfoComponentVisitor::size() const {
+size_t InstrumentVisitor::size() const {
   return m_componentIds->size() - m_droppedDetectors;
 }
 
-bool InfoComponentVisitor::isEmpty() const { return size() == 0; }
+bool InstrumentVisitor::isEmpty() const { return size() == 0; }
 
 boost::shared_ptr<
     const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
-InfoComponentVisitor::componentIdToIndexMap() const {
+InstrumentVisitor::componentIdToIndexMap() const {
   return m_componentIdToIndexMap;
 }
 
 boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-InfoComponentVisitor::detectorIdToIndexMap() const {
+InstrumentVisitor::detectorIdToIndexMap() const {
   return m_detectorIdToIndexMap;
 }
 
 std::unique_ptr<Beamline::ComponentInfo>
-InfoComponentVisitor::componentInfo() const {
+InstrumentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
@@ -285,13 +285,12 @@ InfoComponentVisitor::componentInfo() const {
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
-InfoComponentVisitor::detectorInfo() const {
+InstrumentVisitor::detectorInfo() const {
   return Kernel::make_unique<Mantid::Beamline::DetectorInfo>(
       *m_detectorPositions, *m_detectorRotations, *m_monitorIndices);
 }
 
-boost::shared_ptr<std::vector<detid_t>>
-InfoComponentVisitor::detectorIds() const {
+boost::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const {
   return m_orderedDetectorIds;
 }
 

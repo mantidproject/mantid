@@ -24,7 +24,7 @@ class ComponentInfo;
 class DetectorInfo;
 }
 namespace Geometry {
-class InfoComponentVisitor;
+class InstrumentVisitor;
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
@@ -257,9 +257,9 @@ public:
       boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds);
 
-  void setInfoVisitor(const InfoComponentVisitor &visitor);
+  void setInfoVisitor(const InstrumentVisitor &visitor);
 
-  const InfoComponentVisitor &infoVisitor() const;
+  const InstrumentVisitor &infoVisitor() const;
 
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
@@ -357,7 +357,7 @@ private:
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};
   /// Component and Detector info relevant cache
-  std::unique_ptr<const InfoComponentVisitor> m_infoVisitor;
+  std::unique_ptr<const InstrumentVisitor> m_infoVisitor;
 };
 namespace Conversion {
 
