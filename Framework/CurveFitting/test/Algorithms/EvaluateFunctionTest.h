@@ -87,7 +87,7 @@ public:
     tester.setRange(0, 30);
     tester.setWorkspaceRange(40, 50);
     tester.setWorkspaceIndex();
-    tester.runAlgorithm();
+    tester.runAlgorithm(true);
     tester.checkResult(true);
   }
 
