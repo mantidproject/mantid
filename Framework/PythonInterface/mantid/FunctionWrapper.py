@@ -168,8 +168,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
    
           #Add the functions
           for a in args:
-             if not isinstance(a, int): 
-                self.fun.add(a.fun)    
+             if not isinstance(a, int):
+                functionToAdd = FunctionFactory.createInitialized( a.fun.__str__() )             
+                self.fun.add(functionToAdd)    
       
     def getParameter(self, name):
         """ get value of parameter of specified name
