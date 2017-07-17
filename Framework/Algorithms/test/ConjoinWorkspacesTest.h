@@ -306,7 +306,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisUnit", unit));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
 
-    auto &result = getWSFromADS(ws1Name);
+    auto result = getWSFromADS(ws1Name);
 
     TSM_ASSERT_EQUALS("YUnitLabel was not reset after YUnit changed",
                       result->YUnitLabel(), label);
@@ -329,7 +329,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisLabel", label));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
 
-    auto &result = getWSFromADS(ws1Name);
+    auto result = getWSFromADS(ws1Name);
 
     TS_ASSERT_EQUALS(unit, result->YUnit());
     TS_ASSERT_EQUALS(label, result->YUnitLabel());
