@@ -10,7 +10,14 @@
 namespace Mantid {
 namespace API {
 
-/** IndexProperty : TODO: DESCRIPTION
+/** IndexProperty : Implementation of a property type which returns a
+  SpectrumIndexSet provided an input vector of integers or a string. The
+  constructor accepts a WorkspaceProperty and an IndexTypeProperty which are
+  used to validate user input and access the IndexInfo which manages spectrum
+  index information within the workspace.
+
+  @author Lamar Moore
+  @data 1/7/2017
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

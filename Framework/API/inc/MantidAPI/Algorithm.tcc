@@ -105,7 +105,7 @@ void Algorithm::setIndexProperty(const std::string &name,
 * T2 is either std::string or std::vector<int>
 
 @param name Property name
-@param wsName Workspace as a pointer
+@param wsName Workspace name as string
 @param type Index type IndexType::WorkspaceIndex or IndexType::SpectrumNum
 @param list List of indices to be used.
 */

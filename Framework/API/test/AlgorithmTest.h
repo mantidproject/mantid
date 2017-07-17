@@ -812,23 +812,51 @@ public:
     TS_ASSERT_THROWS_NOTHING(indexAlg.init());
   }
 
-  void testIndexingAlgorithm_setIndexPropertyMethods() {
-    IndexingAlgorithm indexAlg;
+  void
+  testIndexingAlgorithm_setIndexPropertyWithWorkspacePointerAndVectorOfIntegers() {
     auto wksp =
         WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    IndexingAlgorithm indexAlg;
     indexAlg.init();
-    AnalysisDataService::Instance().add("wksp", wksp);
     TS_ASSERT_THROWS_NOTHING(
         (indexAlg.setIndexProperty<MatrixWorkspace, std::vector<int>>(
             "InputWorkspace", wksp, IndexType::WorkspaceIndex,
             std::vector<int>{1, 2, 3, 4, 5})));
+  }
+
+  void
+  testIndexingAlgorithm_setIndexPropertyWithWorkspacePointerAndStringList() {
+    auto wksp =
+        WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    IndexingAlgorithm indexAlg;
+    indexAlg.init();
     TS_ASSERT_THROWS_NOTHING(
         (indexAlg.setIndexProperty<MatrixWorkspace, std::string>(
             "InputWorkspace", wksp, IndexType::WorkspaceIndex, "1:5")));
+  }
+
+  void
+  testIndexingAlgorithm_setIndexPropertyWithWorkspaceNameAndVectorOfIntegers() {
+    auto wksp =
+        WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    AnalysisDataService::Instance().add("wksp", wksp);
+    IndexingAlgorithm indexAlg;
+    indexAlg.init();
+    // Requires workspace in ADS due to validity checks
     TS_ASSERT_THROWS_NOTHING(
         (indexAlg.setIndexProperty<MatrixWorkspace, std::vector<int>>(
             "InputWorkspace", "wksp", IndexType::WorkspaceIndex,
             std::vector<int>{1, 2, 3, 4, 5})));
+    AnalysisDataService::Instance().remove("wksp");
+  }
+
+  void testIndexingAlgorithm_setIndexPropertyWithWorkspaceNameAndStringList() {
+    auto wksp =
+        WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    AnalysisDataService::Instance().add("wksp", wksp);
+    IndexingAlgorithm indexAlg;
+    indexAlg.init();
+    // Requires workspace in ADS due to validity checks
     TS_ASSERT_THROWS_NOTHING(
         (indexAlg.setIndexProperty<MatrixWorkspace, std::string>(
             "InputWorkspace", "wksp", IndexType::WorkspaceIndex, "1:5")));
@@ -840,9 +868,8 @@ public:
     indexAlg.init();
     auto wksp =
         WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
-    AnalysisDataService::Instance().add("wksp", wksp);
     indexAlg.setIndexProperty<MatrixWorkspace, std::string>(
-        "InputWorkspace", "wksp", IndexType::WorkspaceIndex, "1:5");
+        "InputWorkspace", wksp, IndexType::WorkspaceIndex, "1:5");
 
     MatrixWorkspace_sptr wsTest;
     SpectrumIndexSet indexSet(0);
@@ -855,8 +882,6 @@ public:
 
     for (size_t i = 0; i < indexSet.size(); i++)
       TS_ASSERT_EQUALS(indexSet[i], i + 1);
-
-    AnalysisDataService::Instance().remove("wksp");
   }
 
   void testIndexingAlgorithm_accessFailInvalidPropertyType() {

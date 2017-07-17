@@ -9,7 +9,10 @@ namespace API {
 
 enum IndexType { SpectrumNum = 1, WorkspaceIndex = 2 };
 
-/** IndexTypeProperty : TODO : Add support for DetectorIDs
+/** IndexTypeProperty : Implementation of a property which stores the type of
+input indices users require for accessing workspace data. This works in harmony
+with IndexProperty and is not intended for isolated use.
+
 @author Lamar Moore
 @date 05-05-2017
 Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
