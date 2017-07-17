@@ -217,14 +217,16 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr,
 std::unique_ptr<Geometry::InstrumentVisitor>
 makeOrRetrieveVisitor(boost::shared_ptr<const Instrument> parInstrument,
                       const Instrument &newInstrument) {
-  if (!newInstrument.hasInfoVisitor() || newInstrument.isEmptyInstrument()) {
+  if (!newInstrument.hasInstrumentVisitor() ||
+      newInstrument.isEmptyInstrument()) {
 
     auto visitor = Kernel::make_unique<InstrumentVisitor>(parInstrument);
     // Collect everything
     visitor->walkInstrument();
     return visitor;
   } else {
-    return Kernel::make_unique<InstrumentVisitor>(newInstrument.infoVisitor());
+    return Kernel::make_unique<InstrumentVisitor>(
+        newInstrument.instrumentVisitor());
   }
 }
 }
@@ -320,8 +322,9 @@ Instrument_sptr ExperimentInfo::makeParameterizedInstrument() const {
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
   auto instrument = makeParameterizedInstrument();
   instrument->setDetectorInfo(m_detectorInfo);
-  instrument->setInfoVisitor(*m_infoVisitor); // TODO. We actually only need the
-                                              // ID->index part of this mapping
+  instrument->setInstrumentVisitor(
+      *m_infoVisitor); // TODO. We actually only need the
+                       // ID->index part of this mapping
   instrument->setComponentInfo(m_componentInfo, m_infoVisitor->componentIds());
   return instrument;
 }

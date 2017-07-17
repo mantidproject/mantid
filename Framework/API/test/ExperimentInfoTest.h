@@ -82,7 +82,7 @@ public:
 
     // ALL of these should be set. Even though we have just an empty instrument
     // stored. See constructor.
-    TS_ASSERT(i->hasInfoVisitor());
+    TS_ASSERT(i->hasInstrumentVisitor());
     TS_ASSERT(i->hasDetectorInfo());
   }
 

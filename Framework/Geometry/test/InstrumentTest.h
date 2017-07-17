@@ -689,7 +689,7 @@ public:
                                  // ExperimentInfo::setInstrumen
     TSM_ASSERT("Can only be "
                "available when associated with ExperimentInfo",
-               !loneInstrument.hasInfoVisitor());
+               !loneInstrument.hasInstrumentVisitor());
     TSM_ASSERT("Can only be "
                "available when associated with ExperimentInfo",
                !loneInstrument.hasDetectorInfo());
@@ -697,11 +697,11 @@ public:
 
   void test_set_InfoVisitor() {
     Instrument instrument;
-    TS_ASSERT(!instrument.hasInfoVisitor());
+    TS_ASSERT(!instrument.hasInstrumentVisitor());
     InstrumentVisitor visitor(boost::make_shared<Instrument>(
         boost::make_shared<Instrument>(), boost::make_shared<ParameterMap>()));
-    instrument.setInfoVisitor(visitor);
-    TS_ASSERT(instrument.hasInfoVisitor());
+    instrument.setInstrumentVisitor(visitor);
+    TS_ASSERT(instrument.hasInstrumentVisitor());
   }
 
 private:
