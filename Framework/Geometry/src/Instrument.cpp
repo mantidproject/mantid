@@ -1,5 +1,5 @@
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -1251,7 +1251,7 @@ const Beamline::ComponentInfo &Instrument::componentInfo() const {
 
 /**
  * Only for use by ExperimentInfo
- * @return True only if a InfoComponentVisitor has been set.
+ * @return True only if a InstrumentVisitor has been set.
  */
 bool Instrument::hasInfoVisitor() const {
   return static_cast<bool>(m_infoVisitor);
@@ -1292,14 +1292,14 @@ void Instrument::setComponentInfo(
   m_componentCache = std::move(componentIds);
 }
 
-void Instrument::setInfoVisitor(const InfoComponentVisitor &visitor) {
-  m_infoVisitor.reset(new InfoComponentVisitor(visitor));
+void Instrument::setInfoVisitor(const InstrumentVisitor &visitor) {
+  m_infoVisitor.reset(new InstrumentVisitor(visitor));
 }
 
-const InfoComponentVisitor &Instrument::infoVisitor() const {
+const InstrumentVisitor &Instrument::infoVisitor() const {
   if (!m_infoVisitor) {
     throw std::runtime_error(
-        "Instrument::infoVisitor InfoComponentVisitor never set");
+        "Instrument::infoVisitor InstrumentVisitor never set");
   }
   return *m_infoVisitor;
 }

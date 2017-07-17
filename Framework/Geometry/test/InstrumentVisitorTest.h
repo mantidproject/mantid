@@ -1,12 +1,12 @@
-#ifndef MANTID_GEOMETRY_INFOCOMPONENTVISITORTEST_H_
-#define MANTID_GEOMETRY_INFOCOMPONENTVISITORTEST_H_
+#ifndef MANTID_GEOMETRY_INSTRUMENTVISITORVISITORTEST_H_
+#define MANTID_GEOMETRY_INSTRUMENTVISITORVISITORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidBeamline/ComponentInfo.h"
@@ -31,14 +31,14 @@ makeParameterized(boost::shared_ptr<const Instrument> baseInstrument) {
 }
 }
 
-class InfoComponentVisitorTest : public CxxTest::TestSuite {
+class InstrumentVisitorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InfoComponentVisitorTest *createSuite() {
-    return new InfoComponentVisitorTest();
+  static InstrumentVisitorTest *createSuite() {
+    return new InstrumentVisitorTest();
   }
-  static void destroySuite(InfoComponentVisitorTest *suite) { delete suite; }
+  static void destroySuite(InstrumentVisitorTest *suite) { delete suite; }
 
   void test_visitor_basic_sanity_check() {
 
@@ -48,7 +48,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
     // Create the visitor.
-    InfoComponentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(makeParameterized(visitee));
     // Visit everything
     visitee->registerContents(visitor);
 
@@ -78,7 +78,7 @@ public:
     TS_ASSERT_EQUALS(pmap->size(), 2);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(
+    InstrumentVisitor visitor(
         boost::make_shared<const Instrument>(visitee, pmap));
 
     // Visit everything. Purging should happen.
@@ -127,7 +127,7 @@ public:
     TSM_ASSERT_EQUALS("Expect 2 items in the parameter map", paramMap->size(),
                       2);
 
-    InfoComponentVisitor visitor(parInstrument);
+    InstrumentVisitor visitor(parInstrument);
     visitor.walkInstrument();
 
     TSM_ASSERT_EQUALS("Expect 0 items in the purged parameter map",
@@ -161,7 +161,7 @@ public:
 
     const size_t instrumentIndex = 3; // Instrument is always hightest index.
 
-    InfoComponentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(makeParameterized(visitee));
     // Visit everything
     visitor.walkInstrument();
 
@@ -184,7 +184,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    InfoComponentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
     visitor.walkInstrument();
@@ -236,7 +236,7 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
     visitor.walkInstrument();
@@ -256,7 +256,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    InfoComponentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(makeParameterized(visitee));
     // Visit everything
     visitor.walkInstrument();
 
@@ -286,7 +286,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    InfoComponentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(makeParameterized(visitee));
     // Visit everything
     visitor.walkInstrument();
 
@@ -318,7 +318,7 @@ public:
     visitee->add(det);
     visitee->markAsDetector(det);
 
-    InfoComponentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
     visitor.walkInstrument();
@@ -338,7 +338,7 @@ public:
     const int nPixelsWide = 10; // Gives 10*10 detectors in total
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
         1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
-    InfoComponentVisitor visitor(makeParameterized(instrument));
+    InstrumentVisitor visitor(makeParameterized(instrument));
     visitor.walkInstrument();
 
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
@@ -351,7 +351,7 @@ public:
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
         1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
 
-    InfoComponentVisitor visitor(makeParameterized(instrument));
+    InstrumentVisitor visitor(makeParameterized(instrument));
 
     // Visit everything
     visitor.walkInstrument();
@@ -367,7 +367,7 @@ public:
   }
 };
 
-class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {
+class InstrumentVisitorTestPerformance : public CxxTest::TestSuite {
 private:
   const int m_nPixels = 1000;
   boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
@@ -375,23 +375,23 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InfoComponentVisitorTestPerformance *createSuite() {
-    return new InfoComponentVisitorTestPerformance();
+  static InstrumentVisitorTestPerformance *createSuite() {
+    return new InstrumentVisitorTestPerformance();
   }
-  static void destroySuite(InfoComponentVisitorTestPerformance *suite) {
+  static void destroySuite(InstrumentVisitorTestPerformance *suite) {
     delete suite;
   }
 
-  InfoComponentVisitorTestPerformance() {
+  InstrumentVisitorTestPerformance() {
     m_instrument = makeParameterized(
         ComponentCreationHelper::createTestInstrumentRectangular(
             1 /*n banks*/, m_nPixels, 1 /*sample-bank distance*/));
   }
 
   void test_process_rectangular_instrument() {
-    InfoComponentVisitor visitor(m_instrument);
+    InstrumentVisitor visitor(m_instrument);
     visitor.walkInstrument();
     TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
   }
 };
-#endif /* MANTID_API_INFOCOMPONENTVISITORTEST_H_ */
+#endif /* MANTID_API_INSTRUMENTVISITORVISITORTEST_H_ */

@@ -7,7 +7,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
@@ -26,7 +26,7 @@ std::tuple<boost::shared_ptr<Beamline::ComponentInfo>,
            boost::shared_ptr<const std::unordered_map<
                Mantid::Geometry::IComponent *, size_t>>>
 makeComponentInfo(boost::shared_ptr<const Instrument> parInstrument) {
-  InfoComponentVisitor visitor(parInstrument);
+  InstrumentVisitor visitor(parInstrument);
   parInstrument->registerContents(visitor);
   return std::make_tuple(
       boost::shared_ptr<Beamline::ComponentInfo>(visitor.componentInfo()),
@@ -698,7 +698,7 @@ public:
   void test_set_InfoVisitor() {
     Instrument instrument;
     TS_ASSERT(!instrument.hasInfoVisitor());
-    InfoComponentVisitor visitor(boost::make_shared<Instrument>(
+    InstrumentVisitor visitor(boost::make_shared<Instrument>(
         boost::make_shared<Instrument>(), boost::make_shared<ParameterMap>()));
     instrument.setInfoVisitor(visitor);
     TS_ASSERT(instrument.hasInfoVisitor());
