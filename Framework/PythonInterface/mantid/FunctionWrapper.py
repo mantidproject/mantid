@@ -346,8 +346,10 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
        self.initByName("MultiDomainFunction", *args)
                
        # Tie the global parameters
-       if(kwargs.has_key('global')):
-          self.tieAll(**kwargs['global'])
+       if(kwargs.has_key('Global')):
+          list = kwargs['Global']
+          for name in list:
+             self.tieAll(name)
        
        # Set domain indices: 1 to 1       
        for i in range(0, len(self)):
