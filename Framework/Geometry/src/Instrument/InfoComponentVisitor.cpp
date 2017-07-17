@@ -72,10 +72,11 @@ InfoComponentVisitor::InfoComponentVisitor(
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
-      m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
+      m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
+          m_orderedDetectorIds->size())),
       m_rotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
-      m_detectorRotations(
-          boost::make_shared<std::vector<Eigen::Quaterniond>>()),
+      m_detectorRotations(boost::make_shared<std::vector<Eigen::Quaterniond>>(
+          m_orderedDetectorIds->size())),
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr) {
 
@@ -92,8 +93,6 @@ InfoComponentVisitor::InfoComponentVisitor(
 
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors);  // Exact
-  m_detectorPositions->reserve(nDetectors);              // Exact
-  m_detectorRotations->reserve(nDetectors);              // Exact
   m_assemblySortedComponentIndices->reserve(nDetectors); // Approximation
   m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
 }
@@ -220,9 +219,10 @@ size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
     (*m_componentIds)[detectorIndex] = detector.getComponentID();
     m_assemblySortedDetectorIndices->push_back(detectorIndex);
     m_assemblySortedComponentIndices->push_back(detectorIndex);
-    m_detectorPositions->emplace_back(Kernel::toVector3d(detector.getPos()));
-    m_detectorRotations->emplace_back(
-        Kernel::toQuaterniond(detector.getRotation()));
+    (*m_detectorPositions)[detectorIndex] =
+        Kernel::toVector3d(detector.getPos());
+    (*m_detectorRotations)[detectorIndex] =
+        Kernel::toQuaterniond(detector.getRotation());
     if (m_instrument->isMonitorViaIndex(detectorIndex)) {
       m_monitorIndices->push_back(detectorIndex);
     }
