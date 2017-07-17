@@ -245,7 +245,7 @@ public:
 
   bool hasDetectorInfo() const;
   const Beamline::DetectorInfo &detectorInfo() const;
-  bool hasInfoVisitor() const;
+  bool hasInstrumentVisitor() const;
 
   bool hasComponentInfo() const;
   const Beamline::ComponentInfo &componentInfo() const;
@@ -257,9 +257,9 @@ public:
       boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds);
 
-  void setInfoVisitor(const InstrumentVisitor &visitor);
+  void setInstrumentVisitor(const InstrumentVisitor &visitor);
 
-  const InstrumentVisitor &infoVisitor() const;
+  const InstrumentVisitor &instrumentVisitor() const;
 
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
@@ -357,7 +357,7 @@ private:
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};
   /// Component and Detector info relevant cache
-  std::unique_ptr<const InstrumentVisitor> m_infoVisitor;
+  std::unique_ptr<const InstrumentVisitor> m_instrVisitor;
 };
 namespace Conversion {
 

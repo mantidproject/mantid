@@ -1253,8 +1253,8 @@ const Beamline::ComponentInfo &Instrument::componentInfo() const {
  * Only for use by ExperimentInfo
  * @return True only if a InstrumentVisitor has been set.
  */
-bool Instrument::hasInfoVisitor() const {
-  return static_cast<bool>(m_infoVisitor);
+bool Instrument::hasInstrumentVisitor() const {
+  return static_cast<bool>(m_instrVisitor);
 }
 
 /**
@@ -1292,16 +1292,16 @@ void Instrument::setComponentInfo(
   m_componentCache = std::move(componentIds);
 }
 
-void Instrument::setInfoVisitor(const InstrumentVisitor &visitor) {
-  m_infoVisitor.reset(new InstrumentVisitor(visitor));
+void Instrument::setInstrumentVisitor(const InstrumentVisitor &visitor) {
+  m_instrVisitor.reset(new InstrumentVisitor(visitor));
 }
 
-const InstrumentVisitor &Instrument::infoVisitor() const {
-  if (!m_infoVisitor) {
+const InstrumentVisitor &Instrument::instrumentVisitor() const {
+  if (!m_instrVisitor) {
     throw std::runtime_error(
         "Instrument::infoVisitor InstrumentVisitor never set");
   }
-  return *m_infoVisitor;
+  return *m_instrVisitor;
 }
 
 /// Returns the index for a detector ID. Used for accessing DetectorInfo.
