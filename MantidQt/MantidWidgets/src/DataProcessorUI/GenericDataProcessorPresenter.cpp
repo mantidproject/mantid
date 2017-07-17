@@ -269,6 +269,9 @@ void GenericDataProcessorPresenter::process() {
 
   m_newSelection = false;
 
+  // Clear any highlighted rows
+  m_manager->clearHighlighted();
+
   // Progress: each group and each row within count as a progress step.
   int progress = 0;
   int maxProgress = (int)(m_selectedData.size());
@@ -331,6 +334,7 @@ void GenericDataProcessorPresenter::nextRow() {
   // Add processed row data to the group
   int rowIndex = m_rowItem.first;
   m_groupData[rowIndex] = m_rowItem.second;
+  int groupIndex = m_gqueue.front().first;
   auto &rqueue = m_gqueue.front().second;
 
   if (!rqueue.empty()) {
@@ -339,7 +343,7 @@ void GenericDataProcessorPresenter::nextRow() {
     // Reduce next row
     m_rowItem = rqueue.front();
     rqueue.pop();
-    startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
+    startAsyncRowReduceThread(&m_rowItem, groupIndex);
   } else {
     m_gqueue.pop();
     // Set next action flag
@@ -347,7 +351,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
     if (m_groupData.size() > 1) {
       // Multiple rows in containing group, do post-processing on the group
-      startAsyncGroupReduceThread(m_groupData);
+      startAsyncGroupReduceThread(m_groupData, groupIndex);
     } else {
       // Single row in containing group, skip to next group
       nextGroup();
@@ -398,10 +402,10 @@ void GenericDataProcessorPresenter::startAsyncRowReduceThread(RowItem *rowItem,
 Reduce the current group asynchronously
 */
 void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
-    GroupData &groupData) {
+    GroupData &groupData, int groupIndex) {
 
-  auto *worker =
-      new GenericDataProcessorPresenterGroupReducerWorker(this, groupData);
+  auto *worker = new GenericDataProcessorPresenterGroupReducerWorker(
+      this, groupData, groupIndex);
   m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
   m_workerThread->start();
 }
@@ -483,8 +487,13 @@ Post-processes the workspaces created by the given rows together.
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
 
+  // If no post processing has been defined, then we are dealing with a
+  // one-level tree
+  // where all rows are in one group. We don't want to perform post-processing
+  // in
+  // this case.
   if (!m_postprocess)
-    throw std::runtime_error("Cannot post-process workspaces");
+    return;
 
   // The input workspace names
   std::vector<std::string> inputNames;

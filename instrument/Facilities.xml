@@ -639,7 +639,7 @@
     <technique>Powder diffraction</technique>
   </instrument>
 
-  <instrument name="D4">
+  <instrument name="D4C">
     <technique>Liquid diffraction</technique>
   </instrument>
 

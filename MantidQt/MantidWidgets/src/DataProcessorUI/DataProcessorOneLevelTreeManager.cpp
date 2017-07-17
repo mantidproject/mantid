@@ -388,10 +388,27 @@ void DataProcessorOneLevelTreeManager::update(
                      QString::fromStdString(data[col]));
 }
 
+/** Sets a new row to be highlighted
+* @param position : The index of the row to be highlighted
+*/
+void DataProcessorOneLevelTreeManager::addHighlighted(int position) {
+  m_model->addHighlighted(position);
+}
+
+/** Sets a new row to be highlighted
+* @param position : The index of the row to be highlighted
+* @param parent : The parent of the row
+*/
+void DataProcessorOneLevelTreeManager::addHighlighted(int position,
+                                                      int parent) {
+  UNUSED_ARG(parent);
+  addHighlighted(position);
+}
+
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model
 */
-boost::shared_ptr<QAbstractItemModel>
+boost::shared_ptr<AbstractDataProcessorTreeModel>
 DataProcessorOneLevelTreeManager::getModel() {
   return m_model;
 }

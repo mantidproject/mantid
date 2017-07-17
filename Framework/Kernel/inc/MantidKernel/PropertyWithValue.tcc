@@ -4,6 +4,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
@@ -112,6 +113,21 @@ void PropertyWithValue<TYPE>::saveProperty(::NeXus::File * /*file*/) {
  */
 template <typename TYPE> std::string PropertyWithValue<TYPE>::value() const {
   return toString(m_value);
+}
+
+/** Get the value of the property as a string
+ *  @return The property's value
+ */
+template <typename TYPE> std::string PropertyWithValue<TYPE>::valueAsPrettyStr(
+    const size_t maxLength, const bool collapseLists) const {
+  std::string retVal;
+  try {
+    retVal = toPrettyString(m_value, maxLength, collapseLists);
+  } catch (boost::bad_lexical_cast &) {
+    // toPrettyStringFailed, default to using toString instead
+    retVal = Strings::shorten(value(), maxLength);
+  }
+  return retVal;
 }
 
 /**
