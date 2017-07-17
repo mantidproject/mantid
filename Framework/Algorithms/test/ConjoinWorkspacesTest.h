@@ -33,10 +33,10 @@ public:
         ws2Name("ConjoinWorkspacesTest_grp2") {}
 
   MatrixWorkspace_sptr getWSFromADS(std::string wsName) {
-	  auto out = boost::dynamic_pointer_cast<MatrixWorkspace>(
-		  AnalysisDataService::Instance().retrieve(wsName));
-	  TS_ASSERT(out);
-	  return out;
+    auto out = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(wsName));
+    TS_ASSERT(out);
+    return out;
   }
 
   void setupWS() {
@@ -109,9 +109,7 @@ public:
     TS_ASSERT(conj.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-	TS_ASSERT_THROWS_NOTHING(
-		output = getWSFromADS("top");
-	);
+    TS_ASSERT_THROWS_NOTHING(output = getWSFromADS("top"););
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 25);
     // Check a few values
     TS_ASSERT_EQUALS(output->readX(0)[0], in1->readX(0)[0]);
@@ -179,13 +177,12 @@ public:
     int numBins = 20;
     ws1 = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins);
 
-	AnalysisDataService::Instance().add(ws1Name, ws1);
+    AnalysisDataService::Instance().add(ws1Name, ws1);
     ws2 = WorkspaceCreationHelper::createEventWorkspace(5, numBins);
 
     ConjoinWorkspaces conj;
     conj.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        conj.setPropertyValue("InputWorkspace1", ws1Name));
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", ws1Name));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace2", ws2));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckOverlapping", true));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
@@ -242,9 +239,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(conj.execute();)
     TS_ASSERT(conj.isExecuted());
 
-	TS_ASSERT_THROWS_NOTHING(
-		out = getWSFromADS(ws1Name);
-	);
+    TS_ASSERT_THROWS_NOTHING(out = getWSFromADS(ws1Name););
     if (!out)
       return;
 
@@ -260,88 +255,89 @@ public:
   void test_DONTCheckForOverlap_2D() { performTestNoOverlap(false); }
 
   void setupAlgForSetYUnitAndLabel(ConjoinWorkspaces &conj) {
-	  MatrixWorkspace_sptr ws1, ws2, out;
-	  int numBins = 20;
+    MatrixWorkspace_sptr ws1, ws2, out;
+    int numBins = 20;
 
-	  ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
-	  ws2 = WorkspaceCreationHelper::create2DWorkspace(5, numBins);
+    ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
+    ws2 = WorkspaceCreationHelper::create2DWorkspace(5, numBins);
 
-	  AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
-	  AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);
+    AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
+    AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);
 
-	  conj.initialize();
-	  conj.setRethrows(true);
-	  conj.setPropertyValue("InputWorkspace1", ws1Name);
-	  conj.setPropertyValue("InputWorkspace2", ws2Name);
-	  conj.setProperty("CheckOverlapping", false);
+    conj.initialize();
+    conj.setRethrows(true);
+    conj.setPropertyValue("InputWorkspace1", ws1Name);
+    conj.setPropertyValue("InputWorkspace2", ws2Name);
+    conj.setProperty("CheckOverlapping", false);
   }
 
   void test_setYUnitAndLabel() {
-	  ConjoinWorkspaces conj;
-	  setupAlgForSetYUnitAndLabel(conj);
-	  const std::string label = "Modified y label";
-	  const std::string unit = "Modified y unit";
+    ConjoinWorkspaces conj;
+    setupAlgForSetYUnitAndLabel(conj);
+    const std::string label = "Modified y label";
+    const std::string unit = "Modified y unit";
 
-	  TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisLabel", label));
-	  TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisUnit", unit));
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisLabel", label));
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisUnit", unit));
 
-	  TS_ASSERT_THROWS_NOTHING(conj.execute());
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
 
-	  auto out = getWSFromADS(ws1Name);
-	  if (!out)
-		  return;
+    auto out = getWSFromADS(ws1Name);
+    if (!out)
+      return;
 
-	  TS_ASSERT_EQUALS(label, out->YUnitLabel());
-	  TS_ASSERT_EQUALS(unit, out->YUnit());
-	  }
+    TS_ASSERT_EQUALS(label, out->YUnitLabel());
+    TS_ASSERT_EQUALS(unit, out->YUnit());
+  }
 
   void test_setYUnit() {
-	  ConjoinWorkspaces conj;
-	  setupAlgForSetYUnitAndLabel(conj);
+    ConjoinWorkspaces conj;
+    setupAlgForSetYUnitAndLabel(conj);
 
-	  auto out = getWSFromADS(ws1Name);
-	  if (!out)
-		  return;
+    auto out = getWSFromADS(ws1Name);
+    if (!out)
+      return;
 
-	  const std::string label = "Should be unmodified";
-	  out->setYUnitLabel(label);
+    const std::string label = "Should be unmodified";
+    out->setYUnitLabel(label);
 
-	  const std::string unit = "Modified y unit";
+    const std::string unit = "Modified y unit";
 
-	  TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisUnit", unit));
-	  TS_ASSERT_THROWS_NOTHING(conj.execute());
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisUnit", unit));
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
 
-	  auto &result = getWSFromADS(ws1Name);
+    auto &result = getWSFromADS(ws1Name);
 
-	  TSM_ASSERT_EQUALS("YUnitLabel was not reset after YUnit changed", result->YUnitLabel(), label);
-	  TS_ASSERT_EQUALS(unit, result->YUnit());
+    TSM_ASSERT_EQUALS("YUnitLabel was not reset after YUnit changed",
+                      result->YUnitLabel(), label);
+    TS_ASSERT_EQUALS(unit, result->YUnit());
   }
 
   void test_setYLabel() {
-	  ConjoinWorkspaces conj;
-	  setupAlgForSetYUnitAndLabel(conj);
+    ConjoinWorkspaces conj;
+    setupAlgForSetYUnitAndLabel(conj);
 
-	  auto out = getWSFromADS(ws1Name);
-	  if (!out)
-		  return;
+    auto out = getWSFromADS(ws1Name);
+    if (!out)
+      return;
 
-	  const std::string unit = "Should be unmodified";
-	  out->setYUnit(unit);
+    const std::string unit = "Should be unmodified";
+    out->setYUnit(unit);
 
-	  const std::string label = "Modified y label";
+    const std::string label = "Modified y label";
 
-	  TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisLabel", label));
-	  TS_ASSERT_THROWS_NOTHING(conj.execute());
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisLabel", label));
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
 
-	  auto &result = getWSFromADS(ws1Name);
+    auto &result = getWSFromADS(ws1Name);
 
-	  TS_ASSERT_EQUALS(unit, result->YUnit());
-	  TS_ASSERT_EQUALS(label, result->YUnitLabel());
+    TS_ASSERT_EQUALS(unit, result->YUnit());
+    TS_ASSERT_EQUALS(label, result->YUnitLabel());
   }
 
 private:
-	const std::string ws1Name{"ws1name"};
-	const std::string ws2Name{"ws2name"};
+  const std::string ws1Name{"ws1name"};
+  const std::string ws2Name{"ws2name"};
 
   MatrixWorkspace_sptr
   setupMismatchedWorkspace(int startIndex, int endIndex,
