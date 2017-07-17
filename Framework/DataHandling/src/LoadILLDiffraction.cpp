@@ -304,8 +304,12 @@ void LoadILLDiffraction::calculateRelativeRotations(
   // The rotations in the NeXus file are the absolute rotation of the first
   // tube. Here we get the angle of that tube as defined in the IDF.
 
-  const double firstTubeRotationAngle =
+  double firstTubeRotationAngle =
       firstTubePosition.angle(V3D(0, 0, 1)) * rad2deg;
+
+  if (m_instName == "D20")
+    firstTubeRotationAngle += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE;
+
   g_log.debug() << "First tube rotation:" << firstTubeRotationAngle << "\n";
 
   // Now pass calculate the rotations to apply for each time index.
