@@ -70,7 +70,7 @@ public:
   /** Check the validateInputs() calls */
   void doTestValid(bool pass, double BackgroundInnerFactor,
                    double BackgroundOuterFactor, double BackgroundInnerRadius,
-                   double BackgroundOuterRadius) {
+                   double BackgroundOuterRadius, int NumSteps = 16) {
     PeakIntensityVsRadius alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -82,7 +82,7 @@ public:
         "OutputWorkspace", "PeakIntensityVsRadiusTest_OutputWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RadiusStart", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RadiusEnd", 1.5));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumSteps", 16));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumSteps", NumSteps));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("BackgroundInnerFactor", BackgroundInnerFactor));
     TS_ASSERT_THROWS_NOTHING(
@@ -108,6 +108,7 @@ public:
     doTestValid(false, 0, 1.0, 0, 0.15);
     doTestValid(false, 1.0, 0, 0.15, 0);
     doTestValid(false, 1.0, 1.0, 0.12, 0.15);
+    doTestValid(true, 1.0, 2.0, 0, 0, -8);
   }
 
   MatrixWorkspace_sptr doTest(double BackgroundInnerFactor,
@@ -192,6 +193,8 @@ public:
     TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
     TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
   }
+
+  void test
 };
 
 #endif /* MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_ */
