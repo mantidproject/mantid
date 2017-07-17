@@ -17,7 +17,7 @@ namespace API {
   index information within the workspace.
 
   @author Lamar Moore
-  @data 1/7/2017
+  @date 1/7/2017
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
