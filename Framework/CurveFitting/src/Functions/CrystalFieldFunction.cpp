@@ -1178,10 +1178,58 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
 }
 
 /// Update the target function in a multi site - single spectrum case.
-void CrystalFieldFunction::updateMultiSiteSingleSpectrum() const {}
+void CrystalFieldFunction::updateMultiSiteSingleSpectrum() const {
+  auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
+  auto peakShape = getAttribute("PeakShape").asString();
+  bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
+  auto xVec = m_control.getAttribute("FWHMX").asVector();
+  auto yVec = m_control.getAttribute("FWHMX").asVector();
+  auto &FWHMs = m_control.FWHMs();
+  auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
+
+  size_t spectrumIndexShift = hasBackground() ? 1 : 0;
+  auto &compSource = compositeSource();
+  for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
+    FunctionDomainGeneral domain;
+    FunctionValues values;
+    compSource.getFunction(ionIndex)->function(domain, values);
+
+    auto &ionSpectrum = dynamic_cast<CompositeFunction &>(
+        *m_target->getFunction(ionIndex + spectrumIndexShift));
+    CrystalFieldUtils::updateSpectrumFunction(ionSpectrum, peakShape, values, 0,
+                                              xVec, yVec, fwhmVariation,
+                                              defaultFWHM, fixAllPeaks);
+  }
+}
 
 /// Update the target function in a multi site - multi spectrum case.
-void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {}
+void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {
+  try {
+    auto &compSource = compositeSource();
+    for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
+      DoubleFortranVector en;
+      ComplexFortranMatrix wf;
+      ComplexFortranMatrix ham;
+      ComplexFortranMatrix hz;
+      int nre = 0;
+      auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*compSource.getFunction(ionIndex));
+      peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
+      ham += hz;
+
+      auto &temperatures = m_control.temperatures();
+      auto &FWHMs = m_control.FWHMs();
+      for (size_t i = 0; i < temperatures.size(); ++i) {
+        auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target->getFunction(i));
+        auto &ionSpectrum = dynamic_cast<CompositeFunction &>(*spectrum.getFunction(ionIndex));
+        updateSpectrum(ionSpectrum, nre, en, wf, ham, temperatures[i],
+                       FWHMs[i], i);
+      }
+    }
+  } catch (std::out_of_range &) {
+    buildTargetFunction();
+    return;
+  }
+}
 
 /// Update a function for a single spectrum.
 void CrystalFieldFunction::updateSpectrum(API::IFunction &spectrum, int nre,
