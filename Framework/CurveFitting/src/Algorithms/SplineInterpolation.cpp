@@ -155,7 +155,7 @@ void SplineInterpolation::exec() {
   if (order > 0) {
     for (size_t i = 0; i < histNo; ++i) {
       derivs[i] = WorkspaceFactory::Instance().create(mws, order);
-      NumericAxis* vAxis = new NumericAxis(order);
+      NumericAxis *vAxis = new NumericAxis(order);
       for (size_t j = 0; j < order; ++j) {
         vAxis->setValue(j, j + 1);
         derivs[i]->setSharedX(j, mws->sharedX(0));
@@ -193,8 +193,9 @@ void SplineInterpolation::exec() {
     // first check that the x-axis (first spectrum) is sorted ascending
     if (!std::is_sorted(mwspt->x(0).rawData().begin(),
                         mwspt->x(0).rawData().end())) {
-      throw std::runtime_error("X-axis of the workspace to match is not sorted. "
-                               "Consider calling SortXAxis before.");
+      throw std::runtime_error(
+          "X-axis of the workspace to match is not sorted. "
+          "Consider calling SortXAxis before.");
     }
 
     for (size_t i = 0; i < histNo; ++i) {
