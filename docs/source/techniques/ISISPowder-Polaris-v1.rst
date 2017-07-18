@@ -719,7 +719,7 @@ On POLARIS this is set to the following:
   cylinder_sample_height = 4.0
 
 cylinder_sample_radius
-=====================   
+======================
 
 The radius of the Vanadium rod.
 
@@ -730,7 +730,7 @@ On POLARIS this is set to the following:
   cylinder_sample_radius = 0.4
 
 cylinder_position
-================
+=================
 
 The position of the Vanadium rod in [x, y, z]
 
