@@ -507,7 +507,7 @@ QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
 
 /** Sets the 'processed' status of a data item
 * @param processed : True to set processed, false to set unprocessed
-* @param position : The position of the item to be highlighted
+* @param position : The position of the item
 * @param parent : The parent of this item
 * @return : Boolean indicating whether process status was set successfully
 */
