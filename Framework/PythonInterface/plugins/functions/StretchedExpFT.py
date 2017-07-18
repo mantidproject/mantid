@@ -65,7 +65,7 @@ class StretchedExpFT(IFunction1D):
         beta = self.getParameterValue('Beta')
         Centre = self.getParameterValue('Centre')
 
-        for _, value in {'Height': height, 'Tau': tau, 'Beta': beta}.items():
+        for value in (height, tau, beta):
             if value <= 0:
                 return None
         return {'Height': height, 'Tau': tau, 'Beta': beta, 'Centre': Centre}

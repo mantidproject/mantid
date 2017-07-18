@@ -35,7 +35,7 @@ The integral of :math:`StretchedExpFT` in this bin is the red dot, and the value
 This situation is likely to arise for samples with a relaxation rate :math:`h/Tau \ll \delta E`.
 Finally, the blue line is the evaluation of :math:`PrimStretchedExpFT` at each bin center, which
 by design amounts to the integral of :math:`StretchedExpFT` within each bin. This curve
-coincides with the red dot for the central bin, as expected. Also you it agrees with the
+coincides with the red dot for the central bin, as expected. Also, it agrees with the
 center-of-bin evaluation of :math:`StretchedExpFT` at high energies, when the center-of-the-bin
 approximation is acceptable.
 

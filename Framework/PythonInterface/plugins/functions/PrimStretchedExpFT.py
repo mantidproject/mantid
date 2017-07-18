@@ -2,7 +2,7 @@
 
 '''
 @author Jose Borreguero, NScD
-@date October 06, 2013
+@date June 01, 2017
 
 Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
@@ -31,9 +31,10 @@ import scipy.constants
 from scipy.fftpack import fft, fftfreq
 from scipy.special import gamma
 from mantid.api import IFunction1D, FunctionFactory
+from StretchedExpFTHelper import StretchedExpFTMixin
 
 
-class PrimStretchedExpFT(IFunction1D):
+class PrimStretchedExpFT(StretchedExpFTMixin, IFunction1D):
     # Class variables
     _planck_constant = scipy.constants.Planck/scipy.constants.e*1E15  # meV*psec
 
@@ -42,9 +43,6 @@ class PrimStretchedExpFT(IFunction1D):
         """declare some constants"""
         super(PrimStretchedExpFT, self).__init__()
         self._parmList = list()
-
-    def category(self):
-        return 'QuasiElastic'
 
     def init(self):
         """Declare parameters that participate in the fitting"""
@@ -55,7 +53,6 @@ class PrimStretchedExpFT(IFunction1D):
         self.declareParameter('Centre', 0.0, 'Centre of the peak')
         # Keep order in which parameters are declared. Should be a class
         # variable but we initialize it just below parameter declaration
-        # to make sure we follow the order.
         self._parmList = ['Height', 'Tau', 'Beta', 'Centre']
 
     def validateParams(self):
@@ -65,7 +62,7 @@ class PrimStretchedExpFT(IFunction1D):
         beta = self.getParameterValue('Beta')
         Centre = self.getParameterValue('Centre')
 
-        for _, value in {'Height': height, 'Tau': tau, 'Beta': beta}.items():
+        for value in (height, tau, beta):
             if value <= 0:
                 return None
         return {'Height': height, 'Tau': tau, 'Beta': beta, 'Centre': Centre}
