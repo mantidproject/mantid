@@ -32,7 +32,9 @@ Masking
 
 The mask from the solid angle workspace is copied to the
 data. Additional masking is provided by :ref:`MaskBTP <algm-MaskBTP>`
-using the Bank, Tube and Pixel parameters.
+using the Bank, Tube and Pixel parameters. MaskBTP is only run once so
+it can only apply one additional mask to all the data, read
+:ref:`MaskBTP <algm-MaskBTP>` to see the usage.
 
 Background
 ##########

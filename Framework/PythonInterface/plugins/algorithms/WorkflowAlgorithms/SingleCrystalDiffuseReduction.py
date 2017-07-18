@@ -16,11 +16,11 @@ from mantid.kernel import VisibleWhenProperty, PropertyCriterion, FloatArrayLeng
 from mantid import logger
 import numpy as np
 
-temp_workspace_list = ['__sa', '__flux', '__run', '__md', '__data', '__norm',
-                       '__bkg', '__bkg_md', '__bkg_data', '__bkg_norm', '__scaled_background']
-
 
 class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
+    temp_workspace_list = ['__sa', '__flux', '__run', '__md', '__data', '__norm',
+                           '__bkg', '__bkg_md', '__bkg_data', '__bkg_norm', '__scaled_background',
+                           'PreprocessedDetectorsWS']
 
     def category(self):
         return "Diffraction\\Reduction"
@@ -118,7 +118,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.setPropertyGroup("Axis1","Goniometer")
         self.setPropertyGroup("Axis2","Goniometer")
 
-        # Goniometer
+        # Corrections
         self.setPropertyGroup("LoadInstrument","Corrections")
         self.setPropertyGroup("DetCal","Corrections")
         self.setPropertyGroup("Bank","Corrections")
@@ -151,7 +151,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         # remove possible old temp workspaces
-        [DeleteWorkspace(ws) for ws in temp_workspace_list if mtd.doesExist(ws)]
+        [DeleteWorkspace(ws) for ws in self.temp_workspace_list if mtd.doesExist(ws)]
 
         _background = bool(self.getProperty("Background").value)
         _load_inst = bool(self.getProperty("LoadInstrument").value)
@@ -177,7 +177,6 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
 
         if _masking:
             MaskBTP(Workspace='__sa',
-                    Instrument=mtd['__sa'].getInstrument().getName(),
                     Bank=self.getProperty("Bank").value,
                     Tube=self.getProperty("Tube").value,
                     Pixel=self.getProperty("Pixel").value)
@@ -295,7 +294,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.setProperty("OutputWorkspace", mtd[_outWS_name])
 
         # remove temp workspaces
-        [DeleteWorkspace(ws) for ws in temp_workspace_list if mtd.doesExist(ws)]
+        [DeleteWorkspace(ws) for ws in self.temp_workspace_list if mtd.doesExist(ws)]
 
     def _generate_UBList(self):
         CreateSingleValuedWorkspace(OutputWorkspace='__ub')
