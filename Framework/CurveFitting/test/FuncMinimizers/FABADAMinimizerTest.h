@@ -19,7 +19,7 @@ using namespace Mantid::CurveFitting::Functions;
 
 namespace {
 
-API::MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
+MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
                                               size_t XYLength = 20) {
   MatrixWorkspace_sptr ws2(new WorkspaceTester);
   ws2->initialize(NVectors, XYLength, XYLength);
@@ -36,13 +36,13 @@ API::MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
   return ws2;
 }
 
-void doTestExpDecay(API::MatrixWorkspace_sptr ws2) {
+void doTestExpDecay(Mantid::API::MatrixWorkspace_sptr ws2) {
 
-  API::IFunction_sptr fun(new ExpDecay);
+  IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 8.);
   fun->setParameter("Lifetime", 1.0);
 
-  Algorithms::Fit fit;
+  Fit fit;
   fit.initialize();
 
   fit.setRethrows(true);
