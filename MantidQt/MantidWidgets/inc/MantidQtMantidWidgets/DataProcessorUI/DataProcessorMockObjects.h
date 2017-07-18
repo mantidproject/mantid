@@ -72,9 +72,9 @@ public:
   MOCK_METHOD0(addActionsProxy, void());
 
   // Calls we don't care about
-  void showTable(boost::shared_ptr<QAbstractItemModel>) override{};
+  void showTable(boost::shared_ptr<
+      MantidQt::MantidWidgets::AbstractDataProcessorTreeModel>) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
-  void setSelectionModelConnections() override{};
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
 };
@@ -125,11 +125,10 @@ public:
 
   MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
   MOCK_METHOD1(setModel, void(std::string name));
-  MOCK_METHOD2(setIndexProcessed, void(int index, bool processed));
   MOCK_METHOD1(accept, void(DataProcessorMainPresenter *));
   MOCK_CONST_METHOD0(selectedParents, std::set<int>());
   MOCK_CONST_METHOD0(selectedChildren, std::map<int, std::set<int>>());
-  MOCK_CONST_METHOD0(newSelectionMade, bool());
+  MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD2(askUserYesNo,
                      bool(const std::string &prompt, const std::string &title));
   MOCK_CONST_METHOD2(giveUserWarning,

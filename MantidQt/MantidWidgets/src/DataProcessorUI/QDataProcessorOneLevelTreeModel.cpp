@@ -20,6 +20,8 @@ QDataProcessorOneLevelTreeModel::QDataProcessorOneLevelTreeModel(
     throw std::invalid_argument(
         "Invalid table workspace. Table workspace must "
         "have the same number of columns as the white list");
+
+  m_rows = std::vector<bool>(tableWorkspace->rowCount(), false);
 }
 
 QDataProcessorOneLevelTreeModel::~QDataProcessorOneLevelTreeModel() {}
