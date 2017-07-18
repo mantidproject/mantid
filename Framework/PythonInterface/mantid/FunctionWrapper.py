@@ -339,7 +339,7 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
        self.initByName("MultiDomainFunction", *args)
                
        # Tie the global parameters
-       if(kwargs.has_key('Global')):
+       if 'Global' in kwargs:
           list = kwargs['Global']
           for name in list:
              self.tieAll(name)
