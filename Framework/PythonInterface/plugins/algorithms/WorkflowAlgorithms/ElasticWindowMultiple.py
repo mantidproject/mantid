@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
+import numpy as np
 
 
 def _normalize_to_lowest_temp(elt_ws_name):
@@ -319,7 +320,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # Look for sample unit in logs in workspace
             tmp = run[self._sample_log_name].value
             value_action = {'last_value': lambda x: x[len(x) - 1],
-                            'average': lambda x: x.mean()}
+                            'average': lambda x: x.mean(),
+                            'lowest_value': lambda x: np.amin(x)}
             sample = value_action[self._sample_log_value](tmp)
             unit = run[self._sample_log_name].units
             logger.information('%d %s found for run: %s' % (sample, unit, run_name))
