@@ -292,30 +292,76 @@ size_t CrystalFieldFunction::nParams() const {
   return m_nSourceParams + m_target->nParams();
 }
 
-/// Returns the index of parameter name
+/// Returns the index of a parameter with a given name
+/// @param name :: Name of a parameter.
 size_t CrystalFieldFunction::parameterIndex(const std::string &name) const {
-  throw Kernel::Exception::NotImplementedError(
-      "CrystalFieldFunction::parameterIndex not implemented properly.");
-  // checkSourceFunction();
-  // auto ref = getParameterReference(name);
-  // auto fun = ref.ownerFunction();
-  // auto index = ref.parameterIndex();
-  // if (fun == &m_control) {
-  //  return index;
-  //} else if (fun == m_source.get()) {
-  //  return m_nControlParams + index;
-  //} else {
-  //  checkTargetFunction();
-  //  return m_nSourceParams + index;
-  //}
+  checkSourceFunction();
+  checkTargetFunction();
+  auto ref = getParameterReference(name);
+  auto index = m_control.getParameterIndex(ref);
+  if (index < m_nControlParams) {
+    return index;
+  }
+  index = m_source->getParameterIndex(ref);
+  if (index < m_nSourceParams) {
+    return index + m_nControlParams;
+  }
+  index = m_target->getParameterIndex(ref);
+  if (index < m_target->nParams()) {
+    return index + m_nControlParams + m_nSourceParams;
+  }
+  throw std::invalid_argument("CrystalFieldFunction parameter not found: " + name);
 }
 
 /// Returns the name of parameter i
 std::string CrystalFieldFunction::parameterName(size_t i) const {
   checkSourceFunction();
   checkTargetFunction();
-  return i < m_nSourceParams ? m_source->parameterName(i)
-                          : m_target->parameterName(i - m_nSourceParams);
+  // Lambda that forms a name of a parameter of a composite function
+  // giving it a custom prefix
+  auto makeName = [](const CompositeFunction &composite, size_t index,
+                    const std::string &prefix) {
+    auto funIndex = composite.functionIndex(index);
+    auto paramName = composite.parameterLocalName(index);
+    std::string name(prefix);
+    name.append(std::to_string(funIndex)).append(".").append(paramName);
+    return name;
+  };
+
+  if (i < m_nControlParams) {
+    if (isMultiSpectrum()) {
+      // IntensityScalings for each spectrum
+      return makeName(m_control, i, "sp");
+    } else {
+      // No parameters here, just for completeness
+      return m_control.parameterName(i);
+    }
+  }
+
+  i -= m_nControlParams;
+  if (i < m_nSourceParams) {
+    if (isMultiSite()) {
+      // Crystal field, intensity scaling for each ion
+      return makeName(compositeSource(), i, "ion");
+    } else {
+      // Crystal field
+      return m_source->parameterName(i);
+    }
+  }
+
+  i -= m_nSourceParams;
+  if (isMultiSpectrum()) {
+    if (isMultiSite()) {
+    }
+  } else {
+    if (isMultiSite()) {
+    } else {
+      return makeName(*m_target, i, "pk");
+    }
+  }
+
+  throw Kernel::Exception::NotImplementedError(
+      "CrystalFieldFunction::parameterName not implemented properly.");
 }
 
 /// Returns the description of parameter i
@@ -420,6 +466,25 @@ std::vector<std::string> CrystalFieldFunction::getAttributeNames() const {
   checkSourceFunction();
   checkTargetFunction();
   std::vector<std::string> attNames = IFunction::getAttributeNames();
+  auto controlAttributeNames = m_control.getAttributeNames();
+  // Lambda function that moves a attribute name from controlAttributeNames
+  // to attNames.
+  auto moveAttributeName =
+      [&](const std::string &name) {
+        auto iterFound = std::find(controlAttributeNames.begin(),
+                                   controlAttributeNames.end(), name);
+        if (iterFound != controlAttributeNames.end()) {
+          controlAttributeNames.erase(iterFound);
+          attNames.push_back(name);
+        }
+  };
+  // These names must appear first and in this order in the output vector
+  moveAttributeName("Ions");
+  moveAttributeName("Symmetries");
+  moveAttributeName("Temperatures");
+  // Copy the rest of the names
+  attNames.insert(attNames.end(), controlAttributeNames.begin(),
+                        controlAttributeNames.end());
   return attNames;
 }
 
@@ -546,81 +611,6 @@ size_t CrystalFieldFunction::nSpectra() const {
   return m_control.nFunctions();
 }
 
-/// Check that a spectrum index is within the range
-/// @param iSpec :: Index of a spectrum.
-/// @throws if index is outside the range.
-void CrystalFieldFunction::checkSpectrumIndex(size_t iSpec) const {
-  auto nSpec = nSpectra();
-  if (nSpec == 0) {
-    throw std::runtime_error("No spectra defined.");
-  } else if (nSpec == 1) {
-    throw std::runtime_error("Cannot use spectra indices in a single-spectrum case.");
-  } else if (iSpec >= nSpec) {
-    throw std::out_of_range("Spectrum index (" + std::to_string(iSpec) +
-                            ") is out side outside the range (N=" +
-                            std::to_string(nSpectra()) + ").");
-  }
-}
-
-/// Check if there is an attribute specific to a spectrum (multi-spectrum case only).
-/// @param iSpec :: Index of a spectrum.
-/// @param attName :: Name of an attribute to check.
-bool CrystalFieldFunction::hasSpectrumAttribute(size_t iSpec, const std::string &attName) const {
-  if (nSpectra() < 2) {
-    return false;
-  }
-  checkSpectrumIndex(iSpec);
-  if (attName == "FWHMX" || attName == "FWHMY" || attName == "Temperature") {
-    return true;
-  }
-  return false;
-}
-
-/// Get an attribute specific to a spectrum (multi-spectrum case only).
-/// @param iSpec :: Index of a spectrum.
-/// @param attName :: Name of an attribute.
-API::IFunction::Attribute
-CrystalFieldFunction::getSpectrumAttribute(size_t iSpec,
-                                           const std::string &attName) const {
-  //checkSpectrumIndex(iSpec);
-  //if (attName == "FWHMX") {
-  //  if (iSpec < m_fwhmX.size()) {
-  //    return Attribute(m_fwhmX[iSpec]);
-  //  } else {
-  //    return Attribute(std::vector<double>());
-  //  }
-  //} else if (attName == "FWHMY") {
-  //  if (iSpec < m_fwhmY.size()) {
-  //    return Attribute(m_fwhmY[iSpec]);
-  //  } else {
-  //    return Attribute(std::vector<double>());
-  //  }
-  //} else if (attName == "Temperature") {
-  //  return Attribute(m_temperatures[iSpec]);
-  //}
-  throw std::runtime_error("Attribute " + attName + " not found.");
-}
-
-/// Set a value to a spectrum-specific attribute
-/// @param iSpec :: Index of a spectrum.
-/// @param attName :: Name of an attribute.
-/// @param value :: New value of the attribute.
-void CrystalFieldFunction::setSpectrumAttribute(size_t iSpec, const std::string &attName, const Attribute &value) {
-  //checkSpectrumIndex(iSpec);
-  //if (attName == "FWHMX") {
-  //  if (iSpec < m_fwhmX.size()) {
-  //    m_fwhmX[iSpec] = value.asVector();
-  //  }
-  //} else if (attName == "FWHMY") {
-  //  if (iSpec < m_fwhmY.size()) {
-  //    m_fwhmY[iSpec] = value.asVector();
-  //  }
-  //} else if (attName == "Temperature") {
-  //  m_temperatures[iSpec] = value.asDouble();
-  //  IFunction::storeAttributeValue("Temperatures", Attribute(m_temperatures));
-  //}
-}
-
 /// Get a reference to the control function
 IFunction *CrystalFieldFunction::getControl() const {
   return &m_control;
@@ -722,14 +712,6 @@ IConstraint *CrystalFieldFunction::getConstraint(size_t i) const {
     }
   }
   return constraint;
-}
-
-void CrystalFieldFunction::setIonsAttribute(const std::string &name,
-                                            const Attribute &attr) {
-}
-
-void CrystalFieldFunction::setSymmetriesAttribute(const std::string &name,
-                                                  const Attribute &attr) {
 }
 
 /// Check if the function is set up for a multi-site calculations.
@@ -1137,8 +1119,8 @@ void CrystalFieldFunction::updateSingleSiteSingleSpectrum() const {
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   auto peakShape = getAttribute("PeakShape").asString();
   bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
-  auto xVec = m_control.getFunction(0)->getAttribute("FWHMX").asVector();
-  auto yVec = m_control.getFunction(0)->getAttribute("FWHMX").asVector();
+  auto xVec = m_control.getAttribute("FWHMX").asVector();
+  auto yVec = m_control.getAttribute("FWHMX").asVector();
   auto &FWHMs = m_control.FWHMs();
   auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
 

@@ -185,10 +185,6 @@ private:
                        API::FunctionValues &values, size_t iSpec,
                        double intensityScaling) const;
 
-  void setIonsAttribute(const std::string &name, const Attribute &attr);
-  void setSymmetriesAttribute(const std::string &name, const Attribute &attr);
-  //void setTemperaturesAttribute(const std::string &name, const Attribute &attr);
-
   /// Set the source function
   void setSource(API::IFunction_sptr source) const;
   /// Update target function if necessary.
@@ -197,15 +193,6 @@ private:
   bool isSourceName(const std::string &aName) const;
   /// Get a reference to the source function if it's composite
   API::CompositeFunction &compositeSource() const;
-
-  /// Check that a spectrum index is within the range
-  void checkSpectrumIndex(size_t iSpec) const;
-  /// Check if there is an attribute specific to a spectrum (multi-spectrum case only).
-  bool hasSpectrumAttribute(size_t iSpec, const std::string &attName) const;
-  /// Get an attribute specific to a spectrum (multi-spectrum case only).
-  Attribute getSpectrumAttribute(size_t iSpec, const std::string &attName) const;
-  /// Set a value to a spectrum-specific attribute
-  void setSpectrumAttribute(size_t iSpec, const std::string &name, const Attribute &);
 
   /// Get a reference to an attribute
   std::pair<API::IFunction*, std::string> getAttributeReference(const std::string& attName) const;
