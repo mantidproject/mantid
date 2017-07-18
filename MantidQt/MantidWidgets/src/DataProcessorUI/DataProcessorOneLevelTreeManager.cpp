@@ -396,7 +396,7 @@ int DataProcessorOneLevelTreeManager::rowCount() const {
 }
 
 /** Gets the number of rows in the table
-* @param : The parent of the row
+* @param parent : The parent of the row
 * @return : Number of rows
 */
 int DataProcessorOneLevelTreeManager::rowCount(int parent) const {
