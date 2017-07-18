@@ -484,6 +484,7 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             rebined_broad_spectrum = self._fix_empty_array()
 
+        rebined_broad_spectrum = rebined_broad_spectrum / AbinsModules.AbinsParameters.bin_width
         return local_freq, local_coeff, rebined_broad_spectrum
 
     # noinspection PyUnusedLocal
