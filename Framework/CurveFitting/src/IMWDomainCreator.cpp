@@ -145,7 +145,9 @@ std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
 
   setParameters();
 
-  // find the fitting interval: from -> to
+  // From points to the first occurrence of StartX in the workspace interval.
+  // End points to the last occurrence of EndX in the workspace interval.
+  // Find the fitting interval: from -> to
   Mantid::MantidVec::const_iterator from;
   Mantid::MantidVec::const_iterator to;
 
@@ -186,6 +188,9 @@ std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
     }
   }
 
+  // Check whether the fitting interval defined by StartX and EndX is 0.
+  // This occurs when StartX and EndX are both less than the minimum workspace
+  // x-value or greater than the maximum workspace x-value.
   if (to - from == 0) {
     throw std::invalid_argument("StartX and EndX values do not capture a range "
                                 "within the workspace interval.");
