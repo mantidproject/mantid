@@ -5,31 +5,29 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/make_constructor.hpp>
 
-
-
 using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::IValidator;
 using namespace boost::python;
 
 namespace {
-    /**
-    * Factory function to allow more flexibility in the constructor
-    * @param lower An optional lower bound
-    * @param upper An optional upper bound
-    * @returns A pointer to a new ArrayBoundedValidator object
-    */
-    template <typename T>
-    ArrayBoundedValidator<T> *createArrayBoundedValidator(object lower = object(),
-        object upper = object()) {
-        auto validator = new ArrayBoundedValidator<T>();
-        if (!Mantid::PythonInterface::isNone(lower)) {
-            validator->setLower(extract<T>(lower));
-        }
-        if (!Mantid::PythonInterface::isNone(upper)) {
-            validator->setUpper(extract<T>(upper));
-        }
-        return validator;
-    }
+/**
+* Factory function to allow more flexibility in the constructor
+* @param lower An optional lower bound
+* @param upper An optional upper bound
+* @returns A pointer to a new ArrayBoundedValidator object
+*/
+template <typename T>
+ArrayBoundedValidator<T> *createArrayBoundedValidator(object lower = object(),
+                                                      object upper = object()) {
+  auto validator = new ArrayBoundedValidator<T>();
+  if (!Mantid::PythonInterface::isNone(lower)) {
+    validator->setLower(extract<T>(lower));
+  }
+  if (!Mantid::PythonInterface::isNone(upper)) {
+    validator->setUpper(extract<T>(upper));
+  }
+  return validator;
+}
 
 #define EXPORT_ARRAYBOUNDEDVALIDATOR(type, prefix)                             \
   class_<ArrayBoundedValidator<type>, bases<IValidator>, boost::noncopyable>(  \
@@ -57,10 +55,8 @@ namespace {
       .def("clearUpper", &ArrayBoundedValidator<type>::clearUpper,             \
            arg("self"), "Clear any set upper bound");
 }
- 
+
 void export_ArrayBoundedValidator() {
   EXPORT_ARRAYBOUNDEDVALIDATOR(double, Float);
   EXPORT_ARRAYBOUNDEDVALIDATOR(long, Int);
-
 }
-
