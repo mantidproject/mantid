@@ -8,7 +8,7 @@ import testhelpers
 import platform
 from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit, FitDialog 
 from mantid.simpleapi import FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, MultiDomainFunctionWrapper 
-from mantid.simpleapi import Gaussian, LinearBackground
+from mantid.simpleapi import Gaussian, LinearBackground, Polynomial
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -79,7 +79,10 @@ class FunctionWrapperTest(unittest.TestCase):
         self.assertAlmostEqual(c[1]["Height"], 10.0,10) 
         c[1]["Height"] = 11.0
         self.assertAlmostEqual(c[1]["Height"], 11.0,10)
-
+        
+    def test_attributes(self):
+        testhelpers.assertRaisesNothing(self, FunctionWrapper, "Polynomial", attributes={'n': 3}, A0=4, A1=3, A2=2, A3=1)
+        
     def test_fix(self):
         g = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=15)
         
@@ -433,7 +436,7 @@ class FunctionWrapperTest(unittest.TestCase):
         s = lb + g
         self.assertTrue( isinstance( s, CompositeFunctionWrapper) )
     
-    def test_evaluation_and_arithmetic(self):
+    def test_evaluation(self):
         l0 = FunctionWrapper( "LinearBackground", A0=0, A1=2)
         l1 = FunctionWrapper( "LinearBackground", A0=5, A1=-1)
 
@@ -455,6 +458,22 @@ class FunctionWrapperTest(unittest.TestCase):
         self.assertAlmostEqual(pvals[2], 12.5)
         self.assertAlmostEqual(pvals[3], 10.5)
         
+        sq = Polynomial(attributes={'n': 2}, A0=0, A1=0.0, A2=1.0)
+        sqws = EvaluateFunction(sq,"ws", OutputWorkspace='out')
+        sqvals = sqws.readY(1)
+        self.assertAlmostEqual(sqvals[0], 0.25)
+        self.assertAlmostEqual(sqvals[1], 2.25)
+        self.assertAlmostEqual(sqvals[2], 6.25)
+        
+    def test_arithmetic(self):
+        l0 = FunctionWrapper( "LinearBackground", A0=0, A1=2)
+        l1 = FunctionWrapper( "LinearBackground", A0=5, A1=-1)
+
+        ws = CreateWorkspace(DataX=[0,1], DataY=[5])
+
+        c = CompositeFunctionWrapper(l0, l1)
+        p = ProductFunctionWrapper(l0, l1)
+        
         s1 = c + p
         s1ws = EvaluateFunction(s1,"ws", OutputWorkspace='out')
         s1vals = s1ws.readY(1)
@@ -464,6 +483,8 @@ class FunctionWrapperTest(unittest.TestCase):
         s2ws = EvaluateFunction(s2,"ws", OutputWorkspace='out')
         s2vals = s2ws.readY(1)
         self.assertAlmostEqual(s2vals[0], 10.0)
+
+        
        
 if __name__ == '__main__':
     unittest.main()

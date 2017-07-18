@@ -12,13 +12,16 @@ class FunctionWrapper:
        self.fun = FunctionFactory.createFunction(name)
     
        # Deal with attributes first
-#       for key in kwargs:
-#          if self.fun.hasAttribute(key):
-#              self.fun.storeAttributeValue(key, kwargs[key])
-            
+       for key in kwargs:
+          if key == "attributes":
+             atts = kwargs[key]
+             for keya in atts:
+               self.fun.setAttributeValue(keya, atts[keya])
+          
        # Then deal with parameters        
        for key in kwargs:
-          self.fun.setParameter(key, kwargs[key])
+          if key != "attributes":
+             self.fun.setParameter(key, kwargs[key])
              
   def __getitem__ (self, name):
       """ Called from array-like access on RHS
