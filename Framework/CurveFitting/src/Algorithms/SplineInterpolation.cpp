@@ -373,7 +373,8 @@ void SplineInterpolation::extrapolateFlat(
 }
 
 /** Find the region that has to be interpolated
- * E.g. iwspt x-axis is from 50-100, while mwspt x-axis is 0-200, this will return
+ * E.g. iwspt x-axis is from 50-100, while mwspt x-axis is 0-200, this will
+ * return
  * the pair of the indices of mwspt, that are just above 50, and just below 100
  * This is used for linear case only, to be consistent with cubic spline case
  * @param iwspt : workspace to interpolate
@@ -383,7 +384,8 @@ void SplineInterpolation::extrapolateFlat(
 */
 std::pair<size_t, size_t>
 SplineInterpolation::findInterpolationRange(MatrixWorkspace_const_sptr iwspt,
-                                            MatrixWorkspace_sptr mwspt, const size_t row) {
+                                            MatrixWorkspace_sptr mwspt,
+                                            const size_t row) {
 
   auto xAxisIn = iwspt->x(row).rawData();
   std::sort(xAxisIn.begin(), xAxisIn.end());
