@@ -257,6 +257,7 @@ void Algorithm::initialize() {
     return;
 
   g_log.setName(this->name());
+  setLoggingOffset(0);
   try {
     try {
       this->init();
@@ -1059,8 +1060,13 @@ void Algorithm::logAlgorithmInfo() const {
     logger.notice() << '\n';
     // Make use of the AlgorithmHistory class, which holds all the info we want
     // here
-    AlgorithmHistory AH(this);
-    logger.information() << AH;
+    AlgorithmHistory algHistory(this);
+    size_t maxPropertyLength = 40;
+    if (logger.is(Logger::Priority::PRIO_DEBUG)) {
+      // include the full property value when logging in debug
+      maxPropertyLength = 0;
+    }
+    algHistory.printSelf(logger.information(), 0, maxPropertyLength);
   }
 }
 
@@ -1545,6 +1551,34 @@ void Algorithm::cancel() {
   }
 }
 
+/// Returns the cancellation state
+bool Algorithm::getCancel() const { return m_cancel; }
+
+/// Returns a reference to the logger.
+Kernel::Logger &Algorithm::getLogger() const { return g_log; }
+/// Logging can be disabled by passing a value of false
+void Algorithm::setLogging(const bool value) { g_log.setEnabled(value); }
+/// returns the status of logging, True = enabled
+bool Algorithm::isLogging() const { return g_log.getEnabled(); }
+
+/* Sets the logging priority offset. Values are subtracted from the log level.
+ *
+ * Example value=1 will turn warning into notice
+ * Example value=-1 will turn notice into warning
+ */
+void Algorithm::setLoggingOffset(const int value) {
+  if (m_communicator->rank() == 0)
+    g_log.setLevelOffset(value);
+  else {
+    int offset{1};
+    ConfigService::Instance().getValue("mpi.loggingOffset", offset);
+    g_log.setLevelOffset(value + offset);
+  }
+}
+
+/// returns the logging priority offset
+int Algorithm::getLoggingOffset() const { return g_log.getLevelOffset(); }
+
 //--------------------------------------------------------------------------------------------
 /** This is called during long-running operations,
  * and check if the algorithm has requested that it be cancelled.
@@ -1668,6 +1702,9 @@ void Algorithm::execMasterOnly() {
  * support execution with multiple MPI ranks and require a special behavior on
  * non-master ranks in master-only execution. */
 void Algorithm::execNonMaster() {
+  // If there is no output we can simply do nothing.
+  if (m_pureOutputWorkspaceProps.size() == 0)
+    return;
   // Does Algorithm have exactly one input and one output workspace property?
   if (m_inputWorkspaceProps.size() == 1 &&
       m_pureOutputWorkspaceProps.size() == 1) {
@@ -1678,7 +1715,16 @@ void Algorithm::execNonMaster() {
         // This is the reverse cast of what is done in
         // cacheWorkspaceProperties(), so it should never fail.
         const Property &prop = dynamic_cast<Property &>(*wsProp);
-        setProperty(prop.name(), ws->cloneEmpty());
+        auto clone = ws->cloneEmpty();
+        // Currently we have not implemented a proper cloneEmpty() for all
+        // workspace types, in particular the abundance of Workspace2D subtypes,
+        // so we do a safety check here.
+        if (ws->storageMode() != clone->storageMode())
+          throw std::runtime_error(clone->id() +
+                                   "::cloneEmpty() did not return a workspace "
+                                   "with the correct storage mode. Make sure "
+                                   "cloneEmpty() sets the storage mode.");
+        setProperty(prop.name(), std::move(clone));
         return;
       }
     }

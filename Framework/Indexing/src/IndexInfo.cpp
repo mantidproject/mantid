@@ -193,11 +193,20 @@ SpectrumIndexSet IndexInfo::makeIndexSet(
   return m_spectrumNumberTranslator->makeIndexSet(globalIndices);
 }
 
+/// Returns true if the given global index is on this partition.
 bool IndexInfo::isOnThisPartition(GlobalSpectrumIndex globalIndex) const {
   // A map from global index to partition might be faster, consider adding this
   // if it is used a lot and has performance issues.
   const auto helperSet = makeIndexSet(globalIndex, globalIndex);
   return helperSet.size() == 1;
+}
+
+/// Returns the storage mode used in MPI runs.
+Parallel::StorageMode IndexInfo::storageMode() const { return m_storageMode; }
+
+/// Returns the communicator used in MPI runs.
+Parallel::Communicator IndexInfo::communicator() const {
+  return *m_communicator;
 }
 
 void IndexInfo::makeSpectrumNumberTranslator(

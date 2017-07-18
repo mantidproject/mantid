@@ -49,6 +49,12 @@ double FunctionGenerator::getParameter(size_t i) const {
                           : m_target->getParameter(i - m_nOwnParams);
 }
 
+/// Check if function has a parameter with a particular name.
+bool FunctionGenerator::hasParameter(const std::string &name) const {
+  checkTargetFunction();
+  return m_source->hasParameter(name) || m_target->hasParameter(name);
+}
+
 /// Set parameter by name.
 void FunctionGenerator::setParameter(const std::string &name,
                                      const double &value, bool explicitlySet) {
