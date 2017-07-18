@@ -111,13 +111,6 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
     }
   }
 
-  const std::string derivName = getProperty("OutputWorkspaceDeriv");
-  if (derivName.empty() && derivOrder > 0) {
-    result["OutputWorkspaceDeriv"] =
-        "Enter a name for the OutputWorkspaceDeriv "
-        "or set DerivOrder to zero.";
-  }
-
   return result;
 }
 
@@ -348,7 +341,7 @@ void SplineInterpolation::calculateSpline(
  * @param row : the workspace index
  * @param indices : the pair of x-axis indices defining the extrapolation range
  * @param doDerivs : whether derivatives are requested
- * @param deriv : the vector of derivative workspaces
+ * @param derivs : the vector of derivative workspaces
 */
 void SplineInterpolation::extrapolateFlat(
     MatrixWorkspace_sptr ows, MatrixWorkspace_const_sptr iwspt,
