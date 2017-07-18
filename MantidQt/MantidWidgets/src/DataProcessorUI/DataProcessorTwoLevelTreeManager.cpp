@@ -595,7 +595,7 @@ int DataProcessorTwoLevelTreeManager::rowCount() const {
 }
 
 /** Gets the number of rows of a parent group in the table
-* @param : Index of the parent group
+* @param parent : Index of the parent group
 * @return : Number of rows of a group
 */
 int DataProcessorTwoLevelTreeManager::rowCount(int parent) const {
