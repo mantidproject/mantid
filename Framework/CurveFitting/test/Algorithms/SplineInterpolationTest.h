@@ -64,22 +64,78 @@ public:
     checkOutput(alg);
   }
 
-  void testLinearHistogram() {
+  void testLinear2Point() {
 
     MatrixWorkspace_sptr iws =
         WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), 1, 2.1, 4.9, 1.4, true);
+            SplineFunc(), 3, 2.1, 4.9, 1.4, true);
 
     MatrixWorkspace_sptr mws =
         WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), 1, 1.6, 5.6, 0.4, true);
+            SplineFunc(), 2, 1.6, 5.6, 0.4, true);
 
     SplineInterpolation alg;
     runAlgorithm(alg, 1, iws, mws, true);
 
-    const MatrixWorkspace_sptr ows = alg.getProperty("OutputWorkspace");
+    checkOutputLinear(alg);
+  }
 
-    const auto &y = ows->y(0);
+  void checkOutputLinear(const SplineInterpolation &alg) const {
+    MatrixWorkspace_const_sptr ows = alg.getProperty("OutputWorkspace");
+    WorkspaceGroup_const_sptr derivs = alg.getProperty("OutputWorkspaceDeriv");
+
+    TS_ASSERT(ows->isHistogramData())
+    TS_ASSERT_EQUALS(ows->getNumberHistograms(), 3)
+    TS_ASSERT_EQUALS(ows->blocksize(), 9)
+
+    NumericAxis *xAxis = dynamic_cast<NumericAxis *>(ows->getAxis(0));
+    TS_ASSERT(xAxis);
+
+    for (size_t i = 0; i < ows->blocksize(); i++) {
+      TS_ASSERT_EQUALS((*xAxis)(i), 1.6 + i * 0.4);
+    }
+
+    const auto &y = ows->y(0).rawData();
+
+    TS_ASSERT_EQUALS(y[0], 4.2)
+    TS_ASSERT_EQUALS(y[1], 4.2)
+    TS_ASSERT_EQUALS(y[2], 4.2)
+    TS_ASSERT_DELTA(y[3], 4.6, 1e-10)
+    TS_ASSERT_DELTA(y[4], 5.4, 1e-10)
+    TS_ASSERT_DELTA(y[5], 6.2, 1e-10)
+    TS_ASSERT_DELTA(y[6], 7., 1e-10)
+    TS_ASSERT_EQUALS(y[7], 7.)
+    TS_ASSERT_EQUALS(y[8], 7.)
+
+    for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
+      MatrixWorkspace_const_sptr derivsWs =
+          boost::dynamic_pointer_cast<const MatrixWorkspace>(
+              derivs->getItem(i));
+
+      NumericAxis *derivVAxis =
+          dynamic_cast<NumericAxis *>(derivsWs->getAxis(1));
+      TS_ASSERT(derivVAxis);
+      TS_ASSERT_EQUALS((*derivVAxis)(0), 1);
+      NumericAxis *derivXAxis =
+          dynamic_cast<NumericAxis *>(derivsWs->getAxis(0));
+      TS_ASSERT(derivXAxis);
+
+      for (size_t i = 0; i < ows->blocksize(); i++) {
+        TS_ASSERT_EQUALS((*derivXAxis)(i), 1.6 + i * 0.4);
+      }
+
+      const auto &deriv = derivsWs->y(0);
+
+      TS_ASSERT_EQUALS(deriv[0], 0.)
+      TS_ASSERT_EQUALS(deriv[1], 0.)
+      TS_ASSERT_EQUALS(deriv[2], 0.)
+      TS_ASSERT_DELTA(deriv[3], 2., 1e-10)
+      TS_ASSERT_DELTA(deriv[4], 2., 1e-10)
+      TS_ASSERT_DELTA(deriv[5], 2., 1e-10)
+      TS_ASSERT_DELTA(deriv[6], 2., 1e-10)
+      TS_ASSERT_EQUALS(deriv[7], 0.)
+      TS_ASSERT_EQUALS(deriv[8], 0.)
+    }
   }
 
   void testExecMultipleSpectra() {

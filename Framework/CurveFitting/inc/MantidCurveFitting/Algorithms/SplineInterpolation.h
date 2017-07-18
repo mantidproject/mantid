@@ -83,7 +83,7 @@ private:
   void calculateDerivatives(API::MatrixWorkspace_const_sptr,
                             API::MatrixWorkspace_sptr, const size_t) const;
 
-  /// Find the the extrapolation range
+  /// Find the the interpolation range
   std::pair<size_t, size_t>
       findInterpolationRange(API::MatrixWorkspace_const_sptr,
                              API::MatrixWorkspace_sptr, const size_t);
