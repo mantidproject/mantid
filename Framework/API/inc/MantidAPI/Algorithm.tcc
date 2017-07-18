@@ -2,6 +2,8 @@
 #include "MantidAPI/IndexProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
+/* Currently required for Windows. Otherwise warning C4661 is issued. The
+ * ArrayProperty exlicit instantiations are not found.*/
 #ifdef _WIN32
 #include "MantidKernel/ArrayProperty.tcc"
 #endif
