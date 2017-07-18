@@ -171,10 +171,12 @@ will also be highlighted. Starting a new reduction will clear all highlighted
 rows and groups.
 
 If reduction is paused and then resumed again, the interface will check if any
-of the data in previously processed rows has been manually changed. If so, the
-whole group contained the altered row will be processed again, while groups
-whose rows data has been unchanged will be ignored. In addition, any new
-selected rows / groups will be processed while deselected ones will be ignored.
+data in previously processed rows and groups had been manually changed in
+between. If data within a row has been altered, the row and its containing group
+will be reprocessed. If rows are added or removed from a group, the group will
+need to be processed again as well. It is also possible to change the selection
+of rows and groups and doing so will process new data items while ignoring any
+deselected ones.
 
 Next to the **Process** button there is a checkbox which allows enabling and
 disabling output to an ipython notebook. If the checkbox is enabled, a dialog

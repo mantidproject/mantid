@@ -40,8 +40,7 @@ class GenericDataProcessorPresenterThread;
 /** @class GenericDataProcessorPresenter
 
 GenericDataProcessorPresenter is a presenter class for the Data Processor
-Interface. It
-handles any interface functionality and model manipulation.
+Interface. It handles any interface functionality and model manipulation.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -124,7 +123,6 @@ public:
                    ProgressableView *progressView) override;
   void accept(DataProcessorMainPresenter *mainPresenter) override;
   void setModel(std::string name) override;
-  void setIndexProcessed(int index, bool processed) override;
 
   // The following methods are public only for testing purposes
   // Get the whitelist
@@ -135,16 +133,14 @@ public:
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(const GroupData &groupData,
                                             const std::string &prefix = "");
-  // Set the state of whether a new selection has been made
-  void setNewSelectionState(bool newSelectionMade);
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
-  bool newSelectionMade() const override;
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) const override;
   void giveUserWarning(const std::string &prompt,
                        const std::string &title) const override;
+  bool isProcessing() const override;
 
 protected:
   // The table view we're managing
@@ -216,16 +212,14 @@ private:
   bool m_promptUser;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
-  // stores whether a new table selection has been made before processing
-  bool m_newSelection;
-  // list of indexes of processed groups
-  std::set<int> m_processedGroupIndexes;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Thread to run reducer worker in
   std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
-  // A boolean indicating whether or not data reduction has been paused
-  mutable bool m_reductionPaused;
+  // A boolean that can be set to pause reduction of the current item
+  bool m_pauseReduction;
+  // A boolean indicating whether data reduction is confirmed paused
+  bool m_reductionPaused;
   // Enumeration of the reduction actions that can be taken
   enum class ReductionFlag { ReduceRowFlag, ReduceGroupFlag, StopReduceFlag };
   // A flag of the next action due to be carried out

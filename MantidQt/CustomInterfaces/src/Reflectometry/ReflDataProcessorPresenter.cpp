@@ -47,10 +47,10 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 void ReflDataProcessorPresenter::process() {
 
   // Get selected runs
-  m_selectedData = m_manager->selectedData(true);
+  const auto newSelected = m_manager->selectedData(true);
 
   // Don't continue if there are no items to process
-  if (m_selectedData.size() == 0)
+  if (newSelected.size() == 0)
     return;
 
   // If uniform slicing is empty process normally, delegating to
@@ -59,12 +59,14 @@ void ReflDataProcessorPresenter::process() {
       m_mainPresenter->getTimeSlicingValues().toStdString();
   if (timeSlicingValues.empty()) {
     // Check if any input event workspaces still exist in ADS
-    if (proceedIfWSTypeInADS(m_selectedData, true)) {
+    if (proceedIfWSTypeInADS(newSelected, true)) {
       setPromptUser(false); // Prevent prompting user twice
       GenericDataProcessorPresenter::process();
     }
     return;
   }
+
+  m_selectedData = newSelected;
 
   // Check if any input non-event workspaces exist in ADS
   if (!proceedIfWSTypeInADS(m_selectedData, false))

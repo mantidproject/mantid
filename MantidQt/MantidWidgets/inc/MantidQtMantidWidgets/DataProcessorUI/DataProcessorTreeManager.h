@@ -90,11 +90,15 @@ public:
   /// Update row with new data
   virtual void update(int parent, int child,
                       const std::vector<std::string> &data) = 0;
-  /// Add a new data item to be highlighted
-  virtual void addHighlighted(int position) = 0;
-  virtual void addHighlighted(int position, int parent) = 0;
-  /// Clear all highlighted data items
-  void clearHighlighted() { getModel()->clearHighlighted(); }
+  /// Get the number of rows of a given parent
+  virtual int rowCount() const = 0;
+  virtual int rowCount(int parent) const = 0;
+  /// Get the 'processed' status of a data item
+  virtual bool isProcessed(int position) const = 0;
+  virtual bool isProcessed(int position, int parent) const = 0;
+  /// Set the 'processed' status of a data item
+  virtual void setProcessed(bool processed, int position) = 0;
+  virtual void setProcessed(bool processed, int position, int parent) = 0;
 
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,
