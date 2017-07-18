@@ -211,7 +211,7 @@ void SplineInterpolation::exec() {
           findInterpolationRange(iwspt, mwspt, i);
 
       // perform interpolation in the range
-      for (size_t k = range.first; k <= range.second; ++k) {
+      for (size_t k = range.first; k < range.second; ++k) {
         gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]),
                                 &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k],
                                 acc.get(), &(outputWorkspace->mutableY(i)[k]));
@@ -363,7 +363,7 @@ void SplineInterpolation::extrapolateFlat(
       derivs[row]->mutableY(0)[bin] = 0.;
     }
   }
-  for (size_t bin = indices.second + 1; bin < ows->blocksize(); ++bin) {
+  for (size_t bin = indices.second; bin < ows->blocksize(); ++bin) {
     ows->mutableY(row)[bin] = yLast;
     if (doDerivs) {
       // if derivatives are requested
@@ -374,7 +374,7 @@ void SplineInterpolation::extrapolateFlat(
 
 /** Find the region that has to be interpolated
  * E.g. iwspt x-axis is from 50-100, while mwspt x-axis is 0-200, this will return
- * the pair of the indices of mws, that are just above 50, and just below 100
+ * the pair of the indices of mwspt, that are just above 50, and just below 100
  * This is used for linear case only, to be consistent with cubic spline case
  * @param iwspt : workspace to interpolate
  * @param mwspt : workspace to match
@@ -389,17 +389,34 @@ SplineInterpolation::findInterpolationRange(MatrixWorkspace_const_sptr iwspt,
   std::sort(xAxisIn.begin(), xAxisIn.end());
   const auto &xAxisOut = mwspt->x(0).rawData();
 
-  // identify the x-range that is outside iws
-  const auto firstIt =
-      std::upper_bound(xAxisOut.cbegin(), xAxisOut.cend(), xAxisIn.front());
-  size_t firstIndex = firstIt - xAxisOut.cbegin();
+  size_t firstIndex = 0;
+  size_t lastIndex = xAxisOut.size();
 
-  const auto lastIt =
-      std::lower_bound(xAxisOut.cbegin(), xAxisOut.cend(), xAxisIn.back());
-  size_t lastIndex = xAxisOut.cend() - lastIt - 2;
+  if (xAxisOut.front() >= xAxisIn.back()) {
+    lastIndex = firstIndex;
+  } else if (xAxisOut.back() <= xAxisIn.front()) {
+    firstIndex = lastIndex;
+  } else {
+    for (size_t i = 0; i < xAxisOut.size(); ++i) {
+      if (xAxisOut[i] > xAxisIn.front()) {
+        firstIndex = i;
+        break;
+      }
+    }
+    for (size_t i = 0; i < xAxisOut.size(); ++i) {
+      if (xAxisOut[i] > xAxisIn.back()) {
+        lastIndex = i;
+        break;
+      }
+    }
+  }
 
-  g_log.debug("Will perform flat extrapolation outside bin range " +
-              std::to_string(firstIndex) + " to " + std::to_string(lastIndex));
+  std::stringstream log;
+  log << "Workspace index " << row
+      << ": Will perform flat extrapolation outside bin range: " << firstIndex
+      << " to " << lastIndex << "\n";
+
+  g_log.debug(log.str());
 
   return std::make_pair(firstIndex, lastIndex);
 }
