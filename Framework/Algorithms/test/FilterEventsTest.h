@@ -770,6 +770,7 @@ public:
           dynamic_cast<Kernel::TimeSeriesProperty<int> *>(
               filtered_ws->run().getProperty("slow_int_log"));
       TS_ASSERT(intlog);
+      TS_ASSERT_EQUALS(intlog->units(), "meter");
     }
 
     // clean up all the workspaces generated
@@ -1012,6 +1013,7 @@ public:
     // add an integer slow log
     auto int_tsp =
         Kernel::make_unique<Kernel::TimeSeriesProperty<int>>("slow_int_log");
+    int_tsp->setUnits("meter");
     for (size_t i = 0; i < 10; ++i) {
       Kernel::DateAndTime log_time(runstart_i64 + 5 * pulsedt * i);
       int log_value = static_cast<int>(i + 1) * 20;
