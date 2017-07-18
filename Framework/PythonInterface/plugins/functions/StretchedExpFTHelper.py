@@ -4,7 +4,8 @@
 @author Jose Borreguero, NScD
 @date July 19, 2017
 
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory,
+NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -34,6 +35,7 @@ from scipy.special import gamma
 from scipy import constants
 import numpy as np
 
+
 def fillJacobian(function, xvals, jacobian, partials):
     """Fill the jacobian object with the dictionary of partial derivatives
     :param function: instance of StretchedExpFT or PrimStretchedExpFT
@@ -53,6 +55,7 @@ def fillJacobian(function, xvals, jacobian, partials):
             pd = partials[name]
             for ix in range(len(xvals)):
                 jacobian.set(ix, ip, pd[ix])
+
 
 def functionDeriv1D(function, xvals, jacobian):
     """Numerical derivative except for Height parameter
@@ -83,6 +86,7 @@ def functionDeriv1D(function, xvals, jacobian):
     partials['Height'] = function.function1D(xvals, **pp)
     function.fillJacobian(xvals, jacobian, partials)
 
+
 def init(function):
     """Declare parameters that participate in the fitting
     :param function: instance of StretchedExpFT or PrimStretchedExpFT
@@ -95,6 +99,7 @@ def init(function):
     # Keep order in which parameters are declared. Should be a class
     # variable but we initialize it just below parameter declaration
     function._parmList = ['Height', 'Tau', 'Beta', 'Centre']
+
 
 def validateParams(function):
     """Check parameters are positive
@@ -116,6 +121,7 @@ surrogates = {'fillJacobian': fillJacobian,
               'init': init,
               'validateParams': validateParams,}
 
+
 def surrogate(method):
     """
     Decorator that replaces the passed method with a function
@@ -124,6 +130,7 @@ def surrogate(method):
     :return: replacing function
     """
     return surrogates[method.__name__]
+
 
 def function1Dcommon(function, xvals, refine_factor=16, **optparms):
     """Fourier transform of the symmetrized stretched exponential
@@ -160,8 +167,7 @@ def function1Dcommon(function, xvals, refine_factor=16, **optparms):
     fourier = np.abs(fft(decay).real)  # notice the reverse of decay array
     fourier /= fourier[0]  # set maximum to unity
     # Normalize the integral in energies to unity
-    fourier *= 2 * p['Tau'] * gamma(1. / p['Beta']) / (
-    p['Beta'] * planck_constant)
+    fourier *= 2*p['Tau']*gamma(1./p['Beta']) / (p['Beta']*planck_constant)
     # symmetrize to negative energies
     fourier = np.concatenate([fourier[nt:], fourier[:nt]])  # increasing ordering
     # Find corresponding energies

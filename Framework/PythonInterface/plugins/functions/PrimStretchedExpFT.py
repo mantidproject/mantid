@@ -4,7 +4,8 @@
 @author Jose Borreguero, NScD
 @date June 01, 2017
 
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory,
+NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -31,7 +32,6 @@ from mantid.api import IFunction1D, FunctionFactory
 from StretchedExpFTHelper import surrogate, function1Dcommon
 
 
-#class PrimStretchedExpFT(StretchedExpFTMixin, IFunction1D):
 class PrimStretchedExpFT(IFunction1D):
     # pylint: disable=super-on-old-class
     def __init__(self):
