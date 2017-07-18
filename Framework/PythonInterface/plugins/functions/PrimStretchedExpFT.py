@@ -25,10 +25,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 from __future__ import (absolute_import, division, print_function)
-import copy
 import numpy as np
-from scipy.fftpack import fft, fftfreq
-from scipy.special import gamma
+
 from mantid.api import IFunction1D, FunctionFactory
 from StretchedExpFTHelper import surrogate, function1Dcommon
 
@@ -74,16 +72,17 @@ class PrimStretchedExpFT(IFunction1D):
         :param optparms: alternate list of function parameters
         :return: P(bin_boundaries[i+1])- P(bin_boundaries[i]), the difference of the primitive
         """
-        energies, fourier = function1Dcommon(self, xvals, **optparms)
+        rf = 16
+        parms, de, energies, fourier = function1Dcommon(self, xvals, rf=rf, **optparms)
         denergies = (energies[-1] - energies[0]) / (len(energies)-1)
         # Find bin boundaries
         boundaries = (xvals[1:]+xvals[:-1])/2  # internal bin boundaries
         boundaries = np.insert(boundaries, 0, 2*xvals[0]-boundaries[0])  # external lower boundary
         boundaries = np.append(boundaries, 2*xvals[-1]-boundaries[-1])  # external upper boundary
-        primitive = np.cumsum(fourier) * (denergies/(refine_factor*de))  # running Riemann sum
-        transform = np.interp(boundaries[1:] - p['Centre'], energies, primitive) - \
-            np.interp(boundaries[:-1] - p['Centre'], energies, primitive)
-        return transform*p['Height']
+        primitive = np.cumsum(fourier) * (denergies/(rf*de))  # running Riemann sum
+        transform = np.interp(boundaries[1:] - parms['Centre'], energies, primitive) - \
+            np.interp(boundaries[:-1] - parms['Centre'], energies, primitive)
+        return transform * parms['Height']
 
     @surrogate
     def fillJacobian(self, xvals, jacobian, partials):

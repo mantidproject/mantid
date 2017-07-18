@@ -25,13 +25,11 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 from __future__ import (absolute_import, division, print_function)
-import copy
 import numpy as np
 import scipy.constants
-from scipy.fftpack import fft, fftfreq
-from scipy.special import gamma
-from mantid.api import IFunction1D, FunctionFactory
 
+from mantid.api import IFunction1D, FunctionFactory
+from StretchedExpFTHelper import surrogate, function1Dcommon
 
 class StretchedExpFT(IFunction1D):
     # Class variables
@@ -67,8 +65,8 @@ class StretchedExpFT(IFunction1D):
             F(E) is normalized:
                 \int_{-infty}^{infty} dE F(E) = 1
         """
-        energies, fourier = function1Dcommon(self, xvals, **optparms)
-        transform = p['Height'] * np.interp(xvals-p['Centre'], energies, fourier)
+        parms, de, energies, fourier = function1Dcommon(self, xvals, **optparms)
+        transform = parms['Height'] * np.interp(xvals-parms['Centre'], energies, fourier)
         return transform
 
     @surrogate

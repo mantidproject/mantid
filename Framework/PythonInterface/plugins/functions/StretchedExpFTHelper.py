@@ -28,8 +28,11 @@ This module provides functionality common to classes StretchedExpFT and PrimStre
 """
 
 from __future__ import (absolute_import, division, print_function)
-
-import scipy
+import copy
+from scipy.fftpack import fft, fftfreq
+from scipy.special import gamma
+from scipy import constants
+import numpy as np
 
 def fillJacobian(function, xvals, jacobian, partials):
     """Fill the jacobian object with the dictionary of partial derivatives
@@ -122,15 +125,16 @@ def surrogate(method):
     """
     return surrogates[method.__name__]
 
-def function1Dcommon(function, xvals, **optparms):
+def function1Dcommon(function, xvals, refine_factor=16, **optparms):
     """Fourier transform of the symmetrized stretched exponential
     :param function: instance of StretchedExpFT or PrimStretchedExpFT
     :param xvals: energy domain
+    :param refine_factor: divide the natural energy width by this value
     :param optparms: optional parameters used when evaluating the numerical derivative
-    :return: energies and function values
+    :return: parameters, energy width, energies, and function values
     """
-    planck_constant = scipy.constants.Planck / scipy.constants.e * 1E15  # meV*psec
-    p = self.validateParams()
+    planck_constant = constants.Planck / constants.e * 1E15  # meV*psec
+    p = function.validateParams()
     if not p:
         # return zeros if parameters not valid
         return np.zeros(len(xvals), dtype=float)
@@ -142,7 +146,6 @@ def function1Dcommon(function, xvals, **optparms):
     ne = len(xvals)
     # energy spacing. Assumed xvals is a single-segment grid
     # of increasing energy values
-    refine_factor = 16.0
     de = (xvals[-1] - xvals[0]) / (refine_factor * (ne - 1))
     erange = 2 * max(abs(xvals))
     dt = 0.5 * planck_constant / erange  # spacing in time
@@ -164,4 +167,4 @@ def function1Dcommon(function, xvals, **optparms):
     # Find corresponding energies
     energies = planck_constant * fftfreq(2 * nt, d=dt)  # standard ordering
     energies = np.concatenate([energies[nt:], energies[:nt]])  # increasing ordering
-    return energies, fourier
+    return p, de, energies, fourier
