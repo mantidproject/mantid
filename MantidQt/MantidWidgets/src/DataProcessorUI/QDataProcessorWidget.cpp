@@ -181,7 +181,11 @@ void QDataProcessorWidget::showTable(
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
-          SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
+          SLOT(rowDataUpdated(const QModelIndex &, const QModelIndex &)));
+  connect(m_model.get(), SIGNAL(rowsInserted(const QModelIndex &, int, int)),
+          this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
+  connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
+          this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
 }
 
@@ -216,22 +220,40 @@ void QDataProcessorWidget::on_comboProcessInstrument_currentIndexChanged(
 }
 
 /**
-This slot notifies the presenter that the table has been updated/changed by the
-user
+This slot updates the 'process' status of affected groups and notifies the
+presenter that the table has been updated. This is called when rows are added
+or removed from the table.
 */
-void QDataProcessorWidget::tableUpdated(const QModelIndex &topLeft,
-                                        const QModelIndex &bottomRight) {
+void QDataProcessorWidget::rowsUpdated(const QModelIndex &parent, int start,
+                                       int end) {
+  Q_UNUSED(start);
+  Q_UNUSED(end);
+
+  if (parent.isValid()) {
+    // Changing the number of rows in a group will set the containing group
+    // unprocessed
+    m_model->setProcessed(false, parent.row());
+  }
+
+  m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
+}
+
+/**
+This slot updates the 'process' status of affected rows and groups and notifies
+the presenter that the table has been updated. This is called when data within
+the rows is updated.
+*/
+void QDataProcessorWidget::rowDataUpdated(const QModelIndex &topLeft,
+                                          const QModelIndex &bottomRight) {
   Q_UNUSED(bottomRight);
 
   if (!m_presenter->isProcessing()) {
     auto pIndex = m_model->parent(topLeft);
     if (pIndex.isValid()) {
       // Changes made to rows outside of processing will set the containing
-      // group and all constituent rows unprocessed
+      // group and all changed row unprocessed
       m_model->setProcessed(false, pIndex.row());
-      for (int i = 0; i < m_model->rowCount(pIndex); i++) {
-        m_model->setProcessed(false, i, pIndex);
-      }
+      m_model->setProcessed(false, topLeft.row(), pIndex);
     }
   }
 

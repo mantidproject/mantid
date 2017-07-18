@@ -977,7 +977,6 @@ Insert a new row
 void GenericDataProcessorPresenter::appendRow() {
 
   m_manager->appendRow();
-  m_tableDirty = true;
 }
 
 /**
@@ -986,7 +985,6 @@ Insert a new group
 void GenericDataProcessorPresenter::appendGroup() {
 
   m_manager->appendGroup();
-  m_tableDirty = true;
 }
 
 /**
@@ -995,15 +993,14 @@ Delete row(s) from the model
 void GenericDataProcessorPresenter::deleteRow() {
 
   m_manager->deleteRow();
-  m_tableDirty = true;
 }
 
 /**
 Delete group(s) from the model
 */
 void GenericDataProcessorPresenter::deleteGroup() {
+
   m_manager->deleteGroup();
-  m_tableDirty = true;
 }
 
 /**
@@ -1012,7 +1009,6 @@ Group rows together
 void GenericDataProcessorPresenter::groupRows() {
 
   m_manager->groupRows();
-  m_tableDirty = true;
 }
 
 /**
@@ -1309,7 +1305,6 @@ void GenericDataProcessorPresenter::expandSelection() {
 void GenericDataProcessorPresenter::clearSelected() {
 
   m_manager->clearSelected();
-  m_tableDirty = true;
 }
 
 /** Copy current selection to clipboard */

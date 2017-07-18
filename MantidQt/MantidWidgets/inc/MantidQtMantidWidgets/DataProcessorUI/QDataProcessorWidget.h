@@ -163,7 +163,8 @@ public slots:
 
 private slots:
   void setModel(QString name);
-  void tableUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+  void rowsUpdated(const QModelIndex &parent, int first, int last);
+  void rowDataUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);
   void showContextMenu(const QPoint &pos);
   void processClicked();
 };
