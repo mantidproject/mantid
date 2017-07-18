@@ -126,7 +126,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         num_samples = len(input_files)
         num_vanadium = len(self.getProperty('VanadiumFiles').value)
-
         if num_samples != num_vanadium and num_vanadium != 0:
             run_num_mismatch = 'You must input the same number of sample and vanadium runs'
             issues['InputFiles'] = run_num_mismatch
