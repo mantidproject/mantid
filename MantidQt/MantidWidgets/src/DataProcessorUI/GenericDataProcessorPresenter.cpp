@@ -974,42 +974,27 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 /**
 Insert a new row
 */
-void GenericDataProcessorPresenter::appendRow() {
-
-  m_manager->appendRow();
-}
+void GenericDataProcessorPresenter::appendRow() { m_manager->appendRow(); }
 
 /**
 Insert a new group
 */
-void GenericDataProcessorPresenter::appendGroup() {
-
-  m_manager->appendGroup();
-}
+void GenericDataProcessorPresenter::appendGroup() { m_manager->appendGroup(); }
 
 /**
 Delete row(s) from the model
 */
-void GenericDataProcessorPresenter::deleteRow() {
-
-  m_manager->deleteRow();
-}
+void GenericDataProcessorPresenter::deleteRow() { m_manager->deleteRow(); }
 
 /**
 Delete group(s) from the model
 */
-void GenericDataProcessorPresenter::deleteGroup() {
-
-  m_manager->deleteGroup();
-}
+void GenericDataProcessorPresenter::deleteGroup() { m_manager->deleteGroup(); }
 
 /**
 Group rows together
 */
-void GenericDataProcessorPresenter::groupRows() {
-
-  m_manager->groupRows();
-}
+void GenericDataProcessorPresenter::groupRows() { m_manager->groupRows(); }
 
 /**
 Expand all groups

@@ -76,7 +76,8 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
 
   // Connect the model
-  void showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) override;
+  void
+  showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) override;
 
   // Dialog/Prompt methods
   std::string requestNotebookPath() override;
@@ -164,7 +165,8 @@ public slots:
 private slots:
   void setModel(QString name);
   void rowsUpdated(const QModelIndex &parent, int first, int last);
-  void rowDataUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+  void rowDataUpdated(const QModelIndex &topLeft,
+                      const QModelIndex &bottomRight);
   void showContextMenu(const QPoint &pos);
   void processClicked();
 };
