@@ -172,14 +172,17 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
  */
 void WorkspaceJoiners::validateInputs(const MatrixWorkspace &ws1,
                                       const MatrixWorkspace &ws2) {
-  // This is the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(ws1) ||
-      !WorkspaceHelpers::commonBoundaries(ws2)) {
-    g_log.error(
-        "Both input workspaces must have common binning for all their spectra");
-    throw std::invalid_argument(
-        "Both input workspaces must have common binning for all their spectra");
-  }
+	// Workspaces with point data are allowed to have different binning
+	if (ws1.isHistogramData() || ws2.isHistogramData()) {
+		// This is the full check for common binning
+		if (!WorkspaceHelpers::commonBoundaries(ws1) ||
+			!WorkspaceHelpers::commonBoundaries(ws2)) {
+			g_log.error(
+				"Both input workspaces must have common binning for all their spectra");
+			throw std::invalid_argument(
+				"Both input workspaces must have common binning for all their spectra");
+		}
+	}
 
   if (ws1.getInstrument()->getName() != ws2.getInstrument()->getName()) {
     const std::string message("The input workspaces are not compatible because "
