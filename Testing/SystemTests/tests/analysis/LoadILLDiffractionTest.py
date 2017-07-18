@@ -6,7 +6,6 @@ from mantid import config
 
 class LoadILLDiffractionTest(stresstesting.MantidStressTest):
     def setUp(self):
-        # cache default instrument and datadirs
         self.facility = config['default.facility']
         self.instrument = config['default.instrument']
         self.datadirs = config['datasearch.directories']
@@ -21,7 +20,7 @@ class LoadILLDiffractionTest(stresstesting.MantidStressTest):
         config['datasearch.directories'] = self.datadirs
 
     def d20_detector_scan_test(self):
-        ws = LoadILLDiffraction('967076.nxs')
+        LoadILLDiffraction('967076.nxs')
         LoadNexusProcessed(Filename="967076_reference_load.nxs", OutputWorkspace="ref")
         result = CompareWorkspaces(Workspace1='967076', Workspace2='ref', Tolerance=1e-6)
 
@@ -34,4 +33,3 @@ class LoadILLDiffractionTest(stresstesting.MantidStressTest):
         self.d20_detector_scan_test()
 
         self.tearDown()
-
