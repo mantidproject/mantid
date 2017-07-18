@@ -12,11 +12,11 @@
 #include <MantidAPI/MatrixWorkspace_fwd.h>
 #include <MantidAPI/WorkspaceGroup_fwd.h>
 
-#include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h>
 #include <QDockWidget>
 #include <QMap>
 #include <QMetaType>
+#include <QHash>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
@@ -86,11 +86,6 @@ public:
   MantidQt::MantidWidgets::WorkspacePresenterWN_wptr
   getPresenterWeakPtr() override;
 
-  MantidSurfacePlotDialog::UserInputSurface
-  chooseContourPlotOptions(int nWorkspaces) const;
-  MantidSurfacePlotDialog::UserInputSurface
-  chooseSurfacePlotOptions(int nWorkspaces) const;
-
   SortDirection getSortDirection() const override;
   SortCriteria getSortCriteria() const override;
   void sortWorkspaces(SortCriteria criteria, SortDirection direction) override;
@@ -129,7 +124,7 @@ public:
   void showWorkspaceData() override;
   void saveToProgram() override;
   void showInstrumentView() override;
-  void plotSpectrum(bool showErrors) override;
+  void plotSpectrum(std::string type) override;
   void showColourFillPlot() override;
   void showDetectorsTable() override;
   void showBoxDataTable() override;
@@ -144,8 +139,6 @@ public:
   void showTransposed() override;
   void convertToMatrixWorkspace() override;
   void convertMDHistoToMatrixWorkspace() override;
-  void showSurfacePlot() override;
-  void showContourPlot() override;
 
   bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
                              const bool wait = true) override;
@@ -176,8 +169,7 @@ private:
       QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const;
   void addPeaksWorkspaceMenuItems(
       QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr &WS) const;
-  void addWorkspaceGroupMenuItems(
-      QMenu *menu, const Mantid::API::WorkspaceGroup_const_sptr &groupWS) const;
+  void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu *menu) const;
   void addClearMenuItems(QMenu *menu, const QString &wsName);
 
@@ -224,14 +216,13 @@ private slots:
   void onClickShowTransposed();
   void onClickPlotSpectra();
   void onClickPlotSpectraErr();
+  void onClickPlotAdvanced();
   void onClickDrawColorFillPlot();
   void onClickShowDetectorTable();
   void onClickConvertToMatrixWorkspace();
   void onClickConvertMDHistoToMatrixWorkspace();
   void onClickShowAlgHistory();
   void onClickShowSampleMaterial();
-  void onClickPlotSurface();
-  void onClickPlotContour();
   void onClickClearUB();
   void incrementUpdateCount();
   void filterWorkspaceTree(const QString &text);
@@ -262,13 +253,13 @@ private:
 
   // Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr,
-      *m_showDetectors, *m_showBoxData, *m_showVatesGui, *m_showSpectrumViewer,
-      *m_showSliceViewer, *m_colorFill, *m_showLogs, *m_showSampleMaterial,
-      *m_showHist, *m_showMDPlot, *m_showListData, *m_saveNexus, *m_rename,
-      *m_delete, *m_program, *m_ascendingSortAction, *m_descendingSortAction,
-      *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
-      *m_convertToMatrixWorkspace, *m_convertMDHistoToMatrixWorkspace,
-      *m_clearUB, *m_plotSurface, *m_plotContour;
+      *m_plotAdvanced, *m_showDetectors, *m_showBoxData, *m_showVatesGui,
+      *m_showSpectrumViewer, *m_showSliceViewer, *m_colorFill, *m_showLogs,
+      *m_showSampleMaterial, *m_showHist, *m_showMDPlot, *m_showListData,
+      *m_saveNexus, *m_rename, *m_delete, *m_program, *m_ascendingSortAction,
+      *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice,
+      *m_showTransposed, *m_convertToMatrixWorkspace,
+      *m_convertMDHistoToMatrixWorkspace, *m_clearUB;
 
   QAtomicInt m_updateCount;
   bool m_treeUpdating;

@@ -7,13 +7,12 @@ import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter,
                                    PositiveFloatParameter, FloatParameter, ClassTypeParameter, DictParameter,
-                                   PositiveFloatWithNoneParameter)
+                                   PositiveFloatWithNoneParameter, BoolParameter)
 from sans.state.automatic_setters import (automatic_setters)
 from sans.common.enums import (RebinType, RangeStepType, SANSInstrument)
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
                                         one_is_none, validation_message)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
-from sans.common.file_information import (get_instrument_paths_for_sans_file)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -23,6 +22,7 @@ from sans.common.file_information import (get_instrument_paths_for_sans_file)
 class StateNormalizeToMonitor(StateBase):
     prompt_peak_correction_min = PositiveFloatWithNoneParameter()
     prompt_peak_correction_max = PositiveFloatWithNoneParameter()
+    prompt_peak_correction_enabled = BoolParameter()
 
     rebin_type = ClassTypeParameter(RebinType)
     wavelength_low = PositiveFloatParameter()
@@ -41,6 +41,10 @@ class StateNormalizeToMonitor(StateBase):
         super(StateNormalizeToMonitor, self).__init__()
         self.background_TOF_monitor_start = {}
         self.background_TOF_monitor_stop = {}
+        self.prompt_peak_correction_enabled = False
+
+        # Default rebin type is a standard Rebin
+        self.rebin_type = RebinType.Rebin
 
     def validate(self):
         is_invalid = {}
@@ -147,6 +151,7 @@ class StateNormalizeToMonitorLOQ(StateNormalizeToMonitor):
         # Set the LOQ default range for prompt peak correction
         self.prompt_peak_correction_min = 19000.0
         self.prompt_peak_correction_max = 20500.0
+        self.prompt_peak_correction_enabled = True
 
     def validate(self):
         super(StateNormalizeToMonitorLOQ, self).validate()
@@ -161,11 +166,10 @@ def set_default_incident_monitor(normalize_monitor_info, data_info):
     :param normalize_monitor_info: a StateNormalizeMonitor object on which we set the default value
     :param data_info: a StateData object
     """
-    file_name = data_info.sample_scatter
-    _, ipf_path = get_instrument_paths_for_sans_file(file_name)
+    ipf_file_path = data_info.ipf_file_path
     named_element = "default-incident-monitor-spectrum"
     monitor_spectrum_tag_to_search = [named_element]
-    found_monitor_spectrum = get_named_elements_from_ipf_file(ipf_path, monitor_spectrum_tag_to_search, int)
+    found_monitor_spectrum = get_named_elements_from_ipf_file(ipf_file_path, monitor_spectrum_tag_to_search, int)
     if named_element in found_monitor_spectrum:
         normalize_monitor_info.incident_monitor = found_monitor_spectrum[named_element]
 

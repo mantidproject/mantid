@@ -9,6 +9,9 @@
 #include <type_traits>
 
 namespace Mantid {
+namespace Geometry {
+class Instrument;
+}
 namespace API {
 class MatrixWorkspace;
 class HistoWorkspace;
@@ -41,6 +44,7 @@ class Workspace2D;
       EventWorkspace can be created from it.
 
   Other arguments can include:
+  - The instrument.
   - The desired number of spectra (NumSpectra) to be created in the output
     workspace.
   - A reference to an IndexInfo object, defining the number of spectra and
@@ -56,10 +60,10 @@ class Workspace2D;
   ~~~{.cpp}
   create<T>(NumSpectra, Histogram)
   create<T>(IndexInfo,  Histogram)
+  create<T>(Instrument, NumSpectra, Histogram)
+  create<T>(Instrument, IndexInfo,  Histogram)
   create<T>(ParentWS)
   create<T>(ParentWS, Histogram)
-  create<T>(ParentWS, NumSpectra)
-  create<T>(ParentWS, IndexInfo)
   create<T>(ParentWS, NumSpectra, Histogram)
   create<T>(ParentWS, IndexInfo, Histogram)
   ~~~
@@ -68,7 +72,7 @@ class Workspace2D;
     identical to the size of the parent, the created workspace has the same
     number of spectra as the parent workspace and spectrum number as well as
     detector ID information is copied from the parent.
-  - If Histogram is not given, the created workspace has X identical to the
+  - If only ParentWS is given, the created workspace has X identical to the
     parent workspace and Y and E are initialized to 0.
   - If a Histogram with 'NULL' Y and E is given, Y and E are initialized to 0.
 
@@ -130,11 +134,26 @@ template <>
 MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace>
 createConcreteHelper();
 
+template <class HistArg>
+void fixDistributionFlag(API::MatrixWorkspace &, const HistArg &) {}
+
+template <>
+MANTID_DATAOBJECTS_DLL void
+fixDistributionFlag(API::MatrixWorkspace &workspace,
+                    const HistogramData::Histogram &histArg);
+
 MANTID_DATAOBJECTS_DLL void
 initializeFromParent(const API::MatrixWorkspace &parent,
                      API::MatrixWorkspace &ws);
+
+MANTID_DATAOBJECTS_DLL void
+initializeFromParentWithoutLogs(const API::MatrixWorkspace &parent,
+                                API::MatrixWorkspace &ws);
 }
 
+/** This is the create() method that all the other create() methods call.
+ *  And it is also called directly.
+ */
 template <class T, class P, class IndexArg, class HistArg,
           class = typename std::enable_if<
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
@@ -159,9 +178,58 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
     }
   }
 
+  // The instrument is also copied by initializeFromParent, but if indexArg is
+  // IndexInfo and contains non-empty spectrum definitions the initialize call
+  // will fail due to invalid indices in the spectrum definitions. Therefore, we
+  // copy the instrument first. This should be cleaned up once we figure out the
+  // future of WorkspaceFactory.
+  ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   detail::initializeFromParent(parent, *ws);
+  // initializeFromParent sets the distribution flag to the same value as
+  // parent. In case histArg is an actual Histogram that is not the correct
+  // behavior so we have to set it back to the value given by histArg.
+  detail::fixDistributionFlag(*ws, histArg);
+  return ws;
+}
 
+/** create a new workspace with empty run, i.e., without logs
+ *  this is for initializeFromParentWithoutLogs
+ */
+template <class T, class P, class IndexArg, class HistArg,
+          class = typename std::enable_if<
+              std::is_base_of<API::MatrixWorkspace, P>::value>::type>
+std::unique_ptr<T> createWithoutLogs(const P &parent, const IndexArg &indexArg,
+                                     const HistArg &histArg) {
+  // Figure out (dynamic) target type:
+  // - Type is same as parent if T is base of parent
+  // - If T is not base of parent, conversion may occur. Currently only
+  //   supported for EventWorkspace
+  std::unique_ptr<T> ws;
+  if (std::is_base_of<API::HistoWorkspace, T>::value &&
+      parent.id() == "EventWorkspace") {
+    // Drop events, create Workspace2D or T whichever is more derived.
+    ws = detail::createHelper<T>();
+  } else {
+    try {
+      // If parent is more derived than T: create type(parent)
+      ws = dynamic_cast<const T &>(parent).cloneEmpty();
+    } catch (std::bad_cast &) {
+      // If T is more derived than parent: create T
+      ws = detail::createConcreteHelper<T>();
+    }
+  }
+
+  // The instrument is also copied by initializeFromParentWithoutLogs,
+  // but if indexArg is
+  // IndexInfo and contains non-empty spectrum definitions the initialize call
+  // will fail due to invalid indices in the spectrum definitions. Therefore, we
+  // copy the instrument first. This should be cleaned up once we figure out the
+  // future of WorkspaceFactory.
+  ws->setInstrument(parent.getInstrument());
+  ws->initialize(indexArg, HistogramData::Histogram(histArg));
+  detail::initializeFromParentWithoutLogs(parent, *ws);
+  detail::fixDistributionFlag(*ws, histArg);
   return ws;
 }
 
@@ -172,6 +240,19 @@ template <class T, class IndexArg, class HistArg,
 std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = Kernel::make_unique<T>();
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
+  return ws;
+}
+
+template <class T, class IndexArg, class HistArg,
+          typename std::enable_if<
+              !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
+              nullptr>
+std::unique_ptr<T>
+create(const boost::shared_ptr<const Geometry::Instrument> instrument,
+       const IndexArg &indexArg, const HistArg &histArg) {
+  auto ws = Kernel::make_unique<T>();
+  ws->setInstrument(std::move(instrument));
+  ws->initialize(indexArg, HistogramData::Histogram(histArg));
   return std::move(ws);
 }
 
@@ -179,15 +260,26 @@ template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
 std::unique_ptr<T> create(const P &parent) {
-  return create<T>(parent, parent.getNumberHistograms(),
-                   detail::stripData(parent.histogram(0)));
+  const auto numHistograms = parent.getNumberHistograms();
+  auto ws =
+      create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
+  for (size_t i = 0; i < numHistograms; ++i) {
+    ws->setSharedX(i, parent.sharedX(i));
+  }
+  return ws;
 }
 
-template <class T, class P, class IndexArg,
+template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
-std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg) {
-  return create<T>(parent, indexArg, detail::stripData(parent.histogram(0)));
+std::unique_ptr<T> createWithoutLogs(const P &parent) {
+  const auto numHistograms = parent.getNumberHistograms();
+  auto ws = createWithoutLogs<T>(parent, numHistograms,
+                                 detail::stripData(parent.histogram(0)));
+  for (size_t i = 0; i < numHistograms; ++i) {
+    ws->setSharedX(i, parent.sharedX(i));
+  }
+  return ws;
 }
 
 // Templating with HistArg clashes with the IndexArg template above. Could be

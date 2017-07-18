@@ -17,6 +17,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
+#include <nexus/NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
 
@@ -224,6 +225,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
     std::ostringstream os;
     os << "det-" << i;
     Detector *d = new Detector(os.str(), i, 0);
+    instr->add(d);
     instr->markAsDetector(d);
   }
   space2D->setInstrument(instr);

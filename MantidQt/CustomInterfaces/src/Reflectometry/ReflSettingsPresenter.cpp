@@ -52,206 +52,223 @@ void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
 */
 void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
   m_currentInstrumentName = instName;
-  m_view->setPolarisationOptionsEnabled(instName != "INTER" &&
-                                        instName != "SURF");
+  bool enable = instName != "INTER" && instName != "SURF";
+  m_view->setIsPolCorrEnabled(enable);
+  m_view->setPolarisationOptionsEnabled(enable);
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
-* @return :: Global options for 'CreateTransmissionWorkspaceAuto'
-*/
+ * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
+ */
 std::string ReflSettingsPresenter::getTransmissionOptions() const {
 
   std::vector<std::string> options;
 
-  // Add analysis mode
-  auto analysisMode = m_view->getAnalysisMode();
-  if (!analysisMode.empty())
-    options.push_back("AnalysisMode=" + analysisMode);
+  if (m_view->experimentSettingsEnabled()) {
 
-  // Add monitor integral min
-  auto monIntMin = m_view->getMonitorIntegralMin();
-  if (!monIntMin.empty())
-    options.push_back("MonitorIntegrationWavelengthMin=" + monIntMin);
+    // Add analysis mode
+    auto analysisMode = m_view->getAnalysisMode();
+    if (!analysisMode.empty())
+      options.push_back("AnalysisMode=" + analysisMode);
 
-  // Add monitor integral max
-  auto monIntMax = m_view->getMonitorIntegralMax();
-  if (!monIntMax.empty())
-    options.push_back("MonitorIntegrationWavelengthMax=" + monIntMax);
+    // Add start overlap
+    auto startOv = m_view->getStartOverlap();
+    if (!startOv.empty())
+      options.push_back("StartOverlap=" + startOv);
 
-  // Add monitor background min
-  auto monBgMin = m_view->getMonitorBackgroundMin();
-  if (!monBgMin.empty())
-    options.push_back("MonitorBackgroundWavelengthMin=" + monBgMin);
-
-  // Add monitor background max
-  auto monBgMax = m_view->getMonitorBackgroundMax();
-  if (!monBgMax.empty())
-    options.push_back("MonitorBackgroundWavelengthMax=" + monBgMax);
-
-  // Add lambda min
-  auto lamMin = m_view->getLambdaMin();
-  if (!lamMin.empty())
-    options.push_back("WavelengthMin=" + lamMin);
-
-  // Add lambda max
-  auto lamMax = m_view->getLambdaMax();
-  if (!lamMax.empty())
-    options.push_back("WavelengthMax=" + lamMax);
-
-  // Add I0MonitorIndex
-  auto I0MonitorIndex = m_view->getI0MonitorIndex();
-  if (!I0MonitorIndex.empty())
-    options.push_back("I0MonitorIndex=" + I0MonitorIndex);
-
-  // Add detector limits
-  auto procInst = m_view->getProcessingInstructions();
-  if (!procInst.empty()) {
-    wrapWithQuotes(procInst);
-    options.push_back("ProcessingInstructions=" + procInst);
+    // Add end overlap
+    auto endOv = m_view->getEndOverlap();
+    if (!endOv.empty())
+      options.push_back("EndOverlap=" + endOv);
   }
 
-  // Add start overlap
-  auto startOv = m_view->getStartOverlap();
-  if (!startOv.empty())
-    options.push_back("StartOverlap=" + startOv);
+  if (m_view->instrumentSettingsEnabled()) {
+    // Add monitor integral min
+    auto monIntMin = m_view->getMonitorIntegralMin();
+    if (!monIntMin.empty())
+      options.push_back("MonitorIntegrationWavelengthMin=" + monIntMin);
 
-  // Add end overlap
-  auto endOv = m_view->getEndOverlap();
-  if (!endOv.empty())
-    options.push_back("EndOverlap=" + endOv);
+    // Add monitor integral max
+    auto monIntMax = m_view->getMonitorIntegralMax();
+    if (!monIntMax.empty())
+      options.push_back("MonitorIntegrationWavelengthMax=" + monIntMax);
+
+    // Add monitor background min
+    auto monBgMin = m_view->getMonitorBackgroundMin();
+    if (!monBgMin.empty())
+      options.push_back("MonitorBackgroundWavelengthMin=" + monBgMin);
+
+    // Add monitor background max
+    auto monBgMax = m_view->getMonitorBackgroundMax();
+    if (!monBgMax.empty())
+      options.push_back("MonitorBackgroundWavelengthMax=" + monBgMax);
+
+    // Add lambda min
+    auto lamMin = m_view->getLambdaMin();
+    if (!lamMin.empty())
+      options.push_back("WavelengthMin=" + lamMin);
+
+    // Add lambda max
+    auto lamMax = m_view->getLambdaMax();
+    if (!lamMax.empty())
+      options.push_back("WavelengthMax=" + lamMax);
+
+    // Add I0MonitorIndex
+    auto I0MonitorIndex = m_view->getI0MonitorIndex();
+    if (!I0MonitorIndex.empty())
+      options.push_back("I0MonitorIndex=" + I0MonitorIndex);
+
+    // Add detector limits
+    auto procInst = m_view->getProcessingInstructions();
+    if (!procInst.empty()) {
+      wrapWithQuotes(procInst);
+      options.push_back("ProcessingInstructions=" + procInst);
+    }
+  }
 
   return boost::algorithm::join(options, ",");
 }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'
-* @return :: Global options for 'ReflectometryReductionOneAuto'
-*/
+ * @return :: Global options for 'ReflectometryReductionOneAuto'
+ */
 std::string ReflSettingsPresenter::getReductionOptions() const {
 
   std::vector<std::string> options;
 
-  // Add analysis mode
-  auto analysisMode = m_view->getAnalysisMode();
-  if (!analysisMode.empty())
-    options.push_back("AnalysisMode=" + analysisMode);
+  if (m_view->experimentSettingsEnabled()) {
 
-  // Add CRho
-  auto crho = m_view->getCRho();
-  if (!crho.empty()) {
-    wrapWithQuotes(crho);
-    options.push_back("CRho=" + crho);
+    // Add analysis mode
+    auto analysisMode = m_view->getAnalysisMode();
+    if (!analysisMode.empty())
+      options.push_back("AnalysisMode=" + analysisMode);
+
+    // Add CRho
+    auto crho = m_view->getCRho();
+    if (!crho.empty()) {
+      wrapWithQuotes(crho);
+      options.push_back("CRho=" + crho);
+    }
+
+    // Add CAlpha
+    auto calpha = m_view->getCAlpha();
+    if (!calpha.empty()) {
+      wrapWithQuotes(calpha);
+      options.push_back("CAlpha=" + calpha);
+    }
+
+    // Add CAp
+    auto cap = m_view->getCAp();
+    if (!cap.empty()) {
+      wrapWithQuotes(cap);
+      options.push_back("CAp=" + cap);
+    }
+
+    // Add CPp
+    auto cpp = m_view->getCPp();
+    if (!cpp.empty()) {
+      wrapWithQuotes(cpp);
+      options.push_back("CPp=" + cpp);
+    }
+
+    // Add direct beam
+    auto dbnr = m_view->getDirectBeam();
+    if (!dbnr.empty()) {
+      wrapWithQuotes(dbnr);
+      options.push_back("RegionOfDirectBeam=" + dbnr);
+    }
+
+    // Add polarisation corrections
+    auto polCorr = m_view->getPolarisationCorrections();
+    if (!polCorr.empty())
+      options.push_back("PolarizationAnalysis=" + polCorr);
+
+    // Add scale factor
+    auto scaleFactor = m_view->getScaleFactor();
+    if (!scaleFactor.empty())
+      options.push_back("ScaleFactor=" + scaleFactor);
+
+    // Add momentum transfer limits
+    auto qTransStep = m_view->getMomentumTransferStep();
+    if (!qTransStep.empty()) {
+      options.push_back("MomentumTransferStep=" + qTransStep);
+    }
+
+    // Add start overlap
+    auto startOv = m_view->getStartOverlap();
+    if (!startOv.empty())
+      options.push_back("StartOverlap=" + startOv);
+
+    // Add end overlap
+    auto endOv = m_view->getEndOverlap();
+    if (!endOv.empty())
+      options.push_back("EndOverlap=" + endOv);
+
+    // Add transmission runs
+    auto transRuns = this->getTransmissionRuns(true);
+    if (!transRuns.empty()) {
+      std::vector<std::string> splitRuns;
+      boost::split(splitRuns, transRuns, boost::is_any_of(","));
+      options.push_back("FirstTransmissionRun=TRANS_" + splitRuns[0]);
+      if (splitRuns.size() > 1)
+        options.push_back("SecondTransmissionRun=TRANS_" + splitRuns[1]);
+    }
   }
 
-  // Add CAlpha
-  auto calpha = m_view->getCAlpha();
-  if (!calpha.empty()) {
-    wrapWithQuotes(calpha);
-    options.push_back("CAlpha=" + calpha);
+  if (m_view->instrumentSettingsEnabled()) {
+
+    // Add integrated monitors option
+    auto intMonCheck = m_view->getIntMonCheck();
+    if (!intMonCheck.empty())
+      options.push_back("NormalizeByIntegratedMonitors=" + intMonCheck);
+
+    // Add monitor integral min
+    auto monIntMin = m_view->getMonitorIntegralMin();
+    if (!monIntMin.empty())
+      options.push_back("MonitorIntegrationWavelengthMin=" + monIntMin);
+
+    // Add monitor integral max
+    auto monIntMax = m_view->getMonitorIntegralMax();
+    if (!monIntMax.empty())
+      options.push_back("MonitorIntegrationWavelengthMax=" + monIntMax);
+
+    // Add monitor background min
+    auto monBgMin = m_view->getMonitorBackgroundMin();
+    if (!monBgMin.empty())
+      options.push_back("MonitorBackgroundWavelengthMin=" + monBgMin);
+
+    // Add monitor background max
+    auto monBgMax = m_view->getMonitorBackgroundMax();
+    if (!monBgMax.empty())
+      options.push_back("MonitorBackgroundWavelengthMax=" + monBgMax);
+
+    // Add lambda min
+    auto lamMin = m_view->getLambdaMin();
+    if (!lamMin.empty())
+      options.push_back("WavelengthMin=" + lamMin);
+
+    // Add lambda max
+    auto lamMax = m_view->getLambdaMax();
+    if (!lamMax.empty())
+      options.push_back("WavelengthMax=" + lamMax);
+
+    // Add I0MonitorIndex
+    auto I0MonitorIndex = m_view->getI0MonitorIndex();
+    if (!I0MonitorIndex.empty())
+      options.push_back("I0MonitorIndex=" + I0MonitorIndex);
+
+    // Add detector limits
+    auto procInst = m_view->getProcessingInstructions();
+    if (!procInst.empty()) {
+      wrapWithQuotes(procInst);
+      options.push_back("ProcessingInstructions=" + procInst);
+    }
+
+    // Add correction type
+    auto correctionType = m_view->getDetectorCorrectionType();
+    if (!correctionType.empty())
+      options.push_back("DetectorCorrectionType=" + correctionType);
   }
-
-  // Add CAp
-  auto cap = m_view->getCAp();
-  if (!cap.empty()) {
-    wrapWithQuotes(cap);
-    options.push_back("CAp=" + cap);
-  }
-
-  // Add CPp
-  auto cpp = m_view->getCPp();
-  if (!cpp.empty()) {
-    wrapWithQuotes(cpp);
-    options.push_back("CPp=" + cpp);
-  }
-
-  // Add direct beam
-  auto dbnr = m_view->getDirectBeam();
-  if (!dbnr.empty()) {
-    wrapWithQuotes(dbnr);
-    options.push_back("RegionOfDirectBeam=" + dbnr);
-  }
-
-  // Add polarisation corrections
-  auto polCorr = m_view->getPolarisationCorrections();
-  if (!polCorr.empty())
-    options.push_back("PolarizationAnalysis=" + polCorr);
-
-  // Add integrated monitors option
-  auto intMonCheck = m_view->getIntMonCheck();
-  if (!intMonCheck.empty())
-    options.push_back("NormalizeByIntegratedMonitors=" + intMonCheck);
-
-  // Add monitor integral min
-  auto monIntMin = m_view->getMonitorIntegralMin();
-  if (!monIntMin.empty())
-    options.push_back("MonitorIntegrationWavelengthMin=" + monIntMin);
-
-  // Add monitor integral max
-  auto monIntMax = m_view->getMonitorIntegralMax();
-  if (!monIntMax.empty())
-    options.push_back("MonitorIntegrationWavelengthMax=" + monIntMax);
-
-  // Add monitor background min
-  auto monBgMin = m_view->getMonitorBackgroundMin();
-  if (!monBgMin.empty())
-    options.push_back("MonitorBackgroundWavelengthMin=" + monBgMin);
-
-  // Add monitor background max
-  auto monBgMax = m_view->getMonitorBackgroundMax();
-  if (!monBgMax.empty())
-    options.push_back("MonitorBackgroundWavelengthMax=" + monBgMax);
-
-  // Add lambda min
-  auto lamMin = m_view->getLambdaMin();
-  if (!lamMin.empty())
-    options.push_back("WavelengthMin=" + lamMin);
-
-  // Add lambda max
-  auto lamMax = m_view->getLambdaMax();
-  if (!lamMax.empty())
-    options.push_back("WavelengthMax=" + lamMax);
-
-  // Add I0MonitorIndex
-  auto I0MonitorIndex = m_view->getI0MonitorIndex();
-  if (!I0MonitorIndex.empty())
-    options.push_back("I0MonitorIndex=" + I0MonitorIndex);
-
-  // Add scale factor
-  auto scaleFactor = m_view->getScaleFactor();
-  if (!scaleFactor.empty())
-    options.push_back("ScaleFactor=" + scaleFactor);
-
-  // Add momentum transfer limits
-  auto qTransStep = m_view->getMomentumTransferStep();
-  if (!qTransStep.empty()) {
-    options.push_back("MomentumTransferStep=" + qTransStep);
-  }
-
-  // Add detector limits
-  auto procInst = m_view->getProcessingInstructions();
-  if (!procInst.empty()) {
-    wrapWithQuotes(procInst);
-    options.push_back("ProcessingInstructions=" + procInst);
-  }
-
-  // Add correction type
-  auto correctionType = m_view->getDetectorCorrectionType();
-  if (!correctionType.empty())
-    options.push_back("DetectorCorrectionType=" + correctionType);
-
-  // Add start overlap
-  auto startOv = m_view->getStartOverlap();
-  if (!startOv.empty())
-    options.push_back("StartOverlap=" + startOv);
-
-  // Add end overlap
-  auto endOv = m_view->getEndOverlap();
-  if (!endOv.empty())
-    options.push_back("EndOverlap=" + endOv);
-
-  // Add transmission runs
-  auto transRuns = this->getTransmissionRuns();
-  if (!transRuns.empty())
-    options.push_back(transRuns);
 
   return boost::algorithm::join(options, ",");
 }
@@ -260,9 +277,10 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 *ADS. Returns a string with transmission runs so that they are considered in the
 *reduction
 *
+* @param loadRuns :: If true, will try to load transmission runs as well
 * @return :: transmission run(s) as a string that will be used for the reduction
 */
-std::string ReflSettingsPresenter::getTransmissionRuns() const {
+std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
 
   auto runs = m_view->getTransmissionRuns();
   if (runs.empty())
@@ -276,30 +294,31 @@ std::string ReflSettingsPresenter::getTransmissionRuns() const {
                                 "transmission runs separated by ',' "
                                 "are allowed.");
 
-  for (const auto &run : transRuns) {
-    if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
-      continue;
-    // Load transmission runs and put them in the ADS
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadISISNexus");
-    alg->setProperty("Filename", run);
-    alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
-    alg->execute();
+  if (loadRuns) {
+    for (const auto &run : transRuns) {
+      if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
+        continue;
+      // Load transmission runs and put them in the ADS
+      IAlgorithm_sptr alg =
+          AlgorithmManager::Instance().create("LoadISISNexus");
+      alg->setProperty("Filename", run);
+      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
+      alg->execute();
+    }
   }
 
-  // Return them as options for reduction
-  std::string options = "FirstTransmissionRun=TRANS_" + transRuns[0];
-  if (transRuns.size() > 1)
-    options += ",SecondTransmissionRun=TRANS_" + transRuns[1];
-
-  return options;
+  return runs;
 }
 
 /** Returns global options for 'Stitch1DMany'
-* @return :: Global options for 'Stitch1DMany'
-*/
+ * @return :: Global options for 'Stitch1DMany'
+ */
 std::string ReflSettingsPresenter::getStitchOptions() const {
 
-  return m_view->getStitchOptions();
+  if (m_view->experimentSettingsEnabled())
+    return m_view->getStitchOptions();
+
+  return std::string();
 }
 
 /** Creates hints for 'Stitch1DMany'
@@ -324,7 +343,7 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto inst = createEmptyInstrument(m_currentInstrumentName);
 
   // Collect all default values and set them in view
-  std::vector<std::string> defaults(6);
+  std::vector<std::string> defaults(8);
   defaults[0] = alg->getPropertyValue("AnalysisMode");
   defaults[1] = alg->getPropertyValue("PolarizationAnalysis");
 
@@ -343,6 +362,14 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto cPp = inst->getStringParameter("cPp");
   if (!cPp.empty())
     defaults[5] = cPp[0];
+
+  if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
+    defaults[6] = boost::lexical_cast<std::string>(
+        inst->getNumberParameter("TransRunStartOverlap")[0]);
+
+    defaults[7] = boost::lexical_cast<std::string>(
+        inst->getNumberParameter("TransRunEndOverlap")[0]);
+  }
 
   m_view->setExpDefaults(defaults);
 }

@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
@@ -14,9 +15,11 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPauseCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h"
@@ -86,7 +89,13 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<DataProcessorOptionsCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorProcessCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorPauseCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorExpandCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorExpandGroupsCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorCollapseGroupsCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorPlotRowCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorPlotGroupCommand>(m_presenter));
@@ -438,7 +447,8 @@ TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
 
   if (groups.empty() && rows.empty()) {
 
-    if (options["WarnProcessAll"].toBool() && prompt) {
+    if (options["WarnProcessAll"].toBool() && prompt &&
+        m_presenter->newSelectionMade()) {
       if (!m_presenter->askUserYesNo(
               "This will process all rows in the table. Continue?",
               "Process all rows?"))
@@ -578,10 +588,26 @@ void DataProcessorTwoLevelTreeManager::update(
                      QString::fromStdString(data[col]));
 }
 
+/** Sets a new group to be highlighted
+* @param position : The position of the group
+*/
+void DataProcessorTwoLevelTreeManager::addHighlighted(int position) {
+  m_model->addHighlighted(position);
+}
+
+/** Sets a row to be highlighted
+* @param position : The position of the row
+* @param parent : Parent of the row
+*/
+void DataProcessorTwoLevelTreeManager::addHighlighted(int position,
+                                                      int parent) {
+  m_model->addHighlighted(position, m_model->index(parent, 0));
+}
+
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model
 */
-boost::shared_ptr<QAbstractItemModel>
+boost::shared_ptr<AbstractDataProcessorTreeModel>
 DataProcessorTwoLevelTreeManager::getModel() {
   return m_model;
 }

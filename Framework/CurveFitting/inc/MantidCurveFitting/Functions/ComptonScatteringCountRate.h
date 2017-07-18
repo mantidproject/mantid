@@ -3,7 +3,6 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {

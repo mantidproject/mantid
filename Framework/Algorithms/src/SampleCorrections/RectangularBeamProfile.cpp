@@ -90,10 +90,10 @@ RectangularBeamProfile::defineActiveRegion(const API::Sample &sample) const {
   const auto &sampleMin(sampleBox.minPoint());
   const auto &sampleMax(sampleBox.maxPoint());
   V3D minPoint, maxPoint;
-  minPoint[m_horIdx] = m_min[m_horIdx];
-  maxPoint[m_horIdx] = m_min[m_horIdx] + m_width;
-  minPoint[m_upIdx] = m_min[m_upIdx];
-  maxPoint[m_upIdx] = m_min[m_upIdx] + m_height;
+  minPoint[m_horIdx] = std::max(sampleMin[m_horIdx], m_min[m_horIdx]);
+  maxPoint[m_horIdx] = std::min(sampleMax[m_horIdx], m_min[m_horIdx] + m_width);
+  minPoint[m_upIdx] = std::max(sampleMin[m_upIdx], m_min[m_upIdx]);
+  maxPoint[m_upIdx] = std::min(sampleMax[m_upIdx], m_min[m_upIdx] + m_height);
   minPoint[m_beamIdx] = sampleMin[m_beamIdx];
   maxPoint[m_beamIdx] = sampleMax[m_beamIdx];
 

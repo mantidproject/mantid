@@ -117,6 +117,7 @@
   </instrument>
 
   <instrument name="LOQ">
+    <zeropadding size="8" startRunNumber="99738" prefix="LOQ"/>
     <technique>Small Angle Scattering</technique>
     <livedata>
       <connection name="histo" address="NDXLOQ:6789" listener="ISISHistoDataListener" />
@@ -582,7 +583,7 @@
 
 </facility>
 
-<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc" nofileprefix="True">
+<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc" nofileprefix="True" multifilelimit="1000">
 
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique>
@@ -630,6 +631,17 @@
     <technique>Powder diffraction</technique>
   </instrument>
 
+  <instrument name="D20">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
+  <instrument name="D1B">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
+  <instrument name="D4C">
+    <technique>Liquid diffraction</technique>
+  </instrument>
 
   <instrument name="D17">
     <technique>Reflectometry</technique>
@@ -757,6 +769,14 @@
   </instrument>
 </facility>
 
+<!-- HZB -->
+<facility name="HZB" FileExtensions=".nxs">
+  <instrument name="EXED">
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Single Crystal Diffraction</technique>
+  </instrument>
+</facility>
+
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
 <facility name="TEST_LIVE" FileExtensions=".nxs,.raw">
   <instrument name="ISIS_Histogram">
@@ -784,6 +804,13 @@
     <technique>Test Listener</technique>
     <livedata>
       <connection name="fake" address="127.0.0.1:0" listener="FakeEventDataListener" />
+    </livedata>
+  </instrument>
+  
+  <instrument name="ISIS_Kafka_Event">
+    <technique>Test Listener</technique>
+    <livedata>
+      <connection name="kafka_event" address="sakura:9092" listener="KafkaEventListener" />
     </livedata>
   </instrument>
 

@@ -1,7 +1,10 @@
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.simpleapi import AlignAndFocusPowder, AlignAndFocusPowderFromFiles, \
+    NormaliseByCurrent, PDDetermineCharacterizations,PDLoadCharacterizations, \
+    SaveGSS, SetUncertainties
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
+    FileProperty, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, FloatArrayProperty
 import mantid
 
@@ -28,8 +31,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                                           defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=["_event.nxs", ".nxs.h5"]),
                              "Event file")
-        self.declareProperty("MaxChunkSize", 0.0,
-                             "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
+        self.copyProperties('AlignAndFocusPowderFromFiles', 'MaxChunkSize')
         self.declareProperty("FilterBadPulses", 95.,
                              doc="Filter out events measured while proton " +
                              "charge is more than 5% below average")
@@ -47,6 +49,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
                                                      direction=Direction.Output),
                              doc="Handle to reduced workspace")
+        self.copyProperties('AlignAndFocusPowderFromFiles', 'CacheDir')
         self.declareProperty(FileProperty(name="PDFgetNFile", defaultValue="", action=FileAction.Save,
                                           extensions=[".getn"]), "Output filename")
         self.setPropertyGroup("OutputWorkspace", group)
@@ -59,13 +62,9 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                                           action=FileAction.OptionalLoad,
                                           extensions=["txt"]),
                              "File with characterization runs denoted")
-
-        self.declareProperty("RemovePromptPulseWidth", 0.0,
-                             "Width of events (in microseconds) near the prompt pulse to remove. 0 disables")
-        self.declareProperty("CropWavelengthMin", 0.,
-                             "Crop the data at this minimum wavelength.")
-        self.declareProperty("CropWavelengthMax", 0.,
-                             "Crop the data at this maximum wavelength.")
+        self.copyProperties('AlignAndFocusPowderFromFiles',
+                            ['FrequencyLogNames', 'WaveLengthLogNames', 'RemovePromptPulseWidth',
+                             'CropWavelengthMin', 'CropWavelengthMax'])
 
         self.declareProperty(FloatArrayProperty("Binning", values=[0., 0., 0.],
                                                 direction=Direction.Input),
@@ -102,7 +101,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         return issues
 
     def _loadCharacterizations(self):
-        self._focusPos = {}
+        self._alignArgs = {}
         self._iparmFile = None
 
         charFilename = self.getProperty("CharacterizationRunsFile").value
@@ -113,48 +112,55 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         results = PDLoadCharacterizations(Filename=charFilename,
                                           OutputWorkspace="characterizations")
         self._iparmFile = results[1]
-        self._focusPos['PrimaryFlightPath'] = results[2]
-        self._focusPos['SpectrumIDs'] = results[3]
-        self._focusPos['L2'] = results[4]
-        self._focusPos['Polar'] = results[5]
-        self._focusPos['Azimuthal'] = results[6]
+        self._alignArgs['PrimaryFlightPath'] = results[2]
+        self._alignArgs['SpectrumIDs'] = results[3]
+        self._alignArgs['L2'] = results[4]
+        self._alignArgs['Polar'] = results[5]
+        self._alignArgs['Azimuthal'] = results[6]
 
     def PyExec(self):
         self._loadCharacterizations()
-
-        wksp = self.getProperty("InputWorkspace").value
-        if wksp is None:
-            wksp = LoadEventAndCompress(Filename=self.getProperty("Filename").value,
-                                        OutputWorkspace=self.getPropertyValue("OutputWorkspace"),
-                                        MaxChunkSize=self.getProperty("MaxChunkSize").value,
-                                        FilterBadPulses=self.getProperty("FilterBadPulses").value,
-                                        CompressTOFTolerance=COMPRESS_TOL_TOF)
-            if wksp.getNumberEvents() <= 0: # checked InputWorkspace during validateInputs
-                raise RuntimeError("Workspace contains no events")
-        else:
-            self.log().information("Using input workspace. Ignoring properties 'Filename', " +
-                                   "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
-
         charac = ""
         if mtd.doesExist("characterizations"):
             charac = "characterizations"
 
-        # get the correct row of the table
-        PDDetermineCharacterizations(InputWorkspace=wksp,
-                                     Characterizations=charac,
-                                     ReductionProperties="__snspowderreduction")
+        # arguments for both AlignAndFocusPowder and AlignAndFocusPowderFromFiles
+        self._alignArgs['OutputWorkspace'] = self.getPropertyValue("OutputWorkspace")
+        self._alignArgs['RemovePromptPulseWidth'] = self.getProperty("RemovePromptPulseWidth").value
+        self._alignArgs['CompressTolerance'] = COMPRESS_TOL_TOF
+        self._alignArgs['PreserveEvents'] = True
+        self._alignArgs['CalFileName'] = self.getProperty("CalibrationFile").value
+        self._alignArgs['Params']=self.getProperty("Binning").value
+        self._alignArgs['ResampleX']=self.getProperty("ResampleX").value
+        self._alignArgs['Dspacing']=True
+        self._alignArgs['CropWavelengthMin'] = self.getProperty('CropWavelengthMin').value
+        self._alignArgs['CropWavelengthMax'] = self.getProperty('CropWavelengthMax').value
+        self._alignArgs['ReductionProperties'] = '__snspowderreduction'
 
-        wksp = AlignAndFocusPowder(InputWorkspace=wksp, OutputWorkspace=wksp,
-                                   CalFileName=self.getProperty("CalibrationFile").value,
-                                   Params=self.getProperty("Binning").value,
-                                   ResampleX=self.getProperty("ResampleX").value, Dspacing=True,
-                                   PreserveEvents=False,
-                                   RemovePromptPulseWidth=self.getProperty("RemovePromptPulseWidth").value,
-                                   CompressTolerance=COMPRESS_TOL_TOF,
-                                   CropWavelengthMin=self.getProperty("CropWavelengthMin").value,
-                                   CropWavelengthMax=self.getProperty("CropWavelengthMax").value,
-                                   ReductionProperties="__snspowderreduction",
-                                   **(self._focusPos))
+        wksp = self.getProperty("InputWorkspace").value
+        if wksp is None:  # run from file with caching
+            wksp = AlignAndFocusPowderFromFiles(Filename=self.getProperty("Filename").value,
+                                                CacheDir=self.getProperty("CacheDir").value,
+                                                MaxChunkSize=self.getProperty("MaxChunkSize").value,
+                                                FilterBadPulses=self.getProperty("FilterBadPulses").value,
+                                                Characterizations=charac,
+                                                FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
+                                                WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
+                                                **(self._alignArgs))
+        else:  # process the input workspace
+            self.log().information("Using input workspace. Ignoring properties 'Filename', " +
+                                   "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
+
+            # get the correct row of the table
+            PDDetermineCharacterizations(InputWorkspace=wksp,
+                                         Characterizations=charac,
+                                         ReductionProperties="__snspowderreduction",
+                                         FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
+                                         WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
+
+            wksp = AlignAndFocusPowder(InputWorkspace=wksp,
+                                       **(self._alignArgs))
+
         wksp = NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
         wksp.getRun()['gsas_monitor'] = 1
         if self._iparmFile is not None:

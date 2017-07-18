@@ -305,7 +305,7 @@ bool FitOneSinglePeak::simpleFit() {
   // Fit with different starting values of peak width
   size_t numfits = m_vecFWHM.size();
 
-  Progress progress(this, 0, 1, numfits);
+  Progress progress(this, 0.0, 1.0, numfits);
 
   for (size_t i = 0; i < numfits; ++i) {
     // set FWHM
@@ -519,7 +519,7 @@ void FitOneSinglePeak::highBkgdFit() {
   // Store starting setup
   m_bkupPeakFunc = backup(m_peakFunc);
 
-  Progress progress(this, 0, 1, m_vecFWHM.size());
+  Progress progress(this, 0.0, 1.0, m_vecFWHM.size());
 
   // Fit with different starting values of peak width
   for (size_t i = 0; i < m_vecFWHM.size(); ++i) {

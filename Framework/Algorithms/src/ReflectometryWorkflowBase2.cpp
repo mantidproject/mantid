@@ -4,7 +4,9 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/Unit.h"
 
@@ -14,6 +16,23 @@ using namespace Mantid::Geometry;
 
 namespace Mantid {
 namespace Algorithms {
+
+/** Initialize properties related to the type of reduction
+*/
+void ReflectometryWorkflowBase2::initReductionProperties() {
+  // Summation type
+  std::vector<std::string> summationTypes = {"SumInLambda", "SumInQ"};
+  declareProperty("SummationType", "SumInLambda",
+                  boost::make_shared<StringListValidator>(summationTypes),
+                  "The type of summation to perform.", Direction::Input);
+
+  // Reduction type
+  std::vector<std::string> reductionTypes = {"Normal", "DivergentBeam",
+                                             "NonFlatSample"};
+  declareProperty("ReductionType", "Normal",
+                  boost::make_shared<StringListValidator>(reductionTypes),
+                  "The type of reduction to perform.", Direction::Input);
+}
 
 /** Initialize properties related to direct beam normalization
 */
@@ -178,6 +197,33 @@ void ReflectometryWorkflowBase2::initMomentumTransferProperties() {
                   "Factor you wish to scale Q workspace by.", Direction::Input);
 }
 
+/** Validate reduction properties, if given
+*
+* @return :: A map with results of validation
+*/
+std::map<std::string, std::string>
+ReflectometryWorkflowBase2::validateReductionProperties() const {
+
+  std::map<std::string, std::string> results;
+
+  // If summing in Q, then reduction type must be given
+  const std::string summationType = getProperty("SummationType");
+  const std::string reductionType = getProperty("ReductionType");
+  if (summationType == "SumInQ") {
+    if (reductionType == "Normal") {
+      results["ReductionType"] =
+          "ReductionType must be set if SummationType is SumInQ";
+    }
+  } else {
+    if (reductionType != "Normal") {
+      results["ReductionType"] =
+          "ReductionType should not be set unless SummationType is SumInQ";
+    }
+  }
+
+  return results;
+}
+
 /** Validate direct beam if given
 *
 * @return :: A map with results of validation
@@ -320,10 +366,12 @@ ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS) {
 /** Process an input workspace in TOF according to specified processing commands
 * to get a detector workspace in wavelength.
 * @param inputWS :: the input workspace in TOF
+* @param convert :: whether the result should be converted to wavelength
 * @return :: the detector workspace in wavelength
 */
 MatrixWorkspace_sptr
-ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
+ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
+                                           const bool convert) {
 
   const std::string processingCommands =
       getPropertyValue("ProcessingInstructions");
@@ -334,7 +382,9 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
   groupAlg->execute();
   MatrixWorkspace_sptr detectorWS = groupAlg->getProperty("OutputWorkspace");
 
-  detectorWS = convertToWavelength(detectorWS);
+  if (convert) {
+    detectorWS = convertToWavelength(detectorWS);
+  }
 
   return detectorWS;
 }
@@ -431,6 +481,14 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(
 void ReflectometryWorkflowBase2::populateMonitorProperties(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
 
+  const auto startOverlap = checkForOptionalInstrumentDefault<double>(
+      this, "StartOverlap", instrument, "TransRunStartOverlap");
+  if (startOverlap.is_initialized())
+    alg->setProperty("StartOverlap", startOverlap.get());
+  const auto endOverlap = checkForOptionalInstrumentDefault<double>(
+      this, "EndOverlap", instrument, "TransRunEndOverlap");
+  if (endOverlap.is_initialized())
+    alg->setProperty("EndOverlap", endOverlap.get());
   const auto monitorIndex = checkForOptionalInstrumentDefault<int>(
       this, "I0MonitorIndex", instrument, "I0MonitorIndex");
   if (monitorIndex.is_initialized())
@@ -512,6 +570,32 @@ std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
     alg->setProperty("ProcessingInstructions", instructions);
     return instructions;
   }
+}
+
+/** Set transmission properties
+*
+* @param alg :: The algorithm to populate parameters for
+* @return Boolean, whether or not any transmission runs were found
+*/
+bool ReflectometryWorkflowBase2::populateTransmissionProperties(
+    IAlgorithm_sptr alg) const {
+
+  bool transRunsExist = false;
+
+  MatrixWorkspace_sptr firstWS = getProperty("FirstTransmissionRun");
+  if (firstWS) {
+    transRunsExist = true;
+    alg->setProperty("FirstTransmissionRun", firstWS);
+    MatrixWorkspace_sptr secondWS = getProperty("SecondTransmissionRun");
+    if (secondWS) {
+      alg->setProperty("SecondTransmissionRun", secondWS);
+      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+      alg->setPropertyValue("Params", getPropertyValue("Params"));
+    }
+  }
+
+  return transRunsExist;
 }
 
 } // namespace Algorithms

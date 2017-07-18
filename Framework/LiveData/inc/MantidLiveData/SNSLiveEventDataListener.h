@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidLiveData/ADARA/ADARAParser.h"
-#include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 #include <Poco/Timer.h>
@@ -37,7 +37,7 @@ namespace LiveData {
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class SNSLiveEventDataListener : public API::ILiveListener,
+class SNSLiveEventDataListener : public API::LiveListener,
                                  public Poco::Runnable,
                                  public ADARA::Parser {
 public:

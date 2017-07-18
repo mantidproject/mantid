@@ -16,8 +16,10 @@ digraph IndirectILLReductionQENS {
   	Run
   	BackgroundRun
   	CalibrationRun
+  	CalibrationBackgroundRun
   	AlignmentRun
   	BackgroundScalingFactor
+  	CalibrationBackgroundScalingFactor
   	CalibrationPeakRange
   	UnmirrorOption
   	CropDeadMonitorChannels
@@ -29,15 +31,19 @@ digraph IndirectILLReductionQENS {
   	SelectNexusFilesByMetadataA [label="SelectNexusFilesByMetadata"]
   	SelectNexusFilesByMetadataB [label="SelectNexusFilesByMetadata"]
     SelectNexusFilesByMetadataC [label="SelectNexusFilesByMetadata"]
+    SelectNexusFilesByMetadataD [label="SelectNexusFilesByMetadata"]
     IndirectILLEnergyTransfer
     IndirectILLEnergyTransferA [label="IndirectILLEnergyTransfer"]
     IndirectILLEnergyTransferB [label="IndirectILLEnergyTransfer"]
   	IndirectILLEnergyTransferC [label="IndirectILLEnergyTransfer"]
+  	IndirectILLEnergyTransferD [label="IndirectILLEnergyTransfer"]
   	Integration
-  	Minus
+  	MinusA [label="Minus"]
+  	MinusB [label="Minus"]
   	Divide
     Plus
-    Scale
+    ScaleA [label="Scale"]
+    ScaleB [label="Scale"]
     MatchPeaks
     GroupWorkspaces
   }
@@ -49,18 +55,24 @@ digraph IndirectILLReductionQENS {
   Run -> SelectNexusFilesByMetadata
   SelectNexusFilesByMetadata -> IndirectILLEnergyTransfer
   CropDeadMonitorChannels -> IndirectILLEnergyTransfer
-  IndirectILLEnergyTransfer -> Minus
+  IndirectILLEnergyTransfer -> MinusA
   BackgroundRun -> SelectNexusFilesByMetadataB
   SelectNexusFilesByMetadataB -> IndirectILLEnergyTransferB
-  IndirectILLEnergyTransferB -> Scale
-  BackgroundScalingFactor -> Scale
-  Scale -> Minus
+  IndirectILLEnergyTransferB -> ScaleA
+  BackgroundScalingFactor -> ScaleA
+  ScaleA -> MinusA
   CalibrationRun -> SelectNexusFilesByMetadataC
   SelectNexusFilesByMetadataC -> IndirectILLEnergyTransferC
-  IndirectILLEnergyTransferC -> Integration
+  IndirectILLEnergyTransferC -> MinusB
+  CalibrationBackgroundRun -> SelectNexusFilesByMetadataD
+  SelectNexusFilesByMetadataD -> IndirectILLEnergyTransferD
+  IndirectILLEnergyTransferD -> ScaleB
+  ScaleB -> MinusB
+  CalibrationBackgroundScalingFactor -> ScaleB
+  MinusB -> Integration
   CalibrationPeakRange -> Integration
   Integration -> Divide
-  Minus -> Divide
+  MinusA -> Divide
   Divide -> MatchPeaks
   UnmirrorOption -> MatchPeaks
   AlignmentRun -> SelectNexusFilesByMetadataA

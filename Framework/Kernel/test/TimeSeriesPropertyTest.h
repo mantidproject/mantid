@@ -959,9 +959,13 @@ public:
     */
 
     // test
-    for (size_t i = 0; i < 10; ++i) {
-      TS_ASSERT_EQUALS(outputs[i]->size(), 2);
+    for (auto it : outputs) {
+      TS_ASSERT_EQUALS(it->size(), 2);
     }
+
+    // cleanup
+    for (auto &it : outputs)
+      delete it;
   }
 
   //----------------------------------------------------------------------------

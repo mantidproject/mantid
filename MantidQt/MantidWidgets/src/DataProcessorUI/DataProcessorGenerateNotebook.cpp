@@ -463,7 +463,9 @@ boost::tuple<std::string, std::string> reduceRowString(
         const DataProcessorPreprocessingAlgorithm preprocessor =
             preprocessMap.at(colName);
         // The pre-processing options
-        const std::string options = preprocessingOptionsMap.at(colName);
+        const std::string options = preprocessingOptionsMap.count(colName) > 0
+                                        ? preprocessingOptionsMap.at(colName)
+                                        : "";
         // Python code ran to load and pre-process runs
         const boost::tuple<std::string, std::string> load_ws_string =
             loadWorkspaceString(runStr, instrument, preprocessor, options);

@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
 from sans.common.enums import serializable_enum
 
@@ -19,6 +20,8 @@ simple_range = namedtuple('simple_range', 'start, stop, step, step_type')
 complex_range = namedtuple('complex_steps', 'start, step1, mid, step2, stop, step_type1, step_type2')
 rebin_string_values = namedtuple('rebin_string_values', 'value')
 event_binning_string_values = namedtuple('event_binning_string_values', 'value')
+q_rebin_values = namedtuple('q_rebin_values', 'min, max, rebin_string')
+
 
 # Mask
 mask_line = namedtuple('mask_line', 'width, angle, x, y')
@@ -131,6 +134,7 @@ class BackId(object):
 
 # -- OTHER - not settable in user file
 @serializable_enum("reduction_dimensionality", "use_full_wavelength_range", "event_slices",
-                   "use_compatibility_mode")
+                   "use_compatibility_mode", "save_types", "save_as_zero_error_free", "user_specified_output_name",
+                   "user_specified_output_name_suffix", "use_reduction_mode_as_suffix")
 class OtherId(object):
     pass

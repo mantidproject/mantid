@@ -636,9 +636,9 @@ void MantidEV::loadEventFileEntered_slot() {
  */
 void MantidEV::loadEventFile_slot() {
   QString file_path = getFilePath(last_event_file);
-  QString Qfile_name =
-      QFileDialog::getOpenFileName(this, tr("Load event file"), file_path,
-                                   tr("Nexus Files (*.nxs);; All files(*)"));
+  QString Qfile_name = QFileDialog::getOpenFileName(
+      this, tr("Load event file"), file_path,
+      tr("Nexus Files (*.nxs *.h5);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.EventFileName_ledt->setText(Qfile_name);
@@ -1076,7 +1076,7 @@ void MantidEV::integratePeaks_slot() {
   bool ellipsoid_integrate = m_uiForm.EllipsoidIntegration_rbtn->isChecked();
   bool use_cylinder_integration = m_uiForm.Cylinder_ckbx->isChecked();
 
-  if (sphere_integrate || use_cylinder_integration) {
+  if (sphere_integrate) {
     double peak_radius = 0.20;
     double inner_radius = 0.20;
     double outer_radius = 0.25;

@@ -68,7 +68,6 @@ public:
   ~EnggDiffFittingViewQtWidget() override;
 
   /// From the IEnggDiffractionUserMsg interface
-  //@{
   void showStatus(const std::string &sts) override;
 
   void userWarning(const std::string &warn,
@@ -77,19 +76,14 @@ public:
   void userError(const std::string &err,
                  const std::string &description) override;
   void enableCalibrateFocusFitUserActions(bool enable) override;
-  //@}
 
   /// From the IEnggDiffractionSettings interface
-  //@{
   EnggDiffCalibSettings currentCalibSettings() const override;
 
   std::string focusingDir() const override;
-  //@}
 
   /// From the IEnggDiffractionPythonRunner interface
-  //@{
   virtual std::string enggRunPythonCode(const std::string &pyCode) override;
-  //@}
 
   void enable(bool enable);
 
@@ -164,6 +158,12 @@ public:
   void setZoomTool(bool enabled);
 
   void resetView();
+
+  std::string getCurrentInstrument() const override { return m_currentInst; }
+
+  void setCurrentInstrument(const std::string &newInstrument) override {
+    m_currentInst = newInstrument;
+  }
 
 protected:
   void initLayout();
@@ -246,6 +246,10 @@ private:
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffFittingPresenter> m_presenter;
+
+  /// current selected instrument
+  /// updated from the EnggDiffractionPresenter processInstChange
+  std::string m_currentInst = "";
 };
 
 } // namespace CustomInterfaces

@@ -125,6 +125,13 @@ public:
     pAlg->setPropertyValue("OutputWorkspace", "WS3DNoQ");
     pAlg->setPropertyValue("PreprocDetectorsWS", "");
     pAlg->setPropertyValue("QDimensions", "CopyToMD");
+    // Following 5 arguments should be ignored
+    pAlg->setPropertyValue("Q3DFrames", "HKL");
+    pAlg->setPropertyValue("QConversionScales", "HKL");
+    pAlg->setPropertyValue("UProj", "0,0,1");
+    pAlg->setPropertyValue("VProj", "1,0,0");
+    pAlg->setPropertyValue("WProj", "0,1,0");
+
     pAlg->setPropertyValue("OtherDimensions", "phi,chi");
     //    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode",
     //    "NoDE"));

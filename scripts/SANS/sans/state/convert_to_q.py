@@ -25,17 +25,9 @@ class StateConvertToQ(StateBase):
     wavelength_cutoff = PositiveFloatParameter()
 
     # 1D settings
-    # The complex binning instructions require a second step and a mid point, which produces:
-    #   start -> step -> mid -> step2 -> stop
-    # The simple form is:
-    #   start -> step -> stop
     q_min = PositiveFloatParameter()
     q_max = PositiveFloatParameter()
-    q_step = PositiveFloatParameter()
-    q_step_type = ClassTypeParameter(RangeStepType)
-    q_step2 = PositiveFloatParameter()
-    q_step_type2 = ClassTypeParameter(RangeStepType)
-    q_mid = PositiveFloatParameter()
+    q_1d_rebin_string = StringParameter()
 
     # 2D settings
     q_xy_max = PositiveFloatParameter()
@@ -94,6 +86,19 @@ class StateConvertToQ(StateBase):
                                             "q_max": self.q_max})
                 is_invalid.update(entry)
 
+        if self.q_1d_rebin_string is not None:
+            if self.q_1d_rebin_string == "":
+                entry = validation_message("Q rebin string does not seem to be valid.",
+                                           "Make sure to provide a valid rebin string",
+                                           {"q_1d_rebin_string": self.q_1d_rebin_string})
+                is_invalid.update(entry)
+            elif not is_valid_rebin_string(self.q_1d_rebin_string):
+                entry = validation_message("Q rebin string does not seem to be valid.",
+                                           "Make sure to provide a valid rebin string",
+                                           {"q_1d_rebin_string": self.q_1d_rebin_string})
+                is_invalid.update(entry)
+
+        # QXY settings
         if self.reduction_dimensionality is ReductionDimensionality.TwoDim:
             if self.q_xy_max is None or self.q_xy_step is None:
                 entry = validation_message("Q bounds not set for 2D reduction.",
@@ -170,3 +175,32 @@ def get_convert_to_q_builder(data_info):
     else:
         raise NotImplementedError("StateConvertToQBuilder: Could not find any valid save builder for the "
                                   "specified StateData object {0}".format(str(data_info)))
+
+
+# -------------------------------------------
+# Free functions
+# -------------------------------------------
+def is_valid_rebin_string(rebin_string):
+    is_valid = True
+
+    try:
+        values = [float(el) for el in rebin_string.split(",")]
+        if len(values) < 2:
+            is_valid = False
+        elif len(values) == 2:
+            if values[0] > values[1]:
+                is_valid = False
+        elif len(values) % 2 == 1:  # odd number of entries
+            step_points = values[::2]
+            if not is_increasing(step_points):
+                is_valid = False
+        else:
+            is_valid = False
+
+    except:  # noqa
+        is_valid = False
+    return is_valid
+
+
+def is_increasing(step_points):
+    return all(el1 <= el2 for el1, el2 in zip(step_points, step_points[1:]))

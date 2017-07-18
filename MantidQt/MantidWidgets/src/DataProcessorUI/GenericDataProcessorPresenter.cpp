@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NotebookWriter.h"
@@ -12,16 +13,18 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
-#include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 
+#include <boost/algorithm/string/join.hpp>
+#include <algorithm>
+#include <unordered_map>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
@@ -31,6 +34,57 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
+
+namespace {
+std::map<std::string, std::string>
+convertStringToMap(const std::string &options) {
+
+  std::vector<std::string> optionsVec;
+  std::map<std::string, std::string> optionsMap;
+
+  boost::split(optionsVec, options, boost::is_any_of(";"));
+
+  for (const auto &option : optionsVec) {
+
+    std::vector<std::string> opt;
+    boost::split(opt, option, boost::is_any_of(","));
+
+    std::vector<std::string> temp(opt.begin() + 1, opt.end());
+
+    optionsMap[opt[0]] = boost::algorithm::join(temp, ",");
+  }
+  return optionsMap;
+}
+
+std::unordered_map<std::string, std::set<std::string>>
+convertStringToMapWithSet(const std::string &properties) {
+  // The provided string has the form
+  // key1: value11, value12; key2: value21;
+  // The keys are keys in a map which maps to a set of values
+  std::unordered_map<std::string, std::set<std::string>> props;
+
+  if (properties.empty()) {
+    return props;
+  }
+
+  // Split by each map pair
+  std::vector<std::string> propVec;
+  boost::split(propVec, properties, boost::is_any_of(";"));
+
+  for (const auto &prop : propVec) {
+    // Split the key and values
+    std::vector<std::string> elements;
+    boost::split(elements, prop, boost::is_any_of(":"));
+
+    // Split values
+    std::vector<std::string> vals;
+    boost::split(vals, elements[1], boost::is_any_of(","));
+    std::set<std::string> values(vals.begin(), vals.end());
+    props[elements[0]] = values;
+  }
+  return props;
+}
+}
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -55,14 +109,17 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<std::string, std::string> &postprocessMap,
     const std::string &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor),
-      m_postprocessMap(postprocessMap), m_loader(loader), m_postprocess(true),
-      m_tableDirty(false) {
+      m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
+      m_preprocessMap(preprocessMap), m_processor(processor),
+      m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
+      m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
+      m_tableDirty(false), m_newSelection(true), m_reductionPaused(true),
+      m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
-                         "<b>Override <samp>" + processor.name() +
+                         "<b>Override <samp>" +
+                             QString::fromStdString(processor.name()) +
                              "</samp> properties</b><br /><i>optional</i><br "
                              "/>This column allows you to "
                              "override the properties used when executing "
@@ -71,9 +128,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "key=value pairs, separated by commas. Values "
                              "containing commas must be quoted. In case of "
                              "conflict between options "
-                             "specified via this column and options specified "
-                             "via the <b>Process</b> line edit, the former "
-                             "prevail.");
+                             "specified via this column and global options "
+                             "specified externally, the former prevail.");
   m_columns = static_cast<int>(m_whitelist.size());
 
   if (m_postprocessor.name().empty()) {
@@ -167,7 +223,7 @@ void GenericDataProcessorPresenter::acceptViews(
     if (m_manager->isValidModel(
             boost::dynamic_pointer_cast<ITableWorkspace>(ws),
             m_whitelist.size()))
-      m_workspaceList.insert(name);
+      m_workspaceList.insert(QString::fromStdString(name));
   }
   observeAdd();
   observePostDelete();
@@ -185,6 +241,12 @@ void GenericDataProcessorPresenter::acceptViews(
 
   // Start with a blank table
   newTable();
+
+  // The view should currently be in the paused state
+  m_view->pause();
+
+  // Setup table selection model connections
+  m_view->setSelectionModelConnections();
 }
 
 /**
@@ -192,64 +254,193 @@ Process selected data
 */
 void GenericDataProcessorPresenter::process() {
 
-  const auto items = m_manager->selectedData(true);
-
-  // Don't bother continuing if there are no items to process
-  if (items.size() == 0)
+  // If selection unchanged, resume processing the old selection
+  if (!m_newSelection) {
+    resume();
     return;
+  }
+
+  // Otherwise obtain new runs
+  m_selectedData = m_manager->selectedData(m_promptUser);
+
+  // Don't continue if there are no items to process
+  if (m_selectedData.size() == 0)
+    return;
+
+  m_newSelection = false;
+
+  // Clear any highlighted rows
+  m_manager->clearHighlighted();
 
   // Progress: each group and each row within count as a progress step.
   int progress = 0;
-  int maxProgress = (int)(items.size());
-  for (const auto subitem : items) {
+  int maxProgress = (int)(m_selectedData.size());
+  for (const auto &subitem : m_selectedData) {
     maxProgress += (int)(subitem.second.size());
   }
-  ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
-                                     m_progressView);
+  m_progressReporter =
+      new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
 
-  for (const auto &item : items) {
+  // Clear the group queue
+  m_gqueue = GroupQueue();
 
-    // Group with updated columns
-    GroupData newGroup;
+  for (const auto &item : m_selectedData) {
+    // Loop over each group
+    RowQueue rowQueue;
 
-    // Reduce rows sequentially
-
-    // Loop over rows within this group
     for (const auto &data : item.second) {
-      // data.first -> index of this row within the group
-      // data.second -> vector containing data
-
-      try {
-        auto newData = reduceRow(data.second);
-        m_manager->update(item.first, data.first, newData);
-        newGroup[data.first] = newData;
-        progressReporter.report();
-
-      } catch (std::exception &ex) {
-        m_mainPresenter->giveUserCritical(ex.what(), "Error");
-        progressReporter.clear();
-        return;
-      }
-
-      progressReporter.report();
+      // Add all row items to queue
+      rowQueue.push(data);
     }
-
-    // Post-process (if needed)
-    if (item.second.size() > 1) {
-      try {
-        postProcessGroup(newGroup);
-        progressReporter.report();
-      } catch (std::exception &ex) {
-        m_mainPresenter->giveUserCritical(ex.what(), "Error");
-        progressReporter.clear();
-        return;
-      }
-    }
+    m_gqueue.emplace(item.first, rowQueue);
   }
 
-  // If "Output Notebook" checkbox is checked then create an ipython notebook
-  if (m_view->getEnableNotebook()) {
-    saveNotebook(items);
+  // Start processing the first group
+  m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
+  resume();
+}
+
+/**
+        m_view->giveUserCritical(ex.what(), "Error");
+Decide which processing action to take next
+*/
+void GenericDataProcessorPresenter::doNextAction() {
+
+  switch (m_nextActionFlag) {
+  case ReductionFlag::ReduceRowFlag:
+    nextRow();
+    break;
+  case ReductionFlag::ReduceGroupFlag:
+    nextGroup();
+    break;
+  case ReductionFlag::StopReduceFlag:
+    break;
+  }
+  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // a flag we aren't handling.
+}
+
+/**
+Process a new row
+*/
+void GenericDataProcessorPresenter::nextRow() {
+
+  if (m_reductionPaused) {
+    // Notify presenter that reduction is paused
+    m_mainPresenter->confirmReductionPaused();
+    return;
+  }
+
+  // Add processed row data to the group
+  int rowIndex = m_rowItem.first;
+  m_groupData[rowIndex] = m_rowItem.second;
+  int groupIndex = m_gqueue.front().first;
+  auto &rqueue = m_gqueue.front().second;
+
+  if (!rqueue.empty()) {
+    // Set next action flag
+    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
+    // Reduce next row
+    m_rowItem = rqueue.front();
+    rqueue.pop();
+    startAsyncRowReduceThread(&m_rowItem, groupIndex);
+  } else {
+    m_gqueue.pop();
+    // Set next action flag
+    m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
+
+    if (m_groupData.size() > 1) {
+      // Multiple rows in containing group, do post-processing on the group
+      startAsyncGroupReduceThread(m_groupData, groupIndex);
+    } else {
+      // Single row in containing group, skip to next group
+      nextGroup();
+    }
+  }
+}
+
+/**
+Process a new group
+*/
+void GenericDataProcessorPresenter::nextGroup() {
+
+  if (m_reductionPaused) {
+    // Notify presenter that reduction is paused
+    m_mainPresenter->confirmReductionPaused();
+    return;
+  }
+
+  if (!m_gqueue.empty()) {
+    // Set next action flag
+    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
+    // Reduce first row
+    auto &rqueue = m_gqueue.front().second;
+    m_rowItem = rqueue.front();
+    rqueue.pop();
+    startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
+  } else {
+    // If "Output Notebook" checkbox is checked then create an ipython notebook
+    if (m_view->getEnableNotebook())
+      saveNotebook(m_selectedData);
+    endReduction();
+  }
+}
+
+/*
+Reduce the current row asynchronously
+*/
+void GenericDataProcessorPresenter::startAsyncRowReduceThread(RowItem *rowItem,
+                                                              int groupIndex) {
+
+  auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
+      this, rowItem, groupIndex);
+  m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
+  m_workerThread->start();
+}
+
+/*
+Reduce the current group asynchronously
+*/
+void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
+    GroupData &groupData, int groupIndex) {
+
+  auto *worker = new GenericDataProcessorPresenterGroupReducerWorker(
+      this, groupData, groupIndex);
+  m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
+  m_workerThread->start();
+}
+
+/**
+End reduction
+*/
+void GenericDataProcessorPresenter::endReduction() {
+
+  pause();
+  m_mainPresenter->confirmReductionPaused();
+  m_newSelection = true; // Allow same selection to be processed again
+}
+
+/**
+Handle reduction error
+*/
+void GenericDataProcessorPresenter::reductionError(std::exception ex) {
+
+  m_view->giveUserCritical(ex.what(), "Error");
+}
+
+/**
+Handle thread completion
+*/
+void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
+
+  m_workerThread.release();
+
+  if (exitCode == 0) { // Success
+    m_progressReporter->report();
+    doNextAction();
+  } else { // Error
+    m_progressReporter->clear();
+    endReduction();
   }
 }
 
@@ -268,12 +459,14 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
   // Global pre-processing options as a map where keys are column
   // name and values are pre-processing options as a string
   const std::map<std::string, std::string> preprocessingOptionsMap =
-      m_mainPresenter->getPreprocessingOptions();
+      convertStringToMap(
+          m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
   // Global processing options as a string
-  const std::string processingOptions = m_mainPresenter->getProcessingOptions();
+  const std::string processingOptions =
+      m_mainPresenter->getProcessingOptions().toStdString();
   // Global post-processing options as a string
   const std::string postprocessingOptions =
-      m_mainPresenter->getPostprocessingOptions();
+      m_mainPresenter->getPostprocessingOptions().toStdString();
 
   auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
       m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
@@ -294,8 +487,13 @@ Post-processes the workspaces created by the given rows together.
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
 
+  // If no post processing has been defined, then we are dealing with a
+  // one-level tree
+  // where all rows are in one group. We don't want to perform post-processing
+  // in
+  // this case.
   if (!m_postprocess)
-    throw std::runtime_error("Cannot post-process workspaces");
+    return;
 
   // The input workspace names
   std::vector<std::string> inputNames;
@@ -331,7 +529,8 @@ void GenericDataProcessorPresenter::postProcessGroup(
   alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
 
   // Global post-processing options
-  const std::string options = m_mainPresenter->getPostprocessingOptions();
+  const std::string options =
+      m_mainPresenter->getPostprocessingOptions().toStdString();
 
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
@@ -390,7 +589,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
   // If we're only given one run, just return that
   if (runs.size() == 1)
-    return loadRun(runs[0], instrument, preprocessor.prefix());
+    return getRun(runs[0], instrument, preprocessor.prefix());
 
   const std::string outputName =
       preprocessor.prefix() + boost::algorithm::join(runs, "_");
@@ -404,7 +603,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   alg->initialize();
   alg->setProperty(
       preprocessor.lhsProperty(),
-      loadRun(runs[0], instrument, preprocessor.prefix())->getName());
+      getRun(runs[0], instrument, preprocessor.prefix())->getName());
   alg->setProperty(preprocessor.outputProperty(), outputName);
 
   // Drop the first run from the runs list
@@ -425,7 +624,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
       alg->setProperty(
           preprocessor.rhsProperty(),
-          loadRun(*runIt, instrument, preprocessor.prefix())->getName());
+          getRun(*runIt, instrument, preprocessor.prefix())->getName());
       alg->execute();
 
       if (runIt != --runs.end()) {
@@ -521,63 +720,117 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
 }
 
 /**
-Loads a run from disk or fetches it from the AnalysisDataService
-@param run : The name of the run
-@param instrument : The instrument the run belongs to
-@param prefix : The prefix to be prepended to the run number
-@throws std::runtime_error if the run could not be loaded
-@returns a shared pointer to the workspace
+Sets the state of whether a new table selection has been made
+@param newSelectionMade : Boolean on setting new table selection state
 */
-Workspace_sptr
-GenericDataProcessorPresenter::loadRun(const std::string &run,
-                                       const std::string &instrument,
-                                       const std::string &prefix) {
-  // First, let's see if the run given is the name of a workspace in the ADS
-  if (AnalysisDataService::Instance().doesExist(run))
-    return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
-  // Try with prefix
-  if (AnalysisDataService::Instance().doesExist(prefix + run))
-    return AnalysisDataService::Instance().retrieveWS<Workspace>(prefix + run);
+void GenericDataProcessorPresenter::setNewSelectionState(
+    bool newSelectionMade) {
 
-  // Is the run string is numeric
-  if (boost::regex_match(run, boost::regex("\\d+"))) {
-    std::string wsName;
-
-    // Look for "<run_number>" in the ADS
-    wsName = run;
-    if (AnalysisDataService::Instance().doesExist(wsName))
-      return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
-
-    // Look for "<instrument><run_number>" in the ADS
-    wsName = instrument + run;
-    if (AnalysisDataService::Instance().doesExist(wsName))
-      return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
-  }
-
-  // We'll just have to load it ourselves
-  const std::string filename = instrument + run;
-  const std::string outputName = prefix + run;
-  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(m_loader);
-  algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", filename);
-  algLoadRun->setProperty("OutputWorkspace", outputName);
-  algLoadRun->execute();
-
-  if (!algLoadRun->isExecuted())
-    throw std::runtime_error("Could not open " + filename);
-
-  return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+  m_newSelection = newSelectionMade;
 }
 
-/**
-Reduce a row
-@param data :: [input] The data in this row as a vector where elements
-correspond to column contents
-@throws std::runtime_error if reduction fails
-@return :: Data updated after running the algorithm
-*/
-std::vector<std::string>
-GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
+/** Loads a run found from disk or AnalysisDataService
+ *
+ * @param run : The name of the run
+ * @param instrument : The instrument the run belongs to
+ * @param prefix : The prefix to be prepended to the run number
+ * @throws std::runtime_error if the run could not be loaded
+ * @returns a shared pointer to the workspace
+ */
+Workspace_sptr
+GenericDataProcessorPresenter::getRun(const std::string &run,
+                                      const std::string &instrument,
+                                      const std::string &prefix) {
+
+  bool runFound;
+  std::string outName;
+  std::string fileName = instrument + run;
+
+  outName = findRunInADS(run, prefix, runFound);
+  if (!runFound) {
+    outName = loadRun(run, instrument, prefix, m_loader, runFound);
+    if (!runFound)
+      throw std::runtime_error("Could not open " + fileName);
+  }
+
+  return AnalysisDataService::Instance().retrieveWS<Workspace>(outName);
+}
+
+/** Tries fetching a run from AnalysisDataService
+ *
+ * @param run : The name of the run
+ * @param prefix : The prefix to be prepended to the run number
+ * @param runFound : Whether or not the run was actually found
+ * @returns string name of the run
+ */
+std::string GenericDataProcessorPresenter::findRunInADS(
+    const std::string &run, const std::string &prefix, bool &runFound) {
+
+  runFound = true;
+
+  // First, let's see if the run given is the name of a workspace in the ADS
+  if (AnalysisDataService::Instance().doesExist(run))
+    return run;
+
+  // Try with prefix
+  if (AnalysisDataService::Instance().doesExist(prefix + run))
+    return prefix + run;
+
+  // Is the run string is numeric?
+  if (boost::regex_match(run, boost::regex("\\d+"))) {
+
+    // Look for "<run_number>" in the ADS
+    if (AnalysisDataService::Instance().doesExist(run))
+      return run;
+
+    // Look for "<instrument><run_number>" in the ADS
+    if (AnalysisDataService::Instance().doesExist(prefix + run))
+      return prefix + run;
+  }
+
+  // Run not found in ADS;
+  runFound = false;
+  return "";
+}
+
+/** Tries loading a run from disk
+ *
+ * @param run : The name of the run
+ * @param instrument : The instrument the run belongs to
+ * @param prefix : The prefix to be prepended to the run number
+ * @param loader : The algorithm used for loading runs
+ * @param runFound : Whether or not the run was actually found
+ * @returns string name of the run
+ */
+std::string GenericDataProcessorPresenter::loadRun(
+    const std::string &run, const std::string &instrument,
+    const std::string &prefix, const std::string &loader, bool &runFound) {
+
+  runFound = true;
+  const std::string fileName = instrument + run;
+  const std::string outputName = prefix + run;
+
+  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader);
+  algLoadRun->initialize();
+  algLoadRun->setProperty("Filename", fileName);
+  algLoadRun->setProperty("OutputWorkspace", outputName);
+  algLoadRun->execute();
+  if (!algLoadRun->isExecuted()) {
+    // Run not loaded from disk
+    runFound = false;
+    return "";
+  }
+
+  return outputName;
+}
+
+/** Reduce a row
+ *
+ * @param data :: [input] The data in this row as a vector where elements
+ * correspond to column contents
+ * @throws std::runtime_error if reduction fails
+ */
+void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   /* Create the processing algorithm */
 
@@ -590,7 +843,15 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   // Global pre-processing options as a map
   std::map<std::string, std::string> globalOptions;
   if (!m_preprocessMap.empty())
-    globalOptions = m_mainPresenter->getPreprocessingOptions();
+    globalOptions = convertStringToMap(
+        m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
+
+  // Pre-processing properties
+  auto preProcessPropMap = convertStringToMapWithSet(
+      m_mainPresenter->getPreprocessingProperties().toStdString());
+
+  // Properties not to be used in processing
+  std::set<std::string> restrictedProps;
 
   // Loop over all columns in the whitelist except 'Options'
   for (int i = 0; i < m_columns - 1; i++) {
@@ -600,38 +861,58 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
     // The column's name
     auto columnName = m_whitelist.colNameFromColIndex(i);
 
+    // The value for which preprocessing can be conducted on
+    std::string preProcessValue;
+
+    if (globalOptions.count(columnName) && !globalOptions[columnName].empty()) {
+      auto tmpOptionsMap = parseKeyValueString(globalOptions[columnName]);
+      for (auto &optionMapEntry : tmpOptionsMap) {
+        preProcessValue += optionMapEntry.second;
+      }
+    } else if (!data->at(i).empty()) {
+      preProcessValue = data->at(i);
+    } else {
+      continue;
+    }
+
     if (m_preprocessMap.count(columnName)) {
       // This column needs pre-processing
 
-      const std::string runStr = data.at(i);
-
-      if (!runStr.empty()) {
-
-        auto preprocessor = m_preprocessMap[columnName];
-
-        // Global pre-processing options for this algorithm as a string
-        const std::string options = globalOptions[columnName];
-
-        auto optionsMap = parseKeyValueString(options);
-        auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
-        alg->setProperty(propertyName, runWS->getName());
+      // We do not want the associated properties to be set again in
+      // processing
+      if (preProcessPropMap.count(columnName) > 0) {
+        for (auto &prop : preProcessPropMap[columnName]) {
+          restrictedProps.insert(prop);
+        }
       }
+
+      auto preprocessor = m_preprocessMap.at(columnName);
+
+      const std::string globalOptionsForColumn =
+          globalOptions.count(columnName) > 0 ? globalOptions.at(columnName)
+                                              : "";
+
+      auto optionsMap = parseKeyValueString(globalOptionsForColumn);
+      auto runWS =
+          prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
+      alg->setProperty(propertyName, runWS->getName());
     } else {
       // No pre-processing needed
-      auto propertyValue = data.at(i);
+      auto propertyValue = data->at(i);
       if (!propertyValue.empty())
         alg->setPropertyValue(propertyName, propertyValue);
     }
   }
 
   // Global processing options as a string
-  std::string options = m_mainPresenter->getProcessingOptions();
+  std::string options = m_mainPresenter->getProcessingOptions().toStdString();
 
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      alg->setProperty(kvp->first, kvp->second);
+      if (restrictedProps.find(kvp->first) == restrictedProps.end())
+        alg->setProperty(kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);
@@ -639,7 +920,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   }
 
   /* Now deal with 'Options' column */
-  options = data.back();
+  options = data->back();
 
   // Parse and set any user-specified options
   optionsMap = parseKeyValueString(options);
@@ -655,7 +936,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   /* We need to give a name to the output workspaces */
   for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
     alg->setProperty(m_processor.outputPropertyName(i),
-                     getReducedWorkspaceName(data, m_processor.prefix(i)));
+                     getReducedWorkspaceName(*data, m_processor.prefix(i)));
   }
 
   /* Now run the processing algorithm */
@@ -669,7 +950,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
       auto columnName = m_whitelist.colNameFromColIndex(i);
 
-      if (data.at(i).empty() && !m_preprocessMap.count(columnName)) {
+      if (data->at(i).empty() && !m_preprocessMap.count(columnName)) {
 
         std::string propValue =
             alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));
@@ -684,11 +965,10 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
               exp;
         }
 
-        newData[i] = propValue;
+        newData->at(i) = propValue;
       }
     }
   }
-  return newData;
 }
 
 /**
@@ -736,9 +1016,20 @@ void GenericDataProcessorPresenter::groupRows() {
 }
 
 /**
+Expand all groups
+*/
+void GenericDataProcessorPresenter::expandAll() { m_view->expandAll(); }
+
+/**
+Collapse all groups
+*/
+void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
+
+/**
 Used by the view to tell the presenter something has changed
 */
 void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
+
   switch (flag) {
   case DataProcessorPresenter::SaveAsFlag:
     saveTableAs();
@@ -803,6 +1094,18 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::PlotGroupFlag:
     plotGroup();
     break;
+  case DataProcessorPresenter::ExpandAllGroupsFlag:
+    expandAll();
+    break;
+  case DataProcessorPresenter::CollapseAllGroupsFlag:
+    collapseAll();
+    break;
+  case DataProcessorPresenter::PauseFlag:
+    pause();
+    break;
+  case DataProcessorPresenter::SelectionChangedFlag:
+    m_newSelection = true;
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
@@ -826,8 +1129,8 @@ void GenericDataProcessorPresenter::saveTable() {
 Press changes to a new item in the ADS
 */
 void GenericDataProcessorPresenter::saveTableAs() {
-  const std::string userString = m_mainPresenter->askUserString(
-      "Save As", "Enter a workspace name:", "Workspace");
+  const std::string userString =
+      m_view->askUserString("Save As", "Enter a workspace name:", "Workspace");
   if (!userString.empty()) {
     m_wsName = userString;
     saveTable();
@@ -839,10 +1142,9 @@ Start a new, untitled table
 */
 void GenericDataProcessorPresenter::newTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_mainPresenter->askUserYesNo(
-            "Your current table has unsaved changes. Are you "
-            "sure you want to discard them?",
-            "Start New Table?"))
+    if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
+                              "sure you want to discard them?",
+                              "Start New Table?"))
       return;
 
   m_manager->newTable(m_whitelist);
@@ -857,10 +1159,9 @@ Open a table from the ADS
 */
 void GenericDataProcessorPresenter::openTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_mainPresenter->askUserYesNo(
-            "Your current table has unsaved changes. Are you "
-            "sure you want to discard them?",
-            "Open Table?"))
+    if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
+                              "sure you want to discard them?",
+                              "Open Table?"))
       return;
 
   auto &ads = AnalysisDataService::Instance();
@@ -870,8 +1171,7 @@ void GenericDataProcessorPresenter::openTable() {
     return;
 
   if (!ads.isValid(toOpen).empty()) {
-    m_mainPresenter->giveUserCritical("Could not open workspace: " + toOpen,
-                                      "Error");
+    m_view->giveUserCritical("Could not open workspace: " + toOpen, "Error");
     return;
   }
 
@@ -889,7 +1189,7 @@ void GenericDataProcessorPresenter::openTable() {
     m_view->showTable(m_manager->getModel());
     m_tableDirty = false;
   } catch (std::runtime_error &e) {
-    m_mainPresenter->giveUserCritical(
+    m_view->giveUserCritical(
         "Could not open workspace: " + std::string(e.what()), "Error");
   }
 }
@@ -908,14 +1208,14 @@ void GenericDataProcessorPresenter::importTable() {
   pythonSrc << "except:\n";
   pythonSrc << "  pass\n";
 
-  const std::string result =
-      m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
+  const std::string result = m_view->runPythonAlgorithm(pythonSrc.str());
 
   // result will hold the name of the output workspace
   // otherwise this should be an empty string.
   QString outputWorkspaceName = QString::fromStdString(result);
-  auto toOpen = outputWorkspaceName.trimmed().toStdString();
-  m_view->setModel(toOpen);
+  std::string toOpen = outputWorkspaceName.trimmed().toStdString();
+  if (!toOpen.empty())
+    m_view->setModel(toOpen);
 }
 
 /**
@@ -929,7 +1229,7 @@ void GenericDataProcessorPresenter::exportTable() {
   pythonSrc << "except:\n";
   pythonSrc << "  pass\n";
 
-  m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
+  m_view->runPythonAlgorithm(pythonSrc.str());
 }
 
 /**
@@ -944,18 +1244,18 @@ void GenericDataProcessorPresenter::addHandle(
   if (!m_manager->isValidModel(workspace, m_columns))
     return;
 
-  m_workspaceList.insert(name);
+  m_workspaceList.insert(QString::fromStdString(name));
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
 Handle ADS remove events
 */
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
-  m_workspaceList.erase(name);
+  m_workspaceList.remove(QString::fromStdString(name));
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
@@ -964,7 +1264,7 @@ Handle ADS clear events
 void GenericDataProcessorPresenter::clearADSHandle() {
   m_workspaceList.clear();
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
@@ -975,13 +1275,13 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
 
   // if a workspace with oldName exists then replace it for the same workspace
   // with newName
-  if (m_workspaceList.find(oldName) == m_workspaceList.end())
+  if (!m_workspaceList.contains(QString::fromStdString(oldName)))
     return;
 
-  m_workspaceList.erase(oldName);
-  m_workspaceList.insert(newName);
+  m_workspaceList.remove(QString::fromStdString(oldName));
+  m_workspaceList.insert(QString::fromStdString(newName));
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
@@ -990,11 +1290,11 @@ Handle ADS replace events
 void GenericDataProcessorPresenter::afterReplaceHandle(
     const std::string &name, Mantid::API::Workspace_sptr workspace) {
   // Erase it
-  m_workspaceList.erase(name);
+  m_workspaceList.remove(QString::fromStdString(name));
 
   // If it's a table workspace, bring it back
   if (m_manager->isValidModel(workspace, m_columns))
-    m_workspaceList.insert(name);
+    m_workspaceList.insert(QString::fromStdString(name));
 
   m_view->setTableList(m_workspaceList);
 }
@@ -1057,7 +1357,10 @@ void GenericDataProcessorPresenter::setInstrumentList(
     const std::vector<std::string> &instruments,
     const std::string &defaultInstrument) {
 
-  m_view->setInstrumentList(instruments, defaultInstrument);
+  std::string instrList = boost::algorithm::join(instruments, ",");
+
+  m_view->setInstrumentList(QString::fromStdString(instrList),
+                            QString::fromStdString(defaultInstrument));
 }
 
 /** Plots any currently selected rows */
@@ -1071,6 +1374,7 @@ void GenericDataProcessorPresenter::plotRow() {
   const auto items = m_manager->selectedData();
 
   for (const auto &item : items) {
+
     for (const auto &run : item.second) {
 
       const std::string wsName =
@@ -1084,7 +1388,7 @@ void GenericDataProcessorPresenter::plotRow() {
   }
 
   if (!notFound.empty())
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +
@@ -1125,7 +1429,7 @@ void GenericDataProcessorPresenter::plotGroup() {
   }
 
   if (!notFound.empty())
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +
@@ -1153,7 +1457,7 @@ void GenericDataProcessorPresenter::plotWorkspaces(
 
   pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
 
-  m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
+  m_view->runPythonAlgorithm(pythonSrc.str());
 }
 
 /** Shows the Refl Options dialog */
@@ -1215,11 +1519,44 @@ void GenericDataProcessorPresenter::addCommands() {
 }
 
 /**
+Pauses reduction. If currently reducing runs, this does not take effect until
+the current thread for reducing a row or group has finished
+*/
+void GenericDataProcessorPresenter::pause() {
+
+  m_view->pause();
+  m_mainPresenter->pause();
+
+  m_reductionPaused = true;
+}
+
+/** Resumes reduction if currently paused
+*/
+void GenericDataProcessorPresenter::resume() {
+
+  m_view->resume();
+  m_mainPresenter->resume();
+
+  m_reductionPaused = false;
+  m_mainPresenter->confirmReductionResumed();
+
+  doNextAction();
+}
+
+/**
 * Tells the view to load a table workspace
 * @param name : [input] The workspace's name
 */
 void GenericDataProcessorPresenter::setModel(std::string name) {
   m_view->setModel(name);
+}
+
+/**
+* Sets whether to prompt user when getting selected runs
+* @param allowPrompt : [input] Enable setting user prompt
+*/
+void GenericDataProcessorPresenter::setPromptUser(bool allowPrompt) {
+  m_promptUser = allowPrompt;
 }
 
 /**
@@ -1246,7 +1583,9 @@ void GenericDataProcessorPresenter::accept(
   m_mainPresenter = mainPresenter;
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
-  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
+  // Presenter should initially be in the paused state
+  m_mainPresenter->pause();
 }
 
 /** Returs the list of valid workspaces currently in the ADS
@@ -1279,6 +1618,13 @@ ChildItems GenericDataProcessorPresenter::selectedChildren() const {
   return m_view->getSelectedChildren();
 }
 
+/** Checks if the selected runs have changed
+* @return :: selection changed bool
+*/
+bool GenericDataProcessorPresenter::newSelectionMade() const {
+  return m_newSelection;
+}
+
 /** Ask user for Yes/No
  * @param prompt :: the question to ask
  * @param title :: the title
@@ -1287,7 +1633,7 @@ ChildItems GenericDataProcessorPresenter::selectedChildren() const {
 bool GenericDataProcessorPresenter::askUserYesNo(
     const std::string &prompt, const std::string &title) const {
 
-  return m_mainPresenter->askUserYesNo(prompt, title);
+  return m_view->askUserYesNo(prompt, title);
 }
 
 /** Print warning message
@@ -1297,7 +1643,7 @@ bool GenericDataProcessorPresenter::askUserYesNo(
 void GenericDataProcessorPresenter::giveUserWarning(
     const std::string &prompt, const std::string &title) const {
 
-  m_mainPresenter->giveUserWarning(prompt, title);
+  m_view->giveUserWarning(prompt, title);
 }
 }
 }

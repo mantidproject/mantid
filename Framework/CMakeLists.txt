@@ -21,7 +21,6 @@ if ( NOT COMMONSETUP_DONE )
   include ( CommonSetup )
 endif ()
 
-option(BUILD_MATLAB_DEPENDENCIES "Build Mantid-Matlab interface in the case of Matlab was found" OFF)
 ###########################################################################
 # Look for dependencies - bail out if any necessary ones not found
 ###########################################################################
@@ -57,6 +56,11 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   endif ( MPI_BUILD )
 endif ()
 
+set ( MPI_EXPERIMENTAL OFF CACHE BOOL "Enable MPI options" )
+if ( MPI_EXPERIMENTAL )
+  include ( BoostMPI )
+endif ()
+
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
@@ -70,6 +74,9 @@ add_subdirectory (Types)
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
 
+include_directories (Parallel/inc)
+add_subdirectory (Parallel)
+
 include_directories (HistogramData/inc)
 add_subdirectory (HistogramData)
 
@@ -79,6 +86,7 @@ add_subdirectory (Indexing)
 include_directories (Beamline/inc)
 add_subdirectory (Beamline)
 
+set ( MANTIDLIBS ${MANTIDLIBS} Parallel )
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
 set ( MANTIDLIBS ${MANTIDLIBS} HistogramData )
 # Indexing has header-only dependency on Kernel, so Kernel comes after.
@@ -98,13 +106,6 @@ add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )
 
 add_subdirectory (PythonInterface)
-#
-if (BUILD_MATLAB_DEPENDENCIES)
-    find_package ( Matlab )
-    if( MATLAB_FOUND )
-        add_subdirectory (MatlabAPI)
-    endif ()
-endif()
 
 include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)

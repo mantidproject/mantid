@@ -1,5 +1,6 @@
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import stresstesting
 
@@ -119,6 +120,11 @@ class SANSMoveTest(unittest.TestCase):
                                        component_key, move_info, workspace)
 
     def check_that_sets_to_zero(self, workspace, move_alg, move_info, comp_name=None):
+        def _get_components_to_compare(_key, _move_info, _component_names):
+            if _key in _move_info.detectors:
+                _name = _move_info.detectors[_key].detector_name
+                _component_names.append(_name)
+
         # Reset the position to zero
         move_alg.setProperty("Workspace", workspace)
         move_alg.setProperty("MoveType", "SetToZero")
@@ -131,11 +137,11 @@ class SANSMoveTest(unittest.TestCase):
 
         # Get the components to compare
         if comp_name is None:
-            hab_name = move_info.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name
-            lab_name = move_info.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name
             component_names = list(move_info.monitor_names.values())
-            component_names.append(hab_name)
-            component_names.append(lab_name)
+            hab_name = DetectorType.to_string(DetectorType.HAB)
+            lab_name = DetectorType.to_string(DetectorType.LAB),
+            _get_components_to_compare(hab_name, move_info, component_names)
+            _get_components_to_compare(lab_name, move_info, component_names)
             component_names.append("some-sample-holder")
         else:
             component_names = [comp_name]
@@ -155,11 +161,11 @@ class SANSMoveTest(unittest.TestCase):
             position = component.getPos()
             position_base = base_component.getPos()
             for index in range(0, 3):
-                self.assertAlmostEqual(position[index], position_base[index], delta=1e-4)
+                self.assertAlmostEquals(position[index], position_base[index], delta=1e-4)
             rotation = component.getRotation()
             rotation_base = base_component.getRotation()
             for index in range(0, 4):
-                self.assertAlmostEqual(rotation[index], rotation_base[index], delta=1e-4)
+                self.assertAlmostEquals(rotation[index], rotation_base[index], delta=1e-4)
 
     def _run_move(self, state, workspace, move_type, beam_coordinates=None, component=None):
         move_alg = AlgorithmManager.createUnmanaged("SANSMove")
@@ -301,7 +307,7 @@ class SANSMoveTest(unittest.TestCase):
         component_to_investigate = DetectorType.to_string(DetectorType.LAB)
         # The rotation couples the movements, hence we just insert absoltute value, to have a type of regression test.
         expected_position = V3D(0, -38, 25.3)
-        expected_rotation = Quat(0.978146, 0, 0.20792, 0)
+        expected_rotation = Quat(0.978146, 0, -0.20792, 0)
         self.compare_expected_position(expected_position, expected_rotation,
                                        component_to_investigate, state.move, workspace)
 

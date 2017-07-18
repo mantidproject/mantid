@@ -11,8 +11,8 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidNexus/NexusClasses.h"
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -46,7 +46,7 @@ using Mantid::HistogramData::BinEdges;
  */
 int LoadNXSPE::identiferConfidence(const std::string &value) {
   int confidence = 0;
-  if (value.compare("NXSPE") == 0) {
+  if (value == "NXSPE") {
     confidence = 99;
   } else {
     boost::regex re("^NXSP", boost::regex::icase);

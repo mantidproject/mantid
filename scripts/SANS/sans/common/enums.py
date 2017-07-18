@@ -46,8 +46,8 @@ def string_convertible(cls):
                @serializable_enum
                class MyClass(object):
                 ...
-    @param cls: a reference to the class
-    @return: the class
+    :param cls: a reference to the class
+    :return: the class
     """
     def to_string(elements, convert_to_string):
         for key, value in list(elements.items()):
@@ -246,7 +246,7 @@ class RebinType(object):
 #  SaveType
 # --------------------------
 @string_convertible
-@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS")
+@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS", "Nexus")
 class SaveType(object):
     """
     Defines the save types available
@@ -318,7 +318,8 @@ class OutputMode(object):
 # -------------------------------
 @string_convertible
 @serializable_enum("SampleScatter", "SampleTransmission", "SampleDirect", "CanScatter", "CanTransmission", "CanDirect",
-                   "Output", "UserFile")
+                   "Output", "UserFile", "SampleScatterPeriod", "SampleTransmissionPeriod", "SampleDirectPeriod",
+                   "CanScatterPeriod", "CanTransmissionPeriod", "CanDirectPeriod",)
 class BatchReductionEntry(object):
     """
     Defines the entries of a batch reduction file.

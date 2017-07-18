@@ -647,10 +647,9 @@ public:
     Mantid::Geometry::ObjComponent *sample =
         new Mantid::Geometry::ObjComponent("sample");
     instrument->markAsSamplePos(sample);
-    boost::shared_ptr<Mantid::Geometry::Detector> det =
-        boost::shared_ptr<Mantid::Geometry::Detector>(
-            new Mantid::Geometry::Detector("det", 1, 0));
-    instrument->markAsDetector(det.get());
+    auto *det = new Mantid::Geometry::Detector("det", 1, 0);
+    instrument->add(det);
+    instrument->markAsDetector(det);
 
     API::MatrixWorkspace_sptr ws = createTestWorkspace(false);
     ws->setInstrument(instrument);
@@ -659,7 +658,7 @@ public:
     auto &pmap = ws->instrumentParameters();
 
     std::string value = "20.0 , ExpDecay , Lifetime , , , , , , , TOF ,";
-    pmap.add("fitting", det.get(), "Lifetime", value);
+    pmap.add("fitting", det, "Lifetime", value);
     const auto &detectorInfo = ws->detectorInfo();
     const auto detIndex = detectorInfo.indexOf(det->getID());
     const auto &detFromWS = detectorInfo.detector(detIndex);

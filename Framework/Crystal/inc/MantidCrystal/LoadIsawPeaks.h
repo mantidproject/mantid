@@ -45,11 +45,6 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  /// Reads calibration/detector section and returns first word of next line
-  std::string ApplyCalibInfo(std::ifstream &in, std::string startChar,
-                             Geometry::Instrument_const_sptr instr,
-                             API::DetectorInfo &detectorInfo, double &T0);
-
   /// Reads first line of peaks file and returns first word of next line
   std::string readHeader(Mantid::DataObjects::PeaksWorkspace_sptr outWS,
                          std::ifstream &in, double &T0);

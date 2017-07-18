@@ -58,10 +58,13 @@ public slots:
   virtual void showPage(const QString &url);
   virtual void showPage(const QUrl &url);
 
-  /// Tires to locate a file name index.html in the given namespace and then
+  /// Tries to locate a file name index.html in the given namespace and then
   /// shows that page.
   virtual void showHomePage(const QString &namespace_name);
   virtual void showHomePage();
+
+  /// Prints the current open page
+  virtual void printPage();
 
 signals:
   /// fired to relay warning messages from the help system.

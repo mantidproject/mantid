@@ -246,7 +246,7 @@ protected:
   QtProperty *getTieProperty(QtProperty *prop) const;
 
   /// Add a tie property
-  AProperty addTieProperty(QtProperty *prop, QString tie);
+  void addTieProperty(QtProperty *prop, QString tie);
   /// Check if a parameter property has a tie
   bool hasTie(QtProperty *prop) const;
   /// Check if a property is a tie

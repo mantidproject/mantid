@@ -43,6 +43,8 @@ if ( CPPCHECK_EXECUTABLE )
 
   set ( CPPCHECK_EXCLUDES
         Framework/LiveData/src/ISIS/DAE/
+        Framework/LiveData/src/ISIS/private/flatbuffers/
+        Framework/LiveData/src/ISIS/private/schema/
         Framework/DataHandling/src/LoadRaw/
         Framework/ICat/inc/MantidICat/ICat3/GSoapGenerated/
         Framework/ICat/src/ICat3/GSoapGenerated/

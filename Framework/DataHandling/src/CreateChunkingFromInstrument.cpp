@@ -195,7 +195,7 @@ bool startsWith(const string &str, const string &prefix) {
   if (str.length() < prefix.length())
     return false;
 
-  return (str.substr(0, prefix.length()).compare(prefix) == 0);
+  return (str.substr(0, prefix.length()) == prefix);
 }
 
 /**
@@ -236,7 +236,7 @@ string parentName(IComponent_const_sptr comp, const string &prefix) {
 string parentName(IComponent_const_sptr comp, const vector<string> &names) {
   // handle the special case of the component has the name
   for (const auto &name : names)
-    if (name.compare(comp->getName()) == 0)
+    if (name == comp->getName())
       return name;
 
   // find the parent with the correct name
@@ -244,7 +244,7 @@ string parentName(IComponent_const_sptr comp, const vector<string> &names) {
   if (parent) {
     // see if this is the parent
     for (const auto &name : names)
-      if (name.compare(parent->getName()) == 0)
+      if (name == parent->getName())
         return name;
 
     // or recurse
@@ -377,10 +377,9 @@ void CreateChunkingFromInstrument::exec() {
   string groupLevel = this->getPropertyValue(PARAM_CHUNK_BY);
   vector<string> groupNames =
       getGroupNames(this->getPropertyValue(PARAM_CHUNK_NAMES));
-  if (groupLevel.compare("All") == 0) {
+  if (groupLevel == "All") {
     return; // nothing to do
-  } else if (inst->getName().compare("SNAP") == 0 &&
-             groupLevel.compare("Group") == 0) {
+  } else if (inst->getName() == "SNAP" && groupLevel == "Group") {
     groupNames.clear();
     groupNames.emplace_back("East");
     groupNames.emplace_back("West");

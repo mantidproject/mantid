@@ -22,7 +22,7 @@ class UnitCellTest(unittest.TestCase):
 
         u4 = u2
         self.assertAlmostEquals(u4.volume(),1./u2.recVolume(),10)
-        u2.seta(3);
+        u2.seta(3)
         self.assertAlmostEquals(u2.a(),3,10)
 
     def test_numpy_array_conversion(self):
@@ -34,6 +34,24 @@ class UnitCellTest(unittest.TestCase):
         u = UnitCell()
         testhelpers.assertRaisesNothing(self, u.recalculateFromGstar, gstar)
         self._check_cell(u)
+
+    def test_to_string(self):
+        unit = UnitCell(3,3,3)
+        expected_str = "UnitCell with lattice parameters: a = 3 b = 3 c = 3 "\
+                       "alpha = 90 beta = 90 gamma = 90"
+        expected_repr = "UnitCell(3, 3, 3, 90, 90, 90)"
+
+        self.assertEqual(expected_str, str(unit))
+        self.assertEqual(expected_repr, unit.__repr__())
+
+        newUnit = eval(unit.__repr__())
+        self.assertEqual(unit.a(), newUnit.a())
+        self.assertEqual(unit.b(), newUnit.b())
+        self.assertEqual(unit.c(), newUnit.c())
+
+        self.assertEqual(unit.alpha(), newUnit.alpha())
+        self.assertEqual(unit.beta(), newUnit.beta())
+        self.assertEqual(unit.gamma(), newUnit.gamma())
 
     def _check_cell(self, cell):
         self.assertAlmostEqual(cell.a(),2.5,10)

@@ -5,6 +5,7 @@ from mantid.kernel import *
 from mantid import config
 
 import os
+import warnings
 
 
 class VesuvioDiffractionReduction(DataProcessorAlgorithm):
@@ -25,7 +26,7 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         return 'Diffraction\\Reduction'
 
     def summary(self):
-        return 'Performs diffraction reduction for VESUVIO'
+        return ('Performs diffraction reduction for VESUVIO. This algorithm is deprecated (April-2017).')
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty('InputFiles'),
@@ -75,6 +76,9 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
+
+        warnings.warn("This algorithm is depreciated (April-2017). Please use ISISIndirectDiffractionReduction")
+
         from IndirectReductionCommon import (load_files,
                                              get_multi_frame_rebin,
                                              identify_bad_detectors,

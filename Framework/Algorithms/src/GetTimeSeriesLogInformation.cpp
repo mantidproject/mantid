@@ -158,9 +158,9 @@ void GetTimeSeriesLogInformation::processTimeRange() {
   // Time unit option
   string timeoption = this->getProperty("TimeRangeOption");
   int timecase = 0;
-  if (timeoption.compare("Absolute Time (nano second)") == 0)
+  if (timeoption == "Absolute Time (nano second)")
     timecase = 1;
-  else if (timeoption.compare("Relative Time (second)") == 0)
+  else if (timeoption == "Relative Time (second)")
     timecase = 0;
   else
     timecase = -1;

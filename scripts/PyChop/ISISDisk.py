@@ -190,10 +190,13 @@ class ISISDisk:
             res = []
             for en in Et:
                 Ef = Eis[ie] - en
-                fac = (Ef/Eis[ie])**1.5
-                chopRes = (2*chop_width[ie]/t_mod_chop) * (1+((self.samp_det+self.chop_samp+lastChopDist)/self.samp_det)*fac)
-                modRes = (2*mod_width[ie]/t_mod_chop) * (1+(self.chop_samp/self.samp_det)*fac)
-                res.append(np.sqrt(chopRes**2 + modRes**2)*Eis[ie])
+                if (Ef > 0):
+                    fac = (Ef/Eis[ie])**1.5
+                    chopRes = (2*chop_width[ie]/t_mod_chop) * (1+((self.samp_det+self.chop_samp+lastChopDist)/self.samp_det)*fac)
+                    modRes = (2*mod_width[ie]/t_mod_chop) * (1+(self.chop_samp/self.samp_det)*fac)
+                    res.append(np.sqrt(chopRes**2 + modRes**2)*Eis[ie])
+                else:
+                    res.append(np.nan)
             if len(ie_list) == 1:
                 res_list = res
             else:
@@ -450,6 +453,6 @@ class ISISDisk:
         if Ei:
             idx1 = (np.abs(Eis - Ei) / np.abs(Eis)) < 0.1
             idx += idx1
-        Eis = np.array([Eis[i] for i in range(len(Eis)) if idx[i]])
-        lines = np.array([lines[i] for i in range(len(Eis)) if idx[i]])
+        Eis = Eis[idx]
+        lines = np.array(lines)[idx]
         return Eis, lines

@@ -62,8 +62,10 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
       // if the line doesn't start with a time treat it as a continuation of the
       // previous data
       if (change_times.empty() || isNumeric) { // if there are no previous data
-        std::string mess =
-            "Cannot parse log file " + logFName + ". Line:" + str;
+        std::string mess = std::string("Cannot parse log file ")
+                               .append(logFName)
+                               .append(". Line:")
+                               .append(str);
         g_log.error(mess);
         throw std::logic_error(mess);
       }

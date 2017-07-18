@@ -138,6 +138,9 @@ public:
   // solid angle via ray tracing
   double rayTraceSolidAngle(const Kernel::V3D &observer) const;
 
+  /// Calculates the volume of this object.
+  double volume() const;
+
   /// Calculate (or return cached value of) Axis Aligned Bounding box
   /// (DEPRECATED)
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
@@ -211,6 +214,12 @@ private:
                         const Mantid::Kernel::V3D &centre,
                         const Mantid::Kernel::V3D &axis, const double radius,
                         const double height) const;
+
+  /// Returns the volume.
+  double monteCarloVolume() const;
+  /// Returns the volume.
+  double singleShotMonteCarloVolume(const int shotSize,
+                                    const size_t seed) const;
 
   /// Top rule [ Geometric scope of object]
   std::unique_ptr<Rule> TopRule;

@@ -4,6 +4,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 
 using Mantid::DataObjects::PeaksWorkspace;
 
@@ -120,7 +121,7 @@ void CentroidPeaks::integrate() {
     for (int ichan = chanstart; ichan <= chanend; ++ichan) {
       for (int irow = rowstart; irow <= rowend; ++irow) {
         for (int icol = colstart; icol <= colend; ++icol) {
-          if (edgePixel(bankName, icol, irow, Edge))
+          if (edgePixel(inst, bankName, icol, irow, Edge))
             continue;
           const auto it =
               wi_to_detid_map.find(findPixelID(bankName, icol, irow));
@@ -148,7 +149,7 @@ void CentroidPeaks::integrate() {
 
     peak.setDetectorID(findPixelID(bankName, col, row));
     // Set wavelength to change tof for peak object
-    if (!edgePixel(bankName, col, row, Edge)) {
+    if (!edgePixel(inst, bankName, col, row, Edge)) {
       it = wi_to_detid_map.find(findPixelID(bankName, col, row));
       workspaceIndex = (it->second);
       Mantid::Kernel::Units::Wavelength wl;
@@ -175,7 +176,7 @@ void CentroidPeaks::integrate() {
     int row = peak.getRow();
     std::string bankName = peak.getBankName();
 
-    if (edgePixel(bankName, col, row, Edge)) {
+    if (edgePixel(inst, bankName, col, row, Edge)) {
       peakWS->removePeak(i);
     }
   }
@@ -237,7 +238,7 @@ void CentroidPeaks::integrateEvent() {
 
     double intensity = 0.0;
     double tofcentroid = 0.0;
-    if (edgePixel(bankName, col, row, Edge))
+    if (edgePixel(inst, bankName, col, row, Edge))
       continue;
 
     double tofstart = TOFPeakd * std::pow(1.004, -PeakRadius);
@@ -250,7 +251,7 @@ void CentroidPeaks::integrateEvent() {
     int colend = col + PeakRadius;
     for (int irow = rowstart; irow <= rowend; ++irow) {
       for (int icol = colstart; icol <= colend; ++icol) {
-        if (edgePixel(bankName, icol, irow, Edge))
+        if (edgePixel(inst, bankName, icol, irow, Edge))
           continue;
         auto it1 = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
         size_t workspaceIndex = (it1->second);
@@ -276,7 +277,7 @@ void CentroidPeaks::integrateEvent() {
     row = std::max(0, row);
     col = int(colcentroid / intensity);
     col = std::max(0, col);
-    if (!edgePixel(bankName, col, row, Edge)) {
+    if (!edgePixel(inst, bankName, col, row, Edge)) {
       peak.setDetectorID(findPixelID(bankName, col, row));
 
       // Set wavelength to change tof for peak object
@@ -305,7 +306,7 @@ void CentroidPeaks::integrateEvent() {
     int row = peak.getRow();
     std::string bankName = peak.getBankName();
 
-    if (edgePixel(bankName, col, row, Edge)) {
+    if (edgePixel(inst, bankName, col, row, Edge)) {
       peakWS->removePeak(i);
     }
   }
@@ -318,7 +319,7 @@ void CentroidPeaks::integrateEvent() {
  */
 void CentroidPeaks::exec() {
   inWS = getProperty("InputWorkspace");
-
+  inst = inWS->getInstrument();
   // For quickly looking up workspace index from det id
   wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap();
 
@@ -332,10 +333,9 @@ void CentroidPeaks::exec() {
 }
 
 int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
-  Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
   boost::shared_ptr<const IComponent> parent =
-      Iptr->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+      inst->getComponentByName(bankName);
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -346,45 +346,15 @@ int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
     // Only works for WISH
     bankName0.erase(0, 4);
     std::ostringstream pixelString;
-    pixelString << Iptr->getName() << "/" << bankName0 << "/" << bankName
+    pixelString << inst->getName() << "/" << bankName0 << "/" << bankName
                 << "/tube" << std::setw(3) << std::setfill('0') << col
                 << "/pixel" << std::setw(4) << std::setfill('0') << row;
     boost::shared_ptr<const Geometry::IComponent> component =
-        Iptr->getComponentByName(pixelString.str());
+        inst->getComponentByName(pixelString.str());
     boost::shared_ptr<const Detector> pixel =
         boost::dynamic_pointer_cast<const Detector>(component);
     return pixel->getID();
   }
-}
-bool CentroidPeaks::edgePixel(std::string bankName, int col, int row,
-                              int Edge) {
-  if (bankName.compare("None") == 0)
-    return false;
-  Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
-  boost::shared_ptr<const IComponent> parent =
-      Iptr->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
-
-    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-           row >= (RDet->ypixels() - Edge);
-  } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    int NROWS = static_cast<int>(grandchildren.size());
-    int NCOLS = static_cast<int>(children.size());
-    // Wish pixels and tubes start at 1 not 0
-    return col - 1 < Edge || col - 1 >= (NCOLS - Edge) || row - 1 < Edge ||
-           row - 1 >= (NROWS - Edge);
-  }
-  return false;
 }
 
 } // namespace Mantid

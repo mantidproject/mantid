@@ -205,6 +205,9 @@ void ProjectSaveView::save(bool checked) {
   emit projectSaved();
 
   close();
+  // Set the result code after calling close() because
+  // close() sets it to QDialog::Rejected
+  setResult(QDialog::Accepted);
 }
 
 /**

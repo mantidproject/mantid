@@ -4,7 +4,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import copy
-from sans.state.state_base import (StateBase, BoolParameter, StringParameter,
+from sans.state.state_base import (StateBase, BoolParameter, StringParameter, StringWithNoneParameter,
                                    ClassTypeListParameter, rename_descriptor_names)
 from sans.common.enums import (SaveType, SANSInstrument)
 from sans.state.automatic_setters import (automatic_setters)
@@ -15,9 +15,13 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateSave(StateBase):
-    file_name = StringParameter()
     zero_free_correction = BoolParameter()
     file_format = ClassTypeListParameter(SaveType)
+
+    # Settings for the output name
+    user_specified_output_name = StringWithNoneParameter()
+    user_specified_output_name_suffix = StringParameter()
+    use_reduction_mode_as_suffix = BoolParameter()
 
     def __init__(self):
         super(StateSave, self).__init__()

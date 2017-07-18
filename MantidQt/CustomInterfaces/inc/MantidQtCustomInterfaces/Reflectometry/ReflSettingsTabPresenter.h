@@ -48,6 +48,8 @@ public:
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) override;
 
+  /// Returns values passed for 'Transmission run(s)'
+  std::string getTransmissionRuns(int group, bool loadRuns) const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions(int group) const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'

@@ -22,6 +22,7 @@ public:
     std::unique_ptr<DetectorInfo> detInfo;
     TS_ASSERT_THROWS_NOTHING(detInfo = Kernel::make_unique<DetectorInfo>());
     TS_ASSERT_EQUALS(detInfo->size(), 0);
+    TS_ASSERT(!detInfo->isScanning());
     TS_ASSERT_THROWS_NOTHING(
         detInfo = Kernel::make_unique<DetectorInfo>(PosVec(1), RotVec(1)));
     TS_ASSERT_EQUALS(detInfo->size(), 1);

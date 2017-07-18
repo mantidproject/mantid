@@ -91,17 +91,6 @@ private:
   /// Gets the log scale setting for the mode
   bool getLogScale();
 
-  /**
-   * Extract the min and max values of a source. If we are dealing with a filter
-   * which does not
-   * have the information then look upstream for the information
-   * @param source A pointer to a source
-   * @param minValue A reference to a min value.
-   * @param maxValue A reference to a max value.
-   */
-  void setMinBufferAndMaxBuffer(pqPipelineSource *source, double &minValue,
-                                double &maxValue);
-
   /// Md constants
   MantidQt::API::MdConstants m_mdConstants;
 

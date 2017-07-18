@@ -183,9 +183,10 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmDockWidget.cpp
                    src/Mantid/MantidMDCurve.cpp
                    src/Mantid/MantidMDCurveDialog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
+                   src/Mantid/MantidPlotUtilities.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidSampleMaterialDialog.cpp
-				   src/Mantid/MantidGroupPlotGenerator.cpp
+                   src/Mantid/MantidSurfaceContourPlotGenerator.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/PeakPickerTool.cpp
@@ -375,9 +376,10 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidMatrixFunction.h
+                   src/Mantid/MantidPlotUtilities.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidSampleMaterialDialog.h
-				   src/Mantid/MantidGroupPlotGenerator.h
+		   src/Mantid/MantidSurfaceContourPlotGenerator.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidTable.h
                    src/Mantid/PeakPickerTool.h
@@ -637,7 +639,11 @@ set ( MOCCED_FILES ${MOCCED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc
 
 set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+if ( WIN32 )
+  set ( MANIFEST_FILES MantidPlot.manifest )
+endif ()
+
+set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} ${MANIFEST_FILES} )
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers( src/PrecompiledHeader.h ALL_SRC )
@@ -915,13 +921,13 @@ else ()
 	endif ()
 
 	# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
-	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR}/test;MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
+	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
 
 	# Fixes for Darwin (MacOS)
 	if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		set (MANTIDPLOT_PATH  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${BIN_DIR}/MantidPlot" )
 		# Append to the path and set MANTIDPATH for MacOS' MantidPlot to run
-		set (TEST_ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
+		set (TEST_ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
 	endif ()
 
 	# Make a ctest target for each file

@@ -36,7 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakOverlayViewFactoryBase : public PeakOverlayViewFactory {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayViewFactoryBase
+    : public PeakOverlayViewFactory {
 protected:
   QwtPlot *m_plot;
   QWidget *m_parent;

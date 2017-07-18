@@ -48,6 +48,12 @@ public:
     MockSettingsView mockView;
     ReflSettingsPresenter presenter(&mockView);
 
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(mockView, instrumentSettingsEnabled())
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
@@ -87,16 +93,16 @@ public:
     boost::split(optionsVec, options, split_q());
     TS_ASSERT_EQUALS(optionsVec.size(), 11);
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(optionsVec[1], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[2], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[3], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[4], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[5], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[6], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[7], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[8], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[9], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[10], "EndOverlap=12");
+    TS_ASSERT_EQUALS(optionsVec[1], "StartOverlap=10");
+    TS_ASSERT_EQUALS(optionsVec[2], "EndOverlap=12");
+    TS_ASSERT_EQUALS(optionsVec[3], "MonitorIntegrationWavelengthMin=4");
+    TS_ASSERT_EQUALS(optionsVec[4], "MonitorIntegrationWavelengthMax=10");
+    TS_ASSERT_EQUALS(optionsVec[5], "MonitorBackgroundWavelengthMin=12");
+    TS_ASSERT_EQUALS(optionsVec[6], "MonitorBackgroundWavelengthMax=17");
+    TS_ASSERT_EQUALS(optionsVec[7], "WavelengthMin=1");
+    TS_ASSERT_EQUALS(optionsVec[8], "WavelengthMax=15");
+    TS_ASSERT_EQUALS(optionsVec[9], "I0MonitorIndex=2");
+    TS_ASSERT_EQUALS(optionsVec[10], "ProcessingInstructions=\"3,4\"");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -105,6 +111,12 @@ public:
     MockSettingsView mockView;
     ReflSettingsPresenter presenter(&mockView);
 
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(mockView, instrumentSettingsEnabled())
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
@@ -183,24 +195,24 @@ public:
     TS_ASSERT_EQUALS(optionsVec[4], "CPp=\"0.54,0.33,1.81\"");
     TS_ASSERT_EQUALS(optionsVec[5], "RegionOfDirectBeam=\"0,3\"");
     TS_ASSERT_EQUALS(optionsVec[6], "PolarizationAnalysis=PNR");
-    TS_ASSERT_EQUALS(optionsVec[7], "NormalizeByIntegratedMonitors=True");
-    TS_ASSERT_EQUALS(optionsVec[8], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[9], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[10], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[11], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[12], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[13], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[14], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[15], "ScaleFactor=2");
-    TS_ASSERT_EQUALS(optionsVec[16], "MomentumTransferStep=-0.02");
-    TS_ASSERT_EQUALS(optionsVec[17], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[18], "DetectorCorrectionType=VerticalShift");
-    TS_ASSERT_EQUALS(optionsVec[19], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[20], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[21],
+    TS_ASSERT_EQUALS(optionsVec[7], "ScaleFactor=2");
+    TS_ASSERT_EQUALS(optionsVec[8], "MomentumTransferStep=-0.02");
+    TS_ASSERT_EQUALS(optionsVec[9], "StartOverlap=10");
+    TS_ASSERT_EQUALS(optionsVec[10], "EndOverlap=12");
+    TS_ASSERT_EQUALS(optionsVec[11],
                      "FirstTransmissionRun=TRANS_INTER00013463");
-    TS_ASSERT_EQUALS(optionsVec[22],
+    TS_ASSERT_EQUALS(optionsVec[12],
                      "SecondTransmissionRun=TRANS_INTER00013464");
+    TS_ASSERT_EQUALS(optionsVec[13], "NormalizeByIntegratedMonitors=True");
+    TS_ASSERT_EQUALS(optionsVec[14], "MonitorIntegrationWavelengthMin=4");
+    TS_ASSERT_EQUALS(optionsVec[15], "MonitorIntegrationWavelengthMax=10");
+    TS_ASSERT_EQUALS(optionsVec[16], "MonitorBackgroundWavelengthMin=12");
+    TS_ASSERT_EQUALS(optionsVec[17], "MonitorBackgroundWavelengthMax=17");
+    TS_ASSERT_EQUALS(optionsVec[18], "WavelengthMin=1");
+    TS_ASSERT_EQUALS(optionsVec[19], "WavelengthMax=15");
+    TS_ASSERT_EQUALS(optionsVec[20], "I0MonitorIndex=2");
+    TS_ASSERT_EQUALS(optionsVec[21], "ProcessingInstructions=\"3,4\"");
+    TS_ASSERT_EQUALS(optionsVec[22], "DetectorCorrectionType=VerticalShift");
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
@@ -213,6 +225,10 @@ public:
     MockSettingsView mockView;
     ReflSettingsPresenter presenter(&mockView);
 
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(mockView, instrumentSettingsEnabled()).Times(0);
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
     presenter.getStitchOptions();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
@@ -222,9 +238,11 @@ public:
     MockSettingsView mockView;
     ReflSettingsPresenter presenter(&mockView);
 
+    EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
     presenter.setInstrumentName("INTER");
+    EXPECT_CALL(mockView, setIsPolCorrEnabled(true)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(true))
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
@@ -236,6 +254,7 @@ public:
     MockMainWindowPresenter mainPresenter;
 
     // Set instrument to 'POLREF'
+    EXPECT_CALL(mockView, setIsPolCorrEnabled(true)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(true))
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
@@ -245,7 +264,7 @@ public:
         "1.006831,-0.011467,0.002244,-0.000095",
         "1.017526,-0.017183,0.003136,-0.000140",
         "0.917940,0.038265,-0.006645,0.000282",
-        "0.972762,0.001828,-0.000261,0.0"};
+        "0.972762,0.001828,-0.000261,0.0", "10", "12"};
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
@@ -258,6 +277,7 @@ public:
     ReflSettingsPresenter presenter(&mockView);
 
     // Set instrument to 'INTER'
+    EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
     presenter.setInstrumentName("INTER");
@@ -269,6 +289,89 @@ public:
     EXPECT_CALL(mockView, setInstDefaults(defaults_double, defaults_str))
         .Times(1);
     presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testExperimentSettingsDisabled() {
+
+    MockSettingsView mockView;
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(3)
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockView, instrumentSettingsEnabled())
+        .Times(2)
+        .WillRepeatedly(Return(true));
+
+    // Experiment settings shouldn't be called
+    EXPECT_CALL(mockView, getAnalysisMode()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(0));
+
+    // Instrument settings should be called
+    EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getMonitorIntegralMin()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getMonitorIntegralMax()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getMonitorBackgroundMin()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getMonitorBackgroundMax()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getLambdaMin()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getLambdaMax()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getI0MonitorIndex()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getProcessingInstructions()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getDetectorCorrectionType()).Times(Exactly(1));
+
+    auto transmissionOptions = presenter.getTransmissionOptions();
+    auto reductionOptions = presenter.getReductionOptions();
+    auto stitchOptions = presenter.getStitchOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testInstrumentSettingsDisabled() {
+
+    MockSettingsView mockView;
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(3)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, instrumentSettingsEnabled())
+        .Times(2)
+        .WillRepeatedly(Return(false));
+
+    // Instrument settings shouldn't be called
+    EXPECT_CALL(mockView, getMonitorIntegralMin()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getMonitorIntegralMax()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getMonitorBackgroundMin()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getMonitorBackgroundMax()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getLambdaMin()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getLambdaMax()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getI0MonitorIndex()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getProcessingInstructions()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getDetectorCorrectionType()).Times(Exactly(0));
+
+    // Experiment settings should be called
+    EXPECT_CALL(mockView, getAnalysisMode()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getCRho()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getCAlpha()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getCAp()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getCPp()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getDirectBeam()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getPolarisationCorrections()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getScaleFactor()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getMomentumTransferStep()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
+
+    auto transmissionOptions = presenter.getTransmissionOptions();
+    auto reductionOptions = presenter.getReductionOptions();
+    auto stitchOptions = presenter.getStitchOptions();
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 };

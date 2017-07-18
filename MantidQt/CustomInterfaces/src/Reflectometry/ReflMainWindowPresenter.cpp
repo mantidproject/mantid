@@ -23,7 +23,7 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflSaveTabPresenter *savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
       m_eventPresenter(eventPresenter), m_settingsPresenter(settingsPresenter),
-      m_savePresenter(savePresenter) {
+      m_savePresenter(savePresenter), m_isProcessing(false) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
@@ -37,6 +37,36 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 /** Destructor
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
+
+/**
+Used by the view to tell the presenter something has changed
+*/
+void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
+
+  switch (flag) {
+  case Flag::ConfirmReductionPausedFlag:
+    m_isProcessing = false;
+    break;
+  case Flag::ConfirmReductionResumedFlag:
+    m_isProcessing = true;
+    break;
+  }
+  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // a flag we aren't handling.
+}
+
+/** Returns values passed for 'Transmission run(s)'
+*
+* @param group :: Index of the group in 'Settings' tab from which to get the
+*values
+* @return :: Values passed for 'Transmission run(s)'
+*/
+std::string ReflMainWindowPresenter::getTransmissionRuns(int group) const {
+
+  checkSettingsPtrValid(m_settingsPresenter);
+
+  return m_settingsPresenter->getTransmissionRuns(group, false);
+}
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 *
@@ -79,18 +109,32 @@ std::string ReflMainWindowPresenter::getStitchOptions(int group) const {
   return m_settingsPresenter->getStitchOptions(group);
 }
 
-/** Returns global time-slicing options
+/** Returns time-slicing values
 *
 * @param group :: Index of the group in 'Event Handling' tab from which to get
-*the options
-* @return :: Global time-slicing options
+*the values
+* @return :: Time-slicing values
 */
-std::string ReflMainWindowPresenter::getTimeSlicingOptions(int group) const {
+std::string ReflMainWindowPresenter::getTimeSlicingValues(int group) const {
 
   checkEventPtrValid(m_eventPresenter);
 
-  // Request global time-slicing options to 'Event Handling' presenter
-  return m_eventPresenter->getTimeSlicingOptions(group);
+  // Request global time-slicing values to 'Event Handling' presenter
+  return m_eventPresenter->getTimeSlicingValues(group);
+}
+
+/** Returns time-slicing type
+*
+* @param group :: Index of the group in 'Event Handling' tab from which to get
+*the type
+* @return :: Time-slicing type
+*/
+std::string ReflMainWindowPresenter::getTimeSlicingType(int group) const {
+
+  checkEventPtrValid(m_eventPresenter);
+
+  // Request time-slicing type to 'Event Handling' presenter
+  return m_eventPresenter->getTimeSlicingType(group);
 }
 
 /**
@@ -105,17 +149,6 @@ void ReflMainWindowPresenter::giveUserCritical(const std::string &prompt,
 }
 
 /**
-Tells the view to show a warning dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void ReflMainWindowPresenter::giveUserWarning(const std::string &prompt,
-                                              const std::string &title) {
-
-  m_view->giveUserWarning(prompt, title);
-}
-
-/**
 Tells the view to show an information dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
@@ -124,33 +157,6 @@ void ReflMainWindowPresenter::giveUserInfo(const std::string &prompt,
                                            const std::string &title) {
 
   m_view->giveUserInfo(prompt, title);
-}
-
-/**
-Tells the view to ask the user a Yes/No question
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@returns a boolean true if Yes, false if No
-*/
-bool ReflMainWindowPresenter::askUserYesNo(const std::string &prompt,
-                                           const std::string &title) {
-
-  return m_view->askUserYesNo(prompt, title);
-}
-
-/**
-Tells the view to ask the user to enter a string.
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@param defaultValue : The default value entered.
-@returns The user's string if submitted, or an empty string
-*/
-std::string
-ReflMainWindowPresenter::askUserString(const std::string &prompt,
-                                       const std::string &title,
-                                       const std::string &defaultValue) {
-
-  return m_view->askUserString(prompt, title, defaultValue);
 }
 
 /**
@@ -172,6 +178,15 @@ void ReflMainWindowPresenter::setInstrumentName(
     const std::string &instName) const {
 
   m_settingsPresenter->setInstrumentName(instName);
+}
+
+/**
+Checks whether or not data is currently being processed in the Runs Tab
+* @return : Bool on whether data is being processed
+*/
+bool ReflMainWindowPresenter::checkIfProcessing() const {
+
+  return m_isProcessing;
 }
 
 /** Checks for Settings Tab null pointer

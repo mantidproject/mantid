@@ -82,7 +82,7 @@ LogFilterGenerator::generateFilter(const std::string &logName) const {
  */
 void LogFilterGenerator::filterByStatus(LogFilter *filter) const {
   const auto status = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(
-      getLogData("running"));
+      getLogData("running", false));
   if (!status) {
     return;
   }
@@ -131,14 +131,18 @@ void LogFilterGenerator::filterByPeriod(LogFilter *filter) const {
 /**
  * Get log data from workspace
  * @param logName :: [input] Name of log to get
+ * @param warnIfNotFound :: If true log a warning if the sample log is not
+ * found, otherwise do not log a warning
  * @returns :: Pointer to log, or null if log does not exist in workspace
  */
-Property *LogFilterGenerator::getLogData(const std::string &logName) const {
+Property *LogFilterGenerator::getLogData(const std::string &logName,
+                                         bool warnIfNotFound) const {
   try {
     const auto logData = m_run.getLogData(logName);
     return logData;
   } catch (const std::runtime_error &) {
-    g_log.warning("Could not find log value " + logName + " in workspace");
+    if (warnIfNotFound)
+      g_log.warning("Could not find log value " + logName + " in workspace");
     return nullptr;
   }
 }

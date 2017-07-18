@@ -19,6 +19,12 @@
       </property>
       <item>
         <widget class="QToolBox" name="toolbox">
+          <property name="font">
+            <font>
+              <pointsize>11</pointsize>
+              <bold>true</bold>
+            </font>
+          </property>
         </widget>
       </item>
     </layout>

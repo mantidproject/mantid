@@ -70,7 +70,7 @@ public:
     TS_ASSERT(elist.hasDetectorID(1));
 
     SplittersWorkspace_sptr splittersws =
-        createSplitter(runstart_i64, pulsedt, tofdt);
+        createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), 5);
 
     return;
@@ -113,7 +113,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
     SplittersWorkspace_sptr splws =
-        createSplitter(runstart_i64, pulsedt, tofdt);
+        createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
     FilterEvents filter;
@@ -264,7 +264,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
     SplittersWorkspace_sptr splws =
-        createSplitter(runstart_i64, pulsedt, tofdt);
+        createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
     FilterEvents filter;
@@ -657,7 +657,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS10_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
 
     // check sample log "splitter"
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
@@ -826,6 +826,7 @@ public:
     filter.setProperty("SplitterWorkspace", "TableSplitter1");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+    filter.setProperty("RelativeTime", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -847,7 +848,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_A"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
 
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
     // check sample log "splitter"
@@ -1170,8 +1171,9 @@ public:
    * int64_t format of unit nanosecond
     * @param numpulses : number of pulses in the event workspace
    */
-  SplittersWorkspace_sptr createSplitter(int64_t runstart_i64, int64_t pulsedt,
-                                         int64_t tofdt) {
+  SplittersWorkspace_sptr createSplittersWorkspace(int64_t runstart_i64,
+                                                   int64_t pulsedt,
+                                                   int64_t tofdt) {
     SplittersWorkspace_sptr splitterws =
         boost::shared_ptr<SplittersWorkspace>(new SplittersWorkspace);
 
@@ -1255,14 +1257,14 @@ public:
                                                 size_y));
 
     for (size_t ix = 0; ix < size_x; ++ix)
-      splitterws->mutableX(0)[ix] = static_cast<double>(time_vec[ix]);
+      splitterws->mutableX(0)[ix] = static_cast<double>(time_vec[ix]) * 1.E-9;
     for (size_t iy = 0; iy < size_y; ++iy)
       splitterws->mutableY(0)[iy] = static_cast<double>(index_vec[iy]);
 
     // print out splitters
     for (size_t ix = 0; ix < size_y; ++ix)
-      std::cout << ix << ": " << splitterws->mutableX(0)[ix] * 1.0E-9 << "  -  "
-                << splitterws->mutableX(0)[ix + 1] * 1.0E-9 << ": "
+      std::cout << ix << ": " << splitterws->mutableX(0)[ix] << "  -  "
+                << splitterws->mutableX(0)[ix + 1] << ": "
                 << splitterws->mutableY(0)[ix] << "\n";
 
     return splitterws;
@@ -1434,6 +1436,7 @@ public:
     auto &vec_splitTimes = spws->mutableX(0);
     auto &vec_splitGroup = spws->mutableY(0);
 
+    // set up the splitters in nanosecond
     vec_splitTimes[0] = 1000000;
     vec_splitTimes[1] = 1300000;
     vec_splitTimes[2] = 2000000;
@@ -1445,6 +1448,10 @@ public:
     vec_splitTimes[8] = 8000000;
     vec_splitTimes[9] = 9000000;
     vec_splitTimes[10] = 10000000;
+
+    // convert the splitters' time to second
+    for (size_t i = 0; i < vec_splitTimes.size(); ++i)
+      vec_splitTimes[i] *= 1.E-9;
 
     vec_splitGroup[0] = 2;
     vec_splitGroup[1] = 5;
@@ -1467,6 +1474,7 @@ public:
     auto &vec_splitTimes = spws->mutableX(0);
     auto &vec_splitGroup = spws->mutableY(0);
 
+    // create the splitters in nanosecond
     vec_splitTimes[0] = 1000000;
     vec_splitTimes[1] = 1300000; // Rule in  1,339,000
     vec_splitTimes[2] = 2000000;
@@ -1478,6 +1486,10 @@ public:
     vec_splitTimes[8] = 8000000;
     vec_splitTimes[9] = 9000000;
     vec_splitTimes[10] = 10000000;
+
+    // convert the splitters' time to second
+    for (size_t i = 0; i < vec_splitTimes.size(); ++i)
+      vec_splitTimes[i] *= 1.E-9;
 
     vec_splitGroup[0] = 2;
     vec_splitGroup[1] = 5;

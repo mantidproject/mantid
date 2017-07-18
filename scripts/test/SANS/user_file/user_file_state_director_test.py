@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import os
 import unittest
 import mantid
@@ -79,10 +80,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(convert_to_q.radius_cutoff == 0.2)
         self.assertTrue(convert_to_q.q_min == .001)
         self.assertTrue(convert_to_q.q_max == .2)
-        self.assertTrue(convert_to_q.q_step == .001)
-        self.assertTrue(convert_to_q.q_step_type is RangeStepType.Lin)
-        self.assertTrue(convert_to_q.q_step2 == .08)
-        self.assertTrue(convert_to_q.q_step_type2 is RangeStepType.Log)
+        self.assertTrue(convert_to_q.q_1d_rebin_string == "0.001,0.001,0.0126,-0.08,0.2")
         self.assertTrue(convert_to_q.use_gravity)
 
         self.assertTrue(convert_to_q.use_q_resolution)
@@ -177,7 +175,6 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         user_file_path = create_user_file(sample_user_file)
 
         director.set_user_file(user_file_path)
-        # TODO: Add manual settings
         state = director.construct()
 
         # Assert
@@ -217,6 +214,9 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         # clean up
         if os.path.exists(user_file_path):
             os.remove(user_file_path)
+
+if __name__ == "__main__":
+    unittest.main()
 
 if __name__ == "__main__":
     unittest.main()

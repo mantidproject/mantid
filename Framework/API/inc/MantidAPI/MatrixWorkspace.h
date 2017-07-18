@@ -8,6 +8,9 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/EmptyValues.h"
 
+#include <atomic>
+#include <mutex>
+
 namespace Mantid {
 
 namespace Indexing {
@@ -99,7 +102,8 @@ public:
 
   /**@name Instrument queries */
   //@{
-  Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
+  boost::shared_ptr<const Geometry::IDetector>
+  getDetector(const size_t workspaceIndex) const;
   double detectorTwoTheta(const Geometry::IDetector &det) const;
   double detectorSignedTwoTheta(const Geometry::IDetector &det) const;
 
@@ -451,9 +455,6 @@ public:
 
   void saveInstrumentNexus(::NeXus::File *file) const;
   void loadInstrumentNexus(::NeXus::File *file);
-  void saveSpectraMapNexus(
-      ::NeXus::File *file, const std::vector<int> &spec,
-      const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
   //=====================================================================================
   // MD Geometry methods
@@ -537,6 +538,8 @@ public:
   // End image methods
   //=====================================================================================
 
+  void invalidateCachedSpectrumNumbers();
+
   void cacheDetectorGroupings(const det2group_map &mapping) override;
   size_t groupOfDetectorID(const detid_t detID) const override;
 
@@ -544,7 +547,8 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
 
-  MatrixWorkspace();
+  MatrixWorkspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.
@@ -564,7 +568,7 @@ protected:
 
 private:
   MatrixWorkspace *doClone() const override = 0;
-  virtual MatrixWorkspace *doCloneEmpty() const = 0;
+  MatrixWorkspace *doCloneEmpty() const override = 0;
 
   /// Create an MantidImage instance.
   MantidImage_sptr
@@ -575,10 +579,9 @@ private:
   void setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std::size_t),
                 const MantidImage &image, size_t start, bool parallelExecution);
 
-  // Helper functions for IndexInfo, as a workaround while spectrum numbers and
-  // detector IDs are still stored in ISpectrum.
-  specnum_t spectrumNumber(const size_t index) const;
-  const std::set<detid_t> &detectorIDs(const size_t index) const;
+  void setIndexInfoWithoutISpectrumUpdate(const Indexing::IndexInfo &indexInfo);
+  void buildDefaultSpectrumDefinitions();
+  void rebuildDetectorIDGroupings();
 
   std::unique_ptr<Indexing::IndexInfo> m_indexInfo;
 
@@ -602,6 +605,9 @@ private:
   /// A workspace holding monitor data relating to the main data in the
   /// containing workspace (null if none).
   boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
+
+  mutable std::atomic<bool> m_indexInfoNeedsUpdate{true};
+  mutable std::mutex m_indexInfoMutex;
 
 protected:
   /// Getter for the dimension id based on the axis.

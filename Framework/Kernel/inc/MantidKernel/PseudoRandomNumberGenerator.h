@@ -26,7 +26,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/NDRandomNumberGenerator.h"
-#include "MantidKernel/ClassMacros.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -41,6 +40,14 @@ class MANTID_KERNEL_DLL PseudoRandomNumberGenerator
 public:
   /// Default constructor setting the dimension to 1
   PseudoRandomNumberGenerator();
+
+  /// Disable copy operator
+  PseudoRandomNumberGenerator(const PseudoRandomNumberGenerator &) = delete;
+
+  /// Disable assignment operator
+  PseudoRandomNumberGenerator &
+  operator=(const PseudoRandomNumberGenerator &) = delete;
+
   /// Set the random number seed
   virtual void setSeed(const size_t seedValue) = 0;
   /// Sets the range of the subsequent calls to nextValue;
@@ -62,9 +69,6 @@ public:
   virtual double max() const = 0;
   /// Return next random value
   double operator()() { return nextValue(); }
-
-private:
-  DISABLE_COPY_AND_ASSIGN(PseudoRandomNumberGenerator)
 };
 }
 }

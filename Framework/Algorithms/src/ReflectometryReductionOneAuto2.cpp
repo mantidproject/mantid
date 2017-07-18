@@ -112,6 +112,9 @@ void ReflectometryReductionOneAuto2::init() {
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input run in TOF or wavelength");
 
+  // Reduction type
+  initReductionProperties();
+
   // Analysis mode
   const std::vector<std::string> analysisMode{"PointDetectorAnalysis",
                                               "MultiDetectorAnalysis"};
@@ -228,7 +231,8 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->initialize();
 
   // Mandatory properties
-
+  alg->setProperty("SummationType", getPropertyValue("SummationType"));
+  alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
@@ -250,6 +254,7 @@ void ReflectometryReductionOneAuto2::exec() {
     // Calculate theta
     theta = calculateTheta(instructions, inputWS);
   }
+  alg->setProperty("ThetaIn", theta);
 
   // Optional properties
 
@@ -257,7 +262,12 @@ void ReflectometryReductionOneAuto2::exec() {
   populateMonitorProperties(alg, instrument);
   alg->setPropertyValue("NormalizeByIntegratedMonitors",
                         getPropertyValue("NormalizeByIntegratedMonitors"));
-  populateTransmissionProperties(alg, instrument);
+  bool transRunsFound = populateTransmissionProperties(alg);
+  if (transRunsFound)
+    alg->setProperty("StrictSpectrumChecking",
+                     getPropertyValue("StrictSpectrumChecking"));
+  else
+    populateAlgorithmicCorrectionProperties(alg, instrument);
 
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
@@ -289,7 +299,10 @@ void ReflectometryReductionOneAuto2::exec() {
     setProperty("ScaleFactor", 1.0);
 }
 
-/** Returns the detectors of interest, specified via processing instructions
+/** Returns the detectors of interest, specified via processing instructions.
+* Note that this returns the names of the parent detectors of the first and
+* last spectrum indices in the processing instructions. It is assumed that all
+* the interim detectors have the same parent.
 *
 * @param instructions :: processing instructions defining detectors of interest
 * @param inputWS :: the input workspace
@@ -299,24 +312,30 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
     const std::string &instructions, MatrixWorkspace_sptr inputWS) {
 
   std::vector<std::string> wsIndices;
-  boost::split(wsIndices, instructions, boost::is_any_of(":,-"));
+  boost::split(wsIndices, instructions, boost::is_any_of(":,-+"));
   // vector of comopnents
   std::vector<std::string> detectors;
 
-  for (const auto wsIndex : wsIndices) {
+  try {
+    for (const auto wsIndex : wsIndices) {
 
-    size_t index = boost::lexical_cast<size_t>(wsIndex);
+      size_t index = boost::lexical_cast<size_t>(wsIndex);
 
-    auto detector = inputWS->getDetector(index);
-    auto parent = detector->getParent();
+      auto detector = inputWS->getDetector(index);
+      auto parent = detector->getParent();
 
-    if (parent) {
-      auto parentType = parent->type();
-      auto detectorName = (parentType == "Instrument") ? detector->getName()
-                                                       : parent->getName();
-      detectors.push_back(detectorName);
+      if (parent) {
+        auto parentType = parent->type();
+        auto detectorName = (parentType == "Instrument") ? detector->getName()
+                                                         : parent->getName();
+        detectors.push_back(detectorName);
+      }
     }
+  } catch (boost::bad_lexical_cast &) {
+    throw std::runtime_error("Invalid processing instructions: " +
+                             instructions);
   }
+
   return detectors;
 }
 
@@ -404,32 +423,14 @@ void ReflectometryReductionOneAuto2::populateDirectBeamProperties(
                         getPropertyValue("RegionOfDirectBeam"));
 }
 
-/** Set transmission properties
+/** Set algorithmic correction properties
 *
 * @param alg :: ReflectometryReductionOne algorithm
-* @param instrument :: the instrument attached to the workspace
+* @param instrument :: The instrument attached to the workspace
 */
-void ReflectometryReductionOneAuto2::populateTransmissionProperties(
+void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
 
-  // Transmission run(s)
-
-  MatrixWorkspace_sptr firstWS = getProperty("FirstTransmissionRun");
-  if (firstWS) {
-    alg->setProperty("FirstTransmissionRun", firstWS);
-    alg->setPropertyValue("StrictSpectrumChecking",
-                          getPropertyValue("StrictSpectrumChecking"));
-    MatrixWorkspace_sptr secondWS = getProperty("SecondTransmissionRun");
-    if (secondWS) {
-      alg->setProperty("SecondTransmissionRun", secondWS);
-      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-      alg->setPropertyValue("Params", getPropertyValue("Params"));
-    }
-    return;
-  }
-
-  // No transmission runs, try algorithmic corrections
   // With algorithmic corrections, monitors should not be integrated, see below
 
   const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");

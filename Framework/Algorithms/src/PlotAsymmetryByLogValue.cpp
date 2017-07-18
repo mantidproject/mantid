@@ -228,8 +228,8 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   // Parse run names and get the number of runs
   parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt,
                 m_filenameZeros);
-  is = atoi(firstFN.c_str()); // starting run number
-  ie = atoi(lastFN.c_str());  // last run number
+  is = std::stoul(firstFN); // starting run number
+  ie = std::stoul(lastFN);  // last run number
   if (ie < is) {
     throw std::runtime_error(
         "First run number is greater than last run number");

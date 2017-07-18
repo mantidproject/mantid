@@ -61,14 +61,6 @@ public:
                  bool createRenderProxy = true);
   /// Default destructor.
   ~ThreeSliceView() override;
-
-  /// Correct the color scale range if not in automatic mode.
-  void correctColorScaleRange();
-  /**
-   * Correct an oddity in the creation of the 3D view so that the cuts
-   * are visibile.
-   */
-  // void correctVisibility();
   /**
    * ViewBase::destroyView
    */

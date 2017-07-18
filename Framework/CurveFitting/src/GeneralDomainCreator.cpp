@@ -207,7 +207,7 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
       auto columnName = m_manager->getPropertyValue(propName);
       columnsToClone.push_back(columnName);
     }
-    outputWorkspace = inputWorkspace->clone(columnsToClone);
+    outputWorkspace = inputWorkspace->cloneColumns(columnsToClone);
     if (rowCount != outputWorkspace->rowCount()) {
       throw std::runtime_error("Cloned workspace has wrong number of rows.");
     }

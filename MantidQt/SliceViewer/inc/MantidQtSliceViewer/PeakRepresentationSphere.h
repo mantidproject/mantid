@@ -30,7 +30,8 @@ namespace SliceViewer {
   <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakRepresentationSphere : public PeakRepresentation {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationSphere
+    : public PeakRepresentation {
 public:
   PeakRepresentationSphere(const Mantid::Kernel::V3D &origin,
                            const double &peakRadius,
@@ -54,6 +55,12 @@ public:
   const Mantid::Kernel::V3D &getOrigin() const override;
   /// Show the background radius
   void showBackgroundRadius(const bool show) override;
+
+  /**
+   * The zoom-out factor ensures that the sphere can be viewed
+   * in its entirety in full-screen or default mode.
+   **/
+  double getZoomOutFactor() const;
 
 protected:
   std::shared_ptr<PeakPrimitives> getDrawingInformation(
@@ -96,6 +103,8 @@ private:
   optional_double m_backgroundInnerRadiusAtDistance;
   /// Outer radius at distance.
   optional_double m_backgroundOuterRadiusAtDistance;
+  /// Zoom out factor
+  const double zoomOutFactor = 2.;
 };
 }
 }

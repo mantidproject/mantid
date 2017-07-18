@@ -224,7 +224,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             transpose_alg.setProperty("OutputWorkspace", self._elf_workspace)
             transpose_alg.execute()
 
-            sort_alg.setProperty("InputWorkspace", transpose_alg.getProperty("OutputWorkspace").value)
+            sort_alg.setProperty("InputWorkspace",transpose_alg.getProperty("OutputWorkspace").value)
             sort_alg.setProperty("OutputWorkspace", self._elf_workspace)
             sort_alg.execute()
 
@@ -299,6 +299,22 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         run = mtd[ws_name].getRun()
 
+        if self._sample_log_name == 'Position':
+            # Look for sample changer position in logs in workspace
+            if self._sample_log_name in run:
+                tmp = run[self._sample_log_name].value
+                value_action = {'last_value': lambda x: x[len(x) - 1],
+                                'average': lambda x: x.mean()}
+                position = value_action['last_value'](tmp)
+                if position == 0:
+                    self._sample_log_name = 'Bot_Can_Top'
+                if position == 1:
+                    self._sample_log_name = 'Middle_Can_Top'
+                if position == 2:
+                    self._sample_log_name = 'Top_Can_Top'
+            else:
+                logger.information('Position not found in workspace.')
+
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
             tmp = run[self._sample_log_name].value
@@ -306,7 +322,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                             'average': lambda x: x.mean()}
             sample = value_action[self._sample_log_value](tmp)
             unit = run[self._sample_log_name].units
-            logger.debug('%d %s found for run: %s' % (sample, unit, run_name))
+            logger.information('%d %s found for run: %s' % (sample, unit, run_name))
             return sample, unit
 
         else:

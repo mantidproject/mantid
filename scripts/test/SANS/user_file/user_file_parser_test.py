@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
@@ -5,14 +6,14 @@ from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, F
 from sans.user_file.user_file_parser import (DetParser, LimitParser, MaskParser, SampleParser, SetParser, TransParser,
                                              TubeCalibFileParser, QResolutionParser, FitParser, GravityParser,
                                              MaskFileParser, MonParser, PrintParser, BackParser, SANS2DParser, LOQParser,
-                                             UserFileParser)
+                                             UserFileParser, LARMORParser)
 from sans.user_file.user_file_common import (DetectorId, BackId, range_entry, back_single_monitor_entry,
                                              single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
                                              simple_range, complex_range, MaskId, mask_block, mask_block_cross,
                                              mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
                                              position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
                                              fit_general, MonId, monitor_length, monitor_file, GravityId,
-                                             monitor_spectrum, PrintId, det_fit_range)
+                                             monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
 
 
 # -----------------------------------------------------------------
@@ -24,6 +25,10 @@ def assert_valid_result(result, expected, assert_true):
     assert_true(len(keys_expected) == len(keys_result))
     for key in keys_result:
         assert_true(key in keys_expected)
+        if result[key] != expected[key]:
+            print("=================================")
+            print(result[key])
+            print(expected[key])
         assert_true(result[key] == expected[key])
 
 
@@ -191,25 +196,26 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_q_limits_are_parsed_correctly(self):
-        valid_settings = {"L/Q 12 34": {LimitsId.q: simple_range(start=12, stop=34, step=None, step_type=None)},
-                          "L/Q 12 34 2.7": {LimitsId.q: simple_range(start=12, stop=34, step=2.7,
-                                                                     step_type=RangeStepType.Lin)},
-                          "L/Q -12 34.6 2.7/LOG": {LimitsId.q: simple_range(start=-12, stop=34.6, step=2.7,
-                                                                            step_type=RangeStepType.Log)},
-                          "L/q -12 3.6 2 /LIN": {LimitsId.q: simple_range(start=-12, stop=3.6, step=2,
-                                                                          step_type=RangeStepType.Lin)},
-                          "L/q -12 ,  0.4  ,23 ,-34.8, 3.6": {LimitsId.q: complex_range(start=-12, step1=0.4,
-                                                              mid=23, step2=34.8, stop=3.6,
-                                                              step_type1=RangeStepType.Lin,
-                                                              step_type2=RangeStepType.Log)},
-                          "L/q -12  , 0.4 , 23 ,-34.8 ,3.6 /LIn": {LimitsId.q: complex_range(start=-12, step1=0.4,
-                                                                   mid=23, step2=34.8, stop=3.6,
-                                                                   step_type1=RangeStepType.Lin,
-                                                                   step_type2=RangeStepType.Lin)},
-                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6  /Log": {LimitsId.q: complex_range(start=-12,
-                                                                    step1=0.4, mid=23, step2=34.8, stop=3.6,
-                                                                    step_type1=RangeStepType.Log,
-                                                                    step_type2=RangeStepType.Log)}
+        valid_settings = {"L/Q 12 34": {LimitsId.q: q_rebin_values(min=12., max=34., rebin_string="12.0,34.0")},
+                          "L/Q 12 34 2.7": {LimitsId.q: q_rebin_values(min=12., max=34., rebin_string="12.0,2.7,34.0")},
+                          "L/Q -12 34.6 2.7/LOG": {LimitsId.q: q_rebin_values(min=-12., max=34.6,
+                                                                              rebin_string="-12.0,-2.7,34.6")},
+                          "L/q -12 3.6 2 /LIN": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                                            rebin_string="-12.0,2.0,3.6")},
+                          "L/q -12 ,  0.4  ,23 ,-34.8, 3.6": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                              rebin_string="-12.0,0.4,23.0,-34.8,3.6")},  # noqa
+                          "L/q -12  , 0.4 , 23 ,-34.8 ,3.6 /LIn": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                                   rebin_string="-12.0,0.4,23.0,34.8,3.6")},
+                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6  /Log": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                                    rebin_string="-12.0,-0.4,23.0,-34.8,3.6")},
+                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {LimitsId.q: q_rebin_values(min=-12.,
+                                                                                                          max=5.6,
+                                                                    rebin_string="-12.0,-0.4,23.0,-34.8,3.6,"
+                                                                                 "-0.123,5.6")},
+                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6, -.123, 5.6": {LimitsId.q: q_rebin_values(min=-12.,
+                                                                                                     max=5.6,
+                                                                          rebin_string="-12.0,0.4,23.0,34.8,3.6,"
+                                                                                       "-0.123,5.6")}
                           }
 
         invalid_settings = {"L/Q 12 2 3 4": RuntimeError,
@@ -218,7 +224,6 @@ class LimitParserTest(unittest.TestCase):
                             "L/Q 12 2 /LIN": RuntimeError,
                             "L/Q ": RuntimeError,
                             "L/Q a 1 2 3 4 /LIN": RuntimeError}
-
         limit_parser = LimitParser()
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
@@ -497,10 +502,13 @@ class SetParserTest(unittest.TestCase):
                           "SET centre / hAb 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
                                                                                   detector_type=DetectorType.HAB)},
                           "SET centre /FRONT 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
-                                                      detector_type=DetectorType.HAB)}}
+                                                      detector_type=DetectorType.HAB)},
+                          "SET centre /FRONT 23 45 55 67": {SetId.centre: position_entry(pos1=23, pos2=45,
+                                                            detector_type=DetectorType.HAB)},
+                          }
 
         invalid_settings = {"SET centre 23": RuntimeError,
-                            "SEt centre 34 34 34": RuntimeError,
+                            "SEt centre 34 34 23 ": RuntimeError,
                             "SEt centre/MAIN/ 34 34": RuntimeError,
                             "SEt centre/MAIN": RuntimeError}
 
@@ -647,16 +655,6 @@ class FitParserTest(unittest.TestCase):
     def test_that_gets_type(self):
         self.assertTrue(FitParser.get_type(), "FIT")
 
-    def test_that_trans_clear_is_parsed_correctly(self):
-        valid_settings = {"FIT/ trans / clear": {FitId.clear: True},
-                          "FIT/traNS /ofF": {FitId.clear: True}}
-
-        invalid_settings = {"FIT/  clear": RuntimeError,
-                            "FIT/MONITOR/OFF": RuntimeError}
-
-        fit_parser = FitParser()
-        do_test(fit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
-
     def test_that_general_fit_is_parsed_correctly(self):
         valid_settings = {"FIT/ trans / LIN 123 3556": {FitId.general: fit_general(start=123, stop=3556,
                                                         fit_type=FitType.Linear, data_type=None, polynomial_order=0)},
@@ -686,6 +684,10 @@ class FitParserTest(unittest.TestCase):
                           "FIT/Trans / can/polynomiAL 5 23 45": {FitId.general: fit_general(start=23, stop=45,
                                                                  fit_type=FitType.Polynomial, data_type=DataType.Can,
                                                                                             polynomial_order=5)},
+                          "FIT/ trans / clear": {FitId.general: fit_general(start=None, stop=None,
+                                                 fit_type=FitType.NoFit, data_type=None, polynomial_order=None)},
+                          "FIT/traNS /ofF": {FitId.general: fit_general(start=None, stop=None,
+                                             fit_type=FitType.NoFit, data_type=None, polynomial_order=None)}
                           }
 
         invalid_settings = {"FIT/TRANS/ YlOG 123": RuntimeError,
@@ -695,7 +697,9 @@ class FitParserTest(unittest.TestCase):
                             "FIT/Trans /": RuntimeError,
                             "FIT/Trans / Lin 23": RuntimeError,
                             "FIT/Trans / lin 23 5 6": RuntimeError,
-                            "FIT/Trans / lin 23 t": RuntimeError}
+                            "FIT/Trans / lin 23 t": RuntimeError,
+                            "FIT/  clear": RuntimeError,
+                            "FIT/MONITOR/OFF": RuntimeError}
 
         fit_parser = FitParser()
         do_test(fit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
@@ -831,10 +835,18 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_hab_files_are_parsed_correctly(self):
-        valid_settings = {"MON/HAB  = C:\path1\Path2\file.ext ": {MonId.hab: "C:/path1/Path2/file.ext"},
-                          "MON/ hAB  = filE.Ext ": {MonId.hab: "filE.Ext"},
-                          "MON/HAb= \path1\Path2\file.ext ": {MonId.hab: "/path1/Path2/file.ext"},
-                          "MON/hAB= /path1/Path2/file.ext ": {MonId.hab: "/path1/Path2/file.ext"}}
+        valid_settings = {"MON/HAB  = C:\path1\Path2\file.ext ": {MonId.direct: [monitor_file(
+                                                                                file_path="C:/path1/Path2/file.ext",
+                                                                                detector_type=DetectorType.HAB)]},
+                          "MON/ hAB  = filE.Ext ": {MonId.direct: [monitor_file(
+                                                                   file_path="filE.Ext",
+                                                                   detector_type=DetectorType.HAB)]},
+                          "MON/HAb= \path1\Path2\file.ext ": {MonId.direct: [monitor_file(
+                                                              file_path="/path1/Path2/file.ext",
+                                                              detector_type=DetectorType.HAB)]},
+                          "MON/hAB= /path1/Path2/file.ext ": {MonId.direct: [monitor_file(
+                                                              file_path="/path1/Path2/file.ext",
+                                                              detector_type=DetectorType.HAB)]}}
         invalid_settings = {"MON/HAB= /path1/ Path2/file.ext ": RuntimeError,
                             "MON/hAB /path1/Path2/file.ext ": RuntimeError,
                             "MON/HAB=/path1/Path2/file ": RuntimeError}
@@ -934,6 +946,17 @@ class LOQParserTest(unittest.TestCase):
     def test_that_loq_is_parsed_correctly(self):
         loq_parser = LOQParser()
         result = loq_parser.parse_line("LOQ ")
+        self.assertTrue(result is not None)
+        self.assertTrue(not result)
+
+
+class LARMORParserTest(unittest.TestCase):
+    def test_that_gets_type(self):
+        self.assertTrue(LARMORParser.get_type(), "LARMOR")
+
+    def test_that_loq_is_parsed_correctly(self):
+        loq_parser = LARMORParser()
+        result = loq_parser.parse_line("LARMOR ")
         self.assertTrue(result is not None)
         self.assertTrue(not result)
 

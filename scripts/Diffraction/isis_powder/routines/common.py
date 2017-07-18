@@ -1,13 +1,34 @@
 from __future__ import (absolute_import, division, print_function)
+from six import iterkeys
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
-from isis_powder.routines.common_enums import InputBatchingEnum
+from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 
 
-def crop_banks_in_tof(bank_list, crop_values_list):
+def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
     """
-    Crops the each bank by the specified tuple values from a list of tuples in TOF. The number
+    Provides a light wrapper around the dictionary key helper and uses case insensitive lookup.
+    This also provides a generic error message stating the following key could not be found
+    in the calibration mapping file. As several instruments will use this message it makes
+    sense to localise it to common. If a message is passed in append_to_error_message it
+    will append that to the end of the generic error message in its own line when an
+    exception is raised.
+    :param dictionary: The dictionary to search in for the key
+    :param key: The key to search for
+    :param append_to_error_message: (Optional) The message to append to the end of the error message
+    :return: The found key if it exists
+    """
+    err_message = "The field '" + str(key) + "' is required within the calibration file but was not found."
+    err_message += '\n' + str(append_to_error_message) if append_to_error_message else ''
+
+    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True,
+                                 case_insensitive=True, exception_msg=err_message)
+
+
+def crop_banks_using_crop_list(bank_list, crop_values_list):
+    """
+    Crops each bank by the specified tuple values from a list of tuples in TOF. The number
     of tuples must match the number of banks to crop. A list of [(100,200), (150,250)] would crop
     bank 1 to the values 100, 200 and bank 2 to 150 and 250 in TOF.
     :param bank_list: The list of workspaces each containing one bank of data to crop
@@ -16,6 +37,11 @@ def crop_banks_in_tof(bank_list, crop_values_list):
     """
     if not isinstance(crop_values_list, list):
         raise ValueError("The cropping values were not in a list type")
+    elif not isinstance(bank_list, list):
+        # This error is probably internal as we control the bank lists
+        raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
+
+    # Finally check the number of elements are equal
     if len(bank_list) != len(crop_values_list):
         raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
 
@@ -45,7 +71,7 @@ def crop_in_tof(ws_to_crop, x_min=None, x_max=None):
     return cropped_ws
 
 
-def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
+def dictionary_key_helper(dictionary, key, throws=True, case_insensitive=False, exception_msg=None):
     """
     Checks if the key is in the dictionary and performs various different actions if it is not depending on
     the user parameters. If set to not throw it will return none. Otherwise it will throw a custom user message
@@ -53,12 +79,25 @@ def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
     :param dictionary: The dictionary to search for the key
     :param key: The key to search for in the dictionary
     :param throws: (Optional) Defaults to true, whether this should throw on a key not being present
+    :param case_insensitive (Optional) Defaults to false, if set to true it accounts for mixed case but is O(n) time
     :param exception_msg: (Optional) The error message to print in the KeyError instead of the default Python message
     :return: The key if it was found, None if throws was set to false and the key was not found.
     """
     if key in dictionary:
+        # Try to use hashing first
         return dictionary[key]
-    elif not throws:
+
+    # If we still couldn't find it use the O(n) method
+    if case_insensitive:
+        # Convert key to str
+        lower_key = str(key).lower()
+        for dict_key in iterkeys(dictionary):
+            if str(dict_key).lower() == lower_key:
+                # Found it
+                return dictionary[dict_key]
+
+    # It doesn't exist at this point lets go into our error handling
+    if not throws:
         return None
     elif exception_msg:
         # Print user specified message
@@ -86,20 +125,6 @@ def extract_ws_spectra(ws_to_split):
     return spectra_bank_list
 
 
-def extract_and_crop_spectra(focused_ws, instrument):
-    """
-    Extracts the individual spectra from a focused workspace (see extract_ws_spectra) then applies
-    the user specified cropping. This is the smallest cropping window for use on focused data that
-    is applied on a bank by bank basis. It then returns the extracted and cropped workspaces as a list.
-    :param focused_ws: The focused workspace to extract and crop the spectra of
-    :param instrument: The instrument object associated to this workspace
-    :return: The extracted and cropped workspaces as a list
-    """
-    ws_spectra = extract_ws_spectra(ws_to_split=focused_ws)
-    ws_spectra = instrument._crop_banks_to_user_tof(ws_spectra)
-    return ws_spectra
-
-
 def generate_run_numbers(run_number_string):
     """
     Generates a list of run numbers as a list from the input. This input can be either a string or int type
@@ -109,8 +134,12 @@ def generate_run_numbers(run_number_string):
     :return: A list of run numbers generated from the string
     """
     # Check its not a single run
-    if isinstance(run_number_string, int) or run_number_string.isdigit():
-        return [int(run_number_string)]  # Cast into a list and return
+    if isinstance(run_number_string, int):
+        # Cast into a list and return
+        return [run_number_string]
+    elif isinstance(run_number_string, str) and run_number_string.isdigit():
+        # We can let Python handle the conversion in this case
+        return [int(run_number_string)]
 
     # If its a string we must parse it
     run_number_string = run_number_string.strip()
@@ -119,21 +148,80 @@ def generate_run_numbers(run_number_string):
     return run_list
 
 
-def get_monitor_ws(ws_to_process, run_number_string, instrument):
+def generate_splined_name(vanadium_string, *args):
+    """
+    Generates a unique splined vanadium name which encapsulates
+    any properties passed into this method so that the vanadium
+    can be later loaded. This acts as a fingerprint for the vanadium
+    as some properties (such as offset file used) can impact
+    on the correct splined vanadium file to use.
+    :param vanadium_string: The name of this vanadium run
+    :param args: Any identifying properties to append to the name
+    :return: The splined vanadium name
+    """
+    out_name = "VanSplined" + '_' + str(vanadium_string)
+    for passed_arg in args:
+        if isinstance(passed_arg, list):
+            for arg in passed_arg:
+                out_name += '_' + str(arg)
+        else:
+            out_name += '_' + (str(passed_arg))
+
+    out_name += ".nxs"
+    return out_name
+
+
+def get_first_run_number(run_number_string):
+    """
+    Takes a run number string and returns the first user specified run from that string
+    :param run_number_string: The string to parse to find the first user rnu
+    :return: The first run for the user input of runs
+    """
+    run_numbers = generate_run_numbers(run_number_string=run_number_string)
+    if isinstance(run_numbers, list):
+        run_numbers = run_numbers[0]
+
+    return run_numbers
+
+
+def extract_single_spectrum(ws_to_process, spectrum_number_to_extract):
     """
     Extracts the monitor spectrum into its own individual workspaces from the input workspace
-    based on the number of this spectrum in the instrument object. The run number is used
-    to determine the monitor spectrum number on instruments who potentially have differing
-    monitor numbers depending on the age of the run.
+    based on the number of the spectrum given
     :param ws_to_process: The workspace to extract the monitor from
-    :param run_number_string: The run number as a string to determine the correct monitor position
-    :param instrument: The instrument to query for the monitor position
+    :param spectrum_number_to_extract: The spectrum of the workspace to extract
     :return: The extracted monitor as a workspace
     """
-    number_list = generate_run_numbers(run_number_string)
-    monitor_spectra = instrument._get_monitor_spectra_index(number_list[0])
-    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
+    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process,
+                                                   WorkspaceIndex=spectrum_number_to_extract)
     return load_monitor_ws
+
+
+def keep_single_ws_unit(d_spacing_group, tof_group, unit_to_keep):
+    """
+    Takes variables to the output workspaces in d-spacing and TOF and removes one
+    of them depending on what the user has selected as their unit to keep.
+    If a workspace has been deleted it additionally deletes the variable.
+    If a unit they want to keep has not been specified it does nothing.
+    :param d_spacing_group: The output workspace group in dSpacing
+    :param tof_group: The output workspace group in TOF
+    :param unit_to_keep: The unit to keep from the WorkspaceUnits enum
+    :return: None
+    """
+    if not unit_to_keep:
+        # If they do not specify which unit to keep don't do anything
+        return
+
+    if unit_to_keep == WORKSPACE_UNITS.d_spacing:
+        remove_intermediate_workspace(tof_group)
+        del tof_group
+
+    elif unit_to_keep == WORKSPACE_UNITS.tof:
+        remove_intermediate_workspace(d_spacing_group)
+        del d_spacing_group
+
+    else:
+        raise ValueError("The user specified unit to keep is unknown")
 
 
 def load_current_normalised_ws_list(run_number_string, instrument, input_batching=None):
@@ -152,9 +240,10 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
         input_batching = instrument._get_input_batching_mode()
 
     run_information = instrument._get_run_details(run_number_string=run_number_string)
-    raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
+    file_ext = run_information.file_extension
+    raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument, file_ext=file_ext)
 
-    if input_batching.lower() == InputBatchingEnum.Summed.lower() and len(raw_ws_list) > 1:
+    if input_batching == INPUT_BATCHING.Summed and len(raw_ws_list) > 1:
         summed_ws = _sum_ws_range(ws_list=raw_ws_list)
         remove_intermediate_workspace(raw_ws_list)
         raw_ws_list = [summed_ws]
@@ -163,6 +252,64 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
                                                instrument=instrument)
 
     return normalised_ws_list
+
+
+def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
+    """
+    Rebins the specified workspace with the specified new bin width. Allows the user
+    to also set optionally the first and final bin boundaries of the histogram too.
+    If the bin boundaries are not set they are preserved from the original workspace
+    :param workspace: The workspace to rebin
+    :param new_bin_width: The new bin width to use across the workspace
+    :param start_x: (Optional) The first x bin to crop to
+    :param end_x: (Optional) The final x bin to crop to
+    :return: The rebinned workspace
+    """
+
+    # Find the starting and ending bin boundaries if they were not set
+    if start_x is None:
+        start_x = workspace.readX(0)[0]
+    if end_x is None:
+        end_x = workspace.readX(0)[-1]
+
+    rebin_string = str(start_x) + ',' + str(new_bin_width) + ',' + str(end_x)
+    workspace = mantid.Rebin(InputWorkspace=workspace, OutputWorkspace=workspace, Params=rebin_string)
+    return workspace
+
+
+def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_x_list=None):
+    """
+    Rebins a list of workspaces with the specified bin widths in the list provided.
+    The number of bin widths and workspaces in the list must match. Additionally if
+    the optional parameters for start_x_list or end_x_list are provided these must
+    have the same length too.
+    :param workspace_list: The list of workspaces to rebin in place
+    :param bin_width_list: The list of new bin widths to apply to each workspace
+    :param start_x_list: The list of starting x boundaries to rebin to
+    :param end_x_list: The list of ending x boundaries to rebin to
+    :return: List of rebinned workspace
+    """
+    if not isinstance(workspace_list, list) or not isinstance(bin_width_list, list):
+        raise RuntimeError("One of the types passed to rebin_workspace_list was not a list")
+
+    ws_list_len = len(workspace_list)
+    if ws_list_len != len(bin_width_list):
+        raise ValueError("The number of bin widths found to rebin to does not match the number of banks")
+    if start_x_list and len(start_x_list) != ws_list_len:
+        raise ValueError("The number of starting bin values does not match the number of banks")
+    if end_x_list and len(end_x_list) != ws_list_len:
+        raise ValueError("The number of ending bin values does not match the number of banks")
+
+    # Create a list of None types of equal length to make using zip iterator easy
+    start_x_list = [None] * ws_list_len if start_x_list is None else start_x_list
+    end_x_list = [None] * ws_list_len if end_x_list is None else end_x_list
+
+    output_list = []
+    for ws, bin_width, start_x, end_x in zip(workspace_list, bin_width_list, start_x_list, end_x_list):
+        output_list.append(rebin_workspace(workspace=ws, new_bin_width=bin_width,
+                                           start_x=start_x, end_x=end_x))
+
+    return output_list
 
 
 def remove_intermediate_workspace(workspaces):
@@ -180,7 +327,30 @@ def remove_intermediate_workspace(workspaces):
         mantid.DeleteWorkspace(workspaces)
 
 
-def spline_vanadium_for_focusing(focused_vanadium_spectra, num_splines):
+def run_normalise_by_current(ws):
+    """
+    Runs the Normalise By Current algorithm on the input workspace
+    :param ws: The workspace to run normalise by current on
+    :return: The current normalised workspace
+    """
+    ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+    return ws
+
+
+def spline_vanadium_workspaces(focused_vanadium_spectra, spline_coefficient):
+    """
+    Returns a splined vanadium workspace from the focused vanadium bank list.
+    This runs both StripVanadiumPeaks and SplineBackgrounds on the input
+    workspace list and returns a list of the stripped and splined workspaces
+    :param focused_vanadium_spectra: The vanadium workspaces to process
+    :param spline_coefficient: The coefficient to use when creating the splined vanadium workspaces
+    :return: The splined vanadium workspace
+    """
+    splined_workspaces = spline_workspaces(focused_vanadium_spectra, num_splines=spline_coefficient)
+    return splined_workspaces
+
+
+def spline_workspaces(focused_vanadium_spectra, num_splines):
     """
     Splines a list of workspaces in TOF and returns the splines in new workspaces in a
     list of said splined workspaces. The input workspaces should have any Bragg peaks
@@ -201,20 +371,28 @@ def spline_vanadium_for_focusing(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
+def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scale_factor=None):
     """
     Loads the list of empty runs specified by the empty_sample_ws_string and subtracts
     them from the workspace specified. Returns the subtracted workspace.
     :param ws_to_correct: The workspace to subtract the empty instrument runs from
     :param empty_sample_ws_string: The empty run numbers to subtract from the workspace
     :param instrument: The instrument object these runs belong to
+    :param scale_factor: The percentage to scale the loaded runs by
     :return: The workspace with the empty runs subtracted
     """
-    if empty_sample_ws_string:
-        empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
-                                                       input_batching=InputBatchingEnum.Summed)
-        mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample[0], OutputWorkspace=ws_to_correct)
-        remove_intermediate_workspace(empty_sample)
+    # If an empty string was not specified just return to skip this step
+    if empty_sample_ws_string is None:
+        return ws_to_correct
+
+    empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
+                                                   input_batching=INPUT_BATCHING.Summed)
+    empty_sample = empty_sample[0]
+    if scale_factor:
+        empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
+                                    Operation="Multiply")
+    mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+    remove_intermediate_workspace(empty_sample)
 
     return ws_to_correct
 
@@ -248,7 +426,7 @@ def _normalise_workspaces(ws_list, instrument, run_details):
     """
     output_list = []
     for ws in ws_list:
-        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws, run_details=run_details))
+        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws))
 
     return output_list
 
@@ -268,7 +446,7 @@ def _check_load_range(list_of_runs_to_load):
                          " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
 
 
-def _load_raw_files(run_number_string, instrument):
+def _load_raw_files(run_number_string, instrument, file_ext=None):
     """
     Uses the run number string to generate a list of run numbers to load in
     :param run_number_string: The run number string to generate
@@ -276,11 +454,11 @@ def _load_raw_files(run_number_string, instrument):
     :return: A list of loaded workspaces
     """
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
-    load_raw_ws = _load_list_of_files(run_number_list, instrument)
+    load_raw_ws = _load_list_of_files(run_number_list, instrument, file_ext=file_ext)
     return load_raw_ws
 
 
-def _load_list_of_files(run_numbers_list, instrument):
+def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
     """
     Loads files based on the list passed to it. If the list is
     greater than the maximum range it will raise an exception
@@ -294,10 +472,19 @@ def _load_list_of_files(run_numbers_list, instrument):
 
     for run_number in run_numbers_list:
         file_name = instrument._generate_input_file_name(run_number=run_number)
+        file_name = file_name + str(file_ext) if file_ext else file_name
         read_ws = mantid.Load(Filename=file_name)
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
 
     return read_ws_list
+
+
+def _strip_vanadium_peaks(workspaces_to_strip):
+    out_list = []
+    for i, ws in enumerate(workspaces_to_strip):
+        out_name = ws.getName() + "_toSpline-" + str(i+1)
+        out_list.append(mantid.StripVanadiumPeaks(InputWorkspace=ws, OutputWorkspace=out_name))
+    return out_list
 
 
 def _sum_ws_range(ws_list):
@@ -323,4 +510,4 @@ def _run_number_generator(processed_string):
         number_generator = kernel.IntArrayProperty('array_generator', processed_string)
         return number_generator.value.tolist()
     except RuntimeError:
-        raise RuntimeError("Could not generate run numbers from this input: " + processed_string)
+        raise ValueError("Could not generate run numbers from this input: " + processed_string)

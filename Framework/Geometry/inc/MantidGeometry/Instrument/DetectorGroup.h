@@ -181,6 +181,7 @@ public:
 
   const ParameterMap &parameterMap() const override;
   size_t index() const override;
+  virtual void registerContents(class ComponentVisitor &visitor) const override;
 
 protected:
   /// The ID of this effective detector

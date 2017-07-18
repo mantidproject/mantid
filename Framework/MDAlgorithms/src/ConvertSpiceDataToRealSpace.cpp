@@ -1,19 +1,20 @@
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <Poco/TemporaryFile.h>
@@ -373,7 +374,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
       // anode
       std::vector<std::string> terms;
       boost::split(terms, colname, boost::is_any_of(anodelogprefix));
-      size_t anodeid = static_cast<size_t>(atoi(terms.back().c_str()));
+      size_t anodeid = static_cast<size_t>(std::stoi(terms.back()));
       anodelist.emplace_back(anodeid, icol);
     } else {
       samplenameindexmap.emplace(colname, icol);
@@ -492,7 +493,7 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
       ExperimentInfo_sptr tmpei = mdws->getExperimentInfo(i);
       // check run number matches
       int runnumber =
-          atoi(tmpei->run().getProperty("run_number")->value().c_str());
+          std::stoi(tmpei->run().getProperty("run_number")->value());
       if (runnumber != static_cast<int>(vecrunno[i]))
         throw std::runtime_error("Run number does not match to Pt. value.");
       // add property
@@ -525,8 +526,7 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
     Geometry::Instrument_const_sptr tmp_inst = ws2d->getInstrument();
     tmp_expinfo->setInstrument(tmp_inst);
 
-    int runnumber =
-        atoi(ws2d->run().getProperty("run_number")->value().c_str());
+    int runnumber = std::stoi(ws2d->run().getProperty("run_number")->value());
     tmp_expinfo->mutableRun().addProperty(
         new PropertyWithValue<int>("run_number", runnumber));
 
@@ -593,8 +593,8 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
       MDEW_MDEVENT_3);
 
   for (const auto &thisWorkspace : vec_ws2d) {
-    short unsigned int runnumber = static_cast<short unsigned int>(
-        atoi(thisWorkspace->run().getProperty("run_number")->value().c_str()));
+    uint16_t runnumber = static_cast<uint16_t>(
+        std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
 
     detid_t detindex = 0;
 
@@ -670,7 +670,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
   for (size_t iws = 0; iws < vec_ws2d.size(); ++iws) {
     API::MatrixWorkspace_sptr thisWorkspace = vec_ws2d[iws];
     short unsigned int runnumber = static_cast<short unsigned int>(
-        atoi(thisWorkspace->run().getProperty("run_number")->value().c_str()));
+        std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
 
     detid_t detindex = 0;
     float signal = static_cast<float>(vecmonitor[iws]);

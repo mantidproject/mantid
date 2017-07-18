@@ -1,15 +1,15 @@
 #ifndef MANTID_DATAHANDLING_MASKDETECTORS_H_
 #define MANTID_DATAHANDLING_MASKDETECTORS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
+namespace Indexing {
+class SpectrumNumber;
+}
 namespace DataHandling {
 /** An algorithm to mask a detector, or set of detectors.
     The workspace spectra associated with those detectors are zeroed.
@@ -99,10 +99,10 @@ private:
                                    const RangeInfo &rangeInfo);
 
   void execPeaks(DataObjects::PeaksWorkspace_sptr WS);
-  void fillIndexListFromSpectra(std::vector<size_t> &indexList,
-                                const std::vector<specnum_t> &spectraList,
-                                const API::MatrixWorkspace_sptr WS,
-                                const RangeInfo &range_info);
+  void fillIndexListFromSpectra(
+      std::vector<size_t> &indexList,
+      const std::vector<Indexing::SpectrumNumber> &spectraList,
+      const API::MatrixWorkspace_sptr WS, const RangeInfo &range_info);
   void appendToDetectorListFromComponentList(
       std::vector<detid_t> &detectorList,
       const std::vector<std::string> &componentList,

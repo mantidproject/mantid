@@ -142,7 +142,8 @@ void Integration::exec() {
           "Range lists not supported for EventWorkspaces.");
     }
     // Get the eventworkspace rebinned to apply the upper and lowerrange
-    double evntMinRange = std::max(minRange, eventInputWS->getEventXMin());
+    double evntMinRange =
+        isEmpty(minRange) ? eventInputWS->getEventXMin() : minRange;
     double evntMaxRange =
         isEmpty(maxRange) ? eventInputWS->getEventXMax() : maxRange;
     localworkspace =
@@ -161,7 +162,7 @@ void Integration::exec() {
       this->getOutputWorkspace(localworkspace, minSpec, maxSpec);
 
   bool is_distrib = outputWorkspace->isDistribution();
-  Progress progress(this, progressStart, 1, maxSpec - minSpec + 1);
+  Progress progress(this, progressStart, 1.0, maxSpec - minSpec + 1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
   const bool axisIsNumeric = localworkspace->getAxis(1)->isNumeric();

@@ -101,7 +101,11 @@ size_t DetectorInfo::size() const {
 }
 
 /// Returns true if the beamline has scanning detectors.
-bool DetectorInfo::isScanning() const { return size() != m_positions->size(); }
+bool DetectorInfo::isScanning() const {
+  if (!m_positions)
+    return false;
+  return size() != m_positions->size();
+}
 
 /// Returns true if the detector with given detector index is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {

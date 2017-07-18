@@ -44,15 +44,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport BoundaryConstraint : public API::IConstraint {
 public:
   /// Default constructor
-  BoundaryConstraint()
-      : API::IConstraint(), m_penaltyFactor(1000.0), m_parameterName(""),
-        m_hasLowerBound(false), m_hasUpperBound(false), m_lowerBound(DBL_MAX),
-        m_upperBound(-DBL_MAX) {}
+  BoundaryConstraint();
 
   /// Constructor with no boundary arguments
-  BoundaryConstraint(const std::string &paramName)
-      : API::IConstraint(), m_penaltyFactor(1000.0), m_parameterName(paramName),
-        m_hasLowerBound(false), m_hasUpperBound(false) {}
+  BoundaryConstraint(const std::string &paramName);
 
   /// Constructor with boundary arguments
   BoundaryConstraint(API::IFunction *fun, const std::string paramName,
@@ -114,7 +109,7 @@ public:
   }
 
   /// Get parameter name
-  std::string getParameterName() const { return m_parameterName; }
+  //  std::string getParameterName() const { return m_parameterName; }
 
   /// overwrite IConstraint base class methods
   double check() override;
@@ -128,7 +123,7 @@ private:
   double m_penaltyFactor;
 
   /// name of parameter you want to constraint
-  std::string m_parameterName;
+  // std::string m_parameterName;
 
   /// has a lower bound set true/false
   bool m_hasLowerBound;

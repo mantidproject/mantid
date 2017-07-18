@@ -3,10 +3,50 @@
 //----------------------------------------------------------------------
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+
+#include <unordered_map>
+#include <vector>
 
 using namespace Mantid::DataObjects;
+
+namespace {
+// Anonymous namespace
+using namespace Mantid;
+using WsIndexToDetIds = std::unordered_map<size_t, std::vector<detid_t>>;
+
+WsIndexToDetIds mapDetectorsToWsIndexes(const API::DetectorInfo &detectorInfo,
+                                        const detid2index_map &mapping) {
+  const auto &detectorIds = detectorInfo.detectorIDs();
+  WsIndexToDetIds indexToDetMapping;
+
+  indexToDetMapping.reserve(detectorIds.size());
+  for (const auto detectorID : detectorIds) {
+    auto detMapEntry = mapping.find(detectorID);
+    if (detMapEntry == mapping.end()) {
+      throw std::runtime_error(
+          "Detector ID " + std::to_string(detectorID) +
+          " was not found in the workspace index mapping.");
+    }
+
+    const size_t wsIndex = detMapEntry->second;
+    auto indexMapEntry = indexToDetMapping.find(wsIndex);
+    if (indexMapEntry == indexToDetMapping.end()) {
+      // Create a new vector if one does not exist
+      indexToDetMapping[wsIndex] = std::vector<detid_t>{detectorID};
+    } else {
+      // Otherwise add the detector ID to the current list
+      indexToDetMapping[wsIndex].push_back(detectorID);
+    }
+  }
+  return indexToDetMapping;
+}
+}
 
 namespace Mantid {
 namespace Crystal {
@@ -16,17 +56,23 @@ DECLARE_ALGORITHM(FindSXPeaks)
 using namespace Kernel;
 using namespace API;
 
+// Type def the index to detector mapping
+using WsIndexToDetIds = std::unordered_map<size_t, std::vector<detid_t>>;
+
 FindSXPeaks::FindSXPeaks()
-    : API::Algorithm(), m_MinRange(DBL_MAX), m_MaxRange(-DBL_MAX), m_MinSpec(0),
-      m_MaxSpec(0) {}
+    : API::Algorithm(), m_MinRange(DBL_MAX), m_MaxRange(-DBL_MAX),
+      m_MinWsIndex(0), m_MaxWsIndex(0) {}
 
 /** Initialisation method.
  *
  */
 void FindSXPeaks::init() {
+  auto wsValidation = boost::make_shared<CompositeValidator>();
+  wsValidation->add<HistogramValidator>();
+  wsValidation->add<WorkspaceUnitValidator>("TOF");
+
   declareProperty(make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<HistogramValidator>()),
+                      "InputWorkspace", "", Direction::Input, wsValidation),
                   "The name of the Workspace2D to take as input");
   declareProperty("RangeLower", EMPTY_DBL(),
                   "The X value to search from (default 0)");
@@ -62,33 +108,33 @@ void FindSXPeaks::exec() {
   m_MaxRange = getProperty("RangeUpper");
 
   // the assignment below is intended and if removed will break the unit tests
-  m_MinSpec = static_cast<int>(getProperty("StartWorkspaceIndex"));
-  m_MaxSpec = static_cast<int>(getProperty("EndWorkspaceIndex"));
+  m_MinWsIndex = static_cast<int>(getProperty("StartWorkspaceIndex"));
+  m_MaxWsIndex = static_cast<int>(getProperty("EndWorkspaceIndex"));
   double SB = getProperty("SignalBackground");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
-  // copy the instrument accross. Cannot generate peaks without doing this
+  // copy the instrument across. Cannot generate peaks without doing this
   // first.
   m_peaks->setInstrument(localworkspace->getInstrument());
 
   size_t numberOfSpectra = localworkspace->getNumberHistograms();
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
-  if (m_MinSpec > numberOfSpectra) {
+  if (m_MinWsIndex > numberOfSpectra) {
     g_log.warning("StartSpectrum out of range! Set to 0.");
-    m_MinSpec = 0;
+    m_MinWsIndex = 0;
   }
-  if (m_MinSpec > m_MaxSpec) {
+  if (m_MinWsIndex > m_MaxWsIndex) {
     throw std::invalid_argument(
         "Cannot have StartWorkspaceIndex > EndWorkspaceIndex");
   }
-  if (isEmpty(m_MaxSpec))
-    m_MaxSpec = numberOfSpectra - 1;
-  if (m_MaxSpec > numberOfSpectra - 1 || m_MaxSpec < m_MinSpec) {
+  if (isEmpty(m_MaxWsIndex))
+    m_MaxWsIndex = numberOfSpectra - 1;
+  if (m_MaxWsIndex > numberOfSpectra - 1 || m_MaxWsIndex < m_MinWsIndex) {
     g_log.warning("EndSpectrum out of range! Set to max detector number");
-    m_MaxSpec = numberOfSpectra;
+    m_MaxWsIndex = numberOfSpectra;
   }
   if (m_MinRange > m_MaxRange) {
     g_log.warning("Range_upper is less than Range_lower. Will integrate up to "
@@ -96,23 +142,33 @@ void FindSXPeaks::exec() {
     m_MaxRange = 0.0;
   }
 
-  Progress progress(this, 0, 1, (m_MaxSpec - m_MinSpec + 1));
+  Progress progress(this, 0.0, 1.0, m_MaxWsIndex - m_MinWsIndex + 1);
 
   // Calculate the primary flight path.
   const auto &spectrumInfo = localworkspace->spectrumInfo();
+  const auto &detectorInfo = localworkspace->detectorInfo();
+
+  const WsIndexToDetIds wsIndexToDetIdMap = mapDetectorsToWsIndexes(
+      detectorInfo, localworkspace->getDetectorIDToWorkspaceIndexMap());
 
   peakvector entries;
-  // Reserve 1000 peaks to make later push_back fast for first 1000 peaks, but
-  // unlikely to have more than this.
-  entries.reserve(1000);
-  // Count the peaks so that we can resize the peakvector at the end.
+  entries.reserve(m_MaxWsIndex - m_MinWsIndex);
+  // Count the peaks so that we can resize the peak vector at the end.
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace))
-  for (int i = static_cast<int>(m_MinSpec); i <= static_cast<int>(m_MaxSpec);
-       ++i) {
+  for (int wsIndex = static_cast<int>(m_MinWsIndex);
+       wsIndex <= static_cast<int>(m_MaxWsIndex); ++wsIndex) {
     PARALLEL_START_INTERUPT_REGION
+
+    // If no detector found / monitor, skip onto the next spectrum
+    const size_t wsIndexSize_t = static_cast<size_t>(wsIndex);
+    if (!spectrumInfo.hasDetectors(wsIndexSize_t) ||
+        spectrumInfo.isMonitor(wsIndexSize_t)) {
+      continue;
+    }
+
     // Retrieve the spectrum into a vector
-    const auto &X = localworkspace->x(i);
-    const auto &Y = localworkspace->y(i);
+    const auto &X = localworkspace->x(wsIndex);
+    const auto &Y = localworkspace->y(wsIndex);
 
     // Find the range [min,max]
     auto lowit = (m_MinRange == EMPTY_DBL())
@@ -152,26 +208,11 @@ void FindSXPeaks::exec() {
     double rightBinEdge = *std::next(leftBinPosition);
     double tof = 0.5 * (leftBinEdge + rightBinEdge);
 
-    // If no detector found, skip onto the next spectrum
-    if (!spectrumInfo.hasDetectors(static_cast<size_t>(i))) {
-      continue;
-    }
-    if (!spectrumInfo.hasUniqueDetector(i)) {
-      std::ostringstream sout;
-      sout << "Spectrum at workspace index " << i
-           << " has unsupported number of detectors.";
-      throw std::runtime_error(sout.str());
-    }
-    const auto &det = spectrumInfo.detector(static_cast<size_t>(i));
+    const double phi =
+        calculatePhi(wsIndexToDetIdMap, spectrumInfo, wsIndexSize_t);
 
-    double phi = det.getPhi();
-    if (phi < 0) {
-      phi += 2.0 * M_PI;
-    }
-
-    std::vector<int> specs(1, i);
-
-    SXPeak peak(tof, phi, *maxY, specs, i, spectrumInfo);
+    std::vector<int> specs(1, wsIndex);
+    SXPeak peak(tof, phi, *maxY, specs, wsIndex, spectrumInfo);
     PARALLEL_CRITICAL(entries) { entries.push_back(peak); }
     progress.report();
     PARALLEL_END_INTERUPT_REGION
@@ -183,6 +224,38 @@ void FindSXPeaks::exec() {
 
   setProperty("OutputWorkspace", m_peaks);
   progress.report();
+}
+
+/**
+  * Calculates the average phi value if the workspace contains
+  * multiple detectors per spectrum, or returns the value
+  * of phi if it is a single detector to spectrum mapping.
+  * @param detectorMapping :: The mapping of workspace index to detector id(s)
+  * @param spectrumInfo :: The spectrum info of this workspace
+  * @param wsIndex :: The index to return the phi value of
+  * @return :: The averaged or exact value of phi
+  */
+double FindSXPeaks::calculatePhi(const WsIndexToDetIds &detectorMapping,
+                                 const SpectrumInfo &spectrumInfo,
+                                 size_t wsIndex) {
+  double phi = std::numeric_limits<double>::infinity();
+  const size_t numDetectors = detectorMapping.at(wsIndex).size();
+  const auto &det = spectrumInfo.detector(wsIndex);
+  if (numDetectors == 1) {
+    phi = det.getPhi();
+  } else {
+    // Have to average the value for phi
+    auto detectorGroup = dynamic_cast<const Geometry::DetectorGroup *>(&det);
+    if (!detectorGroup) {
+      throw std::runtime_error("Could not cast to detector group");
+    }
+    detectorGroup->getPhi();
+  }
+
+  if (phi < 0) {
+    phi += 2.0 * M_PI;
+  }
+  return phi;
 }
 
 /**

@@ -1,5 +1,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Timer.h"
+#include <sstream>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {
@@ -25,6 +27,11 @@ ProgressBase::ProgressBase(double start, double end, int64_t numSteps)
     : m_start(start), m_end(end), m_ifirst(0), m_numSteps(numSteps),
       m_notifyStep(1), m_notifyStepPct(1), m_step(1), m_i(0),
       m_last_reported(-1), m_timeElapsed(new Timer), m_notifyStepPrecision(0) {
+  if (start < 0. || start >= end) {
+    std::stringstream msg;
+    msg << "Progress range invalid 0 <= start=" << start << " <= end=" << end;
+    throw std::invalid_argument(msg.str());
+  }
   this->setNumSteps(numSteps);
   m_last_reported = -m_notifyStep;
   m_timeElapsed->reset();
@@ -51,8 +58,8 @@ ProgressBase &ProgressBase::operator=(const ProgressBase &rhs) {
     m_notifyStep = rhs.m_notifyStep;
     m_notifyStepPct = rhs.m_notifyStepPct;
     m_step = rhs.m_step;
-    m_i = rhs.m_i;
-    m_last_reported = rhs.m_last_reported;
+    m_i.store(rhs.m_i.load());
+    m_last_reported.store(rhs.m_last_reported.load());
     // copy the timer state, being careful only to copy state & not the actual
     // pointer
     *m_timeElapsed = *rhs.m_timeElapsed;
@@ -75,7 +82,7 @@ ProgressBase::~ProgressBase() { delete m_timeElapsed; }
 void ProgressBase::report(const std::string &msg) {
   if (++m_i - m_last_reported < m_notifyStep)
     return;
-  m_last_reported = m_i;
+  m_last_reported.store(m_i.load());
   this->doReport(msg);
 }
 
@@ -91,7 +98,7 @@ void ProgressBase::report(int64_t i, const std::string &msg) {
   m_i = i;
   if (m_i - m_last_reported < m_notifyStep)
     return;
-  m_last_reported = m_i;
+  m_last_reported.store(m_i.load());
   this->doReport(msg);
 }
 
@@ -107,7 +114,7 @@ void ProgressBase::reportIncrement(int inc, const std::string &msg) {
   m_i += int64_t(inc);
   if (m_i - m_last_reported < m_notifyStep)
     return;
-  m_last_reported = m_i;
+  m_last_reported.store(m_i.load());
   this->doReport(msg);
 }
 
@@ -119,10 +126,10 @@ void ProgressBase::reportIncrement(int inc, const std::string &msg) {
     @param msg :: Optional message string
 */
 void ProgressBase::reportIncrement(size_t inc, const std::string &msg) {
-  m_i += int64_t(inc);
+  m_i += static_cast<int64_t>(inc);
   if (m_i - m_last_reported < m_notifyStep)
     return;
-  m_last_reported = m_i;
+  m_last_reported.store(m_i.load());
   this->doReport(msg);
 }
 
@@ -132,14 +139,14 @@ void ProgressBase::reportIncrement(size_t inc, const std::string &msg) {
  * @param nsteps :: the number of steps to take between start and end
  */
 void ProgressBase::setNumSteps(int64_t nsteps) {
-  m_numSteps = nsteps;
-  if (m_numSteps <= 0)
-    m_numSteps = 1; // Minimum of 1
-  m_step = (m_end - m_start) / double(m_numSteps);
-  m_notifyStep = (static_cast<int64_t>(double(m_numSteps) * m_notifyStepPct /
-                                       100 / (m_end - m_start)));
-  if (m_notifyStep <= 0)
-    m_notifyStep = 1;
+  m_numSteps = std::max(nsteps, int64_t{1}); // Minimum of 1
+
+  double numSteps = static_cast<double>(m_numSteps);
+  m_step = (m_end - m_start) / numSteps;
+
+  m_notifyStep = static_cast<int64_t>(numSteps * m_notifyStepPct * 0.01 /
+                                      (m_end - m_start));
+  m_notifyStep = std::max(m_notifyStep, int64_t{1}); // Minimum of 1
 }
 
 //----------------------------------------------------------------------------------------------
@@ -150,6 +157,11 @@ void ProgressBase::setNumSteps(int64_t nsteps) {
  * @param end :: Ending progress
  */
 void ProgressBase::resetNumSteps(int64_t nsteps, double start, double end) {
+  if (start < 0. || start >= end) {
+    std::stringstream msg;
+    msg << "Progress range invalid 0 <= start=" << start << " <= end=" << end;
+    throw std::invalid_argument(msg.str());
+  }
   m_start = start;
   m_end = end;
   m_i = 0;

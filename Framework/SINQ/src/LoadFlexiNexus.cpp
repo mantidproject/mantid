@@ -189,7 +189,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   } else {
     const std::string xname(it->second);
     ws->getAxis(0)->title() = xname;
-    if (xname.compare("TOF") == 0) {
+    if (xname == "TOF") {
       g_log.debug() << "Setting X-unit to be TOF\n";
       ws->getAxis(0)->setUnit("TOF");
     }

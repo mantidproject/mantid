@@ -3,6 +3,10 @@
 //-----------------------------------------------
 #include "MantidKernel/ThreadSafeLogStream.h"
 
+#include <Poco/Logger.h>
+#include <Poco/StreamUtil.h>
+#include <Poco/UnbufferedStreamBuf.h>
+
 using namespace Mantid::Kernel;
 
 //************************************************************

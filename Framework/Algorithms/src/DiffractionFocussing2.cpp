@@ -1,4 +1,3 @@
-#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -11,9 +10,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidIndexing/Group.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <cfloat>
 #include <iterator>
@@ -171,16 +171,15 @@ void DiffractionFocussing2::exec() {
   // is irrelevant
   MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
 
-  Progress *prog;
-  prog = new API::Progress(this, 0.2, 1.00,
-                           static_cast<int>(totalHistProcess) + nGroups);
+  std::unique_ptr<Progress> prog = make_unique<API::Progress>(
+      this, 0.2, 1.0, static_cast<int>(totalHistProcess) + nGroups);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))
   for (int outWorkspaceIndex = 0;
        outWorkspaceIndex < static_cast<int>(m_validGroups.size());
        outWorkspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
-    int group = m_validGroups[outWorkspaceIndex];
+    int group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
 
     // Get the group
     auto it = group2xvector.find(group);
@@ -321,8 +320,6 @@ void DiffractionFocussing2::exec() {
                                     std::move(m_validGroups),
                                     std::move(m_wsIndices)));
 
-  delete prog;
-
   setProperty("OutputWorkspace", out);
 
   this->cleanup();
@@ -337,7 +334,8 @@ void DiffractionFocussing2::exec() {
  */
 void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it
-  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size());
+  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size(),
+                                    m_matrixInputW->binEdges(0));
 
   MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
   bool inPlace = (m_matrixInputW == outputWS);
@@ -348,8 +346,8 @@ void DiffractionFocussing2::execEvent() {
 
   EventType eventWtype = m_eventW->getEventType();
 
-  Progress *prog;
-  prog = new Progress(this, 0.2, 0.25, nGroups);
+  std::unique_ptr<Progress> prog =
+      make_unique<Progress>(this, 0.2, 0.25, nGroups);
 
   // determine precount size
   vector<size_t> size_required(this->m_validGroups.size(), 0);
@@ -365,12 +363,12 @@ void DiffractionFocussing2::execEvent() {
   }
 
   // ------------- Pre-allocate Event Lists ----------------------------
-  delete prog;
-  prog = new Progress(this, 0.25, 0.3, totalHistProcess);
+  prog.reset();
+  prog = make_unique<Progress>(this, 0.25, 0.3, totalHistProcess);
 
   // This creates and reserves the space required
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
-    const int group = this->m_validGroups[iGroup];
+    const int group = static_cast<int>(m_validGroups[iGroup]);
     EventList &groupEL = out->getSpectrum(iGroup);
     groupEL.switchTo(eventWtype);
     groupEL.reserve(size_required[iGroup]);
@@ -380,8 +378,8 @@ void DiffractionFocussing2::execEvent() {
   }
 
   // ----------- Focus ---------------
-  delete prog;
-  prog = new Progress(this, 0.3, 0.9, totalHistProcess);
+  prog.reset();
+  prog = make_unique<Progress>(this, 0.3, 0.9, totalHistProcess);
 
   if (this->m_validGroups.size() == 1) {
     g_log.information() << "Performing focussing on a single group\n";
@@ -451,11 +449,11 @@ void DiffractionFocussing2::execEvent() {
 
   // Now that the data is cleaned up, go through it and set the X vectors to the
   // input workspace we first talked about.
-  delete prog;
-  prog = new Progress(this, 0.9, 1.0, nGroups);
+  prog.reset();
+  prog = make_unique<Progress>(this, 0.9, 1.0, nGroups);
   for (size_t workspaceIndex = 0; workspaceIndex < this->m_validGroups.size();
        workspaceIndex++) {
-    const int group = this->m_validGroups[workspaceIndex];
+    const int group = static_cast<int>(m_validGroups[workspaceIndex]);
     // Now this is the workspace index of that group; simply 1 offset
     prog->reportIncrement(1, "Setting X");
 
@@ -482,7 +480,6 @@ void DiffractionFocussing2::execEvent() {
   }
   out->clearMRU();
   setProperty("OutputWorkspace", std::move(out));
-  delete prog;
 }
 
 //=============================================================================

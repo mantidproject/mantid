@@ -4,11 +4,12 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -57,7 +58,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D)
  */
 int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".xml") != 0)
+  if (extn != ".xml")
     return 0;
 
   std::istream &is = descriptor.data();
@@ -77,7 +78,7 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
     // Get pointer to root element
     Element *pRootElem = pDoc->documentElement();
     if (pRootElem) {
-      if (pRootElem->tagName().compare("SASroot") == 0) {
+      if (pRootElem->tagName() == "SASroot") {
         confidence = 80;
       }
     }

@@ -8,19 +8,18 @@ Below are listed the current recommendations for which minimizers to use with Ma
 * By default Mantid uses Levenberg-Marquardt
 
   We can also recommend Trust Region, in particular where stability is important
-* For Bayesian analysis, we currently support only one minimizer, which is FABADA
 
-The above recommendations are based on the results presented in the sections
-following this section.
+The above recommendations are based on the results presented in sections below.
 
-We hope to be able to provide recommendations for subsets of neutron
-fitting problems, such as for constrained problems in the future.
-However, to help us facilitate this, please let us know if you have
-any fitting problems that you would like to share.
+We are expanding the set of fitting problems we test against, which may, for example, 
+provide enough evidence to recommend different minimizers for different subsets of neutron
+fitting problems in the future. And, we are constantly looking for new example, in
+particular, where a user has found a fitting difficult or slow.
 
-Further, if you think you have a bright idea for a new minimizer please
-do not hesitate to either let us know or test out your idea yourself
-using the fit benchmarking tests discussed below.
+Also, if the fit minimizer benchmarking tool is available for anyone to test new minimizers
+and modifications to existing minimizers.
+
+For the task of Bayesian probability sampling: this is supported with the FABADA minimizer.
 
 Comparing Minimizers
 ====================

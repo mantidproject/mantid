@@ -82,7 +82,7 @@ void SphericalAbsorption::exec() {
   correctionFactors->setYUnitLabel("Attenuation factor");
   double m_sphRadius = getProperty("SphericalSampleRadius"); // in cm
 
-  Progress progress(this, 0, 1, 2);
+  Progress progress(this, 0.0, 1.0, 2);
 
   progress.report("AnvredCorrection");
 

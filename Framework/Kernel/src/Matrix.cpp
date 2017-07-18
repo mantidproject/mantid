@@ -1,8 +1,10 @@
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/V3D.h"
+
+#include <sstream>
 
 using Mantid::Kernel::TimeSeriesProperty;
 
@@ -382,6 +384,27 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
     }
   }
   return Out;
+}
+
+/**
+  Matrix multiplication THIS * Vec to produce a vec
+  @param in :: size of vector > this->nrows
+  @param out :: result of Matrix(This * Vec)
+  @throw MisMatch<size_t> if there is a size mismatch.
+*/
+template <typename T>
+void Matrix<T>::multiplyPoint(const std::vector<T> &in,
+                              std::vector<T> &out) const {
+  out.resize(nx);
+  std::fill(std::begin(out), std::end(out), static_cast<T>(0.0));
+  if (ny > in.size())
+    throw Kernel::Exception::MisMatch<size_t>(ny, in.size(),
+                                              "Matrix::multiplyPoint(in,out)");
+  for (size_t i = 0; i < nx; i++) {
+    for (size_t j = 0; j < ny; j++) {
+      out[i] += V[i][j] * in[j];
+    }
+  }
 }
 
 template <typename T>

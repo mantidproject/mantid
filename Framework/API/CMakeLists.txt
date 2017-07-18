@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/Column.cpp
 	src/ColumnFactory.cpp
 	src/CommonBinsValidator.cpp
+	src/ComponentInfo.cpp
 	src/CompositeCatalog.cpp
 	src/CompositeDomainMD.cpp
 	src/CompositeFunction.cpp
@@ -28,6 +29,7 @@ set ( SRC_FILES
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
 	src/DetectorInfo.cpp
+        src/DetectorSearcher.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/EqualBinSizesValidator.cpp
@@ -44,6 +46,7 @@ set ( SRC_FILES
 	src/FunctionDomainGeneral.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
+	src/FunctionGenerator.cpp
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
@@ -65,7 +68,6 @@ set ( SRC_FILES
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILatticeFunction.cpp
-	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
 	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
@@ -87,6 +89,7 @@ set ( SRC_FILES
 	src/JointDomain.cpp
 	src/LatticeDomain.cpp
 	src/LinearScale.cpp
+	src/LiveListener.cpp
 	src/LiveListenerFactory.cpp
 	src/LogFilterGenerator.cpp
 	src/LogManager.cpp
@@ -101,8 +104,8 @@ set ( SRC_FILES
 	src/MultiPeriodGroupWorker.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
-	src/NearestNeighbourInfo.cpp
-	src/NearestNeighbours.cpp
+        src/WorkspaceNearestNeighbourInfo.cpp
+        src/WorkspaceNearestNeighbours.cpp
 	src/NotebookBuilder.cpp
 	src/NotebookWriter.cpp
 	src/NullCoordTransform.cpp
@@ -175,6 +178,7 @@ set ( INC_FILES
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
 	inc/MantidAPI/CommonBinsValidator.h
+	inc/MantidAPI/ComponentInfo.h
 	inc/MantidAPI/CompositeCatalog.h
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
@@ -186,6 +190,7 @@ set ( INC_FILES
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
 	inc/MantidAPI/DetectorInfo.h
+        inc/MantidAPI/DetectorSearcher.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
@@ -204,6 +209,7 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionDomainGeneral.h
 	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
+	inc/MantidAPI/FunctionGenerator.h
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
@@ -274,6 +280,7 @@ set ( INC_FILES
 	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LatticeDomain.h
 	inc/MantidAPI/LinearScale.h
+	inc/MantidAPI/LiveListener.h
 	inc/MantidAPI/LiveListenerFactory.h
 	inc/MantidAPI/LogFilterGenerator.h
 	inc/MantidAPI/LogManager.h
@@ -290,8 +297,8 @@ set ( INC_FILES
 	inc/MantidAPI/MultiPeriodGroupWorker.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
-	inc/MantidAPI/NearestNeighbourInfo.h
-	inc/MantidAPI/NearestNeighbours.h
+  inc/MantidAPI/WorkspaceNearestNeighbourInfo.h
+  inc/MantidAPI/WorkspaceNearestNeighbours.h
 	inc/MantidAPI/NotebookBuilder.h
 	inc/MantidAPI/NotebookWriter.h
 	inc/MantidAPI/NullCoordTransform.h
@@ -347,17 +354,20 @@ set ( TEST_FILES
 	AlgorithmManagerTest.h
 	AlgorithmPropertyTest.h
 	AlgorithmProxyTest.h
+	AlgorithmMPITest.h
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
 	AsynchronousTest.h
 	BinEdgeAxisTest.h
 	BoxControllerTest.h
 	CommonBinsValidatorTest.h
+	ComponentInfoTest.h
 	CompositeFunctionTest.h
 	CoordTransformTest.h
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
 	DetectorInfoTest.h
+        DetectorSearcherTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
 	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
@@ -385,7 +395,6 @@ set ( TEST_FILES
 	IFunction1DTest.h
 	IFunctionMDTest.h
 	ILatticeFunctionTest.h
-	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
 	IkedaCarpenterModeratorTest.h
@@ -396,6 +405,7 @@ set ( TEST_FILES
 	InstrumentValidatorTest.h
 	LatticeDomainTest.h
 	LiveListenerFactoryTest.h
+	LiveListenerTest.h
 	LogFilterGeneratorTest.h
 	LogManagerTest.h
 	MDGeometryTest.h
@@ -407,8 +417,8 @@ set ( TEST_FILES
 	MultiPeriodGroupWorkerTest.h
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
-	NearestNeighbourInfoTest.h
-	NearestNeighboursTest.h
+        WorkspaceNearestNeighbourInfoTest.h
+        WorkspaceNearestNeighboursTest.h
 	NotebookBuilderTest.h
 	NotebookWriterTest.h
 	NumericAxisTest.h
@@ -417,6 +427,7 @@ set ( TEST_FILES
 	ParameterReferenceTest.h
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
+        ProgressTest.h
 	ProjectionTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h

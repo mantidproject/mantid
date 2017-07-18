@@ -1,8 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
 #define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
 
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h"
-#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory {
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflGenericDataProcessorPresenterFactory {
 public:
   ReflGenericDataProcessorPresenterFactory() = default;
   virtual ~ReflGenericDataProcessorPresenterFactory() = default;

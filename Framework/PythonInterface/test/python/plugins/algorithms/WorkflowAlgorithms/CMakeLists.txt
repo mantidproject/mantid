@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   IndirectCalibrationTest.py
   IndirectCylinderAbsorptionTest.py
   IndirectCylinderAbsorption2Test.py
+  IndirectDiffScanTest.py
   IndirectFlatPlateAbsorptionTest.py
   IndirectFlatPlateAbsorption2Test.py
   IndirectILLEnergyTransferTest.py
@@ -23,6 +24,7 @@ set ( TEST_PY_FILES
   IndirectILLReductionFWSTest.py
   IndirectILLReductionQENSTest.py
   IndirectResolutionTest.py
+  IndirectSampleChangerTest.py
   IndirectTransmissionMonitorTest.py
   IqtFitMultipleTest.py
   IqtFitSequentialTest.py
@@ -48,4 +50,5 @@ set ( TEST_PY_FILES
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test name=PythonWorkflowAlgorithms
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonWorkflowAlgorithms ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.WorkflowAlgorithms ${TEST_PY_FILES} )
+add_subdirectory( sans )

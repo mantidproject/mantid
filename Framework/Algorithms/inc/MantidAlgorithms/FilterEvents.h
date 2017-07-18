@@ -121,7 +121,7 @@ private:
   void filterEventsByVectorSplitters(double progressamount);
 
   /// Examine workspace
-  void examineEventWS();
+  void examineAndSortEventWS();
 
   /// Convert SplittersWorkspace to vector of time and vector of target
   /// (itarget)
@@ -146,7 +146,7 @@ private:
   std::vector<double> m_detTofOffsets;
   std::vector<double> m_detTofFactors;
 
-  bool m_FilterByPulseTime;
+  bool m_filterByPulseTime;
 
   DataObjects::TableWorkspace_sptr m_informationWS;
   bool m_hasInfoWS;
