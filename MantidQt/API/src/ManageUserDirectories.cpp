@@ -132,10 +132,9 @@ void ManageUserDirectories::saveProperties() {
 */
 void ManageUserDirectories::appendSlashIfNone(QString &path) const {
   path = path.trimmed();
-  if (path.endsWith("/") || path.endsWith("\\") || path.isEmpty()) {
-    return;
-  } else {
-    path.append("/");
+  if (!(path.endsWith("/") || path.endsWith("\\") || path.isEmpty())) {
+	  // Don't need to add to a \\, as it would just get changed to a / immediately after
+	  path.append("/");
   }
 }
 
