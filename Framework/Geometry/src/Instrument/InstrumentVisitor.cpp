@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidBeamline/Beamline.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 
@@ -275,19 +276,19 @@ InstrumentVisitor::detectorIdToIndexMap() const {
   return m_detectorIdToIndexMap;
 }
 
-std::unique_ptr<Beamline::ComponentInfo>
-InstrumentVisitor::componentInfo() const {
-  return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
+std::unique_ptr<Beamline::Beamline> InstrumentVisitor::beamline() const {
+
+  auto componentInfo = Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_positions, m_rotations, m_sourceIndex,
       m_sampleIndex);
-}
 
-std::unique_ptr<Beamline::DetectorInfo>
-InstrumentVisitor::detectorInfo() const {
-  return Kernel::make_unique<Mantid::Beamline::DetectorInfo>(
+  auto detectorInfo = Kernel::make_unique<Mantid::Beamline::DetectorInfo>(
       *m_detectorPositions, *m_detectorRotations, *m_monitorIndices);
+
+  return Kernel::make_unique<Beamline::Beamline>(std::move(componentInfo),
+                                                 std::move(detectorInfo));
 }
 
 boost::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const {

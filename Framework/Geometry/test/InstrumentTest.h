@@ -12,8 +12,9 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/Beamline.h"
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid;
@@ -25,13 +26,18 @@ std::tuple<boost::shared_ptr<Beamline::ComponentInfo>,
            boost::shared_ptr<const std::vector<Geometry::ComponentID>>,
            boost::shared_ptr<const std::unordered_map<
                Mantid::Geometry::IComponent *, size_t>>>
-makeComponentInfo(boost::shared_ptr<const Instrument> parInstrument) {
+makeBeamline(boost::shared_ptr<const Instrument> parInstrument) {
   InstrumentVisitor visitor(parInstrument);
-  parInstrument->registerContents(visitor);
-  return std::make_tuple(
-      boost::shared_ptr<Beamline::ComponentInfo>(visitor.componentInfo()),
-      boost::shared_ptr<Beamline::DetectorInfo>(visitor.detectorInfo()),
-      visitor.componentIds(), visitor.componentIdToIndexMap());
+  visitor.walkInstrument();
+  auto beamline = visitor.beamline();
+  boost::shared_ptr<Beamline::ComponentInfo> compInfo(
+      new Beamline::ComponentInfo(beamline->componentInfo()));
+  boost::shared_ptr<Beamline::DetectorInfo> detInfo(
+      new Beamline::DetectorInfo(beamline->detectorInfo()));
+  compInfo->setDetectorInfo(detInfo.get());
+  detInfo->setComponentInfo(compInfo.get());
+  return std::make_tuple(compInfo, detInfo, visitor.componentIds(),
+                         visitor.componentIdToIndexMap());
 }
 
 class InstrumentTest : public CxxTest::TestSuite {
@@ -543,18 +549,16 @@ public:
 
     // Extract information from instrument to create DetectorInfo
     auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
-    auto componentTuple = makeComponentInfo(instr);
-    auto componentInfo = std::get<0>(componentTuple);
-    auto detInfo = std::get<1>(componentTuple);
-    auto componentIds = std::get<2>(componentTuple);
-    auto componentIdToIndexMap = std::get<3>(componentTuple);
+    auto beamlineTuple = makeBeamline(instr);
+    auto componentInfo = std::get<0>(beamlineTuple);
+    auto detInfo = std::get<1>(beamlineTuple);
+    auto componentIds = std::get<2>(beamlineTuple);
+    auto componentIdToIndexMap = std::get<3>(beamlineTuple);
     instr->setComponentInfo(componentInfo, componentIds);
     pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
         *componentInfo, componentIds, componentIdToIndexMap));
 
     instr->setDetectorInfo(detInfo);
-    detInfo->setComponentInfo(componentInfo.get());
-    componentInfo->setDetectorInfo(detInfo.get());
     // bank 1
     TS_ASSERT(detInfo->position(0).isApprox(
         toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}), 1e-12));
@@ -617,18 +621,16 @@ public:
     auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
 
     // Extract information from instrument to create DetectorInfo
-    auto componentTuple = makeComponentInfo(instr);
-    auto componentInfo = std::get<0>(componentTuple);
-    auto detInfo = std::get<1>(componentTuple);
-    auto componentIds = std::get<2>(componentTuple);
-    auto componentIdToIndexMap = std::get<3>(componentTuple);
+    auto beamlineTuple = makeBeamline(instr);
+    auto componentInfo = std::get<0>(beamlineTuple);
+    auto detInfo = std::get<1>(beamlineTuple);
+    auto componentIds = std::get<2>(beamlineTuple);
+    auto componentIdToIndexMap = std::get<3>(beamlineTuple);
     instr->setComponentInfo(componentInfo, componentIds);
     pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
         *componentInfo, componentIds, componentIdToIndexMap));
 
     instr->setDetectorInfo(detInfo);
-    detInfo->setComponentInfo(componentInfo.get());
-    componentInfo->setDetectorInfo(detInfo.get());
 
     // bank 1
     double pitch = 0.008;

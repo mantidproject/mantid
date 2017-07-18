@@ -19,6 +19,7 @@ class IDetector;
 class ParameterMap;
 }
 namespace Beamline {
+class Beamline;
 class ComponentInfo;
 class DetectorInfo;
 }
@@ -153,11 +154,9 @@ public:
 
   bool isEmpty() const;
 
-  std::unique_ptr<Beamline::ComponentInfo> componentInfo() const;
-
-  std::unique_ptr<Beamline::DetectorInfo> detectorInfo() const;
-
   boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
+
+  std::unique_ptr<Beamline::Beamline> beamline() const;
 };
 } // namespace Geometry
 } // namespace Mantid

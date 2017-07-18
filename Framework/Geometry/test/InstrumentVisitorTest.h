@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidBeamline/Beamline.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -134,17 +135,14 @@ public:
                       paramMap->size(), 0);
 
     // Now we check that thing are located where we expect them to be.
-    auto compInfo = visitor.componentInfo();
-    auto detInfo = visitor.detectorInfo();
-    compInfo->setDetectorInfo(detInfo.get());
-    detInfo->setComponentInfo(compInfo.get());
+    auto beamline = visitor.beamline();
 
     TSM_ASSERT("Check source position",
-               compInfo->position(1)
-                   .isApprox(Mantid::Kernel::toVector3d(newSourcePos)));
+               beamline->componentInfo().position(1).isApprox(
+                   Mantid::Kernel::toVector3d(newSourcePos)));
     TSM_ASSERT("Check instrument position",
-               compInfo->position(3)
-                   .isApprox(Mantid::Kernel::toVector3d(newInstrumentPos)));
+               beamline->componentInfo().position(3).isApprox(
+                   Mantid::Kernel::toVector3d(newInstrumentPos)));
   }
 
   void test_visitor_detector_sanity_check() {
@@ -165,16 +163,15 @@ public:
     // Visit everything
     visitor.walkInstrument();
 
-    auto compInfo = visitor.componentInfo();
-    auto detInfo = visitor.detectorInfo();
-    compInfo->setDetectorInfo(detInfo.get());
-    detInfo->setComponentInfo(compInfo.get());
+    auto beamline = visitor.beamline();
 
     TSM_ASSERT_EQUALS("Detector has parent of instrument",
-                      compInfo->parent(detectorIndex), instrumentIndex);
-    TSM_ASSERT_EQUALS("Instrument has single detector",
-                      compInfo->detectorsInSubtree(instrumentIndex),
-                      std::vector<size_t>{detectorIndex});
+                      beamline->componentInfo().parent(detectorIndex),
+                      instrumentIndex);
+    TSM_ASSERT_EQUALS(
+        "Instrument has single detector",
+        beamline->componentInfo().detectorsInSubtree(instrumentIndex),
+        std::vector<size_t>{detectorIndex});
   }
 
   void test_visitor_component_check() {
@@ -241,12 +238,10 @@ public:
     // Visit everything
     visitor.walkInstrument();
 
-    auto compInfo = visitor.componentInfo();
-    auto detInfo = visitor.detectorInfo();
-    compInfo->setDetectorInfo(detInfo.get());
-    detInfo->setComponentInfo(compInfo.get());
+    auto beamline = visitor.beamline();
 
-    TS_ASSERT_EQUALS(compInfo->detectorsInSubtree(3), std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(beamline->componentInfo().detectorsInSubtree(3),
+                     std::vector<size_t>{0});
   }
 
   void test_visitor_component_ranges_check() {
@@ -260,20 +255,19 @@ public:
     // Visit everything
     visitor.walkInstrument();
 
-    auto compInfo = visitor.componentInfo();
-    auto detInfo = visitor.detectorInfo();
-    compInfo->setDetectorInfo(detInfo.get());
-    detInfo->setComponentInfo(compInfo.get());
+    auto beamline = visitor.beamline();
+    const auto &compInfo = beamline->componentInfo();
+    const auto &detInfo = beamline->detectorInfo();
 
-    TS_ASSERT_EQUALS(compInfo->size(), 4); // 4 components in total
-    TS_ASSERT_EQUALS(detInfo->size(), 1);  // 1 component is a detector
+    TS_ASSERT_EQUALS(compInfo.size(), 4); // 4 components in total
+    TS_ASSERT_EQUALS(detInfo.size(), 1);  // 1 component is a detector
 
-    auto subTreeOfRoot = compInfo->componentsInSubtree(3);
+    auto subTreeOfRoot = compInfo.componentsInSubtree(3);
     TS_ASSERT_EQUALS(
         std::set<size_t>(subTreeOfRoot.begin(), subTreeOfRoot.end()),
         (std::set<size_t>({0, 1, 2, 3})));
 
-    auto subTreeOfNonRoot = compInfo->componentsInSubtree(1);
+    auto subTreeOfNonRoot = compInfo.componentsInSubtree(1);
     TS_ASSERT_EQUALS(
         std::set<size_t>(subTreeOfNonRoot.begin(), subTreeOfNonRoot.end()),
         (std::set<size_t>({1})));
@@ -356,14 +350,12 @@ public:
     // Visit everything
     visitor.walkInstrument();
 
-    auto compInfo = visitor.componentInfo();
-    auto detInfo = visitor.detectorInfo();
-    compInfo->setDetectorInfo(detInfo.get());
-    detInfo->setComponentInfo(compInfo.get());
+    auto beamline = visitor.beamline();
+    const auto &compInfo = beamline->componentInfo();
 
-    TS_ASSERT_EQUALS(compInfo->parent(compInfo->source()), compInfo->root());
-    TS_ASSERT_EQUALS(compInfo->parent(compInfo->sample()), compInfo->root());
-    TS_ASSERT_EQUALS(compInfo->parent(compInfo->root()), compInfo->root());
+    TS_ASSERT_EQUALS(compInfo.parent(compInfo.source()), compInfo.root());
+    TS_ASSERT_EQUALS(compInfo.parent(compInfo.sample()), compInfo.root());
+    TS_ASSERT_EQUALS(compInfo.parent(compInfo.root()), compInfo.root());
   }
 };
 
