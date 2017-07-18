@@ -354,7 +354,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
 
     if (m_uiForm.ckUseVanadium->isChecked()) {
       const auto vanFile =
-        m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
+          m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
       msgDiffReduction->setProperty("VanadiumFiles", vanFile);
     }
   }
