@@ -37,6 +37,32 @@ std::string loadFile(const std::string &filename) {
   return retVal;
 }
 
+// ------------------------------------------------------------------------------------------------
+/** Return a string shortened with the center replace by " ... "
+* If the string is already short enough then the original string will be
+*returned.
+* If the max length or input string length is smaller than the ellipsis, the
+*input will be returned.
+*
+* @param input :: input string
+* @param max_length :: The maximum length of the return string (0 = return full
+*string)
+* @return the modified string.
+*/
+std::string shorten(const std::string &input, const size_t max_length) {
+  const std::string ellipsis = " ... ";
+  const size_t ellipsisSize = ellipsis.size();
+  // limit too small or input too small, return input string
+  if ((max_length == 0) || (input.size() < ellipsisSize + 2) ||
+      (input.size() <= max_length))
+    return input;
+
+  const size_t end_length = (max_length - ellipsisSize) / 2;
+  std::string retVal = input.substr(0, end_length) + ellipsis +
+                       input.substr(input.size() - end_length, end_length);
+  return retVal;
+}
+
 //------------------------------------------------------------------------------------------------
 /** Return a string with all matching occurence-strings
  *

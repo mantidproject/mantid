@@ -170,9 +170,9 @@ double DetectorInfo::signedTwoTheta(const size_t index) const {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Source and sample are at same position!");
   }
-  // Get the instrument up axis.
+  // Get the axis defining the sign
   const auto &instrumentUpAxis =
-      m_instrument->getReferenceFrame()->vecPointingUp();
+      m_instrument->getReferenceFrame()->vecThetaSign();
 
   const auto sampleDetVec = position(index) - samplePos;
   double angle = sampleDetVec.angle(beamLine);
@@ -199,9 +199,9 @@ DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) const {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Source and sample are at same position!");
   }
-  // Get the instrument up axis.
+  // Get the axis defining the sign
   const auto &instrumentUpAxis =
-      m_instrument->getReferenceFrame()->vecPointingUp();
+      m_instrument->getReferenceFrame()->vecThetaSign();
 
   const auto sampleDetVec = position(index) - samplePos;
   double angle = sampleDetVec.angle(beamLine);

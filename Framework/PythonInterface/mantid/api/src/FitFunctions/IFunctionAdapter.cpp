@@ -167,6 +167,7 @@ void IFunctionAdapter::setAttribute(const std::string &attName,
     object value = object(handle<>(getAttributeValue(*this, attr)));
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue",
                                           attName, value);
+    storeAttributeValue(attName, attr);
   } catch (UndefinedAttributeError &) {
     IFunction::setAttribute(attName, attr);
   }

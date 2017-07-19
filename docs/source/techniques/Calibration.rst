@@ -17,6 +17,6 @@ in:
 .. toctree::
    :maxdepth: 1
 
-   calibration_implementation
+   Calibration_implementation
 
 .. categories:: Techniques
