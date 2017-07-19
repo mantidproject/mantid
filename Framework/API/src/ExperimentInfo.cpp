@@ -249,8 +249,6 @@ const std::string ExperimentInfo::toString() const {
   return out.str();
 }
 
-
-
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
 */

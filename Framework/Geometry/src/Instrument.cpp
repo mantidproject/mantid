@@ -1254,7 +1254,6 @@ bool Instrument::hasInstrumentVisitor() const {
   return static_cast<bool>(m_instrVisitor);
 }
 
-
 bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
 
 int Instrument::add(IComponent *component) {
