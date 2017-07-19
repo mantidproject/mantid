@@ -164,7 +164,8 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
 }
 
 /** Checks that the two input workspace have common size and the same
-* instrument & unit. There is an option to check whether their binning is compatible
+* instrument & unit. There is an option to check whether their binning is
+* compatible
 *  Also calls the checkForOverlap method.
 *  @param ws1 :: The first input workspace
 *  @param ws2 :: The second input workspace
