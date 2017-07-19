@@ -372,8 +372,7 @@ double FABADAMinimizer::gaussianStep(const double &jump) {
 */
 void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
                                        double &newValue, double &step) {
-  const size_t &i = parameterIndex;
-  API::IConstraint *iconstr = m_fitFunction->getConstraint(i);
+  API::IConstraint *iconstr = m_fitFunction->getConstraint(parameterIndex);
   if (!iconstr)
     return;
   Constraints::BoundaryConstraint *bcon =
@@ -388,21 +387,21 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
   // Lower
   while (newValue < lower) {
     if (std::abs(step) > delta) {
-      newValue = m_parameters.get(i) + step / 10.0;
+      newValue = m_parameters.get(parameterIndex) + step / 10.0;
       step = step / 10;
-      m_jump[i] = m_jump[i] / 10;
+      m_jump[parameterIndex] = m_jump[parameterIndex] / 10;
     } else {
-      newValue = lower + std::abs(step) - (m_parameters.get(i) - lower);
+      newValue = lower + std::abs(step) - (m_parameters.get(parameterIndex) - lower);
     }
   }
   // Upper
   while (newValue > upper) {
     if (std::abs(step) > delta) {
-      newValue = m_parameters.get(i) + step / 10.0;
+      newValue = m_parameters.get(parameterIndex) + step / 10.0;
       step = step / 10;
-      m_jump[i] = m_jump[i] / 10;
+      m_jump[parameterIndex] = m_jump[parameterIndex] / 10;
     } else {
-      newValue = upper - (std::abs(step) + m_parameters.get(i) - upper);
+      newValue = upper - (std::abs(step) + m_parameters.get(parameterIndex) - upper);
     }
   }
 }
@@ -417,10 +416,9 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
 void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
                                      GSLVector &newParameters,
                                      double &newValue) {
-  const size_t &i = parameterIndex;
   // Fulfill the ties of the other parameters
   for (size_t j = 0; j < m_nParams; ++j) {
-    if (j != i) {
+    if (j != parameterIndex) {
       API::ParameterTie *tie = m_fitFunction->getTie(j);
       if (tie) {
         newValue = tie->eval();
@@ -433,14 +431,14 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
     }
   }
   // After all the other variables, the current one is updated to the ties
-  API::ParameterTie *tie = m_fitFunction->getTie(i);
+  API::ParameterTie *tie = m_fitFunction->getTie(parameterIndex);
   if (tie) {
     newValue = tie->eval();
     if (boost::math::isnan(newValue)) { // maybe not needed
       throw std::runtime_error("Parameter value is NaN.");
     }
-    newParameters.set(i, newValue);
-    m_fitFunction->setParameter(i, newValue);
+    newParameters.set(parameterIndex, newValue);
+    m_fitFunction->setParameter(parameterIndex, newValue);
   }
   //*ALTERNATIVE CODE
   //*To avoid creating the new class (way too slow)
@@ -478,7 +476,6 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
                                             const double &chi2New,
                                             GSLVector &newParameters) {
 
-  const size_t &i = parameterIndex;
 
   // If new Chi square value is lower, jumping directly to new parameter
   if (chi2New < m_chi2) {
@@ -488,7 +485,7 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
     m_chain[m_nParams].push_back(chi2New);
     m_parameters = newParameters;
     m_chi2 = chi2New;
-    m_changes[i] += 1;
+    m_changes[parameterIndex] += 1;
   }
 
   // If new Chi square value is higher, it depends on the probability
@@ -498,7 +495,7 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
 
     // Decide if changing or not
     boost::mt19937 mt;
-    mt.seed(int(time_t()) + 48 * (int(m_counter) + 76 * int(i)));
+    mt.seed(int(time_t()) + 48 * (int(m_counter) + 76 * int(parameterIndex)));
     boost::uniform_real<> distr(0.0, 1.0);
     double p = distr(mt);
     if (p <= prob) {
@@ -508,7 +505,7 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
       m_chain[m_nParams].push_back(chi2New);
       m_parameters = newParameters;
       m_chi2 = chi2New;
-      m_changes[i] += 1;
+      m_changes[parameterIndex] += 1;
     } else {
       for (size_t j = 0; j < m_nParams; j++) {
         m_chain[j].push_back(m_parameters.get(j));

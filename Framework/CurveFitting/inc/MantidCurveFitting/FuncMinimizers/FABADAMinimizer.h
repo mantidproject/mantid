@@ -23,7 +23,9 @@ namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
 
-/** FABADA : TODO: DESCRIPTION
+/** FABADA : Implements the FABADA Algorithm, based on a Adaptive Metropolis
+  Algorithm extended with Gibbs Sampling. Designed to obtain the Bayesian
+  posterior PDFs
 
   Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
