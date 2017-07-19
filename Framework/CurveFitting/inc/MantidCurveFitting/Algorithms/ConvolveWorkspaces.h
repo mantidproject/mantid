@@ -5,13 +5,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/Functions/CubicSpline.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidCurveFitting/Functions/CubicSpline.h"
-#include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunction1D.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -42,8 +42,8 @@ namespace Algorithms {
 
 class DLLExport ConvolveWorkspaces : public API::Algorithm {
 public:
-  ConvolveWorkspaces();
-  ~ConvolveWorkspaces() override;
+  ConvolveWorkspaces() : API::Algorithm() {}
+  ~ConvolveWorkspaces() override {}
   /// Algorithm's name
   const std::string name() const override { return "ConvolveWorkspaces"; }
   /// Summary of algorithms purpose
@@ -63,7 +63,7 @@ private:
   void exec() override;
   void convolve(MantidVec &xValues, const MantidVec &Y1, const MantidVec &Y2,
                 MantidVec &out) const;
-  API::Progress *prog;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 
 } // namespace Algorithms

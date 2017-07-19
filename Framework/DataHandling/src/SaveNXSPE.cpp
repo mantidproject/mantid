@@ -16,6 +16,7 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <nexus/NeXusFile.hpp>
 #include <boost/scoped_array.hpp>
 #include <limits>
 

@@ -9,14 +9,14 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <Poco/File.h>
 #include <boost/regex.hpp>
 #include <fstream>
-#include <Poco/File.h>
 #include <sstream>
 #include <string>
 
@@ -121,7 +121,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   std::vector<double> vecX, vecY, vecE;
 
   // progress
-  Progress *prog = nullptr;
+  std::unique_ptr<Progress> prog = nullptr;
 
   // Parameters for reading file
   char currentLine[256];
@@ -159,8 +159,8 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   while (!input.eof() && input.getline(currentLine, 256)) {
     // Initialize progress after NSpec is imported
-    if (nSpec != 0 && prog == nullptr) {
-      prog = new Progress(this, 0.0, 1.0, nSpec);
+    if (nSpec != 0 && !prog) {
+      prog = make_unique<Progress>(this, 0.0, 1.0, nSpec);
     }
 
     // Set flag to test SLOG
@@ -453,9 +453,6 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   // build instrument geometry
   createInstrumentGeometry(outputWorkspace, instrumentname, primaryflightpath,
                            detectorIDs, totalflightpaths, twothetas);
-
-  // Clean up
-  delete prog;
 
   return outputWorkspace;
 }

@@ -465,8 +465,6 @@ class SPowderSemiEmpiricalCalculator(object):
             fundamentals_coefficients=fund_coeff,
             quantum_order=order)
 
-        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
-
         if local_freq.any():  # check if local_freq has non-zero values
 
             q2 = None
@@ -499,7 +497,7 @@ class SPowderSemiEmpiricalCalculator(object):
             rebined_broad_spectrum = self._fix_empty_array()
 
         # multiply by k-point weight
-        rebined_broad_spectrum = rebined_broad_spectrum * self._weight
+        rebined_broad_spectrum = rebined_broad_spectrum * self._weight / AbinsModules.AbinsParameters.bin_width
 
         return local_freq, local_coeff, rebined_broad_spectrum
 

@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
@@ -126,7 +127,7 @@ class RunSetupScript(BaseScriptElement):
         elif inst_name == 'VULCAN':
             pass
         else:
-            print 'Instrument %s is not supported for set default parameter value.' % str(inst_name)
+            print ('Instrument %s is not supported for set default parameter value.' % str(inst_name))
 
         return
 

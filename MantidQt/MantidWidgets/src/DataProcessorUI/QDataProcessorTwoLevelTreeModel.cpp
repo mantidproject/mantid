@@ -15,7 +15,7 @@ columns, their indices and descriptions
 QDataProcessorTwoLevelTreeModel::QDataProcessorTwoLevelTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
-    : m_tWS(tableWorkspace), m_whitelist(whitelist) {
+    : AbstractDataProcessorTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size() + 1)
     throw std::invalid_argument("Invalid table workspace. Table workspace must "
@@ -31,14 +31,6 @@ QDataProcessorTwoLevelTreeModel::QDataProcessorTwoLevelTreeModel(
 
 QDataProcessorTwoLevelTreeModel::~QDataProcessorTwoLevelTreeModel() {}
 
-/** Returns the number of columns, i.e. elements in the whitelist
-* @return : The number of columns
-*/
-int QDataProcessorTwoLevelTreeModel::columnCount(
-    const QModelIndex & /* parent */) const {
-  return static_cast<int>(m_whitelist.size());
-}
-
 /** Returns data for specified index
 * @param index : The index
 * @param role : The role
@@ -46,37 +38,46 @@ int QDataProcessorTwoLevelTreeModel::columnCount(
 */
 QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
                                                int role) const {
-  if (!index.isValid())
-    return QVariant();
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole)
+  if (!index.isValid())
     return QVariant();
 
   if (!parent(index).isValid()) {
     // Index corresponds to a group
 
-    if (index.column() == 0) {
+    if ((role == Qt::DisplayRole || role == Qt::EditRole) &&
+        index.column() == 0) {
       // Return the group name only in the first column
       return QString::fromStdString(m_groupName.at(index.row()));
-    } else {
-      return QVariant();
+    }
+    if (role == Qt::BackgroundRole) {
+      // Highlight if this is in the list of highlighted groups
+      if (std::find(m_highlightGroups.begin(), m_highlightGroups.end(),
+                    index.row()) != m_highlightGroups.end())
+        return QColor("#00b300");
     }
   } else {
     // Index corresponds to a row
+    auto pIndex = parent(index);
 
-    // Absolute position of this row in the table
-    int absolutePosition = m_rowsOfGroup[parent(index).row()][index.row()];
-    return QString::fromStdString(
-        m_tWS->String(absolutePosition, index.column() + 1));
+    if (role == Qt::DisplayRole || role == Qt::EditRole) {
+      // Absolute position of this row in the table
+      int absolutePosition = m_rowsOfGroup[pIndex.row()][index.row()];
+      return QString::fromStdString(
+          m_tWS->String(absolutePosition, index.column() + 1));
+    }
+    if (role == Qt::BackgroundRole) {
+      // Highlight if this is in the list of highlighted rows
+      if (m_highlightRows.count(pIndex.row())) {
+        auto groupItems = m_highlightRows.at(pIndex.row());
+        if (std::find(groupItems.begin(), groupItems.end(), index.row()) !=
+            groupItems.end())
+          return QColor("#00b300");
+      }
+    }
   }
-}
 
-Qt::ItemFlags
-QDataProcessorTwoLevelTreeModel::flags(const QModelIndex &index) const {
-  if (!index.isValid())
-    return 0;
-
-  return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+  return QVariant();
 }
 
 /** Returns the column name (header data for given section)
@@ -467,13 +468,49 @@ void QDataProcessorTwoLevelTreeModel::setupModelData(
 }
 
 /** Return the underlying data structure, i.e. the table workspace this model is
- * representing
- *
- * @return :: the underlying table workspace
- */
+* representing
+* @return :: the underlying table workspace
+*/
 ITableWorkspace_sptr
 QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
+}
+
+/** Add a new data item to be highlighted
+* @param position : The position of the item to be highlighted
+* @param parent : The parent of this item
+* @return : Boolean indicating whether the row was successfully highlighted
+*/
+bool QDataProcessorTwoLevelTreeModel::addHighlighted(
+    int position, const QModelIndex &parent) {
+
+  if (!parent.isValid()) {
+    // We have a group item (no parent)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount())
+      return false;
+
+    m_highlightGroups.push_back(position);
+  } else {
+    // We have a row item (parent exists)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount(parent))
+      return false;
+
+    m_highlightRows[parent.row()].push_back(position);
+  }
+
+  return true;
+}
+
+/** Clear the lists of highlighted rows and groups
+*/
+void QDataProcessorTwoLevelTreeModel::clearHighlighted() {
+
+  m_highlightRows.clear();
+  m_highlightGroups.clear();
 }
 
 } // namespace MantidWidgets

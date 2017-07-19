@@ -134,6 +134,14 @@ template <>
 MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace>
 createConcreteHelper();
 
+template <class HistArg>
+void fixDistributionFlag(API::MatrixWorkspace &, const HistArg &) {}
+
+template <>
+MANTID_DATAOBJECTS_DLL void
+fixDistributionFlag(API::MatrixWorkspace &workspace,
+                    const HistogramData::Histogram &histArg);
+
 MANTID_DATAOBJECTS_DLL void
 initializeFromParent(const API::MatrixWorkspace &parent,
                      API::MatrixWorkspace &ws);
@@ -143,7 +151,8 @@ initializeFromParentWithoutLogs(const API::MatrixWorkspace &parent,
                                 API::MatrixWorkspace &ws);
 }
 
-/** This is the create() method that all the other create() methods call
+/** This is the create() method that all the other create() methods call.
+ *  And it is also called directly.
  */
 template <class T, class P, class IndexArg, class HistArg,
           class = typename std::enable_if<
@@ -169,8 +178,7 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
     }
   }
 
-  // The instrument is also copied by initializeFromParent or
-  // initializeFromParentWithoutLogs, but if indexArg is
+  // The instrument is also copied by initializeFromParent, but if indexArg is
   // IndexInfo and contains non-empty spectrum definitions the initialize call
   // will fail due to invalid indices in the spectrum definitions. Therefore, we
   // copy the instrument first. This should be cleaned up once we figure out the
@@ -178,6 +186,10 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
   ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   detail::initializeFromParent(parent, *ws);
+  // initializeFromParent sets the distribution flag to the same value as
+  // parent. In case histArg is an actual Histogram that is not the correct
+  // behavior so we have to set it back to the value given by histArg.
+  detail::fixDistributionFlag(*ws, histArg);
   return ws;
 }
 
@@ -217,6 +229,7 @@ std::unique_ptr<T> createWithoutLogs(const P &parent, const IndexArg &indexArg,
   ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   detail::initializeFromParentWithoutLogs(parent, *ws);
+  detail::fixDistributionFlag(*ws, histArg);
   return ws;
 }
 

@@ -1,15 +1,11 @@
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/FindPeaksMD.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/VMD.h"
-#include "MantidAPI/Run.h"
-#include "MantidKernel/BoundedValidator.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
-
-#include <cmath>
-#include <boost/type_traits/integral_constant.hpp>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/VMD.h"
 
 #include <map>
 #include <vector>
@@ -322,7 +318,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // List of chosen possible peak boxes.
     std::vector<API::IMDNode *> peakBoxes;
 
-    prog = new Progress(this, 0.30, 0.95, m_maxPeaks);
+    prog = make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
 
     // used for selecting method for calculating BinCount
     bool isMDEvent(ws->id().find("MDEventWorkspace") != std::string::npos);
@@ -507,7 +503,7 @@ void FindPeaksMD::findPeaksHisto(
     // List of chosen possible peak boxes.
     std::vector<size_t> peakBoxes;
 
-    prog = new Progress(this, 0.30, 0.95, m_maxPeaks);
+    prog = make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
 
     int64_t numBoxesFound = 0;
     // Now we go (backwards) through the map
@@ -614,8 +610,6 @@ void FindPeaksMD::exec() {
                              "MDHistoWorkspace or a MDEventWorkspace; it does "
                              "not work on a regular MatrixWorkspace.");
   }
-
-  delete prog;
 
   // Do a sort by bank name and then descending bin count (intensity)
   std::vector<std::pair<std::string, bool>> criteria;

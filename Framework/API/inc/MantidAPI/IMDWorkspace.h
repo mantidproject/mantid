@@ -1,7 +1,6 @@
 #ifndef MANTID_API_IMDWORKSPACE_H_
 #define MANTID_API_IMDWORKSPACE_H_
 
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
@@ -69,7 +68,8 @@ static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 
 class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
-  IMDWorkspace();
+  IMDWorkspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   IMDWorkspace &operator=(const IMDWorkspace &other) = delete;
 
   /**
@@ -85,6 +85,12 @@ public:
   std::unique_ptr<IMDWorkspace> clone() const {
     return std::unique_ptr<IMDWorkspace>(doClone());
   }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<IMDWorkspace> cloneEmpty() const {
+    return std::unique_ptr<IMDWorkspace>(doCloneEmpty());
+  }
+
   /// Get the number of points associated with the workspace.
   /// For MDEvenWorkspace it is the number of events contributing into the
   /// workspace
@@ -176,6 +182,7 @@ protected:
 private:
   std::string m_convention;
   IMDWorkspace *doClone() const override = 0;
+  IMDWorkspace *doCloneEmpty() const override = 0;
 };
 
 /// Shared pointer to the IMDWorkspace base class

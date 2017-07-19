@@ -4,6 +4,7 @@
 #include "MantidQtAPI/DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include <array>
 
 namespace MantidQt {
 namespace API {
@@ -12,13 +13,13 @@ enum class DimensionSelection { H, K, L };
 
 void EXPORT_OPT_MANTIDQT_API
 provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
-                  Mantid::API::IMDWorkspace_const_sptr workspace);
+                  const Mantid::API::IMDWorkspace &workspace);
 
 bool EXPORT_OPT_MANTIDQT_API
-requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace);
+requiresSkewMatrix(const Mantid::API::IMDWorkspace &workspace);
 
 bool EXPORT_OPT_MANTIDQT_API
-isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace, size_t dimX,
+isHKLDimensions(const Mantid::API::IMDWorkspace &workspace, size_t dimX,
                 size_t dimY);
 
 size_t EXPORT_OPT_MANTIDQT_API
@@ -26,19 +27,13 @@ getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
                             size_t dimX, size_t dimY);
 
 void EXPORT_OPT_MANTIDQT_API
-transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
-                            Mantid::coord_t skewMatrixCoord[9]);
-
-void EXPORT_OPT_MANTIDQT_API
-transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
-                                   const Mantid::coord_t skewMatrix[9],
-                                   const size_t &dimX, const size_t &dimY,
-                                   const size_t &dimSlice);
+transformFromDoubleToCoordT(const Mantid::Kernel::DblMatrix &skewMatrix,
+                            std::array<Mantid::coord_t, 9> &skewMatrixCoord);
 
 template <typename T>
-void transformLookpointToWorkspaceCoordGeneric(
-    T &lookPoint, const Mantid::coord_t skewMatrix[9], const size_t &dimX,
-    const size_t &dimY, const size_t &dimSlice) {
+void transformLookpointToWorkspaceCoord(
+    T &lookPoint, const std::array<Mantid::coord_t, 9> &skewMatrix,
+    const size_t &dimX, const size_t &dimY, const size_t &dimSlice) {
   auto sliceDimResult =
       (lookPoint[dimSlice] - skewMatrix[3 * dimSlice + dimX] * lookPoint[dimX] -
        skewMatrix[3 * dimSlice + dimY] * lookPoint[dimY]) /
@@ -62,8 +57,8 @@ void transformLookpointToWorkspaceCoordGeneric(
 }
 
 std::pair<double, double> EXPORT_OPT_MANTIDQT_API
-getGridLineAnglesInRadian(Mantid::coord_t skewMatrixCoord[9], size_t dimX,
-                          size_t dimY);
+getGridLineAnglesInRadian(const std::array<Mantid::coord_t, 9> &skewMatrixCoord,
+                          size_t dimX, size_t dimY);
 }
 }
 

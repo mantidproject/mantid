@@ -28,11 +28,24 @@ Plotting Improvements
 Algorithm Toolbox
 #################
 
-Scripting Window
-################
+Workspace History Window
+########################
+
+.. figure:: ../../images/WorkspaceHistoryShortenedValues.png
+   :class: screenshot
+   :align: right
+
+- Algorithm proprties with long values are now shown in a shortened format both in this display and the log.  The full history is still retained, and genereated python scripts will still work as before.
+
 
 Documentation
 #############
+
+Custom Interfaces
+#################
+
+- General > Multi dataset fitting interface and the general fitting dock now display the status string returned by the `Fit` algorithm. If an error occured during fitting it will be reported in this string.
+
 
 Bugs Resolved
 -------------

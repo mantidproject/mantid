@@ -2,8 +2,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IDetector.h"
@@ -24,14 +24,7 @@ using namespace API;
 /// Default constructor
 UnwrapMonitor::UnwrapMonitor()
     : m_conversionConstant(0.), m_inputWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.),
-      m_XSize(0), m_progress(nullptr) {}
-
-/// Destructor
-UnwrapMonitor::~UnwrapMonitor() {
-  if (m_progress)
-    delete m_progress;
-  m_progress = nullptr;
-}
+      m_XSize(0) {}
 
 /// Initialisation method
 void UnwrapMonitor::init() {
@@ -102,7 +95,7 @@ void UnwrapMonitor::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const double L1 = spectrumInfo.l1();
 
-  m_progress = new Progress(this, 0.0, 1.0, numberOfSpectra);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, numberOfSpectra);
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i) {
     if (!spectrumInfo.hasDetectors(i)) {

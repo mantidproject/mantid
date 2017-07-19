@@ -14,7 +14,7 @@ using namespace Mantid::API;
 QDataProcessorOneLevelTreeModel::QDataProcessorOneLevelTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
-    : m_tWS(tableWorkspace), m_whitelist(whitelist) {
+    : AbstractDataProcessorTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size())
     throw std::invalid_argument(
@@ -23,14 +23,6 @@ QDataProcessorOneLevelTreeModel::QDataProcessorOneLevelTreeModel(
 }
 
 QDataProcessorOneLevelTreeModel::~QDataProcessorOneLevelTreeModel() {}
-
-/** Returns the number of columns, i.e. elements in the whitelist
-* @return : The number of columns
-*/
-int QDataProcessorOneLevelTreeModel::columnCount(
-    const QModelIndex & /* parent */) const {
-  return static_cast<int>(m_whitelist.size());
-}
 
 /** Returns data for specified index
 * @param index : The index
@@ -42,21 +34,19 @@ QVariant QDataProcessorOneLevelTreeModel::data(const QModelIndex &index,
   if (!index.isValid())
     return QVariant();
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole)
-    return QVariant();
-
   if (parent(index).isValid())
     return QVariant();
 
-  return QString::fromStdString(m_tWS->String(index.row(), index.column()));
-}
+  if (role == Qt::DisplayRole || role == Qt::EditRole) {
+    return QString::fromStdString(m_tWS->String(index.row(), index.column()));
+  } else if (role == Qt::BackgroundRole) {
+    // Highlight if this is in the lists of rows to be highlighted
+    if (std::find(m_highlightRows.begin(), m_highlightRows.end(),
+                  index.row()) != m_highlightRows.end())
+      return QColor("#00b300");
+  }
 
-Qt::ItemFlags
-QDataProcessorOneLevelTreeModel::flags(const QModelIndex &index) const {
-  if (!index.isValid())
-    return 0;
-
-  return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+  return QVariant();
 }
 
 /** Returns the column name (header data for given section)
@@ -195,6 +185,44 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
   emit dataChanged(index, index);
 
   return true;
+}
+
+/** Sets the currently highlighted row
+* @param position : The position of the row to be highlighted
+* @param parent : The parent of this row
+* @return : Boolean indicating whether the row was successfully highlighted
+*/
+bool QDataProcessorOneLevelTreeModel::addHighlighted(
+    int position, const QModelIndex &parent) {
+
+  // No parent items exists, this should not be possible
+  if (parent.isValid())
+    return false;
+
+  // Incorrect position
+  if (position < 0 || position >= rowCount())
+    return false;
+
+  m_highlightRows.push_back(position);
+
+  return true;
+}
+
+/** Clear the list of highlighted rows
+*/
+void QDataProcessorOneLevelTreeModel::clearHighlighted() {
+
+  m_highlightRows.clear();
+}
+
+/** Return the underlying data structure, i.e. the table workspace this model is
+* representing
+*
+* @return :: the underlying table workspace
+*/
+ITableWorkspace_sptr
+QDataProcessorOneLevelTreeModel::getTableWorkspace() const {
+  return m_tWS;
 }
 
 } // namespace MantidWidgets

@@ -4,8 +4,9 @@
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
 #include <map>
-#include <string>
 #include <vector>
+
+#include <QString>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -39,9 +40,9 @@ public:
   DataProcessorWhiteList() : m_lastIndex(0){};
   virtual ~DataProcessorWhiteList(){};
 
-  void addElement(const std::string &colName, const std::string &algProperty,
-                  const std::string &description, bool showValue = false,
-                  const std::string &prefix = "");
+  void addElement(const QString &colName, const QString &algProperty,
+                  const QString &description, bool showValue = false,
+                  const QString &prefix = "");
   int colIndexFromColName(const std::string &colName) const;
   std::string colNameFromColIndex(int index) const;
   std::string algPropFromColIndex(int index) const;
