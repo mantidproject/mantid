@@ -170,7 +170,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
 *  @param ws1 :: The first input workspace
 *  @param ws2 :: The second input workspace
 *  @param checkBinning :: A flag for whether to check that the workspaces have
-* compatible binning
+* compatible binning (default true)
 *  @throw std::invalid_argument If the workspaces are not compatible
 */
 void Mantid::Algorithms::WorkspaceJoiners::validateInputs(
@@ -220,18 +220,6 @@ void Mantid::Algorithms::WorkspaceJoiners::validateInputs(
     g_log.error(message);
     throw std::invalid_argument(message);
   }
-}
-
-/** Checks that the two input workspace have common binning & size, the same
- * instrument & unit.
- *  Also calls the checkForOverlap method.
- *  @param ws1 :: The first input workspace
- *  @param ws2 :: The second input workspace
- *  @throw std::invalid_argument If the workspaces are not compatible
- */
-void WorkspaceJoiners::validateInputs(const MatrixWorkspace &ws1,
-                                      const MatrixWorkspace &ws2) {
-  validateInputs(ws1, ws2, true);
 }
 
 /**
