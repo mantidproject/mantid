@@ -20,7 +20,7 @@ using namespace Mantid::CurveFitting::Functions;
 namespace {
 
 MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
-                                              size_t XYLength = 20) {
+                                         size_t XYLength = 20) {
   MatrixWorkspace_sptr ws2(new WorkspaceTester);
   ws2->initialize(NVectors, XYLength, XYLength);
 
