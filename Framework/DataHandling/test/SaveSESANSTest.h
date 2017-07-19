@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/SaveSESANS.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::DataHandling::SaveSESANS;
 
@@ -15,12 +17,17 @@ public:
   static void destroySuite( SaveSESANSTest *suite ) { delete suite; }
 
 
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
+  void test_rejectTooManySpectra() {
+	  Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+
+	  Mantid::DataHandling::SaveSESANS testAlg;
+	  testAlg.initialize();
+	  testAlg.setChild(true);
+	  testAlg.setRethrows(true);
+	  testAlg.setProperty("InputWorkspace", ws);
+	  testAlg.setProperty("Filename", "test.ses");
+	  TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
   }
-
-
 };
 
 

@@ -1,13 +1,27 @@
 #ifndef MANTID_DATAHANDLING_SAVESESANS_H_
 #define MANTID_DATAHANDLING_SAVESESANS_H_
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
-
 
 namespace Mantid {
 namespace DataHandling {
 
-/** SaveSESANS : TODO: DESCRIPTION
+/** SaveSESANS : Save a workspace in the SESANS file format
+
+  Require properties:
+  <UL>
+  <LI> InputWorkspace - The name of the workspace to save</LI>
+  <LI> Filename - The path to save the file</LI>
+  <LI> Theta_zmax - TODO : Find a good description for this</LI>
+  <LI> Theta_zmaz_unit - Unit for theta_znmax</LI>
+  <LI> Theta_ymax - TODO : Find a good description for this</LI>
+  <LI> Theta_ymaz_unit - Unit for theta_ymax</LI>
+  <LI> Orientation - Orientation of the instrument
+  </UL>
+
+  @author Joseph Ramsay, ISIS
+  @date 19/07/2017
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,8 +44,18 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_DATAHANDLING_DLL SaveSESANS {
-public:};
+class MANTID_DATAHANDLING_DLL SaveSESANS : public API::Algorithm {
+public:
+	const std::string name() const override;
+	const std::string summary() const override;
+	int version() const override;
+	const std::string category() const override;
+
+private:	
+	const std::vector<std::string> fileExtensions{ ".ses" };
+	void init() override;
+	void exec() override;
+};
 
 } // namespace DataHandling
 } // namespace Mantid
