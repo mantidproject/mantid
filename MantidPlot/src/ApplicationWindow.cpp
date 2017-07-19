@@ -7757,12 +7757,12 @@ void ApplicationWindow::printAllPlots() {
     bool firstPage = true;
     foreach (MdiSubWindow *w, windows) {
       if (std::string(w->metaObject()->className()) == "MultiLayer") {
-          if (firstPage || printer.newPage()) {
-              MultiLayer *ml = dynamic_cast<MultiLayer *>(w);
-              if (ml)
-                  ml->printAllLayers(paint);
-              firstPage = false;
-          }
+        if (firstPage || printer.newPage()) {
+          MultiLayer *ml = dynamic_cast<MultiLayer *>(w);
+          if (ml)
+            ml->printAllLayers(paint);
+          firstPage = false;
+        }
       }
     }
     paint->end();
