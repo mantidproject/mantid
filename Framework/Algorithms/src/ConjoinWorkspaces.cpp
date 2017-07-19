@@ -55,7 +55,7 @@ void ConjoinWorkspaces::exec() {
   }
 
   if (event_ws1 && event_ws2) {
-    this->validateInputs(*event_ws1, *event_ws2);
+    this->validateInputs(*event_ws1, *event_ws2, false);
 
     // Check there is no overlap
     if (this->getProperty("CheckOverlapping")) {
