@@ -506,13 +506,26 @@ void PDCalibration::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  // sort the calibration workspaces
+  { // limit scope
+    auto alg = createChildAlgorithm("SortTableWorkspace");
+    alg->setProperty("InputWorkspace", m_calibrationTable);
+    alg->setProperty("OutputWorkspace", m_calibrationTable);
+    alg->setProperty("Columns", "detid");
+    alg->executeAsChildAlg();
+    m_calibrationTable = alg->getProperty("OutputWorkspace");
+  }
+  setProperty("OutputCalibrationTable", m_calibrationTable);
+
   // fix-up the diagnostic workspaces
-  auto alg = createChildAlgorithm("SortTableWorkspace");
-  alg->setProperty("InputWorkspace", m_peakPositionTable);
-  alg->setProperty("OutputWorkspace", m_peakPositionTable);
-  alg->setProperty("Columns", "detid");
-  alg->executeAsChildAlg();
-  m_peakPositionTable = alg->getProperty("OutputWorkspace");
+  { // limit scope
+    auto alg = createChildAlgorithm("SortTableWorkspace");
+    alg->setProperty("InputWorkspace", m_peakPositionTable);
+    alg->setProperty("OutputWorkspace", m_peakPositionTable);
+    alg->setProperty("Columns", "detid");
+    alg->executeAsChildAlg();
+    m_peakPositionTable = alg->getProperty("OutputWorkspace");
+  }
 
   // set the diagnostic workspaces out
   const std::string partials_prefix = getPropertyValue("DiagnosticWorkspaces");
@@ -863,7 +876,6 @@ void PDCalibration::loadOldCalibration() {
     m_calibrationTable->addColumn("int", "dasid");
   m_calibrationTable->addColumn("double", "tofmin");
   m_calibrationTable->addColumn("double", "tofmax");
-  setProperty("OutputCalibrationTable", m_calibrationTable);
 
   // copy over the values
   for (std::size_t rowNum = 0; rowNum < calibrationTableOld->rowCount();
