@@ -1,6 +1,7 @@
 #include "MantidBeamline/Beamline.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include <memory>
 
 namespace Mantid {
 namespace Beamline {
@@ -8,10 +9,16 @@ namespace Beamline {
 namespace {
 
 template <typename T>
-boost::shared_ptr<T> copyOrNull(const boost::shared_ptr<T> &source) {
-  return source ? boost::make_shared<T>(*source)
-                : boost::shared_ptr<T>(nullptr);
+std::unique_ptr<T> copyOrNull(const std::unique_ptr<T> &source) {
+  return source ? std::make_unique<T>(*source) : std::unique_ptr<T>(nullptr);
 }
+}
+
+Beamline::Beamline() :
+    m_componentInfo(std::unique_ptr<ComponentInfo>(nullptr)),
+    m_detectorInfo(std::unique_ptr<DetectorInfo>(nullptr))
+{
+
 }
 
 /**
@@ -38,8 +45,8 @@ Beamline &Beamline::operator=(const Beamline &other) {
 
 Beamline::Beamline(ComponentInfo &&componentInfo, DetectorInfo &&detectorInfo)
     : m_empty(false),
-      m_componentInfo(boost::make_shared<ComponentInfo>(componentInfo)),
-      m_detectorInfo(boost::make_shared<DetectorInfo>(detectorInfo)) {
+      m_componentInfo(std::make_unique<ComponentInfo>(componentInfo)),
+      m_detectorInfo(std::make_unique<DetectorInfo>(detectorInfo)) {
   m_componentInfo->setDetectorInfo(m_detectorInfo.get());
   m_detectorInfo->setComponentInfo(m_componentInfo.get());
 }

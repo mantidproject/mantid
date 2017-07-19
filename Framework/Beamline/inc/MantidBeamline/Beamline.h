@@ -2,14 +2,13 @@
 #define MANTID_BEAMLINE_BEAMLINE_H_
 
 #include "MantidBeamline/DllConfig.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/proto/functional/range/empty.hpp>
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
+#include <memory>
 
 namespace Mantid {
 namespace Beamline {
 
-class ComponentInfo;
-class DetectorInfo;
 /** Beamline : Also known as Instrument 2.0
 
   This is the top-level object for accessing ComponentInfo, DetectorInfo and
@@ -45,7 +44,7 @@ class DetectorInfo;
 */
 class MANTID_BEAMLINE_DLL Beamline {
 public:
-  Beamline() = default;
+  Beamline();
   Beamline(const Beamline &other);
   Beamline &operator=(const Beamline &other);
   Beamline(ComponentInfo &&componentInfo, DetectorInfo &&detectorInfo);
@@ -57,8 +56,8 @@ public:
 
 private:
   bool m_empty = true;
-  boost::shared_ptr<ComponentInfo> m_componentInfo{nullptr};
-  boost::shared_ptr<DetectorInfo> m_detectorInfo{nullptr};
+  std::unique_ptr<ComponentInfo> m_componentInfo;
+  std::unique_ptr<DetectorInfo> m_detectorInfo;
 };
 
 } // namespace Beamline
