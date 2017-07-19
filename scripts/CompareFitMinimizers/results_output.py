@@ -24,6 +24,7 @@ formats such as RST and plain text.
 
 from __future__ import (absolute_import, division, print_function)
 
+from plotHelper import *
 import numpy as np
 from docutils.core import publish_string
 import post_processing as postproc
@@ -51,6 +52,62 @@ WORKING_DIR = os.getcwd()
 # Directory of this script (e.g. in source)
 SCRIPT_DIR = os.path.dirname(__file__)
 
+def build_plot(minimizers, results_per_test, problems_obj, group_name, use_errors,
+                               simple_text=True, rst=False, save_to_file=False, color_scale=None):
+    """
+    Prints out results for a group of fit problems in accuracy and runtime tables, in a summary
+    format and both as simple text, rst format and/or to file depending on input arguments
+
+    @param minimizers :: list of minimizer names
+    @param results_per_test :: result objects
+    @param problems_obj :: definitions of the test problems
+    @param group_name :: name of this group of problems (example 'NIST "lower difficulty"', or
+                         'Neutron data')
+    @param use_errors :: whether to use observational errors
+    @param simple_text :: whether to print the tables in a simple text format
+    @param rst :: whether to print the tables in rst format. They are printed to the standard outputs
+                  and to files following specific naming conventions
+    @param save_to_file :: If rst=True, whether to save the tables to files following specific naming conventions
+    @param color_scale :: threshold-color pairs. This is used for RST tables. The number of levels
+                          must be consistent with the style sheet used in the documentation pages (5
+                          at the moment).
+    """
+    linked_problems = build_indiv_linked_problems(results_per_test, group_name)
+
+    # Calculate summary tables
+    accuracy_tbl, runtime_tbl = postproc.calc_accuracy_runtime_tbls(results_per_test, minimizers)
+    norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime = \
+        postproc.calc_norm_summary_tables(accuracy_tbl, runtime_tbl)
+
+    header = " ============= moos: ===============\n"
+    header += " =================================================================\n"
+    print(header)
+
+    min_sum_err_sq = np.amin(accuracy_tbl, 1)
+    num_tests = len(results_per_test)
+    results_text = ''
+    for test_idx in range(0, num_tests):
+        results_text += "{0}\t".format(results_per_test[test_idx][0].problem.name)
+        for minimiz_idx, minimiz in enumerate(minimizers):
+            # 'e' format is easier to read in raw text output than 'g'
+            results_text += (" {0:.10g}".
+                             format(results_per_test[test_idx][minimiz_idx].sum_err_sq /
+                                    min_sum_err_sq[test_idx]))
+        results_text += "\n"
+    print (results_text)
+    for minimiz_idx, minimiz in enumerate(minimizers):
+		
+        for  test_idx in range(0, num_tests):
+			a=1
+    #        # 'e' format is easier to read in raw text output than 'g'
+#			results_text += "{0}\t".format(results_per_test[test_idx][0].problem.name)
+#            results_text += (" {0:.10g}".
+#                             format(results_per_test[test_idx][minimiz_idx].sum_err_sq /
+#                                    min_sum_err_sq[test_idx]))
+#        results_text += "\n"
+    print(results_text)
+   
+   
 
 def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors,
                                simple_text=True, rst=False, save_to_file=False, color_scale=None):
@@ -272,7 +329,7 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
     grp_linked_names = build_group_linked_names(group_names)
 
     header = '**************** Accuracy ******** \n\n'
-    print(header)
+    #print(header)
     tbl_all_summary_acc = build_rst_table(minimizers, grp_linked_names, groups_norm_acc,
                                           comparison_type='summary', comparison_dim='accuracy',
                                           using_errors=use_errors)
@@ -283,15 +340,17 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
         save_table_to_file(tbl_all_summary_acc, use_errors, 'summary', FILENAME_SUFFIX_ACCURACY, FILENAME_EXT_HTML)
 
     header = '**************** Runtime ******** \n\n'
-    print(header)
+    #print(header)
     tbl_all_summary_runtime = build_rst_table(minimizers, grp_linked_names, groups_norm_runtime,
                                               comparison_type='summary', comparison_dim='runtime',
                                               using_errors=use_errors)
-    print(tbl_all_summary_runtime)
+    #print(tbl_all_summary_runtime)
 
     if save_to_file:
         save_table_to_file(tbl_all_summary_runtime, use_errors, 'summary', FILENAME_SUFFIX_RUNTIME, FILENAME_EXT_TXT)
         save_table_to_file(tbl_all_summary_runtime, use_errors, 'summary', FILENAME_SUFFIX_RUNTIME, FILENAME_EXT_HTML)
+
+	print("hi ")
 
 
 def weighted_suffix_string(use_errors):
@@ -347,7 +406,6 @@ def calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale=None):
 
     return cell_len
 
-
 def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_dim,
                     using_errors, color_scale=None):
     """"
@@ -401,7 +459,7 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_di
         tbl_body += '\n'
         tbl_body += tbl_footer
 
-    return tbl_header + tbl_body
+    return tbl_header  + tbl_body
 
 
 def build_rst_table_header_chunks(first_col_len, cell_len, columns_txt):
