@@ -86,9 +86,8 @@ public:
   /// Handle data reduction paused/resumed
   void pause() const override;
   void resume() const override;
-  /// Reduction paused/resumed confirmation handler
+  /// Reduction paused confirmation handler
   void confirmReductionPaused() const override;
-  void confirmReductionResumed() const override;
 
 private:
   /// The search model

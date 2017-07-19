@@ -80,6 +80,9 @@ public:
   void pause() override;
   void resume() override;
 
+  // Reduction paused confirmation handler
+  void confirmReductionPaused() override;
+
   // Setter methods
   void setSelection(const std::set<int> &groups) override;
   void setSelectionModelConnections() override;

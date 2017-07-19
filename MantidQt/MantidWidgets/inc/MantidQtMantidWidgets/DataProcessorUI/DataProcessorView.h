@@ -77,6 +77,9 @@ public:
   virtual void pause() = 0;
   virtual void resume() = 0;
 
+  // Reduction paused confirmation handler
+  virtual void confirmReductionPaused() = 0;
+
   // Setter methods
   virtual void setTableList(const std::set<std::string> &tables) = 0;
   virtual void setInstrumentList(const std::vector<std::string> &instruments,

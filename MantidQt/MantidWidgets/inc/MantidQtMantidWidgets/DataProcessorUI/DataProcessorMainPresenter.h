@@ -74,9 +74,8 @@ public:
   virtual void pause() const = 0;
   virtual void resume() const = 0;
 
-  /// Handle data reduction paused/resumed confirmation
+  /// Handle data reduction paused confirmation
   virtual void confirmReductionPaused() const = 0;
-  virtual void confirmReductionResumed() const = 0;
 };
 }
 }

@@ -269,8 +269,9 @@ Process a new row
 void GenericDataProcessorPresenter::nextRow() {
 
   if (m_reductionPaused) {
-    // Notify presenter that reduction is paused
+    // Notify presenter and view that reduction is paused
     m_mainPresenter->confirmReductionPaused();
+    m_view->confirmReductionPaused();
     return;
   }
 
@@ -307,8 +308,9 @@ Process a new group
 void GenericDataProcessorPresenter::nextGroup() {
 
   if (m_reductionPaused) {
-    // Notify presenter that reduction is paused
+    // Notify presenter and view that reduction is paused
     m_mainPresenter->confirmReductionPaused();
+    m_view->confirmReductionPaused();
     return;
   }
 
@@ -1454,7 +1456,6 @@ void GenericDataProcessorPresenter::pause() {
 
   m_view->pause();
   m_mainPresenter->pause();
-
   m_reductionPaused = true;
 }
 
@@ -1464,9 +1465,7 @@ void GenericDataProcessorPresenter::resume() {
 
   m_view->resume();
   m_mainPresenter->resume();
-
   m_reductionPaused = false;
-  m_mainPresenter->confirmReductionResumed();
 
   doNextAction();
 }

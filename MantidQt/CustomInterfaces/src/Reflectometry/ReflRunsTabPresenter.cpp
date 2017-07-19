@@ -427,38 +427,33 @@ std::string ReflRunsTabPresenter::getTimeSlicingType() const {
   return m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup());
 }
 
-/** Tells view to enable the 'process' button and disable the 'pause' button
-* when data reduction is paused
+/** Disables the 'pause' button when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() const {
 
-  m_view->setRowActionEnabled(0, true);
   m_view->setRowActionEnabled(1, false);
 }
 
-/** Tells view to disable the 'process' button and enable the 'pause' button
-* when data reduction is resumed
+/** Disables the 'process' button and enables the 'pause' button when data
+ * reduction is resumed. Also notifies main presenter that data reduction is
+ * confirmed to be resumed.
 */
 void ReflRunsTabPresenter::resume() const {
 
   m_view->setRowActionEnabled(0, false);
   m_view->setRowActionEnabled(1, true);
+  m_mainPresenter->notify(
+      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
 
-/** Notifies main presenter that data reduction is confirmed to be paused
+/** Enables 'process' button and notifies main presenter that data reduction is
+* confirmed to be paused
 */
 void ReflRunsTabPresenter::confirmReductionPaused() const {
 
+  m_view->setRowActionEnabled(0, true);
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
-}
-
-/** Notifies main presenter that data reduction is confirmed to be resumed
-*/
-void ReflRunsTabPresenter::confirmReductionResumed() const {
-
-  m_mainPresenter->notify(
-      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
 
 /**

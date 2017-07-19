@@ -233,11 +233,6 @@ Handle interface when data reduction paused
 */
 void QDataProcessorWidget::pause() {
 
-  // Enable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(true);
-  m_contextMenu->actions()[0]->setEnabled(true);
-  ui.buttonProcess->setEnabled(true);
-
   // Disable 'pause' buttons
   ui.rowToolBar->actions()[1]->setEnabled(false);
   m_contextMenu->actions()[1]->setEnabled(false);
@@ -256,6 +251,17 @@ void QDataProcessorWidget::resume() {
   // Disable 'pause' buttons
   ui.rowToolBar->actions()[1]->setEnabled(true);
   m_contextMenu->actions()[1]->setEnabled(true);
+}
+
+/**
+Handle interface when data reduction confirmed to be paused
+*/
+void QDataProcessorWidget::confirmReductionPaused() {
+  
+  // Enable 'resume' buttons
+  ui.rowToolBar->actions()[0]->setEnabled(true);
+  m_contextMenu->actions()[0]->setEnabled(true);
+  ui.buttonProcess->setEnabled(true);
 }
 
 /**
