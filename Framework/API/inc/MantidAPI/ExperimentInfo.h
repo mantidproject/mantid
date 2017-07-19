@@ -9,6 +9,7 @@
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidBeamline/Beamline.h"
 
 #include <list>
 #include <mutex>
@@ -187,7 +188,7 @@ protected:
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
   /// Description of the choppers for this experiment.
   std::list<boost::shared_ptr<ChopperModel>> m_choppers;
-  /// The information on the sample environment
+  /// The information on the sample envirKonment
   boost::shared_ptr<Sample> m_sample;
   /// The run information
   boost::shared_ptr<Run> m_run;
@@ -198,7 +199,7 @@ protected:
 
 private:
   void makeAPIComponentInfo(const Geometry::InstrumentVisitor &visitor,
-                            const Geometry::Instrument &newInstrument);
+                            Beamline::ComponentInfo &mutableComponentInfo);
 
   boost::shared_ptr<Geometry::Instrument> makeParameterizedInstrument() const;
   /// Fill with given instrument parameter
@@ -231,10 +232,11 @@ private:
   /// Mutex to protect against cow_ptr copying
   mutable std::recursive_mutex m_mutex;
 
-  boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
   std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
 
-  boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
+  /// Beamline (instrument 2.0)
+  Beamline::Beamline m_beamline;
+
   boost::shared_ptr<Geometry::ComponentInfo> m_componentInfoWrapper;
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;

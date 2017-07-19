@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidBeamline/Beamline.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -54,7 +55,7 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
       m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
-      m_detectorInfo(instr->m_detectorInfo) {
+      m_beamline(instr->m_beamline) {
   bool isPhysicalInstrument =
       m_map ? m_instr->m_isPhysicalInstrument : m_isPhysicalInstrument;
   if (!isPhysicalInstrument)
@@ -75,8 +76,7 @@ Instrument::Instrument(const Instrument &instr)
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
       m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
-      m_referenceFrame(instr.m_referenceFrame),
-      m_detectorInfo(instr.m_detectorInfo) {
+      m_referenceFrame(instr.m_referenceFrame), m_beamline(instr.m_beamline) {
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
@@ -1232,21 +1232,18 @@ bool Instrument::isMonitorViaIndex(const size_t index) const {
 }
 
 /// Only for use by ExperimentInfo. Returns returns true if this instrument
-/// contains a DetectorInfo.
-bool Instrument::hasDetectorInfo() const {
-  return static_cast<bool>(m_detectorInfo);
+/// contains a Beamline.
+bool Instrument::hasBeamline() const { return !m_beamline.empty(); }
+
+/// Only for use by ExperimentInfo. Returns a reference to the Beamline.
+const Beamline::Beamline &Instrument::beamline() const {
+  if (!hasBeamline())
+    throw std::runtime_error("Cannot return reference to NULL Beamline");
+  return m_beamline;
 }
-/// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
-const Beamline::DetectorInfo &Instrument::detectorInfo() const {
-  if (!hasDetectorInfo())
-    throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
-  return *m_detectorInfo;
-}
-/// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
-const Beamline::ComponentInfo &Instrument::componentInfo() const {
-  if (!hasComponentInfo())
-    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
-  return *m_componentInfo;
+
+void Instrument::setBeamline(Beamline::Beamline beamline) {
+  m_beamline = beamline;
 }
 
 /**
@@ -1257,39 +1254,12 @@ bool Instrument::hasInstrumentVisitor() const {
   return static_cast<bool>(m_instrVisitor);
 }
 
-/**
- * Only for use by ExperimentInfo
- * @return True only if a ComponentInfo has been set.
- */
-bool Instrument::hasComponentInfo() const {
-  return static_cast<bool>(m_componentInfo);
-}
 
 bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
 
 int Instrument::add(IComponent *component) {
   // invalidate cache
   return CompAssembly::add(component);
-}
-
-/* Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
- * Sets the pointer to the detector id -> index map
-*/
-void Instrument::setDetectorInfo(
-    boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
-  m_detectorInfo = std::move(detectorInfo);
-}
-
-void Instrument::setComponentInfo(
-    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds) {
-  if (componentInfo->size() != componentIds->size()) {
-    throw std::runtime_error("Instrument::setInstrument requires that the same "
-                             "number of component ids are provided as the size "
-                             "of the ComponentInfo");
-  }
-  m_componentInfo = std::move(componentInfo);
-  m_componentCache = std::move(componentIds);
 }
 
 void Instrument::setInstrumentVisitor(const InstrumentVisitor &visitor) {
@@ -1317,13 +1287,15 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
   // Information will be stored directly in pmap so we do not need DetectorInfo
   // or ComponentInfo.
-  pmap->setDetectorInfo(nullptr);
+  pmap->setBeamline(Beamline::Beamline{} /*Empty beamline*/);
   pmap->setComponentInfo(nullptr);
   // Instrument is only needed for DetectorInfo access so it is not needed.
   pmap->setInstrument(nullptr);
 
-  if (!hasDetectorInfo() && !hasComponentInfo())
+  if (!hasInstrumentVisitor())
     return pmap;
+
+  auto componentCache = m_instrVisitor->componentIds();
 
   const auto &baseInstr = m_map ? *m_instr : *this;
 
@@ -1337,30 +1309,31 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   Eigen::Affine3d transformation;
   int64_t oldParentIndex = -1;
 
-  for (size_t i = 0; i < m_componentInfo->size(); ++i) {
+  const auto &compInfo = m_beamline.componentInfo();
+  const auto &detInfo = m_beamline.detectorInfo();
+  for (size_t i = 0; i < compInfo.size(); ++i) {
 
-    const int64_t parentIndex = m_componentInfo->parent(i);
+    const int64_t parentIndex = compInfo.parent(i);
     const bool makeTransform = parentIndex != oldParentIndex;
     bool isRectangularDetectorPixel = false;
 
     if (makeTransform) {
       oldParentIndex = parentIndex;
-      const auto parentPos = m_componentInfo->position(parentIndex);
-      const auto invParentRot =
-          m_componentInfo->rotation(parentIndex).conjugate();
+      const auto parentPos = compInfo.position(parentIndex);
+      const auto invParentRot = compInfo.rotation(parentIndex).conjugate();
 
       transformation = invParentRot;
       transformation.translate(-parentPos);
     }
 
-    if (m_componentInfo->isDetector(i)) {
+    if (compInfo.isDetector(i)) {
 
       const boost::shared_ptr<const IDetector> &baseDet =
           std::get<1>(baseInstr.m_detectorCache[i]);
 
       isRectangularDetectorPixel = bool(
           boost::dynamic_pointer_cast<const RectangularDetectorPixel>(baseDet));
-      if (m_detectorInfo->isMasked(i)) {
+      if (detInfo.isMasked(i)) {
         pmap->forceUnsafeSetMasked(baseDet.get(), true);
       }
 
@@ -1368,8 +1341,8 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
         // Special case: scaling for RectangularDetectorPixel.
         if (isRectangularDetectorPixel) {
 
-          size_t panelIndex = m_componentInfo->parent(parentIndex);
-          ComponentID panelID = m_componentCache->operator[](panelIndex);
+          size_t panelIndex = compInfo.parent(parentIndex);
+          ComponentID panelID = componentCache->operator[](panelIndex);
 
           Eigen::Vector3d scale(1, 1, 1);
           if (auto scalex = pmap->get(panelID, "scalex"))
@@ -1382,11 +1355,11 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     }
 
     // Undo parent transformation to obtain relative position/rotation.
-    Eigen::Vector3d relPos = transformation * m_componentInfo->position(i);
-    Eigen::Quaterniond relRot = m_componentInfo->relativeRotation(i);
+    Eigen::Vector3d relPos = transformation * compInfo.position(i);
+    Eigen::Quaterniond relRot = compInfo.relativeRotation(i);
 
     const IComponent *baseComponent =
-        m_componentCache->operator[](i)->getBaseComponent();
+        componentCache->operator[](i)->getBaseComponent();
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
       if (isRectangularDetectorPixel) {
@@ -1394,13 +1367,13 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
                                  "parameters for RectangularDetectorPixel are "
                                  "not supported");
       }
-      pmap->addV3D(m_componentCache->operator[](i), ParameterMap::pos(),
+      pmap->addV3D(componentCache->operator[](i), ParameterMap::pos(),
                    Kernel::toV3D(relPos));
     }
     if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate())
             .vec()
             .norm() >= imag_norm_max) {
-      pmap->addQuat(m_componentCache->operator[](i), ParameterMap::rot(),
+      pmap->addQuat(componentCache->operator[](i), ParameterMap::rot(),
                     Kernel::toQuat(relRot));
     }
   }

@@ -138,10 +138,10 @@ public:
     auto beamline = visitor.beamline();
 
     TSM_ASSERT("Check source position",
-               beamline->componentInfo().position(1).isApprox(
+               beamline.componentInfo().position(1).isApprox(
                    Mantid::Kernel::toVector3d(newSourcePos)));
     TSM_ASSERT("Check instrument position",
-               beamline->componentInfo().position(3).isApprox(
+               beamline.componentInfo().position(3).isApprox(
                    Mantid::Kernel::toVector3d(newInstrumentPos)));
   }
 
@@ -166,11 +166,11 @@ public:
     auto beamline = visitor.beamline();
 
     TSM_ASSERT_EQUALS("Detector has parent of instrument",
-                      beamline->componentInfo().parent(detectorIndex),
+                      beamline.componentInfo().parent(detectorIndex),
                       instrumentIndex);
     TSM_ASSERT_EQUALS(
         "Instrument has single detector",
-        beamline->componentInfo().detectorsInSubtree(instrumentIndex),
+        beamline.componentInfo().detectorsInSubtree(instrumentIndex),
         std::vector<size_t>{detectorIndex});
   }
 
@@ -240,7 +240,7 @@ public:
 
     auto beamline = visitor.beamline();
 
-    TS_ASSERT_EQUALS(beamline->componentInfo().detectorsInSubtree(3),
+    TS_ASSERT_EQUALS(beamline.componentInfo().detectorsInSubtree(3),
                      std::vector<size_t>{0});
   }
 
@@ -256,8 +256,8 @@ public:
     visitor.walkInstrument();
 
     auto beamline = visitor.beamline();
-    const auto &compInfo = beamline->componentInfo();
-    const auto &detInfo = beamline->detectorInfo();
+    const auto &compInfo = beamline.componentInfo();
+    const auto &detInfo = beamline.detectorInfo();
 
     TS_ASSERT_EQUALS(compInfo.size(), 4); // 4 components in total
     TS_ASSERT_EQUALS(detInfo.size(), 1);  // 1 component is a detector
@@ -351,7 +351,7 @@ public:
     visitor.walkInstrument();
 
     auto beamline = visitor.beamline();
-    const auto &compInfo = beamline->componentInfo();
+    const auto &compInfo = beamline.componentInfo();
 
     TS_ASSERT_EQUALS(compInfo.parent(compInfo.source()), compInfo.root());
     TS_ASSERT_EQUALS(compInfo.parent(compInfo.sample()), compInfo.root());

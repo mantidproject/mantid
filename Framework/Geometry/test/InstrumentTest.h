@@ -21,22 +21,15 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-std::tuple<boost::shared_ptr<Beamline::ComponentInfo>,
-           boost::shared_ptr<Beamline::DetectorInfo>,
+std::tuple<Beamline::Beamline,
            boost::shared_ptr<const std::vector<Geometry::ComponentID>>,
            boost::shared_ptr<const std::unordered_map<
                Mantid::Geometry::IComponent *, size_t>>>
-makeBeamline(boost::shared_ptr<const Instrument> parInstrument) {
+makeBeamlineTuple(boost::shared_ptr<const Instrument> parInstrument) {
   InstrumentVisitor visitor(parInstrument);
   visitor.walkInstrument();
-  auto beamline = visitor.beamline();
-  boost::shared_ptr<Beamline::ComponentInfo> compInfo(
-      new Beamline::ComponentInfo(beamline->componentInfo()));
-  boost::shared_ptr<Beamline::DetectorInfo> detInfo(
-      new Beamline::DetectorInfo(beamline->detectorInfo()));
-  compInfo->setDetectorInfo(detInfo.get());
-  detInfo->setComponentInfo(compInfo.get());
-  return std::make_tuple(compInfo, detInfo, visitor.componentIds(),
+
+  return std::make_tuple(visitor.beamline(), visitor.componentIds(),
                          visitor.componentIdToIndexMap());
 }
 
@@ -549,26 +542,28 @@ public:
 
     // Extract information from instrument to create DetectorInfo
     auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
-    auto beamlineTuple = makeBeamline(instr);
-    auto componentInfo = std::get<0>(beamlineTuple);
-    auto detInfo = std::get<1>(beamlineTuple);
-    auto componentIds = std::get<2>(beamlineTuple);
-    auto componentIdToIndexMap = std::get<3>(beamlineTuple);
-    instr->setComponentInfo(componentInfo, componentIds);
+    auto visitor = InstrumentVisitor(instr);
+    visitor.walkInstrument();
+    instr->setInstrumentVisitor(visitor);
+    instr->setBeamline(visitor.beamline());
+    auto componentIds = visitor.componentIds();
+    auto componentIdToIndexMap = visitor.componentIdToIndexMap();
+    auto beamline = const_cast<Beamline::Beamline &>(instr->beamline());
+    auto &compInfo = beamline.mutableComponentInfo();
+    auto &detInfo = beamline.mutableDetectorInfo();
     pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
-        *componentInfo, componentIds, componentIdToIndexMap));
+        compInfo, componentIds, componentIdToIndexMap));
 
-    instr->setDetectorInfo(detInfo);
     // bank 1
-    TS_ASSERT(detInfo->position(0).isApprox(
+    TS_ASSERT(detInfo.position(0).isApprox(
         toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}), 1e-12));
-    TS_ASSERT(detInfo->position(2).isApprox(
+    TS_ASSERT(detInfo.position(2).isApprox(
         toVector3d(bankOffset + V3D{0.008, -0.0002, 0.0}), 1e-12));
     // bank 2
-    TS_ASSERT(detInfo->position(9).isApprox(
+    TS_ASSERT(detInfo.position(9).isApprox(
         toVector3d(bankEpsilon + V3D{-0.008, -0.0002, 0.0}), 1e-12));
     // bank 3
-    TS_ASSERT(detInfo->position(18)
+    TS_ASSERT(detInfo.position(18)
                   .isApprox(Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
 
     const V3D detOffset{0.2, 0.3, 0.4};
@@ -577,13 +572,13 @@ public:
     const Quat detRot(42.0, detAxis);
     const Quat detRotEps(1e-11, detAxis);
 
-    detInfo->setPosition(0, detInfo->position(0) + toVector3d(detOffset));
-    detInfo->setRotation(18, toQuaterniond(detRot) * detInfo->rotation(18));
+    detInfo.setPosition(0, detInfo.position(0) + toVector3d(detOffset));
+    detInfo.setRotation(18, toQuaterniond(detRot) * detInfo.rotation(18));
     // Shifts/rotations by epsilon below tolerance, should not generate
     // parameter from this:
-    detInfo->setPosition(1, detInfo->position(1) + toVector3d(detEpsilon));
-    detInfo->setPosition(9, detInfo->position(9) + toVector3d(detEpsilon));
-    detInfo->setRotation(19, toQuaterniond(detRotEps) * detInfo->rotation(19));
+    detInfo.setPosition(1, detInfo.position(1) + toVector3d(detEpsilon));
+    detInfo.setPosition(9, detInfo.position(9) + toVector3d(detEpsilon));
+    detInfo.setRotation(19, toQuaterniond(detRotEps) * detInfo.rotation(19));
     // All position information should be purged
     TS_ASSERT_EQUALS(pmap->size(), 0);
 
@@ -591,7 +586,7 @@ public:
     // 3 bank parameters + 2 det parameters
     TS_ASSERT_EQUALS(legacyMap->size(), 5);
     Instrument legacyInstrument(baseInstrument, legacyMap);
-    TS_ASSERT(!legacyInstrument.hasDetectorInfo());
+    TS_ASSERT(!legacyInstrument.hasBeamline());
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(),
                      bankOffset + V3D(-0.008, -0.0002, 0.0) + detOffset);
@@ -619,34 +614,33 @@ public:
     pmap->addDouble(bank1->getComponentID(), "scaley", scaley);
 
     auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
-
-    // Extract information from instrument to create DetectorInfo
-    auto beamlineTuple = makeBeamline(instr);
-    auto componentInfo = std::get<0>(beamlineTuple);
-    auto detInfo = std::get<1>(beamlineTuple);
-    auto componentIds = std::get<2>(beamlineTuple);
-    auto componentIdToIndexMap = std::get<3>(beamlineTuple);
-    instr->setComponentInfo(componentInfo, componentIds);
+    auto visitor = InstrumentVisitor(instr);
+    visitor.walkInstrument();
+    instr->setInstrumentVisitor(visitor);
+    instr->setBeamline(visitor.beamline());
+    auto componentIds = visitor.componentIds();
+    auto componentIdToIndexMap = visitor.componentIdToIndexMap();
+    auto beamline = const_cast<Beamline::Beamline &>(instr->beamline());
+    auto &compInfo = beamline.mutableComponentInfo();
+    auto &detInfo = beamline.mutableDetectorInfo();
     pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
-        *componentInfo, componentIds, componentIdToIndexMap));
-
-    instr->setDetectorInfo(detInfo);
+        compInfo, componentIds, componentIdToIndexMap));
 
     // bank 1
     double pitch = 0.008;
     TS_ASSERT(
-        detInfo->position(0).isApprox(toVector3d(V3D{0.0, 0.0, 5.0}), 1e-12));
-    TS_ASSERT(detInfo->position(1)
+        detInfo.position(0).isApprox(toVector3d(V3D{0.0, 0.0, 5.0}), 1e-12));
+    TS_ASSERT(detInfo.position(1)
                   .isApprox(toVector3d(V3D{0.0, scaley * pitch, 5.0}), 1e-12));
-    TS_ASSERT(detInfo->position(2)
+    TS_ASSERT(detInfo.position(2)
                   .isApprox(toVector3d(V3D{scalex * pitch, 0.0, 5.0}), 1e-12));
-    TS_ASSERT(detInfo->position(3).isApprox(
+    TS_ASSERT(detInfo.position(3).isApprox(
         toVector3d(V3D{scalex * pitch, scaley * pitch, 5.0}), 1e-12));
 
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-10, 5e-10, 5e-10};
 
-    detInfo->setPosition(2, detInfo->position(2) + toVector3d(detEpsilon));
+    detInfo.setPosition(2, detInfo.position(2) + toVector3d(detEpsilon));
     // 2 bank parameters, det pos/rot is in DetectorInfo
     TS_ASSERT_EQUALS(pmap->size(), 2);
 
@@ -655,13 +649,13 @@ public:
     // Legacy instrument does not support positions in ParameterMap for
     // RectangularDetectorPixel (parameters ignored by
     // RectangularDetectorPixel::getRelativePos), so we cannot support this.
-    detInfo->setPosition(3, detInfo->position(3) + toVector3d(detOffset));
+    detInfo.setPosition(3, detInfo.position(3) + toVector3d(detOffset));
     TS_ASSERT_THROWS(instr->makeLegacyParameterMap(), std::runtime_error);
 
     // 2 bank parameters + 0 det parameters
     TS_ASSERT_EQUALS(legacyMap->size(), 2);
     Instrument legacyInstrument(baseInstrument, legacyMap);
-    TS_ASSERT(!legacyInstrument.hasDetectorInfo());
+    TS_ASSERT(!legacyInstrument.hasBeamline());
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(),
                      V3D(0.0, 0.0, 5.0));
@@ -694,7 +688,7 @@ public:
                !loneInstrument.hasInstrumentVisitor());
     TSM_ASSERT("Can only be "
                "available when associated with ExperimentInfo",
-               !loneInstrument.hasDetectorInfo());
+               !loneInstrument.hasBeamline());
   }
 
   void test_set_InfoVisitor() {

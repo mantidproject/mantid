@@ -2,7 +2,8 @@
 #define MANTID_BEAMLINE_BEAMLINE_H_
 
 #include "MantidBeamline/DllConfig.h"
-#include <memory>
+#include <boost/shared_ptr.hpp>
+#include <boost/proto/functional/range/empty.hpp>
 
 namespace Mantid {
 namespace Beamline {
@@ -18,6 +19,8 @@ class DetectorInfo;
   this type ensures
   that client code is not exposed to creation or setup internals. Beamline owns
   both ComponentInfo and DetectorInfo.
+
+  Beamline is deliberately trivial to copy.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -42,16 +45,20 @@ class DetectorInfo;
 */
 class MANTID_BEAMLINE_DLL Beamline {
 public:
-  Beamline(std::unique_ptr<ComponentInfo> &&componentInfo,
-           std::unique_ptr<DetectorInfo> &&detectorInfo);
+  Beamline() = default;
+  Beamline(const Beamline &other);
+  Beamline &operator=(const Beamline &other);
+  Beamline(ComponentInfo &&componentInfo, DetectorInfo &&detectorInfo);
   const ComponentInfo &componentInfo() const;
   const DetectorInfo &detectorInfo() const;
   ComponentInfo &mutableComponentInfo();
   DetectorInfo &mutableDetectorInfo();
+  bool empty() const;
 
 private:
-  std::unique_ptr<ComponentInfo> m_componentInfo;
-  std::unique_ptr<DetectorInfo> m_detectorInfo;
+  bool m_empty = true;
+  boost::shared_ptr<ComponentInfo> m_componentInfo{nullptr};
+  boost::shared_ptr<DetectorInfo> m_detectorInfo{nullptr};
 };
 
 } // namespace Beamline

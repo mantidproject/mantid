@@ -63,6 +63,67 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("ExperimentInfo");
+
+/**
+ * Make wrapper ComponentInfo
+ * @param visitor : Component visitor to query. Visitor MUST have been filled
+ * via registerContents.
+ * @param compInfo : base ComponentInfo to build from.
+ * @return Wrapper ComponentInfo.
+ */
+boost::shared_ptr<Geometry::ComponentInfo>
+makeWrapperComponentInfo(const InstrumentVisitor &visitor,
+                         Beamline::ComponentInfo &compInfo) {
+
+  return boost::make_shared<Geometry::ComponentInfo>(
+      compInfo, visitor.componentIds(), visitor.componentIdToIndexMap());
+}
+
+void checkDetectorInfoSize(const Beamline::DetectorInfo &oldDetInfo,
+                           const Beamline::DetectorInfo &newDetInfo) {
+  if (oldDetInfo.size() > 0 && oldDetInfo.size() != newDetInfo.size())
+    throw std::runtime_error("ExperimentInfo: DetectorInfo size mismatch.");
+}
+
+void checkComponentInfoSize(const Beamline::ComponentInfo &oldCompInfo,
+                            const Beamline::ComponentInfo &newCompInfo) {
+  // if (oldCompInfo.size() > 0 && oldCompInfo.size() != newCompInfo.size())
+  //  throw std::runtime_error("ExperimentInfo: ComponentInfo size mismatch.");
+}
+
+void checkCompatibility(const Beamline::Beamline &oldBL,
+                        const Beamline::Beamline &newBL) {
+  if (oldBL.empty())
+    return;
+  checkDetectorInfoSize(oldBL.detectorInfo(), newBL.detectorInfo());
+  checkComponentInfoSize(oldBL.componentInfo(), newBL.componentInfo());
+}
+
+std::unique_ptr<Geometry::InstrumentVisitor>
+makeOrRetrieveVisitor(boost::shared_ptr<const Instrument> parInstrument,
+                      const Instrument &newInstrument) {
+  if (!newInstrument.hasInstrumentVisitor() ||
+      newInstrument.isEmptyInstrument()) {
+
+    auto visitor = Kernel::make_unique<InstrumentVisitor>(parInstrument);
+    // Collect everything
+    visitor->walkInstrument();
+    return visitor;
+  } else {
+    return Kernel::make_unique<InstrumentVisitor>(
+        newInstrument.instrumentVisitor());
+  }
+}
+
+Beamline::Beamline makeOrRetrieveBeamline(const InstrumentVisitor &visitor,
+                                          const Instrument &newInstrument) {
+
+  if (!newInstrument.hasBeamline() || newInstrument.isEmptyInstrument()) {
+    return visitor.beamline();
+  } else {
+    return newInstrument.beamline();
+  }
+}
 }
 
 /** Constructor
@@ -71,20 +132,20 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
-      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
-      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()),
       m_infoVisitor(Kernel::make_unique<InstrumentVisitor>(sptr_instrument)) {
-  auto parInstrument = makeParameterizedInstrument();
-  m_parmap->setDetectorInfo(m_detectorInfo);
-  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-      *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
-      m_parmap.get(), m_infoVisitor->detectorIdToIndexMap());
 
   m_infoVisitor->walkInstrument();
-  makeAPIComponentInfo(*m_infoVisitor, *sptr_instrument);
+  m_beamline = m_infoVisitor->beamline();
+
+  m_componentInfoWrapper = makeWrapperComponentInfo(
+      *m_infoVisitor, m_beamline.mutableComponentInfo());
+  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+      m_beamline.mutableDetectorInfo(), sptr_instrument,
+      m_infoVisitor->detectorIds(), m_parmap.get(),
+      m_infoVisitor->detectorIdToIndexMap());
+
+  m_parmap->setBeamline(m_beamline);
   m_parmap->setComponentInfo(m_componentInfoWrapper);
-  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
-  m_detectorInfo->setComponentInfo(m_componentInfo.get());
 }
 
 /**
@@ -187,80 +248,7 @@ const std::string ExperimentInfo::toString() const {
   return out.str();
 }
 
-// Helpers for setInstrument and getInstrument
-namespace {
-void checkDetectorInfoSize(const Instrument &instr,
-                           const Beamline::DetectorInfo &detInfo) {
-  const auto numDets = instr.getNumberDetectors();
-  if (numDets != detInfo.size())
-    throw std::runtime_error("ExperimentInfo: size mismatch between "
-                             "DetectorInfo and number of detectors in "
-                             "instrument");
-}
 
-std::unique_ptr<Beamline::DetectorInfo>
-makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr,
-                 const InstrumentVisitor &visitor) {
-
-  if (newInstr.hasDetectorInfo()) {
-    // We allocate a new DetectorInfo in case there is an Instrument holding a
-    // reference to our current DetectorInfo.
-    const auto &detInfo = newInstr.detectorInfo();
-    checkDetectorInfoSize(oldInstr, detInfo);
-    // Implicit copy constructor ensures that all other info. Masking, etc, is
-    // copied.
-    return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
-  } else {
-    return visitor.detectorInfo();
-  }
-}
-
-std::unique_ptr<Geometry::InstrumentVisitor>
-makeOrRetrieveVisitor(boost::shared_ptr<const Instrument> parInstrument,
-                      const Instrument &newInstrument) {
-  if (!newInstrument.hasInstrumentVisitor() ||
-      newInstrument.isEmptyInstrument()) {
-
-    auto visitor = Kernel::make_unique<InstrumentVisitor>(parInstrument);
-    // Collect everything
-    visitor->walkInstrument();
-    return visitor;
-  } else {
-    return Kernel::make_unique<InstrumentVisitor>(
-        newInstrument.instrumentVisitor());
-  }
-}
-}
-
-/**
- * Make the beamline and API ComponentInfo
- * @param visitor : Component visitor to query. Visitor MUST have been filled
- * via registerContents.
- * @param newInstrument : unparametrised new instrument
- */
-void ExperimentInfo::makeAPIComponentInfo(const InstrumentVisitor &visitor,
-                                          const Instrument &newInstrument) {
-
-  if (newInstrument.hasComponentInfo()) {
-    /*
-     * Copy existing ComponentInfo. That way we take updates to positions
-     * rotation etc that have happened on newInstrument. These are lost when
-     * we go back to the infoComponentVisitor.
-    */
-    // TODO checkComponentInfo compatibility like is done for DetectorInfo.
-    m_componentInfo = Kernel::make_unique<Beamline::ComponentInfo>(
-        newInstrument.componentInfo());
-
-  } else {
-    // We have to make the internal Beamline ComponentInfo
-    m_componentInfo = visitor.componentInfo();
-  }
-
-  // Wrapper API ComponentInfo
-  m_componentInfoWrapper = boost::make_shared<Geometry::ComponentInfo>(
-      *m_componentInfo, visitor.componentIds(),
-      visitor.componentIdToIndexMap());
-}
 
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
@@ -283,23 +271,19 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 
   // Make the ComponentInfo first
   m_infoVisitor = makeOrRetrieveVisitor(parInstrument, *instr);
+  auto newBeamline = makeOrRetrieveBeamline(*m_infoVisitor, *instr);
+  checkCompatibility(m_beamline /*old*/, newBeamline /*new*/);
+  m_beamline = newBeamline;
 
-  makeAPIComponentInfo(*m_infoVisitor, *instr);
+  m_componentInfoWrapper = makeWrapperComponentInfo(
+      *m_infoVisitor, m_beamline.mutableComponentInfo());
+  m_parmap->setBeamline(m_beamline);
   m_parmap->setComponentInfo(m_componentInfoWrapper);
 
-  // Make the DetectorInfo. ComponentInfo needs to be set
-  // on the Parameter map before doing this.
-  m_detectorInfo = makeDetectorInfo(*parInstrument, *instr, *m_infoVisitor);
-  m_parmap->setDetectorInfo(m_detectorInfo);
-
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-      *m_detectorInfo, makeParameterizedInstrument(),
+      m_beamline.mutableDetectorInfo(), makeParameterizedInstrument(),
       m_infoVisitor->detectorIds(), m_parmap.get(),
       m_infoVisitor->detectorIdToIndexMap());
-
-  // Cross link Component and Detector info objects
-  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
-  m_detectorInfo->setComponentInfo(m_componentInfo.get());
 
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
@@ -310,7 +294,6 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 
 Instrument_sptr ExperimentInfo::makeParameterizedInstrument() const {
   populateIfNotLoaded();
-  checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
   return Geometry::ParComponentFactory::createInstrument(sptr_instrument,
                                                          m_parmap);
 }
@@ -322,11 +305,10 @@ Instrument_sptr ExperimentInfo::makeParameterizedInstrument() const {
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
   auto instrument = makeParameterizedInstrument();
-  instrument->setDetectorInfo(m_detectorInfo);
-  instrument->setInstrumentVisitor(
-      *m_infoVisitor); // TODO. We actually only need the
-                       // ID->index part of this mapping
-  instrument->setComponentInfo(m_componentInfo, m_infoVisitor->componentIds());
+
+  instrument->setInstrumentVisitor(*m_infoVisitor);
+
+  instrument->setBeamline(m_beamline);
   return instrument;
 }
 
@@ -1658,9 +1640,10 @@ void ExperimentInfo::populateWithParameter(
       if (!componentInfo().isDetector(componentIndex))
         throw std::runtime_error(
             "Found masking for a non-detector component. This is not possible");
-      m_detectorInfo->setMasked(componentIndex,
-                                paramValue); // all detector indexes have same
-                                             // component index (guarantee)
+      m_beamline.mutableDetectorInfo().setMasked(
+          componentIndex,
+          paramValue); // all detector indexes have same
+                       // component index (guarantee)
     }
   } else if (name == "x" || name == "y" || name == "z") {
     paramMapForPosAndRot.addPositionCoordinate(paramInfo.m_component, name,

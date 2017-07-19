@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidBeamline/Beamline.h"
 #include <cstddef>
 #include <utility>
 #include <vector>
@@ -17,11 +18,6 @@ class IComponent;
 class ICompAssembly;
 class IDetector;
 class ParameterMap;
-}
-namespace Beamline {
-class Beamline;
-class ComponentInfo;
-class DetectorInfo;
 }
 
 namespace Geometry {
@@ -156,8 +152,12 @@ public:
 
   boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
 
-  std::unique_ptr<Beamline::Beamline> beamline() const;
+  Beamline::Beamline beamline() const;
 };
+
+/// Convenience non-member construction function. This should be standard usage.
+Beamline::Beamline makeBeamline(boost::shared_ptr<const Instrument> instrument);
+
 } // namespace Geometry
 } // namespace Mantid
 

@@ -31,6 +31,7 @@
 
 #include <set>
 #include <unordered_map>
+#include "MantidBeamline/DetectorInfo.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -83,7 +84,7 @@ public:
     // ALL of these should be set. Even though we have just an empty instrument
     // stored. See constructor.
     TS_ASSERT(i->hasInstrumentVisitor());
-    TS_ASSERT(i->hasDetectorInfo());
+    TS_ASSERT(i->hasBeamline());
   }
 
   void test_GetSetInstrument_default() {

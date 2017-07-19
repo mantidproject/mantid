@@ -276,23 +276,29 @@ InstrumentVisitor::detectorIdToIndexMap() const {
   return m_detectorIdToIndexMap;
 }
 
-std::unique_ptr<Beamline::Beamline> InstrumentVisitor::beamline() const {
+Beamline::Beamline InstrumentVisitor::beamline() const {
 
-  auto componentInfo = Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
+  Mantid::Beamline::ComponentInfo componentInfo(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_positions, m_rotations, m_sourceIndex,
       m_sampleIndex);
 
-  auto detectorInfo = Kernel::make_unique<Mantid::Beamline::DetectorInfo>(
+  Mantid::Beamline::DetectorInfo detectorInfo(
       *m_detectorPositions, *m_detectorRotations, *m_monitorIndices);
 
-  return Kernel::make_unique<Beamline::Beamline>(std::move(componentInfo),
-                                                 std::move(detectorInfo));
+  return Beamline::Beamline(std::move(componentInfo), std::move(detectorInfo));
 }
 
 boost::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const {
   return m_orderedDetectorIds;
+}
+
+Beamline::Beamline
+makeBeamline(boost::shared_ptr<const Instrument> instrument) {
+  InstrumentVisitor visitor(instrument);
+  visitor.walkInstrument();
+  return visitor.beamline();
 }
 
 } // namespace Geometry
