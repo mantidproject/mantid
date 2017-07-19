@@ -1447,7 +1447,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.log().information("SplitterWorkspace = %s, Information Workspace = %s. " % (
             split_ws_name, str(self._splitinfotablews)))
 
-        base_name = raw_ws_name
+        base_name = raw_ws_name + '_split'
 
         # find out whether the splitters are relative time or epoch time
         split_ws = AnalysisDataService.retrieve(split_ws_name)
@@ -1474,6 +1474,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              SplitterWorkspace=split_ws_name, GroupWorkspaces=True, RelativeTime=is_relative_time)
         else:
             # split with information table
+            self.log().notice('[DB...BAT] Raw Name: {0}.  Base Name: {1}'.format(raw_ws_name, base_name))
             api.FilterEvents(InputWorkspace=raw_ws_name, OutputWorkspaceBaseName=base_name,
                              SplitterWorkspace=split_ws_name, InformationWorkspace=str(self._splitinfotablews),
                              GroupWorkspaces=True, RelativeTime=is_relative_time)
