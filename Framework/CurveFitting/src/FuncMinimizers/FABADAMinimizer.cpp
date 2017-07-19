@@ -655,7 +655,7 @@ void FABADAMinimizer::simAnnealingRefrigeration() {
     m_temperature /= m_tempStep;
 }
 
-/* Returns true if iteration must continue. Returns false otherwise.
+/* @return :: true if iteration must continue, false otherwise.
 *
 */
 bool FABADAMinimizer::iterationContinuation() {
@@ -798,7 +798,7 @@ void FABADAMinimizer::outputCostFunctionTable(size_t convLength,
   setProperty("CostFunctionTable", wsChi2);
 }
 
-/** Create the workspace containing PDF
+/** Create the workspace containing probability density function (PDF)
 *
 * @param convLength :: length of the converged chain
 * @param reducedChain :: the reduced chain (will be sorted)
@@ -844,9 +844,9 @@ FABADAMinimizer::outputPDF(size_t convLength,
       Y[i - 1] = pdf_y[i - 1] / (double(convLength) * bin);
     }
 
-    auto pos_MPchi2 = std::max_element(pdf_y.begin(), pdf_y.end());
+    auto indexMostProbableChi2 = std::max_element(pdf_y.begin(), pdf_y.end());
 
-    mostPchi2 = X[pos_MPchi2 - pdf_y.begin()] + (bin / 2.0);
+    mostPchi2 = X[indexMostProbableChi2 - pdf_y.begin()] + (bin / 2.0);
 
     // Do one iteration for each parameter.
     for (size_t j = 0; j < m_nParams; ++j) {
