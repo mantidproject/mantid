@@ -44,7 +44,7 @@ const std::string ConjoinXRuns::name() const { return "ConjoinXRuns"; }
 int ConjoinXRuns::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConjoinXRuns::category() const { 
+const std::string ConjoinXRuns::category() const {
   return "Transforms\\Merging";
 }
 
