@@ -1,7 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import (SimpleShapeMonteCarloAbsorption, Load, ConvertUnits,
-                              CompareWorkspaces, SetSampleMaterial, CreateSampleWorkspace)
+                              CompareWorkspaces, SetSampleMaterial, CreateSampleWorkspace,
+                              DeleteWorkspace)
 from mantid.kernel import *
 from mantid.api import *
 
@@ -44,6 +45,10 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
         num_hists = corr_ws.getNumberHistograms()
         self.assertEquals(num_hists, 10)
+
+    def tearDown(self):
+        DeleteWorkspace(self._red_ws)
+        DeleteWorkspace(self._corrected_flat_plate)
 
     def test_flat_plate(self):
         """
@@ -102,9 +107,9 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
         # _corrected_flat_plate is with mass density 1.0
         CompareWorkspaces(self._corrected_flat_plate, corrected_num, Tolerance=1e-6)
+        DeleteWorkspace(corrected_num)
 
     def test_material_already_defined(self):
-
         SetSampleMaterial(InputWorkspace=self._red_ws,
                           ChemicalFormula='H2-O',
                           SampleMassDensity=1.0)
@@ -122,7 +127,60 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         self._test_corrections_workspace(corrected)
         CompareWorkspaces(self._corrected_flat_plate, corrected, Tolerance=1e-6)
 
-    # TODO: add test for powder diffraction data
+        # TODO: add test for powder diffraction data
+
+    # ------------------------------------- Failure Cases ----------------------------------------
+
+    def test_no_chemical_formula(self):
+        kwargs = {'InputWorkspace': self._red_ws,
+                  'MaterialAlreadyDefined': False,
+                  'DensityType': 'Mass Density',
+                  'Density': 1.0,
+                  'EventsPerPoint': 200,
+                  'BeamHeight': 3.5,
+                  'BeamWidth': 4.0,
+                  'Height': 2.0,
+                  'Shape': 'FlatPlate',
+                  'Width': 1.4,
+                  'Thickness': 2.1}
+
+        self.assertRaises(RuntimeError, SimpleShapeMonteCarloAbsorption, **kwargs)
+
+    def test_flat_plate_no_params(self):
+        """
+        If the shape is flat plate but the relevant parameters haven't been entered this should throw
+        relevant params are Height, Width, Thickness
+        """
+
+        kwargs = {'InputWorkspace': self._red_ws,
+                  'ChemicalFormula': 'H2-O',
+                  'DensityType': 'Mass Density',
+                  'Density': 1.0,
+                  'EventsPerPoint': 200,
+                  'BeamHeight': 3.5,
+                  'BeamWidth': 4.0,
+                  'Shape': 'FlatPlate'}
+
+        self.assertRaises(RuntimeError, SimpleShapeMonteCarloAbsorption, **kwargs)
+
+    def test_not_in_wavelength(self):
+
+        red_ws_not_wavelength = Load('irs26176_graphite002_red.nxs')
+
+        kwargs = {'InputWorkspace': red_ws_not_wavelength,
+                  'ChemicalFormula': 'H2-O',
+                  'DensityType': 'Mass Density',
+                  'Density': 1.0,
+                  'EventsPerPoint': 200,
+                  'BeamHeight': 3.5,
+                  'BeamWidth': 4.0,
+                  'Height': 2.0,
+                  'Shape': 'FlatPlate',
+                  'Width': 1.4,
+                  'Thickness': 2.1}
+
+        self.assertRaises(RuntimeError, SimpleShapeMonteCarloAbsorption, **kwargs)
+        DeleteWorkspace(red_ws_not_wavelength)
 
 if __name__ == "__main__":
     unittest.main()
