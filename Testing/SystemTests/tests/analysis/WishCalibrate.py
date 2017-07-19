@@ -30,6 +30,9 @@ class WishCalibration(stresstesting.MantidStressTest):
         self.calibration_out_path = tempfile.NamedTemporaryFile().name
         self.correction_out_path = tempfile.NamedTemporaryFile().name
 
+    def skipTests(self):
+        return True
+
     def cleanup(self):
         mantid.mtd.clear()
         try:
@@ -38,17 +41,8 @@ class WishCalibration(stresstesting.MantidStressTest):
         except OSError:
             print("Failed to remove an temp output file in WishCalibration")
 
-    def excludeInPullRequests(self):
-        # Skip in PR's as we require a lot of fitting and the CSV saving / loading can be really IO
-        # intensive slowing this test right down
-        return True
-
     def requiredFiles(self):
         return [self.calibration_ref_name, self.correction_ref_name]
-
-    def requiredMemoryMB(self):
-        # Require at least 8GB if we are going to do this test
-        return 8096
 
     def validate(self):
         calibration_ref_path = mantid.FileFinder.getFullPath(self.calibration_ref_name)

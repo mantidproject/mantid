@@ -426,7 +426,7 @@ def _normalise_workspaces(ws_list, instrument, run_details):
     """
     output_list = []
     for ws in ws_list:
-        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws, run_details=run_details))
+        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws))
 
     return output_list
 

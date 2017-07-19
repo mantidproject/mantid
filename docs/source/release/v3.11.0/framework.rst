@@ -36,6 +36,11 @@ CurveFitting
 
 - :ref:`GramCharlier <func-GramCharlier>` is a new fit function primarily for use in neutron compton scattering.
 
+Bug fixes
+#########
+
+- :ref:`CubicSpline <func-CubicSpline>` is fixed to sort the y-values and x-values correctly.
+
 Improved
 ########
 
@@ -45,6 +50,12 @@ Python
 Python Algorithms
 #################
 
+
+Python Fit Functions
+####################
+
+- A bug that makes it difficult to define and use attributes in python fit functions has been fixed.
+
 |
 
 Full list of
@@ -52,3 +63,5 @@ Full list of
 and
 `Python <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.11%22+is%3Amerged+label%3A%22Component%3A+Python%22>`__
 changes on GitHub
+
+

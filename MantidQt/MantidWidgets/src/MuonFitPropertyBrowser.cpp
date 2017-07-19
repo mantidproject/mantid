@@ -1058,7 +1058,6 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
       return;
     }
   }
-
   clearGroupCheckboxes();
   QSettings settings;
   for (const auto group : groups) {
@@ -1449,9 +1448,11 @@ void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
   if (isItGroup) {
     // all groups is index 0
     m_enumManager->setValue(m_groupsToFit, 0);
+    setAllGroups();
   } else {
     // all pairs is index 1
     m_enumManager->setValue(m_groupsToFit, 1);
+    setAllPairs();
   }
 }
 void MuonFitPropertyBrowser::setGroupNames(
