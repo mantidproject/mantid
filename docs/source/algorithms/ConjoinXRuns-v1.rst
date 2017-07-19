@@ -28,9 +28,9 @@ If specified, this log values will constitute the x-axis of the resulting worksp
 Usage
 -----
 
-**Example - JoinRuns**
+**Example - ConjoinXRuns**
 
-.. testcode:: JoinRunsExample
+.. testcode:: ConjoinXRunsExample
    
     # Create input workspaces
     list = []
@@ -43,7 +43,7 @@ Usage
         list.append(ws)
 
     # Join the workspaces
-    out = JoinRuns(list)
+    out = ConjoinXRuns(list)
 
     # Check the output
     print("out has {0} bins with x-axis as: {1}, {2}, {3}, {4}, {5}, {6}".
@@ -52,13 +52,13 @@ Usage
 
 Output:
 
-.. testoutput:: JoinRunsExample
+.. testoutput:: ConjoinXRunsExample
 
     out has 6 bins with x-axis as: 25.0, 75.0, 125.0, 175.0, 225.0, 275.0
 
-**Example - JoinRuns with a numeric log**
+**Example - ConjoinXRuns with a numeric log**
 
-.. testcode:: JoinRunsLogExample
+.. testcode:: ConjoinXRunsLogExample
 
     # Create input workspaces
     list = []
@@ -72,7 +72,7 @@ Output:
         list.append(ws)
 
     # Join the workspaces
-    out = JoinRuns(list, SampleLogAsXAxis='LOG')
+    out = ConjoinXRuns(list, SampleLogAsXAxis='LOG')
 
     # Check the output
     print("out has {0} bins with x-axis as: {1}, {2}, {3}".
@@ -80,13 +80,13 @@ Output:
 
 Output:
 
-.. testoutput:: JoinRunsLogExample
+.. testoutput:: ConjoinXRunsLogExample
 
     out has 3 bins with x-axis as: 0.0, 5.0, 10.0
 
-**Example - JoinRuns with a numeric time series log**
+**Example - ConjoinXRuns with a numeric time series log**
 
-.. testcode:: JoinRunsTSLogExample
+.. testcode:: ConjoinXRunsTSLogExample
 
     import datetime
     # Create input workspaces
@@ -104,7 +104,7 @@ Output:
         list.append(ws)
 
     # Join the workspaces
-    out = JoinRuns(list, SampleLogAsXAxis='LOG')
+    out = ConjoinXRuns(list, SampleLogAsXAxis='LOG')
 
     # Check the output
     print("out has {0} bins with x-axis as: {1}, {2}, {3}, {4}, {5}, {6}".
@@ -113,13 +113,13 @@ Output:
 
 Output:
 
-.. testoutput:: JoinRunsTSLogExample
+.. testoutput:: ConjoinXRunsTSLogExample
 
     out has 6 bins with x-axis as: 0.0, 0.25, 10.0, 10.25, 20.0, 20.25
 
-**Example - JoinRuns to fail with a sample log forbidding to merge**
+**Example - ConjoinXRuns to fail with a sample log forbidding to merge**
 
-.. testcode:: JoinRunsLogFail
+.. testcode:: ConjoinXRunsLogFail
 
      # Create input workspaces
     list = []
@@ -132,13 +132,13 @@ Output:
         AddSampleLog(Workspace=ws, LogName="Wavelength", LogType="Number", LogText=str(2+0.5*i))
         list.append(ws)
     try:
-        out = JoinRuns(list, SampleLogsFail="Wavelength", SampleLogsFailTolerances="0.1", FailBehaviour="Stop")
+        out = ConjoinXRuns(list, SampleLogsFail="Wavelength", SampleLogsFailTolerances="0.1", FailBehaviour="Stop")
     except ValueError:
         print("The differences in the wavelength of the inputs are more than the allowed tolerance")
 
 Output:
 
-.. testoutput:: JoinRunsLogFail
+.. testoutput:: ConjoinXRunsLogFail
 
     The differences in the wavelength of the inputs are more than the allowed tolerance
 

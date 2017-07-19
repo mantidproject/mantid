@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_JOINRUNSTEST_H_
-#define MANTID_ALGORITHMS_JOINRUNSTEST_H_
+#ifndef MANTID_ALGORITHMS_CONJOINXRUNSTEST_H_
+#define MANTID_ALGORITHMS_CONJOINXRUNSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -7,22 +7,22 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
-#include "MantidAlgorithms/JoinRuns.h"
+#include "MantidAlgorithms/ConjoinXRuns.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::JoinRuns;
+using Mantid::Algorithms::ConjoinXRuns;
 using Mantid::Algorithms::AddSampleLog;
 using Mantid::Algorithms::AddTimeSeriesLog;
 using namespace Mantid::API;
 using namespace WorkspaceCreationHelper;
 
-class JoinRunsTest : public CxxTest::TestSuite {
+class ConjoinXRunsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static JoinRunsTest *createSuite() { return new JoinRunsTest(); }
-  static void destroySuite(JoinRunsTest *suite) { delete suite; }
+  static ConjoinXRunsTest *createSuite() { return new ConjoinXRunsTest(); }
+  static void destroySuite(ConjoinXRunsTest *suite) { delete suite; }
 
   void setUp() override {
     MatrixWorkspace_sptr ws1 = create2DWorkspace123(5, 3); // 3 points
@@ -287,8 +287,8 @@ public:
   }
 
 private:
-  JoinRuns m_testee;
+  ConjoinXRuns m_testee;
   std::vector<std::string> m_testWS;
 };
 
-#endif /* MANTID_ALGORITHMS_JOINRUNSTEST_H_ */
+#endif /* MANTID_ALGORITHMS_ConjoinXRunsTEST_H_ */

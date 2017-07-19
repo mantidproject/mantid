@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_JOINRUNS_H_
-#define MANTID_ALGORITHMS_JOINRUNS_H_
+#ifndef MANTID_ALGORITHMS_CONJOINXRUNS_H_
+#define MANTID_ALGORITHMS_CONJOINXRUNS_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -10,7 +10,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** JoinRuns : This algorithms joins the input workspaces horizontally,
+/** ConjoinXRuns : This algorithms joins the input workspaces horizontally,
 * i.e. by appending (concatenating) their columns.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -34,7 +34,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL JoinRuns : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConjoinXRuns : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -66,4 +66,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_JoinRuns_H_ */
+#endif /* MANTID_ALGORITHMS_CONJOINXRUNS_H */

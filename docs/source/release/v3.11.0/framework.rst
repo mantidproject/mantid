@@ -11,7 +11,7 @@ Algorithms
 New
 ###
 
-- :ref:`JoinRuns <algm-JoinRuns>` performs concatenation of the workspaces into a single one by handling the sample logs merging as in :ref:`MergeRuns <algm-MergeRuns>`.
+- :ref:`ConjoinXRuns <algm-ConjoinXRuns>` performs concatenation of the workspaces into a single one by handling the sample logs merging as in :ref:`MergeRuns <algm-MergeRuns>`.
 
 Improved
 ########

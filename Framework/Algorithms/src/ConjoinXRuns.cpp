@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/JoinRuns.h"
+#include "MantidAlgorithms/ConjoinXRuns.h"
 
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -33,28 +33,28 @@ static const std::string SAMPLE_LOG_X_AXIS_PROPERTY = "SampleLogAsXAxis";
 }
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(JoinRuns)
+DECLARE_ALGORITHM(ConjoinXRuns)
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string JoinRuns::name() const { return "JoinRuns"; }
+const std::string ConjoinXRuns::name() const { return "ConjoinXRuns"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int JoinRuns::version() const { return 1; }
+int ConjoinXRuns::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string JoinRuns::category() const { return "Transforms\\Merging"; }
+const std::string ConjoinXRuns::category() const { return "Transforms\\Merging"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string JoinRuns::summary() const {
+const std::string ConjoinXRuns::summary() const {
   return "Joins the input workspaces horizontally by appending their columns.";
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void JoinRuns::init() {
+void ConjoinXRuns::init() {
   declareProperty(
       Kernel::make_unique<ArrayProperty<std::string>>(
           INPUT_WORKSPACE_PROPERTY, boost::make_shared<ADSValidator>()),
@@ -100,7 +100,7 @@ void JoinRuns::init() {
       "throw and error, when encountering a failure on merging.");
 }
 
-std::map<std::string, std::string> JoinRuns::validateInputs() {
+std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
   std::map<std::string, std::string> issues;
 
   const std::vector<std::string> inputs_given =
@@ -157,7 +157,7 @@ std::map<std::string, std::string> JoinRuns::validateInputs() {
 * @return : empty if the log exists, is numeric, and matches the size of the
 * workspace, error message otherwise
 */
-std::string JoinRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
+std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
   std::string result;
   if (!m_logEntry.empty()) {
 
@@ -208,7 +208,7 @@ std::string JoinRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 * @param ws : the input workspace
 * @return : the x-axis to use for the output workspace
 */
-std::vector<double> JoinRuns::getXAxis(MatrixWorkspace_sptr ws) const {
+std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 
   std::vector<double> axis;
   axis.reserve(ws->blocksize());
@@ -245,7 +245,7 @@ std::vector<double> JoinRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 //----------------------------------------------------------------------------------------------
 /** Makes up the correct history of the output workspace
 */
-void JoinRuns::fillHistory() {
+void ConjoinXRuns::fillHistory() {
   // If this is not a child algorithm add the history
   if (!isChild()) {
     // Loop over the input workspaces, making the call that copies their
@@ -266,7 +266,7 @@ void JoinRuns::fillHistory() {
 /** Joins the given spectrum for the list of workspaces
 * @param wsIndex : the workspace index
 */
-void JoinRuns::joinSpectrum(int64_t wsIndex) {
+void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> spectrum;
   std::vector<double> errors;
   spectrum.reserve(m_outWS->blocksize());
@@ -287,7 +287,7 @@ void JoinRuns::joinSpectrum(int64_t wsIndex) {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void JoinRuns::exec() {
+void ConjoinXRuns::exec() {
 
   const std::vector<std::string> inputs_given =
       getProperty(INPUT_WORKSPACE_PROPERTY);
