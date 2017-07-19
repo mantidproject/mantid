@@ -91,19 +91,21 @@ class plot(data):
         for k,data in enumerate(self.data,0):
 		     #get data in same form
              xData =[]
+             eData=[]
              for label in labels:
                  if label in data.y:
                     for j,y in  enumerate(data.y,0):
                        if label ==y:
                           xData.append(data.x[j])
+                          eData.append(data.E[j])
+
                  else:
                     xData.append(0.0)
-			       
-             print (len(xData),xData)
-             print (k)		      
+                    eData.append(0.0)
+                  
              plt.yticks(yNum+width*(len(self.data)-1.)/2.,labels)
              if data.showError:
-                  plt.barh(yNum+k*width,xData,xerr=data.E,label=data.name,color=data.colour,align='center')
+                  plt.barh(yNum+k*width,xData,width,xerr=eData,label=data.name,color=data.colour,align='center')
              else:
 
                   plt.barh(yNum+k*width,xData,width,label=data.name,color=data.colour,align='center')
