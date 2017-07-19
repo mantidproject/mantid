@@ -14,12 +14,9 @@ std::unique_ptr<T> copyOrNull(const std::unique_ptr<T> &source) {
 }
 }
 
-Beamline::Beamline() :
-    m_componentInfo(std::unique_ptr<ComponentInfo>(nullptr)),
-    m_detectorInfo(std::unique_ptr<DetectorInfo>(nullptr))
-{
-
-}
+Beamline::Beamline()
+    : m_componentInfo(std::unique_ptr<ComponentInfo>(nullptr)),
+      m_detectorInfo(std::unique_ptr<DetectorInfo>(nullptr)) {}
 
 /**
  * Copy constructor.

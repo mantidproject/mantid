@@ -87,8 +87,8 @@ void checkDetectorInfoSize(const Beamline::DetectorInfo &oldDetInfo,
 
 void checkComponentInfoSize(const Beamline::ComponentInfo &oldCompInfo,
                             const Beamline::ComponentInfo &newCompInfo) {
-   // Minimum size for a componentInfo is 1 (itself)
-   if (oldCompInfo.size() > 1 && oldCompInfo.size() != newCompInfo.size())
+  // Minimum size for a componentInfo is 1 (itself)
+  if (oldCompInfo.size() > 1 && oldCompInfo.size() != newCompInfo.size())
     throw std::runtime_error("ExperimentInfo: ComponentInfo size mismatch.");
 }
 

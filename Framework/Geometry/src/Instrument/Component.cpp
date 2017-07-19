@@ -319,7 +319,7 @@ bool Component::hasComponentInfo() const {
 Kernel::V3D Component::getRelativePos() const {
   if (m_map) {
 
-    if (hasComponentInfo() && !m_map->componentInfo().isDetector(index())) {
+    if (hasComponentInfo()) {
       return m_map->componentInfo().relativePosition(index());
     } else {
       if (m_map->contains(m_base, "pos")) {
@@ -335,7 +335,7 @@ Kernel::V3D Component::getRelativePos() const {
 /// Return the absolute position of the Component
 Kernel::V3D Component::getPos() const {
   if (m_map) {
-    if (hasComponentInfo() && !m_map->componentInfo().isDetector(index())) {
+    if (hasComponentInfo()) {
       return m_map->componentInfo().position(index());
     } else {
       // We currently have to treat detectors in a different way because
@@ -353,13 +353,6 @@ Kernel::V3D Component::getPos() const {
 
         Quat parentRot;
         V3D parentPos;
-        if (hasComponentInfo() &&
-            !m_map->componentInfo().isDetector(
-                m_map->componentInfo().parent(index()))) {
-          size_t parentIndex = m_map->componentInfo().parent(index());
-          parentRot = m_map->componentInfo().rotation(parentIndex);
-          parentPos = m_map->componentInfo().position(parentIndex);
-        } else {
 
           if (!(m_map->getCachedLocation(baseParent, parentPos) &&
                 m_map->getCachedRotation(baseParent, parentRot))) {
@@ -370,7 +363,6 @@ Kernel::V3D Component::getPos() const {
               parentRot = parParent->getRotation();
               parentPos = parParent->getPos();
             }
-          }
         }
         parentRot.rotate(absPos);
         absPos += parentPos;
@@ -391,7 +383,7 @@ Kernel::V3D Component::getPos() const {
 /// Return the relative rotation of the Compoonent to the parent
 Kernel::Quat Component::getRelativeRot() const {
   if (m_map) {
-    if (hasComponentInfo() && !m_map->componentInfo().isDetector(index())) {
+    if (hasComponentInfo()) {
       return m_map->componentInfo().relativeRotation(index());
     } else {
       if (m_map->contains(m_base, "rot")) {
@@ -407,7 +399,7 @@ Kernel::Quat Component::getRelativeRot() const {
 /// Return the absolute rotation of the Component
 Kernel::Quat Component::getRotation() const {
   if (m_map) {
-    if (hasComponentInfo() && !m_map->componentInfo().isDetector(index())) {
+    if (hasComponentInfo()) {
       return m_map->componentInfo().rotation(index());
     } else {
       // Avoid instantiation of the parent's parameterized object if possible
@@ -417,13 +409,6 @@ Kernel::Quat Component::getRotation() const {
       } else {
         Quat parentRot;
 
-        if (hasComponentInfo() &&
-            !m_map->componentInfo().isDetector(
-                m_map->componentInfo().parent(index()))) {
-          size_t parentIndex = m_map->componentInfo().parent(index());
-          parentRot = m_map->componentInfo().rotation(parentIndex);
-        } else {
-
           if (!m_map->getCachedRotation(baseParent, parentRot)) {
             // Get the parent's rotation
             boost::shared_ptr<const IComponent> parParent = getParent();
@@ -431,7 +416,7 @@ Kernel::Quat Component::getRotation() const {
               parentRot = parParent->getRotation();
             }
           }
-        }
+
         return parentRot * getRelativeRot();
       }
     }

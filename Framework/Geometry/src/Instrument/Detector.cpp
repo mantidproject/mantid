@@ -128,41 +128,6 @@ det_topology Detector::getTopology(V3D &center) const {
   return rect;
 }
 
-/// Return the relative position to the parent
-Kernel::V3D Detector::getRelativePos() const {
-  if (m_map && hasDetectorInfo())
-    return Kernel::toV3D(m_map->detectorInfo().position(index())) -
-           getParent()->getPos();
-  return ObjComponent::getRelativePos();
-}
-
-/// Return the absolute position of the Detector
-Kernel::V3D Detector::getPos() const {
-  if (m_map && hasDetectorInfo())
-    return Kernel::toV3D(m_map->detectorInfo().position(index()));
-  return ObjComponent::getPos();
-}
-
-/// Return the relative rotation to the parent
-Kernel::Quat Detector::getRelativeRot() const {
-  if (m_map && hasDetectorInfo()) {
-    auto inverseParentRot = getParent()->getRotation();
-    inverseParentRot.inverse();
-    // Note the unusual order. This matches the convention in Component::getPos
-    // (child rotations first, then parent, then grandparent, ...).
-    return inverseParentRot *
-           Kernel::toQuat(m_map->detectorInfo().rotation(index()));
-  }
-  return ObjComponent::getRelativeRot();
-}
-
-/// Return the absolute rotation of the Detector
-Kernel::Quat Detector::getRotation() const {
-  if (m_map && hasDetectorInfo())
-    return Kernel::toQuat(m_map->detectorInfo().rotation(index()));
-  return ObjComponent::getRotation();
-}
-
 /// Helper for legacy access mode. Returns a reference to the ParameterMap.
 const ParameterMap &Detector::parameterMap() const { return *m_map; }
 

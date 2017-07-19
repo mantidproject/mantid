@@ -77,11 +77,6 @@ public:
      coordinate system */
   det_topology getTopology(Kernel::V3D &center) const override;
 
-  Kernel::V3D getRelativePos() const override;
-  Kernel::V3D getPos() const override;
-  Kernel::Quat getRelativeRot() const override;
-  Kernel::Quat getRotation() const override;
-
   const ParameterMap &parameterMap() const override;
   size_t index() const override;
 
