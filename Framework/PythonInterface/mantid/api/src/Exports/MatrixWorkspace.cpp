@@ -3,6 +3,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/IDetector.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"

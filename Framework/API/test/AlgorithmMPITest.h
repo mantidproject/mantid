@@ -6,16 +6,15 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 #include "MantidKernel/Property.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidParallel/Communicator.h"
+#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
 #include "MantidTestHelpers/ParallelRunner.h"
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace ParallelTestHelpers;
@@ -294,18 +293,15 @@ void runNoParallelism(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
-    FakeAlgNoParallelism alg;
-    alg.setCommunicator(comm);
     auto in = boost::make_shared<WorkspaceTester>(storageMode);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", in);
-    alg.setRethrows(true);
+    auto alg = create<FakeAlgNoParallelism>(comm);
+    alg->setProperty("InputWorkspace", in);
     if (comm.size() == 1) {
-      TS_ASSERT_THROWS_NOTHING(alg.execute());
-      TS_ASSERT(alg.isExecuted());
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+      TS_ASSERT(alg->isExecuted());
     } else {
       TS_ASSERT_THROWS_EQUALS(
-          alg.execute(), const std::runtime_error &e, std::string(e.what()),
+          alg->execute(), const std::runtime_error &e, std::string(e.what()),
           "Algorithm does not support execution with input workspaces of the "
           "following storage types: \nInputWorkspace " +
               Parallel::toString(storageMode) + "\n.");
@@ -314,32 +310,21 @@ void runNoParallelism(const Parallel::Communicator &comm) {
 }
 
 void runTestGetInputWorkspaceStorageModes(const Parallel::Communicator &comm) {
-  FakeAlgTestGetInputWorkspaceStorageModes alg;
-  alg.setCommunicator(comm);
-  alg.initialize();
-  alg.setProperty("Input1", boost::make_shared<WorkspaceTester>());
-  alg.setProperty("Input2", boost::make_shared<WorkspaceTester>());
-  std::string wsName1("inout1" + std::to_string(comm.rank()));
-  std::string wsName2("inout2" + std::to_string(comm.rank()));
-  auto inout1 = boost::make_shared<WorkspaceTester>();
-  auto inout2 = boost::make_shared<WorkspaceTester>();
-  AnalysisDataService::Instance().addOrReplace(wsName1, inout1);
-  AnalysisDataService::Instance().addOrReplace(wsName2, inout2);
-  alg.setProperty("InOut1", wsName1);
-  alg.setProperty("InOut2", wsName2);
-  TS_ASSERT_THROWS_NOTHING(alg.execute());
-  TS_ASSERT(alg.isExecuted());
+  auto alg = create<FakeAlgTestGetInputWorkspaceStorageModes>(comm);
+  alg->setProperty("Input1", boost::make_shared<WorkspaceTester>());
+  alg->setProperty("Input2", boost::make_shared<WorkspaceTester>());
+  alg->setProperty("InOut1", boost::make_shared<WorkspaceTester>());
+  alg->setProperty("InOut2", boost::make_shared<WorkspaceTester>());
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  TS_ASSERT(alg->isExecuted());
 }
 
 void runBadGetParallelExecutionMode(const Parallel::Communicator &comm) {
-  FakeAlgBadGetParallelExecutionMode alg;
-  alg.setCommunicator(comm);
-  alg.initialize();
-  alg.setRethrows(true);
+  auto alg = create<FakeAlgBadGetParallelExecutionMode>(comm);
   if (comm.size() == 1) {
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
   } else {
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e,
                             std::string(e.what()),
                             "Parallel::ExecutionMode::Serial is not a valid "
                             "*parallel* execution mode.");
@@ -350,22 +335,16 @@ void run1To1(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
-    FakeAlg1To1 alg;
-    alg.setCommunicator(comm);
-    alg.initialize();
     auto in = boost::make_shared<FakeWorkspaceA>(storageMode);
     in->initialize(1, 2, 1);
+    auto alg = create<FakeAlg1To1>(comm);
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
-      alg.setProperty("InputWorkspace", in);
+      alg->setProperty("InputWorkspace", in);
     } else {
-      alg.setProperty("InputWorkspace", in->cloneEmpty());
+      alg->setProperty("InputWorkspace", in->cloneEmpty());
     }
-    // In a true MPI run we could simply use "out", but in the threaded
-    // fake-runner we have only one ADS, so we have to avoid clashes.
-    std::string outName("out" + std::to_string(comm.rank()));
-    alg.setProperty("OutputWorkspace", outName);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    auto out = AnalysisDataService::Instance().retrieve(outName);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(out->storageMode(), storageMode);
     TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
   }
@@ -375,21 +354,19 @@ void runNTo0(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
-    FakeAlgNTo0 alg;
-    alg.setCommunicator(comm);
-    alg.initialize();
     auto in1 = boost::make_shared<FakeWorkspaceA>(storageMode);
     auto in2 = boost::make_shared<FakeWorkspaceB>(storageMode);
     in1->initialize(1, 2, 1);
     in2->initialize(1, 2, 1);
+    auto alg = create<FakeAlgNTo0>(comm);
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
-      alg.setProperty("InputWorkspace1", in1);
-      alg.setProperty("InputWorkspace2", in2);
+      alg->setProperty("InputWorkspace1", in1);
+      alg->setProperty("InputWorkspace2", in2);
     } else {
-      alg.setProperty("InputWorkspace1", in1->cloneEmpty());
-      alg.setProperty("InputWorkspace2", in2->cloneEmpty());
+      alg->setProperty("InputWorkspace1", in1->cloneEmpty());
+      alg->setProperty("InputWorkspace2", in2->cloneEmpty());
     }
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 }
 
@@ -397,36 +374,31 @@ void runNTo1StorageModeFailure(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
-    FakeAlgNTo1StorageModeFailure alg;
-    alg.setCommunicator(comm);
-    alg.initialize();
     auto in1 = boost::make_shared<FakeWorkspaceA>(storageMode);
     auto in2 = boost::make_shared<FakeWorkspaceB>(storageMode);
     in1->initialize(1, 2, 1);
     in2->initialize(1, 2, 1);
+    auto alg = create<FakeAlgNTo1StorageModeFailure>(comm);
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
-      alg.setProperty("InputWorkspace1", in1);
-      alg.setProperty("InputWorkspace2", in2);
+      alg->setProperty("InputWorkspace1", in1);
+      alg->setProperty("InputWorkspace2", in2);
     } else {
-      alg.setProperty("InputWorkspace1", in1->cloneEmpty());
-      alg.setProperty("InputWorkspace2", in2->cloneEmpty());
+      alg->setProperty("InputWorkspace1", in1->cloneEmpty());
+      alg->setProperty("InputWorkspace2", in2->cloneEmpty());
     }
-    // In a true MPI run we could simply use "out", but in the threaded
-    // fake-runner we have only one ADS, so we have to avoid clashes.
-    std::string outName("out" + std::to_string(comm.rank()));
-    alg.setProperty("OutputWorkspace", outName);
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
-      TS_ASSERT_THROWS_NOTHING(alg.execute());
-      TS_ASSERT(alg.isExecuted());
-      auto out = AnalysisDataService::Instance().retrieve(outName);
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+      TS_ASSERT(alg->isExecuted());
+      Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
       // Preserving storage mode is actually not guaranteed, but this
       // implementation does of FakeAlgNTo1StorageModeFailure does.
       TS_ASSERT_EQUALS(out->storageMode(), storageMode);
       TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
     } else {
-      // Internally this actually does throw but exceptions are just logged.
-      TS_ASSERT_THROWS_NOTHING(alg.execute());
-      TS_ASSERT(!alg.isExecuted());
+      TS_ASSERT_THROWS_EQUALS(
+          alg->execute(), const std::runtime_error &e, std::string(e.what()),
+          "Attempt to run algorithm with Parallel::ExecutionMode::MasterOnly: "
+          "Execution in this mode not implemented.");
     }
   }
 }
@@ -435,27 +407,21 @@ void runNTo1(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
-    FakeAlgNTo1 alg;
-    alg.setCommunicator(comm);
-    alg.initialize();
     auto in1 = boost::make_shared<FakeWorkspaceA>(storageMode);
     auto in2 = boost::make_shared<FakeWorkspaceB>(storageMode);
     in1->initialize(1, 2, 1);
     in2->initialize(1, 2, 1);
+    auto alg = create<FakeAlgNTo1>(comm);
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
-      alg.setProperty("InputWorkspace1", in1);
-      alg.setProperty("InputWorkspace2", in2);
+      alg->setProperty("InputWorkspace1", in1);
+      alg->setProperty("InputWorkspace2", in2);
     } else {
-      alg.setProperty("InputWorkspace1", in1->cloneEmpty());
-      alg.setProperty("InputWorkspace2", in2->cloneEmpty());
+      alg->setProperty("InputWorkspace1", in1->cloneEmpty());
+      alg->setProperty("InputWorkspace2", in2->cloneEmpty());
     }
-    // In a true MPI run we could simply use "out", but in the threaded
-    // fake-runner we have only one ADS, so we have to avoid clashes.
-    std::string outName("out" + std::to_string(comm.rank()));
-    alg.setProperty("OutputWorkspace", outName);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-    auto out = AnalysisDataService::Instance().retrieve(outName);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(out->storageMode(), storageMode);
     TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
   }
@@ -463,62 +429,45 @@ void runNTo1(const Parallel::Communicator &comm) {
 
 template <Parallel::StorageMode storageMode>
 void run0To1(const Parallel::Communicator &comm) {
-  FakeAlg0To1<storageMode> alg;
-  alg.setCommunicator(comm);
-  alg.initialize();
-  // In a true MPI run we could simply use "out", but in the threaded
-  // fake-runner we have only one ADS, so we have to avoid clashes.
-  std::string outName("out" + std::to_string(comm.rank()));
-  alg.setProperty("OutputWorkspace", outName);
-  TS_ASSERT_THROWS_NOTHING(alg.execute());
-  TS_ASSERT(alg.isExecuted());
-  auto out = AnalysisDataService::Instance().retrieve(outName);
+  auto alg = create<FakeAlg0To1<storageMode>>(comm);
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  TS_ASSERT(alg->isExecuted());
+  Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
   TS_ASSERT_EQUALS(out->storageMode(), storageMode);
   TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
 }
 
 template <Parallel::StorageMode modeIn, Parallel::StorageMode modeOut>
 void run1To1StorageModeTransition(const Parallel::Communicator &comm) {
-  FakeAlg1To1StorageModeTransition<modeOut> alg;
-  alg.setCommunicator(comm);
-  alg.initialize();
   auto in = boost::make_shared<FakeWorkspaceA>(modeIn);
   in->initialize(1, 2, 1);
+  auto alg = create<FakeAlg1To1StorageModeTransition<modeOut>>(comm);
   if (modeIn != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
-    alg.setProperty("InputWorkspace", in);
+    alg->setProperty("InputWorkspace", in);
   } else {
-    alg.setProperty("InputWorkspace", in->cloneEmpty());
+    alg->setProperty("InputWorkspace", in->cloneEmpty());
   }
-  // In a true MPI run we could simply use "out", but in the threaded
-  // fake-runner we have only one ADS, so we have to avoid clashes.
-  std::string outName("out" + std::to_string(comm.rank()));
-  alg.setProperty("OutputWorkspace", outName);
-  TS_ASSERT_THROWS_NOTHING(alg.execute());
-  TS_ASSERT(alg.isExecuted());
-  auto out = AnalysisDataService::Instance().retrieve(outName);
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  TS_ASSERT(alg->isExecuted());
+  Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
   TS_ASSERT_EQUALS(out->storageMode(), modeOut);
   TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
 }
 
 void runChained(const Parallel::Communicator &comm) {
   using Parallel::StorageMode;
-  FakeAlg0To1<StorageMode::MasterOnly> alg1;
-  alg1.initialize();
-  std::string outName("out" + std::to_string(comm.rank()));
-  alg1.setProperty("OutputWorkspace", outName);
-  TS_ASSERT_THROWS_NOTHING(alg1.execute());
-  TS_ASSERT(alg1.isExecuted());
-  auto ws1 = AnalysisDataService::Instance().retrieve(outName);
+  auto alg1 = create<FakeAlg0To1<StorageMode::MasterOnly>>(comm);
+  TS_ASSERT_THROWS_NOTHING(alg1->execute());
+  TS_ASSERT(alg1->isExecuted());
+  Workspace_sptr ws1 = alg1->getProperty("OutputWorkspace");
   TS_ASSERT_EQUALS(ws1->storageMode(), StorageMode::MasterOnly);
 
-  FakeAlg1To1StorageModeTransition<StorageMode::Distributed> alg2;
-  alg2.setCommunicator(comm);
-  alg2.initialize();
-  alg2.setProperty("InputWorkspace", ws1);
-  alg2.setProperty("OutputWorkspace", outName);
-  TS_ASSERT_THROWS_NOTHING(alg2.execute());
-  TS_ASSERT(alg2.isExecuted());
-  auto ws2 = AnalysisDataService::Instance().retrieve(outName);
+  auto alg2 =
+      create<FakeAlg1To1StorageModeTransition<StorageMode::Distributed>>(comm);
+  alg2->setProperty("InputWorkspace", ws1);
+  TS_ASSERT_THROWS_NOTHING(alg2->execute());
+  TS_ASSERT(alg2->isExecuted());
+  Workspace_const_sptr ws2 = alg2->getProperty("OutputWorkspace");
   TS_ASSERT_EQUALS(ws2->storageMode(), StorageMode::Distributed);
 }
 }
@@ -530,84 +479,32 @@ public:
   static AlgorithmMPITest *createSuite() { return new AlgorithmMPITest(); }
   static void destroySuite(AlgorithmMPITest *suite) { delete suite; }
 
-  AlgorithmMPITest() { AnalysisDataService::Instance(); }
-
-  void testNoParallelism() {
-    runNoParallelism(Parallel::Communicator{});
-    runParallel(runNoParallelism);
-    Mantid::API::AnalysisDataService::Instance().clear();
-  }
+  void testNoParallelism() { runParallel(runNoParallelism); }
 
   void testGetInputWorkspaceStorageModes() {
-    runTestGetInputWorkspaceStorageModes(Parallel::Communicator{});
     runParallel(runTestGetInputWorkspaceStorageModes);
-    Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testBadGetParallelExecutionMode() {
-    runBadGetParallelExecutionMode(Parallel::Communicator{});
     runParallel(runBadGetParallelExecutionMode);
-    Mantid::API::AnalysisDataService::Instance().clear();
   }
 
-  void test1To1() {
-    run1To1(Parallel::Communicator{});
-    runParallel(run1To1);
-    Mantid::API::AnalysisDataService::Instance().clear();
-  }
+  void test1To1() { runParallel(run1To1); }
 
-  void testNTo0() {
-    runNTo0(Parallel::Communicator{});
-    runParallel(runNTo0);
-    Mantid::API::AnalysisDataService::Instance().clear();
-  }
+  void testNTo0() { runParallel(runNTo0); }
 
-  void testNTo1StorageModeFailure() {
-    runNTo1StorageModeFailure(Parallel::Communicator{});
-    runParallel(runNTo1StorageModeFailure);
-    Mantid::API::AnalysisDataService::Instance().clear();
-  }
+  void testNTo1StorageModeFailure() { runParallel(runNTo1StorageModeFailure); }
 
-  void testNTo1() {
-    runNTo1(Parallel::Communicator{});
-    runParallel(runNTo1);
-    Mantid::API::AnalysisDataService::Instance().clear();
-  }
+  void testNTo1() { runParallel(runNTo1); }
 
   void test0To1() {
-    run0To1<Parallel::StorageMode::Cloned>(Parallel::Communicator{});
-    run0To1<Parallel::StorageMode::Distributed>(Parallel::Communicator{});
-    run0To1<Parallel::StorageMode::MasterOnly>(Parallel::Communicator{});
     runParallel(run0To1<Parallel::StorageMode::Cloned>);
     runParallel(run0To1<Parallel::StorageMode::Distributed>);
     runParallel(run0To1<Parallel::StorageMode::MasterOnly>);
-    Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void test1To1StorageModeTransition() {
     using Parallel::StorageMode;
-    run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::Cloned>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::Distributed>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::MasterOnly>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::Distributed, StorageMode::Cloned>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::Distributed,
-                                 StorageMode::Distributed>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::Distributed,
-                                 StorageMode::MasterOnly>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::MasterOnly, StorageMode::Cloned>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::MasterOnly,
-                                 StorageMode::Distributed>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::MasterOnly,
-                                 StorageMode::MasterOnly>(
-        Parallel::Communicator{});
     runParallel(
         run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::Cloned>);
     runParallel(run1To1StorageModeTransition<StorageMode::Cloned,
@@ -626,15 +523,12 @@ public:
                                              StorageMode::Distributed>);
     runParallel(run1To1StorageModeTransition<StorageMode::MasterOnly,
                                              StorageMode::MasterOnly>);
-    Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testChained() {
     // Test that output from one algorithm can be fed into another (in
     // combination with non-trivial storage modes).
-    runChained(Parallel::Communicator{});
     runParallel(runChained);
-    Mantid::API::AnalysisDataService::Instance().clear();
   }
 };
 

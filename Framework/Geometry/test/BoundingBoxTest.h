@@ -7,6 +7,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Timer.h"
 
+#include <float.h>
+
 using namespace Mantid;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;

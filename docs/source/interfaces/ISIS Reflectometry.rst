@@ -165,11 +165,19 @@ processing that is in progress. And at the bottom, near the **Process**
 button is the processing instrument selector. The processing instrument is
 used to help identify the correct data to load when processing runs.
 
+While processing, any runs that have been successfully processed will have their
+row highlighted green. Any groups that have been post-processed successfully
+will also be highlighted. Starting a new reduction will clear all highlighted
+rows and groups.
+
 Next to the **Process** button there is a checkbox which allows enabling and
 disabling output to an ipython notebook. If the checkbox is enabled, a dialog
 window will ask for a save location for the notebook after processing is
 complete. A generated notebook contains python code to repeat the processing
 steps and output relevant plots.
+
+**Note**: The interface cannot be closed while runs are being processed. To close
+the interface, you must first stop the reduction by clicking on the **Pause** button.
 
 Tool Bar
 ^^^^^^^^
@@ -187,6 +195,9 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 | Process          | Processes the selected runs, or, if no runs are selected,|
 |                  | all of the runs in the table. When a group is selected,  |
 |                  | runs belonging to the same group are stitched together.  |
++------------------+----------------------------------------------------------+
+| Pause            | Pauses processing any selected runs. Processing may be   |
+|                  | resumed by clicking on the 'Process' button.             |
 +------------------+----------------------------------------------------------+
 | Expand Selection | Expands your selection such that the group containing the|
 |                  | row you have selected is selected.                       |

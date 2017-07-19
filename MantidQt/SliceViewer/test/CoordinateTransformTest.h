@@ -127,8 +127,8 @@ public:
 
     // Act
     auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
-                                                         m_dimY);
+        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
+                                                         m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
 
     // cast into null
@@ -144,8 +144,8 @@ public:
 
     // Act
     auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
-                                                         m_dimY);
+        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
+                                                         m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
 
     // Assert
@@ -166,8 +166,8 @@ public:
 
     // act
     auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
-                                                         m_dimY);
+        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
+                                                         m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
 
     // assert
@@ -186,8 +186,8 @@ public:
 
     // Act
     auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
-                                                         m_dimY);
+        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
+                                                         m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     double expectedValue = 0.75;
     bool skewCorrect = skewWithinTolerance(coords[0], expectedValue);
@@ -201,8 +201,8 @@ public:
 
     // Act
     auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
-                                                         m_dimY);
+        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
+                                                         m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT(
@@ -218,8 +218,8 @@ public:
 
     // Act
     auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
-                                                         m_dimY);
+        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
+                                                         m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT("Datasets without a UBmatrix should not be transformed",
@@ -234,8 +234,8 @@ public:
 
     // Act
     auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
-                                                         m_dimY);
+        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
+                                                         m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT("Datasets without a Wmatrix should not be transformed",
@@ -251,8 +251,8 @@ public:
 
     // Act
     auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
-                                                         m_dimY);
+        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
+                                                         m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT("Datasets without a Affmatrix should still be transformed",

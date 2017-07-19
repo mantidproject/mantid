@@ -25,5 +25,18 @@ std::string toString(const std::map<std::string, StorageMode> &map) {
   return ret;
 }
 
+/// Returns a StorageMode for a human-readable string representation.
+StorageMode fromString(const std::string &mode) {
+  if (mode == "Parallel::StorageMode::Cloned")
+    return StorageMode::Cloned;
+  if (mode == "Parallel::StorageMode::Distributed")
+    return StorageMode::Distributed;
+  if (mode == "Parallel::StorageMode::MasterOnly")
+    return StorageMode::MasterOnly;
+  throw std::invalid_argument(
+      "Parallel::fromString could not convert provided input into a "
+      "Parallel::StorageMode.");
+}
+
 } // namespace Parallel
 } // namespace Mantid

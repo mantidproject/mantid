@@ -267,6 +267,75 @@ public:
     TS_ASSERT_EQUALS(out, "Help,Me,I'm,Stuck,Inside,A,Test");
   }
 
+  void test_joinCompress() {
+
+    std::vector<std::vector<int>> inputList{
+        {1, 2, 3},
+        {-1, 0, 1},
+        {356, 366, 367, 368, 370, 371, 372, 375},
+        {7, 6, 5, 6, 7, 8, 10}};
+    std::vector<std::string> resultList{
+        "1-3", "-1-1", "356,366-368,370-372,375", "7,6,5-8,10"};
+
+    for (size_t i = 0; i < inputList.size(); i++) {
+      const auto &inputVector = inputList[i];
+      TS_ASSERT_EQUALS(
+          joinCompress(inputVector.begin(), inputVector.end(), ",", "-"),
+          resultList[i]);
+    }
+  }
+
+  void test_shorten() {
+
+    std::vector<std::string> inputList{
+        "",          // empty
+        "1,2",       // shorter than the ellipsis
+        "1,2,3",     // equal in length than the ellipsis
+        "1,2,35",    // one longer than the ellipsis
+        "1,2,3,4",   // two longer than the ellipsis
+        "1,2,3,45",  // just long enough for the ellipsis
+        "12,3,4,56", // another past the ellipsis
+        "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"};
+    std::vector<std::string> resultListMaxLength7{
+        "",        // empty
+        "1,2",     // shorter than the ellipsis
+        "1,2,3",   // equal in length than the ellipsis
+        "1,2,35",  // one longer than the ellipsis
+        "1,2,3,4", // two longer than the ellipsis
+        "1 ... 5", // just long enough for the ellipsis
+        "1 ... 6", // another past the ellipsis
+        "1 ... 0"};
+
+    std::vector<std::string> resultListMaxLength20{
+        "",          // empty
+        "1,2",       // shorter than the ellipsis
+        "1,2,3",     // equal in length than the ellipsis
+        "1,2,35",    // one longer than the ellipsis
+        "1,2,3,4",   // two longer than the ellipsis
+        "1,2,3,45",  // just long enough for the ellipsis
+        "12,3,4,56", // another past the ellipsis
+        "1,2,3,4 ... 8,19,20"};
+
+    // test very short max size
+    int maxLength = 7;
+    for (size_t i = 0; i < inputList.size(); i++) {
+      const auto &input = inputList[i];
+      std::string result = shorten(input, maxLength);
+      TS_ASSERT_EQUALS(result, resultListMaxLength7[i]);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), maxLength);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), input.size());
+    }
+    // test longer max size
+    maxLength = 20;
+    for (size_t i = 0; i < inputList.size(); i++) {
+      const auto &input = inputList[i];
+      std::string result = shorten(input, maxLength);
+      TS_ASSERT_EQUALS(result, resultListMaxLength20[i]);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), maxLength);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), input.size());
+    }
+  }
+
   void test_endsWithInt() {
     TS_ASSERT_EQUALS(endsWithInt("pixel22"), 22);
     TS_ASSERT_EQUALS(endsWithInt("pixel000123"), 123);
