@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import SimpleShapeMonteCarloAbsorption, Load, ConvertUnits
+from mantid.simpleapi import SimpleShapeMonteCarloAbsorption, Load, ConvertUnits, CompareWorkspaces, SetSampleMaterial
 from mantid.kernel import *
 from mantid.api import *
 
@@ -25,6 +25,15 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
         self._red_ws = red_ws
 
+        corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
+                                                    Shape='FlatPlate',
+                                                    Width=2.0,
+                                                    Thickness=2.0,
+                                                    **self._arguments)
+
+        # store the basic flat plate workspace so it can be compared with others
+        self._corrected_flat_plate = corrected
+
     def _test_corrections_workspace(self, corr_ws):
         x_unit = corr_ws.getAxis(0).getUnit().unitID()
         self.assertEquals(x_unit, 'Wavelength')
@@ -45,6 +54,8 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                     Width=2.0,
                                                     Thickness=2.0,
                                                     **kwargs)
+
+        self._corrected_flat_plate = corrected
 
         self._test_corrections_workspace(corrected)
 
@@ -76,19 +87,13 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
     def test_number_density(self):
         """
         Mass Density for water is 1.0
-        Number Density for water is 0.033
+        Number Density for water is 0.033428
         These should give similar results
         """
 
         kwargs = self._arguments
-        corrected_mass = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
-                                                         Shape='FlatPlate',
-                                                         Width=2.0,
-                                                         Thickness=2.0,
-                                                         **kwargs)
-
         kwargs['DensityType'] = 'Number Density'
-        kwargs['Density'] = 0.033
+        kwargs['Density'] = 0.033428
 
         corrected_num = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
                                                         Shape='FlatPlate',
@@ -96,8 +101,27 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                         Thickness=2.0,
                                                         **kwargs)
 
-        self.assertEquals(corrected_mass.readY(0)[1], corrected_num.readY(0)[1])
+        # _corrected_flat_plate is with mass density 1.0
+        CompareWorkspaces(self._corrected_flat_plate, corrected_num, Tolerance=1e-6)
 
+    def test_material_already_defined(self):
+
+        SetSampleMaterial(InputWorkspace=self._red_ws,
+                          ChemicalFormula='H2-O',
+                          SampleMassDensity=1.0)
+
+        corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
+                                                    MaterialAlreadyDefined=True,
+                                                    EventsPerPoint=200,
+                                                    BeamHeight=3.5,
+                                                    BeamWidth=4.0,
+                                                    Height=2.0,
+                                                    Shape='FlatPlate',
+                                                    Width=2.0,
+                                                    Thickness=2.0)
+
+        self._test_corrections_workspace(corrected)
+        CompareWorkspaces(self._corrected_flat_plate, corrected_num, Tolerance=1e-6)
 
 if __name__ == "__main__":
     unittest.main()
