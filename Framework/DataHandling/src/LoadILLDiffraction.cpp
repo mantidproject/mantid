@@ -337,9 +337,10 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
   // First load the monitors
   for (size_t i = 0; i < NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      m_outWorkspace->mutableY(j + i * m_numberScanPoints) = monitor[j];
-      m_outWorkspace->mutableE(j + i * m_numberScanPoints) = sqrt(monitor[j]);
-      m_outWorkspace->mutableX(j + i * m_numberScanPoints) = axis;
+      const auto wsIndex = j + i * m_numberScanPoints;
+      m_outWorkspace->mutableY(wsIndex) = monitor[j];
+      m_outWorkspace->mutableE(wsIndex) = sqrt(monitor[j]);
+      m_outWorkspace->mutableX(wsIndex) = axis;
     }
   }
 
@@ -350,13 +351,14 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
   for (size_t i = NUMBER_MONITORS;
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      unsigned int y = data(
-          static_cast<int>(j),
-          static_cast<int>((i - NUMBER_MONITORS + deadOffset) / m_sizeDim1),
-          static_cast<int>((i - NUMBER_MONITORS) % m_sizeDim2));
-      m_outWorkspace->mutableY(j + i * m_numberScanPoints) = y;
-      m_outWorkspace->mutableE(j + i * m_numberScanPoints) = sqrt(y);
-      m_outWorkspace->mutableX(j + i * m_numberScanPoints) = axis;
+      const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim1;
+      const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+      unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
+                            static_cast<int>(pixelInTubeNumber));
+      const auto wsIndex = j + i * m_numberScanPoints;
+      m_outWorkspace->mutableY(wsIndex) = y;
+      m_outWorkspace->mutableE(wsIndex) = sqrt(y);
+      m_outWorkspace->mutableX(wsIndex) = axis;
     }
   }
 }
@@ -389,11 +391,11 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
+    const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim1;
+    const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      unsigned int y = data(
-          static_cast<int>(j),
-          static_cast<int>((i - NUMBER_MONITORS + deadOffset) / m_sizeDim1),
-          static_cast<int>((i - NUMBER_MONITORS) % m_sizeDim2));
+      unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
+                            static_cast<int>(pixelInTubeNumber));
       spectrum[j] = y;
       errors[j] = sqrt(y);
     }
