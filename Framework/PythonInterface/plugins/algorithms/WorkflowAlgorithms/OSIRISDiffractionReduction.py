@@ -3,6 +3,8 @@ from six import iteritems, iterkeys, itervalues
 
 import itertools
 
+from IndirectReductionCommon import load_files
+
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -307,22 +309,30 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         """
         Execute the algorithm in diffraction-only mode
         """
+
         # Load all sample, vanadium files
-        for fileName in self._sample_runs + self._vanadium_runs:
-            Load(Filename=fileName,
-                 OutputWorkspace=fileName,
-                 SpectrumMin=self._spec_min,
-                 SpectrumMax=self._spec_max,
-                 LoadLogFiles=self._load_logs)
+        ipf_file_name = self._instrument_name + '_diffraction_' + self._mode + '_Parameters.xml'
+        sample_ws_names, _ = load_files(self._sample_runs,
+                                        ipf_file_name,
+                                        self._spec_min,
+                                        self._spec_max,
+                                        load_logs=self._load_logs)
+        vanadium_ws_names, _ = load_files(self._vanadium_runs,
+                                       ipf_file_name,
+                                       self._spec_min,
+                                       self._spec_max,
+                                       load_logs=self._load_logs)
+        container_ws_names = []
 
         # Load the container run
         if self._container_files:
-            for container in self._container_files:
-                Load(Filename=container,
-                     OutputWorkspace=container,
-                     SpectrumMin=self._spec_min,
-                     SpectrumMax=self._spec_max,
-                     LoadLogFiles=self._load_logs)
+            container_ws_names, _ = load_files(self._sample_runs,
+                                               ipf_file_name,
+                                               self._spec_min,
+                                               self._spec_max,
+                                               load_logs=self._load_logs)
+
+            for container in container_ws_names:
 
                 # Scale the container run if required
                 if self._container_scale_factor != 1.0:
@@ -332,27 +342,26 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                           Operation='Multiply')
 
         # Add the sample workspaces to the dRange to sample map
-        for idx in range(len(self._sample_runs)):
-            if self._container_files:
+        for container, sample in zip(container_ws_names, sample_ws_names):
 
-                RebinToWorkspace(WorkspaceToRebin=self._container_files[idx],
-                                 WorkspaceToMatch=self._sample_runs[idx],
-                                 OutputWorkspace=self._container_files[idx])
+            if container_ws_names:
+                RebinToWorkspace(WorkspaceToRebin=container,
+                                 WorkspaceToMatch=sample,
+                                 OutputWorkspace=container)
 
-                Minus(LHSWorkspace=self._sample_runs[idx],
-                      RHSWorkspace=self._container_files[idx],
-                      OutputWorkspace=self._sample_runs[idx])
+                Minus(LHSWorkspace=sample,
+                      RHSWorkspace=container,
+                      OutputWorkspace=sample)
 
-            self._sam_ws_map.addWs(self._sample_runs[idx])
+            self._sam_ws_map.addWs(sample)
 
         # Add the vanadium workspaces to the dRange to vanadium map
-        for van in self._vanadium_runs:
+        for van in vanadium_ws_names:
             self._van_ws_map.addWs(van)
 
         # Finished with container now so delete it
-        if self._container_files:
-            for container in self._container_files:
-                DeleteWorkspace(container)
+        for container in container_ws_names:
+            DeleteWorkspace(container)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
         for d_range in iterkeys(self._sam_ws_map.getMap()):
