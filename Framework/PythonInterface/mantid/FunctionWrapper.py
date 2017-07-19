@@ -17,10 +17,12 @@ class FunctionWrapper:
              atts = kwargs[key]
              for keya in atts:
                self.fun.setAttributeValue(keya, atts[keya])
+          elif self.fun.hasAttribute(key):
+             self.fun.setAttributeValue(key, kwargs[key])
           
        # Then deal with parameters        
        for key in kwargs:
-          if key != "attributes":
+          if key != "attributes" and not self.fun.hasAttribute(key):
              self.fun.setParameter(key, kwargs[key])
              
   def __getitem__ (self, name):

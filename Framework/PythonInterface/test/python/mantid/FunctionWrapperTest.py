@@ -82,6 +82,7 @@ class FunctionWrapperTest(unittest.TestCase):
         
     def test_attributes(self):
         testhelpers.assertRaisesNothing(self, FunctionWrapper, "Polynomial", attributes={'n': 3}, A0=4, A1=3, A2=2, A3=1)
+        testhelpers.assertRaisesNothing(self, FunctionWrapper, "Polynomial", n=3, A0=4, A1=3, A2=2, A3=1)
         
     def test_fix(self):
         g = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=15)
