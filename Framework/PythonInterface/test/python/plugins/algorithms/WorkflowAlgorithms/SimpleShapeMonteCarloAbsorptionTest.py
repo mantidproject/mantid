@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import SimpleShapeMonteCarloAbsorption, Load, ConvertUnits, CompareWorkspaces, SetSampleMaterial
+from mantid.simpleapi import (SimpleShapeMonteCarloAbsorption, Load, ConvertUnits,
+                              CompareWorkspaces, SetSampleMaterial, CreateSampleWorkspace)
 from mantid.kernel import *
 from mantid.api import *
 
@@ -54,8 +55,6 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                     Width=2.0,
                                                     Thickness=2.0,
                                                     **kwargs)
-
-        self._corrected_flat_plate = corrected
 
         self._test_corrections_workspace(corrected)
 
@@ -121,7 +120,9 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                     Thickness=2.0)
 
         self._test_corrections_workspace(corrected)
-        CompareWorkspaces(self._corrected_flat_plate, corrected_num, Tolerance=1e-6)
+        CompareWorkspaces(self._corrected_flat_plate, corrected, Tolerance=1e-6)
+
+    # TODO: add test for powder diffraction data
 
 if __name__ == "__main__":
     unittest.main()
