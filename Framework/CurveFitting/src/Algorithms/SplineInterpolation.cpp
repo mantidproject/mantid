@@ -150,7 +150,7 @@ void SplineInterpolation::exec() {
       derivs[i] = WorkspaceFactory::Instance().create(mws, order);
       NumericAxis *vAxis = new NumericAxis(order);
       for (size_t j = 0; j < order; ++j) {
-        vAxis->setValue(j, j + 1.);
+        vAxis->setValue(j, static_cast<int>(j) + 1.);
         derivs[i]->setSharedX(j, mws->sharedX(0));
       }
       derivs[i]->replaceAxis(1, vAxis);

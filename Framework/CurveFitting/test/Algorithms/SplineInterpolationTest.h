@@ -92,7 +92,8 @@ public:
     TS_ASSERT(xAxis);
 
     for (size_t i = 0; i < ows->blocksize(); i++) {
-      TS_ASSERT_EQUALS((*xAxis)(i), 1.6 + i * 0.4);
+      double ref = 1.6 + static_cast<int>(i) * 0.4;
+      TS_ASSERT_EQUALS((*xAxis)(i), ref);
     }
 
     const auto &y = ows->y(0).rawData();
@@ -121,7 +122,8 @@ public:
       TS_ASSERT(derivXAxis);
 
       for (size_t i = 0; i < ows->blocksize(); i++) {
-        TS_ASSERT_EQUALS((*derivXAxis)(i), 1.6 + i * 0.4);
+        double ref = 1.6 + static_cast<int>(i) * 0.4;
+        TS_ASSERT_EQUALS((*derivXAxis)(i), ref);
       }
 
       const auto &deriv = derivsWs->y(0);
