@@ -304,8 +304,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # Look for sample changer position in logs in workspace
             if self._sample_log_name in run:
                 tmp = run[self._sample_log_name].value
-                value_action = {'last_value': lambda x: x[len(x) - 1],
-                                'average': lambda x: x.mean()}
+                value_action = {'last_value': lambda x: x[-1],
+                                'average': lambda x: x.mean(),
+                                'lowest_value': lambda x: np.amin(x)}
                 position = value_action['last_value'](tmp)
                 if position == 0:
                     self._sample_log_name = 'Bot_Can_Top'
@@ -319,7 +320,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
             tmp = run[self._sample_log_name].value
-            value_action = {'last_value': lambda x: x[len(x) - 1],
+            value_action = {'last_value': lambda x: x[-1],
                             'average': lambda x: x.mean(),
                             'lowest_value': lambda x: np.amin(x)}
             sample = value_action[self._sample_log_value](tmp)
