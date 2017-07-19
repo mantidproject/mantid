@@ -15,6 +15,7 @@ New
 Improved
 ########
 
+- :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>` is extended to support conversion to elastic d-spacing.
 
 Deprecated
 ##########

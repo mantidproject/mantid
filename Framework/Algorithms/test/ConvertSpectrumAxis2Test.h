@@ -236,6 +236,48 @@ public:
   }
 
   void
+  test_Target_ElasticDSpacing_Returns_Correct_Value_When_EFixed_Is_Set_In_Algorithm() {
+    const std::string inputWS("inWS");
+    const std::string outputWS("outWS");
+
+    do_algorithm_run("ElasticDSpacing", inputWS, outputWS, false);
+
+    MatrixWorkspace_const_sptr input, output;
+    TS_ASSERT_THROWS_NOTHING(
+        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputWS));
+
+    // Should now have a numeric axis up the side, with units of d
+    const Axis *qAxis = 0;
+    TS_ASSERT_THROWS_NOTHING(qAxis = output->getAxis(1));
+    TS_ASSERT(qAxis->isNumeric());
+    TS_ASSERT_EQUALS(qAxis->unit()->unitID(), "dSpacing");
+
+    TS_ASSERT_DELTA((*qAxis)(0), 71.5464, 1e-4);
+    TS_ASSERT_DELTA((*qAxis)(1), 143.0286, 1e-4);
+    TS_ASSERT_DELTA((*qAxis)(2), 2 * M_PI / DBL_MIN, 1e-10);
+
+    // Check axis is correct length
+    TS_ASSERT_THROWS((*qAxis)(3), Mantid::Kernel::Exception::IndexError);
+
+    TS_ASSERT_EQUALS(input->x(0), output->x(0));
+    TS_ASSERT_EQUALS(input->y(0), output->y(0));
+    TS_ASSERT_EQUALS(input->e(0), output->e(0));
+    TS_ASSERT_EQUALS(input->x(1), output->x(1));
+    TS_ASSERT_EQUALS(input->y(1), output->y(1));
+    TS_ASSERT_EQUALS(input->e(1), output->e(1));
+    TS_ASSERT_EQUALS(input->x(2), output->x(2));
+    TS_ASSERT_EQUALS(input->y(2), output->y(2));
+    TS_ASSERT_EQUALS(input->e(2), output->e(2));
+
+    // Clean up workspaces.
+    clean_up_workspaces(inputWS, outputWS);
+  }
+
+  void
   test_Target_ElasticQSquared_Returns_Correct_Value_When_EFixed_Is_Set_In_Algorithm() {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
