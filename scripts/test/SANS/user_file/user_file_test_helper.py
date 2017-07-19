@@ -79,7 +79,7 @@ sample_user_file = ("PRINT for changer\n"
 
 
 def create_user_file(user_file_content):
-    temp = tempfile.NamedTemporaryFile(delete=False)
+    temp = tempfile.NamedTemporaryFile(mode='w+', delete=False)
     temp.write(user_file_content)
     user_file_path = temp.name
     temp.close()
