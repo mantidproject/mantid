@@ -10,7 +10,8 @@ namespace {
 
 template <typename T>
 std::unique_ptr<T> copyOrNull(const std::unique_ptr<T> &source) {
-  return source ? std::unique_ptr<T>(new T(*source)) : std::unique_ptr<T>(nullptr);
+  return source ? std::unique_ptr<T>(new T(*source))
+                : std::unique_ptr<T>(nullptr);
 }
 }
 
@@ -41,9 +42,10 @@ Beamline &Beamline::operator=(const Beamline &other) {
 }
 
 Beamline::Beamline(ComponentInfo &&componentInfo, DetectorInfo &&detectorInfo)
-    : m_empty(false),
-      m_componentInfo(std::unique_ptr<ComponentInfo>(new ComponentInfo(componentInfo))),
-      m_detectorInfo(std::unique_ptr<DetectorInfo>(new DetectorInfo(detectorInfo))) {
+    : m_empty(false), m_componentInfo(std::unique_ptr<ComponentInfo>(
+                          new ComponentInfo(componentInfo))),
+      m_detectorInfo(
+          std::unique_ptr<DetectorInfo>(new DetectorInfo(detectorInfo))) {
   m_componentInfo->setDetectorInfo(m_detectorInfo.get());
   m_detectorInfo->setComponentInfo(m_componentInfo.get());
 }
