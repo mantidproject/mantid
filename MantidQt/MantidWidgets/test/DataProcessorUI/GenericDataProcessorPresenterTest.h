@@ -1546,34 +1546,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
-  void testDeselectAll() {
-    NiceMock<MockDataProcessorView> mockDataProcessorView;
-    NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
-
-    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
-    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
-        .Times(1)
-        .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
-
-    // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
-
-    // Select all rows / groups
-    EXPECT_CALL(mockDataProcessorView, deselectAll()).Times(1);
-
-    presenter.notify(DataProcessorPresenter::DeselectAllFlag);
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
-  }
-
   /*
   * Test processing workspaces with non-standard names, with
   * and without run_number information in the sample log.

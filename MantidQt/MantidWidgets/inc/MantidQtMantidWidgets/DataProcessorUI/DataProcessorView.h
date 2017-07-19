@@ -82,7 +82,7 @@ public:
   virtual void expandAll() = 0;
   virtual void collapseAll() = 0;
 
-  // Select all groups
+  // Select all rows/groups
   virtual void selectAll() = 0;
 
   // Handle pause/resume of data reduction

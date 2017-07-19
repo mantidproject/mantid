@@ -106,7 +106,7 @@ public:
   void expandAll() override;
   void collapseAll() override;
 
-  // Select all groups
+  // Select all rows/groups
   void selectAll() override;
 
   // Handle pause/resume of data reduction
