@@ -413,7 +413,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                  InfinityValue=0.0)
 
         # Create a list of sample workspace NAMES, since we need this for MergeRuns.
-        samWsNamesList = self._sam_ws_map.getMap().values()
+        samWsNamesList = list(self._sam_ws_map.getMap().values())
 
         if len(samWsNamesList) > 1:
             # Merge the sample files into one.
