@@ -25,10 +25,14 @@ class PeakIntensityVsRadiusTest : public CxxTest::TestSuite {
 public:
   void test_Init() {
     PeakIntensityVsRadius alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    assertSuccessfulInitialization(alg);
   }
 
+  void assertSuccessfulInitialization(PeakIntensityVsRadius &alg) {
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized())
+  }
+  
   //-------------------------------------------------------------------------------
   /** Create the (blank) MDEW */
   static void createMDEW() {
@@ -67,27 +71,19 @@ public:
         "PeakIntensityVsRadiusTest_peaks", peakWS);
   }
 
-  void assertSuccessfulInitialization(PeakIntensityVsRadius &alg) {
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized())
+  void test_worksWithValidInputs() {
+    ensureExecutionNoThrow(1.0, 2.0, 0, 0);
+    ensureExecutionNoThrow(0, 0, 0.12, 0.15);
+    ensureExecutionNoThrow(1.0, 0, 0, 0.15);
+    ensureExecutionNoThrow(0, 1.5, 0.15, 0);
+    // Can't specify fixed and variable
   }
 
-  /** Check the validateInputs() calls */
-  void doTestValid(bool assertExecuteSuccess, double BackgroundInnerFactor,
-                   double BackgroundOuterFactor, double BackgroundInnerRadius,
-                   double BackgroundOuterRadius, int NumSteps) {
-    PeakIntensityVsRadius alg;
-    // Name of the output workspace.
-    std::string outWSName("PeakIntensityVsRadiusTest_OutputWS");
-    assertSuccessfulInitialization(alg);
-    assertNoThrowWhenSettingProperties(
-        alg, outWSName, BackgroundInnerFactor, BackgroundOuterFactor,
-        BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
-    if (assertExecuteSuccess) {
-      TS_ASSERT_THROWS_NOTHING(alg.execute(););
-    } else {
-      TS_ASSERT_THROWS_ANYTHING(alg.execute(););
-    }
+  void test_throwsWhenExecutingForInvalidInputs() {
+    ensureExecutionThrows(1.0, 0, 0.15, 0);
+    ensureExecutionThrows(0, 1.0, 0, 0.15);
+    ensureExecutionThrows(1.0, 0, 0.15, 0);
+    ensureExecutionThrows(1.0, 1.0, 0.12, 0.15);
   }
 
   void ensureExecutionThrows(double BackgroundInnerFactor,
@@ -106,31 +102,22 @@ public:
                 BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
   }
 
-  void test_worksWithValidInputs() {
-    ensureExecutionNoThrow(1.0, 2.0, 0, 0);
-    ensureExecutionNoThrow(0, 0, 0.12, 0.15);
-    ensureExecutionNoThrow(1.0, 0, 0, 0.15);
-    ensureExecutionNoThrow(0, 1.5, 0.15, 0);
-    // Can't specify fixed and variable
-  }
-
-  void test_throwsWhenExecutingForInvalidInputs() {
-    ensureExecutionThrows(1.0, 0, 0.15, 0);
-    ensureExecutionThrows(0, 1.0, 0, 0.15);
-    ensureExecutionThrows(1.0, 0, 0.15, 0);
-    ensureExecutionThrows(1.0, 1.0, 0.12, 0.15);
-  }
-
-  template<typename PropertyType>
-  void assertInvalidPropertyValue(PeakIntensityVsRadius &alg, std::string const&name,
-                                  PropertyType value) {
-    TS_ASSERT_THROWS_ANYTHING(alg.setProperty(name, value))
-  }
-
-  void test_throwsWhenSettingInvalidPropertyValues() {
+  /** Check the validateInputs() calls */
+  void doTestValid(bool assertExecuteSuccess, double BackgroundInnerFactor,
+                   double BackgroundOuterFactor, double BackgroundInnerRadius,
+                   double BackgroundOuterRadius, int NumSteps) {
     PeakIntensityVsRadius alg;
+    // Name of the output workspace.
+    std::string outWSName("PeakIntensityVsRadiusTest_OutputWS");
     assertSuccessfulInitialization(alg);
-    assertInvalidPropertyValue(alg, "NumSteps", -8);
+    assertNoThrowWhenSettingProperties(
+        alg, outWSName, BackgroundInnerFactor, BackgroundOuterFactor,
+        BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
+    if (assertExecuteSuccess) {
+      TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    } else {
+      TS_ASSERT_THROWS_ANYTHING(alg.execute(););
+    }
   }
 
   void assertNoThrowWhenSettingProperties(PeakIntensityVsRadius &alg,
@@ -159,6 +146,29 @@ public:
         alg.setProperty("BackgroundOuterRadius", BackgroundOuterRadius));
   }
 
+  void test_throwsWhenSettingInvalidPropertyValues() {
+    PeakIntensityVsRadius alg;
+    assertSuccessfulInitialization(alg);
+    assertInvalidPropertyValue(alg, "NumSteps", -8);
+  }
+
+  template<typename PropertyType>
+  void assertInvalidPropertyValue(PeakIntensityVsRadius &alg, std::string const&name,
+                                  PropertyType value) {
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty(name, value))
+  }
+
+  void test_VariableBackground() {
+    MatrixWorkspace_sptr ws = doTest(1.0, 2.0, 0, 0);
+    // Check the results
+    TSM_ASSERT_EQUALS("Two peaks", ws->getNumberHistograms(), 2);
+    assertFirstFourYValuesCloseToZero(ws);
+
+    // Points before 0.5 are approximately zero because the background shell is
+    // in the peak.
+    assertFlatAfter1(ws);
+  }
+
   MatrixWorkspace_sptr doTest(double BackgroundInnerFactor,
                               double BackgroundOuterFactor,
                               double BackgroundInnerRadius,
@@ -183,9 +193,28 @@ public:
     return ws;
   }
 
+  void test_FixedBackground() {
+    // Background
+    MatrixWorkspace_sptr ws = doTest(0, 0, 0.4, 0.5);
+    // Check the results
+    TSM_ASSERT_EQUALS("Two peaks", ws->getNumberHistograms(), 2);
+
+    // Points before 0.5 are approximately zero because the background shell is
+    // in the peak.
+    assertFirstFourYValuesCloseToZero(ws);
+    assertFlatAfter1(ws);
+  }
+
   void assertFlatAfter1(MatrixWorkspace_sptr ws) {
     TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
     TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6)
+  }
+
+  void assertFirstFourYValuesCloseToZero(MatrixWorkspace_sptr ws) {
+    TS_ASSERT_DELTA(ws->y(0)[0], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[3], 0, 10);
   }
 
   void test_NoBackground() {
@@ -200,35 +229,6 @@ public:
     assertFlatAfter1(ws);
   }
 
-  void assertFirstFourYValuesCloseToZero(MatrixWorkspace_sptr ws) {
-    TS_ASSERT_DELTA(ws->y(0)[0], 0, 10);
-    TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);
-    TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);
-    TS_ASSERT_DELTA(ws->y(0)[3], 0, 10);
-  }
-
-  void test_VariableBackground() {
-    MatrixWorkspace_sptr ws = doTest(1.0, 2.0, 0, 0);
-    // Check the results
-    TSM_ASSERT_EQUALS("Two peaks", ws->getNumberHistograms(), 2);
-    assertFirstFourYValuesCloseToZero(ws);
-
-    // Points before 0.5 are approximately zero because the background shell is
-    // in the peak.
-    assertFlatAfter1(ws);
-  }
-
-  void test_FixedBackground() {
-    // Background
-    MatrixWorkspace_sptr ws = doTest(0, 0, 0.4, 0.5);
-    // Check the results
-    TSM_ASSERT_EQUALS("Two peaks", ws->getNumberHistograms(), 2);
-
-    // Points before 0.5 are approximately zero because the background shell is
-    // in the peak.
-    assertFirstFourYValuesCloseToZero(ws);
-    assertFlatAfter1(ws);
-  }
 private:
   PeakIntensityVsRadius m_alg;
 };
