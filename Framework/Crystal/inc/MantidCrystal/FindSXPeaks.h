@@ -105,6 +105,9 @@ private:
                                                                                  const API::SpectrumInfo &spectrumInfo,
                                                                                  const double minValue, const double maxValue) const;
 
+  /// Selects a peak finding strategy
+  std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy> getReducePeakListStrategy() const;
+
   //
   void reducePeakList(const peakvector &);
   /// The value in X to start the search from

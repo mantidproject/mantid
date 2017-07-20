@@ -177,26 +177,28 @@ private:
 
 
 
-///* ------------------------------------------------------------------------------------------
-// * PeakListReduction Strategy
-// * ------------------------------------------------------------------------------------------
-// */
+/* ------------------------------------------------------------------------------------------
+ * PeakListReduction Strategy
+ * ------------------------------------------------------------------------------------------
+ */
 
-//class DLLExport ReducePeakListStrategy {
-//public:
-//  virtual PeakList reduce(const PeakList& peaks, const double resolution) const = 0;
-//};
+class DLLExport ReducePeakListStrategy {
+public:
+  virtual std::vector<SXPeak> reduce(const std::vector<SXPeak>& peaks, const double resolution) const = 0;
+};
 
 
-//class DLLExport SimpleReduceStrategy : public ReducePeakListStrategy {
-//public:
-//  PeakList reduce(const PeakList& peaks, const double resolution) const override;
-//};
+class DLLExport SimpleReduceStrategy : public ReducePeakListStrategy {
+public:
+  std::vector<SXPeak> reduce(const std::vector<SXPeak>& peaks, const double resolution) const override;
+};
 
-//class DLLExport FindMaxReduceStrategy : public ReducePeakListStrategy {
-//public:
-//  PeakList reduce(const PeakList& peaks, const double resolution) const override;
-//};
+class DLLExport FindMaxReduceStrategy : public ReducePeakListStrategy {
+public:
+  std::vector<SXPeak> reduce(const std::vector<SXPeak>& peaks, const double resolution) const override;
+private:
+  std::vector<SXPeak*> createGraph(const std::vector<SXPeak>& peakList, const double resolution) const;
+};
 
 } // namespace FindSXPeaksHelper
 } // namespace Crystal

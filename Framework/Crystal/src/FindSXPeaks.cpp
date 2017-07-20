@@ -225,20 +225,9 @@ then convert SXPeaks objects to PeakObjects and add them to the output workspace
 @param pcv : current peak list containing potential duplicates
 */
 void FindSXPeaks::reducePeakList(const peakvector &pcv) {
-  double resol = getProperty("Resolution");
-  peakvector finalv;
-
-  for (const auto &currentPeak : pcv) {
-    auto pos = std::find_if(finalv.begin(), finalv.end(),
-                            [&currentPeak, resol](SXPeak &peak) {
-                              bool result = currentPeak.compare(peak, resol);
-                              if (result)
-                                peak += currentPeak;
-                              return result;
-                            });
-    if (pos == finalv.end())
-      finalv.push_back(currentPeak);
-  }
+  double resolution = getProperty("Resolution");
+  auto reductionStrategy = getReducePeakListStrategy();
+  auto finalv = reductionStrategy->reduce(pcv, resolution);
 
   for (auto &finalPeak : finalv) {
     finalPeak.reduce();
@@ -282,6 +271,15 @@ std::unique_ptr<FindSXPeaksHelper::PeakFindingStrategy> FindSXPeaks::getPeakFind
     return Mantid::Kernel::make_unique<AllPeaksStrategy>(backgroundStrategy, spectrumInfo, minValue, maxValue);
   } else {
     throw std::invalid_argument("The selected peak finding strategy has not been implemented yet.");
+  }
+}
+
+
+std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy> FindSXPeaks::getReducePeakListStrategy() const {
+  if (true) {
+    return Mantid::Kernel::make_unique<FindSXPeaksHelper::SimpleReduceStrategy>();
+  } else {
+    return Mantid::Kernel::make_unique<FindSXPeaksHelper::FindMaxReduceStrategy>();
   }
 }
 

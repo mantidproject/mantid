@@ -5,6 +5,12 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include <boost/graph/adjacency_list.hpp>
+
+
+using namespace boost;
+
+
 namespace Mantid {
 namespace Crystal {
 namespace FindSXPeaksHelper{
@@ -79,6 +85,7 @@ bool SXPeak::compare(const SXPeak &rhs, double tolerance) const {
     return false;
   return true;
 }
+
 
 /**
 Getter for LabQ
@@ -444,45 +451,100 @@ PeakList AllPeaksStrategy::convertToSXPeaks(const HistogramData::HistogramX& x, 
 }
 
 
-///* ------------------------------------------------------------------------------------------
-// * PeakList Reduction Strategy
-// * ------------------------------------------------------------------------------------------
-// */
-//PeakList SimpleReduceStrategy::reduce(const PeakList& peaksList, double resolution) const  {
-//  // If the peaks are empty then do nothing
-//  if (!peaks) {
-//    return peaksList;
-//  }
+/* ------------------------------------------------------------------------------------------
+ * PeakList Reduction Strategy
+ * ------------------------------------------------------------------------------------------
+ */
+std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak>& peaks, double resolution) const  {
+  // If the peaks are empty then do nothing
+  if (peaks.empty()) {
+    return peaks;
+  }
 
-//  auto& peaks = peaksList.get();
+  std::vector<SXPeak> finalPeaks;
+  for (const auto &currentPeak : peaks) {
+    auto pos = std::find_if(finalPeaks.begin(), finalPeaks.end(),
+                            [&currentPeak, resolution](SXPeak &peak) {
+                              bool result = currentPeak.compare(peak, resolution);
+                              if (result)
+                                peak += currentPeak;
+                              return result;
+                            });
+    if (pos == finalPeaks.end()) {
+      finalPeaks.push_back(currentPeak);
+    }
+  }
 
-//  std::vector<SXPeak> finalPeaks;
-//  for (const auto &currentPeak : peaks) {
-//    auto pos = std::find_if(finalPeaks.begin(), finalPeaks.end(),
-//                            [&currentPeak, resolution](SXPeak &peak) {
-//                              bool result = currentPeak.compare(peak, resolution);
-//                              if (result)
-//                                peak += currentPeak;
-//                              return result;
-//                            });
-//    if (pos == finalPeaks.end()) {
-//      finalPeaks.push_back(currentPeak);
-//    }
-//  }
-
-//  PeaksList newPeaksList = finalPeaks;
-//  return newPeaksList;
-//}
+  return finalPeaks;
+}
 
 
-//PeakList SimpleReduceStrategy::reduce(const PeakList& peaksList, double resolution) const  {
-//  if (!peaks) {
-//    return peaksList;
-//  }
+std::vector<SXPeak>  FindMaxReduceStrategy::reduce(const std::vector<SXPeak> & peaks, double resolution) const  {
+  // If the peaks are empty then do nothing
+  if (peaks.empty()) {
+    return peaks;
+  }
+
+  // Create graph
+  auto peakGraph = createGraph(peaks, resolution);
+
+  return peaks;
+}
 
 
-//  return peaksList;
-//}
+// Define some graph elements
+typedef adjacency_list<vecS, vecS, undirectedS, SXPeak*> PeakGraph;
+typedef boost::graph_traits<PeakGraph>::vertex_descriptor Vertex;
+typedef boost::graph_traits<PeakGraph>::edge_descriptor Edge;
+
+
+std::vector<SXPeak*> FindMaxReduceStrategy::createGraph(const std::vector<SXPeak>& peakList, const double resolution) const {
+
+  // Create a vector of addresses. Note that the peaks live on the stack. This here only works,
+  // because the peaks are always in a stack frame below.
+  std::vector<SXPeak*> peaks;
+  for (const auto& peak : peakList) {
+
+    peaks.push_back(&const_cast<SXPeak&>(peak));
+  }
+
+  // Add the peaks to a graph
+  Edge edge;
+  PeakGraph graph;
+  PeakGraph::vertex_iterator vertexIt, vertexEnd;
+
+  for (const auto peak : peaks) {
+    // 1. Add the vertex
+    auto vertex = add_vertex(peak, graph);
+
+    // 2. Iterate over all elements already in the graph and check if they need to edstablish an edge between them.
+    std::tie(vertexIt, vertexEnd) = vertices(graph);
+    for (; vertexIt != vertexEnd; ++vertexIt) {
+      // 2.1 Check if we are looking at the new vertex itself. We don't want self-loops
+      if (vertex == *vertexIt) {
+        continue;
+      }
+
+      // 2.2 Check if the edge exists already
+      if (boost::edge(vertex, *vertexIt, graph).second) {
+          continue;
+      }
+
+      // 2.3 Check if the two vertices should have an edge
+      const auto toCheck = graph[*vertexIt];
+      if (!peak->compare(*toCheck, resolution)) {
+        // We need to create an edge
+        add_edge (vertex, *vertexIt, graph);
+      }
+    }
+  }
+
+
+  // Create disjoined graphs from graph above
+  // TODO
+
+  return peaks;
+}
 
 
 

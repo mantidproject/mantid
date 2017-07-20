@@ -147,6 +147,62 @@ public:
 
   }
 
+
+  void testThatCanReduceWithSimpleReduceStrategy() {
+    //GIVEN
+    auto simpleStrategy = Mantid::Kernel::make_unique<SimpleReduceStrategy>();
+    auto workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    const auto &spectrumInfo = workspace->spectrumInfo();
+    const double resolution = 0.001;
+    std::vector<SXPeak> peaks;
+    peaks.emplace_back(1 /*TOF*/, 1 /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    peaks.emplace_back(1 /*TOF*/, 1 /*phi*/, 0.2 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+
+    peaks.emplace_back(1 /*TOF*/, 1.1 /*phi*/, 0.3 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    peaks.emplace_back(1 /*TOF*/, 1.1001 /*phi*/, 0.4 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+
+    peaks.emplace_back(3 /*TOF*/, 2 /*phi*/, 0.5 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    peaks.emplace_back(3 /*TOF*/, 2.0001 /*phi*/, 0.6 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+
+    PeakList peakList = peaks;
+
+    // WHEN
+    auto reducedPeaks = simpleStrategy->reduce(peakList.get(), resolution);
+
+    // THEN
+    const double tolerance = 1e-6;
+    TSM_ASSERT("Should have three peaks", reducedPeaks.size() == 3);
+    TSM_ASSERT("Should have a value of 0.1 + 0.2 = 0.3", std::abs(reducedPeaks[0].getIntensity() - 0.3) < tolerance);
+    TSM_ASSERT("Should have a value of 0.3 + 0.4 = 0.7", std::abs(reducedPeaks[1].getIntensity() - 0.7) < tolerance);
+    TSM_ASSERT("Should have a value of 0.5 + 0.6 = 01.1", std::abs(reducedPeaks[2].getIntensity() - 1.1) < tolerance);
+  }
+
+
+  void testThatCanReduceWithFindMaxReduceStrategy() {
+    //GIVEN
+    auto findMaxReduceStrategy = Mantid::Kernel::make_unique<FindMaxReduceStrategy>();
+    auto workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    const auto &spectrumInfo = workspace->spectrumInfo();
+    const double resolution = 0.001;
+    std::vector<SXPeak> peaks;
+    peaks.emplace_back(1 /*TOF*/, 1 /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    peaks.emplace_back(1 /*TOF*/, 1 /*phi*/, 0.2 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+
+    peaks.emplace_back(1 /*TOF*/, 1.1 /*phi*/, 0.3 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    peaks.emplace_back(1 /*TOF*/, 1.1001 /*phi*/, 0.4 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+
+    peaks.emplace_back(3 /*TOF*/, 2 /*phi*/, 0.5 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    peaks.emplace_back(3 /*TOF*/, 2.0001 /*phi*/, 0.6 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+
+    PeakList peakList = peaks;
+
+    // WHEN
+    auto reducedPeaks = findMaxReduceStrategy->reduce(peakList.get(), resolution);
+  }
+
+
 private:
 
   void doRunStrongestPeakTest(BackgroundStrategy* backgroundStrategy) {
