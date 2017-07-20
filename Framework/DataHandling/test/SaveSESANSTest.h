@@ -10,7 +10,6 @@
 
 #include "boost/algorithm/string/predicate.hpp"
 #include <fstream>
-#include <iostream> // MAKE SURE THIS IS TAKEN OUT
 #include <Poco/File.h>
 
 using Mantid::DataHandling::SaveSESANS;
