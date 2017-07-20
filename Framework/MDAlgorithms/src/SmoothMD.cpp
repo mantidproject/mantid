@@ -3,27 +3,27 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include <boost/make_shared.hpp>
-#include <vector>
-#include <stack>
-#include <numeric>
-#include <map>
-#include <string>
-#include <sstream>
-#include <utility>
-#include <limits>
-#include <boost/function.hpp>
+#include "MantidKernel/PropertyWithValue.h"
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <limits>
+#include <map>
+#include <numeric>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <vector>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -124,10 +124,10 @@ KernelVector gaussianKernel(const double fwhm) {
  * The contributing elements should sum to unity
  */
 KernelVector renormaliseKernel(KernelVector kernel,
-                               std::vector<bool> validity) {
+                               const std::vector<bool> &validity) {
 
-  if (std::accumulate(validity.cbegin(), validity.cend(), 0.0) <
-      kernel.size()) {
+  if (validity.size() == kernel.size() &&
+      std::find(validity.cbegin(), validity.cend(), false) != validity.cend()) {
     // Use validity as a mask
     for (size_t i = 0; i < kernel.size(); ++i) {
       kernel[i] *= validity[i];

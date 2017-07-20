@@ -487,8 +487,13 @@ Post-processes the workspaces created by the given rows together.
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
 
+  // If no post processing has been defined, then we are dealing with a
+  // one-level tree
+  // where all rows are in one group. We don't want to perform post-processing
+  // in
+  // this case.
   if (!m_postprocess)
-    throw std::runtime_error("Cannot post-process workspaces");
+    return;
 
   // The input workspace names
   std::vector<std::string> inputNames;

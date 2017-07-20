@@ -26,7 +26,7 @@ public:
     TS_ASSERT(!iProp->documentation().compare(""))
     TS_ASSERT(typeid(std::vector<int>) == *iProp->type_info())
     TS_ASSERT(iProp->isDefault())
-    TS_ASSERT(iProp->operator()().empty())
+    TS_ASSERT(iProp->operator()().empty());
 
     TS_ASSERT(!dProp->name().compare("doubleProp"))
     TS_ASSERT(!dProp->documentation().compare(""))
@@ -82,7 +82,7 @@ public:
     TS_ASSERT_EQUALS(i.operator()()[0], 1);
     TS_ASSERT_EQUALS(i.operator()()[1], 2);
     TS_ASSERT_EQUALS(i.operator()()[2], 3);
-    TS_ASSERT_EQUALS(i.getDefault(), i_stringValue);
+    TS_ASSERT_EQUALS(i.getDefault(), "1,2,3");
     TS_ASSERT(i.isDefault());
 
     ArrayProperty<int> i2("i", "-1-1");
@@ -299,6 +299,65 @@ public:
                       static_cast<Property *>(0))
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
                       static_cast<Property *>(0))
+  }
+
+  void testPrettyPrinting() {
+    const std::vector<std::string> inputList{
+        "1,2,3", "-1,0,1", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
+        "1-9998, 9999, 2000, 20002-29999"};
+    const std::vector<std::string> resultList{
+        "1-3", "-1-1", "356,366-368,370-372,375", "7,6,5-8,10",
+        "1-9999,2000,20002-29999"};
+
+    TSM_ASSERT("Test Failed for vectors of int",
+               listShorteningwithType<int>(inputList, resultList));
+    TSM_ASSERT("Test Failed for vectors of long",
+               listShorteningwithType<long>(inputList, resultList));
+    // explicit test for in32_t with matches det_id_t and spec_id_t
+    TSM_ASSERT("Test Failed for vectors of int32_t",
+               listShorteningwithType<int32_t>(inputList, resultList));
+
+    // unsigned types
+    const std::vector<std::string> inputListUnsigned{
+        "1,2,3", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
+        "1-9998, 9999, 2000, 20002-29999"};
+    const std::vector<std::string> resultListUnsigned{
+        "1-3", "356,366-368,370-372,375", "7,6,5-8,10",
+        "1-9999,2000,20002-29999"};
+    TSM_ASSERT("Test Failed for vectors of unsigned int",
+               listShorteningwithType<unsigned int>(inputListUnsigned,
+                                                    resultListUnsigned));
+    TSM_ASSERT(
+        "Test Failed for vectors of size_t",
+        listShorteningwithType<size_t>(inputListUnsigned, resultListUnsigned));
+
+    // check shortening does not happen for floating point types
+    const std::vector<std::string> inputListFloat{
+        "1.0,2.0,3.0", "1.0,1.5,2.0,3.0", "-1,0,1",
+    };
+    const std::vector<std::string> resultListFloat{
+        "1,2,3", "1,1.5,2,3", "-1,0,1",
+    };
+    TSM_ASSERT("Test Failed for vectors of float",
+               listShorteningwithType<float>(inputListFloat, resultListFloat));
+    TSM_ASSERT("Test Failed for vectors of double",
+               listShorteningwithType<double>(inputListFloat, resultListFloat));
+  }
+
+  template <typename T>
+  bool listShorteningwithType(const std::vector<std::string> &inputList,
+                              const std::vector<std::string> &resultList) {
+
+    bool success = true;
+    for (size_t i = 0; i < inputList.size(); i++) {
+      ArrayProperty<T> listProperty("i", inputList[i]);
+      std::string response = listProperty.valueAsPrettyStr(0, true);
+      TS_ASSERT_EQUALS(response, resultList[i]);
+      if (response != resultList[i]) {
+        success = false;
+      }
+    }
+    return success;
   }
 
 private:
