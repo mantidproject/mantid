@@ -32,7 +32,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized())
   }
-  
+
   //-------------------------------------------------------------------------------
   /** Create the (blank) MDEW */
   static void createMDEW() {
@@ -152,9 +152,9 @@ public:
     assertInvalidPropertyValue(alg, "NumSteps", -8);
   }
 
-  template<typename PropertyType>
-  void assertInvalidPropertyValue(PeakIntensityVsRadius &alg, std::string const&name,
-                                  PropertyType value) {
+  template <typename PropertyType>
+  void assertInvalidPropertyValue(PeakIntensityVsRadius &alg,
+                                  std::string const &name, PropertyType value) {
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty(name, value))
   }
 
