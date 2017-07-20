@@ -869,11 +869,6 @@ FABADAMinimizer::outputPDF(size_t convLength,
         Y[i - 1] = pdf_y[i - 1] / (double(convLength) * bin);
       }
 
-      // Calculate the most probable value, from the PDF.
-      //*Not used (by the moment)
-      //*auto pos_MP = std::max_element(pdf_y.begin(), pdf_y.end());
-      //*double mostP = X[pos_MP - pdf_y.begin()] + (bin / 2.0);
-      //*m_leastSquares->setParameter(j, mostP);
     }
   } // if convLength > 0
   else {
