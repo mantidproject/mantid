@@ -825,7 +825,7 @@ FABADAMinimizer::outputPDF(size_t convLength,
   // Calculate the cost function Probability Density Function
   if (convLength > 0) {
     std::sort(reducedChain[m_nParams].begin(), reducedChain[m_nParams].end());
-    std::vector<double> pdf_y(pdfLength, 0);
+    std::vector<double> PDFYAxis(pdfLength, 0);
     double start = reducedChain[m_nParams][0];
     double bin =
         (reducedChain[m_nParams][convLength - 1] - start) / double(pdfLength);
@@ -837,21 +837,21 @@ FABADAMinimizer::outputPDF(size_t convLength,
       double binEnd = start + double(i) * bin;
       X[i] = binEnd;
       while (step < convLength && reducedChain[m_nParams][step] <= binEnd) {
-        pdf_y[i - 1] += 1;
+        PDFYAxis[i - 1] += 1;
         ++step;
       }
       // Divided by convLength * bin to normalize
-      Y[i - 1] = pdf_y[i - 1] / (double(convLength) * bin);
+      Y[i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
     }
 
-    auto indexMostProbableChi2 = std::max_element(pdf_y.begin(), pdf_y.end());
+    auto indexMostProbableChi2 = std::max_element(PDFYAxis.begin(), PDFYAxis.end());
 
-    mostPchi2 = X[indexMostProbableChi2 - pdf_y.begin()] + (bin / 2.0);
+    mostPchi2 = X[indexMostProbableChi2 - PDFYAxis.begin()] + (bin / 2.0);
 
     // Do one iteration for each parameter.
     for (size_t j = 0; j < m_nParams; ++j) {
       // Calculate the Probability Density Function
-      std::vector<double> pdf_y(pdfLength, 0);
+      std::vector<double> PDFYAxis(pdfLength, 0);
       double start = reducedChain[j][0];
       double bin =
           (reducedChain[j][convLength - 1] - start) / double(pdfLength);
@@ -863,10 +863,10 @@ FABADAMinimizer::outputPDF(size_t convLength,
         double binEnd = start + double(i) * bin;
         X[i] = binEnd;
         while (step < convLength && reducedChain[j][step] <= binEnd) {
-          pdf_y[i - 1] += 1;
+          PDFYAxis[i - 1] += 1;
           ++step;
         }
-        Y[i - 1] = pdf_y[i - 1] / (double(convLength) * bin);
+        Y[i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
       }
 
     }
