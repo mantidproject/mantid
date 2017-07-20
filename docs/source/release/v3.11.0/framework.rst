@@ -24,6 +24,7 @@ Improved
 - :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays.
 
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
+- :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 
 Deprecated
 ##########
