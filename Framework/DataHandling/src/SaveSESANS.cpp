@@ -16,25 +16,29 @@ namespace DataHandling {
 // Register the algorithm with the AlgorithmFactory
 DECLARE_ALGORITHM(SaveSESANS)
 
+/// Get the algorithm's name
 const std::string SaveSESANS::name() const {
 	return "SaveSESANS";
 }
 
+/// Get a summary of the algorithm
 const std::string SaveSESANS::summary() const {
 	return "Save a file using the SESANS format";
 }
 
+/// Get the version number of the algorithm
 int SaveSESANS::version() const {
 	return 1;
 }
 
+/// Get the algorithm's category
 const std::string SaveSESANS::category() const{
 	return "DataHandling\\Text";
 }
 
 /**
  * Initialise the algorithm
-*/
+ */
 void SaveSESANS::init(){
 	declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
 		"InputWorkspace", "", Kernel::Direction::Input),
@@ -71,6 +75,11 @@ void SaveSESANS::exec(){
 	outfile.close();
 }
 
+/**
+ * Write header values to the output file
+ * @param outfile ofstream to the output file
+ * @param ws The workspace to save
+ */
 void SaveSESANS::writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const_sptr & ws){
 	const API::Sample &sample = ws->sample();
 
@@ -89,6 +98,12 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const
 	writeHeader(outfile, "Wavelength_unit", "A");
 }
 
+/**
+ * Write a single header to the output file
+ * @param outfile ofstream to the output file
+ * @param name The name of the attribute being written
+ * @param value The attribute's value
+*/
 void SaveSESANS::writeHeader(std::ofstream &outfile, const std::string & name, const std::string & value){
 	outfile << std::setfill(' ') << std::setw(MAX_HDR_LENGTH) << std::left << name << value << "\n";
 }

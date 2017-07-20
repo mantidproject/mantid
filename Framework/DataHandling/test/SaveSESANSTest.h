@@ -30,40 +30,45 @@ public:
 	  testAlg.setProperty("InputWorkspace", ws);
 	  testAlg.setProperty("Filename", "test.ses");
 
+	  // Should throw, as we can't save more than one histogram
 	  TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
   }
 
   void test_writeHeaders() {
+	  // Set up workspace
 	  Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 	  ws->setTitle("Sample workspace");
 	  Mantid::API::Sample &sample = ws->mutableSample();
 	  sample.setName("Sample sample");
 
+	  // Set up algorithm
 	  Mantid::DataHandling::SaveSESANS testAlg;
 	  testAlg.initialize();
 	  testAlg.setChild(true);
 	  testAlg.setRethrows(true);
-
 	  testAlg.setProperty("InputWorkspace", ws);
 	  testAlg.setProperty("Filename", "test.ses");
 	  testAlg.setProperty("Theta_zmax", 0.09);
 	  testAlg.setProperty("Theta_ymax", 0.09);
 
+	  // Execute the algorithm
 	  TS_ASSERT_THROWS_NOTHING(testAlg.execute());
 
+	  // Get absolute path to the output file
 	  std::string outputPath = testAlg.getPropertyValue("Filename");
 
+	  // Make sure it exists, and we can read it
 	  TS_ASSERT(Poco::File(outputPath).exists());
 	  std::ifstream file(outputPath);
 	  TS_ASSERT(file.good());
 
 	  std::string line;
-	  file.clear();
-	  std::cout << std::endl;
 	  std::getline(file, line);
 
+	  // First line should give the File Format Version
 	  TS_ASSERT(boost::starts_with(line, "FileFormatVersion"));
 
+	  // BEGIN_DATA must come after the headers
 	  bool beginFound = false;
 	  while (!beginFound && std::getline(file, line))
 		  if (line == "BEGIN_DATA")
