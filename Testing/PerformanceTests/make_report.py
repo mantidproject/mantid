@@ -64,13 +64,6 @@ if __name__ == "__main__":
     import analysis
     import sqlresults
 
-    try:
-        import plotly.offline
-    except:
-        import pip
-
-        pip.main(['install', 'plotly'])
-
     if len(args.dbfile) > 1:
         # Several files - join them into one big .db
         dbfile = join_databases(args.dbfile)
