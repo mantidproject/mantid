@@ -343,8 +343,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Add the sample workspaces to the dRange to sample map
         self._sam_ws_map = DRangeToWorkspaceMap()
-        for idx in range(len(sample_ws_runs)):
-            sample = sample_ws_runs[idx]
+        for idx in range(len(sample_ws_names)):
+            sample = sample_ws_names[idx]
 
             if container_ws_names:
                 container = container_ws_names[idx]
