@@ -173,7 +173,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                               Masses=mass_values,
                               MassProfiles=profiles,
                               IntensityConstraints=intensity_constraints,
-                              MultipleScattering=True,
+                              MultipleScattering=flags.get('ms_enabled', True),
                               GammaBackgroundScale=flags.get('fixed_gamma_scaling', 0.0),
                               ContainerScale=flags.get('fixed_container_scaling', 0.0),
                               **corrections_args)
