@@ -19,7 +19,7 @@ Jump Fit
 
 Improvements
 ------------
-
+- Added a flag 'ms_enabled' (default: True) for enabling/disabling multiple scattering in vesuvio user scripts.
 
 Bugfixes
 --------
