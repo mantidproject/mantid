@@ -245,9 +245,6 @@ void DetectorInfo::merge(const DetectorInfo &other) {
     m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
   }
   m_scanCounts = std::move(scanCounts);
-  if (hasComponentInfo()) {
-    m_componentInfo->setDetectorInfo(this); // TODO this needs more thought!
-  }
 }
 
 void DetectorInfo::setComponentInfo(ComponentInfo *componentInfo) {
