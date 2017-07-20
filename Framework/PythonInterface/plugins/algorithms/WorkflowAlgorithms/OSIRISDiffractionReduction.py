@@ -367,7 +367,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             DeleteWorkspace(container)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
-        for d_range in iterkeys(self._sam_ws_map.getMap()):
+        for d_range in self._sam_ws_map.getMap():
             if d_range not in self._van_ws_map.getMap():
                 raise RuntimeError("There is no van file that covers the " + str(d_range) + " DRange.")
 
@@ -375,13 +375,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # This will mean our map of DRanges to list of workspaces becomes a map
         # of DRanges, each to a *single* workspace.
         temp_sam_map = DRangeToWorkspaceMap()
-        for d_range, ws_list in iteritems(self._sam_ws_map.getMap()):
+        for d_range, ws_list in self._sam_ws_map.getMap().items():
             temp_sam_map.setItem(d_range, average_ws_list(ws_list))
         self._sam_ws_map = temp_sam_map
 
         # Now do the same to the vanadium workspaces.
         temp_van_map = DRangeToWorkspaceMap()
-        for d_range, ws_list in iteritems(self._van_ws_map.getMap()):
+        for d_range, ws_list in self._van_ws_map.getMap().items():
             temp_van_map.setItem(d_range, average_ws_list(ws_list))
         self._van_ws_map = temp_van_map
 
@@ -402,9 +402,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                           XMax=d_range[1])
 
         # Divide all sample files by the corresponding vanadium files.
-        for d_range in iterkeys(self._sam_ws_map.getMap()):
-            sam_ws = self._sam_ws_map.getMap()[d_range]
-            van_ws = self._van_ws_map.getMap()[d_range]
+        for sam_ws, van_ws in zip(self._sam_ws_map.getMap().values(),
+                                  self._van_ws_map.getMap().values()):
             sam_ws, van_ws = self._rebin_to_smallest(sam_ws, van_ws)
             Divide(LHSWorkspace=sam_ws,
                    RHSWorkspace=van_ws,
@@ -416,7 +415,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Create a list of sample workspace NAMES, since we need this for MergeRuns.
         samWsNamesList = []
-        for sam in itervalues(self._sam_ws_map.getMap()):
+        for sam in self._sam_ws_map.getMap().values():
             samWsNamesList.append(sam)
 
         if len(samWsNamesList) > 1:
