@@ -67,62 +67,79 @@ public:
         "PeakIntensityVsRadiusTest_peaks", peakWS);
   }
 
-#define TS_ASSERT_SUCCESSFUL_INITIALZATION(alg)                                \
-  TS_ASSERT_THROWS_NOTHING(alg.initialize())                                   \
-  TS_ASSERT(alg.isInitialized())
+  void assertSuccessfulInitialization(PeakIntensityVsRadius &alg) {
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized())
+  }
 
   /** Check the validateInputs() calls */
   void doTestValid(bool assertExecuteSuccess, double BackgroundInnerFactor,
                    double BackgroundOuterFactor, double BackgroundInnerRadius,
                    double BackgroundOuterRadius, int NumSteps) {
     PeakIntensityVsRadius alg;
-    TS_ASSERT_SUCCESSFUL_INITIALZATION(alg);
+    // Name of the output workspace.
+    std::string outWSName("PeakIntensityVsRadiusTest_OutputWS");
+    assertSuccessfulInitialization(alg);
     assertNoThrowWhenSettingProperties(
-        BackgroundInnerFactor, BackgroundOuterFactor, BackgroundInnerRadius,
-        BackgroundOuterRadius, NumSteps);
-    if (!assertExecuteSuccess) {
-      TS_ASSERT_THROWS_ANYTHING(alg.execute(););
-    } else {
+        alg, outWSName, BackgroundInnerFactor, BackgroundOuterFactor,
+        BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
+    if (assertExecuteSuccess) {
       TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    } else {
+      TS_ASSERT_THROWS_ANYTHING(alg.execute(););
     }
   }
 
-  void doTestThrowsForInvalid(double BackgroundInnerFactor,
-                              double BackgroundOuterFactor,
-                              double BackgroundInnerRadius,
-                              double BackgroundOuterRadius, int NumSteps = 16) {
+  void ensureExecutionThrows(double BackgroundInnerFactor,
+                             double BackgroundOuterFactor,
+                             double BackgroundInnerRadius,
+                             double BackgroundOuterRadius, int NumSteps = 16) {
     doTestValid(false, BackgroundInnerFactor, BackgroundOuterFactor,
                 BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
   }
 
-  void doTestNoThrowForValid(double BackgroundInnerFactor,
-                             double BackgroundOuterFactor,
-                             double BackgroundInnerRadius,
-                             double BackgroundOuterRadius, int NumSteps = 16) {
+  void ensureExecutionNoThrow(double BackgroundInnerFactor,
+                              double BackgroundOuterFactor,
+                              double BackgroundInnerRadius,
+                              double BackgroundOuterRadius, int NumSteps = 16) {
     doTestValid(true, BackgroundInnerFactor, BackgroundOuterFactor,
                 BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
   }
 
-  void test_validateForValidInputs() {
-    doTestNoThrowForValid(1.0, 2.0, 0, 0);
-    doTestNoThrowForValid(0, 0, 0.12, 0.15);
-    doTestNoThrowForValid(1.0, 0, 0, 0.15);
-    doTestNoThrowForValid(0, 1.5, 0.15, 0);
+  void test_worksWithValidInputs() {
+    ensureExecutionNoThrow(1.0, 2.0, 0, 0);
+    ensureExecutionNoThrow(0, 0, 0.12, 0.15);
+    ensureExecutionNoThrow(1.0, 0, 0, 0.15);
+    ensureExecutionNoThrow(0, 1.5, 0.15, 0);
     // Can't specify fixed and variable
   }
 
-  void test_validateForInvalidInputs() {
-    doTestThrowsForInvalid(1.0, 0, 0.15, 0);
-    doTestThrowsForInvalid(0, 1.0, 0, 0.15);
-    doTestThrowsForInvalid(1.0, 0, 0.15, 0);
-    doTestThrowsForInvalid(1.0, 1.0, 0.12, 0.15);
-    doTestThrowsForInvalid(1.0, 2.0, 0, 0, -8);
+  void test_throwsWhenExecutingForInvalidInputs() {
+    ensureExecutionThrows(1.0, 0, 0.15, 0);
+    ensureExecutionThrows(0, 1.0, 0, 0.15);
+    ensureExecutionThrows(1.0, 0, 0.15, 0);
+    ensureExecutionThrows(1.0, 1.0, 0.12, 0.15);
   }
 
-  void assertNoThrowWhenSettingProperties(
-      std::string &outWsName, double BackgroundInnerFactor,
-      double BackgroundOuterFactor, double BackgroundInnerRadius,
-      double BackgroundOuterRadius int NumSteps) {
+  template<typename PropertyType>
+  void assertInvalidPropertyValue(PeakIntensityVsRadius &alg, std::string const&name,
+                                  PropertyType value) {
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty(name, value))
+  }
+
+  void test_throwsWhenSettingInvalidPropertyValues() {
+    PeakIntensityVsRadius alg;
+    assertSuccessfulInitialization(alg);
+    assertInvalidPropertyValue(alg, "NumSteps", -8);
+  }
+
+  void assertNoThrowWhenSettingProperties(PeakIntensityVsRadius &alg,
+                                          std::string &outWSName,
+                                          double BackgroundInnerFactor,
+                                          double BackgroundOuterFactor,
+                                          double BackgroundInnerRadius,
+                                          double BackgroundOuterRadius,
+                                          int NumSteps) {
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "InputWorkspace", "PeakIntensityVsRadiusTest_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
@@ -140,7 +157,6 @@ public:
         alg.setProperty("BackgroundInnerRadius", BackgroundInnerRadius));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("BackgroundOuterRadius", BackgroundOuterRadius));
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
   }
 
   MatrixWorkspace_sptr doTest(double BackgroundInnerFactor,
@@ -151,10 +167,10 @@ public:
     std::string outWSName("PeakIntensityVsRadiusTest_OutputWS");
 
     PeakIntensityVsRadius alg;
-    TS_ASSERT_SUCCESSFUL_INITIALZATION(alg);
+    assertSuccessfulInitialization(alg);
     assertNoThrowWhenSettingProperties(
-        BackgroundInnerFactor, BackgroundOuterFactor, BackgroundInnerRadius,
-        BackgroundOuterRadius, NumSteps);
+        alg, outWSName, BackgroundInnerFactor, BackgroundOuterFactor,
+        BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -167,9 +183,10 @@ public:
     return ws;
   }
 
-#define TS_ASSERT_FLAT_AFTER_1(ws)                                             \
-  TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6); \
-  TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6)
+  void assertFlatAfter1(MatrixWorkspace_sptr ws) {
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6)
+  }
 
   void test_NoBackground() {
     MatrixWorkspace_sptr ws = doTest(0, 0, 0, 0);
@@ -180,24 +197,25 @@ public:
     TS_ASSERT_DELTA(ws->x(0)[2], 0.2, 1e-6);
 
     TS_ASSERT_LESS_THAN(ws->y(0)[5], 1000);
-    TS_ASSERT_FLAT_AFTER_1(ws);
+    assertFlatAfter1(ws);
   }
 
-#define TS_ASSERT_FIRST_FOUR_Y_VALUES_CLOSE_TO_ZERO(ws)                        \
-  TS_ASSERT_DELTA(ws->y(0)[0], 0, 10);                                         \
-  TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);                                         \
-  TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);                                         \
-  TS_ASSERT_DELTA(ws->y(0)[3], 0, 10)
+  void assertFirstFourYValuesCloseToZero(MatrixWorkspace_sptr ws) {
+    TS_ASSERT_DELTA(ws->y(0)[0], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[3], 0, 10);
+  }
 
   void test_VariableBackground() {
     MatrixWorkspace_sptr ws = doTest(1.0, 2.0, 0, 0);
     // Check the results
     TSM_ASSERT_EQUALS("Two peaks", ws->getNumberHistograms(), 2);
-    TS_ASSERT_FIRST_FOUR_Y_VALUES_CLOSE_TO_ZERO(ws);
+    assertFirstFourYValuesCloseToZero(ws);
 
     // Points before 0.5 are approximately zero because the background shell is
     // in the peak.
-    TS_ASSERT_FLAT_AFTER_1(ws);
+    assertFlatAfter1(ws);
   }
 
   void test_FixedBackground() {
@@ -208,9 +226,11 @@ public:
 
     // Points before 0.5 are approximately zero because the background shell is
     // in the peak.
-    TS_ASSERT_FIRST_FOUR_Y_VALUES_CLOSE_TO_ZERO(ws);
-    TS_ASSERT_FLAT_AFTER_1(ws);
+    assertFirstFourYValuesCloseToZero(ws);
+    assertFlatAfter1(ws);
   }
+private:
+  PeakIntensityVsRadius m_alg;
 };
 
 #endif /* MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_ */
