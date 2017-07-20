@@ -55,6 +55,12 @@ private:
 	const std::vector<std::string> fileExtensions{ ".ses" };
 	void init() override;
 	void exec() override;
+
+	void writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const_sptr &ws);
+	void writeHeader(std::ofstream &outfile, const std::string &name, const std::string &value);
+
+	// Length of the longest attribute name in headers (+4 for readbility in the file)
+	const int MAX_HDR_LENGTH = 23;
 };
 
 } // namespace DataHandling
