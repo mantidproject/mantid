@@ -71,7 +71,7 @@ void ConjoinXRuns::init() {
       "workspaces are stitched. "
       "If specified, this will be the x-axis. It has to be numeric, in which "
       "case all the input workspaces must have only one point or numeric "
-      "time series, in which case the number"
+      "time series, in which case the number "
       "of elements in the series must match the number of points for each "
       "workspace.");
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(

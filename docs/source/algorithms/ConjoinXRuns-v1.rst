@@ -23,7 +23,7 @@ This can be a mixed list of workspaces and workspace groups on AnalysisDataServi
 SampleLogAsXAxis
 ----------------
 
-If specified, this log values will constitute the x-axis of the resulting workspace. The log must exist in all the input workspaces and must be numeric (int or double), in which case the input workspaces must contain single bin only, or numeric time series, in which case the lenght of the series must match the number of bins. 
+If specified, this log values will constitute the x-axis of the resulting workspace. The log must exist in all the input workspaces and must be numeric (int or double), in which case the input workspaces must contain single bin only, or numeric time series, in which case the lenght of the series must match the number of points.
 
 ConjoinX Operation
 ------------------
@@ -162,6 +162,7 @@ Output:
 Related Algorithms
 ------------------
 :ref:`MergeRuns <algm-MergeRuns>` sums the spectra of many workspaces while handling the merging of the sample logs.
+
 :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` combines workspaces by appending their spectra.
 
 .. categories::

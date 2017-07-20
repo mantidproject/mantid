@@ -291,4 +291,41 @@ private:
   std::vector<std::string> m_testWS;
 };
 
-#endif /* MANTID_ALGORITHMS_ConjoinXRunsTEST_H_ */
+class ConjoinXRunsTestPerformance : public CxxTest::TestSuite {
+public:
+  static ConjoinXRunsTestPerformance *createSuite() {
+    return new ConjoinXRunsTestPerformance();
+  }
+  static void destroySuite(ConjoinXRunsTestPerformance *suite) { delete suite; }
+
+  ConjoinXRunsTestPerformance() {}
+
+  void setUp() override {
+    m_ws.reserve(100);
+    for (size_t i = 0; i < 100; ++i) {
+      MatrixWorkspace_sptr ws = create2DWorkspace123(10000, 100);
+      std::string name = "ws" + std::to_string(i);
+      storeWS(name, ws);
+      m_ws.push_back(name);
+    }
+    m_alg.initialize();
+    m_alg.isChild();
+    m_alg.setProperty("InputWorkspaces", m_ws);
+    m_alg.setProperty("OutputWorkspace", "__out");
+  }
+
+  void tearDown() override {
+    for (const auto &ws : m_ws) {
+      removeWS(ws);
+    }
+    m_ws.clear();
+  }
+
+  void test_performance() { m_alg.execute(); }
+
+private:
+  ConjoinXRuns m_alg;
+  std::vector<std::string> m_ws;
+};
+
+#endif /* MANTID_ALGORITHMS_CONJOINXRUNSTEST_H_ */
