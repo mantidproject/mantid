@@ -142,7 +142,7 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
 API::MatrixWorkspace_sptr
 ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace &ws1,
                                  const DataObjects::EventWorkspace &ws2) {
-  this->validateInputs(ws1, ws2);
+  this->validateInputs(ws1, ws2, false);
 
   // Check there is no overlap
   if (this->getProperty("CheckOverlapping")) {
