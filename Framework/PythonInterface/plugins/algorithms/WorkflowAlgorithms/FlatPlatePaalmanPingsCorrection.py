@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, Progress)
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
-                           FloatBoundedValidator, Direction, logger, MaterialBuilder)
+                           FloatBoundedValidator, Direction, logger)
 
 
 class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
