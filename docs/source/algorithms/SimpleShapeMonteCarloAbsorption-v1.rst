@@ -17,9 +17,9 @@ to resort to the more complex :ref:`CreateSampleShape <algm-CreateSampleShape-v1
 algorithms. The computational part is all taken care of by :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption-v1>`. Please see that
 documentation for more details.
 Currently the shape geometries supported are:
- - Flat Plate
- - Cylinder
- - Annulus
+* Flat Plate
+* Cylinder
+* Annulus
 
 Workflow
 --------
