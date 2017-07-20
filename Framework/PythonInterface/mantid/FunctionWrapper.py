@@ -290,7 +290,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
        """ Return composite function, equal to self, but with 
            every composite function within replaced by
            its list of functions, so having a pure list of functions.
-           This enables sensible __add__ and __mult__ operations.
+           This makes it possible to index and iterate all the functions
+           and use tieAll() and untieAll().
+           The return value is not independent of self.
        """
        # If there are no composite functions, do nothing
        needToFlatten = False
