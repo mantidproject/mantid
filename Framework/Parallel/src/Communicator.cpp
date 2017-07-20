@@ -38,5 +38,32 @@ int Communicator::size() const {
   return 1;
 }
 
+#ifdef MPI_EXPERIMENTAL
+/// For internal use only. Casts the Communicator to the underlying
+/// boost::mpi::communicator object.
+Communicator::operator const boost::mpi::communicator &() const {
+  return m_communicator;
+}
+#endif
+
+/// For internal use only. Returns true if the communicator has a
+/// ThreadingBackend.
+bool Communicator::hasBackend() const { return static_cast<bool>(m_backend); }
+
+/// For internal use only. Returns the ThreadingBackend or throws an exception
+/// if not available.
+detail::ThreadingBackend &Communicator::backend() const {
+  if (!m_backend)
+#ifndef MPI_EXPERIMENTAL
+    throw std::runtime_error(
+        "Parallel::Communicator without backend in non-MPI build.");
+#else
+    throw std::runtime_error("Parallel::Communicator without backend in MPI "
+                             "build. Check hasBackend() before accessing the "
+                             "backend.");
+#endif
+  return *m_backend;
+}
+
 } // namespace Parallel
 } // namespace Mantid

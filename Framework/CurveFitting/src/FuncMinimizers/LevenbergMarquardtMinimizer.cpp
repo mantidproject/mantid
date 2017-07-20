@@ -118,8 +118,6 @@ bool LevenbergMarquardtMinimizer::iterate(size_t) {
   }
 
   retVal = hasConverged();
-  m_errorString = gsl_strerror(retVal);
-
   return retVal != GSL_SUCCESS;
 }
 

@@ -19,8 +19,6 @@
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include "SaveNexusProcessedTest.h"
 
@@ -31,6 +29,9 @@
 #include <Poco/File.h>
 
 #include <string>
+
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
