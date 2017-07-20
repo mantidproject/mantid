@@ -120,14 +120,9 @@ def get_results_matching(results, field, value):
 
 
 # ============================================================================================
-def plot_runtime(*args, **kwargs):
-    annot = kwargs['annotate']
-    saveImage = kwargs['saveImage']
-    del kwargs['annotate']
-    del kwargs['saveImage']
-
+def plot_runtime(annotate, saveImage, path, **kwargs):
     name = kwargs['name']
-    (xData, yData) = get_runtime_data(*args, **kwargs)
+    (xData, yData) = get_runtime_data(**kwargs)
     trace1 = go.Scatter(x=xData, y=yData,
                         mode='lines+markers',
                         marker=dict(
@@ -140,7 +135,7 @@ def plot_runtime(*args, **kwargs):
 
     last_num = kwargs.get('last_num', -1)
 
-    if annot and saveImage == False:
+    if annotate and saveImage == False:
         # retrieve commitids for annotation on the plotly graph
         results = get_results(name, type='', where_clause='')
         sorted = [(res["revision"], res["variables"], res["date"], res) for res in results]
@@ -195,7 +190,7 @@ def plot_runtime(*args, **kwargs):
         plt.ylabel(yAxisTitle)
         plt.plot(xData, yData, "-o")
         plt.ylim(ymin=0)
-        plt.savefig("./Report/" + im_filename)
+        plt.savefig(path +"/"+ im_filename)
         plt.close()
         return """<img src="%s"/>""" % im_filename
     else:
@@ -493,10 +488,10 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
 
         if dofigs:
             # Only the latest X entries
-            imgTagHtml = plot_runtime(name=name, x_field=x_field, last_num=last_num, annotate=False, saveImage=True)
-            divShort = plot_runtime(name=name, x_field=x_field, last_num=last_num, annotate=True, saveImage=False)
+            imgTagHtml = plot_runtime(False, True, path, name=name, x_field=x_field, last_num=last_num)
+            divShort = plot_runtime(False, True, path, name=name, x_field=x_field, last_num=last_num)
             # Plot all svn times
-            divDetailed = plot_runtime(name=name, x_field=x_field, last_num=-1, annotate=True, saveImage=False)
+            divDetailed = plot_runtime(False, True, path, name=name, x_field=x_field, last_num=-1)
 
             html += divDetailed + "\n"
             overview_html += imgTagHtml + "\n"
