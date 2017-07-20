@@ -18,6 +18,7 @@ Improved
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information. 
 - :ref:`GroupDetectors <algm-GroupDetectors-v2>` now supports workspaces with detector scans.
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces-v1` provides option to change Y axis unit and label%3A%22Component%3A
+
 Deprecated
 ##########
 
