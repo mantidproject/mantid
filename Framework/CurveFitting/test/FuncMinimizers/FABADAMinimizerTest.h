@@ -37,9 +37,9 @@ MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
   return ws2;
 }
 
-void doTestExpDecay(Mantid::API::MatrixWorkspace_sptr ws2) {
+void doTestExpDecay(MatrixWorkspace_sptr ws2) {
 
-  IFunction_sptr fun(new ExpDecay);
+  Mantid::API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 8.);
   fun->setParameter("Lifetime", 1.0);
 
@@ -155,7 +155,7 @@ public:
   void test_expDecay() {
     auto ws2 = createExpDecayWorkspace();
 
-    API::IFunction_sptr fun(new ExpDecay);
+    Mantid::API::IFunction_sptr fun(new ExpDecay);
     fun->setParameter("Height", 8.);
     fun->setParameter("Lifetime", 1.0);
 
@@ -258,7 +258,7 @@ public:
   void test_low_MaxIterations() {
     auto ws2 = createExpDecayWorkspace();
 
-    API::IFunction_sptr fun(new ExpDecay);
+    Mantid::API::IFunction_sptr fun(new ExpDecay);
     fun->setParameter("Height", 1.);
     fun->setParameter("Lifetime", 1.0);
 
@@ -278,7 +278,6 @@ public:
 
     TS_ASSERT(!fit.isExecuted());
   }
-};
 
 void test_cosineWithConstraint() {
 
@@ -299,7 +298,7 @@ void test_cosineWithConstraint() {
                                "=ConvergedChain,Parameters=Parameters");
   TS_ASSERT_THROWS_NOTHING(fit.execute());
   TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
-  IFunction_sptr fun = fit.getProperty("Function");
+  Mantid::API::IFunction_sptr fun = fit.getProperty("Function");
   TS_ASSERT_DELTA(fun->getParameter("a"), 0.9, 0.1);
   TS_ASSERT_DELTA(fun->getParameter("b"), 0.9, 0.1);
 
@@ -373,7 +372,7 @@ void test_boundaryApplication() {
 }
 
 private:
-API::MatrixWorkspace_sptr createExpDecayWorkspace() {
+MatrixWorkspace_sptr createExpDecayWorkspace() {
   MatrixWorkspace_sptr ws2(new WorkspaceTester);
   ws2->initialize(1, 20, 20);
 
@@ -387,14 +386,14 @@ API::MatrixWorkspace_sptr createExpDecayWorkspace() {
   return ws2;
 }
 
-API::MatrixWorkspace_sptr createCosineWorkspace() {
+MatrixWorkspace_sptr createCosineWorkspace() {
   MatrixWorkspace_sptr ws2(new WorkspaceTester);
   ws2->initialize(1, 20, 20);
 
   Mantid::MantidVec &x = ws2->dataX(0);
   Mantid::MantidVec &y = ws2->dataY(0);
   for (size_t i = 0; i < ws2->blocksize(); ++i) {
-    double xx = 2 * M_PI * i / 20;
+    double xx = 2. * M_PI * double(i) / 20.;
     x[i] = xx;
     y[i] = cos(xx);
   }
@@ -406,10 +405,10 @@ boost::shared_ptr<CostFuncLeastSquares> createCostFunc(bool constraint = false,
                                                        bool tie = false) {
 
   // Domain
-  auto domain = boost::make_shared<API::FunctionDomain1DVector>(
-      API::FunctionDomain1DVector(0.1, 2.0, 20));
+  auto domain = boost::make_shared<Mantid::API::FunctionDomain1DVector>(
+      Mantid::API::FunctionDomain1DVector(0.1, 2.0, 20));
 
-  API::FunctionValues mockData(*domain);
+  Mantid::API::FunctionValues mockData(*domain);
   ExpDecay dataMaker;
   dataMaker.setParameter("Height", 1.);
   dataMaker.setParameter("Lifetime", 0.5);
@@ -417,7 +416,7 @@ boost::shared_ptr<CostFuncLeastSquares> createCostFunc(bool constraint = false,
 
   // Values
   auto values =
-      boost::make_shared<FunctionValues>(API::FunctionValues(*domain));
+      boost::make_shared<FunctionValues>(Mantid::API::FunctionValues(*domain));
   values->setFitDataFromCalculated(mockData);
   values->setFitWeights(1.0);
 
@@ -431,7 +430,7 @@ boost::shared_ptr<CostFuncLeastSquares> createCostFunc(bool constraint = false,
     Mantid::CurveFitting::Constraints::BoundaryConstraint *constraint =
         new Mantid::CurveFitting::Constraints::BoundaryConstraint(
             func.get(), "Height", 0.9, 1.1);
-    func->addConstraint(constraint);
+    func->addConstraint(std::unique_ptr<Mantid::API::IConstraint> (constraint));
   }
 
   if (tie) {
@@ -446,12 +445,11 @@ boost::shared_ptr<CostFuncLeastSquares> createCostFunc(bool constraint = false,
 
   return costFun;
 }
-};
 
 void setUp() override { ws = createTestWorkspace(2000, 2000); }
 void test_expDecay_performance() { doTestExpDecay(ws); }
 
 private:
-API::MatrixWorkspace_sptr ws;
+MatrixWorkspace_sptr ws;
 };
 #endif /* MANTID_CURVEFITTING_FABADAMINIMIZERTEST_H_ */
