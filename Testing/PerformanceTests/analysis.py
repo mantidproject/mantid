@@ -188,7 +188,7 @@ def plot_runtime(annotate, saveImage, path, **kwargs):
         plt.title(title)
         plt.xlabel(xAxisTitle)
         plt.ylabel(yAxisTitle)
-        plt.plot(xData, yData, "-o")
+        plt.plot(xData, yData, "-b.")
         plt.ylim(ymin=0)
         plt.savefig(path + "/" + im_filename)
         plt.close()
