@@ -9,55 +9,33 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <unordered_map>
 #include <vector>
 
 using namespace Mantid::DataObjects;
+using namespace Mantid::Crystal::FindSXPeaksHelper;
 
-namespace {
-// Anonymous namespace
-using namespace Mantid;
-using WsIndexToDetIds = std::unordered_map<size_t, std::vector<detid_t>>;
-
-WsIndexToDetIds mapDetectorsToWsIndexes(const API::DetectorInfo &detectorInfo,
-                                        const detid2index_map &mapping) {
-  const auto &detectorIds = detectorInfo.detectorIDs();
-  WsIndexToDetIds indexToDetMapping;
-
-  indexToDetMapping.reserve(detectorIds.size());
-  for (const auto detectorID : detectorIds) {
-    auto detMapEntry = mapping.find(detectorID);
-    if (detMapEntry == mapping.end()) {
-      throw std::runtime_error(
-          "Detector ID " + std::to_string(detectorID) +
-          " was not found in the workspace index mapping.");
-    }
-
-    const size_t wsIndex = detMapEntry->second;
-    auto indexMapEntry = indexToDetMapping.find(wsIndex);
-    if (indexMapEntry == indexToDetMapping.end()) {
-      // Create a new vector if one does not exist
-      indexToDetMapping[wsIndex] = std::vector<detid_t>{detectorID};
-    } else {
-      // Otherwise add the detector ID to the current list
-      indexToDetMapping[wsIndex].push_back(detectorID);
-    }
-  }
-  return indexToDetMapping;
-}
-}
 
 namespace Mantid {
 namespace Crystal {
+
+const std::string FindSXPeaks::perSpectrumBackground = "PerSpectrumBackground";
+const std::string FindSXPeaks::absoluteBackground = "AbsoluteBackground";
+
+
+const std::string FindSXPeaks::strongestPeakStrategy = "StrongestPeakOnly";
+const std::string FindSXPeaks::allPeaksStrategy = "AllPeaks";
+
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FindSXPeaks)
 
 using namespace Kernel;
 using namespace API;
 
-// Type def the index to detector mapping
-using WsIndexToDetIds = std::unordered_map<size_t, std::vector<detid_t>>;
 
 FindSXPeaks::FindSXPeaks()
     : API::Algorithm(), m_MinRange(DBL_MAX), m_MaxRange(-DBL_MAX),
@@ -84,8 +62,54 @@ void FindSXPeaks::init() {
                   "Start spectrum number (default 0)");
   declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "End spectrum number  (default FindSXPeaks)");
+
+
+  std::vector<std::string> peakFindingStrategy = {strongestPeakStrategy,
+                                                  allPeaksStrategy};
+    declareProperty(
+        "PeakFindingStrategy", strongestPeakStrategy,
+        boost::make_shared<StringListValidator>(peakFindingStrategy),
+        "Different options for peak finding."
+        "1. StrongestPeakOnly: This is a much more performant way of finding the strongest peak per spectrum (provided there is one).\n"
+        "2. AllPeaks: This strategy will find all peaks in each spectrum. This is slower than StrongestPeakOnly.\n");
+
+
+  std::vector<std::string> backgroundStrategy = {perSpectrumBackground,
+                                                 absoluteBackground};
+    declareProperty(
+        "BackgroundStrategy", perSpectrumBackground,
+        boost::make_shared<StringListValidator>(backgroundStrategy),
+        "Strategy for the background."
+        "1. PerSpectrumBackground: This is the default strategy. Peaks which are"
+        " below the estimated background are discarded. The background is estimated"
+        " to be an average of the first and the last signal and multiplied"
+        " by the SignalBackground property.\n"
+        "2.AbsoluteBackground: This option is only valid for "
+       "MDEventWorkspaces. Peaks which are below the specified background are discarded."
+        " An absolute background is specified for all spectra. This background is specified"
+        " via the absolute background strategy. \n");
+
+
   declareProperty("SignalBackground", 10.0,
                   "Multiplication factor for the signal background");
+
+  setPropertySettings("SignalBackground",
+                        make_unique<EnabledWhenProperty>(
+                            "BackgroundStrategy",
+                            Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                            perSpectrumBackground));
+
+  declareProperty(absoluteBackground, 10.0,
+                  "The absolute background below which peaks are discarded. "
+                  "This is used when the AbsoluteBackground strategy in the"
+                  " BackgroundStrategy property is used.");
+
+  setPropertySettings(absoluteBackground,
+                        make_unique<EnabledWhenProperty>(
+                            "BackgroundStrategy",
+                            Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                            absoluteBackground));
+
   declareProperty(
       "Resolution", 0.01,
       "Tolerance needed to avoid peak duplication in number of pixels");
@@ -110,7 +134,6 @@ void FindSXPeaks::exec() {
   // the assignment below is intended and if removed will break the unit tests
   m_MinWsIndex = static_cast<int>(getProperty("StartWorkspaceIndex"));
   m_MaxWsIndex = static_cast<int>(getProperty("EndWorkspaceIndex"));
-  double SB = getProperty("SignalBackground");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
@@ -146,10 +169,12 @@ void FindSXPeaks::exec() {
 
   // Calculate the primary flight path.
   const auto &spectrumInfo = localworkspace->spectrumInfo();
-  const auto &detectorInfo = localworkspace->detectorInfo();
 
-  const WsIndexToDetIds wsIndexToDetIdMap = mapDetectorsToWsIndexes(
-      detectorInfo, localworkspace->getDetectorIDToWorkspaceIndexMap());
+  // Get the background strategy
+  auto backgroundStrategy = getBackgroundStrategy();
+
+  // Get the peak finding strategy
+  auto peakFindingStrategy = getPeakFindingStrategy(backgroundStrategy.get(), spectrumInfo, m_MinRange, m_MaxRange);
 
   peakvector entries;
   entries.reserve(m_MaxWsIndex - m_MinWsIndex);
@@ -167,53 +192,20 @@ void FindSXPeaks::exec() {
     }
 
     // Retrieve the spectrum into a vector
-    const auto &X = localworkspace->x(wsIndex);
-    const auto &Y = localworkspace->y(wsIndex);
+    const auto &x = localworkspace->x(wsIndex);
+    const auto &y = localworkspace->y(wsIndex);
 
-    // Find the range [min,max]
-    auto lowit = (m_MinRange == EMPTY_DBL())
-                     ? X.begin()
-                     : std::lower_bound(X.begin(), X.end(), m_MinRange);
-
-    auto highit =
-        (m_MaxRange == EMPTY_DBL())
-            ? X.end()
-            : std::find_if(lowit, X.end(),
-                           std::bind2nd(std::greater<double>(), m_MaxRange));
-
-    // If range specified doesn't overlap with this spectrum then bail out
-    if (lowit == X.end() || highit == X.begin())
+    // Run the peak finding strategy
+    auto foundPeaks = peakFindingStrategy->findSXPeaks(x, y, wsIndex);
+    if (!foundPeaks) {
       continue;
+    }
 
-    --highit; // Upper limit is the bin before, i.e. the last value smaller than
-              // MaxRange
-
-    auto distmin = std::distance(X.begin(), lowit);
-    auto distmax = std::distance(X.begin(), highit);
-
-    // Find the max element
-    auto maxY = (Y.size() > 1)
-                    ? std::max_element(Y.begin() + distmin, Y.begin() + distmax)
-                    : Y.begin();
-
-    double intensity = (*maxY);
-    double background = 0.5 * (1.0 + Y.front() + Y.back());
-    if (intensity < SB * background) // This is not a peak.
-      continue;
-
-    // t.o.f. of the peak
-    auto d = std::distance(Y.begin(), maxY);
-    auto leftBinPosition = X.begin() + d;
-    double leftBinEdge = *leftBinPosition;
-    double rightBinEdge = *std::next(leftBinPosition);
-    double tof = 0.5 * (leftBinEdge + rightBinEdge);
-
-    const double phi =
-        calculatePhi(wsIndexToDetIdMap, spectrumInfo, wsIndexSize_t);
-
-    std::vector<int> specs(1, wsIndex);
-    SXPeak peak(tof, phi, *maxY, specs, wsIndex, spectrumInfo);
-    PARALLEL_CRITICAL(entries) { entries.push_back(peak); }
+    PARALLEL_CRITICAL(entries) {
+      for (const auto& peak : *foundPeaks) {
+        entries.push_back(peak);
+      }
+    }
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
@@ -226,37 +218,6 @@ void FindSXPeaks::exec() {
   progress.report();
 }
 
-/**
-  * Calculates the average phi value if the workspace contains
-  * multiple detectors per spectrum, or returns the value
-  * of phi if it is a single detector to spectrum mapping.
-  * @param detectorMapping :: The mapping of workspace index to detector id(s)
-  * @param spectrumInfo :: The spectrum info of this workspace
-  * @param wsIndex :: The index to return the phi value of
-  * @return :: The averaged or exact value of phi
-  */
-double FindSXPeaks::calculatePhi(const WsIndexToDetIds &detectorMapping,
-                                 const SpectrumInfo &spectrumInfo,
-                                 size_t wsIndex) {
-  double phi = std::numeric_limits<double>::infinity();
-  const size_t numDetectors = detectorMapping.at(wsIndex).size();
-  const auto &det = spectrumInfo.detector(wsIndex);
-  if (numDetectors == 1) {
-    phi = det.getPhi();
-  } else {
-    // Have to average the value for phi
-    auto detectorGroup = dynamic_cast<const Geometry::DetectorGroup *>(&det);
-    if (!detectorGroup) {
-      throw std::runtime_error("Could not cast to detector group");
-    }
-    detectorGroup->getPhi();
-  }
-
-  if (phi < 0) {
-    phi += 2.0 * M_PI;
-  }
-  return phi;
-}
 
 /**
 Reduce the peak list by removing duplicates
@@ -294,5 +255,37 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv) {
     }
   }
 }
+
+std::unique_ptr<BackgroundStrategy> FindSXPeaks::getBackgroundStrategy() const {
+  const std::string backgroundStrategy = getProperty("BackgroundStrategy");
+
+  if (backgroundStrategy == perSpectrumBackground) {
+      const double signalBackground = getProperty("SignalBackground");
+      return Mantid::Kernel::make_unique<PerSpectrumBackgroundStrategy>(signalBackground);
+  } else if (backgroundStrategy == absoluteBackground) {
+      const double background = getProperty(absoluteBackground);
+      return Mantid::Kernel::make_unique<AbsoluteBackgroundStrategy>(background);
+  } else {
+    throw std::invalid_argument("The selected background strategy has not been implemented yet.");
+  }
+}
+
+
+std::unique_ptr<FindSXPeaksHelper::PeakFindingStrategy> FindSXPeaks::getPeakFindingStrategy(const BackgroundStrategy* backgroundStrategy,
+                                                                                            const API::SpectrumInfo &spectrumInfo,
+                                                                                            const double minValue, const double maxValue) const {
+  // Get the peak finding stratgy
+  std::string peakFindingStrategy = getProperty("PeakFindingStrategy");
+  if (peakFindingStrategy == strongestPeakStrategy) {
+    return Mantid::Kernel::make_unique<StrongestPeaksStrategy>(backgroundStrategy, spectrumInfo, minValue, maxValue);
+  } else if (peakFindingStrategy == allPeaksStrategy) {
+    return Mantid::Kernel::make_unique<AllPeaksStrategy>(backgroundStrategy, spectrumInfo, minValue, maxValue);
+  } else {
+    throw std::invalid_argument("The selected peak finding strategy has not been implemented yet.");
+  }
+}
+
+
+
 } // namespace Algorithms
 } // namespace Mantid
