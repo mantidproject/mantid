@@ -14,10 +14,14 @@ public:
   static LoadSESANSTest *createSuite() { return new LoadSESANSTest(); }
   static void destroySuite( LoadSESANSTest *suite ) { delete suite; }
 
-
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
+  void test_readHeaders() {
+	  Mantid::DataHandling::LoadSESANS testAlg;
+	  testAlg.initialize();
+	  testAlg.setChild(true);
+	  testAlg.setRethrows(true);
+	  testAlg.setProperty("Filename", "test.ses");
+	  testAlg.setProperty("OutputWorkspace", "ws");
+	  TS_ASSERT_THROWS_NOTHING(testAlg.execute());
   }
 
 
