@@ -372,11 +372,11 @@ double FABADAMinimizer::gaussianStep(const double &jump) {
 */
 void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
                                        double &newValue, double &step) {
-  API::IConstraint *iconstr = m_fitFunction->getConstraint(parameterIndex);
-  if (!iconstr)
+  API::IConstraint *iConstraint = m_fitFunction->getConstraint(parameterIndex);
+  if (!iConstraint)
     return;
   Constraints::BoundaryConstraint *bcon =
-      dynamic_cast<Constraints::BoundaryConstraint *>(iconstr);
+      dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
   if (!bcon)
     return;
 
@@ -949,9 +949,9 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
     }
 
     // Calculate the position of the minimum Chi square value
-    auto position_min_chi2 = std::min_element(reducedChain[m_nParams].begin(),
+    auto positionMinChi2 = std::min_element(reducedChain[m_nParams].begin(),
                                               reducedChain[m_nParams].end());
-    m_chi2 = *position_min_chi2;
+    m_chi2 = *positionMinChi2;
 
     // Calculate the parameter value and the errors
     for (size_t j = 0; j < m_nParams; ++j) {
@@ -959,32 +959,31 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
       auto last = m_chain[j].end();
       // red_conv_chain calculated for each parameter
       std::vector<double> conv_chain(first, last);
-      auto &rc_chain_j = reducedChain[j];
       // Obs: Starts at 1 (0 already added)
       for (size_t k = 1; k < convLength; ++k) {
-        rc_chain_j.push_back(conv_chain[nSteps * k]);
+        reducedChain[j].push_back(conv_chain[nSteps * k]);
       }
       // best fit parameters taken
       bestParameters[j] =
-          rc_chain_j[position_min_chi2 - reducedChain[m_nParams].begin()];
-      std::sort(rc_chain_j.begin(), rc_chain_j.end());
-      auto pos_par =
-          std::find(rc_chain_j.begin(), rc_chain_j.end(), bestParameters[j]);
-      auto pos_left = rc_chain_j.begin();
-      auto pos_right = rc_chain_j.end() - 1;
+          reducedChain[j][positionMinChi2 - reducedChain[m_nParams].begin()];
+      std::sort(reducedChain[j].begin(), reducedChain[j].end());
+      auto posBestPar =
+          std::find(reducedChain[j].begin(), reducedChain[j].end(), bestParameters[j]);
+      auto posLeft = reducedChain[j].begin();
+      auto posRight = reducedChain[j].end() - 1;
       // sigma characaterization for a Gaussian (0.34 comes from
       // percentage of area under the curve of a Gaussian from 0 to sigma)
       size_t sigma = static_cast<size_t>(0.34 * double(convLength));
 
       // make sure the iterator is valid in any case
-      if (sigma < static_cast<size_t>(std::distance(pos_left, pos_par))) {
-        pos_left = pos_par - sigma;
+      if (sigma < static_cast<size_t>(std::distance(posLeft, posBestPar))) {
+        posLeft = posBestPar - sigma;
       }
-      if (sigma < static_cast<size_t>(std::distance(pos_par, pos_right))) {
-        pos_right = pos_par + sigma;
+      if (sigma < static_cast<size_t>(std::distance(posBestPar, posRight))) {
+        posRight = posBestPar + sigma;
       }
-      errorLeft[j] = *pos_left - *pos_par;
-      errorRight[j] = *pos_right - *pos_par;
+      errorLeft[j] = *posLeft - *posBestPar;
+      errorRight[j] = *posRight - *posBestPar;
     }
   } // End if there is converged chain
 
@@ -1022,10 +1021,10 @@ void FABADAMinimizer::initChainsAndParameters() {
     double param = m_fitFunction->getParameter(i);
     m_parameters.set(i, param);
 
-    API::IConstraint *iconstr = m_fitFunction->getConstraint(i);
-    if (iconstr) {
+    API::IConstraint *iConstraint = m_fitFunction->getConstraint(i);
+    if (iConstraint) {
       Constraints::BoundaryConstraint *bcon =
-          dynamic_cast<Constraints::BoundaryConstraint *>(iconstr);
+          dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
       if (bcon) {
         if (bcon->hasLower()) {
           if (param < bcon->lower())

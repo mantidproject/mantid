@@ -184,14 +184,14 @@ public:
     size_t nParams = fun->nParams();
 
     // Test PDF workspace
-    MatrixWorkspace_sptr pdf = fit.getProperty("PDF");
-    TS_ASSERT(pdf);
-    TS_ASSERT_EQUALS(pdf->getNumberHistograms(), nParams + 1);
-    TS_ASSERT_EQUALS(pdf->x(0).size(), 21);
-    TS_ASSERT_EQUALS(pdf->y(0).size(), 20);
-    TS_ASSERT_DELTA(pdf->y(0)[7], 0.41, 0.01);
-    TS_ASSERT_DELTA(pdf->y(1)[8], 5.24, 0.01);
-    TS_ASSERT_DELTA(pdf->y(2)[0], 0.44, 0.01);
+    MatrixWorkspace_sptr PDF = fit.getProperty("PDF");
+    TS_ASSERT(PDF);
+    TS_ASSERT_EQUALS(PDF->getNumberHistograms(), nParams + 1);
+    TS_ASSERT_EQUALS(PDF->x(0).size(), 21);
+    TS_ASSERT_EQUALS(PDF->y(0).size(), 20);
+    TS_ASSERT_DELTA(PDF->y(0)[7], 0.41, 0.01);
+    TS_ASSERT_DELTA(PDF->y(1)[8], 5.24, 0.01);
+    TS_ASSERT_DELTA(PDF->y(2)[0], 0.44, 0.01);
 
     //  Test CostFunction table
     ITableWorkspace_sptr costFunctTable = fit.getProperty("CostFunctionTable");
@@ -303,11 +303,11 @@ void test_cosineWithConstraint() {
   TS_ASSERT_DELTA(fun->getParameter("b"), 0.9, 0.1);
 
   // Test PDF workspace
-  MatrixWorkspace_sptr pdf = fit.getProperty("PDF");
-  TS_ASSERT(pdf);
-  TS_ASSERT_DELTA(pdf->y(0)[11], 0.55, 0.01);
-  TS_ASSERT_DELTA(pdf->y(1)[19], 4.88, 0.01);
-  TS_ASSERT_DELTA(pdf->y(2)[0], 0.34, 0.01);
+  MatrixWorkspace_sptr PDF = fit.getProperty("PDF");
+  TS_ASSERT(PDF);
+  TS_ASSERT_DELTA(PDF->y(0)[11], 0.55, 0.01);
+  TS_ASSERT_DELTA(PDF->y(1)[19], 4.88, 0.01);
+  TS_ASSERT_DELTA(PDF->y(2)[0], 0.34, 0.01);
 
   //  Test CostFunction table
   ITableWorkspace_sptr costFunc = fit.getProperty("CostFunctionTable");
@@ -445,14 +445,12 @@ boost::shared_ptr<CostFuncLeastSquares> createCostFunc(bool constraint = false,
 
   return costFun;
 }
-}
-;
+};
 
 void setUp() override { ws = createTestWorkspace(2000, 2000); }
 void test_expDecay_performance() { doTestExpDecay(ws); }
 
 private:
 API::MatrixWorkspace_sptr ws;
-}
-;
+};
 #endif /* MANTID_CURVEFITTING_FABADAMINIMIZERTEST_H_ */
