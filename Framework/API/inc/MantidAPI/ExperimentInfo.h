@@ -188,7 +188,7 @@ protected:
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
   /// Description of the choppers for this experiment.
   std::list<boost::shared_ptr<ChopperModel>> m_choppers;
-  /// The information on the sample envirKonment
+  /// The information on the sample environment
   boost::shared_ptr<Sample> m_sample;
   /// The run information
   boost::shared_ptr<Run> m_run;
