@@ -158,16 +158,16 @@ void PeaksWorkspace::removePeaks(const std::vector<int> &badPeaks) {
   auto first = peaks.begin();
   auto result = first;
   for (Peak p : peaks) {
-    //if index of peak is not in badPeaks
+    // if index of peak is not in badPeaks
     if (std::find(badPeaks.begin(), badPeaks.end(), i) == badPeaks.end()) {
-      //include in result
+      // include in result
       *result = std::move(*first);
       ++result;
     }
     ++first;
     ++i;
   }
-  //erase peaks outside of result
+  // erase peaks outside of result
   peaks.erase(result, peaks.end());
 }
 
