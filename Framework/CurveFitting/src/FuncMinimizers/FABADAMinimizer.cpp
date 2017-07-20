@@ -884,13 +884,13 @@ FABADAMinimizer::outputPDF(size_t convLength,
 /** Create the table workspace containing parameter values
 *
 * @param bestParameters :: vector containing best values for fitting parameters
-* @param errorsLeft :: the errors (left)
-* @param errorsRight :: the errors (right)
+* @param errorLeft :: [output] vector containing the sqrt of the mean square left deviation
+* @param errorRight :: [output] vector containing the sqrt of the mean square right deviation
 */
 void FABADAMinimizer::outputParameterTable(
     const std::vector<double> &bestParameters,
-    const std::vector<double> &errorsLeft,
-    const std::vector<double> &errorsRight) {
+    const std::vector<double> &errorLeft,
+    const std::vector<double> &errorRight) {
 
   // Create the workspace for the parameters' value and errors.
   API::ITableWorkspace_sptr wsPdfE =
@@ -902,8 +902,8 @@ void FABADAMinimizer::outputParameterTable(
 
   for (size_t j = 0; j < m_nParams; ++j) {
     API::TableRow row = wsPdfE->appendRow();
-    row << m_fitFunction->parameterName(j) << bestParameters[j] << errorsLeft[j]
-        << errorsRight[j];
+    row << m_fitFunction->parameterName(j) << bestParameters[j] << errorLeft[j]
+        << errorRight[j];
   }
   // Set and name the Parameter Errors workspace.
   setProperty("Parameters", wsPdfE);
@@ -917,8 +917,8 @@ void FABADAMinimizer::outputParameterTable(
 * @param reducedChain :: [output] the reduced chain
 * @param bestParameters :: [output] vector containing best values for fitting
 *parameters
-* @param errorLeft :: [output] vector containing the errors (left)
-* @param errorRight :: [output] vector containing the errors (right)
+* @param errorLeft :: [output] vector containing the sqrt of the mean square left deviation
+* @param errorRight :: [output] vector containing the sqrt of the mean square right deviation
 */
 void FABADAMinimizer::calculateConvChainAndBestParameters(
     size_t convLength, int nSteps,
@@ -964,21 +964,18 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
       std::sort(reducedChain[j].begin(), reducedChain[j].end());
       auto posBestPar =
           std::find(reducedChain[j].begin(), reducedChain[j].end(), bestParameters[j]);
-      auto posLeft = reducedChain[j].begin();
-      auto posRight = reducedChain[j].end() - 1;
-      // sigma characaterization for a Gaussian (0.34 comes from
-      // percentage of area under the curve of a Gaussian from 0 to sigma)
-      size_t sigma = static_cast<size_t>(0.34 * double(convLength));
+      double varLeft = 0, varRight = 0;
+      auto k = reducedChain[j].begin();
+      while (k != reducedChain[j].end()) {
+        if (k < posBestPar) varLeft += (*k - bestParameters[j]) * (*k - bestParameters[j]);
+        else if (k > posBestPar) varRight += (*k - bestParameters[j]) * (*k - bestParameters[j]);
+        ++k;
+      }
+      if (posBestPar != reducedChain[j].begin()) varLeft /= double(posBestPar - reducedChain[j].begin());
+      if (posBestPar != reducedChain[j].end() - 1) varRight /= double(reducedChain[j].end() - posBestPar - 1);
 
-      // make sure the iterator is valid in any case
-      if (sigma < static_cast<size_t>(std::distance(posLeft, posBestPar))) {
-        posLeft = posBestPar - sigma;
-      }
-      if (sigma < static_cast<size_t>(std::distance(posBestPar, posRight))) {
-        posRight = posBestPar + sigma;
-      }
-      errorLeft[j] = *posLeft - *posBestPar;
-      errorRight[j] = *posRight - *posBestPar;
+      errorLeft[j] = - sqrt(varLeft);
+      errorRight[j] = sqrt(varRight);
     }
   } // End if there is converged chain
 
