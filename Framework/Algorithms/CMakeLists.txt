@@ -249,11 +249,13 @@ set ( SRC_FILES
 	src/ResizeRectangularDetector.cpp
 	src/RingProfile.cpp
 	src/SANSCollimationLengthEstimator.cpp
+	src/SampleCorrections/DetectorGridDefinition.cpp
 	src/SampleCorrections/MCAbsorptionStrategy.cpp
 	src/SampleCorrections/MCInteractionVolume.cpp
 	src/SampleCorrections/MayersSampleCorrection.cpp
 	src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
 	src/SampleCorrections/RectangularBeamProfile.cpp
+	src/SampleCorrections/SparseInstrument.cpp
 	src/SassenaFFT.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
@@ -566,12 +568,14 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/RingProfile.h
 	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
+	inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
 	inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
 	inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
 	inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
 	inc/MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h
+	inc/MantidAlgorithms/SampleCorrections/SparseInstrument.h
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
@@ -739,6 +743,7 @@ set ( TEST_FILES
 	DetectorEfficiencyCorTest.h
 	DetectorEfficiencyCorUserTest.h
 	DetectorEfficiencyVariationTest.h
+	DetectorGridDefinitionTest.h
 	DiffractionEventCalibrateDetectorsTest.h
 	DiffractionFocussing2Test.h
 	DiffractionFocussingTest.h
@@ -895,6 +900,7 @@ set ( TEST_FILES
 	SofQWTest.h
 	SolidAngleTest.h
 	SortEventsTest.h
+	SparseInstrumentTest.h
 	SpatialGroupingTest.h
 	SpecularReflectionCalculateThetaTest.h
 	SpecularReflectionPositionCorrect2Test.h

@@ -45,6 +45,7 @@ SCDPanelErrors::SCDPanelErrors() : m_setupFinished(false) {
   declareParameter("ZRotate", 0.0, "Rotate angle in Z");
   declareParameter("ScaleWidth", 1.0, "Scale width of detector");
   declareParameter("ScaleHeight", 1.0, "Scale height of detector");
+  declareParameter("T0Shift", 0.0, "Shift for TOF");
   declareAttribute("FileName", Attribute("", true));
   declareAttribute("Workspace", Attribute(""));
   declareAttribute("Bank", Attribute(""));
@@ -67,6 +68,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
                                   double roty, double rotz, double scalex,
                                   double scaley, std::string detname,
                                   Workspace_sptr inputW) const {
+  if (detname.compare("none") == 0.0)
+    return;
   // CORELLI has sixteenpack under bank
   DataObjects::PeaksWorkspace_sptr inputP =
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
@@ -164,7 +167,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
 void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
                           double xrotate, double yrotate, double zrotate,
                           double scalex, double scaley, double *out,
-                          const double *xValues, const size_t nData) const {
+                          const double *xValues, const size_t nData,
+                          double tShift) const {
   UNUSED_ARG(xValues);
   if (nData == 0)
     return;
@@ -190,9 +194,8 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
     Units::Wavelength wl;
 
     wl.initialize(peak2.getL1(), peak2.getL2(), peak2.getScattering(), 0,
-                  peak.getInitialEnergy(), 0.0);
-
-    peak2.setWavelength(wl.singleFromTOF(peak.getTOF()));
+                  peak2.getInitialEnergy(), 0.0);
+    peak2.setWavelength(wl.singleFromTOF(peak.getTOF() + tShift));
     V3D Q3 = peak2.getQSampleFrame();
     out[i * 3] = Q3[0] - Q2[0];
     out[i * 3 + 1] = Q3[1] - Q2[1];
@@ -218,8 +221,9 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   const double zrotate = getParameter("ZRotate");
   const double scalex = getParameter("ScaleWidth");
   const double scaley = getParameter("ScaleHeight");
+  const double tShift = getParameter("T0Shift");
   eval(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, out,
-       xValues, nData);
+       xValues, nData, tShift);
 }
 
 /**
