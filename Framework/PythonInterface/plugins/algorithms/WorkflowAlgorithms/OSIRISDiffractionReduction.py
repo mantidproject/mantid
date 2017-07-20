@@ -8,6 +8,8 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
+import time
+
 
 # pylint: disable=too-few-public-methods
 
@@ -311,7 +313,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         """
 
         # Load all sample, vanadium files
-        ipf_file_name = 'OSIRIS_diffraction_diffspec_Parameters.xml'
+        ipf_file_name = 'OSIRIS_diffraction_diffonly_Parameters.xml'
         sample_ws_names, _ = load_files(self._sample_runs,
                                         ipf_file_name,
                                         self._spec_min,
@@ -326,7 +328,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Load the container run
         if self._container_files:
-            container_ws_names, _ = load_files(self._sample_runs,
+            container_ws_names, _ = load_files(self._container_files,
                                                ipf_file_name,
                                                self._spec_min,
                                                self._spec_max,
@@ -371,6 +373,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for d_range in self._sam_ws_map.getMap():
             if d_range not in self._van_ws_map.getMap():
                 raise RuntimeError("There is no van file that covers the " + str(d_range) + " DRange.")
+
 
         # Average together any sample workspaces with the same DRange.
         # This will mean our map of DRanges to list of workspaces becomes a map
