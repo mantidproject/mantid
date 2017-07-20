@@ -446,6 +446,7 @@ boost::shared_ptr<CostFuncLeastSquares> createCostFunc(bool constraint = false,
   return costFun;
 }
 
+public:
 void setUp() override { ws = createTestWorkspace(2000, 2000); }
 void test_expDecay_performance() { doTestExpDecay(ws); }
 
