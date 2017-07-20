@@ -1,9 +1,10 @@
 #ifndef MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_
 #define MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_
 
-#include "MantidCrystal/PeakIntensityVsRadius.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidCrystal/PeakIntensityVsRadius.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -11,7 +12,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -99,15 +99,19 @@ public:
   }
 
   void doTestThrowsForInvalid(double BackgroundInnerFactor,
-    double BackgroundOuterFactor, double BackgroundInnerRadius,
-    double BackgroundOuterRadius, int NumSteps = 16) {
-    doTestValid(false, BackgroundInnerFactor, BackgroundOuterFactor, BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
+                              double BackgroundOuterFactor,
+                              double BackgroundInnerRadius,
+                              double BackgroundOuterRadius, int NumSteps = 16) {
+    doTestValid(false, BackgroundInnerFactor, BackgroundOuterFactor,
+                BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
   }
 
   void doTestNoThrowForValid(double BackgroundInnerFactor,
-    double BackgroundOuterFactor, double BackgroundInnerRadius,
-    double BackgroundOuterRadius, int NumSteps = 16) {
-    doTestValid(true, BackgroundInnerFactor, BackgroundOuterFactor, BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
+                             double BackgroundOuterFactor,
+                             double BackgroundInnerRadius,
+                             double BackgroundOuterRadius, int NumSteps = 16) {
+    doTestValid(true, BackgroundInnerFactor, BackgroundOuterFactor,
+                BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
   }
 
   void test_validateForValidInputs() {
@@ -165,6 +169,10 @@ public:
     return ws;
   }
 
+#define TS_ASSERT_FLAT_AFTER_1(ws)                                             \
+  TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6); \
+  TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6)
+
   void test_NoBackground() {
     MatrixWorkspace_sptr ws = doTest(0, 0, 0, 0);
     // Check the results
@@ -174,23 +182,24 @@ public:
     TS_ASSERT_DELTA(ws->x(0)[2], 0.2, 1e-6);
 
     TS_ASSERT_LESS_THAN(ws->y(0)[5], 1000);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
+    TS_ASSERT_FLAT_AFTER_1(ws);
   }
+
+#define TS_ASSERT_FIRST_FOUR_Y_VALUES_CLOSE_TO_ZERO(ws)                        \
+  TS_ASSERT_DELTA(ws->y(0)[0], 0, 10);                                         \
+  TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);                                         \
+  TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);                                         \
+  TS_ASSERT_DELTA(ws->y(0)[3], 0, 10)
 
   void test_VariableBackground() {
     MatrixWorkspace_sptr ws = doTest(1.0, 2.0, 0, 0);
     // Check the results
     TSM_ASSERT_EQUALS("Two peaks", ws->getNumberHistograms(), 2);
+    TS_ASSERT_FIRST_FOUR_Y_VALUES_CLOSE_TO_ZERO(ws);
 
     // Points before 0.5 are approximately zero because the background shell is
     // in the peak.
-    TS_ASSERT_DELTA(ws->y(0)[0], 0, 10);
-    TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);
-    TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);
-    TS_ASSERT_DELTA(ws->y(0)[3], 0, 10);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
+    TS_ASSERT_FLAT_AFTER_1(ws);
   }
 
   void test_FixedBackground() {
@@ -201,14 +210,9 @@ public:
 
     // Points before 0.5 are approximately zero because the background shell is
     // in the peak.
-    TS_ASSERT_DELTA(ws->y(0)[0], 0, 10);
-    TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);
-    TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);
-    TS_ASSERT_DELTA(ws->y(0)[3], 0, 10);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
+    TS_ASSERT_FIRST_FOUR_Y_VALUES_CLOSE_TO_ZERO(ws);
+    TS_ASSERT_FLAT_AFTER_1(ws);
   }
-
 };
 
 #endif /* MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_ */
