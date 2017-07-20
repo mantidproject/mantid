@@ -17,6 +17,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
@@ -147,6 +148,16 @@ void PeaksWorkspace::removePeak(const int peakNum) {
         "PeaksWorkspace::removePeak(): peakNum is out of range.");
   }
   peaks.erase(peaks.begin() + peakNum);
+}
+
+/** Removes multiple peaks
+* @param badPeaks Pointers to peaks to be removed
+*/
+void PeaksWorkspace::removePeaks(const std::vector<Peak*>& badPeaks) {
+    peaks.erase(remove_if(peaks.begin(), peaks.end(),
+        [&badPeaks] (const Mantid::DataObjects::Peak& peak)
+    {return std::find(badPeaks.begin(), badPeaks.end(), &peak) != badPeaks.end(); }),
+        peaks.end());
 }
 
 //---------------------------------------------------------------------------------------------
