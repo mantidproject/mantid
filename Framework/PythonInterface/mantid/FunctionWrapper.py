@@ -292,6 +292,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
            its list of functions, so having a pure list of functions.
            This makes it possible to index and iterate all the functions
            and use tieAll() and untieAll().
+           Not to be used with a mixture of product and sum 
+           composite functions, because the arithmetic 
+           may no longer be correct.
            The return value is not independent of self.
        """
        # If there are no composite functions, do nothing
