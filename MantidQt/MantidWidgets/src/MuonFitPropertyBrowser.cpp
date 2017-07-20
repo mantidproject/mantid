@@ -394,16 +394,8 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
 		for (auto iter = m_periodBoxes.constBegin();
 			iter != m_periodBoxes.constEnd(); ++iter) {
 			m_boolManager->setValue(iter.value(), selectedPeriod == iter.key());
-
-			/*if (selectedPeriod == iter.key()) {
-				m_boolManager->setValue(iter.value(), true);
-			}
-			else {
-				m_boolManager->setValue(iter.value(), false);
-			}*/
 		}
 	}
-
   } else {
     FitPropertyBrowser::enumChanged(prop);
   }
