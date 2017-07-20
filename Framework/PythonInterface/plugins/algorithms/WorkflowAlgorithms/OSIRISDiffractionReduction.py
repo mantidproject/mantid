@@ -312,7 +312,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         """
 
         # Load all sample, vanadium files
-        ipf_file_name = self._instrument_name + '_diffraction_' + self._mode + '_Parameters.xml'
+        ipf_file_name = 'OSIRIS_diffraction_' + self._mode + '_Parameters.xml'
         sample_ws_names, _ = load_files(self._sample_runs,
                                         ipf_file_name,
                                         self._spec_min,
