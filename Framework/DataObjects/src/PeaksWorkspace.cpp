@@ -151,13 +151,23 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 }
 
 /** Removes multiple peaks
-* @param badPeaks Pointers to peaks to be removed
+* @param badPeaks peaks to be removed
 */
-void PeaksWorkspace::removePeaks(const std::vector<Peak*>& badPeaks) {
-    peaks.erase(remove_if(peaks.begin(), peaks.end(),
-        [&badPeaks] (const Mantid::DataObjects::Peak& peak)
-    {return std::find(badPeaks.begin(), badPeaks.end(), &peak) != badPeaks.end(); }),
-        peaks.end());
+void PeaksWorkspace::removePeaks(const std::vector<int>& badPeaks) {
+    int i = 0;
+    auto first = peaks.begin();
+    auto result = first;
+    for (Peak p : peaks)
+    {
+        if (std::find(badPeaks.begin(), badPeaks.end(), i) == badPeaks.end())
+        {
+            *result = std::move(*first);
+            ++result;
+        }
+        ++first;
+        ++i;
+    }
+    peaks.erase(result, peaks.end());
 }
 
 //---------------------------------------------------------------------------------------------
