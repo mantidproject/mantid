@@ -8,8 +8,6 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
-import time
-
 
 # pylint: disable=too-few-public-methods
 
@@ -373,7 +371,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for d_range in self._sam_ws_map.getMap():
             if d_range not in self._van_ws_map.getMap():
                 raise RuntimeError("There is no van file that covers the " + str(d_range) + " DRange.")
-
 
         # Average together any sample workspaces with the same DRange.
         # This will mean our map of DRanges to list of workspaces becomes a map
