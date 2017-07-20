@@ -67,31 +67,20 @@ public:
         "PeakIntensityVsRadiusTest_peaks", peakWS);
   }
 
+#define TS_ASSERT_SUCCESSFUL_INITIALZATION(alg)                                \
+  TS_ASSERT_THROWS_NOTHING(alg.initialize())                                   \
+  TS_ASSERT(alg.isInitialized())
+
   /** Check the validateInputs() calls */
-  void doTestValid(bool pass, double BackgroundInnerFactor,
+  void doTestValid(bool assertExecuteSuccess, double BackgroundInnerFactor,
                    double BackgroundOuterFactor, double BackgroundInnerRadius,
                    double BackgroundOuterRadius, int NumSteps) {
     PeakIntensityVsRadius alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InputWorkspace", "PeakIntensityVsRadiusTest_MDEWS"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "PeaksWorkspace", "PeakIntensityVsRadiusTest_peaks"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "OutputWorkspace", "PeakIntensityVsRadiusTest_OutputWS"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RadiusStart", 0.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RadiusEnd", 1.5));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumSteps", NumSteps));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundInnerFactor", BackgroundInnerFactor));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundOuterFactor", BackgroundOuterFactor));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundInnerRadius", BackgroundInnerRadius));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundOuterRadius", BackgroundOuterRadius));
-    if (!pass) {
+    TS_ASSERT_SUCCESSFUL_INITIALZATION(alg);
+    assertNoThrowWhenSettingProperties(
+        BackgroundInnerFactor, BackgroundOuterFactor, BackgroundInnerRadius,
+        BackgroundOuterRadius, NumSteps);
+    if (!assertExecuteSuccess) {
       TS_ASSERT_THROWS_ANYTHING(alg.execute(););
     } else {
       TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -130,16 +119,10 @@ public:
     doTestThrowsForInvalid(1.0, 2.0, 0, 0, -8);
   }
 
-  MatrixWorkspace_sptr doTest(double BackgroundInnerFactor,
-                              double BackgroundOuterFactor,
-                              double BackgroundInnerRadius,
-                              double BackgroundOuterRadius) {
-    // Name of the output workspace.
-    std::string outWSName("PeakIntensityVsRadiusTest_OutputWS");
-
-    PeakIntensityVsRadius alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+  void assertNoThrowWhenSettingProperties(
+      std::string &outWsName, double BackgroundInnerFactor,
+      double BackgroundOuterFactor, double BackgroundInnerRadius,
+      double BackgroundOuterRadius int NumSteps) {
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "InputWorkspace", "PeakIntensityVsRadiusTest_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
@@ -148,7 +131,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RadiusStart", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RadiusEnd", 1.5));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumSteps", 16));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumSteps", NumSteps));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("BackgroundInnerFactor", BackgroundInnerFactor));
     TS_ASSERT_THROWS_NOTHING(
@@ -157,6 +140,21 @@ public:
         alg.setProperty("BackgroundInnerRadius", BackgroundInnerRadius));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("BackgroundOuterRadius", BackgroundOuterRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+  }
+
+  MatrixWorkspace_sptr doTest(double BackgroundInnerFactor,
+                              double BackgroundOuterFactor,
+                              double BackgroundInnerRadius,
+                              double BackgroundOuterRadius, int NumSteps = 16) {
+    // Name of the output workspace.
+    std::string outWSName("PeakIntensityVsRadiusTest_OutputWS");
+
+    PeakIntensityVsRadius alg;
+    TS_ASSERT_SUCCESSFUL_INITIALZATION(alg);
+    assertNoThrowWhenSettingProperties(
+        BackgroundInnerFactor, BackgroundOuterFactor, BackgroundInnerRadius,
+        BackgroundOuterRadius, NumSteps);
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
