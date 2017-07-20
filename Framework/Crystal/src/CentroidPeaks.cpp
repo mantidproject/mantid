@@ -338,20 +338,21 @@ int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
   }
 }
 
-void CentroidPeaks::removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace_sptr& peakWS, const int& edge) {
-    std::vector<int> badPeaks;
-    for (int i = int(peakWS->getNumberPeaks()) - 1; i >= 0; --i) {
-        // Get a direct ref to that peak.
-        auto &peak = peakWS->getPeak(i);
-        int col = peak.getCol();
-        int row = peak.getRow();
-        std::string bankName = peak.getBankName();
+void CentroidPeaks::removeEdgePeaks(
+    Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const int &edge) {
+  std::vector<int> badPeaks;
+  for (int i = int(peakWS->getNumberPeaks()) - 1; i >= 0; --i) {
+    // Get a direct ref to that peak.
+    auto &peak = peakWS->getPeak(i);
+    int col = peak.getCol();
+    int row = peak.getRow();
+    std::string bankName = peak.getBankName();
 
-        if (edgePixel(inst, bankName, col, row, edge)) {
-            badPeaks.push_back(i);
-        }
+    if (edgePixel(inst, bankName, col, row, edge)) {
+      badPeaks.push_back(i);
     }
-    peakWS->removePeaks(badPeaks);
+  }
+  peakWS->removePeaks(badPeaks);
 }
 
 } // namespace Mantid

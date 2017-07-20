@@ -84,7 +84,7 @@ void OptimizeLatticeForCellType::exec() {
       const std::vector<Peak> &peaks = ws->getPeaks();
       if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(),
                     peaks[i].getRow(), edge)) {
-       badPeaks.push_back(i);
+        badPeaks.push_back(i);
       }
     }
     ws->removePeaks(badPeaks);

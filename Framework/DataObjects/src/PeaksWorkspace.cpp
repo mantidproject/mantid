@@ -153,21 +153,22 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 /** Removes multiple peaks
 * @param badPeaks peaks to be removed
 */
-void PeaksWorkspace::removePeaks(const std::vector<int>& badPeaks) {
-    int i = 0;
-    auto first = peaks.begin();
-    auto result = first;
-    for (Peak p : peaks)
-    {
-        if (std::find(badPeaks.begin(), badPeaks.end(), i) == badPeaks.end())
-        {
-            *result = std::move(*first);
-            ++result;
-        }
-        ++first;
-        ++i;
+void PeaksWorkspace::removePeaks(const std::vector<int> &badPeaks) {
+  int i = 0;
+  auto first = peaks.begin();
+  auto result = first;
+  for (Peak p : peaks) {
+    //if index of peak is not in badPeaks
+    if (std::find(badPeaks.begin(), badPeaks.end(), i) == badPeaks.end()) {
+      //include in result
+      *result = std::move(*first);
+      ++result;
     }
-    peaks.erase(result, peaks.end());
+    ++first;
+    ++i;
+  }
+  //erase peaks outside of result
+  peaks.erase(result, peaks.end());
 }
 
 //---------------------------------------------------------------------------------------------
