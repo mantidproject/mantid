@@ -307,7 +307,7 @@ void GenericDataProcessorPresenter::process() {
       // Set row as unprocessed if settings have changed or the expected output
       // workspaces cannot be found
       bool rowWSFound = true;
-      for (int i = 0; i < m_processor.numberOfOutputProperties(); i++) {
+      for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
         rowWSFound = AnalysisDataService::Instance().doesExist(
             getReducedWorkspaceName(data.second, m_processor.prefix(i)));
         if (!rowWSFound)
