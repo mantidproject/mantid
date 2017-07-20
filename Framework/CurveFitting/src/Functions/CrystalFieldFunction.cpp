@@ -34,18 +34,23 @@ DECLARE_FUNCTION(CrystalFieldFunction)
 
 namespace {
 
+const std::string ION_PREFIX("ion");
+const std::string SPECTRUM_PREFIX("sp");
+const std::string BACKGROUND_PREFIX("bg");
+const std::string PEAK_PREFIX("pk");
+
 // Regex for names of attributes/parameters for a particular spectrum
 // Example: sp1.FWHMX
-const std::regex SPECTRUM_ATTR_REGEX("sp([0-9]+)\\.(.+)");
+const std::regex SPECTRUM_ATTR_REGEX(SPECTRUM_PREFIX + "([0-9]+)\\.(.+)");
 // Regex for names of attributes/parameters for a background
 // Example: bg.A1
-const std::regex BACKGROUND_ATTR_REGEX("bg\\.(.+)");
+const std::regex BACKGROUND_ATTR_REGEX(BACKGROUND_PREFIX + "\\.(.+)");
 // Regex for names of attributes/parameters for peaks
 // Example: pk1.PeakCentre
-const std::regex PEAK_ATTR_REGEX("pk([0-9]+)\\.(.+)");
+const std::regex PEAK_ATTR_REGEX(PEAK_PREFIX + "([0-9]+)\\.(.+)");
 // Regex for names of attributes/parameters for peaks
 // Example: ion1.pk0.PeakCentre
-const std::regex ION_ATTR_REGEX("ion([0-9]+)\\.(.+)");
+const std::regex ION_ATTR_REGEX(ION_PREFIX + "([0-9]+)\\.(.+)");
 
 
 /// Define the source function for CrystalFieldFunction.
@@ -170,6 +175,49 @@ CompositeFunction *getSpectrum(CompositeFunction *control,
   return spectrum;
 }
 
+/// Forms a name of a parameter of a composite function giving it a custom prefix.
+/// @param composite :: Some composite function.
+/// @param index :: An index of a parameter
+/// @param prefix :: A prefix for the returned name
+/// @return A name that starts with the prefix followed by an index of a member function
+///   followed by a local name. For example sp0.IntensityScaling
+std::string makeName(const CompositeFunction &composite, size_t index,
+                     const std::string &prefix) {
+  auto funIndex = composite.functionIndex(index);
+  auto paramName = composite.parameterLocalName(index);
+  std::string name(prefix);
+  if (prefix != "bg") {
+    name.append(std::to_string(funIndex));
+  }
+  name.append(".").append(paramName);
+  return name;
+}
+
+/// Forms a more complex custom parameter name
+/// @param composite :: Some composite function.
+/// @param index :: An index of a parameter
+/// @param prefix :: A prefix for the returned name
+/// @return A name that starts with parentPrefix1 followed by an index then 
+/// parentPrefix2 if not empty with another index and finally followed by
+/// prefix and a local parameter name. Examples: sp0.bg.A1, ion1.sp0.pk3.Sigma
+std::string makeComplexName(const CompositeFunction &composite, size_t index,
+                            const std::string &prefix,
+                            const std::string &parentPrefix1,
+                            const std::string &parentPrefix2 = "") {
+  auto funIndex = composite.functionIndex(index);
+  auto &fun =
+      dynamic_cast<const CompositeFunction &>(*composite.getFunction(funIndex));
+  size_t localIndex = composite.parameterLocalIndex(index);
+  std::string paramName;
+  paramName.append(parentPrefix1).append(std::to_string(funIndex)).append(".");
+  if (parentPrefix2.empty()) {
+    paramName.append(makeName(fun, localIndex, prefix));
+  } else {
+    paramName.append(makeComplexName(fun, localIndex, prefix, parentPrefix2));
+  }
+  return paramName;
+}
+
 } // namespace
 
 /// Constructor
@@ -289,7 +337,7 @@ double CrystalFieldFunction::getParameter(const std::string &name) const {
 size_t CrystalFieldFunction::nParams() const {
   checkSourceFunction();
   checkTargetFunction();
-  return m_nSourceParams + m_target->nParams();
+  return m_nControlParams + m_nSourceParams + m_target->nParams();
 }
 
 /// Returns the index of a parameter with a given name
@@ -315,23 +363,18 @@ size_t CrystalFieldFunction::parameterIndex(const std::string &name) const {
 
 /// Returns the name of parameter i
 std::string CrystalFieldFunction::parameterName(size_t i) const {
+  if (i >= nParams()) {
+    throw std::invalid_argument("CrystalFieldFunction's parameter index " +
+                                std::to_string(i) + " is out of range " +
+                                std::to_string(nParams()));
+  }
   checkSourceFunction();
   checkTargetFunction();
-  // Lambda that forms a name of a parameter of a composite function
-  // giving it a custom prefix
-  auto makeName = [](const CompositeFunction &composite, size_t index,
-                    const std::string &prefix) {
-    auto funIndex = composite.functionIndex(index);
-    auto paramName = composite.parameterLocalName(index);
-    std::string name(prefix);
-    name.append(std::to_string(funIndex)).append(".").append(paramName);
-    return name;
-  };
 
   if (i < m_nControlParams) {
     if (isMultiSpectrum()) {
       // IntensityScalings for each spectrum
-      return makeName(m_control, i, "sp");
+      return makeName(m_control, i, SPECTRUM_PREFIX);
     } else {
       // No parameters here, just for completeness
       return m_control.parameterName(i);
@@ -342,7 +385,7 @@ std::string CrystalFieldFunction::parameterName(size_t i) const {
   if (i < m_nSourceParams) {
     if (isMultiSite()) {
       // Crystal field, intensity scaling for each ion
-      return makeName(compositeSource(), i, "ion");
+      return makeName(compositeSource(), i, ION_PREFIX);
     } else {
       // Crystal field
       return m_source->parameterName(i);
@@ -355,8 +398,14 @@ std::string CrystalFieldFunction::parameterName(size_t i) const {
     }
   } else {
     if (isMultiSite()) {
+      return makeComplexName(*m_target, i, PEAK_PREFIX, ION_PREFIX);
     } else {
-      return makeName(*m_target, i, "pk");
+      // Single site, single spectrum
+      if (hasBackground()) {
+        if (i == 0) {
+        }
+      }
+      return makeName(*m_target, i, PEAK_PREFIX);
     }
   }
 
@@ -760,26 +809,6 @@ API::CompositeFunction &CrystalFieldFunction::compositeSource() const {
   return *composite;
 }
 
-///// Check that attributes needed to build the source are consistent
-//void CrystalFieldFunction::checkSourceConsistent() const {
-//  if (m_ions.empty()) {
-//    throw std::runtime_error("No ions are set.");
-//  }
-//  if (m_ions.size() != m_symmetries.size()) {
-//    throw std::runtime_error(
-//        "Number of ions is different from number of symmetries.");
-//  }
-//}
-
-/// Check that attributes and parameters are consistent.
-/// If not excepion is thrown.
-//void CrystalFieldFunction::checkConsistent() const {
-//  if (m_control.nFunctions() == 0) {
-//    m_control.buildControls();
-//  }
-//  m_control.checkConsistent();
-//}
-
 /// Build source function if necessary.
 void CrystalFieldFunction::checkSourceFunction() const {
   if (!m_source) {
@@ -975,10 +1004,10 @@ void CrystalFieldFunction::buildMultiSiteSingleSpectrum() const {
     }
 
     auto ionSpectrum = boost::make_shared<CompositeFunction>();
-    spectrum->addFunction(ionSpectrum);
     CrystalFieldUtils::buildSpectrumFunction(*ionSpectrum, peakShape, values, xVec,
                                              yVec, fwhmVariation, defaultFWHM,
                                              nRequiredPeaks, fixAllPeaks);
+    spectrum->addFunction(ionSpectrum);
   }
 }
 

@@ -11,10 +11,11 @@ namespace Functions {
 using namespace API;
 
 CrystalFieldControl::CrystalFieldControl() : CompositeFunction() {
+  const bool quotedString = true;
   // A comma-separated list of ion names
-  declareAttribute("Ions", Attribute(""));
+  declareAttribute("Ions", Attribute("", quotedString));
   // A comma-separated list of symmetry names
-  declareAttribute("Symmetries", Attribute(""));
+  declareAttribute("Symmetries", Attribute("", quotedString));
   // Temperature values for each spectrum.
   declareAttribute("Temperatures", Attribute(std::vector<double>()));
   // Default widths for peaks in each spectrum. If given it must have
@@ -24,7 +25,7 @@ CrystalFieldControl::CrystalFieldControl() : CompositeFunction() {
   // Variation in FWHM of peaks when with model is used (FWHMX and FWHMY)
   declareAttribute("FWHMVariation", Attribute(0.1));
   // Definition of the background function
-  declareAttribute("Background", Attribute("", true));
+  declareAttribute("Background", Attribute("", quotedString));
   // Name of a IPeakFunction to use for peaks
   declareAttribute("PeakShape", Attribute("Lorentzian"));
   // Energy tolerance in crystal field calculations
@@ -41,9 +42,9 @@ CrystalFieldControl::CrystalFieldControl() : CompositeFunction() {
 void CrystalFieldControl::setAttribute(const std::string &name,
                                        const API::IFunction::Attribute &attr) {
   if (name == "Ions") {
-    parseStringListAttribute("Ions", attr.asString(), m_ions);
+    parseStringListAttribute("Ions", attr.asUnquotedString(), m_ions);
   } else if (name == "Symmetries") {
-    parseStringListAttribute("Symmetries", attr.asString(), m_symmetries);
+    parseStringListAttribute("Symmetries", attr.asUnquotedString(), m_symmetries);
   } else if (name == "PhysicalProperties") {
     parseStringListAttribute("PhysicalProperties", attr.asString(),
                              m_physProps);
