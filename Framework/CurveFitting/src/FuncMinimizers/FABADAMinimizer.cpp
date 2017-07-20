@@ -162,9 +162,9 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   }
 }
 
-/** Do one iteration. Returns true if iterations to be continued, false if they
-* must stop.
+/** Do one iteration.
 *
+* @return :: true if iterations must be continued, false otherwise
 */
 bool FABADAMinimizer::iterate(size_t) {
 
@@ -186,17 +186,17 @@ bool FABADAMinimizer::iterate(size_t) {
   // Do one iteration of FABADA's algorithm for each parameter.
   for (size_t i = 0; i < m; i++) {
 
-    GSLVector new_parameters = m_parameters;
+    GSLVector newParameters = m_parameters;
 
     // Calculate the step from a Gaussian
     double step = gaussianStep(m_jump[i]);
 
     // Calculate the new value of the parameter
-    double new_value = m_parameters.get(i) + step;
+    double newValue = m_parameters.get(i) + step;
 
     // Checks if it is inside the boundary constrinctions.
     // If not, changes it.
-    boundApplication(i, new_value, step);
+    boundApplication(i, newValue, step);
     // Obs: As well as checking whether the ties are not contradictory is
     // too constly, if there are tied parameters that are bounded,
     // checking that the boundedness is fulfilled for all the parameters
@@ -205,31 +205,31 @@ bool FABADAMinimizer::iterate(size_t) {
     // the user should be aware of that.
 
     // Set the new value in order to calculate the new Chi square value
-    if (std::isnan(new_value)) {
+    if (std::isnan(newValue)) {
       throw std::runtime_error("Parameter value is NaN.");
     }
-    new_parameters.set(i, new_value);
+    newParameters.set(i, newValue);
 
     // Update the new value through the IFunction
-    m_fitFunction->setParameter(i, new_value);
+    m_fitFunction->setParameter(i, newValue);
 
     // First, it fulfills the other ties, finally the current parameter tie
     // It notices m_leastSquares (the CostFuncLeastSquares) that we have
     // modified the parameters
-    tieApplication(i, new_parameters, new_value);
+    tieApplication(i, newParameters, newValue);
 
     // To track "unmovable" parameters (=> cannot converge)
-    if (!m_parChanged[i] && new_parameters.get(i) != m_parameters.get(i))
+    if (!m_parChanged[i] && newParameters.get(i) != m_parameters.get(i))
       m_parChanged[i] = true;
 
     // Calculate the new chi2 value
-    double chi2_new = m_leastSquares->val();
+    double newChi2 = m_leastSquares->val();
     // Save the old one to check convergence later on
-    double chi2_old = m_chi2;
+    double oldChi2 = m_chi2;
 
-    // Given the new chi2, position, m_changes[ParameterIndex] and chains are
+    // Given the new chi2, position, m_changes[parameterIndex] and chains are
     // updated
-    algorithmDisplacement(i, chi2_new, new_parameters);
+    algorithmDisplacement(i, newChi2, newParameters);
 
     // Update the jump once each JUMP_CHECKING_RATE iterations
     if (m_counter % JUMP_CHECKING_RATE == 150) // JUMP CHECKING RATE IS 200, BUT
@@ -250,9 +250,9 @@ bool FABADAMinimizer::iterate(size_t) {
 
     if (m_leftRefrPoints == 0 && !m_parConverged[i] &&
         m_counter > LOWER_CONVERGENCE_LIMIT) {
-      if (chi2_old != m_chi2) {
-        double chi2_quotient = fabs(m_chi2 - chi2_old) / chi2_old;
-        if (chi2_quotient < m_criteria[i]) {
+      if (oldChi2 != m_chi2) {
+        double chi2Quotient = fabs(m_chi2 - oldChi2) / oldChi2;
+        if (chi2Quotient < m_criteria[i]) {
           m_parConverged[i] = true;
         }
       }
@@ -297,13 +297,13 @@ void FABADAMinimizer::finalize() {
   size_t convLength = size_t(double(chainLength) / double(nSteps));
 
   // Reduced chain
-  std::vector<std::vector<double>> red_conv_chain;
+  std::vector<std::vector<double>> reducedConvergedChain;
   // Declaring vectors for best values
   std::vector<double> bestParameters(m_nParams);
   std::vector<double> errorLeft(m_nParams);
   std::vector<double> errorRight(m_nParams);
 
-  calculateConvChainAndBestParameters(convLength, nSteps, red_conv_chain,
+  calculateConvChainAndBestParameters(convLength, nSteps, reducedConvergedChain,
                                       bestParameters, errorLeft, errorRight);
 
   if (!getPropertyValue("Parameters").empty()) {
@@ -330,7 +330,7 @@ void FABADAMinimizer::finalize() {
     outputChains();
   }
 
-  double mostPchi2 = outputPDF(convLength, red_conv_chain);
+  double mostPchi2 = outputPDF(convLength, reducedConvergedChain);
 
   if (!getPropertyValue("ConvergedChain").empty()) {
     outputConvergedChains(convLength, nSteps);
@@ -368,7 +368,7 @@ double FABADAMinimizer::gaussianStep(const double &jump) {
 *
 * @param parameterIndex :: the index of the parameter
 * @param newValue :: the value of the parameter
-* @param step :: a step used to modify the parameter value
+* @param step :: the step used to modify the parameter value
 */
 void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
                                        double &newValue, double &step) {
@@ -440,18 +440,6 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
     newParameters.set(parameterIndex, newValue);
     m_fitFunction->setParameter(parameterIndex, newValue);
   }
-  //*ALTERNATIVE CODE
-  //*To avoid creating the new class (way too slow)
-  //*We could also setValue a certain parameter setting its own value
-  //*on m_leastSquares (thus no real change)
-  /*try{
-          m_leastSquares->drop();
-  }
-
-  catch (...) {
-          m_leastSquares->push();
-          m_leastSquares->drop();
-  }*/
 
   // Convert type to setDirty the cost function
   //(to notify the CostFunction we have modified the IFunction)
@@ -535,44 +523,43 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
 * @param parameterIndex :: the index of the current parameter
 */
 void FABADAMinimizer::jumpUpdate(const size_t &parameterIndex) {
-  const size_t &i = parameterIndex;
   const double jumpAR = getProperty("JumpAcceptanceRate");
-  double jnew;
+  double newJump;
 
-  if (m_leftRefrPoints == 0 && m_changes[i] == m_changesOld[i])
-    ++m_numInactiveRegenerations[i];
+  if (m_leftRefrPoints == 0 && m_changes[parameterIndex] == m_changesOld[parameterIndex])
+    ++m_numInactiveRegenerations[parameterIndex];
   else
-    m_changesOld[i] = m_changes[i];
+    m_changesOld[parameterIndex] = m_changes[parameterIndex];
 
-  if (m_changes[i] == 0) {
-    jnew = m_jump[i] / JUMP_CHECKING_RATE;
+  if (m_changes[parameterIndex] == 0) {
+    newJump = m_jump[parameterIndex] / JUMP_CHECKING_RATE;
     // JUST FOR THE CASE THERE HAS NOT BEEN ANY CHANGE
     //(treated as if only one acceptance).
   } else {
-    m_numInactiveRegenerations[i] = 0;
-    double f = m_changes[i] / double(m_counter);
+    m_numInactiveRegenerations[parameterIndex] = 0;
+    double f = m_changes[parameterIndex] / double(m_counter);
 
     //*ALTERNATIVE CODE
     //*Current acceptance rate evaluated
-    //*double f = m_changes[i] / double(JUMP_CHECKING_RATE);
+    //*double f = m_changes[parameterIndex] / double(JUMP_CHECKING_RATE);
     //*Obs: should be quicker to explore, but less stable (maybe not ergodic)
 
-    jnew = m_jump[i] * f / jumpAR;
+    newJump = m_jump[parameterIndex] * f / jumpAR;
 
     //*ALTERNATIVE CODE
     //*Reset the m_changes value to get the information
     //*for the current jump, not the whole history (maybe not ergodic)
-    //*m_changes[i] = 0;
+    //*m_changes[parameterIndex] = 0;
   }
 
-  m_jump[i] = jnew;
+  m_jump[parameterIndex] = newJump;
 
   // Check if the new jump is too small. It means that it has been a wrong
   // convergence.
-  if (std::abs(m_jump[i]) < LOW_JUMP_LIMIT) {
+  if (std::abs(m_jump[parameterIndex]) < LOW_JUMP_LIMIT) {
     g_log.warning()
         << "Wrong convergence might be reached for parameter " +
-               m_fitFunction->parameterName(i) +
+               m_fitFunction->parameterName(parameterIndex) +
                ". Try to set a proper initial value for this parameter\n";
   }
 }
@@ -703,15 +690,15 @@ bool FABADAMinimizer::iterationContinuation() {
 */
 void FABADAMinimizer::outputChains() {
 
-  size_t chain_length = m_chain[0].size();
+  size_t chainLength = m_chain[0].size();
   API::MatrixWorkspace_sptr wsC = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", m_nParams + 1, chain_length, chain_length);
+      "Workspace2D", m_nParams + 1, chainLength, chainLength);
 
   // Do one iteration for each parameter plus one for Chi square.
   for (size_t j = 0; j < m_nParams + 1; ++j) {
     auto &X = wsC->mutableX(j);
     auto &Y = wsC->mutableY(j);
-    for (size_t k = 0; k < chain_length; ++k) {
+    for (size_t k = 0; k < chainLength; ++k) {
       X[k] = double(k);
       Y[k] = m_chain[j][k];
     }
@@ -745,12 +732,12 @@ void FABADAMinimizer::outputConvergedChains(size_t convLength, int nSteps) {
     std::vector<double>::const_iterator first =
         m_chain[j].begin() + m_convPoint;
     std::vector<double>::const_iterator last = m_chain[j].end();
-    std::vector<double> conv_chain(first, last);
+    std::vector<double> convChain(first, last);
     auto &X = wsConv->mutableX(j);
     auto &Y = wsConv->mutableY(j);
     for (size_t k = 0; k < convLength; ++k) {
       X[k] = double(k);
-      Y[k] = conv_chain[nSteps * k];
+      Y[k] = convChain[nSteps * k];
     }
   }
 
@@ -769,32 +756,32 @@ void FABADAMinimizer::outputCostFunctionTable(size_t convLength,
   // Create the workspace for the Chi square values.
   API::ITableWorkspace_sptr wsChi2 =
       API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  wsChi2->addColumn("double", "Chi2min");
-  wsChi2->addColumn("double", "Chi2MP");
-  wsChi2->addColumn("double", "Chi2min_red");
-  wsChi2->addColumn("double", "Chi2MP_red");
+  wsChi2->addColumn("double", "Chi2 Minimum");
+  wsChi2->addColumn("double", "Most Probable Chi2");
+  wsChi2->addColumn("double", "reduced Chi2 Minimum");
+  wsChi2->addColumn("double", "Most Probable reduced Chi2");
 
   // Obtain the quantity of the initial data.
   API::FunctionDomain_sptr domain = m_leastSquares->getDomain();
-  size_t data_number = domain->size();
+  size_t dataSize = domain->size();
 
   // Calculate the value for the reduced Chi square.
-  double Chi2min_red =
-      m_chi2 / (double(data_number - m_nParams)); // For de minimum value.
-  double mostPchi2_red;
+  double minimumChi2Red =
+      m_chi2 / (double(dataSize - m_nParams)); // For de minimum value.
+  double mostProbableChi2Red;
   if (convLength > 0)
-    mostPchi2_red = mostProbableChi2 / (double(data_number - m_nParams));
+    mostProbableChi2Red = mostProbableChi2 / (double(dataSize - m_nParams));
   else {
     g_log.warning()
         << "Most probable chi square not calculated. -1 is returned.\n"
         << "Most probable reduced chi square not calculated. -1 is "
            "returned.\n";
-    mostPchi2_red = -1;
+    mostProbableChi2Red = -1;
   }
 
   // Add the information to the workspace and name it.
   API::TableRow row = wsChi2->appendRow();
-  row << m_chi2 << mostProbableChi2 << Chi2min_red << mostPchi2_red;
+  row << m_chi2 << mostProbableChi2 << minimumChi2Red << mostProbableChi2Red;
   setProperty("CostFunctionTable", wsChi2);
 }
 
@@ -935,12 +922,12 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
       reducedChain.push_back(v);
     }
 
-    // Calculate the red_conv_chain for the cost fuction.
+    // Calculate the reducedConvergedChain for the cost fuction.
     auto first = m_chain[m_nParams].begin() + m_convPoint;
     auto last = m_chain[m_nParams].end();
-    std::vector<double> conv_chain(first, last);
+    std::vector<double> convChain(first, last);
     for (size_t k = 1; k < convLength; ++k) {
-      reducedChain[m_nParams].push_back(conv_chain[nSteps * k]);
+      reducedChain[m_nParams].push_back(convChain[nSteps * k]);
     }
 
     // Calculate the position of the minimum Chi square value
@@ -952,11 +939,11 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
     for (size_t j = 0; j < m_nParams; ++j) {
       auto first = m_chain[j].begin() + m_convPoint;
       auto last = m_chain[j].end();
-      // red_conv_chain calculated for each parameter
-      std::vector<double> conv_chain(first, last);
+      // reducedConvergedChain calculated for each parameter
+      std::vector<double> convChain(first, last);
       // Obs: Starts at 1 (0 already added)
       for (size_t k = 1; k < convLength; ++k) {
-        reducedChain[j].push_back(conv_chain[nSteps * k]);
+        reducedChain[j].push_back(convChain[nSteps * k]);
       }
       // best fit parameters taken
       bestParameters[j] =
