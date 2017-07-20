@@ -14,7 +14,7 @@ This algorithm joins the input workspaces into a single one by concatenating the
 
 InputWorkspaces
 ---------------
-This can be a mixed list of workspaces and workspace groups on AnalysisDataService (ADS), that will be flattened to a list of workspaces. MatrixWorkspaces representing point-data are required with:
+This can be a mixed list of workspaces and workspace groups on AnalysisDataService (ADS), that will be flattened to a list of workspaces. MatrixWorkspaces representing **point-data** are required with:
 
 - the same instrument
 - the same number of histograms
@@ -24,6 +24,23 @@ SampleLogAsXAxis
 ----------------
 
 If specified, this log values will constitute the x-axis of the resulting workspace. The log must exist in all the input workspaces and must be numeric (int or double), in which case the input workspaces must contain single bin only, or numeric time series, in which case the lenght of the series must match the number of bins. 
+
+ConjoinX Operation
+------------------
+
++---------------------------------------------------------------------+-----------------------------------------------------------+
+|Example case with 2 input workspaces with several points each.       | .. image:: ../images/ConjoinXRunsBinary.png               |
+|By default the original x-axes will be concatenated.                 |    :height: 150                                           |
+|If **SampleLogAsXAxis** is given, it has to be a numeric time        |    :width: 400                                            |
+|series log with the same size as many points are in a row for        |    :alt: ConjoinXRuns as a binary operation               |
+|each of the inputs. It will then make up the x-axis of the result.   |                                                           |
++---------------------------------------------------------------------+-----------------------------------------------------------+
+|Example case with multiple input workspaces having a single point    | .. image:: ../images/ConjoinXRunsMulti.png                |
+|each. If **SampleLogAsXAxis** is given, it must be a numeric scalar  |    :height: 150                                           |
+|(or a time series with a single value).                              |    :width: 400                                            |
+|                                                                     |    :alt: ConjoinXRuns with multiple inputs                |
++---------------------------------------------------------------------+-----------------------------------------------------------+
+
 
 Usage
 -----
