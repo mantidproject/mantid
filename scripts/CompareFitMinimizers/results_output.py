@@ -33,6 +33,7 @@ import mantidplot as mp
 import pymantidplot.qtiplot as qti
 import mantid.simpleapi as msapi
 
+
 # older version of numpy does not support nanmean and nanmedian
 # and nanmean and nanmedian was removed in scipy 0.18 in favor of numpy
 # so try numpy first then scipy.stats
@@ -53,7 +54,7 @@ WORKING_DIR = os.getcwd()
 SCRIPT_DIR = os.path.dirname(__file__)
 
 def build_plot(minimizers, results_per_test, problems_obj, group_name, use_errors,
-                               simple_text=True, rst=False, save_to_file=False, color_scale=None):
+                               simple_text=True, rst=False, save_to_file=False):
     """
     Prints out results for a group of fit problems in accuracy and runtime tables, in a summary
     format and both as simple text, rst format and/or to file depending on input arguments
@@ -68,46 +69,103 @@ def build_plot(minimizers, results_per_test, problems_obj, group_name, use_error
     @param rst :: whether to print the tables in rst format. They are printed to the standard outputs
                   and to files following specific naming conventions
     @param save_to_file :: If rst=True, whether to save the tables to files following specific naming conventions
-    @param color_scale :: threshold-color pairs. This is used for RST tables. The number of levels
-                          must be consistent with the style sheet used in the documentation pages (5
-                          at the moment).
+    
     """
     linked_problems = build_indiv_linked_problems(results_per_test, group_name)
-
     # Calculate summary tables
     accuracy_tbl, runtime_tbl = postproc.calc_accuracy_runtime_tbls(results_per_test, minimizers)
     norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime = \
         postproc.calc_norm_summary_tables(accuracy_tbl, runtime_tbl)
 
-    header = " ============= moos: ===============\n"
-    header += " =================================================================\n"
-    print(header)
 
-    min_sum_err_sq = np.amin(accuracy_tbl, 1)
-    num_tests = len(results_per_test)
-    results_text = ''
-    for test_idx in range(0, num_tests):
-        results_text += "{0}\t".format(results_per_test[test_idx][0].problem.name)
-        for minimiz_idx, minimiz in enumerate(minimizers):
-            # 'e' format is easier to read in raw text output than 'g'
-            results_text += (" {0:.10g}".
-                             format(results_per_test[test_idx][minimiz_idx].sum_err_sq /
-                                    min_sum_err_sq[test_idx]))
-        results_text += "\n"
-    print (results_text)
-    for minimiz_idx, minimiz in enumerate(minimizers):
-		
-        for  test_idx in range(0, num_tests):
-			a=1
-    #        # 'e' format is easier to read in raw text output than 'g'
-#			results_text += "{0}\t".format(results_per_test[test_idx][0].problem.name)
-#            results_text += (" {0:.10g}".
-#                             format(results_per_test[test_idx][minimiz_idx].sum_err_sq /
-#                                    min_sum_err_sq[test_idx]))
-#        results_text += "\n"
-    print(results_text)
+
+
+    file_name = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.'
+                 .format(weighted=weighted_suffix_string(use_errors),
+                         version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name=group_name))+".pdf"
+    build_plot_test(minimizers, linked_problems, norm_acc_rankings,
+                                        comparison_type='accuracy', comparison_dim='',
+                                        using_errors=use_errors, output=file_name)
    
+
+    file_name = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.'
+                 .format(weighted=weighted_suffix_string(use_errors),
+                         version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name=group_name))+".pdf"
+    build_plot_test(minimizers, linked_problems, norm_runtimes,
+                                            comparison_type='runtime', comparison_dim='',
+                                            using_errors=use_errors, output=file_name)
+
    
+def plot_set_up(columns_txt,cells,rows_txt):
+    fig=plot()
+    colours=['red','blue','black','yellow','green']
+    max=0.0
+    colourCounter=0
+    for j,name in enumerate(columns_txt):
+        xData=[]
+        yData=[]
+        for row in range(0,cells.shape[0]):
+            label=rows_txt[row]
+            end=label.find("<")
+            label=label[1:end]
+            
+            x_value=cells[row,j]
+            if x_value == x_value and np.isfinite(x_value):
+                  xData.append(x_value)
+                  yData.append(label)
+                  if xData[-1]>max:
+                      max=xData[-1]								
+        results=data(name,xData,yData)
+        print(xData)
+        results.colour=colours[colourCounter]
+        colourCounter+=1
+        fig.add_data(results)
+
+    return fig,max
+def figure_set_up(fig,output=""):
+    fig.labels["x"] = "Relative Score"
+    fig.labels["y"] = "Test Name"
+    fig.legend="upper right"
+    fig.xrange["start"]=1.e-1
+    safe=True
+    fig.make_y_bar_plot(safe,output)
+def build_plot_test(columns_txt, rows_txt, cells, comparison_type, comparison_dim,
+                    using_errors, output=""):
+    """"
+    Builds an RST table as a string, given the list of column and row headers,
+    and a 2D numpy array with values for the cells.
+    This can be tricky/counterintuitive, see:
+    http://docutils.sourceforge.net/docs/dev/rst/problems.html
+
+    @param columns_txt :: the text for the columns, one item per column
+    @param rows_txt :: the text for the rows (will go in the leftmost column)
+    @param cells :: a 2D numpy array with as many rows as items have been given
+    in rows_txt, and as many columns as items have been given in columns_txt
+
+    @param comparison_type :: whether this is a 'summary', or a full 'accuracy', or 'runtime'
+                              table.
+    @param comparison_dim :: dimension (accuracy / runtime)
+    @param using_errors :: whether this comparison uses errors in the cost function
+    (weighted or unweighted), required to link the table properly
+
+    @param color_scale :: list with pairs of threshold value - color, to produce color
+    tags for the cells
+    """
+    columns_txt = display_name_for_minimizers(columns_txt)
+    items_link = build_items_links(comparison_type, comparison_dim, using_errors)
+
+    fig,max=plot_set_up(columns_txt,cells,rows_txt)
+    fig.labels["title"] = "Comparison of sum of square errors"
+    if max>10:
+         fig.xrange['end']=max*10. 
+         fig.logs['x']=True
+    else:
+         fig.xrange['end']=max+2. 
+         fig.xrange['start']=0.0 
+         fig.logs['x']=False
+    figure_set_up(fig,output)
+
+
 
 def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors,
                                simple_text=True, rst=False, save_to_file=False, color_scale=None):
