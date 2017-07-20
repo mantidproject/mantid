@@ -190,7 +190,7 @@ def plot_runtime(annotate, saveImage, path, **kwargs):
         plt.ylabel(yAxisTitle)
         plt.plot(xData, yData, "-o")
         plt.ylim(ymin=0)
-        plt.savefig(path +"/"+ im_filename)
+        plt.savefig(path + "/" + im_filename)
         plt.close()
         return """<img src="%s"/>""" % im_filename
     else:
@@ -489,9 +489,9 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
         if dofigs:
             # Only the latest X entries
             imgTagHtml = plot_runtime(False, True, path, name=name, x_field=x_field, last_num=last_num)
-            divShort = plot_runtime(False, True, path, name=name, x_field=x_field, last_num=last_num)
+            divShort = plot_runtime(True, False, path, name=name, x_field=x_field, last_num=last_num)
             # Plot all svn times
-            divDetailed = plot_runtime(False, True, path, name=name, x_field=x_field, last_num=-1)
+            divDetailed = plot_runtime(True, False, path, name=name, x_field=x_field, last_num=-1)
 
             html += divDetailed + "\n"
             overview_html += imgTagHtml + "\n"
