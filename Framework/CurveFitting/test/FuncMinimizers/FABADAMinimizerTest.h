@@ -10,6 +10,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using Mantid::CurveFitting::FuncMinimisers::FABADAMinimizer;
 using namespace Mantid::API;
@@ -71,7 +72,7 @@ void doTestExpDecay(Mantid::API::MatrixWorkspace_sptr ws2) {
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("PDF"));
   MatrixWorkspace_sptr wsPDF = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("PDF"));
+      AnalysisDataService::Instance().retrieve("PDF"));
   TS_ASSERT(wsPDF);
   TS_ASSERT_EQUALS(wsPDF->getNumberHistograms(), n + 1);
 
@@ -83,7 +84,7 @@ void doTestExpDecay(Mantid::API::MatrixWorkspace_sptr ws2) {
   TS_ASSERT(AnalysisDataService::Instance().doesExist("CostFunction"));
   ITableWorkspace_sptr CostFunctionTable =
       boost::dynamic_pointer_cast<ITableWorkspace>(
-          API::AnalysisDataService::Instance().retrieve("CostFunction"));
+          AnalysisDataService::Instance().retrieve("CostFunction"));
 
   TS_ASSERT(CostFunctionTable);
   TS_ASSERT_EQUALS(CostFunctionTable->columnCount(), 4);
@@ -104,7 +105,7 @@ void doTestExpDecay(Mantid::API::MatrixWorkspace_sptr ws2) {
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("ConvergedChain"));
   MatrixWorkspace_sptr wsConv = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("ConvergedChain"));
+      AnalysisDataService::Instance().retrieve("ConvergedChain"));
   TS_ASSERT(wsConv);
   TS_ASSERT_EQUALS(wsConv->getNumberHistograms(), n + 1);
 
@@ -114,7 +115,7 @@ void doTestExpDecay(Mantid::API::MatrixWorkspace_sptr ws2) {
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("Chain"));
   MatrixWorkspace_sptr wsChain = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("Chain"));
+      AnalysisDataService::Instance().retrieve("Chain"));
   TS_ASSERT(wsChain);
   TS_ASSERT_EQUALS(wsChain->getNumberHistograms(), n + 1);
 
@@ -125,7 +126,7 @@ void doTestExpDecay(Mantid::API::MatrixWorkspace_sptr ws2) {
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("Parameters"));
   ITableWorkspace_sptr Ptable = boost::dynamic_pointer_cast<ITableWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("Parameters"));
+      AnalysisDataService::Instance().retrieve("Parameters"));
 
   TS_ASSERT(Ptable);
   TS_ASSERT_EQUALS(Ptable->columnCount(), 4);
