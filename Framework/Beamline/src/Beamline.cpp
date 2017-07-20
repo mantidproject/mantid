@@ -13,6 +13,15 @@ std::unique_ptr<T> copyOrNull(const std::unique_ptr<T> &source) {
   return source ? std::unique_ptr<T>(new T(*source))
                 : std::unique_ptr<T>(nullptr);
 }
+
+bool bindTogether(ComponentInfo *compInfo, DetectorInfo *detInfo) {
+  bool canBind = compInfo != nullptr && detInfo != nullptr;
+  if (canBind) {
+    compInfo->setDetectorInfo(detInfo);
+    detInfo->setComponentInfo(compInfo);
+  }
+  return canBind;
+}
 }
 
 Beamline::Beamline()
@@ -30,13 +39,16 @@ Beamline::Beamline()
 Beamline::Beamline(const Beamline &other)
     : m_empty(other.m_empty),
       m_componentInfo(copyOrNull(other.m_componentInfo)),
-      m_detectorInfo(copyOrNull(other.m_detectorInfo)) {}
+      m_detectorInfo(copyOrNull(other.m_detectorInfo)) {
+  bindTogether(m_componentInfo.get(), m_detectorInfo.get());
+}
 
 Beamline &Beamline::operator=(const Beamline &other) {
   if (&other != this) {
     m_componentInfo = copyOrNull(other.m_componentInfo);
     m_detectorInfo = copyOrNull(other.m_detectorInfo);
     m_empty = other.m_empty;
+    bindTogether(m_componentInfo.get(), m_detectorInfo.get());
   }
   return *this;
 }
@@ -46,8 +58,7 @@ Beamline::Beamline(ComponentInfo &&componentInfo, DetectorInfo &&detectorInfo)
                           new ComponentInfo(componentInfo))),
       m_detectorInfo(
           std::unique_ptr<DetectorInfo>(new DetectorInfo(detectorInfo))) {
-  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
-  m_detectorInfo->setComponentInfo(m_componentInfo.get());
+  bindTogether(m_componentInfo.get(), m_detectorInfo.get());
 }
 
 const ComponentInfo &Beamline::componentInfo() const {
