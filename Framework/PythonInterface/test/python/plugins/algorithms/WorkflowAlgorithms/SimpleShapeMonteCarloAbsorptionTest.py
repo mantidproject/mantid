@@ -46,6 +46,9 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         num_hists = corr_ws.getNumberHistograms()
         self.assertEquals(num_hists, 10)
 
+        blocksize = corr_ws.blocksize()
+        self.assertEquals(blocksize, 1905)
+
     def tearDown(self):
         DeleteWorkspace(self._red_ws)
         DeleteWorkspace(self._corrected_flat_plate)
