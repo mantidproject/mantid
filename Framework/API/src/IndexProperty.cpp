@@ -4,15 +4,13 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
 
-#include "MantidKernel/ArrayProperty.tcc"
-
 namespace Mantid {
 namespace API {
 IndexProperty::IndexProperty(const std::string &name,
                              const IWorkspaceProperty &workspaceProp,
                              const IndexTypeProperty &indexTypeProp,
                              Kernel::IValidator_sptr validator)
-    : ArrayProperty<int>(name, "", validator), m_workspaceProp(workspaceProp),
+    : ArrayProperty(name, "", validator), m_workspaceProp(workspaceProp),
       m_indexTypeProp(indexTypeProp), m_indices(0), m_indicesExtracted(false) {}
 
 IndexProperty *IndexProperty::clone() const { return new IndexProperty(*this); }

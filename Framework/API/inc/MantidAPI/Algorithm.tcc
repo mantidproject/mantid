@@ -2,12 +2,6 @@
 #include "MantidAPI/IndexProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
-/* Currently required for Windows. Otherwise warning C4661 is issued. The
- * ArrayProperty exlicit instantiations are not found.*/
-#ifdef _WIN32
-#include "MantidKernel/ArrayProperty.tcc"
-#endif
-
 namespace {
 template <typename T1, typename T2>
 void setWorkspaceProperty(Mantid::API::WorkspaceProperty<T1> *wsProp,
