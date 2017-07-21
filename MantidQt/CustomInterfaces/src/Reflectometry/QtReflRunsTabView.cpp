@@ -53,10 +53,16 @@ void QtReflRunsTabView::initLayout() {
   QDataProcessorWidget *qDataProcessorWidget_1 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
   ui.toolbox->addItem(qDataProcessorWidget_1, "Group 1");
+  connect(qDataProcessorWidget_1,
+          SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   QDataProcessorWidget *qDataProcessorWidget_2 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
   ui.toolbox->addItem(qDataProcessorWidget_2, "Group 2");
+  connect(qDataProcessorWidget_2,
+          SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   std::vector<DataProcessorPresenter *> processingWidgets;
   processingWidgets.push_back(qDataProcessorWidget_1->getPresenter());
@@ -151,6 +157,16 @@ void QtReflRunsTabView::setRowCommands(
 * Clears all the actions (commands)
 */
 void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
+
+/**
+* Sets a specific action in the "Edit" menu enabled or disabled
+* @param index : The index of the action in the "Edit" menu
+* @param enabled : Whether to enable or disable the action
+*/
+void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
+
+  ui.menuRows->actions()[index]->setEnabled(enabled);
+}
 
 /**
 * Set all possible tranfer methods

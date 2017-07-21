@@ -14,6 +14,7 @@
 #include <condition_variable>
 #include <mutex>
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 

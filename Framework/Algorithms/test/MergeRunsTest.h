@@ -1454,7 +1454,8 @@ public:
     alg.initialize();
     alg.setPropertyValue("SampleLogsFail", "prop2");
     alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
-    alg.setPropertyValue("FailBehaviour", MergeRunsOptions::STOP_BEHAVIOUR);
+    alg.setPropertyValue("FailBehaviour",
+                         RunCombinationOptions::STOP_BEHAVIOUR);
     do_test_mergeSampleLogs_modified_alg(
         alg, ws, "prop2", SampleLogsBehaviour::FAIL_MERGE, "3", 1, true);
   }
@@ -1476,7 +1477,8 @@ public:
 
     MergeRuns alg;
     alg.initialize();
-    alg.setPropertyValue("RebinBehaviour", MergeRunsOptions::FAIL_BEHAVIOUR);
+    alg.setPropertyValue("RebinBehaviour",
+                         RunCombinationOptions::FAIL_BEHAVIOUR);
     do_test_mergeSampleLogs_modified_alg(
         alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1);
   }
@@ -1490,8 +1492,10 @@ public:
 
     MergeRuns alg;
     alg.initialize();
-    alg.setPropertyValue("RebinBehaviour", MergeRunsOptions::FAIL_BEHAVIOUR);
-    alg.setPropertyValue("FailBehaviour", MergeRunsOptions::STOP_BEHAVIOUR);
+    alg.setPropertyValue("RebinBehaviour",
+                         RunCombinationOptions::FAIL_BEHAVIOUR);
+    alg.setPropertyValue("FailBehaviour",
+                         RunCombinationOptions::STOP_BEHAVIOUR);
     do_test_mergeSampleLogs_modified_alg(
         alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1, true);
   }

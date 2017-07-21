@@ -30,6 +30,13 @@ public:
   }
   static void destroySuite(RunCombinationHelperTest *suite) { delete suite; }
 
+  void setUp() override {
+    m_reference =
+        create2DWorkspaceWithFullInstrument(2, 3, true, false, true, "test");
+    setUnits(m_reference);
+    m_testee.setReferenceProperties(m_reference);
+  }
+
   void testUnwraping() {
 
     MatrixWorkspace_sptr ws1 = create2DWorkspace(2, 3);
@@ -58,56 +65,61 @@ public:
     removeWS("ws3");
   }
 
-  void testCompatibility() {
+  void testCompatible() {
+    MatrixWorkspace_sptr ws = m_reference->clone();
+    TS_ASSERT(m_testee.checkCompatibility(ws).empty());
+  }
 
-    MatrixWorkspace_sptr ws1 =
-        create2DWorkspaceWithFullInstrument(2, 3, true, false, true, "test");
-    m_testee.setReferenceProperties(ws1);
-
-    // compatible
-    MatrixWorkspace_sptr ws2 = ws1->clone();
-    TS_ASSERT(m_testee.checkCompatibility(ws2).empty());
-
-    // incompatible instrument
-    MatrixWorkspace_sptr ws3 =
+  void testIncompatibleInstrument() {
+    MatrixWorkspace_sptr ws =
         create2DWorkspaceWithFullInstrument(2, 3, true, false, true, "other");
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws3),
+    setUnits(ws);
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws),
                      "different instrument names; ");
+  }
 
-    // incompatible number of histograms
-    MatrixWorkspace_sptr ws4 =
+  void testIncompatibleNumHistograms() {
+    MatrixWorkspace_sptr ws =
         create2DWorkspaceWithFullInstrument(3, 3, true, false, true, "test");
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws4, true),
+    setUnits(ws);
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws, true),
                      "different number of histograms; ");
-    TS_ASSERT(m_testee.checkCompatibility(ws4).empty());
+    TS_ASSERT(m_testee.checkCompatibility(ws).empty());
+  }
 
-    // point data
-    MatrixWorkspace_sptr ws5 =
+  void testIncompatibleDataType() {
+    MatrixWorkspace_sptr ws =
         create2DWorkspaceWithFullInstrument(2, 3, true, false, false, "test");
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws5),
+    setUnits(ws);
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws),
                      "different distribution or histogram type; ");
+  }
 
-    // setup units of the reference
-    ws1->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    ws1->getAxis(1)->unit() = UnitFactory::Instance().create("Momentum");
-    ws1->setYUnit("Counts");
-    m_testee.setReferenceProperties(ws1);
+  void testIncompatibleXUnits() {
+    MatrixWorkspace_sptr ws = m_reference->clone();
+    ws->getAxis(0)->unit() = UnitFactory::Instance().create("Energy");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws), "different X units; ");
+  }
 
-    // incompatible x-axis unit
-    MatrixWorkspace_sptr ws6 = ws1->clone();
-    ws6->getAxis(0)->unit() = UnitFactory::Instance().create("Energy");
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws6), "different X units; ");
+  void testIncompatibleYUnits() {
+    MatrixWorkspace_sptr ws = m_reference->clone();
+    ws->setYUnit("Frequency");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws), "different Y units; ");
+  }
 
-    // incompatible spectrum-axis unit
-    MatrixWorkspace_sptr ws7 = ws1->clone();
-    ws7->getAxis(1)->unit() = UnitFactory::Instance().create("QSquared");
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws7),
+  void testIncompatibleSpectrumAxisUnits() {
+    MatrixWorkspace_sptr ws = m_reference->clone();
+    ws->getAxis(1)->unit() = UnitFactory::Instance().create("QSquared");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws),
                      "different spectrum axis units; ");
+  }
 
-    // incompatible y unit
-    MatrixWorkspace_sptr ws8 = ws1->clone();
-    ws8->setYUnit("Frequency");
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws8), "different Y units; ");
+  void testIncompatibleMultiple() {
+    MatrixWorkspace_sptr ws = m_reference->clone();
+    ws->getAxis(0)->unit() = UnitFactory::Instance().create("Energy");
+    ws->getAxis(1)->unit() = UnitFactory::Instance().create("QSquared");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws),
+                     "different X units; different spectrum axis units; ");
   }
 
   void test_scanning_workspaces_throw_no_error() {
@@ -139,13 +151,20 @@ public:
   }
 
 private:
-  RunCombinationHelper m_testee;
+  void setUnits(MatrixWorkspace_sptr ws) {
+    ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    ws->getAxis(1)->unit() = UnitFactory::Instance().create("Momentum");
+    ws->setYUnit("Counts");
+  }
 
   MatrixWorkspace_sptr createSampleScanningWorkspace(int nTimeIndexes,
                                                      int nhist = 2) {
     return create2DDetectorScanWorkspaceWithFullInstrument(
         nhist, 3, nTimeIndexes, true, false, true, "test");
   }
+
+  RunCombinationHelper m_testee;
+  MatrixWorkspace_sptr m_reference;
 };
 
 #endif /* MANTID_ALGORITHMS_RUNCOMBINATIONHELPERTEST_H_ */

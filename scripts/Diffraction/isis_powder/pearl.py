@@ -72,9 +72,12 @@ class Pearl(AbstractInst):
         attenuation_path = self._inst_settings.attenuation_file_path
         return pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_path, ws_to_correct=input_workspace)
 
-    def _normalise_ws_current(self, ws_to_correct, run_details=None):
-        monitor_ws = common.get_monitor_ws(ws_to_process=ws_to_correct, run_number_string=run_details.run_number,
-                                           instrument=self)
+    def _normalise_ws_current(self, ws_to_correct):
+        monitor_spectra = self._inst_settings.monitor_spec_no
+
+        monitor_ws = common.extract_single_spectrum(ws_to_process=ws_to_correct,
+                                                    spectrum_number_to_extract=monitor_spectra)
+
         normalised_ws = pearl_algs.normalise_ws_current(ws_to_correct=ws_to_correct, monitor_ws=monitor_ws,
                                                         spline_coeff=self._inst_settings.monitor_spline,
                                                         integration_range=self._inst_settings.monitor_integration_range,
@@ -89,9 +92,6 @@ class Pearl(AbstractInst):
 
     def _get_current_tt_mode(self):
         return self._inst_settings.tt_mode
-
-    def _get_monitor_spectra_index(self, run_number):
-        return self._inst_settings.monitor_spec_no
 
     def _spline_vanadium_ws(self, focused_vanadium_spectra):
         focused_vanadium_spectra = pearl_algs.strip_bragg_peaks(focused_vanadium_spectra)

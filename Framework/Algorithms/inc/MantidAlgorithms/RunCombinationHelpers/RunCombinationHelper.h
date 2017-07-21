@@ -35,7 +35,7 @@ namespace Algorithms {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-namespace MergeRunsOptions {
+namespace RunCombinationOptions {
 static const std::string SKIP_BEHAVIOUR = "Skip File";
 static const std::string STOP_BEHAVIOUR = "Stop";
 static const std::string REBIN_BEHAVIOUR = "Rebin";

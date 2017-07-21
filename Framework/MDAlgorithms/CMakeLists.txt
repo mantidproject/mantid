@@ -65,8 +65,6 @@ set ( SRC_FILES
     src/InvalidParameter.cpp
     src/InvalidParameterParser.cpp
     src/LessThanMD.cpp
-    src/LoadILLAscii.cpp
-    src/LoadILLAsciiHelper.cpp
     src/LoadMD.cpp
     src/LoadSQW.cpp
     src/LoadSQW2.cpp
@@ -196,8 +194,6 @@ set ( INC_FILES
     inc/MantidMDAlgorithms/InvalidParameter.h
     inc/MantidMDAlgorithms/InvalidParameterParser.h
     inc/MantidMDAlgorithms/LessThanMD.h
-    inc/MantidMDAlgorithms/LoadILLAscii.h
-    inc/MantidMDAlgorithms/LoadILLAsciiHelper.h
     inc/MantidMDAlgorithms/LoadMD.h
     inc/MantidMDAlgorithms/LoadSQW.h
     inc/MantidMDAlgorithms/LoadSQW2.h

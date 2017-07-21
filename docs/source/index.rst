@@ -23,6 +23,7 @@ Mantid Documentation
    algorithms/index
    algorithms/*
    concepts/index
+   development/index
    interfaces/index
    fitfunctions/*
    fitminimizers/index
