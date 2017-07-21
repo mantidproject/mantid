@@ -473,7 +473,6 @@ void ReflRunsTabPresenter::resume() const {
 * @return : Boolean on whether to start a new autoreduction
 */
 bool ReflRunsTabPresenter::startNewAutoreduction() const {
-  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
   bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
   bool transferMethodChanged =
       m_currentTransferMethod != m_view->getTransferMethod();
