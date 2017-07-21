@@ -343,11 +343,11 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                       RHSWorkspace=self._container_files[idx],
                       OutputWorkspace=self._sample_runs[idx])
 
-            self._sam_ws_map.addWs(self._sample_runs[idx])
+            self._sam_ws_map.addWs(self._sample_runs[idx], self._man_d_range)
 
         # Add the vanadium workspaces to the dRange to vanadium map
         for van in self._vanadium_runs:
-            self._van_ws_map.addWs(van)
+            self._van_ws_map.addWs(van, self._man_d_range)
 
         # Finished with container now so delete it
         if self._container_files:
