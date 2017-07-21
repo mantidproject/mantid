@@ -50,35 +50,37 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
   const auto &indexInfo = wksp->indexInfo();
   auto type = m_indexTypeProp.selectedType();
 
-  auto list = value();
-  if ((std::count(list.cbegin(), list.cend(), ':') == 1 ||
-       std::count(list.cbegin(), list.cend(), '-') == 1) &&
-      std::count(list.cbegin(), list.cend(), ',') == 0) {
-    auto pos = list.find(":");
-    pos = (pos == std::string::npos) ? list.find("-") : pos;
-    auto min = stoi(list.substr(0, pos));
-    auto max = stoi(list.substr(pos + 1, list.size() - 1));
-
-    switch (type) {
-    case IndexType::WorkspaceIndex:
-      return indexInfo.makeIndexSet(
-          static_cast<Indexing::GlobalSpectrumIndex>(min),
-          static_cast<Indexing::GlobalSpectrumIndex>(max));
-    case IndexType::SpectrumNum:
-      return indexInfo.makeIndexSet(static_cast<Indexing::SpectrumNumber>(min),
-                                    static_cast<Indexing::SpectrumNumber>(max));
-    }
-  } else if (!m_value.empty()) {
-    switch (type) {
-    case IndexType::WorkspaceIndex:
-      return indexInfo.makeIndexSet(std::vector<Indexing::GlobalSpectrumIndex>(
-          m_value.begin(), m_value.end()));
-    case IndexType::SpectrumNum:
-      return indexInfo.makeIndexSet(std::vector<Indexing::SpectrumNumber>(
-          m_value.begin(), m_value.end()));
-    }
-  } else {
+  if (m_value.empty()) {
     return indexInfo.makeIndexSet();
+  } else {
+    auto res = std::minmax_element(m_value.cbegin(), m_value.cend());
+    auto min = *res.first;
+    auto max = *res.second;
+
+    auto isRange = (max - min) == (m_value.size() - 1);
+
+    if (isRange) {
+      switch (type) {
+      case IndexType::WorkspaceIndex:
+        return indexInfo.makeIndexSet(
+            static_cast<Indexing::GlobalSpectrumIndex>(min),
+            static_cast<Indexing::GlobalSpectrumIndex>(max));
+      case IndexType::SpectrumNum:
+        return indexInfo.makeIndexSet(
+            static_cast<Indexing::SpectrumNumber>(min),
+            static_cast<Indexing::SpectrumNumber>(max));
+      }
+    } else {
+      switch (type) {
+      case IndexType::WorkspaceIndex:
+        return indexInfo.makeIndexSet(
+            std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(),
+                                                       m_value.end()));
+      case IndexType::SpectrumNum:
+        return indexInfo.makeIndexSet(std::vector<Indexing::SpectrumNumber>(
+            m_value.begin(), m_value.end()));
+      }
+    }
   }
 
   m_indicesExtracted = true;
