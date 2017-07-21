@@ -202,3 +202,4 @@ ALL_FIG_FORMATS = ["png", "pdf", "ps", "eps", "svg"]
 # from https://matplotlib.org/devdocs/api/_as_gen/matplotlib.pyplot.savefig.html
 DPI = 600
 BBOX = "tight"
+BACKGROUND = "white"

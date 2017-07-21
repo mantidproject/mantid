@@ -262,7 +262,7 @@ class Abins(PythonAlgorithm):
                           for i in range(len(y_ticks))]
 
         cmap = plt.get_cmap(AbinsModules.AbinsParameters.colormap)
-        cmap.set_under(color='black')
+        cmap.set_under(color=AbinsModules.AbinsConstants.BACKGROUND)
         interpolation = AbinsModules.AbinsParameters.interpolation
 
         num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
