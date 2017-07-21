@@ -81,6 +81,8 @@ public:
   void confirmReductionPaused() const override;
 
 private:
+  static auto constexpr PROCESS = 0;
+  static auto constexpr PAUSE = 1;
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   /// The main view we're managing

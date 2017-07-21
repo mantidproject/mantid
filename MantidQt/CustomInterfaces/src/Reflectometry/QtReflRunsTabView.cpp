@@ -168,6 +168,10 @@ void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
   ui.menuRows->actions()[index]->setEnabled(enabled);
 }
 
+void QtReflRunsTabView::setTransferEnabled(bool enabled) {
+    ui.buttonTransfer->setEnabled(enabled);
+}
+
 /**
 * Set all possible tranfer methods
 * @param methods : All possible transfer methods.

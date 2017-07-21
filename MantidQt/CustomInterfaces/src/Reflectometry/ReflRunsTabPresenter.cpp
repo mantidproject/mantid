@@ -416,8 +416,8 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 /** Disables the 'pause' button when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() const {
-
-  m_view->setRowActionEnabled(1, false);
+  m_view->setTransferEnabled(true);
+  m_view->setRowActionEnabled(PROCESS, false);
 }
 
 /** Disables the 'process' button and enables the 'pause' button when data
@@ -426,8 +426,9 @@ void ReflRunsTabPresenter::pause() const {
 */
 void ReflRunsTabPresenter::resume() const {
 
-  m_view->setRowActionEnabled(0, false);
-  m_view->setRowActionEnabled(1, true);
+  m_view->setRowActionEnabled(PROCESS, false);
+  m_view->setTransferEnabled(false);
+  m_view->setRowActionEnabled(PAUSE, true);
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
@@ -437,7 +438,7 @@ void ReflRunsTabPresenter::resume() const {
 */
 void ReflRunsTabPresenter::confirmReductionPaused() const {
 
-  m_view->setRowActionEnabled(0, true);
+  m_view->setRowActionEnabled(PROCESS, true);
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
 }
