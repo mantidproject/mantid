@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import SetBeam, SetSample, MonteCarloAbsorption
-from mantid.api import DataProcessorAlgorithm, mtd, AlgorithmFactory, MatrixWorkspaceProperty, Progress
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress
 from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
 
