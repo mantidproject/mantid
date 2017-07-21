@@ -108,18 +108,18 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
 
         self.declareProperty(name='Height', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Height of the sample environment')
+                             doc='Height of the sample environment (cm)')
 
         # flat plate options
 
         self.declareProperty(name='Width', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Width of the FlatPlate sample environment')
+                             doc='Width of the FlatPlate sample environment (cm)')
         self.setPropertySettings('Width', flatPlateCondition)
 
         self.declareProperty(name='Thickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(),
-                             doc='Thickness of the FlatPlate sample environment')
+                             doc='Thickness of the FlatPlate sample environment (cm)')
         self.setPropertySettings('Thickness', flatPlateCondition)
 
         self.declareProperty(name='Center', defaultValue=0.0,
@@ -127,26 +127,27 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertySettings('Center', flatPlateCondition)
 
         self.declareProperty(name='Angle', defaultValue=0.0,
-                             doc='Angle of the FlatPlate sample environment')
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Angle of the FlatPlate sample environment with respect to the beam (degrees)')
         self.setPropertySettings('Angle', flatPlateCondition)
 
         # cylinder options
 
         self.declareProperty(name='Radius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Radius of the Cylinder sample environment')
+                             doc='Radius of the Cylinder sample environment (cm)')
         self.setPropertySettings('Radius', cylinderCondition)
 
         # annulus options
 
         self.declareProperty(name='OuterRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Outer radius of the Annulus sample environment')
+                             doc='Outer radius of the Annulus sample environment (cm)')
         self.setPropertySettings('OuterRadius', annulusCondition)
 
         self.declareProperty(name='InnerRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Inner radius of the Annulus sample environment')
+                             doc='Inner radius of the Annulus sample environment (cm)')
         self.setPropertySettings('InnerRadius', annulusCondition)
 
         # -------------------------------------------------------------------------------------------
