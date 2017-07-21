@@ -240,8 +240,7 @@ void ReflRunsTabPresenter::autoreduce(bool startNew) {
 
     // Select all rows / groups in existing table and delete them
     tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
-    tablePresenter->notify(
-        DataProcessorPresenter::DeleteGroupFlag);
+    tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
 
     // Select and transfer all rows to the table
     m_view->setAllSearchRowsSelected();
