@@ -92,11 +92,14 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(0)->type(), "double");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(0)->name(), "Chi2 Minimum");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->type(), "double");
-  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->name(), "Most Probable Chi2");
+  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->name(),
+                   "Most Probable Chi2");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->type(), "double");
-  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->name(), "reduced Chi2 Minimum");
+  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->name(),
+                   "reduced Chi2 Minimum");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->type(), "double");
-  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->name(), "Most Probable reduced Chi2");
+  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->name(),
+                   "Most Probable reduced Chi2");
   TS_ASSERT(CostFunctionTable->Double(0, 0) <= CostFunctionTable->Double(0, 1));
   TS_ASSERT(CostFunctionTable->Double(0, 2) <= CostFunctionTable->Double(0, 3));
   // TS_ASSERT_DELTA(CostFunctionTable->Double(0, 0),
@@ -202,11 +205,14 @@ public:
     TS_ASSERT_EQUALS(costFunctTable->getColumn(0)->type(), "double");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(0)->name(), "Chi2 Minimum");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(1)->type(), "double");
-    TS_ASSERT_EQUALS(costFunctTable->getColumn(1)->name(), "Most Probable Chi2");
+    TS_ASSERT_EQUALS(costFunctTable->getColumn(1)->name(),
+                     "Most Probable Chi2");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(2)->type(), "double");
-    TS_ASSERT_EQUALS(costFunctTable->getColumn(2)->name(), "reduced Chi2 Minimum");
+    TS_ASSERT_EQUALS(costFunctTable->getColumn(2)->name(),
+                     "reduced Chi2 Minimum");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(3)->type(), "double");
-    TS_ASSERT_EQUALS(costFunctTable->getColumn(3)->name(), "Most Probable reduced Chi2");
+    TS_ASSERT_EQUALS(costFunctTable->getColumn(3)->name(),
+                     "Most Probable reduced Chi2");
     TS_ASSERT_LESS_THAN_EQUALS(costFunctTable->Double(0, 0),
                                costFunctTable->Double(0, 1));
     TS_ASSERT_LESS_THAN_EQUALS(costFunctTable->Double(0, 2),
@@ -283,13 +289,14 @@ public:
     fit.setProperty("WorkspaceIndex", 0);
     fit.setProperty("CreateOutput", true);
     fit.setProperty("MaxIterations", 100000);
-    fit.setProperty("Minimizer", "FABADA,ChainLength=10000,StepsBetweenValues="
-                                 "10,ConvergenceCriteria=0.1,CostFunctionTable="
-                                 "CostFunction,Chains=Chain,ConvergedChain"
-                                 "=ConvergedChain,Parameters=Parameters,"
-                                 "SimAnnealingApplied=True,MaximumTemperature=10.0,"
-                                 "NumRefrigerationSteps=5,SimAnnealingIterations="
-                                 "3000");
+    fit.setProperty("Minimizer",
+                    "FABADA,ChainLength=10000,StepsBetweenValues="
+                    "10,ConvergenceCriteria=0.1,CostFunctionTable="
+                    "CostFunction,Chains=Chain,ConvergedChain"
+                    "=ConvergedChain,Parameters=Parameters,"
+                    "SimAnnealingApplied=True,MaximumTemperature=10.0,"
+                    "NumRefrigerationSteps=5,SimAnnealingIterations="
+                    "3000");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
     TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
     Mantid::API::IFunction_sptr fun = fit.getProperty("Function");
