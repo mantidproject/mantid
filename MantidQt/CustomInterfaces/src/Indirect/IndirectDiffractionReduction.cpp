@@ -112,17 +112,17 @@ void IndirectDiffractionReduction::run() {
     showInformationBox("Sample files input is invalid.");
     return;
   }
+
+  // Check whether the 'Use Vanadium File' checkbox has been checked but
+  // no vanadium files have been entered.
+  if (mode == "diffspec" && m_uiForm.ckUseVanadium->isChecked() &&
+    m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
+    showInformationBox("Use Vanadium File checked but no vanadium files "
+      "have been supplied.");
+  }
+
   if (instName == "OSIRIS") {
     if (mode == "diffonly") {
-
-      // Check whether the 'Use Vanadium File' checkbox has been checked but
-      // no vanadium files have been entered.
-      if (m_uiForm.ckUseVanadium->isChecked() &&
-          m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
-        showInformationBox("Use Vanadium File checked but no vanadium files "
-                           "have been supplied.");
-      }
-
       if (!validateVanCal()) {
         showInformationBox("Vanadium and Calibration input is invalid.");
         return;
