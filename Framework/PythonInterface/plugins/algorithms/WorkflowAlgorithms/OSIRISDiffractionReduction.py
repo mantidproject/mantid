@@ -257,7 +257,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf
         bound_validator = IntArrayBoundedValidator(1, len(TIME_REGIME_TO_DRANGE))
         self.declareProperty(IntArrayProperty('DRange', 1, validator=bound_validator),
-                             doc='Drange to use when DetectDRange is disabled')
+                             doc='Dranges to use when DetectDRange is disabled')
 
         self._cal = None
         self._output_ws_name = None
@@ -283,8 +283,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._spec_max = self.getPropertyValue("SpectraMax")
 
         self._man_d_range = None
+        # Check whether to manually override d-ranges.
         if not self.getProperty("DetectDRange").value:
-            self._man_d_range = self.getProperty("DRange").value - 1
+            self._man_d_range = [x - 1 for x in self.getProperty("DRange").value]
 
     def validateInputs(self):
         self._get_properties()
@@ -333,22 +334,22 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                           Operation='Multiply')
 
         # Add the sample workspaces to the dRange to sample map
-        for idx in range(len(self._sample_runs)):
+        for idx, sample in enumerate(self._sample_runs):
             if self._container_files:
 
                 RebinToWorkspace(WorkspaceToRebin=self._container_files[idx],
-                                 WorkspaceToMatch=self._sample_runs[idx],
+                                 WorkspaceToMatch=sample,
                                  OutputWorkspace=self._container_files[idx])
 
-                Minus(LHSWorkspace=self._sample_runs[idx],
+                Minus(LHSWorkspace=sample,
                       RHSWorkspace=self._container_files[idx],
-                      OutputWorkspace=self._sample_runs[idx])
+                      OutputWorkspace=sample)
 
-            self._sam_ws_map.addWs(self._sample_runs[idx], self._man_d_range)
+            self._sam_ws_map.addWs(sample, self._man_d_range[idx])
 
         # Add the vanadium workspaces to the dRange to vanadium map
-        for van in self._vanadium_runs:
-            self._van_ws_map.addWs(van, self._man_d_range)
+        for idx, van in enumerate(self._vanadium_runs):
+            self._van_ws_map.addWs(van, self._man_d_range[idx])
 
         # Finished with container now so delete it
         if self._container_files:
