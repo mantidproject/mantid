@@ -284,8 +284,12 @@ void GenericDataProcessorPresenter::process() {
   for (const auto &item : m_selectedData) {
     // Loop over each group
 
-    // Set all groups and their rows as unprocessed if settings have changed
-    if (settingsChanged)
+    // Set group as unprocessed if settings have changed or the expected output
+    // workspace cannot be found
+    bool groupWSFound = AnalysisDataService::Instance().doesExist(
+        getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix()));
+
+    if (settingsChanged || !groupWSFound)
       m_manager->setProcessed(false, item.first);
 
     // Groups that are already processed or cannot be post-processed (only 1
@@ -296,8 +300,23 @@ void GenericDataProcessorPresenter::process() {
     RowQueue rowQueue;
 
     for (const auto &data : item.second) {
+
       // Add all row items to queue
       rowQueue.push(data);
+
+      // Set row as unprocessed if settings have changed or the expected output
+      // workspaces cannot be found
+      bool rowWSFound = true;
+      for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
+        rowWSFound = AnalysisDataService::Instance().doesExist(
+            getReducedWorkspaceName(data.second, m_processor.prefix(i)));
+        if (!rowWSFound)
+          break;
+      }
+
+      if (settingsChanged || !rowWSFound)
+        m_manager->setProcessed(false, data.first, item.first);
+
       // Rows that are already processed do not count in progress
       if (!m_manager->isProcessed(data.first, item.first))
         maxProgress++;
@@ -510,8 +529,13 @@ Post-processes the workspaces created by the given rows together.
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
 
+  // If no post processing has been defined, then we are dealing with a
+  // one-level tree
+  // where all rows are in one group. We don't want to perform post-processing
+  // in
+  // this case.
   if (!m_postprocess)
-    throw std::runtime_error("Cannot post-process workspaces");
+    return;
 
   // The input workspace names
   std::vector<std::string> inputNames;

@@ -50,7 +50,8 @@ private slots:
     try {
       m_presenter->postProcessGroup(m_groupData);
       // Group is set processed if all constituent rows are processed
-      if (m_presenter->m_manager->rowCount(m_groupIndex) == m_groupData.size())
+      if (m_presenter->m_manager->rowCount(m_groupIndex) ==
+          static_cast<int>(m_groupData.size()))
         m_presenter->m_manager->setProcessed(true, m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {

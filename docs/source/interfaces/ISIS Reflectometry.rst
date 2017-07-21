@@ -174,9 +174,10 @@ If reduction is paused and then resumed again, the interface will check if any
 data in previously processed rows and groups had been manually changed in
 between. If data within a row has been altered, the row and its containing group
 will be reprocessed. If rows are added or removed from a group, the group will
-need to be processed again as well. It is also possible to change the selection
-of rows and groups and doing so will process new data items while ignoring any
-deselected ones.
+need to be processed again as well. Deleting or renaming the output workspaces
+for processed rows or groups will cause only that item to be processed again. It
+is also possible to change the selection of rows and groups and doing so will
+process new data items while ignoring any deselected ones.
 
 Next to the **Process** button there is a checkbox which allows enabling and
 disabling output to an ipython notebook. If the checkbox is enabled, a dialog

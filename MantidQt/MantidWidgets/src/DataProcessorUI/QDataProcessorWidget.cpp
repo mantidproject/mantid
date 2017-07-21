@@ -611,9 +611,10 @@ std::string
 QDataProcessorWidget::runPythonAlgorithm(const std::string &pythonCode) {
 
   QString output = runPythonCode(QString::fromStdString(pythonCode));
-  return output.toStdString();
 
   emit runPythonAlgorithm(QString::fromStdString(pythonCode));
+
+  return output.toStdString();
 }
 
 /** Transfer runs to the table

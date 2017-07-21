@@ -19,6 +19,7 @@ Jump Fit
 
 Improvements
 ------------
+- The *S(Q, W)* interface now automatically replaces NaN values with 0.
 
 
 Bugfixes

@@ -75,7 +75,7 @@ private:
                                    int groupIndex) override {
     try {
       postProcessGroup(groupData);
-      if (m_manager->rowCount(groupIndex) == groupData.size())
+      if (m_manager->rowCount(groupIndex) == static_cast<int>(groupData.size()))
         m_manager->setProcessed(true, groupIndex);
     } catch (std::exception &ex) {
       reductionError(ex);

@@ -27,7 +27,8 @@ from .LoadCRYSTAL import LoadCRYSTAL
 from .CalculatePowder import CalculatePowder
 from .CalculateSingleCrystal import CalculateSingleCrystal
 from .CalculateDWSingleCrystal import CalculateDWSingleCrystal
-from .CalculateS import CalculateS
+from .CalculateS import  CalculateS
+from .SPowderSemiEmpiricalCalculator import SPowderSemiEmpiricalCalculator
 
 # Data
 from .GeneralData import GeneralData

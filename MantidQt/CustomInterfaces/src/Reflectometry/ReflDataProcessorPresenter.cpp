@@ -50,7 +50,7 @@ void ReflDataProcessorPresenter::process() {
   const auto newSelected = m_manager->selectedData(true);
 
   // Don't continue if there are no items to process
-  if (newSelected.size() == 0)
+  if (newSelected.empty())
     return;
 
   // If uniform slicing is empty process normally, delegating to

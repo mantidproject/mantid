@@ -44,7 +44,6 @@ public:
   // Indices must match the order in static string array
   enum class Value : uint8_t { Linear, CSpline };
 
-  InterpolationOption();
   void set(Value kind);
   void set(const std::string &kind);
 
@@ -52,11 +51,11 @@ public:
   std::string propertyDoc() const;
 
   void applyInplace(HistogramData::Histogram &inOut, size_t stepSize) const;
+  void applyInPlace(const HistogramData::Histogram &in,
+                    HistogramData::Histogram &out) const;
 
 private:
-  using MethodImpl = void(HistogramData::Histogram &inOut,
-                          const size_t stepSize);
-  MethodImpl *m_impl = nullptr;
+  Value m_value = Value::Linear;
 };
 
 } // namespace Algorithms

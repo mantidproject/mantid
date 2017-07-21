@@ -3,6 +3,7 @@
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
+#include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -11,13 +12,28 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/make_function.hpp>
+#include <boost/python/def.hpp>
+#include <boost/python/dict.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/overloads.hpp>
 
 using Mantid::Kernel::Property;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::AbstractInstantiator;
 using Mantid::PythonInterface::std_vector_exporter;
+using Mantid::PythonInterface::PythonObjectInstantiator;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Property)
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(valueAsPrettyStrOverloader,
+                                       valueAsPrettyStr, 0, 2)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 void export_Property() {
   register_ptr_to_python<Property *>();
@@ -69,6 +85,16 @@ void export_Property() {
                     "The value of the property as a string. "
                     "For some property types, e.g. Workspaces, it is useful to "
                     "be able to refer to the string value directly")
+
+      .def("valueAsPrettyStr", &Property::valueAsPrettyStr,
+           valueAsPrettyStrOverloader(
+               (arg("maxLength") = 0, arg("collapseLists") = true),
+               "The value of the property as a formatted string. "
+               "If maxLength is defined then the output may not contain the "
+               "full "
+               "contents of the property. The maxLength and collapseLists "
+               "arguments "
+               "do not work for all property types"))
 
       .add_property("allowedValues", &Property::allowedValues,
                     "A list of allowed values")

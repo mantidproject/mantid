@@ -148,6 +148,24 @@ public:
     TS_ASSERT(frame->origin().empty());
   }
 
+  void test_extract_ref_info_theta_sign() {
+    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
+                           "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING6.xml";
+    std::string xmlText = Strings::loadFile(filename);
+    boost::shared_ptr<const Instrument> i;
+
+    // Parse the XML
+    InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+
+    // Extract the reference frame object
+    boost::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame();
+
+    // Test that values have been populated with expected values (those from
+    // file).
+    TS_ASSERT_EQUALS(V3D(1., 0., 0.), frame->vecThetaSign());
+  }
+
   void
   test_parse_IDF_for_unit_testing() // IDF stands for Instrument Definition File
   {
