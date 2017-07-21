@@ -161,11 +161,11 @@ public:
   void test_MultiAtom_with_no_number_density_throws() {
     MaterialBuilder builder;
     builder.setName("Nickel").setFormula("Al2-O3");
-    TS_ASSERT_THROWS_EQUALS(builder.build(), const std::runtime_error &e,
-                            std::string(e.what()),
-                            "The number density could be determined. Please "
-                            "provide the number density, ZParameter and unit "
-                            "cell volume or mass density.")
+    TS_ASSERT_THROWS_EQUALS(
+        builder.build(), const std::runtime_error &e, std::string(e.what()),
+        "The number density could not be determined. Please "
+        "provide the number density, ZParameter and unit "
+        "cell volume or mass density.")
   }
 };
 
