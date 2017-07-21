@@ -44,7 +44,7 @@ class IOmodule(object):
         else:
             raise ValueError("Invalid name of the group. String was expected.")
 
-        core_name = filename[0:filename.find(".")]
+        core_name = filename[0:filename.rfind(".")]
         self._hdf_filename = core_name + ".hdf5"  # name of hdf file
 
         try:
