@@ -4,8 +4,8 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 
-#include <utility>
 #include <unordered_map>
+#include <utility>
 
 namespace Mantid {
 namespace DataHandling {
@@ -51,17 +51,7 @@ public:
 	int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-	void init() override;
-	void exec() override;
-	std::pair<std::string, std::string> splitHeader(const std::string &line, const int &lineNum);
-
-	void throwFormatError(const std::string &line, const std::string &message, const int &lineNum);
-	void consumeHeaders(std::ifstream &infile, std::string &line, int &lineNum);
-	void checkMandatoryHeaders();
-	std::unordered_map<std::string, std::vector<std::string>> consumeData(std::ifstream &infile, std::string &line, int &lineNum);
-
-	const std::vector<std::string> fileExtensions{ ".ses" };
-	std::unordered_map<std::string, std::string> attributes;
+	// Private constants
 	const std::vector<std::string> mandatoryAttributes{
 		"FileFormatVersion", "DataFileTitle", "Sample", "Thickness", "Thickness_unit",
 		"Theta_zmax", "Theta_zmax_unit", "Theta_ymax", "Theta_ymax_unit", "Orientation",
@@ -69,10 +59,27 @@ private:
 	const std::vector<std::string> mandatoryColumnHeaders{
 		"SpinEchoLength", "Depolarisation", "Depolarisation_error", "Wavelength"
 	};
+	const std::vector<std::string> fileExtensions{ ".ses" };
 
+	// Private functions
+	void init() override;
+	void exec() override;
+
+	void consumeHeaders(std::ifstream &infile, std::string &line, int &lineNum);
+	std::unordered_map<std::string, std::vector<std::string>> consumeData(std::ifstream &infile, std::string &line, int &lineNum);
+	std::pair<std::string, std::string> splitHeader(const std::string &line, const int &lineNum);
+	void throwFormatError(const std::string &line, const std::string &message, const int &lineNum);
+	void checkMandatoryHeaders();
+
+	// Private helper functions
 	static bool space(const char &c);
 	static bool notSpace(const char &c);
 	static std::vector<std::string> split(const std::string &str, const char &delim = ' ');
+	static std::string repeatAndJoin(const std::string &str, const std::string &delim, const int n);
+
+	// Private members
+	std::unordered_map<std::string, std::string> attributes;
+
 };
 
 } // namespace DataHandling
