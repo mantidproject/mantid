@@ -50,19 +50,16 @@ public:
 
   IndexProperty *clone() const override;
 
+  using Kernel::ArrayProperty<int>::operator=;
+
   bool isDefault() const override;
   std::string isValid() const override;
-  std::vector<int> &operator=(const std::vector<int> &rhs) override;
   std::string operator=(const std::string &rhs);
-  std::string setValue(const std::string &value) override;
   Indexing::SpectrumIndexSet getIndices() const;
-  std::string value() const override;
 
 private:
   const IWorkspaceProperty &m_workspaceProp;
   const IndexTypeProperty &m_indexTypeProp;
-  int m_min;
-  int m_max;
   mutable Indexing::SpectrumIndexSet m_indices;
   mutable bool m_indicesExtracted;
   std::string m_validString;

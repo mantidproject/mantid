@@ -106,52 +106,10 @@ public:
 
     IndexProperty indexProp("IndexSet", m_wkspProp, m_itypeProp);
 
-    indexProp.setValue("30:35");
+    auto error = indexProp.setValue("30:35");
 
-    TS_ASSERT_EQUALS(indexProp.isValid(),
+    TS_ASSERT_EQUALS(error,
                      "Indices provided to IndexProperty are out of range.");
-  }
-
-  void testRetrieveShortStringValueForPureRangeVector() {
-    auto ws =
-        WorkspaceFactory::Instance().create("WorkspaceTester", 1000, 10, 9);
-    m_wkspProp = ws;
-
-    IndexProperty indexProp("IndexSet", m_wkspProp, m_itypeProp);
-
-    std::vector<int> input(1000);
-    std::iota(input.begin(), input.end(), 0);
-    indexProp = input;
-
-    TS_ASSERT_EQUALS(indexProp.value(), "0:999");
-    TS_ASSERT_EQUALS(indexProp.isValid(), "");
-  }
-
-  void testRetrieveShortStringValueForMinMaxString() {
-    auto ws =
-        WorkspaceFactory::Instance().create("WorkspaceTester", 100, 10, 9);
-    m_wkspProp = ws;
-
-    IndexProperty indexProp("IndexSet", m_wkspProp, m_itypeProp);
-
-    indexProp.setValue("10:55");
-
-    TS_ASSERT_EQUALS(indexProp.value(), "10:55");
-    TS_ASSERT_EQUALS(indexProp.isValid(), "");
-  }
-
-  void testRetrieveShortStringValueForPureRangeString() {
-    auto ws =
-        WorkspaceFactory::Instance().create("WorkspaceTester", 100, 10, 9);
-    m_wkspProp = ws;
-
-    IndexProperty indexProp("IndexSet", m_wkspProp, m_itypeProp);
-
-    indexProp =
-        "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30";
-
-    TS_ASSERT_EQUALS(indexProp.value(), "10:30");
-    TS_ASSERT_EQUALS(indexProp.isValid(), "");
   }
 
 private:
