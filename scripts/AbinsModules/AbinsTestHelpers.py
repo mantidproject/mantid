@@ -4,7 +4,6 @@ import platform
 import os
 import AbinsModules
 
-
 # Module with helper functions used to create tests.
 def version_as_tuple(string=None):
     """
@@ -55,14 +54,24 @@ def find_file(filename=None):
 
 def remove_output_files(list_of_names=None):
     """Removes output files created during a test."""
+
+    # import ConfigService here to avoid:
+    # RuntimeError: Pickling of "mantid.kernel._kernel.ConfigServiceImpl"
+    # instances is not enabled (http://www.boost.org/libs/python/doc/v2/pickle.html)
+
+    from mantid.kernel import ConfigService
+
     if not isinstance(list_of_names, list):
         raise ValueError("List of names is expected.")
     if not all(isinstance(i, str) for i in list_of_names):
         raise ValueError("Each name should be a string.")
 
-    files = os.listdir(os.getcwd())
-    for filename in files:
+    save_dir_path = ConfigService.getString("defaultsave.directory")
+    all_files = os.listdir(save_dir_path)
+    for filename in all_files:
         for name in list_of_names:
             if name in filename:
-                os.remove(filename)
+                full_path = os.path.join(save_dir_path, filename)
+                if os.path.isfile(full_path):
+                    os.remove(full_path)
                 break
