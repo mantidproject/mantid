@@ -46,6 +46,7 @@ void LoadSESANS::exec() {
 	std::string filename = getPropertyValue("Filename");
 	std::ifstream infile(filename);
 
+	// Check file is readable
 	if (!infile) {
 		g_log.error("Unable to open file " + filename);
 		throw Kernel::Exception::FileError("Unable to open file ", filename);
@@ -56,13 +57,21 @@ void LoadSESANS::exec() {
 	int lineNum = 0;
 	std::string line;
 	std::getline(infile, line);
-	lineNum++;
 
 	// First line must be FileFormatVersion:
 	if (!boost::starts_with(line, "FileFormatVersion"))
 		throwFormatError(line, "File must begin by providing FileFormatVersion", lineNum);
 
+	// Read in all the header values, and make sure all the mandatory ones are supplied
 	consumeHeaders(infile, line, lineNum);
+	lineNum++;
+	checkMandatoryHeaders();
+
+	// Make sure we haven't reached the end of the file without reading any data
+	if (line != "BEGIN_DATA")
+		throwFormatError("<EOF>", "Expected \"BEGIN_DATA\" before EOF", lineNum + 1);
+
+	infile.close();
 }
 
 std::pair<std::string, std::string> LoadSESANS::splitHeader(const std::string &line, const int &lineNum) {
@@ -70,25 +79,23 @@ std::pair<std::string, std::string> LoadSESANS::splitHeader(const std::string &l
 	auto i = line.begin();
 
 	// Discard leading whitespace
-	i = find_if(i, line.end(), notSpace);
+	i = find_if(i, line.end(), &notSpace);
 	// Find the end of the first word
-	auto j = find_if(i, line.end(), space);
+	auto j = find_if(i, line.end(), &space);
 	
 	if (j == line.end())
 		throwFormatError(line, "Expected key-value pair", lineNum);
+
 	attribute.first = std::string(i, j);
 
-	//Find start and end of second word
+	// Find start of second word
 	i = find_if(j, line.end(), notSpace);
 	if (i == line.end())
 		throwFormatError(line, "Expected key-value pair", lineNum);
-	j = find_if(i, line.end(), space);
-	attribute.second = std::string(i, j);
+	
+	// Grab from there to the end of the line
+	attribute.second = std::string(i, line.end());
 
-	i = find_if(j, line.end(), notSpace);
-	if (i != line.end())
-		g_log.warning("Too many values supplied at line " + std::to_string(lineNum) +
-			". Discarded all but the first 2");
 	return attribute;
 }
 
@@ -111,14 +118,22 @@ void LoadSESANS::throwFormatError(const std::string &line, const std::string &me
 void LoadSESANS::consumeHeaders(std::ifstream &infile, std::string &line, int &lineNum) {
 	std::pair<std::string, std::string> attr;
 
-	while (line != "BEGIN_DATA") {
-		if (std::getline(infile, line)) {
-			lineNum++;
+	do {
+		lineNum++;
+		if (!line.empty()) {
+			// Split up the line into a key-value pair and add it to our set of attributes
 			attr = splitHeader(line, lineNum);
-			attributes[attr.first] = attr.second;
+			attributes.insert(attr);
 		}
-		else {
-			throwFormatError("EOF", "Expected \"BEGIN_DATA\" before EOF", lineNum);
+	} while (std::getline(infile, line) && line != "BEGIN_DATA");
+}
+
+void LoadSESANS::checkMandatoryHeaders(){
+	for (std::string attr : mandatoryAttributes) {
+		if (attributes.find(attr) == attributes.end()) {
+			std::string err = "Failed to supply parameter: \"" + attr + "\"";
+			g_log.error(err);
+			throw std::runtime_error(err);
 		}
 	}
 }

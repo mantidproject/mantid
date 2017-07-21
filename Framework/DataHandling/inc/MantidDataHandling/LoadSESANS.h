@@ -4,7 +4,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 
-#include <pair>
+#include <utility>
 #include <unordered_map>
 
 namespace Mantid {
@@ -54,10 +54,10 @@ private:
 	void init() override;
 	void exec() override;
 	std::pair<std::string, std::string> splitHeader(const std::string &line, const int &lineNum);
-	bool space(const char &c);
-	bool notSpace(const char &c);
+
 	void throwFormatError(const std::string &line, const std::string &message, const int &lineNum);
 	void consumeHeaders(std::ifstream &infile, std::string &line, int &lineNum);
+	void checkMandatoryHeaders();
 
 	const std::vector<std::string> fileExtensions{ ".ses" };
 	std::unordered_map<std::string, std::string> attributes;
@@ -65,6 +65,9 @@ private:
 		"FileFormatVersion", "DataFileTitle", "Sample", "Thickness", "Thickness_unit",
 		"Theta_zmax", "Theta_zmax_unit", "Theta_ymax", "Theta_ymax_unit", "Orientation",
 		"SpinEchoLength_unit", "Depolarisation_unit", "Wavelength_unit" };
+
+	static bool space(const char &c);
+	static bool notSpace(const char &c);
 };
 
 } // namespace DataHandling
