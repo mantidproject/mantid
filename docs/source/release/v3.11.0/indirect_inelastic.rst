@@ -11,6 +11,11 @@ New features
 Algorithms
 ##########
 
+Bayes
+#####
+
+- Removed fit option from plot options drop-down menu.
+
 Data Analysis
 #############
 
