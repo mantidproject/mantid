@@ -548,7 +548,7 @@ public:
     instr->setBeamline(visitor.beamline());
     auto componentIds = visitor.componentIds();
     auto componentIdToIndexMap = visitor.componentIdToIndexMap();
-    auto beamline = const_cast<Beamline::Beamline &>(instr->beamline());
+    auto &beamline = const_cast<Beamline::Beamline &>(instr->beamline());
     auto &compInfo = beamline.mutableComponentInfo();
     auto &detInfo = beamline.mutableDetectorInfo();
     pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
@@ -620,7 +620,7 @@ public:
     instr->setBeamline(visitor.beamline());
     auto componentIds = visitor.componentIds();
     auto componentIdToIndexMap = visitor.componentIdToIndexMap();
-    auto beamline = const_cast<Beamline::Beamline &>(instr->beamline());
+    auto &beamline = const_cast<Beamline::Beamline &>(instr->beamline());
     auto &compInfo = beamline.mutableComponentInfo();
     auto &detInfo = beamline.mutableDetectorInfo();
     pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(

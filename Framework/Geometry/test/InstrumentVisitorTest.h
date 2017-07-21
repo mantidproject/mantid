@@ -351,11 +351,33 @@ public:
     visitor.walkInstrument();
 
     auto beamline = visitor.beamline();
+
     const auto &compInfo = beamline.componentInfo();
 
     TS_ASSERT_EQUALS(compInfo.parent(compInfo.source()), compInfo.root());
     TS_ASSERT_EQUALS(compInfo.parent(compInfo.sample()), compInfo.root());
     TS_ASSERT_EQUALS(compInfo.parent(compInfo.root()), compInfo.root());
+  }
+
+  void test_binding_and_rebinding_beamline_togther_works() {
+    // This is really a test for of Beamline object
+    using Mantid::Beamline::Beamline;
+
+    Beamline target;
+    {
+      Beamline source = makeBeamline(
+          ComponentCreationHelper::createTestInstrumentRectangular(1, 10));
+      target = source;
+      // Now source goes out of scope!
+    }
+    // Has target rebound everyting correctly?.
+    // Getting the position of via ComponentInfo via DetectorInfo. Undefined if
+    // not rebound properly.
+    target.componentInfo().position(0);
+
+    // Gettting the sample pos via DetectorInfo via ComponentInfo. Undefined if
+    // not rebound properly.
+    target.detectorInfo().samplePosition();
   }
 };
 
