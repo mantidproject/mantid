@@ -3430,14 +3430,17 @@ public:
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     presenter.accept(&mockMainPresenter);
 
-    // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
-
     // User hits the 'pause' button
     EXPECT_CALL(mockDataProcessorView, pause()).Times(1);
     EXPECT_CALL(mockMainPresenter, pause()).Times(1);
 
     presenter.notify(DataProcessorPresenter::PauseFlag);
+
+    // When processing first group, it should confirm reduction has been paused
+    EXPECT_CALL(mockMainPresenter, confirmReductionPaused()).Times(1);
+    EXPECT_CALL(mockDataProcessorView, confirmReductionPaused()).Times(1);
+
+    presenter.callNextGroup();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));

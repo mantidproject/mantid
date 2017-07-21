@@ -51,6 +51,7 @@ public:
   MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD0(pause, void());
   MOCK_METHOD0(resume, void());
+  MOCK_METHOD0(confirmReductionPaused, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const std::string &text));
 
@@ -111,10 +112,7 @@ public:
   // Data reduction paused/resumed handling
   MOCK_CONST_METHOD0(pause, void());
   MOCK_CONST_METHOD0(resume, void());
-
-  // Calls we don't care about
-  void confirmReductionPaused() const override{};
-  void confirmReductionResumed() const override{};
+  MOCK_CONST_METHOD0(confirmReductionPaused, void());
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
