@@ -1,8 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
+from mantid.simpleapi import SetBeam, SetSample, MonteCarloAbsorption
+from mantid.api import DataProcessorAlgorithm, mtd, AlgorithmFactory, MatrixWorkspaceProperty, Progress
+from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion,
+                           StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
 
 
 class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
