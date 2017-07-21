@@ -58,6 +58,7 @@ private:
 	void throwFormatError(const std::string &line, const std::string &message, const int &lineNum);
 	void consumeHeaders(std::ifstream &infile, std::string &line, int &lineNum);
 	void checkMandatoryHeaders();
+	std::unordered_map<std::string, std::vector<std::string>> consumeData(std::ifstream &infile, std::string &line, int &lineNum);
 
 	const std::vector<std::string> fileExtensions{ ".ses" };
 	std::unordered_map<std::string, std::string> attributes;
@@ -65,9 +66,13 @@ private:
 		"FileFormatVersion", "DataFileTitle", "Sample", "Thickness", "Thickness_unit",
 		"Theta_zmax", "Theta_zmax_unit", "Theta_ymax", "Theta_ymax_unit", "Orientation",
 		"SpinEchoLength_unit", "Depolarisation_unit", "Wavelength_unit" };
+	const std::vector<std::string> mandatoryColumnHeaders{
+		"SpinEchoLength", "Depolarisation", "Depolarisation_error", "Wavelength"
+	};
 
 	static bool space(const char &c);
 	static bool notSpace(const char &c);
+	static std::vector<std::string> split(const std::string &str, const char &delim = ' ');
 };
 
 } // namespace DataHandling

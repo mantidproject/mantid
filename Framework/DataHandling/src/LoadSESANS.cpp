@@ -86,6 +86,8 @@ void LoadSESANS::exec() {
 	if (line != "BEGIN_DATA")
 		throwFormatError("<EOF>", "Expected \"BEGIN_DATA\" before EOF", lineNum + 1);
 
+	auto columns = consumeData(infile, line, lineNum);
+
 	infile.close();
 }
 
@@ -180,6 +182,54 @@ void LoadSESANS::checkMandatoryHeaders(){
 			throw std::runtime_error(err);
 		}
 	}
+}
+
+std::unordered_map<std::string, std::vector<std::string>> LoadSESANS::consumeData(std::ifstream &infile, std::string &line, int &lineNum) {
+	std::getline(infile, line);
+	auto columnHeaders = split(line);
+
+	// Make sure all 4 mandatory columns have been supplied
+	for (std::string header : mandatoryColumnHeaders)
+		if (std::find(columnHeaders.begin(), columnHeaders.end(), header) == columnHeaders.end())
+			throwFormatError(line, "Failed to supply mandatory column header: \"" + header + "\"", lineNum);
+
+	// Tokens in a line
+	std::vector<std::string> tokens;
+
+	// Map of column name -> column values
+	std::unordered_map<std::string, std::vector<std::string>> columns;
+
+	while (std::getline(infile, line)) {
+		lineNum++;
+		tokens = split(line);
+
+		// If there aren't enough values in the row, discard the row
+		if (tokens.size() != columnHeaders.size()) 
+			g_log.warning("Line " + std::to_string(lineNum) + " discarded, as contained the wrong number of columns. Got " + std::to_string(tokens.size()) + ", expected " + std::to_string(columnHeaders.size()));
+		else
+			// Add each value to the relevant column
+			for (int i = 0; i < tokens.size(); i++)
+				columns[columnHeaders[i]].push_back(tokens[i]);
+	}
+	g_log.information("Loaded " + std::to_string(columns[columnHeaders[0]].size()) + " rows of data");
+	return columns;
+}
+
+std::vector<std::string> LoadSESANS::split(const std::string &str, const char &delim) {
+	std::vector<std::string> result;
+
+	auto i = str.begin();
+	i = find_if(i, str.end(), &notSpace);
+
+	auto j = find_if(i, str.end(), &space);
+
+	while (i != str.end()) {
+		result.push_back(std::string(i, j));
+		i = find_if(j, str.end(), &notSpace);
+		j = find_if(i, str.end(), &space);
+	}
+
+	return result;
 }
 
 } // namespace DataHandling
