@@ -255,7 +255,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Note that dRange numbers are offset to match the numbering in the OSIRIS manual
         # http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf
-        self.declareProperty('DRange', 1, validator=IntBoundedValidator(1, len(TIME_REGIME_TO_DRANGE) + 1),
+        bound_validator = IntArrayBoundedValidator(1, len(TIME_REGIME_TO_DRANGE))
+        self.declareProperty(IntArrayProperty('DRange', 1, validator=bound_validator),
                              doc='Drange to use when DetectDRange is disabled')
 
         self._cal = None
