@@ -292,6 +292,7 @@ signals:
   void errorsEnabled(bool enabled);
   void fitUndone();
   void functionLoaded(const QString &);
+  void fitResultsChanged(const QString &status);
 
 protected slots:
   /// Get the registered function names
@@ -361,6 +362,10 @@ private slots:
 
   /// Update structure tooltips for all functions
   void updateStructureTooltips();
+  /// Display the status string returned from Fit
+  void showFitResultStatus(const QString &status);
+  /// Clear the Fit status display
+  void clearFitResultStatus();
 
 protected:
   void modifyFitMenu(QAction *fitAction, bool enabled);
@@ -538,6 +543,8 @@ private:
 
   /// To display a tip text
   QLabel *m_tip;
+  /// To display fit status
+  QLabel *m_status;
 
   // The widget for choosing the fit function.
   QDialog *m_fitSelector;

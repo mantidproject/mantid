@@ -34,18 +34,20 @@ class DataProcessorClearSelectedCommand : public DataProcessorCommandBase {
 public:
   DataProcessorClearSelectedCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorClearSelectedCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorClearSelectedCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ClearSelectedFlag);
   };
-  std::string name() override { return std::string("Clear Selected"); }
-  std::string icon() override { return std::string("://erase.png"); }
-  std::string tooltip() override { return std::string("Clear selected"); }
-  std::string whatsthis() override {
-    return std::string("Clears the contents of the selected rows");
+  QString name() override { return QString("Clear Selected"); }
+  QString icon() override { return QString("://erase.png"); }
+  QString tooltip() override { return QString("Clear selected"); }
+  QString whatsthis() override {
+    return QString("Clears the contents of the selected rows");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

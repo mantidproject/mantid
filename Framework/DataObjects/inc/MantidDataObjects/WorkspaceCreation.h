@@ -151,7 +151,8 @@ initializeFromParentWithoutLogs(const API::MatrixWorkspace &parent,
                                 API::MatrixWorkspace &ws);
 }
 
-/** This is the create() method that all the other create() methods call
+/** This is the create() method that all the other create() methods call.
+ *  And it is also called directly.
  */
 template <class T, class P, class IndexArg, class HistArg,
           class = typename std::enable_if<
@@ -177,7 +178,7 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
     }
   }
 
-  // The instrument is also copied by initializeFromParent, but if indexArg in
+  // The instrument is also copied by initializeFromParent, but if indexArg is
   // IndexInfo and contains non-empty spectrum definitions the initialize call
   // will fail due to invalid indices in the spectrum definitions. Therefore, we
   // copy the instrument first. This should be cleaned up once we figure out the

@@ -67,18 +67,15 @@ public:
   /// Returns time-slicing type
   std::string getTimeSlicingType(int group) const override;
 
-  /// Dialog/Prompt methods
-  std::string askUserString(const std::string &prompt, const std::string &title,
-                            const std::string &defaultValue) override;
-  bool askUserYesNo(const std::string &prompt,
-                    const std::string &title) override;
-  void giveUserWarning(const std::string &prompt,
-                       const std::string &title) override;
+  /// Dialog to show error message
   void giveUserCritical(const std::string &prompt,
                         const std::string &title) override;
+  /// Dialog to show information
   void giveUserInfo(const std::string &prompt,
                     const std::string &title) override;
+  /// Run a python algorithm
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
+  /// Set the instrument name
   void setInstrumentName(const std::string &instName) const override;
 
   /// Returns whether the Runs Tab is currently processing any runs

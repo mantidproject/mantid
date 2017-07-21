@@ -5,10 +5,12 @@ set ( SRC_FILES
 	src/CatalogSelector.cpp
 	src/CheckboxHeader.cpp
 	src/ColorBarWidget.cpp
+	src/DataProcessorUI/AbstractDataProcessorTreeModel.cpp
 	src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
 	src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
 	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
+	src/DataProcessorUI/DataProcessorPreprocessMap.cpp
 	src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorProcessingAlgorithmBase.cpp
 	src/DataProcessorUI/DataProcessorTwoLevelTreeManager.cpp
@@ -130,6 +132,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
     inc/MantidQtMantidWidgets/CheckboxHeader.h
     inc/MantidQtMantidWidgets/ColorBarWidget.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h
     inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
     inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterThread.h
@@ -248,6 +251,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessMap.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h
@@ -373,6 +377,7 @@ set ( TEST_FILES
         DataProcessorUI/DataProcessorOneLevelTreeManagerTest.h
         DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
         DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
+        DataProcessorUI/DataProcessorPreprocessMapTest.h
         DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h
         DataProcessorUI/DataProcessorProcessingAlgorithmTest.h
         DataProcessorUI/DataProcessorTwoLevelTreeManagerTest.h
