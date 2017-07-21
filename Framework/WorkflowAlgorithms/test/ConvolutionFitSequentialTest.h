@@ -162,6 +162,10 @@ public:
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
                 "ReductionWs_conv_1LFixF_s0_to_5_Parameters"));
 
+    auto columnNames = paramTable->getColumnNames();
+    auto eisfColumnName = columnNames[columnNames.size() - 1];
+    std::cout << eisfColumnName << std::endl;
+
     // Retrieve and analyse results table
     MatrixWorkspace_sptr resultWs;
     TS_ASSERT_THROWS_NOTHING(
