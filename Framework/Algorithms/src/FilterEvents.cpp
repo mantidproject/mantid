@@ -1468,6 +1468,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       for (int tindex = 0; tindex <= max_target_index; ++tindex) {
         TimeSeriesProperty<double> *new_property =
             new TimeSeriesProperty<double>(dbl_prop->name());
+        new_property->setUnits(dbl_prop->units());
         output_vector.push_back(new_property);
       }
 
@@ -1497,6 +1498,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       for (int tindex = 0; tindex <= max_target_index; ++tindex) {
         TimeSeriesProperty<int> *new_property =
             new TimeSeriesProperty<int>(int_prop->name());
+        new_property->setUnits(int_prop->units());
         output_vector.push_back(new_property);
       }
 

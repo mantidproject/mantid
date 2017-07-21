@@ -62,6 +62,7 @@ private:
     try {
       reduceRow(&rowItem->second);
       m_manager->update(groupIndex, rowItem->first, rowItem->second);
+      m_manager->setProcessed(true, rowItem->first, groupIndex);
     } catch (std::exception &ex) {
       reductionError(ex);
       threadFinished(1);
@@ -70,9 +71,12 @@ private:
   }
 
   // non-async group reduce
-  void startAsyncGroupReduceThread(GroupData &groupData) override {
+  void startAsyncGroupReduceThread(GroupData &groupData,
+                                   int groupIndex) override {
     try {
       postProcessGroup(groupData);
+      if (m_manager->rowCount(groupIndex) == static_cast<int>(groupData.size()))
+        m_manager->setProcessed(true, groupIndex);
     } catch (std::exception &ex) {
       reductionError(ex);
       threadFinished(1);
@@ -1065,17 +1069,19 @@ public:
         .Times(1)
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(2)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(false));
@@ -1149,17 +1155,19 @@ public:
         .Times(1)
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(2)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(false));
@@ -1244,17 +1252,19 @@ public:
         .Times(1)
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(2)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(false));
@@ -1333,17 +1343,19 @@ public:
         .WillRepeatedly(Return(std::set<int>()));
     EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(2)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(false));
@@ -1415,17 +1427,19 @@ public:
         .Times(1)
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(2)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillRepeatedly(Return("Params = \"0.1\""));
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(true));
@@ -1557,17 +1571,19 @@ public:
         .Times(1)
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(2)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
 
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
@@ -1690,6 +1706,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(DataProcessorPresenter::TableUpdatedFlag);
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
     // The user will decide not to discard their changes
@@ -1727,6 +1744,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(DataProcessorPresenter::TableUpdatedFlag);
     presenter.notify(DataProcessorPresenter::AppendGroupFlag);
 
     // The user will decide not to discard their changes
@@ -1767,6 +1785,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(2)
         .WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(DataProcessorPresenter::TableUpdatedFlag);
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
@@ -1782,6 +1801,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
+    presenter.notify(DataProcessorPresenter::TableUpdatedFlag);
     presenter.notify(DataProcessorPresenter::DeleteRowFlag);
 
     // The user will decide not to discard their changes when asked
@@ -1817,6 +1837,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(2)
         .WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(DataProcessorPresenter::TableUpdatedFlag);
     presenter.notify(DataProcessorPresenter::AppendGroupFlag);
     presenter.notify(DataProcessorPresenter::AppendGroupFlag);
 
@@ -1832,6 +1853,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    presenter.notify(DataProcessorPresenter::TableUpdatedFlag);
     presenter.notify(DataProcessorPresenter::DeleteGroupFlag);
 
     // The user will decide not to discard their changes when asked
@@ -1869,6 +1891,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(2)
         .WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(DataProcessorPresenter::TableUpdatedFlag);
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
@@ -1902,6 +1925,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(DataProcessorPresenter::TableUpdatedFlag);
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
     // and tries to open a workspace, but gets prompted and decides not to
@@ -3143,16 +3167,20 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(false));
@@ -3336,17 +3364,19 @@ public:
         .Times(1)
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(2)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return("Params='-0.10'"));
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(false));
@@ -3408,30 +3438,6 @@ public:
     EXPECT_CALL(mockMainPresenter, pause()).Times(1);
 
     presenter.notify(DataProcessorPresenter::PauseFlag);
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
-  }
-
-  void testResumeReduction() {
-    NiceMock<MockDataProcessorView> mockDataProcessorView;
-    NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
-
-    // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
-
-    // User hits the 'resume' button
-    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
-    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
-
-    presenter.setNewSelectionState(false);
-    presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));

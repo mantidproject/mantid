@@ -167,7 +167,7 @@ For example:
 
 Run Python with ``mpirun`` and the desired number of MPI ranks:
 
-.. code-block:: shell
+.. code-block:: sh
 
   mpirun -n 3 python test.py
 
@@ -177,7 +177,7 @@ Alternatively, a modified version of ``mantidpython`` that internally uses ``mpi
 
 Possible output:
 
-.. code-block:: shell
+.. code-block:: sh
 
   CreateWorkspace-[Notice] CreateWorkspace started
   CreateWorkspace-[Notice] CreateWorkspace successful, Duration 0.02 seconds
@@ -214,7 +214,7 @@ The current solution to this is a logging offset for all but the master rank.
 By default an offset of 1 is added, i.e., an error message from any rank but rank 0 will be displayed as a warning.
 The offset can be adjusted in the Mantid properties file, e.g.,
 
-.. code-block:: shell
+.. code-block:: sh
 
   mpi.loggingOffset=3
 

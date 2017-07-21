@@ -139,6 +139,9 @@ public:
 
     generateTestData(testDataSize, refSet, x, 1);
 
+    // swap ref values
+    std::swap(refSet[1], refSet[3]);
+
     FunctionDomain1DView view(x.get(), testDataSize);
     FunctionValues testDataValues(view);
 
