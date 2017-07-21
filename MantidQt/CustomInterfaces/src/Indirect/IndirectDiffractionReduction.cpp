@@ -116,9 +116,9 @@ void IndirectDiffractionReduction::run() {
   // Check whether the 'Use Vanadium File' checkbox has been checked but
   // no vanadium files have been entered.
   if (mode == "diffspec" && m_uiForm.ckUseVanadium->isChecked() &&
-    m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
+      m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
     showInformationBox("Use Vanadium File checked but no vanadium files "
-      "have been supplied.");
+                       "have been supplied.");
   }
 
   if (instName == "OSIRIS") {
