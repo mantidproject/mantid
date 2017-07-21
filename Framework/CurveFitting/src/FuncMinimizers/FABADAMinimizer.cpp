@@ -391,7 +391,8 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
       step = step / 10;
       m_jump[parameterIndex] = m_jump[parameterIndex] / 10;
     } else {
-      newValue = lower + std::abs(step) - (m_parameters.get(parameterIndex) - lower);
+      newValue =
+          lower + std::abs(step) - (m_parameters.get(parameterIndex) - lower);
     }
   }
   // Upper
@@ -401,7 +402,8 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
       step = step / 10;
       m_jump[parameterIndex] = m_jump[parameterIndex] / 10;
     } else {
-      newValue = upper - (std::abs(step) + m_parameters.get(parameterIndex) - upper);
+      newValue =
+          upper - (std::abs(step) + m_parameters.get(parameterIndex) - upper);
     }
   }
 }
@@ -464,7 +466,6 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
                                             const double &chi2New,
                                             GSLVector &newParameters) {
 
-
   // If new Chi square value is lower, jumping directly to new parameter
   if (chi2New < m_chi2) {
     for (size_t j = 0; j < m_nParams; j++) {
@@ -526,7 +527,8 @@ void FABADAMinimizer::jumpUpdate(const size_t &parameterIndex) {
   const double jumpAR = getProperty("JumpAcceptanceRate");
   double newJump;
 
-  if (m_leftRefrPoints == 0 && m_changes[parameterIndex] == m_changesOld[parameterIndex])
+  if (m_leftRefrPoints == 0 &&
+      m_changes[parameterIndex] == m_changesOld[parameterIndex])
     ++m_numInactiveRegenerations[parameterIndex];
   else
     m_changesOld[parameterIndex] = m_changes[parameterIndex];
@@ -831,7 +833,8 @@ FABADAMinimizer::outputPDF(size_t convLength,
       Y[i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
     }
 
-    auto indexMostProbableChi2 = std::max_element(PDFYAxis.begin(), PDFYAxis.end());
+    auto indexMostProbableChi2 =
+        std::max_element(PDFYAxis.begin(), PDFYAxis.end());
 
     mostPchi2 = X[indexMostProbableChi2 - PDFYAxis.begin()] + (bin / 2.0);
 
@@ -855,7 +858,6 @@ FABADAMinimizer::outputPDF(size_t convLength,
         }
         Y[i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
       }
-
     }
   } // if convLength > 0
   else {
@@ -871,8 +873,10 @@ FABADAMinimizer::outputPDF(size_t convLength,
 /** Create the table workspace containing parameter values
 *
 * @param bestParameters :: vector containing best values for fitting parameters
-* @param errorLeft :: [output] vector containing the sqrt of the mean square left deviation
-* @param errorRight :: [output] vector containing the sqrt of the mean square right deviation
+* @param errorLeft :: [output] vector containing the sqrt of the mean square
+*left deviation
+* @param errorRight :: [output] vector containing the sqrt of the mean square
+*right deviation
 */
 void FABADAMinimizer::outputParameterTable(
     const std::vector<double> &bestParameters,
@@ -904,8 +908,10 @@ void FABADAMinimizer::outputParameterTable(
 * @param reducedChain :: [output] the reduced chain
 * @param bestParameters :: [output] vector containing best values for fitting
 *parameters
-* @param errorLeft :: [output] vector containing the sqrt of the mean square left deviation
-* @param errorRight :: [output] vector containing the sqrt of the mean square right deviation
+* @param errorLeft :: [output] vector containing the sqrt of the mean square
+*left deviation
+* @param errorRight :: [output] vector containing the sqrt of the mean square
+*right deviation
 */
 void FABADAMinimizer::calculateConvChainAndBestParameters(
     size_t convLength, int nSteps,
@@ -932,7 +938,7 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
 
     // Calculate the position of the minimum Chi square value
     auto positionMinChi2 = std::min_element(reducedChain[m_nParams].begin(),
-                                              reducedChain[m_nParams].end());
+                                            reducedChain[m_nParams].end());
     m_chi2 = *positionMinChi2;
 
     // Calculate the parameter value and the errors
@@ -949,19 +955,23 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
       bestParameters[j] =
           reducedChain[j][positionMinChi2 - reducedChain[m_nParams].begin()];
       std::sort(reducedChain[j].begin(), reducedChain[j].end());
-      auto posBestPar =
-          std::find(reducedChain[j].begin(), reducedChain[j].end(), bestParameters[j]);
+      auto posBestPar = std::find(reducedChain[j].begin(),
+                                  reducedChain[j].end(), bestParameters[j]);
       double varLeft = 0, varRight = 0;
       auto k = reducedChain[j].begin();
       while (k != reducedChain[j].end()) {
-        if (k < posBestPar) varLeft += (*k - bestParameters[j]) * (*k - bestParameters[j]);
-        else if (k > posBestPar) varRight += (*k - bestParameters[j]) * (*k - bestParameters[j]);
+        if (k < posBestPar)
+          varLeft += (*k - bestParameters[j]) * (*k - bestParameters[j]);
+        else if (k > posBestPar)
+          varRight += (*k - bestParameters[j]) * (*k - bestParameters[j]);
         ++k;
       }
-      if (posBestPar != reducedChain[j].begin()) varLeft /= double(posBestPar - reducedChain[j].begin());
-      if (posBestPar != reducedChain[j].end() - 1) varRight /= double(reducedChain[j].end() - posBestPar - 1);
+      if (posBestPar != reducedChain[j].begin())
+        varLeft /= double(posBestPar - reducedChain[j].begin());
+      if (posBestPar != reducedChain[j].end() - 1)
+        varRight /= double(reducedChain[j].end() - posBestPar - 1);
 
-      errorLeft[j] = - sqrt(varLeft);
+      errorLeft[j] = -sqrt(varLeft);
       errorRight[j] = sqrt(varRight);
     }
   } // End if there is converged chain

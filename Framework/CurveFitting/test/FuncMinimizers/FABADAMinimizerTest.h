@@ -279,178 +279,179 @@ public:
     TS_ASSERT(!fit.isExecuted());
   }
 
-void test_cosineWithConstraint() {
+  void test_cosineWithConstraint() {
 
-  auto ws2 = createCosineWorkspace();
+    auto ws2 = createCosineWorkspace();
 
-  Fit fit;
-  fit.initialize();
-  fit.setChild(true);
-  fit.setPropertyValue("Function", "name=UserFunction, Formula=a*cos(b*x), "
-                                   "a=2, b=-1, constraints=(0<b<1)");
-  fit.setProperty("InputWorkspace", ws2);
-  fit.setProperty("WorkspaceIndex", 0);
-  fit.setProperty("CreateOutput", true);
-  fit.setProperty("MaxIterations", 100000);
-  fit.setProperty("Minimizer", "FABADA,ChainLength=5000,StepsBetweenValues="
-                               "10,ConvergenceCriteria=0.1,CostFunctionTable="
-                               "CostFunction,Chains=Chain,ConvergedChain"
-                               "=ConvergedChain,Parameters=Parameters");
-  TS_ASSERT_THROWS_NOTHING(fit.execute());
-  TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
-  Mantid::API::IFunction_sptr fun = fit.getProperty("Function");
-  TS_ASSERT_DELTA(fun->getParameter("a"), 0.9, 0.1);
-  TS_ASSERT_DELTA(fun->getParameter("b"), 0.9, 0.1);
+    Fit fit;
+    fit.initialize();
+    fit.setChild(true);
+    fit.setPropertyValue("Function", "name=UserFunction, Formula=a*cos(b*x), "
+                                     "a=2, b=-1, constraints=(0<b<1)");
+    fit.setProperty("InputWorkspace", ws2);
+    fit.setProperty("WorkspaceIndex", 0);
+    fit.setProperty("CreateOutput", true);
+    fit.setProperty("MaxIterations", 100000);
+    fit.setProperty("Minimizer", "FABADA,ChainLength=5000,StepsBetweenValues="
+                                 "10,ConvergenceCriteria=0.1,CostFunctionTable="
+                                 "CostFunction,Chains=Chain,ConvergedChain"
+                                 "=ConvergedChain,Parameters=Parameters");
+    TS_ASSERT_THROWS_NOTHING(fit.execute());
+    TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
+    Mantid::API::IFunction_sptr fun = fit.getProperty("Function");
+    TS_ASSERT_DELTA(fun->getParameter("a"), 0.9, 0.1);
+    TS_ASSERT_DELTA(fun->getParameter("b"), 0.9, 0.1);
 
-  // Test PDF workspace
-  MatrixWorkspace_sptr PDF = fit.getProperty("PDF");
-  TS_ASSERT(PDF);
-  TS_ASSERT_DELTA(PDF->y(0)[11], 0.55, 0.01);
-  TS_ASSERT_DELTA(PDF->y(1)[19], 4.88, 0.01);
-  TS_ASSERT_DELTA(PDF->y(2)[0], 0.34, 0.01);
+    // Test PDF workspace
+    MatrixWorkspace_sptr PDF = fit.getProperty("PDF");
+    TS_ASSERT(PDF);
+    TS_ASSERT_DELTA(PDF->y(0)[11], 0.55, 0.01);
+    TS_ASSERT_DELTA(PDF->y(1)[19], 4.88, 0.01);
+    TS_ASSERT_DELTA(PDF->y(2)[0], 0.34, 0.01);
 
-  //  Test CostFunction table
-  ITableWorkspace_sptr costFunc = fit.getProperty("CostFunctionTable");
-  TS_ASSERT(costFunc);
-  TS_ASSERT_EQUALS(costFunc->columnCount(), 4);
-  TS_ASSERT_EQUALS(costFunc->rowCount(), 1);
-  TS_ASSERT_LESS_THAN_EQUALS(costFunc->Double(0, 0), costFunc->Double(0, 1));
-  TS_ASSERT_LESS_THAN_EQUALS(costFunc->Double(0, 2), costFunc->Double(0, 3));
-  TS_ASSERT_DELTA(costFunc->Double(0, 0), costFunc->Double(0, 1), 0.5);
-  TS_ASSERT_DELTA(costFunc->Double(0, 0), 0.0, 1.0);
+    //  Test CostFunction table
+    ITableWorkspace_sptr costFunc = fit.getProperty("CostFunctionTable");
+    TS_ASSERT(costFunc);
+    TS_ASSERT_EQUALS(costFunc->columnCount(), 4);
+    TS_ASSERT_EQUALS(costFunc->rowCount(), 1);
+    TS_ASSERT_LESS_THAN_EQUALS(costFunc->Double(0, 0), costFunc->Double(0, 1));
+    TS_ASSERT_LESS_THAN_EQUALS(costFunc->Double(0, 2), costFunc->Double(0, 3));
+    TS_ASSERT_DELTA(costFunc->Double(0, 0), costFunc->Double(0, 1), 0.5);
+    TS_ASSERT_DELTA(costFunc->Double(0, 0), 0.0, 1.0);
 
-  // Parameters workspace
-  ITableWorkspace_sptr param = fit.getProperty("Parameters");
-  TS_ASSERT(param);
-  TS_ASSERT_EQUALS(param->columnCount(), 4);
-  TS_ASSERT_EQUALS(param->rowCount(), 2);
-  TS_ASSERT_DELTA(param->Double(0, 2), -0.50, 0.01);
-  TS_ASSERT_DELTA(param->Double(0, 3), 1.10, 0.01);
-  TS_ASSERT_DELTA(param->Double(1, 2), -0.07, 0.01);
-  TS_ASSERT_DELTA(param->Double(1, 3), 0.01, 0.1);
-}
+    // Parameters workspace
+    ITableWorkspace_sptr param = fit.getProperty("Parameters");
+    TS_ASSERT(param);
+    TS_ASSERT_EQUALS(param->columnCount(), 4);
+    TS_ASSERT_EQUALS(param->rowCount(), 2);
+    TS_ASSERT_DELTA(param->Double(0, 2), -0.50, 0.01);
+    TS_ASSERT_DELTA(param->Double(0, 3), 1.10, 0.01);
+    TS_ASSERT_DELTA(param->Double(1, 2), -0.07, 0.01);
+    TS_ASSERT_DELTA(param->Double(1, 3), 0.01, 0.1);
+  }
 
-void test_boundaryApplication() {
+  void test_boundaryApplication() {
 
-  // Cost function
-  // Parameter 'Height' is constrained to [0.9, 1.1]
-  auto costFunc = createCostFunc(true);
+    // Cost function
+    // Parameter 'Height' is constrained to [0.9, 1.1]
+    auto costFunc = createCostFunc(true);
 
-  FABADAMinimizer fabada;
-  fabada.initialize(costFunc, 10000);
+    FABADAMinimizer fabada;
+    fabada.initialize(costFunc, 10000);
 
-  // height is above upper bound
-  double height = 2.5;
-  double lifetime = 2.5;
-  double step = 0.1;
-  fabada.boundApplication(0, height, step);
-  fabada.boundApplication(1, lifetime, step);
-  TS_ASSERT_EQUALS(height, 1.1);
-  TS_ASSERT_EQUALS(lifetime, 2.5);
+    // height is above upper bound
+    double height = 2.5;
+    double lifetime = 2.5;
+    double step = 0.1;
+    fabada.boundApplication(0, height, step);
+    fabada.boundApplication(1, lifetime, step);
+    TS_ASSERT_EQUALS(height, 1.1);
+    TS_ASSERT_EQUALS(lifetime, 2.5);
 
-  // height is below lower bound
-  height = -0.5;
-  fabada.boundApplication(0, height, step);
-  TS_ASSERT_EQUALS(height, 0.9);
+    // height is below lower bound
+    height = -0.5;
+    fabada.boundApplication(0, height, step);
+    TS_ASSERT_EQUALS(height, 0.9);
 
-  // height is within range
-  height = 1.01;
-  fabada.boundApplication(0, height, step);
-  TS_ASSERT_EQUALS(height, 1.01);
+    // height is within range
+    height = 1.01;
+    fabada.boundApplication(0, height, step);
+    TS_ASSERT_EQUALS(height, 1.01);
 
-  // Now with bigger step
-  step = 105;
-  height = 2.5;
-  fabada.boundApplication(0, height, step);
-  TS_ASSERT_DELTA(height, 1.095, 0.001);
-  height = -2.5;
-  fabada.boundApplication(0, height, step);
-  TS_ASSERT_DELTA(height, 0.905, 0.001);
-  height = 1.002;
-  fabada.boundApplication(0, height, step);
-  TS_ASSERT_EQUALS(height, 1.002);
-}
+    // Now with bigger step
+    step = 105;
+    height = 2.5;
+    fabada.boundApplication(0, height, step);
+    TS_ASSERT_DELTA(height, 1.095, 0.001);
+    height = -2.5;
+    fabada.boundApplication(0, height, step);
+    TS_ASSERT_DELTA(height, 0.905, 0.001);
+    height = 1.002;
+    fabada.boundApplication(0, height, step);
+    TS_ASSERT_EQUALS(height, 1.002);
+  }
 
 private:
-MatrixWorkspace_sptr createExpDecayWorkspace() {
-  MatrixWorkspace_sptr ws2(new WorkspaceTester);
-  ws2->initialize(1, 20, 20);
+  MatrixWorkspace_sptr createExpDecayWorkspace() {
+    MatrixWorkspace_sptr ws2(new WorkspaceTester);
+    ws2->initialize(1, 20, 20);
 
-  Mantid::MantidVec &x = ws2->dataX(0);
-  Mantid::MantidVec &y = ws2->dataY(0);
-  for (size_t i = 0; i < ws2->blocksize(); ++i) {
-    x[i] = 0.1 * double(i);
-    y[i] = 10.0 * exp(-(x[i]) / 0.5);
+    Mantid::MantidVec &x = ws2->dataX(0);
+    Mantid::MantidVec &y = ws2->dataY(0);
+    for (size_t i = 0; i < ws2->blocksize(); ++i) {
+      x[i] = 0.1 * double(i);
+      y[i] = 10.0 * exp(-(x[i]) / 0.5);
+    }
+
+    return ws2;
   }
 
-  return ws2;
-}
+  MatrixWorkspace_sptr createCosineWorkspace() {
+    MatrixWorkspace_sptr ws2(new WorkspaceTester);
+    ws2->initialize(1, 20, 20);
 
-MatrixWorkspace_sptr createCosineWorkspace() {
-  MatrixWorkspace_sptr ws2(new WorkspaceTester);
-  ws2->initialize(1, 20, 20);
+    Mantid::MantidVec &x = ws2->dataX(0);
+    Mantid::MantidVec &y = ws2->dataY(0);
+    for (size_t i = 0; i < ws2->blocksize(); ++i) {
+      double xx = 2. * M_PI * double(i) / 20.;
+      x[i] = xx;
+      y[i] = cos(xx);
+    }
 
-  Mantid::MantidVec &x = ws2->dataX(0);
-  Mantid::MantidVec &y = ws2->dataY(0);
-  for (size_t i = 0; i < ws2->blocksize(); ++i) {
-    double xx = 2. * M_PI * double(i) / 20.;
-    x[i] = xx;
-    y[i] = cos(xx);
+    return ws2;
   }
 
-  return ws2;
-}
+  boost::shared_ptr<CostFuncLeastSquares>
+  createCostFunc(bool constraint = false, bool tie = false) {
 
-boost::shared_ptr<CostFuncLeastSquares> createCostFunc(bool constraint = false,
-                                                       bool tie = false) {
+    // Domain
+    auto domain = boost::make_shared<Mantid::API::FunctionDomain1DVector>(
+        Mantid::API::FunctionDomain1DVector(0.1, 2.0, 20));
 
-  // Domain
-  auto domain = boost::make_shared<Mantid::API::FunctionDomain1DVector>(
-      Mantid::API::FunctionDomain1DVector(0.1, 2.0, 20));
+    Mantid::API::FunctionValues mockData(*domain);
+    ExpDecay dataMaker;
+    dataMaker.setParameter("Height", 1.);
+    dataMaker.setParameter("Lifetime", 0.5);
+    dataMaker.function(*domain, mockData);
 
-  Mantid::API::FunctionValues mockData(*domain);
-  ExpDecay dataMaker;
-  dataMaker.setParameter("Height", 1.);
-  dataMaker.setParameter("Lifetime", 0.5);
-  dataMaker.function(*domain, mockData);
+    // Values
+    auto values = boost::make_shared<FunctionValues>(
+        Mantid::API::FunctionValues(*domain));
+    values->setFitDataFromCalculated(mockData);
+    values->setFitWeights(1.0);
 
-  // Values
-  auto values =
-      boost::make_shared<FunctionValues>(Mantid::API::FunctionValues(*domain));
-  values->setFitDataFromCalculated(mockData);
-  values->setFitWeights(1.0);
+    // Function
+    boost::shared_ptr<ExpDecay> func = boost::make_shared<ExpDecay>();
+    func->setParameter("Height", 1.);
+    func->setParameter("Lifetime", 1.);
 
-  // Function
-  boost::shared_ptr<ExpDecay> func = boost::make_shared<ExpDecay>();
-  func->setParameter("Height", 1.);
-  func->setParameter("Lifetime", 1.);
+    if (constraint) {
+      // Constraint on parameter Height
+      Mantid::CurveFitting::Constraints::BoundaryConstraint *constraint =
+          new Mantid::CurveFitting::Constraints::BoundaryConstraint(
+              func.get(), "Height", 0.9, 1.1);
+      func->addConstraint(
+          std::unique_ptr<Mantid::API::IConstraint>(constraint));
+    }
 
-  if (constraint) {
-    // Constraint on parameter Height
-    Mantid::CurveFitting::Constraints::BoundaryConstraint *constraint =
-        new Mantid::CurveFitting::Constraints::BoundaryConstraint(
-            func.get(), "Height", 0.9, 1.1);
-    func->addConstraint(std::unique_ptr<Mantid::API::IConstraint> (constraint));
+    if (tie) {
+      func->addTies("Height=0.9");
+      func->addTies("Lifetime=0.4");
+    }
+
+    // Cost function
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
+    costFun->setFittingFunction(func, domain, values);
+
+    return costFun;
   }
-
-  if (tie) {
-    func->addTies("Height=0.9");
-    func->addTies("Lifetime=0.4");
-  }
-
-  // Cost function
-  boost::shared_ptr<CostFuncLeastSquares> costFun =
-      boost::make_shared<CostFuncLeastSquares>();
-  costFun->setFittingFunction(func, domain, values);
-
-  return costFun;
-}
 
 public:
-void setUp() override { ws = createTestWorkspace(2000, 2000); }
-void test_expDecay_performance() { doTestExpDecay(ws); }
+  void setUp() override { ws = createTestWorkspace(2000, 2000); }
+  void test_expDecay_performance() { doTestExpDecay(ws); }
 
 private:
-MatrixWorkspace_sptr ws;
+  MatrixWorkspace_sptr ws;
 };
 #endif /* MANTID_CURVEFITTING_FABADAMINIMIZERTEST_H_ */
