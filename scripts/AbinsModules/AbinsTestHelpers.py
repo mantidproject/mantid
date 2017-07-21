@@ -4,6 +4,7 @@ import platform
 import os
 import AbinsModules
 
+
 # Module with helper functions used to create tests.
 def version_as_tuple(string=None):
     """
