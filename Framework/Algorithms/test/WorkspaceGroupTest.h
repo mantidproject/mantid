@@ -177,9 +177,9 @@ public:
     int nHist = 20, nBins = 10;
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins, 1);
+        WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins, 1);
+        WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
     Instrument_sptr instr(new Instrument);
 
     // set some dead detectors

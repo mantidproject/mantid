@@ -4,6 +4,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Cache.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"

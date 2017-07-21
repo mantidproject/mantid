@@ -2,13 +2,13 @@
 #define MANTID_BEAMLINE_BEAMLINE_H_
 
 #include "MantidBeamline/DllConfig.h"
-#include "MantidBeamline/ComponentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
 #include <memory>
 
 namespace Mantid {
 namespace Beamline {
 
+class ComponentInfo;
+class DetectorInfo;
 /** Beamline : Also known as Instrument 2.0
 
   This is the top-level object for accessing ComponentInfo, DetectorInfo and

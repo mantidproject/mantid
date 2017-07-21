@@ -156,7 +156,8 @@ public:
 };
 
 /// Convenience non-member construction function. This should be standard usage.
-Beamline::Beamline makeBeamline(boost::shared_ptr<const Instrument> instrument);
+DLLExport Beamline::Beamline
+makeBeamline(boost::shared_ptr<const Instrument> instrument);
 
 } // namespace Geometry
 } // namespace Mantid
