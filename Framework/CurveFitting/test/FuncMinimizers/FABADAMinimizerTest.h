@@ -90,13 +90,13 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
   TS_ASSERT_EQUALS(CostFunctionTable->columnCount(), 4);
   TS_ASSERT_EQUALS(CostFunctionTable->rowCount(), 1);
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(0)->type(), "double");
-  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(0)->name(), "Chi2min");
+  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(0)->name(), "Chi2 Minimum");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->type(), "double");
-  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->name(), "Chi2MP");
+  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->name(), "Most Probable Chi2");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->type(), "double");
-  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->name(), "Chi2min_red");
+  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->name(), "reduced Chi2 Minimum");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->type(), "double");
-  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->name(), "Chi2MP_red");
+  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->name(), "Most Probable reduced Chi2");
   TS_ASSERT(CostFunctionTable->Double(0, 0) <= CostFunctionTable->Double(0, 1));
   TS_ASSERT(CostFunctionTable->Double(0, 2) <= CostFunctionTable->Double(0, 3));
   // TS_ASSERT_DELTA(CostFunctionTable->Double(0, 0),
@@ -167,7 +167,7 @@ public:
     fit.setProperty("WorkspaceIndex", 0);
     fit.setProperty("CreateOutput", true);
     fit.setProperty("MaxIterations", 100000);
-    fit.setProperty("Minimizer", "FABADA,ChainLength=5000,StepsBetweenValues="
+    fit.setProperty("Minimizer", "FABADA,ChainLength=10000,StepsBetweenValues="
                                  "10,ConvergenceCriteria=0.1,CostFunctionTable="
                                  "CostFunction,Chains=Chain,ConvergedChain"
                                  "=ConvergedChain,Parameters=Parameters");
@@ -190,9 +190,9 @@ public:
     TS_ASSERT_EQUALS(PDF->getNumberHistograms(), nParams + 1);
     TS_ASSERT_EQUALS(PDF->x(0).size(), 21);
     TS_ASSERT_EQUALS(PDF->y(0).size(), 20);
-    TS_ASSERT_DELTA(PDF->y(0)[7], 0.41, 0.01);
-    TS_ASSERT_DELTA(PDF->y(1)[8], 5.24, 0.01);
-    TS_ASSERT_DELTA(PDF->y(2)[0], 0.44, 0.01);
+    TS_ASSERT_DELTA(PDF->y(0)[7], 0.41, 0.3);
+    TS_ASSERT_DELTA(PDF->y(1)[8], 5.24, 1.0);
+    TS_ASSERT_DELTA(PDF->y(2)[0], 0.44, 0.3);
 
     //  Test CostFunction table
     ITableWorkspace_sptr costFunctTable = fit.getProperty("CostFunctionTable");
@@ -200,13 +200,13 @@ public:
     TS_ASSERT_EQUALS(costFunctTable->columnCount(), 4);
     TS_ASSERT_EQUALS(costFunctTable->rowCount(), 1);
     TS_ASSERT_EQUALS(costFunctTable->getColumn(0)->type(), "double");
-    TS_ASSERT_EQUALS(costFunctTable->getColumn(0)->name(), "Chi2min");
+    TS_ASSERT_EQUALS(costFunctTable->getColumn(0)->name(), "Chi2 Minimum");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(1)->type(), "double");
-    TS_ASSERT_EQUALS(costFunctTable->getColumn(1)->name(), "Chi2MP");
+    TS_ASSERT_EQUALS(costFunctTable->getColumn(1)->name(), "Most Probable Chi2");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(2)->type(), "double");
-    TS_ASSERT_EQUALS(costFunctTable->getColumn(2)->name(), "Chi2min_red");
+    TS_ASSERT_EQUALS(costFunctTable->getColumn(2)->name(), "reduced Chi2 Minimum");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(3)->type(), "double");
-    TS_ASSERT_EQUALS(costFunctTable->getColumn(3)->name(), "Chi2MP_red");
+    TS_ASSERT_EQUALS(costFunctTable->getColumn(3)->name(), "Most Probable reduced Chi2");
     TS_ASSERT_LESS_THAN_EQUALS(costFunctTable->Double(0, 0),
                                costFunctTable->Double(0, 1));
     TS_ASSERT_LESS_THAN_EQUALS(costFunctTable->Double(0, 2),
@@ -221,15 +221,6 @@ public:
     TS_ASSERT_EQUALS(convChain->getNumberHistograms(), nParams + 1);
     TS_ASSERT_EQUALS(convChain->x(0).size(), 500);
     TS_ASSERT_EQUALS(convChain->x(0)[437], 437);
-    TS_ASSERT_DELTA(convChain->y(0)[0], 9.4, 0.1);
-    TS_ASSERT_DELTA(convChain->y(0)[249], 9.4, 0.1);
-    TS_ASSERT_DELTA(convChain->y(0)[499], 10.4, 0.1);
-    TS_ASSERT_DELTA(convChain->y(1)[0], 0.5, 0.1);
-    TS_ASSERT_DELTA(convChain->y(1)[249], 0.5, 0.1);
-    TS_ASSERT_DELTA(convChain->y(1)[499], 0.5, 0.1);
-    TS_ASSERT_DELTA(convChain->y(2)[0], 0.3, 0.1);
-    TS_ASSERT_DELTA(convChain->y(2)[249], 0.2, 0.1);
-    TS_ASSERT_DELTA(convChain->y(2)[499], 0.6, 0.1);
 
     // Test Chain workspace
     MatrixWorkspace_sptr chain = fit.getProperty("Chains");
@@ -292,10 +283,13 @@ public:
     fit.setProperty("WorkspaceIndex", 0);
     fit.setProperty("CreateOutput", true);
     fit.setProperty("MaxIterations", 100000);
-    fit.setProperty("Minimizer", "FABADA,ChainLength=5000,StepsBetweenValues="
+    fit.setProperty("Minimizer", "FABADA,ChainLength=10000,StepsBetweenValues="
                                  "10,ConvergenceCriteria=0.1,CostFunctionTable="
                                  "CostFunction,Chains=Chain,ConvergedChain"
-                                 "=ConvergedChain,Parameters=Parameters");
+                                 "=ConvergedChain,Parameters=Parameters,"
+                                 "SimAnnealingApplied=True,MaximumTemperature=10.0,"
+                                 "NumRefrigerationSteps=5,SimAnnealingIterations="
+                                 "3000");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
     TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
     Mantid::API::IFunction_sptr fun = fit.getProperty("Function");
@@ -305,9 +299,9 @@ public:
     // Test PDF workspace
     MatrixWorkspace_sptr PDF = fit.getProperty("PDF");
     TS_ASSERT(PDF);
-    TS_ASSERT_DELTA(PDF->y(0)[11], 0.55, 0.01);
-    TS_ASSERT_DELTA(PDF->y(1)[19], 4.88, 0.01);
-    TS_ASSERT_DELTA(PDF->y(2)[0], 0.34, 0.01);
+    TS_ASSERT_DELTA(PDF->y(0)[11], 0.55, 0.3);
+    TS_ASSERT_DELTA(PDF->y(1)[19], 4.88, 1.0);
+    TS_ASSERT_DELTA(PDF->y(2)[0], 0.34, 0.2);
 
     //  Test CostFunction table
     ITableWorkspace_sptr costFunc = fit.getProperty("CostFunctionTable");
