@@ -105,6 +105,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setPropertyValue("MaxIterations", "-1"),
                      std::invalid_argument);
+
   }
 
   void test_fit_function_that_does_not_contain_resolution_is_not_allowed() {
@@ -127,7 +128,8 @@ public:
   void test_exec_with_red_file() {
     const int totalBins = 6;
     auto resWs = create2DWorkspace(5, 1);
-    auto redWs = create2DWorkspace(totalBins, 5);    createConvFitResWorkspace(5, totalBins);
+    auto redWs = create2DWorkspace(totalBins, 5);    
+    createConvFitResWorkspace(5, totalBins);
     AnalysisDataService::Instance().add("ResolutionWs_", resWs);
     AnalysisDataService::Instance().add("ReductionWs_", redWs);
     Mantid::Algorithms::ConvolutionFitSequential alg;
