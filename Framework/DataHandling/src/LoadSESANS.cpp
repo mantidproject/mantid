@@ -39,10 +39,44 @@ const std::string LoadSESANS::category() const {
 
 /** Get the confidence that this algorithm can load a file
  * @param descriptor A descriptor for the file
- * @return The confidence level (0 to 100) where 0 indicates this file will not be used
+ * @return The confidence level (0 to 100) where 0 indicates this algorithm will not be used
  */
 int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
-	return 50; //ARBITRARY - CHANGE THIS
+	// Check we're looking at a text-based file
+	if (!descriptor.isAscii())
+		return 0;
+
+	if (descriptor.extension() == ".ses" || descriptor.extension() == ".SES")
+		return 70;
+
+	// Nothing was obviously right or wrong, so we'll have to dig around a bit in the file
+
+	auto &file = descriptor.data();
+	std::string line;
+
+	// First line should be FileFormatVersion
+	std::getline(file, line);
+	bool ffvFound = boost::starts_with(line, "FileFormatVersion");
+
+	// Next few lines should be key-value pairs
+	std::regex kvPair("[\\w_]+\\s+[\\w\\d\\.\\-]+(\\s+[\\w\\d\\.\\-\\$]+)*");
+	int kvPairsFound = 0;
+
+	while (std::getline(file, line) && !line.empty())
+		if (std::regex_match(line, kvPair))
+			kvPairsFound++;
+
+	// There are 13 mandatory key-value pairs. If there are 11 found, a couple may just have been missed off, but if there are fewer than we're probably looking at something else
+	if (kvPairsFound < 10)
+		return 0;
+
+	// Next non-blank line
+	while (std::getline(file, line) && line.empty());
+
+	bool beginFound = line == "BEGIN_DATA";
+
+	// Return something which takes us above other ASCII formats, as long as FileFormatVersion and BEGIN_DATA were found. If the format is 
+	return 15 + 3 * ffvFound + 3 * beginFound;
 }
 
 /**
@@ -206,7 +240,9 @@ void LoadSESANS::throwFormatError(const std::string &line, const std::string &me
 */
 void LoadSESANS::checkMandatoryHeaders() {
 	for (std::string attr : mandatoryAttributes) {
-		if (attributes.find(attr) == attributes.end()) {
+		//if (std::find(attributes.begin(), attributes.end(), attr) == attributes.end()){
+		//if (attributes.find(attr) == attributes.end()) {
+		if (!attributes.count(attr)){
 			std::string err = "Failed to supply parameter: \"" + attr + "\"";
 			g_log.error(err);
 			throw std::runtime_error(err);

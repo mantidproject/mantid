@@ -17,7 +17,6 @@ namespace DataHandling {
   <LI> Theta_zmaz_unit - Unit for theta_znmax</LI>
   <LI> Theta_ymax - TODO : Find a good description for this</LI>
   <LI> Theta_ymaz_unit - Unit for theta_ymax</LI>
-  <LI> Orientation - Orientation of the instrument
   </UL>
 
   @author Joseph Ramsay, ISIS

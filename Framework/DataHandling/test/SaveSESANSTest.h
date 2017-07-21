@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/SaveSESANS.h"
+#include "MantidDataHandling/LoadSESANS.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -21,64 +22,51 @@ public:
   static SaveSESANSTest *createSuite() { return new SaveSESANSTest(); }
   static void destroySuite( SaveSESANSTest *suite ) { delete suite; }
 
-  void test_rejectTooManySpectra() {
-	  auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
-	  Mantid::DataHandling::SaveSESANS testAlg;
-	  testAlg.initialize();
+  void test_init() {
+	  TS_ASSERT_THROWS_NOTHING(testAlg.initialize());
+	  TS_ASSERT(testAlg.isInitialized());
 	  testAlg.setChild(true);
 	  testAlg.setRethrows(true);
-	  testAlg.setProperty("InputWorkspace", ws);
-	  testAlg.setProperty("Filename", "test.ses");
+	  TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", outfileName));
+	  testAlg.setProperty("Theta_zmax", 0.09);
+	  testAlg.setProperty("Theta_ymax", 0.09);
+  }
 
+  void test_rejectTooManySpectra() {
+	  auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+	  TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("InputWorkspace", ws));
+	  
 	  // Should throw, as we can't save more than one histogram
 	  TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
   }
 
-  void test_writeHeaders() {
+  void test_exec() {
 	  // Set up workspace
-	  Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
+	  auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 	  ws->setTitle("Sample workspace");
 	  Mantid::API::Sample &sample = ws->mutableSample();
 	  sample.setName("Sample sample");
 
-	  // Set up algorithm
-	  Mantid::DataHandling::SaveSESANS testAlg;
-	  testAlg.initialize();
-	  testAlg.setChild(true);
-	  testAlg.setRethrows(true);
 	  testAlg.setProperty("InputWorkspace", ws);
-	  testAlg.setProperty("Filename", "test.ses");
-	  testAlg.setProperty("Theta_zmax", 0.09);
-	  testAlg.setProperty("Theta_ymax", 0.09);
-
+	  
 	  // Execute the algorithm
 	  TS_ASSERT_THROWS_NOTHING(testAlg.execute());
 
 	  // Get absolute path to the output file
 	  std::string outputPath = testAlg.getPropertyValue("Filename");
+	  std::string outws = "outws";
 
-	  // Make sure it exists, and we can read it
-	  TS_ASSERT(Poco::File(outputPath).exists());
-	  std::ifstream file(outputPath);
-	  TS_ASSERT(file.good());
-
-	  std::string line;
-	  std::getline(file, line);
-
-	  // First line should give the File Format Version
-	  TS_ASSERT(boost::starts_with(line, "FileFormatVersion"));
-
-	  // BEGIN_DATA must come after the headers
-	  bool beginFound = false;
-	  while (!beginFound && std::getline(file, line))
-		  if (line == "BEGIN_DATA")
-			  beginFound = true;
-	  
-	  TS_ASSERT(beginFound);
-
-	  file.close();
+	  Mantid::DataHandling::LoadSESANS loader;
+	  loader.initialize();
+	  TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", outputPath));
+	  TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", outws));
+	  std::string result;
+	  TS_ASSERT_THROWS_NOTHING(loader.execute());
   }
 
+private:
+	SaveSESANS testAlg;
+	const std::string outfileName = "temp.ses";
 };
 
 
