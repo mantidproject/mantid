@@ -68,7 +68,11 @@ def remove_output_files(list_of_names=None):
         raise ValueError("Each name should be a string.")
 
     save_dir_path = ConfigService.getString("defaultsave.directory")
-    all_files = os.listdir(save_dir_path)
+    if save_dir_path != "":  # default save directory set
+        all_files = os.listdir(save_dir_path)
+    else:
+        all_files = os.listdir(os.getcwd())
+
     for filename in all_files:
         for name in list_of_names:
             if name in filename:
