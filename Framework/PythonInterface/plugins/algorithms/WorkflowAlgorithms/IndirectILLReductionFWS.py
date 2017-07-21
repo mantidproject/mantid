@@ -251,13 +251,21 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             left = mtd[groupws].getItem(0).getName()
             right = mtd[groupws].getItem(1).getName()
             sum = '__sum_'+groupws
-            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=sum)
 
             left_monitor = mtd[left].getRun().getLogData('MonitorIntegral').value
             right_monitor = mtd[right].getRun().getLogData('MonitorIntegral').value
 
             if left_monitor != 0. and right_monitor != 0.:
-                Scale(InputWorkspace=sum, OutputWorkspace=sum, Factor=0.5)
+                sum_monitor = left_monitor + right_monitor
+                left_factor = left_monitor / sum_monitor
+                right_factor = right_monitor / sum_monitor
+                Scale(InputWorkspace=left, OutputWorkspace=left, Factor=left_factor)
+                Scale(InputWorkspace=right, OutputWorkspace=right, Factor=right_factor)
+            else:
+                self.log().notice('Zero monitor integral has been found in one (or both) wings;'
+                                  ' left: {0}, right: {1}'.format(left_monitor, right_monitor))
+
+            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=sum)
 
             DeleteWorkspace(left)
             DeleteWorkspace(right)
@@ -404,10 +412,14 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         for energy in self._all_runs[reference]:
             if energy in self._all_runs[label]:
                 ws = self._insert_energy_value(self._red_ws + '_' + label, energy, label)
-                x_range = mtd[ws].readX(0)[-1] - mtd[ws].readX(0)[0]
                 if mtd[ws].blocksize() > 1:
-                    Integration(InputWorkspace=ws, OutputWorkspace=ws)
-                    Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./x_range)
+                    SortXAxis(InputWorkspace=ws, OutputWorkspace=ws)
+                    axis = mtd[ws].readX(0)
+                    start = axis[0]
+                    end = axis[-1]
+                    range = end-start
+                    params = [start, range, end]
+                    Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params=params)
 
     def _interpolate(self, label, reference):
         '''
@@ -485,10 +497,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             for column in range(mtd[sample].blocksize()):
                 scale = np.max(mtd[calib].extractY()[:,column])
                 for spectrum in range(mtd[sample].getNumberHistograms()):
-                    y = mtd[sample].dataY(spectrum)[column]
-                    e = mtd[sample].dataE(spectrum)[column]
-                    y *= scale
-                    e *= scale
+                    mtd[sample].dataY(spectrum)[column] *= scale
+                    mtd[sample].dataE(spectrum)[column] *= scale
 
     def _get_observable_values(self, ws_list):
         '''

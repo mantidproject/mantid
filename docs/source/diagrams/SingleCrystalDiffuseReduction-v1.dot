@@ -1,0 +1,61 @@
+digraph SingleCrystalDiffuseReduction {
+  label="Single Crystal Diffuse Reduction"
+  $global_style
+
+  subgraph algorithms {
+    $algorithm_style
+    Load
+    LoadIsawUB
+    SetUB [label="SetUB\n(Loop for all symmetries)"]
+    ConvertToMD
+    MDNormSCD [label="MDNormSCD\n(Accumulate data and normalisation)"]
+    DivideMD [label="DivideMD\ndata/normalisation"]
+    DivideMDbkg [label="DivideMD+MinusMD\ndata/normalisation - background/backgroundNormalisation*BackgroundScale"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    Background [label="Subtracting backgroud?"]
+    isLastRunNumber [label="Is last Sample Run Number?"]
+    moreSymmetry [label="Is last symmetries to use?"]
+  }
+
+  subgraph params {
+    $param_style
+    RunNumberList [label="Filename\n(Loop for all files to reduce)"]
+    SolidAngle
+    Flux
+    SymmetryOps
+    UBMatrix
+    proj [label="U/V/Wproj"]
+    binning [label="BinningDim0/1/2"]
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph process_style {
+    $process_style
+    CreateSymmetryUBs
+    NextSymmetry
+    NextFile
+  }
+  RunNumberList -> Load -> SetUB -> ConvertToMD -> MDNormSCD
+  MDNormSCD -> moreSymmetry
+  moreSymmetry -> isLastRunNumber [label="Yes"]
+  moreSymmetry -> NextSymmetry [label="No"]
+  isLastRunNumber -> NextFile [label="No"]
+  isLastRunNumber -> Background [label="Yes"]
+  Background -> DivideMD [label="No"]
+  Background -> DivideMDbkg [label="Yes"]
+  DivideMDbkg -> OutputWorkspace
+  DivideMD -> OutputWorkspace
+  proj -> ConvertToMD
+  SolidAngle -> MDNormSCD
+  Flux -> MDNormSCD
+  binning -> MDNormSCD
+  UBMatrix ->  LoadIsawUB -> CreateSymmetryUBs -> SetUB
+  SymmetryOps -> CreateSymmetryUBs
+}

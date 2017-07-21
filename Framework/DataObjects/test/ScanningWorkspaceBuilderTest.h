@@ -544,9 +544,9 @@ private:
   size_t nBins = 10;
 
   const std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges = {
-      {0, 1}, {1, 3}, {3, 6}, {6, 10}};
+      {0, 2}, {2, 3}, {3, 6}, {6, 10}};
 
-  std::vector<double> timeDurations = {1e-9, 2e-9, 3e-9, 4e-9};
+  std::vector<double> timeDurations = {2e-9, 1e-9, 3e-9, 4e-9};
 
   std::vector<std::vector<V3D>> positions;
   std::vector<std::vector<Quat>> rotations;
