@@ -127,8 +127,7 @@ public:
   void test_exec_with_red_file() {
     const int totalBins = 6;
     auto resWs = create2DWorkspace(5, 1);
-    auto redWs = create2DWorkspace(totalBins, 5);
-    createConvFitResWorkspace(5, totalBins);
+    auto redWs = create2DWorkspace(totalBins, 5);    createConvFitResWorkspace(5, totalBins);
     AnalysisDataService::Instance().add("ResolutionWs_", resWs);
     AnalysisDataService::Instance().add("ReductionWs_", redWs);
     Mantid::Algorithms::ConvolutionFitSequential alg;
@@ -161,10 +160,6 @@ public:
         paramTable =
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
                 "ReductionWs_conv_1LFixF_s0_to_5_Parameters"));
-
-    auto columnNames = paramTable->getColumnNames();
-    auto eisfColumnName = columnNames[columnNames.size() - 1];
-    std::cout << eisfColumnName << std::endl;
 
     // Retrieve and analyse results table
     MatrixWorkspace_sptr resultWs;
