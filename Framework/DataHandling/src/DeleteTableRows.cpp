@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/DeleteTableRows.h"
-#include "MantidDataObjects/Peak.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
