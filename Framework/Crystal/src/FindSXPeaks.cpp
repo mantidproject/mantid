@@ -74,41 +74,27 @@ void FindSXPeaks::init() {
         "2. AllPeaks: This strategy will find all peaks in each spectrum. This is slower than StrongestPeakOnly.\n");
 
 
-  std::vector<std::string> backgroundStrategy = {perSpectrumBackground,
-                                                 absoluteBackground};
-    declareProperty(
-        "BackgroundStrategy", perSpectrumBackground,
-        boost::make_shared<StringListValidator>(backgroundStrategy),
-        "Strategy for the background."
-        "1. PerSpectrumBackground: This is the default strategy. Peaks which are"
-        " below the estimated background are discarded. The background is estimated"
-        " to be an average of the first and the last signal and multiplied"
-        " by the SignalBackground property.\n"
-        "2.AbsoluteBackground: This option is only valid for "
-       "MDEventWorkspaces. Peaks which are below the specified background are discarded."
-        " An absolute background is specified for all spectra. This background is specified"
-        " via the absolute background strategy. \n");
-
-
   declareProperty("SignalBackground", 10.0,
-                  "Multiplication factor for the signal background");
+                  "Multiplication factor for the signal background. Peaks which are"
+                  " below the estimated background are discarded. The background is estimated"
+                  " to be an average of the first and the last signal and multiplied"
+                  " by the SignalBackground property.\n");
 
   setPropertySettings("SignalBackground",
                         make_unique<EnabledWhenProperty>(
-                            "BackgroundStrategy",
+                            "PeakFindingStrategy",
                             Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
-                            perSpectrumBackground));
+                            strongestPeakStrategy));
 
   declareProperty(absoluteBackground, 10.0,
-                  "The absolute background below which peaks are discarded. "
-                  "This is used when the AbsoluteBackground strategy in the"
-                  " BackgroundStrategy property is used.");
+                  "Peaks which are below the specified absolute background are discarded."
+                  " The background is specified for all spectra.");
 
   setPropertySettings(absoluteBackground,
                         make_unique<EnabledWhenProperty>(
-                            "BackgroundStrategy",
+                            "PeakFindingStrategy",
                             Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
-                            absoluteBackground));
+                            allPeaksStrategy));
 
   declareProperty(
       "Resolution", 0.01,
@@ -246,12 +232,11 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv) {
 }
 
 std::unique_ptr<BackgroundStrategy> FindSXPeaks::getBackgroundStrategy() const {
-  const std::string backgroundStrategy = getProperty("BackgroundStrategy");
-
-  if (backgroundStrategy == perSpectrumBackground) {
+  const std::string peakFindingStrategy = getProperty("PeakFindingStrategy");
+  if (peakFindingStrategy == strongestPeakStrategy) {
       const double signalBackground = getProperty("SignalBackground");
       return Mantid::Kernel::make_unique<PerSpectrumBackgroundStrategy>(signalBackground);
-  } else if (backgroundStrategy == absoluteBackground) {
+  } else if (peakFindingStrategy == allPeaksStrategy) {
       const double background = getProperty(absoluteBackground);
       return Mantid::Kernel::make_unique<AbsoluteBackgroundStrategy>(background);
   } else {
@@ -276,7 +261,7 @@ std::unique_ptr<FindSXPeaksHelper::PeakFindingStrategy> FindSXPeaks::getPeakFind
 
 
 std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy> FindSXPeaks::getReducePeakListStrategy() const {
-  std::string peakFindingStrategy = getProperty("PeakFindingStrategy");
+  const std::string peakFindingStrategy = getProperty("PeakFindingStrategy");
   auto useSimpleReduceStrategy = peakFindingStrategy == strongestPeakStrategy;
   if (useSimpleReduceStrategy) {
     return Mantid::Kernel::make_unique<FindSXPeaksHelper::SimpleReduceStrategy>();
