@@ -487,21 +487,21 @@ public:
 
   void test_removePeaks() {
 
-      auto pw = buildPW();
-      Instrument_const_sptr inst = pw->getInstrument();
+    auto pw = buildPW();
+    Instrument_const_sptr inst = pw->getInstrument();
 
-      Peak p(inst, 1, 3.0);
-      Peak p2(inst, 2, 6.0);
-      Peak p3(inst, 3, 9.0);
-      pw->addPeak(p);
-      pw->addPeak(p2);
-      pw->addPeak(p3);
+    Peak p(inst, 1, 3.0);
+    Peak p2(inst, 2, 6.0);
+    Peak p3(inst, 3, 9.0);
+    pw->addPeak(p);
+    pw->addPeak(p2);
+    pw->addPeak(p3);
 
-      std::vector<int> badPeaks;
-      badPeaks.push_back(0);
-      badPeaks.push_back(2);
-      pw->removePeaks(badPeaks);
-      TS_ASSERT_EQUALS(pw->getNumberPeaks(), 1);
+    std::vector<int> badPeaks;
+    badPeaks.push_back(0);
+    badPeaks.push_back(2);
+    pw->removePeaks(badPeaks);
+    TS_ASSERT_EQUALS(pw->getNumberPeaks(), 1);
   }
 
 private:
@@ -519,7 +519,7 @@ private:
     pw->addPeak(p2);
     pw->addPeak(p3);
     pw->addPeak(p4);
-    
+
     return pw;
   }
 
