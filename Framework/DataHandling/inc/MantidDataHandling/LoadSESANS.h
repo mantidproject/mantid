@@ -74,8 +74,8 @@ private:
 	// Private helper functions
 	static bool space(const char &c);
 	static bool notSpace(const char &c);
-	static std::vector<std::string> split(const std::string &str, const char &delim = ' ');
-	static std::string repeatAndJoin(const std::string &str, const std::string &delim, const int n);
+	static std::vector<std::string> split(const std::string &str);
+	static std::string repeatAndJoin(const std::string &str, const std::string &delim, const int &n);
 
 	// Private members
 	std::unordered_map<std::string, std::string> attributes;

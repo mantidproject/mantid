@@ -165,7 +165,8 @@ std::unordered_map<std::string, std::vector<std::string>> LoadSESANS::consumeDat
 		if (std::find(columnHeaders.begin(), columnHeaders.end(), header) == columnHeaders.end())
 			throwFormatError(line, "Failed to supply mandatory column header: \"" + header + "\"", lineNum);
 
-	std::regex lineRegex("^\\s*" + repeatAndJoin(numberRegex, "\\s*", columnHeaders.size()));
+	// static_cast is safe as realistically our file is never going to have enough columns to overflow
+	std::regex lineRegex("^\\s*" + repeatAndJoin(numberRegex, "\\s*", static_cast<int>(columnHeaders.size())));
 
 	// Tokens in a line
 	std::vector<std::string> tokens;
@@ -179,7 +180,7 @@ std::unordered_map<std::string, std::vector<std::string>> LoadSESANS::consumeDat
 		if (std::regex_match(line, lineRegex)) {
 			tokens = split(line);
 
-			for (int i = 0; i < tokens.size(); i++)
+			for (unsigned int i = 0; i < tokens.size(); i++)
 				columns[columnHeaders[i]].push_back(tokens[i]);
 		}
 		else {
@@ -271,7 +272,7 @@ bool LoadSESANS::notSpace(const char &c) {
  * @param delim The delimiter
  * @return Vector of string segments
  */
-std::vector<std::string> LoadSESANS::split(const std::string &str, const char &delim) {
+std::vector<std::string> LoadSESANS::split(const std::string &str) {
 	std::vector<std::string> result;
 
 	auto i = str.begin();
@@ -294,7 +295,7 @@ std::vector<std::string> LoadSESANS::split(const std::string &str, const char &d
  * @param n The number of times to repeat
  * @return The repeated string
 */
-std::string LoadSESANS::repeatAndJoin(const std::string &str, const std::string &delim, int n) {
+std::string LoadSESANS::repeatAndJoin(const std::string &str, const std::string &delim, const int &n) {
 	std::string result = "";
 	for (int i = 0; i < n; i++) {
 		result += str + delim;
