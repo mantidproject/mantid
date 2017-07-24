@@ -8,6 +8,7 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::API;
@@ -17,14 +18,26 @@ using namespace Mantid::Indexing;
 namespace Mantid {
 namespace DataObjects {
 
+/**
+ * Create the scanning workspace builder. Time ranges must still be set before
+ *this can be used.
+ *
+ * @param instrument A pointer to the base instrument for the workspace
+ * @param nTimeIndexes The number of time indexes to create
+ * @param nBins The number of bins (or points) for each spectrum
+ * @param isPointData If true will use points for the x-axis instead of bins
+ */
 ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(
     const boost::shared_ptr<const Geometry::Instrument> &instrument,
-    const size_t nTimeIndexes, const size_t nBins)
+    const size_t nTimeIndexes, const size_t nBins, const bool isPointData)
     : m_nDetectors(instrument->getNumberDetectors()),
       m_nTimeIndexes(nTimeIndexes), m_nBins(nBins), m_instrument(instrument),
       m_histogram(BinEdges(nBins + 1, LinearGenerator(1.0, 1.0)),
                   Counts(nBins, 0.0)),
-      m_indexingType(IndexingType::Default) {}
+      m_indexingType(IndexingType::Default) {
+  if (isPointData)
+    m_histogram = HistogramData::Histogram(Points(nBins), Counts(nBins, 0.0));
+}
 
 /**
  * Set a histogram to be used for all the workspace spectra. This can be used to
@@ -141,7 +154,7 @@ void ScanningWorkspaceBuilder::setRotations(
  *rotate the instrument in the horizontal plane
  */
 void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
-    const std::vector<double> &relativeRotations,
+    const std::vector<double> relativeRotations,
     const Kernel::V3D &rotationPosition, const Kernel::V3D &rotationAxis) {
 
   if (!m_positions.empty() || !m_rotations.empty())
@@ -149,7 +162,7 @@ void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
                            "rotations have already been set.");
 
   verifyTimeIndexSize(relativeRotations.size(), "instrument angles");
-  m_instrumentAngles = relativeRotations;
+  m_instrumentAngles = std::move(relativeRotations);
   m_rotationPosition = rotationPosition;
   m_rotationAxis = rotationAxis;
 }
@@ -179,7 +192,8 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
       m_instrument, m_nDetectors * m_nTimeIndexes, m_histogram);
 
   auto &outputDetectorInfo = outputWorkspace->mutableDetectorInfo();
-  outputDetectorInfo.setScanInterval(0, m_timeRanges[0]);
+  for (size_t i = 0; i < m_nDetectors; ++i)
+    outputDetectorInfo.setScanInterval(i, m_timeRanges[0]);
 
   buildOutputDetectorInfo(outputDetectorInfo);
 
@@ -243,6 +257,8 @@ void ScanningWorkspaceBuilder::buildRelativeRotationsForScans(
     DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 0; i < outputDetectorInfo.size(); ++i) {
     for (size_t j = 0; j < outputDetectorInfo.scanCount(i); ++j) {
+      if (outputDetectorInfo.isMonitor({i, j}))
+        continue;
       auto position = outputDetectorInfo.position({i, j});
       const auto rotation = Kernel::Quat(m_instrumentAngles[j], m_rotationAxis);
       position -= m_rotationPosition;

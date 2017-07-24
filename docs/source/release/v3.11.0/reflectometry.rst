@@ -18,9 +18,11 @@ ISIS Reflectometry
 - The interface can now operate asynchronously in that one can still interact with Mantid while data is processing (instead of freezing Mantid until it finished):
 
   - Reduction can be paused using the new 'Pause' button added to the interface. It may be resumed again by clicking on the 'Process' button again.
-  - Changing which rows are selected while paused will restart the whole processing sequence.
   - Data reduction must be paused first before the interface can be closed.
   - When reduction is paused, the interface will finish reducing the current row before pausing.
+  - Changing item selection while paused will cause the newly selected items to be processed instead.
+  - Altering data within a row while paused will set that row and its containing group unprocessed. Adding/removing rows from a group will also set the group unprocessed.
+  - Deleting or renaming output workspaces of processed rows/groups will set that row/group unprocessed.
 
 - During reduction, rows and groups that have been successfully processed are highlighted green.
 
