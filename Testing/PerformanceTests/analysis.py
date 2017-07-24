@@ -29,7 +29,6 @@ DEFAULT_PLOTLY_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transiti
 DEFAULT_HTML_FOOTER = """</body></html>"""
 
 
-
 # ============================================================================================
 def to_datetime(formatted_str):
     """Return a datetime object from a formatted string
@@ -206,6 +205,7 @@ def plot_runtime(annotate, saveImage, path, **kwargs):
         return """<img src="%s"/>""" % im_filename
     else:
         return offline.plot(fig, output_type='div', show_link=False, auto_open=False, include_plotlyjs=False)
+
 
 # ============================================================================================
 def make_css_file(path):
