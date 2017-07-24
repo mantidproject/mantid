@@ -55,6 +55,10 @@ Python
 Python Algorithms
 #################
 
+Bugfixes
+########
+
+- :ref:`MatchPeaks <algm-MatchPeaks-v1>` is fixed to not to leave temporary hidden workspaces behind.
 
 Python Fit Functions
 ####################
