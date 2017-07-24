@@ -38,16 +38,18 @@ void DeleteTableRows::exec() {
   std::vector<size_t> rows = getProperty("Rows");
   // sort the row indices in reverse order
   std::set<size_t, std::greater<size_t>> sortedRows(rows.begin(), rows.end());
+  std::vector<int> badPeaks;
   auto it = sortedRows.begin();
   for (; it != sortedRows.end(); ++it) {
     if (*it >= tw->rowCount())
       continue;
     if (pw) {
-      pw->removePeak(static_cast<int>(*it));
+      badPeaks.push_back(static_cast<int>(*it));
     } else {
       tw->removeRow(*it);
     }
   }
+  pw->removePeaks(badPeaks);
   setProperty("TableWorkspace", tw);
 }
 
