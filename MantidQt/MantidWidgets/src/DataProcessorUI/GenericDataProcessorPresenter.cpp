@@ -744,7 +744,7 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     const GroupData &groupData, const std::string &prefix) {
 
   if (!m_postprocess)
-    throw std::runtime_error("Cannot retrieve post-processed workspace name");
+    return std::string();
 
   /* This method calculates, for a given set of rows, the name of the output
   * (post-processed) workspace */
