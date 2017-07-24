@@ -68,7 +68,7 @@ public:
 
 private:
   void setPickColor(const GLColor &c) { m_pickColor = c; }
-
+  
   GLColor m_dataColor;
   GLColor m_pickColor;
 
