@@ -61,7 +61,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Import the manager definition
-    import analysis
+    try:
+        import analysis
+    except:
+        # plotly not available, use matplotlib fallback
+        import analysis_mpl as analysis
+
     import sqlresults
 
     if len(args.dbfile) > 1:
