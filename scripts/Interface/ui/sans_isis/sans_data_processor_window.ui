@@ -986,7 +986,7 @@ QGroupBox::title {
                     </property>
                     <layout class="QGridLayout" name="gridLayout_9">
                      <item row="7" column="3">
-                      <widget class="QPushButton" name="transmissioin_mask_files_push_button">
+                      <widget class="QPushButton" name="transmission_mask_files_push_button">
                        <property name="text">
                         <string>Browse</string>
                        </property>
@@ -1048,7 +1048,7 @@ QGroupBox::title {
                       </widget>
                      </item>
                      <item row="6" column="3">
-                      <widget class="QPushButton" name="transmissioin_roi_files_push_button">
+                      <widget class="QPushButton" name="transmission_roi_files_push_button">
                        <property name="text">
                         <string>Browse</string>
                        </property>

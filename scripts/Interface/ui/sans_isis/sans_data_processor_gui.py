@@ -94,6 +94,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.__pixel_adjustment_det_2_path_key = "pixel_adjustment_det_2_path"
         self.__wavelength_adjustment_det_1_path_key = "wavelength_adjustment_det_1_path"
         self.__wavelength_adjustment_det_2_path_key = "wavelength_adjustment_det_2_path"
+        self.__transmission_roi_files_path_key = "transmission_roi_files_path"
+        self.__transmission_mask_files_path_key = "transmission_roi_files_path"
+        self.__q_resolution_moderator_path_key = "q_resolution_moderator_file_path"
 
         # Instrument
         self._instrument = None
@@ -185,6 +188,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.transmission_target_combo_box.currentIndexChanged.connect(self._on_transmission_target_has_changed)
         self._on_transmission_target_has_changed()
 
+        # Roi and Mask files
+        self.transmission_roi_files_push_button.clicked.connect(self._on_load_transmission_roi_files)
+        self.transmission_mask_files_push_button.clicked.connect(self._on_load_transmission_mask_files)
+
+        # Q Resolution
+        self.q_resolution_moderator_file_push_button.clicked.connect(self._on_load_moderator_file)
+
         return True
 
     def _setup_main_tab(self):
@@ -247,7 +257,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def get_batch_file_path(self):
         return str(self.batch_line_edit.text())
 
-    def _load_file(self, line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func):
+    @staticmethod
+    def _load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func):
         # Get the last location of the user file
         settings = QtCore.QSettings()
         settings.beginGroup(q_settings_group_key)
@@ -375,12 +386,31 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.transmission_radius_line_edit.setEnabled(use_roi)
         self.transmission_roi_files_label.setEnabled(use_roi)
         self.transmission_roi_files_line_edit.setEnabled(use_roi)
-        self.transmission_roi_files_push_button(use_roi)
+        self.transmission_roi_files_push_button.setEnabled(use_roi)
         self.transmission_mask_files_label.setEnabled(use_roi)
         self.transmission_mask_files_line_edit.setEnabled(use_roi)
-        self.transmission_mask_files_push_button(use_roi)
+        self.transmission_mask_files_push_button.setEnabled(use_roi)
 
+    def get_transmission_roi_files(self):
+        return str(self.transmission_roi_files_line_edit.text())
 
+    def _on_load_transmission_roi_files(self):
+        self._load_file(self.transmission_roi_files_line_edit, "*.*", self.__generic_settings,
+                        self.__transmission_roi_files_path_key,  self.get_transmission_roi_files)
+
+    def get_transmission_mask_files(self):
+        return str(self.transmission_mask_files_line_edit.text())
+
+    def _on_load_transmission_mask_files(self):
+        self._load_file(self.transmission_mask_files_line_edit, "*.*", self.__generic_settings,
+                        self.__transmission_mask_files_path_key,  self.get_transmission_mask_files)
+
+    def get_moderator_file(self):
+        return str(self.q_resolution_moderator_file_line_edit.text())
+
+    def _on_load_moderator_file(self):
+        self._load_file(self.q_resolution_moderator_file_line_edit, "*.*", self.__generic_settings,
+                        self.__q_resolution_moderator_path_key,  self.get_moderator_file)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
