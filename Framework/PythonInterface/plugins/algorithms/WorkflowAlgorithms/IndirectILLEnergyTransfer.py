@@ -48,7 +48,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _efixed = None
 
     def category(self):
-        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
+        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
 
     def summary(self):
         return 'Performs initial energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
@@ -169,22 +169,21 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             logger.debug('Mask bins larger than {0}'.format(xend))
             MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[xend + 1], XMax=x_values[-1])
 
-    def _convert_to_energy(self, ws, n_crop):
+    def _convert_to_energy(self, ws):
         """
         Converts the x-axis from raw channel number to energy transfer
         @param ws :: input workspace name
-        @param ws :: number of cropped bins
         """
 
         x = mtd[ws].readX(0)
         size = mtd[ws].blocksize()
         mid = (x[-1] + x[0])/ 2.
-        scale = 1000.  # from micro ev to mili ev
+        scale = 0.001  # from micro ev to mili ev
 
-        factor = (size + n_crop)/(size - 1)
+        factor = size / (size - 1)
 
         if self._doppler_energy != 0:
-            formula = '(x/{0} - 1)*{1}'.format(mid, (self._doppler_energy / scale) * factor)
+            formula = '(x/{0} - 1)*{1}'.format(mid, self._doppler_energy * scale * factor)
         else:
             # Center the data for elastic fixed window scan, for integration over the elastic peak
             formula = '(x-{0})*{1}'.format(mid-0.5, 1. / scale)
@@ -268,7 +267,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             self._progress.report("Loading run #"+runnumber)
             if i == 0:
                 LoadILLIndirect(Filename=item,OutputWorkspace=self._red_ws)
-            if i > 0:
+            else:
                 LoadILLIndirect(Filename=item, OutputWorkspace=ws_name)
                 MergeRuns(InputWorkspaces=[self._red_ws,ws_name],OutputWorkspace=self._red_ws)
                 DeleteWorkspace(ws_name)
@@ -330,18 +329,16 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self._normalise_to_monitor(ws, mon)
 
-        n_cropped_bins = 0
-
         if self._reduction_type == 'QENS':
             if self._dead_channels:
                 CropWorkspace(InputWorkspace=ws,OutputWorkspace=ws,XMin=float(xmin),XMax=float(xmax+1.))
-                n_cropped_bins = mtd[mon].blocksize() - mtd[ws].blocksize() - 1
+                ScaleX(InputWorkspace=ws, OutputWorkspace=ws, Factor=-float(xmin), Operation='Add')
             else:
                 self._mask(ws, xmin, xmax)
 
         DeleteWorkspace(mon)
 
-        self._convert_to_energy(ws, n_cropped_bins)
+        self._convert_to_energy(ws)
 
         target = None
         if self._spectrum_axis == '2Theta':
@@ -386,7 +383,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         Normalises the ws to the monitor dependent on the reduction type
         @param ws :: input workspace name
-        @param ws :: ws's monitor
+        @param mon :: ws's monitor
         """
         x = mtd[ws].readX(0)
 
