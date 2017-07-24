@@ -135,9 +135,6 @@ ReferenceTuple getReferenceTuple(const std::string &name) {
   if (std::regex_match(localName, match, BACKGROUND_ATTR_REGEX)) {
     localName = match[1].str();
     type = Background;
-    //if (spectrumIndex == UNDEFINED_INDEX) {
-    //  spectrumIndex = 0;
-    //}
   }
 
   if (std::regex_match(localName, match, PEAK_ATTR_REGEX)) {
@@ -147,75 +144,9 @@ ReferenceTuple getReferenceTuple(const std::string &name) {
     peakIndex = std::stoul(match[1].str());
     localName = match[2].str();
     type = Peak;
-    //if (spectrumIndex == UNDEFINED_INDEX) {
-    //  spectrumIndex = 0;
-    //}
   }
 
   return ReferenceTuple({localName, ionIndex, spectrumIndex, peakIndex, type});
-}
-
-CompositeFunction *getSpectrum(CompositeFunction *control,
-                               CompositeFunction *source,
-                               CompositeFunction *target,
-                               const ReferenceTuple &refTuple) {
-  CompositeFunction *spectrum = target;
-  if (refTuple.spectrumIndex != UNDEFINED_INDEX) {
-    spectrum = dynamic_cast<CompositeFunction*>(spectrum->getFunction(refTuple.spectrumIndex).get());
-  } else {
-  }
-
-  if (refTuple.ionIndex != UNDEFINED_INDEX) {
-    spectrum = dynamic_cast<CompositeFunction*>(spectrum->getFunction(refTuple.ionIndex).get());
-  }
-
-  if (refTuple.name == "IntensityScaling") {
-
-  }
-  return spectrum;
-}
-
-/// Forms a name of a parameter of a composite function giving it a custom prefix.
-/// @param composite :: Some composite function.
-/// @param index :: An index of a parameter
-/// @param prefix :: A prefix for the returned name
-/// @return A name that starts with the prefix followed by an index of a member function
-///   followed by a local name. For example sp0.IntensityScaling
-std::string makeName(const CompositeFunction &composite, size_t index,
-                     const std::string &prefix) {
-  auto funIndex = composite.functionIndex(index);
-  auto paramName = composite.parameterLocalName(index);
-  std::string name(prefix);
-  if (prefix != "bg") {
-    name.append(std::to_string(funIndex));
-  }
-  name.append(".").append(paramName);
-  return name;
-}
-
-/// Forms a more complex custom parameter name
-/// @param composite :: Some composite function.
-/// @param index :: An index of a parameter
-/// @param prefix :: A prefix for the returned name
-/// @return A name that starts with parentPrefix1 followed by an index then 
-/// parentPrefix2 if not empty with another index and finally followed by
-/// prefix and a local parameter name. Examples: sp0.bg.A1, ion1.sp0.pk3.Sigma
-std::string makeComplexName(const CompositeFunction &composite, size_t index,
-                            const std::string &prefix,
-                            const std::string &parentPrefix1,
-                            const std::string &parentPrefix2 = "") {
-  auto funIndex = composite.functionIndex(index);
-  auto &fun =
-      dynamic_cast<const CompositeFunction &>(*composite.getFunction(funIndex));
-  size_t localIndex = composite.parameterLocalIndex(index);
-  std::string paramName;
-  paramName.append(parentPrefix1).append(std::to_string(funIndex)).append(".");
-  if (parentPrefix2.empty()) {
-    paramName.append(makeName(fun, localIndex, prefix));
-  } else {
-    paramName.append(makeComplexName(fun, localIndex, prefix, parentPrefix2));
-  }
-  return paramName;
 }
 
 } // namespace
@@ -482,8 +413,11 @@ void CrystalFieldFunction::declareParameter(const std::string &, double,
 size_t CrystalFieldFunction::nAttributes() const {
   checkSourceFunction();
   checkTargetFunction();
-  return IFunction::nAttributes() + m_source->nAttributes() +
-         m_target->nAttributes();
+  auto nAttrs = IFunction::nAttributes() + m_control.nAttributes();
+  for(size_t iSpec = 0; iSpec < m_control.nFunctions(); ++iSpec) {
+    nAttrs += m_control.getFunction(iSpec)->nAttributes();
+  }
+  return nAttrs;
 }
 
 /// Returns a list of attribute names
@@ -674,6 +608,11 @@ IFunction *CrystalFieldFunction::getBackground(size_t spectrumIndex) const {
   if (!hasBackground()) {
     throw std::invalid_argument("Function has no background");
   }
+  // spectrumIndex must be given for multispectrum only
+  bool invalidArgument = (spectrumIndex == UNDEFINED_INDEX) == isMultiSpectrum();
+  if (invalidArgument) {
+    throw std::invalid_argument("Background parameter not found");
+  }
   if (isMultiSite()) {
     if (isMultiSpectrum()) {
       auto &spectrum = dynamic_cast<CompositeFunction &>(
@@ -697,6 +636,10 @@ IFunction *CrystalFieldFunction::getBackground(size_t spectrumIndex) const {
 
 /// Get a reference to a function with peak parameters
 IFunction *CrystalFieldFunction::getPeak(size_t ionIndex, size_t spectrumIndex, size_t peakIndex) const {
+  bool invalidArgument = (spectrumIndex == UNDEFINED_INDEX) == isMultiSpectrum();
+  if (invalidArgument) {
+    throw std::invalid_argument("Peak parameter not found");
+  }
   if (isMultiSite()) {
     if (isMultiSpectrum()) {
       auto &spectrum = dynamic_cast<CompositeFunction &>(
@@ -800,17 +743,6 @@ bool CrystalFieldFunction::hasPeaks() const { return m_control.hasPeaks(); }
 /// Check if there are any phys. properties.
 bool CrystalFieldFunction::hasPhysProperties() const { return m_control.hasPhysProperties(); }
 
-/// Test if a name (parameter's or attribute's) belongs to m_source
-/// @param aName :: A name to test.
-bool CrystalFieldFunction::isSourceName(const std::string &aName) const {
-  if (aName.empty()) {
-    throw std::invalid_argument(
-        "Parameter or attribute name cannot be empty string.");
-  }
-
-  return (aName.front() != 'f' || aName.find('.') == std::string::npos);
-}
-
 /// Get a reference to the source function if it's composite
 API::CompositeFunction &CrystalFieldFunction::compositeSource() const {
   auto composite = dynamic_cast<CompositeFunction*>(m_source.get());
@@ -906,7 +838,6 @@ void CrystalFieldFunction::buildSingleSiteSingleSpectrum() const {
         "CrystalFieldPeaks returned odd number of values.");
   }
 
-  //bool hasWidthModel = !m_fwhmX.empty();
   auto xVec = m_control.getAttribute("FWHMX").asVector();
   auto yVec = m_control.getAttribute("FWHMY").asVector();
   auto &FWHMs = m_control.FWHMs();
@@ -915,11 +846,9 @@ void CrystalFieldFunction::buildSingleSiteSingleSpectrum() const {
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   auto peakShape = getAttribute("PeakShape").asString();
   size_t nRequiredPeaks = getAttribute("NPeaks").asInt();
-  auto nPeaks = CrystalFieldUtils::buildSpectrumFunction(
+  CrystalFieldUtils::buildSpectrumFunction(
       *spectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM,
       nRequiredPeaks, fixAllPeaks);
-  (void)nPeaks;
-  // storeReadOnlyAttribute("NPeaks", Attribute(static_cast<int>(m_nPeaks)));
 }
 
 /// Build the target function in a single site - multi spectrum case.
@@ -1094,7 +1023,6 @@ API::IFunction_sptr CrystalFieldFunction::buildSpectrum(
     double intensityScaling) const {
   FunctionValues values;
   calcExcitations(nre, en, wf, temperature, values, iSpec, intensityScaling);
-//  CrystalFieldUtils::calculateNPeaks(values);
   const auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   const auto peakShape = getAttribute("PeakShape").asString();
   auto bkgdShape = getAttribute("Background").asUnquotedString();

@@ -26,6 +26,7 @@ public:
 
     auto attributeNames = cf.getAttributeNames();
     TS_ASSERT_EQUALS(attributeNames.size(), 15);
+    TS_ASSERT_EQUALS(cf.nAttributes(), 15);
     TS_ASSERT_EQUALS(attributeNames[0], "Ions");
     TS_ASSERT_EQUALS(attributeNames[1], "Symmetries");
     TS_ASSERT_EQUALS(attributeNames[2], "Temperatures");
@@ -60,6 +61,7 @@ public:
     cf.setAttributeValue("Background", "name=FlatBackground");
     auto attributeNames = cf.getAttributeNames();
     TS_ASSERT_EQUALS(attributeNames.size(), 15);
+    TS_ASSERT_EQUALS(cf.nAttributes(), 15);
     TS_ASSERT_EQUALS(attributeNames[0], "Ions");
     TS_ASSERT_EQUALS(attributeNames[1], "Symmetries");
     TS_ASSERT_EQUALS(attributeNames[2], "Temperatures");
@@ -97,6 +99,7 @@ public:
 
     auto attributeNames = cf.getAttributeNames();
     TS_ASSERT_EQUALS(attributeNames.size(), 17);
+    TS_ASSERT_EQUALS(cf.nAttributes(), 17);
     TS_ASSERT_EQUALS(attributeNames[0], "Ions");
     TS_ASSERT_EQUALS(attributeNames[1], "Symmetries");
     TS_ASSERT_EQUALS(attributeNames[2], "Temperatures");
@@ -141,6 +144,7 @@ public:
 
     auto attributeNames = cf.getAttributeNames();
     TS_ASSERT_EQUALS(attributeNames.size(), 17);
+    TS_ASSERT_EQUALS(cf.nAttributes(), 17);
     TS_ASSERT_EQUALS(attributeNames[0], "Ions");
     TS_ASSERT_EQUALS(attributeNames[1], "Symmetries");
     TS_ASSERT_EQUALS(attributeNames[2], "Temperatures");
@@ -187,6 +191,7 @@ public:
     cf.setAttributeValue("FWHMs", std::vector<double>({1}));
     auto attributeNames = cf.getAttributeNames();
     TS_ASSERT_EQUALS(attributeNames.size(), 15);
+    TS_ASSERT_EQUALS(cf.nAttributes(), 15);
     TS_ASSERT_EQUALS(attributeNames[0], "Ions");
     TS_ASSERT_EQUALS(attributeNames[1], "Symmetries");
     TS_ASSERT_EQUALS(attributeNames[2], "Temperatures");
@@ -240,6 +245,7 @@ public:
     cf.setAttributeValue("Background", "name=LinearBackground");
     auto attributeNames = cf.getAttributeNames();
     TS_ASSERT_EQUALS(attributeNames.size(), 15);
+    TS_ASSERT_EQUALS(cf.nAttributes(), 15);
     TS_ASSERT_EQUALS(attributeNames[0], "Ions");
     TS_ASSERT_EQUALS(attributeNames[1], "Symmetries");
     TS_ASSERT_EQUALS(attributeNames[2], "Temperatures");
@@ -294,6 +300,7 @@ public:
     cf.setAttributeValue("FWHMs", std::vector<double>({1, 2}));
     auto attributeNames = cf.getAttributeNames();
     TS_ASSERT_EQUALS(attributeNames.size(), 17);
+    TS_ASSERT_EQUALS(cf.nAttributes(), 17);
     TS_ASSERT_EQUALS(attributeNames[0], "Ions");
     TS_ASSERT_EQUALS(attributeNames[1], "Symmetries");
     TS_ASSERT_EQUALS(attributeNames[2], "Temperatures");
@@ -357,6 +364,7 @@ public:
     cf.setAttributeValue("Background", "name=LinearBackground");
     auto attributeNames = cf.getAttributeNames();
     TS_ASSERT_EQUALS(attributeNames.size(), 17);
+    TS_ASSERT_EQUALS(cf.nAttributes(), 17);
     TS_ASSERT_EQUALS(attributeNames[0], "Ions");
     TS_ASSERT_EQUALS(attributeNames[1], "Symmetries");
     TS_ASSERT_EQUALS(attributeNames[2], "Temperatures");

@@ -191,8 +191,6 @@ private:
   void setSource(API::IFunction_sptr source) const;
   /// Update target function if necessary.
   void checkTargetFunction() const;
-  /// Test if a name (parameter's or attribute's) belongs to m_source
-  bool isSourceName(const std::string &aName) const;
   /// Get a reference to the source function if it's composite
   API::CompositeFunction &compositeSource() const;
 
