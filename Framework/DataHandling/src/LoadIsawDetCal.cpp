@@ -39,12 +39,12 @@ using namespace DataObjects;
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace> >(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
-  const auto exts = std::vector<std::string>({".DetCal"});
+  const auto exts = std::vector<std::string>({ ".DetCal" });
   declareProperty(
       Kernel::make_unique<API::MultipleFileProperty>("Filename", exts),
       "The input filename of the ISAW DetCal file (Two files "
@@ -133,7 +133,7 @@ void LoadIsawDetCal::exec() {
   std::string line;
   std::string detname;
   // Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector>> detList;
+  std::vector<boost::shared_ptr<RectangularDetector> > detList;
   for (int i = 0; i < inst->nelements(); i++) {
     boost::shared_ptr<RectangularDetector> det;
     boost::shared_ptr<ICompAssembly> assem;
@@ -210,31 +210,28 @@ void LoadIsawDetCal::exec() {
       else
         center(0.0, 0.0, -mL1, "moderator", ws, detectorInfo);
       // mT0 and time of flight are both in microsec
-      if (inputW) {
-        API::Run &run = inputW->mutableRun();
-        // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
-        IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
-        alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-        alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
-        if (run.hasProperty("T0")) {
-          double T0IDF = run.getPropertyValueAsType<double>("T0");
-          mT0 += T0IDF;
-          alg1->setProperty("Offset", mT0);
-        } else {
-          alg1->setProperty("Offset", mT0);
+      if (mT0 != 0.0) {
+        if (inputW) {
+          API::Run &run = inputW->mutableRun();
+          // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
+          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
+          alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+          alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
+          if (run.hasProperty("T0")) {
+            double T0IDF = run.getPropertyValueAsType<double>("T0");
+            alg1->setProperty("Offset", mT0 - T0IDF);
+          } else {
+            alg1->setProperty("Offset", mT0);
+          }
+          alg1->executeAsChildAlg();
+          inputW = alg1->getProperty("OutputWorkspace");
+          // set T0 in the run parameters
+          run.addProperty<double>("T0", mT0, true);
+        } else if (inputP) {
+          // set T0 in the run parameters
+          API::Run &run = inputP->mutableRun();
+          run.addProperty<double>("T0", mT0, true);
         }
-        alg1->executeAsChildAlg();
-        inputW = alg1->getProperty("OutputWorkspace");
-        // set T0 in the run parameters
-        run.addProperty<double>("T0", mT0, true);
-      } else if (inputP) {
-        API::Run &run = inputP->mutableRun();
-        if (run.hasProperty("T0")) {
-          double T0IDF = run.getPropertyValueAsType<double>("T0");
-          mT0 += T0IDF;
-        }
-        // set T0 in the run parameters
-        run.addProperty<double>("T0", mT0, true);
       }
     }
 
@@ -406,7 +403,7 @@ Instrument_sptr LoadIsawDetCal::getCheckInst(API::Workspace_sptr ws) {
 
 std::vector<std::string> LoadIsawDetCal::getFilenames() {
   std::vector<std::string> filenamesFromPropertyUnraveld;
-  std::vector<std::vector<std::string>> filenamesFromProperty =
+  std::vector<std::vector<std::string> > filenamesFromProperty =
       this->getProperty("Filename");
   for (const auto &outer : filenamesFromProperty) {
     std::copy(outer.begin(), outer.end(),
