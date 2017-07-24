@@ -1243,7 +1243,7 @@ const Beamline::Beamline &Instrument::beamline() const {
 }
 
 void Instrument::setBeamline(Beamline::Beamline beamline) {
-  m_beamline = beamline;
+  m_beamline = std::move(beamline);
 }
 
 /**
@@ -1286,8 +1286,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
   // Information will be stored directly in pmap so we do not need DetectorInfo
   // or ComponentInfo.
-  pmap->setBeamline(Beamline::Beamline{} /*Empty beamline*/);
-  pmap->setComponentInfo(nullptr);
+  pmap->clearBeamline();
   // Instrument is only needed for DetectorInfo access so it is not needed.
   pmap->setInstrument(nullptr);
 

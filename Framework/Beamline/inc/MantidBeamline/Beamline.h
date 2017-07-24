@@ -47,6 +47,8 @@ public:
   Beamline();
   Beamline(const Beamline &other);
   Beamline &operator=(const Beamline &other);
+  Beamline(Beamline &&) = default;
+  Beamline &operator=(Beamline &&) = default;
   Beamline(ComponentInfo &&componentInfo, DetectorInfo &&detectorInfo);
   const ComponentInfo &componentInfo() const;
   const DetectorInfo &detectorInfo() const;

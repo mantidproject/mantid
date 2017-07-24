@@ -25,6 +25,7 @@ namespace Geometry {
 class BoundingBox;
 class ComponentInfo;
 class Instrument;
+class InstrumentVisitor;
 
 /** @class ParameterMap ParameterMap.h
 
@@ -352,9 +353,9 @@ public:
   size_t detectorIndex(const detid_t detID) const;
   size_t componentIndex(const Geometry::ComponentID componentId) const;
   const std::vector<Geometry::ComponentID> &componentIds() const;
-  void setBeamline(Beamline::Beamline beamline);
-  void setComponentInfo(
-      boost::shared_ptr<const Geometry::ComponentInfo> componentInfo);
+  void setBeamline(Beamline::Beamline beamline,
+                   const Geometry::InstrumentVisitor &visitor);
+  void clearBeamline();
   void setInstrument(const Instrument *instrument);
 
 private:

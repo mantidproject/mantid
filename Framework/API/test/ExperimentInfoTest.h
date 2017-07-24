@@ -971,6 +971,33 @@ public:
                      compInfo.parent(compInfo.indexOf(bankId)));
   }
 
+  void test_creates_self_consistent_parameter_map() {
+
+    // Regression test that instrument can still be used properly after
+    // workspace goes out of scope
+    Instrument_const_sptr instrument;
+
+    {
+      const int nPixels = 10;
+      auto tmpInstr = ComponentCreationHelper::createTestInstrumentRectangular(
+          1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+          1 /*sample-bank distance*/);
+
+      ExperimentInfo tmpExpInfo;
+      tmpExpInfo.setInstrument(tmpInstr);
+      instrument = tmpExpInfo.getInstrument();
+
+      // This call is fine, because Beamline pointed to by API::ComponentInfo
+      // wrapper on ParameterMap owned by Instrument still exists (it's owned by
+      // the ExperimentInfo)
+      (*instrument)[0]->getPos();
+      // ExperimentInfo goes out of scope
+    }
+
+    // ExperimentInfo is gone, but this call should also succeeed
+    (*instrument)[0]->getPos();
+  }
+
 private:
   void addInstrumentWithParameter(ExperimentInfo &expt, const std::string &name,
                                   const std::string &value) {

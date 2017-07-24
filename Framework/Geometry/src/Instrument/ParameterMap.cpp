@@ -7,6 +7,7 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include <cstring>
 #include <nexus/NeXusFile.hpp>
@@ -1199,13 +1200,18 @@ size_t ParameterMap::componentIndex(const ComponentID componentId) const {
   return m_componentInfo->indexOf(componentId);
 }
 
-void ParameterMap::setBeamline(Beamline::Beamline beamline) {
-  m_beamline = beamline;
+void ParameterMap::setBeamline(Beamline::Beamline beamline,
+                               const Geometry::InstrumentVisitor &visitor) {
+  m_beamline = std::move(beamline);
+  // We reference the internal beamline copy in the following
+  m_componentInfo = boost::make_shared<Geometry::ComponentInfo>(
+      m_beamline.mutableComponentInfo(), visitor.componentIds(),
+      visitor.componentIdToIndexMap());
 }
 
-void ParameterMap::setComponentInfo(
-    boost::shared_ptr<const Geometry::ComponentInfo> componentInfo) {
-  m_componentInfo = std::move(componentInfo);
+void ParameterMap::clearBeamline() {
+  m_beamline = Beamline::Beamline{};
+  m_componentInfo = boost::shared_ptr<Geometry::ComponentInfo>(nullptr);
 }
 
 /// Only for use by Instrument. Sets the pointer to the owning instrument.

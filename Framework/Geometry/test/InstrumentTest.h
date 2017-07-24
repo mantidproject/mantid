@@ -546,13 +546,9 @@ public:
     visitor.walkInstrument();
     instr->setInstrumentVisitor(visitor);
     instr->setBeamline(visitor.beamline());
-    auto componentIds = visitor.componentIds();
-    auto componentIdToIndexMap = visitor.componentIdToIndexMap();
     auto &beamline = const_cast<Beamline::Beamline &>(instr->beamline());
-    auto &compInfo = beamline.mutableComponentInfo();
     auto &detInfo = beamline.mutableDetectorInfo();
-    pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
-        compInfo, componentIds, componentIdToIndexMap));
+    pmap->setBeamline(beamline, visitor);
 
     // bank 1
     TS_ASSERT(detInfo.position(0).isApprox(
@@ -618,13 +614,9 @@ public:
     visitor.walkInstrument();
     instr->setInstrumentVisitor(visitor);
     instr->setBeamline(visitor.beamline());
-    auto componentIds = visitor.componentIds();
-    auto componentIdToIndexMap = visitor.componentIdToIndexMap();
     auto &beamline = const_cast<Beamline::Beamline &>(instr->beamline());
-    auto &compInfo = beamline.mutableComponentInfo();
     auto &detInfo = beamline.mutableDetectorInfo();
-    pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
-        compInfo, componentIds, componentIdToIndexMap));
+    pmap->setBeamline(beamline, visitor);
 
     // bank 1
     double pitch = 0.008;

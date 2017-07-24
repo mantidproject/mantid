@@ -145,8 +145,7 @@ ExperimentInfo::ExperimentInfo()
       m_infoVisitor->detectorIds(), m_parmap.get(),
       m_infoVisitor->detectorIdToIndexMap());
 
-  m_parmap->setBeamline(m_beamline);
-  m_parmap->setComponentInfo(m_componentInfoWrapper);
+  m_parmap->setBeamline(m_beamline, *m_infoVisitor);
 }
 
 /**
@@ -272,12 +271,12 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_infoVisitor = makeOrRetrieveVisitor(parInstrument, *instr);
   auto newBeamline = makeOrRetrieveBeamline(*m_infoVisitor, *instr);
   checkCompatibility(m_beamline /*old*/, newBeamline /*new*/);
-  m_beamline = newBeamline;
+  m_beamline = std::move(newBeamline);
 
   m_componentInfoWrapper = makeWrapperComponentInfo(
       *m_infoVisitor, m_beamline.mutableComponentInfo());
-  m_parmap->setBeamline(m_beamline);
-  m_parmap->setComponentInfo(m_componentInfoWrapper);
+
+  m_parmap->setBeamline(m_beamline, *m_infoVisitor);
 
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       m_beamline.mutableDetectorInfo(), makeParameterizedInstrument(),

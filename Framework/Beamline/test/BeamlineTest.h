@@ -63,6 +63,27 @@ public:
     TS_ASSERT(!a.empty());
     TS_ASSERT(!b.empty());
   }
+
+  void test_moveable() {
+    Beamline a(ComponentInfo{}, DetectorInfo{});
+    auto *detInfo = &a.detectorInfo();
+    auto *compInfo = &a.componentInfo();
+    // Should NOT yield new infos
+    Beamline b(std::move(a));
+    TS_ASSERT_EQUALS(&b.detectorInfo(), detInfo);
+    TS_ASSERT_EQUALS(&b.componentInfo(), compInfo);
+  }
+
+  void test_move_assignment() {
+    Beamline a(ComponentInfo{}, DetectorInfo{});
+    auto *detInfo = &a.detectorInfo();
+    auto *compInfo = &a.componentInfo();
+    // Should NOT yield new infos
+    Beamline b{};
+    b = std::move(a);
+    TS_ASSERT_EQUALS(&b.detectorInfo(), detInfo);
+    TS_ASSERT_EQUALS(&b.componentInfo(), compInfo);
+  }
 };
 
 #endif /* MANTID_BEAMLINE_BEAMLINETEST_H_ */
