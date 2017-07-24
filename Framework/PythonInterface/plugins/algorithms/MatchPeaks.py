@@ -1,6 +1,6 @@
 # pylint: disable=too-many-branches
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import *
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, ITableWorkspaceProperty, PropertyMode, MatrixWorkspace
 from mantid.simpleapi import *
 from mantid.kernel import Direction
 import numpy as np
@@ -105,14 +105,18 @@ class MatchPeaks(PythonAlgorithm):
         self._match_option = self.getProperty('MatchInput2ToCenter').value
         self._output_bin_range = self.getPropertyValue('BinRangeTable')
 
+
         if self._input_ws:
-            ReplaceSpecialValues(self._input_ws,NaNValue=0,InfinityValue=0)
+            ReplaceSpecialValues(InputWorkspace = self._input_ws, OutputWorkspace = self._input_ws,
+                                 NaNValue = 0, InfinityValue = 0)
 
         if self._input_2_ws:
-            ReplaceSpecialValues(self._input_2_ws, NaNValue=0, InfinityValue=0)
+            ReplaceSpecialValues(InputWorkspace = self._input_2_ws, OutputWorkspace = self._input_2_ws,
+                                 NaNValue = 0, InfinityValue = 0)
 
         if self._input_3_ws:
-            ReplaceSpecialValues(self._input_3_ws, NaNValue=0, InfinityValue=0)
+            ReplaceSpecialValues(InputWorkspace = self._input_3_ws, OutputWorkspace = self._input_3_ws,
+                                 NaNValue = 0, InfinityValue = 0)
 
     def validateInputs(self):
         issues = dict()
@@ -208,7 +212,9 @@ class MatchPeaks(PythonAlgorithm):
         if self._masking:
             mask_ws(output_ws, min_bin, max_bin)
 
-        if self._output_bin_range != '':
+        if self._output_bin_range:
+            self.log().error('Bin range table name:' + self._output_bin_range)
+            self.log().error('Creating the table for masked bin ranges.')
             # Create table with its columns containing bin range
             bin_range = CreateEmptyTableWorkspace(OutputWorkspace=self._output_bin_range)
             bin_range.addColumn(type="double", name='MinBin')

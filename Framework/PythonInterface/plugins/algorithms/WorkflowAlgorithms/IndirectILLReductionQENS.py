@@ -426,10 +426,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
                 CloneWorkspace(InputWorkspace = name, OutputWorkspace = outname)
             elif self._unmirror_option == 6:
-                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True)
+                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
             elif self._unmirror_option == 7:
                 MatchPeaks(InputWorkspace = name, InputWorkspace2 = mtd[alignment].getItem(0).getName(),
-                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True)
+                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
 
         elif wings == 2:  # two wing
 
