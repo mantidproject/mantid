@@ -155,7 +155,7 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 */
 void PeaksWorkspace::removePeaks(const std::vector<int> &badPeaks) {
   if (badPeaks.size() == 0)
-      return;
+    return;
   int i = 0;
   auto first = peaks.begin();
   auto end = peaks.end();
