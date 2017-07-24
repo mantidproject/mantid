@@ -17,7 +17,17 @@ import plotly.graph_objs as go
 # This is the date string format as returned by the database
 DATE_STR_FORMAT_MICRO = "%Y-%m-%d %H:%M:%S.%f"
 DATE_STR_FORMAT_NO_MICRO = "%Y-%m-%d %H:%M:%S"
-mantid_addr = "https://github.com/mantidproject/mantid"
+MANTID_ADDRESS = "https://github.com/mantidproject/mantid"
+# The default HTML header
+DEFAULT_HTML_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html>
+<head><LINK href="report.css" rel="stylesheet" type="text/css"></head>
+"""
+DEFAULT_PLOTLY_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html>
+    <head><LINK href="report.css" rel="stylesheet" type="text/css"><script src="https://cdn.plot.ly/plotly-latest.min.js"></script></head>
+    """
+
+DEFAULT_HTML_FOOTER = """</body></html>"""
+
 
 
 # ============================================================================================
@@ -144,7 +154,7 @@ def plot_runtime(annotate, saveImage, path, **kwargs):
 
         commitids = []
         for (rev, variable, date, res) in sorted:
-            commitids.append("""<a href="%s/commit/%s">  </a>""" % (mantid_addr, res["commitid"]))
+            commitids.append("""<a href="%s/commit/%s">  </a>""" % (MANTID_ADDRESS, res["commitid"]))
 
         if last_num > 0:
             commitids = commitids[-last_num:]
@@ -196,18 +206,6 @@ def plot_runtime(annotate, saveImage, path, **kwargs):
         return """<img src="%s"/>""" % im_filename
     else:
         return offline.plot(fig, output_type='div', show_link=False, auto_open=False, include_plotlyjs=False)
-
-
-# The default HTML header
-default_html_header = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html>
-<head><LINK href="report.css" rel="stylesheet" type="text/css"></head>
-"""
-default_plotly_header = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html>
-    <head><LINK href="report.css" rel="stylesheet" type="text/css"><script src="https://cdn.plot.ly/plotly-latest.min.js"></script></head>
-    """
-
-default_html_footer = """</body></html>"""
-
 
 # ============================================================================================
 def make_css_file(path):
@@ -261,7 +259,7 @@ def make_environment_html(res):
 # ============================================================================================
 def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
     """ Create a detailed HTML report for the named test """
-    html = default_plotly_header
+    html = DEFAULT_PLOTLY_HEADER
     html += """<h1>Detailed report for %s</h1><br>""" % (name)
     html += fig1 + "\n"
     html += fig2 + "\n"
@@ -313,7 +311,7 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
                 # Comparison to previous commit, if anything can be done
                 if (last_commitid != ""):
                     val = """<a href="%s/compare/%s...%s">diff</a>""" % (
-                        mantid_addr, last_commitid, commitid)
+                        MANTID_ADDRESS, last_commitid, commitid)
 
             else:
                 # Normal fields
@@ -328,7 +326,7 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
                     commitid = val
                     partial_commitid = val
                     if (len(partial_commitid) > 7): partial_commitid = partial_commitid[0:7];
-                    val = """<a href="%s/commit/%s">%s</a>""" % (mantid_addr, commitid, partial_commitid)
+                    val = """<a href="%s/commit/%s">%s</a>""" % (MANTID_ADDRESS, commitid, partial_commitid)
 
                 if field == "runtime":
                     val = "%.3f" % (res["runtime"])
@@ -350,7 +348,7 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
         html += """<h3>Environment</h3>
         %s""" % make_environment_html(results[0])
 
-    html += default_html_footer
+    html += DEFAULT_HTML_FOOTER
 
     f = open(os.path.join(basedir, "%s.htm" % name), "w")
     html = html.replace("\n", os.linesep)  # Fix line endings for windows
@@ -446,8 +444,8 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
         dofigs = False
 
     # Start the HTML
-    overview_html = default_plotly_header
-    html = default_html_header
+    overview_html = DEFAULT_HTML_HEADER
+    html = DEFAULT_HTML_HEADER
     html += """<h1>Mantid System Tests: %s</h1>""" % starts_with
     if not dofigs:
         html += """<p class="error">There was an error generating plots. No figures will be present in the report.</p>"""
@@ -491,7 +489,7 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
         html += detailed_html
         overview_html += detailed_html
 
-    html += default_html_footer
+    html += DEFAULT_HTML_FOOTER
     overview_html += "</body></html>"
 
     filename = starts_with + ".htm"
@@ -523,7 +521,7 @@ def generate_html_report(path, last_num, x_field='revision'):
     # Detect if you can do figures
     dofigs = True
     # --------- Start the HTML --------------
-    html = default_html_header
+    html = DEFAULT_HTML_HEADER
     html += """<h1>Mantid System Tests Auto-Generated Report</h1>"""
     html += """<p><a href="overview_plot.htm">See an overview of performance plots for all tests by clicking here.</a></p> """
     if not dofigs:
@@ -564,7 +562,7 @@ def generate_html_report(path, last_num, x_field='revision'):
     html += """<h2>Overall Results Summary</h2>"""
     html += get_html_summary_table(test_names)
 
-    html += default_html_footer
+    html += DEFAULT_HTML_FOOTER
 
     f = open(os.path.join(basedir, "report.htm"), "w")
     html = html.replace("\n", os.linesep)  # Fix line endings for windows
