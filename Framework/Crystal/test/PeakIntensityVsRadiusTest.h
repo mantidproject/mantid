@@ -126,7 +126,7 @@ public:
                                           double BackgroundOuterFactor,
                                           double BackgroundInnerRadius,
                                           double BackgroundOuterRadius) {
-    auto int constexpr DEFAULT_NUM_STEPS = 16;
+    auto constexpr DEFAULT_NUM_STEPS = 16;
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "InputWorkspace", "PeakIntensityVsRadiusTest_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
