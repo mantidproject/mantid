@@ -58,7 +58,8 @@ public:
 
   ScanningWorkspaceBuilder(
       const boost::shared_ptr<const Geometry::Instrument> &instrument,
-      const size_t nTimeIndexes, const size_t nBins);
+      const size_t nTimeIndexes, const size_t nBins,
+      const bool isPointData = false);
 
   void setHistogram(HistogramData::Histogram histogram);
 
@@ -69,7 +70,7 @@ public:
                      const std::vector<double> &durations);
   void setPositions(std::vector<std::vector<Kernel::V3D>> positions);
   void setRotations(std::vector<std::vector<Kernel::Quat>> rotations);
-  void setRelativeRotationsForScans(const std::vector<double> &instrumentAngles,
+  void setRelativeRotationsForScans(const std::vector<double> instrumentAngles,
                                     const Kernel::V3D &rotationPosition,
                                     const Kernel::V3D &rotationAxis);
 

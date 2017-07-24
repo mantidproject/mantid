@@ -63,37 +63,38 @@ class AbinsCalculateSPowderTest(unittest.TestCase):
         # wrong filename
         with self.assertRaises(ValueError):
 
-            AbinsModules.CalculateS(filename=1, temperature=self._temperature, sample_form=self._sample_form,
-                                    abins_data=good_data, instrument=self._instrument,
-                                    quantum_order_num=self._order_event)
+            AbinsModules.CalculateS.init(filename=1, temperature=self._temperature, sample_form=self._sample_form,
+                                         abins_data=good_data, instrument=self._instrument,
+                                         quantum_order_num=self._order_event)
 
         # wrong temperature
         with self.assertRaises(ValueError):
 
-            AbinsModules.CalculateS(filename=full_path_filename, temperature=-1, sample_form=self._sample_form,
-                                    abins_data=good_data, instrument=self._instrument,
-                                    quantum_order_num=self._order_event)
+            AbinsModules.CalculateS.init(filename=full_path_filename, temperature=-1, sample_form=self._sample_form,
+                                         abins_data=good_data, instrument=self._instrument,
+                                         quantum_order_num=self._order_event)
 
         # wrong sample
         with self.assertRaises(ValueError):
 
-            AbinsModules.CalculateS(filename=full_path_filename, temperature=self._temperature, sample_form="SOLID",
-                       abins_data=good_data, instrument=self._instrument, quantum_order_num=self._order_event)
+            AbinsModules.CalculateS.init(filename=full_path_filename, temperature=self._temperature, sample_form="SOLID",
+                                         abins_data=good_data, instrument=self._instrument,
+                                         quantum_order_num=self._order_event)
 
         # wrong abins data: content of abins data instead of object abins_data
         with self.assertRaises(ValueError):
 
-            AbinsModules.CalculateS(filename=full_path_filename, temperature=self._temperature,
-                                    sample_form=self._sample_form, abins_data=good_data.extract(),
-                                    instrument=self._instrument, quantum_order_num=self._order_event)
+            AbinsModules.CalculateS.init(filename=full_path_filename, temperature=self._temperature,
+                                         sample_form=self._sample_form, abins_data=good_data.extract(),
+                                         instrument=self._instrument, quantum_order_num=self._order_event)
 
         # wrong instrument
         with self.assertRaises(ValueError):
 
             # noinspection PyUnusedLocal
-            AbinsModules.CalculateS(filename=full_path_filename, temperature=self._temperature,
-                                    sample_form=self._sample_form, abins_data=good_data.extract(),
-                                    instrument=self._instrument, quantum_order_num=self._order_event)
+            AbinsModules.CalculateS.init(filename=full_path_filename, temperature=self._temperature,
+                                         sample_form=self._sample_form, abins_data=good_data.extract(),
+                                         instrument=self._instrument, quantum_order_num=self._order_event)
 
     #  main test
     def test_good_case(self):
@@ -103,7 +104,7 @@ class AbinsCalculateSPowderTest(unittest.TestCase):
     def _good_case(self, name=None):
         # calculation of powder data
         good_data = self._get_good_data(filename=name)
-        good_tester = AbinsModules.CalculateS(
+        good_tester = AbinsModules.CalculateS.init(
             filename=AbinsModules.AbinsTestHelpers.find_file(filename=name + ".phonon"),
             temperature=self._temperature, sample_form=self._sample_form, abins_data=good_data["DFT"],
             instrument=self._instrument, quantum_order_num=self._order_event)
@@ -112,7 +113,7 @@ class AbinsCalculateSPowderTest(unittest.TestCase):
         self._check_data(good_data=good_data["S"], data=calculated_data.extract())
 
         # check if loading powder data is correct
-        new_tester = AbinsModules.CalculateS(filename=AbinsModules.AbinsTestHelpers.find_file(filename=name + ".phonon"),
+        new_tester = AbinsModules.CalculateS.init(filename=AbinsModules.AbinsTestHelpers.find_file(filename=name + ".phonon"),
                                 temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=good_data["DFT"], instrument=self._instrument,
                                 quantum_order_num=self._order_event)

@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/InterpolationOption.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
@@ -22,20 +23,11 @@ using Kernel::Property;
 namespace Algorithms {
 
 /**
- * Constructs an object with the default interpolation method
- */
-InterpolationOption::InterpolationOption() { set(Value::Linear); }
-
-/**
  * Set the interpolation option
  * @param kind Set the type of interpolation on the call to apply
  */
 void InterpolationOption::set(InterpolationOption::Value kind) {
-  if (kind == Value::Linear) {
-    m_impl = interpolateLinearInplace;
-  } else {
-    m_impl = interpolateCSplineInplace;
-  }
+  m_value = kind;
 }
 
 /**
@@ -44,9 +36,9 @@ void InterpolationOption::set(InterpolationOption::Value kind) {
  */
 void InterpolationOption::set(const std::string &kind) {
   if (kind == LINEAR_OPT) {
-    m_impl = interpolateLinearInplace;
+    m_value = Value::Linear;
   } else if (kind == CSPLINE_OPT) {
-    m_impl = interpolateCSplineInplace;
+    m_value = Value::CSpline;
   } else {
     throw std::invalid_argument(
         "InterpolationOption::set() - Unknown interpolation method '" + kind +
@@ -81,8 +73,38 @@ std::string InterpolationOption::propertyDoc() const {
  */
 void InterpolationOption::applyInplace(HistogramData::Histogram &inOut,
                                        size_t stepSize) const {
-  assert(m_impl);
-  (*m_impl)(inOut, stepSize);
+  switch (m_value) {
+  case Value::Linear:
+    interpolateLinearInplace(inOut, stepSize);
+    return;
+  case Value::CSpline:
+    interpolateCSplineInplace(inOut, stepSize);
+    return;
+  default:
+    throw std::runtime_error("InterpolationOption::applyInplace() - "
+                             "Unimplemented interpolation method.");
+  }
+}
+
+/**
+ * Apply the interpolation method to the output histogram.
+ * @param in A histogram from which to interpolate
+ * @param out A histogram where to store the interpolated values
+ * @throw runtime_error Indicates unknown interpolatio method.
+ */
+void InterpolationOption::applyInPlace(const HistogramData::Histogram &in,
+                                       HistogramData::Histogram &out) const {
+  switch (m_value) {
+  case Value::Linear:
+    interpolateLinearInplace(in, out);
+    return;
+  case Value::CSpline:
+    interpolateCSplineInplace(in, out);
+    return;
+  default:
+    throw std::runtime_error("InterpolationOption::applyInplace() - "
+                             "Unimplemented interpolation method.");
+  }
 }
 
 } // namespace Algorithms

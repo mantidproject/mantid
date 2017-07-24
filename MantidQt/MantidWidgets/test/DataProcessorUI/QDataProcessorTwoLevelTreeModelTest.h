@@ -631,16 +631,16 @@ public:
     QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
 
     // Non-existent row
-    TS_ASSERT_EQUALS(model.addHighlighted(10, model.index(0, 0)), false);
-    TS_ASSERT_EQUALS(model.addHighlighted(-1, model.index(0, 0)), false);
+    TS_ASSERT_EQUALS(model.setProcessed(true, 10, model.index(0, 0)), false);
+    TS_ASSERT_EQUALS(model.setProcessed(true, -1, model.index(0, 0)), false);
 
     // Non-existent group
-    TS_ASSERT_EQUALS(model.addHighlighted(10), false);
-    TS_ASSERT_EQUALS(model.addHighlighted(-1), false);
+    TS_ASSERT_EQUALS(model.setProcessed(true, 10), false);
+    TS_ASSERT_EQUALS(model.setProcessed(true, -1), false);
 
-    // Highlight 1st row of 1st group and 2nd group
-    TS_ASSERT_EQUALS(model.addHighlighted(0, model.index(0, 0)), true);
-    TS_ASSERT_EQUALS(model.addHighlighted(1), true);
+    // Set 1st row of 1st group and 2nd group processed
+    TS_ASSERT_EQUALS(model.setProcessed(true, 0, model.index(0, 0)), true);
+    TS_ASSERT_EQUALS(model.setProcessed(true, 1), true);
 
     // Only the 1st row of 1st group and 2nd group should be highlighted
     TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
@@ -673,46 +673,33 @@ public:
         "");
   }
 
-  void testClearHighlightTable() {
+  void testIsProcessed() {
     auto ws = fourRowTable();
     QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
 
-    // Highlight 1st row of 1st group and 2nd group
-    TS_ASSERT_EQUALS(model.addHighlighted(0, model.index(0, 0)), true);
-    TS_ASSERT_EQUALS(model.addHighlighted(1), true);
+    // Set 1st row of 1st group and 2nd group processed
+    model.setProcessed(true, 0, model.index(0, 0));
+    model.setProcessed(true, 1);
 
-    // Clear all highlighted rows
-    model.clearHighlighted();
+    // Non-existent row
+    TS_ASSERT_THROWS(model.isProcessed(10, model.index(0, 0)),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(model.isProcessed(-1, model.index(0, 0)),
+                     std::invalid_argument);
 
-    // No rows or groups should be highlighted
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     "");
-    TS_ASSERT_EQUALS(
-        model.data(model.index(0, 0, model.index(0, 0)), Qt::BackgroundRole)
-            .toString()
-            .toStdString(),
-        "");
-    TS_ASSERT_EQUALS(
-        model.data(model.index(1, 0, model.index(0, 0)), Qt::BackgroundRole)
-            .toString()
-            .toStdString(),
-        "");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     "");
-    TS_ASSERT_EQUALS(
-        model.data(model.index(0, 0, model.index(1, 0)), Qt::BackgroundRole)
-            .toString()
-            .toStdString(),
-        "");
-    TS_ASSERT_EQUALS(
-        model.data(model.index(1, 0, model.index(1, 0)), Qt::BackgroundRole)
-            .toString()
-            .toStdString(),
-        "");
+    // Non-existent group
+    TS_ASSERT_THROWS(model.isProcessed(10), std::invalid_argument);
+    TS_ASSERT_THROWS(model.isProcessed(-1), std::invalid_argument);
+
+    // Only the 1st row of 1st group and 2nd group should be highlighted
+    TS_ASSERT_EQUALS(model.isProcessed(model.index(0, 0).row(), QModelIndex()),
+                     false);
+    TS_ASSERT_EQUALS(model.isProcessed(0, model.index(0, 0)), true);
+    TS_ASSERT_EQUALS(model.isProcessed(1, model.index(0, 0)), false);
+    TS_ASSERT_EQUALS(model.isProcessed(model.index(1, 0).row(), QModelIndex()),
+                     true);
+    TS_ASSERT_EQUALS(model.isProcessed(0, model.index(1, 0)), false);
+    TS_ASSERT_EQUALS(model.isProcessed(1, model.index(1, 0)), false);
   }
 
 private:

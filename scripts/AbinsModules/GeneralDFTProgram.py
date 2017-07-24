@@ -152,7 +152,8 @@ class GeneralDFTProgram(object):
                       "frequencies": data["frequencies"],
                       # 4D array [k][atom_n][freq][3] (one entry corresponds to
                       # one coordinate for atom atom_n, frequency  freq and k-point k )
-                      "atomic_displacements": data["atomic_displacements"]
+                      "atomic_displacements": data["atomic_displacements"],
+                      "unit_cell": data["unit_cell"]
                       })
 
         atoms = AbinsModules.AtomsDaTa(num_atoms=self._num_atoms)
