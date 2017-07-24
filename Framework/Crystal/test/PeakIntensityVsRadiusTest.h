@@ -89,30 +89,30 @@ public:
   void ensureExecutionThrows(double BackgroundInnerFactor,
                              double BackgroundOuterFactor,
                              double BackgroundInnerRadius,
-                             double BackgroundOuterRadius, int NumSteps = 16) {
+                             double BackgroundOuterRadius) {
     doTestValid(false, BackgroundInnerFactor, BackgroundOuterFactor,
-                BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
+                BackgroundInnerRadius, BackgroundOuterRadius);
   }
 
   void ensureExecutionNoThrow(double BackgroundInnerFactor,
                               double BackgroundOuterFactor,
                               double BackgroundInnerRadius,
-                              double BackgroundOuterRadius, int NumSteps = 16) {
+                              double BackgroundOuterRadius) {
     doTestValid(true, BackgroundInnerFactor, BackgroundOuterFactor,
-                BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
+                BackgroundInnerRadius, BackgroundOuterRadius);
   }
 
   /** Check the validateInputs() calls */
   void doTestValid(bool assertExecuteSuccess, double BackgroundInnerFactor,
                    double BackgroundOuterFactor, double BackgroundInnerRadius,
-                   double BackgroundOuterRadius, int NumSteps) {
+                   double BackgroundOuterRadius) {
     PeakIntensityVsRadius alg;
     // Name of the output workspace.
     std::string outWSName("PeakIntensityVsRadiusTest_OutputWS");
     assertSuccessfulInitialization(alg);
     assertNoThrowWhenSettingProperties(
         alg, outWSName, BackgroundInnerFactor, BackgroundOuterFactor,
-        BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
+        BackgroundInnerRadius, BackgroundOuterRadius);
     if (assertExecuteSuccess) {
       TS_ASSERT_THROWS_NOTHING(alg.execute(););
     } else {
@@ -125,8 +125,8 @@ public:
                                           double BackgroundInnerFactor,
                                           double BackgroundOuterFactor,
                                           double BackgroundInnerRadius,
-                                          double BackgroundOuterRadius,
-                                          int NumSteps) {
+                                          double BackgroundOuterRadius) {
+    auto int constexpr DEFAULT_NUM_STEPS = 16;
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "InputWorkspace", "PeakIntensityVsRadiusTest_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
@@ -135,7 +135,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RadiusStart", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RadiusEnd", 1.5));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumSteps", NumSteps));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumSteps", DEFAULT_NUM_STEPS));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("BackgroundInnerFactor", BackgroundInnerFactor));
     TS_ASSERT_THROWS_NOTHING(
@@ -172,7 +172,7 @@ public:
   MatrixWorkspace_sptr doTest(double BackgroundInnerFactor,
                               double BackgroundOuterFactor,
                               double BackgroundInnerRadius,
-                              double BackgroundOuterRadius, int NumSteps = 16) {
+                              double BackgroundOuterRadius) {
     // Name of the output workspace.
     std::string outWSName("PeakIntensityVsRadiusTest_OutputWS");
 
@@ -180,7 +180,7 @@ public:
     assertSuccessfulInitialization(alg);
     assertNoThrowWhenSettingProperties(
         alg, outWSName, BackgroundInnerFactor, BackgroundOuterFactor,
-        BackgroundInnerRadius, BackgroundOuterRadius, NumSteps);
+        BackgroundInnerRadius, BackgroundOuterRadius);
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -228,9 +228,6 @@ public:
     TS_ASSERT_LESS_THAN(ws->y(0)[5], 1000);
     assertFlatAfter1(ws);
   }
-
-private:
-  PeakIntensityVsRadius m_alg;
 };
 
 #endif /* MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_ */
