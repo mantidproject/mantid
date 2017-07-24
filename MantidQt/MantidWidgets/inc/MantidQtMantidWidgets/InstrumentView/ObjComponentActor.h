@@ -1,5 +1,7 @@
 #ifndef OBJCOMPONENT_ACTOR_H_
 #define OBJCOMPONENT_ACTOR_H_
+
+#include "MantidKernel/Logger.h"
 #include "ComponentActor.h"
 #include "GLColor.h"
 /**
@@ -66,9 +68,12 @@ public:
 
 private:
   void setPickColor(const GLColor &c) { m_pickColor = c; }
-
+  
   GLColor m_dataColor;
   GLColor m_pickColor;
+
+  Mantid::Kernel::Logger m_log;
+  Mantid::Kernel::Logger &g_log;
 
   friend class InstrumentActor;
 };
