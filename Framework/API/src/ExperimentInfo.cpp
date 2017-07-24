@@ -97,7 +97,7 @@ void checkCompatibility(const Beamline::Beamline &oldBL,
   if (oldBL.empty())
     return;
   checkDetectorInfoSize(oldBL.detectorInfo(), newBL.detectorInfo());
-  // checkComponentInfoSize(oldBL.componentInfo(), newBL.componentInfo());
+  checkComponentInfoSize(oldBL.componentInfo(), newBL.componentInfo());
 }
 
 std::unique_ptr<Geometry::InstrumentVisitor>
