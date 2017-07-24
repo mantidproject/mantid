@@ -52,8 +52,8 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
     return indexInfo.makeIndexSet();
   } else {
     auto res = std::minmax_element(m_value.cbegin(), m_value.cend());
-    auto min = *res.first;
-    auto max = *res.second;
+    auto min = static_cast<size_t>(*res.first);
+    auto max = static_cast<size_t>(*res.second);
 
     auto isRange = (max - min) == (m_value.size() - 1);
 
