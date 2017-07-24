@@ -213,8 +213,6 @@ class MatchPeaks(PythonAlgorithm):
             mask_ws(output_ws, min_bin, max_bin)
 
         if self._output_bin_range:
-            self.log().error('Bin range table name:' + self._output_bin_range)
-            self.log().error('Creating the table for masked bin ranges.')
             # Create table with its columns containing bin range
             bin_range = CreateEmptyTableWorkspace(OutputWorkspace=self._output_bin_range)
             bin_range.addColumn(type="double", name='MinBin')
