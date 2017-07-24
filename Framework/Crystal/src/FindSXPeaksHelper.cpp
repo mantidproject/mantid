@@ -381,7 +381,7 @@ std::vector<std::unique_ptr<PeakContainer>>  AllPeaksStrategy::getAllPeaks(const
   std::vector<std::unique_ptr<PeakContainer>> peaks;
 
   // We want to the upper boundary to be inclusive hence we need to increment it by one
-  if (high != y.end()) {
+  if (high != x.end()) {
       ++high;
   }
   auto distanceMin = std::distance(x.begin(), low);
