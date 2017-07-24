@@ -39,12 +39,12 @@ using namespace DataObjects;
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace> >(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
-  const auto exts = std::vector<std::string>({ ".DetCal" });
+  const auto exts = std::vector<std::string>({".DetCal"});
   declareProperty(
       Kernel::make_unique<API::MultipleFileProperty>("Filename", exts),
       "The input filename of the ISAW DetCal file (Two files "
@@ -133,7 +133,7 @@ void LoadIsawDetCal::exec() {
   std::string line;
   std::string detname;
   // Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector> > detList;
+  std::vector<boost::shared_ptr<RectangularDetector>> detList;
   for (int i = 0; i < inst->nelements(); i++) {
     boost::shared_ptr<RectangularDetector> det;
     boost::shared_ptr<ICompAssembly> assem;
@@ -403,7 +403,7 @@ Instrument_sptr LoadIsawDetCal::getCheckInst(API::Workspace_sptr ws) {
 
 std::vector<std::string> LoadIsawDetCal::getFilenames() {
   std::vector<std::string> filenamesFromPropertyUnraveld;
-  std::vector<std::vector<std::string> > filenamesFromProperty =
+  std::vector<std::vector<std::string>> filenamesFromProperty =
       this->getProperty("Filename");
   for (const auto &outer : filenamesFromProperty) {
     std::copy(outer.begin(), outer.end(),
