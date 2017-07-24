@@ -36,7 +36,7 @@ import mantid.simpleapi as msapi
 import input_parsing as iparsing
 import results_output as fitout
 import test_result
-
+from plotHelper import *
 
 def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizers,
                                    group_names, group_suffix_names, color_scale, save_to_file=False):
@@ -163,6 +163,8 @@ def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
 
     problems = []
     results_per_problem = []
+    count =0
+    previous_name="none"
     for prob_file in problem_files:
         try:
             # Note the CUTEst problem are assumed to be expressed in NIST format
@@ -173,13 +175,13 @@ def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
         print("* Testing fitting for problem definition file {0}".format(prob_file))
         print("* Testing fitting of problem {0}".format(prob.name))
 
-        results_prob = do_fitting_benchmark_one_problem(prob, minimizers, use_errors)
+        results_prob = do_fitting_benchmark_one_problem(prob, minimizers, use_errors,count,previous_name)
         results_per_problem.extend(results_prob)
 
     return problems, results_per_problem
 
 
-def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
+def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,previous_name="none"):
     """
     One problem with potentially several starting points, returns a list (start points) of
     lists (minimizers).
@@ -188,6 +190,7 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
     @param minimizers :: list of minimizers to evaluate/compare
     @param use_errors :: whether to use observational errors when evaluating accuracy (in the
                          cost function)
+    @param count :: the current count for the number of different start values for a given problem
     """
 
     wks, cost_function = prepare_wks_cost_function(prob, use_errors)
@@ -197,7 +200,8 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
 
     # Get function definitions for the problem - one for each starting point
     function_defs = get_function_definitions(prob)
-
+    # search for lowest chi2
+    min_chi2 = 1.e6
     # Loop over the different starting points
     for user_func in function_defs:
         results_problem_start = []
@@ -220,9 +224,10 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
             else:
                 sum_err_sq = float("inf")
                 print(" WARNING: no output fit workspace")
-
             print("   sum sq: {0}".format(sum_err_sq))
-
+            if chi2 <min_chi2:
+                best_fit=data(minimizer_name,fit_wks.readX(1),fit_wks.readY(1))
+                min_chi2=chi2
             result = test_result.FittingTestResult()
             result.problem = prob
             result.fit_status = status
@@ -236,7 +241,57 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
             results_problem_start.append(result)
 
         results_fit_problem.append(results_problem_start)
+	    # make plots 
+        fig=plot()
+        best_fit.markers=''
+        best_fit.linestyle='-'
+        best_fit.colour='green'
+        best_fit.order_data()
+        fig.add_data(best_fit)
+        xData = wks.readX(0)
+        yData = wks.readY(0)
+        eData = wks.readE(0)
+        raw=data("Data",xData,yData,eData)
+        raw.showError=True
+        raw.linestyle=''	
+        fig.add_data(raw)
+        fig.labels['x']="Time ($\mu s$)"
+        if prob.name == previous_name:
+              count+=1
+        else:
+              count =1
+              previous_name=prob.name
+        fig.labels['y']="something "
+        fig.labels['title']=prob.name[:-4]+" "+str(count)
+        fig.title_size=10
+        status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(user_func, wks, Output='ws_fitting_test',
+                                                                Minimizer='Levenberg-Marquardt',
+                                                                CostFunction='Least squares',IgnoreInvalidData=True,
+                                                                StartX=prob.start_x, EndX=prob.end_x,MaxIterations=0)
+        xData = fit_wks.readX(1)
+        yData = fit_wks.readY(1)
+        startData=data("Start Guess",xData,yData)
+        startData.order_data()
+        startData.colour="blue"
+        startData.markers=''
+        startData.linestyle="-" 
+        start_fig=plot()
+        start_fig.add_data(raw)	  	 
+        start_fig.add_data(startData)
+        start_fig.labels['x']="Time ($\mu s$)"
+        start_fig.labels['y']="something" 
+        title=user_func[27:-1]
+        loc=title.find(",")
+        if loc > 35:
+            tmp=title[30:]
+            tmploc = tmp.find("+")+30
+            title=title[:tmploc+1]+"\n"+title[tmploc+2:]
 
+        title=title[:loc+1]+"\n"+title[loc+2:]
+        start_fig.labels['title']=prob.name[:-4]+" "+str(count)+"\n"+title
+        start_fig.title_size=10        
+        fig.make_scatter_plot("Fit for "+prob.name[:-4]+" "+str(count)+".pdf")
+        start_fig.make_scatter_plot("start for "+prob.name[:-4]+" "+str(count)+".pdf")
     return results_fit_problem
 
 
@@ -258,6 +313,7 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
     chi2 = None
     param_tbl = None
     fit_wks = None
+ 
     try:
         # When using 'Least squares' (weighted by errors), ignore nans and zero errors, but don't
         # ignore them when using 'Unweighted least squares' as that would ignore all values!

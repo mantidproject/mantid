@@ -23,11 +23,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class data:
+    """
+    Holds the data and relevant information for plotting
+    """
     def __init__(self,name=None,x=[],y=[],E=[]):
+	"""
+    Creates a data object. 
+	@param x :: the x data
+	@param y :: the y data
+	@param E :: the (y) errors
+
+    """
         if(name != None):
                 self.name = name
                 self.x = x
-                self.y = y
+                self.y = y						    
         else:
                 self.name ='none'
                 self.x = [0.0,0.0,0.0]
@@ -39,10 +49,30 @@ class data:
         self.showError=False
         self.markers="x"
         self.colour="k"
+        self.linestyle='--'
+    def order_data(self):
+	"""
+    Ensures that the data is in assending order in x
+	Prevents line plots looping back on them selves
+    """
+        xData=self.x.copy()
+        yData=self.y.copy()
+        eData=self.E.copy()
 
+        for j in range(0,len(yData)):
+            for k in range(0,len(xData)-1):
+               if xData[k]>xData[k+1]:
+                    xData[k+1],xData[k]=xData[k],xData[k+1]
+                    yData[k+1],yData[k]=yData[k],yData[k+1]
+                    eData[k+1],eData[k]=eData[k],eData[k+1]
+        self.x=xData
+        self.y=yData
+        self.E=eData	    
 
 class insert(data):
-
+    """
+    Minimal information for defining an insert
+    """
     def __init__(self):
         self.logs= {'x':False,'y':False}
         #make this a list later
@@ -52,11 +82,20 @@ class insert(data):
         self.yrange={'start':0.0,'end':0.0}
         self.position={'left':0.0, 'bottom':0.0, 'width':0.25, 'height':0.25}
     def add_data(self,inputData):
+        """
+        Creates a horizontal bar plot
+        @param safe :: if to ensure that y labels only appear once
+        @param save:: the name of the file to save to
+        the default is not to save
+        """
         self.data.append(inputData)
 
 
-class plot(data,insert):
 
+class plot(data,insert):
+    """
+    Minimal information for a plot
+    """
     def __init__(self):
         self.logs= {'x':False,'y':False}
         #make this a list later
@@ -66,31 +105,68 @@ class plot(data,insert):
         self.yrange={'start':0.0,'end':0.0}
         self.legend="upper left"
         self.insert=None
+        self.title_size=20
     def add_data(self,inputData):
+        """
+        Adds the data to the main plot
+        @param inputData :: the data to add to the plot
+        """
         self.data.append(inputData)
     def add_insert(self,inputInsert):
+        """
+        Adds an insert to the plot
+        @param inputInsert :: the insert to add to the plot
+        """
         self.insert=inputInsert	  
-    def make_scatter_plot(self):
+    def make_scatter_plot(self,save=""):  
+        """
+        Creates a scatter plot
+        @param save:: the name of the file to save to
+        the default is not to save
+        """
         fig=plt.figure()
         plt.xlabel(self.labels["x"])
         plt.ylabel(self.labels["y"])
-        plt.title(self.labels["title"])
+        plt.title(self.labels["title"],fontsize=self.title_size)
         for data in self.data:
                 if(data.showError):
                         #plot with errors
-                        plt.errorbar(data.x,data.y,yerr=data.E,label=data.name ,marker=data.markers,color=data.colour,linestyle='--',markersize=8)
+                        plt.errorbar(data.x,data.y,yerr=data.E,label=data.name ,marker=data.markers,color=data.colour,linestyle=data.linestyle,markersize=8)
                 else:
-                        plt.plot(data.x,data.y,label=data.name,marker=data.markers,color=data.colour,linestyle='--',markersize=8)
+                        plt.plot(data.x,data.y,label=data.name,marker=data.markers,color=data.colour,linestyle=data.linestyle,markersize=8)
         plt.legend(loc=self.legend)
-        plt.show()
+        if  self.xrange["start"]!=0.0 or self.xrange["end"]!=0.0:
+             plt.xlim([self.xrange["start"],self.xrange["end"]])
+        if  self.yrange["start"]!=0.0 or self.yrange["end"]!=0.0:
+             plt.xlim([self.yrange["start"],self.yrange["end"]])
+        if self.logs['x']==True:
+             plt.xscale("log")
+        if self.logs['y']==True:
+             plt.yscale("log")			     			
+        plt.tight_layout()
+        if save=="":
+           plt.show()
+        else:
+           print ("saving to "+save.replace(" ","_"))
+           plt.savefig(save.replace(" ","_"))
+       
     # safe is used if the y values (strings) all have unique names
     def make_y_bar_plot(self,safe=True,save=""):
+        """
+        Creates a horizontal bar plot
+        @param save:: the name of the file to save to
+        the default is not to save
+        """
         if self.insert==None:
             self.make_y_bar_plot_no_insert(safe,save)
         else:
             self.make_y_bar_plot_insert(safe,save)
 
     def make_y_labels_safe_part_1(self):
+        """
+        Ensures that if multiple data sets share some labels (y values)
+        that the plot includes each one once and only once. 
+        """
         labels=[]
         for data in self.data:
              for y in data.y:
@@ -98,6 +174,12 @@ class plot(data,insert):
                     labels.append(y)
         return labels	
     def get_safe_data(self,labels,data):
+         """
+         Ensures that if multiple data sets share some labels (y values)
+         that the plot is correct. If its not present a value of 0 is used
+         @param labels :: the safe y labels
+         @param data :: the data object to be made safe
+         """
 		 #get data in same form
          xData =[]
          eData=[]
@@ -112,6 +194,12 @@ class plot(data,insert):
                     eData.append(0.0)
          return xData,eData						 
     def make_y_bar_plot_insert(self,safe,save):
+        """
+        Creates a horizontal bar plot
+        @param safe :: if to ensure that y labels only appear once
+        @param save:: the name of the file to save to
+        the default is not to save
+        """
         fig,ax1=plt.subplots()
         ax1.set_xlabel(self.labels["x"])
         ax1.set_ylabel(self.labels["y"])
@@ -162,6 +250,13 @@ class plot(data,insert):
            plt.savefig(save.replace(" ","_"))
 
     def make_y_bar_plot_no_insert(self,safe,save):
+        """
+        Creates a horizontal bar plot
+        @param safe :: if to ensure that y labels only appear once
+        @param save:: the name of the file to save to
+        the default is not to save
+        """
+
         fig=plt.figure()
         plt.xlabel(self.labels["x"])
         plt.ylabel(self.labels["y"])

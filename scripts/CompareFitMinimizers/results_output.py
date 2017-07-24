@@ -54,10 +54,9 @@ WORKING_DIR = os.getcwd()
 SCRIPT_DIR = os.path.dirname(__file__)
 
 def build_plot(minimizers, results_per_test, problems_obj, group_name, use_errors,
-                               simple_text=True, rst=False, save_to_file=False):
+                               save_to_file=False):
     """
-    Prints out results for a group of fit problems in accuracy and runtime tables, in a summary
-    format and both as simple text, rst format and/or to file depending on input arguments
+    Create bar plots of results for a group of fit problems in accuracy and runtime
 
     @param minimizers :: list of minimizer names
     @param results_per_test :: result objects
@@ -65,10 +64,7 @@ def build_plot(minimizers, results_per_test, problems_obj, group_name, use_error
     @param group_name :: name of this group of problems (example 'NIST "lower difficulty"', or
                          'Neutron data')
     @param use_errors :: whether to use observational errors
-    @param simple_text :: whether to print the tables in a simple text format
-    @param rst :: whether to print the tables in rst format. They are printed to the standard outputs
-                  and to files following specific naming conventions
-    @param save_to_file :: If rst=True, whether to save the tables to files following specific naming conventions
+    @param save_to_file :: If True, whether to save the plots to files following specific naming conventions
     
     """
     linked_problems = build_indiv_linked_problems(results_per_test, group_name)
@@ -82,21 +78,30 @@ def build_plot(minimizers, results_per_test, problems_obj, group_name, use_error
 
     file_name = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.'
                  .format(weighted=weighted_suffix_string(use_errors),
-                         version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name=group_name))+".pdf"
-    build_plot_test(minimizers, linked_problems, norm_acc_rankings,
+                         version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name=group_name))+"pdf"
+    build_plot_bars(minimizers, linked_problems, norm_acc_rankings,
                                         comparison_type='accuracy', comparison_dim='',
                                         using_errors=use_errors, output=file_name)
    
 
     file_name = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.'
                  .format(weighted=weighted_suffix_string(use_errors),
-                         version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name=group_name))+".pdf"
-    build_plot_test(minimizers, linked_problems, norm_runtimes,
-                                            comparison_type='runtime', comparison_dim='',
-                                            using_errors=use_errors, output=file_name)
+                         version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name=group_name))+"pdf"
+
+    build_plot_bars(minimizers, linked_problems, norm_runtimes,comparison_type='runtime', 
+	                comparison_dim='',using_errors=use_errors, output=file_name)
 
    
 def plot_set_up(columns_txt,cells,rows_txt):
+    """"
+    Sets up the inital plot and adds the data to it
+
+    @param columns_txt :: the text for the columns, one item per column
+    @param rows_txt :: the text for the rows (will go in the leftmost column)
+    @param cells :: a 2D numpy array with as many rows as items have been given
+    in rows_txt, and as many columns as items have been given in columns_txt
+
+    """
     fig=plot()
     colours=['red','blue','black','yellow','green']
     max=0.0
@@ -123,16 +128,21 @@ def plot_set_up(columns_txt,cells,rows_txt):
 
     return fig,max
 def figure_set_up(fig,output=""):
+    """"
+    Creates the shared set up of the bar chart
+    @param output :: name of the save file
+    """
     fig.labels["x"] = "Relative Score"
     fig.labels["y"] = "Test Name"
     fig.legend="upper right"
     fig.xrange["start"]=1.e-1
     safe=True
     fig.make_y_bar_plot(safe,output)
-def build_plot_test(columns_txt, rows_txt, cells, comparison_type, comparison_dim,
+
+def build_plot_bars(columns_txt, rows_txt, cells, comparison_type, comparison_dim,
                     using_errors, output=""):
     """"
-    Builds an RST table as a string, given the list of column and row headers,
+    Builds a plot, given the list of column and row headers,
     and a 2D numpy array with values for the cells.
     This can be tricky/counterintuitive, see:
     http://docutils.sourceforge.net/docs/dev/rst/problems.html
@@ -148,8 +158,7 @@ def build_plot_test(columns_txt, rows_txt, cells, comparison_type, comparison_di
     @param using_errors :: whether this comparison uses errors in the cost function
     (weighted or unweighted), required to link the table properly
 
-    @param color_scale :: list with pairs of threshold value - color, to produce color
-    tags for the cells
+    @param output :: name of the save file
     """
     columns_txt = display_name_for_minimizers(columns_txt)
     items_link = build_items_links(comparison_type, comparison_dim, using_errors)
@@ -160,7 +169,7 @@ def build_plot_test(columns_txt, rows_txt, cells, comparison_type, comparison_di
          fig.xrange['end']=max*10. 
          fig.logs['x']=True
     else:
-         fig.xrange['end']=max+2. 
+         fig.xrange['end']=max+1.5 
          fig.xrange['start']=0.0 
          fig.logs['x']=False
     figure_set_up(fig,output)
