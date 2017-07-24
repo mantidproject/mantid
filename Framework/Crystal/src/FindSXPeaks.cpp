@@ -276,7 +276,9 @@ std::unique_ptr<FindSXPeaksHelper::PeakFindingStrategy> FindSXPeaks::getPeakFind
 
 
 std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy> FindSXPeaks::getReducePeakListStrategy() const {
-  if (true) {
+  std::string peakFindingStrategy = getProperty("PeakFindingStrategy");
+  auto useSimpleReduceStrategy = peakFindingStrategy == strongestPeakStrategy;
+  if (useSimpleReduceStrategy) {
     return Mantid::Kernel::make_unique<FindSXPeaksHelper::SimpleReduceStrategy>();
   } else {
     return Mantid::Kernel::make_unique<FindSXPeaksHelper::FindMaxReduceStrategy>();

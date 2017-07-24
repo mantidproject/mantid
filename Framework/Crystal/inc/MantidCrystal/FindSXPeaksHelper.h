@@ -197,7 +197,9 @@ class DLLExport FindMaxReduceStrategy : public ReducePeakListStrategy {
 public:
   std::vector<SXPeak> reduce(const std::vector<SXPeak>& peaks, const double resolution) const override;
 private:
-  std::vector<SXPeak*> createGraph(const std::vector<SXPeak>& peakList, const double resolution) const;
+  std::vector<std::vector<SXPeak*>> getPeakGroups(const std::vector<SXPeak>& peakList, const double resolution) const;
+
+  std::vector<SXPeak> getFinalPeaks(const std::vector<std::vector<SXPeak*>>& peakGroups) const;
 };
 
 } // namespace FindSXPeaksHelper

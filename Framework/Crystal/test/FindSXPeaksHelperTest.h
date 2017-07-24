@@ -187,8 +187,8 @@ public:
     const auto &spectrumInfo = workspace->spectrumInfo();
     const double resolution = 0.001;
     std::vector<SXPeak> peaks;
-    peaks.emplace_back(1 /*TOF*/, 1 /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
-    peaks.emplace_back(1 /*TOF*/, 1 /*phi*/, 0.2 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    peaks.emplace_back(1 /*TOF*/, 0.99 /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    peaks.emplace_back(1 /*TOF*/, 0.99 /*phi*/, 0.2 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
 
     peaks.emplace_back(1 /*TOF*/, 1.1 /*phi*/, 0.3 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
     peaks.emplace_back(1 /*TOF*/, 1.1001 /*phi*/, 0.4 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
@@ -200,6 +200,13 @@ public:
 
     // WHEN
     auto reducedPeaks = findMaxReduceStrategy->reduce(peakList.get(), resolution);
+
+    // THEN
+    const double tolerance = 1e-6;
+    TSM_ASSERT("Should have three peaks", reducedPeaks.size() == 3);
+    TSM_ASSERT("Should have a value of max(0.1, 0.2) = 0.2", std::abs(reducedPeaks[0].getIntensity() - 0.2) < tolerance);
+    TSM_ASSERT("Should have a value of max(0.1, 0.2) = 0.2", std::abs(reducedPeaks[1].getIntensity() - 0.4) < tolerance);
+    TSM_ASSERT("Should have a value of max(0.1, 0.2) = 0.2", std::abs(reducedPeaks[2].getIntensity() - 0.6) < tolerance);
   }
 
 

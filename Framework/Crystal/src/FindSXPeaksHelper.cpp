@@ -6,6 +6,7 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
 
 
 using namespace boost;
@@ -485,10 +486,11 @@ std::vector<SXPeak>  FindMaxReduceStrategy::reduce(const std::vector<SXPeak> & p
     return peaks;
   }
 
-  // Create graph
-  auto peakGraph = createGraph(peaks, resolution);
+  // Groups the peaks into elements which are considered alike
+  auto peakGroups = getPeakGroups(peaks, resolution);
 
-  return peaks;
+  // Now reduce the peaks groups
+  return getFinalPeaks(peakGroups);
 }
 
 
@@ -498,13 +500,12 @@ typedef boost::graph_traits<PeakGraph>::vertex_descriptor Vertex;
 typedef boost::graph_traits<PeakGraph>::edge_descriptor Edge;
 
 
-std::vector<SXPeak*> FindMaxReduceStrategy::createGraph(const std::vector<SXPeak>& peakList, const double resolution) const {
+std::vector<std::vector<SXPeak*>> FindMaxReduceStrategy::getPeakGroups(const std::vector<SXPeak>& peakList, const double resolution) const {
 
   // Create a vector of addresses. Note that the peaks live on the stack. This here only works,
   // because the peaks are always in a stack frame below.
   std::vector<SXPeak*> peaks;
   for (const auto& peak : peakList) {
-
     peaks.push_back(&const_cast<SXPeak&>(peak));
   }
 
@@ -532,20 +533,47 @@ std::vector<SXPeak*> FindMaxReduceStrategy::createGraph(const std::vector<SXPeak
 
       // 2.3 Check if the two vertices should have an edge
       const auto toCheck = graph[*vertexIt];
-      if (!peak->compare(*toCheck, resolution)) {
+      if (peak->compare(*toCheck, resolution)) {
         // We need to create an edge
         add_edge (vertex, *vertexIt, graph);
       }
     }
   }
 
-
   // Create disjoined graphs from graph above
-  // TODO
+  std::vector<int> components(boost::num_vertices(graph));
+  const int numberOfPeaks = connected_components(graph, &components[0]);
 
-  return peaks;
+  std::vector<std::vector<SXPeak*>> peakGroups(numberOfPeaks);
+
+  for (auto i = 0u; i < components.size(); ++i) {
+    auto index = components[i];
+    peakGroups[index].push_back(graph[i]);
+  }
+
+  return peakGroups;
 }
 
+
+std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(const std::vector<std::vector<SXPeak*>>& peakGroups) const {
+  std::vector<SXPeak> peaks;
+  // For each peak groupf find one peak
+  // Currently we select the peak with the largest signal (this strategy could be changed to something like a weighted mean or similar)
+  for (auto& group : peakGroups) {
+    SXPeak* maxPeak = nullptr;
+    double maxIntensity = std::numeric_limits<double>::min();
+    for (auto* element : group) {
+      if (element->getIntensity() > maxIntensity) {
+        maxIntensity = element->getIntensity();
+        maxPeak = element;
+      }
+    }
+
+    // Add the max peak
+    peaks.push_back(*maxPeak);
+  }
+  return peaks;
+}
 
 
 } // namespace FindSXPeaksHelper
