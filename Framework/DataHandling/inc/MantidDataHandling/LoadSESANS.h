@@ -61,7 +61,7 @@ private:
       "Wavelength_unit"};
   const std::vector<std::string> mandatoryColumnHeaders{
       "SpinEchoLength", "Depolarisation", "Depolarisation_error", "Wavelength"};
-  const std::vector<std::string> fileExtensions{".ses"};
+  const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans", ".SESANS"};
 
   // Private functions
   void init() override;

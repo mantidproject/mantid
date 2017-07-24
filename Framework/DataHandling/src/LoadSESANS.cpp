@@ -41,7 +41,8 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
   if (!descriptor.isAscii())
     return 0;
 
-  if (descriptor.extension() == ".ses" || descriptor.extension() == ".SES")
+  // If the file has a SESANS extension
+  if (std::find(fileExtensions.begin(), fileExtensions.end(), descriptor.extension()) != fileExtensions.end())
     return 70;
 
   // Nothing was obviously right or wrong, so we'll have to dig around a bit in
@@ -75,7 +76,7 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
   bool beginFound = line == "BEGIN_DATA";
 
   // Return something which takes us above other ASCII formats, as long as
-  // FileFormatVersion and BEGIN_DATA were found. If the format is
+  // FileFormatVersion and BEGIN_DATA were found
   return 15 + 3 * ffvFound + 3 * beginFound;
 }
 
