@@ -293,7 +293,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 Scale(InputWorkspace=back_calibration, Factor=self._back_calib_scaling, OutputWorkspace=back_calibration)
                 Minus(LHSWorkspace=calibration, RHSWorkspace=back_calibration, OutputWorkspace=calibration)
 
-            MatchPeaks(InputWorkspace=calibration,OutputWorkspace=calibration,MaskBins=True)
+            MatchPeaks(InputWorkspace=calibration,OutputWorkspace=calibration,MaskBins=True,BinRangeTable = '')
             Integration(InputWorkspace=calibration,RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
                         OutputWorkspace=calibration)
             self._warn_negative_integral(calibration,'in calibration run.')

@@ -105,7 +105,6 @@ class MatchPeaks(PythonAlgorithm):
         self._match_option = self.getProperty('MatchInput2ToCenter').value
         self._output_bin_range = self.getPropertyValue('BinRangeTable')
 
-
         if self._input_ws:
             ReplaceSpecialValues(InputWorkspace = self._input_ws, OutputWorkspace = self._input_ws,
                                  NaNValue = 0, InfinityValue = 0)
