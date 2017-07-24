@@ -6,6 +6,8 @@
 #include "MantidCurveFitting/FortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalFieldControl.h"
 
+#include <unordered_map>
+
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
@@ -205,13 +207,18 @@ private:
   API::IFunction *getSpectrumControl(size_t spectrumIndex) const;
   /// Get a reference to a function with ion parameters
   API::IFunction *getIon(size_t ionIndex) const;
-  /// Get a reference to a spectrum function
-  API::CompositeFunction *getCompositeFor(size_t ionIndex, size_t spectrumIndex,
-                                      size_t peakIndex) const;
   /// Get a reference to a function with background parameters
   API::IFunction *getBackground(size_t spectrumIndex) const;
   /// Get a reference to a function with peak parameters
   API::IFunction *getPeak(size_t ionIndex, size_t spectrumIndex, size_t peakIndex) const;
+
+  /// Make maps between parameter names and indices
+  void makeMaps() const;
+  void makeMapsSS() const;
+  void makeMapsSM() const;
+  void makeMapsMS() const;
+  void makeMapsMM() const;
+  size_t makeMapsForFunction(const IFunction& fun, size_t iFirst, const std::string &prefix) const;
 
   /// Function that creates the source function.
   mutable CrystalFieldControl m_control;
@@ -221,10 +228,14 @@ private:
   mutable API::CompositeFunction_sptr m_target;
   /// Cached number of parameters in m_control.
   mutable size_t m_nControlParams;
-  /// Cached number of parameters in m_source.
-  mutable size_t m_nSourceParams;
+  /// Cached number of parameters in m_control and m_source.
+  mutable size_t m_nControlSourceParams;
   /// Flag indicating that updateTargetFunction() is required.
   mutable bool m_dirtyTarget;
+  /// Map parameter names to indices
+  mutable std::unordered_map<std::string, size_t> m_mapNames2Indices;
+  /// Map parameter indices to names
+  mutable std::vector<std::string> m_mapIndices2Names;
 };
 
 } // namespace Functions

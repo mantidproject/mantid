@@ -221,8 +221,9 @@ std::string makeComplexName(const CompositeFunction &composite, size_t index,
 } // namespace
 
 /// Constructor
-CrystalFieldFunction::CrystalFieldFunction() : IFunction(), m_dirtyTarget(true) {
-}
+CrystalFieldFunction::CrystalFieldFunction()
+    : IFunction(), m_nControlParams(0), m_nControlSourceParams(0),
+      m_dirtyTarget(true) {}
 
 // Evaluates the function
 void CrystalFieldFunction::function(const FunctionDomain &domain,
@@ -269,12 +270,12 @@ void CrystalFieldFunction::setParameter(size_t i, const double &value,
   if (i < m_nControlParams) {
     m_control.setParameter(i, value, explicitlySet);
     m_dirtyTarget = true;
-  } else if (i < m_nSourceParams) {
+  } else if (i < m_nControlSourceParams) {
     m_source->setParameter(i - m_nControlParams, value, explicitlySet);
     m_dirtyTarget = true;
   } else {
     checkTargetFunction();
-    m_target->setParameter(i - m_nSourceParams, value, explicitlySet);
+    m_target->setParameter(i - m_nControlSourceParams, value, explicitlySet);
   }
 }
 
@@ -284,11 +285,11 @@ void CrystalFieldFunction::setParameterDescription(
   checkSourceFunction();
   if (i < m_nControlParams) {
     m_control.setParameterDescription(i, description);
-  } else if (i < m_nSourceParams) {
+  } else if (i < m_nControlSourceParams) {
     m_source->setParameterDescription(i - m_nControlParams, description);
   } else {
     checkTargetFunction();
-    m_target->setParameterDescription(i - m_nSourceParams, description);
+    m_target->setParameterDescription(i - m_nControlSourceParams, description);
   }
 }
 
@@ -298,10 +299,10 @@ double CrystalFieldFunction::getParameter(size_t i) const {
   checkTargetFunction();
   if (i < m_nControlParams) {
     return m_control.getParameter(i);
-  } else if (i < m_nSourceParams) {
+  } else if (i < m_nControlSourceParams) {
     return m_source->getParameter(i - m_nControlParams);
   } else {
-    return m_target->getParameter(i - m_nSourceParams);
+    return m_target->getParameter(i - m_nControlSourceParams);
   }
 }
 
@@ -309,8 +310,6 @@ double CrystalFieldFunction::getParameter(size_t i) const {
 void CrystalFieldFunction::setParameter(const std::string &name,
                                         const double &value,
                                         bool explicitlySet) {
-  checkSourceFunction();
-  checkTargetFunction();
   auto ref = getParameterReference(name);
   ref.setParameter(value, explicitlySet);
 }
@@ -318,8 +317,6 @@ void CrystalFieldFunction::setParameter(const std::string &name,
 /// Set description of parameter by name.
 void CrystalFieldFunction::setParameterDescription(
     const std::string &name, const std::string &description) {
-  checkSourceFunction();
-  checkTargetFunction();
   auto ref = getParameterReference(name);
   ref.getLocalFunction()->setParameterDescription(ref.getLocalIndex(),
                                                   description);
@@ -327,8 +324,6 @@ void CrystalFieldFunction::setParameterDescription(
 
 /// Get parameter by name.
 double CrystalFieldFunction::getParameter(const std::string &name) const {
-  checkSourceFunction();
-  checkTargetFunction();
   auto ref = getParameterReference(name);
   return ref.getParameter();
 }
@@ -337,7 +332,7 @@ double CrystalFieldFunction::getParameter(const std::string &name) const {
 size_t CrystalFieldFunction::nParams() const {
   checkSourceFunction();
   checkTargetFunction();
-  return m_nControlParams + m_nSourceParams + m_target->nParams();
+  return m_nControlSourceParams + m_target->nParams();
 }
 
 /// Returns the index of a parameter with a given name
@@ -345,20 +340,14 @@ size_t CrystalFieldFunction::nParams() const {
 size_t CrystalFieldFunction::parameterIndex(const std::string &name) const {
   checkSourceFunction();
   checkTargetFunction();
-  auto ref = getParameterReference(name);
-  auto index = m_control.getParameterIndex(ref);
-  if (index < m_nControlParams) {
-    return index;
+  if (nParams() != m_mapIndices2Names.size()) {
+    makeMaps();
   }
-  index = m_source->getParameterIndex(ref);
-  if (index < m_nSourceParams) {
-    return index + m_nControlParams;
+  auto found = m_mapNames2Indices.find(name);
+  if (found == m_mapNames2Indices.end()) {
+    throw std::invalid_argument("CrystalFieldFunction parameter not found: " + name);
   }
-  index = m_target->getParameterIndex(ref);
-  if (index < m_target->nParams()) {
-    return index + m_nControlParams + m_nSourceParams;
-  }
-  throw std::invalid_argument("CrystalFieldFunction parameter not found: " + name);
+  return found->second;
 }
 
 /// Returns the name of parameter i
@@ -370,81 +359,61 @@ std::string CrystalFieldFunction::parameterName(size_t i) const {
   }
   checkSourceFunction();
   checkTargetFunction();
-
-  if (i < m_nControlParams) {
-    if (isMultiSpectrum()) {
-      // IntensityScalings for each spectrum
-      return makeName(m_control, i, SPECTRUM_PREFIX);
-    } else {
-      // No parameters here, just for completeness
-      return m_control.parameterName(i);
-    }
+  if (nParams() != m_mapIndices2Names.size()) {
+    makeMaps();
   }
-
-  i -= m_nControlParams;
-  if (i < m_nSourceParams) {
-    if (isMultiSite()) {
-      // Crystal field, intensity scaling for each ion
-      return makeName(compositeSource(), i, ION_PREFIX);
-    } else {
-      // Crystal field
-      return m_source->parameterName(i);
-    }
-  }
-
-  i -= m_nSourceParams;
-  if (isMultiSpectrum()) {
-    if (isMultiSite()) {
-    }
-  } else {
-    if (isMultiSite()) {
-      return makeComplexName(*m_target, i, PEAK_PREFIX, ION_PREFIX);
-    } else {
-      // Single site, single spectrum
-      if (hasBackground()) {
-        if (i == 0) {
-        }
-      }
-      return makeName(*m_target, i, PEAK_PREFIX);
-    }
-  }
-
-  throw Kernel::Exception::NotImplementedError(
-      "CrystalFieldFunction::parameterName not implemented properly.");
+  return m_mapIndices2Names[i];
 }
 
 /// Returns the description of parameter i
 std::string CrystalFieldFunction::parameterDescription(size_t i) const {
   checkSourceFunction();
   checkTargetFunction();
-  return i < m_nSourceParams ? m_source->parameterDescription(i)
-                          : m_target->parameterDescription(i - m_nSourceParams);
+  if (i < m_nControlParams) {
+    return m_control.parameterDescription(i);
+  } else if (i < m_nControlSourceParams) {
+    return m_source->parameterDescription(i - m_nControlParams);
+  } else {
+    return m_target->parameterDescription(i - m_nControlSourceParams);
+  }
 }
 
 /// Checks if a parameter has been set explicitly
 bool CrystalFieldFunction::isExplicitlySet(size_t i) const {
   checkSourceFunction();
   checkTargetFunction();
-  return i < m_nSourceParams ? m_source->isExplicitlySet(i)
-                          : m_target->isExplicitlySet(i - m_nSourceParams);
+  if (i < m_nControlParams) {
+    return m_control.isExplicitlySet(i);
+  } else if (i < m_nControlSourceParams) {
+    return m_source->isExplicitlySet(i - m_nControlParams);
+  } else {
+    return m_target->isExplicitlySet(i - m_nControlSourceParams);
+  }
 }
 
 /// Get the fitting error for a parameter
 double CrystalFieldFunction::getError(size_t i) const {
   checkSourceFunction();
   checkTargetFunction();
-  return i < m_nSourceParams ? m_source->getError(i)
-                          : m_target->getError(i - m_nSourceParams);
+  if (i < m_nControlParams) {
+    return m_control.getError(i);
+  } else if (i < m_nControlSourceParams) {
+    return m_source->getError(i - m_nControlParams);
+  } else {
+    return m_target->getError(i - m_nControlSourceParams);
+  }
 }
 
 /// Set the fitting error for a parameter
 void CrystalFieldFunction::setError(size_t i, double err) {
   checkSourceFunction();
-  if (i < m_nSourceParams) {
-    m_source->setError(i, err);
+  checkTargetFunction();
+  if (i < m_nControlParams) {
+    m_control.setError(i, err);
+  } else if (i < m_nControlSourceParams) {
+    m_source->setError(i - m_nControlParams, err);
   } else {
-    checkTargetFunction();
-    m_target->setError(i - m_nSourceParams, err);
+    m_target->setError(i - m_nControlSourceParams, err);
   }
 }
 
@@ -452,11 +421,13 @@ void CrystalFieldFunction::setError(size_t i, double err) {
 void CrystalFieldFunction::setParameterStatus(
     size_t i, IFunction::ParameterStatus status) {
   checkSourceFunction();
-  if (i < m_nSourceParams) {
-    m_source->setParameterStatus(i, status);
+  checkTargetFunction();
+  if (i < m_nControlParams) {
+    m_control.setParameterStatus(i, status);
+  } else if (i < m_nControlSourceParams) {
+    m_source->setParameterStatus(i - m_nControlParams, status);
   } else {
-    checkTargetFunction();
-    m_target->setParameterStatus(i - m_nSourceParams, status);
+    m_target->setParameterStatus(i - m_nControlSourceParams, status);
   }
 }
 
@@ -464,11 +435,13 @@ void CrystalFieldFunction::setParameterStatus(
 IFunction::ParameterStatus
 CrystalFieldFunction::getParameterStatus(size_t i) const {
   checkSourceFunction();
-  if (i < m_nSourceParams) {
-    return m_source->getParameterStatus(i);
+  checkTargetFunction();
+  if (i < m_nControlParams) {
+    return m_control.getParameterStatus(i);
+  } else if (i < m_nControlSourceParams) {
+    return m_source->getParameterStatus(i - m_nControlParams);
   } else {
-    checkTargetFunction();
-    return m_target->getParameterStatus(i - m_nSourceParams);
+    return m_target->getParameterStatus(i - m_nControlSourceParams);
   }
 }
 
@@ -476,16 +449,19 @@ CrystalFieldFunction::getParameterStatus(size_t i) const {
 size_t
 CrystalFieldFunction::getParameterIndex(const ParameterReference &ref) const {
   checkSourceFunction();
-  if (ref.getLocalFunction() == this) {
-    auto index = ref.getLocalIndex();
-    auto np = nParams();
-    if (index < np) {
-      return index;
-    }
-    return np;
-  }
   checkTargetFunction();
-  return m_target->getParameterIndex(ref) + m_nSourceParams;
+  if (ref.getLocalFunction() == this) {
+    return ref.getLocalIndex();
+  }
+  auto index = m_control.getParameterIndex(ref);
+  if (index < m_nControlParams) {
+    return index;
+  }
+  index = m_source->getParameterIndex(ref);
+  if (index < m_source->nParams()) {
+    return index + m_nControlParams;
+  }
+  return m_target->getParameterIndex(ref) + m_nControlSourceParams;
 }
 
 /// Set up the function for a fit.
@@ -531,9 +507,18 @@ std::vector<std::string> CrystalFieldFunction::getAttributeNames() const {
   moveAttributeName("Ions");
   moveAttributeName("Symmetries");
   moveAttributeName("Temperatures");
+  moveAttributeName("Background");
   // Copy the rest of the names
   attNames.insert(attNames.end(), controlAttributeNames.begin(),
                         controlAttributeNames.end());
+  for(size_t iSpec=0; iSpec < m_control.nFunctions(); ++iSpec) {
+    std::string prefix = SPECTRUM_PREFIX + std::to_string(iSpec) + ".";
+    auto names = m_control.getFunction(iSpec)->getAttributeNames();
+    for(auto &name: names) {
+      name.insert(name.begin(), prefix.begin(), prefix.end());
+    }
+    attNames.insert(attNames.end(), names.begin(), names.end());
+  }
   return attNames;
 }
 
@@ -603,6 +588,11 @@ CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
 /// Get a reference to a parameter
 API::ParameterReference CrystalFieldFunction::getParameterReference(
     const std::string &paramName) const {
+  checkSourceFunction();
+  checkTargetFunction();
+  if (nParams() != m_mapIndices2Names.size()) {
+    makeMaps();
+  }
 
   const auto refTuple = getReferenceTuple(paramName);
   const auto &ionIndex = refTuple.ionIndex;
@@ -679,47 +669,64 @@ IFunction *CrystalFieldFunction::getIon(size_t ionIndex) const {
   }
 }
 
-/// Get a reference to a spectrum function
-CompositeFunction *
-CrystalFieldFunction::getCompositeFor(size_t ionIndex, size_t spectrumIndex,
-                                      size_t peakIndex) const {
-  CompositeFunction *spectrum = m_target.get();
-  if (isMultiSpectrum()) {
-    if (spectrumIndex == UNDEFINED_INDEX) {
-      throw std::invalid_argument("Spectrum parameter doesn't exist.");
-    }
-    spectrum = dynamic_cast<CompositeFunction*>(spectrum->getFunction(spectrumIndex).get());
-    if (!spectrum) {
-      throw std::logic_error("Spectrum function must be composite.");
-    }
-  } else if (spectrumIndex != UNDEFINED_INDEX) {
-    throw std::invalid_argument("Function is not multispectrum.");
-  }
-  if (isMultiSite() && peakIndex != UNDEFINED_INDEX) {
-    size_t indexShift = hasBackground() ? 1 : 0;
-    spectrum = dynamic_cast<CompositeFunction*>(spectrum->getFunction(ionIndex + indexShift).get());
-    if (!spectrum) {
-      throw std::logic_error("Spectrum function must be composite.");
-    }
-  }
-  return spectrum;
-}
-
 /// Get a reference to a function with background parameters
 IFunction *CrystalFieldFunction::getBackground(size_t spectrumIndex) const {
   if (!hasBackground()) {
     throw std::invalid_argument("Function has no background");
   }
-  return getCompositeFor(0, spectrumIndex, UNDEFINED_INDEX)->getFunction(0).get();
+  if (isMultiSite()) {
+    if (isMultiSpectrum()) {
+      auto &spectrum = dynamic_cast<CompositeFunction &>(
+          *m_target->getFunction(spectrumIndex));
+      auto &ionSpectrum =
+          dynamic_cast<CompositeFunction &>(*spectrum.getFunction(0));
+      return ionSpectrum.getFunction(0).get();
+    } else {
+      return m_target->getFunction(0).get();
+    }
+  } else {
+    if (isMultiSpectrum()) {
+      auto &spectrum = dynamic_cast<CompositeFunction &>(
+          *m_target->getFunction(spectrumIndex));
+      return spectrum.getFunction(0).get();
+    } else {
+      return m_target->getFunction(0).get();
+    }
+  }
 }
 
 /// Get a reference to a function with peak parameters
 IFunction *CrystalFieldFunction::getPeak(size_t ionIndex, size_t spectrumIndex, size_t peakIndex) const {
-  size_t indexShift = 0;
-  if (hasBackground() && !isMultiSite()) {
-    indexShift = 1;
+  if (isMultiSite()) {
+    if (isMultiSpectrum()) {
+      auto &spectrum = dynamic_cast<CompositeFunction &>(
+          *m_target->getFunction(spectrumIndex));
+      auto &ionSpectrum =
+          dynamic_cast<CompositeFunction &>(*spectrum.getFunction(ionIndex));
+      if (ionIndex == 0 && hasBackground()) {
+        ++peakIndex;
+      }
+      return ionSpectrum.getFunction(peakIndex).get();
+    } else {
+      if (hasBackground()) {
+        ++ionIndex;
+      }
+      auto &ionSpectrum =
+          dynamic_cast<CompositeFunction &>(*m_target->getFunction(ionIndex));
+      return ionSpectrum.getFunction(peakIndex).get();
+    }
+  } else {
+    if (hasBackground()) {
+      ++peakIndex;
+    }
+    if (isMultiSpectrum()) {
+      auto &spectrum = dynamic_cast<CompositeFunction &>(
+          *m_target->getFunction(spectrumIndex));
+      return spectrum.getFunction(peakIndex).get();
+    } else {
+      return m_target->getFunction(peakIndex).get();
+    }
   }
-  return getCompositeFor(ionIndex, spectrumIndex, peakIndex)->getFunction(peakIndex + indexShift).get();
 }
 
   /// Get the i-th spectrum
@@ -735,15 +742,17 @@ CompositeFunction_sptr CrystalFieldFunction::getSpectrum(size_t spectrumIndex) {
 /// Get the tie for i-th parameter
 ParameterTie *CrystalFieldFunction::getTie(size_t i) const {
   checkSourceFunction();
+  checkTargetFunction();
   auto tie = IFunction::getTie(i);
-  if (!tie) {
-    return nullptr;
+  if (tie) {
+    return tie;
   }
-  if (i < m_nSourceParams) {
-    tie = m_source->getTie(i);
+  if (i < m_nControlParams) {
+    tie = m_control.getTie(i);
+  } else if (i < m_nControlSourceParams) {
+    tie = m_source->getTie(i - m_nControlParams);
   } else {
-    checkTargetFunction();
-    tie = m_target->getTie(i - m_nSourceParams);
+    tie = m_target->getTie(i - m_nControlSourceParams);
   }
   return tie;
 }
@@ -753,11 +762,13 @@ IConstraint *CrystalFieldFunction::getConstraint(size_t i) const {
   checkSourceFunction();
   auto constraint = IFunction::getConstraint(i);
   if (constraint == nullptr) {
-    if (i < m_nSourceParams) {
-      constraint = m_source->getConstraint(i);
+    if (i < m_nControlParams) {
+      constraint = m_control.getConstraint(i);
+    } else if (i < m_nControlSourceParams) {
+      constraint = m_source->getConstraint(i - m_nControlParams);
     } else {
       checkTargetFunction();
-      constraint = m_target->getConstraint(i - m_nSourceParams);
+      constraint = m_target->getConstraint(i - m_nControlSourceParams);
     }
   }
   return constraint;
@@ -820,7 +831,7 @@ void CrystalFieldFunction::checkSourceFunction() const {
 void CrystalFieldFunction::buildSourceFunction() const {
   setSource(m_control.buildSource());
   m_nControlParams = m_control.nParams();
-  m_nSourceParams = m_nControlParams + m_source->nParams();
+  m_nControlSourceParams = m_nControlParams + m_source->nParams();
 }
 
 
@@ -1046,6 +1057,7 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
           buildSpectrum(nre, en, wf, temperatures[i], FWHMs[i], i, addBackground, ionIntensityScaling * spectrumIntensityScaling));
     }
   }
+  m_target->checkFunction();
 }
 
 /// Calculate excitations at given temperature
@@ -1152,13 +1164,14 @@ void CrystalFieldFunction::updateSingleSiteSingleSpectrum() const {
   auto yVec = m_control.getAttribute("FWHMX").asVector();
   auto &FWHMs = m_control.FWHMs();
   auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
+  size_t indexShift = hasBackground() ? 1 : 0;
 
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
   m_target->setAttributeValue("NumDeriv", true);
   auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
-  CrystalFieldUtils::updateSpectrumFunction(spectrum, peakShape, values, 0,
+  CrystalFieldUtils::updateSpectrumFunction(spectrum, peakShape, values, indexShift,
                                             xVec, yVec, fwhmVariation,
                                             defaultFWHM, fixAllPeaks);
 }
@@ -1261,6 +1274,174 @@ void CrystalFieldFunction::updateSpectrum(API::IFunction &spectrum, int nre,
   CrystalFieldUtils::updateSpectrumFunction(
       composite, peakShape, values, 1, xVec, yVec,
       fwhmVariation, fwhm, fixAllPeaks);
+}
+
+/// Make maps between parameter names and indices
+void CrystalFieldFunction::makeMaps() const {
+  m_mapNames2Indices.clear();
+  m_mapIndices2Names.resize(nParams());
+  if (isMultiSite()) {
+    if (isMultiSpectrum()) {
+      makeMapsMM();
+    } else {
+      makeMapsMS();
+    }
+  } else {
+    if (isMultiSpectrum()) {
+      makeMapsSM();
+    } else {
+      makeMapsSS();
+    }
+  }
+}
+
+/// Make parameter names from names of a function and map them to indices
+/// @param fun :: A function to get parameter names from.
+/// @param iFirst :: An index that maps to the first parameter of fun.
+/// @param prefix :: A prefix to add to all parameters
+size_t
+CrystalFieldFunction::makeMapsForFunction(const IFunction &fun, size_t iFirst,
+                                          const std::string &prefix) const {
+  auto n = fun.nParams();
+  for (size_t i = 0; i < n; ++i) {
+    size_t j = i + iFirst;
+    auto name(prefix);
+    name.append(fun.parameterName(i));
+    //std::cerr << "map " << j << ": " << name << std::endl;
+    m_mapNames2Indices[name] = j;
+    m_mapIndices2Names[j] = name;
+  }
+  return n;
+}
+
+/// Parameter-index map for single-site single-spectrum
+void CrystalFieldFunction::makeMapsSS() const {
+  size_t i = makeMapsForFunction(*m_source, 0, "");
+
+  size_t peakIndex = 0;
+  // If there is a background it's the first function in m_target
+  if (hasBackground()) {
+    auto &background = *m_target->getFunction(0);
+    i += makeMapsForFunction(background, i, BACKGROUND_PREFIX + ".");
+    peakIndex = 1;
+  }
+  // All other functions are peaks.
+  for(size_t ip = peakIndex; ip < m_target->nFunctions(); ++ip) {
+    std::string prefix(PEAK_PREFIX);
+    prefix.append(std::to_string(ip - peakIndex)).append(".");
+    i += makeMapsForFunction(*m_target->getFunction(ip), i, prefix);
+  }
+}
+
+/// Parameter-index map for single-site multi-spectrum
+void CrystalFieldFunction::makeMapsSM() const {
+  size_t i = 0;
+  // Intensity scalings for each spectrum
+  for(size_t j = 0; j < m_control.nFunctions(); ++j) {
+    std::string prefix(SPECTRUM_PREFIX);
+    prefix.append(std::to_string(j)).append(".");
+    i += makeMapsForFunction(*m_control.getFunction(j), i, prefix);
+  }
+  // Crystal field parameters
+  i += makeMapsForFunction(*m_source, i, "");
+
+  size_t peakIndex = 0;
+  for (size_t iSpec = 0; iSpec < m_target->nFunctions(); ++iSpec) {
+    auto &spectrum = dynamic_cast<const CompositeFunction&>(*m_target->getFunction(iSpec));
+    std::string spectrumPrefix(SPECTRUM_PREFIX);
+    spectrumPrefix.append(std::to_string(iSpec)).append(".");
+    // If there is a background it's the first function in spectrum
+    if (hasBackground()) {
+      auto &background = *spectrum.getFunction(0);
+      i += makeMapsForFunction(background, i, spectrumPrefix + BACKGROUND_PREFIX + ".");
+      peakIndex = 1;
+    }
+    // All other functions are peaks.
+    for (size_t ip = peakIndex; ip < spectrum.nFunctions(); ++ip) {
+      std::string prefix(spectrumPrefix);
+      prefix.append(PEAK_PREFIX).append(std::to_string(ip - peakIndex)).append(".");
+      i += makeMapsForFunction(*spectrum.getFunction(ip), i, prefix);
+    }
+  }
+}
+
+/// Parameter-index map for multi-site single-spectrum
+void CrystalFieldFunction::makeMapsMS() const {
+  size_t i = 0;
+  // Intensity scalings for each ion
+  auto &crystalField = compositeSource();
+  for(size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
+    std::string prefix(ION_PREFIX);
+    prefix.append(std::to_string(ion)).append(".");
+    i += makeMapsForFunction(*crystalField.getFunction(ion), i, prefix);
+  }
+  // Spectrum split into an optional background and groups of peaks for
+  // each ion
+  size_t ionIndex = 0;
+  // If there is a background it's the first function in spectrum
+  if (hasBackground()) {
+    auto &background = *m_target->getFunction(0);
+    i += makeMapsForFunction(background, i, BACKGROUND_PREFIX + ".");
+    ionIndex = 1;
+  }
+  // All other functions are ion spectra.
+  for (size_t ion = ionIndex; ion < m_target->nFunctions(); ++ion) {
+    std::string ionPrefix(ION_PREFIX);
+    ionPrefix.append(std::to_string(ion - ionIndex)).append(".");
+    // All other functions are peaks.
+    auto &spectrum = dynamic_cast<const CompositeFunction&>(*m_target->getFunction(ion));
+    for (size_t ip = 0; ip < spectrum.nFunctions(); ++ip) {
+      std::string prefix(ionPrefix);
+      prefix.append(PEAK_PREFIX).append(std::to_string(ip)).append(".");
+      i += makeMapsForFunction(*spectrum.getFunction(ip), i, prefix);
+    }
+  }
+}
+
+/// Parameter-index map for multi-site multi-spectrum
+void CrystalFieldFunction::makeMapsMM() const {
+  size_t i = 0;
+  // Intensity scalings for each spectrum
+  for(size_t j = 0; j < m_control.nFunctions(); ++j) {
+    std::string prefix(SPECTRUM_PREFIX);
+    prefix.append(std::to_string(j)).append(".");
+    i += makeMapsForFunction(*m_control.getFunction(j), i, prefix);
+  }
+  // Intensity scalings for each ion
+  auto &crystalField = compositeSource();
+  for(size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
+    std::string prefix(ION_PREFIX);
+    prefix.append(std::to_string(ion)).append(".");
+    i += makeMapsForFunction(*crystalField.getFunction(ion), i, prefix);
+  }
+
+  // The spectra (background and peak) parameters
+  for (size_t iSpec = 0; iSpec < m_target->nFunctions(); ++iSpec) {
+    auto &spectrum = dynamic_cast<const CompositeFunction&>(*m_target->getFunction(iSpec));
+    std::string spectrumPrefix(SPECTRUM_PREFIX);
+    spectrumPrefix.append(std::to_string(iSpec)).append(".");
+
+    // All other functions are ion spectra.
+    for (size_t ion = 0; ion < m_target->nFunctions(); ++ion) {
+      auto &ionSpectrum =
+          dynamic_cast<const CompositeFunction &>(*spectrum.getFunction(ion));
+      size_t peakIndex = 0;
+      if (ion == 0 && hasBackground()) {
+        peakIndex = 1;
+        std::string prefix(spectrumPrefix);
+        prefix.append(BACKGROUND_PREFIX).append(".");
+        i += makeMapsForFunction(*ionSpectrum.getFunction(0), i, prefix);
+      }
+      std::string ionPrefix(ION_PREFIX);
+      ionPrefix.append(std::to_string(ion)).append(".").append(spectrumPrefix);
+      // All other functions are peaks.
+      for (size_t ip = peakIndex; ip < ionSpectrum.nFunctions(); ++ip) {
+        std::string prefix(ionPrefix);
+        prefix.append(PEAK_PREFIX).append(std::to_string(ip - peakIndex)).append(".");
+        i += makeMapsForFunction(*ionSpectrum.getFunction(ip), i, prefix);
+      }
+    }
+  }
 }
 
 } // namespace Functions
