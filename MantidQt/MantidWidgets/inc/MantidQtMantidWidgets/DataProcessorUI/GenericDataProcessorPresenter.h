@@ -180,7 +180,7 @@ protected:
   void plotWorkspaces(const std::set<std::string> &workspaces);
 
 protected slots:
-  void reductionError(std::exception ex);
+  void reductionError(QString ex);
   void threadFinished(const int exitCode);
 
 private:

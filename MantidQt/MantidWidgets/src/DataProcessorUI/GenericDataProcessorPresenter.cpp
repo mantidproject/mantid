@@ -472,9 +472,8 @@ void GenericDataProcessorPresenter::endReduction() {
 /**
 Handle reduction error
 */
-void GenericDataProcessorPresenter::reductionError(std::exception ex) {
-
-  m_view->giveUserCritical(ex.what(), "Error");
+void GenericDataProcessorPresenter::reductionError(QString ex) {
+  m_view->giveUserCritical(ex.toStdString(), "Error");
 }
 
 /**
