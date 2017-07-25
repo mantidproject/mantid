@@ -53,7 +53,7 @@ class MantidStressTest(unittest.TestCase):
 
     # Define a delimiter when reporting results
     DELIMITER = '|'
-    
+
     # Define a prefix for reporting results
     PREFIX = 'RESULT'
 
@@ -70,15 +70,22 @@ class MantidStressTest(unittest.TestCase):
         mantid.api.FrameworkManager.clear()
         from mantid.kernel import MemoryStats
         self.memory = MemoryStats().residentMem()/1024
-    
+
     def runTest(self):
         raise NotImplementedError('"runTest(self)" should be overridden in a derived class')
-    
+
     def skipTests(self):
         '''
         Override this to return True when the tests should be skipped for some
-        reason. 
+        reason.
         See also: requiredFiles() and requiredMemoryMB()
+        '''
+        return False
+
+    def excludeInPullRequests(self):
+        '''
+        Override this to return True if the test is too slow or deemed unnecessary to be run with every pull request.
+        These tests will be run nightly instead.
         '''
         return False
 
@@ -98,7 +105,7 @@ class MantidStressTest(unittest.TestCase):
         Return a list of files.
         '''
         return []
-    
+
     def requiredMemoryMB(self):
         '''
         Override this method to specify the amount of free memory,
@@ -109,7 +116,7 @@ class MantidStressTest(unittest.TestCase):
 
     def validateMethod(self):
         '''
-        Override this to specify which validation method to use. Look at the validate* methods to 
+        Override this to specify which validation method to use. Look at the validate* methods to
         see what allowed values are.
         '''
         return "WorkspaceToNeXus"
@@ -144,7 +151,7 @@ class MantidStressTest(unittest.TestCase):
                     return True
         except RuntimeError as e:
             return False
-                
+
 
         # file was not found
         return False
@@ -168,13 +175,14 @@ class MantidStressTest(unittest.TestCase):
 
         if not foundAll:
             sys.exit(TestRunner.SKIP_TEST)
-            
+
+
     def __verifyMemory(self):
         """ Do we need to skip due to lack of memory? """
         required = self.requiredMemoryMB()
         if required <= 0:
             return
-        
+
         # Check if memory is available
         from mantid.kernel import MemoryStats
         MB_avail = MemoryStats().availMem()/(1024.)
@@ -182,17 +190,22 @@ class MantidStressTest(unittest.TestCase):
             print("Insufficient memory available to run test! %g MB available, need %g MB." % (MB_avail,required))
             sys.exit(TestRunner.SKIP_TEST)
 
+
     def execute(self):
         '''
         Run the defined number of iterations of this test
         '''
         # Do we need to skip due to missing files?
         self.__verifyRequiredFiles()
-        
+
         self.__verifyMemory()
-        
+
         # A custom check for skipping the tests for other reasons
         if self.skipTests():
+            sys.exit(TestRunner.SKIP_TEST)
+
+        # A custom check for skipping tests that shouldn't be run with every PR
+        if self.excludeInPullRequests():
             sys.exit(TestRunner.SKIP_TEST)
 
         # Start timer
@@ -206,7 +219,7 @@ class MantidStressTest(unittest.TestCase):
         delta_t = float(time.time() - start)
         # Finish
         #self.reportResult('time_taken', '%.2f' % delta_t)
-        
+
     def __prepASCIIFile(self, filename):
         """
         Prepare an ascii file for comparison using difflib.
@@ -255,7 +268,7 @@ class MantidStressTest(unittest.TestCase):
 
     def validateWorkspaceToNeXus(self):
         '''
-        Assumes the second item from self.validate() is a nexus file and loads it 
+        Assumes the second item from self.validate() is a nexus file and loads it
         to compare to the supplied workspace.
         '''
         valNames = list(self.validate())
@@ -294,7 +307,7 @@ class MantidStressTest(unittest.TestCase):
         '''
         Performs a check that two workspaces are equal using the CompareWorkspaces
         algorithm. Loads one workspace from a nexus file if appropriate.
-        Returns true if: the workspaces match 
+        Returns true if: the workspaces match
                       OR the validate method has not been overridden.
         Returns false if the workspace do not match. The reason will be in the log.
         '''
@@ -319,12 +332,12 @@ class MantidStressTest(unittest.TestCase):
             else:
                 SaveNexus(InputWorkspace=valNames[0],Filename=self.__class__.__name__+'-mismatch.nxs')
             return False
-                    
+
         return True
 
     def doValidation(self):
         """
-        Perform validation. This selects which validation method to use by the result 
+        Perform validation. This selects which validation method to use by the result
         of validateMethod() and validate(). If validate() is not overridden this will
         return True.
         """
@@ -332,7 +345,7 @@ class MantidStressTest(unittest.TestCase):
         validation = self.validate()
         if validation is None:
             return True
-        
+
         # if a simple boolean then use this
         if type(validation) == bool:
             return validation
@@ -353,7 +366,7 @@ class MantidStressTest(unittest.TestCase):
             return self.validateASCII()
         else:
             raise RuntimeError("invalid validation method '%s'" % self.validateMethod())
-    
+
     def returnValidationCode(self,code):
         """
         Calls doValidation() and returns 0 in success and code if failed. This will be
@@ -392,8 +405,8 @@ class MantidStressTest(unittest.TestCase):
         clean up, i.e. remove workspaces etc
         '''
         pass
-    
-   
+
+
     def assertDelta(self, value, expected, delta, msg=""):
         """
         Check that a value is within +- delta of the expected value
@@ -401,10 +414,10 @@ class MantidStressTest(unittest.TestCase):
         # Build the error message
         if msg != "": msg += " "
         msg += "Expected %g == %g within +- %g." % (value, expected, delta)
-        
+
         if (value > expected+delta) or  (value < expected-delta):
             raise Exception(msg)
-    
+
     def assertLessThan(self, value, expected, msg=""):
         """
         Check that a value is < expected.
@@ -412,10 +425,10 @@ class MantidStressTest(unittest.TestCase):
         # Build the error message
         if msg != "": msg += " "
         msg += "Expected %g < %g " % (value, expected)
-        
+
         if (value >= expected):
             raise Exception(msg)
-    
+
     def assertGreaterThan(self, value, expected, msg=""):
         """
         Check that a value is > expected.
@@ -423,19 +436,19 @@ class MantidStressTest(unittest.TestCase):
         # Build the error message
         if msg != "": msg += " "
         msg += "Expected %g > %g " % (value, expected)
-        
+
         if (value <= expected):
             raise Exception(msg)
-            
-    
+
+
 #########################################################################
-# A class to store the results of a test 
+# A class to store the results of a test
 #########################################################################
 class TestResult(object):
     '''
     Stores the results of each test so that they can be reported later.
     '''
-    
+
     def __init__(self):
         self._results = []
         self.name = ''
@@ -446,7 +459,7 @@ class TestResult(object):
         self.total_time = ''
         self.output = ''
         self.err = ''
-    
+
     def __eq__(self, other):
         return self.name == other.name
 
@@ -458,7 +471,7 @@ class TestResult(object):
         Add an item to the store, this should be a list containing 2 entries: [Name, Value]
         '''
         self._results.append(item)
-        
+
     def resultLogs(self):
         '''
         Get the map storing the results
@@ -471,7 +484,7 @@ class TestResult(object):
 class ResultReporter(object):
     '''
     A base class for results reporting. In order to get the results in an
-    appropriate form, subclass this class and implement the dispatchResults 
+    appropriate form, subclass this class and implement the dispatchResults
     method.
     '''
 
@@ -489,7 +502,7 @@ class TextResultReporter(ResultReporter):
     '''
     Report the results of a test using standard out
     '''
-    
+
     def dispatchResults(self, result):
         '''
         Print the results to standard out
@@ -510,7 +523,7 @@ from xmlreporter import XmlResultReporter
 #########################################################################
 class TestRunner(object):
     '''
-    A base class to serve as a wrapper to actually run the tests in a specific 
+    A base class to serve as a wrapper to actually run the tests in a specific
     environment, i.e. console, gui
     '''
     SUCCESS_CODE = 0
@@ -519,6 +532,7 @@ class TestRunner(object):
     VALIDATION_FAIL_CODE = 99
     NOT_A_TEST = 98
     SKIP_TEST = 97
+
 
     def __init__(self, executable, exec_args=None, escape_quotes=False):
         self._executable = executable
@@ -540,7 +554,7 @@ class TestRunner(object):
                                 stderr = subprocess.STDOUT, bufsize=-1)
         std_out, _ = proc.communicate()
         return proc.returncode, std_out
-    
+
     def start(self, script):
         '''
         Run the given test code in a new subprocess
@@ -563,10 +577,11 @@ class TestRunner(object):
 #########################################################################
 class TestScript(object):
 
-    def __init__(self, test_dir, module_name, test_cls_name):
+    def __init__(self, test_dir, module_name, test_cls_name, exclude_in_pr_builds):
         self._test_dir = test_dir
         self._modname = module_name
         self._test_cls_name = test_cls_name
+        self._exclude_in_pr_builds = not exclude_in_pr_builds
 
     def asString(self):
         code = '''import sys
@@ -574,12 +589,14 @@ sys.path.append('{0}')
 sys.path.append('{1}')
 from {2} import {3}
 systest = {3}()
+if {5}:
+    systest.excludeInPullRequests = lambda: False
 systest.execute()
 exitcode = systest.returnValidationCode({4})
 systest.cleanup()
 sys.exit(exitcode)'''
         return code.format(TESTING_FRAMEWORK_DIR, self._test_dir, self._modname,
-                           self._test_cls_name, TestRunner.VALIDATION_FAIL_CODE)
+                           self._test_cls_name, TestRunner.VALIDATION_FAIL_CODE, self._exclude_in_pr_builds)
 
 #########################################################################
 # A class to tie together a test and its results
@@ -593,6 +610,7 @@ class TestSuite(object):
         self._modname = modname
         self._test_cls_name = testname
         self._fqtestname = modname
+
         # A None testname indicates the source did not load properly
         # It has come this far so that it gets reported as a proper failure
         # by the framework
@@ -630,10 +648,10 @@ class TestSuite(object):
         self.setOutputMsg(reason)
         self._result.status = 'skipped'
 
-    def execute(self, runner):
+    def execute(self, runner, exclude_in_pr_builds):
         print(time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fqtestname)
         if self._test_cls_name is not None:
-          script = TestScript(self._test_dir, self._modname, self._test_cls_name)
+          script = TestScript(self._test_dir, self._modname, self._test_cls_name,exclude_in_pr_builds)
           # Start the new process and wait until it finishes
           retcode, output  = runner.start(script)
         else:
@@ -672,7 +690,7 @@ class TestSuite(object):
             entries = line.split(MantidStressTest.DELIMITER)
             if len(entries) == 3 and entries[0] == MantidStressTest.PREFIX:
                 self._result.addItem([entries[1], entries[2]])
-                
+
     def setOutputMsg(self, msg=None):
         if msg is not None:
             self._result.output = msg
@@ -685,18 +703,18 @@ class TestSuite(object):
 # The main API class
 #########################################################################
 class TestManager(object):
-    '''A manager class that is responsible for overseeing the testing process. 
+    '''A manager class that is responsible for overseeing the testing process.
     This is the main interaction point for the framework.
     '''
 
     def __init__(self, test_loc, runner, output = [TextResultReporter()],
-                 testsInclude=None, testsExclude=None):
+                 testsInclude=None, testsExclude=None, exclude_in_pr_builds=None):
         '''Initialize a class instance'''
 
         # Runners and reporters
         self._runner = runner
         self._reporters = output
-        
+
         # If given option is a directory
         if os.path.isdir(test_loc) == True:
             test_dir = os.path.abspath(test_loc).replace('\\','/')
@@ -723,6 +741,8 @@ class TestManager(object):
 
         self._testsInclude = testsInclude
         self._testsExclude = testsExclude
+        # flag to exclude slow tests from pull requests
+        self._exclude_in_pr_builds = exclude_in_pr_builds
 
     totalTests = property(lambda self: len(self._tests))
     skippedTests = property(lambda self: (self.totalTests - self._passedTests - self._failedTests))
@@ -744,7 +764,7 @@ class TestManager(object):
         # Get the defined tests
         for suite in self._tests:
             if self.__shouldTest(suite):
-                suite.execute(self._runner)
+                suite.execute(self._runner, self._exclude_in_pr_builds)
             if suite.status == "success":
                 self._passedTests += 1
             elif suite.status == "skipped":

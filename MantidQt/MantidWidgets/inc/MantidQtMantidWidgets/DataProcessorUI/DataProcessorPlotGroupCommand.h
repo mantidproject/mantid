@@ -34,21 +34,21 @@ class DataProcessorPlotGroupCommand : public DataProcessorCommandBase {
 public:
   DataProcessorPlotGroupCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorPlotGroupCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorPlotGroupCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PlotGroupFlag);
   };
-  std::string name() override { return std::string("Plot Selected Groups"); }
-  std::string icon() override { return std::string("://trajectory.png"); }
-  std::string tooltip() override {
-    return std::string("Plots the selected group");
+  QString name() override { return QString("Plot Selected Groups"); }
+  QString icon() override { return QString("://trajectory.png"); }
+  QString tooltip() override { return QString("Plots the selected group"); }
+  QString whatsthis() override {
+    return QString("Creates a plot of the post-processed workspaces "
+                   "produced by any groups any selected runs are in");
   }
-  std::string whatsthis() override {
-    return std::string("Creates a plot of the post-processed workspaces "
-                       "produced by any groups any selected runs are in");
-  }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

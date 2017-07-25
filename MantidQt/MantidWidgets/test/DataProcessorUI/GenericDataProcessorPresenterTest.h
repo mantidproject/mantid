@@ -12,6 +12,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ProgressableViewMockObject.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::MantidWidgets;
@@ -22,6 +23,72 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
+
+// Use this mocked presenter for tests that will start the reducing row/group
+// workers/threads. This overrides the async methods to be non-async, allowing
+// them to be tested.
+class GenericDataProcessorPresenterNoThread
+    : public GenericDataProcessorPresenter {
+public:
+  // Standard constructor
+  GenericDataProcessorPresenterNoThread(
+      const DataProcessorWhiteList &whitelist,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
+      const std::map<std::string, std::string> &postprocessMap =
+          std::map<std::string, std::string>(),
+      const std::string &loader = "Load")
+      : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
+                                      postprocessor, postprocessMap, loader) {}
+
+  // Delegating constructor (no pre-processing required)
+  GenericDataProcessorPresenterNoThread(
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor)
+      : GenericDataProcessorPresenter(
+            whitelist,
+            std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
+            processor, postprocessor) {}
+
+  // Destructor
+  ~GenericDataProcessorPresenterNoThread() override {}
+
+private:
+  // non-async row reduce
+  void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex) override {
+    try {
+      reduceRow(&rowItem->second);
+      m_manager->update(groupIndex, rowItem->first, rowItem->second);
+      m_manager->addHighlighted(rowItem->first, groupIndex);
+    } catch (std::exception &ex) {
+      reductionError(ex);
+      threadFinished(1);
+    }
+    threadFinished(0);
+  }
+
+  // non-async group reduce
+  void startAsyncGroupReduceThread(GroupData &groupData,
+                                   int groupIndex) override {
+    try {
+      postProcessGroup(groupData);
+      m_manager->addHighlighted(groupIndex);
+    } catch (std::exception &ex) {
+      reductionError(ex);
+      threadFinished(1);
+    }
+    threadFinished(0);
+  }
+
+  // Overriden non-async methods have same implementation as parent class
+  void process() override { GenericDataProcessorPresenter::process(); }
+  void plotRow() override { GenericDataProcessorPresenter::plotRow(); }
+  void plotGroup() override { GenericDataProcessorPresenter::process(); }
+};
+
 class GenericDataProcessorPresenterTest : public CxxTest::TestSuite {
 
 private:
@@ -376,17 +443,15 @@ public:
   void testSaveNew() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
 
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -395,18 +460,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testSaveExisting() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -414,24 +476,22 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace")).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
+        .Times(0);
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testSaveAs() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -440,13 +500,13 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // The user hits "save as" but cancels when choosing a name
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return(""));
     presenter.notify(DataProcessorPresenter::SaveAsFlag);
 
     // The user hits "save as" and and enters "Workspace" for a name
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveAsFlag);
@@ -462,18 +522,15 @@ public:
     AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -482,7 +539,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" twice with no rows selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -514,18 +571,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendRowSpecify() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -537,7 +591,7 @@ public:
     rowlist[0].insert(1);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" twice, with the second row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -569,18 +623,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendRowSpecifyPlural() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -594,7 +645,7 @@ public:
     rowlist[1].insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" once, with the second, third, and fourth row
     // selected.
@@ -624,18 +675,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendRowSpecifyGroup() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -647,7 +695,7 @@ public:
     grouplist.insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" once, with the first group selected.
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -676,18 +724,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendGroup() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -696,7 +741,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" once, with the first group selected.
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
@@ -723,18 +768,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendGroupSpecifyPlural() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspaceThreeGroups("TestWorkspace",
                                         presenter.getWhiteList());
@@ -744,7 +786,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     std::set<int> grouplist;
     grouplist.insert(0);
@@ -778,18 +820,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testDeleteRowNone() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -798,7 +837,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with no rows selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -819,18 +858,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testDeleteRowSingle() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -842,7 +878,7 @@ public:
     rowlist[0].insert(1);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with the second row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -866,18 +902,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testDeleteRowPlural() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -891,7 +924,7 @@ public:
     rowlist[1].insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with the first three rows selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -913,18 +946,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testDeleteGroup() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -933,7 +963,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete group" with no groups selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
@@ -957,18 +987,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testDeleteGroupPlural() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspaceThreeGroups("TestWorkspace",
                                         presenter.getWhiteList());
@@ -982,7 +1009,7 @@ public:
     grouplist.insert(1);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with the second row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
@@ -1006,14 +1033,13 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testProcess() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1032,7 +1058,7 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1041,15 +1067,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1097,7 +1120,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1119,7 +1142,7 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1128,15 +1151,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1193,7 +1213,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1217,7 +1237,7 @@ public:
     createMultiPeriodTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1226,15 +1246,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1285,7 +1302,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1305,7 +1322,7 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first two rows
     // selected
@@ -1317,16 +1334,13 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
-    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1375,7 +1389,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1394,7 +1408,7 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1403,15 +1417,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1499,7 +1510,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1539,7 +1550,7 @@ public:
     grouplist.insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1548,15 +1559,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1612,15 +1620,13 @@ public:
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // We should receive an error
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(1);
 
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
@@ -1630,21 +1636,18 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testBadWorkspaceLength() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // Because we to open twice, get an error twice
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(2);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(2);
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(2)
         .WillRepeatedly(Return("TestWorkspace"));
@@ -1673,18 +1676,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveAfterAppendRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // User hits "append row"
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1696,7 +1696,7 @@ public:
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
     // The user will decide not to discard their changes
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
 
@@ -1704,30 +1704,27 @@ public:
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     // The user saves
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     // The user tries to create a new table again, and does not get bothered
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveAfterAppendGroup() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // User hits "append group"
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
@@ -1736,7 +1733,7 @@ public:
     presenter.notify(DataProcessorPresenter::AppendGroupFlag);
 
     // The user will decide not to discard their changes
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
 
@@ -1744,30 +1741,27 @@ public:
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     // The user saves
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     // The user tries to create a new table again, and does not get bothered
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveAfterDeleteRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // User hits "append row" a couple of times
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1780,7 +1774,7 @@ public:
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
     // The user saves
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -1794,7 +1788,7 @@ public:
     presenter.notify(DataProcessorPresenter::DeleteRowFlag);
 
     // The user will decide not to discard their changes when asked
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
 
@@ -1805,24 +1799,21 @@ public:
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     // The user tries to create a new table again, and does not get bothered
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveAfterDeleteGroup() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // User hits "append group" a couple of times
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
@@ -1833,7 +1824,7 @@ public:
     presenter.notify(DataProcessorPresenter::AppendGroupFlag);
 
     // The user saves
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -1847,7 +1838,7 @@ public:
     presenter.notify(DataProcessorPresenter::DeleteGroupFlag);
 
     // The user will decide not to discard their changes when asked
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
 
@@ -1858,24 +1849,21 @@ public:
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     // The user tries to create a new table again, and does not get bothered
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveAndDiscard() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // User hits "append row" a couple of times
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1888,7 +1876,7 @@ public:
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
     // Then hits "new table", and decides to discard
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(true));
     presenter.notify(DataProcessorPresenter::NewTableFlag);
@@ -1898,18 +1886,15 @@ public:
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveOnOpen() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
 
@@ -1924,13 +1909,13 @@ public:
 
     // and tries to open a workspace, but gets prompted and decides not to
     // discard
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // the user does it again, but discards
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -1942,22 +1927,19 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testExpandSelection() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     auto ws = createWorkspace("TestWorkspace", presenter.getWhiteList());
     TableRow row = ws->appendRow();
@@ -2077,7 +2059,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     std::map<int, std::set<int>> selection;
     std::set<int> expected;
@@ -2155,18 +2137,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testGroupRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     auto ws = createWorkspace("TestWorkspace", presenter.getWhiteList());
     TableRow row = ws->appendRow();
@@ -2219,7 +2198,7 @@ public:
     selection[0].insert(0);
     selection[0].insert(1);
 
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(2)
         .WillRepeatedly(Return(selection));
@@ -2246,18 +2225,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testGroupRowsNothingSelected() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     auto ws = createWorkspace("TestWorkspace", presenter.getWhiteList());
     TableRow row = ws->appendRow();
@@ -2306,7 +2282,7 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
@@ -2317,18 +2293,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testClearRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2341,7 +2314,7 @@ public:
     rowlist[1].insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "clear selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -2385,18 +2358,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testCopyRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2418,18 +2388,15 @@ public:
     presenter.notify(DataProcessorPresenter::CopySelectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testCopyEmptySelection() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(std::string())).Times(1);
@@ -2439,18 +2406,15 @@ public:
     presenter.notify(DataProcessorPresenter::CopySelectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testCopyRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2478,18 +2442,15 @@ public:
     presenter.notify(DataProcessorPresenter::CopySelectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testCutRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2522,18 +2483,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(2, RunCol), "24682");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testCutRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2568,18 +2526,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(0, RunCol), "24682");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2626,18 +2581,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(1, GroupCol), "0");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteNewRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2680,18 +2632,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(4, OptionsCol), "abc");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2747,18 +2696,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(2, OptionsCol), "def");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteNewRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2812,18 +2758,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(5, OptionsCol), "def");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteEmptyClipboard() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // Empty clipboard
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2833,7 +2776,6 @@ public:
     presenter.notify(DataProcessorPresenter::PasteSelectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteToNonexistentGroup() {
@@ -2863,50 +2805,42 @@ public:
   void testImportTable() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
-    EXPECT_CALL(mockMainPresenter,
+    EXPECT_CALL(mockDataProcessorView,
                 runPythonAlgorithm("try:\n  algm = LoadTBLDialog()\n  print "
                                    "algm.getPropertyValue(\"OutputWorkspace\")"
                                    "\nexcept:\n  pass\n"));
     presenter.notify(DataProcessorPresenter::ImportTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testExportTable() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
-    EXPECT_CALL(mockMainPresenter,
+    EXPECT_CALL(mockDataProcessorView,
                 runPythonAlgorithm(
                     "try:\n  algm = SaveTBLDialog()\nexcept:\n  pass\n"));
     presenter.notify(DataProcessorPresenter::ExportTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPlotRowWarn() {
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     createTOFWorkspace("TOF_12345", "12345");
@@ -2921,7 +2855,7 @@ public:
     rowlist[0].insert(0);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _));
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _));
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
@@ -2936,18 +2870,16 @@ public:
     AnalysisDataService::Instance().remove("TOF_12345");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPlotEmptyRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
+
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(0);
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -2956,24 +2888,21 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(2)
         .WillRepeatedly(Return(std::set<int>()));
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _));
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _));
     // Append an empty row to our table
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
     // Attempt to plot the empty row (should result in critical warning)
     presenter.notify(DataProcessorPresenter::PlotRowFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPlotGroupWithEmptyRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     createTOFWorkspace("TOF_12345", "12345");
@@ -2991,7 +2920,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(2)
         .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _));
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _));
     // Open up our table with one row
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
     // Append an empty row to the table
@@ -3001,18 +2930,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("TOF_12345");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPlotGroupWarn() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     createTOFWorkspace("TOF_12345", "12345");
@@ -3026,7 +2952,7 @@ public:
     grouplist.insert(0);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _));
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _));
     // The user hits "plot groups" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
@@ -3042,18 +2968,15 @@ public:
     AnalysisDataService::Instance().remove("TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testWorkspaceNamesNoTrans() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -3085,18 +3008,15 @@ public:
                      "TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testWorkspaceNamesWithTrans() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspaceWithTrans("TestWorkspace",
                                       presenter.getWhiteList());
@@ -3131,19 +3051,16 @@ public:
                      "TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testWorkspaceNameWrongData() {
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspaceWithTrans("TestWorkspace",
                                       presenter.getWhiteList());
@@ -3164,7 +3081,6 @@ public:
     TS_ASSERT_THROWS_ANYTHING(presenter.getPostprocessedWorkspaceName(group));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   /// Tests the reduction when no pre-processing algorithms are given
@@ -3180,9 +3096,9 @@ public:
     EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(0);
     EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
     // Constructor (no pre-processing)
-    GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
-                                            createReflectometryProcessor(),
-                                            createReflectometryPostprocessor());
+    GenericDataProcessorPresenterNoThread presenter(
+        createReflectometryWhiteList(), createReflectometryProcessor(),
+        createReflectometryPostprocessor());
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
 
@@ -3221,7 +3137,7 @@ public:
     createTOFWorkspace("12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -3230,13 +3146,10 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
-        .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString()).Times(0);
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(0);
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -3277,12 +3190,10 @@ public:
   void testPlotRowPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -3297,7 +3208,7 @@ public:
     rowlist[0].insert(1);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
@@ -3312,7 +3223,7 @@ public:
         "base_graph)\nbase_graph = plotSpectrum(\"IvsQ_binned_TOF_12346\", 0, "
         "True, window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
-    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     presenter.notify(DataProcessorPresenter::PlotRowFlag);
 
     // Tidy up
@@ -3321,18 +3232,15 @@ public:
     AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPlotGroupPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -3344,7 +3252,7 @@ public:
     std::set<int> group = {0};
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
@@ -3358,7 +3266,7 @@ public:
         "plotSpectrum(\"IvsQ_TOF_12345_TOF_12346\", 0, True, window = "
         "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
-    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     presenter.notify(DataProcessorPresenter::PlotGroupFlag);
 
     // Tidy up
@@ -3366,7 +3274,6 @@ public:
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testNoPostProcessing() {
@@ -3375,11 +3282,9 @@ public:
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
                                             createReflectometryProcessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // Calls that should throw
     TS_ASSERT_THROWS_ANYTHING(
@@ -3403,7 +3308,7 @@ public:
     NiceMock<MockMainPresenter> mockMainPresenter;
 
     std::map<std::string, std::string> postprocesssMap = {{"dQ/Q", "Params"}};
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
         postprocesssMap);
@@ -3424,7 +3329,7 @@ public:
     grouplist.insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -3433,15 +3338,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -3489,6 +3391,71 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testPauseReduction() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // User hits the 'pause' button
+    EXPECT_CALL(mockDataProcessorView, pause()).Times(1);
+    EXPECT_CALL(mockMainPresenter, pause()).Times(1);
+
+    presenter.notify(DataProcessorPresenter::PauseFlag);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testResumeReduction() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // User hits the 'resume' button
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
+
+    presenter.setNewSelectionState(false);
+    presenter.notify(DataProcessorPresenter::ProcessFlag);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testInstrumentList() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    MockProgressableView mockProgress;
+    GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
+                                            createReflectometryProcessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+
+    EXPECT_CALL(mockDataProcessorView,
+                setInstrumentList(
+                    QString::fromStdString("INTER,SURF,POLREF,OFFSPEC,CRISP"),
+                    QString::fromStdString("INTER"))).Times(1);
+    presenter.setInstrumentList(
+        std::vector<std::string>{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"},
+        "INTER");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 };
 

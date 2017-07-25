@@ -125,7 +125,7 @@ public:
   void modify_allowed_values(Property *const);
 
   /// Make a copy of the present type of validator
-  IPropertySettings *clone() override;
+  IPropertySettings *clone() const override;
 
 protected:
   /// Struct which holds associated property details for comparison

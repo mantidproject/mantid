@@ -1,34 +1,34 @@
+#include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidDataObjects/MDBoxFlatTree.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/Memory.h"
-#include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/MDUnitFactory.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidMDAlgorithms/SetMDFrame.h"
-#include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidDataObjects/CoordTransformAffine.h"
-#include "MantidKernel/ConfigService.h"
-#include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <iostream>
+#include <nexus/NeXusException.hpp>
 #include <vector>
 
 typedef std::unique_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
@@ -496,7 +496,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                 ": this is not possible.");
 
   CPUTimer tim;
-  auto prog = new Progress(this, 0.0, 1.0, 100);
+  auto prog = make_unique<Progress>(this, 0.0, 1.0, 100);
 
   prog->report("Opening file.");
   std::string title;
@@ -617,7 +617,6 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                 << " points after refresh.\n";
 
   g_log.debug() << tim << " to finish up.\n";
-  delete prog;
 }
 
 /**

@@ -2,11 +2,13 @@
 import math
 import time
 import sys
+import os
 from functools import partial
 import numpy as np
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 from reduction_gui.widgets.base_widget import BaseWidget
+
 # from launch_peak_back_selection_1d import DesignerMainWindow
 
 IS_IN_MANTIDPLOT = False
@@ -14,12 +16,12 @@ try:
     # from MantidFramework import *
     # mtd.initialise(False)
     # from mantidsimple import *
-    from mantid.simpleapi import *
+    import mantid.simpleapi as mantid
     from reduction.instruments.reflectometer import data_manipulation
 
     IS_IN_MANTIDPLOT = True
-except ImportError, e:
-    logger.error(e.message())
+except ImportError as e:
+    mantid.logger.error(e)
 
 
 class BaseRefWidget(BaseWidget):
@@ -57,14 +59,16 @@ class BaseRefWidget(BaseWidget):
         # Validators
         self._summary.data_peak_from_pixel.setValidator(QtGui.QIntValidator(self._summary.data_peak_from_pixel))
         self._summary.data_peak_to_pixel.setValidator(QtGui.QIntValidator(self._summary.data_peak_to_pixel))
-        self._summary.data_background_from_pixel1.setValidator(QtGui.QIntValidator(self._summary.data_background_from_pixel1))
-        self._summary.data_background_to_pixel1.setValidator(QtGui.QIntValidator(self._summary.data_background_to_pixel1))
+        self._summary.data_background_from_pixel1.setValidator(
+            QtGui.QIntValidator(self._summary.data_background_from_pixel1))
+        self._summary.data_background_to_pixel1.setValidator(
+            QtGui.QIntValidator(self._summary.data_background_to_pixel1))
         self._summary.data_from_tof.setValidator(QtGui.QIntValidator(self._summary.data_from_tof))
         self._summary.data_to_tof.setValidator(QtGui.QIntValidator(self._summary.data_to_tof))
         self._summary.dq0.setValidator(QtGui.QDoubleValidator(self._summary.dq0))
         self._summary.dq_over_q.setValidator(QtGui.QDoubleValidator(self._summary.dq_over_q))
-#        self._summary.overlapValueMeanRadioButton(QtGui.setChecked(False)
-#        self._summary.overlapValueLowestErrorRadioButton.setChecked(True)
+        #        self._summary.overlapValueMeanRadioButton(QtGui.setChecked(False)
+        #        self._summary.overlapValueLowestErrorRadioButton.setChecked(True)
 
         self._summary.x_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_min_edit))
         self._summary.x_max_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_max_edit))
@@ -75,12 +79,15 @@ class BaseRefWidget(BaseWidget):
         self._summary.q_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_min_edit))
 
         self._summary.angle_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_offset_edit))
-        self._summary.angle_offset_error_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_offset_error_edit))
+        self._summary.angle_offset_error_edit.setValidator(
+            QtGui.QDoubleValidator(self._summary.angle_offset_error_edit))
 
         self._summary.norm_peak_from_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_from_pixel))
         self._summary.norm_peak_to_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_to_pixel))
-        self._summary.norm_background_from_pixel1.setValidator(QtGui.QIntValidator(self._summary.norm_background_from_pixel1))
-        self._summary.norm_background_to_pixel1.setValidator(QtGui.QIntValidator(self._summary.norm_background_to_pixel1))
+        self._summary.norm_background_from_pixel1.setValidator(
+            QtGui.QIntValidator(self._summary.norm_background_from_pixel1))
+        self._summary.norm_background_to_pixel1.setValidator(
+            QtGui.QIntValidator(self._summary.norm_background_to_pixel1))
 
         # Event connections
         self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("returnPressed()"),
@@ -225,7 +232,7 @@ class BaseRefWidget(BaseWidget):
         This retrieve the metadata from the data event NeXus filename
         """
         _full_file_name = filename
-        tmpWks = LoadEventNexus(Filename=_full_file_name,MetaDataOnly='1')
+        tmpWks = mantid.LoadEventNexus(Filename=_full_file_name, MetaDataOnly='1')
 
         isSi = False
 
@@ -257,7 +264,7 @@ class BaseRefWidget(BaseWidget):
         except:
             s2w = mt_run.getProperty('S2HWidth').value[0]
 
-        return [tthd,ths, lambda_requested, s1h, s2h, s1w, s2w, isSi]
+        return [tthd, ths, lambda_requested, s1h, s2h, s1w, s2w, isSi]
 
     def data_run_number_validated(self):
         """
@@ -265,30 +272,30 @@ class BaseRefWidget(BaseWidget):
         number and will retrieve some of the metadata and display them
         in the metadata box
         """
-#        self._summary.data_run_number_processing.show()
+        #        self._summary.data_run_number_processing.show()
         run_number = self._summary.data_run_number_edit.text()
 
         try:
-            _file = FileFinder.findRuns("REF_L%d"%int(run_number))[0]
+            _file = mantid.FileFinder.findRuns("REF_L%d" % int(run_number))[0]
 
-            metadata= self.getMetadata(_file)
+            metadata = self.getMetadata(_file)
 
-            #tthd
+            # tthd
             tthd_value = metadata[0]
             tthd_value_string = '{0:.2f}'.format(tthd_value)
             self._summary.tthd_value.setText(tthd_value_string)
 
-            #ths
+            # ths
             ths_value = metadata[1]
             ths_value_string = '{0:.2f}'.format(ths_value)
             self._summary.ths_value.setText(ths_value_string)
 
-            #lambda requested
+            # lambda requested
             lambda_value = metadata[2]
             lambda_value_string = '{0:.2f}'.format(lambda_value)
             self._summary.lambda_request.setText(lambda_value_string)
 
-            #s1h, s2h, s1w and s2w
+            # s1h, s2h, s1w and s2w
             s1h_value = metadata[3]
             s1h_value_string = '{0:.2f}'.format(s1h_value)
             self._summary.s1h.setText(s1h_value_string)
@@ -309,17 +316,17 @@ class BaseRefWidget(BaseWidget):
             self._summary.s2w.setText(s2w_value_string)
 
             isSi = metadata[7]
-            print isSi
+            print(isSi)
             if isSi:
                 self._summary.label_25.setText("Si height:")
                 self._summary.label_27.setText("Si width:")
             else:
                 self._summary.label25.setText("S2 height:")
                 self._summary.label27.setText("S2 width:")
-#            self._summary.data_run_number_processing.hide()
+            #            self._summary.data_run_number_processing.hide()
         except:
             pass
-#            self._summary.data_run_number_processing.hide()
+        #            self._summary.data_run_number_processing.hide()
 
     def _output_dir_browse(self):
         output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
@@ -334,22 +341,22 @@ class BaseRefWidget(BaseWidget):
         This method will do an weighted average of the value when
         their x-axis is within a given range (precision)
         """
-        _precision = 0.1/100.   #0.1%
+        _precision = 0.1 / 100.  # 0.1%
 
         new_x_axis = []
         new_y_axis = []
         new_e_axis = []
 
-#        if self.bDEBUG:
-#            print 'x_axis before _smooth_x_axis:'
-#            print x_axis
+        #        if self.bDEBUG:
+        #            print 'x_axis before _smooth_x_axis:'
+        #            print x_axis
 
         sz = len(x_axis)
-        i=0
-        while i < sz-1:
+        i = 0
+        while i < sz - 1:
 
             _left_x = x_axis[i]
-            _right_x = x_axis[i+1]
+            _right_x = x_axis[i + 1]
 
             bCalAverage = False
             if _left_x == _right_x:
@@ -367,26 +374,26 @@ class BaseRefWidget(BaseWidget):
 
             if bCalAverage:
 
-                #average the two values
-                _right_e = e_axis[i+1]
+                # average the two values
+                _right_e = e_axis[i + 1]
                 _right_e2 = _right_e * _right_e
-                _right_y = y_axis[i+1]
+                _right_y = y_axis[i + 1]
 
                 if _left_e2 == 0. or _right_e2 == 0.:
                     _y = 0.
                     _e = 0.
                 else:
 
-                    _error = 1./_left_e2 + 1./_right_e2
+                    _error = 1. / _left_e2 + 1. / _right_e2
                     _x = (_left_x + _right_x) / 2.
-                    _y = (_left_y/_left_e2 + _right_y/_right_e2) / _error
-                    _e = math.sqrt(1./_error)
+                    _y = (_left_y / _left_e2 + _right_y / _right_e2) / _error
+                    _e = math.sqrt(1. / _error)
 
                 new_x_axis.append(_x)
                 new_y_axis.append(_y)
                 new_e_axis.append(_e)
 
-                i+=1
+                i += 1
 
             else:
 
@@ -394,12 +401,12 @@ class BaseRefWidget(BaseWidget):
                 new_y_axis.append(y_axis[i])
                 new_e_axis.append(e_axis[i])
 
-            i+=1
+            i += 1
 
-#        if self.bDEBUG:
-#            print
-#            print 'x-axis after _smooth_x_axis:'
-#            print new_x_axis
+        #        if self.bDEBUG:
+        #            print
+        #            print 'x-axis after _smooth_x_axis:'
+        #            print new_x_axis
 
         self.x_axis = new_x_axis
         self.y_axis = new_y_axis
@@ -420,7 +427,7 @@ class BaseRefWidget(BaseWidget):
         dataDen = 0
         for i in range(sz):
             if error_array[i] != 0:
-                tmpFactor = 1./float((pow(error_array[i], 2)))
+                tmpFactor = 1. / float((pow(error_array[i], 2)))
                 dataDen += tmpFactor
 
         if dataDen == 0:
@@ -428,7 +435,7 @@ class BaseRefWidget(BaseWidget):
             mean_error = 0
         else:
             mean = float(dataNum) / float(dataDen)
-            mean_error = math.sqrt(1/dataDen)
+            mean_error = math.sqrt(1 / dataDen)
 
         return [mean, mean_error]
 
@@ -438,7 +445,7 @@ class BaseRefWidget(BaseWidget):
         the weighted mean
         """
 
-        ws_list = AnalysisDataService.getObjectNames()
+        ws_list = mantid.AnalysisDataService.getObjectNames()
         scaled_ws_list = []
 
         # Get the list of scaled histos
@@ -455,19 +462,19 @@ class BaseRefWidget(BaseWidget):
         # Convert each histo to histograms and rebin to final binning
         for ws in scaled_ws_list:
             new_name = "%s_histo" % ws
-            ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
-            Rebin(InputWorkspace=new_name, Params=binning_parameters,
-                  OutputWorkspace=new_name)
+            mantid.ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
+            mantid.Rebin(InputWorkspace=new_name, Params=binning_parameters,
+                         OutputWorkspace=new_name)
 
         # Take the first rebinned histo as our output
-        data_y = mtd[scaled_ws_list[0]+'_histo'].dataY(0)
-        data_e = mtd[scaled_ws_list[0]+'_histo'].dataE(0)
+        data_y = mantid.mtd[scaled_ws_list[0] + '_histo'].dataY(0)
+        data_e = mantid.mtd[scaled_ws_list[0] + '_histo'].dataE(0)
 
         # Add in the other histos, averaging the overlaps
         for scaled_ws in scaled_ws_list:
             y_val_index = 0
-            data_y_i = mtd[scaled_ws +'_histo'].dataY(0)
-            data_e_i = mtd[scaled_ws+'_histo'].dataE(0)
+            data_y_i = mantid.mtd[scaled_ws + '_histo'].dataY(0)
+            data_e_i = mantid.mtd[scaled_ws + '_histo'].dataE(0)
             for y_val in data_y_i:
                 y_val_index += 1
                 if data_y[y_val_index] > 0 and y_val > 0:
@@ -478,7 +485,7 @@ class BaseRefWidget(BaseWidget):
                     data_y[y_val_index] = y_val
                     data_e[y_val_index] = data_e_i[y_val_index]
 
-        return scaled_ws_list[0]+'_histo'
+        return scaled_ws_list[0] + '_histo'
 
     def _produce_y_of_same_x_(self, isUsingLessErrorValue):
         """
@@ -486,7 +493,7 @@ class BaseRefWidget(BaseWidget):
         the weighted mean
         """
 
-        ws_list = AnalysisDataService.getObjectNames()
+        ws_list = mantid.AnalysisDataService.getObjectNames()
         scaled_ws_list = []
 
         # Get the list of scaled histos
@@ -502,17 +509,13 @@ class BaseRefWidget(BaseWidget):
 
         # DEBUGGING ONLY
         _file_number = 0
-#        print '=========== BEFORE REBINING =========='
+        #        print '=========== BEFORE REBINING =========='
         for ws in scaled_ws_list:
             # print 'file_number: ' , file_number
-            data_y = mtd[ws].dataY(0)
+            data_y = mantid.mtd[ws].dataY(0)
 
             # cleanup data 0-> NAN
-            for y_val in data_y:
-                # print '-> data_y[j]: ' , data_y[j] , ' data_e[j]: ' , data_y[j]
-                if y_val < 1e-12:
-                    _y_val = np.nan
-
+            data_y = [np.nan if y_val < 1e-12 else y_val for y_val in data_y]
             _file_number += 1
 
         # END OF DEBUGGING ONLY
@@ -520,38 +523,38 @@ class BaseRefWidget(BaseWidget):
         # Convert each histo to histograms and rebin to final binning
         for ws in scaled_ws_list:
             new_name = "%s_histo" % ws
-            ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
-#            mtd[new_name].setDistribution(True)
-            Rebin(InputWorkspace=new_name, Params=binning_parameters,
-                  OutputWorkspace=new_name)
+            mantid.ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
+            #            mtd[new_name].setDistribution(True)
+            mantid.Rebin(InputWorkspace=new_name, Params=binning_parameters,
+                         OutputWorkspace=new_name)
 
         # Take the first rebinned histo as our output
-        data_y = mtd[scaled_ws_list[0]+'_histo'].dataY(0)
-        data_e = mtd[scaled_ws_list[0]+'_histo'].dataE(0)
+        data_y = mantid.mtd[scaled_ws_list[0] + '_histo'].dataY(0)
+        data_e = mantid.mtd[scaled_ws_list[0] + '_histo'].dataE(0)
 
         # skip first 3 points and last one
         skip_index = 0
         point_to_skip = 3
 
-#        print '============ AFTER REBINING ================' #DEBUGGING ONLY
+        #        print '============ AFTER REBINING ================' #DEBUGGING ONLY
 
         # Add in the other histos, averaging the overlaps
         for i in range(1, len(scaled_ws_list)):
 
-#            print 'i: ' , i
+            #            print 'i: ' , i
 
             skip_point = True
             can_skip_last_point = False
 
-            data_y_i = mtd[scaled_ws_list[i]+'_histo'].dataY(0)
-            data_e_i = mtd[scaled_ws_list[i]+'_histo'].dataE(0)
-            for j in range(len(data_y_i)-1):
+            data_y_i = mantid.mtd[scaled_ws_list[i] + '_histo'].dataY(0)
+            data_e_i = mantid.mtd[scaled_ws_list[i] + '_histo'].dataE(0)
+            for j in range(len(data_y_i) - 1):
 
-#                print '-> j: ' , j
+                #                print '-> j: ' , j
 
                 if data_y_i[j] > 0:
 
-#                    print '   data_y_i[j]: ', data_y_i[j], ' data_e_i[j]: ' , data_e_i[j]
+                    #                    print '   data_y_i[j]: ', data_y_i[j], ' data_e_i[j]: ' , data_e_i[j]
 
                     can_skip_last_point = True
                     if skip_point:
@@ -562,10 +565,10 @@ class BaseRefWidget(BaseWidget):
                         else:
                             continue
 
-                if can_skip_last_point and (data_y_i[j+1]==0):
+                if can_skip_last_point and (data_y_i[j + 1] == 0):
                     break
 
-                if data_y[j]>0 and data_y_i[j]>0:
+                if data_y[j] > 0 and data_y_i[j] > 0:
 
                     if isUsingLessErrorValue:
                         if data_e[j] > data_e_i[j]:
@@ -574,33 +577,33 @@ class BaseRefWidget(BaseWidget):
                     else:
                         [data_y[j], data_e[j]] = self.weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]])
 
-                elif (data_y[j] == 0) and (data_y_i[j]>0):
+                elif (data_y[j] == 0) and (data_y_i[j] > 0):
                     data_y[j] = data_y_i[j]
                     data_e[j] = data_e_i[j]
 
-        return scaled_ws_list[0]+'_histo'
+        return scaled_ws_list[0] + '_histo'
 
     def _create_ascii_clicked(self):
         """
         Reached by the 'Create ASCII' button
         """
 
-        #make sure there is the right output workspace called '
-#        if not mtd.workspaceExists('ref_combined'):
-#            print 'Workspace "ref_combined" does not exist !'
-#            return
+        # make sure there is the right output workspace called '
+        #        if not mtd.workspaceExists('ref_combined'):
+        #            print 'Workspace "ref_combined" does not exist !'
+        #            return
 
-        #get default output file name
+        # get default output file name
         run_number = self._summary.data_run_number_edit.text()
         default_file_name = 'REFL_' + run_number + '_combined_data.txt'
 
-        #retrieve name of the output file
+        # retrieve name of the output file
         file_name = QtGui.QFileDialog.getSaveFileName(self, "Select or define a ASCII file name", default_file_name,
                                                       "(*.txt)")
         if str(file_name).strip() == '':
             return
 
-        #check the status of the 4th column switch
+        # check the status of the 4th column switch
         _with_4th_flag = self._summary.fourth_column_switch.isChecked()
         text = []
         if _with_4th_flag:
@@ -613,36 +616,36 @@ class BaseRefWidget(BaseWidget):
         else:
             text = ['#Q(1/Angstrom) R delta_R']
 
-#        #rebinned using output factors
-#        q_min = float(self._summary.q_min_edit.text())
-#        q_bin = -float(self._summary.q_step_edit.text())
-#
-#        mt = mtd['ref_combined']
-#        x_axis = mt.readX(0)[:]
-#        q_max = float(x_axis[-1])
-#
-#        q_binning = [q_min, q_bin, q_max]
-#        Rebin(InputWorkspace='ref_combined',
-#              OutputWorkspace='ref_combined',
-#              Params=q_binning)
+        #        #rebinned using output factors
+        #        q_min = float(self._summary.q_min_edit.text())
+        #        q_bin = -float(self._summary.q_step_edit.text())
+        #
+        #        mt = mtd['ref_combined']
+        #        x_axis = mt.readX(0)[:]
+        #        q_max = float(x_axis[-1])
+        #
+        #        q_binning = [q_min, q_bin, q_max]
+        #        Rebin(InputWorkspace='ref_combined',
+        #              OutputWorkspace='ref_combined',
+        #              Params=q_binning)
 
-        #using mean or value with less error
+        # using mean or value with less error
         _overlap_less_error_flag = self._summary.overlapValueLowestErrorRadioButton.isChecked()
         wks_file_name = self._produce_y_of_same_x_(_overlap_less_error_flag)
-#        print 'wks_file_name: ' , wks_file_name
+        #        print 'wks_file_name: ' , wks_file_name
 
-#        mt = mtd['ref_combined']
-#        x_axis = mt.readX(0)[:]
-#        y_axis = mt.readY(0)[:]
-#        e_axis = mt.readE(0)[:]
-#
-#        self._smooth_x_axis(x_axis, y_axis, e_axis)
+        #        mt = mtd['ref_combined']
+        #        x_axis = mt.readX(0)[:]
+        #        y_axis = mt.readY(0)[:]
+        #        e_axis = mt.readE(0)[:]
+        #
+        #        self._smooth_x_axis(x_axis, y_axis, e_axis)
 
-        x_axis = mtd[wks_file_name].readX(0)[:]
-        y_axis = mtd[wks_file_name].readY(0)[:]
-        e_axis = mtd[wks_file_name].readE(0)[:]
+        x_axis = mantid.mtd[wks_file_name].readX(0)[:]
+        y_axis = mantid.mtd[wks_file_name].readY(0)[:]
+        e_axis = mantid.mtd[wks_file_name].readE(0)[:]
 
-        sz = len(x_axis)-1
+        sz = len(x_axis) - 1
         for i in range(sz):
             # do not display data where R=0
             if y_axis[i] > 1e-15:
@@ -654,7 +657,7 @@ class BaseRefWidget(BaseWidget):
                     _line += ' ' + _precision
                 text.append(_line)
 
-        f=open(file_name,'w')
+        f = open(file_name, 'w')
         for _line in text:
             f.write(_line + '\n')
 
@@ -669,7 +672,7 @@ class BaseRefWidget(BaseWidget):
                     self._summary.cfg_scaling_factor_file_name.setText(file_name)
                     self.retrieve_list_of_incident_medium(file_name)
         except:
-            print 'Invalid file format (' + file_name + ')'
+            print('Invalid file format (' + file_name + ')')
 
     def variable_value_splitter(self, variable_value):
         """
@@ -679,7 +682,7 @@ class BaseRefWidget(BaseWidget):
         _split = variable_value.split('=')
         variable = _split[0]
         value = _split[1]
-        return {'variable':variable, 'value':value}
+        return {'variable': variable, 'value': value}
 
     def retrieve_list_of_incident_medium(self, cfg_file_name):
         """
@@ -687,7 +690,7 @@ class BaseRefWidget(BaseWidget):
         populate the Incident Medium dropbox with the list of incident medium
         found
         """
-        f=open(cfg_file_name,'r')
+        f = open(cfg_file_name, 'r')
         text = f.readlines()
         list_incident_medium = []
         for _line in text:
@@ -761,7 +764,7 @@ class BaseRefWidget(BaseWidget):
         m.data_files = ["runNumber"]
         reduce_script = m.to_script(True)
 
-        content =  "# Script automatically generated by Mantid on %s\n" % time.ctime()
+        content = "# Script automatically generated by Mantid on %s\n" % time.ctime()
         content += "import sys\n"
         content += "import os\n"
         content += "if (os.environ.has_key(\"MANTIDPATH\")):\n"
@@ -794,7 +797,7 @@ class BaseRefWidget(BaseWidget):
         xml_str += "  <timestamp>%s</timestamp>\n" % time.ctime()
         xml_str += "  <python_version>%s</python_version>\n" % sys.version
         if IS_IN_MANTIDPLOT:
-            xml_str += "  <mantid_version>%s</mantid_version>\n" % mantid_build_version()
+            xml_str += "  <mantid_version>%s</mantid_version>\n" % mantid.mantid_build_version()
         xml_str += m.to_xml()
         xml_str += "</Reduction>\n"
 
@@ -817,7 +820,7 @@ class BaseRefWidget(BaseWidget):
         content += "          CommentIndicator='# ')\n"
 
         home_dir = os.path.expanduser('~')
-        f=open(os.path.join(home_dir,"reduce_%s.py" % self.instrument_name),'w')
+        f = open(os.path.join(home_dir, "reduce_%s.py" % self.instrument_name), 'w')
         f.write(content)
         f.close()
 
@@ -825,23 +828,23 @@ class BaseRefWidget(BaseWidget):
         def _report_error(error=None):
             message = ""
             if error is not None:
-                message += error+'\n\n'
+                message += error + '\n\n'
             else:
                 message += "The automated reduction script could not be saved.\n\n"
             message += "Your script has been saved in your home directory:\n"
-            message += os.path.join(home_dir,"reduce_%s.py" % self.instrument_name)
+            message += os.path.join(home_dir, "reduce_%s.py" % self.instrument_name)
             message += "\n\nTry copying it by hand in %s\n" % sns_path
             QtGui.QMessageBox.warning(self, "Error saving automated reduction script", message)
 
         sns_path = "/SNS/%s/shared/autoreduce" % self.instrument_name
         if os.path.isdir(sns_path):
             if os.access(sns_path, os.W_OK):
-                file_path = os.path.join(sns_path,"reduce_%s.py" % self.instrument_name)
+                file_path = os.path.join(sns_path, "reduce_%s.py" % self.instrument_name)
                 if os.path.isfile(file_path) and not os.access(file_path, os.W_OK):
                     _report_error("You do not have permissions to overwrite %s." % file_path)
                     return
                 try:
-                    f = open(file_path,'w')
+                    f = open(file_path, 'w')
                     f.write(content)
                     f.close()
                     QtGui.QMessageBox.information(self, "Automated reduction script saved",
@@ -865,12 +868,12 @@ class BaseRefWidget(BaseWidget):
             self._summary.auto_reduce_btn.hide()
 
     def _remove_item(self):
-        if self._summary.angle_list.count()==0:
+        if self._summary.angle_list.count() == 0:
             return
         self._summary.angle_list.setEnabled(False)
         self._summary.remove_btn.setEnabled(False)
         row = self._summary.angle_list.currentRow()
-        if row>=0:
+        if row >= 0:
             self._summary.angle_list.takeItem(row)
         self._summary.angle_list.setEnabled(True)
         self._summary.remove_btn.setEnabled(True)
@@ -981,7 +984,7 @@ class BaseRefWidget(BaseWidget):
         self._summary.tof_max_label.setEnabled(is_checked)
         self._summary.data_to_tof.setEnabled(is_checked)
         self._summary.tof_max_label2.setEnabled(is_checked)
-        #self._summary.plot_tof_btn.setEnabled(is_checked)
+        # self._summary.plot_tof_btn.setEnabled(is_checked)
 
         self._edit_event(None, self._summary.tof_range_switch)
 
@@ -1001,40 +1004,40 @@ class BaseRefWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-#        run_number = self._summary.data_run_number_edit.text()
-#        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
-#
-#        #range_min = int(min_ctrl.text())
-#        #range_max = int(max_ctrl.text())
-#
-#        # For REFL, Y is high-res
-#        is_pixel_y = True
-#        is_high_res = True
-#        isPeak = True
-#        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
-#                                                                      high_res=is_high_res,
-#                                                                      instrument=self.short_name,
-#                                                                      isPeak=isPeak)
-#
-#        # for low res
-#        is_high_res = False
-#        is_pixel_y = False
-#        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
-#                                                                      high_res=is_high_res,
-#                                                                      instrument=self.short_name,
-#                                                                      isPeak=isPeak)
-#
-#
-#        basename = os.path.basename(f)
-#        wk1 = "Peak - " + basename + " - Y pixel "
-#        wk2 = "Peak - " + basename + " - X pixel "
-#        dmw = DesignerMainWindow(parent=self, wk1=wk1, wk2=wk2, type='data')
-#
-#        # show it
-#        dmw.show()
-#        # start the Qt main loop execution, existing from this script
-#        # with the same return code of Qt application
-##        sys.exit(app.exec_())
+        #        run_number = self._summary.data_run_number_edit.text()
+        #        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
+        #
+        #        #range_min = int(min_ctrl.text())
+        #        #range_max = int(max_ctrl.text())
+        #
+        #        # For REFL, Y is high-res
+        #        is_pixel_y = True
+        #        is_high_res = True
+        #        isPeak = True
+        #        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
+        #                                                                      high_res=is_high_res,
+        #                                                                      instrument=self.short_name,
+        #                                                                      isPeak=isPeak)
+        #
+        #        # for low res
+        #        is_high_res = False
+        #        is_pixel_y = False
+        #        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
+        #                                                                      high_res=is_high_res,
+        #                                                                      instrument=self.short_name,
+        #                                                                      isPeak=isPeak)
+        #
+        #
+        #        basename = os.path.basename(f)
+        #        wk1 = "Peak - " + basename + " - Y pixel "
+        #        wk2 = "Peak - " + basename + " - X pixel "
+        #        dmw = DesignerMainWindow(parent=self, wk1=wk1, wk2=wk2, type='data')
+        #
+        #        # show it
+        #        dmw.show()
+        #        # start the Qt main loop execution, existing from this script
+        #        # with the same return code of Qt application
+        ##        sys.exit(app.exec_())
 
         _minimum, _maximum = self._integrated_plot(True,
                                                    self._summary.data_run_number_edit,
@@ -1080,73 +1083,73 @@ class BaseRefWidget(BaseWidget):
         """
 
         # retrieve name of workspace first
-        run_number =  self._summary.data_run_number_edit.text()
-        file_path = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
+        run_number = self._summary.data_run_number_edit.text()
+        file_path = mantid.FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
 
         basename = os.path.basename(file_path)
 
-#         if self.instrument_name == 'REF_L':
-#             ws_output_base = "Pixel Y vs TOF" + " - " + basename
-#         else:
-#             ws_output_base = "Pixel X vs TOF" + " - " + basename
+        #         if self.instrument_name == 'REF_L':
+        #             ws_output_base = "Pixel Y vs TOF" + " - " + basename
+        #         else:
+        #             ws_output_base = "Pixel X vs TOF" + " - " + basename
 
-#        if (self.instrument_name == 'REF_L'):
-#            if isPeak:
-#                type = 'Peak'
-#            else:
-#                type = 'Background'
-#            if is_pixel_y is False:
-#                x_title = "X pixel"
-#            else:
-#                x_title = "Y pixel"
-#            ws_output_base =  type + " - " + basename + " - " + x_title
-#        else:
-#            ws_output_base = "Counts vs TOF - %s" % basename
-#            x_title = "Y pixel"
-#            if is_pixel_y is False:
-#                ws_output_base = "Counts vs X pixel - %s" % basename
-#                x_title = "X pixel"
+        #        if (self.instrument_name == 'REF_L'):
+        #            if isPeak:
+        #                type = 'Peak'
+        #            else:
+        #                type = 'Background'
+        #            if is_pixel_y is False:
+        #                x_title = "X pixel"
+        #            else:
+        #                x_title = "Y pixel"
+        #            ws_output_base =  type + " - " + basename + " - " + x_title
+        #        else:
+        #            ws_output_base = "Counts vs TOF - %s" % basename
+        #            x_title = "Y pixel"
+        #            if is_pixel_y is False:
+        #                ws_output_base = "Counts vs X pixel - %s" % basename
+        #                x_title = "X pixel"
 
-#         range_min = int(self._summary.data_from_tof.text())
-#         range_max = int(self._summary.data_to_tof.text())
+        #         range_min = int(self._summary.data_from_tof.text())
+        #         range_max = int(self._summary.data_to_tof.text())
 
         ws_output_base = "Peak - " + basename + " - Y pixel _2D"
-#        if mtd.workspaceExists(ws_output_base):
-#            mtd.deleteWorkspace(ws_output_base)
-#            ws_output_base_1 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs"
-#            mtd.deleteWorkspace(ws_output_base_1)
-#            ws_output_base_2 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs_all"
-#            mtd.deleteWorkspace(ws_output_base_2)
-#            ws_output_base_3 = "Peak - " + self.instrument_name + "_" + str(run_number) + "_event.nxs - Y pixel "
-#            mtd.deleteWorkspace(ws_output_base_3)
+        #        if mtd.workspaceExists(ws_output_base):
+        #            mtd.deleteWorkspace(ws_output_base)
+        #            ws_output_base_1 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs"
+        #            mtd.deleteWorkspace(ws_output_base_1)
+        #            ws_output_base_2 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs_all"
+        #            mtd.deleteWorkspace(ws_output_base_2)
+        #            ws_output_base_3 = "Peak - " + self.instrument_name + "_" + str(run_number) + "_event.nxs - Y pixel "
+        #            mtd.deleteWorkspace(ws_output_base_3)
 
-        if mtd.doesExist(ws_output_base):
-            DeleteWorkspace(ws_output_base)
+        if mantid.mtd.doesExist(ws_output_base):
+            mantid.DeleteWorkspace(ws_output_base)
             ws_output_base_1 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs"
-            DeleteWorkspace(ws_output_base_1)
+            mantid.DeleteWorkspace(ws_output_base_1)
             ws_output_base_2 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs_all"
-            DeleteWorkspace(ws_output_base_2)
+            mantid.DeleteWorkspace(ws_output_base_2)
             ws_output_base_3 = "Peak - " + self.instrument_name + "_" + str(run_number) + "_event.nxs - Y pixel "
-            DeleteWorkspace(ws_output_base_3)
+            mantid.DeleteWorkspace(ws_output_base_3)
 
         data_manipulation.counts_vs_pixel_distribution(file_path,
                                                        is_pixel_y=True,
                                                        callback=None,
                                                        instrument='REFL')
 
-#        def call_back(peakmin, peakmax, backmin, backmax, tofmin, tofmax):
-#            print 'Inside the call_back on the python side'
-#            self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
-#            self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
-#            self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
-#            self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
-#            self._summary.x_min_edit.setText("%-d" % int(tofmin))
-#            self._summary.x_max_edit.setText("%-d" % int(tofmax))
+        #        def call_back(peakmin, peakmax, backmin, backmax, tofmin, tofmax):
+        #            print 'Inside the call_back on the python side'
+        #            self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
+        #            self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
+        #            self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
+        #            self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
+        #            self._summary.x_min_edit.setText("%-d" % int(tofmin))
+        #            self._summary.x_max_edit.setText("%-d" % int(tofmax))
 
         # mantidplot.app should be used instead of _qti.app (it's just an alias)
-        #mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,
+        # mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,
         # double,double,double,double)"), call_back)
-        #mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update
+        # mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update
         # (double,double,double,double,double,double)"), call_back)
 
         peak_min = int(self._summary.data_peak_from_pixel.text())
@@ -1174,40 +1177,40 @@ class BaseRefWidget(BaseWidget):
 
     def _norm_count_vs_y(self):
 
-#        run_number = self._summary.norm_run_number_edit.text()
-#        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
-#
-#        #range_min = int(min_ctrl.text())
-#        #range_max = int(max_ctrl.text())
-#
-#        # For REFL, Y is high-res
-#        is_pixel_y = True
-#        is_high_res = True
-#        isPeak = True
-#        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
-#                                                                      high_res=is_high_res,
-#                                                                      instrument=self.short_name,
-#                                                                      isPeak=isPeak)
-#
-#        # for low res
-#        is_high_res = False
-#        is_pixel_y = False
-#        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
-#                                                                      high_res=is_high_res,
-#                                                                      instrument=self.short_name,
-#                                                                      isPeak=isPeak)
-#
-#
-#        basename = os.path.basename(f)
-#        wk1 = "Peak - " + basename + " - Y pixel "
-#        wk2 = "Peak - " + basename + " - X pixel "
-#        dmw = DesignerMainWindow(parent=self, wk1=wk1, wk2=wk2, type='norm')
-#
-#        # show it
-#        dmw.show()
+        #        run_number = self._summary.norm_run_number_edit.text()
+        #        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
+        #
+        #        #range_min = int(min_ctrl.text())
+        #        #range_max = int(max_ctrl.text())
+        #
+        #        # For REFL, Y is high-res
+        #        is_pixel_y = True
+        #        is_high_res = True
+        #        isPeak = True
+        #        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
+        #                                                                      high_res=is_high_res,
+        #                                                                      instrument=self.short_name,
+        #                                                                      isPeak=isPeak)
+        #
+        #        # for low res
+        #        is_high_res = False
+        #        is_pixel_y = False
+        #        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
+        #                                                                      high_res=is_high_res,
+        #                                                                      instrument=self.short_name,
+        #                                                                      isPeak=isPeak)
+        #
+        #
+        #        basename = os.path.basename(f)
+        #        wk1 = "Peak - " + basename + " - Y pixel "
+        #        wk2 = "Peak - " + basename + " - X pixel "
+        #        dmw = DesignerMainWindow(parent=self, wk1=wk1, wk2=wk2, type='norm')
+        #
+        #        # show it
+        #        dmw.show()
 
-#        dmw = DesignerMainWindow(self, 'norm')
-#        dmw.show()
+        #        dmw = DesignerMainWindow(self, 'norm')
+        #        dmw.show()
         _minimum, _maximum = self._integrated_plot(True,
                                                    self._summary.norm_run_number_edit,
                                                    self._summary.norm_peak_from_pixel,
@@ -1262,7 +1265,7 @@ class BaseRefWidget(BaseWidget):
             return None, None
 
         try:
-            f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]
+            f = mantid.FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]
 
             range_min = int(min_ctrl.text())
             range_max = int(max_ctrl.text())
@@ -1273,7 +1276,7 @@ class BaseRefWidget(BaseWidget):
 
             # For REFL, Y is high-res
 
-            is_pixel_y =  is_high_res
+            is_pixel_y = is_high_res
             # For REFM it's the other way around
             if self.short_name == "REFM":
                 is_pixel_y = not is_pixel_y
@@ -1287,15 +1290,16 @@ class BaseRefWidget(BaseWidget):
                                                                               isPeak=isPeak)
 
             return minimum, maximum
-        except IOError, e:
-            logger.error("Could not find file: " + e.filename())
+        except IOError as e:
+            mantid.logger.error("Could not find file: " + e)
 
     def _plot_tof(self):
         if not IS_IN_MANTIDPLOT:
             return
         try:
-            f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))[0]
-#            print FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
+            f = mantid.FileFinder.findRuns("%s%s" %
+                                           (self.instrument_name, str(self._summary.norm_run_number_edit.text())))[0]
+            #            print FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
             range_min = int(self._summary.data_from_tof.text())
             range_max = int(self._summary.data_to_tof.text())
 
@@ -1315,14 +1319,14 @@ class BaseRefWidget(BaseWidget):
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
-        if len(list_items)>0:
+        if len(list_items) > 0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
             in_list = True
 
-            #loop over all the already defined states and give all of them the
-            #same Qmin, Qsteps, Angle offset, scaling factor config file name
-            #and incident medium
-            i=0
+            # loop over all the already defined states and give all of them the
+            # same Qmin, Qsteps, Angle offset, scaling factor config file name
+            # and incident medium
+            i = 0
             while i < self._summary.angle_list.count():
 
                 current_item = self._summary.angle_list.item(i)
@@ -1345,7 +1349,7 @@ class BaseRefWidget(BaseWidget):
 
                 state.geometry_correction_switch = self._summary.geometry_correction_switch.isChecked()
 
-                #incident medium
+                # incident medium
                 _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))
                                          for j in range(self._summary.incident_medium_combobox.count())]
                 _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
@@ -1359,12 +1363,12 @@ class BaseRefWidget(BaseWidget):
                 state.overlap_lowest_error = self._summary.overlapValueLowestErrorRadioButton.isChecked()
                 state.overlap_mean_value = self._summary.overlapValueMeanRadioButton.isChecked()
 
-                #4th column (precision)
+                # 4th column (precision)
                 state.fourth_column_dq0 = self._summary.dq0.text()
                 state.fourth_column_dq_over_q = self._summary.dq_over_q.text()
 
                 current_item.setData(QtCore.Qt.UserRole, state)
-                i+=1
+                i += 1
 
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
@@ -1377,7 +1381,7 @@ class BaseRefWidget(BaseWidget):
 
                 state.geometry_correction_switch = self._summary.geometry_correction_switch.isChecked()
 
-            #incident medium
+            # incident medium
             _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))
                                      for j in range(self._summary.incident_medium_combobox.count())]
             _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
@@ -1400,11 +1404,11 @@ class BaseRefWidget(BaseWidget):
         self._reset_warnings()
 
     def _angle_changed(self):
-        if self._summary.angle_list.count()==0:
+        if self._summary.angle_list.count() == 0:
             return
         self._summary.angle_list.setEnabled(False)
         self._summary.remove_btn.setEnabled(False)
-        current_item =  self._summary.angle_list.currentItem()
+        current_item = self._summary.angle_list.currentItem()
         if current_item is not None:
             state = current_item.data(QtCore.Qt.UserRole)
             self.set_editing_state(state)
@@ -1418,22 +1422,22 @@ class BaseRefWidget(BaseWidget):
             @param state: data object
         """
         self._summary.angle_list.clear()
-        if len(state.data_sets)==1 and state.data_sets[0].data_files[0]==0:
+        if len(state.data_sets) == 1 and state.data_sets[0].data_files[0] == 0:
             pass
         else:
             for item in state.data_sets:
                 if item is not None:
-                    item_widget = QtGui.QListWidgetItem(unicode(str(','.join([str(i) for i in item.data_files]))),
+                    item_widget = QtGui.QListWidgetItem(str(str(','.join([str(i) for i in item.data_files]))),
                                                         self._summary.angle_list)
                     item_widget.setData(QtCore.Qt.UserRole, item)
 
-        if len(state.data_sets)>0:
+        if len(state.data_sets) > 0:
             self.set_editing_state(state.data_sets[0])
             self._summary.angle_list.setCurrentRow(0, QtGui.QItemSelectionModel.Select)
 
-#            # Common Q binning
-#            self._summary.q_min_edit.setText(str(state.data_sets[0].q_min))
-#            self._summary.log_scale_chk.setChecked(state.data_sets[0].q_step<0)
+            #            # Common Q binning
+            #            self._summary.q_min_edit.setText(str(state.data_sets[0].q_min))
+            #            self._summary.log_scale_chk.setChecked(state.data_sets[0].q_step<0)
 
             # Common angle offset
             if hasattr(state.data_sets[0], "angle_offset"):
@@ -1444,7 +1448,7 @@ class BaseRefWidget(BaseWidget):
 
     def set_editing_state(self, state):
         self._summary.q_min_edit.setText(str(state.q_min))
-        self._summary.log_scale_chk.setChecked(state.q_step<0)
+        self._summary.log_scale_chk.setChecked(state.q_step < 0)
 
         self._summary.incident_medium_combobox.clear()
         _incident_medium_str = str(state.incident_medium_list[0])
@@ -1453,35 +1457,35 @@ class BaseRefWidget(BaseWidget):
             self._summary.incident_medium_combobox.addItem(str(item))
         self._summary.incident_medium_combobox.setCurrentIndex(state.incident_medium_index_selected)
 
-        #Peak from/to pixels
+        # Peak from/to pixels
         self._summary.data_peak_from_pixel.setText(str(state.DataPeakPixels[0]))
         self._summary.data_peak_to_pixel.setText(str(state.DataPeakPixels[1]))
 
-        #data low resolution range
+        # data low resolution range
         self._summary.data_low_res_range_switch.setChecked(state.data_x_range_flag)
         self._summary.x_min_edit.setText(str(state.data_x_range[0]))
         self._summary.x_max_edit.setText(str(state.data_x_range[1]))
         self._data_low_res_clicked(state.data_x_range_flag)
 
-        #data metadata
+        # data metadata
         self._summary.tthd_value.setText(str(state.tthd_value))
         self._summary.ths_value.setText(str(state.ths_value))
 
-        #norm low resolution range
+        # norm low resolution range
         self._summary.norm_low_res_range_switch.setChecked(state.norm_x_range_flag)
         self._summary.norm_x_min_edit.setText(str(state.norm_x_range[0]))
         self._summary.norm_x_max_edit.setText(str(state.norm_x_range[1]))
         self._norm_low_res_clicked(state.data_x_range_flag)
 
-        #Background flag
+        # Background flag
         self._summary.data_background_switch.setChecked(state.DataBackgroundFlag)
         self._data_background_clicked(state.DataBackgroundFlag)
 
-        #Background from/to pixels
+        # Background from/to pixels
         self._summary.data_background_from_pixel1.setText(str(state.DataBackgroundRoi[0]))
         self._summary.data_background_to_pixel1.setText(str(state.DataBackgroundRoi[1]))
 
-        #from TOF and to TOF
+        # from TOF and to TOF
         self._summary.data_from_tof.setText(str(int(state.DataTofRange[0])))
         self._summary.data_to_tof.setText(str(int(state.DataTofRange[1])))
 
@@ -1496,13 +1500,13 @@ class BaseRefWidget(BaseWidget):
         self._summary.norm_background_from_pixel1.setText(str(state.NormBackgroundRoi[0]))
         self._summary.norm_background_to_pixel1.setText(str(state.NormBackgroundRoi[1]))
 
-        #normalization flag
+        # normalization flag
         self._summary.norm_switch.setChecked(state.NormFlag)
         self._norm_clicked(state.NormFlag)
 
         # Q binning
         self._summary.q_min_edit.setText(str(state.q_min))
-        self._summary.log_scale_chk.setChecked(state.q_step<0)
+        self._summary.log_scale_chk.setChecked(state.q_step < 0)
         self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
 
         # overlap ascii values
@@ -1511,10 +1515,10 @@ class BaseRefWidget(BaseWidget):
 
         # Output directory
         if hasattr(state, "output_dir"):
-            if len(str(state.output_dir).strip())>0:
+            if len(str(state.output_dir).strip()) > 0:
                 self._summary.outdir_edit.setText(str(state.output_dir))
 
-        #scaling factor file and options
+        # scaling factor file and options
         self._summary.use_sf_config_switch.setChecked(state.scaling_factor_file_flag)
         self._summary.cfg_scaling_factor_file_name.setText(str(state.scaling_factor_file))
         self._summary.slits_width_flag.setChecked(state.slits_width_flag)
@@ -1526,6 +1530,6 @@ class BaseRefWidget(BaseWidget):
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
 
-        #4th column (precision)
+        # 4th column (precision)
         self._summary.fourth_column_switch.setChecked(state.fourth_column_flag)
         self._fourth_column_clicked(state.fourth_column_flag)
