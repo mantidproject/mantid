@@ -191,20 +191,10 @@ public:
   /// Override if the algorithm is not part of the Mantid distribution.
   const std::string helpURL() const override { return ""; }
 
-  using IPropertyManager::declareProperty;
-
-  using PropertyManagerOwner::declareProperty;
-
-  void declareProperty(std::unique_ptr<Kernel::Property> p,
-                       const std::string &doc = "") override;
-
-  Kernel::IPropertyManager::TypedValue
-  getProperty(const std::string &name) const override;
-
   template <typename T, typename = typename std::enable_if<std::is_convertible<
                             T *, MatrixWorkspace *>::value>::type>
   std::tuple<boost::shared_ptr<T>, Indexing::SpectrumIndexSet>
-  getIndexProperty(const std::string &name) const;
+  getWorkspaceAndIndices(const std::string &name) const;
 
   template <typename T1, typename T2,
             typename = typename std::enable_if<
@@ -212,9 +202,9 @@ public:
             typename = typename std::enable_if<
                 std::is_convertible<T2 *, std::string *>::value ||
                 std::is_convertible<T2 *, std::vector<int> *>::value>::type>
-  void setIndexProperty(const std::string &name,
-                        const boost::shared_ptr<T1> &wksp, IndexType type,
-                        const T2 &list);
+  void setWorkspaceInputProperties(const std::string &name,
+                                   const boost::shared_ptr<T1> &wksp,
+                                   IndexType type, const T2 &list);
 
   template <typename T1, typename T2,
             typename = typename std::enable_if<
@@ -222,8 +212,9 @@ public:
             typename = typename std::enable_if<
                 std::is_convertible<T2 *, std::string *>::value ||
                 std::is_convertible<T2 *, std::vector<int> *>::value>::type>
-  void setIndexProperty(const std::string &name, const std::string &wsName,
-                        IndexType type, const T2 &list);
+  void setWorkspaceInputProperties(const std::string &name,
+                                   const std::string &wsName, IndexType type,
+                                   const T2 &list);
 
   const std::string workspaceMethodName() const override;
   const std::vector<std::string> workspaceMethodOn() const override;
@@ -413,7 +404,7 @@ protected:
 
   template <typename T, typename = typename std::enable_if<std::is_convertible<
                             T *, MatrixWorkspace *>::value>::type>
-  void declareIndexProperty(
+  void declareWorkspaceInputProperties(
       const std::string &propertyName,
       const int allowedIndexTypes = IndexType::WorkspaceIndex,
       PropertyMode::Type optional = PropertyMode::Type::Mandatory,
@@ -421,8 +412,8 @@ protected:
 
 private:
   template <typename T1, typename T2, typename WsType>
-  void doSetIndexProperty(const std::string &name, const T1 &wksp,
-                          IndexType type, const T2 &list);
+  void doSetInputProperties(const std::string &name, const T1 &wksp,
+                            IndexType type, const T2 &list);
   void lockWorkspaces();
   void unlockWorkspaces();
 

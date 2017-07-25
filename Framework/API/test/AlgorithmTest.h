@@ -171,7 +171,10 @@ public:
   static const std::string FAIL_MSG;
 
   void init() override {
-    declareIndexProperty<MatrixWorkspace>("InputWorkspace");
+    declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace");
+    declareProperty(
+        Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+            "InputWorkspace2", "", Mantid::Kernel::Direction::Input));
   }
 
   void exec() override {}
@@ -807,50 +810,50 @@ public:
     TS_ASSERT_EQUALS(algCastConst, algCastNonConst);
   }
 
-  void testIndexingAlgorithm_declareIndexPropertyMethod() {
+  void testIndexingAlgorithm_declareWorkspaceInputPropertiesMethod() {
     IndexingAlgorithm indexAlg;
     TS_ASSERT_THROWS_NOTHING(indexAlg.init());
   }
 
   void
-  testIndexingAlgorithm_setIndexPropertyWithWorkspacePointerAndVectorOfIntegers() {
+  testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspacePointerAndVectorOfIntegers() {
     auto wksp =
         WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     IndexingAlgorithm indexAlg;
     indexAlg.init();
-    TS_ASSERT_THROWS_NOTHING(
-        (indexAlg.setIndexProperty<MatrixWorkspace, std::vector<int>>(
+    TS_ASSERT_THROWS_NOTHING((
+        indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
             "InputWorkspace", wksp, IndexType::WorkspaceIndex,
             std::vector<int>{1, 2, 3, 4, 5})));
   }
 
   void
-  testIndexingAlgorithm_setIndexPropertyWithWorkspacePointerAndStringList() {
+  testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspacePointerAndStringList() {
     auto wksp =
         WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     IndexingAlgorithm indexAlg;
     indexAlg.init();
     TS_ASSERT_THROWS_NOTHING(
-        (indexAlg.setIndexProperty<MatrixWorkspace, std::string>(
+        (indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
             "InputWorkspace", wksp, IndexType::WorkspaceIndex, "1:5")));
   }
 
   void
-  testIndexingAlgorithm_setIndexPropertyWithWorkspaceNameAndVectorOfIntegers() {
+  testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspaceNameAndVectorOfIntegers() {
     auto wksp =
         WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     AnalysisDataService::Instance().add("wksp", wksp);
     IndexingAlgorithm indexAlg;
     indexAlg.init();
     // Requires workspace in ADS due to validity checks
-    TS_ASSERT_THROWS_NOTHING(
-        (indexAlg.setIndexProperty<MatrixWorkspace, std::vector<int>>(
+    TS_ASSERT_THROWS_NOTHING((
+        indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
             "InputWorkspace", "wksp", IndexType::WorkspaceIndex,
             std::vector<int>{1, 2, 3, 4, 5})));
     AnalysisDataService::Instance().remove("wksp");
   }
 
-  void testIndexingAlgorithm_setIndexPropertyWithWorkspaceNameAndStringList() {
+  void testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspaceNameAndStringList() {
     auto wksp =
         WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     AnalysisDataService::Instance().add("wksp", wksp);
@@ -858,17 +861,17 @@ public:
     indexAlg.init();
     // Requires workspace in ADS due to validity checks
     TS_ASSERT_THROWS_NOTHING(
-        (indexAlg.setIndexProperty<MatrixWorkspace, std::string>(
+        (indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
             "InputWorkspace", "wksp", IndexType::WorkspaceIndex, "1:5")));
     AnalysisDataService::Instance().remove("wksp");
   }
 
-  void testIndexingAlgorithm_getIndexPropertyMethod() {
+  void testIndexingAlgorithm_getWorkspaceAndIndicesMethod() {
     IndexingAlgorithm indexAlg;
     indexAlg.init();
     auto wksp =
         WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
-    indexAlg.setIndexProperty<MatrixWorkspace, std::string>(
+    indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
         "InputWorkspace", wksp, IndexType::WorkspaceIndex, "1:5");
 
     MatrixWorkspace_sptr wsTest;
@@ -876,7 +879,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         std::tie(wsTest, indexSet) =
-            indexAlg.getIndexProperty<MatrixWorkspace>("InputWorkspace"));
+            indexAlg.getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace"));
 
     TS_ASSERT_EQUALS(wsTest, wksp);
 
@@ -886,15 +889,13 @@ public:
 
   void testIndexingAlgorithm_accessFailInvalidPropertyType() {
     IndexingAlgorithm indexAlg;
-    indexAlg.declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-        "InputWorkspace", "", Direction::Input));
 
     TS_ASSERT_THROWS(
-        indexAlg.getIndexProperty<MatrixWorkspace>("InputWorkspace"),
+        indexAlg.getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace2"),
         std::runtime_error);
     TS_ASSERT_THROWS(
-        (indexAlg.setIndexProperty<MatrixWorkspace, std::string>(
-            "InputWorkspace", "wksp", IndexType::SpectrumNum, "1:5")),
+        (indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
+            "InputWorkspace2", "wksp", IndexType::SpectrumNum, "1:5")),
         std::runtime_error);
   }
 

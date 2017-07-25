@@ -112,6 +112,21 @@ public:
                      "Indices provided to IndexProperty are out of range.");
   }
 
+  void testIndexAccessWithOperator() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    m_wkspProp = ws;
+
+    IndexProperty indexProp("IndexSet", m_wkspProp, m_itypeProp);
+
+    indexProp.setValue("1:5");
+
+    auto indices = Mantid::Indexing::SpectrumIndexSet(indexProp);
+
+    TS_ASSERT(indices.size() == 5);
+    for (int i = 0; i < 5; i++)
+      TS_ASSERT_EQUALS(indices[i], i + 1)
+  }
+
 private:
   WorkspaceProperty<MatrixWorkspace> m_wkspProp;
   IndexTypeProperty m_itypeProp;

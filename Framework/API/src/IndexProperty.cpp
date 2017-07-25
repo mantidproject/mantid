@@ -37,10 +37,14 @@ std::string IndexProperty::operator=(const std::string &rhs) {
   return setValue(rhs);
 }
 
+IndexProperty::operator Indexing::SpectrumIndexSet() const {
+  return getIndices();
+}
+
 Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
-  MatrixWorkspace_sptr wksp;
-  if ((wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
-           m_workspaceProp.getWorkspace())) == nullptr)
+  MatrixWorkspace_sptr wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      m_workspaceProp.getWorkspace());
+  if (!wksp)
     throw std::runtime_error("Invalid workspace type provided to "
                              "IndexProperty. Must be convertible to "
                              "MatrixWorkspace.");

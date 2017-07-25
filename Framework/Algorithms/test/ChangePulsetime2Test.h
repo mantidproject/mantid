@@ -23,7 +23,7 @@ execute_change_of_pulse_times(EventWorkspace_sptr in_ws, std::string timeOffset,
   alg.initialize();
   alg.setRethrows(true);
   alg.setChild(true);
-  alg.setIndexProperty<EventWorkspace>(
+  alg.setWorkspaceInputProperties<EventWorkspace>(
       "InputWorkspace", in_ws, IndexType::WorkspaceIndex, workspaceIndexList);
   alg.setProperty("InputWorkspace", in_ws);
   alg.setPropertyValue("OutputWorkspace", "out_ws");
@@ -57,9 +57,9 @@ public:
     in_ws = WorkspaceCreationHelper::createEventWorkspace2(100, 100);
     AnalysisDataService::Instance().addOrReplace(in_ws_name, in_ws);
 
-    alg.setIndexProperty<EventWorkspace>("InputWorkspace", in_ws_name,
-                                         IndexType::WorkspaceIndex,
-                                         WorkspaceIndexList);
+    alg.setWorkspaceInputProperties<EventWorkspace>(
+        "InputWorkspace", in_ws_name, IndexType::WorkspaceIndex,
+        WorkspaceIndexList);
     alg.setPropertyValue("OutputWorkspace", out_ws_name);
     alg.setPropertyValue("TimeOffset", "1000.0");
 

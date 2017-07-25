@@ -118,8 +118,8 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
                                 "workspace");
 
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
-    getSpectrum(i)
-        .setSpectrumNo(static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
+    getSpectrum(i).setSpectrumNo(
+        static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
   }
   setStorageMode(indexInfo.storageMode());
   *m_indexInfo = indexInfo;
@@ -525,8 +525,8 @@ std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
       int index = det + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
-                         "): detector ID found (" << det
-                      << " at workspace index " << workspaceIndex
+                         "): detector ID found ("
+                      << det << " at workspace index " << workspaceIndex
                       << ") is invalid.\n";
       } else
         // Save it at that point.
@@ -1983,33 +1983,34 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
 // Explicit Instantiations of IndexProperty Methods in Algorithm
 namespace Mantid {
 namespace API {
-template DLLExport void Algorithm::declareIndexProperty<MatrixWorkspace>(
+template DLLExport void
+Algorithm::declareWorkspaceInputProperties<MatrixWorkspace>(
     const std::string &propertyName, const int allowedIndexTypes,
     PropertyMode::Type optional, LockMode::Type lock, const std::string &doc);
 
 template DLLExport void
-Algorithm::setIndexProperty<MatrixWorkspace, std::vector<int>>(
+Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
     const std::string &name, const MatrixWorkspace_sptr &wksp, IndexType type,
     const std::vector<int> &list);
 
 template DLLExport void
-Algorithm::setIndexProperty<MatrixWorkspace, std::string>(
+Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::string>(
     const std::string &name, const MatrixWorkspace_sptr &wksp, IndexType type,
     const std::string &list);
 
 template DLLExport void
-Algorithm::setIndexProperty<MatrixWorkspace, std::vector<int>>(
+Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
     const std::string &name, const std::string &wsName, IndexType type,
     const std::vector<int> &list);
 
 template DLLExport void
-Algorithm::setIndexProperty<MatrixWorkspace, std::string>(
+Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::string>(
     const std::string &name, const std::string &wsName, IndexType type,
     const std::string &list);
 
 template DLLExport
     std::tuple<boost::shared_ptr<MatrixWorkspace>, Indexing::SpectrumIndexSet>
-    Algorithm::getIndexProperty(const std::string &name) const;
+    Algorithm::getWorkspaceAndIndices(const std::string &name) const;
 } // namespace API
 } // namespace Mantid
 

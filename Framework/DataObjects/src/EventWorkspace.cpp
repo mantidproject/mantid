@@ -672,33 +672,38 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out,
 namespace Mantid {
 namespace API {
 template DLLExport void
-Algorithm::declareIndexProperty<DataObjects::EventWorkspace>(
+Algorithm::declareWorkspaceInputProperties<DataObjects::EventWorkspace>(
     const std::string &propertyName, const int allowedIndexTypes,
     PropertyMode::Type optional, LockMode::Type lock, const std::string &doc);
 
 template DLLExport void
-Algorithm::setIndexProperty<DataObjects::EventWorkspace, std::vector<int>>(
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::vector<int>>(
     const std::string &name, const DataObjects::EventWorkspace_sptr &wksp,
     IndexType type, const std::vector<int> &list);
 
 template DLLExport void
-Algorithm::setIndexProperty<DataObjects::EventWorkspace, std::string>(
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::string>(
     const std::string &name, const DataObjects::EventWorkspace_sptr &wksp,
     IndexType type, const std::string &list);
 
 template DLLExport void
-Algorithm::setIndexProperty<DataObjects::EventWorkspace, std::vector<int>>(
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::vector<int>>(
     const std::string &name, const std::string &wsName, IndexType type,
     const std::vector<int> &list);
 
 template DLLExport void
-Algorithm::setIndexProperty<DataObjects::EventWorkspace, std::string>(
-    const std::string &name, const std::string &wsName, IndexType type,
-    const std::string &list);
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::string>(const std::string &name,
+                                                    const std::string &wsName,
+                                                    IndexType type,
+                                                    const std::string &list);
 
 template DLLExport std::tuple<boost::shared_ptr<DataObjects::EventWorkspace>,
                               Indexing::SpectrumIndexSet>
-Algorithm::getIndexProperty(const std::string &name) const;
+Algorithm::getWorkspaceAndIndices(const std::string &name) const;
 } // namespace API
 } // namespace Mantid
 
