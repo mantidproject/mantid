@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include <vector>
 
+
 namespace Mantid {
 namespace Crystal {
 
@@ -86,8 +87,6 @@ public:
     return "Crystal\\Peaks;Optimization\\PeakFinding";
   }
 
-  static const std::string perSpectrumBackground;
-  static const std::string absoluteBackground;
   static const std::string strongestPeakStrategy;
   static const std::string allPeaksStrategy;
 
@@ -109,7 +108,7 @@ private:
   std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy> getReducePeakListStrategy() const;
 
   //
-  void reducePeakList(const peakvector &);
+  void reducePeakList(const peakvector &, Mantid::API::Progress& progress);
   /// The value in X to start the search from
   double m_MinRange;
   /// The value in X to finish the search at

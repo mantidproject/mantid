@@ -13,6 +13,13 @@
 
 
 namespace Mantid {
+namespace API {
+  class Progress;
+}
+}
+
+
+namespace Mantid {
 namespace Crystal {
 namespace FindSXPeaksHelper {
 
@@ -184,20 +191,20 @@ private:
 
 class DLLExport ReducePeakListStrategy {
 public:
-  virtual std::vector<SXPeak> reduce(const std::vector<SXPeak>& peaks, const double resolution) const = 0;
+  virtual std::vector<SXPeak> reduce(const std::vector<SXPeak>& peaks, const double resolution,  Mantid::API::Progress& progress) const = 0;
 };
 
 
 class DLLExport SimpleReduceStrategy : public ReducePeakListStrategy {
 public:
-  std::vector<SXPeak> reduce(const std::vector<SXPeak>& peaks, const double resolution) const override;
+  std::vector<SXPeak> reduce(const std::vector<SXPeak>& peaks, const double resolution, Mantid::API::Progress& progress) const override;
 };
 
 class DLLExport FindMaxReduceStrategy : public ReducePeakListStrategy {
 public:
-  std::vector<SXPeak> reduce(const std::vector<SXPeak>& peaks, const double resolution) const override;
+  std::vector<SXPeak> reduce(const std::vector<SXPeak>& peaks, const double resolution, Mantid::API::Progress& progress) const override;
 private:
-  std::vector<std::vector<SXPeak*>> getPeakGroups(const std::vector<SXPeak>& peakList, const double resolution) const;
+  std::vector<std::vector<SXPeak*>> getPeakGroups(const std::vector<SXPeak>& peakList, const double resolution, Mantid::API::Progress& progress) const;
 
   std::vector<SXPeak> getFinalPeaks(const std::vector<std::vector<SXPeak*>>& peakGroups) const;
 };

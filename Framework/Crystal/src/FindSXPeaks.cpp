@@ -23,10 +23,6 @@ using namespace Mantid::Crystal::FindSXPeaksHelper;
 namespace Mantid {
 namespace Crystal {
 
-const std::string FindSXPeaks::perSpectrumBackground = "PerSpectrumBackground";
-const std::string FindSXPeaks::absoluteBackground = "AbsoluteBackground";
-
-
 const std::string FindSXPeaks::strongestPeakStrategy = "StrongestPeakOnly";
 const std::string FindSXPeaks::allPeaksStrategy = "AllPeaks";
 
@@ -86,11 +82,11 @@ void FindSXPeaks::init() {
                             Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
                             strongestPeakStrategy));
 
-  declareProperty(absoluteBackground, 10.0,
+  declareProperty("AbsoluteBackground", 10.0,
                   "Peaks which are below the specified absolute background are discarded."
                   " The background is specified for all spectra.");
 
-  setPropertySettings(absoluteBackground,
+  setPropertySettings("AbsoluteBackground",
                         make_unique<EnabledWhenProperty>(
                             "PeakFindingStrategy",
                             Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
@@ -151,7 +147,7 @@ void FindSXPeaks::exec() {
     m_MaxRange = 0.0;
   }
 
-  Progress progress(this, 0.0, 1.0, m_MaxWsIndex - m_MinWsIndex + 1);
+  Progress progress(this, 0.0, 1.0, m_MaxWsIndex - m_MinWsIndex + 2);
 
   // Calculate the primary flight path.
   const auto &spectrumInfo = localworkspace->spectrumInfo();
@@ -198,7 +194,7 @@ void FindSXPeaks::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Now reduce the list with duplicate entries
-  reducePeakList(entries);
+  reducePeakList(entries, progress);
 
   setProperty("OutputWorkspace", m_peaks);
   progress.report();
@@ -210,10 +206,10 @@ Reduce the peak list by removing duplicates
 then convert SXPeaks objects to PeakObjects and add them to the output workspace
 @param pcv : current peak list containing potential duplicates
 */
-void FindSXPeaks::reducePeakList(const peakvector &pcv) {
+void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress& progress) {
   double resolution = getProperty("Resolution");
   auto reductionStrategy = getReducePeakListStrategy();
-  auto finalv = reductionStrategy->reduce(pcv, resolution);
+  auto finalv = reductionStrategy->reduce(pcv, resolution, progress);
 
   for (auto &finalPeak : finalv) {
     finalPeak.reduce();
@@ -237,7 +233,7 @@ std::unique_ptr<BackgroundStrategy> FindSXPeaks::getBackgroundStrategy() const {
       const double signalBackground = getProperty("SignalBackground");
       return Mantid::Kernel::make_unique<PerSpectrumBackgroundStrategy>(signalBackground);
   } else if (peakFindingStrategy == allPeaksStrategy) {
-      const double background = getProperty(absoluteBackground);
+      const double background = getProperty("AbsoluteBackground");
       return Mantid::Kernel::make_unique<AbsoluteBackgroundStrategy>(background);
   } else {
     throw std::invalid_argument("The selected background strategy has not been implemented yet.");

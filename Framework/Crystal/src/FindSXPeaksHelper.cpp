@@ -4,6 +4,9 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
+#include "MantidAPI/Progress.h"
+#include "MantidKernel/Logger.h"
+
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
@@ -11,10 +14,12 @@
 
 using namespace boost;
 
-
 namespace Mantid {
 namespace Crystal {
 namespace FindSXPeaksHelper{
+
+
+Mantid::Kernel::Logger g_log("FindSXPeaksHelper");
 
 
 /* ------------------------------------------------------------------------------------------
@@ -388,7 +393,7 @@ std::vector<std::unique_ptr<PeakContainer>>  AllPeaksStrategy::getAllPeaks(const
   auto distanceMax = std::distance(x.begin(), high);
 
   const auto lowY = y.begin() + distanceMin;
-  const auto highY = distanceMax < y.size() ? y.begin() + distanceMax : y.end();
+  const auto highY = distanceMax < static_cast<int>(y.size()) ? y.begin() + distanceMax : y.end();
 
   for (auto it = lowY; it != highY; ++it) {
       const auto signal = *it;
@@ -456,7 +461,7 @@ PeakList AllPeaksStrategy::convertToSXPeaks(const HistogramData::HistogramX& x, 
  * PeakList Reduction Strategy
  * ------------------------------------------------------------------------------------------
  */
-std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak>& peaks, double resolution) const  {
+std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak>& peaks, double resolution,  Mantid::API::Progress&) const  {
   // If the peaks are empty then do nothing
   if (peaks.empty()) {
     return peaks;
@@ -480,14 +485,14 @@ std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak>& peak
 }
 
 
-std::vector<SXPeak>  FindMaxReduceStrategy::reduce(const std::vector<SXPeak> & peaks, double resolution) const  {
+std::vector<SXPeak>  FindMaxReduceStrategy::reduce(const std::vector<SXPeak> & peaks, double resolution,  Mantid::API::Progress& progress) const  {
   // If the peaks are empty then do nothing
   if (peaks.empty()) {
     return peaks;
   }
 
   // Groups the peaks into elements which are considered alike
-  auto peakGroups = getPeakGroups(peaks, resolution);
+  auto peakGroups = getPeakGroups(peaks, resolution, progress);
 
   // Now reduce the peaks groups
   return getFinalPeaks(peakGroups);
@@ -500,7 +505,7 @@ typedef boost::graph_traits<PeakGraph>::vertex_descriptor Vertex;
 typedef boost::graph_traits<PeakGraph>::edge_descriptor Edge;
 
 
-std::vector<std::vector<SXPeak*>> FindMaxReduceStrategy::getPeakGroups(const std::vector<SXPeak>& peakList, const double resolution) const {
+std::vector<std::vector<SXPeak*>> FindMaxReduceStrategy::getPeakGroups(const std::vector<SXPeak>& peakList, const double resolution, Mantid::API::Progress& progress) const {
 
   // Create a vector of addresses. Note that the peaks live on the stack. This here only works,
   // because the peaks are always in a stack frame below.
@@ -514,12 +519,33 @@ std::vector<std::vector<SXPeak*>> FindMaxReduceStrategy::getPeakGroups(const std
   PeakGraph graph;
   PeakGraph::vertex_iterator vertexIt, vertexEnd;
 
+
+  // Provide a warning if there are more than 500 peaks found.
+  const size_t numberOfPeaksFound = peaks.size();
+  if (numberOfPeaksFound > 500) {
+    g_log.warning("There are more than 500 peaks being processed. This might take a long time. "
+                  "Please check that the cutoff of the background that you have selected is high "
+                  "enough, else the algorithm will mistake background noise for peaks. "
+                  "The instrument view allows you to easily inspect the typical background level.");
+  }
+
+  std::string message = std::string("There are ") + std::to_string(numberOfPeaksFound) + std::string(" peaks. Investigating peak number ");
+  int peakCounter = 0;
+
   for (const auto peak : peaks) {
+    ++peakCounter;
+
     // 1. Add the vertex
     auto vertex = add_vertex(peak, graph);
 
     // 2. Iterate over all elements already in the graph and check if they need to edstablish an edge between them.
     std::tie(vertexIt, vertexEnd) = vertices(graph);
+
+    // Provide a progress report such that users can escape the graph generation
+    if (peakCounter > 50) {
+        progress.doReport(message + std::to_string(peakCounter));
+    }
+
     for (; vertexIt != vertexEnd; ++vertexIt) {
       // 2.1 Check if we are looking at the new vertex itself. We don't want self-loops
       if (vertex == *vertexIt) {
