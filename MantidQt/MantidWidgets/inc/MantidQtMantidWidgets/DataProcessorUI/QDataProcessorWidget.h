@@ -86,7 +86,7 @@ public:
                             const std::string &defaultValue) override;
   bool askUserYesNo(std::string prompt, std::string title) override;
   void giveUserWarning(std::string prompt, std::string title) override;
-  void giveUserCritical(std::string prompt, std::string title) override;
+  void giveUserCritical(QString prompt, std::string title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
   // Settings

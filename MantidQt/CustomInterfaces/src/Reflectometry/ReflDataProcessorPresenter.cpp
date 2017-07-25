@@ -302,6 +302,31 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
   return errors;
 }
 
+/** Retrieves a workspace from the AnalysisDataService based on it's name.
+ * 
+ * @param name :: The name of the workspace to retrieve.
+ * @return A pointer to the retrieved workspace or null if the workspace does not exist or
+ * is not an event workspace.
+ */
+Mantid::API::IEventWorkspace_sptr ReflDataProcessorPresenter::retrieveWorkspaceByName(std::string const& name) const {
+  IEventWorkspace_sptr mws;
+  if (AnalysisDataService::Instance().doesExist(name)) {
+    auto mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(name);
+    if (mws == nullptr) {
+      m_view->giveUserCritical(QString::fromStdString("Workspace to slice " + name +
+                               " is not an event workspace!"),
+                               "Time slicing error");
+      return nullptr;
+    } else {
+      return mws;
+    }
+  } else {
+    m_view->giveUserCritical(QString::fromStdString("Workspace to slice not found: " + name),
+                             "Time slicing error");
+    return nullptr;
+  }
+}
+
 /** Parses a string to extract uniform time slicing
  *
  * @param timeSlicing :: The string to parse
@@ -316,43 +341,31 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
                                               std::vector<double> &startTimes,
                                               std::vector<double> &stopTimes) {
 
-  IEventWorkspace_sptr mws;
-  if (AnalysisDataService::Instance().doesExist(wsName)) {
-    mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wsName);
-    if (!mws) {
-      m_view->giveUserCritical("Workspace to slice " + wsName +
-                                   " is not an event workspace!",
-                               "Time slicing error");
-      return;
+  IEventWorkspace_sptr mws = retrieveWorkspaceByName(wsName);
+  if (mws != nullptr) {
+    const auto run = mws->run();
+    const auto totalDuration = run.endTime() - run.startTime();
+    double totalDurationSec = totalDuration.total_seconds();
+    double sliceDuration = .0;
+    int numSlices = 0;
+
+    if (slicingType == "UniformEven") {
+      numSlices = std::stoi(timeSlicing);
+      sliceDuration = totalDurationSec / numSlices;
+    } else if (slicingType == "Uniform") {
+      sliceDuration = std::stod(timeSlicing);
+      numSlices = static_cast<int>(ceil(totalDurationSec / sliceDuration));
     }
-  } else {
-    m_view->giveUserCritical("Workspace to slice not found: " + wsName,
-                             "Time slicing error");
-    return;
-  }
 
-  const auto run = mws->run();
-  const auto totalDuration = run.endTime() - run.startTime();
-  double totalDurationSec = totalDuration.total_seconds();
-  double sliceDuration = .0;
-  int numSlices = 0;
+    // Add the start/stop times
+    startTimes = std::vector<double>(numSlices);
+    stopTimes = std::vector<double>(numSlices);
 
-  if (slicingType == "UniformEven") {
-    numSlices = std::stoi(timeSlicing);
-    sliceDuration = totalDurationSec / numSlices;
-  } else if (slicingType == "Uniform") {
-    sliceDuration = std::stod(timeSlicing);
-    numSlices = static_cast<int>(ceil(totalDurationSec / sliceDuration));
-  }
-
-  // Add the start/stop times
-  startTimes = std::vector<double>(numSlices);
-  stopTimes = std::vector<double>(numSlices);
-
-  for (int i = 0; i < numSlices; i++) {
-    startTimes[i] = sliceDuration * i;
-    stopTimes[i] = sliceDuration * (i + 1);
-  }
+    for (int i = 0; i < numSlices; i++) {
+      startTimes[i] = sliceDuration * i;
+      stopTimes[i] = sliceDuration * (i + 1);
+    }
+  } 
 }
 
 /** Parses a string to extract custom time slicing

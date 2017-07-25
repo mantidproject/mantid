@@ -4,6 +4,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
+#include "MantidAPI/IEventWorkspace_fwd.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
@@ -105,6 +106,8 @@ private:
   std::string takeSlice(const std::string &runNo, size_t sliceIndex,
                         double startTime, double stopTime,
                         const std::string &logFilter = "");
+  
+  Mantid::API::IEventWorkspace_sptr retrieveWorkspaceByName(std::string const& name) const;
 
   // Asks user if they wish to proceed if a type of workspace exists in the ADS
   bool proceedIfWSTypeInADS(const MantidQt::MantidWidgets::TreeData &data,

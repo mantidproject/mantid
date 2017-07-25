@@ -473,7 +473,7 @@ void GenericDataProcessorPresenter::endReduction() {
 Handle reduction error
 */
 void GenericDataProcessorPresenter::reductionError(QString ex) {
-  m_view->giveUserCritical(ex.toStdString(), "Error");
+  m_view->giveUserCritical(ex, "Error");
 }
 
 /**
@@ -1166,18 +1166,19 @@ void GenericDataProcessorPresenter::openTable() {
       return;
 
   auto &ads = AnalysisDataService::Instance();
-  const std::string toOpen = m_view->getWorkspaceToOpen();
+  auto toOpenStd = m_view->getWorkspaceToOpen();
+  auto toOpenQ = QString::fromStdString(toOpenStd);
 
-  if (toOpen.empty())
+  if (toOpenQ.isEmpty())
     return;
 
-  if (!ads.isValid(toOpen).empty()) {
-    m_view->giveUserCritical("Could not open workspace: " + toOpen, "Error");
+  if (!ads.isValid(toOpenStd).empty()) {
+    m_view->giveUserCritical("Could not open workspace: " + toOpenQ, "Error");
     return;
   }
 
   ITableWorkspace_sptr origTable =
-      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
+      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpenStd);
 
   // We create a clone of the table for live editing. The original is not
   // updated unless we explicitly save.
@@ -1186,12 +1187,12 @@ void GenericDataProcessorPresenter::openTable() {
   try {
     m_manager->isValidModel(newTable, m_whitelist.size());
     m_manager->newTable(newTable, m_whitelist);
-    m_wsName = toOpen;
+    m_wsName = toOpenStd;
     m_view->showTable(m_manager->getModel());
     m_tableDirty = false;
   } catch (std::runtime_error &e) {
-    m_view->giveUserCritical(
-        "Could not open workspace: " + std::string(e.what()), "Error");
+    m_view->giveUserCritical(QString(
+        QString("Could not open workspace: ") + e.what()), "Error");
   }
 }
 

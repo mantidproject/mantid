@@ -67,7 +67,7 @@ public:
                                     const std::string &defaultValue) = 0;
   virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
   virtual void giveUserWarning(std::string prompt, std::string title) = 0;
-  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
+  virtual void giveUserCritical(QString prompt, std::string title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
 
   // Settings
