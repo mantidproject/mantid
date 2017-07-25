@@ -84,6 +84,28 @@ public:
     TS_ASSERT_EQUALS(&b.detectorInfo(), detInfo);
     TS_ASSERT_EQUALS(&b.componentInfo(), compInfo);
   }
+
+  void test_alias() {
+    Beamline a(ComponentInfo{}, DetectorInfo{});
+    auto *detInfo = &a.detectorInfo();
+    auto *compInfo = &a.componentInfo();
+    // Should NOT yield new infos
+    Beamline b = a.alias();
+    TS_ASSERT_EQUALS(&b.detectorInfo(), detInfo);
+    TS_ASSERT_EQUALS(&b.componentInfo(), compInfo);
+  }
+
+  void test_alias_ownership() {
+    Beamline b;
+    {
+      // alias temporary
+      b = Beamline(ComponentInfo{}, DetectorInfo{}).alias();
+    }
+    // This will throw if not shared ownership
+    b.detectorInfo().size();
+    // This will throw if not shared ownership
+    b.componentInfo().size();
+  }
 };
 
 #endif /* MANTID_BEAMLINE_BEAMLINETEST_H_ */

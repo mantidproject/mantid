@@ -353,7 +353,7 @@ public:
   size_t detectorIndex(const detid_t detID) const;
   size_t componentIndex(const Geometry::ComponentID componentId) const;
   const std::vector<Geometry::ComponentID> &componentIds() const;
-  void setBeamline(Beamline::Beamline beamline,
+  void setBeamline(Beamline::Beamline &beamline,
                    const Geometry::InstrumentVisitor &visitor);
   void clearBeamline();
   void setInstrument(const Instrument *instrument);

@@ -1200,9 +1200,10 @@ size_t ParameterMap::componentIndex(const ComponentID componentId) const {
   return m_componentInfo->indexOf(componentId);
 }
 
-void ParameterMap::setBeamline(Beamline::Beamline beamline,
+void ParameterMap::setBeamline(Beamline::Beamline &beamline,
                                const Geometry::InstrumentVisitor &visitor) {
-  m_beamline = std::move(beamline);
+  // We must share beamline internals
+  m_beamline = beamline.alias();
   // We reference the internal beamline copy in the following
   m_componentInfo = boost::make_shared<Geometry::ComponentInfo>(
       m_beamline.mutableComponentInfo(), visitor.componentIds(),

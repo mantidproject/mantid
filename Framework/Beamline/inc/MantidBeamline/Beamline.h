@@ -2,7 +2,7 @@
 #define MANTID_BEAMLINE_BEAMLINE_H_
 
 #include "MantidBeamline/DllConfig.h"
-#include <memory>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Beamline {
@@ -54,12 +54,16 @@ public:
   const DetectorInfo &detectorInfo() const;
   ComponentInfo &mutableComponentInfo();
   DetectorInfo &mutableDetectorInfo();
+  Beamline alias();
   bool empty() const;
 
 private:
+  // For internal use only.
+  Beamline(boost::shared_ptr<ComponentInfo> &componentInfo,
+           boost::shared_ptr<DetectorInfo> &detectorInfo);
   bool m_empty = true;
-  std::unique_ptr<ComponentInfo> m_componentInfo;
-  std::unique_ptr<DetectorInfo> m_detectorInfo;
+  boost::shared_ptr<ComponentInfo> m_componentInfo;
+  boost::shared_ptr<DetectorInfo> m_detectorInfo;
 };
 
 } // namespace Beamline
