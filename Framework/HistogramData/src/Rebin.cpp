@@ -40,7 +40,11 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
     auto owidth = xo_high - xo_low;
     auto nwidth = xn_high - xn_low;
 
-    if (owidth <= 0.0 || nwidth <= 0.0)
+	if (xo_high < -1e100 || xo_low < -1e100) {
+		throw InvalidBinEdgesError("One or more x-values was unusually low (below -1e100). This usually occurs when a monitor spectrum has not been masked after ConvertUnits has been run on the workspace");
+	}
+
+	if (owidth <= 0.0 || nwidth <= 0.0)
       throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
 
     if (xn_high <= xo_low)
