@@ -189,6 +189,7 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
         V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
             boost::math::iround(peak.getL()));
     V3D Q2 = lattice.qFromHKL(hkl);
+  try {
     DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(),
                             hkl, peak.getGoniometerMatrix());
     Units::Wavelength wl;
@@ -200,6 +201,11 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
     out[i * 3] = Q3[0] - Q2[0];
     out[i * 3 + 1] = Q3[1] - Q2[1];
     out[i * 3 + 2] = Q3[2] - Q2[2];
+  } catch (std::runtime_error &) {
+    out[i * 3] = std::numeric_limits<double>::infinity();
+    out[i * 3 + 1] = std::numeric_limits<double>::infinity();
+    out[i * 3 + 2] = std::numeric_limits<double>::infinity();
+  }
   }
   moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate,
                1.0 / scalex, 1.0 / scaley, m_bank, m_workspace);

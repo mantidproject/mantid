@@ -262,12 +262,17 @@ void SCDCalibratePanels::exec() {
         V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
             boost::math::iround(peak.getL()));
     V3D Q2 = lattice0.qFromHKL(hkl);
-    peak.setInstrument(inst);
-    peak.setQSampleFrame(Q2);
-    peak.setHKL(hkl);
+    try {
+        peak.setInstrument(inst);
+        peak.setQSampleFrame(Q2);
+        peak.setHKL(hkl);
+    } catch (...) {
+      g_log.notice() << "Problem in applying calibration to peak "<<i<<"\n";
+    }
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
   // Find U again for optimized geometry and index peaks
   findU(peaksWs);
   // Save as DetCal and XML if requested
