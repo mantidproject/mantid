@@ -441,7 +441,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
   osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
   if (manualDRange)
-    osirisDiffReduction->setProperty("DRange", m_uiForm.spDRange->text().toStdString());
+    osirisDiffReduction->setProperty("DRange",
+                                     m_uiForm.spDRange->text().toStdString());
 
   if (m_uiForm.ckUseCan->isChecked()) {
     osirisDiffReduction->setProperty(
