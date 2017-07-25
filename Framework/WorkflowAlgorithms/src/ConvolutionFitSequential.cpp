@@ -567,7 +567,7 @@ void ConvolutionFitSequential::calculateEISF(
         ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
     columnName += "EISF";
     auto errorColumnName = ampErrorName.substr(
-        0, (ampName.size() - std::string("Amplitude_Err").size()));
+        0, (ampErrorName.size() - std::string("Amplitude_Err").size()));
     errorColumnName += "EISF_Err";
 
     tableWs->addColumn("double", columnName);
