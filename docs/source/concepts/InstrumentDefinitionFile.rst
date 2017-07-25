@@ -945,6 +945,8 @@ processed by Mantid
    converting to MD.
 -  "offset-phi". Effective boolean for turning on/off Phi offsets by PI.
    Set to Always to apply.
+-  "HiddenInInstrumentView". Set to "True" if the component should NOT be
+   rendered in the instrument view, for example if the component is infinite.
 
 The value of the parameter is in the above example specified using a log-file as
 specified with the element <logfile>. The required attribute of <logfile> is
