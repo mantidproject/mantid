@@ -5,7 +5,9 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -212,6 +214,8 @@ then convert SXPeaks objects to PeakObjects and add them to the output workspace
 */
 void FindSXPeaks::reducePeakList(const peakvector &pcv) {
   double resolution = getProperty("Resolution");
+  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
+  auto &goniometerMatrix = localworkspace->run().getGoniometer().getR();
   auto reductionStrategy = getReducePeakListStrategy();
   auto finalv = reductionStrategy->reduce(pcv, resolution);
 
@@ -222,6 +226,7 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv) {
       if (peak) {
         peak->setIntensity(finalPeak.getIntensity());
         peak->setDetectorID(finalPeak.getDetectorId());
+		peak->setGoniometerMatrix(goniometerMatrix);
         m_peaks->addPeak(*peak);
         delete peak;
       }
