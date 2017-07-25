@@ -40,11 +40,11 @@ void DeleteTableRows::exec() {
   std::set<size_t, std::greater<size_t>> sortedRows(rows.begin(), rows.end());
   std::vector<int> badPeaks;
   auto it = sortedRows.begin();
-  for (; it != sortedRows.end(); ++it) {
+  for (int i = 0; it != sortedRows.end(); ++it, ++i) {
     if (*it >= tw->rowCount())
       continue;
     if (pw) {
-      badPeaks.push_back(static_cast<int>(*it));
+      badPeaks.push_back(static_cast<int>(i));
     } else {
       tw->removeRow(*it);
     }

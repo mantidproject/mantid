@@ -486,10 +486,11 @@ public:
   }
 
   void test_removePeaks() {
-
-    auto pw = buildPW();
+    //build peaksworkspace (note number of peaks = 1)
+    auto pw = buildPW(); 
     Instrument_const_sptr inst = pw->getInstrument();
 
+    //add peaks
     Peak p(inst, 1, 3.0);
     Peak p2(inst, 2, 6.0);
     Peak p3(inst, 3, 9.0);
@@ -497,9 +498,11 @@ public:
     pw->addPeak(p2);
     pw->addPeak(p3);
 
+    //number of peaks = 4, now remove 3
     std::vector<int> badPeaks;
     badPeaks.push_back(0);
     badPeaks.push_back(2);
+    badPeaks.push_back(3);
     pw->removePeaks(badPeaks);
     TS_ASSERT_EQUALS(pw->getNumberPeaks(), 1);
   }
