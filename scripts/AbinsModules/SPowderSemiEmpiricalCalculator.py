@@ -552,8 +552,7 @@ class SPowderSemiEmpiricalCalculator(object):
             rebined_broad_spectrum = self._fix_empty_array()
 
         # multiply by k-point weight
-        rebined_broad_spectrum = rebined_broad_spectrum * self._weight
-
+        rebined_broad_spectrum = rebined_broad_spectrum * self._weight / AbinsModules.AbinsParameters.bin_width
         return local_freq, local_coeff, rebined_broad_spectrum
 
     def _helper_atom_angle(self, atom=None, local_freq=None, local_coeff=None, order=None, return_freq=True, q2=None):

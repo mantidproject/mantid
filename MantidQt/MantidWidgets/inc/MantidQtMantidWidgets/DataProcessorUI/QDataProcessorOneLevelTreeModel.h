@@ -2,9 +2,8 @@
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
-#include <QAbstractItemModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
@@ -42,7 +41,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorOneLevelTreeModel
-    : public QAbstractItemModel {
+    : public AbstractDataProcessorTreeModel {
   Q_OBJECT
 public:
   QDataProcessorOneLevelTreeModel(
@@ -52,8 +51,6 @@ public:
 
   // Functions to read data from the model
 
-  // Get flags for a cell
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
   // Get data for a cell
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -62,11 +59,11 @@ public:
                       int role) const override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  // Column count
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent
   QModelIndex index(int row, int column,
                     const QModelIndex &parent = QModelIndex()) const override;
+  // Get the underlying data structure
+  Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
   // Get the parent
   QModelIndex parent(const QModelIndex &index) const override;
@@ -83,11 +80,17 @@ public:
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
 
+  // Miscellaneous model functions
+
+  // Add a row to the list of rows to be highlighted
+  bool addHighlighted(int position,
+                      const QModelIndex &parent = QModelIndex()) override;
+  // Clear the list of highlighted items
+  void clearHighlighted() override;
+
 private:
-  /// Collection of data for viewing.
-  Mantid::API::ITableWorkspace_sptr m_tWS;
-  /// Map of column indexes to names and viceversa
-  DataProcessorWhiteList m_whitelist;
+  /// List of row indexes that should be highlighted
+  std::vector<int> m_highlightRows;
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorOneLevelTreeModel

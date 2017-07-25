@@ -131,8 +131,8 @@ cow_ptr<DataType>::cow_ptr()
 */
 // Note: Need custom implementation, since std::mutex is not copyable.
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) noexcept : Data(A.Data) {
-}
+cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) noexcept
+    : Data(boost::atomic_load(&A.Data)) {}
 
 /**
   Assignment operator : double references the data object
@@ -145,7 +145,7 @@ template <typename DataType>
 cow_ptr<DataType> &cow_ptr<DataType>::
 operator=(const cow_ptr<DataType> &A) noexcept {
   if (this != &A) {
-    Data = A.Data;
+    boost::atomic_store(&Data, boost::atomic_load(&A.Data));
   }
   return *this;
 }
@@ -159,7 +159,7 @@ operator=(const cow_ptr<DataType> &A) noexcept {
 template <typename DataType>
 cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) noexcept {
   if (this->Data != A) {
-    Data = A;
+    boost::atomic_store(&Data, boost::atomic_load(&A));
   }
   return *this;
 }
@@ -183,21 +183,21 @@ template <typename DataType> DataType &cow_ptr<DataType>::access() {
     std::lock_guard<std::mutex> lock{copyMutex};
     // Check again because another thread may have taken copy and dropped
     // reference count since previous check
-    if (!Data.unique())
-      Data = boost::make_shared<DataType>(*Data);
+    if (!Data.unique()) {
+      boost::atomic_store(&Data, boost::make_shared<DataType>(*Data));
+    }
   }
-
   return *Data;
 }
 
 template <typename DataType>
 cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) noexcept {
-  this->Data = std::move(resourceSptr);
+  boost::atomic_store(&this->Data, std::move(resourceSptr));
 }
 
 template <typename DataType>
 cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) noexcept {
-  this->Data = resourceSptr;
+  boost::atomic_store(&this->Data, boost::atomic_load(&resourceSptr));
 }
 
 } // NAMESPACE Kernel

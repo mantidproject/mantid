@@ -59,7 +59,7 @@ public:
     delete Prop2;
   }
 
-  IPropertySettings *clone() override {
+  IPropertySettings *clone() const override {
     return new OrEnabledWhenProperties(propName1, Criteria1, value1, propName2,
                                        Criteria2, value2);
   }

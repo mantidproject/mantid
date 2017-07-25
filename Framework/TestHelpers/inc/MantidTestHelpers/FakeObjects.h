@@ -32,32 +32,37 @@
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;
-using namespace Mantid;
+using Mantid::detid_t;
+using Mantid::specnum_t;
+using Mantid::MantidVec;
 
 //===================================================================================================================
 /** Helper class that implements ISpectrum */
 class SpectrumTester : public ISpectrum {
 public:
-  SpectrumTester(HistogramData::Histogram::XMode xmode,
-                 HistogramData::Histogram::YMode ymode)
+  SpectrumTester(Mantid::HistogramData::Histogram::XMode xmode,
+                 Mantid::HistogramData::Histogram::YMode ymode)
       : ISpectrum(), m_histogram(xmode, ymode) {
     m_histogram.setCounts(0);
     m_histogram.setCountStandardDeviations(0);
   }
-  SpectrumTester(const specnum_t specNo, HistogramData::Histogram::XMode xmode,
-                 HistogramData::Histogram::YMode ymode)
+  SpectrumTester(const specnum_t specNo,
+                 Mantid::HistogramData::Histogram::XMode xmode,
+                 Mantid::HistogramData::Histogram::YMode ymode)
       : ISpectrum(specNo), m_histogram(xmode, ymode) {
     m_histogram.setCounts(0);
     m_histogram.setCountStandardDeviations(0);
   }
 
-  void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override {
+  void setX(const Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> &X)
+      override {
     m_histogram.setX(X);
   }
   MantidVec &dataX() override { return m_histogram.dataX(); }
   const MantidVec &dataX() const override { return m_histogram.dataX(); }
   const MantidVec &readX() const override { return m_histogram.readX(); }
-  Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override {
+  Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX>
+  ptrX() const override {
     return m_histogram.ptrX();
   }
 
@@ -85,13 +90,13 @@ public:
   }
 
 protected:
-  HistogramData::Histogram m_histogram;
+  Mantid::HistogramData::Histogram m_histogram;
 
 private:
-  const HistogramData::Histogram &histogramRef() const override {
+  const Mantid::HistogramData::Histogram &histogramRef() const override {
     return m_histogram;
   }
-  HistogramData::Histogram &mutableHistogramRef() override {
+  Mantid::HistogramData::Histogram &mutableHistogramRef() override {
     return m_histogram;
   }
 };
@@ -99,7 +104,9 @@ private:
 //===================================================================================================================
 class AxeslessWorkspaceTester : public MatrixWorkspace {
 public:
-  AxeslessWorkspaceTester() : MatrixWorkspace(), m_spec(0) {}
+  AxeslessWorkspaceTester(const Mantid::Parallel::StorageMode storageMode =
+                              Mantid::Parallel::StorageMode::Cloned)
+      : MatrixWorkspace(storageMode), m_spec(0) {}
 
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return m_spec; }
@@ -125,9 +132,9 @@ public:
 protected:
   void init(const size_t &numspec, const size_t &j, const size_t &k) override {
     m_spec = numspec;
-    m_vec.resize(m_spec,
-                 SpectrumTester(HistogramData::getHistogramXMode(j, k),
-                                HistogramData::Histogram::YMode::Counts));
+    m_vec.resize(m_spec, SpectrumTester(
+                             Mantid::HistogramData::getHistogramXMode(j, k),
+                             Mantid::HistogramData::Histogram::YMode::Counts));
     for (size_t i = 0; i < m_spec; i++) {
       m_vec[i].setMatrixWorkspace(this, i);
       m_vec[i].dataX().resize(j, 1.0);
@@ -138,7 +145,7 @@ protected:
     }
   }
   void init(const size_t &numspec,
-            const HistogramData::Histogram &histogram) override {
+            const Mantid::HistogramData::Histogram &histogram) override {
     m_spec = numspec;
     m_vec.resize(m_spec, SpectrumTester(histogram.xMode(), histogram.yMode()));
     for (size_t i = 0; i < m_spec; i++) {
@@ -163,13 +170,20 @@ private:
 
 class WorkspaceTester : public AxeslessWorkspaceTester {
 public:
-  WorkspaceTester() : AxeslessWorkspaceTester() {}
+  WorkspaceTester(const Mantid::Parallel::StorageMode storageMode =
+                      Mantid::Parallel::StorageMode::Cloned)
+      : AxeslessWorkspaceTester(storageMode) {}
 
   const std::string id() const override { return "WorkspaceTester"; }
 
   /// Returns a clone of the workspace
   std::unique_ptr<WorkspaceTester> clone() const {
     return std::unique_ptr<WorkspaceTester>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<WorkspaceTester> cloneEmpty() const {
+    return std::unique_ptr<WorkspaceTester>(doCloneEmpty());
   }
 
 protected:
@@ -182,7 +196,7 @@ protected:
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
   void init(const size_t &numspec,
-            const HistogramData::Histogram &histogram) override {
+            const Mantid::HistogramData::Histogram &histogram) override {
     AxeslessWorkspaceTester::init(numspec, histogram);
 
     // Put an 'empty' axis in to test the getAxis method
@@ -196,15 +210,22 @@ private:
     return new WorkspaceTester(*this);
   }
   WorkspaceTester *doCloneEmpty() const override {
-    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
+    return new WorkspaceTester(storageMode());
   }
 };
 
 //===================================================================================================================
 class TableWorkspaceTester : public ITableWorkspace {
 public:
-  TableWorkspaceTester() {}
-  ~TableWorkspaceTester() override {}
+  /// Returns a clone of the workspace
+  std::unique_ptr<TableWorkspaceTester> clone() const {
+    return std::unique_ptr<TableWorkspaceTester>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<TableWorkspaceTester> cloneEmpty() const {
+    return std::unique_ptr<TableWorkspaceTester>(doCloneEmpty());
+  }
 
   const std::string id() const override { return "TableWorkspaceTester"; }
 
@@ -225,10 +246,6 @@ public:
   }
 
   void removeColumn(const std::string &) override {
-    throw std::runtime_error("removeColumn not implemented");
-  }
-
-  ITableWorkspace *clone() const {
     throw std::runtime_error("removeColumn not implemented");
   }
 
@@ -292,12 +309,16 @@ public:
     throw std::runtime_error("find not implemented");
   }
 
-  void find(Kernel::V3D, size_t &, const size_t &) override {
+  void find(Mantid::Kernel::V3D, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 
 private:
   TableWorkspaceTester *doClone() const override {
+    throw std::runtime_error(
+        "Cloning of TableWorkspaceTester is not implemented.");
+  }
+  TableWorkspaceTester *doCloneEmpty() const override {
     throw std::runtime_error(
         "Cloning of TableWorkspaceTester is not implemented.");
   }

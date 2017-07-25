@@ -1,6 +1,11 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORMAINPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORMAINPRESENTER_H
 
+#include "MantidKernel/System.h"
+
+#include <QSet>
+#include <QString>
+
 namespace MantidQt {
 namespace MantidWidgets {
 /** @class DataProcessorMainPresenter
@@ -37,38 +42,34 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DataProcessorMainPresenter {
 public:
-  virtual ~DataProcessorMainPresenter(){};
+  virtual ~DataProcessorMainPresenter() {}
 
-  enum Flag { ADSChangedFlag };
+  /// Notify this receiver with the list of table workspaces in the ADS that can
+  /// be loaded into the interface
+  virtual void notifyADSChanged(const QSet<QString> &workspaceList) {
+    UNUSED_ARG(workspaceList);
+  }
 
-  /// Notify this receiver that something changed in the ADS
-  virtual void notify(DataProcessorMainPresenter::Flag flag) = 0;
-
-  /// Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) = 0;
-  virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
-  virtual void giveUserWarning(std::string prompt, std::string title) = 0;
-  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
-  virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
-
-  /// Return values to perform pre-processing on
-  virtual std::map<std::string, std::string> getPreprocessingValues() const = 0;
+  /// Return global options for pre-processing as a string
+  virtual QString getPreprocessingOptionsAsString() const { return QString(); }
   /// Return property names associated with pre-processing values
-  virtual std::map<std::string, std::set<std::string>>
-  getPreprocessingProperties() const = 0;
-  /// Return global options for pre-processing
-  virtual std::map<std::string, std::string>
-  getPreprocessingOptions() const = 0;
+  virtual QString getPreprocessingProperties() const { return QString(); }
   /// Return global options for reduction
-  virtual std::string getProcessingOptions() const = 0;
+  virtual QString getProcessingOptions() const { return QString(); }
   /// Return global options for post-processing
-  virtual std::string getPostprocessingOptions() const = 0;
+  virtual QString getPostprocessingOptions() const { return QString(); }
   /// Return time-slicing values
-  virtual std::string getTimeSlicingValues() const = 0;
+  virtual QString getTimeSlicingValues() const { return QString(); }
   /// Return time-slicing type
-  virtual std::string getTimeSlicingType() const = 0;
+  virtual QString getTimeSlicingType() const { return QString(); }
+
+  /// Handle data reduction paused/resumed
+  virtual void pause() const {}
+  virtual void resume() const {}
+
+  /// Handle data reduction paused/resumed confirmation
+  virtual void confirmReductionPaused() const {}
+  virtual void confirmReductionResumed() const {}
 };
 }
 }

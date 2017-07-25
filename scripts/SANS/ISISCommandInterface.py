@@ -980,7 +980,6 @@ def DisplayMask(mask_worksp=None):
     """
     # this will be copied from a sample work space if one exists
     counts_data = None
-    _instrument = ReductionSingleton().instrument
 
     if not mask_worksp:
         mask_worksp = '__CurrentMask'

@@ -74,15 +74,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         AbinsParameters.figure_format = "pdf"
 
     def tearDown(self):
-        # remove all created files
-        files = os.listdir(os.getcwd())
-        for filename in files:
-            if self._Si2 in filename:
-                os.remove(filename)
-        try:
-            DeleteWorkspace(self._wrk_name)
-        except ValueError:  # nothing bad happened if there is no workspace to delete
-            pass
+        AbinsTestHelpers.remove_output_files(list_of_names=["Abins", "explicit", "default", "total",
+                                                            "squaricn_scale", "benzene_exp", "experimental"])
+        mtd.clear()
 
     def test_wrong_fwhm(self):
         # fwhm should be positive

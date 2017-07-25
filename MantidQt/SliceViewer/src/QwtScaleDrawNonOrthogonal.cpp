@@ -17,28 +17,10 @@ QwtScaleDrawNonOrthogonal::QwtScaleDrawNonOrthogonal(
     Mantid::API::IMDWorkspace_sptr workspace, size_t dimX, size_t dimY,
     Mantid::Kernel::VMD slicePoint,
     MantidQt::SliceViewer::NonOrthogonalOverlay *gridPlot)
-    : m_plot(plot), m_screenDimension(screenDimension), m_dimX(dimX),
+    : m_fromHklToXyz({{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}}),
+      m_fromXyzToHkl({{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}}),
+      m_plot(plot), m_screenDimension(screenDimension), m_dimX(dimX),
       m_dimY(dimY), m_slicePoint(slicePoint), m_gridPlot(gridPlot) {
-  m_fromHklToXyz[0] = 1.0;
-  m_fromHklToXyz[1] = 0.0;
-  m_fromHklToXyz[2] = 0.0;
-  m_fromHklToXyz[3] = 0.0;
-  m_fromHklToXyz[4] = 1.0;
-  m_fromHklToXyz[5] = 0.0;
-  m_fromHklToXyz[6] = 0.0;
-  m_fromHklToXyz[7] = 0.0;
-  m_fromHklToXyz[8] = 1.0;
-
-  m_fromXyzToHkl[0] = 1.0;
-  m_fromXyzToHkl[1] = 0.0;
-  m_fromXyzToHkl[2] = 0.0;
-  m_fromXyzToHkl[3] = 0.0;
-  m_fromXyzToHkl[4] = 1.0;
-  m_fromXyzToHkl[5] = 0.0;
-  m_fromXyzToHkl[6] = 0.0;
-  m_fromXyzToHkl[7] = 0.0;
-  m_fromXyzToHkl[8] = 1.0;
-
   // Set up the transformation matrix
   setTransformationMatrices(workspace);
 
@@ -241,7 +223,7 @@ QPointF QwtScaleDrawNonOrthogonal::fromMixedCoordinatesToHkl(double x,
   Mantid::Kernel::VMD coords = m_slicePoint;
   coords[m_dimX] = static_cast<Mantid::Kernel::VMD_t>(x);
   coords[m_dimY] = static_cast<Mantid::Kernel::VMD_t>(y);
-  MantidQt::API::transformLookpointToWorkspaceCoordGeneric(
+  MantidQt::API::transformLookpointToWorkspaceCoord(
       coords, m_fromXyzToHkl, m_dimX, m_dimY, m_missingDimension);
   auto coord1 = coords[m_dimX];
   auto coord2 = coords[m_dimY];
@@ -307,9 +289,9 @@ void QwtScaleDrawNonOrthogonal::setTransformationMatrices(
   m_missingDimension =
       MantidQt::API::getMissingHKLDimensionIndex(workspace, m_dimX, m_dimY);
 
-  if (MantidQt::API::isHKLDimensions(workspace, m_dimX, m_dimY)) {
+  if (MantidQt::API::isHKLDimensions(*workspace, m_dimX, m_dimY)) {
     Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
-    MantidQt::API::provideSkewMatrix(skewMatrix, workspace);
+    MantidQt::API::provideSkewMatrix(skewMatrix, *workspace);
     MantidQt::API::transformFromDoubleToCoordT(skewMatrix, m_fromXyzToHkl);
     skewMatrix.Invert();
     MantidQt::API::transformFromDoubleToCoordT(skewMatrix, m_fromHklToXyz);

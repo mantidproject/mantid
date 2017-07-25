@@ -3,16 +3,20 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidParallel/ParallelRunner.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 
+#include <algorithm>
 #include <mutex>
 #include <vector>
 
 using namespace Mantid::Parallel;
+using ParallelTestHelpers::ParallelRunner;
 
 namespace {
-void check_size(const Communicator &comm, const int expected) {
-  TS_ASSERT_EQUALS(comm.size(), expected);
+void get_sizes(const Communicator &comm, std::mutex &mutex,
+               std::vector<int> &sizes) {
+  std::lock_guard<std::mutex> lock(mutex);
+  sizes.push_back(comm.size());
 }
 
 void get_ranks(const Communicator &comm, std::mutex &mutex,
@@ -30,9 +34,15 @@ public:
   static void destroySuite(ParallelRunnerTest *suite) { delete suite; }
 
   void test_size() {
+    std::mutex mutex;
     ParallelRunner parallel;
     TS_ASSERT(parallel.size() > 1);
-    parallel.run(check_size, parallel.size());
+    std::vector<int> sizes;
+    parallel.run(get_sizes, std::ref(mutex), std::ref(sizes));
+    // Currently ParallelRunner also runs the callable with a single rank.
+    TS_ASSERT_EQUALS(std::count(sizes.begin(), sizes.end(), 1), 1);
+    TS_ASSERT_EQUALS(std::count(sizes.begin(), sizes.end(), parallel.size()),
+                     parallel.size());
   }
 
   void test_rank() {
@@ -40,12 +50,18 @@ public:
     std::set<int> ranks;
     ParallelRunner parallel;
     parallel.run(get_ranks, std::ref(mutex), std::ref(ranks));
+    int size{1};
+#ifdef MPI_EXPERIMENTAL
     boost::mpi::communicator world;
-    if (world.size() == 1) {
+    size = world.size();
+#endif
+    if (size == 1) {
       for (int rank = 0; rank < parallel.size(); ++rank)
         TS_ASSERT_EQUALS(ranks.count(rank), 1);
     } else {
+#ifdef MPI_EXPERIMENTAL
       TS_ASSERT_EQUALS(ranks.count(world.rank()), 1);
+#endif
     }
   }
 };

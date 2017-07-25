@@ -1,12 +1,10 @@
 #ifndef MANTID_GEOMETRY_ICOMPONENT_H_
 #define MANTID_GEOMETRY_ICOMPONENT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
+#include <map>
 #include <string>
 #include <vector>
 #include <set>
@@ -22,9 +20,6 @@ class Quat;
 }
 
 namespace Geometry {
-//---------------------------------------------------------
-// Forward declarations
-//---------------------------------------------------------
 class IComponent;
 class BoundingBox;
 class ParameterMap;

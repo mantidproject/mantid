@@ -1,0 +1,93 @@
+digraph isisPowderGenericAlgs{
+    label="ISISPowder - Apply absorption corrections"
+    $global_style
+
+    // **Labels
+    label_GEM                               [label="Apply absorption corrections - GEM"]
+    label_PEARL                             [label="Apply absorption corrections - PEARL"]
+    label_POLARIS                           [label="Apply absorption corrections - POLARIS"]
+
+    // **Parameters
+    subgraph params {
+        $param_style
+
+        // General
+        param_MayersInputs  [label="User/Adv config:\n\n Chemical Formula\n Cylinder Height\n Cylinder Position\n Cylinder Radius\n Number Density\n"]
+
+        // PEARL
+        param_advAbsFilename                [label="Adv config: Absorption Filename"]
+    }
+
+    // **Processes (inc. bespoke inst steps)
+    subgraph {
+        $process_style
+
+    }
+
+    // **Algorithms
+    subgraph algorithms{
+        $algorithm_style
+
+        // General
+        alg_MayersSampleCorr                [label="Mayers Sample Correction"]
+
+        // GEM
+        alg_GEM_maskDetector                [label="Mask detectors 1-100"]
+
+        // PEARL
+        alg_PEARL_Divide                    [label="Divide: Van ws / Absorb ws"]
+        alg_PEARL_Load                      [label="Load"]
+        alg_PEARL_RebinWorkspace            [label="Rebin: Van ws to match Absorb ws"]
+
+        // POLARIS
+        alg_POLARIS_maskDetector            [label="Mask detectors 1-54"]
+
+    }
+
+    // **Decisions
+    subgraph decisions{
+        $decision_style
+
+        // GEM
+        if_GEM_isVanadium                   [label="If: Is Vanadium"]
+        // POLARIS
+        if_POLARIS_isVanadium               [label="If: Is Vanadium"]
+    }
+
+    // **Graph layout for GEM / POLARIS
+    subgraph ApplyAbsorbCorrGemPolaris{
+        // *GEM
+        label_GEM                       ->  if_GEM_isVanadium
+        
+        // Is Vanadium
+        if_GEM_isVanadium               ->  alg_GEM_maskDetector    [label="True"]
+        alg_GEM_maskDetector            ->  alg_MayersSampleCorr    [label="Use Adv Config"]
+
+        // Not Vanadium
+        if_GEM_isVanadium               ->  alg_MayersSampleCorr    [label="False - Use User Config"]
+
+        // *POLARIS
+        label_POLARIS                   ->  if_POLARIS_isVanadium
+
+        // Is Vanadium
+        if_POLARIS_isVanadium           ->  alg_POLARIS_maskDetector [label="True"]
+        alg_POLARIS_maskDetector        ->  alg_MayersSampleCorr    [label="Use Adv Config"]
+
+        // Not Vanadium
+        if_POLARIS_isVanadium           ->  alg_MayersSampleCorr    [label="False - Use User Config"]
+
+        // Vanadium params
+        param_MayersInputs              ->  alg_MayersSampleCorr
+    }
+
+    // **Graph layout for PEARL
+    subgraph ApplyAbsorbPearl{
+        // Load previously calculated Abs corrections
+        label_PEARL                     ->  alg_PEARL_Load
+        param_advAbsFilename            ->  alg_PEARL_Load
+
+        // Rebin and divide
+        alg_PEARL_Load                  ->  alg_PEARL_RebinWorkspace
+        alg_PEARL_RebinWorkspace        ->  alg_PEARL_Divide
+    }
+}

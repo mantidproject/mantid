@@ -447,7 +447,8 @@ class Abins(PythonAlgorithm):
         :param atom_name: name of atom (for example H for hydrogen)
         """
         if atom_name is not None:
-            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name)
+            width = AbinsModules.AbinsParameters.bin_width
+            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name) * width
 
         dim = 1
         length = s_points.size
@@ -736,7 +737,7 @@ class Abins(PythonAlgorithm):
 
         # bin width is expressed in cm^-1
         bin_width = AbinsModules.AbinsParameters.bin_width
-        if not (isinstance(bin_width, float) and 0.0 < bin_width <= 10.0):
+        if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
             raise RuntimeError("Invalid value of bin_width" + message_end)
 
         min_wavenumber = AbinsModules.AbinsParameters.min_wavenumber

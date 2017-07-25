@@ -1,10 +1,10 @@
 #ifndef MANTID_API_IMDHISTOWORKSPACE_H_
 #define MANTID_API_IMDHISTOWORKSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {
@@ -43,6 +43,10 @@ public:
   /// Returns a clone of the workspace
   IMDHistoWorkspace_uptr clone() const {
     return IMDHistoWorkspace_uptr(doClone());
+  }
+  /// Returns a default-initialized clone of the workspace
+  IMDHistoWorkspace_uptr cloneEmpty() const {
+    return IMDHistoWorkspace_uptr(doCloneEmpty());
   }
   /// See the MDHistoWorkspace definition for descriptions of these
   virtual coord_t getInverseVolume() const = 0;
@@ -109,6 +113,7 @@ protected:
 
 private:
   IMDHistoWorkspace *doClone() const override = 0;
+  IMDHistoWorkspace *doCloneEmpty() const override = 0;
 };
 
 } // namespace API

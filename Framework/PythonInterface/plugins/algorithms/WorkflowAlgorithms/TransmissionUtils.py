@@ -302,12 +302,6 @@ def subtract_dark_current(self, workspace, property_manager):
     use_sample_dc = self.getProperty("UseSampleDarkCurrent").value
     dark_current_data = self.getPropertyValue("DarkCurrentFilename")
     property_manager_name = self.getProperty("ReductionProperties").value
-    # Get instrument to use with FileFinder
-    #instrument = ''
-    #if property_manager.existsProperty("InstrumentName"):
-    #    instrument = property_manager.getProperty("InstrumentName").value
-
-    dark_current_property = "DefaultDarkCurrentAlgorithm"
 
     def _dark(ws, dark_current_property, dark_current_file=None):
         if property_manager.existsProperty(dark_current_property):

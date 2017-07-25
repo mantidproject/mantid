@@ -86,6 +86,15 @@ public:
     TS_ASSERT_DELTA(fun.getParameter("f2.Amplitude"), 0.4298 * c_mbsr,
                     1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f2.FWHM"), 1.5, 1e-3);
+
+    TS_ASSERT(fun.hasParameter("B20"));
+    TS_ASSERT(fun.hasParameter("B42"));
+    TS_ASSERT(fun.hasParameter("f0.Amplitude"));
+    TS_ASSERT(fun.hasParameter("f0.FWHM"));
+    TS_ASSERT(fun.hasParameter("f2.Amplitude"));
+    TS_ASSERT(fun.hasParameter("f2.PeakCentre"));
+    TS_ASSERT(!fun.hasParameter("Hello"));
+    TS_ASSERT(!fun.hasParameter("f0.Hello"));
   }
 
   void test_evaluate() {

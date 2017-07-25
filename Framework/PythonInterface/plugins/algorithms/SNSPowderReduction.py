@@ -5,7 +5,7 @@ import os
 
 import mantid.simpleapi as api
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, \
-    FileAction, FileProperty, ITableWorkspaceProperty, PropertyMode, WorkspaceProperty, \
+    FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceProperty, \
     ITableWorkspace, MatrixWorkspace
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
@@ -179,10 +179,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                           extensions=[".h5", ".hd5", ".hdf", ".cal"]))  # CalFileName
         self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml"]), "Overrides grouping from CalibrationFile")
-        self.declareProperty(FileProperty(name="CharacterizationRunsFile",
-                                          defaultValue="",
-                                          action=FileAction.OptionalLoad,
-                                          extensions=["txt"]), "File with characterization runs denoted")
+        self.declareProperty(MultipleFileProperty(name="CharacterizationRunsFile",
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=["txt"]), "File with characterization runs denoted")
         self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=[".ini"]))
         self.copyProperties('AlignAndFocusPowderFromFiles',
@@ -514,6 +513,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     def _loadCharacterizations(self):
         self._focusPos = {}
         charFilename = self.getProperty("CharacterizationRunsFile").value
+        charFilename = ','.join(charFilename)
         expIniFilename = self.getProperty("ExpIniFilename").value
 
         self._charTable = ''

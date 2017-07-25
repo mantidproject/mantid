@@ -167,11 +167,12 @@ void CrossCorrelate::exec() {
   bool is_distrib = inputWS->isDistribution();
 
   std::vector<double> XX(npoints);
-  for (int i = 0; i < npoints; ++i)
+  for (int i = 0; i < npoints; ++i) {
     XX[i] = static_cast<double>(i - nY + 2);
+  }
   // Initialise the progress reporting object
   out->mutableX(0) = XX;
-  m_progress = new Progress(this, 0.0, 1.0, nspecs);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, nspecs);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
   {
@@ -183,9 +184,9 @@ void CrossCorrelate::exec() {
     out->setSharedX(i, out->sharedX(0));
 
     // Get temp references
-    auto &iX = inputWS->x(wsIndex);
-    auto &iY = inputWS->y(wsIndex);
-    auto &iE = inputWS->e(wsIndex);
+    const auto &iX = inputWS->x(wsIndex);
+    const auto &iY = inputWS->y(wsIndex);
+    const auto &iE = inputWS->e(wsIndex);
     // Copy Y,E data of spec(i) to temp vector
     // Now rebin on the grid of reference spectrum
     std::vector<double> tempY(nY);

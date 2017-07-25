@@ -8,12 +8,17 @@
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <numeric>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -23,6 +28,53 @@ using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+
+namespace {
+
+std::unique_ptr<Rebin> prepare_rebin(const Parallel::Communicator &comm,
+                                     const std::string &storageMode) {
+  auto create = ParallelTestHelpers::create<Algorithms::CreateWorkspace>(comm);
+  std::vector<double> dataEYX(2000);
+  for (size_t i = 0; i < dataEYX.size(); ++i)
+    dataEYX[i] = static_cast<double>(i % 2 + 1);
+  int nspec = 1000;
+  create->setProperty<int>("NSpec", nspec);
+  create->setProperty<std::vector<double>>("DataX", dataEYX);
+  create->setProperty<std::vector<double>>("DataY", dataEYX);
+  create->setProperty<std::vector<double>>("DataE", dataEYX);
+  create->setProperty("ParallelStorageMode", storageMode);
+  create->execute();
+  MatrixWorkspace_sptr ws = create->getProperty("OutputWorkspace");
+  auto rebin = ParallelTestHelpers::create<Algorithms::Rebin>(comm);
+  rebin->setProperty("InputWorkspace", ws);
+  return rebin;
+}
+
+void run_rebin(const Parallel::Communicator &comm,
+               const std::string &storageMode) {
+  auto rebin = prepare_rebin(comm, storageMode);
+  rebin->setProperty("Params", "1,1,3");
+  TS_ASSERT_THROWS_NOTHING(rebin->execute());
+  MatrixWorkspace_const_sptr ws = rebin->getProperty("OutputWorkspace");
+  TS_ASSERT_EQUALS(ws->storageMode(), Parallel::fromString(storageMode));
+}
+
+void run_rebin_params_only_bin_width(const Parallel::Communicator &comm,
+                                     const std::string &storageMode) {
+  auto rebin = prepare_rebin(comm, storageMode);
+  rebin->setProperty("Params", "0.5");
+  if (Parallel::fromString(storageMode) == Parallel::StorageMode::Distributed &&
+      comm.size() > 1) {
+    TS_ASSERT_THROWS_EQUALS(
+        rebin->execute(), const std::runtime_error &e, std::string(e.what()),
+        "MatrixWorkspace: Parallel support for XMin and XMax not implemented.");
+  } else {
+    TS_ASSERT_THROWS_NOTHING(rebin->execute());
+    MatrixWorkspace_const_sptr ws = rebin->getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(ws->storageMode(), Parallel::fromString(storageMode));
+  }
+}
+}
 
 class RebinTest : public CxxTest::TestSuite {
 public:
@@ -467,6 +519,30 @@ public:
     std::vector<double> yExpected = {4.0, 4.0, 2.8, 2.8, 2.8, 8.0};
     std::string params = "0.5, 1.0, 3.1, 0.7, 5.0, 2.0, 7.25";
     do_test_FullBinsOnly(params, yExpected, xExpected);
+  }
+
+  void test_parallel_cloned() {
+    ParallelTestHelpers::runParallel(run_rebin,
+                                     "Parallel::StorageMode::Cloned");
+  }
+
+  void test_parallel_distributed() {
+    ParallelTestHelpers::runParallel(run_rebin,
+                                     "Parallel::StorageMode::Distributed");
+  }
+
+  void test_parallel_master_only() {
+    ParallelTestHelpers::runParallel(run_rebin,
+                                     "Parallel::StorageMode::MasterOnly");
+  }
+
+  void test_parallel_only_bin_width() {
+    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width,
+                                     "Parallel::StorageMode::Cloned");
+    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width,
+                                     "Parallel::StorageMode::Distributed");
+    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width,
+                                     "Parallel::StorageMode::MasterOnly");
   }
 
 private:

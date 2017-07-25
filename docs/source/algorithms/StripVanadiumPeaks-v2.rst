@@ -37,7 +37,7 @@ Output:
 
 .. testoutput:: ExStripPeak
 
-    This peak at 0.8116 Angstroms has been reduced from 11569 to a background level of 10771
+    This peak at 0.8116 Angstroms has been reduced from 11569 to a background level of 10845
 
 .. categories::
 

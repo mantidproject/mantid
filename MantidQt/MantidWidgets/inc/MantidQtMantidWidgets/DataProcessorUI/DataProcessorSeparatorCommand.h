@@ -36,14 +36,16 @@ class DataProcessorSeparatorCommand : public DataProcessorCommandBase {
 public:
   DataProcessorSeparatorCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorSeparatorCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorSeparatorCommand(){};
 
   void execute() override{};
-  std::string name() override { return std::string(); }
-  std::string icon() override { return std::string(); }
-  std::string tooltip() override { return std::string(); }
-  std::string whatsthis() override { return std::string(); }
-  std::string shortcut() override { return std::string(); }
+  QString name() override { return QString(); }
+  QString icon() override { return QString(); }
+  QString tooltip() override { return QString(); }
+  QString whatsthis() override { return QString(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

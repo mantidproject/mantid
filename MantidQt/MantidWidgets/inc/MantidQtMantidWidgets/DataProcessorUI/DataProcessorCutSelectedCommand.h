@@ -34,20 +34,22 @@ class DataProcessorCutSelectedCommand : public DataProcessorCommandBase {
 public:
   DataProcessorCutSelectedCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorCutSelectedCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorCutSelectedCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::CutSelectedFlag);
   };
-  std::string name() override { return std::string("Cut Selected"); }
-  std::string icon() override { return std::string("://cut.png"); }
-  std::string tooltip() override { return std::string("Cut selected"); }
-  std::string whatsthis() override {
-    return std::string("Copies the selected rows to the clipboard, and then "
-                       "deletes them. Each row is placed on a new line, and "
-                       "each cell is separated by a tab");
+  QString name() override { return QString("Cut Selected"); }
+  QString icon() override { return QString("://cut.png"); }
+  QString tooltip() override { return QString("Cut selected"); }
+  QString whatsthis() override {
+    return QString("Copies the selected rows to the clipboard, and then "
+                   "deletes them. Each row is placed on a new line, and "
+                   "each cell is separated by a tab");
   }
-  std::string shortcut() override { return std::string("Ctrl+X"); }
+  QString shortcut() override { return QString("Ctrl+X"); }
 };
 }
 }
