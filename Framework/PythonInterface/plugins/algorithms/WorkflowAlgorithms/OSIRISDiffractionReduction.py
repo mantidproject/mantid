@@ -379,12 +379,14 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # of DRanges, each to a *single* workspace.
         temp_sam_map = DRangeToWorkspaceMap()
         for d_range, ws_list in iteritems(self._sam_ws_map.getMap()):
+            self._rebin_to_smallest(ws_list)
             temp_sam_map.setItem(d_range, average_ws_list(ws_list))
         self._sam_ws_map = temp_sam_map
 
         # Now do the same to the vanadium workspaces.
         temp_van_map = DRangeToWorkspaceMap()
         for d_range, ws_list in iteritems(self._van_ws_map.getMap()):
+            self._rebin_to_smallest(ws_list)
             temp_van_map.setItem(d_range, average_ws_list(ws_list))
         self._van_ws_map = temp_van_map
 
@@ -408,7 +410,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for d_range in iterkeys(self._sam_ws_map.getMap()):
             sam_ws = self._sam_ws_map.getMap()[d_range]
             van_ws = self._van_ws_map.getMap()[d_range]
-            sam_ws, van_ws = self._rebin_to_smallest(sam_ws, van_ws)
+            sam_ws, van_ws = self._rebin_to_smallest([sam_ws, van_ws])
             Divide(LHSWorkspace=sam_ws,
                    RHSWorkspace=van_ws,
                    OutputWorkspace=sam_ws)
@@ -514,33 +516,20 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         return run_files
 
-    def _rebin_to_smallest(self, samWS, vanWS):
+    def _rebin_to_smallest(self, workspaces):
         """
-        At some point a change to the control program meant that the raw data
-        got an extra bin. This prevents runs past this point being normalised
-        with a vanadium from an earlier point.  Here we simply rebin to the
-        smallest workspace if the sizes don't match
+        Rebins the specified list to the workspace with the smallest
+        x-range in the list.
 
-        @param samWS A workspace object containing the sample run
-        @param vanWS A workspace object containing the vanadium run
-        @returns samWS, vanWS rebinned  to the smallest if necessary
+        :param workspaces: The list of workspaces to rebin to the smallest.
+        :return:           The rebinned list of workspaces.
         """
-        sample_size, van_size = mtd[samWS].blocksize(), mtd[vanWS].blocksize()
-        if sample_size == van_size:
-            return samWS, vanWS
-
-        if sample_size < van_size:
-            # Rebin vanadium to match sample
-            RebinToWorkspace(WorkspaceToRebin=vanWS,
-                             WorkspaceToMatch=samWS,
-                             OutputWorkspace=vanWS)
-        else:
-            # Rebin sample to match vanadium
-            RebinToWorkspace(WorkspaceToRebin=samWS,
-                             WorkspaceToMatch=vanWS,
-                             OutputWorkspace=samWS)
-
-        return samWS, vanWS
+        smallest_ws = min(workspaces)
+        return [RebinToWorkspace(
+            WorkspaceToRebin=ws,
+            WorkspaceToMatch=smallest_ws,
+            OutputWorkspace=ws
+        ) for ws in workspaces]
 
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
