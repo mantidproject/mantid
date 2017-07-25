@@ -34,22 +34,19 @@ def mask_ws(ws_to_mask, xstart, xend):
 
 
 class MatchPeaks(PythonAlgorithm):
-    def __init__(self):
 
-        PythonAlgorithm.__init__(self)
+    # Mandatory workspaces
+    _input_ws = None
+    _output_ws = None
 
-        # Mandatory workspaces
-        self._input_ws = None
-        self._output_ws = None
+    # Optional workspace
+    _input_2_ws = None
+    _input_3_ws = None
+    _output_bin_range = None
 
-        # Optional workspace
-        self._input_2_ws = None
-        self._input_3_ws = None
-        self._output_bin_range = None
-
-        # Bool flags
-        self._masking = False
-        self._match_option = None
+    # Bool flags
+    _masking = False
+    _match_option = False
 
     def category(self):
         return "Transforms"
@@ -101,9 +98,10 @@ class MatchPeaks(PythonAlgorithm):
         self._input_2_ws = self.getPropertyValue('InputWorkspace2')
         self._input_3_ws = self.getPropertyValue('InputWorkspace3')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
+        self._output_bin_range = self.getPropertyValue('BinRangeTable')
+
         self._masking = self.getProperty('MaskBins').value
         self._match_option = self.getProperty('MatchInput2ToCenter').value
-        self._output_bin_range = self.getPropertyValue('BinRangeTable')
 
         if self._input_ws:
             ReplaceSpecialValues(InputWorkspace = self._input_ws, OutputWorkspace = self._input_ws,
