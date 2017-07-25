@@ -88,8 +88,8 @@ class DRangeToWorkspaceMap(object):
             self._map[d_range] = [ws_name]
         else:
             #check if x ranges matchs and existing run
-            for ws_name in self._map[d_range]:
-                map_lastx = mtd[ws_name].readX(0)[-1]
+            for ws in self._map[d_range]:
+                map_lastx = mtd[ws].readX(0)[-1]
                 ws_lastx = wrksp.readX(0)[-1]
 
                 #if it matches ignore it
@@ -255,9 +255,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Note that dRange numbers are offset to match the numbering in the OSIRIS manual
         # http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf
-        bound_validator = IntArrayBoundedValidator(1, len(TIME_REGIME_TO_DRANGE))
-        self.declareProperty(IntArrayProperty('DRange', 1, validator=bound_validator),
-                             doc='Dranges to use when DetectDRange is disabled')
+        self.declareProperty('DRange', defaultValue="", doc='Dranges to use when DetectDRange is disabled')
 
         self._cal = None
         self._output_ws_name = None
@@ -283,9 +281,14 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._spec_max = self.getPropertyValue("SpectraMax")
 
         self._man_d_range = None
+
         # Check whether to manually override d-ranges.
-        if not self.getProperty("DetectDRange").value:
-            self._man_d_range = [x - 1 for x in self.getProperty("DRange").value]
+        try:
+            if not self.getProperty("DetectDRange").value:
+                self._man_d_range = self._parse_string_array(self.getProperty("DRange").value)
+                self._man_d_range = [x - 1 for x in self._man_d_range]
+        except BaseException as exc:
+            self.log().error(str(exc))
 
     def validateInputs(self):
         self._get_properties()
@@ -335,8 +338,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Add the sample workspaces to the dRange to sample map
         for idx, sample in enumerate(self._sample_runs):
-            if self._container_files:
 
+            if self._container_files:
                 RebinToWorkspace(WorkspaceToRebin=self._container_files[idx],
                                  WorkspaceToMatch=sample,
                                  OutputWorkspace=self._container_files[idx])
@@ -345,11 +348,21 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                       RHSWorkspace=self._container_files[idx],
                       OutputWorkspace=sample)
 
-            self._sam_ws_map.addWs(sample, self._man_d_range[idx])
+            if self._man_d_range is not None and \
+                idx < len(self._man_d_range):
+                self._sam_ws_map.addWs(sample, self._man_d_range[idx])
+            else:
+                self._sam_ws_map.addWs(sample)
 
         # Add the vanadium workspaces to the dRange to vanadium map
         for idx, van in enumerate(self._vanadium_runs):
-            self._van_ws_map.addWs(van, self._man_d_range[idx])
+
+            if self._man_d_range is not None and \
+                idx < len(self._man_d_range):
+                self.log().information("Found: " + str(van))
+                self._van_ws_map.addWs(van, self._man_d_range[idx])
+            else:
+                self._van_ws_map.addWs(van)
 
         # Finished with container now so delete it
         if self._container_files:
@@ -452,6 +465,37 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             DeleteWorkspace(Workspace=wrksp)
 
         self.setProperty("OutputWorkspace", result)
+
+    def _parse_string_array(self, string):
+        """
+        Parse a specified string into an array based on the following specification:
+
+        a   : Add a to the array where a is an integer.
+        a-b : Add the range 'a to b' to the array where a and b are integers.
+        a,b : Add elements of a and b to the array where a and b are integers or ranges.
+
+        Ignores whitespace.
+
+        :param string:  The string to parse to an array.
+        :return:        The array parsed from the string using the specification.
+        """
+        str_ranges = string.replace(" ", "").split(",")
+        str_ranges = [x.split("-") for x in str_ranges]
+
+        range_array = []
+
+        # Iterate over each range/element (represented as a string).
+        for str_range in str_ranges:
+            length = len(str_range)
+
+            # Check whether the current range has one element or
+            # two.
+            if length == 1:
+                range_array.append(int(str_range[0]))
+            elif length == 2:
+                range_array += list(range(int(str_range[0]), int(str_range[1])))
+
+        return range_array
 
     def _find_runs(self, runs):
         """
