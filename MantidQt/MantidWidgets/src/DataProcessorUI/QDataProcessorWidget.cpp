@@ -458,7 +458,7 @@ std::string QDataProcessorWidget::getProcessInstrument() const {
 
 /**
 Get the indices of the highlighted items that have a valid parent
-@returns :: a map where keys are parents of selected items and values are sets
+.what()@returns :: a map where keys are parents of selected items and values are sets
 containing the highlighted children
 */
 std::map<int, std::set<int>> QDataProcessorWidget::getSelectedChildren() const {

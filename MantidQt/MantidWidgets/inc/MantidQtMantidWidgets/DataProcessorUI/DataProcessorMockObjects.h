@@ -37,7 +37,7 @@ public:
                            const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
+  MOCK_METHOD2(giveUserCritical, void(QString, std::string));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
 
   // IO
