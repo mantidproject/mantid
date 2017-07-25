@@ -64,7 +64,7 @@ private:
       m_manager->update(groupIndex, rowItem->first, rowItem->second);
       m_manager->setProcessed(true, rowItem->first, groupIndex);
     } catch (std::exception &ex) {
-      reductionError(ex);
+      reductionError(QString(ex.what()));
       threadFinished(1);
     }
     threadFinished(0);
@@ -78,7 +78,7 @@ private:
       if (m_manager->rowCount(groupIndex) == static_cast<int>(groupData.size()))
         m_manager->setProcessed(true, groupIndex);
     } catch (std::exception &ex) {
-      reductionError(ex);
+      reductionError(QString(ex.what()));
       threadFinished(1);
     }
     threadFinished(0);
