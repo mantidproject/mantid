@@ -7,7 +7,8 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
-#pylint: disable=too-few-public-methods
+
+# pylint: disable=too-few-public-methods
 
 
 class DRange(object):
@@ -26,15 +27,15 @@ class DRange(object):
 
 
 TIME_REGIME_TO_DRANGE = {
-    1.17e4: DRange( 0.7,  2.5),
-    2.94e4: DRange( 2.1,  3.3),
-    4.71e4: DRange( 3.1,  4.3),
-    6.48e4: DRange( 4.1,  5.3),
-    8.25e4: DRange( 5.2,  6.2),
-    10.02e4: DRange( 6.2,  7.3),
-    11.79e4: DRange( 7.3,  8.3),
-    13.55e4: DRange( 8.3,  9.5),
-    15.32e4: DRange( 9.4, 10.6),
+    1.17e4: DRange(0.7, 2.5),
+    2.94e4: DRange(2.1, 3.3),
+    4.71e4: DRange(3.1, 4.3),
+    6.48e4: DRange(4.1, 5.3),
+    8.25e4: DRange(5.2, 6.2),
+    10.02e4: DRange(6.2, 7.3),
+    11.79e4: DRange(7.3, 8.3),
+    13.55e4: DRange(8.3, 9.5),
+    15.32e4: DRange(9.4, 10.6),
     17.09e4: DRange(10.4, 11.6),
     18.86e4: DRange(11.0, 12.5),
     20.63e4: DRange(12.2, 13.8)
@@ -87,12 +88,12 @@ class DRangeToWorkspaceMap(object):
         if d_range not in self._map:
             self._map[d_range] = [ws_name]
         else:
-            #check if x ranges matchs and existing run
+            # check if x ranges matchs and existing run
             for ws in self._map[d_range]:
                 map_lastx = mtd[ws].readX(0)[-1]
                 ws_lastx = wrksp.readX(0)[-1]
 
-                #if it matches ignore it
+                # if it matches ignore it
                 if map_lastx == ws_lastx:
                     DeleteWorkspace(wrksp)
                     return
@@ -192,7 +193,7 @@ def is_in_ranges(range_list, val):
     return False
 
 
-#pylint: disable=no-init,too-many-instance-attributes
+# pylint: disable=no-init,too-many-instance-attributes
 class OSIRISDiffractionReduction(PythonAlgorithm):
     """
     Handles the reduction of OSIRIS Diffraction Data.
@@ -215,13 +216,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         return 'Diffraction\\Reduction'
 
     def summary(self):
-        return "This Python algorithm performs the operations necessary for the reduction of diffraction data "+\
-               "from the Osiris instrument at ISIS "+\
+        return "This Python algorithm performs the operations necessary for the reduction of diffraction data " + \
+               "from the Osiris instrument at ISIS " + \
                "into dSpacing, by correcting for the monitor and linking the various d-ranges together."
 
     def PyInit(self):
-        runs_desc='The list of run numbers that are part of the sample run. '+\
-                  'There should be five of these in most cases. Enter them as comma separated values.'
+        runs_desc = 'The list of run numbers that are part of the sample run. ' + \
+                    'There should be five of these in most cases. Enter them as comma separated values.'
 
         self.declareProperty(StringArrayProperty('Sample'),
                              doc=runs_desc)
@@ -236,16 +237,16 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                              doc='Factor by which to scale the container')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+
-                             '[[DiffractionFocussing]] child algorithms.')
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and ' +
+                                 '[[DiffractionFocussing]] child algorithms.')
 
         self.declareProperty('SpectraMin', 3, doc='Minimum Spectrum to Load from (Must be more than 3)')
 
         self.declareProperty('SpectraMax', 962, doc='Maximum Spectrum to Load from file (Must be less than 962)')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
-                             doc="Name to give the output workspace. If no name is provided, "+
-                             "one will be generated based on the run numbers.")
+                             doc="Name to give the output workspace. If no name is provided, " +
+                                 "one will be generated based on the run numbers.")
 
         self.declareProperty(name='LoadLogFiles', defaultValue=True,
                              doc='Load log files when loading runs')
@@ -307,7 +308,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         return issues
 
-    #pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches
     def PyExec(self):
         """
         Execute the algorithm in diffraction-only mode
@@ -349,7 +350,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                       OutputWorkspace=sample)
 
             if self._man_d_range is not None and \
-                idx < len(self._man_d_range):
+                            idx < len(self._man_d_range):
                 self._sam_ws_map.addWs(sample, self._man_d_range[idx])
             else:
                 self._sam_ws_map.addWs(sample)
@@ -358,7 +359,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for idx, van in enumerate(self._vanadium_runs):
 
             if self._man_d_range is not None and \
-                idx < len(self._man_d_range):
+                            idx < len(self._man_d_range):
                 self.log().information("Found: " + str(van))
                 self._van_ws_map.addWs(van, self._man_d_range[idx])
             else:
@@ -442,8 +443,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         dataX = result.dataX(0)
         dataY = []
         dataE = []
-        for i in range(0, len(dataX)-1):
-            x_val = (dataX[i] + dataX[i+1]) / 2.0
+        for i in range(0, len(dataX) - 1):
+            x_val = (dataX[i] + dataX[i + 1]) / 2.0
             if is_in_ranges(intersections, x_val):
                 dataY.append(2)
                 dataE.append(2)
@@ -459,8 +460,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             resultY = resultY / dataY
             resultE = resultE / dataE
 
-            result.setY(i,resultY)
-            result.setE(i,resultE)
+            result.setY(i, resultY)
+            result.setE(i, resultE)
 
         # Delete all workspaces we've created, except the result.
         for wrksp in self._van_ws_map.getMap().values():
