@@ -74,8 +74,6 @@ public:
   }
 
 private:
-  friend struct Mantid::Kernel::CreateUsingNew<FilterEvents>;
-
   // Implement abstract Algorithm methods
   void init() override;
   // Implement abstract Algorithm methods
@@ -141,21 +139,15 @@ private:
   /// Run object
   std::vector<std::string> getTimeSeriesLogNames();
 
-  //  Kernel::TimeSplitterType generateSplitters(int wsindex);
-
   void generateSplitterTSP(
       std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
 
   void generateSplitterTSPalpha(
       std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
 
-  ///
+  /// Add time series property 'Splitter' to each child workspace
   void mapSplitterTSPtoWorkspaces(
       const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
-
-  //  void splitTSPLogInPlace(DataObjects::EventWorkspace_sptr eventws,
-  //                          std::string logname,
-  //                          Kernel::TimeSplitterType &splitters);
 
   void copyNoneSplitLogs(
       std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,

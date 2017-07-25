@@ -889,15 +889,6 @@ void GenerateEventsFilter::makeFilterBySingleValue(
     addNewTimeFilterSplitter(start, stop, wsindex, empty);
   }
 
-  // add the row for information table workspace
-  //  std::stringstream infoss;
-  //  infoss << "DaDa Log." << m_dblLog->name() << ".From." << min << ".To." <<
-  //  max
-  //         << ".Direction=Increase" << filterIncrease << "DirectionDecrease="
-  //         << filterDecrease;
-  //  API::TableRow row = m_filterInfoWS->appendRow();
-  //  row << wsindex << infoss.str();
-
   return;
 }
 

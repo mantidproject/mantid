@@ -723,7 +723,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # Normalize by current with new name
         if self._normalisebycurrent is True:
-            self.log().warning('[SPECIAL DB] Normalize current to workspace %s' % sample_ws_name)
+            self.log().information('Normalize current to workspace %s' % sample_ws_name)
             # temp_ws = self.get_workspace(sample_ws_name)
             if not (is_event_workspace(sample_ws_name) and get_workspace(sample_ws_name).getNumberEvents() == 0):
                 api.NormaliseByCurrent(InputWorkspace=sample_ws_name,
@@ -891,9 +891,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                         ReductionProperties="__snspowderreduction",
                                         **self._focusPos)
                 # logging (ignorable)
-                #for iws in range(out_ws_c_s.getNumberHistograms()):
-                #    spec = out_ws_c_s.getSpectrum(iws)
-                #    self.log().debug("[DBx131] ws %d: spectrum No = %d. " % (iws, spec.getSpectrumNo()))
                 if is_event_workspace(out_ws_name_chunk_split):
                     self.log().information('After being aligned and focused, workspace %s: Number of events = %d '
                                            'of chunk %d ' % (out_ws_name_chunk_split,
@@ -1474,7 +1471,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              SplitterWorkspace=split_ws_name, GroupWorkspaces=True, RelativeTime=is_relative_time)
         else:
             # split with information table
-            self.log().notice('[DB...BAT] Raw Name: {0}.  Base Name: {1}'.format(raw_ws_name, base_name))
             api.FilterEvents(InputWorkspace=raw_ws_name, OutputWorkspaceBaseName=base_name,
                              SplitterWorkspace=split_ws_name, InformationWorkspace=str(self._splitinfotablews),
                              GroupWorkspaces=True, RelativeTime=is_relative_time)
