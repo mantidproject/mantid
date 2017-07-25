@@ -21,8 +21,7 @@ set ( SRC_FILES
 	src/Indirect/ConvFit.cpp
 	src/Indirect/CorrectionsTab.cpp
 	src/Indirect/DensityOfStates.cpp
-	src/Indirect/Elwin.cpp
-	src/Indirect/ILLCalibration.cpp
+        src/Indirect/Elwin.cpp
 	src/Indirect/ILLEnergyTransfer.cpp
 	src/Indirect/ISISCalibration.cpp
 	src/Indirect/ISISDiagnostics.cpp
@@ -161,8 +160,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
 	inc/MantidQtCustomInterfaces/Indirect/CorrectionsTab.h
 	inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
-	inc/MantidQtCustomInterfaces/Indirect/Elwin.h
-	inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.h
+        inc/MantidQtCustomInterfaces/Indirect/Elwin.h
 	inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
 	inc/MantidQtCustomInterfaces/Indirect/ISISCalibration.h
 	inc/MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h
@@ -310,7 +308,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/CorrectionsTab.h
                 inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
                 inc/MantidQtCustomInterfaces/Indirect/Elwin.h
-                inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.h
                 inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
@@ -406,7 +403,6 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Indirect/ConvFit.ui
                inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.ui
                inc/MantidQtCustomInterfaces/Indirect/Elwin.ui
-               inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.ui
                inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectCorrections.ui

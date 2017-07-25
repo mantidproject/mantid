@@ -21,6 +21,10 @@ Improvements
 ------------
 - The *S(Q, W)* interface now automatically replaces NaN values with 0.
 
+Dropped
+-------
+- :ref:`algm-LoadILLIndirect-v1`, :ref:`algm-IndirectILLReduction`, :ref:`algm-ILLIN16BCalibration` algorithms deprecated since v3.9, are now removed.
+
 
 Bugfixes
 --------
