@@ -524,7 +524,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         :param workspaces: The list of workspaces to rebin to the smallest.
         :return:           The rebinned list of workspaces.
         """
-        workspaces = workspaces.sort()
+        workspaces.sort()
         smallest_ws = workspaces[0]
         return [RebinToWorkspace(
             WorkspaceToRebin=ws,
