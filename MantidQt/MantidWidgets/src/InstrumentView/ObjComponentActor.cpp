@@ -54,8 +54,7 @@ ObjComponentActor::ObjComponentActor(const InstrumentActor &instrActor,
   if (compID->hasParameter("HiddenInInstrumentView") &&
       compID->getBoolParameter("HiddenInInstrumentView")[0]) {
     // If the user has explicitly stated that this component should be hidden,
-    // then hide it
-    setAlwaysHidden();
+    // then hide itn();
   } else if (!isComponentFinite(compID)) {
     // If the component is too large, we hide it so that the scale is not messed
     // up, and warn the user
@@ -66,11 +65,6 @@ ObjComponentActor::ObjComponentActor(const InstrumentActor &instrActor,
                   "component does not have finite size, set "
                   "\"HiddenInInstrumentView\" to True in the IDF");
   }
-  else if (!isComponentFinite(compID)) {
-    // If the component is too large, we hide it so that the scale is not messed up, and warn the user
-    setAlwaysHidden();
-    g_log.warning("Component \"" + compID->getName() + "\" was not rendered, as it is larger than the maximum size. \nIs the component defined correctly in the IDF? If the component does not have finite size, set \"HiddenInInstrumentView\" to True in the IDF");
-  }
 
   // register the component with InstrumentActor and set the pick colour
   IDetector_const_sptr det = getDetector();
@@ -80,8 +74,6 @@ ObjComponentActor::ObjComponentActor(const InstrumentActor &instrActor,
   } else {
     instrActor.pushBackNonDetid(this, compID);
   }
-
-  
 }
 
 ObjComponentActor::~ObjComponentActor() {}
