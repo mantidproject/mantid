@@ -110,7 +110,7 @@ void IndirectTransmission::transAlgDone(bool error) {
   // Do plotting
   m_uiForm.ppPlot->clear();
   m_uiForm.ppPlot->addSpectrum("Can", canWsName + "_Can",
-                               0, Qt::black);
+                               0, Qt::blue);
   m_uiForm.ppPlot->addSpectrum(
       "Sample", sampleWsName + "_Sam", 0, Qt::red);
   m_uiForm.ppPlot->addSpectrum(
