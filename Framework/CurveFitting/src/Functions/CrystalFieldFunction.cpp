@@ -409,33 +409,24 @@ void CrystalFieldFunction::declareParameter(const std::string &, double,
       "CrystalFieldFunction cannot not have its own parameters.");
 }
 
-/// Returns the number of attributes associated with the function
-size_t CrystalFieldFunction::nAttributes() const {
+/// Build and cache the attribute names
+void CrystalFieldFunction::buildAttributeNames() const {
   checkSourceFunction();
   checkTargetFunction();
-  auto nAttrs = IFunction::nAttributes() + m_control.nAttributes();
-  for(size_t iSpec = 0; iSpec < m_control.nFunctions(); ++iSpec) {
-    nAttrs += m_control.getFunction(iSpec)->nAttributes();
+  if (!m_attributeNames.empty()) {
+    return;
   }
-  return nAttrs;
-}
-
-/// Returns a list of attribute names
-std::vector<std::string> CrystalFieldFunction::getAttributeNames() const {
-  checkSourceFunction();
-  checkTargetFunction();
-  std::vector<std::string> attNames = IFunction::getAttributeNames();
+  m_attributeNames = IFunction::getAttributeNames();
   auto controlAttributeNames = m_control.getAttributeNames();
   // Lambda function that moves a attribute name from controlAttributeNames
   // to attNames.
-  auto moveAttributeName =
-      [&](const std::string &name) {
-        auto iterFound = std::find(controlAttributeNames.begin(),
-                                   controlAttributeNames.end(), name);
-        if (iterFound != controlAttributeNames.end()) {
-          controlAttributeNames.erase(iterFound);
-          attNames.push_back(name);
-        }
+  auto moveAttributeName = [&](const std::string &name) {
+    auto iterFound = std::find(controlAttributeNames.begin(),
+                               controlAttributeNames.end(), name);
+    if (iterFound != controlAttributeNames.end()) {
+      controlAttributeNames.erase(iterFound);
+      m_attributeNames.push_back(name);
+    }
   };
   // These names must appear first and in this order in the output vector
   moveAttributeName("Ions");
@@ -443,30 +434,54 @@ std::vector<std::string> CrystalFieldFunction::getAttributeNames() const {
   moveAttributeName("Temperatures");
   moveAttributeName("Background");
   // Copy the rest of the names
-  attNames.insert(attNames.end(), controlAttributeNames.begin(),
-                        controlAttributeNames.end());
-  for(size_t iSpec=0; iSpec < m_control.nFunctions(); ++iSpec) {
-    std::string prefix = SPECTRUM_PREFIX + std::to_string(iSpec) + ".";
+  m_attributeNames.insert(m_attributeNames.end(), controlAttributeNames.begin(),
+                          controlAttributeNames.end());
+  // Get 
+  for (size_t iSpec = 0; iSpec < m_control.nFunctions(); ++iSpec) {
+    std::string prefix(SPECTRUM_PREFIX);
+    prefix.append(std::to_string(iSpec)).append(".");
     auto names = m_control.getFunction(iSpec)->getAttributeNames();
-    for(auto &name: names) {
+    for (auto &name : names) {
       name.insert(name.begin(), prefix.begin(), prefix.end());
     }
-    attNames.insert(attNames.end(), names.begin(), names.end());
+    m_attributeNames.insert(m_attributeNames.end(), names.begin(), names.end());
   }
-  return attNames;
+  auto nSpec = nSpectra();
+  for (size_t iSpec = nSpec; iSpec < m_target->nFunctions(); ++iSpec) {
+    auto &physPropFun = *m_target->getFunction(iSpec);
+    auto names = physPropFun.getAttributeNames();
+    for (auto &name : names) {
+      if (name == "NumDeriv")
+        continue;
+      std::string prefix(physPropFun.name());
+      prefix.append(".");
+      name.insert(name.begin(), prefix.begin(), prefix.end());
+      m_attributeNames.push_back(name);
+    }
+  }
+}
+
+/// Returns the number of attributes associated with the function
+size_t CrystalFieldFunction::nAttributes() const {
+  buildAttributeNames();
+  return m_attributeNames.size();
+}
+
+/// Returns a list of attribute names
+std::vector<std::string> CrystalFieldFunction::getAttributeNames() const {
+  buildAttributeNames();
+  return m_attributeNames;
 }
 
 /// Return a value of attribute attName
 /// @param attName :: Name of an attribute.
 IFunction::Attribute
 CrystalFieldFunction::getAttribute(const std::string &attName) const {
-
   auto attRef = getAttributeReference(attName);
   if (attRef.first == nullptr) {
     // This will throw an exception because attribute doesn't exist
     return IFunction::getAttribute(attName);
   }
-
   return attRef.first->getAttribute(attRef.second);
 }
 
@@ -792,6 +807,7 @@ void CrystalFieldFunction::buildTargetFunction() const {
   } else {
     buildSingleSite();
   }
+  m_attributeNames.clear();
 }
 
 /// Build the target function in a single site case.
@@ -1043,48 +1059,38 @@ API::IFunction_sptr CrystalFieldFunction::buildPhysprop(
     const ComplexFortranMatrix &ham, const std::string &propName) const {
 
   if (propName == "cv") { // HeatCapacity
-    IFunction_sptr retval = IFunction_sptr(new CrystalFieldHeatCapacity);
-    auto &spectrum = dynamic_cast<CrystalFieldHeatCapacity &>(*retval);
-    spectrum.setEnergy(en);
-    return retval;
+    auto propFun = boost::make_shared<CrystalFieldHeatCapacityCalculation>();
+    propFun->setEnergy(en);
+    return propFun;
   }
   if (propName == "chi") { // Susceptibility
-    IFunction_sptr retval = IFunction_sptr(new CrystalFieldSusceptibility);
-    auto &spectrum = dynamic_cast<CrystalFieldSusceptibility &>(*retval);
-    spectrum.setEigensystem(en, wf, nre);
-    //const auto suffix = std::to_string(iSpec);
-    //spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
-    //spectrum.setAttribute("inverse", getAttribute("inverse" + suffix));
-    //spectrum.setAttribute("powder", getAttribute("powder" + suffix));
-    //dynamic_cast<Peaks &>(*m_source).m_PPLambdaIdxChild[iSpec] =
-    //    spectrum.parameterIndex("Lambda");
-    return retval;
+    auto propFun = boost::make_shared<CrystalFieldSusceptibilityCalculation>();
+    propFun->setEigensystem(en, wf, nre);
+    return propFun;
   }
   if (propName == "mh") { // Magnetisation
-    IFunction_sptr retval = IFunction_sptr(new CrystalFieldMagnetisation);
-    auto &spectrum = dynamic_cast<CrystalFieldMagnetisation &>(*retval);
-    spectrum.setHamiltonian(ham, nre);
+    auto propFun = boost::make_shared<CrystalFieldMagnetisation>();
+    propFun->setHamiltonian(ham, nre);
     //spectrum.setAttribute("Temperature", Attribute(temperature));
     //const auto suffix = std::to_string(iSpec);
     //spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
     //spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
     //spectrum.setAttribute("powder", getAttribute("powder" + suffix));
-    return retval;
+    return propFun;
   }
   if (propName == "mt") { // MagneticMoment
-    IFunction_sptr retval = IFunction_sptr(new CrystalFieldMoment);
-    auto &spectrum = dynamic_cast<CrystalFieldMoment &>(*retval);
-    spectrum.setHamiltonian(ham, nre);
+    auto propFun = boost::make_shared<CrystalFieldMoment>();
+    propFun->setHamiltonian(ham, nre);
     //const auto suffix = std::to_string(iSpec);
     //spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
     //spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
     //spectrum.setAttribute("Hmag", getAttribute("Hmag" + suffix));
     //spectrum.setAttribute("inverse", getAttribute("inverse" + suffix));
     //spectrum.setAttribute("powder", getAttribute("powder" + suffix));
-    return retval;
+    return propFun;
   }
 
-  throw std::runtime_error("Physical property type not understood");
+  throw std::runtime_error("Physical property type not understood: " + propName);
 }
 
 
@@ -1334,12 +1340,9 @@ void CrystalFieldFunction::makeMapsSM() const {
       }
     } else {
       // This is a physical property function
-      if (m_control.physProps()[iSpec - nSpectra()] == "chi") {
-        std::string name = "chi.Lambda";
-        m_mapNames2Indices[name] = i;
-        m_mapIndices2Names[i] = name;
-        ++i;
-      }
+      std::string prefix(m_control.physProps()[iSpec - nSpectra()]);
+      prefix.append(".");
+      i += makeMapsForFunction(*m_target->getFunction(iSpec), i, prefix);
     }
   }
 }

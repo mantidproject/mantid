@@ -433,7 +433,7 @@ public:
     cf.setAttributeValue("Symmetries", "C2v");
     cf.setAttributeValue("Temperatures", std::vector<double>({44}));
     cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-    cf.setAttributeValue("PhysicalProperties", "cv, mt");
+    cf.setAttributeValue("PhysicalProperties", "chi, cv");
     bool isMultiSpectrum;
     std::string o_PhysicalProperties;
     std::vector<std::string> parameterNames;

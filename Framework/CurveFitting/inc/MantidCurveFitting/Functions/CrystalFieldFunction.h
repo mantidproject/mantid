@@ -203,6 +203,8 @@ private:
   std::pair<API::IFunction*, std::string> getAttributeReference(const std::string& attName) const;
   /// Get a reference to a parameter
   API::ParameterReference getParameterReference(const std::string &paramName) const;
+  /// Build and cache the attribute names
+  void buildAttributeNames() const;
 
   /// Get a reference to the control function
   API::IFunction *getControl() const;
@@ -239,6 +241,8 @@ private:
   mutable std::unordered_map<std::string, size_t> m_mapNames2Indices;
   /// Map parameter indices to names
   mutable std::vector<std::string> m_mapIndices2Names;
+  /// Attribute names
+  mutable std::vector<std::string> m_attributeNames;
 };
 
 } // namespace Functions
