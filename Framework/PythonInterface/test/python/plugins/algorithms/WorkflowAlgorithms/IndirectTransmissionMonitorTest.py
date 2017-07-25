@@ -27,7 +27,7 @@ class IndirectTransmissionMonitorTest(unittest.TestCase):
         self.assertEqual(trans_workspace.size(), 3, msg='Transmission workspace group should have 3 workspaces: sample, can and transfer')
 
         expected_names = set()
-        expected_names.add(self._can_workspace + '_Can')
+        expected_names.add(self._sample_workspace + '_Can')
         expected_names.add(self._sample_workspace + '_Sam')
         expected_names.add(self._sample_workspace + '_Trans')
         self.assertEqual(set(trans_workspace.getNames()), expected_names)

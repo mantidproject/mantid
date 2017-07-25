@@ -100,7 +100,6 @@ void IndirectTransmission::transAlgDone(bool error) {
     return;
 
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
   QString outWsName = sampleWsName + "_transmission";
 
   WorkspaceGroup_sptr resultWsGroup =
@@ -109,7 +108,7 @@ void IndirectTransmission::transAlgDone(bool error) {
 
   // Do plotting
   m_uiForm.ppPlot->clear();
-  m_uiForm.ppPlot->addSpectrum("Can", canWsName + "_Can", 0, Qt::blue);
+  m_uiForm.ppPlot->addSpectrum("Can", sampleWsName + "_Can", 0, Qt::blue);
   m_uiForm.ppPlot->addSpectrum("Sample", sampleWsName + "_Sam", 0, Qt::red);
   m_uiForm.ppPlot->addSpectrum("Transmission", sampleWsName + "_Trans", 0,
                                Qt::green);
