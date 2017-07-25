@@ -303,26 +303,32 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
 }
 
 /** Retrieves a workspace from the AnalysisDataService based on it's name.
- * 
+ *
  * @param name :: The name of the workspace to retrieve.
- * @return A pointer to the retrieved workspace or null if the workspace does not exist or
+ * @return A pointer to the retrieved workspace or null if the workspace does
+ *not exist or
  * is not an event workspace.
  */
-Mantid::API::IEventWorkspace_sptr ReflDataProcessorPresenter::retrieveWorkspaceByName(std::string const& name) const {
+Mantid::API::IEventWorkspace_sptr
+ReflDataProcessorPresenter::retrieveWorkspaceByName(
+    std::string const &name) const {
   IEventWorkspace_sptr mws;
   if (AnalysisDataService::Instance().doesExist(name)) {
-    auto mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(name);
+    auto mws =
+        AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(name);
     if (mws == nullptr) {
-      m_view->giveUserCritical(QString::fromStdString("Workspace to slice " + name +
-                               " is not an event workspace!"),
-                               "Time slicing error");
+      m_view->giveUserCritical(
+          QString::fromStdString("Workspace to slice " + name +
+                                 " is not an event workspace!"),
+          "Time slicing error");
       return nullptr;
     } else {
       return mws;
     }
   } else {
-    m_view->giveUserCritical(QString::fromStdString("Workspace to slice not found: " + name),
-                             "Time slicing error");
+    m_view->giveUserCritical(
+        QString::fromStdString("Workspace to slice not found: " + name),
+        "Time slicing error");
     return nullptr;
   }
 }
@@ -365,7 +371,7 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
       startTimes[i] = sliceDuration * i;
       stopTimes[i] = sliceDuration * (i + 1);
     }
-  } 
+  }
 }
 
 /** Parses a string to extract custom time slicing

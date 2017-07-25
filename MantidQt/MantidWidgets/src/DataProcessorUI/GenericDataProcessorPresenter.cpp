@@ -1191,8 +1191,8 @@ void GenericDataProcessorPresenter::openTable() {
     m_view->showTable(m_manager->getModel());
     m_tableDirty = false;
   } catch (std::runtime_error &e) {
-    m_view->giveUserCritical(QString(
-        QString("Could not open workspace: ") + e.what()), "Error");
+    m_view->giveUserCritical(
+        QString(QString("Could not open workspace: ") + e.what()), "Error");
   }
 }
 

@@ -538,14 +538,11 @@ void QDataProcessorWidget::accept(DataProcessorMainPresenter *mainPresenter) {
 * @param prompt : The prompt to appear on the dialog
 * @param title : The text for the title bar of the dialog
 */
-void QDataProcessorWidget::giveUserCritical(QString prompt,
-                                            std::string title) {
+void QDataProcessorWidget::giveUserCritical(QString prompt, std::string title) {
 
-  QMessageBox::critical(this, QString::fromStdString(title),
-                        prompt, QMessageBox::Ok,
-                        QMessageBox::Ok);
+  QMessageBox::critical(this, QString::fromStdString(title), prompt,
+                        QMessageBox::Ok, QMessageBox::Ok);
 }
-
 
 /** Shows a critical error dialog
 *

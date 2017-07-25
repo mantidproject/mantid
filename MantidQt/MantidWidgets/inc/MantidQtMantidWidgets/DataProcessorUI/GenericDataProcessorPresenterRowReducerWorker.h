@@ -62,6 +62,7 @@ private slots:
 signals:
   void finished(const int exitCode);
   void reductionErrorSignal(QString ex);
+
 private:
   GenericDataProcessorPresenter *m_presenter;
   RowItem *m_rowItem;
