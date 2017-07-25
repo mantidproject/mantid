@@ -410,7 +410,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for d_range in iterkeys(self._sam_ws_map.getMap()):
             sam_ws = self._sam_ws_map.getMap()[d_range]
             van_ws = self._van_ws_map.getMap()[d_range]
-            sam_ws, van_ws = self._rebin_to_smallest([sam_ws, van_ws])
+            ws_list = self._rebin_to_smallest([sam_ws, van_ws])
+            sam_ws, van_ws = ws_list[0], ws_list[1]
             Divide(LHSWorkspace=sam_ws,
                    RHSWorkspace=van_ws,
                    OutputWorkspace=sam_ws)
