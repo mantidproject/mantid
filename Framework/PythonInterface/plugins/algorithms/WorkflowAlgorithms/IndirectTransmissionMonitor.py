@@ -36,17 +36,18 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self._setup()
 
         ws_basename = str(self._sample_ws_in)
+        ws_canname = str(self._can_ws_in)
 
         trans_prog = Progress(self, start=0.05, end=0.4, nreports=2)
         trans_prog.report('Transforming monitor for Sample')
         self._trans_mon(ws_basename, 'Sam', self._sample_ws_in)
         trans_prog.report('Transforming monitor for Container')
-        self._trans_mon(ws_basename, 'Can', self._can_ws_in)
+        self._trans_mon(ws_canname, 'Can', self._can_ws_in)
 
         workflow_prog = Progress(self, start=0.4, end=1.0, nreports=4)
         # Generate workspace names
         sam_ws = ws_basename + '_Sam'
-        can_ws = ws_basename + '_Can'
+        can_ws = ws_canname + '_Can'
         trans_ws = ws_basename + '_Trans'
 
         # Divide sample and can workspaces

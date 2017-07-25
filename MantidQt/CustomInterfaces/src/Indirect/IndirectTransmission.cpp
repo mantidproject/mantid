@@ -100,24 +100,21 @@ void IndirectTransmission::transAlgDone(bool error) {
     return;
 
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+  QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
   QString outWsName = sampleWsName + "_transmission";
 
   WorkspaceGroup_sptr resultWsGroup =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           outWsName.toStdString());
-  std::vector<std::string> resultWsNames = resultWsGroup->getNames();
-
-  if (resultWsNames.size() < 3)
-    return;
 
   // Do plotting
   m_uiForm.ppPlot->clear();
-  m_uiForm.ppPlot->addSpectrum("Can", QString::fromStdString(resultWsNames[0]),
-                               0, Qt::red);
+  m_uiForm.ppPlot->addSpectrum("Can", canWsName + "_Can",
+                               0, Qt::black);
   m_uiForm.ppPlot->addSpectrum(
-      "Sample", QString::fromStdString(resultWsNames[1]), 0, Qt::black);
+      "Sample", sampleWsName + "_Sam", 0, Qt::red);
   m_uiForm.ppPlot->addSpectrum(
-      "Transmission", QString::fromStdString(resultWsNames[2]), 0, Qt::green);
+      "Transmission", sampleWsName + "_Trans", 0, Qt::green);
   m_uiForm.ppPlot->resizeX();
 
   // Enable plot and save
