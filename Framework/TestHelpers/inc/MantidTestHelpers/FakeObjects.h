@@ -177,9 +177,9 @@ protected:
     AxeslessWorkspaceTester::init(numspec, j, k);
 
     // Put an 'empty' axis in to test the getAxis method
-    m_axes.resize(0);
-    m_axes.push_back(new Mantid::API::RefAxis(j, this));
-    m_axes.push_back(new Mantid::API::SpectraAxis(this));
+    m_axes.resize(2);
+    m_axes[0] = new Mantid::API::RefAxis(j, this);
+    m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
   void init(const size_t &numspec,
             const HistogramData::Histogram &histogram) override {
