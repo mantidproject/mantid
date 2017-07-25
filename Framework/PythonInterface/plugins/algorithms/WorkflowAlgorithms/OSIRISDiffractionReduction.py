@@ -349,8 +349,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                       RHSWorkspace=self._container_files[idx],
                       OutputWorkspace=sample)
 
-            if self._man_d_range is not None and \
-                            idx < len(self._man_d_range):
+            if self._man_d_range is not None and idx < len(self._man_d_range):
                 self._sam_ws_map.addWs(sample, self._man_d_range[idx])
             else:
                 self._sam_ws_map.addWs(sample)
