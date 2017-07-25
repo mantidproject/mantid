@@ -853,7 +853,8 @@ public:
     AnalysisDataService::Instance().remove("wksp");
   }
 
-  void testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspaceNameAndStringList() {
+  void
+  testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspaceNameAndStringList() {
     auto wksp =
         WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     AnalysisDataService::Instance().add("wksp", wksp);
