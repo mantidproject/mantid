@@ -63,9 +63,11 @@ public:
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
   MOCK_METHOD2(setRowActionEnabled, void(int, bool));
+  MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
+  void setAllSearchRowsSelected() override{};
   IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
 };
 
@@ -163,6 +165,7 @@ public:
 
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
+  MOCK_CONST_METHOD0(startNewAutoreduction, bool());
   void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
@@ -230,7 +233,7 @@ public:
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
-  MOCK_METHOD1(notify, void(Flag));
+  MOCK_METHOD1(notify, void(IReflMainWindowPresenter::Flag));
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
                            const std::string &));

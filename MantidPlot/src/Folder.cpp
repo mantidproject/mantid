@@ -54,8 +54,7 @@ QStringList Folder::subfolders() {
   QStringList list;
   QObjectList folderList = children();
   if (!folderList.isEmpty()) {
-    QObject *f;
-    foreach (f, folderList)
+    foreach (QObject *f, folderList)
       list << static_cast<Folder *>(f)->objectName();
   }
   return list;
@@ -104,8 +103,7 @@ Folder *Folder::findSubfolder(const QString &s, bool caseSensitive,
                               bool partialMatch) {
   QObjectList folderList = children();
   if (!folderList.isEmpty()) {
-    QObject *f;
-    foreach (f, folderList) {
+    foreach (QObject *f, folderList) {
       QString name = static_cast<Folder *>(f)->objectName();
       if (partialMatch) {
         if (caseSensitive && name.startsWith(s, Qt::CaseSensitive))
@@ -131,13 +129,11 @@ Folder *Folder::findSubfolder(const QString &s, bool caseSensitive,
 MdiSubWindow *Folder::findWindow(const QString &s, bool windowNames,
                                  bool labels, bool caseSensitive,
                                  bool partialMatch) {
-  MdiSubWindow *w;
-
   auto qt_cs = Qt::CaseInsensitive;
   if (!caseSensitive)
     qt_cs = Qt::CaseInsensitive;
 
-  foreach (w, lstWindows) {
+  foreach (MdiSubWindow *w, lstWindows) {
     if (windowNames) {
       QString name = w->objectName();
 
@@ -216,15 +212,13 @@ QString Folder::sizeToString() {
 
   QObjectList folderList = children();
   if (!folderList.isEmpty()) {
-    QObject *f;
-    foreach (f, folderList)
+    foreach (QObject *f, folderList)
       size += sizeof(static_cast<Folder *>(f)); // FIXME: Doesn't this function
                                                 // add the size of pointers
                                                 // together? For what?
   }
 
-  MdiSubWindow *w;
-  foreach (w, lstWindows)
+  foreach (MdiSubWindow *w, lstWindows)
     size += sizeof(w);
 
   return QString::number(double(8 * size) / 1024.0, 'f', 1) + " " + tr("kB") +
