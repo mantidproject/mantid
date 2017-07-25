@@ -73,7 +73,10 @@
 
    <!-- extended detector space definition for SCP projection -->
    <component type="extended-detector-space">
-       <location /> 
+      <parameter name="HiddenInInstrumentView" type="bool">
+		<value val="True"/>
+      </parameter>
+      <location /> 
    </component>
 
    <type name="extended-detector-space">
