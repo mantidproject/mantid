@@ -81,7 +81,7 @@ Logger g_log("ConfigService");
  * Split the supplied string on semicolons.
  *
  * @param path The path to split.
- * @returns vector containing the splitted path.
+ * @returns vector containing the split path.
  */
 std::vector<std::string> splitPath(const std::string &path) {
   std::vector<std::string> splitted;
@@ -236,8 +236,6 @@ ConfigServiceImpl::ConfigServiceImpl()
     propertiesFilesList += ", " + getUserFilename();
   }
 
-  updateFacilities();
-
   g_log.debug() << "ConfigService created.\n";
   g_log.debug() << "Configured Mantid.properties directory of application as "
                 << getPropertiesDir() << '\n';
@@ -280,6 +278,14 @@ ConfigServiceImpl::ConfigServiceImpl()
   }
   // must update the cache of instrument paths
   cacheInstrumentPaths();
+
+  // update the facilities AFTER we have ensured that all of the directories are
+  // created and the paths updated
+  // if we don't do that first the function below will silently fail without
+  // initialising the facilities vector
+  // and Mantid will crash when it tries to access them, for example when
+  // creating the first time startup screen
+  updateFacilities();
 }
 
 /** Private Destructor
@@ -1794,8 +1800,7 @@ std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
 
 /**
  * Load facility information from instrumentDir/Facilities.xml file if fName
- * parameter
- * is not set
+ * parameter is not set
  * @param fName :: An alternative file name for loading facilities information.
  */
 void ConfigServiceImpl::updateFacilities(const std::string &fName) {
