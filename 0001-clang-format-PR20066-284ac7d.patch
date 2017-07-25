@@ -1,0 +1,26 @@
+From a261c5b6dab32857eacf6bea0bd5c27299547766 Mon Sep 17 00:00:00 2001
+From: mantid-builder <mantid-buildserver@mantidproject.org>
+Date: Tue, 25 Jul 2017 12:18:47 +0100
+Subject: [PATCH] clang-format PR20066 284ac7d
+
+---
+ .../CustomInterfaces/src/Indirect/IndirectDiffractionReduction.cpp     | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/MantidQt/CustomInterfaces/src/Indirect/IndirectDiffractionReduction.cpp b/MantidQt/CustomInterfaces/src/Indirect/IndirectDiffractionReduction.cpp
+index bfa1a6c..466b1ea 100644
+--- a/MantidQt/CustomInterfaces/src/Indirect/IndirectDiffractionReduction.cpp
++++ b/MantidQt/CustomInterfaces/src/Indirect/IndirectDiffractionReduction.cpp
+@@ -441,7 +441,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
+ 
+   osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
+   if (manualDRange)
+-    osirisDiffReduction->setProperty("DRange", m_uiForm.spDRange->text().toStdString());
++    osirisDiffReduction->setProperty("DRange",
++                                     m_uiForm.spDRange->text().toStdString());
+ 
+   if (m_uiForm.ckUseCan->isChecked()) {
+     osirisDiffReduction->setProperty(
+-- 
+2.7.4
+
