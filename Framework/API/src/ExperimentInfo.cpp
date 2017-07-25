@@ -270,7 +270,8 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   // Make the ComponentInfo first
   m_infoVisitor = makeOrRetrieveVisitor(parInstrument, *instr);
   auto newBeamline = makeOrRetrieveBeamline(*m_infoVisitor, *instr);
-  //checkCompatibility(m_beamline /*old*/, newBeamline /*new*/); // This check IS necessary!
+  // checkCompatibility(m_beamline /*old*/, newBeamline /*new*/); // This check
+  // IS necessary!
   m_beamline = std::move(newBeamline);
 
   m_componentInfoWrapper = makeWrapperComponentInfo(
