@@ -64,8 +64,11 @@ public:
   bool hasPhysProperties() const;
   const std::vector<double> &temperatures() const;
   const std::vector<double> &FWHMs() const;
+  const std::vector<std::string> &physProps() const;
 
 private:
+  /// Build control functions for phys properties.
+  void buildPhysPropControls();
   /// Cache the attributes
   void cacheAttributes();
   /// Check that everything is consistent

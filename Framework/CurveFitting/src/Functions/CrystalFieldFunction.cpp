@@ -581,7 +581,11 @@ API::ParameterReference CrystalFieldFunction::getParameterReference(
 
 /// Get number of the number of spectra (excluding phys prop data).
 size_t CrystalFieldFunction::nSpectra() const {
-  return m_control.nFunctions();
+  auto nFuns = m_control.nFunctions();
+  if (nFuns == 0) {
+    nFuns = 1;
+  }
+  return nFuns;
 }
 
 /// Get a reference to the control function
@@ -866,39 +870,22 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   ham += hz;
 
   const auto nSpec = nSpectra();
-  // Get a list of "spectra" which corresponds to physical properties
-  // const auto physprops = getAttribute("PhysicalProperties").asVector();
-  // if (physprops.empty()) {
-  //  m_physprops.resize(nSpec, 0); // Assume no physical properties - just INS
-  //} else if (physprops.size() != nSpec) {
-  //  if (physprops.size() == 1) {
-  //    int physprop = static_cast<int>(physprops.front());
-  //    m_physprops.resize(nSpec, physprop);
-  //  } else {
-  //    throw std::runtime_error("Vector of PhysicalProperties must have same "
-  //                             "size as Temperatures or size 1.");
-  //  }
-  //} else {
-  //  m_physprops.clear();
-  //  for (auto elem : physprops) {
-  //    m_physprops.push_back(static_cast<int>(elem));
-  //  }
-  //}
-  // Create the single-spectrum functions.
-  // m_nPeaks.resize(nSpec);
-
-  //if (m_fwhmX.empty()) {
-  //  m_fwhmX.resize(nSpec);
-  //  m_fwhmY.resize(nSpec);
-  //}
   auto &temperatures = m_control.temperatures();
   auto &FWHMs = m_control.FWHMs();
   const bool addBackground = true;
   for (size_t i = 0; i < nSpec; ++i) {
-    auto intensityScaling = m_control.getFunction(i)->getParameter("IntensityScaling");
-    fun->addFunction(
-        buildSpectrum(nre, en, wf, temperatures[i], FWHMs[i], i, addBackground, intensityScaling));
+    auto intensityScaling =
+        m_control.getFunction(i)->getParameter("IntensityScaling");
+    fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i], FWHMs[i], i,
+                                    addBackground, intensityScaling));
     fun->setDomainIndex(i, i);
+  }
+  auto &physProps = m_control.physProps();
+  size_t i = nSpec;
+  for(auto &prop: physProps) {
+    fun->addFunction(buildPhysprop(nre, en, wf, ham, prop));
+    fun->setDomainIndex(i, i);
+    ++i;
   }
 }
 
@@ -1050,6 +1037,56 @@ API::IFunction_sptr CrystalFieldFunction::buildSpectrum(
       fwhmVariation, fwhm, nRequiredPeaks, fixAllPeaks);
   return IFunction_sptr(spectrum);
 }
+
+API::IFunction_sptr CrystalFieldFunction::buildPhysprop(
+    int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+    const ComplexFortranMatrix &ham, const std::string &propName) const {
+
+  if (propName == "cv") { // HeatCapacity
+    IFunction_sptr retval = IFunction_sptr(new CrystalFieldHeatCapacity);
+    auto &spectrum = dynamic_cast<CrystalFieldHeatCapacity &>(*retval);
+    spectrum.setEnergy(en);
+    return retval;
+  }
+  if (propName == "chi") { // Susceptibility
+    IFunction_sptr retval = IFunction_sptr(new CrystalFieldSusceptibility);
+    auto &spectrum = dynamic_cast<CrystalFieldSusceptibility &>(*retval);
+    spectrum.setEigensystem(en, wf, nre);
+    //const auto suffix = std::to_string(iSpec);
+    //spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
+    //spectrum.setAttribute("inverse", getAttribute("inverse" + suffix));
+    //spectrum.setAttribute("powder", getAttribute("powder" + suffix));
+    //dynamic_cast<Peaks &>(*m_source).m_PPLambdaIdxChild[iSpec] =
+    //    spectrum.parameterIndex("Lambda");
+    return retval;
+  }
+  if (propName == "mh") { // Magnetisation
+    IFunction_sptr retval = IFunction_sptr(new CrystalFieldMagnetisation);
+    auto &spectrum = dynamic_cast<CrystalFieldMagnetisation &>(*retval);
+    spectrum.setHamiltonian(ham, nre);
+    //spectrum.setAttribute("Temperature", Attribute(temperature));
+    //const auto suffix = std::to_string(iSpec);
+    //spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
+    //spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
+    //spectrum.setAttribute("powder", getAttribute("powder" + suffix));
+    return retval;
+  }
+  if (propName == "mt") { // MagneticMoment
+    IFunction_sptr retval = IFunction_sptr(new CrystalFieldMoment);
+    auto &spectrum = dynamic_cast<CrystalFieldMoment &>(*retval);
+    spectrum.setHamiltonian(ham, nre);
+    //const auto suffix = std::to_string(iSpec);
+    //spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
+    //spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
+    //spectrum.setAttribute("Hmag", getAttribute("Hmag" + suffix));
+    //spectrum.setAttribute("inverse", getAttribute("inverse" + suffix));
+    //spectrum.setAttribute("powder", getAttribute("powder" + suffix));
+    return retval;
+  }
+
+  throw std::runtime_error("Physical property type not understood");
+}
+
 
 /// Update m_spectrum function.
 void CrystalFieldFunction::updateTargetFunction() const {
@@ -1275,20 +1312,34 @@ void CrystalFieldFunction::makeMapsSM() const {
 
   size_t peakIndex = 0;
   for (size_t iSpec = 0; iSpec < m_target->nFunctions(); ++iSpec) {
-    auto &spectrum = dynamic_cast<const CompositeFunction&>(*m_target->getFunction(iSpec));
-    std::string spectrumPrefix(SPECTRUM_PREFIX);
-    spectrumPrefix.append(std::to_string(iSpec)).append(".");
-    // If there is a background it's the first function in spectrum
-    if (hasBackground()) {
-      auto &background = *spectrum.getFunction(0);
-      i += makeMapsForFunction(background, i, spectrumPrefix + BACKGROUND_PREFIX + ".");
-      peakIndex = 1;
-    }
-    // All other functions are peaks.
-    for (size_t ip = peakIndex; ip < spectrum.nFunctions(); ++ip) {
-      std::string prefix(spectrumPrefix);
-      prefix.append(PEAK_PREFIX).append(std::to_string(ip - peakIndex)).append(".");
-      i += makeMapsForFunction(*spectrum.getFunction(ip), i, prefix);
+    if (auto spectrum = dynamic_cast<const CompositeFunction *>(
+            m_target->getFunction(iSpec).get())) {
+      // This is a normal spectrum
+      std::string spectrumPrefix(SPECTRUM_PREFIX);
+      spectrumPrefix.append(std::to_string(iSpec)).append(".");
+      // If there is a background it's the first function in spectrum
+      if (hasBackground()) {
+        auto &background = *spectrum->getFunction(0);
+        i += makeMapsForFunction(background, i,
+                                 spectrumPrefix + BACKGROUND_PREFIX + ".");
+        peakIndex = 1;
+      }
+      // All other functions are peaks.
+      for (size_t ip = peakIndex; ip < spectrum->nFunctions(); ++ip) {
+        std::string prefix(spectrumPrefix);
+        prefix.append(PEAK_PREFIX)
+            .append(std::to_string(ip - peakIndex))
+            .append(".");
+        i += makeMapsForFunction(*spectrum->getFunction(ip), i, prefix);
+      }
+    } else {
+      // This is a physical property function
+      if (m_control.physProps()[iSpec - nSpectra()] == "chi") {
+        std::string name = "chi.Lambda";
+        m_mapNames2Indices[name] = i;
+        m_mapIndices2Names[i] = name;
+        ++i;
+      }
     }
   }
 }

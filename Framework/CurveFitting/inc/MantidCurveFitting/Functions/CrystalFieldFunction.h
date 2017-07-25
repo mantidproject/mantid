@@ -186,6 +186,11 @@ private:
                        const ComplexFortranMatrix &wf, double temperature,
                        API::FunctionValues &values, size_t iSpec,
                        double intensityScaling) const;
+  /// Build a physical property function.
+  API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en,
+                                    const ComplexFortranMatrix &wf,
+                                    const ComplexFortranMatrix &ham,
+                                    const std::string &propName) const;
 
   /// Set the source function
   void setSource(API::IFunction_sptr source) const;

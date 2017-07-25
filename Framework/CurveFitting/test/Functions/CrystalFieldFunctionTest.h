@@ -425,6 +425,31 @@ public:
     TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1, 2}));
 
   }
+
+  void test_phys_props() {
+    Mantid::CurveFitting::Functions::CrystalFieldFunction cf;
+
+    cf.setAttributeValue("Ions", "Ce");
+    cf.setAttributeValue("Symmetries", "C2v");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1}));
+    cf.setAttributeValue("PhysicalProperties", "cv, mt");
+    bool isMultiSpectrum;
+    std::string o_PhysicalProperties;
+    std::vector<std::string> parameterNames;
+    std::vector<std::string> attributeNames;
+    cf.checkSourceFunction();
+    isMultiSpectrum = cf.isMultiSpectrum();
+
+    o_PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+
+    parameterNames = cf.getParameterNames();
+    for(auto name: parameterNames) {
+      std::cerr << name << std::endl;
+    }
+
+    attributeNames = cf.getAttributeNames();
+  }
 };
 
 #endif /*CRYSTALFIELDFUNCTIONTEST_H_*/

@@ -48,7 +48,7 @@ void CrystalFieldControl::setAttribute(const std::string &name,
   } else if (name == "PhysicalProperties") {
     parseStringListAttribute("PhysicalProperties", attr.asString(),
                              m_physProps);
-    buildControls();
+    buildPhysPropControls();
   } else {
     if (name == "Temperatures") {
       m_temperatures = attr.asVector();
@@ -175,37 +175,36 @@ const std::vector<double> &CrystalFieldControl::FWHMs() const {
   return m_FWHMs;
 }
 
+const std::vector<std::string> &CrystalFieldControl::physProps() const {
+  return m_physProps;
+}
+
 /// Build control functions for individual spectra.
 void CrystalFieldControl::buildControls() {
-  //if (m_temperatures.empty()) {
-  //  throw std::runtime_error("No temperatures were defined.");
-  //}
   const auto nSpec = m_temperatures.size();
-
   if (nSpec == 1) {
     declareAttribute("FWHMX", Attribute(std::vector<double>()));
     declareAttribute("FWHMY", Attribute(std::vector<double>()));
-    return;
-  }
-
-  const auto nFunc = nFunctions();
-  for(size_t i = 0; i < nSpec; ++i) {
-    if (i >= nFunc) {
+  } else {
+    for (size_t i = 0; i < nSpec; ++i) {
       addFunction(API::IFunction_sptr(new CrystalFieldSpectrumControl));
-    } else if (dynamic_cast<CrystalFieldSpectrumControl*>(getFunction(i).get()) == nullptr) {
-      replaceFunction(i, API::IFunction_sptr(new CrystalFieldSpectrumControl));
-    }
-  }
-  const auto nPProps = m_physProps.size();
-  for(size_t i = 0; i < nPProps; ++i) {
-    auto j = nSpec + i;
-    if (j >= nFunc) {
-      addFunction(API::IFunction_sptr(new CrystalFieldPhysPropControl));
-    } else if (dynamic_cast<CrystalFieldPhysPropControl*>(getFunction(j).get()) == nullptr) {
-      replaceFunction(j, API::IFunction_sptr(new CrystalFieldPhysPropControl));
     }
   }
 }
+
+/// Build control functions for phys properties.
+void CrystalFieldControl::buildPhysPropControls() {
+  const auto nSpec = m_temperatures.size();
+  if (nSpec == 1) {
+    addFunction(API::IFunction_sptr(new CrystalFieldSpectrumControl));
+  }
+  //const auto nPProps = m_physProps.size();
+  //for (size_t i = 0; i < nPProps; ++i) {
+  //  auto j = nSpec + i;
+  //  addFunction(API::IFunction_sptr(new CrystalFieldPhysPropControl));
+  //}
+}
+
 
 /// Check if the function is set up for a multi-site calculations.
 /// (Multiple ions defined)
@@ -322,8 +321,7 @@ CrystalFieldSpectrumControl::CrystalFieldSpectrumControl() : ParamFunction() {
 }
 
 std::string CrystalFieldSpectrumControl::name() const {
-  throw Kernel::Exception::NotImplementedError(
-      "This method is intentionally not implemented.");
+  return "CrystalFieldSpectrumControl";
 }
 
 void CrystalFieldSpectrumControl::function(const API::FunctionDomain &,
@@ -338,8 +336,7 @@ CrystalFieldPhysPropControl::CrystalFieldPhysPropControl() : ParamFunction() {
 }
 
 std::string CrystalFieldPhysPropControl::name() const {
-  throw Kernel::Exception::NotImplementedError(
-      "This method is intentionally not implemented.");
+  return "CrystalFieldPhysPropControl";
 }
 
 void CrystalFieldPhysPropControl::function(const API::FunctionDomain &,
