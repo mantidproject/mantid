@@ -263,11 +263,11 @@ void SCDCalibratePanels::exec() {
             boost::math::iround(peak.getL()));
     V3D Q2 = lattice0.qFromHKL(hkl);
     try {
-        peak.setInstrument(inst);
-        peak.setQSampleFrame(Q2);
-        peak.setHKL(hkl);
+      peak.setInstrument(inst);
+      peak.setQSampleFrame(Q2);
+      peak.setHKL(hkl);
     } catch (...) {
-      g_log.notice() << "Problem in applying calibration to peak "<<i<<"\n";
+      g_log.notice() << "Problem in applying calibration to peak " << i << "\n";
     }
     PARALLEL_END_INTERUPT_REGION
   }

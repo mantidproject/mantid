@@ -189,23 +189,23 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
         V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
             boost::math::iround(peak.getL()));
     V3D Q2 = lattice.qFromHKL(hkl);
-  try {
-    DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(),
-                            hkl, peak.getGoniometerMatrix());
-    Units::Wavelength wl;
+    try {
+      DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(),
+                              hkl, peak.getGoniometerMatrix());
+      Units::Wavelength wl;
 
-    wl.initialize(peak2.getL1(), peak2.getL2(), peak2.getScattering(), 0,
-                  peak2.getInitialEnergy(), 0.0);
-    peak2.setWavelength(wl.singleFromTOF(peak.getTOF() + tShift));
-    V3D Q3 = peak2.getQSampleFrame();
-    out[i * 3] = Q3[0] - Q2[0];
-    out[i * 3 + 1] = Q3[1] - Q2[1];
-    out[i * 3 + 2] = Q3[2] - Q2[2];
-  } catch (std::runtime_error &) {
-    out[i * 3] = std::numeric_limits<double>::infinity();
-    out[i * 3 + 1] = std::numeric_limits<double>::infinity();
-    out[i * 3 + 2] = std::numeric_limits<double>::infinity();
-  }
+      wl.initialize(peak2.getL1(), peak2.getL2(), peak2.getScattering(), 0,
+                    peak2.getInitialEnergy(), 0.0);
+      peak2.setWavelength(wl.singleFromTOF(peak.getTOF() + tShift));
+      V3D Q3 = peak2.getQSampleFrame();
+      out[i * 3] = Q3[0] - Q2[0];
+      out[i * 3 + 1] = Q3[1] - Q2[1];
+      out[i * 3 + 2] = Q3[2] - Q2[2];
+    } catch (std::runtime_error &) {
+      out[i * 3] = std::numeric_limits<double>::infinity();
+      out[i * 3 + 1] = std::numeric_limits<double>::infinity();
+      out[i * 3 + 2] = std::numeric_limits<double>::infinity();
+    }
   }
   moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate,
                1.0 / scalex, 1.0 / scaley, m_bank, m_workspace);
