@@ -37,6 +37,7 @@ public:
 
   void test_D20_no_scan() {
     // Tests the no-scan case for D20
+    // Temperature ramp is not a motor scan so produces a file per T
 
     LoadILLDiffraction alg;
     // Don't put output in ADS by default
@@ -53,10 +54,37 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+
+    TS_ASSERT_EQUALS(outputWS->x(0)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], 2685529)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], 1638.76, 0.01 )
+
+    TS_ASSERT_EQUALS(outputWS->x(1)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(1)[0], 548)
+    TS_ASSERT_DELTA(outputWS->e(1)[0], 23.40, 0.01 )
+
+    TS_ASSERT_EQUALS(outputWS->x(2)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(2)[0], 991)
+    TS_ASSERT_DELTA(outputWS->e(2)[0], 31.48, 0.01 )
+
+    TS_ASSERT_EQUALS(outputWS->x(1111)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(1111)[0], 7080)
+    TS_ASSERT_DELTA(outputWS->e(1111)[0], 84.14, 0.01 )
+
+    TS_ASSERT_EQUALS(outputWS->x(3072)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(3072)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->e(3072)[0], 0.)
+
+    TS_ASSERT_DELTA(outputWS->detectorInfo().twoTheta(1), 2.7716, 0.0001)
   }
 
   void test_D20_scan() {
-    // Tests the scanned case for D20
+    // Tests the omega scanned case for D20
+    // Omega scan is a motor scan, so it is recorded in a single file
+    // But it is not a detector scan within our context
 
     LoadILLDiffraction alg;
     // Don't put output in ADS by default
@@ -76,6 +104,17 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 21)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+
+    for (size_t row = 0; row < 10; ++row) {
+      for (size_t col = 0; col < 21; ++col) {
+        TS_ASSERT_EQUALS(outputWS->y(row)[col], 3 * (col + 1))
+        TS_ASSERT_EQUALS(outputWS->x(row)[col], 1 + 0.2 * col)
+        TS_ASSERT_EQUALS(outputWS->e(row)[col], sqrt(3 * (col + 1)))
+      }
+    }
   }
 
   void test_D20_multifile() {
@@ -96,10 +135,15 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+
   }
 
   void test_D2B_single_file() {
-    // Test a D2B file with 25 detector positions
+    // Test a D2B detector scan file with 25 detector positions
+    // TODO: assert on values!
 
     const int NUMBER_OF_TUBES = 128;
     const int NUMBER_OF_PIXELS = 128;

@@ -351,7 +351,7 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
   for (size_t i = NUMBER_MONITORS;
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim1;
+      const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim2;
       const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
                             static_cast<int>(pixelInTubeNumber));
@@ -391,7 +391,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
-    const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim1;
+    const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim2;
     const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
