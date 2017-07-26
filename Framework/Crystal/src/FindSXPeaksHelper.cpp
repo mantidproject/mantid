@@ -93,6 +93,20 @@ bool SXPeak::compare(const SXPeak &rhs, double tolerance) const {
 }
 
 
+bool SXPeak::compare(const SXPeak &rhs, const double tofTolerance, const double phiTolerance, const double thetaTolerance) const {
+  if (std::abs(_t - rhs._t) > tofTolerance) {
+    return false;
+  }
+  if (std::abs(_phi - rhs._phi) > phiTolerance) {
+    return false;
+  }
+  if (std::abs(_th2 - rhs._th2) > thetaTolerance) {
+    return false;
+  }
+  return true;
+}
+
+
 /**
 Getter for LabQ
 @return q vector
@@ -461,7 +475,14 @@ PeakList AllPeaksStrategy::convertToSXPeaks(const HistogramData::HistogramX& x, 
  * PeakList Reduction Strategy
  * ------------------------------------------------------------------------------------------
  */
-std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak>& peaks, double resolution,  Mantid::API::Progress&) const  {
+
+ReducePeakListStrategy::ReducePeakListStrategy(const CompareStrategy* compareStrategy) : m_compareStrategy(compareStrategy) {}
+
+
+SimpleReduceStrategy::SimpleReduceStrategy(const CompareStrategy* compareStrategy) : ReducePeakListStrategy(compareStrategy) {}
+
+
+std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak>& peaks, Mantid::Kernel::ProgressBase&) const  {
   // If the peaks are empty then do nothing
   if (peaks.empty()) {
     return peaks;
@@ -470,8 +491,9 @@ std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak>& peak
   std::vector<SXPeak> finalPeaks;
   for (const auto &currentPeak : peaks) {
     auto pos = std::find_if(finalPeaks.begin(), finalPeaks.end(),
-                            [&currentPeak, resolution](SXPeak &peak) {
-                              bool result = currentPeak.compare(peak, resolution);
+                            [&currentPeak, this](SXPeak &peak) {
+                              auto result = this->m_compareStrategy->compare(currentPeak, peak);
+                              //bool result = currentPeak.compare(peak, resolution);
                               if (result)
                                 peak += currentPeak;
                               return result;
@@ -485,14 +507,17 @@ std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak>& peak
 }
 
 
-std::vector<SXPeak>  FindMaxReduceStrategy::reduce(const std::vector<SXPeak> & peaks, double resolution,  Mantid::API::Progress& progress) const  {
+FindMaxReduceStrategy::FindMaxReduceStrategy(const CompareStrategy* compareStrategy) : ReducePeakListStrategy(compareStrategy) {}
+
+
+std::vector<SXPeak>  FindMaxReduceStrategy::reduce(const std::vector<SXPeak> & peaks, Mantid::Kernel::ProgressBase& progress) const  {
   // If the peaks are empty then do nothing
   if (peaks.empty()) {
     return peaks;
   }
 
   // Groups the peaks into elements which are considered alike
-  auto peakGroups = getPeakGroups(peaks, resolution, progress);
+  auto peakGroups = getPeakGroups(peaks, progress);
 
   // Now reduce the peaks groups
   return getFinalPeaks(peakGroups);
@@ -505,7 +530,7 @@ typedef boost::graph_traits<PeakGraph>::vertex_descriptor Vertex;
 typedef boost::graph_traits<PeakGraph>::edge_descriptor Edge;
 
 
-std::vector<std::vector<SXPeak*>> FindMaxReduceStrategy::getPeakGroups(const std::vector<SXPeak>& peakList, const double resolution, Mantid::API::Progress& progress) const {
+std::vector<std::vector<SXPeak*>> FindMaxReduceStrategy::getPeakGroups(const std::vector<SXPeak>& peakList, Mantid::Kernel::ProgressBase& progress) const {
 
   // Create a vector of addresses. Note that the peaks live on the stack. This here only works,
   // because the peaks are always in a stack frame below.
@@ -519,14 +544,15 @@ std::vector<std::vector<SXPeak*>> FindMaxReduceStrategy::getPeakGroups(const std
   PeakGraph graph;
   PeakGraph::vertex_iterator vertexIt, vertexEnd;
 
-
   // Provide a warning if there are more than 500 peaks found.
   const size_t numberOfPeaksFound = peaks.size();
   if (numberOfPeaksFound > 500) {
-    g_log.warning("There are more than 500 peaks being processed. This might take a long time. "
-                  "Please check that the cutoff of the background that you have selected is high "
-                  "enough, else the algorithm will mistake background noise for peaks. "
-                  "The instrument view allows you to easily inspect the typical background level.");
+    std::string warningMessage = std::string("There are ") + std::to_string(numberOfPeaksFound) + std::string(" peaks being processed. This might take a long time. "
+                                                                                                              "Please check that the cutoff of the background that "
+                                                                                                              "you have selected is high enough, else the algorithm will"
+                                                                                                              " mistake background noise for peaks. The instrument view "
+                                                                                                              "allows you to easily inspect the typical background level.");
+    g_log.warning(warningMessage);
   }
 
   std::string message = std::string("There are ") + std::to_string(numberOfPeaksFound) + std::string(" peaks. Investigating peak number ");
@@ -559,7 +585,7 @@ std::vector<std::vector<SXPeak*>> FindMaxReduceStrategy::getPeakGroups(const std
 
       // 2.3 Check if the two vertices should have an edge
       const auto toCheck = graph[*vertexIt];
-      if (peak->compare(*toCheck, resolution)) {
+      if (m_compareStrategy->compare(*peak, *toCheck)) {
         // We need to create an edge
         add_edge (vertex, *vertexIt, graph);
       }
@@ -600,6 +626,28 @@ std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(const std::vector<std::
   }
   return peaks;
 }
+
+
+/* ------------------------------------------------------------------------------------------
+ * Comparison Strategy
+ * ------------------------------------------------------------------------------------------
+ */
+RelativeCompareStrategy::RelativeCompareStrategy(const double resolution) : m_resolution(resolution) {}
+
+
+bool RelativeCompareStrategy::compare(const SXPeak& lhs, const SXPeak& rhs) const {
+  return lhs.compare(rhs, m_resolution);
+}
+
+
+AbsoluteCompareStrategy::AbsoluteCompareStrategy(const double tofResolution, const double phiResolution, const double thetaResolution) : m_tofResolution(tofResolution),
+                                                                                                                                     m_phiResolution(phiResolution),
+                                                                                                                                     m_thetaResolution(thetaResolution) {}
+
+bool AbsoluteCompareStrategy::compare(const SXPeak& lhs, const SXPeak& rhs) const {
+  return lhs.compare(rhs, m_tofResolution, m_phiResolution, m_thetaResolution);
+}
+
 
 
 } // namespace FindSXPeaksHelper

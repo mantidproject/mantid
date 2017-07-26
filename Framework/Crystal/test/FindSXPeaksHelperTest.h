@@ -5,9 +5,28 @@
 
 #include "MantidCrystal/FindSXPeaksHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include <gmock/gmock.h>
 
+
+#include <string>
 
 using namespace Mantid::Crystal::FindSXPeaksHelper;
+using namespace testing;
+
+namespace {
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
+class MockProgressBase : public Mantid::Kernel::ProgressBase {
+  public:
+    MOCK_METHOD1(doReport, void(const std::string &));
+};
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
+}
+
 
 class FindSXPeaksHelperTest : public CxxTest::TestSuite {
 public:
@@ -150,11 +169,14 @@ public:
 
   void testThatCanReduceWithSimpleReduceStrategy() {
     //GIVEN
-    auto simpleStrategy = Mantid::Kernel::make_unique<SimpleReduceStrategy>();
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     const auto &spectrumInfo = workspace->spectrumInfo();
-    const double resolution = 0.001;
+
+    const auto resolution = 0.001;
+    auto compareStrategy = Mantid::Kernel::make_unique<RelativeCompareStrategy>(resolution);
+    auto simpleStrategy = Mantid::Kernel::make_unique<SimpleReduceStrategy>(compareStrategy.get());
+
     std::vector<SXPeak> peaks;
     peaks.emplace_back(1 /*TOF*/, 1 /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
     peaks.emplace_back(1 /*TOF*/, 1 /*phi*/, 0.2 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
@@ -167,8 +189,11 @@ public:
 
     PeakList peakList = peaks;
 
+    NiceMock<MockProgressBase> progress;
+    EXPECT_CALL(progress, doReport(_)).Times(0); // We only report if there are more than 50 peaks
+
     // WHEN
-    auto reducedPeaks = simpleStrategy->reduce(peakList.get(), resolution);
+    auto reducedPeaks = simpleStrategy->reduce(peakList.get(), progress);
 
     // THEN
     const double tolerance = 1e-6;
@@ -176,16 +201,20 @@ public:
     TSM_ASSERT("Should have a value of 0.1 + 0.2 = 0.3", std::abs(reducedPeaks[0].getIntensity() - 0.3) < tolerance);
     TSM_ASSERT("Should have a value of 0.3 + 0.4 = 0.7", std::abs(reducedPeaks[1].getIntensity() - 0.7) < tolerance);
     TSM_ASSERT("Should have a value of 0.5 + 0.6 = 01.1", std::abs(reducedPeaks[2].getIntensity() - 1.1) < tolerance);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&progress));
   }
 
 
   void testThatCanReduceWithFindMaxReduceStrategy() {
     //GIVEN
-    auto findMaxReduceStrategy = Mantid::Kernel::make_unique<FindMaxReduceStrategy>();
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     const auto &spectrumInfo = workspace->spectrumInfo();
-    const double resolution = 0.001;
+
+    const auto resolution = 0.001;
+    auto compareStrategy = Mantid::Kernel::make_unique<RelativeCompareStrategy>(resolution);
+    auto findMaxReduceStrategy = Mantid::Kernel::make_unique<FindMaxReduceStrategy>(compareStrategy.get());
+
     std::vector<SXPeak> peaks;
     peaks.emplace_back(1 /*TOF*/, 0.99 /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
     peaks.emplace_back(1 /*TOF*/, 0.99 /*phi*/, 0.2 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
@@ -198,8 +227,11 @@ public:
 
     PeakList peakList = peaks;
 
+    NiceMock<MockProgressBase> progress;
+    EXPECT_CALL(progress, doReport(_)).Times(0); // We only report if there are more than 50 peaks
+
     // WHEN
-    auto reducedPeaks = findMaxReduceStrategy->reduce(peakList.get(), resolution);
+    const auto reducedPeaks = findMaxReduceStrategy->reduce(peakList.get(), progress);
 
     // THEN
     const double tolerance = 1e-6;
@@ -207,6 +239,67 @@ public:
     TSM_ASSERT("Should have a value of max(0.1, 0.2) = 0.2", std::abs(reducedPeaks[0].getIntensity() - 0.2) < tolerance);
     TSM_ASSERT("Should have a value of max(0.1, 0.2) = 0.2", std::abs(reducedPeaks[1].getIntensity() - 0.4) < tolerance);
     TSM_ASSERT("Should have a value of max(0.1, 0.2) = 0.2", std::abs(reducedPeaks[2].getIntensity() - 0.6) < tolerance);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&progress));
+  }
+
+
+  /* ------------------------------------------------------------------------------------------
+   * Comparison Strategy
+   * ------------------------------------------------------------------------------------------
+   */
+  void testThatRelativeComparisonWorks() {
+    // GIVEN
+    auto workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 2);
+    const auto &spectrumInfo = workspace->spectrumInfo();
+    SXPeak peak1(1. /*TOF*/, 0.99 /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    SXPeak peak2(1. /*TOF*/, 0.90 /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    SXPeak peak3(1. /*TOF*/, 1.99 /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+
+    const auto resolution = 0.1;
+    auto compareStrategy = Mantid::Kernel::make_unique<RelativeCompareStrategy>(resolution);
+
+    // WHEN
+    auto result12 = compareStrategy->compare(peak1, peak2);
+    auto result13 = compareStrategy->compare(peak1, peak3);
+
+
+    // THEN
+    TSM_ASSERT("The peaks should be the same", result12)
+    TSM_ASSERT("The peaks should not be the same", !result13)
+  }
+
+  void testThatAbsoluteComparisonWorks() {
+    // GIVEN
+    auto workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 2);
+    const auto &spectrumInfo = workspace->spectrumInfo();
+    SXPeak peak1(1. /*TOF*/, 1. /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    SXPeak peak2(1.5 /*TOF*/, 1. /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    SXPeak peak3(3. /*TOF*/, 1. /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+
+    SXPeak peak4(1. /*TOF*/, 1. /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    SXPeak peak5(1. /*TOF*/, 1.5 /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+    SXPeak peak6(1. /*TOF*/, 3. /*phi*/, 0.1 /*intensity*/,  std::vector<int>(1, 1), 1, spectrumInfo);
+
+    const auto tofResolution = 1.;
+    const auto thetaResolution = 1.;
+    const auto phiResolution = 1.;
+    auto compareStrategy = Mantid::Kernel::make_unique<AbsoluteCompareStrategy>(tofResolution, thetaResolution, phiResolution);
+
+    // WHEN
+    auto result12 = compareStrategy->compare(peak1, peak2);
+    auto result13 = compareStrategy->compare(peak1, peak3);
+
+    auto result45 = compareStrategy->compare(peak4, peak5);
+    auto result46 = compareStrategy->compare(peak4, peak6);
+
+
+    // THEN
+    TSM_ASSERT("The peaks should be the same", result12)
+    TSM_ASSERT("The peaks should not be the same", !result13)
+    TSM_ASSERT("The peaks should be the same", result45)
+    TSM_ASSERT("The peaks should not be the same", !result46)
   }
 
 
@@ -244,7 +337,6 @@ private:
       y[index] = newDataValues[index];
     }
   }
-
 };
 
 

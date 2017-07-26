@@ -70,11 +70,29 @@ void FindSXPeaks::init() {
         "2. AllPeaks: This strategy will find all peaks in each spectrum. This is slower than StrongestPeakOnly.\n");
 
 
+
+  // ---------------------------------------------------------------
+  // Peak strategies + Resolution
+  // ---------------------------------------------------------------
+  const std::string strongestPeaksGroup = "Strongest Peak Only";
+
+  // Declare
   declareProperty("SignalBackground", 10.0,
                   "Multiplication factor for the signal background. Peaks which are"
                   " below the estimated background are discarded. The background is estimated"
                   " to be an average of the first and the last signal and multiplied"
                   " by the SignalBackground property.\n");
+
+  declareProperty("AbsoluteBackground", 10.0,
+                  "Peaks which are below the specified absolute background are discarded."
+                  " The background is specified for all spectra.");
+
+  // Enable
+  setPropertySettings("AbsoluteBackground",
+                        make_unique<EnabledWhenProperty>(
+                            "PeakFindingStrategy",
+                            Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                            allPeaksStrategy));
 
   setPropertySettings("SignalBackground",
                         make_unique<EnabledWhenProperty>(
@@ -82,19 +100,10 @@ void FindSXPeaks::init() {
                             Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
                             strongestPeakStrategy));
 
-  declareProperty("AbsoluteBackground", 10.0,
-                  "Peaks which are below the specified absolute background are discarded."
-                  " The background is specified for all spectra.");
-
-  setPropertySettings("AbsoluteBackground",
-                        make_unique<EnabledWhenProperty>(
-                            "PeakFindingStrategy",
-                            Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
-                            allPeaksStrategy));
-
   declareProperty(
       "Resolution", 0.01,
       "Tolerance needed to avoid peak duplication in number of pixels");
+
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the PeaksWorkspace in which to store the list "
@@ -207,9 +216,9 @@ then convert SXPeaks objects to PeakObjects and add them to the output workspace
 @param pcv : current peak list containing potential duplicates
 */
 void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress& progress) {
-  double resolution = getProperty("Resolution");
-  auto reductionStrategy = getReducePeakListStrategy();
-  auto finalv = reductionStrategy->reduce(pcv, resolution, progress);
+  auto compareStrategy = getCompareStrategy();
+  auto reductionStrategy = getReducePeakListStrategy(compareStrategy.get());
+  auto finalv = reductionStrategy->reduce(pcv, progress);
 
   for (auto &finalPeak : finalv) {
     finalPeak.reduce();
@@ -256,14 +265,20 @@ std::unique_ptr<FindSXPeaksHelper::PeakFindingStrategy> FindSXPeaks::getPeakFind
 }
 
 
-std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy> FindSXPeaks::getReducePeakListStrategy() const {
+std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy> FindSXPeaks::getReducePeakListStrategy(const FindSXPeaksHelper::CompareStrategy* compareStrategy) const {
   const std::string peakFindingStrategy = getProperty("PeakFindingStrategy");
   auto useSimpleReduceStrategy = peakFindingStrategy == strongestPeakStrategy;
   if (useSimpleReduceStrategy) {
-    return Mantid::Kernel::make_unique<FindSXPeaksHelper::SimpleReduceStrategy>();
+    return Mantid::Kernel::make_unique<FindSXPeaksHelper::SimpleReduceStrategy>(compareStrategy);
   } else {
-    return Mantid::Kernel::make_unique<FindSXPeaksHelper::FindMaxReduceStrategy>();
+    return Mantid::Kernel::make_unique<FindSXPeaksHelper::FindMaxReduceStrategy>(compareStrategy);
   }
+}
+
+std::unique_ptr<FindSXPeaksHelper::CompareStrategy> FindSXPeaks::getCompareStrategy() const {
+  double resolution = getProperty("Resolution");
+  // Other compare strategies can be added here, eg the absolute compare stratgy
+  return Mantid::Kernel::make_unique<FindSXPeaksHelper::RelativeCompareStrategy>(resolution);
 }
 
 

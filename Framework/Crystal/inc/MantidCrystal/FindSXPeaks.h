@@ -105,7 +105,10 @@ private:
                                                                                  const double minValue, const double maxValue) const;
 
   /// Selects a peak finding strategy
-  std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy> getReducePeakListStrategy() const;
+  std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy> getReducePeakListStrategy(const FindSXPeaksHelper::CompareStrategy* compareStrategy) const;
+
+  /// Selects a comparison strategy
+  std::unique_ptr<FindSXPeaksHelper::CompareStrategy> getCompareStrategy() const;
 
   //
   void reducePeakList(const peakvector &, Mantid::API::Progress& progress);
