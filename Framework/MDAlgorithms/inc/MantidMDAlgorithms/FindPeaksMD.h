@@ -100,9 +100,6 @@ private:
   /// Goniometer matrix
   Mantid::Kernel::Matrix<double> m_goniometer;
 
-  static const std::string volume;
-  static const std::string numberOfEvents;
-
   /// Use number of events normalization for event workspaces.
   bool m_useNumberOfEventsNormalization = false;
   /// Signal density factor

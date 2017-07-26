@@ -171,10 +171,9 @@ void FindPeaksMD::init() {
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "SignalThresholdFactor", 1.5, Direction::Input),
-                  "The signal threshold factor when the "
-                  "PeakFindingStrategy strategy has been set to "
-                  "NumberOfEventsNormalization.\n"
-                  "The value should be larger than 1.\n"
+                  "The overal signal value (not density!) normalized by the number of events is compared to the specified signal threshold. Boxes which are below this threshold are NOT considered to be peaks."
+                  "This property is enabled when the PeakFindingStrategy has been set to NumberOfEventsNormalization.\n"
+                  "The value of boxes which contain peaks will be above 1. See the below for more information.\n"
                   "Default: 1.50");
 
   setPropertySettings("SignalThresholdFactor",
@@ -451,7 +450,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       // The "bin count" used will be the box density or the number of events in
       // the box
-      double binCount = box->getSignalByNEvents() * m_densityScaleFactor;
+      double binCount = box->getSignalNormalized() * m_densityScaleFactor;
       if (isMDEvent)
         binCount = static_cast<double>(box->getNPoints());
 
