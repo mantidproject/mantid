@@ -182,20 +182,20 @@ void DataProcessorOneLevelTreeManager::clearSelected() {
 }
 
 /** Return the currently selected rows as a string */
-std::string DataProcessorOneLevelTreeManager::copySelected() {
+QString DataProcessorOneLevelTreeManager::copySelected() {
 
   const auto selectedRows = m_presenter->selectedParents();
 
   if (selectedRows.empty())
-    return std::string();
+    return QString();
 
-  std::vector<std::string> lines;
+  std::vector<QString> lines;
 
   for (const auto &row : selectedRows) {
-    std::vector<std::string> line;
+    std::vector<QString> line;
     for (int col = 0; col < m_model->columnCount(); col++) {
       line.push_back(
-          m_model->data(m_model->index(row, col)).toString().toStdString());
+          m_model->data(m_model->index(row, col)).toString());
     }
     lines.push_back(boost::algorithm::join(line, "\t"));
   }
@@ -206,12 +206,12 @@ std::string DataProcessorOneLevelTreeManager::copySelected() {
 * append new rows
 * @param text :: Selected rows to paste as a string
 */
-void DataProcessorOneLevelTreeManager::pasteSelected(const std::string &text) {
+void DataProcessorOneLevelTreeManager::pasteSelected(const QString &text) {
 
   if (text.empty())
     return;
 
-  std::vector<std::string> lines;
+  std::vector<QString> lines;
   boost::split(lines, text, boost::is_any_of("\n"));
 
   // If we have rows selected, we'll overwrite them.
@@ -231,7 +231,7 @@ void DataProcessorOneLevelTreeManager::pasteSelected(const std::string &text) {
   auto rowIt = rows.begin();
   auto lineIt = lines.begin();
   for (; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++) {
-    std::vector<std::string> values;
+    std::vector<QString> values;
     boost::split(values, *lineIt, boost::is_any_of("\t"));
 
     // Paste as many columns as we can from this line
@@ -319,10 +319,10 @@ TreeData DataProcessorOneLevelTreeManager::selectedData(bool prompt) {
   // and each element in the vector is a column
   for (const auto &row : rows) {
 
-    std::vector<std::string> data;
+    std::vector<QString> data;
     for (int i = 0; i < m_model->columnCount(); i++)
       data.push_back(
-          m_model->data(m_model->index(row, i)).toString().toStdString());
+          m_model->data(m_model->index(row, i)).toString());
     selectedData[row][row] = data;
   }
   return selectedData;
@@ -333,7 +333,7 @@ TreeData DataProcessorOneLevelTreeManager::selectedData(bool prompt) {
 * @param whitelist :: [input] Whitelist containing number of columns
 */
 void DataProcessorOneLevelTreeManager::transfer(
-    const std::vector<std::map<std::string, std::string>> &runs,
+    const std::vector<std::map<QString, QString>> &runs,
     const DataProcessorWhiteList &whitelist) {
 
   ITableWorkspace_sptr ws = m_model->getTableWorkspace();
@@ -358,7 +358,7 @@ void DataProcessorOneLevelTreeManager::transfer(
     TableRow newRow = ws->appendRow();
 
     for (int i = 0; i < static_cast<int>(whitelist.size()); i++) {
-      const std::string columnName = whitelist.colNameFromColIndex(i);
+      const QString columnName = whitelist.colNameFromColIndex(i);
       if (row.count(columnName)) {
         newRow << row.at(columnName);
       } else {
@@ -376,7 +376,7 @@ void DataProcessorOneLevelTreeManager::transfer(
 * @param data :: the data
 */
 void DataProcessorOneLevelTreeManager::update(
-    int parent, int child, const std::vector<std::string> &data) {
+    int parent, int child, const std::vector<QString> &data) {
 
   UNUSED_ARG(child);
 

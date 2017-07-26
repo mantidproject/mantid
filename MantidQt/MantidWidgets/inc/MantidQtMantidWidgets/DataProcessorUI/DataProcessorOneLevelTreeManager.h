@@ -68,9 +68,9 @@ public:
   /// Clear selected
   void clearSelected() override;
   /// Copy selected
-  std::string copySelected() override;
+  QString copySelected() override;
   /// Paste selected
-  void pasteSelected(const std::string &text) override;
+  void pasteSelected(const QString &text) override;
   /// Blank table
   void newTable(const DataProcessorWhiteList &whitelist) override;
   /// New table
@@ -80,11 +80,11 @@ public:
   /// Return selected data
   TreeData selectedData(bool prompt) override;
   /// Transfer new data to model
-  void transfer(const std::vector<std::map<std::string, std::string>> &runs,
+  void transfer(const std::vector<std::map<QString, QString>> &runs,
                 const DataProcessorWhiteList &whitelist) override;
   /// Update row with new data
   void update(int parent, int child,
-              const std::vector<std::string> &data) override;
+              const std::vector<QString> &data) override;
   /// Get the number of rows of a given parent
   int rowCount() const override;
   int rowCount(int parent) const override;

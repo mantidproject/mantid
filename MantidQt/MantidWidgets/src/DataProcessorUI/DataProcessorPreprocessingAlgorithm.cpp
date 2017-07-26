@@ -10,8 +10,8 @@ namespace MantidWidgets {
  * algorithm in the processed workspace's name
  */
 DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
-    const std::string &name, const std::string &prefix,
-    const std::set<std::string> &blacklist)
+    const QString &name, const QString &prefix,
+    const std::set<QString> &blacklist)
     : DataProcessorProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
 
   auto inputWsProperties = getInputWsProperties();
@@ -42,8 +42,8 @@ DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
 * algorithm in the processed workspace's name
 */
 DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
-    const std::string &name, const std::string &prefix,
-    const std::string &blacklist)
+    const QString &name, const QString &prefix,
+    const QString &blacklist)
     : DataProcessorPreprocessingAlgorithm(name, prefix,
                                           convertStringToSet(blacklist)) {}
 
@@ -56,22 +56,22 @@ DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm()
 DataProcessorPreprocessingAlgorithm::~DataProcessorPreprocessingAlgorithm() {}
 
 // Returns the name of the lhs input property
-std::string DataProcessorPreprocessingAlgorithm::lhsProperty() const {
+QString DataProcessorPreprocessingAlgorithm::lhsProperty() const {
   return m_lhs;
 }
 
 // Returns the name of the rhs input property
-std::string DataProcessorPreprocessingAlgorithm::rhsProperty() const {
+QString DataProcessorPreprocessingAlgorithm::rhsProperty() const {
   return m_rhs;
 }
 
 // Returns the name of the output property
-std::string DataProcessorPreprocessingAlgorithm::outputProperty() const {
+QString DataProcessorPreprocessingAlgorithm::outputProperty() const {
   return m_outProperty;
 }
 
 // Returns the prefix to add to the output property
-std::string DataProcessorPreprocessingAlgorithm::prefix() const {
+QString DataProcessorPreprocessingAlgorithm::prefix() const {
   return m_prefix;
 }
 }
