@@ -630,7 +630,6 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
                                   m_values[index_tsp_time].value());
       }
 
-
       const size_t nextTspIndex = index_tsp_time + 1;
       if (nextTspIndex < tspTimeVecSize) {
         if (tsp_time_vec[nextTspIndex] > split_stop_time) {
