@@ -1069,24 +1069,13 @@ API::IFunction_sptr CrystalFieldFunction::buildPhysprop(
     return propFun;
   }
   if (propName == "mh") { // Magnetisation
-    auto propFun = boost::make_shared<CrystalFieldMagnetisation>();
+    auto propFun = boost::make_shared<CrystalFieldMagnetisationCalculation>();
     propFun->setHamiltonian(ham, nre);
-    //spectrum.setAttribute("Temperature", Attribute(temperature));
-    //const auto suffix = std::to_string(iSpec);
-    //spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
-    //spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
-    //spectrum.setAttribute("powder", getAttribute("powder" + suffix));
     return propFun;
   }
   if (propName == "mt") { // MagneticMoment
-    auto propFun = boost::make_shared<CrystalFieldMoment>();
+    auto propFun = boost::make_shared<CrystalFieldMomentCalculation>();
     propFun->setHamiltonian(ham, nre);
-    //const auto suffix = std::to_string(iSpec);
-    //spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
-    //spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
-    //spectrum.setAttribute("Hmag", getAttribute("Hmag" + suffix));
-    //spectrum.setAttribute("inverse", getAttribute("inverse" + suffix));
-    //spectrum.setAttribute("powder", getAttribute("powder" + suffix));
     return propFun;
   }
 
