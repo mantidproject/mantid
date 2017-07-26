@@ -296,7 +296,7 @@ public:
                     "=ConvergedChain,Parameters=Parameters,"
                     "SimAnnealingApplied=1,MaximumTemperature=10.0,"
                     "NumRefrigerationSteps=5,SimAnnealingIterations="
-                    "1000");
+                    "3000");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
     TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
     Mantid::API::IFunction_sptr fun = fit.getProperty("Function");
