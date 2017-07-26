@@ -106,7 +106,8 @@ Statistics getStatisticsNumpy(const NumPy::NdArray &data,
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GCC_DIAG_OFF(conversion)
 // Define an overload to handle the default argument
-BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1, 2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1,
+                                2)
 GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
