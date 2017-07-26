@@ -312,18 +312,20 @@ public:
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 2);
     const auto &spectrumInfo = workspace->spectrumInfo();
-    SXPeak peak1(1. /*TOF*/, 1. /*phi*/, 0.1 /*intensity*/,
+
+    const double degreeToRad = M_PI/180.;
+    SXPeak peak1(1. /*TOF*/, degreeToRad /*phi*/, 0.1 /*intensity*/,
                  std::vector<int>(1, 1), 1, spectrumInfo);
-    SXPeak peak2(1.5 /*TOF*/, 1. /*phi*/, 0.1 /*intensity*/,
+    SXPeak peak2(1.5 /*TOF*/, degreeToRad /*phi*/, 0.1 /*intensity*/,
                  std::vector<int>(1, 1), 1, spectrumInfo);
-    SXPeak peak3(3. /*TOF*/, 1. /*phi*/, 0.1 /*intensity*/,
+    SXPeak peak3(3. /*TOF*/, degreeToRad /*phi*/, 0.1 /*intensity*/,
                  std::vector<int>(1, 1), 1, spectrumInfo);
 
-    SXPeak peak4(1. /*TOF*/, 1. /*phi*/, 0.1 /*intensity*/,
+    SXPeak peak4(1. /*TOF*/, degreeToRad /*phi*/, 0.1 /*intensity*/,
                  std::vector<int>(1, 1), 1, spectrumInfo);
-    SXPeak peak5(1. /*TOF*/, 1.5 /*phi*/, 0.1 /*intensity*/,
+    SXPeak peak5(1. /*TOF*/, 1.5*degreeToRad /*phi*/, 0.1 /*intensity*/,
                  std::vector<int>(1, 1), 1, spectrumInfo);
-    SXPeak peak6(1. /*TOF*/, 3. /*phi*/, 0.1 /*intensity*/,
+    SXPeak peak6(1. /*TOF*/, 3.*degreeToRad /*phi*/, 0.1 /*intensity*/,
                  std::vector<int>(1, 1), 1, spectrumInfo);
 
     const auto tofResolution = 1.;

@@ -10,6 +10,8 @@
 #include <vector>
 #include <boost/optional.hpp>
 #include <iterator>
+#include <iostream>
+
 
 namespace Mantid {
 namespace Kernel {
