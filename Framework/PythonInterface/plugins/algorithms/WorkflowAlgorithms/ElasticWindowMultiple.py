@@ -3,8 +3,6 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
-import numpy as np
-
 
 def _normalize_to_lowest_temp(elt_ws_name):
     """
