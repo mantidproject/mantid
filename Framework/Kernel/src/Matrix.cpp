@@ -210,7 +210,7 @@ Matrix<T>::Matrix(const Matrix<T> &A)
 {
   // Note:: m_numRows,m_numColumns zeroed so setMem always works
   setMem(A.m_numRows, A.m_numColumns);
-  if (m_numRows * m_numColumns) {
+  if ((m_numRows * m_numColumns) > 0) {
     for (size_t i = 0; i < m_numRows; i++) {
       for (size_t j = 0; j < m_numColumns; j++) {
         m_rawData[i][j] = A.m_rawData[i][j];
@@ -229,7 +229,7 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &A)
 {
   if (&A != this) {
     setMem(A.m_numRows, A.m_numColumns);
-    if (m_numRows * m_numColumns) {
+    if ((m_numRows * m_numColumns) > 0) {
       for (size_t i = 0; i < m_numRows; i++) {
         for (size_t j = 0; j < m_numColumns; j++) {
           m_rawData[i][j] = A.m_rawData[i][j];
@@ -637,7 +637,7 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
 */
 template <typename T>
 void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
-  if (m_numRows * m_numColumns && RowI < m_numRows && RowJ < m_numRows &&
+  if ((m_numRows * m_numColumns > 0) && RowI < m_numRows && RowJ < m_numRows &&
       RowI != RowJ) {
     for (size_t k = 0; k < m_numColumns; k++) {
       T tmp = m_rawData[RowI][k];
@@ -654,8 +654,8 @@ void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
 */
 template <typename T>
 void Matrix<T>::swapCols(const size_t colI, const size_t colJ) {
-  if (m_numRows * m_numColumns && colI < m_numColumns && colJ < m_numColumns &&
-      colI != colJ) {
+  if ((m_numRows * m_numColumns) > 0 && colI < m_numColumns &&
+      colJ < m_numColumns && colI != colJ) {
     for (size_t k = 0; k < m_numRows; k++) {
       T tmp = m_rawData[k][colI];
       m_rawData[k][colI] = m_rawData[k][colJ];
@@ -670,7 +670,7 @@ void Matrix<T>::zeroMatrix()
   Zeros all elements of the matrix
 */
 {
-  if (m_numRows * m_numColumns) {
+  if ((m_numRows * m_numColumns) > 0) {
     for (size_t i = 0; i < m_numRows; i++) {
       for (size_t j = 0; j < m_numColumns; j++) {
         m_rawData[i][j] = static_cast<T>(0);
@@ -686,7 +686,7 @@ void Matrix<T>::identityMatrix()
   Zeros all the terms outside of the square
 */
 {
-  if (m_numRows * m_numColumns) {
+  if ((m_numRows * m_numColumns) > 0) {
     for (size_t i = 0; i < m_numRows; i++) {
       for (size_t j = 0; j < m_numColumns; j++) {
         m_rawData[i][j] = static_cast<T>(j == i);
@@ -797,7 +797,7 @@ Matrix<T> Matrix<T>::Tprime() const
   @return M^T
 */
 {
-  if (!m_numRows * m_numColumns)
+  if ((m_numRows * m_numColumns) == 0)
     return *this;
 
   if (m_numRows == m_numColumns) // inplace transpose
@@ -824,7 +824,7 @@ Has a in place transpose for a square matrix case.
 @return this^T
 */
 {
-  if (!m_numRows * m_numColumns)
+  if ((m_numRows * m_numColumns) == 0)
     return *this;
 
   if (m_numRows == m_numColumns) // in place transpose
