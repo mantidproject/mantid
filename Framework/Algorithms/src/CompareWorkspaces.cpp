@@ -51,7 +51,7 @@ void CompareWorkspaces::init() {
   declareProperty("CheckMasking", true,
                   "Whether to check that the bin masking matches. ");
   declareProperty("CheckParameterMap", true,
-                  "Whether to check that the parameter maps match. ");
+		  "Whether to check that the parameter maps match. ");
 
   // Have this one false by default - the logs are brittle
   declareProperty("CheckSample", false,
