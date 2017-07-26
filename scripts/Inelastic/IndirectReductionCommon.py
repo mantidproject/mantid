@@ -681,8 +681,9 @@ def save_reduction(workspace_names, formats, x_units='DeltaE'):
                       Filename=workspace_name + '.nxspe')
 
         if 'ascii' in formats:
-            # Changed to version 2 to enable re-loading of files into mantid
-            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
+            # Reverted to version 1 of load ASCII - issues arose from the
+            # TOSCA team - 7 column data should be saved.
+            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 1)
             saveAsciiAlg.initialize()
             saveAsciiAlg.setProperty('InputWorkspace', workspace_name)
             saveAsciiAlg.setProperty('Filename', workspace_name + '.dat')
