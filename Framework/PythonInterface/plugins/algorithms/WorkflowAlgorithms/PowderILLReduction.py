@@ -132,7 +132,7 @@ class PowderILLReduction(PythonAlgorithm):
                 duration = mtd[ws].getRun().getLogData('duration').value
                 Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./duration)
 
-        JoinRuns(InputWorkspaces=temp_ws, SampleLogAsXAxis=self._observable, OutputWorkspace=joined_ws)
+        ConjoinXRuns(InputWorkspaces=temp_ws, SampleLogAsXAxis=self._observable, OutputWorkspace=joined_ws)
 
         DeleteWorkspace(temp_ws)
 

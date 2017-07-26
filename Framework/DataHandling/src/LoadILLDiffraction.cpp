@@ -635,21 +635,6 @@ void LoadILLDiffraction::resolveInstrument() {
 }
 
 /**
- * Initializes the output workspace based on the resolved instrument, scan
- * points, and scan type
- */
-void LoadILLDiffraction::initWorkspace() {
-  size_t nSpectra = m_numberDetectorsActual + 1, nBins = 1;
-  if (m_scanType == DetectorScan) {
-    nSpectra *= m_numberScanPoints;
-  } else if (m_scanType == OtherScan) {
-    nBins = m_numberScanPoints;
-  }
-  m_outWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
-                                                       nBins, nBins);
-}
-
-/**
 * Runs LoadInstrument as child to link the non-moving instrument to workspace
 */
 void LoadILLDiffraction::loadStaticInstrument() {
