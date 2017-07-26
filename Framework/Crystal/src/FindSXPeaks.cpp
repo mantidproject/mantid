@@ -290,6 +290,7 @@ void FindSXPeaks::exec() {
 Reduce the peak list by removing duplicates
 then convert SXPeaks objects to PeakObjects and add them to the output workspace
 @param pcv : current peak list containing potential duplicates
+@param progress: a progress object
 */
 void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   auto compareStrategy = getCompareStrategy();

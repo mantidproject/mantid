@@ -271,9 +271,7 @@ PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x) const {
   * Calculates the average phi value if the workspace contains
   * multiple detectors per spectrum, or returns the value
   * of phi if it is a single detector to spectrum mapping.
-  * @param detectorMapping :: The mapping of workspace index to detector id(s)
-  * @param spectrumInfo :: The spectrum info of this workspace
-  * @param wsIndex :: The index to return the phi value of
+  * @param workspaceIndex :: The index to return the phi value of
   * @return :: The averaged or exact value of phi
   */
 double PeakFindingStrategy::calculatePhi(size_t workspaceIndex) const {
