@@ -6,7 +6,6 @@
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
-#include <qabstractitemmodel.h>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -151,16 +150,6 @@ void QDataProcessorWidget::processClicked() {
   m_presenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
-/** This slot notifies the presenter that the selection has changed
-*/
-void QDataProcessorWidget::newSelection(const QItemSelection &selected,
-                                        const QItemSelection &deselected) {
-
-  Q_UNUSED(selected);
-  Q_UNUSED(deselected);
-  m_presenter->notify(DataProcessorPresenter::SelectionChangedFlag);
-}
-
 /**
 This slot loads a table workspace model and changes to a LoadedMainView
 presenter
@@ -187,15 +176,17 @@ Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
 void QDataProcessorWidget::showTable(
-    boost::shared_ptr<QAbstractItemModel> model) {
+    boost::shared_ptr<AbstractDataProcessorTreeModel> model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
-          SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
+          SLOT(rowDataUpdated(const QModelIndex &, const QModelIndex &)));
+  connect(m_model.get(), SIGNAL(rowsInserted(const QModelIndex &, int, int)),
+          this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
+  connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
+          this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
-  // Reset selection model connections
-  setSelectionModelConnections();
 }
 
 /**
@@ -229,13 +220,43 @@ void QDataProcessorWidget::on_comboProcessInstrument_currentIndexChanged(
 }
 
 /**
-This slot notifies the presenter that the table has been updated/changed by the
-user
+This slot updates the 'process' status of affected groups and notifies the
+presenter that the table has been updated. This is called when rows are added
+or removed from the table.
 */
-void QDataProcessorWidget::tableUpdated(const QModelIndex &topLeft,
-                                        const QModelIndex &bottomRight) {
-  Q_UNUSED(topLeft);
+void QDataProcessorWidget::rowsUpdated(const QModelIndex &parent, int start,
+                                       int end) {
+  Q_UNUSED(start);
+  Q_UNUSED(end);
+
+  if (parent.isValid()) {
+    // Changing the number of rows in a group will set the containing group
+    // unprocessed
+    m_model->setProcessed(false, parent.row());
+  }
+
+  m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
+}
+
+/**
+This slot updates the 'process' status of affected rows and groups and notifies
+the presenter that the table has been updated. This is called when data within
+the rows is updated.
+*/
+void QDataProcessorWidget::rowDataUpdated(const QModelIndex &topLeft,
+                                          const QModelIndex &bottomRight) {
   Q_UNUSED(bottomRight);
+
+  if (!m_presenter->isProcessing()) {
+    auto pIndex = m_model->parent(topLeft);
+    if (pIndex.isValid()) {
+      // Changes made to rows outside of processing will set the containing
+      // group and all changed row unprocessed
+      m_model->setProcessed(false, pIndex.row());
+      m_model->setProcessed(false, topLeft.row(), pIndex);
+    }
+  }
+
   m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
 }
 
@@ -288,6 +309,11 @@ void QDataProcessorWidget::expandAll() { ui.viewTable->expandAll(); }
 Collapse all currently expanded groups
 */
 void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
+
+/**
+Select all rows/groups
+*/
+void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 
 /**
 Handle interface when data reduction paused
@@ -385,17 +411,6 @@ void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
   }
-}
-
-/**
-Set up the connections from the table selection model
-*/
-void QDataProcessorWidget::setSelectionModelConnections() {
-  // Emit a signal when selection has changed
-  connect(
-      ui.viewTable->selectionModel(),
-      SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-      this, SLOT(newSelection(const QItemSelection &, const QItemSelection &)));
 }
 
 /**
@@ -596,9 +611,10 @@ std::string
 QDataProcessorWidget::runPythonAlgorithm(const std::string &pythonCode) {
 
   QString output = runPythonCode(QString::fromStdString(pythonCode));
-  return output.toStdString();
 
   emit runPythonAlgorithm(QString::fromStdString(pythonCode));
+
+  return output.toStdString();
 }
 
 /** Transfer runs to the table

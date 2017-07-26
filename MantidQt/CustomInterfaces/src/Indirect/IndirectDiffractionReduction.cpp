@@ -362,9 +362,11 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   if (mode == "diffspec") {
 
     // Check if vanadium file is used
-    const auto vanFile =
-        m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
-    msgDiffReduction->setProperty("VanadiumFiles", vanFile);
+    if (m_uiForm.ckUseVanadium->isChecked()) {
+      const auto vanFile =
+          m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
+      msgDiffReduction->setProperty("VanadiumFiles", vanFile);
+    }
   }
   msgDiffReduction->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   msgDiffReduction->setProperty("LoadLogFiles",
