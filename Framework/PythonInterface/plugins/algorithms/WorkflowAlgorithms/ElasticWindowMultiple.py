@@ -85,10 +85,12 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         background_range_end = self.getProperty('BackgroundRangeEnd').value
 
         if background_range_start != Property.EMPTY_DBL and background_range_end == Property.EMPTY_DBL:
-            issues['BackgroundRangeEnd'] = 'If background range start was given and background range end must also be provided.'
+            issues['BackgroundRangeEnd'] = 'If background range start was given and ' \
+                                           'background range end must also be provided.'
 
         if background_range_start == Property.EMPTY_DBL and background_range_end != Property.EMPTY_DBL:
-            issues['BackgroundRangeStart'] = 'If background range end was given and background range start must also be provided.'
+            issues['BackgroundRangeStart'] = 'If background range end was given and background ' \
+                                             'range start must also be provided.'
 
         return issues
 
@@ -225,7 +227,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             transpose_alg.setProperty("OutputWorkspace", self._elf_workspace)
             transpose_alg.execute()
 
-            sort_alg.setProperty("InputWorkspace",transpose_alg.getProperty("OutputWorkspace").value)
+            sort_alg.setProperty("InputWorkspace", transpose_alg.getProperty("OutputWorkspace").value)
             sort_alg.setProperty("OutputWorkspace", self._elf_workspace)
             sort_alg.execute()
 
