@@ -166,7 +166,7 @@ std::string FileProperty::setValue(const std::string &propValue) {
 
   // Expand user variables, if there are any
   strippedValue = expandUser(strippedValue);
-  
+
   // If this looks like an absolute path then don't do any searching but make
   // sure the
   // directory exists for a Save property
@@ -402,7 +402,7 @@ std::string FileProperty::convertExtension(const std::string &filepath) const {
   return fullpath.toString();
 }
 
-/** Expand user variables in file path. 
+/** Expand user variables in file path.
  *  On UNIX, ~ is replaced by the user's home directory, if found.
  *  On Windows, a combination of HOMEPATH and HOMEDRIVE will be used.
  *  If the path contains no user variables, or expansion fails, the path is
@@ -412,23 +412,23 @@ std::string FileProperty::convertExtension(const std::string &filepath) const {
  */
 std::string FileProperty::expandUser(const std::string &filepath) const {
   auto start = filepath.begin();
-  
+
   if (*start != '~') // No user variables in filepath
     return filepath;
-  
+
   // Position of the first slash after the variable
   auto nextSlash = find_if(start, filepath.end(), &isSlash);
 
-  // UNIX-style home variable (ie ~/blah)  
-  if (start + 1 == nextSlash){
+  // UNIX-style home variable (ie ~/blah)
+  if (start + 1 == nextSlash) {
     char *home;
-    
+
     if (!(home = std::getenv("HOME")))
       if (!(home = std::getenv("USERPROFILE")))
-	if (!(home = std::getenv("HOMEPATH")))
-	  // Couldn't find any relevant environment variables
-	  return filepath;
-    
+        if (!(home = std::getenv("HOMEPATH")))
+          // Couldn't find any relevant environment variables
+          return filepath;
+
     std::string homeStr = std::string(home);
     return homeStr + std::string(nextSlash, filepath.end());
   }
@@ -436,7 +436,7 @@ std::string FileProperty::expandUser(const std::string &filepath) const {
   // Windows-style home variables (ie ~user/blah)
   char *drive = std::getenv("HomeDrive");
   char *home = std::getenv("HomePath");
-  if (drive && home){
+  if (drive && home) {
     std::string driveStr = std::string(drive);
     std::string homeStr = std::string(home);
     return driveStr + homeStr + std::string(nextSlash, filepath.end());
@@ -446,9 +446,6 @@ std::string FileProperty::expandUser(const std::string &filepath) const {
   return filepath;
 }
 
-bool FileProperty::isSlash(const char &c){
-  return c == '/' || c == '\\';
-}
-
+bool FileProperty::isSlash(const char &c) { return c == '/' || c == '\\'; }
 }
 }
