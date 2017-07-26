@@ -55,7 +55,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                                          SpectraMin=3,
                                          SpectraMax=361,
                                          DetectDRange=False,
-                                         DRange="4")
+                                         DRange="3")
 
         self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
         self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
@@ -75,7 +75,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                                          SpectraMin=3,
                                          SpectraMax=361,
                                          DetectDRange=False,
-                                         DRange="4")
+                                         DRange="3")
 
         self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
         self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
