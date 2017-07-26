@@ -104,6 +104,10 @@ private:
   /// Check file extension to see if a lower- or upper-cased version will also
   /// match if the first does not exist
   std::string convertExtension(const std::string &filepath) const;
+  /// Expand user variables in a filepath
+  std::string expandUser(const std::string &filepath) const;
+  /// Helper for expandUser
+  static bool isSlash(const char &c);
   /// The action type of this property, i.e. load/save
   unsigned int m_action;
   /// The default file extension associated with the type of file this property

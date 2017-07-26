@@ -150,7 +150,7 @@ def Load(*args, **kwargs):
                          "type and cannot be used. Please ensure the Filename is set"
                          " to the path of the file.")
 
-    filename = os.path.expanduser(filename)
+    #filename = os.path.expanduser(filename)
 
     # Create and execute
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
