@@ -2,9 +2,8 @@
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
-#include <QAbstractItemModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
@@ -42,7 +41,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorOneLevelTreeModel
-    : public QAbstractItemModel {
+    : public AbstractDataProcessorTreeModel {
   Q_OBJECT
 public:
   QDataProcessorOneLevelTreeModel(
@@ -52,8 +51,6 @@ public:
 
   // Functions to read data from the model
 
-  // Get flags for a cell
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
   // Get data for a cell
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -62,11 +59,12 @@ public:
                       int role) const override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  // Column count
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent
   QModelIndex index(int row, int column,
                     const QModelIndex &parent = QModelIndex()) const override;
+  // Get the 'processed' status of a row
+  bool isProcessed(int position,
+                   const QModelIndex &parent = QModelIndex()) const override;
   // Get the underlying data structure
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
@@ -84,12 +82,13 @@ public:
   // Remove rows from the model
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
+  // Set the 'processed' status of a row
+  bool setProcessed(bool processed, int position,
+                    const QModelIndex &parent = QModelIndex()) override;
 
 private:
-  /// Collection of data for viewing.
-  Mantid::API::ITableWorkspace_sptr m_tWS;
-  /// Map of column indexes to names and viceversa
-  DataProcessorWhiteList m_whitelist;
+  /// Vector containing process status for each row
+  std::vector<bool> m_rows;
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorOneLevelTreeModel

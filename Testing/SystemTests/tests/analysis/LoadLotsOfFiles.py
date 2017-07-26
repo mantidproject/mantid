@@ -100,7 +100,14 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'Vesuvio_IP_file_test.par',
                 'IP0004_10.par',
                 'Crystalb3lypScratchAbins.out',
-                'V15_0000016544_S000_P01.raw']
+                'V15_0000016544_S000_P01.raw',
+                'TolueneTAbins.out',
+                'TolueneSmallerOrderAbins.out',
+                'TolueneLargerOrderAbins.out',
+                'TolueneScale.out',
+                'TolueneScratchAbins.out',
+                'SingleCrystalDiffuseReduction_UB.mat'
+                ]
 
 EXPECTED_EXT = '.expected'
 
