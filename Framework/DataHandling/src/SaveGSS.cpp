@@ -187,8 +187,11 @@ bool SaveGSS::areAllDetectorsValid() const {
   }
 
   bool allValid = true;
-  // TODO parallel
-  for (size_t histoIndex = 0; histoIndex < numHist; histoIndex++) {
+
+  const int64_t numHistInt64 = static_cast<int64_t>(numHist);
+
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t histoIndex = 0; histoIndex < numHistInt64; histoIndex++) {
     if (allValid == false) {
       break;
     }
