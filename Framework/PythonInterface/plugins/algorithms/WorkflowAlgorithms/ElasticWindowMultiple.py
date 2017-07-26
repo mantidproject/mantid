@@ -4,22 +4,26 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 
+import numpy as np
 
-def _normalize_to_lowest_temp(elt_ws_name):
+
+def _normalize_by_index(workspace, index):
     """
-    Normalise a workspace to the lowest temperature run.
+    Normalize each spectra of the specified workspace by the
+    y-value at the specified index in that spectra.
 
-    @param elt_ws_name Name of the ELT workspace
+    @param workspace    The workspace to normalize.
+    @param index        The index of the y-value to normalize by.
     """
 
-    num_hist = elt_ws_name.getNumberHistograms()
+    num_hist = workspace.getNumberHistograms()
 
     # Normalize each spectrum in the workspace
     for idx in range(0, num_hist):
-        y_vals = elt_ws_name.readY(idx)
-        scale = 1.0 / min(y_vals)
+        y_vals = workspace.readY(idx)
+        scale = 1.0 / y_vals[index]
         y_vals_scaled = scale * y_vals
-        elt_ws_name.setY(idx, y_vals_scaled)
+        workspace.setY(idx, y_vals_scaled)
 
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):
@@ -253,7 +257,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 clone_alg.execute()
                 self._elt_workspace = clone_alg.getProperty("OutputWorkspace").value
 
-            _normalize_to_lowest_temp(self._elt_workspace)
+            _normalize_by_index(self._elt_workspace, np.argmin(sample_param))
 
             self.setProperty('OutputELT', self._elt_workspace)
 
