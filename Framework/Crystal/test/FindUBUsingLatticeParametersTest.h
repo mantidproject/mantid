@@ -26,7 +26,9 @@ public:
   static FindUBUsingLatticeParametersTest *createSuite() {
     return new FindUBUsingLatticeParametersTest();
   }
-  static void destroySuite(FindUBUsingLatticeParametersTest *suite) { delete suite; }
+  static void destroySuite(FindUBUsingLatticeParametersTest *suite) {
+    delete suite;
+  }
 
   FindUBUsingLatticeParametersTest() { m_ws = loadPeaksWorkspace(); }
 
