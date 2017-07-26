@@ -115,7 +115,7 @@ private:
   void generateOutFileNames(size_t numberOfOutFiles);
 
   /// Returns the log value in a GSAS format as a string stream
-  void getLogValue(std::stringstream &out, const API::Run &runinfo,
+  void getLogValue(std::stringstream &out, const API::Run &runInfo,
                    const std::string &name,
                    const std::string &failsafeValue = "UNKNOWN") const;
 

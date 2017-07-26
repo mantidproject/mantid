@@ -192,15 +192,14 @@ bool SaveGSS::areAllDetectorsValid() const {
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t histoIndex = 0; histoIndex < numHistInt64; histoIndex++) {
-    if (allValid == false) {
-      break;
-    }
-    // Check this spectra has detectors
-    if (!spectrumInfo.hasDetectors(histoIndex)) {
-      allValid = false;
-      g_log.warning() << "There is no detector associated with spectrum "
-                      << histoIndex
-                      << ". Workspace is treated as NO-INSTRUMENT case. \n";
+    if (allValid) {
+      // Check this spectra has detectors
+      if (!spectrumInfo.hasDetectors(histoIndex)) {
+        allValid = false;
+        g_log.warning() << "There is no detector associated with spectrum "
+                        << histoIndex
+                        << ". Workspace is treated as NO-INSTRUMENT case. \n";
+      }
     }
   }
   return allValid;
@@ -284,8 +283,8 @@ void SaveGSS::generateBankHeader(std::stringstream &out,
   * Generates the GSAS file and populates the output buffer
   * with the data to be written to the file(s) in subsequent methods
   *
-  * @param :: numOutFiles The number of file to be written
-  * @param :: numOutSpectra The number of spectra per file to be written
+  * @param numOutFiles :: The number of file to be written
+  * @param numOutSpectra :: The number of spectra per file to be written
   */
 void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
   // Generate the output buffer for each histogram (spectrum)
@@ -326,6 +325,7 @@ void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
   * Creates the file header information, which should be at the top of
   * each GSAS output file from the given workspace.
   *
+  * @param out :: The stringstream to write the header to
   * @param l1 :: Value for the moderator to sample distance
   * @return :: A string stream containing the bank header details to be
   * written to the start of the file
@@ -457,11 +457,11 @@ void Mantid::DataHandling::SaveGSS::generateOutFileNames(
   * @param failsafeValue :: The value to use if the property cannot be
   * found. Defaults to 'UNKNOWN'
 */
-void SaveGSS::getLogValue(std::stringstream &out, const API::Run &runinfo,
+void SaveGSS::getLogValue(std::stringstream &out, const API::Run &runInfo,
                           const std::string &name,
                           const std::string &failsafeValue) const {
   // Return without property exists
-  if (!runinfo.hasProperty(name)) {
+  if (!runInfo.hasProperty(name)) {
     out << failsafeValue;
     return;
   }
@@ -571,7 +571,7 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
   * in length and type and logs a warning or throws depending on
   * whether we can continue.
   *
-  * @throws:: If for any reason we cannot run the algorithm
+  * @throws :: If for any reason we cannot run the algorithm
   */
 void SaveGSS::validateUserInput() const {
   // Check whether it is PointData or Histogram
