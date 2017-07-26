@@ -428,6 +428,16 @@ void CrystalFieldFunction::buildAttributeNames() const {
       m_attributeNames.push_back(name);
     }
   };
+  // Prepend a prefix to attribute names, ignore NumDeriv attribute.
+  auto prependPrefix = [&](const std::string &prefix,
+                           const std::vector<std::string> &names) {
+    for (auto name : names) {
+      if (name == "NumDeriv")
+        continue;
+      name.insert(name.begin(), prefix.begin(), prefix.end());
+      m_attributeNames.push_back(name);
+    }
+  };
   // These names must appear first and in this order in the output vector
   moveAttributeName("Ions");
   moveAttributeName("Symmetries");
@@ -447,16 +457,26 @@ void CrystalFieldFunction::buildAttributeNames() const {
     m_attributeNames.insert(m_attributeNames.end(), names.begin(), names.end());
   }
   auto nSpec = nSpectra();
+  // Attributes of physical properties
   for (size_t iSpec = nSpec; iSpec < m_target->nFunctions(); ++iSpec) {
-    auto &physPropFun = *m_target->getFunction(iSpec);
-    auto names = physPropFun.getAttributeNames();
-    for (auto &name : names) {
-      if (name == "NumDeriv")
-        continue;
-      std::string prefix(physPropFun.name());
+    auto fun = m_target->getFunction(iSpec).get();
+    auto compositePhysProp = dynamic_cast<CompositeFunction*>(fun);
+    if (compositePhysProp) {
+      // Multi-site case
+      std::string physPropPrefix(compositePhysProp->getFunction(0)->name());
+      physPropPrefix.append(".");
+      for(size_t ion = 0; ion < compositePhysProp->nFunctions(); ++ion) {
+        std::string prefix(ION_PREFIX);
+        prefix.append(std::to_string(ion)).append(".").append(physPropPrefix);
+        auto names = compositePhysProp->getFunction(ion)->getAttributeNames();
+        prependPrefix(prefix, names);
+      }
+    } else {
+      // Single-site
+      std::string prefix(fun->name());
       prefix.append(".");
-      name.insert(name.begin(), prefix.begin(), prefix.end());
-      m_attributeNames.push_back(name);
+      auto names = fun->getAttributeNames();
+      prependPrefix(prefix, names);
     }
   }
 }
@@ -967,6 +987,11 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
     multiDomain->addFunction(spectrum);
     multiDomain->setDomainIndex(i, i);
   }
+  auto &physProps = m_control.physProps();
+  std::vector<CompositeFunction_sptr> compositePhysProps;
+  for (auto &prop : physProps) {
+    compositePhysProps.emplace_back(new CompositeFunction);
+  }
 
   auto &compSource = compositeSource();
   for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
@@ -988,8 +1013,20 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
       spectra[i]->addFunction(
           buildSpectrum(nre, en, wf, temperatures[i], FWHMs[i], i, addBackground, ionIntensityScaling * spectrumIntensityScaling));
     }
+
+    size_t i = 0;
+    for (auto &prop : physProps) {
+      compositePhysProps[i]->addFunction(buildPhysprop(nre, en, wf, ham, prop));
+      ++i;
+    }
   }
   m_target->checkFunction();
+  size_t i = nSpec;
+  for(auto &propFun: compositePhysProps) {
+    multiDomain->addFunction(propFun);
+    multiDomain->setDomainIndex(i, i);
+    ++i;
+  }
 }
 
 /// Calculate excitations at given temperature
@@ -1387,13 +1424,13 @@ void CrystalFieldFunction::makeMapsMM() const {
   }
 
   // The spectra (background and peak) parameters
-  for (size_t iSpec = 0; iSpec < m_target->nFunctions(); ++iSpec) {
+  for (size_t iSpec = 0; iSpec < nSpectra(); ++iSpec) {
     auto &spectrum = dynamic_cast<const CompositeFunction&>(*m_target->getFunction(iSpec));
     std::string spectrumPrefix(SPECTRUM_PREFIX);
     spectrumPrefix.append(std::to_string(iSpec)).append(".");
 
     // All other functions are ion spectra.
-    for (size_t ion = 0; ion < m_target->nFunctions(); ++ion) {
+    for (size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
       auto &ionSpectrum =
           dynamic_cast<const CompositeFunction &>(*spectrum.getFunction(ion));
       size_t peakIndex = 0;
@@ -1411,6 +1448,17 @@ void CrystalFieldFunction::makeMapsMM() const {
         prefix.append(PEAK_PREFIX).append(std::to_string(ip - peakIndex)).append(".");
         i += makeMapsForFunction(*ionSpectrum.getFunction(ip), i, prefix);
       }
+    }
+  }
+  // The phys prop parameters
+  for (size_t iSpec = nSpectra(); iSpec < m_target->nFunctions(); ++iSpec) {
+    auto &spectrum = dynamic_cast<const CompositeFunction&>(*m_target->getFunction(iSpec));
+    std::string physPropPrefix(spectrum.getFunction(0)->name());
+    physPropPrefix.append(".");
+    for (size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
+      std::string prefix(ION_PREFIX);
+      prefix.append(std::to_string(ion)).append(".").append(physPropPrefix);
+      i += makeMapsForFunction(*spectrum.getFunction(ion), i, prefix);
     }
   }
 }
