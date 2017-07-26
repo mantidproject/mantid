@@ -17,7 +17,7 @@ def _normalize_to_lowest_temp(elt_ws_name):
     # Normalize each spectrum in the workspace
     for idx in range(0, num_hist):
         y_vals = elt_ws_name.readY(idx)
-        scale = 1.0 / y_vals[0]
+        scale = 1.0 / min(y_vals)
         y_vals_scaled = scale * y_vals
         elt_ws_name.setY(idx, y_vals_scaled)
 
@@ -84,10 +84,12 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         background_range_end = self.getProperty('BackgroundRangeEnd').value
 
         if background_range_start != Property.EMPTY_DBL and background_range_end == Property.EMPTY_DBL:
-            issues['BackgroundRangeEnd'] = 'If background range start was given and background range end must also be provided.'
+            issues['BackgroundRangeEnd'] = 'If background range start was given and ' \
+                                           'background range end must also be provided.'
 
         if background_range_start == Property.EMPTY_DBL and background_range_end != Property.EMPTY_DBL:
-            issues['BackgroundRangeStart'] = 'If background range end was given and background range start must also be provided.'
+            issues['BackgroundRangeStart'] = 'If background range end was given and background ' \
+                                             'range start must also be provided.'
 
         return issues
 
@@ -224,7 +226,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             transpose_alg.setProperty("OutputWorkspace", self._elf_workspace)
             transpose_alg.execute()
 
-            sort_alg.setProperty("InputWorkspace",transpose_alg.getProperty("OutputWorkspace").value)
+            sort_alg.setProperty("InputWorkspace", transpose_alg.getProperty("OutputWorkspace").value)
             sort_alg.setProperty("OutputWorkspace", self._elf_workspace)
             sort_alg.execute()
 
@@ -303,7 +305,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # Look for sample changer position in logs in workspace
             if self._sample_log_name in run:
                 tmp = run[self._sample_log_name].value
-                value_action = {'last_value': lambda x: x[len(x) - 1],
+                value_action = {'last_value': lambda x: x[-1],
                                 'average': lambda x: x.mean()}
                 position = value_action['last_value'](tmp)
                 if position == 0:
@@ -318,7 +320,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
             tmp = run[self._sample_log_name].value
-            value_action = {'last_value': lambda x: x[len(x) - 1],
+            value_action = {'last_value': lambda x: x[-1],
                             'average': lambda x: x.mean()}
             sample = value_action[self._sample_log_value](tmp)
             unit = run[self._sample_log_name].units
