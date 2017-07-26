@@ -18,7 +18,7 @@ def _normalize_to_lowest_temp(elt_ws_name):
     # Normalize each spectrum in the workspace
     for idx in range(0, num_hist):
         y_vals = elt_ws_name.readY(idx)
-        scale = 1.0 / y_vals[0]
+        scale = 1.0 / min(y_vals)
         y_vals_scaled = scale * y_vals
         elt_ws_name.setY(idx, y_vals_scaled)
 
@@ -305,8 +305,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             if self._sample_log_name in run:
                 tmp = run[self._sample_log_name].value
                 value_action = {'last_value': lambda x: x[-1],
-                                'average': lambda x: x.mean(),
-                                'lowest_value': lambda x: np.amin(x)}
+                                'average': lambda x: x.mean()}
                 position = value_action['last_value'](tmp)
                 if position == 0:
                     self._sample_log_name = 'Bot_Can_Top'
@@ -321,8 +320,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # Look for sample unit in logs in workspace
             tmp = run[self._sample_log_name].value
             value_action = {'last_value': lambda x: x[-1],
-                            'average': lambda x: x.mean(),
-                            'lowest_value': lambda x: np.amin(x)}
+                            'average': lambda x: x.mean()}
             sample = value_action[self._sample_log_value](tmp)
             unit = run[self._sample_log_name].units
             logger.information('%d %s found for run: %s' % (sample, unit, run_name))
