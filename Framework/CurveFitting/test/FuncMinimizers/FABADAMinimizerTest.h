@@ -225,7 +225,7 @@ public:
     MatrixWorkspace_sptr convChain = fit.getProperty("ConvergedChain");
     TS_ASSERT(convChain);
     TS_ASSERT_EQUALS(convChain->getNumberHistograms(), nParams + 1);
-    TS_ASSERT_EQUALS(convChain->x(0).size(), 500);
+    TS_ASSERT_EQUALS(convChain->x(0).size(), 1000);
     TS_ASSERT_EQUALS(convChain->x(0)[437], 437);
 
     // Test Chain workspace
@@ -233,7 +233,7 @@ public:
     TS_ASSERT(chain);
     TS_ASSERT_EQUALS(chain->getNumberHistograms(), nParams + 1);
     TS_ASSERT_EQUALS(chain->x(0)[5000], 5000);
-    TS_ASSERT(convChain->x(0).size() < chain->x(0).size());
+    TS_ASSERT(convChain->x(0).size() <= chain->x(0).size() - 350);
 
     // Parameters workspace
     ITableWorkspace_sptr param = fit.getProperty("Parameters");
@@ -294,9 +294,9 @@ public:
                     "10,ConvergenceCriteria=0.1,CostFunctionTable="
                     "CostFunction,Chains=Chain,ConvergedChain"
                     "=ConvergedChain,Parameters=Parameters,"
-                    "SimAnnealingApplied=True,MaximumTemperature=10.0,"
+                    "SimAnnealingApplied=1,MaximumTemperature=10.0,"
                     "NumRefrigerationSteps=5,SimAnnealingIterations="
-                    "3000");
+                    "1000");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
     TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
     Mantid::API::IFunction_sptr fun = fit.getProperty("Function");

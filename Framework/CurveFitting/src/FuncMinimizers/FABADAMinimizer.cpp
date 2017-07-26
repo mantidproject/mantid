@@ -217,6 +217,7 @@ bool FABADAMinimizer::iterate(size_t) {
     // It notices m_leastSquares (the CostFuncLeastSquares) that we have
     // modified the parameters
     tieApplication(i, newParameters, newValue);
+    m_fitFunction->applyTies();
 
     // To track "unmovable" parameters (=> cannot converge)
     if (!m_parChanged[i] && newParameters.get(i) != m_parameters.get(i))
