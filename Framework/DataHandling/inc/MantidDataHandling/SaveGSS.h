@@ -137,15 +137,17 @@ private:
   void writeBufferToFile(size_t numOutFiles, size_t numSpectra);
 
   // Writes the header for RALF data format to the buffer
-  void writeRALFHeader(std::stringstream & out, int bank, const HistogramData::Histogram & histo) const;
+  void writeRALFHeader(std::stringstream &out, int bank,
+                       const HistogramData::Histogram &histo) const;
 
   /// Write out the data in RALF - ALT format
-  void writeRALF_ALTdata(std::stringstream & out, const int bank, const HistogramData::Histogram & histo) const;
+  void writeRALF_ALTdata(std::stringstream &out, const int bank,
+                         const HistogramData::Histogram &histo) const;
 
   /// Write out the data in RALF - FXYE format
   void writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
-                     std::stringstream &out,
-                     const HistogramData::Histogram &histo) const;
+                         std::stringstream &out,
+                         const HistogramData::Histogram &histo) const;
 
   /// Write out the data in SLOG format
   void writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
