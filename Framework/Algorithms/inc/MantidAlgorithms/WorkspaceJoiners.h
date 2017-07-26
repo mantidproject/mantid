@@ -56,7 +56,8 @@ protected:
 
   using Mantid::API::Algorithm::validateInputs;
   void validateInputs(const API::MatrixWorkspace &ws1,
-                      const API::MatrixWorkspace &ws2);
+                      const API::MatrixWorkspace &ws2,
+                      const bool checkBinning = true);
   void getMinMax(const API::MatrixWorkspace &ws, specnum_t &min,
                  specnum_t &max);
 

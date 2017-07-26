@@ -55,9 +55,9 @@ void ConjoinWorkspaces::exec() {
   }
 
   if (event_ws1 && event_ws2) {
-    // We do not need to check that binning is compatible, just that there is no
-    // overlap
-    // make sure we should bother checking
+    this->validateInputs(*event_ws1, *event_ws2, false);
+
+    // Check there is no overlap
     if (this->getProperty("CheckOverlapping")) {
       this->checkForOverlap(*event_ws1, *event_ws2, false);
       m_overlapChecked = true;
@@ -71,25 +71,24 @@ void ConjoinWorkspaces::exec() {
     AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
     // Set the result workspace to the first input
     setProperty("InputWorkspace1", output);
-    return;
+  } else {
+    // Check that the input workspaces meet the requirements for this algorithm
+    this->validateInputs(*ws1, *ws2);
+
+    if (this->getProperty("CheckOverlapping")) {
+      this->checkForOverlap(*ws1, *ws2, true);
+      m_overlapChecked = true;
+    }
+
+    MatrixWorkspace_sptr output = execWS2D(*ws1, *ws2);
+    // Copy the history from the original workspace
+    output->history().addHistory(ws1->getHistory());
+
+    // Delete the second input workspace from the ADS
+    AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
+    // Set the result workspace to the first input
+    setProperty("InputWorkspace1", output);
   }
-
-  // Check that the input workspaces meet the requirements for this algorithm
-  this->validateInputs(*ws1, *ws2);
-
-  if (this->getProperty("CheckOverlapping")) {
-    this->checkForOverlap(*ws1, *ws2, true);
-    m_overlapChecked = true;
-  }
-
-  MatrixWorkspace_sptr output = execWS2D(*ws1, *ws2);
-  // Copy the history from the original workspace
-  output->history().addHistory(ws1->getHistory());
-
-  // Delete the second input workspace from the ADS
-  AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
-  // Set the result workspace to the first input
-  setProperty("InputWorkspace1", output);
 }
 
 //----------------------------------------------------------------------------------------------

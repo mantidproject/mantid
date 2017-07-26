@@ -210,7 +210,7 @@ void EnabledWhenProperty::modify_allowed_values(Property *const) {}
 *
 * @return Pointer to cloned EnabledWhenProperty object
 */
-IPropertySettings *EnabledWhenProperty::clone() {
+IPropertySettings *EnabledWhenProperty::clone() const {
   return new EnabledWhenProperty(*this);
 }
 

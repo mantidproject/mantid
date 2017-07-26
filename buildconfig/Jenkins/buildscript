@@ -309,5 +309,9 @@ fi
 # Linux checks it install okay
 ###############################################################################
 if [[ ${SYSTEMTESTS} == true ]]; then
-  $SCRIPT_DIR/systemtests
+  if [[ ${PRBUILD} == true ]]; then
+    EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
+  else
+    $SCRIPT_DIR/systemtests
+  fi
 fi

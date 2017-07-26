@@ -52,6 +52,8 @@ public:
   //-virtual const unsigned int direction() const = 0;
   /// Virtual destructor
   virtual ~IWorkspaceProperty() = default;
+  /// Sets a flag indicating whether this is the master rank in MPI builds.
+  virtual void setIsMasterRank(bool isMasterRank) = 0;
 };
 
 } // namespace API
