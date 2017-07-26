@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
-#include <iostream> //REMEMBER TO REMOVE THIS
+#include <iterator>
 
 namespace Mantid {
 
@@ -420,7 +420,7 @@ std::string FileProperty::expandUser(const std::string &filepath) const {
   auto nextSlash = find_if(start, filepath.end(), &isSlash);
 
   // UNIX-style home variable (ie ~/blah)
-  if (start + 1 == nextSlash) {
+  if (std::distance(start, nextSlash) == 1) {
     char *home;
 
     if (!(home = std::getenv("HOME")))
@@ -446,6 +446,10 @@ std::string FileProperty::expandUser(const std::string &filepath) const {
   return filepath;
 }
 
+/** Is a character either a forward- or back-slash? Helper for expandUser
+ *  @param c The character to test
+ *  @return True if c is "\" or "/"
+ */
 bool FileProperty::isSlash(const char &c) { return c == '/' || c == '\\'; }
 }
 }
