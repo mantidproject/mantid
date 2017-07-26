@@ -65,5 +65,9 @@ std::string &IndexTypeProperty::operator=(API::IndexType type) {
   return *this = val;
 }
 
+std::string IndexTypeProperty::generatePropertyName(const std::string &name) {
+  return name + "IndexType";
+}
+
 } // namespace API
 } // namespace Mantid

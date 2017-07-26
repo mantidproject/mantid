@@ -58,6 +58,8 @@ public:
   operator Indexing::SpectrumIndexSet() const;
   Indexing::SpectrumIndexSet getIndices() const;
 
+  static std::string generatePropertyName(const std::string &name = "");
+
 private:
   const IWorkspaceProperty &m_workspaceProp;
   const IndexTypeProperty &m_indexTypeProp;

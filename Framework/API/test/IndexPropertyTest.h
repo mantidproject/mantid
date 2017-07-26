@@ -127,6 +127,12 @@ public:
       TS_ASSERT_EQUALS(indices[i], i + 1)
   }
 
+  void testGeneratePropertyName() {
+    std::string propName = "InputWorkspace";
+    TS_ASSERT_EQUALS(propName + "IndexSet",
+                     IndexProperty::generatePropertyName(propName));
+  }
+
 private:
   WorkspaceProperty<MatrixWorkspace> m_wkspProp;
   IndexTypeProperty m_itypeProp;

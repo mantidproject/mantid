@@ -15,14 +15,6 @@ void setWorkspaceProperty(Mantid::API::WorkspaceProperty<T1> *wsProp,
                           const T2 &wksp, const boost::false_type &) {
   wsProp->setValue(wksp);
 }
-
-std::string getIndexPropName(const std::string &name) {
-  return name + "IndexSet";
-}
-
-std::string getTypePropName(const std::string &name) {
-  return name + "IndexType";
-}
 } // namespace
 
 namespace Mantid {
@@ -50,14 +42,15 @@ void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
   const auto &wsPropRef = *wsProp;
   declareProperty(std::move(wsProp), doc);
 
-  auto indexTypePropName = getTypePropName(propertyName);
+  auto indexTypePropName =
+      IndexTypeProperty::generatePropertyName(propertyName);
   auto indexTypeProp = Kernel::make_unique<IndexTypeProperty>(
       indexTypePropName, allowedIndexTypes);
   const auto &indexTypePropRef = *indexTypeProp;
 
   declareProperty(std::move(indexTypeProp));
 
-  auto indexPropName = getIndexPropName(propertyName);
+  auto indexPropName = IndexProperty::generatePropertyName(propertyName);
   declareProperty(Kernel::make_unique<IndexProperty>(indexPropName, wsPropRef,
                                                      indexTypePropRef));
 
@@ -78,9 +71,9 @@ void Algorithm::doSetInputProperties(const std::string &name, const T1 &wksp,
   auto *wsProp =
       dynamic_cast<WorkspaceProperty<WsType> *>(getPointerToProperty(name));
   auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
-      getPointerToProperty(getTypePropName(name)));
+      getPointerToProperty(IndexTypeProperty::generatePropertyName(name)));
   auto *indexProp = dynamic_cast<IndexProperty *>(
-      getPointerToProperty(getIndexPropName(name)));
+      getPointerToProperty(IndexProperty::generatePropertyName(name)));
 
   setWorkspaceProperty<WsType, T1>(
       wsProp, wksp, boost::is_convertible<T1, boost::shared_ptr<WsType>>());
@@ -147,7 +140,7 @@ Algorithm::getWorkspaceAndIndices(const std::string &name) const {
   // https://github.com/mantidproject/mantid/issues/20092
 
   auto indexProp = dynamic_cast<IndexProperty *>(
-      getPointerToProperty(getIndexPropName(name)));
+      getPointerToProperty(IndexProperty::generatePropertyName(name)));
   Indexing::SpectrumIndexSet indexSet = *indexProp;
 
   return std::make_tuple(ws, indexSet);

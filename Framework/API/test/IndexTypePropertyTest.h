@@ -79,6 +79,12 @@ public:
 
     TS_ASSERT_EQUALS(prop.selectedType(), IndexType::WorkspaceIndex);
   }
+
+  void testGeneratePropertyName() {
+    std::string propName = "InputWorkspace";
+    TS_ASSERT_EQUALS(propName + "IndexType",
+                     IndexTypeProperty::generatePropertyName(propName));
+  }
 };
 
 #endif /* MANTID_API_INDEXTYPEPROPERTYTEST_H_ */

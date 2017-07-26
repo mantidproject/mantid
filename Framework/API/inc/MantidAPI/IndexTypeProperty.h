@@ -54,6 +54,8 @@ public:
 
   std::string &operator=(API::IndexType type);
 
+  static std::string generatePropertyName(const std::string &name = "");
+
 private:
   std::vector<std::string> m_allowedValues;
 };

@@ -88,5 +88,9 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
   m_indicesExtracted = true;
   return m_indices;
 }
+
+std::string IndexProperty::generatePropertyName(const std::string &name) {
+  return name + "IndexSet";
+}
 } // namespace API
 } // namespace Mantid
