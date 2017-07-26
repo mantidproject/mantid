@@ -23,7 +23,7 @@
 
 #include <QObject>
 
-using RowData = std::vector<QString>;
+using RowData = QStringList;
 using GroupData = std::map<int, RowData>;
 using RowItem = std::pair<int, RowData>;
 using RowQueue = std::queue<RowItem>;

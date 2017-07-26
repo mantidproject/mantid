@@ -25,6 +25,11 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+#include <QStringList>
+#include <QString>
+#include <sstream>
+#include <vector>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -34,17 +39,18 @@ Create string of comma separated list of values from a vector
 @return string of comma separated list of values
 */
 template <typename T, typename A>
-std::string vectorString(const std::vector<T, A> &param_vec) {
+QString vectorString(const std::vector<T, A> &param_vec) {
   std::ostringstream vector_string;
-  const char *separator = "";
+  const char* separator = "";
   for (auto paramIt = param_vec.begin(); paramIt != param_vec.end();
        ++paramIt) {
     vector_string << separator << *paramIt;
     separator = ", ";
   }
-
-  return vector_string.str();
+  return QString::fromStdString(vector_string.str());
 }
+
+QString vectorString(const QStringList &param);
 
 /**
 Create string of comma separated list of parameter values from a vector
@@ -53,15 +59,12 @@ Create string of comma separated list of parameter values from a vector
 @return string of comma separated list of parameter values
 */
 template <typename T, typename A>
-std::string vectorParamString(const std::string &param_name,
-                              const std::vector<T, A> &param_vec) {
-  std::ostringstream param_vector_string;
-
-  param_vector_string << param_name << " = '";
-  param_vector_string << vectorString(param_vec);
-  param_vector_string << "'";
-
-  return param_vector_string.str();
+QString vectorParamString(const QString &param_name,
+                          const std::vector<T, A> &param_vec) {
+  auto param_vector_string = param_name + " = '";
+  param_vector_string += vectorString(param_vec);
+  param_vector_string += "'";
+  return param_vector_string;
 }
 }
 }

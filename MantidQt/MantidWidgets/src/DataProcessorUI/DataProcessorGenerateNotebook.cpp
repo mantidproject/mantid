@@ -264,7 +264,7 @@ QString tableString(const TreeData &treeData,
       QStringList values;
       values.append(QString::number(groupId));
 
-      if (row.second.size() != whitelist.size())
+      if (row.second.size() != ncols)
         throw std::invalid_argument("Can't generate table for notebook");
 
       for (const auto &datum : row.second)
@@ -319,15 +319,17 @@ boost::tuple<QString, QString> postprocessGroupString(
   stitchString += outputWSName;
   stitchString += completeOutputProperties(
                        postprocessor.name(),
-                       postprocessor.numberOfOutputProperties()) << " = ";
-  stitchString += postprocessor.name() << "(";
-  stitchString += postprocessor.inputProperty() << " = '";
+                       postprocessor.numberOfOutputProperties());
+  stitchString += " = ";
+  stitchString += postprocessor.name() + "(";
+  stitchString += postprocessor.inputProperty() + " = '";
   stitchString += inputNames.join(", ");
   stitchString += "'";
-  if (!postprocessingOptions.empty())
+  if (!postprocessingOptions.isEmpty()) {
     stitchString += ", ";
     stitchString += postprocessingOptions;
     stitchString += ")";
+  }
 
   return boost::make_tuple(stitchString, outputWSName);
 }
@@ -340,7 +342,7 @@ boost::tuple<QString, QString> postprocessGroupString(
 QString plot1DString(const QStringList &ws_names) {
   QString plotString;
   plotString += "fig = plots([";
-  plotString += vectorString(ws_names) 
+  plotString += vectorString(ws_names);
   plotString += "], title=['";
   plotString += ws_names.join("', '");
   plotString += "'], legendLocation=[1, 1, 4])\n";
@@ -359,12 +361,12 @@ QString getReducedWorkspaceName(const RowData &data,
                                     const DataProcessorWhiteList &whitelist,
                                     const QString &prefix) {
 
-  if (data.size() != whitelist.size())
+  int ncols = static_cast<int>(whitelist.size());
+  if (data.size() != ncols)
     throw std::invalid_argument(
         "Can't write output workspace name to notebook");
 
   auto names = QStringList();
-  int ncols = static_cast<int>(whitelist.size());
 
   for (int col = 0; col < ncols - 1; col++) {
     // Do we want to use this column to generate the name of the output ws?
@@ -374,12 +376,12 @@ QString getReducedWorkspaceName(const RowData &data,
       if (!valueStr.isEmpty()) {
         // But we may have things like '1+2' which we want to replace with '1_2'
         auto value = valueStr.split(QRegExp("(+|,)"), QString::SkipEmptyParts);
-        names.append(whitelist.prefix(col) + value.join('_'));
+        names.append(whitelist.prefix(col) + value.join("_"));
       }
     }
   } // Columns
 
-  return prefix + names.join('_');
+  return prefix + names.join("_");
 }
 
 /**
@@ -406,7 +408,7 @@ boost::tuple<QString, QString> reduceRowString(
     const std::map<QString, QString> &preprocessingOptionsMap,
     const QString &processingOptions) {
 
-  if (whitelist.size() != data.size()) {
+  if (static_cast<int>(whitelist.size()) != data.size()) {
     throw std::invalid_argument("Can't generate notebook");
   }
 
@@ -435,7 +437,7 @@ boost::tuple<QString, QString> reduceRowString(
       // Get the runs
       const QString runStr = data.at(col);
 
-      if (!runStr.empty()) {
+      if (!runStr.isEmpty()) {
         // Some runs were given for pre-processing
 
         // The pre-processing alg
@@ -460,7 +462,7 @@ boost::tuple<QString, QString> reduceRowString(
       // Just read the property value from the table
       const QString propStr = data.at(col);
 
-      if (!propStr.empty()) {
+      if (!propStr.isEmpty()) {
         // If it was not empty, we used it as an input property to the reduction
         // algorithm
         algProperties.append(algProp + " = " + propStr);
@@ -469,14 +471,14 @@ boost::tuple<QString, QString> reduceRowString(
   }
 
   // 'Options' specified either via 'Options' column or HintinLineEdit
-  auto options = parseKeyValueString(processingOptions);
+  auto options = parseKeyValueString(processingOptions.toStdString());
   const QString optionsStr = data.back();
   // Parse and set any user-specified options
-  auto optionsMap = parseKeyValueString(optionsStr);
+  auto optionsMap = parseKeyValueString(optionsStr.toStdString());
   // Options specified via 'Options' column will be preferred
   optionsMap.insert(options.begin(), options.end());
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
-    algProperties.append(kvp->first + " = " + kvp->second);
+    algProperties.append(QString::fromStdString(kvp->first + " = " + kvp->second));
   }
 
   /* Now construct the names of the reduced workspaces*/
@@ -487,7 +489,7 @@ boost::tuple<QString, QString> reduceRowString(
   // 'IvsLam_TOF_13460_13462
   QStringList outputProperties;
   for (size_t prop = 0; prop < processor.numberOfOutputProperties(); prop++) {
-    output_properties.append(
+    outputProperties.append(
         getReducedWorkspaceName(data, whitelist, processor.prefix(prop)));
   }
 
@@ -513,7 +515,7 @@ boost::tuple<QString, QString> reduceRowString(
   codeString += "\n";
 
   // Return the python code + the output properties
-  return boost::make_tuple(codeString.str(), outputPropertiesStr);
+  return boost::make_tuple(codeString, outputPropertiesStr);
 }
 
 /**
@@ -538,7 +540,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
     run = run.trimmed();
 
   const QString prefix = preprocessor.prefix();
-  const QString outputName = prefix + runs.join('_');
+  const QString outputName = prefix + runs.join("_");
 
   boost::tuple<QString, QString> loadString;
 
@@ -547,7 +549,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
 
   // EXIT POINT if there is only one run
   if (runs.size() == 1) {
-    return boost::make_tuple(loadStrings.str(), boost::get<1>(loadString));
+    return boost::make_tuple(loadStrings, boost::get<1>(loadString));
   }
   loadStrings += outputName;
   loadStrings += " = ";
@@ -562,7 +564,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
                                preprocessor, options);
   }
 
-  return boost::make_tuple(QString(loadStrings.str()), outputName);
+  return boost::make_tuple(loadStrings, outputName);
 }
 
 /**
@@ -627,7 +629,7 @@ QString completeOutputProperties(const QString &algName,
   // We need to specify those too in our python code
 
   Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create(algName);
+      Mantid::API::AlgorithmManager::Instance().create(algName.toStdString());
   auto properties = alg->getProperties();
   int totalOutputProp = 0;
   for (auto &prop : properties) {

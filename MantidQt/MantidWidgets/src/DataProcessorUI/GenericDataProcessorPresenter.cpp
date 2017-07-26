@@ -68,17 +68,11 @@ convertStringToMapWithSet(const QString &properties) {
   }
 
   // Split by each map pair
-  std::vector<QString> propVec;
-  boost::split(propVec, properties, boost::is_any_of(";"));
-
+  auto propVec = properties.split(";");
   for (const auto &prop : propVec) {
     // Split the key and values
-    std::vector<QString> elements;
-    boost::split(elements, prop, boost::is_any_of(":"));
-
-    // Split values
-    std::vector<QString> vals;
-    boost::split(vals, elements[1], boost::is_any_of(","));
+    auto elements = prop.split(":");
+    auto vals = elements[1].split(",");
     std::set<QString> values(vals.begin(), vals.end());
     props[elements[0]] = values;
   }
@@ -119,7 +113,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
                          "<b>Override <samp>" +
-                             QString::fromStdString(processor.name()) +
+                             processor.name() +
                              "</samp> properties</b><br /><i>optional</i><br "
                              "/>This column allows you to "
                              "override the properties used when executing "
@@ -132,7 +126,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "specified externally, the former prevail.");
   m_columns = static_cast<int>(m_whitelist.size());
 
-  if (m_postprocessor.name().empty()) {
+  if (m_postprocessor.name().isEmpty()) {
     m_postprocess = false;
     m_manager = Mantid::Kernel::make_unique<DataProcessorOneLevelTreeManager>(
         this, m_whitelist);
@@ -235,7 +229,7 @@ void GenericDataProcessorPresenter::acceptViews(
   // Provide autocompletion hints for the options column. We use the algorithm's
   // properties minus those we blacklist. We blacklist any useless properties or
   // ones we're handling that the user should'nt touch.
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name().toStdString());
   m_view->setOptionsHintStrategy(
       new AlgorithmHintStrategy(alg, m_processor.blacklist()), m_columns - 1);
 
@@ -260,11 +254,11 @@ void GenericDataProcessorPresenter::process() {
   // Set the global settings. If any have been changed, set all groups and rows
   // as unprocessed
   QString newPreprocessingOptions =
-      m_mainPresenter->getPreprocessingOptionsAsString().toStdString();
+      m_mainPresenter->getPreprocessingOptionsAsString();
   QString newProcessingOptions =
-      m_mainPresenter->getProcessingOptions().toStdString();
+      m_mainPresenter->getProcessingOptions();
   QString newPostprocessingOptions =
-      m_mainPresenter->getPostprocessingOptions().toStdString();
+      m_mainPresenter->getPostprocessingOptions();
 
   bool settingsChanged = m_preprocessingOptions != newPreprocessingOptions ||
                          m_processingOptions != newProcessingOptions ||
@@ -510,7 +504,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
         m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
         m_processor, m_postprocessor, preprocessingOptionsMap,
         m_processingOptions, m_postprocessingOptions);
-    QString generatedNotebook = notebook->generateNotebook(data);
+    auto generatedNotebook = std::string(notebook->generateNotebook(data).toStdString());
 
     std::ofstream file(filename.c_str(), std::ofstream::trunc);
     file << generatedNotebook;
@@ -548,7 +542,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
     const QString inputWSName =
         getReducedWorkspaceName(row.second, m_processor.prefix(0));
 
-    if (AnalysisDataService::Instance().doesExist(inputWSName)) {
+    if (AnalysisDataService::Instance().doesExist(inputWSName.toStdString())) {
 
       inputNames.emplace_back(inputWSName);
     }
@@ -558,7 +552,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
   // If the previous result is in the ADS already, we'll need to remove it.
   // If it's a group, we'll get an error for trying to group into a used group
   // name
-  if (AnalysisDataService::Instance().doesExist(outputWSName))
+  if (AnalysisDataService::Instance().doesExist(outputWSName.toStdString()))
     AnalysisDataService::Instance().remove(outputWSName);
 
   IAlgorithm_sptr alg =
@@ -794,22 +788,22 @@ QString GenericDataProcessorPresenter::findRunInADS(
   runFound = true;
 
   // First, let's see if the run given is the name of a workspace in the ADS
-  if (AnalysisDataService::Instance().doesExist(run))
+  if (AnalysisDataService::Instance().doesExist(run.toStdString()))
     return run;
 
   // Try with prefix
-  if (AnalysisDataService::Instance().doesExist(prefix + run))
+  if (AnalysisDataService::Instance().doesExist((prefix + run).toStdString()))
     return prefix + run;
 
   // Is the run string is numeric?
   if (boost::regex_match(run, boost::regex("\\d+"))) {
 
     // Look for "<run_number>" in the ADS
-    if (AnalysisDataService::Instance().doesExist(run))
+    if (AnalysisDataService::Instance().doesExist(run.toStdString()))
       return run;
 
     // Look for "<instrument><run_number>" in the ADS
-    if (AnalysisDataService::Instance().doesExist(prefix + run))
+    if (AnalysisDataService::Instance().doesExist((prefix + run).toStdString()))
       return prefix + run;
   }
 

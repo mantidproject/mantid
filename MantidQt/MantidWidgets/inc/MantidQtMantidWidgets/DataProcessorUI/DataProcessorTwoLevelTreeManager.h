@@ -84,7 +84,7 @@ public:
                 const DataProcessorWhiteList &whitelist) override;
   /// Update row with new data
   void update(int parent, int child,
-              const std::vector<QString> &data) override;
+              const QStringList &data) override;
   /// Get the number of rows of a given parent
   int rowCount() const override;
   int rowCount(int parent) const override;

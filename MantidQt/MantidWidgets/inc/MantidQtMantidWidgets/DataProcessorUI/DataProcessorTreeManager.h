@@ -8,6 +8,7 @@
 #include <memory>
 #include <set>
 #include <vector>
+#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -15,7 +16,9 @@ namespace MantidWidgets {
 class DataProcessorCommand;
 class DataProcessorWhiteList;
 
-typedef std::map<int, std::map<int, std::vector<QString>>> TreeData;
+using RowData = QStringList;
+using GroupData = std::map<int, RowData>;
+using TreeData = std::map<int, GroupData>;
 
 /** @class DataProcessorTreeManager
 
@@ -89,7 +92,7 @@ public:
            const DataProcessorWhiteList &whitelist) = 0;
   /// Update row with new data
   virtual void update(int parent, int child,
-                      const std::vector<QString> &data) = 0;
+                      const QStringList &data) = 0;
   /// Get the number of rows of a given parent
   virtual int rowCount() const = 0;
   virtual int rowCount(int parent) const = 0;

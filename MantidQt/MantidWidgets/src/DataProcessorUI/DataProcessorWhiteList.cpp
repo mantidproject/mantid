@@ -18,40 +18,40 @@ void DataProcessorWhiteList::addElement(const QString &colName,
                                         const QString &description,
                                         bool showValue, const QString &prefix) {
 
-  m_colIndexToColName.push_back(colName.toStdString());
-  m_colIndexToAlgProp.push_back(algProperty.toStdString());
+  m_colIndexToColName.push_back(colName);
+  m_colIndexToAlgProp.push_back(algProperty);
   m_showValue.push_back(showValue);
-  m_prefix.push_back(prefix.toStdString());
-  m_description.push_back(description.toStdString());
-  m_colNameToColIndex[colName.toStdString()] = m_lastIndex++;
+  m_prefix.push_back(prefix);
+  m_description.push_back(description);
+  m_colNameToColIndex[colName] = m_lastIndex++;
 }
 
 /** Returns the column index for a column specified via its name
     @param colName : The column name
 */
 int DataProcessorWhiteList::colIndexFromColName(
-    const std::string &colName) const {
+    const QString &colName) const {
   return m_colNameToColIndex.at(colName);
 }
 
 /** Returns the column name for a column specified via its index
     @param index : The column index
 */
-std::string DataProcessorWhiteList::colNameFromColIndex(int index) const {
+QString DataProcessorWhiteList::colNameFromColIndex(int index) const {
   return m_colIndexToColName.at(index);
 }
 
 /** Returns the algorithm property linked to a column specified via its index
     @param index : The column index
 */
-std::string DataProcessorWhiteList::algPropFromColIndex(int index) const {
+QString DataProcessorWhiteList::algPropFromColIndex(int index) const {
   return m_colIndexToAlgProp.at(index);
 }
 
 /** Returns the column description for a column specified via its index
     @param index : The column index
 */
-std::string DataProcessorWhiteList::description(int index) const {
+QString DataProcessorWhiteList::description(int index) const {
   return m_description.at(index);
 }
 
@@ -73,7 +73,7 @@ bool DataProcessorWhiteList::showValue(int index) const {
 * only be used if showValue is true for this column
 * @param index : The column index
 */
-std::string DataProcessorWhiteList::prefix(int index) const {
+QString DataProcessorWhiteList::prefix(int index) const {
   return m_prefix.at(index);
 }
 }
