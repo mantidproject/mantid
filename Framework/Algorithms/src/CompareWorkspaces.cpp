@@ -51,7 +51,7 @@ void CompareWorkspaces::init() {
   declareProperty("CheckMasking", true,
                   "Whether to check that the bin masking matches. ");
   declareProperty("CheckParameterMap", true,
-		  "Whether to check that the parameter maps match. ");
+                  "Whether to check that the parameter maps match. ");
 
   // Have this one false by default - the logs are brittle
   declareProperty("CheckSample", false,
@@ -748,11 +748,11 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
     return false;
   }
 
-  if (checkParameterMap){
+  if (checkParameterMap) {
     const Geometry::ParameterMap &ws1_parmap = ws1->constInstrumentParameters();
     const Geometry::ParameterMap &ws2_parmap = ws2->constInstrumentParameters();
   }
-  
+
   if (ws1_parmap != ws2_parmap) {
     g_log.debug()
         << "Here information to help understand parameter map differences:\n";
