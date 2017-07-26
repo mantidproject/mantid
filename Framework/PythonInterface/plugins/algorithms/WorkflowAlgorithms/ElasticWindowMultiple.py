@@ -4,6 +4,7 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 
+
 def _normalize_to_lowest_temp(elt_ws_name):
     """
     Normalise a workspace to the lowest temperature run.
