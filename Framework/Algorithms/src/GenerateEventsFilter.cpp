@@ -386,8 +386,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
 
     // Default and thus just one interval
     std::stringstream ss;
-    ss << "Time Interval From " << m_startTime << " to " << m_stopTime;
-
+    ss << "Time.Interval.From." << m_startTime << ".To." << m_stopTime;
     addNewTimeFilterSplitter(m_startTime, m_stopTime, wsindex, ss.str());
   } else if (vec_timeintervals.size() == 1) {
     double timeinterval = vec_timeintervals[0];
@@ -409,7 +408,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
       Kernel::DateAndTime t0(curtime_ns);
       Kernel::DateAndTime tf(nexttime_ns);
       std::stringstream ss;
-      ss << "Time Interval From " << t0 << " to " << tf;
+      ss << "Time.Interval.From." << t0 << ".to." << tf;
 
       addNewTimeFilterSplitter(t0, tf, wsindex, ss.str());
 
@@ -462,7 +461,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
         Kernel::DateAndTime t0(curtime_ns);
         Kernel::DateAndTime tf(nexttime_ns);
         std::stringstream ss;
-        ss << "Time Interval From " << t0 << " to " << tf;
+        ss << "Time.Interval.From." << t0 << ".to." << tf;
 
         addNewTimeFilterSplitter(t0, tf, wsindex, ss.str());
 
@@ -661,14 +660,14 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
 
   API::TableRow row = m_filterInfoWS->appendRow();
   std::stringstream ss;
-  ss << "Log " << m_dblLog->name() << " From " << minvalue << " To " << maxvalue
-     << "  Value-change-direction ";
+  ss << "Log." << m_dblLog->name() << ".From." << minvalue << ".To." << maxvalue
+     << ".Value-change-direction:";
   if (filterincrease && filterdecrease) {
-    ss << " both ";
+    ss << ".both ";
   } else if (filterincrease) {
-    ss << " increase";
+    ss << ".increase";
   } else {
-    ss << " decrease";
+    ss << ".decrease";
   }
   row << 0 << ss.str();
 }
@@ -718,14 +717,14 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
 
     // Workgroup information
     std::stringstream ss;
-    ss << "Log " << m_dblLog->name() << " From " << lowbound << " To "
-       << upbound << "  Value-change-direction ";
+    ss << "Log." << m_dblLog->name() << ".From." << lowbound << ".To."
+       << upbound << ".Value-change-direction:";
     if (filterincrease && filterdecrease) {
-      ss << " both ";
+      ss << "both";
     } else if (filterincrease) {
-      ss << " increase";
+      ss << "increase";
     } else {
-      ss << " decrease";
+      ss << "decrease";
     };
     API::TableRow newrow = m_filterInfoWS->appendRow();
     newrow << wsindex << ss.str();
@@ -825,15 +824,12 @@ void GenerateEventsFilter::makeFilterBySingleValue(
   // Initialize control parameters
   bool lastGood = false;
   bool isGood = false;
-  ;
   time_duration tol = DateAndTime::durationFromSeconds(TimeTolerance);
   int numgood = 0;
   DateAndTime lastTime, currT;
   DateAndTime start, stop;
 
   size_t progslot = 0;
-  string info;
-
   for (int i = 0; i < m_dblLog->size(); i++) {
     lastTime = currT;
     // The new entry
@@ -862,7 +858,8 @@ void GenerateEventsFilter::makeFilterBySingleValue(
           stop = currT;
         }
 
-        addNewTimeFilterSplitter(start, stop, wsindex, info);
+        std::string empty("");
+        addNewTimeFilterSplitter(start, stop, wsindex, empty);
 
         // Reset the number of good ones, for next time
         numgood = 0;
@@ -887,9 +884,12 @@ void GenerateEventsFilter::makeFilterBySingleValue(
       stop = currT - tol;
     else
       stop = currT;
-    addNewTimeFilterSplitter(start, stop, wsindex, info);
-    numgood = 0;
+
+    std::string empty("");
+    addNewTimeFilterSplitter(start, stop, wsindex, empty);
   }
+
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1540,18 +1540,18 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
     while (logvalue <= maxvalue) {
       stringstream message;
       if (logvalue + delta - 1 > logvalue)
-        message << m_intLog->name() << " = [" << logvalue << ", "
+        message << m_intLog->name() << "=[" << logvalue << ","
                 << logvalue + delta - 1 << "]";
       else
-        message << m_intLog->name() << " = " << logvalue;
+        message << m_intLog->name() << "=" << logvalue;
 
-      message << ". Value change direction: ";
+      message << ".Value change direction:";
       if (filterIncrease && filterDecrease)
-        message << "Both.";
+        message << "Both";
       else if (filterIncrease)
-        message << "Increasing. ";
+        message << "Increasing";
       else if (filterDecrease)
-        message << "Decreasing. ";
+        message << "Decreasing";
 
       TableRow newrow = m_filterInfoWS->appendRow();
       newrow << wsindex << message.str();

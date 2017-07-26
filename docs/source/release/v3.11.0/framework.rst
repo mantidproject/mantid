@@ -24,7 +24,7 @@ Improved
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information.
 - :ref:`GroupDetectors <algm-GroupDetectors-v2>` now supports workspaces with detector scans.
 - :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays.
-
+- :ref:`FilterEvents <algm-FilterEvents-v1>` has refactored on splitting sample logs.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
 
 Deprecated
