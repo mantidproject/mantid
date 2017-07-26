@@ -9,6 +9,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <type_traits>
 
@@ -128,6 +129,7 @@ std::string toPrettyString(
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
+GCC_DIAG_OFF(unused-function)
 /** Explicit specialization for a property of type std::vector<bool>.
 *   This will catch Vectors of char, double, float etc.
 *   This simply concatenates the values using a delimiter
@@ -142,6 +144,7 @@ std::string toPrettyString(
   return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),
                           maxLength);
 }
+GCC_DIAG_ON(unused-function)
 #if __clang__
 #pragma clang diagnostic pop
 #endif

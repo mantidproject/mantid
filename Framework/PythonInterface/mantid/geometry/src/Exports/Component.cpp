@@ -1,3 +1,4 @@
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
@@ -15,7 +16,7 @@ namespace {
 
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(-Wconversion)
+GCC_DIAG_OFF(conversion)
 
 // Default parameter function overloads
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames,
@@ -46,7 +47,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription,
                                        Component::getParamDescription, 1, 2)
 
-GCC_DIAG_ON(-Wconversion)
+GCC_DIAG_ON(conversion)
 
 #ifdef __clang__
 #pragma clang diagnostic pop
