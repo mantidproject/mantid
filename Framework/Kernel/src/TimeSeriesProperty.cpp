@@ -530,9 +530,14 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     std::vector<DateAndTime> &splitter_time_vec, std::vector<int> &target_vec,
     std::vector<TimeSeriesProperty *> outputs) {
   // check inputs
-  if (splitter_time_vec.size() != target_vec.size() + 1)
-    throw std::runtime_error("Input time vector's size does not match taget "
-                             "workspace index vector's size.");
+  if (splitter_time_vec.size() != target_vec.size() + 1) {
+    std::stringstream errss;
+    errss << "Try to split TSP " << this->m_name
+          << ": Input time vector's size " << splitter_time_vec.size()
+          << " does not match (one more larger than) taget "
+             "workspace index vector's size " << target_vec.size() << "\n";
+    throw std::runtime_error(errss.str());
+  }
   // return if the output vector TimeSeriesProperties is not defined
   if (outputs.empty())
     return;
@@ -596,28 +601,20 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     }
   }
 
-  g_log.debug() << "TSP entry: " << index_tsp_time
-                << ", Splitter index = " << index_splitter << "\n";
-
   // now it is the time to put TSP's entries to corresponding
   continue_search = !no_entry_in_range;
   while (continue_search) {
-    // get the first entry index
+    // get next target
+    int target = target_vec[index_splitter];
+
+    // get the first entry index (overlap)
     if (index_tsp_time > 0)
       --index_tsp_time;
 
-    int target = target_vec[index_splitter];
-
-    g_log.debug() << "Target = " << target
-                  << " with splitter index = " << index_splitter << "\n"
-                  << "\t"
-                  << "Time index = " << index_tsp_time << "\n\n";
-
+    // add the continous entries to same target time series property
     bool continue_add = true;
     while (continue_add) {
       // add current entry
-      g_log.debug() << "Add entry " << index_tsp_time << " to target " << target
-                    << "\n";
       if (outputs[target]->size() == 0 ||
           outputs[target]->lastTime() < tsp_time) {
         // avoid to add duplicate entry
@@ -627,9 +624,6 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
 
       // advance to next entry
       ++index_tsp_time;
-
-      g_log.debug() << "\tEntry time " << tsp_time_vec[index_tsp_time]
-                    << ", stop time " << split_stop_time << "\n";
 
       if (index_tsp_time == tsp_time_vec.size()) {
         // last entry. quit all loops
