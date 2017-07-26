@@ -1,8 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid import logger
+# noinspection PyUnresolvedReferences
 from mantid.simpleapi import mtd, Abins, Scale, CompareWorkspaces, Load, DeleteWorkspace
-from mantid.api import MatrixWorkspace
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 import numpy as np
 
@@ -71,6 +71,10 @@ class AbinsBasicTest(unittest.TestCase):
         # wrong extension of phonon file in case of CRYSTAL
         self.assertRaises(RuntimeError, Abins, DFTprogram="CRYSTAL", PhononFile="MgO.wrong_out",
                           OutputWorkspace=self._workspace_name)
+
+        # in case of molecular calculations AllKpointsGiven cannot be False
+        self.assertRaises(RuntimeError, Abins, DFTprogram="CRYSTAL", PhononFile="toluene_molecule_BasicAbins.out",
+                          AllKpointsGiven=False, OutputWorkspace=self._workspace_name)
 
         # no name for workspace
         self.assertRaises(RuntimeError, Abins, PhononFile=self._si2 + ".phonon", Temperature=self._temperature)
@@ -196,17 +200,16 @@ class AbinsBasicTest(unittest.TestCase):
         # Python 3 has no guarantee of dict order so the workspaces in the group may be in
         # a different order on Python 3
         self.assertEqual(wks_all_atoms_explicitly.size(), wks_all_atoms_default.size())
-        explicit_names  = wks_all_atoms_explicitly.getNames()
+        explicit_names = wks_all_atoms_explicitly.getNames()
         for i in range(len(explicit_names)):
             explicit_name = explicit_names[i]
             default_name = "default" + explicit_name[8:]
             (result, messages) = CompareWorkspaces(explicit_name, default_name,
                                                    Tolerance=self._tolerance)
             self.assertEqual(result, True)
-        #endfor
 
         self.assertEqual(wrk_ref.size(), wks_all_atoms_default.size())
-        ref_names  = wrk_ref.getNames()
+        ref_names = wrk_ref.getNames()
         for i in range(len(ref_names)):
             ref_name = ref_names[i]
             default_name = "default" + ref_name[len(self._squaricn + "_ref"):]

@@ -72,6 +72,7 @@
 
 class ColorPickerPopup;
 
+// cppcheck-suppress ConfigurationNotChecked
 class QT_QTCOLORPICKER_EXPORT QtColorPicker : public QPushButton {
   Q_OBJECT
 

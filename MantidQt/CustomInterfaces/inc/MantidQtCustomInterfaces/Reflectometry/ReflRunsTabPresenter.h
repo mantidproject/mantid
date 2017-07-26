@@ -77,6 +77,8 @@ public:
   /// Handle data reduction paused/resumed
   void pause() const override;
   void resume() const override;
+  /// Determine whether to start a new autoreduction
+  bool startNewAutoreduction() const override;
   /// Reduction paused/resumed confirmation handler
   void confirmReductionPaused() const override;
   void confirmReductionResumed() const override;
@@ -100,10 +102,15 @@ private:
   static const std::string LegacyTransferMethod;
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
+  /// The current search string used for autoreduction
+  std::string m_autoSearchString;
+  /// Whether the instrument has been changed before a search was made with it
+  bool m_instrumentChanged;
 
   /// searching
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
+  void autoreduce(bool startNew);
   void transfer();
   void pushCommands();
   /// transfer strategy

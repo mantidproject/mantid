@@ -157,17 +157,17 @@ public:
         .Times(1)
         .WillOnce(Return("UniformEven"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(6)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(6)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(6)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-        .Times(3)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillOnce(Return(false));
@@ -252,17 +252,17 @@ public:
         .Times(1)
         .WillOnce(Return("Uniform"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(8)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(8)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(8)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-        .Times(3)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillOnce(Return(false));
@@ -363,17 +363,17 @@ public:
         .Times(1)
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(6)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(6)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(6)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-        .Times(3)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillOnce(Return(false));
@@ -458,17 +458,17 @@ public:
         .Times(1)
         .WillOnce(Return("LogValue"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(6)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(6)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(6)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-        .Times(3)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillOnce(Return(false));
@@ -554,13 +554,16 @@ public:
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(1)
-        .WillRepeatedly(Return(QString()));
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(1)
-        .WillRepeatedly(Return(QString()));
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillRepeatedly(Return(""));
+        .WillOnce(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
         .Times(2)
         .WillRepeatedly(Return("INTER"));
@@ -614,17 +617,17 @@ public:
         .Times(1)
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(2)
-        .WillRepeatedly(Return(QString()));
+        .Times(1)
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(""));
+        .Times(1)
+        .WillOnce(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
-        .WillRepeatedly(Return(""));
+        .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
         .Times(8)
         .WillRepeatedly(Return("INTER"));
