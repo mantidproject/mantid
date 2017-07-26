@@ -27,7 +27,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
     def test_reduction_with_manual_drange_completes(self):
         """
         Test to ensure reduction with manual dRange selection completes.
-        The run here is for dRange 4.
+        The run here is for dRange 3.
         """
 
         wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw'],
@@ -36,7 +36,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                                          SpectraMin=3,
                                          SpectraMax=361,
                                          DetectDRange=False,
-                                         DRange="4")
+                                         DRange="3")
 
         self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
         self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
