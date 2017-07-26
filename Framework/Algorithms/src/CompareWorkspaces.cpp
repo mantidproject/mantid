@@ -748,18 +748,18 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
     return false;
   }
 
-  if (checkParameterMap) {
+  if (getProperty("CheckParameterMap")) {
     const Geometry::ParameterMap &ws1_parmap = ws1->constInstrumentParameters();
     const Geometry::ParameterMap &ws2_parmap = ws2->constInstrumentParameters();
-  }
 
-  if (ws1_parmap != ws2_parmap) {
-    g_log.debug()
-        << "Here information to help understand parameter map differences:\n";
-    g_log.debug() << ws1_parmap.diff(ws2_parmap);
-    recordMismatch(
-        "Instrument ParameterMap mismatch (differences in ordering ignored)");
-    return false;
+	if (ws1_parmap != ws2_parmap) {
+		g_log.debug()
+			<< "Here information to help understand parameter map differences:\n";
+		g_log.debug() << ws1_parmap.diff(ws2_parmap);
+		recordMismatch(
+			"Instrument ParameterMap mismatch (differences in ordering ignored)");
+		return false;
+	}
   }
 
   // All OK if we're here
