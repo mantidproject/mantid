@@ -5,7 +5,6 @@ from mantid.simpleapi import (SimpleShapeMonteCarloAbsorption, Load, ConvertUnit
                               DeleteWorkspace)
 from mantid.kernel import *
 from mantid.api import *
-from mantid import config
 
 import unittest
 
@@ -91,7 +90,6 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         # Number Density for water is 0.033428
         # These should give similar results
 
-
         kwargs = self._arguments
         kwargs['DensityType'] = 'Number Density'
         kwargs['Density'] = 0.033428
@@ -125,11 +123,8 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         CompareWorkspaces(self._corrected_flat_plate, corrected, Tolerance=1e-6)
 
     def test_ILL_reduced(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'IN16B'
-        config.appendDataSearchSubDir('ILL/IN16B/')
 
-        ill_red_ws = Load('091515_red.nxs')
+        ill_red_ws = Load('ILL/IN16B/091515_red.nxs')
 
         ill_red_ws = ConvertUnits(ill_red_ws, Target='Wavelength', EMode='Indirect', EFixed=1.845)
 
