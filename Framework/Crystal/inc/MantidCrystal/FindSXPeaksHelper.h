@@ -198,12 +198,12 @@ private:
 
 class DLLExport AbsoluteCompareStrategy : public CompareStrategy{
 public:
-  AbsoluteCompareStrategy(const double tofResolution, const double phiResolution, const double thetaResolution);
+  AbsoluteCompareStrategy(const double tofResolution, const double phiResolution, const double twoThetaResolution);
   bool compare(const SXPeak& lhs, const SXPeak& rhs) const override;
 private:
   const double m_tofResolution;
-  const double m_phiResolution;
-  const double m_thetaResolution;
+  double m_phiResolution;
+  double m_twoThetaResolution;
 };
 
 

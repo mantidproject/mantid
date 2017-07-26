@@ -8,6 +8,7 @@
 #include "MantidKernel/Logger.h"
 
 
+#include <cmath>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 
@@ -640,12 +641,17 @@ bool RelativeCompareStrategy::compare(const SXPeak& lhs, const SXPeak& rhs) cons
 }
 
 
-AbsoluteCompareStrategy::AbsoluteCompareStrategy(const double tofResolution, const double phiResolution, const double thetaResolution) : m_tofResolution(tofResolution),
-                                                                                                                                     m_phiResolution(phiResolution),
-                                                                                                                                     m_thetaResolution(thetaResolution) {}
+AbsoluteCompareStrategy::AbsoluteCompareStrategy(const double tofResolution, const double phiResolution, const double twoThetaResolution) : m_tofResolution(tofResolution),
+                                                                                                                                            m_phiResolution(phiResolution),
+                                                                                                                                            m_twoThetaResolution(twoThetaResolution) {
+  // Convert the input from degree to radians
+  constexpr double rad2deg =  M_PI / 180.;
+  m_phiResolution *= rad2deg;
+  m_twoThetaResolution *= rad2deg;
+}
 
 bool AbsoluteCompareStrategy::compare(const SXPeak& lhs, const SXPeak& rhs) const {
-  return lhs.compare(rhs, m_tofResolution, m_phiResolution, m_thetaResolution);
+  return lhs.compare(rhs, m_tofResolution, m_phiResolution, m_twoThetaResolution);
 }
 
 

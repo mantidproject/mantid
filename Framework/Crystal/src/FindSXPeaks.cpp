@@ -26,6 +26,10 @@ namespace Crystal {
 const std::string FindSXPeaks::strongestPeakStrategy = "StrongestPeakOnly";
 const std::string FindSXPeaks::allPeaksStrategy = "AllPeaks";
 
+const std::string FindSXPeaks::relativeResolutionStrategy = "RelativeResolution";
+const std::string FindSXPeaks::absoluteResolutionPeaksStrategy = "AbsoluteResolution";
+
+
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FindSXPeaks)
 
@@ -60,6 +64,10 @@ void FindSXPeaks::init() {
                   "End spectrum number  (default FindSXPeaks)");
 
 
+
+  // ---------------------------------------------------------------
+  // Peak strategies + Threshold
+  // ---------------------------------------------------------------
   std::vector<std::string> peakFindingStrategy = {strongestPeakStrategy,
                                                   allPeaksStrategy};
     declareProperty(
@@ -69,12 +77,6 @@ void FindSXPeaks::init() {
         "1. StrongestPeakOnly: This is a much more performant way of finding the strongest peak per spectrum (provided there is one).\n"
         "2. AllPeaks: This strategy will find all peaks in each spectrum. This is slower than StrongestPeakOnly.\n");
 
-
-
-  // ---------------------------------------------------------------
-  // Peak strategies + Resolution
-  // ---------------------------------------------------------------
-  const std::string strongestPeaksGroup = "Strongest Peak Only";
 
   // Declare
   declareProperty("SignalBackground", 10.0,
@@ -88,26 +90,92 @@ void FindSXPeaks::init() {
                   " The background is specified for all spectra.");
 
   // Enable
-  setPropertySettings("AbsoluteBackground",
-                        make_unique<EnabledWhenProperty>(
-                            "PeakFindingStrategy",
-                            Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
-                            allPeaksStrategy));
-
   setPropertySettings("SignalBackground",
                         make_unique<EnabledWhenProperty>(
                             "PeakFindingStrategy",
                             Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
                             strongestPeakStrategy));
 
+  setPropertySettings("AbsoluteBackground",
+                        make_unique<EnabledWhenProperty>(
+                            "PeakFindingStrategy",
+                            Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                            allPeaksStrategy));
+
+  // Group
+  const std::string peakGroup = "Peak Finding Settings";
+  setPropertyGroup("PeakFindingStrategy", peakGroup);
+  setPropertyGroup("SignalBackground", peakGroup);
+  setPropertyGroup("AbsoluteBackground", peakGroup);
+
+  // ---------------------------------------------------------------
+  // Resolution
+  // ---------------------------------------------------------------
+  // Declare
+  std::vector<std::string> resolutionStrategy = {relativeResolutionStrategy,
+                                                 absoluteResolutionPeaksStrategy};
+  declareProperty(
+      "ResolutionStrategy", relativeResolutionStrategy,
+      boost::make_shared<StringListValidator>(resolutionStrategy),
+      "Different options for the resolution."
+      "1. RelativeResolution: This defines a relative tolerance needed to avoid peak duplication in number of pixels. "
+         "This selection will enable the Resolution property and disable the TofResolution, PhiResolution, ThetaResolution.\n"
+      "1. AbsoluteResolution: This defines an absolute tolerance needed to avoid peak duplication in number of pixels. "
+         "This selection will disable the Resolution property and enable the TofResolution, PhiResolution, ThetaResolution.\n");
+
   declareProperty(
       "Resolution", 0.01,
       "Tolerance needed to avoid peak duplication in number of pixels");
+
+  declareProperty(
+      "TofResolution", 5000.,
+      "Absolute tolerance in time-of-flight needed to avoid peak duplication in number of pixels. The values are specified in microseconds.");
+
+  declareProperty(
+      "PhiResolution", 1.,
+      "Absolute tolerance in the phi coordinate needed to avoid peak duplication in number of pixels. The values are specified in degrees.");
+
+  declareProperty(
+      "TwoThetaResolution", 1.,
+      "Absolute tolerance of two theta value needed to avoid peak duplication in number of pixels. The values are specified in degrees.");
+
+  // Enable
+  setPropertySettings("Resolution",
+                        make_unique<EnabledWhenProperty>(
+                            "ResolutionStrategy",
+                            Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                            relativeResolutionStrategy));
+
+  setPropertySettings("TofResolution",
+                        make_unique<EnabledWhenProperty>(
+                            "ResolutionStrategy",
+                            Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                            absoluteResolutionPeaksStrategy));
+
+  setPropertySettings("PhiResolution",
+                        make_unique<EnabledWhenProperty>(
+                            "ResolutionStrategy",
+                            Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                            absoluteResolutionPeaksStrategy));
+
+  setPropertySettings("TwoThetaResolution",
+                        make_unique<EnabledWhenProperty>(
+                            "ResolutionStrategy",
+                            Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                            absoluteResolutionPeaksStrategy));
 
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the PeaksWorkspace in which to store the list "
                   "of peaks found");
+
+  // Group
+  const std::string resolutionGroup = "Resolution Settings";
+  setPropertyGroup("ResolutionStrategy", resolutionGroup);
+  setPropertyGroup("Resolution", resolutionGroup);
+  setPropertyGroup("TofResolution", resolutionGroup);
+  setPropertyGroup("PhiResolution", resolutionGroup);
+  setPropertyGroup("TwoThetaResolution", resolutionGroup);
 
   // Create the output peaks workspace
   m_peaks.reset(new PeaksWorkspace);
@@ -275,13 +343,20 @@ std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy> FindSXPeaks::getReduc
   }
 }
 
+
 std::unique_ptr<FindSXPeaksHelper::CompareStrategy> FindSXPeaks::getCompareStrategy() const {
-  double resolution = getProperty("Resolution");
-  // Other compare strategies can be added here, eg the absolute compare stratgy
-  return Mantid::Kernel::make_unique<FindSXPeaksHelper::RelativeCompareStrategy>(resolution);
+  const std::string resolutionStrategy = getProperty("ResolutionStrategy");
+  auto useRelativeResolutionStrategy = resolutionStrategy == relativeResolutionStrategy;
+  if (useRelativeResolutionStrategy) {
+      double resolution = getProperty("Resolution");
+      return Mantid::Kernel::make_unique<FindSXPeaksHelper::RelativeCompareStrategy>(resolution);
+  } else {
+      double tofResolution = getProperty("TofResolution");
+      double phiResolution = getProperty("PhiResolution");
+      double twoThetaResolution = getProperty("TwoThetaResolution");
+      return Mantid::Kernel::make_unique<FindSXPeaksHelper::AbsoluteCompareStrategy>(tofResolution, phiResolution, twoThetaResolution);
+  }
 }
-
-
 
 } // namespace Algorithms
 } // namespace Mantid
