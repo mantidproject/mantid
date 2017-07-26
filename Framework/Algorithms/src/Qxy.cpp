@@ -407,7 +407,6 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   int nBins = static_cast<int>(max / delta);
 
   HistogramData::BinEdges axis;
-  double startVal;
   if (log_binning) {
     // get qmin from the run properties
     double qmin = getQminFromWs(*inputWorkspace);
@@ -427,7 +426,7 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
     if (nBins * delta != max)
       ++nBins; // Stop at first boundary past MaxQxy if max is not a multiple of
                // delta
-    startVal = -1.0 * delta * nBins;
+    double startVal = -1.0 * delta * nBins;
     nBins *= 2; // go from -max to +max
     nBins += 1; // Add 1 - this is a histogram
 

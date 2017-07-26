@@ -113,7 +113,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_preprocessMap(preprocessMap), m_processor(processor),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
       m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
-      m_tableDirty(false), m_newSelection(true), m_reductionPaused(true),
+      m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
       m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
   // Column Options must be added to the whitelist
@@ -244,9 +244,6 @@ void GenericDataProcessorPresenter::acceptViews(
 
   // The view should currently be in the paused state
   m_view->pause();
-
-  // Setup table selection model connections
-  m_view->setSelectionModelConnections();
 }
 
 /**
@@ -254,46 +251,83 @@ Process selected data
 */
 void GenericDataProcessorPresenter::process() {
 
-  // If selection unchanged, resume processing the old selection
-  if (!m_newSelection) {
-    resume();
-    return;
-  }
-
-  // Otherwise obtain new runs
   m_selectedData = m_manager->selectedData(m_promptUser);
 
-  // Don't continue if there are no items to process
+  // Don't continue if there are no items selected
   if (m_selectedData.size() == 0)
     return;
 
-  m_newSelection = false;
+  // Set the global settings. If any have been changed, set all groups and rows
+  // as unprocessed
+  std::string newPreprocessingOptions =
+      m_mainPresenter->getPreprocessingOptionsAsString().toStdString();
+  std::string newProcessingOptions =
+      m_mainPresenter->getProcessingOptions().toStdString();
+  std::string newPostprocessingOptions =
+      m_mainPresenter->getPostprocessingOptions().toStdString();
 
-  // Clear any highlighted rows
-  m_manager->clearHighlighted();
+  bool settingsChanged = m_preprocessingOptions != newPreprocessingOptions ||
+                         m_processingOptions != newProcessingOptions ||
+                         m_postprocessingOptions != newPostprocessingOptions;
 
-  // Progress: each group and each row within count as a progress step.
-  int progress = 0;
-  int maxProgress = (int)(m_selectedData.size());
-  for (const auto &subitem : m_selectedData) {
-    maxProgress += (int)(subitem.second.size());
-  }
-  m_progressReporter =
-      new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
+  m_preprocessingOptions = newPreprocessingOptions;
+  m_processingOptions = newProcessingOptions;
+  m_postprocessingOptions = newPostprocessingOptions;
 
   // Clear the group queue
   m_gqueue = GroupQueue();
 
+  // Progress: each group and each row within count as a progress step.
+  int progress = 0;
+  int maxProgress = 0;
+
   for (const auto &item : m_selectedData) {
     // Loop over each group
+
+    // Set group as unprocessed if settings have changed or the expected output
+    // workspace cannot be found
+    bool groupWSFound = AnalysisDataService::Instance().doesExist(
+        getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix()));
+
+    if (settingsChanged || !groupWSFound)
+      m_manager->setProcessed(false, item.first);
+
+    // Groups that are already processed or cannot be post-processed (only 1
+    // child row selected) do not count in progress
+    if (!m_manager->isProcessed(item.first) && item.second.size() > 1)
+      maxProgress++;
+
     RowQueue rowQueue;
 
     for (const auto &data : item.second) {
+
       // Add all row items to queue
       rowQueue.push(data);
+
+      // Set row as unprocessed if settings have changed or the expected output
+      // workspaces cannot be found
+      bool rowWSFound = true;
+      for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
+        rowWSFound = AnalysisDataService::Instance().doesExist(
+            getReducedWorkspaceName(data.second, m_processor.prefix(i)));
+        if (!rowWSFound)
+          break;
+      }
+
+      if (settingsChanged || !rowWSFound)
+        m_manager->setProcessed(false, data.first, item.first);
+
+      // Rows that are already processed do not count in progress
+      if (!m_manager->isProcessed(data.first, item.first))
+        maxProgress++;
     }
     m_gqueue.emplace(item.first, rowQueue);
   }
+
+  // Create progress reporter bar
+  if (maxProgress > 0)
+    m_progressReporter = new ProgressPresenter(progress, maxProgress,
+                                               maxProgress, m_progressView);
 
   // Start processing the first group
   m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
@@ -301,7 +335,6 @@ void GenericDataProcessorPresenter::process() {
 }
 
 /**
-        m_view->giveUserCritical(ex.what(), "Error");
 Decide which processing action to take next
 */
 void GenericDataProcessorPresenter::doNextAction() {
@@ -314,6 +347,7 @@ void GenericDataProcessorPresenter::doNextAction() {
     nextGroup();
     break;
   case ReductionFlag::StopReduceFlag:
+    endReduction();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -325,9 +359,10 @@ Process a new row
 */
 void GenericDataProcessorPresenter::nextRow() {
 
-  if (m_reductionPaused) {
+  if (m_pauseReduction) {
     // Notify presenter that reduction is paused
     m_mainPresenter->confirmReductionPaused();
+    m_reductionPaused = true;
     return;
   }
 
@@ -343,20 +378,26 @@ void GenericDataProcessorPresenter::nextRow() {
     // Reduce next row
     m_rowItem = rqueue.front();
     rqueue.pop();
-    startAsyncRowReduceThread(&m_rowItem, groupIndex);
+    // Skip reducing rows that are already processed
+    if (!m_manager->isProcessed(m_rowItem.first, groupIndex)) {
+      startAsyncRowReduceThread(&m_rowItem, groupIndex);
+      return;
+    }
   } else {
     m_gqueue.pop();
     // Set next action flag
     m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
 
-    if (m_groupData.size() > 1) {
-      // Multiple rows in containing group, do post-processing on the group
+    // Skip post-processing groups that are already processed or only contain a
+    // single row
+    if (!m_manager->isProcessed(groupIndex) && m_groupData.size() > 1) {
       startAsyncGroupReduceThread(m_groupData, groupIndex);
-    } else {
-      // Single row in containing group, skip to next group
-      nextGroup();
+      return;
     }
   }
+
+  // Row / group skipped, perform next action
+  doNextAction();
 }
 
 /**
@@ -364,11 +405,15 @@ Process a new group
 */
 void GenericDataProcessorPresenter::nextGroup() {
 
-  if (m_reductionPaused) {
+  if (m_pauseReduction) {
     // Notify presenter that reduction is paused
     m_mainPresenter->confirmReductionPaused();
+    m_reductionPaused = true;
     return;
   }
+
+  // Clear group data from any previously processed groups
+  m_groupData.clear();
 
   if (!m_gqueue.empty()) {
     // Set next action flag
@@ -377,7 +422,11 @@ void GenericDataProcessorPresenter::nextGroup() {
     auto &rqueue = m_gqueue.front().second;
     m_rowItem = rqueue.front();
     rqueue.pop();
-    startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
+    // Skip reducing rows that are already processed
+    if (!m_manager->isProcessed(m_rowItem.first, m_gqueue.front().first))
+      startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
+    else
+      doNextAction();
   } else {
     // If "Output Notebook" checkbox is checked then create an ipython notebook
     if (m_view->getEnableNotebook())
@@ -416,8 +465,8 @@ End reduction
 void GenericDataProcessorPresenter::endReduction() {
 
   pause();
+  m_reductionPaused = true;
   m_mainPresenter->confirmReductionPaused();
-  m_newSelection = true; // Allow same selection to be processed again
 }
 
 /**
@@ -458,20 +507,13 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 
   // Global pre-processing options as a map where keys are column
   // name and values are pre-processing options as a string
-  const std::map<std::string, std::string> preprocessingOptionsMap =
-      convertStringToMap(
-          m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
-  // Global processing options as a string
-  const std::string processingOptions =
-      m_mainPresenter->getProcessingOptions().toStdString();
-  // Global post-processing options as a string
-  const std::string postprocessingOptions =
-      m_mainPresenter->getPostprocessingOptions().toStdString();
+  const auto preprocessingOptionsMap =
+      convertStringToMap(m_preprocessingOptions);
 
   auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
       m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
-      m_processor, m_postprocessor, preprocessingOptionsMap, processingOptions,
-      postprocessingOptions);
+      m_processor, m_postprocessor, preprocessingOptionsMap,
+      m_processingOptions, m_postprocessingOptions);
   std::string generatedNotebook = notebook->generateNotebook(data);
 
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
@@ -528,11 +570,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
   alg->setProperty(m_postprocessor.inputProperty(), inputWSNames);
   alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
 
-  // Global post-processing options
-  const std::string options =
-      m_mainPresenter->getPostprocessingOptions().toStdString();
-
-  auto optionsMap = parseKeyValueString(options);
+  auto optionsMap = parseKeyValueString(m_postprocessingOptions);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       alg->setProperty(kvp->first, kvp->second);
@@ -719,16 +757,6 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
   return prefix + boost::join(outputNames, "_");
 }
 
-/**
-Sets the state of whether a new table selection has been made
-@param newSelectionMade : Boolean on setting new table selection state
-*/
-void GenericDataProcessorPresenter::setNewSelectionState(
-    bool newSelectionMade) {
-
-  m_newSelection = newSelectionMade;
-}
-
 /** Loads a run found from disk or AnalysisDataService
  *
  * @param run : The name of the run
@@ -843,8 +871,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // Global pre-processing options as a map
   std::map<std::string, std::string> globalOptions;
   if (!m_preprocessMap.empty())
-    globalOptions = convertStringToMap(
-        m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
+    globalOptions = convertStringToMap(m_preprocessingOptions);
 
   // Pre-processing properties
   auto preProcessPropMap = convertStringToMapWithSet(
@@ -904,11 +931,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
     }
   }
 
-  // Global processing options as a string
-  std::string options = m_mainPresenter->getProcessingOptions().toStdString();
-
   // Parse and set any user-specified options
-  auto optionsMap = parseKeyValueString(options);
+  auto optionsMap = parseKeyValueString(m_processingOptions);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       if (restrictedProps.find(kvp->first) == restrictedProps.end())
@@ -920,10 +944,10 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   }
 
   /* Now deal with 'Options' column */
-  options = data->back();
+  const auto userOptions = data->back();
 
   // Parse and set any user-specified options
-  optionsMap = parseKeyValueString(options);
+  optionsMap = parseKeyValueString(userOptions);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       alg->setProperty(kvp->first, kvp->second);
@@ -974,46 +998,27 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 /**
 Insert a new row
 */
-void GenericDataProcessorPresenter::appendRow() {
-
-  m_manager->appendRow();
-  m_tableDirty = true;
-}
+void GenericDataProcessorPresenter::appendRow() { m_manager->appendRow(); }
 
 /**
 Insert a new group
 */
-void GenericDataProcessorPresenter::appendGroup() {
-
-  m_manager->appendGroup();
-  m_tableDirty = true;
-}
+void GenericDataProcessorPresenter::appendGroup() { m_manager->appendGroup(); }
 
 /**
 Delete row(s) from the model
 */
-void GenericDataProcessorPresenter::deleteRow() {
-
-  m_manager->deleteRow();
-  m_tableDirty = true;
-}
+void GenericDataProcessorPresenter::deleteRow() { m_manager->deleteRow(); }
 
 /**
 Delete group(s) from the model
 */
-void GenericDataProcessorPresenter::deleteGroup() {
-  m_manager->deleteGroup();
-  m_tableDirty = true;
-}
+void GenericDataProcessorPresenter::deleteGroup() { m_manager->deleteGroup(); }
 
 /**
 Group rows together
 */
-void GenericDataProcessorPresenter::groupRows() {
-
-  m_manager->groupRows();
-  m_tableDirty = true;
-}
+void GenericDataProcessorPresenter::groupRows() { m_manager->groupRows(); }
 
 /**
 Expand all groups
@@ -1024,6 +1029,11 @@ void GenericDataProcessorPresenter::expandAll() { m_view->expandAll(); }
 Collapse all groups
 */
 void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
+
+/**
+Select all rows / groups
+*/
+void GenericDataProcessorPresenter::selectAll() { m_view->selectAll(); }
 
 /**
 Used by the view to tell the presenter something has changed
@@ -1100,11 +1110,11 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::CollapseAllGroupsFlag:
     collapseAll();
     break;
+  case DataProcessorPresenter::SelectAllFlag:
+    selectAll();
+    break;
   case DataProcessorPresenter::PauseFlag:
     pause();
-    break;
-  case DataProcessorPresenter::SelectionChangedFlag:
-    m_newSelection = true;
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -1312,7 +1322,6 @@ void GenericDataProcessorPresenter::expandSelection() {
 void GenericDataProcessorPresenter::clearSelected() {
 
   m_manager->clearSelected();
-  m_tableDirty = true;
 }
 
 /** Copy current selection to clipboard */
@@ -1527,7 +1536,7 @@ void GenericDataProcessorPresenter::pause() {
   m_view->pause();
   m_mainPresenter->pause();
 
-  m_reductionPaused = true;
+  m_pauseReduction = true;
 }
 
 /** Resumes reduction if currently paused
@@ -1537,6 +1546,7 @@ void GenericDataProcessorPresenter::resume() {
   m_view->resume();
   m_mainPresenter->resume();
 
+  m_pauseReduction = false;
   m_reductionPaused = false;
   m_mainPresenter->confirmReductionResumed();
 
@@ -1618,13 +1628,6 @@ ChildItems GenericDataProcessorPresenter::selectedChildren() const {
   return m_view->getSelectedChildren();
 }
 
-/** Checks if the selected runs have changed
-* @return :: selection changed bool
-*/
-bool GenericDataProcessorPresenter::newSelectionMade() const {
-  return m_newSelection;
-}
-
 /** Ask user for Yes/No
  * @param prompt :: the question to ask
  * @param title :: the title
@@ -1644,6 +1647,13 @@ void GenericDataProcessorPresenter::giveUserWarning(
     const std::string &prompt, const std::string &title) const {
 
   m_view->giveUserWarning(prompt, title);
+}
+
+/** Checks whether data reduction is still in progress or not
+* @return :: the reduction state
+*/
+bool GenericDataProcessorPresenter::isProcessing() const {
+  return !m_reductionPaused;
 }
 }
 }
