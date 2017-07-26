@@ -12,7 +12,6 @@
 #include <iterator>
 #include <iostream>
 
-
 namespace Mantid {
 namespace Kernel {
 class ProgressBase;
