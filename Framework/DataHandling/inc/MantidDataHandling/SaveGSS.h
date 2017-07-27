@@ -106,7 +106,7 @@ private:
                           size_t specIndex) const;
 
   /// Generates the output which will be written to the GSAS file
-  void generateGSASFile(size_t numOutFiles, size_t numOutSpectra);
+  void generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra);
 
   /// Generates the instrument header and returns this as a string stream
   void generateInstrumentHeader(std::stringstream &out, double l1) const;

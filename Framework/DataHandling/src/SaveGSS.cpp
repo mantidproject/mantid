@@ -2,8 +2,6 @@
 
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -11,12 +9,10 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidHistogramData/Histogram.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include <cmath>
 #include <fstream>
 
 namespace Mantid {
@@ -61,10 +57,11 @@ bool isConstantDelta(const HistogramData::BinEdges &xAxis) {
 double fixErrorValue(const double value) {
   // Fix error if value is less than zero or infinity
   // Negative errors cannot be read by GSAS
-  if (value <= 0. || !std::isfinite(value))
+  if (value <= 0. || !std::isfinite(value)) {
     return 0.;
-  else
+  } else {
     return value;
+  }
 }
 
 void writeBankHeader(std::stringstream &out, const std::string &bintype,
@@ -154,7 +151,7 @@ void SaveGSS::exec() {
   m_outputBuffer.resize(nHist);
 
   // Check the user input
-  validateInputs();
+  validateUserInput();
 
   // Progress is 2 * number of histograms. One for generating data
   // one for writing out data
@@ -166,7 +163,7 @@ void SaveGSS::exec() {
   assert(m_outputBuffer.size() == nHist);
 
   // Now start executing main part of the code
-  generateGSASFile(numOfOutFiles, numOutSpectra);
+  generateGSASBuffer(numOfOutFiles, numOutSpectra);
   writeBufferToFile(numOfOutFiles, numOutSpectra);
 }
 
@@ -188,7 +185,7 @@ bool SaveGSS::areAllDetectorsValid() const {
 
   bool allValid = true;
 
-  const int64_t numHistInt64 = static_cast<int64_t>(numHist);
+  const auto numHistInt64 = static_cast<int64_t>(numHist);
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t histoIndex = 0; histoIndex < numHistInt64; histoIndex++) {
@@ -286,7 +283,7 @@ void SaveGSS::generateBankHeader(std::stringstream &out,
   * @param numOutFiles :: The number of file to be written
   * @param numOutSpectra :: The number of spectra per file to be written
   */
-void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
+void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
   // Generate the output buffer for each histogram (spectrum)
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const bool append = getProperty("Append");
@@ -303,7 +300,7 @@ void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
   // set l1 to 0
   const double l1{m_allDetectorsValid ? spectrumInfo.l1() : 0};
 
-  const int64_t numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
+  const auto numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
 
   // Create the various output files we will need in a loop
   PARALLEL_FOR_NO_WSP_CHECK()
@@ -377,7 +374,7 @@ void SaveGSS::generateInstrumentHeader(std::stringstream &out,
     out << "\n";
   }
 
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     out << "# "; // make the next line a comment
   }
   out << m_inputWS->getTitle() << "\n";
@@ -388,7 +385,7 @@ void SaveGSS::generateInstrumentHeader(std::stringstream &out,
   if (getProperty("MultiplyByBinWidth"))
     out << "# with Y multiplied by the bin widths.\n";
   out << "# Primary flight path " << l1 << "m \n";
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     out << "# Sample Temperature: ";
     getLogValue(out, runinfo, "SampleTemp");
     out << " Freq: ";
@@ -403,9 +400,9 @@ void SaveGSS::generateInstrumentHeader(std::stringstream &out,
     const Mantid::API::AlgorithmHistories &algohist =
         m_inputWS->getHistory().getAlgorithmHistories();
     for (const auto &algo : algohist) {
-      if (algo->name().compare("NormaliseByCurrent") == 0)
+      if (algo->name() == "NormaliseByCurrent")
         norm_by_current = true;
-      if (algo->name().compare("NormaliseToMonitor") == 0)
+      if (algo->name() == "NormaliseToMonitor")
         norm_by_monitor = true;
     }
     out << "#";
@@ -491,7 +488,7 @@ void SaveGSS::getLogValue(std::stringstream &out, const API::Run &runInfo,
     // Time series to get mean
     out << log->getStatistics().mean;
   } else {
-    // None time series
+    // No time series - just get the value
     out << prop->value();
   }
 
@@ -591,7 +588,7 @@ void SaveGSS::validateUserInput() const {
                   "well with PointData.");
 
   // Check the number of histogram/spectra < 99
-  const int nHist = static_cast<int>(m_inputWS->getNumberHistograms());
+  const auto nHist = static_cast<int>(m_inputWS->getNumberHistograms());
   if (nHist > 99) {
     std::string outError = "Number of Spectra(" + std::to_string(nHist) +
                            ") cannot be larger than 99 for GSAS file";
@@ -602,7 +599,6 @@ void SaveGSS::validateUserInput() const {
   // Check we have any output filenames
   assert(m_outFileNames.size() > 0);
 
-  const std::string filename = getProperty("Filename");
   const bool append = getProperty("Append");
   for (const auto &filename : m_outFileNames) {
     if (!append && doesFileExist(filename)) {
@@ -629,7 +625,7 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   // 1 otherwise our storage method is no longer valid
   assert(numOutFiles > 1 != numSpectra > 1);
 
-  const int64_t numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
+  const auto numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t fileIndex = 0; fileIndex < numOutFilesInt64; fileIndex++) {
@@ -676,10 +672,9 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
   writeRALFHeader(out, bank, histo);
 
   const size_t dataEntriesPerLine = 4;
-  // Use integer ceiling with casting to double and back
-  // As if we have 6 data entries across 4 lines we need
-  // 2 output lines (4 + 2)
-  // TODO explain this
+  // This method calculates the minimum number of lines
+  // we need to write to capture all the data for example
+  // if we have 6 data entries it will calculate 2 output lines (4 + 2)
   const int64_t numberOfOutLines =
       (datasize + dataEntriesPerLine - 1) / dataEntriesPerLine;
 
@@ -698,7 +693,7 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
       if (dataPosition < datasize) {
         // We have data to append
 
-        const int epos =
+        const auto epos =
             static_cast<int>(fixErrorValue(eVals[dataPosition] * 1000));
 
         outLine << std::fixed << std::setw(8)
@@ -708,7 +703,7 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
         outLine << std::fixed << std::setw(5) << epos;
       }
     }
-	// Append a newline character at the end of each data block
+    // Append a newline character at the end of each data block
     outLine << "\n";
   }
 
