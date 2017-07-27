@@ -1674,7 +1674,8 @@ bool GenericDataProcessorPresenter::isProcessed(int position) const {
  * @param position :: the row to check
  * @return :: true if the row has already been processed else false.
  */
-bool GenericDataProcessorPresenter::isProcessed(int position, int parent) const {
+bool GenericDataProcessorPresenter::isProcessed(int position,
+                                                int parent) const {
   // processing truth table
   // isProcessed      manager    force
   //    0               1          1
@@ -1687,9 +1688,9 @@ bool GenericDataProcessorPresenter::isProcessed(int position, int parent) const 
 /** Set the forced reprocessing flag
  * @param forceReProcessing :: the row to check
  */
-void GenericDataProcessorPresenter::setForcedReProcessing(bool forceReProcessing) {
+void GenericDataProcessorPresenter::setForcedReProcessing(
+    bool forceReProcessing) {
   m_forceProcessing = forceReProcessing;
 }
-
 }
 }

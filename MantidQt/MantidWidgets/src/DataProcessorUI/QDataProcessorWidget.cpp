@@ -653,6 +653,5 @@ void QDataProcessorWidget::setForcedReProcessing(bool forceReProcessing) {
   m_presenter->setForcedReProcessing(forceReProcessing);
 }
 
-
 } // namespace MantidWidgets
 } // namespace Mantid
