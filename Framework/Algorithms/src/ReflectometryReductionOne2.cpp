@@ -915,12 +915,14 @@ void ReflectometryReductionOne2::findTheta0() {
 double
 ReflectometryReductionOne2::twoThetaR(const std::vector<size_t> &detectors) {
   // Get the twoTheta value for the destinaion pixel that we're projecting onto
-  double twoThetaR = getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors));
+  double twoThetaR =
+      getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors));
   if (getPropertyValue("ReductionType") == "DivergentBeam") {
-    // The angle that should be used in the final conversion to Q is (twoThetaR - theta0).
-    // However, the angle actually used by ConvertUnits is twoThetaD / 2 where twoThetaD
-    // is the detector's twoTheta angle. Since it is not easy to change what angle
-    // ConvertUnits uses, we can compensate by setting twoThetaR = twoThetaD / 2 + theta0
+    // The angle that should be used in the final conversion to Q is
+    // (twoThetaR-theta0). However, the angle actually used by ConvertUnits is
+    // twoThetaD/2 where twoThetaD is the detector's twoTheta angle. Since it
+    // is not easy to change what angle ConvertUnits uses, we can compensate by
+    // setting twoThetaR = twoThetaD/2+theta0
     twoThetaR = twoThetaR / 2.0 + theta0();
   }
   return twoThetaR;
@@ -1258,6 +1260,13 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
     const double lambda, const double twoTheta, const double bLambda,
     const double bTwoTheta, const std::vector<size_t> &detectors,
     double &lambdaVMin, double &lambdaVMax) {
+
+  // We cannot project pixels below the horizon angle
+  if (twoTheta <= theta0()) {
+    throw std::runtime_error(
+        "Cannot process twoTheta=" + std::to_string(twoTheta) +
+        " as it is below the horizon angle=" + std::to_string(theta0()));
+  }
 
   // Get the angle from twoThetaR to this detector
   const double twoThetaRVal = twoThetaR(detectors);
