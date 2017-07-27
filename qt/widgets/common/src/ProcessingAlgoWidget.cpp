@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/ProcessingAlgoWidget.h"
+#include "MantidQtWidgets/Common/ProcessingAlgoWidget.h"
 #include <Qsci/qscilexerpython.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"

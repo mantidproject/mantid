@@ -1,6 +1,6 @@
-#include "MantidQtMantidWidgets/UserFunctionDialog.h"
-#include "MantidQtMantidWidgets/RenameParDialog.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/UserFunctionDialog.h"
+#include "MantidQtWidgets/Common/RenameParDialog.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidAPI/Expression.h"
 #include "MantidKernel/ConfigService.h"
 

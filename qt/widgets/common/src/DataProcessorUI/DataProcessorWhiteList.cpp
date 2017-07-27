@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 
 #include <QString>
 

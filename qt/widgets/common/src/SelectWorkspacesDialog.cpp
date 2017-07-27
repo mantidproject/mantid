@@ -2,7 +2,7 @@
 // Includes
 //---------------------------------------
 
-#include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
+#include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 
 #include <QListWidget>
 #include <QVBoxLayout>

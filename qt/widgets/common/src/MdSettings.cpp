@@ -1,5 +1,5 @@
-#include "MantidQtAPI/MdSettings.h"
-#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
 #include "boost/scoped_ptr.hpp"
 #include <QSettings>
 #include <QString>

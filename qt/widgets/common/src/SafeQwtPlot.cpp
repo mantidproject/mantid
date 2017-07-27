@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/SafeQwtPlot.h"
+#include "MantidQtWidgets/Common/SafeQwtPlot.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ReadLock.h"

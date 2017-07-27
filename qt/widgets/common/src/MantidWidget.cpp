@@ -1,4 +1,4 @@
-#include "MantidQtAPI/MantidWidget.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidKernel/Exception.h"
 
 using namespace MantidQt::API;

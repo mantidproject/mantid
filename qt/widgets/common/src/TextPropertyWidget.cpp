@@ -1,4 +1,4 @@
-#include "MantidQtAPI/TextPropertyWidget.h"
+#include "MantidQtWidgets/Common/TextPropertyWidget.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/MaskedProperty.h"
 

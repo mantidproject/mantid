@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidQtAPI/WorkspaceIcons.h"
-#include "MantidQtAPI/pixmaps.h"
+#include "MantidQtWidgets/Common/WorkspaceIcons.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 namespace MantidQt {
 namespace API {

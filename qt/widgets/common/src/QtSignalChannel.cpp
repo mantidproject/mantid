@@ -1,5 +1,5 @@
-#include "MantidQtAPI/QtSignalChannel.h"
-#include "MantidQtAPI/Message.h"
+#include "MantidQtWidgets/Common/QtSignalChannel.h"
+#include "MantidQtWidgets/Common/Message.h"
 #include "MantidKernel/Logger.h"
 
 #include <Poco/Message.h>

@@ -1,10 +1,10 @@
-#include "MantidQtMantidWidgets/MantidTreeWidget.h"
-#include <MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h>
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
+#include <MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtMantidWidgets/MantidDisplayBase.h"
+#include "MantidQtWidgets/Common/MantidDisplayBase.h"
 
 #include <QApplication>
 #include <QDragMoveEvent>

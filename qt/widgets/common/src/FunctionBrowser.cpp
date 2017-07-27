@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/FunctionBrowser.h"
+#include "MantidQtWidgets/Common/FunctionBrowser.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
@@ -9,12 +9,12 @@
 
 #include "MantidKernel/Logger.h"
 
-#include "MantidQtMantidWidgets/DoubleDialogEditor.h"
-#include "MantidQtMantidWidgets/FilenameDialogEditor.h"
-#include "MantidQtMantidWidgets/FormulaDialogEditor.h"
-#include "MantidQtMantidWidgets/SelectFunctionDialog.h"
-#include "MantidQtMantidWidgets/UserFunctionDialog.h"
-#include "MantidQtMantidWidgets/WorkspaceEditorFactory.h"
+#include "MantidQtWidgets/Common/DoubleDialogEditor.h"
+#include "MantidQtWidgets/Common/FilenameDialogEditor.h"
+#include "MantidQtWidgets/Common/FormulaDialogEditor.h"
+#include "MantidQtWidgets/Common/SelectFunctionDialog.h"
+#include "MantidQtWidgets/Common/UserFunctionDialog.h"
+#include "MantidQtWidgets/Common/WorkspaceEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"

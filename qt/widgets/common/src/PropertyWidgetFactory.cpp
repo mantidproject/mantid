@@ -1,13 +1,13 @@
-#include "MantidQtAPI/PropertyWidgetFactory.h"
+#include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "MantidKernel/System.h"
-#include "MantidQtAPI/BoolPropertyWidget.h"
+#include "MantidQtWidgets/Common/BoolPropertyWidget.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
-#include "MantidQtAPI/TextPropertyWidget.h"
-#include "MantidQtAPI/OptionsPropertyWidget.h"
-#include "MantidQtAPI/FilePropertyWidget.h"
-#include <MantidQtAPI/ListPropertyWidget.h>
+#include "MantidQtWidgets/Common/TextPropertyWidget.h"
+#include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
+#include "MantidQtWidgets/Common/FilePropertyWidget.h"
+#include <MantidQtWidgets/Common/ListPropertyWidget.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

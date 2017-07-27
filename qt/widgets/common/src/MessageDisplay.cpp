@@ -1,7 +1,7 @@
 //-------------------------------------------
 // Includes
 //-------------------------------------------
-#include "MantidQtMantidWidgets/MessageDisplay.h"
+#include "MantidQtWidgets/Common/MessageDisplay.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"

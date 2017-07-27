@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
+#include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"

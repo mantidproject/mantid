@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/FindReplaceDialog.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/FindReplaceDialog.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 #include <QLabel>
 #include <QPushButton>

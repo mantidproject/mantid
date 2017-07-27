@@ -1,4 +1,4 @@
-#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
 #include <QSettings>
 #include <QString>
 #include <QStringList>

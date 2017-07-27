@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/PropertyHandler.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/PropertyHandler.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"

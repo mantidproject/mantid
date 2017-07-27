@@ -1,17 +1,17 @@
-#include "MantidQtMantidWidgets/MWView.h"
+#include "MantidQtWidgets/Common/MWView.h"
 // includes for workspace handling
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidQtAPI/SignalRange.h"
+#include "MantidQtWidgets/Common/SignalRange.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include <boost/pointer_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/AlgorithmManager.h"
 // includes for interface development
-#include "MantidQtAPI/QwtRasterDataMD.h"
-#include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Common/MantidColorMap.h"
 #include <qwt_color_map.h>
 #include <qwt_double_rect.h>
 // system includes

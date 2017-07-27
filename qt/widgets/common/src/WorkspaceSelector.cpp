@@ -1,7 +1,7 @@
 //------------------------------------------------------
 // Includes
 //------------------------------------------------------
-#include "MantidQtMantidWidgets/WorkspaceSelector.h"
+#include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>

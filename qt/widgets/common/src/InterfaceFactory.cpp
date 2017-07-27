@@ -1,8 +1,8 @@
 //-----------------------------------------------
 // Includes
 //-----------------------------------------------
-#include "MantidQtAPI/InterfaceFactory.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtWidgets/Common/InterfaceFactory.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidKernel/Logger.h"
 #include <sstream>
 

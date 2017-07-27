@@ -27,9 +27,9 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "MantidQtAPI/ScaleEngine.h"
-#include "MantidQtAPI/PowerScaleEngine.h"
-#include "MantidQtAPI/qwt_compat.h"
+#include "MantidQtWidgets/Common/ScaleEngine.h"
+#include "MantidQtWidgets/Common/PowerScaleEngine.h"
+#include "MantidQtWidgets/Common/qwt_compat.h"
 #include <limits.h>
 
 QwtScaleTransformation *ScaleEngine::transformation() const {

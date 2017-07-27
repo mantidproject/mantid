@@ -1,5 +1,5 @@
-#include "MantidQtAPI/QwtRasterDataMDNonOrthogonal.h"
-#include "MantidQtAPI/NonOrthogonal.h"
+#include "MantidQtWidgets/Common/QwtRasterDataMDNonOrthogonal.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
 
 namespace MantidQt {
 namespace API {

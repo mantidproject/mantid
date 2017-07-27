@@ -1,4 +1,4 @@
-#include "MantidQtAPI/OptionsPropertyWidget.h"
+#include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
 #include "MantidKernel/System.h"
 #include <QtGui>
 #include <QLabel>

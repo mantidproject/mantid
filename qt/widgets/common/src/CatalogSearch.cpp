@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/CatalogSearch.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/CatalogSearch.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"

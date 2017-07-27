@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/WorkspaceEditorFactory.h"
+#include "MantidQtWidgets/Common/WorkspaceEditorFactory.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

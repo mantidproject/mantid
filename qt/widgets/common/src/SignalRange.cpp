@@ -1,4 +1,4 @@
-#include "MantidQtAPI/SignalRange.h"
+#include "MantidQtWidgets/Common/SignalRange.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <cmath>

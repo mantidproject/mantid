@@ -1,5 +1,5 @@
 #include <QtGui>
-#include "MantidQtAPI/RepoModel.h"
+#include "MantidQtWidgets/Common/RepoModel.h"
 
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include <vector>

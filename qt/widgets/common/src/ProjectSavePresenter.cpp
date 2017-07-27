@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
+#include "MantidQtWidgets/Common/ProjectSavePresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 

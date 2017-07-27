@@ -1,7 +1,7 @@
 //--------------------------------------
 // Includes
 //--------------------------------------
-#include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtWidgets/Common/MantidColorMap.h"
 
 // std headers
 #include <fstream>

@@ -1,4 +1,4 @@
-#include "MantidQtAPI/ListPropertyWidget.h"
+#include "MantidQtWidgets/Common/ListPropertyWidget.h"
 #include "MantidKernel/System.h"
 #include <QtGui>
 #include <QLabel>

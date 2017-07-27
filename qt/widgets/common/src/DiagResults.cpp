@@ -1,7 +1,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtMantidWidgets/DiagResults.h"
+#include "MantidQtWidgets/Common/DiagResults.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"

@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/TrackedAction.h"
+#include "MantidQtWidgets/Common/TrackedAction.h"
 #include "MantidKernel/UsageService.h"
 #include <QCoreApplication>
 

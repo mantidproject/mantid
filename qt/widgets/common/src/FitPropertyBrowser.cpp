@@ -1,9 +1,9 @@
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/PropertyHandler.h"
-#include "MantidQtMantidWidgets/SequentialFitDialog.h"
-#include "MantidQtMantidWidgets/MultifitSetupDialog.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
-#include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/PropertyHandler.h"
+#include "MantidQtWidgets/Common/SequentialFitDialog.h"
+#include "MantidQtWidgets/Common/MultifitSetupDialog.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -22,9 +22,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 
-#include "MantidQtMantidWidgets/FilenameDialogEditor.h"
-#include "MantidQtMantidWidgets/FormulaDialogEditor.h"
-#include "MantidQtMantidWidgets/StringEditorFactory.h"
+#include "MantidQtWidgets/Common/FilenameDialogEditor.h"
+#include "MantidQtWidgets/Common/FormulaDialogEditor.h"
+#include "MantidQtWidgets/Common/StringEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
 #include "qteditorfactory.h"

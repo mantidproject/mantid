@@ -1,4 +1,4 @@
-#include "MantidQtAPI/PythonRunner.h"
+#include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidKernel/Logger.h"
 
 #include <QTemporaryFile>

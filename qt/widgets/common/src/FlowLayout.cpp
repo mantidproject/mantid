@@ -40,7 +40,7 @@
 
 #include <QtGui>
 
-#include "MantidQtAPI/FlowLayout.h"
+#include "MantidQtWidgets/Common/FlowLayout.h"
 
 namespace MantidQt {
 namespace API {

@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/FilenameDialogEditor.h"
+#include "MantidQtWidgets/Common/FilenameDialogEditor.h"
 
 #include <QFileDialog>
 #include <QSettings>

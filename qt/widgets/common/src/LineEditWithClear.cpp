@@ -7,7 +7,7 @@
 **
 ****************************************************************************/
 
-#include "MantidQtMantidWidgets/LineEditWithClear.h"
+#include "MantidQtWidgets/Common/LineEditWithClear.h"
 #include <QToolButton>
 #include <QStyle>
 

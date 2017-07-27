@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/MuonFunctionBrowser.h"
-#include "MantidQtMantidWidgets/SelectFunctionDialog.h"
+#include "MantidQtWidgets/Common/MuonFunctionBrowser.h"
+#include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

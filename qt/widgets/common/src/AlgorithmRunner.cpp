@@ -1,4 +1,4 @@
-#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 
 #include <Poco/ActiveResult.h>
 

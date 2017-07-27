@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 

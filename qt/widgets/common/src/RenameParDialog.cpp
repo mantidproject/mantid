@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/RenameParDialog.h"
+#include "MantidQtWidgets/Common/RenameParDialog.h"
 
 #include <algorithm>
 

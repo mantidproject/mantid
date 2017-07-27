@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/PeakPicker.h"
+#include "MantidQtWidgets/Common/PeakPicker.h"
 
 #include <qwt_plot_canvas.h>
 #include <qwt_painter.h>

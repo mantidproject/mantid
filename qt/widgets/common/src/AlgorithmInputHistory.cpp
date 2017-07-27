@@ -1,7 +1,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidAPI/IAlgorithm.h"
 
 #include <QSettings>

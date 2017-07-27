@@ -1,4 +1,4 @@
-#include "MantidQtAPI/MWRunFiles.h"
+#include "MantidQtWidgets/Common/MWRunFiles.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"

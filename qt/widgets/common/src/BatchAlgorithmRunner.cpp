@@ -1,4 +1,4 @@
-#include "MantidQtAPI/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"

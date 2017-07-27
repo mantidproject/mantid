@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/MuonFitDataSelector.h"
+#include "MantidQtWidgets/Common/MuonFitDataSelector.h"
 #include "MantidKernel/Logger.h"
 
 #include "qttreepropertybrowser.h"

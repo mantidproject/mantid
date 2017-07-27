@@ -1,7 +1,7 @@
 #include "MantidAPI/CatalogManager.h"
-#include "MantidQtMantidWidgets/CatalogHelper.h"
-#include "MantidQtAPI/AlgorithmDialog.h"
-#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtWidgets/Common/CatalogHelper.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidKernel/DateAndTime.h"
 
 #include <boost/algorithm/string/regex.hpp>

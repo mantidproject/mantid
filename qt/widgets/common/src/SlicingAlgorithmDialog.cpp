@@ -1,8 +1,8 @@
-#include "MantidQtMantidWidgets/SlicingAlgorithmDialog.h"
+#include "MantidQtWidgets/Common/SlicingAlgorithmDialog.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
 #include <QIntValidator>
 #include <QFileDialog>

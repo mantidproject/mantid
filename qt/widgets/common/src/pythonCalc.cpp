@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/pythonCalc.h"
+#include "MantidQtWidgets/Common/pythonCalc.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyWithValue.h"

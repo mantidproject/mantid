@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

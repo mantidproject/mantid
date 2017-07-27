@@ -1,7 +1,7 @@
 //-------------------------------------------
 // Includes
 //-------------------------------------------
-#include "MantidQtMantidWidgets/SelectFunctionDialog.h"
+#include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 #include "ui_SelectFunctionDialog.h"
 
 #include "MantidAPI/FunctionFactory.h"

@@ -1,7 +1,7 @@
 //------------------------------------------------------
 // Includes
 //------------------------------------------------------
-#include "MantidQtMantidWidgets/PreviewPlot.h"
+#include "MantidQtWidgets/Common/PreviewPlot.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"

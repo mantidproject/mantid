@@ -1,7 +1,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/WidgetScrollbarDecorator.h"
+#include "MantidQtWidgets/Common/WidgetScrollbarDecorator.h"
 
 #include <QMainWindow>
 #include <QScrollArea>

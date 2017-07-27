@@ -1,9 +1,9 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtAPI/MantidWidget.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
-#include "MantidQtMantidWidgets/HintingLineEditFactory.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 
 #include <QWidget>
 #include <qinputdialog.h>

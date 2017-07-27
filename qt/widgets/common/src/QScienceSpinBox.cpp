@@ -1,4 +1,4 @@
-#include "MantidQtAPI/QScienceSpinBox.h"
+#include "MantidQtWidgets/Common/QScienceSpinBox.h"
 #include <limits>
 
 //#define QSPINBOX_QSBDEBUG

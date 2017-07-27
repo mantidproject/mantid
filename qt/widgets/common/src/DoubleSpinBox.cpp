@@ -26,7 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
 //#include <MyParser.h>
 #include <QLineEdit>

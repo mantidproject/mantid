@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/CatalogSelector.h"
+#include "MantidQtWidgets/Common/CatalogSelector.h"
 #include "MantidAPI/CatalogManager.h"
 
 #include <QDesktopWidget>

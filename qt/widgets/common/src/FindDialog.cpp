@@ -1,7 +1,7 @@
 //-------------------------------------------
 // Includes
 //-------------------------------------------
-#include "MantidQtMantidWidgets/FindDialog.h"
+#include "MantidQtWidgets/Common/FindDialog.h"
 
 #include <QLabel>
 #include <QPushButton>

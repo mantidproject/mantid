@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/LogValueSelector.h"
+#include "MantidQtWidgets/Common/LogValueSelector.h"
 
 using Mantid::Kernel::Math::StatisticType;
 

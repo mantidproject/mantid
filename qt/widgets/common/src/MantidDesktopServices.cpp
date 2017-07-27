@@ -1,4 +1,4 @@
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 
 #include <QDesktopServices>
 

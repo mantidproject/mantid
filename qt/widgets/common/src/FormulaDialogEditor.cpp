@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/FormulaDialogEditor.h"
-#include "MantidQtMantidWidgets/UserFunctionDialog.h"
+#include "MantidQtWidgets/Common/FormulaDialogEditor.h"
+#include "MantidQtWidgets/Common/UserFunctionDialog.h"
 
 #include <QSettings>
 

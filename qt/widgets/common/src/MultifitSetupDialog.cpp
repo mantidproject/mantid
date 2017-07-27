@@ -2,8 +2,8 @@
 // Includes
 //---------------------------------------
 
-#include "MantidQtMantidWidgets/MultifitSetupDialog.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/MultifitSetupDialog.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AnalysisDataService.h"

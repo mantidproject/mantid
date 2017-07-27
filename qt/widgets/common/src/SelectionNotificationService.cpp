@@ -1,5 +1,5 @@
 
-#include "MantidQtAPI/SelectionNotificationService.h"
+#include "MantidQtWidgets/Common/SelectionNotificationService.h"
 
 using namespace MantidQt::API;
 

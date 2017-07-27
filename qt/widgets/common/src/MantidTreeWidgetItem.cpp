@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/MantidTreeWidgetItem.h"
-#include "MantidQtMantidWidgets/MantidTreeWidget.h"
+#include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
 
 #include <MantidAPI/Workspace.h>
 #include "MantidAPI/WorkspaceHistory.h"

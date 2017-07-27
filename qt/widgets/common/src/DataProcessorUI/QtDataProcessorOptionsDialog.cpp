@@ -1,6 +1,6 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include <qpushbutton.h>
 
 namespace MantidQt {

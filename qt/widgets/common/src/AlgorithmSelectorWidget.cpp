@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
+#include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmManager.h"
 

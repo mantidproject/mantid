@@ -27,8 +27,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "MantidQtAPI/PowerScaleEngine.h"
-#include "MantidQtAPI/qwt_compat.h"
+#include "MantidQtWidgets/Common/PowerScaleEngine.h"
+#include "MantidQtWidgets/Common/qwt_compat.h"
 
 /*!
   Return a dummy transformation

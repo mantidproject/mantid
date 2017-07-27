@@ -1,7 +1,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtMantidWidgets/SaveWorkspaces.h"
+#include "MantidQtWidgets/Common/SaveWorkspaces.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"

@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/PropertyHandler.h"
+#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,9 +7,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidQtMantidWidgets/StringEditorFactory.h"
+#include "MantidQtWidgets/Common/StringEditorFactory.h"
 
-#include "MantidQtMantidWidgets/MuonFitDataSelector.h"
+#include "MantidQtWidgets/Common/MuonFitDataSelector.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)

@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

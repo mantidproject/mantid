@@ -29,8 +29,8 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================*/
-#include "MantidQtMantidWidgets/pqHelpWindow.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/pqHelpWindow.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "ui_pqHelpWindow.h"
 
 #include <QFileInfo>

@@ -1,7 +1,7 @@
-#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
-#include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include <boost/regex.hpp>
 
 namespace { // anonymous namespace

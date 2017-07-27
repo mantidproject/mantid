@@ -4,11 +4,11 @@
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Logger.h"
 
-#include "MantidQtAPI/AlgorithmDialog.h"
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/MantidWidget.h"
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtAPI/FilePropertyWidget.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/FilePropertyWidget.h"
 
 #include <QIcon>
 #include <QLabel>

@@ -6,7 +6,7 @@
  *      Author: janik
  */
 
-#include "MantidQtAPI/pixmaps.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include <sstream>
 #include <stdexcept>
 

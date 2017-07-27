@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"

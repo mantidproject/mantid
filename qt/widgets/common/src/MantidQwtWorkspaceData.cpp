@@ -1,4 +1,4 @@
-#include "MantidQtAPI/MantidQwtWorkspaceData.h"
+#include "MantidQtWidgets/Common/MantidQwtWorkspaceData.h"
 
 #include <cmath>
 

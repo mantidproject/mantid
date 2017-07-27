@@ -1,9 +1,9 @@
-#include "MantidQtMantidWidgets/ProjectSaveModel.h"
+#include "MantidQtWidgets/Common/ProjectSaveModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtAPI/WindowIcons.h"
-#include "MantidQtAPI/WorkspaceIcons.h"
+#include "MantidQtWidgets/Common/WindowIcons.h"
+#include "MantidQtWidgets/Common/WorkspaceIcons.h"
 
 #include <unordered_set>
 

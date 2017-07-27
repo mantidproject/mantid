@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/HintingLineEdit.h"
+#include "MantidQtWidgets/Common/HintingLineEdit.h"
 
 #include <boost/algorithm/string.hpp>
 #include <QToolTip>

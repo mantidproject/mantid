@@ -1,7 +1,7 @@
 //-----------------------------------
 // Includes
 //-----------------------------------
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 namespace MantidQt {

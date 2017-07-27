@@ -1,11 +1,11 @@
-#include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MantidQtWidgets/Common/RangeSelector.h"
 
 #include <qwt_plot_picker.h>
 
 #include <QEvent>
 #include <QMouseEvent>
 
-#include "MantidQtMantidWidgets/PreviewPlot.h"
+#include "MantidQtWidgets/Common/PreviewPlot.h"
 
 using namespace MantidQt::MantidWidgets;
 

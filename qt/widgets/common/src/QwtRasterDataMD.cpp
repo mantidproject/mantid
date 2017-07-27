@@ -1,4 +1,4 @@
-#include "MantidQtAPI/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
 #include <math.h>
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"

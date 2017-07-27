@@ -2,7 +2,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Exception.h"
-#include "MantidQtMantidWidgets/DataSelector.h"
+#include "MantidQtWidgets/Common/DataSelector.h"
 
 #include <QFileInfo>
 

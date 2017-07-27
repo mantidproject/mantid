@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/ErrorCurve.h"
+#include "MantidQtWidgets/Common/ErrorCurve.h"
 
 #include <QPainter>
 #include <qwt_scale_map.h>

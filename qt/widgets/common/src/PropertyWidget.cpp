@@ -1,4 +1,4 @@
-#include "MantidQtAPI/PropertyWidget.h"
+#include "MantidQtWidgets/Common/PropertyWidget.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidAPI/IWorkspaceProperty.h"

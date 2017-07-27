@@ -1,7 +1,7 @@
 //-------------------------------------------
 // Includes
 //-------------------------------------------
-#include "MantidQtAPI/Message.h"
+#include "MantidQtWidgets/Common/Message.h"
 
 namespace MantidQt {
 namespace API {

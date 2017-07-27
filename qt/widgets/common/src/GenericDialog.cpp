@@ -1,8 +1,8 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/GenericDialog.h"
-#include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/GenericDialog.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileProperty.h"
@@ -26,9 +26,9 @@
 #include <QDir>
 #include <QGroupBox>
 #include <climits>
-#include "MantidQtAPI/PropertyWidgetFactory.h"
-#include "MantidQtAPI/AlgorithmPropertiesWidget.h"
-#include "MantidQtAPI/PropertyWidget.h"
+#include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
+#include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
+#include "MantidQtWidgets/Common/PropertyWidget.h"
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;

@@ -1,8 +1,8 @@
 //---------------------------------------------
 // Includes
 //-----------------------------------------------
-#include "MantidQtMantidWidgets/ScriptEditor.h"
-#include "MantidQtMantidWidgets/FindReplaceDialog.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
+#include "MantidQtWidgets/Common/FindReplaceDialog.h"
 
 // Qt
 #include <QApplication>

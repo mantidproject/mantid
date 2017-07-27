@@ -1,4 +1,4 @@
-#include "MantidQtAPI/SignalBlocker.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include <QAction>
 #include <QPushButton>
 #include <QComboBox>
@@ -40,10 +40,10 @@ template <typename Type> Type *SignalBlocker<Type>::operator->() {
 template <typename Type> void SignalBlocker<Type>::release() { m_obj = NULL; }
 
 // Template instances we need.
-template class EXPORT_OPT_MANTIDQT_API SignalBlocker<QObject>;
-template class EXPORT_OPT_MANTIDQT_API SignalBlocker<QAction>;
-template class EXPORT_OPT_MANTIDQT_API SignalBlocker<QPushButton>;
-template class EXPORT_OPT_MANTIDQT_API SignalBlocker<QComboBox>;
+template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QObject>;
+template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QAction>;
+template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QPushButton>;
+template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QComboBox>;
 
 } // namespace API
 } // namespace Mantid

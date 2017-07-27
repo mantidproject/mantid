@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/SlitCalculator.h"
+#include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Progress.h"

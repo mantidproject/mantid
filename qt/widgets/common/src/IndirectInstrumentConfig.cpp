@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/IndirectInstrumentConfig.h"
+#include "MantidQtWidgets/Common/IndirectInstrumentConfig.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"

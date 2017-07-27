@@ -1,8 +1,8 @@
-#include "MantidQtMantidWidgets/ColorBarWidget.h"
-#include "MantidQtAPI/MantidColorMap.h"
-#include "MantidQtAPI/PowerScaleEngine.h"
-#include "MantidQtAPI/QScienceSpinBox.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/ColorBarWidget.h"
+#include "MantidQtWidgets/Common/MantidColorMap.h"
+#include "MantidQtWidgets/Common/PowerScaleEngine.h"
+#include "MantidQtWidgets/Common/QScienceSpinBox.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include <QKeyEvent>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>

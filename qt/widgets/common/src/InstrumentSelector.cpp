@@ -1,7 +1,7 @@
 //------------------------------------------------------
 // Includes
 //------------------------------------------------------
-#include "MantidQtMantidWidgets/InstrumentSelector.h"
+#include "MantidQtWidgets/Common/InstrumentSelector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"

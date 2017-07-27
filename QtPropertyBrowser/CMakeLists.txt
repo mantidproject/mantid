@@ -20,8 +20,11 @@ set( QTPROPERTYBROWSER_SRCS
 	src/qtbuttonpropertybrowser.cpp
 	src/qtgroupboxpropertybrowser.cpp
 	src/qtpropertybrowserutils.cpp
+	src/DoubleDialogEditor.cpp
 	src/DoubleEditorFactory.cpp
 	src/ParameterPropertyManager.cpp
+	src/StringDialogEditor.cpp
+	src/StringEditorFactory.cpp
 )
 
 # moc'd files will end up in build directory, so add to include path
@@ -102,9 +105,12 @@ set (
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
 )
 
-qt4_wrap_cpp ( EXTRA_MOCS src/DoubleEditorFactory.h 
-                          src/ButtonEditorFactory.h
+qt4_wrap_cpp ( EXTRA_MOCS src/ButtonEditorFactory.h
+                          src/DoubleEditorFactory.h 
+                          src/DoubleDialogEditor.h 
                           src/ParameterPropertyManager.h
+                          src/StringDialogEditor.h
+                          src/StringEditorFactory.h
 )
 
 set (

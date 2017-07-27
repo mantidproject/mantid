@@ -1,4 +1,4 @@
-#include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"

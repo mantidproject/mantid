@@ -1,8 +1,8 @@
-#include "MantidQtAPI/QwtWorkspaceBinData.h"
+#include "MantidQtWidgets/Common/QwtWorkspaceBinData.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
 
 #include <QStringBuilder>
 #include <sstream>

@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h"
 #include <MantidAPI/AnalysisDataService.h>
 
 using namespace Mantid::API;

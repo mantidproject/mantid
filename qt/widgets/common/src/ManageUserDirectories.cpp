@@ -1,5 +1,5 @@
-#include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidKernel/ConfigService.h"
 #include <QtGui>
 #include <QDir>

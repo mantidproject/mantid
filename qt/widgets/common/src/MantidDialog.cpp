@@ -1,7 +1,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/MantidDialog.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 
 #include <QMessageBox>
 

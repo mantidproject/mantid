@@ -1,4 +1,4 @@
-#include "MantidQtAPI/MantidHelpInterface.h"
+#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 #include <QString>
 #include <QUrl>
 

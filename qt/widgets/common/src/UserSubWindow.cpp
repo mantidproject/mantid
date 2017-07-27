@@ -1,8 +1,8 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidKernel/UsageService.h"
 
 #include <QIcon>

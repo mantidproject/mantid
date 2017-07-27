@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/InputController.h"
+#include "MantidQtWidgets/Common/InputController.h"
 
 #include <QMouseEvent>
 #include <QPainter>

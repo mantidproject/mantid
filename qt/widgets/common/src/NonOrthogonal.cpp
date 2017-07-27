@@ -1,4 +1,4 @@
-#include "MantidQtAPI/NonOrthogonal.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"

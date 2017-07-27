@@ -1,9 +1,9 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>

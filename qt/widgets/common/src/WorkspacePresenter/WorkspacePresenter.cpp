@@ -1,7 +1,7 @@
-#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
 #include <MantidAPI/AlgorithmManager.h>
 
 using namespace Mantid;

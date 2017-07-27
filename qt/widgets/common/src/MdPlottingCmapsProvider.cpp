@@ -3,7 +3,7 @@
 #include <fstream>
 #include <vector>
 
-#include "MantidQtAPI/MdPlottingCmapsProvider.h"
+#include "MantidQtWidgets/Common/MdPlottingCmapsProvider.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 

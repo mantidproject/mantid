@@ -1,4 +1,4 @@
-#include "MantidQtAPI/SyncedCheckboxes.h"
+#include "MantidQtWidgets/Common/SyncedCheckboxes.h"
 #include "MantidKernel/System.h"
 
 namespace MantidQt {

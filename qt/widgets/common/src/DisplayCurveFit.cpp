@@ -1,9 +1,9 @@
 #include "MantidKernel/Logger.h"
-#include "MantidQtMantidWidgets/DisplayCurveFit.h"
+#include "MantidQtWidgets/Common/DisplayCurveFit.h"
 // includes for workspace handling
 
 // includes for interface development
-#include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MantidQtWidgets/Common/RangeSelector.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("DisplayCurveFit");

@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <vector>

@@ -2,13 +2,13 @@
 // Includes
 //----------------------------------
 #include <Poco/Environment.h>
-#include "MantidQtAPI/InterfaceManager.h"
-#include "MantidQtAPI/InterfaceFactory.h"
-#include "MantidQtAPI/AlgorithmDialog.h"
-#include "MantidQtAPI/GenericDialog.h"
-#include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtAPI/VatesViewerInterface.h"
-#include "MantidQtAPI/MantidHelpInterface.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/InterfaceFactory.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/GenericDialog.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/Common/VatesViewerInterface.h"
+#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"

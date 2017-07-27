@@ -1,4 +1,4 @@
-#include "MantidQtAPI/BoolPropertyWidget.h"
+#include "MantidQtWidgets/Common/BoolPropertyWidget.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;

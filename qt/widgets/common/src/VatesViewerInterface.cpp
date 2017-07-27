@@ -1,5 +1,5 @@
-#include "MantidQtAPI/VatesViewerInterface.h"
-#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtWidgets/Common/VatesViewerInterface.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 
 using namespace MantidQt::API;
 

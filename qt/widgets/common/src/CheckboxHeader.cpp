@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/CheckboxHeader.h"
+#include "MantidQtWidgets/Common/CheckboxHeader.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
