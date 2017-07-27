@@ -1,0 +1,35 @@
+###########################################################################
+# Now add the packages one-by-one, building up the dependencies as we go
+###########################################################################
+find_package ( QScintilla REQUIRED )
+
+include ( UseQt4 )
+include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+
+# Any MantidQt package can depend on widgets/common, so add the includes to the path here
+include_directories ( widgets/common/inc )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/widgets/common )
+add_subdirectory ( widgets )
+
+###########################################################################
+# Add a custom target to build all of the MantidQt packages
+###########################################################################
+
+if ( MSVC_IDE )
+#  # Add to the 'MantidQt' group in VS
+  set_property ( TARGET qtwidgetscommon PROPERTY FOLDER "MantidQt" )
+#  set_property ( TARGET MantidWidgets PROPERTY FOLDER "MantidQt" )
+#  set_property ( TARGET CustomDialogs PROPERTY FOLDER "MantidQt" )
+#  set_property ( TARGET CustomInterfaces PROPERTY FOLDER "MantidQt" )
+#  set_property ( TARGET DesignerPlugins PROPERTY FOLDER "MantidQt" )
+#  set_property ( TARGET MantidQtSliceViewer PROPERTY FOLDER "MantidQt" )
+#  set_property ( TARGET MantidQtSpectrumViewer PROPERTY FOLDER "MantidQt" )
+#  set_property ( TARGET MantidQtFactory PROPERTY FOLDER "MantidQt" )
+#  set_property ( TARGET mantidqtpython PROPERTY FOLDER "MantidQt" )
+#else ()
+#  add_custom_target ( MantidQt DEPENDS MantidQtAPI MantidWidgets 
+#                                       CustomDialogs CustomInterfaces
+#                                       MantidQtSliceViewer MantidQtSpectrumViewer
+#                                       MantidQtFactory mantidqtpython
+#  )
+endif ()

@@ -661,9 +661,9 @@ qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/images.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/MantidWidgets.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images//fonts/fonts.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/qt/widgets/sliceviewer/icons/SliceViewerIcons.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/CustomInterfaces/icons/CustomInterfacesIcons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Vates/VatesSimpleGui/ViewWidgets/icons/ViewWidgetsIcons.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/qt/paraview_ext/VatesSimpleGui/ViewWidgets/icons/ViewWidgetsIcons.qrc )
 
 ###########################################################################
 # Add the dependencies
@@ -697,10 +697,9 @@ include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
 
 include_directories ( ../QtPropertyBrowser/src )
-include_directories ( ../MantidQt/API/inc )
-include_directories ( ../MantidQt/MantidWidgets/inc )
-include_directories ( ../MantidQt/SliceViewer/inc )
-include_directories ( ../MantidQt/SpectrumViewer/inc )
+include_directories ( ../qt/widgets/common/inc )
+include_directories ( ../qt/widgets/sliceviewer/inc )
+include_directories ( ../qt/widgets/spectrumviewer/inc )
 include_directories ( ../MantidQt/Factory/inc )
 # ui_ files end up in these places
 include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
@@ -824,7 +823,7 @@ if (WITH_ASAN)
 endif ()
 
 # Plugin dependencies
-add_dependencies( MantidPlot mantidqtpython CompilePyUI )
+#add_dependencies( MantidPlot mantidqtpython CompilePyUI )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
