@@ -26,6 +26,8 @@ Improved
 - :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays.
 
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
+- :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` now finds all peaks in each spectrum. It also allows for setting more fine-grained resolutions.
+
 
 Deprecated
 ##########
