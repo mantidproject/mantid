@@ -96,14 +96,14 @@ def get_runtime_data(name='', type='', x_field='revision', last_num=-1):
         data[x] = (iters, runtime)
 
     # Now make a sorted list of (x, runtime/iteration)
-    sorted = [(x, y[1] / y[0]) for (x, y) in data.items()]
-    sorted.sort()
+    sorted_list = [(x, y[1] / y[0]) for (x, y) in data.items()]
+    sorted_list.sort()
 
-    x = [a for (a, b) in sorted]
+    x = [a for (a, b) in sorted_list]
     # For index, convert into an integer index
     if x_field == 'index':
         x = range(len(x))
-    y = [b for (a, b) in sorted]
+    y = [b for (a, b) in sorted_list]
 
     return (x, y)
 
@@ -271,16 +271,16 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
     html += """<table border="1">""" + table_row_header
 
     table_html = ''
-    results = get_results(name, type='', where_clause='')
-    sorted = [(res["revision"], res["variables"], res["date"], res) for res in results]
-    sorted.sort(reverse=False)
+    results = get_results(name, type='', where_clause='', orderby_clause="ORDER BY revision, variables, date")
+    data = [(res["revision"], res["variables"], res["date"], res) for res in results]
+
     count = 0
     last_rev = 0
     commitid = ''
     last_commitid = ''
     row_class = ''
     table_rows = []
-    for (rev, variable, date, res) in sorted:
+    for (rev, variable, date, res) in data:
         table_row_html = ''
         if (rev != last_rev):
             # Changed SVN revision. Swap row color
