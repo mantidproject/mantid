@@ -85,6 +85,7 @@ private:
 
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
   void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace,
                  std::set<int> &indices);

@@ -1,30 +1,16 @@
 #ifndef MANTID_DATAOBJECTS_TABLECOLUMN_H_
 #define MANTID_DATAOBJECTS_TABLECOLUMN_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
-#include "MantidAPI/Column.h"
-#include "MantidKernel/Logger.h"
-
-#include <vector>
-#include <typeinfo>
-#include <stdexcept>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <limits>
-#include <boost/type_traits.hpp>
-#include <boost/numeric/conversion/cast.hpp>
+#include <sstream>
+#include <vector>
+
+#include "MantidAPI/Column.h"
 
 namespace Mantid {
-
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-
 namespace DataObjects {
-
-template <class T> class TableVector;
 
 /** \class TableColumn
 

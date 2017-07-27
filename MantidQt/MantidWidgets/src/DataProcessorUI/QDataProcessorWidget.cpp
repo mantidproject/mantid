@@ -1,11 +1,14 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
-#include <qabstractitemmodel.h>
+#include <qinputdialog.h>
+#include <qmessagebox.h>
+
 namespace {
 const QString DataProcessorSettingsGroup =
     "Mantid/MantidWidgets/ISISDataProcessorUI";
@@ -15,7 +18,6 @@ namespace MantidQt {
 namespace MantidWidgets {
 using namespace Mantid::API;
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
 * @param presenter :: [input] A unique ptr to the presenter
 * @param parent :: [input] The parent of this view
@@ -30,7 +32,66 @@ QDataProcessorWidget::QDataProcessorWidget(
   m_presenter->acceptViews(this, this);
 }
 
-//----------------------------------------------------------------------------------------------
+/** Delegating constructor
+* @param whitelist :: [input] The white list
+* @param algorithm :: [input] The processing algorithm
+* @param parent :: [input] The parent of this view
+*/
+QDataProcessorWidget::QDataProcessorWidget(
+    const DataProcessorWhiteList &whitelist,
+    const DataProcessorProcessingAlgorithm &algorithm, QWidget *parent)
+    : QDataProcessorWidget(
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
+                                                                     algorithm),
+          parent) {}
+
+/** Delegating constructor: pre-processing, no post-processing
+* @param whitelist :: [input] The white list
+* @param preprocessMap :: [input] Pre-processing instructions as a map
+* @param algorithm :: [input] The processing algorithm
+* @param parent :: [input] The parent of this view
+*/
+QDataProcessorWidget::QDataProcessorWidget(
+    const DataProcessorWhiteList &whitelist,
+    const DataProcessorPreprocessMap &preprocessMap,
+    const DataProcessorProcessingAlgorithm &algorithm, QWidget *parent)
+    : QDataProcessorWidget(
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+              whitelist, preprocessMap.asMap(), algorithm),
+          parent) {}
+
+/** Delegating constructor: no pre-processing, post-processing
+* @param whitelist :: [input] The white list
+* @param algorithm :: [input] The processing algorithm
+* @param postprocessor :: [input] The post-processing algorithm
+* @param parent :: [input] The parent of this view
+*/
+QDataProcessorWidget::QDataProcessorWidget(
+    const DataProcessorWhiteList &whitelist,
+    const DataProcessorProcessingAlgorithm &algorithm,
+    const DataProcessorPostprocessingAlgorithm &postprocessor, QWidget *parent)
+    : QDataProcessorWidget(
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+              whitelist, algorithm, postprocessor),
+          parent) {}
+
+/** Delegating constructor: pre-processing, post-processing
+* @param whitelist :: [input] The white list
+* @param preprocessMap :: [input] Pre-processing instructions as a map
+* @param algorithm :: [input] The processing algorithm
+* @param postprocessor :: [input] The post-processing algorithm
+* @param parent :: [input] The parent of this view
+*/
+QDataProcessorWidget::QDataProcessorWidget(
+    const DataProcessorWhiteList &whitelist,
+    const DataProcessorPreprocessMap &preprocessMap,
+    const DataProcessorProcessingAlgorithm &algorithm,
+    const DataProcessorPostprocessingAlgorithm &postprocessor, QWidget *parent)
+    : QDataProcessorWidget(
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+              whitelist, preprocessMap.asMap(), algorithm, postprocessor),
+          parent) {}
+
 /** Destructor
 */
 QDataProcessorWidget::~QDataProcessorWidget() {}
@@ -71,6 +132,12 @@ void QDataProcessorWidget::addActions(
             ui.rowToolBar, std::move(command)));
   }
 
+  // Add actions to context menu
+  m_contextMenu = new QMenu(this);
+  for (const auto &command : m_commands) {
+    m_contextMenu->addAction(command->getAction());
+  }
+
   // Add a whats this button
   ui.rowToolBar->addAction(QWhatsThis::createAction(this));
 }
@@ -109,12 +176,16 @@ Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
 void QDataProcessorWidget::showTable(
-    boost::shared_ptr<QAbstractItemModel> model) {
+    boost::shared_ptr<AbstractDataProcessorTreeModel> model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
-          SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
+          SLOT(rowDataUpdated(const QModelIndex &, const QModelIndex &)));
+  connect(m_model.get(), SIGNAL(rowsInserted(const QModelIndex &, int, int)),
+          this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
+  connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
+          this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
 }
 
@@ -122,15 +193,14 @@ void QDataProcessorWidget::showTable(
 Set the list of tables the user is offered to open
 @param tables : the names of the tables in the ADS
 */
-void QDataProcessorWidget::setTableList(const std::set<std::string> &tables) {
+void QDataProcessorWidget::setTableList(const QSet<QString> &tables) {
   ui.menuOpenTable->clear();
   for (auto it = tables.begin(); it != tables.end(); ++it) {
-    QAction *openTable =
-        ui.menuOpenTable->addAction(QString::fromStdString(*it));
+    QAction *openTable = ui.menuOpenTable->addAction(*it);
     openTable->setIcon(QIcon("://worksheet.png"));
 
     // Map this action to the table name
-    m_openMap->setMapping(openTable, QString::fromStdString(*it));
+    m_openMap->setMapping(openTable, *it);
     // When repeated corrections happen the QMessageBox from openTable()
     // method in ReflMainViewPresenter will be called multiple times
     // when 'no' is clicked.
@@ -150,13 +220,43 @@ void QDataProcessorWidget::on_comboProcessInstrument_currentIndexChanged(
 }
 
 /**
-This slot notifies the presenter that the table has been updated/changed by the
-user
+This slot updates the 'process' status of affected groups and notifies the
+presenter that the table has been updated. This is called when rows are added
+or removed from the table.
 */
-void QDataProcessorWidget::tableUpdated(const QModelIndex &topLeft,
-                                        const QModelIndex &bottomRight) {
-  Q_UNUSED(topLeft);
+void QDataProcessorWidget::rowsUpdated(const QModelIndex &parent, int start,
+                                       int end) {
+  Q_UNUSED(start);
+  Q_UNUSED(end);
+
+  if (parent.isValid()) {
+    // Changing the number of rows in a group will set the containing group
+    // unprocessed
+    m_model->setProcessed(false, parent.row());
+  }
+
+  m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
+}
+
+/**
+This slot updates the 'process' status of affected rows and groups and notifies
+the presenter that the table has been updated. This is called when data within
+the rows is updated.
+*/
+void QDataProcessorWidget::rowDataUpdated(const QModelIndex &topLeft,
+                                          const QModelIndex &bottomRight) {
   Q_UNUSED(bottomRight);
+
+  if (!m_presenter->isProcessing()) {
+    auto pIndex = m_model->parent(topLeft);
+    if (pIndex.isValid()) {
+      // Changes made to rows outside of processing will set the containing
+      // group and all changed row unprocessed
+      m_model->setProcessed(false, pIndex.row());
+      m_model->setProcessed(false, topLeft.row(), pIndex);
+    }
+  }
+
   m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
 }
 
@@ -169,11 +269,7 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   if (!ui.viewTable->indexAt(pos).isValid())
     return;
 
-  QMenu *menu = new QMenu(this);
-  for (const auto &command : m_commands) {
-    menu->addAction(command->getAction());
-  }
-  menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+  m_contextMenu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
 
 /**
@@ -213,6 +309,41 @@ void QDataProcessorWidget::expandAll() { ui.viewTable->expandAll(); }
 Collapse all currently expanded groups
 */
 void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
+
+/**
+Select all rows/groups
+*/
+void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
+
+/**
+Handle interface when data reduction paused
+*/
+void QDataProcessorWidget::pause() {
+
+  // Enable 'resume' buttons
+  ui.rowToolBar->actions()[0]->setEnabled(true);
+  m_contextMenu->actions()[0]->setEnabled(true);
+  ui.buttonProcess->setEnabled(true);
+
+  // Disable 'pause' buttons
+  ui.rowToolBar->actions()[1]->setEnabled(false);
+  m_contextMenu->actions()[1]->setEnabled(false);
+}
+
+/**
+Handle interface when data reduction resumed
+*/
+void QDataProcessorWidget::resume() {
+
+  // Enable 'resume' buttons
+  ui.rowToolBar->actions()[0]->setEnabled(false);
+  m_contextMenu->actions()[0]->setEnabled(false);
+  ui.buttonProcess->setEnabled(false);
+
+  // Disable 'pause' buttons
+  ui.rowToolBar->actions()[1]->setEnabled(true);
+  m_contextMenu->actions()[1]->setEnabled(true);
+}
 
 /**
 Save settings
@@ -287,18 +418,18 @@ Set the list of available instruments to process
 @param instruments : The list of instruments available
 @param defaultInstrument : The instrument to have selected by default
 */
-void QDataProcessorWidget::setInstrumentList(
-    const std::vector<std::string> &instruments,
-    const std::string &defaultInstrument) {
+void QDataProcessorWidget::setInstrumentList(const QString &instruments,
+                                             const QString &defaultInstrument) {
+
   ui.comboProcessInstrument->clear();
 
-  for (auto it = instruments.begin(); it != instruments.end(); ++it) {
-    QString instrument = QString::fromStdString(*it);
-    ui.comboProcessInstrument->addItem(instrument);
+  QStringList instrList = instruments.split(",");
+  for (auto it = instrList.begin(); it != instrList.end(); ++it) {
+    ui.comboProcessInstrument->addItem((*it).trimmed());
   }
 
-  int index = ui.comboProcessInstrument->findData(
-      QString::fromStdString(defaultInstrument), Qt::DisplayRole);
+  int index =
+      ui.comboProcessInstrument->findData(defaultInstrument, Qt::DisplayRole);
   ui.comboProcessInstrument->setCurrentIndex(index);
 }
 
@@ -398,6 +529,125 @@ std::string QDataProcessorWidget::getClipboard() const {
 * Clear the progress
 */
 void QDataProcessorWidget::clearProgress() { ui.progressBar->reset(); }
+
+/** Forward a main presenter to this view's presenter
+* @param mainPresenter :: the main presenter
+*/
+void QDataProcessorWidget::accept(DataProcessorMainPresenter *mainPresenter) {
+
+  m_presenter->accept(mainPresenter);
+}
+
+/** Shows a critical error dialog
+*
+* @param prompt : The prompt to appear on the dialog
+* @param title : The text for the title bar of the dialog
+*/
+void QDataProcessorWidget::giveUserCritical(std::string prompt,
+                                            std::string title) {
+
+  QMessageBox::critical(this, QString::fromStdString(title),
+                        QString::fromStdString(prompt), QMessageBox::Ok,
+                        QMessageBox::Ok);
+}
+
+/** Shows a warning dialog
+*
+* @param prompt : The prompt to appear on the dialog
+* @param title : The text for the title bar of the dialog
+*/
+void QDataProcessorWidget::giveUserWarning(std::string prompt,
+                                           std::string title) {
+
+  QMessageBox::warning(this, QString::fromStdString(title),
+                       QString::fromStdString(prompt), QMessageBox::Ok,
+                       QMessageBox::Ok);
+}
+
+/** Asks the user a Yes/No question
+*
+* @param prompt : The prompt to appear on the dialog
+* @param title : The text for the title bar of the dialog
+* @returns a boolean true if Yes, false if No
+*/
+bool QDataProcessorWidget::askUserYesNo(std::string prompt, std::string title) {
+
+  auto response = QMessageBox::question(
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
+      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+  if (response == QMessageBox::Yes) {
+    return true;
+  }
+  return false;
+}
+
+/** Asks the user to enter a string.
+*
+* @param prompt : The prompt to appear on the dialog
+* @param title : The text for the title bar of the dialog
+* @param defaultValue : The default value entered.
+* @returns The user's string if submitted, or an empty string
+*/
+std::string
+QDataProcessorWidget::askUserString(const std::string &prompt,
+                                    const std::string &title,
+                                    const std::string &defaultValue) {
+
+  bool ok;
+  QString text = QInputDialog::getText(
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
+      QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
+  if (ok)
+    return text.toStdString();
+  return "";
+}
+
+/** Runs python code
+*
+* @param pythonCode :: the python code to run
+* @return :: output from execution
+*/
+std::string
+QDataProcessorWidget::runPythonAlgorithm(const std::string &pythonCode) {
+
+  QString output = runPythonCode(QString::fromStdString(pythonCode));
+
+  emit runPythonAlgorithm(QString::fromStdString(pythonCode));
+
+  return output.toStdString();
+}
+
+/** Transfer runs to the table
+ *
+ */
+void QDataProcessorWidget::transfer(const QList<QString> &runs) {
+
+  std::vector<std::map<std::string, std::string>> runsMap(runs.size());
+  size_t row = 0;
+
+  for (QList<QString>::const_iterator it = runs.begin(); it != runs.end();
+       ++it) {
+
+    QStringList map = (*it).split(",");
+
+    for (QList<QString>::iterator jt = map.begin(); jt != map.end(); ++jt) {
+
+      QStringList pair = (*jt).split(":");
+
+      if (pair.size() != 2) {
+        giveUserCritical("Could not transfer runs to processing table",
+                         "Transfer failed");
+        return;
+      }
+
+      runsMap[row][pair[0].toStdString()] = pair[1].toStdString();
+    }
+
+    row++;
+  }
+
+  m_presenter->transfer(runsMap);
+}
 
 } // namespace MantidWidgets
 } // namespace Mantid

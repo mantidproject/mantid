@@ -19,6 +19,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPauseCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h"
@@ -88,6 +89,8 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<DataProcessorOptionsCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorProcessCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorPauseCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorExpandCommand>(m_presenter));
   addCommand(commands,
              make_unique<DataProcessorExpandGroupsCommand>(m_presenter));
@@ -584,10 +587,62 @@ void DataProcessorTwoLevelTreeManager::update(
                      QString::fromStdString(data[col]));
 }
 
+/** Gets the number of groups in the table
+* @return : Number of groups
+*/
+int DataProcessorTwoLevelTreeManager::rowCount() const {
+  return m_model->rowCount();
+}
+
+/** Gets the number of rows of a parent group in the table
+* @param parent : Index of the parent group
+* @return : Number of rows of a group
+*/
+int DataProcessorTwoLevelTreeManager::rowCount(int parent) const {
+  return m_model->rowCount(m_model->index(parent, 0));
+}
+
+/** Gets the 'process' status of a group
+* @param position : The row index
+* @return : 'process' status
+*/
+bool DataProcessorTwoLevelTreeManager::isProcessed(int position) const {
+  return m_model->isProcessed(position);
+}
+
+/** Gets the 'process' status of a row
+* @param position : The row index
+* @param parent : The parent of the row
+* @return : 'process' status
+*/
+bool DataProcessorTwoLevelTreeManager::isProcessed(int position,
+                                                   int parent) const {
+  return m_model->isProcessed(position, m_model->index(parent, 0));
+}
+
+/** Sets the 'process' status of a group
+* @param processed : True to set group as processed, false to set unprocessed
+* @param position : The index of the group to be set
+*/
+void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
+                                                    int position) {
+  m_model->setProcessed(processed, position);
+}
+
+/** Sets the 'process' status of a row
+* @param processed : True to set row as processed, false to set unprocessed
+* @param position : The index of the row to be set
+* @param parent : The parent of the row
+*/
+void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
+                                                    int position, int parent) {
+  m_model->setProcessed(processed, position, m_model->index(parent, 0));
+}
+
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model
 */
-boost::shared_ptr<QAbstractItemModel>
+boost::shared_ptr<AbstractDataProcessorTreeModel>
 DataProcessorTwoLevelTreeManager::getModel() {
   return m_model;
 }

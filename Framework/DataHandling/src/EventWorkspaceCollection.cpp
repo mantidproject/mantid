@@ -10,6 +10,7 @@
 #include <vector>
 #include <set>
 #include <memory>
+#include <unordered_set>
 #include <boost/bind.hpp>
 
 namespace Mantid {

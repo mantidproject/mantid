@@ -695,7 +695,7 @@ void SliceViewer::updateDimensionSliceWidgets() {
 
 //------------------------------------------
 void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
-  m_coordinateTransform = createCoordinateTransform(m_ws, m_dimX, m_dimY);
+  m_coordinateTransform = createCoordinateTransform(*m_ws, m_dimX, m_dimY);
 
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
     // Transfer the current settings
@@ -712,7 +712,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
     m_data = std::move(tempData);
   }
 
-  m_coordinateTransform = createCoordinateTransform(m_ws, m_dimX, m_dimY);
+  m_coordinateTransform = createCoordinateTransform(*m_ws, m_dimX, m_dimY);
   m_data->setWorkspace(m_ws);
   this->setTransparentZeros(false);
 
@@ -731,7 +731,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
 void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   m_ws = ws;
 
-  m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
+  m_coordinateTransform = createCoordinateTransform(*ws, m_dimX, m_dimY);
   // disconnect and reconnect here
   QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
                    SLOT(checkForHKLDimension()));
@@ -1669,7 +1669,7 @@ void SliceViewer::updateDisplay(bool resetAxes) {
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
-  bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
+  bool canShowSkewedWS = API::isHKLDimensions(*m_ws, m_dimX, m_dimY);
   if (canShowSkewedWS && ui.btnNonOrthogonalToggle->isChecked()) {
     m_nonOrthAxis0->updateSlicePoint(m_slicePoint);
     m_nonOrthAxis1->updateSlicePoint(m_slicePoint);
@@ -1717,9 +1717,9 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
 
 void SliceViewer::checkForHKLDimension() {
 
-  if (API::requiresSkewMatrix(m_ws)) {
-    m_coordinateTransform->checkDimensionsForHKL(m_ws, m_dimX, m_dimY);
-    auto isHKL = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
+  if (API::requiresSkewMatrix(*m_ws)) {
+    m_coordinateTransform->checkDimensionsForHKL(*m_ws, m_dimX, m_dimY);
+    auto isHKL = API::isHKLDimensions(*m_ws, m_dimX, m_dimY);
     auto isNonOrthogonalQWTRasterData =
         dynamic_cast<API::QwtRasterDataMDNonOrthogonal *>(m_data.get()) !=
         nullptr;
@@ -2407,7 +2407,7 @@ void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
 /** NON ORTHOGONAL STUFF **/
 
 void SliceViewer::setNonOrthogonalbtn() {
-  bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
+  bool canShowSkewedWS = API::isHKLDimensions(*m_ws, m_dimX, m_dimY);
   if (!canShowSkewedWS && ui.btnNonOrthogonalToggle->isChecked()) {
     ui.btnNonOrthogonalToggle->toggle();
     m_oldDimNonOrthogonal = true;
@@ -2979,7 +2979,7 @@ std::string SliceViewer::saveDimensionWidgets() const {
 void SliceViewer::switchAxis() {
   if (m_canSwitchScales) { // cannot be called when sliceviewer first
                            // initialised because axis is inaccurate
-    auto isHKL = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
+    auto isHKL = API::isHKLDimensions(*m_ws, m_dimX, m_dimY);
     if (isHKL && ui.btnNonOrthogonalToggle->isChecked()) {
       applyNonOrthogonalAxisScaleDraw();
     } else {

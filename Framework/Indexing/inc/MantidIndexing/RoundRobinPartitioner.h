@@ -4,8 +4,6 @@
 #include "MantidIndexing/DllConfig.h"
 #include "MantidIndexing/Partitioner.h"
 
-#include <stdexcept>
-
 namespace Mantid {
 namespace Indexing {
 
