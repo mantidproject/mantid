@@ -13,8 +13,8 @@ Description
 This is the loader for the raw `.nxs` files produced by the powder diffractometers at ILL.
 Currently it supports the instruments D20 and D2B.
 
-Instrument D20
-##############
+Loading D20
+###########
 
 For D20 1-dimensional detector, it supports 3 resolution modes:
 
@@ -38,6 +38,11 @@ The loader is able to load the following scan configurations:
 - **detector scan**, used always for D2B, and for D20 calibration runs, when the detector moves during the run. In this configuration the output is a *scanning workspace* containing one spectrum for each pixel at each time index. The x-axis is again a single point.
 
 - **other scan**, e.g. omega scan for D20, which is another type of motor scan, but the detector does not move. In this case, the data in the raw file is organised just as for *detector scan*, but the output workspace is not a *scanning workspace*. It is a regular workspace with x-axis corresponding to the scanned variable, e.g. omega angle.
+
+Logs
+####
+
+The loader creates time series logs for each of the scanned variable in the `.nxs` file.
 
 Usage
 -----

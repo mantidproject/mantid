@@ -443,8 +443,7 @@ void LoadILLDiffraction::loadScanVars() {
 void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
   auto absoluteTimes = getAbsoluteTimes(scan);
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if (m_scanVar[i].axis != 1 &&
-        !boost::starts_with(m_scanVar[i].property, "Monitor")) {
+    if (!boost::starts_with(m_scanVar[i].property, "Monitor")) {
       auto property =
           Kernel::make_unique<TimeSeriesProperty<double>>(m_scanVar[i].name);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
@@ -530,7 +529,7 @@ std::vector<double> LoadILLDiffraction::getAxis(const NXDouble &scan) const {
 }
 
 /**
- * Returns the durations for each scan point
+ * Returns the durations in second for each scan point
  * @param scan : scan data
  * @return vector of durations
  */
@@ -554,13 +553,13 @@ LoadILLDiffraction::getDurations(const NXDouble &scan) const {
  */
 std::vector<DateAndTime>
 LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
-  std::vector<DateAndTime> times; // in units of ns
+  std::vector<DateAndTime> times;
   std::vector<double> durations = getDurations(scan);
   DateAndTime time = m_startTime;
   times.emplace_back(time);
   size_t timeIndex = 1;
   while (timeIndex < m_numberScanPoints) {
-    time += durations[timeIndex - 1] * 1E9; // from sec to ns
+    time += durations[timeIndex - 1];
     times.push_back(time);
     ++timeIndex;
   }

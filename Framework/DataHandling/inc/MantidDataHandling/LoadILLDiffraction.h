@@ -97,7 +97,7 @@ private:
   void resolveScanType();
 
   size_t m_sizeDim1; ///< size of dim1, number of pixels in a tube (D2B) or the
-                     ///whole detector (D20)
+                     /// whole detector (D20)
   size_t m_sizeDim2; ///< size of dim2, number of tubes (1 for D20!)
   size_t m_numberDetectorsRead;   ///< number of cells read from file
   size_t m_numberDetectorsActual; ///< number of cells actually active
