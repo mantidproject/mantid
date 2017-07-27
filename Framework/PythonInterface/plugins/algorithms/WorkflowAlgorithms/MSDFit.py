@@ -93,8 +93,9 @@ class MSDFit(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
         progress = Progress(self, 0.0, 0.05, 3)
+        self._original_ws = self._input_ws
 
-        rename_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
+        rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
         rename_alg.setProperty("InputWorkspace", self._input_ws)
         rename_alg.setProperty("OutputWorkspace", self._input_ws + "_" + self._model)
         rename_alg.execute()
@@ -207,9 +208,10 @@ class MSDFit(DataProcessorAlgorithm):
         copy_alg.setProperty("OutputWorkspace", self._output_fit_ws)
         copy_alg.execute()
 
-        delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
-        delete_alg.setProperty("InputWorkspace", self._input_ws)
-        delete_alg.execute()
+        rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
+        rename_alg.setProperty("InputWorkspace", self._input_ws)
+        rename_alg.setProperty("OutputWorkspace", self._original_ws)
+        rename_alg.execute()
 
         self.setProperty('OutputWorkspace', self._output_msd_ws)
         self.setProperty('ParameterWorkspace', self._output_param_ws)
