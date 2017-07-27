@@ -6,6 +6,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/make_unique.h"
 
+#include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <string>
@@ -52,6 +54,7 @@ void SaveSESANS::init(){
 	declareProperty("Theta_zmax_unit", "radians", Kernel::Direction::Input);
 	declareProperty("Theta_ymax", -1.0, Kernel::Direction::Input);
 	declareProperty("Theta_ymax_unit", "radians", Kernel::Direction::Input);
+	declareProperty("Echo_constant", -1.0, Kernel::Direction::Input);
 
 	declareProperty<std::string>("Orientation", "", "Orientation of the instrument");
 }
@@ -72,9 +75,25 @@ void SaveSESANS::exec(){
 	outfile.open(getPropertyValue("Filename"));
 	writeHeaders(outfile, ws);
 	outfile << "\n" << "BEGIN_DATA" << "\n";
+
+	const Mantid::MantidVec wavelength = ws->dataX(0);
+	const Mantid::MantidVec yValues = ws->dataY(0);
+	const Mantid::MantidVec eValues = ws->dataE(0);
+
+	const Mantid::MantidVec spinEchoLength = calculateSpinEchoLength(wavelength);
+	const Mantid::MantidVec depolarisation = calculateDepolarisation(yValues, wavelength);
+	const Mantid::MantidVec error = calculateError(eValues, yValues, wavelength);
+
+	outfile << "SpinEchoLength Depolarisation Depolarisation_error Wavelength\n";
+	for (int i = 0; i < spinEchoLength.size(); i++) {
+		outfile << std::to_string(spinEchoLength[i]) << " "
+		     	<< std::to_string(depolarisation[i]) << " "
+				<< std::to_string(error[i]) << " "
+				<< std::to_string(wavelength[i]) << "\n";
+	}
+
 	outfile.close();
 }
-
 /**
  * Write header values to the output file
  * @param outfile ofstream to the output file
@@ -108,7 +127,35 @@ void SaveSESANS::writeHeader(std::ofstream &outfile, const std::string & name, c
 	outfile << std::setfill(' ') << std::setw(MAX_HDR_LENGTH) << std::left << name << value << "\n";
 }
 
+Mantid::MantidVec SaveSESANS::calculateSpinEchoLength(const Mantid::MantidVec &wavelength) {
+	Mantid::MantidVec spinEchoLength;
+	const double echoConstant = getProperty("EchoConstant");
 
+	// SEL is calculated a wavelength^2 * echoConstant
+	transform(wavelength.begin(), wavelength.end(), back_inserter(spinEchoLength),
+		[&](double w) { return w * w * echoConstant; });
+	return spinEchoLength;
+}
+
+Mantid::MantidVec SaveSESANS::calculateDepolarisation(const Mantid::MantidVec & yValues, const Mantid::MantidVec & wavelength){
+	Mantid::MantidVec depolarisation;
+
+	// Depol is calculated as ln(y) / wavelength^2
+	transform(yValues.begin(), yValues.end(), wavelength.begin(),
+		back_inserter(depolarisation),
+		[](double y, double w) {return log(y) / (w * w); });
+	return depolarisation;
+}
+
+Mantid::MantidVec SaveSESANS::calculateError(const Mantid::MantidVec & eValues, const Mantid::MantidVec & yValues, const Mantid::MantidVec & wavelength){
+	Mantid::MantidVec error;
+
+	// Error is calculated as e / (y * wavelength^2)
+	for (int i = 0; i < eValues.size(); i++) {
+		error.push_back(eValues[i] / (yValues[i] * wavelength[i] * wavelength[i]));
+	}
+	return error;
+}
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -1,6 +1,7 @@
 #ifndef MANTID_DATAHANDLING_SAVESESANS_H_
 #define MANTID_DATAHANDLING_SAVESESANS_H_
 
+#include "MantidKernel/cow_ptr.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 
@@ -51,7 +52,7 @@ public:
 	const std::string category() const override;
 
 private:
-	// Length of the longest attribute name in headers (+4 for readbility in the file)
+	// Length of the longest attribute name in headers (+4 for readability in the file)
 	const int MAX_HDR_LENGTH = 23;
 	const std::vector<std::string> fileExtensions{ ".ses" };
 
@@ -60,6 +61,10 @@ private:
 
 	void writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const_sptr &ws);
 	void writeHeader(std::ofstream &outfile, const std::string &name, const std::string &value);
+
+	Mantid::MantidVec calculateSpinEchoLength(const Mantid::MantidVec &wavelength);
+	Mantid::MantidVec calculateDepolarisation(const Mantid::MantidVec &yValues, const Mantid::MantidVec &wavelength);
+	Mantid::MantidVec calculateError(const Mantid::MantidVec & eValues, const Mantid::MantidVec &yValues, const Mantid::MantidVec &wavelength);
 
 };
 
