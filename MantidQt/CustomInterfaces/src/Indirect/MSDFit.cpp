@@ -74,11 +74,12 @@ void MSDFit::run() {
     return;
 
   // Set the result workspace for Python script export
+  QString model = m_uiForm.modelInput->currentText();
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
   m_pythonExportWsName =
-      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
+      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_" 
+    + model.toStdString() + "_msd";
 
-  QString model = m_uiForm.modelInput->currentText();
   QString wsName = m_uiForm.dsSampleInput->getCurrentDataName();
   double xStart = m_dblManager->value(m_properties["Start"]);
   double xEnd = m_dblManager->value(m_properties["End"]);
@@ -87,7 +88,7 @@ void MSDFit::run() {
 
   IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
   msdAlg->initialize();
-  msdAlg->setProperty("Model", model);
+  msdAlg->setProperty("Model", model.toStdString());
   msdAlg->setProperty("InputWorkspace", wsName.toStdString());
   msdAlg->setProperty("XStart", xStart);
   msdAlg->setProperty("XEnd", xEnd);
@@ -106,10 +107,10 @@ void MSDFit::modelChanged(const QString &model) {
   QStringList suffixes = QStringList();
   
   if (model.compare("Gauss") == 0) {
-    suffixes << "_q2.nxs";
+    suffixes << "_eq2.nxs";
   }
   else {
-    suffixes << "_q.nxs";
+    suffixes << "_eq.nxs";
   }
 
   m_uiForm.dsSampleInput->setFBSuffixes(suffixes);

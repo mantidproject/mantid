@@ -49,11 +49,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_18">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true"/>
-        </item>
-       </layout>
+       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true"/>
       </item>
      </layout>
     </widget>

@@ -4,6 +4,7 @@ from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 from six.moves import range #pylint: disable=redefined-builtin
+from math import sqrt
 
 
 class MSDFit(DataProcessorAlgorithm):
@@ -97,10 +98,13 @@ class MSDFit(DataProcessorAlgorithm):
         self._setup()
         progress = Progress(self, 0.0, 0.05, 3)
 
+        input_params = [self._input_ws + ',i%d' % i for i in range(self._spec_range[0],
+                                                                   self._spec_range[1] + 1)]
+
         # Fit line to each of the spectra
         if self._model == 'Gauss':
             logger.information('Model : Gaussian approximation')
-            function = 'name=MsdGauss, Height=1.0, Msd=0.01'
+            function = 'name=MsdGauss, Height=1.0, Msd=0.1'
             function += ',constraint=(Height>0.0, Msd>0.0)'
             params_list = ['Height','Msd']
         elif self._model == 'Peters':
@@ -116,8 +120,6 @@ class MSDFit(DataProcessorAlgorithm):
         else:
             raise ValueError('No Model defined')
 
-        input_params = [self._input_ws + ',i%d' % i for i in range(self._spec_range[0],
-                                                                    self._spec_range[1] + 1)]
         input_params = ';'.join(input_params)
         progress.report('Sequential fit')
         PlotPeakByLogValue(Input=input_params,
