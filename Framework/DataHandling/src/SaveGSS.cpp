@@ -679,6 +679,7 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
   // Use integer ceiling with casting to double and back
   // As if we have 6 data entries across 4 lines we need
   // 2 output lines (4 + 2)
+  // TODO explain this
   const int64_t numberOfOutLines =
       (datasize + dataEntriesPerLine - 1) / dataEntriesPerLine;
 
@@ -694,7 +695,7 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
 
     // 4 Blocks of data (20 chars) per line (80 chars)
     for (; dataPosition < endPosition; dataPosition++) {
-      if (!(dataPosition >= datasize)) {
+      if (dataPosition < datasize) {
         // We have data to append
 
         const int epos =
@@ -706,8 +707,9 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
                 << static_cast<int>(yVals[dataPosition] * 1000);
         outLine << std::fixed << std::setw(5) << epos;
       }
-      outLine << "\n";
     }
+	// Append a newline character at the end of each data block
+    outLine << "\n";
   }
 
   for (const auto &outLine : outLines) {
