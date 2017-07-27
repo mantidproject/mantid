@@ -93,7 +93,6 @@ public:
     TS_ASSERT_EQUALS(sim->value(), "2017-May-15 14:36:18  5.44174e+06\n")
     TS_ASSERT_EQUALS(spy->value(), "2017-May-15 14:36:18  240\n")
     TS_ASSERT_EQUALS(sample->value(), "2017-May-15 14:36:18  4.9681\n")
-
   }
 
   void test_D20_scan() {
