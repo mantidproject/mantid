@@ -1,13 +1,14 @@
-# pylint: disable=no-init
+#pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import PlotPeakByLogValue, ConvertTableToMatrixWorkspace, SortXAxis, AppendSpectra
+from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from six.moves import range
+from six.moves import range #pylint: disable=redefined-builtin
 
 
 class MSDFit(DataProcessorAlgorithm):
     _output_fit_ws = None
+    _model = None
     _spec_range = None
     _x_range = None
     _input_ws = None
@@ -17,12 +18,17 @@ class MSDFit(DataProcessorAlgorithm):
     def category(self):
         return 'Workflow\\MIDAS'
 
+
     def summary(self):
-        return 'Fits log(intensity) vs Q-squared to obtain the mean squared displacement.'
+        return 'Fits Intensity vs Q for 3 models to obtain the mean squared displacement.'
+
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',direction=Direction.Input),
                              doc='Sample input workspace')
+        self.declareProperty(name='Model', defaultValue='Gauss',
+                             validator=StringListValidator(['Gauss', 'Peters', 'Yi']),
+                             doc='Model options : Gauss, Peters, Yi')
 
         self.declareProperty(name='XStart', defaultValue=0.0,
                              doc='Start of fitting range')
@@ -34,7 +40,7 @@ class MSDFit(DataProcessorAlgorithm):
         self.declareProperty(name='SpecMax', defaultValue=0,
                              doc='End of spectra range to be fit')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',direction=Direction.Output),
                              doc='Output mean squared displacement')
 
         self.declareProperty(ITableWorkspaceProperty('ParameterWorkspace', '',
@@ -46,6 +52,7 @@ class MSDFit(DataProcessorAlgorithm):
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='Output fitted workspaces')
+
 
     def validateInputs(self):
         issues = dict()
@@ -85,14 +92,34 @@ class MSDFit(DataProcessorAlgorithm):
 
         return issues
 
+
     def PyExec(self):
         self._setup()
+        progress = Progress(self, 0.0, 0.05, 3)
 
         # Fit line to each of the spectra
-        function = 'name=LinearBackground, A0=0, A1=0'
+        if self._model == 'Gauss':
+            logger.information('Model : Gaussian approximation')
+            function = 'name=MsdGauss, Height=1.0, Msd=0.01'
+            function += ',constraint=(Height>0.0, Msd>0.0)'
+            params_list = ['Height','Msd']
+        elif self._model == 'Peters':
+            logger.information('Model : Peters & Kneller')
+            function = 'name=MsdPeters, Height=1.0, Msd=1.0, Beta=1.0'
+            function += ',constraint=(Height>0.0, Msd>0.0, 100.0>Beta>0.3)'
+            params_list = ['Height','Msd','Beta']
+        elif self._model == 'Yi':
+            logger.information('Model : Yi et al')
+            function = 'name=MsdYi, Height=1.0, Msd=1.0, Sigma=0.1'
+            function += ',constraint=(Height>0.0, Msd>0.0, Sigma>0.0)'
+            params_list = ['Height','Msd','Sigma']
+        else:
+            raise ValueError('No Model defined')
+
         input_params = [self._input_ws + ',i%d' % i for i in range(self._spec_range[0],
-                                                                   self._spec_range[1] + 1)]
+                                                                    self._spec_range[1] + 1)]
         input_params = ';'.join(input_params)
+        progress.report('Sequential fit')
         PlotPeakByLogValue(Input=input_params,
                            OutputWorkspace=self._output_msd_ws,
                            Function=function,
@@ -112,57 +139,53 @@ class MSDFit(DataProcessorAlgorithm):
         rename_alg.execute()
 
         params_table = mtd[self._output_param_ws]
-
-        # MSD value should be positive, but the fit output is negative
-        msd = params_table.column('A1')
-        for i, value in enumerate(msd):
-            params_table.setCell('A1', i, value * -1)
+        progress.report('Create output files')
 
         # Create workspaces for each of the parameters
         parameter_ws_group = []
+        for par in params_list:
+            ws_name = self._output_msd_ws + '_' + par
+            parameter_ws_group.append(ws_name)
+            convert_alg = self.createChildAlgorithm("ConvertTableToMatrixWorkspace", enableLogging=False)
+            convert_alg.setProperty("InputWorkspace", self._output_param_ws)
+            convert_alg.setProperty("OutputWorkspace", ws_name)
+            convert_alg.setProperty("ColumnX", 'axis-1')
+            convert_alg.setProperty("ColumnY", par)
+            convert_alg.setProperty("ColumnE", par + '_Err')
+            convert_alg.execute()
+            mtd.addOrReplace(ws_name, convert_alg.getProperty("OutputWorkspace").value)
 
-        # A0 workspace
-        ws_name = self._output_msd_ws + '_A0'
-        parameter_ws_group.append(ws_name)
-        ConvertTableToMatrixWorkspace(self._output_param_ws,
-                                      OutputWorkspace=ws_name,
-                                      ColumnX='axis-1',
-                                      ColumnY='A0',
-                                      ColumnE='A0_Err',
-                                      EnableLogging=False)
-        xunit = mtd[ws_name].getAxis(0).setUnit('Label')
+        append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=False)
+        append_alg.setProperty("InputWorkspace1", self._output_msd_ws + '_' + params_list[0])
+        append_alg.setProperty("InputWorkspace2", self._output_msd_ws + '_' + params_list[1])
+        append_alg.setProperty("ValidateInputs", False)
+        append_alg.setProperty("OutputWorkspace", self._output_msd_ws)
+        append_alg.execute()
+        mtd.addOrReplace(self._output_msd_ws, append_alg.getProperty("OutputWorkspace").value)
+        if len(params_list) > 2:
+            append_alg.setProperty("InputWorkspace1", self._output_msd_ws)
+            append_alg.setProperty("InputWorkspace2", self._output_msd_ws + '_' + params_list[2])
+            append_alg.setProperty("ValidateInputs", False)
+            append_alg.setProperty("OutputWorkspace", self._output_msd_ws)
+            append_alg.execute()
+            mtd.addOrReplace(self._output_msd_ws, append_alg.getProperty("OutputWorkspace").value)
+        for par in params_list:
+            delete_alg.setProperty("Workspace", self._output_msd_ws + '_' + par)
+            delete_alg.execute()
+
+        progress.report('Change axes')
+        # Sort ascending x
+        sort_alg = self.createChildAlgorithm("SortXAxis", enableLogging=False)
+        sort_alg.setProperty("InputWorkspace", self._output_msd_ws)
+        sort_alg.setProperty("OutputWorkspace", self._output_msd_ws)
+        sort_alg.execute()
+        mtd.addOrReplace(self._output_msd_ws, sort_alg.getProperty("OutputWorkspace").value)
+        # Create a new x axis for the Q and Q**2 workspaces
+        xunit = mtd[self._output_msd_ws].getAxis(0).setUnit('Label')
         xunit.setLabel('Temperature', 'K')
-        SortXAxis(InputWorkspace=ws_name,
-                  OutputWorkspace=ws_name,
-                  EnableLogging=False)
-
-        # A1 workspace
-        ws_name = self._output_msd_ws + '_A1'
-        parameter_ws_group.append(ws_name)
-        ConvertTableToMatrixWorkspace(self._output_param_ws,
-                                      OutputWorkspace=ws_name,
-                                      ColumnX='axis-1',
-                                      ColumnY='A1',
-                                      ColumnE='A1_Err',
-                                      EnableLogging=False)
-        xunit = mtd[ws_name].getAxis(0).setUnit('Label')
-        xunit.setLabel('Temperature', 'K')
-        SortXAxis(InputWorkspace=ws_name,
-                  OutputWorkspace=ws_name,
-                  EnableLogging=False)
-
-        AppendSpectra(InputWorkspace1=self._output_msd_ws + '_A0',
-                      InputWorkspace2=self._output_msd_ws + '_A1',
-                      ValidateInputs=False,
-                      OutputWorkspace=self._output_msd_ws,
-                      EnableLogging=False)
-        delete_alg.setProperty("Workspace", self._output_msd_ws + '_A0')
-        delete_alg.execute()
-        delete_alg.setProperty("Workspace", self._output_msd_ws + '_A1')
-        delete_alg.execute()
         # Create a new vertical axis for the Q and Q**2 workspaces
-        y_axis = NumericAxis.create(2)
-        for idx in range(1):
+        y_axis = NumericAxis.create(len(params_list))
+        for idx in range(len(params_list)):
             y_axis.setValue(idx, idx)
         mtd[self._output_msd_ws].replaceAxis(1, y_axis)
 
@@ -191,6 +214,7 @@ class MSDFit(DataProcessorAlgorithm):
         Gets algorithm properties.
         """
         self._input_ws = self.getPropertyValue('InputWorkspace')
+        self._model = self.getPropertyValue('Model')
         self._output_msd_ws = self.getPropertyValue('OutputWorkspace')
 
         self._output_param_ws = self.getPropertyValue('ParameterWorkspace')
@@ -206,6 +230,5 @@ class MSDFit(DataProcessorAlgorithm):
 
         self._spec_range = [self.getProperty('SpecMin').value,
                             self.getProperty('SpecMax').value]
-
 
 AlgorithmFactory.subscribe(MSDFit)
