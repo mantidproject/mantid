@@ -63,6 +63,7 @@ void ConjoinWorkspaces::exec() {
   }
 
   if (event_ws1 && event_ws2) {
+    this->validateInputs(*event_ws1, *event_ws2, false);
     auto output = conjoinEvents(*event_ws1, *event_ws2);
     setYUnitAndLabel(*output);
     // Set the result workspace to the first input
