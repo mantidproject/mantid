@@ -9,6 +9,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/IDetector.h"
 // third party libraries
 // N/A
 // standard library

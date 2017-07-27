@@ -35,21 +35,23 @@ class DataProcessorAppendRowCommand : public DataProcessorCommandBase {
 public:
   DataProcessorAppendRowCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorAppendRowCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorAppendRowCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::AppendRowFlag);
   };
-  std::string name() override { return std::string("Insert Row After"); }
-  std::string icon() override { return std::string("://insert_row.png"); }
-  std::string tooltip() override { return std::string("Inserts row after"); }
-  std::string whatsthis() override {
-    return std::string("Inserts a new row after the last selected row. If "
-                       "groups exist and a group is selected, the new row is "
-                       "appended to the selected group. If nothing is selected "
-                       "then a new row is added to the last group");
+  QString name() override { return QString("Insert Row After"); }
+  QString icon() override { return QString("://insert_row.png"); }
+  QString tooltip() override { return QString("Inserts row after"); }
+  QString whatsthis() override {
+    return QString("Inserts a new row after the last selected row. If "
+                   "groups exist and a group is selected, the new row is "
+                   "appended to the selected group. If nothing is selected "
+                   "then a new row is added to the last group");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

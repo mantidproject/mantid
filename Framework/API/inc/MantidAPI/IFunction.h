@@ -396,6 +396,8 @@ public:
                                        const std::string &description) = 0;
   /// Get parameter by name.
   virtual double getParameter(const std::string &name) const = 0;
+  /// Check if function has a parameter with this name.
+  virtual bool hasParameter(const std::string &name) const = 0;
   /// Total number of parameters
   virtual size_t nParams() const = 0;
   /// Returns the index of parameter name

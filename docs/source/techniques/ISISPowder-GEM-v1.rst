@@ -698,4 +698,74 @@ On GEM this is set to the following:
                               (510, 18000)   # Bank 6
                               ]
 
+.. _vanadium_sample_details_gem_isis-powder-diffraction-ref:
+
+Vanadium sample details
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _chemical_formula_sample_details_gem_isis-powder-diffraction-ref:
+
+chemical_formula
+================
+
+The chemical formula for the Vanadium rod.
+This is a rod consisting of 94.86% Vanadium and 5.14% Niobium.
+Because this is not an elemental formula,
+:ref:`number_density_sample_details_gem_isis-powder-diffraction-ref`
+must also be set.
+
+On GEM this is set to the following:
+
+.. code-block:: python
+
+  chemical_formula = "V0.9486 Nb0.0514"
+
+.. _number_density_sample_details_gem_isis-powder-diffraction-ref:
+
+number_density
+==============
+
+The number density corresponding to the
+:ref:`chemical_formula_sample_details_gem_isis-powder-diffraction-ref`
+used. This is in units of atoms/Angstrom^3.
+
+On GEM this is set to the following:
+
+.. code-block:: python
+
+  number_density = 0.071
+
+cylinder_sample_height
+======================
+
+The height of the Vanadium rod.
+
+On GEM this is set to the following:
+
+.. code-block:: python
+
+  cylinder_sample_height = 4.0
+
+cylinder_sample_radius
+======================
+
+The radius of the Vanadium rod.
+
+On GEM this is set to the following:
+
+.. code-block:: python
+
+  cylinder_sample_radius = 0.4
+
+cylinder_position
+=================
+
+The position of the Vanadium rod in [x, y, z]
+
+On GEM this is set to the following:
+
+.. code-block:: python
+
+  cylinder_position = [0.0, 0.0, 0.0]
+
 .. categories:: Techniques

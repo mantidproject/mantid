@@ -14,6 +14,7 @@
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
 #include "MantidTestHelpers/ParallelRunner.h"
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace ParallelTestHelpers;

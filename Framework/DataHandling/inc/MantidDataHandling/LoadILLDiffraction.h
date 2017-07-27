@@ -5,6 +5,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/V3D.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -73,23 +74,34 @@ private:
   std::string getInstrumentFilePath(const std::string &) const;
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
-  void fillMovingInstrumentScan(const NeXus::NXUInt &,
-                                const NeXus::NXDouble &) {}
+  std::vector<double>
+  getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
+                                  const std::string &propertyName) const;
+  void fillMovingInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &);
   void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &,
                                 const NeXus::NXFloat &);
 
-  void initWorkspace();
+  void initStaticWorkspace();
+  void initMovingWorkspace(const NeXus::NXDouble &scan);
+  Kernel::V3D getReferenceComponentPosition(
+      const API::MatrixWorkspace_sptr &instrumentWorkspace);
+  void calculateRelativeRotations(std::vector<double> &instrumentAngles,
+                                  const Kernel::V3D &tube1Position);
   void loadDataScan();
   void loadMetaData();
   void loadScanVars();
   void loadStaticInstrument();
+  API::MatrixWorkspace_sptr loadEmptyInstrument();
   void moveTwoThetaZero(double);
   void resolveInstrument();
   void resolveScanType();
 
-  size_t m_numberDetectorsRead;   ///< number of cells read from file
+  size_t m_sizeDim1;            ///< size of dim1, either tubes or detectors
+  size_t m_sizeDim2;            ///< size of dim2, used for pixels within tubes
+  size_t m_numberDetectorsRead; ///< number of cells read from file
   size_t m_numberDetectorsActual; ///< number of cells actually active
   size_t m_numberScanPoints;      ///< number of scan points
+  size_t m_resolutionMode;        ///< resolution mode; 1:low, 2:nominal, 3:high
 
   std::string m_instName;            ///< instrument name to load the IDF
   std::set<std::string> m_instNames; ///< supported instruments

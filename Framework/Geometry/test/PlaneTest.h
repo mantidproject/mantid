@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Plane.h"

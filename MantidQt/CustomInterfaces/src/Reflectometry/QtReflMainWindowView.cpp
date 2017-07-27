@@ -5,7 +5,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainWindowPresenter.h"
 
-#include <qinputdialog.h>
 #include <qmessagebox.h>
 
 namespace MantidQt {
@@ -48,6 +47,8 @@ IReflRunsTabPresenter *QtReflMainWindowView::createRunsTab() {
 
   QtReflRunsTabView *runsTab = new QtReflRunsTabView(this);
   m_ui.mainTab->addTab(runsTab, QString("Runs"));
+  connect(runsTab, SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   return runsTab->getPresenter();
 }
@@ -98,18 +99,6 @@ void QtReflMainWindowView::giveUserCritical(const std::string &prompt,
 }
 
 /**
-Show a warning dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QtReflMainWindowView::giveUserWarning(const std::string &prompt,
-                                           const std::string &title) {
-  QMessageBox::warning(this, QString::fromStdString(title),
-                       QString::fromStdString(prompt), QMessageBox::Ok,
-                       QMessageBox::Ok);
-}
-
-/**
 Show an information dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
@@ -119,43 +108,6 @@ void QtReflMainWindowView::giveUserInfo(const std::string &prompt,
   QMessageBox::information(this, QString::fromStdString(title),
                            QString::fromStdString(prompt), QMessageBox::Ok,
                            QMessageBox::Ok);
-}
-
-/**
-Ask the user a Yes/No question
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@returns a boolean true if Yes, false if No
-*/
-bool QtReflMainWindowView::askUserYesNo(const std::string &prompt,
-                                        const std::string &title) {
-  auto response = QMessageBox::question(
-      this, QString::fromStdString(title), QString::fromStdString(prompt),
-      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-  if (response == QMessageBox::Yes) {
-    return true;
-  }
-  return false;
-}
-
-/**
-Ask the user to enter a string.
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@param defaultValue : The default value entered.
-@returns The user's string if submitted, or an empty string
-*/
-std::string
-QtReflMainWindowView::askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) {
-  bool ok;
-  QString text = QInputDialog::getText(
-      this, QString::fromStdString(title), QString::fromStdString(prompt),
-      QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
-  if (ok)
-    return text.toStdString();
-  return "";
 }
 
 /**

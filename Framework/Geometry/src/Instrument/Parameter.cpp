@@ -1,7 +1,21 @@
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/RegistrationHelper.h"
+#include "MantidKernel/V3D.h"
 #include <sstream>
+
+/* Register classes into the factory
+ *
+ */
+#define DECLARE_PARAMETER(classname, classtype)                                \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper register_par_##classname(                 \
+      ((Mantid::Geometry::ParameterFactory::subscribe<                         \
+           Mantid::Geometry::ParameterType<classtype>>(#classname)),           \
+       0));                                                                    \
+  }
 
 namespace Mantid {
 namespace Geometry {

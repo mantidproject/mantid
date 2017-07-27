@@ -78,7 +78,7 @@ Deprecated
 - :ref:`RefinePowderInstrumentParameters	 <algm-RefinePowderInstrumentParameters>` is deprecated in favour of v2.
 - :ref:`SetupILLD33Reduction	 <algm-SetupILLD33Reduction>`.
 - :ref:`StartRemoteTransaction	 <algm-StartRemoteTransaction>` is deprecated in favour of v2.
-- :ref:`LoadILLAscii	 <algm-LoadILLAscii>`.
+- :ref:`LoadILLAscii	 <algm-LoadILLDiffraction>`.
 - :ref:`StopRemoteTransaction	 <algm-StopRemoteTransaction>` is deprecated in favour of v2.
 - :ref:`SubmitRemoteJob	 <algm-SubmitRemoteJob>` is deprecated in favour of v2.
 - :ref:`Transpose3D	 <algm-Transpose3D>` is deprecated in favour :ref:`TransposeMD <algm-TransposeMD>`.

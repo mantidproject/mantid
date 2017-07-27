@@ -1,5 +1,6 @@
 #include "AlgorithmHistoryWindow.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 
@@ -558,7 +559,7 @@ void AlgHistoryProperties::displayAlgHistoryProperties() {
     sProperty = (*pIter)->name();
     propList.append(sProperty.c_str());
 
-    sProperty = (*pIter)->value();
+    sProperty = Strings::shorten((*pIter)->value(), 40);
     bool bisDefault = (*pIter)->isDefault();
     if (bisDefault == true) {
       if ((*pIter)->isEmptyDefault()) {

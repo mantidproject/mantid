@@ -380,6 +380,22 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     int j = m_enumManager->value(m_workspace);
     std::string option = m_workspaceNames[j].toStdString();
     setOutputName(option);
+    if (m_periodBoxes.size() > 1) {
+      size_t end = 0;
+      // assumed structure of name
+      // isolate the period
+      for (int k = 0; k < 4; k++) {
+        end = option.find_first_of(";");
+        option = option.substr(end + 1, option.size());
+      }
+      end = option.find_first_of(";");
+      QString selectedPeriod = QString::fromStdString(option.substr(0, end));
+      // turn on only the relevant box
+      for (auto iter = m_periodBoxes.constBegin();
+           iter != m_periodBoxes.constEnd(); ++iter) {
+        m_boolManager->setValue(iter.value(), selectedPeriod == iter.key());
+      }
+    }
   } else {
     FitPropertyBrowser::enumChanged(prop);
   }
@@ -1036,7 +1052,6 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
       return;
     }
   }
-
   clearGroupCheckboxes();
   QSettings settings;
   for (const auto group : groups) {
@@ -1427,9 +1442,11 @@ void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
   if (isItGroup) {
     // all groups is index 0
     m_enumManager->setValue(m_groupsToFit, 0);
+    setAllGroups();
   } else {
     // all pairs is index 1
     m_enumManager->setValue(m_groupsToFit, 1);
+    setAllPairs();
   }
 }
 void MuonFitPropertyBrowser::setGroupNames(

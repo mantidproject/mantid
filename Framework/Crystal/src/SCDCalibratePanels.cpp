@@ -14,6 +14,8 @@
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataObjects/Peak.h"
 #include <fstream>
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -71,10 +73,14 @@ void SCDCalibratePanels::exec() {
 
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   bool changeL1 = getProperty("ChangeL1");
+  bool changeT0 = getProperty("ChangeT0");
   bool changeSize = getProperty("ChangePanelSize");
 
+  if (changeT0)
+    findT0(nPeaks, peaksWs);
   if (changeL1)
     findL1(nPeaks, peaksWs);
+
   boost::container::flat_set<string> MyBankNames;
   for (int i = 0; i < nPeaks; ++i) {
     MyBankNames.insert(peaksWs->getPeak(i).getBankName());
@@ -140,7 +146,7 @@ void SCDCalibratePanels::exec() {
     fun_str << "name=SCDPanelErrors,Workspace=" + bankName << ",Bank=" << iBank;
     fit_alg->setPropertyValue("Function", fun_str.str());
     std::ostringstream tie_str;
-    tie_str << "ScaleWidth=1.0,ScaleHeight=1.0";
+    tie_str << "ScaleWidth=1.0,ScaleHeight=1.0,T0Shift =" << mT0;
     fit_alg->setProperty("Ties", tie_str.str());
     fit_alg->setProperty("InputWorkspace", q3DWS);
     fit_alg->setProperty("CreateOutput", true);
@@ -179,7 +185,8 @@ void SCDCalibratePanels::exec() {
       std::ostringstream tie_str2;
       tie_str2 << "XShift=" << xShift << ",YShift=" << yShift
                << ",ZShift=" << zShift << ",XRotate=" << xRotate
-               << ",YRotate=" << yRotate << ",ZRotate=" << zRotate;
+               << ",YRotate=" << yRotate << ",ZRotate=" << zRotate
+               << ",T0Shift =" << mT0;
       fit2_alg->setProperty("Ties", tie_str2.str());
       fit2_alg->setProperty("InputWorkspace", q3DWS);
       fit2_alg->setProperty("CreateOutput", true);
@@ -219,6 +226,11 @@ void SCDCalibratePanels::exec() {
     findL1(nPeaks, peaksWs);
     parameter_workspaces.push_back("params_L1");
     fit_workspaces.push_back("fit_L1");
+  }
+  // Add T0 files to groups
+  if (changeT0) {
+    parameter_workspaces.push_back("params_T0");
+    fit_workspaces.push_back("fit_T0");
   }
   std::sort(parameter_workspaces.begin(), parameter_workspaces.end());
   std::sort(fit_workspaces.begin(), fit_workspaces.end());
@@ -260,7 +272,12 @@ void SCDCalibratePanels::exec() {
   findU(peaksWs);
   // Save as DetCal and XML if requested
   string DetCalFileName = getProperty("DetCalFilename");
-  saveIsawDetCal(inst, MyBankNames, 0.0, DetCalFileName);
+  API::Run &run = peaksWs->mutableRun();
+  double mT0 = 0.0;
+  if (run.hasProperty("T0")) {
+    mT0 = run.getPropertyValueAsType<double>("T0");
+  }
+  saveIsawDetCal(inst, MyBankNames, mT0, DetCalFileName);
   string XmlFileName = getProperty("XmlFilename");
   saveXmlFile(XmlFileName, MyBankNames, *inst);
   // create table of theoretical vs calculated
@@ -345,29 +362,6 @@ void SCDCalibratePanels::findL1(int nPeaks,
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks,
                                                3 * nPeaks));
 
-  auto &outSp = L1WS->getSpectrum(0);
-  auto &yVec = outSp.mutableY();
-  auto &eVec = outSp.mutableE();
-  auto &xVec = outSp.mutableX();
-  yVec = 0.0;
-
-  for (int i = 0; i < nPeaks; i++) {
-    const DataObjects::Peak &peak = peaksWs->getPeak(i);
-
-    // 1/sigma is considered the weight for the fit
-    double weight = 1.;                // default is even weighting
-    if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
-      weight = 1.0 / peak.getSigmaIntensity();
-    else if (peak.getIntensity() > 0.) // next favorite weight by I
-      weight = 1.0 / peak.getIntensity();
-    else if (peak.getBinCount() > 0.) // then by counts in peak centre
-      weight = 1.0 / peak.getBinCount();
-    for (int j = 0; j < 3; j++) {
-      int k = i * 3 + j;
-      xVec[k] = k;
-      eVec[k] = weight;
-    }
-  }
   IAlgorithm_sptr fitL1_alg;
   try {
     fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
@@ -380,7 +374,7 @@ void SCDCalibratePanels::findL1(int nPeaks,
           << ",Bank=moderator";
   std::ostringstream tie_str;
   tie_str << "XShift=0.0,YShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0,"
-             "ScaleWidth=1.0,ScaleHeight=1.0";
+             "ScaleWidth=1.0,ScaleHeight=1.0,T0Shift =" << mT0;
   fitL1_alg->setPropertyValue("Function", fun_str.str());
   fitL1_alg->setProperty("Ties", tie_str.str());
   fitL1_alg->setProperty("InputWorkspace", L1WS);
@@ -400,6 +394,62 @@ void SCDCalibratePanels::findL1(int nPeaks,
   g_log.notice() << "L1 = "
                  << -peaksWs->getInstrument()->getSource()->getPos().Z() << "  "
                  << fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
+}
+
+void SCDCalibratePanels::findT0(int nPeaks,
+                                DataObjects::PeaksWorkspace_sptr peaksWs) {
+  MatrixWorkspace_sptr T0WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks,
+                                               3 * nPeaks));
+
+  IAlgorithm_sptr fitT0_alg;
+  try {
+    fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    g_log.error("Can't locate Fit algorithm");
+    throw;
+  }
+  std::ostringstream fun_str;
+  fun_str << "name=SCDPanelErrors,Workspace=" << peaksWs->getName()
+          << ",Bank=none";
+  std::ostringstream tie_str;
+  tie_str
+      << "XShift=0.0,YShift=0.0,ZShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0,"
+         "ScaleWidth=1.0,ScaleHeight=1.0";
+  fitT0_alg->setPropertyValue("Function", fun_str.str());
+  fitT0_alg->setProperty("Ties", tie_str.str());
+  fitT0_alg->setProperty("InputWorkspace", T0WS);
+  fitT0_alg->setProperty("CreateOutput", true);
+  fitT0_alg->setProperty("Output", "fit");
+  // Does not converge with derviative minimizers
+  fitT0_alg->setProperty("Minimizer", "Simplex");
+  fitT0_alg->setProperty("MaxIterations", 1000);
+  fitT0_alg->executeAsChildAlg();
+  std::string fitT0Status = fitT0_alg->getProperty("OutputStatus");
+  double chisqT0 = fitT0_alg->getProperty("OutputChi2overDoF");
+  MatrixWorkspace_sptr fitT0 = fitT0_alg->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace("fit_T0", fitT0);
+  ITableWorkspace_sptr paramsT0 = fitT0_alg->getProperty("OutputParameters");
+  AnalysisDataService::Instance().addOrReplace("params_T0", paramsT0);
+  mT0 = paramsT0->getRef<double>("Value", 8);
+  API::Run &run = peaksWs->mutableRun();
+  // set T0 in the run parameters adding to value in peaks file
+  double oldT0 = 0.0;
+  if (run.hasProperty("T0")) {
+    oldT0 = run.getPropertyValueAsType<double>("T0");
+  }
+  run.addProperty<double>("T0", mT0 + oldT0, true);
+  g_log.notice() << "T0 = " << mT0 << "  " << fitT0Status << " Chi2overDoF "
+                 << chisqT0 << "\n";
+  for (int i = 0; i < peaksWs->getNumberPeaks(); i++) {
+    DataObjects::Peak &peak = peaksWs->getPeak(i);
+
+    Units::Wavelength wl;
+
+    wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0,
+                  peak.getInitialEnergy(), 0.0);
+    peak.setWavelength(wl.singleFromTOF(peak.getTOF() + mT0));
+  }
 }
 
 void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
@@ -437,9 +487,13 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   ub_alg->executeAsChildAlg();
 
   // Reindex peaks with new UB
-  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
+  Mantid::API::IAlgorithm_sptr alg =
+      createChildAlgorithm("OptimizeCrystalPlacement");
   alg->setPropertyValue("PeaksWorkspace", peaksWs->getName());
-  alg->setProperty("Tolerance", 0.15);
+  alg->setPropertyValue("ModifiedPeaksWorkspace", peaksWs->getName());
+  alg->setProperty("AdjustSampleOffsets", true);
+  alg->setProperty("MaxAngularChange", 0.0);
+  alg->setProperty("MaxIndexingError", 0.15);
   alg->executeAsChildAlg();
   g_log.notice() << peaksWs->sample().getOrientedLattice().getUB() << "\n";
 }
@@ -512,6 +566,7 @@ void SCDCalibratePanels::init() {
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
   declareProperty("ChangeL1", true, "Change the L1(source to sample) distance");
+  declareProperty("ChangeT0", false, "Change the T0 (initial TOF)");
   declareProperty("ChangePanelSize", true, "Change the height and width of the "
                                            "detectors.  Implemented only for "
                                            "RectangularDetectors.");

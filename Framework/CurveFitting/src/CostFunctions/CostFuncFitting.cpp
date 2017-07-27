@@ -46,6 +46,16 @@ void CostFuncFitting::setParameter(size_t i, const double &value) {
   setDirty();
 }
 
+/// Get parameter name.
+/// @param i :: Index of a cost function parameter. It may be
+/// different from the index of the same parameter in the fitting
+/// function.
+/// @return The name of the parameter as defined by the fitting function.
+std::string CostFuncFitting::parameterName(size_t i) const {
+  checkValidity();
+  return m_function->parameterName(m_indexMap[i]);
+}
+
 /// Number of parameters
 size_t CostFuncFitting::nParams() const {
   checkValidity();
