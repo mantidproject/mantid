@@ -46,14 +46,14 @@ def to_datetime(formatted_str):
 # ============================================================================================
 def get_orderby_clause(last_num):
     """Returns a order by clause that limits to the last # revisions """
-    if last_num > 0:
+    if last_num is not None:
         return " ORDER BY revision DESC limit %d" % last_num
     else:
         return ''
 
 
 # ============================================================================================
-def get_runtime_data(name='', type='', x_field='revision', last_num=-1):
+def get_runtime_data(name='', type='', x_field='revision', last_num=None):
     """Get the test runtime/iteration as a function of an X variable.
 
     Parameters
@@ -143,7 +143,7 @@ def plot_runtime(annotate, saveImage, path, **kwargs):
 
     annotations = []
 
-    last_num = kwargs.get('last_num', -1)
+    last_num = kwargs.get('last_num', None)
 
     if annotate and not saveImage:
         # retrieve commitids for annotation on the plotly graph
