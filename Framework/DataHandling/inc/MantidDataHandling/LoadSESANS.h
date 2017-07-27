@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <utility>
 
+typedef std::unordered_map<std::string, std::vector<double>> ColumnMap;
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -68,13 +70,13 @@ private:
   void exec() override;
 
   void consumeHeaders(std::ifstream &infile, std::string &line, int &lineNum);
-  std::unordered_map<std::string, std::vector<std::string>>
-  consumeData(std::ifstream &infile, std::string &line, int &lineNum);
+  ColumnMap consumeData(std::ifstream &infile, std::string &line, int &lineNum);
   std::pair<std::string, std::string> splitHeader(const std::string &line,
                                                   const int &lineNum);
   void throwFormatError(const std::string &line, const std::string &message,
                         const int &lineNum);
   void checkMandatoryHeaders();
+  API::MatrixWorkspace_sptr makeWorkspace(ColumnMap columns);
 
   // Private helper functions
   static bool space(const char &c);

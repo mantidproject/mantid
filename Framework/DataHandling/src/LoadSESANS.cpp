@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "boost/algorithm/string/predicate.hpp"
 
@@ -113,8 +114,7 @@ void LoadSESANS::exec() {
 
   // First line must be FileFormatVersion:
   if (!boost::starts_with(line, "FileFormatVersion"))
-    throwFormatError(line, "File must begin by providing FileFormatVersion",
-                     lineNum);
+    throwFormatError(line, "File must begin by providing FileFormatVersion", lineNum);
 
   // Read in all the header values, and make sure all the mandatory ones are
   // supplied
@@ -124,11 +124,9 @@ void LoadSESANS::exec() {
 
   // Make sure we haven't reached the end of the file without reading any data
   if (line != "BEGIN_DATA")
-    throwFormatError("<EOF>", "Expected \"BEGIN_DATA\" before EOF",
-                     lineNum + 1);
+    throwFormatError("<EOF>", "Expected \"BEGIN_DATA\" before EOF", lineNum + 1);
 
-  std::unordered_map<std::string, std::vector<std::string>> columns =
-      consumeData(infile, line, lineNum);
+  ColumnMap columns = consumeData(infile, line, lineNum);
 
   infile.close();
 }
@@ -166,9 +164,7 @@ void LoadSESANS::consumeHeaders(std::ifstream &infile, std::string &line,
 * numbers in that column
 * @throw runtime_error If the 4 mandatory columns are not supplied in the file
 */
-std::unordered_map<std::string, std::vector<std::string>>
-LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
-                        int &lineNum) {
+ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line, int &lineNum) {
   std::string numberRegex = "-?\\d+(\\.\\d+)?(E-\\d+)?";
 
   std::getline(infile, line);
@@ -192,7 +188,7 @@ LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
   std::vector<std::string> tokens;
 
   // Map of column name -> column values
-  std::unordered_map<std::string, std::vector<std::string>> columns;
+  ColumnMap columns;
 
   while (std::getline(infile, line)) {
     lineNum++;
@@ -200,8 +196,8 @@ LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
     if (std::regex_match(line, lineRegex)) {
       tokens = split(line);
 
-      for (unsigned int i = 0; i < tokens.size(); i++)
-        columns[columnHeaders[i]].push_back(tokens[i]);
+	  for (unsigned int i = 0; i < tokens.size(); i++)
+		  columns[columnHeaders[i]].push_back(std::stod(tokens[i]));
     } else {
       g_log.warning("Line " + std::to_string(lineNum) +
                     " discarded, as it was badly formed. Expected " +
@@ -278,6 +274,12 @@ void LoadSESANS::checkMandatoryHeaders() {
       throw std::runtime_error(err);
     }
   }
+}
+
+API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
+	int histogramLength = columns["SpinEchoLength"].size();
+	API::MatrixWorkspace_sptr newWorkspace = API::WorkspaceFactory::Instance().create("Workspace2D", 1, histogramLength, histogramLength);
+
 }
 
 /** Is a character whitespace (here considered space or tab)?

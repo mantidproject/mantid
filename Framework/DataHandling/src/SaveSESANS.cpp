@@ -85,11 +85,14 @@ void SaveSESANS::exec(){
 	const auto error = calculateError(eValues, yValues, wavelength);
 
 	outfile << "SpinEchoLength Depolarisation Depolarisation_error Wavelength\n";
+	//outfile.precision(5);
+	//outfile << std::fixed;
+
 	for (int i = 0; i < spinEchoLength.size(); ++i) {
-		outfile << std::to_string(spinEchoLength[i]) << " ";
-		outfile << std::to_string(depolarisation[i]) << " ";
-		outfile << std::to_string(error[i]) << " ";
-		outfile << std::to_string(wavelength[i]) << "\n";
+		outfile << spinEchoLength[i] << " ";
+		outfile << depolarisation[i] << " ";
+		outfile << error[i] << " ";
+		outfile << wavelength[i] << "\n";
 	}
 
 	outfile.close();
@@ -116,6 +119,7 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const
 	writeHeader(outfile, "SpinEchoLength_unit", "A");
 	writeHeader(outfile, "Depolarisation_unit", "A-2 cm-1");
 	writeHeader(outfile, "Wavelength_unit", "A");
+	writeHeader(outfile, "Echo_constant", getPropertyValue("Echo_constant"));
 }
 
 /**

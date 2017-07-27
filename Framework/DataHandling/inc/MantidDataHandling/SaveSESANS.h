@@ -63,7 +63,6 @@ private:
 	void writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const_sptr &ws);
 	void writeHeader(std::ofstream &outfile, const std::string &name, const std::string &value);
 
-	API::MatrixWorkspace_const_sptr convertToSEL(API::MatrixWorkspace_const_sptr &ws);
 	std::vector<double> calculateSpinEchoLength(const HistogramData::Points &wavelength) const;
 	std::vector<double> calculateDepolarisation(const HistogramData::HistogramY &yValues, const HistogramData::Points &wavelength) const;
 	Mantid::MantidVec calculateError(const HistogramData::HistogramE & eValues, const HistogramData::HistogramY &yValues, const HistogramData::Points &wavelength) const;
