@@ -5,11 +5,9 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DetectorInfo.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadILLDiffraction.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::API;
