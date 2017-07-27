@@ -914,7 +914,16 @@ void ReflectometryReductionOne2::findTheta0() {
 */
 double
 ReflectometryReductionOne2::twoThetaR(const std::vector<size_t> &detectors) {
-  return getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors));
+  // Get the twoTheta value for the destinaion pixel that we're projecting onto
+  double twoThetaR = getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors));
+  if (getPropertyValue("ReductionType") == "DivergentBeam") {
+    // The angle that should be used in the final conversion to Q is (twoThetaR - theta0).
+    // However, the angle actually used by ConvertUnits is twoThetaD / 2 where twoThetaD
+    // is the detector's twoTheta angle. Since it is not easy to change what angle
+    // ConvertUnits uses, we can compensate by setting twoThetaR = twoThetaD / 2 + theta0
+    twoThetaR = twoThetaR / 2.0 + theta0();
+  }
+  return twoThetaR;
 }
 
 /**
