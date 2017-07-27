@@ -61,7 +61,7 @@ private:
   // For internal use only.
   Beamline(boost::shared_ptr<ComponentInfo> &componentInfo,
            boost::shared_ptr<DetectorInfo> &detectorInfo);
-  bool m_empty = true;
+  bool m_empty;
   boost::shared_ptr<ComponentInfo> m_componentInfo;
   boost::shared_ptr<DetectorInfo> m_detectorInfo;
 };

@@ -25,7 +25,7 @@ bool bindTogether(ComponentInfo *compInfo, DetectorInfo *detInfo) {
 }
 
 Beamline::Beamline()
-    : m_componentInfo(boost::shared_ptr<ComponentInfo>(nullptr)),
+    : m_empty(true), m_componentInfo(boost::shared_ptr<ComponentInfo>(nullptr)),
       m_detectorInfo(boost::shared_ptr<DetectorInfo>(nullptr)) {}
 
 /**
@@ -62,7 +62,8 @@ Beamline::Beamline(ComponentInfo &&componentInfo, DetectorInfo &&detectorInfo)
 
 Beamline::Beamline(boost::shared_ptr<ComponentInfo> &componentInfo,
                    boost::shared_ptr<DetectorInfo> &detectorInfo)
-    : m_componentInfo(componentInfo), m_detectorInfo(detectorInfo) {
+    : m_empty(false), m_componentInfo(componentInfo),
+      m_detectorInfo(detectorInfo) {
   // Code using this should already have these two objects, bound. But we ensure
   // it.
   bindTogether(m_componentInfo.get(), m_detectorInfo.get());

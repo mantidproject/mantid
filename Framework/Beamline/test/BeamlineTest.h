@@ -35,6 +35,7 @@ public:
                beamline.componentInfo().hasDetectorInfo());
     TSM_ASSERT("DetectorInfo should ref ComponentInfo",
                beamline.detectorInfo().hasComponentInfo());
+    TS_ASSERT(!beamline.empty());
   }
 
   void test_copyable() {
@@ -72,6 +73,7 @@ public:
     Beamline b(std::move(a));
     TS_ASSERT_EQUALS(&b.detectorInfo(), detInfo);
     TS_ASSERT_EQUALS(&b.componentInfo(), compInfo);
+    TS_ASSERT(!b.empty());
   }
 
   void test_move_assignment() {
@@ -83,6 +85,7 @@ public:
     b = std::move(a);
     TS_ASSERT_EQUALS(&b.detectorInfo(), detInfo);
     TS_ASSERT_EQUALS(&b.componentInfo(), compInfo);
+    TS_ASSERT(!b.empty());
   }
 
   void test_alias() {
@@ -93,6 +96,7 @@ public:
     Beamline b = a.alias();
     TS_ASSERT_EQUALS(&b.detectorInfo(), detInfo);
     TS_ASSERT_EQUALS(&b.componentInfo(), compInfo);
+    TS_ASSERT(!b.empty());
   }
 
   void test_alias_ownership() {
