@@ -74,10 +74,10 @@ void ReflDataProcessorPresenter::process() {
 
   // Get global settings
   m_preprocessingOptions =
-      m_mainPresenter->getPreprocessingOptionsAsString().toStdString();
-  m_processingOptions = m_mainPresenter->getProcessingOptions().toStdString();
+      m_mainPresenter->getPreprocessingOptionsAsString();
+  m_processingOptions = m_mainPresenter->getProcessingOptions();
   m_postprocessingOptions =
-      m_mainPresenter->getPostprocessingOptions().toStdString();
+      m_mainPresenter->getPostprocessingOptions();
 
   // Get time slicing type
   auto timeSlicingType = m_mainPresenter->getTimeSlicingType().toStdString();

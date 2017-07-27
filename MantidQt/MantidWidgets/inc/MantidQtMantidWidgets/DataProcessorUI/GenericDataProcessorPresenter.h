@@ -116,7 +116,7 @@ public:
   void setOptions(const std::map<QString, QVariant> &options) override;
   void transfer(
       const std::vector<std::map<QString, QString>> &runs) override;
-  void setInstrumentList(const std::vector<QString> &instruments,
+  void setInstrumentList(const QStringList &instruments,
                          const QString &defaultInstrument) override;
   std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
   void acceptViews(DataProcessorView *tableView,
@@ -128,7 +128,7 @@ public:
   // Get the whitelist
   DataProcessorWhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
-  QString getReducedWorkspaceName(const std::vector<QString> &data,
+  QString getReducedWorkspaceName(const QStringList &data,
                                       const QString &prefix = "");
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData,
@@ -236,7 +236,7 @@ private:
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const QString &run,
                       const DataProcessorPreprocessingAlgorithm &alg,
-                      const std::map<QString, QString> &optionsMap);
+                      const std::map<std::string, std::string> &optionsMap);
   // add row(s) to the model
   void appendRow();
   // add group(s) to the model
@@ -307,7 +307,7 @@ private:
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(
-      const std::map<int, std::map<int, std::vector<QString>>> &data);
+      const TreeData &data);
   std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
 };
 }

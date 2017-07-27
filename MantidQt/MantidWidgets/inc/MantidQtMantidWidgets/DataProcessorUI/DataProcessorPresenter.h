@@ -81,7 +81,7 @@ public:
   virtual void setOptions(const std::map<QString, QVariant> &options) = 0;
   virtual void
   transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
-  virtual void setInstrumentList(const std::vector<QString> &instruments,
+  virtual void setInstrumentList(const QStringList &instruments,
                                  const QString &defaultInstrument) = 0;
   virtual std::vector<std::unique_ptr<DataProcessorCommand>>
   publishCommands() = 0;

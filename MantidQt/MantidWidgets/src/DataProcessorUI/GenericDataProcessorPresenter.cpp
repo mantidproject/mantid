@@ -22,13 +22,13 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 
+#include <QHash>
+#include <QStringList>
 #include <algorithm>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
+#include <iterator>
 #include <sstream>
-#include <unordered_map>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -36,32 +36,27 @@ using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
-std::map<QString, QString>
-convertStringToMap(const QString &options) {
 
-  std::vector<QString> optionsVec;
+std::map<QString, QString> convertStringToMap(const QString &options) {
   std::map<QString, QString> optionsMap;
+  auto optionsVec = options.split(";");
 
-  boost::split(optionsVec, options, boost::is_any_of(";"));
-
-  for (const auto &option : optionsVec) {
-
-    std::vector<QString> opt;
-    boost::split(opt, option, boost::is_any_of(","));
-
-    std::vector<QString> temp(opt.begin() + 1, opt.end());
-
-    optionsMap[opt[0]] = boost::algorithm::join(temp, ",");
+  for (auto const &option : optionsVec) {
+    auto opt = option.split(",");
+    auto const key = opt[0];
+    opt.removeFirst();
+    optionsMap[key] = opt.join(",");
   }
+
   return optionsMap;
 }
 
-std::unordered_map<QString, std::set<QString>>
+QHash<QString, std::set<QString>>
 convertStringToMapWithSet(const QString &properties) {
   // The provided string has the form
   // key1: value11, value12; key2: value21;
   // The keys are keys in a map which maps to a set of values
-  std::unordered_map<QString, std::set<QString>> props;
+  QHash<QString, std::set<QString>> props;
 
   if (properties.isEmpty()) {
     return props;
@@ -77,6 +72,38 @@ convertStringToMapWithSet(const QString &properties) {
     props[elements[0]] = values;
   }
   return props;
+}
+
+void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
+                          QString const &value);
+
+void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
+                          std::string const &value);
+
+void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
+                          std::string const &value);
+
+void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
+                          QString const &value);
+
+void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
+                          QString const &value) {
+  setAlgorithmProperty(alg, name, value.toStdString());
+}
+
+void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
+                          std::string const &value) {
+  alg->setProperty(name, value);
+}
+
+void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
+                          std::string const &value) {
+  setAlgorithmProperty(alg, name.toStdString(), value);
+}
+
+void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
+                          QString const &value) {
+  setAlgorithmProperty(alg, name.toStdString(), value.toStdString());
 }
 }
 
@@ -96,12 +123,10 @@ namespace MantidWidgets {
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
+    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
-    const std::map<QString, QString> &postprocessMap,
-    const QString &loader)
+    const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
       m_preprocessMap(preprocessMap), m_processor(processor),
@@ -112,8 +137,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
-                         "<b>Override <samp>" +
-                             processor.name() +
+                         "<b>Override <samp>" + processor.name() +
                              "</samp> properties</b><br /><i>optional</i><br "
                              "/>This column allows you to "
                              "override the properties used when executing "
@@ -148,8 +172,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor)
     : GenericDataProcessorPresenter(
-          whitelist,
-          std::map<QString, DataProcessorPreprocessingAlgorithm>(),
+          whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
           processor, postprocessor) {}
 
 /**
@@ -161,8 +184,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
+    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     DataProcessorPostprocessingAlgorithm()) {}
@@ -177,8 +199,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor)
     : GenericDataProcessorPresenter(
-          whitelist,
-          std::map<QString, DataProcessorPreprocessingAlgorithm>(),
+          whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
           processor, DataProcessorPostprocessingAlgorithm()) {}
 
 /**
@@ -186,6 +207,15 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 */
 GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 
+namespace {
+std::set<std::string> toStdStringSet(std::set<QString> in) {
+  auto out = std::set<std::string>();
+  std::transform(
+      std::begin(in), std::end(in), std::inserter(out, out.begin()),
+      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
+  return out;
+}
+}
 /**
 * Sets the views this presenter is going to handle
 * @param tableView : The table view
@@ -229,9 +259,11 @@ void GenericDataProcessorPresenter::acceptViews(
   // Provide autocompletion hints for the options column. We use the algorithm's
   // properties minus those we blacklist. We blacklist any useless properties or
   // ones we're handling that the user should'nt touch.
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name().toStdString());
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().create(m_processor.name().toStdString());
   m_view->setOptionsHintStrategy(
-      new AlgorithmHintStrategy(alg, m_processor.blacklist()), m_columns - 1);
+      new AlgorithmHintStrategy(alg, toStdStringSet(m_processor.blacklist())),
+      m_columns - 1);
 
   // Start with a blank table
   newTable();
@@ -255,8 +287,7 @@ void GenericDataProcessorPresenter::process() {
   // as unprocessed
   QString newPreprocessingOptions =
       m_mainPresenter->getPreprocessingOptionsAsString();
-  QString newProcessingOptions =
-      m_mainPresenter->getProcessingOptions();
+  QString newProcessingOptions = m_mainPresenter->getProcessingOptions();
   QString newPostprocessingOptions =
       m_mainPresenter->getPostprocessingOptions();
 
@@ -281,7 +312,8 @@ void GenericDataProcessorPresenter::process() {
     // Set group as unprocessed if settings have changed or the expected output
     // workspace cannot be found
     bool groupWSFound = AnalysisDataService::Instance().doesExist(
-        getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix()));
+        getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix())
+            .toStdString());
 
     if (settingsChanged || !groupWSFound)
       m_manager->setProcessed(false, item.first);
@@ -303,7 +335,8 @@ void GenericDataProcessorPresenter::process() {
       bool rowWSFound = true;
       for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
         rowWSFound = AnalysisDataService::Instance().doesExist(
-            getReducedWorkspaceName(data.second, m_processor.prefix(i)));
+            getReducedWorkspaceName(data.second, m_processor.prefix(i))
+                .toStdString());
         if (!rowWSFound)
           break;
       }
@@ -504,9 +537,10 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
         m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
         m_processor, m_postprocessor, preprocessingOptionsMap,
         m_processingOptions, m_postprocessingOptions);
-    auto generatedNotebook = std::string(notebook->generateNotebook(data).toStdString());
+    auto generatedNotebook =
+        std::string(notebook->generateNotebook(data).toStdString());
 
-    std::ofstream file(filename.c_str(), std::ofstream::trunc);
+    std::ofstream file(filename.toStdString(), std::ofstream::trunc);
     file << generatedNotebook;
     file.flush();
     file.close();
@@ -529,7 +563,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
     return;
 
   // The input workspace names
-  std::vector<QString> inputNames;
+  QStringList inputNames;
 
   // The name to call the post-processed ws
   const QString outputWSName =
@@ -544,27 +578,29 @@ void GenericDataProcessorPresenter::postProcessGroup(
 
     if (AnalysisDataService::Instance().doesExist(inputWSName.toStdString())) {
 
-      inputNames.emplace_back(inputWSName);
+      inputNames.append(inputWSName);
     }
   }
-  const QString inputWSNames = boost::algorithm::join(inputNames, ", ");
+  const QString inputWSNames = inputNames.join(", ");
 
   // If the previous result is in the ADS already, we'll need to remove it.
   // If it's a group, we'll get an error for trying to group into a used group
   // name
   if (AnalysisDataService::Instance().doesExist(outputWSName.toStdString()))
-    AnalysisDataService::Instance().remove(outputWSName);
+    AnalysisDataService::Instance().remove(outputWSName.toStdString());
 
   IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create(m_postprocessor.name());
+      AlgorithmManager::Instance().create(m_postprocessor.name().toStdString());
   alg->initialize();
-  alg->setProperty(m_postprocessor.inputProperty(), inputWSNames);
-  alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
+  setAlgorithmProperty(alg.get(), m_postprocessor.inputProperty(),
+                       inputWSNames);
+  setAlgorithmProperty(alg.get(), m_postprocessor.outputProperty(),
+                       outputWSName);
 
-  auto optionsMap = parseKeyValueString(m_postprocessingOptions);
+  auto optionsMap = parseKeyValueString(m_postprocessingOptions.toStdString());
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      alg->setProperty(kvp->first, kvp->second);
+      setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);
@@ -576,12 +612,13 @@ void GenericDataProcessorPresenter::postProcessGroup(
     const QString propName = prop.second;
     const QString propValueStr =
         groupData.begin()->second[m_whitelist.colIndexFromColName(prop.first)];
-    if (!propValueStr.empty()) {
+    if (!propValueStr.isEmpty()) {
       // Warning: we take minus the value of the properties because in
       // Reflectometry this property refers to the rebin step, and they want a
       // logarithmic binning. If other technique areas need to use a
       // post-process map we'll need to re-think how to do this.
-      alg->setPropertyValue(propName, "-" + propValueStr);
+      alg->setPropertyValue(propName.toStdString(),
+                            ("-" + propValueStr).toStdString());
     }
   }
 
@@ -603,37 +640,34 @@ desired workspace
 Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     const QString &runStr,
     const DataProcessorPreprocessingAlgorithm &preprocessor,
-    const std::map<QString, QString> &optionsMap) {
+    const std::map<std::string, std::string> &optionsMap) {
   const QString instrument = m_view->getProcessInstrument();
 
-  std::vector<QString> runs;
-  boost::split(runs, runStr, boost::is_any_of("+,"));
-
-  if (runs.empty())
+  auto runs = runStr.split(QRegExp("(+|,)"));
+  if (runs.isEmpty())
     throw std::runtime_error("No runs given");
 
   // Remove leading/trailing whitespace from each run
-  for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
-    boost::trim(*runIt);
+  std::transform(runs.begin(), runs.end(), runs.begin(),
+                 [](QString in) -> QString { return in.trimmed(); });
 
   // If we're only given one run, just return that
   if (runs.size() == 1)
     return getRun(runs[0], instrument, preprocessor.prefix());
 
-  const QString outputName =
-      preprocessor.prefix() + boost::algorithm::join(runs, "_");
+  const QString outputName = preprocessor.prefix() + runs.join(" ");
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
   * but that doesn't preserve history nicely, so we'll just take care of tidying
   * up in the event of failure.
   */
   IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create(preprocessor.name());
+      AlgorithmManager::Instance().create(preprocessor.name().toStdString());
   alg->initialize();
-  alg->setProperty(
-      preprocessor.lhsProperty(),
+  setAlgorithmProperty(
+      alg.get(), preprocessor.lhsProperty(),
       getRun(runs[0], instrument, preprocessor.prefix())->getName());
-  alg->setProperty(preprocessor.outputProperty(), outputName);
+  setAlgorithmProperty(alg.get(), preprocessor.outputProperty(), outputName);
 
   // Drop the first run from the runs list
   runs.erase(runs.begin());
@@ -644,32 +678,33 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
       for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
         try {
-          alg->setProperty(kvp->first, kvp->second);
+          setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // We can't apply this option to this pre-processing alg
           throw;
         }
       }
 
-      alg->setProperty(
-          preprocessor.rhsProperty(),
+      setAlgorithmProperty(
+          alg.get(), preprocessor.rhsProperty(),
           getRun(*runIt, instrument, preprocessor.prefix())->getName());
       alg->execute();
 
       if (runIt != --runs.end()) {
         // After the first execution we replace the LHS with the previous output
-        alg->setProperty(preprocessor.lhsProperty(), outputName);
+        setAlgorithmProperty(alg.get(), preprocessor.lhsProperty(), outputName);
       }
     }
   } catch (...) {
     // If we're unable to create the full workspace, discard the partial version
-    AnalysisDataService::Instance().remove(outputName);
+    AnalysisDataService::Instance().remove(outputName.toStdString());
 
     // We've tidied up, now re-throw.
     throw;
   }
 
-  return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+  return AnalysisDataService::Instance().retrieveWS<Workspace>(
+      outputName.toStdString());
 }
 
 /**
@@ -679,8 +714,9 @@ Returns the name of the reduced workspace for a given row
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
-QString GenericDataProcessorPresenter::getReducedWorkspaceName(
-    const std::vector<QString> &data, const QString &prefix) {
+QString
+GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
+                                                       const QString &prefix) {
 
   if (static_cast<int>(data.size()) != m_columns)
     throw std::invalid_argument("Can't find reduced workspace name");
@@ -696,7 +732,7 @@ QString GenericDataProcessorPresenter::getReducedWorkspaceName(
   * this method */
 
   // Temporary vector of strings to construct the name
-  std::vector<QString> names;
+  QStringList names;
 
   for (int col = 0; col < m_columns; col++) {
 
@@ -707,20 +743,17 @@ QString GenericDataProcessorPresenter::getReducedWorkspaceName(
       const QString valueStr = data.at(col);
 
       // If it's not empty, use it
-      if (!valueStr.empty()) {
+      if (!valueStr.isEmpty()) {
 
         // But we may have things like '1+2' which we want to replace with '1_2'
-        std::vector<QString> value;
-        boost::split(value, valueStr, boost::is_any_of("+"));
-
-        names.push_back(m_whitelist.prefix(col) +
-                        boost::algorithm::join(value, "_"));
+        auto value = valueStr.split("+");
+        names.append(m_whitelist.prefix(col) + value.join("_"));
       }
     }
   } // Columns
 
   QString wsname = prefix;
-  wsname += boost::algorithm::join(names, "_");
+  wsname += names.join("_");
 
   return wsname;
 }
@@ -740,12 +773,12 @@ QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
   /* This method calculates, for a given set of rows, the name of the output
   * (post-processed) workspace */
 
-  std::vector<QString> outputNames;
+  QStringList outputNames;
 
   for (const auto &data : groupData) {
-    outputNames.push_back(getReducedWorkspaceName(data.second));
+    outputNames.append(getReducedWorkspaceName(data.second));
   }
-  return prefix + boost::join(outputNames, "_");
+  return prefix + outputNames.join("_");
 }
 
 /** Loads a run found from disk or AnalysisDataService
@@ -756,10 +789,9 @@ QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
  * @throws std::runtime_error if the run could not be loaded
  * @returns a shared pointer to the workspace
  */
-Workspace_sptr
-GenericDataProcessorPresenter::getRun(const QString &run,
-                                      const QString &instrument,
-                                      const QString &prefix) {
+Workspace_sptr GenericDataProcessorPresenter::getRun(const QString &run,
+                                                     const QString &instrument,
+                                                     const QString &prefix) {
 
   bool runFound;
   QString outName;
@@ -769,10 +801,11 @@ GenericDataProcessorPresenter::getRun(const QString &run,
   if (!runFound) {
     outName = loadRun(run, instrument, prefix, m_loader, runFound);
     if (!runFound)
-      throw std::runtime_error("Could not open " + fileName);
+      throw std::runtime_error("Could not open " + fileName.toStdString());
   }
 
-  return AnalysisDataService::Instance().retrieveWS<Workspace>(outName);
+  return AnalysisDataService::Instance().retrieveWS<Workspace>(
+      outName.toStdString());
 }
 
 /** Tries fetching a run from AnalysisDataService
@@ -782,8 +815,9 @@ GenericDataProcessorPresenter::getRun(const QString &run,
  * @param runFound : Whether or not the run was actually found
  * @returns string name of the run
  */
-QString GenericDataProcessorPresenter::findRunInADS(
-    const QString &run, const QString &prefix, bool &runFound) {
+QString GenericDataProcessorPresenter::findRunInADS(const QString &run,
+                                                    const QString &prefix,
+                                                    bool &runFound) {
 
   runFound = true;
 
@@ -796,7 +830,7 @@ QString GenericDataProcessorPresenter::findRunInADS(
     return prefix + run;
 
   // Is the run string is numeric?
-  if (boost::regex_match(run, boost::regex("\\d+"))) {
+  if (QRegExp("\\d+").exactMatch(run)) {
 
     // Look for "<run_number>" in the ADS
     if (AnalysisDataService::Instance().doesExist(run.toStdString()))
@@ -821,15 +855,18 @@ QString GenericDataProcessorPresenter::findRunInADS(
  * @param runFound : Whether or not the run was actually found
  * @returns string name of the run
  */
-QString GenericDataProcessorPresenter::loadRun(
-    const QString &run, const QString &instrument,
-    const QString &prefix, const QString &loader, bool &runFound) {
+QString GenericDataProcessorPresenter::loadRun(const QString &run,
+                                               const QString &instrument,
+                                               const QString &prefix,
+                                               const QString &loader,
+                                               bool &runFound) {
 
   runFound = true;
   const QString fileName = instrument + run;
   const QString outputName = prefix + run;
 
-  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader);
+  IAlgorithm_sptr algLoadRun =
+      AlgorithmManager::Instance().create(loader.toStdString());
   algLoadRun->initialize();
   algLoadRun->setProperty("Filename", fileName);
   algLoadRun->setProperty("OutputWorkspace", outputName);
@@ -853,7 +890,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   /* Create the processing algorithm */
 
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().create(m_processor.name().toStdString());
   alg->initialize();
 
   /* Read input properties from the table */
@@ -865,8 +903,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
     globalOptions = convertStringToMap(m_preprocessingOptions);
 
   // Pre-processing properties
-  auto preProcessPropMap = convertStringToMapWithSet(
-      m_mainPresenter->getPreprocessingProperties().toStdString());
+  auto preProcessPropMap =
+      convertStringToMapWithSet(m_mainPresenter->getPreprocessingProperties());
 
   // Properties not to be used in processing
   std::set<QString> restrictedProps;
@@ -882,12 +920,14 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
     // The value for which preprocessing can be conducted on
     QString preProcessValue;
 
-    if (globalOptions.count(columnName) && !globalOptions[columnName].empty()) {
-      auto tmpOptionsMap = parseKeyValueString(globalOptions[columnName]);
+    if (globalOptions.count(columnName) &&
+        !globalOptions[columnName].isEmpty()) {
+      auto tmpOptionsMap =
+          parseKeyValueString(globalOptions[columnName].toStdString());
       for (auto &optionMapEntry : tmpOptionsMap) {
-        preProcessValue += optionMapEntry.second;
+        preProcessValue += QString::fromStdString(optionMapEntry.second);
       }
-    } else if (!data->at(i).empty()) {
+    } else if (!data->at(i).isEmpty()) {
       preProcessValue = data->at(i);
     } else {
       continue;
@@ -906,28 +946,32 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
       auto preprocessor = m_preprocessMap.at(columnName);
 
-      const QString globalOptionsForColumn =
-          globalOptions.count(columnName) > 0 ? globalOptions.at(columnName)
-                                              : "";
+      const QString globalOptionsForColumn = globalOptions.count(columnName) > 0
+                                                 ? globalOptions.at(columnName)
+                                                 : "";
 
-      auto optionsMap = parseKeyValueString(globalOptionsForColumn);
+      auto optionsMap =
+          parseKeyValueString(globalOptionsForColumn.toStdString());
       auto runWS =
           prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
-      alg->setProperty(propertyName, runWS->getName());
+      setAlgorithmProperty(alg.get(), propertyName.toStdString(),
+                           runWS->getName());
     } else {
       // No pre-processing needed
       auto propertyValue = data->at(i);
-      if (!propertyValue.empty())
-        alg->setPropertyValue(propertyName, propertyValue);
+      if (!propertyValue.isEmpty())
+        alg->setPropertyValue(propertyName.toStdString(),
+                              propertyValue.toStdString());
     }
   }
 
   // Parse and set any user-specified options
-  auto optionsMap = parseKeyValueString(m_processingOptions);
+  auto optionsMap = parseKeyValueString(m_processingOptions.toStdString());
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      if (restrictedProps.find(kvp->first) == restrictedProps.end())
-        alg->setProperty(kvp->first, kvp->second);
+      if (restrictedProps.find(QString::fromStdString(kvp->first)) ==
+          restrictedProps.end())
+        setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);
@@ -938,10 +982,10 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   const auto userOptions = data->back();
 
   // Parse and set any user-specified options
-  optionsMap = parseKeyValueString(userOptions);
+  optionsMap = parseKeyValueString(userOptions.toStdString());
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      alg->setProperty(kvp->first, kvp->second);
+      setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);
@@ -950,8 +994,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   /* We need to give a name to the output workspaces */
   for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
-    alg->setProperty(m_processor.outputPropertyName(i),
-                     getReducedWorkspaceName(*data, m_processor.prefix(i)));
+    setAlgorithmProperty(alg.get(), m_processor.outputPropertyName(i),
+                         getReducedWorkspaceName(*data, m_processor.prefix(i)));
   }
 
   /* Now run the processing algorithm */
@@ -965,23 +1009,23 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
       auto columnName = m_whitelist.colNameFromColIndex(i);
 
-      if (data->at(i).empty() && !m_preprocessMap.count(columnName)) {
+      if (data->at(i).isEmpty() && !m_preprocessMap.count(columnName)) {
 
-        QString propValue =
-            alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));
+        QString propValue = QString::fromStdString(alg->getPropertyValue(
+            m_whitelist.algPropFromColIndex(i).toStdString()));
 
         if (m_options["Round"].toBool()) {
-          QString exp = (propValue.find("e") != QString::npos)
-                                ? propValue.substr(propValue.find("e"))
-                                : "";
+          QString exp = (propValue.indexOf("e") != -1)
+                            ? propValue.right(propValue.indexOf("e"))
+                            : "";
           propValue =
-              propValue.substr(0,
-                               propValue.find(".") +
-                                   m_options["RoundPrecision"].toInt() + 1) +
+              propValue.mid(0,
+                            propValue.indexOf(".") +
+                                m_options["RoundPrecision"].toInt() + 1) +
               exp;
         }
 
-        newData->at(i) = propValue;
+        (*newData)[i] = propValue;
       }
     }
   }
@@ -1109,10 +1153,11 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
 Press changes to the same item in the ADS
 */
 void GenericDataProcessorPresenter::saveTable() {
-  if (!m_wsName.empty()) {
+  if (!m_wsName.isEmpty()) {
     AnalysisDataService::Instance().addOrReplace(
-        m_wsName, boost::shared_ptr<ITableWorkspace>(
-                      m_manager->getTableWorkspace()->clone().release()));
+        m_wsName.toStdString(),
+        boost::shared_ptr<ITableWorkspace>(
+            m_manager->getTableWorkspace()->clone().release()));
     m_tableDirty = false;
   } else {
     saveTableAs();
@@ -1125,7 +1170,7 @@ Press changes to a new item in the ADS
 void GenericDataProcessorPresenter::saveTableAs() {
   const QString userString =
       m_view->askUserString("Save As", "Enter a workspace name:", "Workspace");
-  if (!userString.empty()) {
+  if (!userString.isEmpty()) {
     m_wsName = userString;
     saveTable();
   }
@@ -1159,19 +1204,19 @@ void GenericDataProcessorPresenter::openTable() {
       return;
 
   auto &ads = AnalysisDataService::Instance();
-  auto toOpenStd = m_view->getWorkspaceToOpen();
-  auto toOpenQ = QString::fromStdString(toOpenStd);
+  auto toOpen = m_view->getWorkspaceToOpen();
 
-  if (toOpenQ.isEmpty())
+  if (toOpen.isEmpty())
     return;
 
-  if (!ads.isValid(toOpenStd).empty()) {
-    m_view->giveUserCritical("Could not open workspace: " + toOpenQ, "Error");
+  if (!ads.isValid(toOpen.toStdString()).empty()) {
+    m_view->giveUserCritical("Could not open workspace: " + toOpen, "Error");
     return;
   }
 
   ITableWorkspace_sptr origTable =
-      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpenStd);
+      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+          toOpen.toStdString());
 
   // We create a clone of the table for live editing. The original is not
   // updated unless we explicitly save.
@@ -1180,7 +1225,7 @@ void GenericDataProcessorPresenter::openTable() {
   try {
     m_manager->isValidModel(newTable, m_whitelist.size());
     m_manager->newTable(newTable, m_whitelist);
-    m_wsName = toOpenStd;
+    m_wsName = toOpen;
     m_view->showTable(m_manager->getModel());
     m_tableDirty = false;
   } catch (std::runtime_error &e) {
@@ -1194,21 +1239,20 @@ Import a table from TBL file
 */
 void GenericDataProcessorPresenter::importTable() {
 
-  QStringstream pythonSrc;
-  pythonSrc << "try:\n";
-  pythonSrc << "  algm = "
-            << "LoadTBL"
-            << "Dialog()\n";
-  pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
-  pythonSrc << "except:\n";
-  pythonSrc << "  pass\n";
+  QString pythonSrc;
+  pythonSrc += "try:\n";
+  pythonSrc += "  algm = LoadTBLDialog()\n";
+  pythonSrc += "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
+  pythonSrc += "except:\n";
+  pythonSrc += "  pass\n";
 
-  const QString result = m_view->runPythonAlgorithm(pythonSrc.str());
+  const QString result = m_view->runPythonAlgorithm(pythonSrc);
 
   // result will hold the name of the output workspace
   // otherwise this should be an empty string.
-  QString outputWorkspaceName = result;
-  m_view->setModel(toOpen);
+  QString outputWorkspaceName = result.trimmed();
+  if (!outputWorkspaceName.isEmpty())
+    m_view->setModel(outputWorkspaceName);
 }
 
 /**
@@ -1216,13 +1260,13 @@ Export a table to TBL file
 */
 void GenericDataProcessorPresenter::exportTable() {
 
-  std::stringstream pythonSrc;
-  pythonSrc << "try:\n";
-  pythonSrc << "  algm = SaveTBLDialog()\n";
-  pythonSrc << "except:\n";
-  pythonSrc << "  pass\n";
+  QString pythonSrc;
+  pythonSrc += "try:\n";
+  pythonSrc += "  algm = SaveTBLDialog()\n";
+  pythonSrc += "except:\n";
+  pythonSrc += "  pass\n";
 
-  m_view->runPythonAlgorithm(pythonSrc.str());
+  m_view->runPythonAlgorithm(pythonSrc);
 }
 
 /**
@@ -1263,14 +1307,16 @@ void GenericDataProcessorPresenter::clearADSHandle() {
 /**
 Handle ADS rename events
 */
-void GenericDataProcessorPresenter::renameHandle(const QString &oldName,
-                                                 const QString &newName) {
+void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
+                                                 const std::string &newName) {
 
   // if a workspace with oldName exists then replace it for the same workspace
   // with newName
-  if (m_workspaceList.contains(oldName)) {
-    m_workspaceList.remove(oldName);
-    m_workspaceList.insert(newName);
+  auto QoldName = QString::fromStdString(oldName);
+  auto QnewName = QString::fromStdString(newName);
+  if (m_workspaceList.contains(QoldName)) {
+    m_workspaceList.remove(QoldName);
+    m_workspaceList.insert(QnewName);
     m_view->setTableList(m_workspaceList);
     m_mainPresenter->notifyADSChanged(m_workspaceList);
   }
@@ -1280,13 +1326,14 @@ void GenericDataProcessorPresenter::renameHandle(const QString &oldName,
 Handle ADS replace events
 */
 void GenericDataProcessorPresenter::afterReplaceHandle(
-    const QString &name, Mantid::API::Workspace_sptr workspace) {
+    const std::string &name, Mantid::API::Workspace_sptr workspace) {
+  auto Qname = QString::fromStdString(name);
   // Erase it
-  m_workspaceList.remove(QString::fromStdString(name));
+  m_workspaceList.remove(Qname);
 
   // If it's a table workspace, bring it back
   if (m_manager->isValidModel(workspace, m_columns))
-    m_workspaceList.insert(QString::fromStdString(name));
+    m_workspaceList.insert(Qname);
 
   m_view->setTableList(m_workspaceList);
 }
@@ -1343,12 +1390,11 @@ available instruments in the table view
 @param defaultInstrument : The instrument to have selected by default
 */
 void GenericDataProcessorPresenter::setInstrumentList(
-    const std::vector<QString> &instruments, const QString &defaultInstrument) {
+    const QStringList &instruments, const QString &defaultInstrument) {
 
-  QString instrList = boost::algorithm::join(instruments, ",");
+  QString instrList = instruments.join(",");
 
-  m_view->setInstrumentList(QString::fromStdString(instrList),
-                            QString::fromStdString(defaultInstrument));
+  m_view->setInstrumentList(instrList, defaultInstrument);
 }
 
 /** Plots any currently selected rows */
@@ -1357,7 +1403,7 @@ void GenericDataProcessorPresenter::plotRow() {
   // Set of workspaces to plot
   std::set<QString> workspaces;
   // Set of workspaces not found in the ADS
-  std::set<QString> notFound;
+  QSet<QString> notFound;
 
   const auto items = m_manager->selectedData();
 
@@ -1368,7 +1414,7 @@ void GenericDataProcessorPresenter::plotRow() {
       const QString wsName =
           getReducedWorkspaceName(run.second, m_processor.prefix(0));
 
-      if (AnalysisDataService::Instance().doesExist(wsName))
+      if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
         workspaces.insert(wsName);
       else
         notFound.insert(wsName);
@@ -1379,7 +1425,7 @@ void GenericDataProcessorPresenter::plotRow() {
     m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
-            boost::algorithm::join(notFound, "\n") +
+            QStringList(QStringList::fromSet(notFound)).join("\n") +
             "\n\nPlease check that the rows you are trying to plot have been "
             "fully processed.",
         "Error plotting rows.");
@@ -1398,7 +1444,7 @@ void GenericDataProcessorPresenter::plotGroup() {
   // Set of workspaces to plot
   std::set<QString> workspaces;
   // Set of workspaces not found in the ADS
-  std::set<QString> notFound;
+  QSet<QString> notFound;
 
   auto const items = m_manager->selectedData();
 
@@ -1407,7 +1453,7 @@ void GenericDataProcessorPresenter::plotGroup() {
       const QString wsName =
           getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix());
 
-      if (AnalysisDataService::Instance().doesExist(wsName))
+      if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
         workspaces.insert(wsName);
       else
         notFound.insert(wsName);
@@ -1418,7 +1464,7 @@ void GenericDataProcessorPresenter::plotGroup() {
     m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
-            boost::algorithm::join(notFound, "\n") +
+            QStringList(QStringList::fromSet(notFound)).join("\n") +
             "\n\nPlease check that the groups you are trying to plot have been "
             "fully processed.",
         "Error plotting groups.");
@@ -1433,15 +1479,14 @@ Plot a set of workspaces
 void GenericDataProcessorPresenter::plotWorkspaces(
     const std::set<QString> &workspaces) {
   if (!workspaces.empty()) {
-    std::stringstream pythonSrc;
-    pythonSrc << "base_graph = None\n";
+    QString pythonSrc;
+    pythonSrc += "base_graph = None\n";
     for (auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
-      pythonSrc << "base_graph = plotSpectrum(\"" << *ws
-                << "\", 0, True, window = base_graph)\n";
+      pythonSrc += "base_graph = plotSpectrum(\"" + *ws + "\", 0, True, window = base_graph)\n";
 
-    pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
+    pythonSrc += "base_graph.activeLayer().logLogAxes()\n";
 
-    m_view->runPythonAlgorithm(pythonSrc.str());
+    m_view->runPythonAlgorithm(pythonSrc);
   }
 }
 
@@ -1609,8 +1654,8 @@ ChildItems GenericDataProcessorPresenter::selectedChildren() const {
  * @param title :: the title
  * @return :: Yes/No
  */
-bool GenericDataProcessorPresenter::askUserYesNo(
-    const QString &prompt, const QString &title) const {
+bool GenericDataProcessorPresenter::askUserYesNo(const QString &prompt,
+                                                 const QString &title) const {
 
   return m_view->askUserYesNo(prompt, title);
 }

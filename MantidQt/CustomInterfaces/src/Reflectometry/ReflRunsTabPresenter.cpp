@@ -69,12 +69,12 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   m_currentTransferMethod = m_view->getTransferMethod();
 
   // Set up the instrument selectors
-  std::vector<std::string> instruments;
-  instruments.emplace_back("INTER");
-  instruments.emplace_back("SURF");
-  instruments.emplace_back("CRISP");
-  instruments.emplace_back("POLREF");
-  instruments.emplace_back("OFFSPEC");
+  QStringList instruments;
+  instruments.append("INTER");
+  instruments.append("SURF");
+  instruments.append("CRISP");
+  instruments.append("POLREF");
+  instruments.append("OFFSPEC");
 
   // If the user's configured default instrument is in this list, set it as the
   // default, otherwise use INTER
