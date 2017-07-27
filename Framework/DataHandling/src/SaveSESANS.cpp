@@ -76,24 +76,25 @@ void SaveSESANS::exec(){
 	writeHeaders(outfile, ws);
 	outfile << "\n" << "BEGIN_DATA" << "\n";
 
-	const Mantid::MantidVec wavelength = ws->dataX(0);
-	const Mantid::MantidVec yValues = ws->dataY(0);
-	const Mantid::MantidVec eValues = ws->dataE(0);
+	const auto &wavelength = ws->points(0);
+	const auto &yValues = ws->y(0);
+	const auto &eValues = ws->e(0);
 
-	const Mantid::MantidVec spinEchoLength = calculateSpinEchoLength(wavelength);
-	const Mantid::MantidVec depolarisation = calculateDepolarisation(yValues, wavelength);
-	const Mantid::MantidVec error = calculateError(eValues, yValues, wavelength);
+	const auto spinEchoLength = calculateSpinEchoLength(wavelength);
+	const auto depolarisation = calculateDepolarisation(yValues, wavelength);
+	const auto error = calculateError(eValues, yValues, wavelength);
 
 	outfile << "SpinEchoLength Depolarisation Depolarisation_error Wavelength\n";
-	for (int i = 0; i < spinEchoLength.size(); i++) {
-		outfile << std::to_string(spinEchoLength[i]) << " "
-		     	<< std::to_string(depolarisation[i]) << " "
-				<< std::to_string(error[i]) << " "
-				<< std::to_string(wavelength[i]) << "\n";
+	for (int i = 0; i < spinEchoLength.size(); ++i) {
+		outfile << std::to_string(spinEchoLength[i]) << " ";
+		outfile << std::to_string(depolarisation[i]) << " ";
+		outfile << std::to_string(error[i]) << " ";
+		outfile << std::to_string(wavelength[i]) << "\n";
 	}
 
 	outfile.close();
 }
+
 /**
  * Write header values to the output file
  * @param outfile ofstream to the output file
@@ -127,27 +128,48 @@ void SaveSESANS::writeHeader(std::ofstream &outfile, const std::string & name, c
 	outfile << std::setfill(' ') << std::setw(MAX_HDR_LENGTH) << std::left << name << value << "\n";
 }
 
-Mantid::MantidVec SaveSESANS::calculateSpinEchoLength(const Mantid::MantidVec &wavelength) {
-	Mantid::MantidVec spinEchoLength;
-	const double echoConstant = getProperty("EchoConstant");
+/**
+ * Calculate SpinEchoLength column from wavelength 
+ * ( SEL = wavelength * wavelength * echoConstant)
+ * @param wavelength The wavelength column
+ * @return The corresponding SpinEchoLength column
+ */
+std::vector<double> SaveSESANS::calculateSpinEchoLength(const HistogramData::Points & wavelength) const{
+	std::vector<double> spinEchoLength;
+	const double echoConstant = getProperty("Echo_constant");
 
-	// SEL is calculated a wavelength^2 * echoConstant
+	// SEL is calculated as wavelength^2 * echoConstant
 	transform(wavelength.begin(), wavelength.end(), back_inserter(spinEchoLength),
 		[&](double w) { return w * w * echoConstant; });
 	return spinEchoLength;
 }
 
-Mantid::MantidVec SaveSESANS::calculateDepolarisation(const Mantid::MantidVec & yValues, const Mantid::MantidVec & wavelength){
+/**
+ * Calculate the depolarisation column from wavelength and Y values in the workspace
+ * (depol = ln(y) / wavelength^2)
+ * @param yValues Y column in the workspace
+ * @param wavelength Wavelength column
+ * @return The depolarisation column
+ */
+std::vector<double> SaveSESANS::calculateDepolarisation(const HistogramData::HistogramY & yValues, const HistogramData::Points & wavelength) const {
 	Mantid::MantidVec depolarisation;
 
 	// Depol is calculated as ln(y) / wavelength^2
 	transform(yValues.begin(), yValues.end(), wavelength.begin(),
 		back_inserter(depolarisation),
-		[](double y, double w) {return log(y) / (w * w); });
+		[&](double y, double w) {return log(y) / (w * w); });
 	return depolarisation;
 }
 
-Mantid::MantidVec SaveSESANS::calculateError(const Mantid::MantidVec & eValues, const Mantid::MantidVec & yValues, const Mantid::MantidVec & wavelength){
+/**
+ * Calculate the error column from the workspace values
+ * (error = e / (y * wavelength^2))
+ * @param eValues Error values from the workspace
+ * @param yValues Y values from the workspace
+ * @param wavelength Wavelength values (X values from the workspace)
+ * @return The error column
+ */
+Mantid::MantidVec SaveSESANS::calculateError(const HistogramData::HistogramE & eValues, const HistogramData::HistogramY & yValues, const HistogramData::Points & wavelength) const {
 	Mantid::MantidVec error;
 
 	// Error is calculated as e / (y * wavelength^2)

@@ -4,6 +4,7 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -54,7 +55,7 @@ public:
 private:
 	// Length of the longest attribute name in headers (+4 for readability in the file)
 	const int MAX_HDR_LENGTH = 23;
-	const std::vector<std::string> fileExtensions{ ".ses" };
+	const std::vector<std::string> fileExtensions{ ".ses" , ".SES", ".sesans", ".SESANS" };
 
 	void init() override;
 	void exec() override;
@@ -62,9 +63,10 @@ private:
 	void writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const_sptr &ws);
 	void writeHeader(std::ofstream &outfile, const std::string &name, const std::string &value);
 
-	Mantid::MantidVec calculateSpinEchoLength(const Mantid::MantidVec &wavelength);
-	Mantid::MantidVec calculateDepolarisation(const Mantid::MantidVec &yValues, const Mantid::MantidVec &wavelength);
-	Mantid::MantidVec calculateError(const Mantid::MantidVec & eValues, const Mantid::MantidVec &yValues, const Mantid::MantidVec &wavelength);
+	API::MatrixWorkspace_const_sptr convertToSEL(API::MatrixWorkspace_const_sptr &ws);
+	std::vector<double> calculateSpinEchoLength(const HistogramData::Points &wavelength) const;
+	std::vector<double> calculateDepolarisation(const HistogramData::HistogramY &yValues, const HistogramData::Points &wavelength) const;
+	Mantid::MantidVec calculateError(const HistogramData::HistogramE & eValues, const HistogramData::HistogramY &yValues, const HistogramData::Points &wavelength) const;
 
 };
 
