@@ -174,12 +174,46 @@ public:
 
     auto alg = setupSaveGSSAlg(outFilePath, wsName, "RALF");
     alg->setProperty("Data Format", "ALT");
+	alg->setProperty("SplitFiles", false);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
     TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
         "SaveGSS_test2BankRalfAltFormat_ref.gsa", outFilePath));
 
     AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void test_splitFiles() {
+	  // Tests saving a 2 bank instrument with split files selected
+	  const std::string wsName = "SaveGSS_2BankSplit_ws";
+
+	  auto dataWs = generateTestMatrixWorkspace(wsName, 2, m_defaultNumBins);
+
+	  auto outFileHandle = Poco::TemporaryFile();
+	  const std::string outFilePath = outFileHandle.path();
+
+	  auto alg = setupSaveGSSAlg(outFilePath, wsName, "RALF");
+	  alg->setProperty("Data Format", "FXYE");
+	  alg->setProperty("SplitFiles", true);
+	  alg->execute();
+	  TS_ASSERT(alg->isExecuted());
+	  
+	  // The alg will automatically append 0 and 1 when we split the files
+	  const std::string fileOnePath = outFilePath + "-0";
+	  const std::string fileTwoPath = outFilePath + "-1";
+
+	  TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile("SaveGSS-SplitRef-0.gsas", fileOnePath));
+	  TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile("SaveGSS-SplitRef-1.gsas", fileTwoPath));
+
+	  // Use glob to find any files that match the output pattern
+	  std::set<std::string> returnedFiles;
+	  Poco::Glob::glob(outFilePath, returnedFiles);
+	  for (const auto &filename : returnedFiles) {
+		  Poco::File pocoFile{ filename };
+		  pocoFile.remove();
+	  }
+
+	  AnalysisDataService::Instance().remove(wsName);
   }
 
 private:
