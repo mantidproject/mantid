@@ -114,10 +114,12 @@ void vtkSplatterPlotFactory::doCreate(
                                          return !box || box->getNPoints() == 0;
                                        }),
                         m_sortedBoxes.end());
-    sortBoxesByDecreasingSignal(VERBOSE);
+    this->sortBoxesByDecreasingSignal(VERBOSE);
   }
   size_t num_boxes_to_use = static_cast<size_t>(
       m_percentToUse * static_cast<double>(m_sortedBoxes.size()) / 100.0);
+  // ensure there is at least one box
+  num_boxes_to_use = std::max(num_boxes_to_use, size_t{1});
   if (num_boxes_to_use > 0 && num_boxes_to_use >= m_sortedBoxes.size()) {
     num_boxes_to_use = m_sortedBoxes.size() - 1;
   }
