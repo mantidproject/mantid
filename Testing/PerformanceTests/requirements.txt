@@ -1,2 +1,3 @@
-sqllite
+numpy
+matplotlib
 plotly

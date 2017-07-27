@@ -147,15 +147,10 @@ def plot_runtime(annotate, saveImage, path, **kwargs):
 
     if annotate and not saveImage:
         # retrieve commitids for annotation on the plotly graph
-        results = get_results(name, type='', where_clause='')
-        sorted = [(res["revision"], res["variables"], res["date"], res) for res in results]
-        sorted.sort(reverse=False)
+        results = get_results(name, orderby_clause='ORDER BY revision, variables, date')
+        commitids = ["""<a href="%s/commit/%s">  </a>""" % (MANTID_ADDRESS, res["commitid"]) for res in results]
 
-        commitids = []
-        for (rev, variable, date, res) in sorted:
-            commitids.append("""<a href="%s/commit/%s">  </a>""" % (MANTID_ADDRESS, res["commitid"]))
-
-        if last_num > 0:
+        if last_num is not None:
             commitids = commitids[-last_num:]
 
         for x, y, text in zip(xData, yData, commitids):
@@ -171,8 +166,7 @@ def plot_runtime(annotate, saveImage, path, **kwargs):
                 )
             )
 
-    title = ''
-    if last_num > 0:
+    if last_num is not None:
         title = "Runtime History of %s (last %d revs)" % (name, last_num)
     else:
         title = "Runtime History of %s (all revs)" % name
@@ -477,7 +471,7 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
             imgTagHtml = plot_runtime(False, True, path, name=name, x_field=x_field, last_num=last_num)
             divShort = plot_runtime(True, False, path, name=name, x_field=x_field, last_num=last_num)
             # Plot all svn times
-            divDetailed = plot_runtime(True, False, path, name=name, x_field=x_field, last_num=-1)
+            divDetailed = plot_runtime(True, False, path, name=name, x_field=x_field, last_num=None)
 
             html += divDetailed + "\n"
             overview_html += imgTagHtml + "\n"
