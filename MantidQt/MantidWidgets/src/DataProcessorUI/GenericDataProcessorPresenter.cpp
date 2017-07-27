@@ -653,6 +653,9 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
       for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
         try {
+          auto *x = alg->getPointerToProperty(kvp->second);
+          x->type();
+          std::cout << kvp->first << ", " << kvp->second << "\n";
           alg->setProperty(kvp->first, kvp->second);
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // We can't apply this option to this pre-processing alg
@@ -893,9 +896,11 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
     if (globalOptions.count(columnName) && !globalOptions[columnName].empty()) {
       auto tmpOptionsMap = parseKeyValueString(globalOptions[columnName]);
-      for (auto &optionMapEntry : tmpOptionsMap) {
-        preProcessValue += optionMapEntry.second;
+      std::vector<std::string> valueList;
+      for (auto &val : tmpOptionsMap) {
+        valueList.push_back(val.second);
       }
+      preProcessValue = boost::join(valueList, ",");
     } else if (!data->at(i).empty()) {
       preProcessValue = data->at(i);
     } else {

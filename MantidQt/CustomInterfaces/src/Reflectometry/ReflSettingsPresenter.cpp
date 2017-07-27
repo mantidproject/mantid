@@ -209,9 +209,9 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
     if (!transRuns.empty()) {
       std::vector<std::string> splitRuns;
       boost::split(splitRuns, transRuns, boost::is_any_of(","));
-      options.push_back("FirstTransmissionRun=TRANS_" + splitRuns[0]);
+      options.push_back(splitRuns[0]);
       if (splitRuns.size() > 1)
-        options.push_back("SecondTransmissionRun=TRANS_" + splitRuns[1]);
+        options.push_back(splitRuns[1]);
     }
   }
 
@@ -302,12 +302,17 @@ std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
       IAlgorithm_sptr alg =
           AlgorithmManager::Instance().create("LoadISISNexus");
       alg->setProperty("Filename", run);
-      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
+      alg->setPropertyValue("OutputWorkspace", run);
       alg->execute();
     }
   }
 
-  return runs;
+  // Attach labels to the runs and return them as a single string
+  std::string labelledRuns = "FirstTransmissionRun=" + transRuns[0];
+  if (runs.size() > 1)
+    labelledRuns += ",SecondTransmissionRun=" + transRuns[1];
+
+  return labelledRuns;
 }
 
 /** Returns global options for 'Stitch1DMany'
