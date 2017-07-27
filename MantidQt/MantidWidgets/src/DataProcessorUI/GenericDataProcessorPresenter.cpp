@@ -294,7 +294,7 @@ void GenericDataProcessorPresenter::process() {
 
     // Groups that are already processed or cannot be post-processed (only 1
     // child row selected) do not count in progress
-    if (!m_manager->isProcessed(item.first) && item.second.size() > 1)
+    if (!isProcessed(item.first) && item.second.size() > 1)
       maxProgress++;
 
     RowQueue rowQueue;
@@ -318,7 +318,7 @@ void GenericDataProcessorPresenter::process() {
         m_manager->setProcessed(false, data.first, item.first);
 
       // Rows that are already processed do not count in progress
-      if (!m_manager->isProcessed(data.first, item.first))
+      if (!isProcessed(data.first, item.first))
         maxProgress++;
     }
     m_gqueue.emplace(item.first, rowQueue);
@@ -379,7 +379,7 @@ void GenericDataProcessorPresenter::nextRow() {
     m_rowItem = rqueue.front();
     rqueue.pop();
     // Skip reducing rows that are already processed
-    if (!m_manager->isProcessed(m_rowItem.first, groupIndex)) {
+    if (!isProcessed(m_rowItem.first, groupIndex)) {
       startAsyncRowReduceThread(&m_rowItem, groupIndex);
       return;
     }
@@ -390,7 +390,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
     // Skip post-processing groups that are already processed or only contain a
     // single row
-    if (!m_manager->isProcessed(groupIndex) && m_groupData.size() > 1) {
+    if (!isProcessed(groupIndex) && m_groupData.size() > 1) {
       startAsyncGroupReduceThread(m_groupData, groupIndex);
       return;
     }
@@ -423,7 +423,7 @@ void GenericDataProcessorPresenter::nextGroup() {
     m_rowItem = rqueue.front();
     rqueue.pop();
     // Skip reducing rows that are already processed
-    if (!m_manager->isProcessed(m_rowItem.first, m_gqueue.front().first))
+    if (!isProcessed(m_rowItem.first, m_gqueue.front().first))
       startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
     else
       doNextAction();
@@ -1655,5 +1655,41 @@ void GenericDataProcessorPresenter::giveUserWarning(
 bool GenericDataProcessorPresenter::isProcessing() const {
   return !m_reductionPaused;
 }
+
+/** Checks if a row in the table has been processed.
+ * @param position :: the row to check
+ * @return :: true if the row has already been processed else false.
+ */
+bool GenericDataProcessorPresenter::isProcessed(int position) const {
+  // processing truth table
+  // isProcessed      manager    force
+  //    0               1          1
+  //    0               0          1
+  //    1               1          0
+  //    0               0          0
+  return m_manager->isProcessed(position) && !m_forceProcessing;
+}
+
+/** Checks if a row in the table has been processed.
+ * @param position :: the row to check
+ * @return :: true if the row has already been processed else false.
+ */
+bool GenericDataProcessorPresenter::isProcessed(int position, int parent) const {
+  // processing truth table
+  // isProcessed      manager    force
+  //    0               1          1
+  //    0               0          1
+  //    1               1          0
+  //    0               0          0
+  return m_manager->isProcessed(position, parent) && !m_forceProcessing;
+}
+
+/** Set the forced reprocessing flag
+ * @param forceReProcessing :: the row to check
+ */
+void GenericDataProcessorPresenter::setForcedReProcessing(bool forceReProcessing) {
+  m_forceProcessing = forceReProcessing;
+}
+
 }
 }

@@ -97,6 +97,7 @@ public:
   virtual void giveUserWarning(const std::string &prompt,
                                const std::string &title) const = 0;
   virtual bool isProcessing() const = 0;
+  virtual void setForcedReProcessing(bool forceReProcessing) = 0;
 };
 }
 }

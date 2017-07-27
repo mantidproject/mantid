@@ -649,5 +649,10 @@ void QDataProcessorWidget::transfer(const QList<QString> &runs) {
   m_presenter->transfer(runsMap);
 }
 
+void QDataProcessorWidget::setForcedReProcessing(bool forceReProcessing) {
+  m_presenter->setForcedReProcessing(forceReProcessing);
+}
+
+
 } // namespace MantidWidgets
 } // namespace Mantid
