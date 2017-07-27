@@ -294,12 +294,20 @@ void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
   // Check if the caller has reserved space in our output buffer
   assert(m_outputBuffer.size() > 0);
 
+  // Because of the storage layout we can either handle files > 0
+  // XOR spectra per file > 0. Compensate for the fact that is will be
+  // 1 thing per thing as far as users are concerned.
+  assert(numOutFiles > 1 != numOutSpectra > 1);
+
   // If all detectors are not valid we use the no instrument case and
   // set l1 to 0
   const double l1{m_allDetectorsValid ? spectrumInfo.l1() : 0};
 
+  const int64_t numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
+
   // Create the various output files we will need in a loop
-  for (size_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
     // Add header to new files (e.g. doesn't exist or overwriting)
     if (!doesFileExist(m_outFileNames[fileIndex]) || !append) {
       generateInstrumentHeader(m_outputBuffer[fileIndex], l1);
@@ -311,11 +319,14 @@ void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
       if (m_allDetectorsValid && spectrumInfo.isMasked(specIndex)) {
         continue;
       }
+      // Find the index - this is because we are guaranteed at least
+      // one of these is 0 from the assertion above and the fact
+      // split files is a boolean operator on the input side
+      const int64_t index = specIndex + fileIndex;
       // Add bank header and details to buffer
-
-      generateBankHeader(m_outputBuffer[specIndex], spectrumInfo, specIndex);
+      generateBankHeader(m_outputBuffer[index], spectrumInfo, index);
       // Add data to buffer
-      generateBankData(m_outputBuffer[specIndex], specIndex);
+      generateBankData(m_outputBuffer[index], index);
       m_progress->report();
     }
   }
@@ -466,7 +477,7 @@ void SaveGSS::getLogValue(std::stringstream &out, const API::Run &runInfo,
     return;
   }
   // Get handle of property
-  auto *prop = runinfo.getProperty(name);
+  auto *prop = runInfo.getProperty(name);
 
   // Return without a valid pointer to property
   if (!prop) {
@@ -614,15 +625,21 @@ void SaveGSS::validateUserInput() const {
   */
 void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   // When there are multiple files we can open them all in parallel
+  // Check that either the number of files or spectra is greater than
+  // 1 otherwise our storage method is no longer valid
+  assert(numOutFiles > 1 != numSpectra > 1);
+
+  const int64_t numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
+
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t fileIndex = 0; fileIndex < static_cast<int64_t>(numOutFiles);
-       fileIndex++) {
+  for (int64_t fileIndex = 0; fileIndex < numOutFilesInt64; fileIndex++) {
     // Open each file when there are multiple
     auto outFile = openFileStream(m_outFileNames[fileIndex]);
     for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
       // Write each spectra when there are multiple
-      assert(m_outputBuffer[specIndex].str().size() > 0);
-      outFile << m_outputBuffer[specIndex].rdbuf();
+      const size_t index = specIndex + fileIndex;
+      assert(m_outputBuffer[index].str().size() > 0);
+      outFile << m_outputBuffer[index].rdbuf();
     }
     outFile.close();
   }
@@ -668,7 +685,7 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
   std::vector<std::stringstream> outLines;
   outLines.resize(numberOfOutLines);
 
-  // PARALLEL_FOR_NO_WSP_CHECK()
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < numberOfOutLines; i++) {
     auto &outLine = outLines[i];
 
@@ -677,21 +694,20 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
 
     // 4 Blocks of data (20 chars) per line (80 chars)
     for (; dataPosition < endPosition; dataPosition++) {
-      if (dataPosition >= datasize) {
-        // We have run out of data to append
-        break;
+      if (!(dataPosition >= datasize)) {
+        // We have data to append
+
+        const int epos =
+            static_cast<int>(fixErrorValue(eVals[dataPosition] * 1000));
+
+        outLine << std::fixed << std::setw(8)
+                << static_cast<int>(xPointVals[dataPosition] * 32);
+        outLine << std::fixed << std::setw(7)
+                << static_cast<int>(yVals[dataPosition] * 1000);
+        outLine << std::fixed << std::setw(5) << epos;
       }
-
-      const int epos =
-          static_cast<int>(fixErrorValue(eVals[dataPosition] * 1000));
-
-      outLine << std::fixed << std::setw(8)
-              << static_cast<int>(xPointVals[dataPosition] * 32);
-      outLine << std::fixed << std::setw(7)
-              << static_cast<int>(yVals[dataPosition] * 1000);
-      outLine << std::fixed << std::setw(5) << epos;
+      outLine << "\n";
     }
-    outLine << "\n";
   }
 
   for (const auto &outLine : outLines) {
