@@ -1,9 +1,9 @@
-#pylint: disable=no-init
+# pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from six.moves import range #pylint: disable=redefined-builtin
+from six.moves import range  # pylint: disable=redefined-builtin
 from math import sqrt
 
 
@@ -19,13 +19,11 @@ class MSDFit(DataProcessorAlgorithm):
     def category(self):
         return 'Workflow\\MIDAS'
 
-
     def summary(self):
         return 'Fits Intensity vs Q for 3 models to obtain the mean squared displacement.'
 
-
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='Sample input workspace')
         self.declareProperty(name='Model', defaultValue='Gauss',
                              validator=StringListValidator(['Gauss', 'Peters', 'Yi']),
@@ -41,7 +39,7 @@ class MSDFit(DataProcessorAlgorithm):
         self.declareProperty(name='SpecMax', defaultValue=0,
                              doc='End of spectra range to be fit')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output mean squared displacement')
 
         self.declareProperty(ITableWorkspaceProperty('ParameterWorkspace', '',
@@ -53,7 +51,6 @@ class MSDFit(DataProcessorAlgorithm):
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='Output fitted workspaces')
-
 
     def validateInputs(self):
         issues = dict()
@@ -93,11 +90,15 @@ class MSDFit(DataProcessorAlgorithm):
 
         return issues
 
-
     def PyExec(self):
         self._setup()
         progress = Progress(self, 0.0, 0.05, 3)
 
+        rename_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
+        rename_alg.setProperty("InputWorkspace", self._input_ws)
+        rename_alg.setProperty("OutputWorkspace", self._input_ws + "_" + self._model)
+        rename_alg.execute()
+        self._input_ws = self._input_ws + "_" + self._model
         input_params = [self._input_ws + ',i%d' % i for i in range(self._spec_range[0],
                                                                    self._spec_range[1] + 1)]
 
@@ -106,17 +107,17 @@ class MSDFit(DataProcessorAlgorithm):
             logger.information('Model : Gaussian approximation')
             function = 'name=MsdGauss, Height=1.0, Msd=0.1'
             function += ',constraint=(Height>0.0, Msd>0.0)'
-            params_list = ['Height','Msd']
+            params_list = ['Height', 'Msd']
         elif self._model == 'Peters':
             logger.information('Model : Peters & Kneller')
             function = 'name=MsdPeters, Height=1.0, Msd=1.0, Beta=1.0'
             function += ',constraint=(Height>0.0, Msd>0.0, 100.0>Beta>0.3)'
-            params_list = ['Height','Msd','Beta']
+            params_list = ['Height', 'Msd', 'Beta']
         elif self._model == 'Yi':
             logger.information('Model : Yi et al')
             function = 'name=MsdYi, Height=1.0, Msd=1.0, Sigma=0.1'
             function += ',constraint=(Height>0.0, Msd>0.0, Sigma>0.0)'
-            params_list = ['Height','Msd','Sigma']
+            params_list = ['Height', 'Msd', 'Sigma']
         else:
             raise ValueError('No Model defined')
 
@@ -140,7 +141,6 @@ class MSDFit(DataProcessorAlgorithm):
         rename_alg.setProperty("OutputWorkspace", self._output_param_ws)
         rename_alg.execute()
 
-        params_table = mtd[self._output_param_ws]
         progress.report('Create output files')
 
         # Create workspaces for each of the parameters
@@ -207,6 +207,10 @@ class MSDFit(DataProcessorAlgorithm):
         copy_alg.setProperty("OutputWorkspace", self._output_fit_ws)
         copy_alg.execute()
 
+        delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
+        delete_alg.setProperty("InputWorkspace", self._input_ws)
+        delete_alg.execute()
+
         self.setProperty('OutputWorkspace', self._output_msd_ws)
         self.setProperty('ParameterWorkspace', self._output_param_ws)
         self.setProperty('FitWorkspaces', self._output_fit_ws)
@@ -232,5 +236,6 @@ class MSDFit(DataProcessorAlgorithm):
 
         self._spec_range = [self.getProperty('SpecMin').value,
                             self.getProperty('SpecMax').value]
+
 
 AlgorithmFactory.subscribe(MSDFit)
