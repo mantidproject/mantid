@@ -37,6 +37,7 @@ void MSDFit::setup() {
 
   m_msdTree->addProperty(m_properties["Start"]);
   m_msdTree->addProperty(m_properties["End"]);
+  this->modelChanged(m_uiForm.modelInput->currentText());
 
   auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("MSDRange");
 
@@ -64,6 +65,8 @@ void MSDFit::setup() {
           SLOT(plotFit()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.modelInput, SIGNAL(currentIndexChanged(const QString &)), this, 
+          SLOT(modelChanged(const QString &)));
 }
 
 void MSDFit::run() {
@@ -75,6 +78,7 @@ void MSDFit::run() {
   m_pythonExportWsName =
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
 
+  QString model = m_uiForm.modelInput->currentText();
   QString wsName = m_uiForm.dsSampleInput->getCurrentDataName();
   double xStart = m_dblManager->value(m_properties["Start"]);
   double xEnd = m_dblManager->value(m_properties["End"]);
@@ -83,6 +87,7 @@ void MSDFit::run() {
 
   IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
   msdAlg->initialize();
+  msdAlg->setProperty("Model", model);
   msdAlg->setProperty("InputWorkspace", wsName.toStdString());
   msdAlg->setProperty("XStart", xStart);
   msdAlg->setProperty("XEnd", xEnd);
@@ -95,6 +100,19 @@ void MSDFit::run() {
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+}
+
+void MSDFit::modelChanged(const QString &model) {
+  QStringList suffixes = QStringList();
+  
+  if (model.compare("Gauss") == 0) {
+    suffixes << "_q2.nxs";
+  }
+  else {
+    suffixes << "_q.nxs";
+  }
+
+  m_uiForm.dsSampleInput->setFBSuffixes(suffixes);
 }
 
 void MSDFit::singleFit() {
