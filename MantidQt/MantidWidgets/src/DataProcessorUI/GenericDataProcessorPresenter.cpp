@@ -653,10 +653,9 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
       for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
         try {
-          auto *x = alg->getPointerToProperty(kvp->second);
-          x->type();
-          std::cout << kvp->first << ", " << kvp->second << "\n";
-          alg->setProperty(kvp->first, kvp->second);
+          if (kvp->first != preprocessor.lhsProperty() &&
+              kvp->first != preprocessor.rhsProperty())
+            alg->setProperty(kvp->first, kvp->second);
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // We can't apply this option to this pre-processing alg
           throw;

@@ -302,7 +302,7 @@ std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
       IAlgorithm_sptr alg =
           AlgorithmManager::Instance().create("LoadISISNexus");
       alg->setProperty("Filename", run);
-      alg->setPropertyValue("OutputWorkspace", run);
+      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
       alg->execute();
     }
   }
