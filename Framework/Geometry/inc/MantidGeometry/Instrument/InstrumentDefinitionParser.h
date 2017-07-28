@@ -243,14 +243,18 @@ private:
   /// behavior of atof which always returns 0 if there is a problem.
   double attrToDouble(const Poco::XML::Element *pElem, const std::string &name);
 
+  /// Populate vectors of pointers to type and component xml elements
   void getTypeAndComponentPointers(
       const Poco::XML::Element *pRootElem,
       std::vector<Poco::XML::Element *> &typeElems,
       std::vector<Poco::XML::Element *> &compElems) const;
 
+  /// Throw exception if type name is not unique in the IDF
   void throwIfTypeNameNotUnique(const std::string &filename,
                                 const std::string &typeName) const;
 
+  /// Record type as an assembly if it contains a component, otherwise create a
+  /// shape for it
   void
   createShapeIfTypeIsNotAnAssembly(Mantid::Geometry::ShapeFactory &shapeCreator,
                                    size_t iType, Poco::XML::Element *pTypeElem,
