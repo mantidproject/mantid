@@ -206,7 +206,8 @@ void ConjoinWorkspaces::fixSpectrumNumbers(const MatrixWorkspace &ws1,
     return;
   }
 
-  // Because we were told not to check overlapping, fix up any errors we might run into
+  // Because we were told not to check overlapping, fix up any errors we might
+  // run into
   specnum_t min = -1;
   specnum_t max = -1;
   getMinMax(output, min, max);
