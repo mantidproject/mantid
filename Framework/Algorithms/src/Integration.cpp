@@ -111,7 +111,7 @@ void Integration::exec() {
   if (maxWsIndex > numberOfSpectra - 1 || maxWsIndex < minWsIndex) {
     g_log.warning(
         "EndWorkspaceIndex out of range! Set to max workspace index.");
-    maxWsIndex = numberOfSpectra;
+    maxWsIndex = numberOfSpectra - 1;
   }
   auto rangeListCheck = [minWsIndex, maxWsIndex](
       const std::vector<double> &list, const char *name) {
