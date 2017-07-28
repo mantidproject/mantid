@@ -265,12 +265,16 @@ private:
   /// element
   void adjustTypesContainingCombineComponentsElement(
       ShapeFactory &shapeCreator, const std::string &filename,
-      const std::vector<Poco::XML::Element *> &typeElems,
-      size_t numberOfTypes) const;
+      const std::vector<Poco::XML::Element *> &typeElems, size_t numberOfTypes);
 
   /// Create a vector of elements which contain a \<parameter\>
   void createVectorOfElementsContainingAParameterElement(
-    const Poco::XML::Element *pRootElem);
+      Poco::XML::Element *pRootElem);
+
+  /// Check IdList
+  void checkIdListExistsAndDefinesEnoughIDs(IdList idList,
+                                            Poco::XML::Element *pElem,
+                                            const std::string &filename) const;
 
 public: // for testing
   /// return absolute position of point which is set relative to the

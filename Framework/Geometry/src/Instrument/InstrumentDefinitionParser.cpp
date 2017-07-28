@@ -314,12 +314,9 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
 
       // Loop through all <location> and <locations> elements of this component
       // by looping all the child nodes and then see if any of these nodes are
-      // either
-      // <location> or <locations> elements. Done this way order these locations
-      // are processed
-      // is the order they are listed in the IDF. The latter needed to get
-      // detector IDs
-      // assigned as expected
+      // either <location> or <locations> elements. Done this way order these
+      // locations are processed is the order they are listed in the IDF. The
+      // latter needed to get detector IDs assigned as expected
       for (Node *pNode = pElem->firstChild(); pNode != nullptr;
            pNode = pNode->nextSibling()) {
         auto pChildElem = dynamic_cast<Element *>(pNode);
@@ -337,33 +334,9 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
           // append <locations> elements in <locations>
           appendLocations(m_instrument.get(), pChildElem, pElem, idList);
         }
-      } // finished looping over all childs of this component
+      } // finished looping over all children of this component
 
-      // A check
-      if (idList.counted != static_cast<int>(idList.vec.size())) {
-        std::stringstream ss1, ss2;
-        ss1 << idList.vec.size();
-        ss2 << idList.counted;
-        if (!pElem->hasAttribute("idlist")) {
-          g_log.error("No detector ID list found for detectors of type " +
-                      pElem->getAttribute("type"));
-        } else if (idList.vec.empty()) {
-          g_log.error("No detector IDs found for detectors in list " +
-                      pElem->getAttribute("idlist") + "for detectors of type" +
-                      pElem->getAttribute("type"));
-        } else {
-          g_log.error(
-              "The number of detector IDs listed in idlist named " +
-              pElem->getAttribute("idlist") +
-              " is larger than the number of detectors listed in type = " +
-              pElem->getAttribute("type"));
-        }
-        throw Kernel::Exception::InstrumentDefinitionError(
-            "Number of IDs listed in idlist (=" + ss1.str() +
-                ") is larger than the number of detectors listed in type = " +
-                pElem->getAttribute("type") + " (=" + ss2.str() + ").",
-            filename);
-      }
+      checkIdListExistsAndDefinesEnoughIDs(idList, pElem, filename);
       idList.reset();
     }
   }
@@ -393,13 +366,47 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
 }
 
 /**
+ * Check that the required IdList exists in the IDF and defines a sufficient
+ * number of IDs
+ *
+ * @param idList :: The IdList
+ * @param pElem :: Element with the idlist
+ * @param filename :: Name of the IDF, for exception message
+ */
+void InstrumentDefinitionParser::checkIdListExistsAndDefinesEnoughIDs(
+    IdList idList, Element *pElem, const std::string &filename) const {
+  if (idList.counted != static_cast<int>(idList.vec.size())) {
+    std::stringstream ss1, ss2;
+    ss1 << idList.vec.size();
+    ss2 << idList.counted;
+    if (!pElem->hasAttribute("idlist")) {
+      g_log.error("No detector ID list found for detectors of type " +
+                  pElem->getAttribute("type"));
+    } else if (idList.vec.empty()) {
+      g_log.error("No detector IDs found for detectors in list " +
+                  pElem->getAttribute("idlist") + "for detectors of type" +
+                  pElem->getAttribute("type"));
+    } else {
+      g_log.error("The number of detector IDs listed in idlist named " +
+                  pElem->getAttribute("idlist") +
+                  " is larger than the number of detectors listed in type = " +
+                  pElem->getAttribute("type"));
+    }
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Number of IDs listed in idlist (=" + ss1.str() +
+            ") is larger than the number of detectors listed in type = " +
+            pElem->getAttribute("type") + " (=" + ss2.str() + ").",
+        filename);
+  }
+}
+
+/**
  * Create a vector of elements which contain a \<parameter\>
  *
  * @param pRootElem :: Pointer to the root element
  */
 void InstrumentDefinitionParser::
-    createVectorOfElementsContainingAParameterElement(
-        const Element *pRootElem) {
+    createVectorOfElementsContainingAParameterElement(Element *pRootElem) {
   Poco::AutoPtr<NodeList> pNL_parameter =
       pRootElem->getElementsByTagName("parameter");
   unsigned long numParameter = pNL_parameter->length();
@@ -433,7 +440,7 @@ void InstrumentDefinitionParser::
  */
 void InstrumentDefinitionParser::adjustTypesContainingCombineComponentsElement(
     ShapeFactory &shapeCreator, const std::string &filename,
-    const std::vector<Element *> &typeElems, const size_t numberOfTypes) const {
+    const std::vector<Element *> &typeElems, const size_t numberOfTypes) {
   for (size_t iType = 0; iType < numberOfTypes; ++iType) {
     Element *pTypeElem = typeElems[iType];
     std::__cxx11::string typeName = pTypeElem->getAttribute("name");
