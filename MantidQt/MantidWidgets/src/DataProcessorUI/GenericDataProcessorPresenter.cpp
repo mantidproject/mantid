@@ -800,6 +800,9 @@ Workspace_sptr GenericDataProcessorPresenter::getRun(const QString &run,
       outName.toStdString());
 }
 
+bool isNumeric(QString const& numericCandidate) {
+  return QRegExp("\\d+").exactMatch(run);
+} 
 /** Tries fetching a run from AnalysisDataService
  *
  * @param run : The name of the run
@@ -814,22 +817,21 @@ QString GenericDataProcessorPresenter::findRunInADS(const QString &run,
   runFound = true;
 
   // First, let's see if the run given is the name of a workspace in the ADS
-  if (AnalysisDataService::Instance().doesExist(run.toStdString()))
+  if (workspaceExists(run))
     return run;
 
   // Try with prefix
-  if (AnalysisDataService::Instance().doesExist((prefix + run).toStdString()))
+  if (workspaceExists(prefix + run))
     return prefix + run;
 
   // Is the run string is numeric?
-  if (QRegExp("\\d+").exactMatch(run)) {
-
+  if (isNumeric(run)) {
     // Look for "<run_number>" in the ADS
-    if (AnalysisDataService::Instance().doesExist(run.toStdString()))
+    if (workspaceExists(run))
       return run;
 
     // Look for "<instrument><run_number>" in the ADS
-    if (AnalysisDataService::Instance().doesExist((prefix + run).toStdString()))
+    if (workspaceExists(prefix + run))
       return prefix + run;
   }
 
