@@ -959,7 +959,7 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
       auto posBestPar = std::find(reducedChain[j].begin(),
                                   reducedChain[j].end(), bestParameters[j]);
       double varLeft = 0, varRight = 0;
-      for(auto k = reducedChain[j].begin(); k < reducedChain[j].end(); k++) {
+      for (auto k = reducedChain[j].begin(); k < reducedChain[j].end(); k++) {
         if (k < posBestPar)
           varLeft += (*k - bestParameters[j]) * (*k - bestParameters[j]);
         else if (k > posBestPar)
