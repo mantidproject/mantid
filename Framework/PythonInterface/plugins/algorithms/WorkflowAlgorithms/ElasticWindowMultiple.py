@@ -240,8 +240,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         if self._elt_workspace != '':
             logger.information('Creating ELT workspace')
 
-            # If the ELT workspace was not already created then create it here,
-            # otherwise just clone it
+            # If the ELF workspace was not created, create the ELT workspace
+            # from the Q workspace. Else, clone the ELF workspace.
             if self._elf_workspace == '':
                 transpose_alg.setProperty("InputWorkspace", self._q_workspace)
                 transpose_alg.setProperty("OutputWorkspace", self._elt_workspace)
