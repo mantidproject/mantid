@@ -275,29 +275,8 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
 
   adjustTypesContainingCombineComponentsElement(shapeCreator, filename,
                                                 typeElems, numberOfTypes);
-
-  // create m_hasParameterElement
-  Poco::AutoPtr<NodeList> pNL_parameter =
-      pRootElem->getElementsByTagName("parameter");
-
-  unsigned long numParameter = pNL_parameter->length();
-  m_hasParameterElement.reserve(numParameter);
-
-  // It turns out that looping over all nodes and checking if their nodeName is
-  // equal to "parameter" is much quicker than looping over the pNL_parameter
-  // NodeList.
-  Poco::XML::NodeIterator it(pRootElem, Poco::XML::NodeFilter::SHOW_ELEMENT);
-  Poco::XML::Node *pNode = it.nextNode();
-  while (pNode) {
-    if (pNode->nodeName() == "parameter") {
-      auto pParameterElem = dynamic_cast<Element *>(pNode);
-      m_hasParameterElement.push_back(
-          dynamic_cast<Element *>(pParameterElem->parentNode()));
-    }
-    pNode = it.nextNode();
-  }
-
-  m_hasParameterElement_beenSet = true;
+  // Populates m_hasParameterElement
+  createVectorOfElementsContainingAParameterElement(pRootElem);
 
   // See if any parameters set at instrument level
   setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
@@ -411,6 +390,36 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
 
   // And give back what we created
   return m_instrument;
+}
+
+/**
+ * Create a vector of elements which contain a \<parameter\>
+ *
+ * @param pRootElem :: Pointer to the root element
+ */
+void InstrumentDefinitionParser::
+    createVectorOfElementsContainingAParameterElement(
+        const Element *pRootElem) {
+  Poco::AutoPtr<NodeList> pNL_parameter =
+      pRootElem->getElementsByTagName("parameter");
+  unsigned long numParameter = pNL_parameter->length();
+  m_hasParameterElement.reserve(numParameter);
+
+  // It turns out that looping over all nodes and checking if their nodeName is
+  // equal to "parameter" is much quicker than looping over the pNL_parameter
+  // NodeList.
+  NodeIterator it(pRootElem, NodeFilter::SHOW_ELEMENT);
+  Node *pNode = it.nextNode();
+  while (pNode) {
+    if (pNode->nodeName() == "parameter") {
+      auto pParameterElem = dynamic_cast<Element *>(pNode);
+      m_hasParameterElement.push_back(
+          dynamic_cast<Element *>(pParameterElem->parentNode()));
+    }
+    pNode = it.nextNode();
+  }
+
+  m_hasParameterElement_beenSet = true;
 }
 
 /**

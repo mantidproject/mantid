@@ -78,7 +78,8 @@ public:
   };
 
   /// Parse XML contents
-  boost::shared_ptr<Instrument> parseXML(Kernel::ProgressBase *progressReporter);
+  boost::shared_ptr<Instrument>
+  parseXML(Kernel::ProgressBase *progressReporter);
 
   /// Add/overwrite any parameters specified in instrument with param values
   /// specified in <component-link> XML elements
@@ -266,6 +267,10 @@ private:
       ShapeFactory &shapeCreator, const std::string &filename,
       const std::vector<Poco::XML::Element *> &typeElems,
       size_t numberOfTypes) const;
+
+  /// Create a vector of elements which contain a \<parameter\>
+  void createVectorOfElementsContainingAParameterElement(
+    const Poco::XML::Element *pRootElem);
 
 public: // for testing
   /// return absolute position of point which is set relative to the
