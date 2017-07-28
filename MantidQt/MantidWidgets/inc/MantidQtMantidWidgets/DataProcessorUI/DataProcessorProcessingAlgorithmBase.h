@@ -84,8 +84,7 @@ private:
 
 protected:
   // Converts a string to a vector of strings
-  static std::vector<QString>
-  convertStringToVector(const QString &text);
+  static std::vector<QString> convertStringToVector(const QString &text);
   // Converts a string to a set of strings
   static std::set<QString> convertStringToSet(const QString &text);
 };

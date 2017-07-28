@@ -37,9 +37,8 @@ DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
 */
 DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
     const QString &name, const QString &prefix, const QString &blacklist)
-    : DataProcessorPostprocessingAlgorithm(
-          name, prefix,
-          convertStringToSet(blacklist)) {}
+    : DataProcessorPostprocessingAlgorithm(name, prefix,
+                                           convertStringToSet(blacklist)) {}
 
 /** Default constructor: no algorithm defined */
 DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm()

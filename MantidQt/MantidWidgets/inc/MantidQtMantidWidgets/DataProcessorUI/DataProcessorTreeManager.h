@@ -87,12 +87,10 @@ public:
   /// Return selected data
   virtual TreeData selectedData(bool prompt = false) = 0;
   /// Transfer new data to model
-  virtual void
-  transfer(const std::vector<std::map<QString, QString>> &runs,
-           const DataProcessorWhiteList &whitelist) = 0;
+  virtual void transfer(const std::vector<std::map<QString, QString>> &runs,
+                        const DataProcessorWhiteList &whitelist) = 0;
   /// Update row with new data
-  virtual void update(int parent, int child,
-                      const QStringList &data) = 0;
+  virtual void update(int parent, int child, const QStringList &data) = 0;
   /// Get the number of rows of a given parent
   virtual int rowCount() const = 0;
   virtual int rowCount(int parent) const = 0;

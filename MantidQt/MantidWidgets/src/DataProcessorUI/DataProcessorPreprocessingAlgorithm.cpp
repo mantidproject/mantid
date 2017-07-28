@@ -42,8 +42,7 @@ DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
 * algorithm in the processed workspace's name
 */
 DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
-    const QString &name, const QString &prefix,
-    const QString &blacklist)
+    const QString &name, const QString &prefix, const QString &blacklist)
     : DataProcessorPreprocessingAlgorithm(name, prefix,
                                           convertStringToSet(blacklist)) {}
 
@@ -71,8 +70,6 @@ QString DataProcessorPreprocessingAlgorithm::outputProperty() const {
 }
 
 // Returns the prefix to add to the output property
-QString DataProcessorPreprocessingAlgorithm::prefix() const {
-  return m_prefix;
-}
+QString DataProcessorPreprocessingAlgorithm::prefix() const { return m_prefix; }
 }
 }

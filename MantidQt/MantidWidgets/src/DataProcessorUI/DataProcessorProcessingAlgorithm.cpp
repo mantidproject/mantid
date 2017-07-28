@@ -44,9 +44,8 @@ DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm(
 */
 DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm(
     const QString &name, const QString &prefix, const QString &blacklist)
-    : DataProcessorProcessingAlgorithm(
-          name, convertStringToVector(prefix),
-          convertStringToSet(blacklist)) {}
+    : DataProcessorProcessingAlgorithm(name, convertStringToVector(prefix),
+                                       convertStringToSet(blacklist)) {}
 
 // Destructor
 DataProcessorProcessingAlgorithm::~DataProcessorProcessingAlgorithm() {}

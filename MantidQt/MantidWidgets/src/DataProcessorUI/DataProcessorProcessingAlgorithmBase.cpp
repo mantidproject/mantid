@@ -86,8 +86,8 @@ DataProcessorProcessingAlgorithmBase::convertStringToVector(
 * @param text :: the input string to convert
 * @return :: the string as a set
 */
-std::set<QString> DataProcessorProcessingAlgorithmBase::convertStringToSet(
-    const QString &text) {
+std::set<QString>
+DataProcessorProcessingAlgorithmBase::convertStringToSet(const QString &text) {
 
   if (text.isEmpty())
     return std::set<QString>();

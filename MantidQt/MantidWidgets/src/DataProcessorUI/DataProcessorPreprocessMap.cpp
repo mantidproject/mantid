@@ -24,8 +24,8 @@ void DataProcessorPreprocessMap::addElement(const QString &column,
                                             const QString &prefix,
                                             const QString &blacklist) {
 
-  m_map[column] = DataProcessorPreprocessingAlgorithm(
-      algorithm, prefix, blacklist);
+  m_map[column] =
+      DataProcessorPreprocessingAlgorithm(algorithm, prefix, blacklist);
 }
 
 /** Return a map where keys are columns and values pre-processing algorithms

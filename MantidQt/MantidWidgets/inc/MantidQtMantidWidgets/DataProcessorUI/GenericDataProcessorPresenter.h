@@ -114,8 +114,7 @@ public:
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<QString, QVariant> &options() const override;
   void setOptions(const std::map<QString, QVariant> &options) override;
-  void transfer(
-      const std::vector<std::map<QString, QString>> &runs) override;
+  void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   void setInstrumentList(const QStringList &instruments,
                          const QString &defaultInstrument) override;
   std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
@@ -129,15 +128,14 @@ public:
   DataProcessorWhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
   QString getReducedWorkspaceName(const QStringList &data,
-                                      const QString &prefix = "");
+                                  const QString &prefix = "");
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData,
-                                            const QString &prefix = "");
+                                        const QString &prefix = "");
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
-  bool askUserYesNo(const QString &prompt,
-                    const QString &title) const override;
+  bool askUserYesNo(const QString &prompt, const QString &title) const override;
   void giveUserWarning(const QString &prompt,
                        const QString &title) const override;
   bool isProcessing() const override;
@@ -168,7 +166,7 @@ protected:
   void reduceRow(RowData *data);
   // Finds a run in the AnalysisDataService
   QString findRunInADS(const QString &run, const QString &prefix,
-                           bool &runFound);
+                       bool &runFound);
   // Sets whether to prompt user when getting selected runs
   void setPromptUser(bool allowPrompt);
 
@@ -225,13 +223,11 @@ private:
   // A flag of the next action due to be carried out
   ReductionFlag m_nextActionFlag;
   // load a run into the ADS, or re-use one in the ADS if possible
-  Mantid::API::Workspace_sptr getRun(const QString &run,
-                                     const QString &instrument,
-                                     const QString &prefix);
+  Mantid::API::Workspace_sptr
+  getRun(const QString &run, const QString &instrument, const QString &prefix);
   // Loads a run from disk
   QString loadRun(const QString &run, const QString &instrument,
-                      const QString &prefix, const QString &loader,
-                      bool &runFound);
+                  const QString &prefix, const QString &loader, bool &runFound);
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const QString &run,
@@ -306,8 +302,7 @@ private:
                     const std::string &newName) override;
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
-  void saveNotebook(
-      const TreeData &data);
+  void saveNotebook(const TreeData &data);
   std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
 };
 }

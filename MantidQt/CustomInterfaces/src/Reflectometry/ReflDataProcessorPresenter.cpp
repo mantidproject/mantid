@@ -28,12 +28,10 @@ namespace CustomInterfaces {
 */
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
-    const std::map<QString, QString> &postprocessMap,
-    const QString &loader)
+    const std::map<QString, QString> &postprocessMap, const QString &loader)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     postprocessor, postprocessMap, loader) {}
 
@@ -56,8 +54,7 @@ void ReflDataProcessorPresenter::process() {
 
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
-  auto timeSlicingValues =
-      m_mainPresenter->getTimeSlicingValues();
+  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.isEmpty()) {
     // Check if any input event workspaces still exist in ADS
     if (proceedIfWSTypeInADS(newSelected, true)) {
@@ -74,11 +71,9 @@ void ReflDataProcessorPresenter::process() {
     return;
 
   // Get global settings
-  m_preprocessingOptions =
-      m_mainPresenter->getPreprocessingOptionsAsString();
+  m_preprocessingOptions = m_mainPresenter->getPreprocessingOptionsAsString();
   m_processingOptions = m_mainPresenter->getProcessingOptions();
-  m_postprocessingOptions =
-      m_mainPresenter->getPostprocessingOptions();
+  m_postprocessingOptions = m_mainPresenter->getPostprocessingOptions();
 
   // Get time slicing type
   auto timeSlicingType = m_mainPresenter->getTimeSlicingType();
@@ -175,7 +170,8 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
       }
       // Remove monitors which were loaded as separate workspaces
       for (const auto &run : loadedRuns) {
-        AnalysisDataService::Instance().remove(("TOF_" + run + "_monitors").toStdString());
+        AnalysisDataService::Instance().remove(
+            ("TOF_" + run + "_monitors").toStdString());
       }
       return false;
     }
@@ -211,8 +207,8 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
   for (const auto &row : group) {
 
-    const auto rowID = row.first;         // Integer ID of this row
-    const auto data = row.second;         // Vector containing data for this row
+    const auto rowID = row.first;  // Integer ID of this row
+    const auto data = row.second;  // Vector containing data for this row
     auto runNo = row.second.at(0); // The run number
 
     if (timeSlicingType == "UniformEven" || timeSlicingType == "Uniform") {
@@ -311,24 +307,22 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
  * is not an event workspace.
  */
 Mantid::API::IEventWorkspace_sptr
-ReflDataProcessorPresenter::retrieveWorkspaceByName(
-    QString const &name) const {
+ReflDataProcessorPresenter::retrieveWorkspaceByName(QString const &name) const {
   IEventWorkspace_sptr mws;
   if (AnalysisDataService::Instance().doesExist(name.toStdString())) {
-    auto mws =
-        AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(name.toStdString());
+    auto mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
+        name.toStdString());
     if (mws == nullptr) {
       m_view->giveUserCritical("Workspace to slice " + name +
-                                 " is not an event workspace!",
-          "Time slicing error");
+                                   " is not an event workspace!",
+                               "Time slicing error");
       return nullptr;
     } else {
       return mws;
     }
   } else {
-    m_view->giveUserCritical(
-        "Workspace to slice not found: " + name,
-        "Time slicing error");
+    m_view->giveUserCritical("Workspace to slice not found: " + name,
+                             "Time slicing error");
     return nullptr;
   }
 }
@@ -386,8 +380,9 @@ void ReflDataProcessorPresenter::parseCustom(const QString &timeSlicing,
 
   auto timeStr = timeSlicing.split(",");
   std::vector<double> times;
-  std::transform(timeStr.begin(), timeStr.end(), std::back_inserter(times),
-                 [](const QString &astr) { return std::stod(astr.toStdString()); });
+  std::transform(
+      timeStr.begin(), timeStr.end(), std::back_inserter(times),
+      [](const QString &astr) { return std::stod(astr.toStdString()); });
 
   size_t numSlices = times.size() > 1 ? times.size() - 1 : 1;
 
@@ -418,7 +413,8 @@ void ReflDataProcessorPresenter::parseLogValue(const QString &inputStr,
                                                std::vector<double> &startTimes,
                                                std::vector<double> &stopTimes) {
 
-  // auto strMap = fromStdStringMap(parseKeyValueString(inputStr.toStdString()));
+  // auto strMap =
+  // fromStdStringMap(parseKeyValueString(inputStr.toStdString()));
   // QString timeSlicing = strMap.at("Slicing");
   // logFilter = strMap.at("LogFilter");
 
@@ -439,10 +435,10 @@ bool ReflDataProcessorPresenter::loadEventRun(const QString &runNo) {
 
   outName = findRunInADS(runNo, prefix, runFound);
   if (!runFound ||
-      AnalysisDataService::Instance().doesExist((outName + "_monitors").toStdString()) ==
-          false ||
-      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(outName.toStdString()) ==
-          NULL) {
+      AnalysisDataService::Instance().doesExist(
+          (outName + "_monitors").toStdString()) == false ||
+      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
+          outName.toStdString()) == NULL) {
     // Monitors must be loaded first and workspace must be an event workspace
     loadRun(runNo, instrument, prefix, "LoadEventNexus", runFound);
   }
@@ -475,16 +471,17 @@ void ReflDataProcessorPresenter::loadNonEventRun(const QString &runNo) {
  * @returns string name of the run
  */
 QString ReflDataProcessorPresenter::loadRun(const QString &run,
-                                                const QString &instrument,
-                                                const QString &prefix,
-                                                const QString &loader,
-                                                bool &runFound) {
+                                            const QString &instrument,
+                                            const QString &prefix,
+                                            const QString &loader,
+                                            bool &runFound) {
 
   runFound = true;
   auto const fileName = instrument + run;
   auto const outputName = prefix + run;
 
-  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader.toStdString());
+  IAlgorithm_sptr algLoadRun =
+      AlgorithmManager::Instance().create(loader.toStdString());
   algLoadRun->initialize();
   algLoadRun->setProperty("Filename", fileName.toStdString());
   algLoadRun->setProperty("OutputWorkspace", outputName.toStdString());
@@ -509,18 +506,19 @@ QString ReflDataProcessorPresenter::loadRun(const QString &run,
 * @param logFilter :: The log filter to use if slicing by log value
 * @return :: the name of the sliced workspace (without prefix 'TOF_')
 */
-QString ReflDataProcessorPresenter::takeSlice(
-    const QString &runNo, size_t sliceIndex, double startTime,
-    double stopTime, const QString &logFilter) {
+QString ReflDataProcessorPresenter::takeSlice(const QString &runNo,
+                                              size_t sliceIndex,
+                                              double startTime, double stopTime,
+                                              const QString &logFilter) {
 
   QString runName = "TOF_" + runNo;
   QString sliceName = runName + "_slice_" + QString::number(sliceIndex);
   QString monName = runName + "_monitors";
-  QString filterAlg =
-      logFilter.isEmpty() ? "FilterByTime" : "FilterByLogValue";
+  QString filterAlg = logFilter.isEmpty() ? "FilterByTime" : "FilterByLogValue";
 
   // Filter the run using the appropriate filter algorithm
-  IAlgorithm_sptr filter = AlgorithmManager::Instance().create(filterAlg.toStdString());
+  IAlgorithm_sptr filter =
+      AlgorithmManager::Instance().create(filterAlg.toStdString());
   filter->initialize();
   filter->setProperty("InputWorkspace", runName.toStdString());
   filter->setProperty("OutputWorkspace", sliceName.toStdString());
@@ -538,9 +536,11 @@ QString ReflDataProcessorPresenter::takeSlice(
 
   // Obtain the normalization constant for this slice
   IEventWorkspace_sptr mws =
-      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(runName.toStdString());
+      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
+          runName.toStdString());
   double total = mws->run().getProtonCharge();
-  mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(sliceName.toStdString());
+  mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
+      sliceName.toStdString());
   double slice = mws->run().getProtonCharge();
   double scaleFactor = slice / total;
 
@@ -555,21 +555,24 @@ QString ReflDataProcessorPresenter::takeSlice(
       AlgorithmManager::Instance().create("RebinToWorkspace");
   rebinDet->initialize();
   rebinDet->setProperty("WorkspaceToRebin", sliceName.toStdString());
-  rebinDet->setProperty("WorkspaceToMatch", "__" + monName.toStdString() + "_temp");
+  rebinDet->setProperty("WorkspaceToMatch",
+                        "__" + monName.toStdString() + "_temp");
   rebinDet->setProperty("OutputWorkspace", sliceName.toStdString());
   rebinDet->setProperty("PreserveEvents", false);
   rebinDet->execute();
 
   IAlgorithm_sptr append = AlgorithmManager::Instance().create("AppendSpectra");
   append->initialize();
-  append->setProperty("InputWorkspace1", "__" + monName.toStdString() + "_temp");
+  append->setProperty("InputWorkspace1",
+                      "__" + monName.toStdString() + "_temp");
   append->setProperty("InputWorkspace2", sliceName.toStdString());
   append->setProperty("OutputWorkspace", sliceName.toStdString());
   append->setProperty("MergeLogs", true);
   append->execute();
 
   // Remove temporary monitor ws
-  AnalysisDataService::Instance().remove("__" + monName.toStdString() + "_temp");
+  AnalysisDataService::Instance().remove("__" + monName.toStdString() +
+                                         "_temp");
 
   return sliceName.left(4);
 }
@@ -602,8 +605,7 @@ void ReflDataProcessorPresenter::plotRow() {
       const auto wsName = getReducedWorkspaceName(run.second, "IvsQ_");
 
       for (size_t slice = 0; slice < numSlices; slice++) {
-        const QString sliceName =
-            wsName + "_slice_" + QString::number(slice);
+        const QString sliceName = wsName + "_slice_" + QString::number(slice);
         if (AnalysisDataService::Instance().doesExist(sliceName.toStdString()))
           workspaces.insert(sliceName);
         else
@@ -639,7 +641,7 @@ QString ReflDataProcessorPresenter::getPostprocessedWorkspaceName(
 
   for (const auto &data : groupData) {
     outputNames.append(getReducedWorkspaceName(data.second) + "_slice_" +
-                          QString::number(index));
+                       QString::number(index));
   }
   return prefix + outputNames.join("_");
 }
@@ -652,8 +654,7 @@ void ReflDataProcessorPresenter::plotGroup() {
     return;
 
   // If slicing values are empty plot normally
-  auto timeSlicingValues =
-      m_mainPresenter->getTimeSlicingValues();
+  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.isEmpty()) {
     GenericDataProcessorPresenter::plotGroup();
     return;
@@ -687,7 +688,7 @@ void ReflDataProcessorPresenter::plotGroup() {
     m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
-            QStringList(QStringList::fromSet(notFound)).join("\n")+
+            QStringList(QStringList::fromSet(notFound)).join("\n") +
             "\n\nPlease check that the groups you are trying to plot have been "
             "fully processed.",
         "Error plotting groups.");
@@ -723,7 +724,8 @@ bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
           foundInputWorkspaces.append(outName);
         } else if (isEventWS) { // monitors must be loaded
           auto monName = outName + "_monitors";
-          if (AnalysisDataService::Instance().doesExist(monName.toStdString()) == false)
+          if (AnalysisDataService::Instance().doesExist(
+                  monName.toStdString()) == false)
             foundInputWorkspaces.append(outName);
         }
       }

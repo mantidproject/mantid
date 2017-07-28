@@ -41,7 +41,7 @@ Create string of comma separated list of values from a vector
 template <typename T, typename A>
 QString vectorString(const std::vector<T, A> &param_vec) {
   std::ostringstream vector_string;
-  const char* separator = "";
+  const char *separator = "";
   for (auto paramIt = param_vec.begin(); paramIt != param_vec.end();
        ++paramIt) {
     vector_string << separator << *paramIt;

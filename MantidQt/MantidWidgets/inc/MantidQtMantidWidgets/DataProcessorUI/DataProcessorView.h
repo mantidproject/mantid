@@ -62,9 +62,8 @@ public:
   // Dialog/Prompt methods
   virtual QString requestNotebookPath() = 0;
   /// Dialog/Prompt methods
-  virtual QString askUserString(const QString &prompt,
-                                    const QString &title,
-                                    const QString &defaultValue) = 0;
+  virtual QString askUserString(const QString &prompt, const QString &title,
+                                const QString &defaultValue) = 0;
   virtual bool askUserYesNo(QString prompt, QString title) = 0;
   virtual void giveUserWarning(QString prompt, QString title) = 0;
   virtual void giveUserCritical(QString prompt, QString title) = 0;

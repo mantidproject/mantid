@@ -89,7 +89,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
       {"Run(s)",
        DataProcessorPreprocessingAlgorithm(
            "Plus", "TOF_", std::set<QString>{"LHSWorkspace", "RHSWorkspace",
-                                                 "OutputWorkspace"})},
+                                             "OutputWorkspace"})},
       /* 'CreateTransmissionWorkspaceAuto' will be applied to column
          'Transmission Run(s)'*/
       {"Transmission Run(s)",

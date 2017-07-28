@@ -564,9 +564,8 @@ QString QDataProcessorWidget::askUserString(const QString &prompt,
                                             const QString &defaultValue) {
 
   bool ok;
-  QString text =
-      QInputDialog::getText(this, title, prompt, QLineEdit::Normal,
-                            defaultValue, &ok);
+  QString text = QInputDialog::getText(this, title, prompt, QLineEdit::Normal,
+                                       defaultValue, &ok);
   return ok ? text : QString("");
 }
 
@@ -575,8 +574,7 @@ QString QDataProcessorWidget::askUserString(const QString &prompt,
 * @param pythonCode :: the python code to run
 * @return :: output from execution
 */
-QString
-QDataProcessorWidget::runPythonAlgorithm(const QString &pythonCode) {
+QString QDataProcessorWidget::runPythonAlgorithm(const QString &pythonCode) {
 
   QString output = runPythonCode(pythonCode);
   emit ranPythonAlgorithm(pythonCode);

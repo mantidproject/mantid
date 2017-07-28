@@ -68,12 +68,10 @@ private:
   void plotGroup() override;
   // Loads a run from disk
   QString loadRun(const QString &run, const QString &instrument,
-                      const QString &prefix, const QString &loader,
-                      bool &runFound);
+                  const QString &prefix, const QString &loader, bool &runFound);
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData,
-                                            const QString &prefix,
-                                            size_t index);
+                                        const QString &prefix, size_t index);
   // Loads a group of runs
   bool loadGroup(const GroupData &group);
   // Process a group of runs which are event workspaces
@@ -84,13 +82,11 @@ private:
   bool processGroupAsNonEventWS(int groupID, GroupData &group);
 
   // Parse uniform / uniform even time slicing from input string
-  void parseUniform(const QString &timeSlicing,
-                    const QString &slicingType, const QString &wsName,
-                    std::vector<double> &startTimes,
+  void parseUniform(const QString &timeSlicing, const QString &slicingType,
+                    const QString &wsName, std::vector<double> &startTimes,
                     std::vector<double> &stopTimes);
   // Parse custom time slicing from input string
-  void parseCustom(const QString &timeSlicing,
-                   std::vector<double> &startTimes,
+  void parseCustom(const QString &timeSlicing, std::vector<double> &startTimes,
                    std::vector<double> &stopTimes);
   // Parse log value slicing and filter from input string
   void parseLogValue(const QString &inputStr, QString &logFilter,
@@ -103,9 +99,8 @@ private:
   void loadNonEventRun(const QString &runNo);
 
   // Take a slice from event workspace
-  QString takeSlice(const QString &runNo, size_t sliceIndex,
-                        double startTime, double stopTime,
-                        const QString &logFilter = "");
+  QString takeSlice(const QString &runNo, size_t sliceIndex, double startTime,
+                    double stopTime, const QString &logFilter = "");
 
   Mantid::API::IEventWorkspace_sptr
   retrieveWorkspaceByName(QString const &name) const;

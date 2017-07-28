@@ -48,8 +48,7 @@ using RowData = QStringList;
 using GroupData = std::map<int, RowData>;
 using TreeData = std::map<int, GroupData>;
 
-QStringList DLLExport
-splitByCommas(const QString &namesString);
+QStringList DLLExport splitByCommas(const QString &namesString);
 
 QString DLLExport plot1DString(const QStringList &ws_names);
 
@@ -65,8 +64,7 @@ boost::tuple<QString, QString> DLLExport postprocessGroupString(
     const QString &postprocessingOptions);
 
 QString DLLExport
-plotsString(const QStringList &output_ws,
-            const QString &stitched_wsStr,
+plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
             const DataProcessorProcessingAlgorithm &processor);
 
 QString DLLExport
@@ -77,8 +75,7 @@ getReducedWorkspaceName(const RowData &data,
 boost::tuple<QString, QString> DLLExport reduceRowString(
     const RowData &data, const QString &instrument,
     const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const std::map<QString, QString> &preprocessOoptionsMap,
     const QString &processingOptions);

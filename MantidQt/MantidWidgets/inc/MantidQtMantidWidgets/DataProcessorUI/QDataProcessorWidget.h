@@ -83,7 +83,7 @@ public:
   QString requestNotebookPath() override;
   /// Dialog/Prompt methods
   QString askUserString(const QString &prompt, const QString &title,
-                            const QString &defaultValue) override;
+                        const QString &defaultValue) override;
   bool askUserYesNo(QString prompt, QString title) override;
   void giveUserWarning(QString prompt, QString title) override;
   void giveUserCritical(QString prompt, QString title) override;
@@ -167,7 +167,7 @@ private slots:
                       const QModelIndex &bottomRight);
   void showContextMenu(const QPoint &pos);
   void processClicked();
-  void ensureHasExtension(QString& filename) const;
+  void ensureHasExtension(QString &filename) const;
 };
 
 } // namespace Mantid

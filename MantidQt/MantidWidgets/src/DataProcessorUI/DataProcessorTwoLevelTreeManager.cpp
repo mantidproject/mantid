@@ -488,7 +488,8 @@ TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
           std::stringstream err;
           err << "Some groups will not be fully processed.";
           err << " Are you sure you want to continue?";
-          if (!m_presenter->askUserYesNo(QString::fromStdString(err.str()), "Continue Processing?"))
+          if (!m_presenter->askUserYesNo(QString::fromStdString(err.str()),
+                                         "Continue Processing?"))
             return selectedData;
           else
             break;
@@ -570,8 +571,8 @@ void DataProcessorTwoLevelTreeManager::transfer(
 * @param child :: the row
 * @param data :: the data
 */
-void DataProcessorTwoLevelTreeManager::update(
-    int parent, int child, const QStringList &data) {
+void DataProcessorTwoLevelTreeManager::update(int parent, int child,
+                                              const QStringList &data) {
 
   if (static_cast<int>(data.size()) != m_model->columnCount())
     throw std::invalid_argument("Can't update tree with given data");
@@ -665,7 +666,8 @@ ITableWorkspace_sptr DataProcessorTwoLevelTreeManager::createDefaultWorkspace(
 
   for (int col = 0; col < static_cast<int>(whitelist.size()); col++) {
     // The columns provided to this presenter
-    auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
+    auto column =
+        ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
     column->setPlotType(0);
   }
   ws->appendRow();

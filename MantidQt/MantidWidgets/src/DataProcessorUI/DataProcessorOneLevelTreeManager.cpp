@@ -189,8 +189,7 @@ QString DataProcessorOneLevelTreeManager::copySelected() {
   for (const auto &row : selectedRows) {
     QStringList line;
     for (int col = 0; col < m_model->columnCount(); col++) {
-      line.append(
-          m_model->data(m_model->index(row, col)).toString());
+      line.append(m_model->data(m_model->index(row, col)).toString());
     }
     lines.append(line.join("\t"));
   }
@@ -231,8 +230,7 @@ void DataProcessorOneLevelTreeManager::pasteSelected(const QString &text) {
     for (int col = 0;
          col < m_model->columnCount() && col < static_cast<int>(values.size());
          ++col)
-      m_model->setData(m_model->index(*rowIt, col),
-                       values[col]);
+      m_model->setData(m_model->index(*rowIt, col), values[col]);
   }
 }
 
@@ -314,8 +312,7 @@ TreeData DataProcessorOneLevelTreeManager::selectedData(bool prompt) {
 
     QStringList data;
     for (int i = 0; i < m_model->columnCount(); i++)
-      data.append(
-          m_model->data(m_model->index(row, i)).toString());
+      data.append(m_model->data(m_model->index(row, i)).toString());
     selectedData[row][row] = data;
   }
   return selectedData;
@@ -368,8 +365,8 @@ void DataProcessorOneLevelTreeManager::transfer(
 * @param child :: the row
 * @param data :: the data
 */
-void DataProcessorOneLevelTreeManager::update(
-    int parent, int child, const QStringList &data) {
+void DataProcessorOneLevelTreeManager::update(int parent, int child,
+                                              const QStringList &data) {
 
   UNUSED_ARG(child);
 
@@ -377,8 +374,7 @@ void DataProcessorOneLevelTreeManager::update(
     throw std::invalid_argument("Can't update tree with given data");
 
   for (int col = 0; col < m_model->columnCount(); col++)
-    m_model->setData(m_model->index(parent, col),
-                     data[col]);
+    m_model->setData(m_model->index(parent, col), data[col]);
 }
 
 /** Gets the number of rows in the table
@@ -464,7 +460,8 @@ ITableWorkspace_sptr DataProcessorOneLevelTreeManager::createDefaultWorkspace(
 
   for (int col = 0; col < static_cast<int>(whitelist.size()); col++) {
     // The columns provided to this presenter
-    auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
+    auto column =
+        ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
     column->setPlotType(0);
   }
   ws->appendRow();

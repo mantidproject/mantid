@@ -29,8 +29,7 @@ void DataProcessorWhiteList::addElement(const QString &colName,
 /** Returns the column index for a column specified via its name
     @param colName : The column name
 */
-int DataProcessorWhiteList::colIndexFromColName(
-    const QString &colName) const {
+int DataProcessorWhiteList::colIndexFromColName(const QString &colName) const {
   return m_colNameToColIndex.at(colName);
 }
 

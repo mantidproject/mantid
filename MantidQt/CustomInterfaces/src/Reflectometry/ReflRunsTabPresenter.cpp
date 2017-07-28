@@ -38,9 +38,10 @@ namespace CustomInterfaces {
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
-QStringList fromStdStringVector(std::vector<std::string> const& inVec) {
+QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
   QStringList outVec;
-  std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec), &QString::fromStdString);
+  std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec),
+                 &QString::fromStdString);
   return outVec;
 }
 }
@@ -88,17 +89,19 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
 
   // If the user's configured default instrument is in this list, set it as the
   // default, otherwise use INTER
-  const std::string defaultInst = 
+  const std::string defaultInst =
       Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
   if (std::find(instruments.begin(), instruments.end(), defaultInst) !=
       instruments.end()) {
     m_view->setInstrumentList(instruments, defaultInst);
     for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(fromStdStringVector(instruments), QString::fromStdString(defaultInst));
+      presenter->setInstrumentList(fromStdStringVector(instruments),
+                                   QString::fromStdString(defaultInst));
   } else {
     m_view->setInstrumentList(instruments, "INTER");
     for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(fromStdStringVector(instruments), QString::fromStdString("INTER"));
+      presenter->setInstrumentList(fromStdStringVector(instruments),
+                                   QString::fromStdString("INTER"));
   }
 }
 
@@ -312,7 +315,8 @@ void ReflRunsTabPresenter::transfer() {
   }
 
   m_tablePresenters.at(m_view->getSelectedGroup())
-      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(results.getTransferRuns()));
+      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
+          results.getTransferRuns()));
 }
 
 /**
