@@ -206,7 +206,7 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Init properties for diagnostics
   initDebugProperties();
-  
+
   // Output workspace in Q
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceBinned", "", Direction::Output),

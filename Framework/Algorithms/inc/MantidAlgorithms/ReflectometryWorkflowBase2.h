@@ -65,8 +65,8 @@ protected:
   /// Crop a workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   cropWavelength(Mantid::API::MatrixWorkspace_sptr inputWS,
-      const bool useArgs = false, const double argMin = 0.0,
-      const double argMax = 0.0);
+                 const bool useArgs = false, const double argMin = 0.0,
+                 const double argMax = 0.0);
   // Create a detector workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
