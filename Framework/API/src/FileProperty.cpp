@@ -4,7 +4,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Strings.h"
 
 #include <Poco/File.h>
@@ -12,8 +11,6 @@
 
 #include <boost/make_shared.hpp>
 
-#include <algorithm>
-#include <cctype>
 #include <cstdlib>
 #include <iterator>
 
@@ -403,10 +400,12 @@ std::string FileProperty::convertExtension(const std::string &filepath) const {
 }
 
 /** Expand user variables in file path.
- *  On UNIX, ~ is replaced by the user's home directory, if found.
- *  On Windows, a combination of HOMEPATH and HOMEDRIVE will be used.
+ *  On Windows and UNIX, ~ is replaced by the user's home directory, if found.
  *  If the path contains no user variables, or expansion fails, the path is
- *  returned unchanged, for errors to be dealt with by the calling function
+ *  returned unchanged, for errors to be dealt with by the calling function.
+ *  Note: this function does not support the "~user/blah" format for a named
+ *  user's home directory - if this is encountered, the filepath is returned
+ *  unchanged.
  *  @param filepath The path to expand
  *  @return The expanded path
  */
@@ -419,31 +418,18 @@ std::string FileProperty::expandUser(const std::string &filepath) const {
   // Position of the first slash after the variable
   auto nextSlash = find_if(start, filepath.end(), &isSlash);
 
-  // UNIX-style home variable (ie ~/blah)
-  if (std::distance(start, nextSlash) == 1) {
-    char *home;
+  // ~user/blah format - no support for this as yet
+  if (std::distance(start, nextSlash) != 1)
+    return filepath;
 
-    if (!(home = std::getenv("HOME")))
-      if (!(home = std::getenv("USERPROFILE")))
-        if (!(home = std::getenv("HOMEPATH")))
-          // Couldn't find any relevant environment variables
-          return filepath;
+  char *home;
+  if (!(home = std::getenv("HOME")))          // Usually set on Windows and UNIX
+    if (!(home = std::getenv("USERPROFILE"))) // Not usually set on UNIX
+      // Couldn't find any relevant environment variables
+      return filepath;
 
-    std::string homeStr = std::string(home);
-    return homeStr + std::string(nextSlash, filepath.end());
-  }
-
-  // Windows-style home variables (ie ~user/blah)
-  char *drive = std::getenv("HomeDrive");
-  char *home = std::getenv("HomePath");
-  if (drive && home) {
-    std::string driveStr = std::string(drive);
-    std::string homeStr = std::string(home);
-    return driveStr + homeStr + std::string(nextSlash, filepath.end());
-  }
-
-  // Couldn't find enough relevant environment variables
-  return filepath;
+  std::string homeStr = std::string(home);
+  return homeStr + std::string(nextSlash, filepath.end());
 }
 
 /** Is a character either a forward- or back-slash? Helper for expandUser
