@@ -332,9 +332,9 @@ void DataProcessorOneLevelTreeManager::transfer(
     // If the table only has one row, check if it is empty and if so, remove it.
     // This is to make things nicer when transferring, as the default table has
     // one empty row
-    size_t cols = ws->columnCount();
+    auto cols = ws->columnCount();
     bool emptyTable = true;
-    for (size_t i = 0; i < cols; i++) {
+    for (auto i = 0u; i < cols; i++) {
       if (!ws->String(0, i).empty())
         emptyTable = false;
     }
@@ -347,7 +347,7 @@ void DataProcessorOneLevelTreeManager::transfer(
 
     TableRow newRow = ws->appendRow();
 
-    for (int i = 0; i < static_cast<int>(whitelist.size()); i++) {
+    for (auto i = 0; i < static_cast<int>(whitelist.size()); i++) {
       const QString columnName = whitelist.colNameFromColIndex(i);
       if (row.count(columnName)) {
         newRow << row.at(columnName);
@@ -485,8 +485,8 @@ void DataProcessorOneLevelTreeManager::validateModel(
                              "columns to be used as a data processor table.");
 
   try {
-    size_t ncols = ws->columnCount();
-    for (size_t i = 0; i < ncols; i++)
+    auto ncols = ws->columnCount();
+    for (auto i = 0u; i < ncols; i++)
       ws->String(0, i);
   } catch (const std::runtime_error &) {
     throw std::runtime_error("Selected table does not meet the specifications "

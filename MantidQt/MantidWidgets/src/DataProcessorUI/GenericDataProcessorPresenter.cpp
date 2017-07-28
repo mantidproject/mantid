@@ -322,7 +322,7 @@ void GenericDataProcessorPresenter::process() {
       // Set row as unprocessed if settings have changed or the expected output
       // workspaces cannot be found
       bool rowWSFound = true;
-      for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
+      for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
         rowWSFound = AnalysisDataService::Instance().doesExist(
             getReducedWorkspaceName(data.second, m_processor.prefix(i))
                 .toStdString());
@@ -982,7 +982,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   }
 
   /* We need to give a name to the output workspaces */
-  for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
+  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
     setAlgorithmProperty(alg.get(), m_processor.outputPropertyName(i),
                          getReducedWorkspaceName(*data, m_processor.prefix(i)));
   }
@@ -1532,7 +1532,7 @@ void GenericDataProcessorPresenter::addCommands() {
 
   auto commands = m_manager->publishCommands();
   std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;
-  for (size_t comm = 10; comm < commands.size(); comm++)
+  for (auto comm = 10u; comm < commands.size(); comm++)
     commandsToShow.push_back(std::move(commands.at(comm)));
   m_view->addActions(std::move(commandsToShow));
 }
@@ -1567,7 +1567,7 @@ void GenericDataProcessorPresenter::resume() {
 * Tells the view to load a table workspace
 * @param name : [input] The workspace's name
 */
-void GenericDataProcessorPresenter::setModel(QString name) {
+void GenericDataProcessorPresenter::setModel(QString const& name) {
   m_view->setModel(name);
 }
 

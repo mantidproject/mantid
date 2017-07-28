@@ -481,7 +481,7 @@ boost::tuple<QString, QString> reduceRowString(
   // 'IvsQ_TOF_13460_13462',
   // 'IvsLam_TOF_13460_13462
   QStringList outputProperties;
-  for (size_t prop = 0; prop < processor.numberOfOutputProperties(); prop++) {
+  for (auto prop = 0u; prop < processor.numberOfOutputProperties(); prop++) {
     outputProperties.append(
         getReducedWorkspaceName(data, whitelist, processor.prefix(prop)));
   }
