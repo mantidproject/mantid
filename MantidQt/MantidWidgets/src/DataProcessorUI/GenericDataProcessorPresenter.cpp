@@ -74,7 +74,6 @@ convertStringToMapWithSet(const QString &properties) {
   return props;
 }
 
-
 void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
                           std::string const &value) {
   alg->setProperty(name, value);
@@ -93,6 +92,14 @@ void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
 void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
                           QString const &value) {
   setAlgorithmProperty(alg, name.toStdString(), value.toStdString());
+}
+
+bool workspaceExists(QString const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName.toStdString());
+}
+
+void removeWorkspace(QString const &workspaceName) {
+  AnalysisDataService::Instance().remove(workspaceName.toStdString());
 }
 }
 
@@ -199,9 +206,9 @@ GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
-  std::transform(std::begin(in), std::end(in), std::inserter(out, out.begin()),
-                 [](QString const &inStr)
-                     -> std::string { return inStr.toStdString(); });
+  std::transform(
+      std::begin(in), std::end(in), std::inserter(out, out.begin()),
+      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
   return out;
 }
 }
@@ -300,9 +307,8 @@ void GenericDataProcessorPresenter::process() {
 
     // Set group as unprocessed if settings have changed or the expected output
     // workspace cannot be found
-    bool groupWSFound = AnalysisDataService::Instance().doesExist(
-        getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix())
-            .toStdString());
+    bool groupWSFound = workspaceExists(
+        getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix()));
 
     if (settingsChanged || !groupWSFound)
       m_manager->setProcessed(false, item.first);
@@ -322,12 +328,9 @@ void GenericDataProcessorPresenter::process() {
       // Set row as unprocessed if settings have changed or the expected output
       // workspaces cannot be found
       bool rowWSFound = true;
-      for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
-        rowWSFound = AnalysisDataService::Instance().doesExist(
-            getReducedWorkspaceName(data.second, m_processor.prefix(i))
-                .toStdString());
-        if (!rowWSFound)
-          break;
+      for (auto i = 0u; i < m_processor.numberOfOutputProperties() && rowWSFound; i++) {
+        rowWSFound = workspaceExists(
+            getReducedWorkspaceName(data.second, m_processor.prefix(i)));
       }
 
       if (settingsChanged || !rowWSFound)
@@ -559,24 +562,25 @@ void GenericDataProcessorPresenter::postProcessGroup(
       getPostprocessedWorkspaceName(groupData, m_postprocessor.prefix());
 
   // Go through each row and get the input ws names
-  for (const auto &row : groupData) {
+  for (auto const &row : groupData) {
 
     // The name of the reduced workspace for this row
-    const QString inputWSName =
+    auto const inputWSName =
         getReducedWorkspaceName(row.second, m_processor.prefix(0));
 
-    if (AnalysisDataService::Instance().doesExist(inputWSName.toStdString())) {
-
+    if (workspaceExists(inputWSName)) {
       inputNames.append(inputWSName);
     }
   }
-  const QString inputWSNames = inputNames.join(", ");
+
+  auto const inputWSNames = inputNames.join(", ");
 
   // If the previous result is in the ADS already, we'll need to remove it.
   // If it's a group, we'll get an error for trying to group into a used group
   // name
-  if (AnalysisDataService::Instance().doesExist(outputWSName.toStdString()))
-    AnalysisDataService::Instance().remove(outputWSName.toStdString());
+  if (workspaceExists(outputWSName)) {
+    removeWorkspace(outputWSName);
+  }
 
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create(m_postprocessor.name().toStdString());
@@ -686,8 +690,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     }
   } catch (...) {
     // If we're unable to create the full workspace, discard the partial version
-    AnalysisDataService::Instance().remove(outputName.toStdString());
-
+    removeWorkspace(outputName);
     // We've tidied up, now re-throw.
     throw;
   }
@@ -1008,8 +1011,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                             ? propValue.right(propValue.indexOf("e"))
                             : "";
           propValue =
-              propValue.mid(0, propValue.indexOf(".") +
-                                   m_options["RoundPrecision"].toInt() + 1) +
+              propValue.mid(0,
+                            propValue.indexOf(".") +
+                                m_options["RoundPrecision"].toInt() + 1) +
               exp;
         }
 
@@ -1402,7 +1406,7 @@ void GenericDataProcessorPresenter::plotRow() {
       const QString wsName =
           getReducedWorkspaceName(run.second, m_processor.prefix(0));
 
-      if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+      if (workspaceExists(wsName))
         workspaces.insert(wsName);
       else
         notFound.insert(wsName);
@@ -1441,7 +1445,7 @@ void GenericDataProcessorPresenter::plotGroup() {
       const QString wsName =
           getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix());
 
-      if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+      if (workspaceExists(wsName))
         workspaces.insert(wsName);
       else
         notFound.insert(wsName);
@@ -1567,7 +1571,7 @@ void GenericDataProcessorPresenter::resume() {
 * Tells the view to load a table workspace
 * @param name : [input] The workspace's name
 */
-void GenericDataProcessorPresenter::setModel(QString const& name) {
+void GenericDataProcessorPresenter::setModel(QString const &name) {
   m_view->setModel(name);
 }
 
