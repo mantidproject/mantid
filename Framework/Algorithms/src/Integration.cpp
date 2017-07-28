@@ -114,10 +114,6 @@ void Integration::exec() {
   }
   auto rangeListCheck = [minSpec, maxSpec](const std::vector<double> &list,
                                            const char *name) {
-    if (maxSpec < minSpec) {
-      throw std::runtime_error(
-          "Maximum spectrum index smaller than the minimum.");
-    }
     if (!list.empty() &&
         list.size() != static_cast<size_t>(maxSpec - minSpec) + 1) {
       std::ostringstream sout;
