@@ -156,7 +156,7 @@ private:
   void setOptions(const std::map<QString, QVariant> &) override {}
   void
   transfer(const std::vector<std::map<QString, QString>> &) override {}
-  void setInstrumentList(const std::vector<QString> &,
+  void setInstrumentList(const QStringList &,
                          const QString &) override {}
   // void accept(WorkspaceReceiver *) {};
   void acceptViews(DataProcessorView *, ProgressableView *) override {}
