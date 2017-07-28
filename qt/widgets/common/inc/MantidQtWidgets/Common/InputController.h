@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H
 #define MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QObject>
 #include <QRect>
 #include <QColor>
@@ -28,7 +28,7 @@ namespace MantidWidgets {
     on the surface.
 
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputController : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON InputController : public QObject {
   Q_OBJECT
 public:
   explicit InputController(QObject *parent, bool contextAllowed = true);
@@ -67,7 +67,7 @@ private:
     translation, rotation and zooming.
 
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputController3DMove
+class EXPORT_OPT_MANTIDQT_COMMON InputController3DMove
     : public InputController {
   Q_OBJECT
 
@@ -103,7 +103,7 @@ private:
 /**
     Controller for picking detectors.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerPick
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerPick
     : public InputController {
   Q_OBJECT
 
@@ -127,7 +127,7 @@ private:
 /**
     Controller for drawing mask shapes.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawShape
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerDrawShape
     : public InputController {
   Q_OBJECT
 
@@ -182,7 +182,7 @@ private:
 /**
     Controller for moving the instrument on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerMoveUnwrapped
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerMoveUnwrapped
     : public InputController {
   Q_OBJECT
 
@@ -206,7 +206,7 @@ private:
 /**
     Controller for free drawing on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDraw
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerDraw
     : public InputController {
   Q_OBJECT
 
@@ -246,7 +246,7 @@ private:
 /**
     Controller for erasing peaks on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerSelection
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerSelection
     : public InputControllerDraw {
   Q_OBJECT
 
@@ -271,7 +271,7 @@ private:
 /**
     Controller for drawing and erasing arbitrary shapes on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawAndErase
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerDrawAndErase
     : public InputControllerDraw {
   Q_OBJECT
 

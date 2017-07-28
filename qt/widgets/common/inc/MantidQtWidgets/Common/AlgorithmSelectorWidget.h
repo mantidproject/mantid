@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 #include <vector>
 #include <Poco/NObserver.h>
@@ -44,7 +44,7 @@ struct SelectedAlgorithm {
 
   @date 2012-03-06
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS AlgorithmSelectorWidget
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmSelectorWidget
     : public QWidget {
   Q_OBJECT
   Q_PROPERTY(bool showExecuteButton READ showExecuteButton WRITE

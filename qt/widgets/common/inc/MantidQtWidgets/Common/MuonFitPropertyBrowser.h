@@ -39,7 +39,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class PropertyHandler;
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitPropertyBrowser
+class EXPORT_OPT_MANTIDQT_COMMON MuonFitPropertyBrowser
     : public MantidQt::MantidWidgets::FitPropertyBrowser,
       public MantidQt::MantidWidgets::IMuonFitFunctionModel,
       public IMuonFitDataModel {

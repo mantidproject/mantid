@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_PROGRESSABLEVIEW_H_
 #define MANTIDQTMANTIDWIDGETS_PROGRESSABLEVIEW_H_
 
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -29,7 +29,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ProgressableView {
+class EXPORT_OPT_MANTIDQT_COMMON ProgressableView {
 public:
   virtual void setProgressRange(int min, int max) = 0;
   virtual void setProgress(int progress) = 0;

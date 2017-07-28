@@ -2,7 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H
 
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -38,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorTwoLevelTreeManager
+class EXPORT_OPT_MANTIDQT_COMMON DataProcessorTwoLevelTreeManager
     : public DataProcessorTreeManager {
 public:
   /// Constructor

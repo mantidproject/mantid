@@ -2,7 +2,7 @@
 #define MANTID_MANTIDWIDGETS_MUONFITDATASELECTOR_H_
 
 #include "ui_MuonFitDataSelector.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
@@ -38,7 +38,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitDataSelector
+class EXPORT_OPT_MANTIDQT_COMMON MuonFitDataSelector
     : public MantidQt::API::MantidWidget,
       public IMuonFitDataSelector {
   Q_OBJECT

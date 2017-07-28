@@ -85,8 +85,8 @@
 **
 ****************************************************************************/
 
-#include "qtpropertymanager.h"
-#include "qtpropertybrowserutils_p.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h"
 #include <QtCore/QDateTime>
 #include <QtCore/QLocale>
 #include <QtCore/QMap>

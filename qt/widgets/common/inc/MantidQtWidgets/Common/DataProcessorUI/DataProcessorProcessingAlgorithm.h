@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHM_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHM_H
 
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
 
 #include <QString>
@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorProcessingAlgorithm
+class EXPORT_OPT_MANTIDQT_COMMON DataProcessorProcessingAlgorithm
     : public DataProcessorProcessingAlgorithmBase {
 public:
   DataProcessorProcessingAlgorithm() = delete;

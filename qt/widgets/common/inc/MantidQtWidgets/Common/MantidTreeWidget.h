@@ -1,7 +1,7 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
 #define MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
 
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/MatrixWorkspace_fwd.h>
 #include <MantidQtWidgets/Common/MantidWSIndexDialog.h>
@@ -16,7 +16,7 @@ class QWorkspaceDockView;
 
 enum class MantidItemSortScheme { ByName, ByLastModified };
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidTreeWidget : public QTreeWidget {
+class EXPORT_OPT_MANTIDQT_COMMON MantidTreeWidget : public QTreeWidget {
   Q_OBJECT
 
 public:

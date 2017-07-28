@@ -83,12 +83,10 @@
 	src/DisplayCurveFit.cpp
 	src/DoubleSpinBox.cpp
 	src/ErrorCurve.cpp
-	src/FilenameDialogEditor.cpp
 	src/FindDialog.cpp
 	src/FindReplaceDialog.cpp
 	src/FitOptionsBrowser.cpp
 	src/FitPropertyBrowser.cpp
-	src/FormulaDialogEditor.cpp
 	src/FunctionBrowser.cpp
 	src/HintingLineEdit.cpp
 	src/IndirectInstrumentConfig.cpp
@@ -126,13 +124,29 @@
 	src/SlitCalculator.cpp
 	src/TrackedAction.cpp
 	src/UserFunctionDialog.cpp
-	src/WorkspaceEditorFactory.cpp
 	src/WorkspacePresenter/ADSAdapter.cpp
 	src/WorkspacePresenter/QWorkspaceDockView.cpp
 	src/WorkspacePresenter/WorkspacePresenter.cpp
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
+
+	src/QtPropertyBrowser/qtpropertybrowser.cpp
+	src/QtPropertyBrowser/qtpropertymanager.cpp
+	src/QtPropertyBrowser/qteditorfactory.cpp
+	src/QtPropertyBrowser/qtvariantproperty.cpp
+	src/QtPropertyBrowser/qttreepropertybrowser.cpp
+	src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp
+	src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp
+	src/QtPropertyBrowser/qtpropertybrowserutils.cpp
+	src/QtPropertyBrowser/DoubleDialogEditor.cpp
+	src/QtPropertyBrowser/DoubleEditorFactory.cpp
+	src/QtPropertyBrowser/FilenameDialogEditor.cpp
+    src/QtPropertyBrowser/FormulaDialogEditor.cpp
+	src/QtPropertyBrowser/ParameterPropertyManager.cpp
+	src/QtPropertyBrowser/StringDialogEditor.cpp
+	src/QtPropertyBrowser/StringEditorFactory.cpp
+	src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
 )
 
 set ( MOC_FILES
@@ -180,8 +194,6 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/DiagResults.h
   inc/MantidQtWidgets/Common/DisplayCurveFit.h
   inc/MantidQtWidgets/Common/DoubleSpinBox.h
-  inc/MantidQtWidgets/Common/FilenameDialogEditor.h
-  inc/MantidQtWidgets/Common/FormulaDialogEditor.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
   inc/MantidQtWidgets/Common/FindDialog.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
@@ -222,11 +234,19 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/SlitCalculator.h
   inc/MantidQtWidgets/Common/TrackedAction.h
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
-  inc/MantidQtWidgets/Common/WorkspaceEditorFactory.h
   inc/MantidQtWidgets/Common/WorkspaceSelector.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
   inc/MantidQtWidgets/Common/LogValueSelector.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h 
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -413,14 +433,109 @@ set( TEST_FILES
    WorkspacePresenter/ADSAdapterTest.h
    WorkspacePresenter/WorkspacePresenterTest.h
 )
+# moc'd files will end up in build directory, so add to include path
+include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
+
+# Need to use a string of calls to the qt4_generate_moc macro
+# instead of qt4_wrap_cpp because the latter produces files with
+# a cxx suffix when QtPropertyBrowser requires cpp
+
+qt4_generate_moc (
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
+)
+qt4_generate_moc (
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
+)
+qt4_generate_moc (
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h 
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
+)
+qt4_generate_moc (
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp
+)
+qt4_generate_moc (
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
+)
+qt4_generate_moc (
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
+)
+qt4_generate_moc (
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
+)
+qt4_generate_moc (
+  src/QtPropertyBrowser/qtpropertymanager.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
+)
+qt4_generate_moc (
+  src/QtPropertyBrowser/qteditorfactory.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
+)
+qt4_generate_moc (
+  src/QtPropertyBrowser/qttreepropertybrowser.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
+)
+
+set (
+  QTPROPERTYBROWSER_HEADERS_ONLY_MOC
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
+  ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
+  ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
+)
+
+set_source_files_properties (
+  ${QTPROPERTYBROWSER_HEADERS_ONLY_MOC}
+  PROPERTIES
+    HEADER_FILE_ONLY true
+)
+
+qt4_generate_moc (
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
+)
+
+set (
+  QTPROPERTYBROWSER_HEADERS_MOC
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
+)
+
+set (
+  QTPROPERTYBROWSER_MOC
+  ${QTPROPERTYBROWSER_HEADERS_MOC}
+  ${QTPROPERTYBROWSER_HEADERS_ONLY_MOC}
+  ${EXTRA_MOCS}
+)
+
+find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
+include(${QT_USE_FILE})
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+set ( ALL_SRC
+  ${SRC_FILES}
+  ${MOCCED_FILES}
+  ${QTPROPERTYBROWSER_MOC}
+  ${QTPROPERTYBROWSER_SRCS}
+  ${QTPROPERTYBROWSER_RESOURCES})
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
 if(MAKE_VATES AND ParaView_FOUND)
   include( ${PARAVIEW_USE_FILE} )
 endif()
+
+include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
+add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
 
 # Python includes
 include_directories ( ${PYTHON_INCLUDE_PATH})
@@ -439,7 +554,7 @@ endif ()
 
 target_link_libraries ( qtwidgetscommon LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES}
-  ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}
+  ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${QSCINTILLA_LIBRARIES}
 )
 
 if(MAKE_VATES AND ParaView_FOUND)

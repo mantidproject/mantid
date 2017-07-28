@@ -2,7 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_
 
 #include "MantidQtWidgets/Common/MantidDialog.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QHash>
 #include <QSignalMapper>
 #include <QGridLayout>
@@ -41,7 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SaveWorkspaces
+class EXPORT_OPT_MANTIDQT_COMMON SaveWorkspaces
     : public API::MantidDialog {
   Q_OBJECT
 

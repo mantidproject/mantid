@@ -1,7 +1,7 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_QWORKSPACEDOCKVIEW_H
 #define MANTIDQT_MANTIDWIDGETS_QWORKSPACEDOCKVIEW_H
 
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <MantidAPI/ExperimentInfo.h>
 #include <MantidAPI/IAlgorithm_fwd.h>
@@ -72,7 +72,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QWorkspaceDockView
+class EXPORT_OPT_MANTIDQT_COMMON QWorkspaceDockView
     : public QDockWidget,
       public IWorkspaceDockView,
       public boost::enable_shared_from_this<QWorkspaceDockView> {

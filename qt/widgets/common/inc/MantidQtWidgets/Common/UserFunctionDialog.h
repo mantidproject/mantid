@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_USERFUNCTIONDIALOG_H_
 #define MANTIDQTMANTIDWIDGETS_USERFUNCTIONDIALOG_H_
 
-#include "../MantidWidgets/ui_UserFunctionDialog.h"
-#include "WidgetDllOption.h"
+#include "ui_UserFunctionDialog.h"
+#include "DllOption.h"
 
 #include <QMap>
 #include <QSet>
@@ -16,7 +16,7 @@ namespace MantidWidgets {
 /**
  * A dialog for construction a user fitting function from existing components
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS UserFunctionDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON UserFunctionDialog : public QDialog {
   Q_OBJECT
 
 public:

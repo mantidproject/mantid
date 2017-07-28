@@ -2,7 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_RENAMEPARDIALOG_H_
 
 #include "ui_RenameParDialog.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 #include <vector>
 #include <string>
@@ -12,7 +12,7 @@ namespace MantidWidgets {
 /**
  * A dialog for renaming parameters for a user function
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS RenameParDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON RenameParDialog : public QDialog {
   Q_OBJECT
 
 public:

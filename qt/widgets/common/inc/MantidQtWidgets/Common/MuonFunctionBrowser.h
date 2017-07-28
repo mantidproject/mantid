@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_MUONFUNCTIONBROWSER_H_
 #define MANTID_MANTIDWIDGETS_MUONFUNCTIONBROWSER_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 
 namespace MantidQt {
@@ -30,7 +30,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFunctionBrowser
+class EXPORT_OPT_MANTIDQT_COMMON MuonFunctionBrowser
     : public FunctionBrowser {
   Q_OBJECT
 

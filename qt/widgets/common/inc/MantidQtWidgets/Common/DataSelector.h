@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATASELECTOR_H_
 #define MANTIDQTMANTIDWIDGETS_DATASELECTOR_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "ui_DataSelector.h"
 
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
@@ -48,7 +48,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataSelector
+class EXPORT_OPT_MANTIDQT_COMMON DataSelector
     : public API::MantidWidget {
   Q_OBJECT
 

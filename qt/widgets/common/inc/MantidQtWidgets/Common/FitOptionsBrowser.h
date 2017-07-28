@@ -1,7 +1,7 @@
 #ifndef MANTIDWIDGETS_FITOPTIONSBROWSER_H_
 #define MANTIDWIDGETS_FITOPTIONSBROWSER_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 #include <QWidget>
 #include <QMap>
@@ -34,7 +34,7 @@ namespace MantidWidgets {
  * and set properties of Fit algorithm (excluding Function and Workspace)
  *
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitOptionsBrowser : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON FitOptionsBrowser : public QWidget {
   Q_OBJECT
 public:
   /// Support for fitting algorithms:

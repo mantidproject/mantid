@@ -85,7 +85,7 @@
 **
 ****************************************************************************/
 
-#include "qttreepropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include <QtCore/QSet>
 #include <QtGui/QIcon>
 #include <QtGui/QTreeWidget>

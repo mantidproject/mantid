@@ -9,7 +9,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -28,7 +28,7 @@ input MD workspace
 2) It pre-populates those dimension input controls based on existing values.
 
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SlicingAlgorithmDialog
+class EXPORT_OPT_MANTIDQT_COMMON SlicingAlgorithmDialog
     : public MantidQt::API::AlgorithmDialog {
   Q_OBJECT
 public:
@@ -124,7 +124,7 @@ private:
 Class SliceMDDialog
 Concrete SlicingAlgorithm Dialog geared for SliceMD
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SliceMDDialog
+class EXPORT_OPT_MANTIDQT_COMMON SliceMDDialog
     : public SlicingAlgorithmDialog {
   Q_OBJECT
 public:
@@ -139,7 +139,7 @@ public:
 Class BinMDDialog
 Concrete BinMDDialog Dialog geared for BinMD
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS BinMDDialog
+class EXPORT_OPT_MANTIDQT_COMMON BinMDDialog
     : public SlicingAlgorithmDialog {
   Q_OBJECT
 public:

@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_PERIODICTABLEWIDGET_H_
 #define MANTID_MANTIDWIDGETS_PERIODICTABLEWIDGET_H_
 
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <qvector.h>
 #include <QWidget>
 #include "ui_PeriodicTableWidget.h"
@@ -32,7 +32,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PeriodicTableWidget : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON PeriodicTableWidget : public QWidget {
   Q_OBJECT
 
 public:

@@ -6,7 +6,7 @@
 #include "MantidQtWidgets/Common/IProjectSaveView.h"
 #include "MantidQtWidgets/Common/ProjectSaveModel.h"
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <vector>
 
 //------------------------------------------------
@@ -38,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ProjectSavePresenter {
+class EXPORT_OPT_MANTIDQT_COMMON ProjectSavePresenter {
 public:
   enum class Notification {
     UncheckWorkspace,

@@ -12,14 +12,14 @@
 
 #include <QLineEdit>
 #include "MantidKernel/System.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 class QToolButton;
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS LineEditWithClear : public QLineEdit {
+class EXPORT_OPT_MANTIDQT_COMMON LineEditWithClear : public QLineEdit {
   Q_OBJECT
 
 public:

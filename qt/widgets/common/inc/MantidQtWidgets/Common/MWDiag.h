@@ -3,7 +3,7 @@
 
 #include "ui_MWDiag.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QSettings>
 #include <QStringList>
 #include <QComboBox>
@@ -26,7 +26,7 @@ namespace MantidWidgets {
 class MWRunFiles;
 class DiagResults;
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWDiag : public API::MantidWidget {
+class EXPORT_OPT_MANTIDQT_COMMON MWDiag : public API::MantidWidget {
   Q_OBJECT
 
 public:

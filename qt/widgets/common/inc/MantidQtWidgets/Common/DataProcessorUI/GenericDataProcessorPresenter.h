@@ -16,7 +16,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QSet>
 #include <queue>
@@ -63,7 +63,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
+class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
     : public QObject,
       public DataProcessorPresenter,
       public MantidQt::API::WorkspaceObserver {

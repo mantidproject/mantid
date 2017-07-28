@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_ADSADAPTER_H_
 #define MANTID_MANTIDWIDGETS_ADSADAPTER_H_
 
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h"
 #include <MantidQtWidgets/Common/WorkspaceObserver.h>
 #include <Poco/NObserver.h>
@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ADSAdapter : public WorkspaceProvider {
+class EXPORT_OPT_MANTIDQT_COMMON ADSAdapter : public WorkspaceProvider {
 public:
   explicit ADSAdapter();
   ~ADSAdapter() override;

@@ -1,7 +1,7 @@
 #ifndef MANTIDWIDGETS_FUNCTIONBROWSER_H_
 #define MANTIDWIDGETS_FUNCTIONBROWSER_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 #include "MantidAPI/IFunction.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
@@ -52,7 +52,7 @@ class CreateAttributePropertyForFunctionBrowser;
  *
  * @date 18/04/2012
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FunctionBrowser
+class EXPORT_OPT_MANTIDQT_COMMON FunctionBrowser
     : public QWidget,
       public IFunctionBrowser {
   Q_OBJECT

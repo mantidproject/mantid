@@ -8,7 +8,7 @@
 #include <QDialog>
 #include <QListWidget>
 #include <QStringList>
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <string>
 
 namespace MantidQt {
@@ -41,7 +41,7 @@ namespace MantidWidgets {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SelectWorkspacesDialog
+class EXPORT_OPT_MANTIDQT_COMMON SelectWorkspacesDialog
     : public QDialog {
   Q_OBJECT
 

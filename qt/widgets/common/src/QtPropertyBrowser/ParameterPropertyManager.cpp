@@ -1,6 +1,5 @@
-#include "ParameterPropertyManager.h"
-
-#include "qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 
 #include <stdexcept>
 #include <math.h>

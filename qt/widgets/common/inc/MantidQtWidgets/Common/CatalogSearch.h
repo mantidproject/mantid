@@ -2,7 +2,7 @@
 #define MANTIDQTWIDGETS_CATALOGSEARCH_H_
 
 #include "ui_CatalogSearch.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidQtWidgets/Common/CatalogSelector.h"
@@ -41,7 +41,7 @@ namespace MantidWidgets {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS CatalogSearch : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON CatalogSearch : public QWidget {
   Q_OBJECT
 
 public:

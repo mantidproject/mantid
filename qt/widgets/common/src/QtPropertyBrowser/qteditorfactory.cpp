@@ -85,8 +85,8 @@
 **
 ****************************************************************************/
 
-#include "qteditorfactory.h"
-#include "qtpropertybrowserutils_p.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h"
 #include <QtGui/QSpinBox>
 #include <QtGui/QScrollBar>
 #include <QtGui/QComboBox>

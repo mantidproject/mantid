@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_IMUONFITDATASELECTOR_H_
 #define MANTID_MANTIDWIDGETS_IMUONFITDATASELECTOR_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QString>
 #include <QStringList>
 #include <boost/optional/optional.hpp>
@@ -14,7 +14,7 @@ namespace MantidWidgets {
  *
  * This abstract base class can be used for mocking purposes
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataSelector {
+class EXPORT_OPT_MANTIDQT_COMMON IMuonFitDataSelector {
 public:
   enum class FitType { Single, CoAdd, Simultaneous };
   virtual ~IMuonFitDataSelector() {}

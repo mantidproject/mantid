@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_IMUONFITDATAMODEL_H_
 #define MANTID_MANTIDWIDGETS_IMUONFITDATAMODEL_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QObject>
 #include <QString>
 #include <QStringList>
@@ -34,7 +34,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataModel {
+class EXPORT_OPT_MANTIDQT_COMMON IMuonFitDataModel {
 public:
   virtual void setWorkspaceNames(const QStringList &wsNames) = 0;
   virtual void workspacesToFitChanged(int n) = 0;

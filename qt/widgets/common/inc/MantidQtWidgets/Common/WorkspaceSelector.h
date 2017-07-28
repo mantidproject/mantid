@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_WORKSPACESELECTOR_H_
 #define MANTIDQTMANTIDWIDGETS_WORKSPACESELECTOR_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QComboBox>
 #include <QStringList>
 #include "MantidAPI/AnalysisDataService.h"
@@ -59,7 +59,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS WorkspaceSelector : public QComboBox {
+class EXPORT_OPT_MANTIDQT_COMMON WorkspaceSelector : public QComboBox {
   Q_OBJECT
 
   Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE

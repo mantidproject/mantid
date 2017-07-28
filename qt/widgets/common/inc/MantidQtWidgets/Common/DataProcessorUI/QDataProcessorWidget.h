@@ -6,7 +6,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_DataProcessorWidget.h"
 #include <QSignalMapper>
 
@@ -44,7 +44,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorWidget
+class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget
     : public MantidQt::API::MantidWidget,
       public DataProcessorView,
       public ProgressableView {

@@ -2,11 +2,11 @@
 #define MANTIDQTWIDGETS_CATALOGSELECTOR_H_
 
 #include "ui_CatalogSelector.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS CatalogSelector : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON CatalogSelector : public QWidget {
   Q_OBJECT
 
 public:

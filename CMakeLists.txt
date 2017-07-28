@@ -125,13 +125,6 @@ endif()
 find_package ( GSL REQUIRED )
 
 ###########################################################################
-# Add QtPropertyBrowser to build
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  add_subdirectory ( QtPropertyBrowser )
-endif(ENABLE_MANTIDPLOT)
-
-###########################################################################
 # Now add in all the components
 ###########################################################################
 # Flag that this is a full build, i.e not framework only

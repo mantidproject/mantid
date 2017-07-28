@@ -85,7 +85,7 @@
 **
 ****************************************************************************/
 
-#include "qtpropertybrowserutils_p.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h"
 #include <QtGui/QApplication>
 #include <QtGui/QPainter>
 #include <QtGui/QHBoxLayout>

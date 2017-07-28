@@ -2,7 +2,7 @@
 #define MANTID_MANTIDWIDGETS_COLORBARWIDGET_H_
 
 #include "MantidQtWidgets/Common/MantidColorMap.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_ColorBarWidget.h"
 #include <QtGui/QWidget>
 #include <QtGui>
@@ -37,7 +37,7 @@ signals:
  * @author Janik Zikovsky
  * @date Oct 31, 2011.
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ColorBarWidget : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON ColorBarWidget : public QWidget {
   Q_OBJECT
   Q_PROPERTY(double minimum READ getMinimum WRITE setMinimum)
   Q_PROPERTY(double maximum READ getMaximum WRITE setMaximum)

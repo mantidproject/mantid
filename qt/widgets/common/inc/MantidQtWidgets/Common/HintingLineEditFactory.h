@@ -4,8 +4,8 @@
 #include <QStyledItemDelegate>
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtMantidWidgets/HintingLineEdit.h"
-#include "MantidQtMantidWidgets/HintStrategy.h"
+#include "MantidQtWidgets/Common/HintingLineEdit.h"
+#include "MantidQtWidgets/Common/HintStrategy.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace MantidQt {

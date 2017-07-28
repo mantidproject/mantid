@@ -4,7 +4,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "MantidKernel/FilterChannel.h"
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/QtSignalChannel.h"
@@ -37,7 +37,7 @@ using API::Message; // So that the slots work
  * a message is a framework Poco message or a simple string.
  * It can connect to the Mantid logging framework if required
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MessageDisplay : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget {
   Q_OBJECT
   Q_PROPERTY(QString source READ source WRITE setSource)
 

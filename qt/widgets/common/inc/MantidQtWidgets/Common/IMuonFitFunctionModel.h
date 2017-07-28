@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONMODEL_H_
 #define MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONMODEL_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "MantidAPI/IFunction.h"
 #include <QObject>
 
@@ -33,7 +33,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitFunctionModel {
+class EXPORT_OPT_MANTIDQT_COMMON IMuonFitFunctionModel {
 public:
   virtual ~IMuonFitFunctionModel() {}
   virtual void setFunction(const Mantid::API::IFunction_sptr func) = 0;

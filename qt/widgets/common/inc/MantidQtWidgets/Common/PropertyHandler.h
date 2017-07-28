@@ -2,7 +2,7 @@
 #define PROPERTY_HANDLER_H
 
 #include "MantidAPI/IFunction.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 /* Forward declarations */
 namespace Mantid {
@@ -31,7 +31,7 @@ class FitPropertyBrowser;
 /**
  * Helps display and edit functions in FitPropertyBrowser
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PropertyHandler
+class EXPORT_OPT_MANTIDQT_COMMON PropertyHandler
     : public QObject,
       public Mantid::API::FunctionHandler {
   Q_OBJECT

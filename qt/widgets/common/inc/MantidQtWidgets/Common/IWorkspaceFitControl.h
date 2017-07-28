@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_IWORKSPACEFITCONTROL_H_
 #define MANTID_MANTIDWIDGETS_IWORKSPACEFITCONTROL_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QString>
 
 namespace MantidQt {
@@ -32,7 +32,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IWorkspaceFitControl {
+class EXPORT_OPT_MANTIDQT_COMMON IWorkspaceFitControl {
 public:
   virtual ~IWorkspaceFitControl() {}
   virtual void setWorkspaceName(const QString &wsName) = 0;

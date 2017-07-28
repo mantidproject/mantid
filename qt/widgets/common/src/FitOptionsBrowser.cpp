@@ -7,8 +7,8 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-#include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include <iostream>
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -19,10 +19,10 @@
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include "qteditorfactory.h"
-#include "DoubleEditorFactory.h"
-#include "CompositeEditorFactory.h"
-#include "ButtonEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)

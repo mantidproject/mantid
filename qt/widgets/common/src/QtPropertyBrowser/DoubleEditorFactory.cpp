@@ -1,6 +1,5 @@
-#include "DoubleEditorFactory.h"
-
-#include "ParameterPropertyManager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h"
 
 #include <QDoubleValidator>
 

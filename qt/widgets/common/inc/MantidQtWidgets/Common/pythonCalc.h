@@ -4,7 +4,7 @@
 #include <Poco/Path.h>
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QLineEdit>
 #include <QLabel>
 #include <QString>
@@ -14,7 +14,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS pythonCalc : public API::MantidWidget {
+class EXPORT_OPT_MANTIDQT_COMMON pythonCalc : public API::MantidWidget {
   Q_OBJECT
 
 public:

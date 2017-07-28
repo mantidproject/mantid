@@ -29,7 +29,7 @@
 #ifndef DoubleSpinBox_H
 #define DoubleSpinBox_H
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <map>
 
 #include <QAbstractSpinBox>
@@ -40,7 +40,7 @@
 /**
  * It allows the user to specify a custom display format.
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DoubleSpinBox
+class EXPORT_OPT_MANTIDQT_COMMON DoubleSpinBox
     : public QAbstractSpinBox {
   Q_OBJECT
 
@@ -108,7 +108,7 @@ private:
 
 //! A checkable DoubleSpinBox that can be used to select the limits of a double
 // interval.
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS RangeLimitBox : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON RangeLimitBox : public QWidget {
 public:
   enum LimitType { LeftLimit, RightLimit };
 

@@ -2,7 +2,7 @@
 #define MANTIDHELPWINDOW_H
 
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QWidget>
 #include <string>
 
@@ -15,7 +15,7 @@ class pqHelpWindow;
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidHelpWindow
+class EXPORT_OPT_MANTIDQT_COMMON MantidHelpWindow
     : public API::MantidHelpInterface {
   Q_OBJECT
 

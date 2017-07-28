@@ -1,7 +1,7 @@
 #ifndef MANTIDWIDGETS_ERRORCURVE_H
 #define MANTIDWIDGETS_ERRORCURVE_H
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <qwt_plot_item.h>
 #include <qwt_plot_curve.h>
 
@@ -9,7 +9,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /// Curve to draw error bars.
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ErrorCurve : public QwtPlotItem {
+class EXPORT_OPT_MANTIDQT_COMMON ErrorCurve : public QwtPlotItem {
 
 public:
   ErrorCurve(const QwtPlotCurve *dataCurve,

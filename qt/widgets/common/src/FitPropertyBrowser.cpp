@@ -22,14 +22,14 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 
-#include "MantidQtWidgets/Common/FilenameDialogEditor.h"
-#include "MantidQtWidgets/Common/FormulaDialogEditor.h"
-#include "MantidQtWidgets/Common/StringEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h"
 
-#include "qttreepropertybrowser.h"
-#include "qteditorfactory.h"
-#include "DoubleEditorFactory.h"
-#include "ParameterPropertyManager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h"
 
 #include <Poco/ActiveResult.h>
 

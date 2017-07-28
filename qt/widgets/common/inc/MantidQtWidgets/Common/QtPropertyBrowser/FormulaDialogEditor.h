@@ -1,7 +1,7 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_FORMULADIALOGEDIT_H
 #define MANTIDQT_MANTIDWIDGETS_FORMULADIALOGEDIT_H
 
-#include "MantidQtWidgets/Common/StringDialogEditor.h"
+#include "StringDialogEditor.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

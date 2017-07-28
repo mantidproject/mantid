@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_INSTRUMENTSELECTOR_H_
 #define MANTIDQTMANTIDWIDGETS_INSTRUMENTSELECTOR_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QComboBox>
 #include <QStringList>
 #include "MantidKernel/ConfigService.h"
@@ -47,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentSelector : public QComboBox {
+class EXPORT_OPT_MANTIDQT_COMMON InstrumentSelector : public QComboBox {
   Q_OBJECT
 
   Q_PROPERTY(QStringList techniques READ getTechniques WRITE setTechniques)

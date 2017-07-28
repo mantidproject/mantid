@@ -1,4 +1,4 @@
-#include "StringEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h"
 
 QWidget *StringEditorFactory::createEditorForManager(QtStringPropertyManager *,
                                                      QtProperty *property,

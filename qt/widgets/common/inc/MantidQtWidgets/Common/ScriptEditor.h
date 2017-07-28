@@ -8,7 +8,7 @@
 #include <Qsci/qsciscintilla.h>
 #include <QDialog>
 #include <QTextDocument>
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 //----------------------------------
 // Forward declarations
@@ -24,7 +24,7 @@ class QsciAPIs;
 /**
  * A small wrapper around a QStringList to manage a command history
  */
-struct EXPORT_OPT_MANTIDQT_MANTIDWIDGETS CommandHistory {
+struct EXPORT_OPT_MANTIDQT_COMMON CommandHistory {
   /// Default constructor
   CommandHistory() : m_commands(), m_hist_maxsize(1000), m_current(0) {}
   /// Add a block of lines
@@ -78,7 +78,7 @@ private:
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ScriptEditor : public QsciScintilla {
+class EXPORT_OPT_MANTIDQT_COMMON ScriptEditor : public QsciScintilla {
   // Qt macro
   Q_OBJECT
 

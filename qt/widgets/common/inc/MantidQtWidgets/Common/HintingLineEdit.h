@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 #include <map>
 #include <QtGui>
@@ -37,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS HintingLineEdit : public QLineEdit {
+class EXPORT_OPT_MANTIDQT_COMMON HintingLineEdit : public QLineEdit {
   Q_OBJECT
 public:
   HintingLineEdit(QWidget *parent,

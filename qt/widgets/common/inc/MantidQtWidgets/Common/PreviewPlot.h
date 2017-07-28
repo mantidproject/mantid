@@ -3,7 +3,7 @@
 
 #include "ui_PreviewPlot.h"
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/ErrorCurve.h"
 #include "MantidQtWidgets/Common/RangeSelector.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
@@ -59,7 +59,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 // forward declaration
 class DisplayCurveFit;
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PreviewPlot : public API::MantidWidget {
+class EXPORT_OPT_MANTIDQT_COMMON PreviewPlot : public API::MantidWidget {
   Q_OBJECT
 
   Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)

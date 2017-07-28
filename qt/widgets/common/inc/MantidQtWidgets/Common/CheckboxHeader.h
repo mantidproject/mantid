@@ -1,7 +1,7 @@
 #ifndef MANTIDQTWIDGETS_CHECKBOXHEADER_H_
 #define MANTIDQTWIDGETS_CHECKBOXHEADER_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 #include <QHeaderView>
 #include <QMouseEvent>
@@ -38,7 +38,7 @@ namespace MantidWidgets {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS CheckboxHeader : public QHeaderView {
+class EXPORT_OPT_MANTIDQT_COMMON CheckboxHeader : public QHeaderView {
   Q_OBJECT
 
 public:

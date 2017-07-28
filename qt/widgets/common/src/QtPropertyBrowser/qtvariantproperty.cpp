@@ -85,9 +85,9 @@
 **
 ****************************************************************************/
 
-#include "qtvariantproperty.h"
-#include "qtpropertymanager.h"
-#include "qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include <QtCore/QVariant>
 #include <QtGui/QIcon>
 #include <QtCore/QDate>

@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/AlgorithmObserver.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 #include <QDockWidget>
 #include <QHash>
@@ -52,7 +52,7 @@ class PropertyHandler;
  * @date 13/11/2009
  */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitPropertyBrowser
+class EXPORT_OPT_MANTIDQT_COMMON FitPropertyBrowser
     : public QDockWidget,
       public Mantid::API::AlgorithmObserver,
       public MantidQt::API::WorkspaceObserver,

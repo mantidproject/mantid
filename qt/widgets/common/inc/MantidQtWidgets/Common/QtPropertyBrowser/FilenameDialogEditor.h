@@ -1,7 +1,7 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_FILENAMEDIALOGEDITFACTORY_H
 #define MANTIDQT_MANTIDWIDGETS_FILENAMEDIALOGEDITFACTORY_H
 
-#include "MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h"
+#include "StringDialogEditor.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_INDIRECTINSTRUMENTCONFIG_H_
 #define MANTIDQTMANTIDWIDGETS_INDIRECTINSTRUMENTCONFIG_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "ui_IndirectInstrumentConfig.h"
 
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
@@ -45,7 +45,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IndirectInstrumentConfig
+class EXPORT_OPT_MANTIDQT_COMMON IndirectInstrumentConfig
     : public API::MantidWidget {
   Q_OBJECT
 

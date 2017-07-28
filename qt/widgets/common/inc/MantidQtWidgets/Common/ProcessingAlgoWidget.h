@@ -2,7 +2,7 @@
 #define MANTIDWIDGETS_PROCESSINGALGOWIDGET_H_
 
 #include <QWidget>
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "ui_ProcessingAlgoWidget.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -15,7 +15,7 @@ namespace MantidWidgets {
  *
  * For use initially in the StartLiveDataDialog.
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ProcessingAlgoWidget : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON ProcessingAlgoWidget : public QWidget {
   Q_OBJECT
   Q_PROPERTY(QString infoString READ infoString WRITE infoString)
   Q_PROPERTY(bool editorVisible READ editorVisible WRITE editorVisible)

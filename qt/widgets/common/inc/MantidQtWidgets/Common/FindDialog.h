@@ -10,7 +10,7 @@
  * Specialisation of FindReplaceDialog that only
  * does finding
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FindDialog : public FindReplaceDialog {
+class EXPORT_OPT_MANTIDQT_COMMON FindDialog : public FindReplaceDialog {
   Q_OBJECT
 
 public:

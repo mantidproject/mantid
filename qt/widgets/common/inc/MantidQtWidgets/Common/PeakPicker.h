@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <qwt_plot.h>
 #include <qwt_plot_marker.h>
@@ -37,7 +37,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PeakPicker : public QwtPlotPicker,
+class EXPORT_OPT_MANTIDQT_COMMON PeakPicker : public QwtPlotPicker,
                                                      public QwtPlotItem {
   Q_OBJECT
 

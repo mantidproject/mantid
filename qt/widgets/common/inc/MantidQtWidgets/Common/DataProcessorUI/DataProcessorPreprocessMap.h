@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSMAP_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSMAP_H
 
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include <map>
 
@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorPreprocessMap {
+class EXPORT_OPT_MANTIDQT_COMMON DataProcessorPreprocessMap {
 public:
   // Default constructor
   DataProcessorPreprocessMap();

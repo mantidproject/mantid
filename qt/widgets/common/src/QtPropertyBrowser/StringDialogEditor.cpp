@@ -1,4 +1,4 @@
-#include "StringDialogEditor.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h"
 
 #include <QHBoxLayout>
 #include <QLineEdit>

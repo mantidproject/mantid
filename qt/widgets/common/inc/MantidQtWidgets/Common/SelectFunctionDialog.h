@@ -4,7 +4,7 @@
 //--------------------------------------------------
 // Includes
 //--------------------------------------------------
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 #include <QDialog>
 #include <map>
@@ -16,7 +16,7 @@ class SelectFunctionDialog;
 /**
  * Select a function type out of a list of available ones.
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SelectFunctionDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SelectFunctionDialog : public QDialog {
   Q_OBJECT
 
 public:

@@ -22,6 +22,8 @@ set( QTPROPERTYBROWSER_SRCS
 	src/qtpropertybrowserutils.cpp
 	src/DoubleDialogEditor.cpp
 	src/DoubleEditorFactory.cpp
+	src/FilenameDialogEditor.cpp
+    src/FormulaDialogEditor.cpp
 	src/ParameterPropertyManager.cpp
 	src/StringDialogEditor.cpp
 	src/StringEditorFactory.cpp
@@ -107,7 +109,9 @@ set (
 
 qt4_wrap_cpp ( EXTRA_MOCS src/ButtonEditorFactory.h
                           src/DoubleEditorFactory.h 
-                          src/DoubleDialogEditor.h 
+                          src/DoubleDialogEditor.h
+                          src/FormulaDialogEditor.h
+                          src/FilenameDialogEditor.h
                           src/ParameterPropertyManager.h
                           src/StringDialogEditor.h
                           src/StringEditorFactory.h

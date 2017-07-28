@@ -3,7 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QAbstractItemModel>
 #include <QColor>
 
@@ -37,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS AbstractDataProcessorTreeModel
+class EXPORT_OPT_MANTIDQT_COMMON AbstractDataProcessorTreeModel
     : public QAbstractItemModel {
   Q_OBJECT
 public:

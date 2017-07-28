@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_EXCITATIONSDIAGRESULTS_H_
 
 #include "MantidQtWidgets/Common/MantidDialog.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QHash>
 #include <QSignalMapper>
 #include <QGridLayout>
@@ -10,7 +10,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DiagResults : public API::MantidDialog {
+class EXPORT_OPT_MANTIDQT_COMMON DiagResults : public API::MantidDialog {
   Q_OBJECT
 
 public:

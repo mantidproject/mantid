@@ -1,8 +1,8 @@
 #include "MantidQtWidgets/Common/MuonFitDataSelector.h"
 #include "MantidKernel/Logger.h"
 
-#include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitDataSelector");

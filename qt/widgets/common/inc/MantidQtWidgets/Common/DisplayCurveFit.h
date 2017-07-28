@@ -2,7 +2,7 @@
 #define MANTID_MANTIDWIDGETS_DISPLAYCURVEFIT_H_
 // includes for interface development
 #include "ui_DisplayCurveFit.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/RangeSelector.h"
 // includes for workspace handling
@@ -54,7 +54,7 @@ class RangeSelector;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DisplayCurveFit
+class EXPORT_OPT_MANTIDQT_COMMON DisplayCurveFit
     : public API::MantidWidget {
   Q_OBJECT
 

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------
 #include <QDialog>
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 //----------------------------------
 // Forward declarations
@@ -22,7 +22,7 @@ class QShowEvent;
  * Raises a dialog allowing the user to find/replace
  * text in the editor.
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FindReplaceDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON FindReplaceDialog : public QDialog {
   Q_OBJECT
 
 public:

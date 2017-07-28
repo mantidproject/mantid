@@ -3,7 +3,7 @@
 
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QObject>
 #include <memory>
 #include <qmenu.h>
@@ -42,7 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorCommandAdapter
+class EXPORT_OPT_MANTIDQT_COMMON DataProcessorCommandAdapter
     : public QObject {
   Q_OBJECT
 public:

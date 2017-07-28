@@ -1,4 +1,4 @@
-#include "DoubleDialogEditor.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 
 #include <QHBoxLayout>
 #include <QLineEdit>

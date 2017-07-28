@@ -1,7 +1,7 @@
 #ifndef STRINGEDITORFACTORY_H
 #define STRINGEDITORFACTORY_H
 
-#include "qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
 namespace MantidQt {

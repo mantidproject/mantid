@@ -14,9 +14,9 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 
-#include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
-#include "ParameterPropertyManager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h"
 
 #include <QMessageBox>
 

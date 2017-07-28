@@ -6,7 +6,7 @@
 //----------------------------------
 #include "MantidAPI/InstrumentDataService.h"
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "ui_SlitCalculator.h"
 #include <QDialog>
 
@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SlitCalculator : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SlitCalculator : public QDialog {
   Q_OBJECT
 public:
   SlitCalculator(QWidget *parent);

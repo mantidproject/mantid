@@ -9,18 +9,18 @@
 
 #include "MantidKernel/Logger.h"
 
-#include "MantidQtWidgets/Common/DoubleDialogEditor.h"
-#include "MantidQtWidgets/Common/FilenameDialogEditor.h"
-#include "MantidQtWidgets/Common/FormulaDialogEditor.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h"
 #include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 #include "MantidQtWidgets/Common/UserFunctionDialog.h"
-#include "MantidQtWidgets/Common/WorkspaceEditorFactory.h"
 
-#include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
-#include "qteditorfactory.h"
-#include "DoubleEditorFactory.h"
-#include "CompositeEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

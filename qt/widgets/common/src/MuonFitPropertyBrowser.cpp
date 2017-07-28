@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidQtWidgets/Common/StringEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h"
 
 #include "MantidQtWidgets/Common/MuonFitDataSelector.h"
 
@@ -20,8 +20,8 @@
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include "DoubleEditorFactory.h"
-#include "qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -37,8 +37,8 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 
-#include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 
 #include <Poco/ActiveResult.h>
 

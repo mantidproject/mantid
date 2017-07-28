@@ -2,7 +2,7 @@
 #define MANTIDQT_MANTIDWIDGETS_LOGVALUESELECTOR_H_
 
 #include "ui_LogValueSelector.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -32,7 +32,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS LogValueSelector
+class EXPORT_OPT_MANTIDQT_COMMON LogValueSelector
     : public MantidQt::API::MantidWidget {
   Q_OBJECT
 public:

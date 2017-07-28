@@ -85,9 +85,8 @@
 **
 ****************************************************************************/
 
-#include "qtpropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h"
 #include <QtCore/QSet>
-#include <QtCore/QMap>
 #include <QtGui/QIcon>
 
 #if defined(Q_CC_MSVC)
@@ -97,41 +96,6 @@
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
 #endif
-
-class QtPropertyPrivate
-{
-public:
-    QtPropertyPrivate(QtAbstractPropertyManager *manager) : m_enabled(true), m_modified(false), m_manager(manager) {}
-    QtProperty *q_ptr;
-
-    QSet<QtProperty *> m_parentItems;
-    QList<QtProperty *> m_subItems;
-    QMap<QString,bool> m_options;
-
-    QString m_toolTip;
-    QString m_statusTip;
-    QString m_whatsThis;
-    QString m_name;
-    bool m_enabled;
-    bool m_modified;
-
-    QtAbstractPropertyManager * const m_manager;
-};
-
-class QtAbstractPropertyManagerPrivate
-{
-    QtAbstractPropertyManager *q_ptr;
-    Q_DECLARE_PUBLIC(QtAbstractPropertyManager)
-public:
-    void propertyDestroyed(QtProperty *property);
-    void propertyChanged(QtProperty *property) const;
-    void propertyRemoved(QtProperty *property,
-                QtProperty *parentProperty) const;
-    void propertyInserted(QtProperty *property, QtProperty *parentProperty,
-                QtProperty *afterProperty) const;
-
-    QSet<QtProperty *> m_properties;
-};
 
 /**
     \class QtProperty

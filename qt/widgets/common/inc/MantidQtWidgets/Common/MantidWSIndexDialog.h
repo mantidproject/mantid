@@ -4,7 +4,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <QCheckBox>
 #include <QComboBox>
@@ -85,7 +85,7 @@ class IntervalList;
    <http://doxygen.mantidproject.org>
 */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS Interval {
+class EXPORT_OPT_MANTIDQT_COMMON Interval {
 public:
   /// Constructor - starting and ending at single.
   explicit Interval(int single);
@@ -129,7 +129,7 @@ private:
   int m_start, m_end;
 };
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IntervalList {
+class EXPORT_OPT_MANTIDQT_COMMON IntervalList {
 public:
   /// Constructor - with empty list.
   IntervalList(void);
@@ -203,7 +203,7 @@ private:
   QList<Interval> m_list;
 };
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IntervalListValidator
+class EXPORT_OPT_MANTIDQT_COMMON IntervalListValidator
     : public QValidator {
   Q_OBJECT
 
@@ -220,7 +220,7 @@ private:
   IntervalList m_intervalList;
 };
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWSIndexWidget : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON MantidWSIndexWidget : public QWidget {
   Q_OBJECT
 
   /** Auxiliary class to wrap the QLineEdit allowing warning to the user
@@ -404,7 +404,7 @@ private:
   bool m_usingWsIndexChoice = false, m_usingSprectraNumChoice = false;
 };
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWSIndexDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON MantidWSIndexDialog : public QDialog {
   Q_OBJECT
 
 public:

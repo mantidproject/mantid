@@ -1,7 +1,7 @@
 #ifndef MANTIDQT_MANTIDWIDGET_POSHPLOTTING_H
 #define MANTIDQT_MANTIDWIDGET_POSHPLOTTING_H
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 #include <qwt_plot_picker.h>
 #include <qwt_plot.h>
@@ -18,7 +18,7 @@ class PreviewPlot;
 * @author Michael Whitty, RAL ISIS
 * @date 11/10/2010
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS RangeSelector : public QwtPlotPicker {
+class EXPORT_OPT_MANTIDQT_COMMON RangeSelector : public QwtPlotPicker {
   Q_OBJECT
 public:
   enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };

@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __pqHelpWindow_h
 
 #include <QMainWindow>
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 class HelpBrowser;
 class QHelpEngine;
@@ -43,7 +43,7 @@ class QWebView;
 
 /// pqHelpWindow provides a assistant-like window  for showing help provided by
 /// a QHelpEngine.
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS pqHelpWindow : public QMainWindow {
+class EXPORT_OPT_MANTIDQT_COMMON pqHelpWindow : public QMainWindow {
   Q_OBJECT
   typedef QMainWindow Superclass;
 

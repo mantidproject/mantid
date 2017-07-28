@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

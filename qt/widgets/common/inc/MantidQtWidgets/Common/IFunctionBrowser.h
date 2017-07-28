@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_IFUNCTIONBROWSER_H_
 #define MANTID_MANTIDWIDGETS_IFUNCTIONBROWSER_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include "MantidAPI/IFunction.h"
 #include <QString>
 
@@ -33,7 +33,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IFunctionBrowser {
+class EXPORT_OPT_MANTIDQT_COMMON IFunctionBrowser {
 public:
   virtual ~IFunctionBrowser() {}
   virtual QString getFunctionString() = 0;

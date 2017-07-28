@@ -1,7 +1,7 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
 #define MANTIDQT_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
 
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h"
@@ -45,7 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS WorkspacePresenter
+class EXPORT_OPT_MANTIDQT_COMMON WorkspacePresenter
     : public WorkspaceProviderNotifiable,
       public ViewNotifiable {
 public:

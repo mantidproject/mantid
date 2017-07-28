@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_TRACKEDACTION_H_
 #define MANTID_MANTIDWIDGETS_TRACKEDACTION_H_
 
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 #include <QAction>
 
 namespace MantidQt {
@@ -31,7 +31,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS TrackedAction : public QAction {
+class EXPORT_OPT_MANTIDQT_COMMON TrackedAction : public QAction {
   Q_OBJECT
 public:
   TrackedAction(QObject *parent);

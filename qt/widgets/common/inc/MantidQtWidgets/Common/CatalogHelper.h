@@ -2,11 +2,11 @@
 #define MANTIDQTWIDGETS_CATALOGHELPER_H_
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "WidgetDllOption.h"
+#include "DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS CatalogHelper {
+class EXPORT_OPT_MANTIDQT_COMMON CatalogHelper {
 
 public:
   /// Obtain the list of instruments that are available for the given session
