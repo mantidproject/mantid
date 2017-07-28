@@ -260,6 +260,13 @@ private:
                                    size_t iType, Poco::XML::Element *pTypeElem,
                                    const std::string &typeName);
 
+  /// Adjust each type which contains a \<combine-components-into-one-shape\>
+  /// element
+  void adjustTypesContainingCombineComponentsElement(
+      ShapeFactory &shapeCreator, const std::string &filename,
+      const std::vector<Poco::XML::Element *> &typeElems,
+      size_t numberOfTypes) const;
+
 public: // for testing
   /// return absolute position of point which is set relative to the
   /// coordinate system of the input component

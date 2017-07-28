@@ -273,30 +273,8 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
     createShapeIfTypeIsNotAnAssembly(shapeCreator, iType, pTypeElem, typeName);
   }
 
-  // Deal with adjusting types containing <combine-components-into-one-shape>
-  for (size_t iType = 0; iType < numberOfTypes; ++iType) {
-    Element *pTypeElem = typeElems[iType];
-    std::string typeName = pTypeElem->getAttribute("name");
-
-    // In this loop only interested in types containing
-    // <combine-components-into-one-shape>
-    Poco::AutoPtr<NodeList> pNL_type_combine_into_one_shape =
-        pTypeElem->getElementsByTagName("combine-components-into-one-shape");
-    const unsigned long nelements = pNL_type_combine_into_one_shape->length();
-    if (nelements == 0)
-      continue;
-
-    throwIfTypeNameNotUnique(filename, typeName);
-    getTypeElement[typeName] = pTypeElem;
-
-    InstrumentDefinitionParser helper;
-    helper.adjust(pTypeElem, isTypeAssembly, getTypeElement);
-
-    isTypeAssembly[typeName] = false;
-
-    mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
-  }
+  adjustTypesContainingCombineComponentsElement(shapeCreator, filename,
+                                                typeElems, numberOfTypes);
 
   // create m_hasParameterElement
   Poco::AutoPtr<NodeList> pNL_parameter =
@@ -436,6 +414,42 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
 }
 
 /**
+ * "Adjust" (see adjust method) each type which contains a
+ * \<combine-components-into-one-shape\> element
+ *
+ * @param shapeCreator :: Factory for creating a shape
+ * @param filename :: Name of the IDF file
+ * @param typeElems :: Vector of pointers to type elements
+ * @param numberOfTypes :: Total number of type elements
+ */
+void InstrumentDefinitionParser::adjustTypesContainingCombineComponentsElement(
+    ShapeFactory &shapeCreator, const std::string &filename,
+    const std::vector<Element *> &typeElems, const size_t numberOfTypes) const {
+  for (size_t iType = 0; iType < numberOfTypes; ++iType) {
+    Element *pTypeElem = typeElems[iType];
+    std::__cxx11::string typeName = pTypeElem->getAttribute("name");
+
+    // In this loop only interested in types containing
+    // <combine-components-into-one-shape>
+    Poco::AutoPtr<NodeList> pNL_type_combine_into_one_shape =
+        pTypeElem->getElementsByTagName("combine-components-into-one-shape");
+    if (pNL_type_combine_into_one_shape->length() == 0)
+      continue;
+
+    throwIfTypeNameNotUnique(filename, typeName);
+    getTypeElement[typeName] = pTypeElem;
+
+    InstrumentDefinitionParser helper;
+    helper.adjust(pTypeElem, isTypeAssembly, getTypeElement);
+
+    isTypeAssembly[typeName] = false;
+
+    mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
+    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+  }
+}
+
+/**
  * If type does not contain a component element then it is not an assembly
  * and a shape can be created
  *
@@ -465,7 +479,7 @@ void InstrumentDefinitionParser::createShapeIfTypeIsNotAnAssembly(
 }
 
 /**
- * Create vectors of pointers to "types" and "components"
+ * Create vectors of pointers to \<type\>s and \<component\>s"
  *
  * @param pRootElem :: Pointer to the root element
  * @param typeElems :: Reference to type vector to populate
@@ -2522,22 +2536,23 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
   }
 }
 
-/** Takes as input a \<type\> element containing a
-*<combine-components-into-one-shape>, and
-*   adjust the \<type\> element by replacing its containing \<component\>
-*elements with \<cuboid\>'s
-*   (note for now this will only work for \<cuboid\>'s and when necessary this
-*can be extended).
-*
-*  @param pElem ::  Poco::XML \<type\> element that we want to adjust
-*  @param isTypeAssembly [in] :: tell whether any other type, but the special
-*one treated here, is assembly or not
-*  @param getTypeElement [in] :: contain pointers to all types but the onces
-*treated here
-*
-*  @throw InstrumentDefinitionError Thrown if issues with the content of XML
-*instrument file
-*/
+/**
+ * Takes as input a \<type\> element containing a
+ * <combine-components-into-one-shape>, and
+ * adjust the \<type\> element by replacing its containing \<component\>
+ * elements with \<cuboid\>'s
+ * (note for now this will only work for \<cuboid\>'s and when necessary this
+ * can be extended).
+ *
+ *  @param pElem ::  Poco::XML \<type\> element that we want to adjust
+ *  @param isTypeAssembly [in] :: tell whether any other type, but the special
+ * one treated here, is assembly or not
+ *  @param getTypeElement [in] :: contain pointers to all types but the onces
+ * treated here
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
+ * instrument file
+ */
 void InstrumentDefinitionParser::adjust(
     Poco::XML::Element *pElem, std::map<std::string, bool> &isTypeAssembly,
     std::map<std::string, Poco::XML::Element *> &getTypeElement) {
