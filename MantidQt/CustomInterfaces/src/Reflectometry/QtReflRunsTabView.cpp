@@ -154,6 +154,14 @@ void QtReflRunsTabView::setRowCommands(
 }
 
 /**
+* Sets all rows in the table view to be selected
+*/
+void QtReflRunsTabView::setAllSearchRowsSelected() {
+
+  ui.tableSearchResults->selectAll();
+}
+
+/**
 * Clears all the actions (commands)
 */
 void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
@@ -166,6 +174,15 @@ void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
 void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
 
   ui.menuRows->actions()[index]->setEnabled(enabled);
+}
+
+/**
+* Sets the "Autoreduce" button enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
+
+  ui.buttonAutoreduce->setEnabled(enabled);
 }
 
 /**
@@ -243,9 +260,26 @@ void QtReflRunsTabView::icatSearchComplete() {
 This slot notifies the presenter that the "search" button has been pressed
 */
 void QtReflRunsTabView::on_actionSearch_triggered() {
+  m_algoRunner.get()->disconnect(); // disconnect any other connections
   m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(icatSearchComplete()));
+          SLOT(icatSearchComplete()), Qt::UniqueConnection);
+}
+
+/**
+This slot conducts a search operation before notifying the presenter that the
+"autoreduce" button has been pressed
+*/
+void QtReflRunsTabView::on_actionAutoreduce_triggered() {
+  // No need to search first if not starting a new autoreduction
+  if (m_presenter->startNewAutoreduction()) {
+    m_algoRunner.get()->disconnect(); // disconnect any other connections
+    m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
+    connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+            SLOT(newAutoreduction()), Qt::UniqueConnection);
+  } else {
+    m_presenter->notify(IReflRunsTabPresenter::ResumeAutoreductionFlag);
+  }
 }
 
 /**
@@ -290,6 +324,13 @@ void QtReflRunsTabView::instrumentChanged(int index) {
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
   m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+}
+
+/**
+This notifies the presenter that a new autoreduction has been started
+*/
+void QtReflRunsTabView::newAutoreduction() {
+  m_presenter->notify(IReflRunsTabPresenter::NewAutoreductionFlag);
 }
 
 /**

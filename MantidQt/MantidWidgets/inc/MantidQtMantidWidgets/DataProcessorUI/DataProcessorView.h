@@ -9,7 +9,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-class QAbstractItemModel;
+class AbstractDataProcessorTreeModel;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -56,7 +56,8 @@ public:
   addActions(std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
 
   // Connect the model
-  virtual void showTable(boost::shared_ptr<QAbstractItemModel> model) = 0;
+  virtual void
+  showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) = 0;
 
   // Dialog/Prompt methods
   virtual std::string requestNotebookPath() = 0;
@@ -81,6 +82,9 @@ public:
   virtual void expandAll() = 0;
   virtual void collapseAll() = 0;
 
+  // Select all rows/groups
+  virtual void selectAll() = 0;
+
   // Handle pause/resume of data reduction
   virtual void pause() = 0;
   virtual void resume() = 0;
@@ -90,7 +94,6 @@ public:
   virtual void setInstrumentList(const QString &instruments,
                                  const QString &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &groups) = 0;
-  virtual void setSelectionModelConnections() = 0;
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;
