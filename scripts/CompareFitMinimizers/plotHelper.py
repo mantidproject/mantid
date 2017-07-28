@@ -21,7 +21,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+import copy
 class data:
     """
     Holds the data and relevant information for plotting
@@ -36,8 +36,8 @@ class data:
     """
         if(name != None):
                 self.name = name
-                self.x = x
-                self.y = y						    
+                self.x = copy.copy(x)
+                self.y = copy.copy(y)						    
         else:
                 self.name ='none'
                 self.x = [0.0,0.0,0.0]
@@ -45,7 +45,7 @@ class data:
         if(len(E)==0):
                 self.E=np.zeros(len(self.x))
         else:
-                self.E=E
+                self.E=copy.copy(E)
         self.showError=False
         self.markers="x"
         self.colour="k"
@@ -55,9 +55,9 @@ class data:
     Ensures that the data is in assending order in x
 	Prevents line plots looping back on them selves
     """
-        xData=self.x.copy()
-        yData=self.y.copy()
-        eData=self.E.copy()
+        xData=self.x
+        yData=self.y
+        eData=self.E
 
         for j in range(0,len(yData)):
             for k in range(0,len(xData)-1):
@@ -65,9 +65,7 @@ class data:
                     xData[k+1],xData[k]=xData[k],xData[k+1]
                     yData[k+1],yData[k]=yData[k],yData[k+1]
                     eData[k+1],eData[k]=eData[k],eData[k+1]
-        self.x=xData
-        self.y=yData
-        self.E=eData	    
+       	    
 
 class insert(data):
     """

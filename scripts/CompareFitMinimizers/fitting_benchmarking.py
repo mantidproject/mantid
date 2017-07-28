@@ -201,7 +201,7 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
     # Get function definitions for the problem - one for each starting point
     function_defs = get_function_definitions(prob)
     # search for lowest chi2
-    min_chi2 = 1.e6
+    min_sum_err_sq = 1.e20
     # Loop over the different starting points
     for user_func in function_defs:
         results_problem_start = []
@@ -221,13 +221,14 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
             if fit_wks:
                 sum_err_sq = sum_of_squares(fit_wks.readY(2))
                 # print " output simulated values: {0}".format(fit_wks.readY(1))
+                if sum_err_sq <min_sum_err_sq:
+                       best_fit=data(minimizer_name,fit_wks.readX(1),fit_wks.readY(1))
+                       min_sum_err_sq=sum_err_sq
             else:
                 sum_err_sq = float("inf")
                 print(" WARNING: no output fit workspace")
             print("   sum sq: {0}".format(sum_err_sq))
-            if chi2 <min_chi2:
-                best_fit=data(minimizer_name,fit_wks.readX(1),fit_wks.readY(1))
-                min_chi2=chi2
+            
             result = test_result.FittingTestResult()
             result.problem = prob
             result.fit_status = status
