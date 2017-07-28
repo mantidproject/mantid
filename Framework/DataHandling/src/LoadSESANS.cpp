@@ -2,6 +2,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -9,6 +10,7 @@
 #include "boost/algorithm/string/predicate.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <regex>
 
@@ -126,9 +128,14 @@ void LoadSESANS::exec() {
   if (line != "BEGIN_DATA")
     throwFormatError("<EOF>", "Expected \"BEGIN_DATA\" before EOF", lineNum + 1);
 
+  // Read file columns into a map - now we can get rid of the file
   ColumnMap columns = consumeData(infile, line, lineNum);
-
   infile.close();
+
+  // Make a workspace from the columns and set it as the output
+  API::MatrixWorkspace_sptr newWorkspace = makeWorkspace(columns);
+  setProperty("OutputWorkspace", newWorkspace);
+
 }
 
 /** Read headers from the input file into the attribute map, until BEGIN_DATA is
@@ -196,7 +203,7 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line, int 
     if (std::regex_match(line, lineRegex)) {
       tokens = split(line);
 
-	  for (unsigned int i = 0; i < tokens.size(); i++)
+	  for (unsigned int i = 0; i < tokens.size(); i++) 
 		  columns[columnHeaders[i]].push_back(std::stod(tokens[i]));
     } else {
       g_log.warning("Line " + std::to_string(lineNum) +
@@ -277,9 +284,22 @@ void LoadSESANS::checkMandatoryHeaders() {
 }
 
 API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
-	int histogramLength = columns["SpinEchoLength"].size();
+	size_t histogramLength = columns["SpinEchoLength"].size();
 	API::MatrixWorkspace_sptr newWorkspace = API::WorkspaceFactory::Instance().create("Workspace2D", 1, histogramLength, histogramLength);
 
+	auto yValues = calculateYValues(columns["Depolarisation"], columns["Wavelength"]);
+	auto eValues = calculateEValues(columns["Depolarisation_error"], yValues, columns["Wavelength"]);
+	newWorkspace->setPoints(0, columns["Wavelength"]);
+
+	auto &dataY = newWorkspace->mutableY(0);
+	auto &dataE = newWorkspace->mutableE(0);
+
+	for (int i = 0; i < histogramLength; i++) {
+		dataY[i] = yValues[i];
+		dataE[i] = eValues[i];
+	}
+
+	return newWorkspace;
 }
 
 /** Is a character whitespace (here considered space or tab)?
@@ -330,6 +350,24 @@ std::string LoadSESANS::repeatAndJoin(const std::string &str,
     result += str + delim;
   }
   return result + str;
+}
+
+Column LoadSESANS::calculateYValues(const Column &depolarisation, const Column &wavelength) const {
+	Column yValues;
+
+	transform(depolarisation.begin(), depolarisation.end(), wavelength.begin(),
+		back_inserter(depolarisation),
+		[&](double depol, double wavelength) { return exp(depol * wavelength * wavelength); });
+	return yValues;
+}
+
+Column LoadSESANS::calculateEValues(const Column & error, const Column & yValues, const Column & wavelength) const {
+	Column eValues;
+
+	for (int i = 0; i < error.size(); i++) {
+		eValues.push_back(error[i] * yValues[i] * wavelength[i] * wavelength[i]);
+	}
+	return eValues;
 }
 
 } // namespace DataHandling
