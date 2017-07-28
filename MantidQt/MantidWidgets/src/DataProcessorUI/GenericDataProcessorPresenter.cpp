@@ -1672,6 +1672,7 @@ bool GenericDataProcessorPresenter::isProcessed(int position) const {
 
 /** Checks if a row in the table has been processed.
  * @param position :: the row to check
+ * @param parent :: the parent
  * @return :: true if the row has already been processed else false.
  */
 bool GenericDataProcessorPresenter::isProcessed(int position,
