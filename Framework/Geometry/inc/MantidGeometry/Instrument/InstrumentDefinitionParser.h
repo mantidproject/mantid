@@ -276,6 +276,10 @@ private:
                                             Poco::XML::Element *pElem,
                                             const std::string &filename) const;
 
+  /// Check component has a \<location\> or \<locations\> element
+  void checkComponentContainsLocationElement(Poco::XML::Element *pElem,
+                                             const std::string &filename) const;
+
 public: // for testing
   /// return absolute position of point which is set relative to the
   /// coordinate system of the input component

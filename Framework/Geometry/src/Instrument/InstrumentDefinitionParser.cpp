@@ -292,25 +292,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
     {
       IdList idList; // structure to possibly be populated with detector IDs
 
-      // Get all <location> and <locations> elements contained in component
-      // element just for the purpose of a IDF syntax check
-      Poco::AutoPtr<NodeList> pNL_location =
-          pElem->getElementsByTagName("location");
-      Poco::AutoPtr<NodeList> pNL_locations =
-          pElem->getElementsByTagName("locations");
-      // do a IDF syntax check
-      if (pNL_location->length() == 0 && pNL_locations->length() == 0) {
-        g_log.error(std::string("A component element must contain at least one "
-                                "<location> or <locations> element") +
-                    " even if it is just an empty location element of the form "
-                    "<location />");
-        throw Kernel::Exception::InstrumentDefinitionError(
-            std::string("A component element must contain at least one "
-                        "<location> or <locations> element") +
-                " even if it is just an empty location element of the form "
-                "<location />",
-            filename);
-      }
+      checkComponentContainsLocationElement(pElem, filename);
 
       // Loop through all <location> and <locations> elements of this component
       // by looping all the child nodes and then see if any of these nodes are
@@ -363,6 +345,35 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
 
   // And give back what we created
   return m_instrument;
+}
+
+/**
+ * Component must contain a \<location\> or \<locations\>
+ * Throw an exception if it does not
+ *
+ * @param pNL_location ::
+ * @param pNL_locations ::
+ * @param filename :: Name of the IDF, for exception message
+ */
+void InstrumentDefinitionParser::checkComponentContainsLocationElement(
+    Element *pElem, const std::string &filename) const {
+  Poco::AutoPtr<NodeList> pNL_location =
+      pElem->getElementsByTagName("location");
+  Poco::AutoPtr<NodeList> pNL_locations =
+      pElem->getElementsByTagName("locations");
+
+  if (pNL_location->length() == 0 && pNL_locations->length() == 0) {
+    g_log.error(std::string("A component element must contain at least one "
+                            "<location> or <locations> element") +
+                " even if it is just an empty location element of the form "
+                "<location />");
+    throw Kernel::Exception::InstrumentDefinitionError(
+        std::string("A component element must contain at least one "
+                    "<location> or <locations> element") +
+            " even if it is just an empty location element of the form "
+            "<location />",
+        filename);
+  }
 }
 
 /**
