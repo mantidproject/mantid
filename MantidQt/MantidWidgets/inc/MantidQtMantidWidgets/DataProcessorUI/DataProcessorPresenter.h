@@ -72,6 +72,7 @@ public:
     PlotGroupFlag,
     ExpandAllGroupsFlag,
     CollapseAllGroupsFlag,
+    SelectAllFlag,
     PauseFlag
   };
 

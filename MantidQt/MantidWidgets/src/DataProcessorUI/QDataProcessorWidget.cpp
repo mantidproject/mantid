@@ -322,6 +322,11 @@ Collapse all currently expanded groups
 void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
 
 /**
+Select all rows/groups
+*/
+void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
+
+/**
 Handle interface when data reduction paused
 */
 void QDataProcessorWidget::pause() {

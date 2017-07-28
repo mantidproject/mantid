@@ -49,6 +49,7 @@ public:
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
+  MOCK_METHOD0(selectAll, void());
   MOCK_METHOD0(pause, void());
   MOCK_METHOD0(resume, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
