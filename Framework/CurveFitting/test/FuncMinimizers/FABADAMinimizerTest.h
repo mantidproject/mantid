@@ -276,62 +276,62 @@ public:
     TS_ASSERT(!fit.isExecuted());
   }
 
-   /* void test_cosineWithConstraint() {
+  /* void test_cosineWithConstraint() {
 
-    auto ws2 = createCosineWorkspace();
+   auto ws2 = createCosineWorkspace();
 
-    Fit fit;
-    fit.initialize();
-    fit.setChild(true);
-    fit.setPropertyValue("Function", "name=UserFunction, Formula=a*cos(b*x), "
-                                     "a=2, b=-1, constraints=(0<b<1)");
-    fit.setProperty("InputWorkspace", ws2);
-    fit.setProperty("WorkspaceIndex", 0);
-    fit.setProperty("CreateOutput", true);
-    fit.setProperty("MaxIterations", 100000);
-    fit.setProperty("Minimizer",
-                    "FABADA,ChainLength=10000,StepsBetweenValues="
-                    "10,ConvergenceCriteria=0.1,CostFunctionTable="
-                    "CostFunction,Chains=Chain,ConvergedChain"
-                    "=ConvergedChain,Parameters=Parameters,"
-                    "SimAnnealingApplied=1,MaximumTemperature=10.0,"
-                    "NumRefrigerationSteps=5,SimAnnealingIterations="
-                    "3000");
-    TS_ASSERT_THROWS_NOTHING(fit.execute());
-    TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
-    Mantid::API::IFunction_sptr fun = fit.getProperty("Function");
-    TS_ASSERT_DELTA(fun->getParameter("a"), 0.9, 0.1);
-    TS_ASSERT_DELTA(fun->getParameter("b"), 0.9, 0.1);
+   Fit fit;
+   fit.initialize();
+   fit.setChild(true);
+   fit.setPropertyValue("Function", "name=UserFunction, Formula=a*cos(b*x), "
+                                    "a=2, b=-1, constraints=(0<b<1)");
+   fit.setProperty("InputWorkspace", ws2);
+   fit.setProperty("WorkspaceIndex", 0);
+   fit.setProperty("CreateOutput", true);
+   fit.setProperty("MaxIterations", 100000);
+   fit.setProperty("Minimizer",
+                   "FABADA,ChainLength=10000,StepsBetweenValues="
+                   "10,ConvergenceCriteria=0.1,CostFunctionTable="
+                   "CostFunction,Chains=Chain,ConvergedChain"
+                   "=ConvergedChain,Parameters=Parameters,"
+                   "SimAnnealingApplied=1,MaximumTemperature=10.0,"
+                   "NumRefrigerationSteps=5,SimAnnealingIterations="
+                   "3000");
+   TS_ASSERT_THROWS_NOTHING(fit.execute());
+   TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
+   Mantid::API::IFunction_sptr fun = fit.getProperty("Function");
+   TS_ASSERT_DELTA(fun->getParameter("a"), 0.9, 0.1);
+   TS_ASSERT_DELTA(fun->getParameter("b"), 0.9, 0.1);
 
-    // Test PDF workspace
-    MatrixWorkspace_sptr PDF = fit.getProperty("PDF");
-    TS_ASSERT(PDF);
-    TS_ASSERT_DELTA(PDF->y(0)[11], 0.55, 0.3);
-    TS_ASSERT_DELTA(PDF->y(1)[19], 4.88, 1.0);
-    TS_ASSERT_DELTA(PDF->y(2)[0], 0.34, 0.2);
+   // Test PDF workspace
+   MatrixWorkspace_sptr PDF = fit.getProperty("PDF");
+   TS_ASSERT(PDF);
+   TS_ASSERT_DELTA(PDF->y(0)[11], 0.55, 0.3);
+   TS_ASSERT_DELTA(PDF->y(1)[19], 4.88, 1.0);
+   TS_ASSERT_DELTA(PDF->y(2)[0], 0.34, 0.2);
 
-    //  Test CostFunction table
-    ITableWorkspace_sptr costFunc = fit.getProperty("CostFunctionTable");
-    TS_ASSERT(costFunc);
-    TS_ASSERT_EQUALS(costFunc->columnCount(), 4);
-    TS_ASSERT_EQUALS(costFunc->rowCount(), 1);
-    TS_ASSERT_LESS_THAN_EQUALS(costFunc->Double(0, 0), costFunc->Double(0,
-    1));
-    TS_ASSERT_LESS_THAN_EQUALS(costFunc->Double(0, 2), costFunc->Double(0,
-    3));
-    TS_ASSERT_DELTA(costFunc->Double(0, 0), costFunc->Double(0, 1), 0.5);
-    TS_ASSERT_DELTA(costFunc->Double(0, 0), 0.0, 1.0);
+   //  Test CostFunction table
+   ITableWorkspace_sptr costFunc = fit.getProperty("CostFunctionTable");
+   TS_ASSERT(costFunc);
+   TS_ASSERT_EQUALS(costFunc->columnCount(), 4);
+   TS_ASSERT_EQUALS(costFunc->rowCount(), 1);
+   TS_ASSERT_LESS_THAN_EQUALS(costFunc->Double(0, 0), costFunc->Double(0,
+   1));
+   TS_ASSERT_LESS_THAN_EQUALS(costFunc->Double(0, 2), costFunc->Double(0,
+   3));
+   TS_ASSERT_DELTA(costFunc->Double(0, 0), costFunc->Double(0, 1), 0.5);
+   TS_ASSERT_DELTA(costFunc->Double(0, 0), 0.0, 1.0);
 
-    // Parameters workspace
-    ITableWorkspace_sptr param = fit.getProperty("Parameters");
-    TS_ASSERT(param);
-    TS_ASSERT_EQUALS(param->columnCount(), 4);
-    TS_ASSERT_EQUALS(param->rowCount(), 2);
-    TS_ASSERT_DELTA(param->Double(0, 2), -0.50, 0.01);
-    TS_ASSERT_DELTA(param->Double(0, 3), 1.10, 0.01);
-    TS_ASSERT_DELTA(param->Double(1, 2), -0.07, 0.01);
-    TS_ASSERT_DELTA(param->Double(1, 3), 0.01, 0.1);
-  }*/
+   // Parameters workspace
+   ITableWorkspace_sptr param = fit.getProperty("Parameters");
+   TS_ASSERT(param);
+   TS_ASSERT_EQUALS(param->columnCount(), 4);
+   TS_ASSERT_EQUALS(param->rowCount(), 2);
+   TS_ASSERT_DELTA(param->Double(0, 2), -0.50, 0.01);
+   TS_ASSERT_DELTA(param->Double(0, 3), 1.10, 0.01);
+   TS_ASSERT_DELTA(param->Double(1, 2), -0.07, 0.01);
+   TS_ASSERT_DELTA(param->Double(1, 3), 0.01, 0.1);
+ }*/
 
   void test_boundaryApplication() {
 
