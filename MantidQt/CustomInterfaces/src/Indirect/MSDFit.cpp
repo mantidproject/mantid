@@ -65,8 +65,9 @@ void MSDFit::setup() {
           SLOT(plotFit()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.modelInput, SIGNAL(currentIndexChanged(const QString &)),
-          this, SLOT(modelChanged(const QString &)));
+
+  QStringList suffixes = QStringList("_eq.nxs");
+  m_uiForm.dsSampleInput->setFBSuffixes(suffixes);
 }
 
 void MSDFit::run() {
@@ -101,18 +102,6 @@ void MSDFit::run() {
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
-}
-
-void MSDFit::modelChanged(const QString &model) {
-  QStringList suffixes = QStringList();
-
-  if (model.compare("Gauss") == 0) {
-    suffixes << "_eq2.nxs";
-  } else {
-    suffixes << "_eq.nxs";
-  }
-
-  m_uiForm.dsSampleInput->setFBSuffixes(suffixes);
 }
 
 void MSDFit::singleFit() {

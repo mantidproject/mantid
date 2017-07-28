@@ -20,7 +20,6 @@ private:
   void loadSettings(const QSettings &settings) override;
 
 private slots:
-  void modelChanged(const QString &text);
   void singleFit();
   void plotFit(QString wsName = QString(), int specNo = -1);
   void newDataLoaded(const QString wsName);
