@@ -74,26 +74,15 @@ convertStringToMapWithSet(const QString &properties) {
   return props;
 }
 
-void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
-                          QString const &value);
-
-void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
-                          std::string const &value);
-
-void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
-                          std::string const &value);
-
-void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
-                          QString const &value);
-
-void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
-                          QString const &value) {
-  setAlgorithmProperty(alg, name, value.toStdString());
-}
 
 void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
                           std::string const &value) {
   alg->setProperty(name, value);
+}
+
+void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
+                          QString const &value) {
+  setAlgorithmProperty(alg, name, value.toStdString());
 }
 
 void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
