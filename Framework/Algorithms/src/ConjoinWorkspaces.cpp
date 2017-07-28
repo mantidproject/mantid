@@ -195,40 +195,35 @@ ConjoinWorkspaces::conjoinHistograms(const API::MatrixWorkspace &ws1,
 void ConjoinWorkspaces::fixSpectrumNumbers(const MatrixWorkspace &ws1,
                                            const MatrixWorkspace &ws2,
                                            MatrixWorkspace &output) {
-  bool needsFix(false);
 
   if (this->getProperty("CheckOverlapping")) {
     // If CheckOverlapping is required, then either skip fixing spectrum number
     // or get stopped by an exception
     if (!m_overlapChecked)
+      // This throws if the spectrum numbers overlap
       checkForOverlap(ws1, ws2, true);
-    needsFix = false;
-  } else {
-    // It will be determined later whether spectrum number needs to be fixed.
-    needsFix = true;
-  }
-  if (!needsFix)
+    // At this point, we don't have to do anything
     return;
+  }
 
-  // is everything possibly ok?
-  specnum_t min;
-  specnum_t max;
+  // Because we were told not to check overlapping, fix up any errors we might run into
+  specnum_t min = -1;
+  specnum_t max = -1;
   getMinMax(output, min, max);
   if (max - min >= static_cast<specnum_t>(
                        output.getNumberHistograms())) // nothing to do then
     return;
 
   // information for remapping the spectra numbers
-  specnum_t ws1min;
-  specnum_t ws1max;
+  specnum_t ws1min = -1;
+  specnum_t ws1max = -1;
   getMinMax(ws1, ws1min, ws1max);
 
   // change the axis by adding the maximum existing spectrum number to the
   // current value
   for (size_t i = ws1.getNumberHistograms(); i < output.getNumberHistograms();
        i++) {
-    specnum_t origid;
-    origid = output.getSpectrum(i).getSpectrumNo();
+    specnum_t origid = output.getSpectrum(i).getSpectrumNo();
     output.getSpectrum(i).setSpectrumNo(origid + ws1max);
   }
 }
