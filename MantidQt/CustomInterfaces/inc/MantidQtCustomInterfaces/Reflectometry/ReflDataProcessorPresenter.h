@@ -45,13 +45,13 @@ public:
   // Constructor
   ReflDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
-      const std::map<std::string, std::string> &postprocessMap =
-          std::map<std::string, std::string>(),
-      const std::string &loader = "Load");
+      const std::map<QString, QString> &postprocessMap =
+          std::map<QString, QString>(),
+      const QString &loader = "Load");
   ~ReflDataProcessorPresenter() override;
 
   // The following methods are public for testing purposes only
@@ -67,8 +67,8 @@ private:
   void plotRow() override;
   void plotGroup() override;
   // Loads a run from disk
-  std::string loadRun(const std::string &run, const std::string &instrument,
-                      const std::string &prefix, const std::string &loader,
+  QString loadRun(const QString &run, const QString &instrument,
+                      const QString &prefix, const QString &loader,
                       bool &runFound);
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(const GroupData &groupData,
@@ -78,37 +78,37 @@ private:
   bool loadGroup(const GroupData &group);
   // Process a group of runs which are event workspaces
   bool processGroupAsEventWS(int groupID, const GroupData &group,
-                             const std::string &timeSlicingType,
-                             const std::string &timeSlicingValues);
+                             const QString &timeSlicingType,
+                             const QString &timeSlicingValues);
   // Process a group of runs which are not event workspaces
   bool processGroupAsNonEventWS(int groupID, GroupData &group);
 
   // Parse uniform / uniform even time slicing from input string
-  void parseUniform(const std::string &timeSlicing,
-                    const std::string &slicingType, const std::string &wsName,
+  void parseUniform(const QString &timeSlicing,
+                    const QString &slicingType, const QString &wsName,
                     std::vector<double> &startTimes,
                     std::vector<double> &stopTimes);
   // Parse custom time slicing from input string
-  void parseCustom(const std::string &timeSlicing,
+  void parseCustom(const QString &timeSlicing,
                    std::vector<double> &startTimes,
                    std::vector<double> &stopTimes);
   // Parse log value slicing and filter from input string
-  void parseLogValue(const std::string &inputStr, std::string &logFilter,
+  void parseLogValue(const QString &inputStr, QString &logFilter,
                      std::vector<double> &minValues,
                      std::vector<double> &maxValues);
 
   // Load a run as event workspace
-  bool loadEventRun(const std::string &runNo);
+  bool loadEventRun(const QString &runNo);
   // Load a run (non-event workspace)
-  void loadNonEventRun(const std::string &runNo);
+  void loadNonEventRun(const QString &runNo);
 
   // Take a slice from event workspace
-  std::string takeSlice(const std::string &runNo, size_t sliceIndex,
+  QString takeSlice(const QString &runNo, size_t sliceIndex,
                         double startTime, double stopTime,
-                        const std::string &logFilter = "");
+                        const QString &logFilter = "");
 
   Mantid::API::IEventWorkspace_sptr
-  retrieveWorkspaceByName(std::string const &name) const;
+  retrieveWorkspaceByName(QString const &name) const;
 
   // Asks user if they wish to proceed if a type of workspace exists in the ADS
   bool proceedIfWSTypeInADS(const MantidQt::MantidWidgets::TreeData &data,

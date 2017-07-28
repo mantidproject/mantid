@@ -84,7 +84,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
   // Pre-processing instructions as a map:
   // Keys are the column names
   // Values are the pre-processing algorithms that will be applied to columns
-  std::map<std::string, DataProcessorPreprocessingAlgorithm> preprocessMap = {
+  std::map<QString, DataProcessorPreprocessingAlgorithm> preprocessMap = {
       /* 'Plus' will be applied to column 'Run(s)'*/
       {"Run(s)",
        DataProcessorPreprocessingAlgorithm(
@@ -107,7 +107,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
   // post-processing algorithm
   // Key is column name
   // Value is property name of the post-processing algorithm
-  std::map<std::string, std::string> postprocessMap = {{"dQ/Q", "Params"}};
+  std::map<QString, QString> postprocessMap = {{"dQ/Q", "Params"}};
 
   return Mantid::Kernel::make_unique<ReflDataProcessorPresenter>(
       whitelist, preprocessMap, processor, postprocessor, postprocessMap,

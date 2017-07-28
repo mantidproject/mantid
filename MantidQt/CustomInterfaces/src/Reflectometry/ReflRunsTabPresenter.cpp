@@ -14,15 +14,19 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
+#include <QStringList>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <algorithm>
+#include <iterator>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -33,6 +37,12 @@ namespace CustomInterfaces {
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
+
+QStringList fromStdStringVector(std::vector<std::string> const& inVec) {
+  QStringList outVec;
+  std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec), &QString::fromStdString);
+  return outVec;
+}
 }
 
 /** Constructor
@@ -69,26 +79,26 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   m_currentTransferMethod = m_view->getTransferMethod();
 
   // Set up the instrument selectors
-  QStringList instruments;
-  instruments.append("INTER");
-  instruments.append("SURF");
-  instruments.append("CRISP");
-  instruments.append("POLREF");
-  instruments.append("OFFSPEC");
+  std::vector<std::string> instruments;
+  instruments.emplace_back("INTER");
+  instruments.emplace_back("SURF");
+  instruments.emplace_back("CRISP");
+  instruments.emplace_back("POLREF");
+  instruments.emplace_back("OFFSPEC");
 
   // If the user's configured default instrument is in this list, set it as the
   // default, otherwise use INTER
-  const std::string defaultInst =
+  const std::string defaultInst = 
       Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
   if (std::find(instruments.begin(), instruments.end(), defaultInst) !=
       instruments.end()) {
     m_view->setInstrumentList(instruments, defaultInst);
     for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(instruments, defaultInst);
+      presenter->setInstrumentList(fromStdStringVector(instruments), QString::fromStdString(defaultInst));
   } else {
     m_view->setInstrumentList(instruments, "INTER");
     for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(instruments, "INTER");
+      presenter->setInstrumentList(fromStdStringVector(instruments), QString::fromStdString("INTER"));
   }
 }
 
@@ -302,7 +312,7 @@ void ReflRunsTabPresenter::transfer() {
   }
 
   m_tablePresenters.at(m_view->getSelectedGroup())
-      ->transfer(results.getTransferRuns());
+      ->transfer(fromStdStringVectorMap(results.getTransferRuns()));
 }
 
 /**

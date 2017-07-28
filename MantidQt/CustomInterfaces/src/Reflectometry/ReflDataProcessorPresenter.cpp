@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -27,12 +28,12 @@ namespace CustomInterfaces {
 */
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+    const std::map<QString, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
-    const std::map<std::string, std::string> &postprocessMap,
-    const std::string &loader)
+    const std::map<QString, QString> &postprocessMap,
+    const QString &loader)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     postprocessor, postprocessMap, loader) {}
 
@@ -56,8 +57,8 @@ void ReflDataProcessorPresenter::process() {
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
   auto timeSlicingValues =
-      m_mainPresenter->getTimeSlicingValues().toStdString();
-  if (timeSlicingValues.empty()) {
+      m_mainPresenter->getTimeSlicingValues();
+  if (timeSlicingValues.isEmpty()) {
     // Check if any input event workspaces still exist in ADS
     if (proceedIfWSTypeInADS(newSelected, true)) {
       setPromptUser(false); // Prevent prompting user twice
@@ -80,11 +81,11 @@ void ReflDataProcessorPresenter::process() {
       m_mainPresenter->getPostprocessingOptions();
 
   // Get time slicing type
-  auto timeSlicingType = m_mainPresenter->getTimeSlicingType().toStdString();
+  auto timeSlicingType = m_mainPresenter->getTimeSlicingType();
 
   // Progress report
   int progress = 0;
-  int maxProgress = (int)(m_selectedData.size());
+  int maxProgress = static_cast<int>(m_selectedData.size());
   ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
                                      m_progressView);
 
@@ -155,12 +156,12 @@ void ReflDataProcessorPresenter::process() {
 bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
 
   // Set of runs loaded successfully
-  std::set<std::string> loadedRuns;
+  std::set<QString> loadedRuns;
 
   for (const auto &row : group) {
 
     // The run number
-    std::string runNo = row.second.at(0);
+    auto runNo = row.second.at(0);
     // Try loading as event workspace
     bool eventWS = loadEventRun(runNo);
     if (!eventWS) {
@@ -168,13 +169,13 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
       // process the whole group as non-event data.
       for (const auto &rowNew : group) {
         // The run number
-        std::string runNo = rowNew.second.at(0);
+        auto runNo = rowNew.second.at(0);
         // Load as non-event workspace
         loadNonEventRun(runNo);
       }
       // Remove monitors which were loaded as separate workspaces
       for (const auto &run : loadedRuns) {
-        AnalysisDataService::Instance().remove("TOF_" + run + "_monitors");
+        AnalysisDataService::Instance().remove(("TOF_" + run + "_monitors").toStdString());
       }
       return false;
     }
@@ -192,15 +193,15 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
 * @return :: true if errors were encountered
 */
 bool ReflDataProcessorPresenter::processGroupAsEventWS(
-    int groupID, const GroupData &group, const std::string &timeSlicingType,
-    const std::string &timeSlicingValues) {
+    int groupID, const GroupData &group, const QString &timeSlicingType,
+    const QString &timeSlicingValues) {
 
   bool errors = false;
   bool multiRow = group.size() > 1;
   size_t numGroupSlices = INT_MAX;
 
   std::vector<double> startTimes, stopTimes;
-  std::string logFilter; // Set if we are slicing by log value
+  QString logFilter; // Set if we are slicing by log value
 
   // For custom/log value slicing the start/stop times are the same for all rows
   if (timeSlicingType == "Custom")
@@ -212,10 +213,10 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
     const auto rowID = row.first;         // Integer ID of this row
     const auto data = row.second;         // Vector containing data for this row
-    std::string runNo = row.second.at(0); // The run number
+    auto runNo = row.second.at(0); // The run number
 
     if (timeSlicingType == "UniformEven" || timeSlicingType == "Uniform") {
-      const std::string runName = "TOF_" + runNo;
+      const QString runName = "TOF_" + runNo;
       parseUniform(timeSlicingValues, timeSlicingType, runName, startTimes,
                    stopTimes);
     }
@@ -226,7 +227,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     for (size_t i = 0; i < numSlices; i++) {
       try {
         RowData slice(data);
-        std::string wsName =
+        QString wsName =
             takeSlice(runNo, i, startTimes[i], stopTimes[i], logFilter);
         slice[0] = wsName;
         reduceRow(&slice);
@@ -254,10 +255,10 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
     for (size_t i = 0; i < numGroupSlices; i++) {
       GroupData groupNew;
-      std::vector<std::string> data;
+      QStringList data;
       for (const auto &row : group) {
         data = row.second;
-        data[0] = row.second[0] + "_slice_" + std::to_string(i);
+        data[0] = row.second[0] + "_slice_" + QString::number(i);
         groupNew[row.first] = data;
       }
       try {
@@ -311,15 +312,14 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
  */
 Mantid::API::IEventWorkspace_sptr
 ReflDataProcessorPresenter::retrieveWorkspaceByName(
-    std::string const &name) const {
+    QString const &name) const {
   IEventWorkspace_sptr mws;
-  if (AnalysisDataService::Instance().doesExist(name)) {
+  if (AnalysisDataService::Instance().doesExist(name.toStdString())) {
     auto mws =
-        AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(name);
+        AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(name.toStdString());
     if (mws == nullptr) {
-      m_view->giveUserCritical(
-          QString::fromStdString("Workspace to slice " + name +
-                                 " is not an event workspace!"),
+      m_view->giveUserCritical("Workspace to slice " + name +
+                                 " is not an event workspace!",
           "Time slicing error");
       return nullptr;
     } else {
@@ -327,7 +327,7 @@ ReflDataProcessorPresenter::retrieveWorkspaceByName(
     }
   } else {
     m_view->giveUserCritical(
-        QString::fromStdString("Workspace to slice not found: " + name),
+        "Workspace to slice not found: " + name,
         "Time slicing error");
     return nullptr;
   }
@@ -341,9 +341,9 @@ ReflDataProcessorPresenter::retrieveWorkspaceByName(
  * @param startTimes :: Start times for the set of slices
  * @param stopTimes :: Stop times for the set of slices
  */
-void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
-                                              const std::string &slicingType,
-                                              const std::string &wsName,
+void ReflDataProcessorPresenter::parseUniform(const QString &timeSlicing,
+                                              const QString &slicingType,
+                                              const QString &wsName,
                                               std::vector<double> &startTimes,
                                               std::vector<double> &stopTimes) {
 
@@ -356,10 +356,10 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
     int numSlices = 0;
 
     if (slicingType == "UniformEven") {
-      numSlices = std::stoi(timeSlicing);
+      numSlices = std::stoi(timeSlicing.toStdString());
       sliceDuration = totalDurationSec / numSlices;
     } else if (slicingType == "Uniform") {
-      sliceDuration = std::stod(timeSlicing);
+      sliceDuration = std::stod(timeSlicing.toStdString());
       numSlices = static_cast<int>(ceil(totalDurationSec / sliceDuration));
     }
 
@@ -380,16 +380,14 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
  * @param startTimes :: Start times for the set of slices
  * @param stopTimes :: Stop times for the set of slices
  */
-void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
+void ReflDataProcessorPresenter::parseCustom(const QString &timeSlicing,
                                              std::vector<double> &startTimes,
                                              std::vector<double> &stopTimes) {
 
-  std::vector<std::string> timesStr;
-  boost::split(timesStr, timeSlicing, boost::is_any_of(","));
-
+  auto timeStr = timeSlicing.split(",");
   std::vector<double> times;
-  std::transform(timesStr.begin(), timesStr.end(), std::back_inserter(times),
-                 [](const std::string &astr) { return std::stod(astr); });
+  std::transform(timeStr.begin(), timeStr.end(), std::back_inserter(times),
+                 [](const QString &astr) { return std::stod(astr.toStdString()); });
 
   size_t numSlices = times.size() > 1 ? times.size() - 1 : 1;
 
@@ -415,13 +413,13 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
  * @param startTimes :: Start times for the set of slices
  * @param stopTimes :: Stop times for the set of slices
  */
-void ReflDataProcessorPresenter::parseLogValue(const std::string &inputStr,
-                                               std::string &logFilter,
+void ReflDataProcessorPresenter::parseLogValue(const QString &inputStr,
+                                               QString &logFilter,
                                                std::vector<double> &startTimes,
                                                std::vector<double> &stopTimes) {
 
-  auto strMap = parseKeyValueString(inputStr);
-  std::string timeSlicing = strMap.at("Slicing");
+  auto strMap = fromStdStringMap(parseKeyValueString(inputStr.toStdString()));
+  QString timeSlicing = strMap.at("Slicing");
   logFilter = strMap.at("LogFilter");
 
   parseCustom(timeSlicing, startTimes, stopTimes);
@@ -432,18 +430,18 @@ void ReflDataProcessorPresenter::parseLogValue(const std::string &inputStr,
 * @param runNo :: The run number as a string
 * @return :: True if algorithm was executed. False otherwise
 */
-bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
+bool ReflDataProcessorPresenter::loadEventRun(const QString &runNo) {
 
   bool runFound;
-  std::string outName;
-  std::string prefix = "TOF_";
-  std::string instrument = m_view->getProcessInstrument();
+  QString outName;
+  QString prefix = "TOF_";
+  QString instrument = m_view->getProcessInstrument();
 
   outName = findRunInADS(runNo, prefix, runFound);
   if (!runFound ||
-      AnalysisDataService::Instance().doesExist(outName + "_monitors") ==
+      AnalysisDataService::Instance().doesExist((outName + "_monitors").toStdString()) ==
           false ||
-      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(outName) ==
+      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(outName.toStdString()) ==
           NULL) {
     // Monitors must be loaded first and workspace must be an event workspace
     loadRun(runNo, instrument, prefix, "LoadEventNexus", runFound);
@@ -456,11 +454,11 @@ bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
 *
 * @param runNo :: The run number as a string
 */
-void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
+void ReflDataProcessorPresenter::loadNonEventRun(const QString &runNo) {
 
   bool runFound; // unused but required
-  std::string prefix = "TOF_";
-  std::string instrument = m_view->getProcessInstrument();
+  auto prefix = QString("TOF_");
+  auto instrument = m_view->getProcessInstrument();
 
   findRunInADS(runNo, prefix, runFound);
   if (!runFound)
@@ -476,20 +474,20 @@ void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
  * @param runFound : Whether or not the run was actually found
  * @returns string name of the run
  */
-std::string ReflDataProcessorPresenter::loadRun(const std::string &run,
-                                                const std::string &instrument,
-                                                const std::string &prefix,
-                                                const std::string &loader,
+QString ReflDataProcessorPresenter::loadRun(const QString &run,
+                                                const QString &instrument,
+                                                const QString &prefix,
+                                                const QString &loader,
                                                 bool &runFound) {
 
   runFound = true;
-  const std::string fileName = instrument + run;
-  const std::string outputName = prefix + run;
+  auto const fileName = instrument + run;
+  auto const outputName = prefix + run;
 
-  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader);
+  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader.toStdString());
   algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", fileName);
-  algLoadRun->setProperty("OutputWorkspace", outputName);
+  algLoadRun->setProperty("Filename", fileName.toStdString());
+  algLoadRun->setProperty("OutputWorkspace", outputName.toStdString());
   if (loader == "LoadEventNexus")
     algLoadRun->setProperty("LoadMonitors", true);
   algLoadRun->execute();
@@ -512,28 +510,28 @@ std::string ReflDataProcessorPresenter::loadRun(const std::string &run,
 * @return :: the name of the sliced workspace (without prefix 'TOF_')
 */
 std::string ReflDataProcessorPresenter::takeSlice(
-    const std::string &runNo, size_t sliceIndex, double startTime,
-    double stopTime, const std::string &logFilter) {
+    const QString &runNo, size_t sliceIndex, double startTime,
+    double stopTime, const QString &logFilter) {
 
-  std::string runName = "TOF_" + runNo;
-  std::string sliceName = runName + "_slice_" + std::to_string(sliceIndex);
-  std::string monName = runName + "_monitors";
-  std::string filterAlg =
+  QString runName = "TOF_" + runNo;
+  QString sliceName = runName + "_slice_" + std::to_string(sliceIndex);
+  QString monName = runName + "_monitors";
+  QString filterAlg =
       logFilter.empty() ? "FilterByTime" : "FilterByLogValue";
 
   // Filter the run using the appropriate filter algorithm
   IAlgorithm_sptr filter = AlgorithmManager::Instance().create(filterAlg);
   filter->initialize();
-  filter->setProperty("InputWorkspace", runName);
-  filter->setProperty("OutputWorkspace", sliceName);
+  filter->setProperty("InputWorkspace", runName.toStdString());
+  filter->setProperty("OutputWorkspace", sliceName.toStdString());
   if (filterAlg == "FilterByTime") {
-    filter->setProperty("StartTime", startTime);
-    filter->setProperty("StopTime", stopTime);
+    filter->setProperty("StartTime", startTime.toStdString());
+    filter->setProperty("StopTime", stopTime.toStdString());
   } else { // FilterByLogValue
-    filter->setProperty("MinimumValue", startTime);
-    filter->setProperty("MaximumValue", stopTime);
+    filter->setProperty("MinimumValue", startTime.toStdString());
+    filter->setProperty("MaximumValue", stopTime.toStdString());
     filter->setProperty("TimeTolerance", 1.0);
-    filter->setProperty("LogName", logFilter);
+    filter->setProperty("LogName", logFilter.toStdString());
   }
 
   filter->execute();
@@ -548,30 +546,30 @@ std::string ReflDataProcessorPresenter::takeSlice(
 
   IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
   scale->initialize();
-  scale->setProperty("InputWorkspace", monName);
-  scale->setProperty("Factor", scaleFactor);
-  scale->setProperty("OutputWorkspace", "__" + monName + "_temp");
+  scale->setProperty("InputWorkspace", monName.toStdString());
+  scale->setProperty("Factor", scaleFactor.toStdString());
+  scale->setProperty("OutputWorkspace", "__" + monName.toStdString() + "_temp");
   scale->execute();
 
   IAlgorithm_sptr rebinDet =
       AlgorithmManager::Instance().create("RebinToWorkspace");
   rebinDet->initialize();
-  rebinDet->setProperty("WorkspaceToRebin", sliceName);
-  rebinDet->setProperty("WorkspaceToMatch", "__" + monName + "_temp");
-  rebinDet->setProperty("OutputWorkspace", sliceName);
+  rebinDet->setProperty("WorkspaceToRebin", sliceName.toStdString());
+  rebinDet->setProperty("WorkspaceToMatch", "__" + monName.toStdString() + "_temp");
+  rebinDet->setProperty("OutputWorkspace", sliceName.toStdString());
   rebinDet->setProperty("PreserveEvents", false);
   rebinDet->execute();
 
   IAlgorithm_sptr append = AlgorithmManager::Instance().create("AppendSpectra");
   append->initialize();
-  append->setProperty("InputWorkspace1", "__" + monName + "_temp");
-  append->setProperty("InputWorkspace2", sliceName);
-  append->setProperty("OutputWorkspace", sliceName);
+  append->setProperty("InputWorkspace1", "__" + monName.toStdString() + "_temp");
+  append->setProperty("InputWorkspace2", sliceName.toStdString());
+  append->setProperty("OutputWorkspace", sliceName.toStdString());
   append->setProperty("MergeLogs", true);
   append->execute();
 
   // Remove temporary monitor ws
-  AnalysisDataService::Instance().remove("__" + monName + "_temp");
+  AnalysisDataService::Instance().remove("__" + monName.toStdString() + "_temp");
 
   return sliceName.substr(4);
 }
@@ -594,7 +592,7 @@ void ReflDataProcessorPresenter::plotRow() {
   // Set of workspaces to plot
   std::set<std::string> workspaces;
   // Set of workspaces not found in the ADS
-  std::set<std::string> notFound;
+  QSet<QString> notFound;
 
   for (const auto &item : items) {
 
@@ -606,7 +604,7 @@ void ReflDataProcessorPresenter::plotRow() {
       for (size_t slice = 0; slice < numSlices; slice++) {
         const std::string sliceName =
             wsName + "_slice_" + std::to_string(slice);
-        if (AnalysisDataService::Instance().doesExist(sliceName))
+        if (AnalysisDataService::Instance().doesExist(sliceName.toStdString()))
           workspaces.insert(sliceName);
         else
           notFound.insert(sliceName);
@@ -618,7 +616,7 @@ void ReflDataProcessorPresenter::plotRow() {
     m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
-            boost::algorithm::join(notFound, "\n") +
+            QStringList::fromSet(notFound).join("\n") +
             "\n\nPlease check that the rows you are trying to plot have been "
             "fully processed.",
         "Error plotting rows.");
