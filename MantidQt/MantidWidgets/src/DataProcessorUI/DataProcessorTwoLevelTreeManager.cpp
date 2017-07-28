@@ -318,7 +318,7 @@ int parseDenaryInteger(QString const& in) {
   if(ok)
     return out;
   else
-    throw std::runtime_error("Failed to parse '" + in + "' as a denary integer.");
+    throw std::runtime_error("Failed to parse '" + in.toStdString() + "' as a denary integer.");
 }
 
 /** Paste the contents of the clipboard into the currently selected rows, or

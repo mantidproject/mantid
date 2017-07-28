@@ -801,7 +801,7 @@ Workspace_sptr GenericDataProcessorPresenter::getRun(const QString &run,
 }
 
 bool isNumeric(QString const& numericCandidate) {
-  return QRegExp("\\d+").exactMatch(run);
+  return QRegExp("\\d+").exactMatch(numericCandidate);
 } 
 /** Tries fetching a run from AnalysisDataService
  *

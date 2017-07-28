@@ -121,7 +121,7 @@ public:
   void acceptViews(DataProcessorView *tableView,
                    ProgressableView *progressView) override;
   void accept(DataProcessorMainPresenter *mainPresenter) override;
-  void setModel(QString name) override;
+  void setModel(QString const& name) override;
 
   // The following methods are public only for testing purposes
   // Get the whitelist

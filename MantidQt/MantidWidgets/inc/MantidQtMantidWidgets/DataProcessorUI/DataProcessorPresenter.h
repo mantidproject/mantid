@@ -88,7 +88,7 @@ public:
   virtual void accept(DataProcessorMainPresenter *mainPresenter) = 0;
   virtual void acceptViews(DataProcessorView *tableView,
                            ProgressableView *progressView) = 0;
-  virtual void setModel(QString name) = 0;
+  virtual void setModel(QString const& name) = 0;
   virtual ParentItems selectedParents() const = 0;
   virtual ChildItems selectedChildren() const = 0;
   virtual bool askUserYesNo(const QString &prompt,
