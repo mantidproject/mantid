@@ -150,11 +150,6 @@ void Integration::exec() {
         rangeFilterEventWorkspace(eventInputWS, evntMinRange, evntMaxRange);
 
     progressStart = 0.5;
-    if ((isEmpty(maxSpec)) && (isEmpty(maxSpec))) {
-      // Assign it to the output workspace property
-      setProperty("OutputWorkspace", localworkspace);
-      return;
-    }
   }
 
   // Create the 2D workspace (with 1 bin) for the output
