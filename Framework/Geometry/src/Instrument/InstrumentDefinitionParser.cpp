@@ -215,12 +215,12 @@ void InstrumentDefinitionParser::throwIfTypeNameNotUnique(
 //----------------------------------------------------------------------------------------------
 /** Fully parse the IDF XML contents and returns the instrument thus created
  *
- * @param prog :: Optional Progress reporter object. If NULL, no progress
- *reporting.
+ * @param progressReporter :: Optional Progress reporter object. If NULL, no
+ * progress reporting.
  * @return the instrument that was created
  */
 Instrument_sptr
-InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
+InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
   auto pDoc = getDocument();
 
   // Get pointer to root element
@@ -303,12 +303,12 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
 
   // do analysis for each top level component element
-  if (prog)
-    prog->resetNumSteps(compElems.size(), 0.0, 1.0);
+  if (progressReporter)
+    progressReporter->resetNumSteps(compElems.size(), 0.0, 1.0);
 
   for (auto pElem : compElems) {
-    if (prog)
-      prog->report("Loading instrument Definition");
+    if (progressReporter)
+      progressReporter->report("Loading instrument Definition");
 
     {
       IdList idList; // structure to possibly be populated with detector IDs

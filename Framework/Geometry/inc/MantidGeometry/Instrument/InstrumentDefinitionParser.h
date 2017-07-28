@@ -78,7 +78,7 @@ public:
   };
 
   /// Parse XML contents
-  boost::shared_ptr<Instrument> parseXML(Kernel::ProgressBase *prog);
+  boost::shared_ptr<Instrument> parseXML(Kernel::ProgressBase *progressReporter);
 
   /// Add/overwrite any parameters specified in instrument with param values
   /// specified in <component-link> XML elements
