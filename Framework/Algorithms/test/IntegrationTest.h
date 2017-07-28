@@ -702,8 +702,8 @@ public:
   }
 
   void testStartWSIndexGreaterThanEnd() {
-    const double startIndex = 4;
-    const double endIndex = 2;
+    const int startIndex = 4;
+    const int endIndex = 2;
 
     MatrixWorkspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(
@@ -731,7 +731,7 @@ public:
   }
 
   void testStartWSIndexEqualsEnd() {
-    const double index = 3;
+    const int index = 3;
 
     MatrixWorkspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(
