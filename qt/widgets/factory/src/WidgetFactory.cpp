@@ -1,7 +1,7 @@
-#include "MantidQtFactory/WidgetFactory.h"
+#include "MantidQtWidgets/Factory/WidgetFactory.h"
 #include "MantidKernel/System.h"
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
-#include "MantidQtSliceViewer/SliceViewer.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 
 using namespace MantidQt::SliceViewer;
 

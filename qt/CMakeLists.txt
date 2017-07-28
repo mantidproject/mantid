@@ -22,18 +22,19 @@ if ( MSVC_IDE )
   set_property ( TARGET qtwidgetssliceviewer PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET qtwidgetsspectrumviewer PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET qtwidgetsrefdetectorview PROPERTY FOLDER "MantidQt" )
+  set_property ( TARGET qtwidgetsfactory PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET MantidWidgets PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET CustomDialogs PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET CustomInterfaces PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET DesignerPlugins PROPERTY FOLDER "MantidQt" )
-#  set_property ( TARGET MantidQtFactory PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET mantidqtpython PROPERTY FOLDER "MantidQt" )
 else ()
   add_custom_target ( MantidQt DEPENDS qtwidgetscommon 
                                        qtwidgetssliceviewer
                                        qtwidgetsspectrumviewer
                                        qtwidgetsrefdetectorview
+                                       qtwidgetsfactory
 #                                       CustomDialogs CustomInterfaces
-#                                       MantidQtFactory mantidqtpython
+#                                       mantidqtpython
   )
 endif ()

@@ -6,10 +6,10 @@ add_subdirectory ( instrumentview )
 add_subdirectory ( sliceviewer )
 add_subdirectory ( spectrumviewer )
 add_subdirectory ( refdetectorview)
+add_subdirectory ( factory )
 
 #add_subdirectory ( CustomDialogs )
 #add_subdirectory ( CustomInterfaces )
-#add_subdirectory ( Factory )
 #add_subdirectory ( Python )
 #add_subdirectory ( DesignerPlugins )
 

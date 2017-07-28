@@ -3,11 +3,11 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
-	inc/MantidQtFactory/WidgetFactory.h
+	inc/MantidQtWidgets/Factory/WidgetFactory.h
 )
 
 set ( MOC_FILES 
-	inc/MantidQtFactory/WidgetFactory.h
+	inc/MantidQtWidgets/Factory/WidgetFactory.h
 )
 
 set ( UI_FILES 
@@ -18,7 +18,7 @@ set ( TEST_FILES
 )
 
 include_directories ( inc )
-include_directories ( ../SliceViewer/inc )
+include_directories ( ../sliceviewer/inc )
 
 ###########################################################################
 # Main Library Target
@@ -31,21 +31,22 @@ set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../SliceViewer )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../sliceviewer )
 
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_FACTORY )
 
 # This creates the target library
-add_library ( MantidQtFactory ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( qtwidgetsfactory ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtFactory PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( qtwidgetsfactory PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtFactory LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( qtwidgetsfactory LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             qtwidgetscommon
+            qtwidgetssliceviewer
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
@@ -56,6 +57,6 @@ target_link_libraries ( MantidQtFactory LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTI
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidQtFactory ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS qtwidgetsfactory ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 

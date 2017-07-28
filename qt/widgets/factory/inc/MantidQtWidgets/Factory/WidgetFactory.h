@@ -4,8 +4,8 @@
 #include "DllOption.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidQtSliceViewer/SliceViewer.h"
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include "qapplication.h"
 #include <Qsci/qscilexer.h>
 #include <QtCore/QtCore>
