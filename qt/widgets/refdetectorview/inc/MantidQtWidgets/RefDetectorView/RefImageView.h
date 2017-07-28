@@ -4,8 +4,8 @@
 #include <QMainWindow>
 #include <QtGui>
 
-#include "MantidQtSpectrumViewer/GraphDisplay.h"
-#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 #include "DllOption.h"
 
 /**

@@ -1,12 +1,12 @@
 #ifndef REF_SLIDER_HANDLER_H
 #define REF_SLIDER_HANDLER_H
 
-#include "MantidQtSpectrumViewer/ISliderHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/ISliderHandler.h"
 #include <QRect>
 
 #include "ui_RefImageView.h"
-#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtRefDetectorViewer/DllOption.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/RefDetectorView/DllOption.h"
 
 /**
     @class SliderHandler

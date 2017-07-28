@@ -1,7 +1,7 @@
 #include <QLineEdit>
 #include <qwt_plot_canvas.h>
 
-#include "MantidQtRefDetectorViewer/RefIVConnections.h"
+#include "MantidQtWidgets/RefDetectorView/RefIVConnections.h"
 
 namespace MantidQt {
 namespace RefDetectorViewer {

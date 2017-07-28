@@ -1,4 +1,4 @@
-#include "MantidQtRefDetectorViewer/RefImagePlotItem.h"
+#include "MantidQtWidgets/RefDetectorView/RefImagePlotItem.h"
 
 namespace MantidQt {
 namespace RefDetectorViewer {

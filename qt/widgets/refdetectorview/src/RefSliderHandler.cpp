@@ -1,7 +1,7 @@
 
 
 #include <QScrollBar>
-#include "MantidQtRefDetectorViewer/RefSliderHandler.h"
+#include "MantidQtWidgets/RefDetectorView/RefSliderHandler.h"
 
 namespace MantidQt {
 namespace RefDetectorViewer {

@@ -45,8 +45,7 @@ endif ()
 
 # ... and links to other required libs
 target_link_libraries ( MantidQtFactory LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-            MantidQtAPI
-            MantidQtSliceViewer
+            qtwidgetscommon
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}

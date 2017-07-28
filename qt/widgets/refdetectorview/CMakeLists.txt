@@ -11,26 +11,26 @@ set ( SRC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-       inc/MantidQtRefDetectorViewer/RefImageDisplay.h
-       inc/MantidQtRefDetectorViewer/RefIVConnections.h
-       inc/MantidQtRefDetectorViewer/RefImagePlotItem.h
-       inc/MantidQtRefDetectorViewer/RefImageView.h
-       inc/MantidQtRefDetectorViewer/RefSliderHandler.h
-       inc/MantidQtRefDetectorViewer/RefRangeHandler.h
-       inc/MantidQtRefDetectorViewer/RefMatrixWSImageView.h
-       inc/MantidQtRefDetectorViewer/RefLimitsHandler.h
+       inc/MantidQtWidgets/RefDetectorView/RefImageDisplay.h
+       inc/MantidQtWidgets/RefDetectorView/RefIVConnections.h
+       inc/MantidQtWidgets/RefDetectorView/RefImagePlotItem.h
+       inc/MantidQtWidgets/RefDetectorView/RefImageView.h
+       inc/MantidQtWidgets/RefDetectorView/RefSliderHandler.h
+       inc/MantidQtWidgets/RefDetectorView/RefRangeHandler.h
+       inc/MantidQtWidgets/RefDetectorView/RefMatrixWSImageView.h
+       inc/MantidQtWidgets/RefDetectorView/RefLimitsHandler.h
 )
 
 set ( MOC_FILES
-       inc/MantidQtRefDetectorViewer/RefIVConnections.h
+       inc/MantidQtWidgets/RefDetectorView/RefIVConnections.h
 )
 
 set ( UI_FILES
-       inc/MantidQtRefDetectorViewer/RefImageView.ui
+       inc/MantidQtWidgets/RefDetectorView/RefImageView.ui
 )
 
 include_directories ( inc )
-include_directories ( ../SpectrumViewer/inc )
+include_directories ( ../spectrumviewer/inc )
 
 
 ###########################################################################
@@ -52,15 +52,15 @@ include_directories ( inc )
 add_definitions ( -DIN_MANTIDQT_REFDETECTORVIEWER )
 
 # This creates the target library
-add_library ( MantidQtRefDetectorViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( qtwidgetsrefdetectorview ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtRefDetectorViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( qtwidgetsrefdetectorview PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtRefDetectorViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtSpectrumViewer
+target_link_libraries ( qtwidgetsrefdetectorview LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            qtwidgetsspectrumviewer
             ${CORE_MANTIDLIBS}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
@@ -74,8 +74,8 @@ target_link_libraries ( MantidQtRefDetectorViewer LINK_PRIVATE ${TCMALLOC_LIBRAR
 
 add_executable ( RefDetectorViewDemo EXCLUDE_FROM_ALL src/RefDetectorViewDemo.cpp )
 target_link_libraries ( RefDetectorViewDemo LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtRefDetectorViewer
-            MantidQtSpectrumViewer
+            qtwidgetsrefdetectorview
+            qtwidgetsspectrumviewer
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${QT_LIBRARIES}
@@ -90,4 +90,4 @@ target_link_libraries ( RefDetectorViewDemo LINK_PRIVATE ${TCMALLOC_LIBRARIES_LI
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidQtRefDetectorViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS qtwidgetsrefdetectorview ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

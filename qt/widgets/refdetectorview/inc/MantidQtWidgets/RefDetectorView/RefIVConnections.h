@@ -6,11 +6,11 @@
 #include <QActionGroup>
 
 #include "ui_RefImageView.h"
-#include "MantidQtRefDetectorViewer/RefImageView.h"
-#include "MantidQtSpectrumViewer/TrackingPicker.h"
-#include "MantidQtRefDetectorViewer/RefImageDisplay.h"
-#include "MantidQtSpectrumViewer/GraphDisplay.h"
-#include "MantidQtSpectrumViewer/ColorMaps.h"
+#include "MantidQtWidgets/RefDetectorView/RefImageView.h"
+#include "MantidQtWidgets/SpectrumViewer/TrackingPicker.h"
+#include "MantidQtWidgets/RefDetectorView/RefImageDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
 #include "DllOption.h"
 
 /**

@@ -1,9 +1,9 @@
 #ifndef REF_IMAGE_PLOT_ITEM_H
 #define REF_IMAGE_PLOT_ITEM_H
 
-#include "MantidQtSpectrumViewer/SpectrumPlotItem.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumPlotItem.h"
 #include "DllOption.h"
-#include "MantidQtRefDetectorViewer/RefLimitsHandler.h"
+#include "MantidQtWidgets/RefDetectorView/RefLimitsHandler.h"
 
 namespace MantidQt {
 namespace RefDetectorViewer {

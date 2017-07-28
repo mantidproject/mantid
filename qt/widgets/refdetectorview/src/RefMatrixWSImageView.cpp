@@ -1,10 +1,10 @@
-#include "MantidQtRefDetectorViewer/RefMatrixWSImageView.h"
+#include "MantidQtWidgets/RefDetectorView/RefMatrixWSImageView.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidQtRefDetectorViewer/RefIVConnections.h"
-#include "MantidQtSpectrumViewer/ArrayDataSource.h"
+#include "MantidQtWidgets/RefDetectorView/RefIVConnections.h"
+#include "MantidQtWidgets/SpectrumViewer/ArrayDataSource.h"
 
 using Mantid::API::MatrixWorkspace_sptr;
 using namespace MantidQt;

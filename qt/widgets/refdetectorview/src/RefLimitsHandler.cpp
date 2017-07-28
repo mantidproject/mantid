@@ -1,4 +1,4 @@
-#include "MantidQtRefDetectorViewer/RefLimitsHandler.h"
+#include "MantidQtWidgets/RefDetectorView/RefLimitsHandler.h"
 
 namespace MantidQt {
 namespace RefDetectorViewer {
