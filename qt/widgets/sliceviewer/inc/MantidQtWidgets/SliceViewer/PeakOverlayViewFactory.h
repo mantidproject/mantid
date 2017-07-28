@@ -3,7 +3,7 @@
 
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
-#include "MantidQtSliceViewer/PeakOverlayView.h"
+#include "MantidQtWidgets/SliceViewer/PeakOverlayView.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {

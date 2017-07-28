@@ -2,7 +2,7 @@
 #define PEAKSWORKSPACEWIDGET_H
 
 #include <QtGui/QWidget>
-#include "MantidQtSliceViewer/PeakViewColor.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include "DllOption.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "ui_PeaksWorkspaceWidget.h"

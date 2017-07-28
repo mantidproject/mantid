@@ -1,12 +1,23 @@
-#ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_SPHERE_H
-#define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_SPHERE_H
+#ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_CROSS_H
+#define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_CROSS_H
 
-#include "MantidQtSliceViewer/PeakRepresentation.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
+
+namespace {
+struct PeakDrawInformationPeak {
+  int peakHalfCrossWidth;
+  int peakHalfCrossHeight;
+  int peakLineWidth;
+  double peakOpacityAtDistance;
+  Mantid::Kernel::V3D peakOrigin;
+};
+}
 
 namespace MantidQt {
 namespace SliceViewer {
 
-/** PeakRepresentationSphere : Draws a circle for spherical peaks.
+/** PeakRepresentationCross : Draws a cross-shaped peak for peaks without
+  any shape
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,14 +41,11 @@ namespace SliceViewer {
   <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationSphere
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationCross
     : public PeakRepresentation {
 public:
-  PeakRepresentationSphere(const Mantid::Kernel::V3D &origin,
-                           const double &peakRadius,
-                           const double &backgroundInnerRadius,
-                           const double &backgroundOuterRadius);
-
+  PeakRepresentationCross(const Mantid::Kernel::V3D &origin, const double &maxZ,
+                          const double &minZ);
   /// Setter for the slice point
   void setSlicePoint(const double &) override;
   /// Transform the coordinates.
@@ -56,12 +64,6 @@ public:
   /// Show the background radius
   void showBackgroundRadius(const bool show) override;
 
-  /**
-   * The zoom-out factor ensures that the sphere can be viewed
-   * in its entirety in full-screen or default mode.
-   **/
-  double getZoomOutFactor() const;
-
 protected:
   std::shared_ptr<PeakPrimitives> getDrawingInformation(
       PeakRepresentationViewInformation viewInformation) override;
@@ -70,41 +72,30 @@ protected:
               std::shared_ptr<PeakPrimitives> drawingInformation,
               PeakRepresentationViewInformation viewInformation) override;
 
+  // The members are placed here for testing
+  /// Fraction of the view considered for the effectiveRadius.
+  double m_intoViewFraction;
+  /// Cross size percentage in y a fraction of the current screen height.
+  double m_crossViewFraction;
+
 private:
   /// Original origin x=h, y=k, z=l
   const Mantid::Kernel::V3D m_originalOrigin;
   /// Origin md-x, md-y, and md-z
   Mantid::Kernel::V3D m_origin;
-  /// actual peak radius
-  const double m_peakRadius;
-  /// Peak background inner radius
-  const double m_backgroundInnerRadius;
-  /// Peak background outer radius
-  double m_backgroundOuterRadius;
+
+  /// effective peak radius
+  double m_effectiveRadius;
   /// Max opacity
   const double m_opacityMax;
   /// Min opacity
   const double m_opacityMin;
+  /// Cached opacity gradient
+  const double m_opacityGradient;
   /// Cached opacity at the distance z from origin
-  double m_cachedOpacityAtDistance;
-  /// Cached radius at the distance z from origin
-  optional_double m_peakRadiusAtDistance;
-  /// Cached opacity gradient.
-  const double m_cachedOpacityGradient;
-  /// Cached radius squared.
-  const double m_peakRadiusSQ;
-  /// Cached background inner radius sq.
-  const double m_backgroundInnerRadiusSQ;
-  /// Cached background outer radius sq.
-  double m_backgroundOuterRadiusSQ;
-  /// Flag to indicate that the background radius should be drawn.
-  bool m_showBackgroundRadius;
-  /// Inner radius at distance.
-  optional_double m_backgroundInnerRadiusAtDistance;
-  /// Outer radius at distance.
-  optional_double m_backgroundOuterRadiusAtDistance;
-  /// Zoom out factor
-  const double zoomOutFactor = 2.;
+  double m_opacityAtDistance;
+  /// Current slice point.
+  double m_slicePoint;
 };
 }
 }

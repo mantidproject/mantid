@@ -1,6 +1,6 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "../inc/MantidQtSliceViewer/LinePlotOptions.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

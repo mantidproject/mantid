@@ -1,6 +1,6 @@
-#include "MantidQtSliceViewer/PeakOverlayInteractive.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
-#include "MantidQtMantidWidgets/InputController.h"
+#include "MantidQtWidgets/SliceViewer/PeakOverlayInteractive.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
+#include "MantidQtWidgets/Common/InputController.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>

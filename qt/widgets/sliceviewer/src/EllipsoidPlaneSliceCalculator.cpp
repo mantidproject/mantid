@@ -1,5 +1,5 @@
 #include "MantidKernel/V2D.h"
-#include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
+#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
 
 #include <algorithm>
 #include <cmath>

@@ -4,7 +4,7 @@
 #include "DllOption.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidQtSliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include <vector>
 
 namespace Mantid {

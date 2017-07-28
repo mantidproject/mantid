@@ -1,7 +1,7 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_VIEW_H_
 #define MANTID_SLICEVIEWER_PEAK_VIEW_H_
 
-#include "MantidQtSliceViewer/PeakOverlayInteractive.h"
+#include "MantidQtWidgets/SliceViewer/PeakOverlayInteractive.h"
 #include "PeakRepresentation.h"
 
 namespace MantidQt {

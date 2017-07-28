@@ -2,8 +2,8 @@
 #define MANTID_SLICEVIEWER_PROXYCOMPOSITEPEAKSPRESENTER_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtSliceViewer/CompositePeaksPresenter.h"
-#include "MantidQtSliceViewer/UpdateableOnDemand.h"
+#include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
 #include <boost/shared_ptr.hpp>
 #include <QObject>
 

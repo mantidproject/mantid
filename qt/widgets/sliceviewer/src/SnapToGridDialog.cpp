@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/SnapToGridDialog.h"
+#include "MantidQtWidgets/SliceViewer/SnapToGridDialog.h"
 #include <QIntValidator>
 
 /// Constructor

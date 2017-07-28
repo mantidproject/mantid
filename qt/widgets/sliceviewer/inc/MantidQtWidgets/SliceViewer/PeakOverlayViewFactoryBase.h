@@ -2,7 +2,7 @@
 #define MANTID_SLICEVIEWER_PEAKOVERLAYVIEWFACTORYBASE_H_
 
 #include "DllOption.h"
-#include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
 #include <qcolor.h>

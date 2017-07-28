@@ -1,5 +1,5 @@
-#include "MantidQtSliceViewer/CoordinateTransform.h"
-#include "MantidQtAPI/NonOrthogonal.h"
+#include "MantidQtWidgets/SliceViewer/CoordinateTransform.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 

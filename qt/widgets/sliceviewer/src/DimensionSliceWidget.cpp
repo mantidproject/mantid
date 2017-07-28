@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/DimensionSliceWidget.h"
+#include "MantidQtWidgets/SliceViewer/DimensionSliceWidget.h"
 #include "MantidKernel/UnitLabel.h"
 #include <iosfwd>
 #include <qlayout.h>

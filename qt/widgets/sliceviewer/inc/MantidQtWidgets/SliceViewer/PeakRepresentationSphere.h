@@ -1,13 +1,12 @@
-#ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
-#define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
+#ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_SPHERE_H
+#define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_SPHERE_H
 
-#include "MantidQtSliceViewer/PeakRepresentation.h"
-#include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
-#include "MantidKernel/V2D.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
+
 namespace MantidQt {
 namespace SliceViewer {
 
-/** PeakRepresentationEllipsoid : Draws an ellipse for elliptical peaks.
+/** PeakRepresentationSphere : Draws a circle for spherical peaks.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -31,16 +30,13 @@ namespace SliceViewer {
   <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationEllipsoid
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationSphere
     : public PeakRepresentation {
 public:
-  PeakRepresentationEllipsoid(
-      const Mantid::Kernel::V3D &origin, const std::vector<double> peakRadii,
-      const std::vector<double> backgroundInnerRadii,
-      const std::vector<double> backgroundOuterRadii,
-      const std::vector<Mantid::Kernel::V3D> directions,
-      std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
-          calculator);
+  PeakRepresentationSphere(const Mantid::Kernel::V3D &origin,
+                           const double &peakRadius,
+                           const double &backgroundInnerRadius,
+                           const double &backgroundOuterRadius);
 
   /// Setter for the slice point
   void setSlicePoint(const double &) override;
@@ -60,8 +56,10 @@ public:
   /// Show the background radius
   void showBackgroundRadius(const bool show) override;
 
-  static const double zeroRadius;
-  /// Get the zoom out factor
+  /**
+   * The zoom-out factor ensures that the sphere can be viewed
+   * in its entirety in full-screen or default mode.
+   **/
   double getZoomOutFactor() const;
 
 protected:
@@ -73,55 +71,40 @@ protected:
               PeakRepresentationViewInformation viewInformation) override;
 
 private:
-  //---------- Original collections
   /// Original origin x=h, y=k, z=l
-  Mantid::Kernel::V3D m_originalOrigin;
-  /// Original directions
-  std::vector<Mantid::Kernel::V3D> m_originalDirections;
-  /// Original cached opacity gradient
-  Mantid::Kernel::V3D m_originalCachedOpacityGradient;
-
-  // -----------Working copies of collections
+  const Mantid::Kernel::V3D m_originalOrigin;
   /// Origin md-x, md-y, and md-z
   Mantid::Kernel::V3D m_origin;
-  /// Direction in md-x, md-y and md-z
-  std::vector<Mantid::Kernel::V3D> m_directions;
-  /// Actual peak radii
-  const std::vector<double> m_peakRadii;
-  /// Peak background inner radii
-  const std::vector<double> m_backgroundInnerRadii;
+  /// actual peak radius
+  const double m_peakRadius;
+  /// Peak background inner radius
+  const double m_backgroundInnerRadius;
   /// Peak background outer radius
-  const std::vector<double> m_backgroundOuterRadii;
-
+  double m_backgroundOuterRadius;
   /// Max opacity
   const double m_opacityMax;
   /// Min opacity
   const double m_opacityMin;
   /// Cached opacity at the distance z from origin
   double m_cachedOpacityAtDistance;
-  /// Cached opacity gradient
-  Mantid::Kernel::V3D m_cachedOpacityGradient;
-
-  // ---- Drawing information of the 2D ellipses
-  /// Angle between the x axis and the major ellipse axis
-  double m_angleEllipse;
-
-  /// Radii of the ellipse. First entry is the Major axis, second the minor axis
-  std::vector<double> m_radiiEllipse;
-  std::vector<double> m_radiiEllipseBackgroundInner;
-  std::vector<double> m_radiiEllipseBackgroundOuter;
-
-  // Origin of the ellipse
-  Mantid::Kernel::V3D m_originEllipse;
-  Mantid::Kernel::V3D m_originEllipseBackgroundInner;
-  Mantid::Kernel::V3D m_originEllipseBackgroundOuter;
-
+  /// Cached radius at the distance z from origin
+  optional_double m_peakRadiusAtDistance;
+  /// Cached opacity gradient.
+  const double m_cachedOpacityGradient;
+  /// Cached radius squared.
+  const double m_peakRadiusSQ;
+  /// Cached background inner radius sq.
+  const double m_backgroundInnerRadiusSQ;
+  /// Cached background outer radius sq.
+  double m_backgroundOuterRadiusSQ;
   /// Flag to indicate that the background radius should be drawn.
-  bool m_showBackgroundRadii;
-
-  /// A calculator to extract the ellipse parameters
-  std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
-      m_calculator;
+  bool m_showBackgroundRadius;
+  /// Inner radius at distance.
+  optional_double m_backgroundInnerRadiusAtDistance;
+  /// Outer radius at distance.
+  optional_double m_backgroundOuterRadiusAtDistance;
+  /// Zoom out factor
+  const double zoomOutFactor = 2.;
 };
 }
 }

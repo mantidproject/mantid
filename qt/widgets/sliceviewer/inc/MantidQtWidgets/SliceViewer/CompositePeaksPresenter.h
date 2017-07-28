@@ -1,13 +1,13 @@
 #ifndef MANTID_SLICEVIEWER_COMPOSITEPEAKSPRESENTER_H_
 #define MANTID_SLICEVIEWER_COMPOSITEPEAKSPRESENTER_H_
 
-#include "MantidQtSliceViewer/PeaksPresenter.h"
-#include "MantidQtSliceViewer/NullPeaksPresenter.h"
-#include "MantidQtSliceViewer/PeakBoundingBox.h"
-#include "MantidQtSliceViewer/PeakPalette.h"
-#include "MantidQtSliceViewer/ZoomablePeaksView.h"
-#include "MantidQtSliceViewer/UpdateableOnDemand.h"
-#include "MantidQtSliceViewer/ZoomableOnDemand.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/NullPeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
+#include "MantidQtWidgets/SliceViewer/ZoomablePeaksView.h"
+#include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
+#include "MantidQtWidgets/SliceViewer/ZoomableOnDemand.h"
 #include <vector>
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>

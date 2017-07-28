@@ -1,7 +1,7 @@
-#include "MantidQtSliceViewer/PeaksWorkspaceWidget.h"
-#include "MantidQtSliceViewer/PeaksViewer.h"
-#include "MantidQtSliceViewer/QPeaksTableModel.h"
-#include "MantidQtAPI/SignalBlocker.h"
+#include "MantidQtWidgets/SliceViewer/PeaksWorkspaceWidget.h"
+#include "MantidQtWidgets/SliceViewer/PeaksViewer.h"
+#include "MantidQtWidgets/SliceViewer/QPeaksTableModel.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <QColorDialog>
 #include <QPlastiqueStyle>

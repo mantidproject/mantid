@@ -1,7 +1,7 @@
 #include <QDialogButtonBox>
 #include <QUrl>
-#include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/SliceViewer/PeaksViewerOverlayDialog.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "ui_PeaksViewerOverlayDialog.h"
 
 namespace MantidQt {

@@ -1,4 +1,4 @@
-#include "../inc/MantidQtSliceViewer/XYLimitsDialog.h"
+#include "MantidQtWidgets/SliceViewer/XYLimitsDialog.h"
 #include "MantidKernel/UnitLabel.h"
 #include <QIntValidator>
 

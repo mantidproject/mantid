@@ -1,23 +1,13 @@
-#ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_CROSS_H
-#define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_CROSS_H
+#ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
+#define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
 
-#include "MantidQtSliceViewer/PeakRepresentation.h"
-
-namespace {
-struct PeakDrawInformationPeak {
-  int peakHalfCrossWidth;
-  int peakHalfCrossHeight;
-  int peakLineWidth;
-  double peakOpacityAtDistance;
-  Mantid::Kernel::V3D peakOrigin;
-};
-}
-
+#include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
+#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
+#include "MantidKernel/V2D.h"
 namespace MantidQt {
 namespace SliceViewer {
 
-/** PeakRepresentationCross : Draws a cross-shaped peak for peaks without
-  any shape
+/** PeakRepresentationEllipsoid : Draws an ellipse for elliptical peaks.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -41,11 +31,17 @@ namespace SliceViewer {
   <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationCross
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationEllipsoid
     : public PeakRepresentation {
 public:
-  PeakRepresentationCross(const Mantid::Kernel::V3D &origin, const double &maxZ,
-                          const double &minZ);
+  PeakRepresentationEllipsoid(
+      const Mantid::Kernel::V3D &origin, const std::vector<double> peakRadii,
+      const std::vector<double> backgroundInnerRadii,
+      const std::vector<double> backgroundOuterRadii,
+      const std::vector<Mantid::Kernel::V3D> directions,
+      std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
+          calculator);
+
   /// Setter for the slice point
   void setSlicePoint(const double &) override;
   /// Transform the coordinates.
@@ -64,6 +60,10 @@ public:
   /// Show the background radius
   void showBackgroundRadius(const bool show) override;
 
+  static const double zeroRadius;
+  /// Get the zoom out factor
+  double getZoomOutFactor() const;
+
 protected:
   std::shared_ptr<PeakPrimitives> getDrawingInformation(
       PeakRepresentationViewInformation viewInformation) override;
@@ -72,30 +72,56 @@ protected:
               std::shared_ptr<PeakPrimitives> drawingInformation,
               PeakRepresentationViewInformation viewInformation) override;
 
-  // The members are placed here for testing
-  /// Fraction of the view considered for the effectiveRadius.
-  double m_intoViewFraction;
-  /// Cross size percentage in y a fraction of the current screen height.
-  double m_crossViewFraction;
-
 private:
+  //---------- Original collections
   /// Original origin x=h, y=k, z=l
-  const Mantid::Kernel::V3D m_originalOrigin;
+  Mantid::Kernel::V3D m_originalOrigin;
+  /// Original directions
+  std::vector<Mantid::Kernel::V3D> m_originalDirections;
+  /// Original cached opacity gradient
+  Mantid::Kernel::V3D m_originalCachedOpacityGradient;
+
+  // -----------Working copies of collections
   /// Origin md-x, md-y, and md-z
   Mantid::Kernel::V3D m_origin;
+  /// Direction in md-x, md-y and md-z
+  std::vector<Mantid::Kernel::V3D> m_directions;
+  /// Actual peak radii
+  const std::vector<double> m_peakRadii;
+  /// Peak background inner radii
+  const std::vector<double> m_backgroundInnerRadii;
+  /// Peak background outer radius
+  const std::vector<double> m_backgroundOuterRadii;
 
-  /// effective peak radius
-  double m_effectiveRadius;
   /// Max opacity
   const double m_opacityMax;
   /// Min opacity
   const double m_opacityMin;
-  /// Cached opacity gradient
-  const double m_opacityGradient;
   /// Cached opacity at the distance z from origin
-  double m_opacityAtDistance;
-  /// Current slice point.
-  double m_slicePoint;
+  double m_cachedOpacityAtDistance;
+  /// Cached opacity gradient
+  Mantid::Kernel::V3D m_cachedOpacityGradient;
+
+  // ---- Drawing information of the 2D ellipses
+  /// Angle between the x axis and the major ellipse axis
+  double m_angleEllipse;
+
+  /// Radii of the ellipse. First entry is the Major axis, second the minor axis
+  std::vector<double> m_radiiEllipse;
+  std::vector<double> m_radiiEllipseBackgroundInner;
+  std::vector<double> m_radiiEllipseBackgroundOuter;
+
+  // Origin of the ellipse
+  Mantid::Kernel::V3D m_originEllipse;
+  Mantid::Kernel::V3D m_originEllipseBackgroundInner;
+  Mantid::Kernel::V3D m_originEllipseBackgroundOuter;
+
+  /// Flag to indicate that the background radius should be drawn.
+  bool m_showBackgroundRadii;
+
+  /// A calculator to extract the ellipse parameters
+  std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
+      m_calculator;
 };
 }
 }

@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/CustomTools.h"
+#include "MantidQtWidgets/SliceViewer/CustomTools.h"
 #include <iosfwd>
 
 namespace MantidQt {

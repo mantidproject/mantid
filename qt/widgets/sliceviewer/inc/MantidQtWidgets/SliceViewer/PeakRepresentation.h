@@ -1,8 +1,8 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
 #define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
 
-#include "MantidQtSliceViewer/PeakPrimitives.h"
-#include "MantidQtSliceViewer/PeakViewColor.h"
+#include "MantidQtWidgets/SliceViewer/PeakPrimitives.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include <boost/optional.hpp>
 

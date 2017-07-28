@@ -2,11 +2,11 @@
 #define SLICEVIEWERWINDOW_H
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtSliceViewer/LineViewer.h"
-#include "MantidQtSliceViewer/SliceViewer.h"
-#include "MantidQtSliceViewer/PeaksViewer.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
+#include "MantidQtWidgets/SliceViewer/LineViewer.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
+#include "MantidQtWidgets/SliceViewer/PeaksViewer.h"
 #include <QtGui/QMainWindow>
 #include <QtGui/QSplitter>
 #include <QtGui/qdialog.h>

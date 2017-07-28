@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/NonOrthogonalOverlay.h"
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qpainter.h>
@@ -9,7 +9,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtAPI/NonOrthogonal.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
 #include <numeric>
 
 using namespace Mantid::Kernel;

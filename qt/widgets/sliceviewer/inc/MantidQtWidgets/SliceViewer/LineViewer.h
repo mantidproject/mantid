@@ -10,9 +10,9 @@
 #include <qwt_plot.h>
 #include <qwt_painter.h>
 #include "MantidAPI/CoordTransform.h"
-#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
-#include "MantidQtSliceViewer/LinePlotOptions.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 
 namespace MantidQt {
 namespace SliceViewer {

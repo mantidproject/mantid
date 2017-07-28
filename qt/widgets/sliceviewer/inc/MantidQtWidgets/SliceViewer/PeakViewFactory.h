@@ -1,10 +1,10 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_VIEW_FACTORY_H_
 #define MANTID_SLICEVIEWER_PEAK_VIEW_FACTORY_H_
 
-#include "MantidQtSliceViewer/PeakOverlayViewFactoryBase.h"
-#include "MantidQtSliceViewer/PeakRepresentation.h"
-#include "MantidQtSliceViewer/PeakViewColor.h"
-#include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
+#include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactoryBase.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
+#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 

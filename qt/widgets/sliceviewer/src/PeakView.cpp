@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/PeakView.h"
+#include "MantidQtWidgets/SliceViewer/PeakView.h"
 
 #include <QPainter>
 #include <qwt_plot.h>

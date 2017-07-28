@@ -2,7 +2,7 @@
 #define MANTID_SLICEVIEWER_PEAKOVERLAYINTERACTIVE_H_
 
 #include "DllOption.h"
-#include "MantidQtSliceViewer/PeakOverlayView.h"
+#include "MantidQtWidgets/SliceViewer/PeakOverlayView.h"
 #include <QtGui/QWidget>
 #include <QtGui/QCursor>
 

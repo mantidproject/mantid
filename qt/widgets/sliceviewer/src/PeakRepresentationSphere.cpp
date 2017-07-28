@@ -1,6 +1,6 @@
-#include "MantidQtSliceViewer/PeakRepresentationSphere.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h"
 #include "MantidKernel/V2D.h"
-#include "MantidQtSliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 
 #include <QPainter>
 

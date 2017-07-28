@@ -1,6 +1,6 @@
-#include "MantidQtSliceViewer/QwtScaleDrawNonOrthogonal.h"
+#include "MantidQtWidgets/SliceViewer/QwtScaleDrawNonOrthogonal.h"
 
-#include "MantidQtAPI/NonOrthogonal.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
 #include <QPainter>
 #include <QPalette>
 #include "qwt_layout_metrics.h"

@@ -8,12 +8,12 @@
 #include <qwt_valuelist.h>
 #include <qpainter.h>
 #include "MantidKernel/System.h"
-#include "MantidQtAPI/QwtRasterDataMD.h"
-#include "MantidQtAPI/QwtRasterDataMDNonOrthogonal.h"
+#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Common/QwtRasterDataMDNonOrthogonal.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtAPI/NonOrthogonal.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
 #include "MantidKernel/Matrix.h"
 
 namespace MantidQt {

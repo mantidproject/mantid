@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/SliceViewerFunctions.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerFunctions.h"
 
 namespace MantidQt {
 namespace SliceViewer {

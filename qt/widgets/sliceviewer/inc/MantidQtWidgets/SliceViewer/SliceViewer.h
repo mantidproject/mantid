@@ -1,7 +1,7 @@
 #ifndef SLICEVIEWER_H
 #define SLICEVIEWER_H
 
-#include "MantidQtMantidWidgets/ColorBarWidget.h"
+#include "MantidQtWidgets/Common/ColorBarWidget.h"
 #include "DimensionSliceWidget.h"
 #include "DllOption.h"
 #include "MantidAPI/IMDIterator.h"
@@ -10,22 +10,22 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/VMD.h"
-#include "MantidQtAPI/MdSettings.h"
-#include "MantidQtMantidWidgets/SafeQwtPlot.h"
-#include "MantidQtAPI/SyncedCheckboxes.h"
-#include "MantidQtSliceViewer/CoordinateTransform.h"
-#include "MantidQtSliceViewer/LineOverlay.h"
-#include "MantidQtSliceViewer/NonOrthogonalOverlay.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
-#include "MantidQtSliceViewer/ZoomablePeaksView.h"
-#include "MantidQtSliceViewer/QwtScaleDrawNonOrthogonal.h"
-#include "MantidQtAPI/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
+#include "MantidQtWidgets/Common/SafeQwtPlot.h"
+#include "MantidQtWidgets/Common/SyncedCheckboxes.h"
+#include "MantidQtWidgets/SliceViewer/CoordinateTransform.h"
+#include "MantidQtWidgets/SliceViewer/LineOverlay.h"
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/ZoomablePeaksView.h"
+#include "MantidQtWidgets/SliceViewer/QwtScaleDrawNonOrthogonal.h"
+#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <qwt_color_map.h>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_plot.h>
 #include <vector>
-#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include <boost/shared_ptr.hpp>
 
 class QDragEnterEvent;

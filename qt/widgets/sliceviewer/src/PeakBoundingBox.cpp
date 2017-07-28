@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include <stdexcept>
 #include <boost/format.hpp>
 #include <cmath>

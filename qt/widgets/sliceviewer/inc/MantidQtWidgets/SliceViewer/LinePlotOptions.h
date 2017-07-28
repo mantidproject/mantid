@@ -3,7 +3,7 @@
 
 #include <QtGui/QWidget>
 #include "ui_LinePlotOptions.h"
-#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/Common/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "DllOption.h"
 

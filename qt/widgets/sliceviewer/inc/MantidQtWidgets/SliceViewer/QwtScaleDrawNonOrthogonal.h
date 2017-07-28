@@ -1,7 +1,7 @@
 #ifndef QWT_SCALE_DRAW_NON_ORTHOGONAL_H
 #define QWT_SCALE_DRAW_NON_ORTHOGONAL_H
 
-#include "MantidQtSliceViewer/NonOrthogonalOverlay.h"
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
 #include "MantidAPI/IMDWorkspace.h"

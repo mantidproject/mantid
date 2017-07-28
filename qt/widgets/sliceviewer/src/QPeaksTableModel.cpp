@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/QPeaksTableModel.h"
+#include "MantidQtWidgets/SliceViewer/QPeaksTableModel.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Crystal/IPeak.h"

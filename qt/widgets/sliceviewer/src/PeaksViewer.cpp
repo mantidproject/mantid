@@ -1,11 +1,11 @@
-#include "MantidQtSliceViewer/PeaksViewer.h"
+#include "MantidQtWidgets/SliceViewer/PeaksViewer.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/UsageService.h"
-#include "MantidQtAPI/TSVSerialiser.h"
-#include "MantidQtSliceViewer/PeaksTableColumnsDialog.h"
-#include "MantidQtSliceViewer/PeaksWorkspaceWidget.h"
-#include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/SliceViewer/PeaksTableColumnsDialog.h"
+#include "MantidQtWidgets/SliceViewer/PeaksWorkspaceWidget.h"
+#include "MantidQtWidgets/SliceViewer/ProxyCompositePeaksPresenter.h"
 #include <QBoxLayout>
 #include <QLayoutItem>
 

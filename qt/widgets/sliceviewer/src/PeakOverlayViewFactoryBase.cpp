@@ -1,5 +1,5 @@
-#include "MantidQtSliceViewer/PeakOverlayViewFactoryBase.h"
-#include "MantidQtSliceViewer/PeakPalette.h"
+#include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactoryBase.h"
+#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;

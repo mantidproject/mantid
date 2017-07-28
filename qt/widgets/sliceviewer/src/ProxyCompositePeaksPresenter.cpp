@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/ProxyCompositePeaksPresenter.h"
 
 namespace MantidQt {
 namespace SliceViewer {

@@ -1,13 +1,13 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/VMD.h"
-#include "MantidQtSliceViewer/LineViewer.h"
-#include "MantidQtSliceViewer/SliceViewer.h"
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtWidgets/SliceViewer/LineViewer.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include <qboxlayout.h>
 #include <qmainwindow.h>
 #include <qlayout.h>

@@ -1,6 +1,6 @@
-#include "MantidQtSliceViewer/LineOverlay.h"
+#include "MantidQtWidgets/SliceViewer/LineOverlay.h"
 #include "MantidKernel/Utils.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include <QRect>
 #include <QShowEvent>
 #include <qpainter.h>

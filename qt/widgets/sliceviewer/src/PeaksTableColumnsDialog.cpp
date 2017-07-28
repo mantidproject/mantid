@@ -1,5 +1,5 @@
-#include "MantidQtSliceViewer/PeaksTableColumnsDialog.h"
-#include "MantidQtSliceViewer/QPeaksTableModel.h"
+#include "MantidQtWidgets/SliceViewer/PeaksTableColumnsDialog.h"
+#include "MantidQtWidgets/SliceViewer/QPeaksTableModel.h"
 #include "ui_PeaksTableColumnsDialog.h"
 
 // REMOVE

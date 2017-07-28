@@ -1,7 +1,7 @@
-#include "MantidQtSliceViewer/PeakPrimitives.h"
-#include "MantidQtSliceViewer/PeakBoundingBox.h"
-#include "MantidQtSliceViewer/PeakRepresentationCross.h"
-#include "MantidQtSliceViewer/PeakViewColor.h"
+#include "MantidQtWidgets/SliceViewer/PeakPrimitives.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include "MantidKernel/V2D.h"
 #include <QPainter>
 

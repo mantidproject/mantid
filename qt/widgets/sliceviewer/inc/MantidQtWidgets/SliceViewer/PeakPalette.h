@@ -2,7 +2,7 @@
 #define MANTID_SLICEVIEWER_PEAKPALETTE_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtSliceViewer/PeakViewColor.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include <algorithm>
 #include <sstream>
 #include <stdexcept>

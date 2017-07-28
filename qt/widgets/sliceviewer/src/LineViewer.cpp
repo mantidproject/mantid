@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/LineViewer.h"
+#include "MantidQtWidgets/SliceViewer/LineViewer.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -9,11 +9,11 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidKernel/VMD.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
-#include "MantidQtAPI/TSVSerialiser.h"
-#include "MantidQtSliceViewer/LinePlotOptions.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_scale_engine.h>

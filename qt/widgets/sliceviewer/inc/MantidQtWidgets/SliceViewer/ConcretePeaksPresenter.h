@@ -2,8 +2,8 @@
 #define MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
-#include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"

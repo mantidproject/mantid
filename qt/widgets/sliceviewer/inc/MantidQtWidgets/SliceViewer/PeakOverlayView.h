@@ -3,9 +3,9 @@
 
 #include "MantidKernel/V2D.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
-#include "MantidQtSliceViewer/PeakPalette.h"
-#include "MantidQtSliceViewer/PeakViewColor.h"
-#include "MantidQtSliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include <QPointF>
 #include <boost/shared_ptr.hpp>
 

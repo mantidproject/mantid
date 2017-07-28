@@ -2,7 +2,7 @@
 #define MANTIDSLICEVIEWER_PEAKSVIEWEROVERLAYDIALOG_H
 
 #include <QDialog>
-#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 
 class QAbstractButton;
 namespace Ui {

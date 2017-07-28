@@ -4,8 +4,8 @@
 #include <QtGui/QWidget>
 #include "DllOption.h"
 #include <boost/shared_ptr.hpp>
-#include "MantidQtSliceViewer/PeaksPresenter.h"
-#include "MantidQtSliceViewer/UpdateableOnDemand.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include <boost/shared_ptr.hpp>
 

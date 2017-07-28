@@ -1,7 +1,7 @@
 #include "MantidKernel/Logger.h"
-#include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
-#include "MantidQtSliceViewer/PeakBoundingBox.h"
-#include "MantidQtSliceViewer/PeakRepresentationEllipsoid.h"
+#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("PeakRepresentation");

@@ -3,9 +3,9 @@
 
 #include "DllOption.h"
 #include <boost/shared_ptr.hpp>
-#include "MantidQtSliceViewer/PeakEditMode.h"
-#include "MantidQtSliceViewer/PeakPalette.h"
-#include "MantidQtSliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakEditMode.h"
+#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 
 #include <set>
 #include <QObject>

@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/CompositePeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <stdexcept>
 

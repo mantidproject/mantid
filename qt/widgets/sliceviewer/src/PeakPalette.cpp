@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/PeakPalette.h"
+#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
 
 #include <QColor>
 #include <algorithm>
