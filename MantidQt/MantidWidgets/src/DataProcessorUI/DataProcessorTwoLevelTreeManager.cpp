@@ -311,6 +311,16 @@ QString DataProcessorTwoLevelTreeManager::copySelected() {
   return lines.join("\n");
 }
 
+/// Converts a string denoting a denary integer to it's int value.
+int parseDenaryInteger(QString const& in) {
+  static auto ok = false;
+  auto out = in.toInt(&ok, 10);
+  if(ok)
+    return out;
+  else
+    throw std::runtime_error("Failed to parse '" + in + "' as a denary integer.");
+}
+
 /** Paste the contents of the clipboard into the currently selected rows, or
 * append new rows
 * @param text :: Selected rows to paste as a string
@@ -333,8 +343,8 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const QString &text) {
     // Add as many new rows as required
     for (auto i = 0; i < lines.size(); ++i) {
       auto values = lines[i].split("\t");
-
-      int groupId = boost::lexical_cast<int>(values.front().toStdString());
+      
+      int groupId = parseDenaryInteger(values.front());
       int rowId = numRowsInGroup(groupId);
       if (!m_model->insertRow(rowId, m_model->index(groupId, 0)))
         return;
