@@ -5,7 +5,6 @@
 #include <vector>
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
-#include <MantidGeometry/Objects/ShapeFactory.h>
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
@@ -28,6 +27,7 @@ class IComponent;
 class Instrument;
 class ObjComponent;
 class Object;
+class ShapeFactory;
 
 /** Creates an instrument data from a XML instrument description file
 

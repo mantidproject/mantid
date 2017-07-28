@@ -302,7 +302,7 @@ void InstrumentDefinitionParser::collateTypeInformation(
   const size_t numberOfTypes = typeElems.size();
   for (size_t iType = 0; iType < numberOfTypes; ++iType) {
     Element *pTypeElem = typeElems[iType];
-    std::__cxx11::string typeName = pTypeElem->getAttribute("name");
+    std::string typeName = pTypeElem->getAttribute("name");
 
     // If type contains <combine-components-into-one-shape> then make adjustment
     // after this loop has completed
@@ -478,7 +478,7 @@ void InstrumentDefinitionParser::adjustTypesContainingCombineComponentsElement(
     const std::vector<Element *> &typeElems, const size_t numberOfTypes) {
   for (size_t iType = 0; iType < numberOfTypes; ++iType) {
     Element *pTypeElem = typeElems[iType];
-    std::__cxx11::string typeName = pTypeElem->getAttribute("name");
+    std::string typeName = pTypeElem->getAttribute("name");
 
     // In this loop only interested in types containing
     // <combine-components-into-one-shape>
