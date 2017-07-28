@@ -286,19 +286,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
     if (nelements == 0)
       continue;
 
-    // Each type in the IDF must be uniquely named, hence return error if type
-    // has already been defined
-    if (getTypeElement.find(typeName) != getTypeElement.end()) {
-      g_log.error(std::string("XML file: ")
-                      .append(filename)
-                      .append("contains more than one type element named ")
-                      .append(typeName));
-      throw Kernel::Exception::InstrumentDefinitionError(
-          std::string(
-              "XML instrument file contains more than one type element named ")
-              .append(typeName)
-              .append(filename));
-    }
+    throwIfTypeNameNotUnique(filename, typeName);
     getTypeElement[typeName] = pTypeElem;
 
     InstrumentDefinitionParser helper;
