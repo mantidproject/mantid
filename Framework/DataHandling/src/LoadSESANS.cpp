@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
@@ -134,8 +135,10 @@ void LoadSESANS::exec() {
 
   // Make a workspace from the columns and set it as the output
   API::MatrixWorkspace_sptr newWorkspace = makeWorkspace(columns);
+  newWorkspace->setTitle(attributes["DataFileTitle"]);
+  newWorkspace->mutableSample().setName(attributes["Sample"]);
+  newWorkspace->mutableSample().setThickness(std::stod(attributes["Thickness"]));
   setProperty("OutputWorkspace", newWorkspace);
-
 }
 
 /** Read headers from the input file into the attribute map, until BEGIN_DATA is
@@ -261,8 +264,7 @@ LoadSESANS::splitHeader(const std::string &line, const int &lineNum) {
 void LoadSESANS::throwFormatError(const std::string &line,
                                   const std::string &message,
                                   const int &lineNum) {
-  std::string output = "Badly formed line at line " + std::to_string(lineNum) +
-                       "\n\n" + "\t" + line + "\n\n" + message;
+	std::string output = "Badly formed line at line " + std::to_string(lineNum) + ": \"" + line + "\"\n(" + message + ")";
   g_log.error(output);
   throw std::runtime_error(output);
 }
@@ -354,10 +356,10 @@ std::string LoadSESANS::repeatAndJoin(const std::string &str,
 
 Column LoadSESANS::calculateYValues(const Column &depolarisation, const Column &wavelength) const {
 	Column yValues;
-
+	
 	transform(depolarisation.begin(), depolarisation.end(), wavelength.begin(),
-		back_inserter(depolarisation),
-		[&](double depol, double wavelength) { return exp(depol * wavelength * wavelength); });
+		back_inserter(yValues),
+		[&](double depol, double wave) { return exp(depol * wave * wave); });
 	return yValues;
 }
 
