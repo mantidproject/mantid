@@ -101,6 +101,7 @@ void IndirectSqw::run() {
   sqwAlg->setProperty("EMode", "Indirect");
   sqwAlg->setProperty("EFixed", eFixed.toStdString());
   sqwAlg->setProperty("Method", "NormalisedPolygon");
+  sqwAlg->setProperty("ReplaceNaNs", true);
 
   m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
 

@@ -267,6 +267,11 @@ Output:
 
   1
 
+Related Algorithms
+------------------
+:ref:`ConjoinXRuns <algm-ConjoinXRuns>` concatenates the workspaces in the x dimension by handling the merging of the Sample Logs.
+:ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` combines workspaces by appending their spectra.
+
 .. categories::
 
 .. sourcelink::
