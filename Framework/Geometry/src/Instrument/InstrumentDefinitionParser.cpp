@@ -248,17 +248,61 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
         "No type elements in XML instrument file", filename);
   }
 
-  // Collect some information about types for later use including:
-  //  * populate directory getTypeElement
-  //  * populate directory isTypeAssembly
-  //  * create shapes for all none assembly components and store in
-  //  mapTypeNameToShape
-  //  * If 'Outline' attribute set for assembly add attribute object_created=no
-  //  to indicate the shape for this assembly should be created later.
+  collateTypeInformation(filename, typeElems, shapeCreator);
+
+  // Populate m_hasParameterElement
+  createVectorOfElementsContainingAParameterElement(pRootElem);
+
+  // See if any parameters set at instrument level
+  setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
+
+  parseLocationsForEachTopLevelComponent(progressReporter, filename, compElems);
+
+  // Don't need this anymore (if it was even used) so empty it out to save
+  // memory
+  m_tempPosHolder.clear();
+
+  // Read in or create the geometry cache file
+  m_cachingOption = setupGeometryCache();
+
+  // Add/overwrite any instrument params with values specified in
+  // <component-link> XML elements
+  setComponentLinks(m_instrument, pRootElem);
+
+  if (m_indirectPositions)
+    createNeutronicInstrument();
+
+  // Instrument::markAsDetector is slow unless the detector IDs in the IDF are
+  // sorted. To circumvent this we use the 2-part interface,
+  // markAsDetectorIncomplete (which does not sort) and markAsDetectorFinalize
+  // (which does the final sorting).
+  m_instrument->markAsDetectorFinalize();
+
+  // And give back what we created
+  return m_instrument;
+}
+
+/**
+ * Collect some information about types for later use including:
+ * - populate directory getTypeElement
+ * - populate directory isTypeAssembly
+ * - create shapes for all none assembly components and store in
+ * mapTypeNameToShape
+ * - If 'Outline' attribute set for assembly add attribute object_created=no
+ * to indicate the shape for this assembly should be created later.
+ *
+ * @param filename :: Name of the IDF, for exception message
+ * @param typeElems ::
+ * @param shapeCreator ::
+ * @param numberOfTypes  :: Total number of type elements
+ */
+void InstrumentDefinitionParser::collateTypeInformation(
+    const std::string &filename, const std::vector<Element *> &typeElems,
+    ShapeFactory &shapeCreator) {
   const size_t numberOfTypes = typeElems.size();
   for (size_t iType = 0; iType < numberOfTypes; ++iType) {
     Element *pTypeElem = typeElems[iType];
-    std::string typeName = pTypeElem->getAttribute("name");
+    std::__cxx11::string typeName = pTypeElem->getAttribute("name");
 
     // If type contains <combine-components-into-one-shape> then make adjustment
     // after this loop has completed
@@ -275,13 +319,18 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
 
   adjustTypesContainingCombineComponentsElement(shapeCreator, filename,
                                                 typeElems, numberOfTypes);
-  // Populates m_hasParameterElement
-  createVectorOfElementsContainingAParameterElement(pRootElem);
+}
 
-  // See if any parameters set at instrument level
-  setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
-
-  // do analysis for each top level component element
+/**
+ * Aggregate locations and IDs for components
+ *
+ * @param progressReporter :: A progress reporter
+ * @param filename :: Name of the IDF, for exception message
+ * @param compElems :: Vector of pointers for component elements
+ */
+void InstrumentDefinitionParser::parseLocationsForEachTopLevelComponent(
+    ProgressBase *progressReporter, const std::string &filename,
+    const std::vector<Element *> &compElems) {
   if (progressReporter)
     progressReporter->resetNumSteps(compElems.size(), 0.0, 1.0);
 
@@ -321,37 +370,13 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
       idList.reset();
     }
   }
-
-  // Don't need this anymore (if it was even used) so empty it out to save
-  // memory
-  m_tempPosHolder.clear();
-
-  // Read in or create the geometry cache file
-  m_cachingOption = setupGeometryCache();
-
-  // Add/overwrite any instrument params with values specified in
-  // <component-link> XML elements
-  setComponentLinks(m_instrument, pRootElem);
-
-  if (m_indirectPositions)
-    createNeutronicInstrument();
-
-  // Instrument::markAsDetector is slow unless the detector IDs in the IDF are
-  // sorted. To circumvent this we use the 2-part interface,
-  // markAsDetectorIncomplete (which does not sort) and markAsDetectorFinalize
-  // (which does the final sorting).
-  m_instrument->markAsDetectorFinalize();
-
-  // And give back what we created
-  return m_instrument;
 }
 
 /**
  * Component must contain a \<location\> or \<locations\>
  * Throw an exception if it does not
  *
- * @param pNL_location ::
- * @param pNL_locations ::
+ * @param pElem :: Element with the idlist
  * @param filename :: Name of the IDF, for exception message
  */
 void InstrumentDefinitionParser::checkComponentContainsLocationElement(

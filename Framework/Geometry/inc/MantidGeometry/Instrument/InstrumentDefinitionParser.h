@@ -280,6 +280,17 @@ private:
   void checkComponentContainsLocationElement(Poco::XML::Element *pElem,
                                              const std::string &filename) const;
 
+  /// Aggregate locations and IDs for components
+  void parseLocationsForEachTopLevelComponent(
+      Kernel::ProgressBase *progressReporter, const std::string &filename,
+      const std::vector<Poco::XML::Element *> &compElems);
+
+  /// Collect some information about types for later use
+  void
+  collateTypeInformation(const std::string &filename,
+                         const std::vector<Poco::XML::Element *> &typeElems,
+                         ShapeFactory &shapeCreator);
+
 public: // for testing
   /// return absolute position of point which is set relative to the
   /// coordinate system of the input component
