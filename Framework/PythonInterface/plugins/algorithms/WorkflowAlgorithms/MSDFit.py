@@ -4,7 +4,6 @@ from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 from six.moves import range  # pylint: disable=redefined-builtin
-from math import sqrt
 
 
 class MSDFit(DataProcessorAlgorithm):

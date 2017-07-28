@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 '''
 @author Spencer Howells, ISIS
 @date December 05, 2013
@@ -24,14 +24,17 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 from __future__ import (absolute_import, division, print_function)
-import math, numpy as np
+
+import math
+import numpy as np
+
 from mantid.api import IFunction1D, FunctionFactory
+
 
 # For a Gaussian distribution the elastic intensity is propotional to exp(-msd*Q^2)
 # where the mean square displacement msd = <r^2>.
 
 class MsdGauss(IFunction1D):
-
     def category(self):
         return "QuasiElastic"
 
@@ -45,7 +48,7 @@ class MsdGauss(IFunction1D):
         msd = self.getParameterValue("Msd")
 
         xvals = np.array(xvals)
-        intensity = height * np.exp(-msd*xvals*xvals)
+        intensity = height * np.exp(-msd * xvals * xvals)
 
         return intensity
 
@@ -55,10 +58,11 @@ class MsdGauss(IFunction1D):
 
         i = 0
         for x in xvals:
-            e = math.exp(-msd*x*x)
-            jacobian.set(i,0,e)
-            jacobian.set(i,1,-x*x*e*height)
+            e = math.exp(-msd * x * x)
+            jacobian.set(i, 0, e)
+            jacobian.set(i, 1, -x * x * e * height)
             i += 1
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(MsdGauss)
