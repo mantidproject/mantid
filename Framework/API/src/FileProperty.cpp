@@ -12,8 +12,6 @@
 
 #include <boost/make_shared.hpp>
 
-#include <algorithm>
-#include <cctype>
 #include <cstdlib>
 #include <iterator>
 
@@ -413,11 +411,13 @@ std::string FileProperty::convertExtension(const std::string &filepath) const {
 std::string FileProperty::expandUser(const std::string &filepath) const {
   auto start = filepath.begin();
 
-  if (*start != '~') // No user variables in filepath
-    return filepath;
+  if (filepath[0] == '~')
+	  return filepath;
 
   // Position of the first slash after the variable
   auto nextSlash = find_if(start, filepath.end(), &isSlash);
+
+  std::string userHome = findUserHome(filepath);
 
   // UNIX-style home variable (ie ~/blah)
   if (std::distance(start, nextSlash) == 1) {
@@ -445,6 +445,31 @@ std::string FileProperty::expandUser(const std::string &filepath) const {
   // Couldn't find enough relevant environment variables
   return filepath;
 }
+
+// Based on posixpath.expanduser
+std::string FileProperty::findUNIXUserHome(const std::string &filepath) {
+	auto start = filepath.begin();
+	auto nextSlash = find_if(start, filepath.end(), &isSlash);
+
+	char *home;
+
+	if (std::distance(start, nextSlash) == 1 && (home = std::getenv("HOME")))
+		return home;
+}
+
+// Based on ntpath.expanduser
+std::string FileProperty::findWindowsUserHome(const std::string &filepath) {
+	
+}
+
+std::string FileProperty::findUserHome(const std::string &filepath) {
+#if defined(_WIN32) || defined(_WIN64)
+		return findWindowsUserHome(filepath);
+#else
+		return findUNIXUserHome(filepath);
+#endif
+}
+
 
 /** Is a character either a forward- or back-slash? Helper for expandUser
  *  @param c The character to test
