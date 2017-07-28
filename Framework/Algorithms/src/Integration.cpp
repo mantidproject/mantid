@@ -101,15 +101,15 @@ void Integration::exec() {
   const int numberOfSpectra =
       static_cast<int>(localworkspace->getNumberHistograms());
 
-  // Check 'StartSpectrum' is in range 0-numberOfSpectra
+  // Check 'StartWorkspaceIndex' is in range 0-numberOfSpectra
   if (minWsIndex > numberOfSpectra) {
-    g_log.warning("StartSpectrum out of range! Set to 0.");
+    g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
     minWsIndex = 0;
   }
   if (isEmpty(maxWsIndex))
     maxWsIndex = numberOfSpectra - 1;
   if (maxWsIndex > numberOfSpectra - 1 || maxWsIndex < minWsIndex) {
-    g_log.warning("EndSpectrum out of range! Set to max detector number");
+    g_log.warning("EndWorkspaceIndex out of range! Set to max workspace index.");
     maxWsIndex = numberOfSpectra;
   }
   auto rangeListCheck = [minWsIndex, maxWsIndex](const std::vector<double> &list,
