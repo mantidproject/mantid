@@ -294,11 +294,10 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
 
       checkComponentContainsLocationElement(pElem, filename);
 
-      // Loop through all <location> and <locations> elements of this component
-      // by looping all the child nodes and then see if any of these nodes are
-      // either <location> or <locations> elements. Done this way order these
-      // locations are processed is the order they are listed in the IDF. The
-      // latter needed to get detector IDs assigned as expected
+      // Loop through all children of this component and see if any
+      // are a <location> or <locations>. Done this way, the
+      // order they are processed is the order they are listed in the
+      // IDF. This is necessary to match the order of the detector IDs.
       for (Node *pNode = pElem->firstChild(); pNode != nullptr;
            pNode = pNode->nextSibling()) {
         auto pChildElem = dynamic_cast<Element *>(pNode);
