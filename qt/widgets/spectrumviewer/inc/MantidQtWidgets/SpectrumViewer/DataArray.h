@@ -6,7 +6,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "MantidQtSpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 
 /**
     @class DataArray

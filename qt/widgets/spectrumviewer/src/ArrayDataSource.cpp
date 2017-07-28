@@ -1,8 +1,8 @@
 
 #include <math.h>
 
-#include "MantidQtSpectrumViewer/ArrayDataSource.h"
-#include "MantidQtSpectrumViewer/SVUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/ArrayDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
 namespace MantidQt {
 namespace SpectrumView {

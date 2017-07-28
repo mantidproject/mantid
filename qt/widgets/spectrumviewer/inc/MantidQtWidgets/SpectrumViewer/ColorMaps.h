@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <QColor>
-#include "MantidQtSpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 
 /**
     @class ColorMaps

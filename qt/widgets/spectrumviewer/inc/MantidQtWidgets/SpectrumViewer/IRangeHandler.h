@@ -1,8 +1,8 @@
 #ifndef IRANGE_HANDLER_H
 #define IRANGE_HANDLER_H
 
-#include "MantidQtSpectrumViewer/DllOptionSV.h"
-#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 
 namespace MantidQt {
 namespace SpectrumView {

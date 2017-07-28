@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "MantidQtSpectrumViewer/EModeHandler.h"
-#include "MantidQtSpectrumViewer/QtUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
 #include "MantidKernel/Logger.h"
 
 #include <QLineEdit>

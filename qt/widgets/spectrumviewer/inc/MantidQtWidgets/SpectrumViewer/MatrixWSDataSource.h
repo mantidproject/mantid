@@ -3,9 +3,9 @@
 
 #include <cstddef>
 
-#include "MantidQtSpectrumViewer/DataArray.h"
-#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtSpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/DataArray.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 

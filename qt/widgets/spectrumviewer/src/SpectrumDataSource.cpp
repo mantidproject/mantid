@@ -1,7 +1,7 @@
 
 #include <math.h>
 
-#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 
 namespace MantidQt {
 namespace SpectrumView {

@@ -20,36 +20,36 @@ set ( SRC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-       inc/MantidQtSpectrumViewer/ColorMaps.h
-       inc/MantidQtSpectrumViewer/SpectrumDisplay.h
-       inc/MantidQtSpectrumViewer/SVConnections.h
-       inc/MantidQtSpectrumViewer/DataArray.h
-       inc/MantidQtSpectrumViewer/SpectrumPlotItem.h
-       inc/MantidQtSpectrumViewer/SVUtils.h
-       inc/MantidQtSpectrumViewer/TrackingPicker.h
-       inc/MantidQtSpectrumViewer/GraphDisplay.h
-       inc/MantidQtSpectrumViewer/SpectrumView.h
-       inc/MantidQtSpectrumViewer/QtUtils.h
-       inc/MantidQtSpectrumViewer/SpectrumDataSource.h
-       inc/MantidQtSpectrumViewer/ISliderHandler.h
-       inc/MantidQtSpectrumViewer/IRangeHandler.h
-       inc/MantidQtSpectrumViewer/SliderHandler.h
-       inc/MantidQtSpectrumViewer/RangeHandler.h
-       inc/MantidQtSpectrumViewer/EModeHandler.h
-       inc/MantidQtSpectrumViewer/MatrixWSDataSource.h
-       #inc/MantidQtSpectrumViewer/MatrixWSSpectrumView.h
-       inc/MantidQtSpectrumViewer/ArrayDataSource.h
+       inc/MantidQtWidgets/SpectrumViewer/ColorMaps.h
+       inc/MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h
+       inc/MantidQtWidgets/SpectrumViewer/SVConnections.h
+       inc/MantidQtWidgets/SpectrumViewer/DataArray.h
+       inc/MantidQtWidgets/SpectrumViewer/SpectrumPlotItem.h
+       inc/MantidQtWidgets/SpectrumViewer/SVUtils.h
+       inc/MantidQtWidgets/SpectrumViewer/TrackingPicker.h
+       inc/MantidQtWidgets/SpectrumViewer/GraphDisplay.h
+       inc/MantidQtWidgets/SpectrumViewer/SpectrumView.h
+       inc/MantidQtWidgets/SpectrumViewer/QtUtils.h
+       inc/MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h
+       inc/MantidQtWidgets/SpectrumViewer/ISliderHandler.h
+       inc/MantidQtWidgets/SpectrumViewer/IRangeHandler.h
+       inc/MantidQtWidgets/SpectrumViewer/SliderHandler.h
+       inc/MantidQtWidgets/SpectrumViewer/RangeHandler.h
+       inc/MantidQtWidgets/SpectrumViewer/EModeHandler.h
+       inc/MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h
+      #inc/MantidQtWidgets/SpectrumViewer/MatrixWSSpectrumView.h
+       inc/MantidQtWidgets/SpectrumViewer/ArrayDataSource.h
 )
 
 set ( MOC_FILES
-       inc/MantidQtSpectrumViewer/SpectrumDisplay.h
-       inc/MantidQtSpectrumViewer/SpectrumView.h
-       inc/MantidQtSpectrumViewer/SVConnections.h
-       inc/MantidQtSpectrumViewer/TrackingPicker.h
+       inc/MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h
+       inc/MantidQtWidgets/SpectrumViewer/SpectrumView.h
+       inc/MantidQtWidgets/SpectrumViewer/SVConnections.h
+       inc/MantidQtWidgets/SpectrumViewer/TrackingPicker.h
 )
 
 set ( UI_FILES
-       inc/MantidQtSpectrumViewer/SpectrumView.ui
+       inc/MantidQtWidgets/SpectrumViewer/SpectrumView.ui
 )
 
 
@@ -74,15 +74,14 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 add_definitions ( -DIN_MANTIDQT_SPECTRUMVIEWER )
 
 # This creates the target library
-add_library ( MantidQtSpectrumViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( qtwidgetsspectrumviewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtSpectrumViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( qtwidgetsspectrumviewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 # ... and links to other required libs
-target_link_libraries ( MantidQtSpectrumViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtAPI
-            MantidWidgets
+target_link_libraries ( qtwidgetsspectrumviewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            qtwidgetscommon
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
@@ -94,4 +93,4 @@ target_link_libraries ( MantidQtSpectrumViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidQtSpectrumViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS qtwidgetsspectrumviewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

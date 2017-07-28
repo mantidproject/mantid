@@ -1,15 +1,15 @@
-#include "MantidQtSpectrumViewer/SpectrumView.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UsageService.h"
-#include "MantidQtAPI/TSVSerialiser.h"
-#include "MantidQtSpectrumViewer/ColorMaps.h"
-#include "MantidQtSpectrumViewer/SVConnections.h"
-#include "MantidQtSpectrumViewer/SpectrumDisplay.h"
-#include "MantidQtSpectrumViewer/SliderHandler.h"
-#include "MantidQtSpectrumViewer/RangeHandler.h"
-#include "MantidQtSpectrumViewer/EModeHandler.h"
-#include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
+#include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/SliderHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/RangeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
 
 #include <boost/make_shared.hpp>
 

@@ -1,19 +1,18 @@
-#ifndef RANGE_HANDLER_H
-#define RANGE_HANDLER_H
+#ifndef EMODE_HANDLER_H
+#define EMODE_HANDLER_H
 
-#include "MantidQtSpectrumViewer/IRangeHandler.h"
 #include "ui_SpectrumView.h"
-#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtSpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 
 /**
-    @class RangeHandler
+    @class EModeHandler
 
-    This manages the min, max and step range controls for the SpectrumView
-    data viewer.
+    This manages the instrument type combo box (emode) and E Fixed controls
+    for the SpectrumView data viewer.
 
     @author Dennis Mikkelson
-    @date   2012-04-25
+    @date   2012-10-12
 
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
 
@@ -39,28 +38,28 @@
 namespace MantidQt {
 namespace SpectrumView {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER RangeHandler : public IRangeHandler {
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER EModeHandler {
 public:
-  /// Construct object to manage min, max and step controls in the UI
-  RangeHandler(Ui_SpectrumViewer *svUI);
+  /// Construct object to manage E Mode controls in the UI
+  EModeHandler(Ui_SpectrumViewer *sv_ui);
 
-  /// Configure min, max and step controls for the specified data source
-  void configureRangeControls(SpectrumDataSource_sptr dataSource) override;
+  /// Get the E Mode to control units calculation, from the combo box
+  int getEMode();
 
-  /// Get the range of data to display in the image, from GUI controls
-  void getRange(double &min, double &max, double &step) override;
+  /// Set the E Mode to control units calculation, in the combo box
+  void setEMode(const int mode);
 
-  /// Set the values displayed in the GUI controls
-  void setRange(double min, double max, double step);
+  /// Get the E Fixed value from the GUI
+  double getEFixed();
+
+  /// Set the E Fixed value in the GUI
+  void setEFixed(const double efixed);
 
 private:
   Ui_SpectrumViewer *m_svUI;
-  double m_totalMinX;
-  double m_totalMaxX;
-  size_t m_totalNSteps;
 };
 
 } // namespace SpectrumView
 } // namespace MantidQt
 
-#endif // RANGE_HANDLER_H
+#endif // EMODE_HANDLER_H

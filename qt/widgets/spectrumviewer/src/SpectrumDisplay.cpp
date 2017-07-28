@@ -7,14 +7,14 @@
 #include <qimage.h>
 #include <qwt_scale_engine.h>
 
-#include "MantidQtSpectrumViewer/SpectrumDisplay.h"
-#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtSpectrumViewer/DataArray.h"
-#include "MantidQtSpectrumViewer/ColorMaps.h"
-#include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/SVUtils.h"
-#include "MantidQtSpectrumViewer/SliderHandler.h"
-#include "MantidQtSpectrumViewer/TrackingPicker.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/DataArray.h"
+#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
+#include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/SliderHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/TrackingPicker.h"
 
 namespace MantidQt {
 namespace SpectrumView {

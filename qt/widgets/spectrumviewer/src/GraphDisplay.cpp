@@ -1,7 +1,7 @@
-#include "MantidQtSpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
 
-#include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/SVUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
 #include <boost/algorithm/clamp.hpp>
 #include <QtGui>

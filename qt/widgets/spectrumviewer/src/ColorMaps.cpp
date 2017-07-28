@@ -2,7 +2,7 @@
 #include <sstream>
 #include <math.h>
 
-#include "MantidQtSpectrumViewer/ColorMaps.h"
+#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
 
 namespace MantidQt {
 namespace SpectrumView {

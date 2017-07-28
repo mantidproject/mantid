@@ -1,4 +1,4 @@
-#include "MantidQtSpectrumViewer/TrackingPicker.h"
+#include "MantidQtWidgets/SpectrumViewer/TrackingPicker.h"
 
 namespace MantidQt {
 namespace SpectrumView {

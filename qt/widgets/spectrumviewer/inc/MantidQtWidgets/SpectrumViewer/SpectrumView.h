@@ -7,12 +7,12 @@
 #include <QList>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtSpectrumViewer/GraphDisplay.h"
-#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
-#include "MantidQtSpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 
 /**
     @class SpectrumView

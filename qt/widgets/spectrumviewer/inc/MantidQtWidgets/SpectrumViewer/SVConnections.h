@@ -6,12 +6,12 @@
 #include <QActionGroup>
 
 #include "ui_SpectrumView.h"
-#include "MantidQtSpectrumViewer/SpectrumView.h"
-#include "MantidQtSpectrumViewer/TrackingPicker.h"
-#include "MantidQtSpectrumViewer/SpectrumDisplay.h"
-#include "MantidQtSpectrumViewer/GraphDisplay.h"
-#include "MantidQtSpectrumViewer/DllOptionSV.h"
-#include "MantidQtSpectrumViewer/ColorMaps.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
+#include "MantidQtWidgets/SpectrumViewer/TrackingPicker.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
 
 /**
     @class SVConnections

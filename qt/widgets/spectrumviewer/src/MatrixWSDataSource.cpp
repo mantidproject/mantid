@@ -8,9 +8,9 @@
 
 #include <QThread>
 
-#include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
-#include "MantidQtSpectrumViewer/EModeHandler.h"
-#include "MantidQtSpectrumViewer/SVUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"

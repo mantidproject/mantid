@@ -3,7 +3,7 @@
 
 #include <QVector>
 
-#include "MantidQtSpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 
 /**
     @class SVUtils

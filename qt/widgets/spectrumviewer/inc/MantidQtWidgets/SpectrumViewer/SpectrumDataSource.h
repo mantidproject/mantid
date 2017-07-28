@@ -6,8 +6,8 @@
 #include <vector>
 #include <string>
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidQtSpectrumViewer/DataArray.h"
-#include "MantidQtSpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/DataArray.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 
 /**
     @class SpectrumDataSource

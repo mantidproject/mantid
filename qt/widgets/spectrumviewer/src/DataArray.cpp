@@ -4,7 +4,7 @@
 
 #include <math.h>
 
-#include "MantidQtSpectrumViewer/DataArray.h"
+#include "MantidQtWidgets/SpectrumViewer/DataArray.h"
 
 namespace MantidQt {
 namespace SpectrumView {

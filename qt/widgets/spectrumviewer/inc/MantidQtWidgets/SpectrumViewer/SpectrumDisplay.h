@@ -8,12 +8,12 @@
 #include <qwt_plot.h>
 #include <boost/weak_ptr.hpp>
 
-#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtSpectrumViewer/GraphDisplay.h"
-#include "MantidQtSpectrumViewer/SpectrumPlotItem.h"
-#include "MantidQtSpectrumViewer/ISliderHandler.h"
-#include "MantidQtSpectrumViewer/IRangeHandler.h"
-#include "MantidQtSpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumPlotItem.h"
+#include "MantidQtWidgets/SpectrumViewer/ISliderHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/IRangeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 
 /**
     @class SpectrumDisplay

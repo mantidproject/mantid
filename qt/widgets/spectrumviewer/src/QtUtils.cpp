@@ -1,5 +1,5 @@
-#include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/SVUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
 namespace MantidQt {
 namespace SpectrumView {

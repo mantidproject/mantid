@@ -1,9 +1,9 @@
 #include <qwt_plot_canvas.h>
 
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/MantidColorMap.h"
 
-#include "MantidQtSpectrumViewer/SVConnections.h"
+#include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
 
 namespace MantidQt {
 namespace SpectrumView {

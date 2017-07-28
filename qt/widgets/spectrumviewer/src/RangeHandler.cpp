@@ -1,8 +1,8 @@
 #include <QLineEdit>
 
-#include "MantidQtSpectrumViewer/RangeHandler.h"
-#include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/SVUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/RangeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 #include "MantidKernel/Logger.h"
 
 namespace {
