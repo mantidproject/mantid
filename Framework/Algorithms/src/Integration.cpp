@@ -85,9 +85,9 @@ void Integration::exec() {
   /// The value in X to finish the integration at
   double maxRange = getProperty("RangeUpper");
   /// The spectrum to start the integration from
-  int minSpec = getProperty("StartWorkspaceIndex");
+  int minWsIndex = getProperty("StartWorkspaceIndex");
   /// The spectrum to finish the integration at
-  int maxSpec = getProperty("EndWorkspaceIndex");
+  int maxWsIndex = getProperty("EndWorkspaceIndex");
   /// Flag for including partial bins
   const bool incPartBins = getProperty("IncludePartialBins");
   /// List of X values to start the integration from
@@ -102,23 +102,23 @@ void Integration::exec() {
       static_cast<int>(localworkspace->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
-  if (minSpec > numberOfSpectra) {
+  if (minWsIndex > numberOfSpectra) {
     g_log.warning("StartSpectrum out of range! Set to 0.");
-    minSpec = 0;
+    minWsIndex = 0;
   }
-  if (isEmpty(maxSpec))
-    maxSpec = numberOfSpectra - 1;
-  if (maxSpec > numberOfSpectra - 1 || maxSpec < minSpec) {
+  if (isEmpty(maxWsIndex))
+    maxWsIndex = numberOfSpectra - 1;
+  if (maxWsIndex > numberOfSpectra - 1 || maxWsIndex < minWsIndex) {
     g_log.warning("EndSpectrum out of range! Set to max detector number");
-    maxSpec = numberOfSpectra;
+    maxWsIndex = numberOfSpectra;
   }
-  auto rangeListCheck = [minSpec, maxSpec](const std::vector<double> &list,
+  auto rangeListCheck = [minWsIndex, maxWsIndex](const std::vector<double> &list,
                                            const char *name) {
     if (!list.empty() &&
-        list.size() != static_cast<size_t>(maxSpec - minSpec) + 1) {
+        list.size() != static_cast<size_t>(maxWsIndex - minWsIndex) + 1) {
       std::ostringstream sout;
       sout << name << " has " << list.size() << " values but it should contain "
-           << maxSpec - minSpec + 1 << '\n';
+           << maxWsIndex - minWsIndex + 1 << '\n';
       throw std::runtime_error(sout.str());
     }
   };
@@ -150,20 +150,20 @@ void Integration::exec() {
 
   // Create the 2D workspace (with 1 bin) for the output
   MatrixWorkspace_sptr outputWorkspace =
-      this->getOutputWorkspace(localworkspace, minSpec, maxSpec);
+      this->getOutputWorkspace(localworkspace, minWsIndex, maxWsIndex);
 
   bool is_distrib = outputWorkspace->isDistribution();
-  Progress progress(this, progressStart, 1.0, maxSpec - minSpec + 1);
+  Progress progress(this, progressStart, 1.0, maxWsIndex - minWsIndex + 1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
   const bool axisIsNumeric = localworkspace->getAxis(1)->isNumeric();
 
   // Loop over spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))
-  for (int i = minSpec; i <= maxSpec; ++i) {
+  for (int i = minWsIndex; i <= maxWsIndex; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Workspace index on the output
-    const int outWI = i - minSpec;
+    const int outWI = i - minWsIndex;
 
     // Copy Axis values from previous workspace
     if (axisIsText) {
