@@ -102,7 +102,7 @@ void Integration::exec() {
       static_cast<int>(localworkspace->getNumberHistograms());
 
   // Check 'StartWorkspaceIndex' is in range 0-numberOfSpectra
-  if (minWsIndex > numberOfSpectra) {
+  if (minWsIndex >= numberOfSpectra) {
     g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
     minWsIndex = 0;
   }
