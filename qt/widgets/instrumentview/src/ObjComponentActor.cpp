@@ -1,6 +1,6 @@
-#include "MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
+#include "MantidQtWidgets/InstrumentView/ObjComponentActor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"

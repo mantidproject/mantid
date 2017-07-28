@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -8,7 +8,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
-#include "MantidQtMantidWidgets/InstrumentView/GLActor.h"
+#include "MantidQtWidgets/InstrumentView/GLActor.h"
 #include <queue>
 #include <QMessageBox>
 #include <QString>

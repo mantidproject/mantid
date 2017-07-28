@@ -42,7 +42,7 @@ protected:
 /**
  *  Editor for double values
  */
-class QT_QTPROPERTYBROWSER_EXPORT DoubleEditor: public QLineEdit
+class EXPORT_OPT_MANTIDQT_COMMON DoubleEditor: public QLineEdit
 {
   Q_OBJECT
 public:
@@ -62,7 +62,7 @@ protected:
 /**
  *  Specialized version of double editor for parameters
  */
-class QT_QTPROPERTYBROWSER_EXPORT ParameterEditor : public DoubleEditor
+class EXPORT_OPT_MANTIDQT_COMMON ParameterEditor : public DoubleEditor
 {
   Q_OBJECT
 public:
@@ -74,7 +74,7 @@ protected slots:
 /**
  * Concrete double editor factory for double properties
  */
-class QT_QTPROPERTYBROWSER_EXPORT DoubleEditorFactory : public DoubleEditorFactoryBase<QtDoublePropertyManager,DoubleEditor>
+class EXPORT_OPT_MANTIDQT_COMMON DoubleEditorFactory : public DoubleEditorFactoryBase<QtDoublePropertyManager,DoubleEditor>
 {
   Q_OBJECT
 public:
@@ -85,7 +85,7 @@ public:
 /**
  * Concrete double editor factory for parameter properties
  */
-class QT_QTPROPERTYBROWSER_EXPORT ParameterEditorFactory : public DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor>
+class EXPORT_OPT_MANTIDQT_COMMON ParameterEditorFactory : public DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor>
 {
   Q_OBJECT
 public:

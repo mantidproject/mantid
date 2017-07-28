@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTWIDGETTAB_H
 #define INSTRUMENTWIDGETTAB_H
 
-#include <MantidQtMantidWidgets/WidgetDllOption.h>
+#include <MantidQtWidgets/Common/WidgetDllOption.h>
 #include "InstrumentWidgetTypes.h"
 
 #include <QFrame>
@@ -19,7 +19,7 @@ namespace MantidWidgets {
 class InstrumentWidget;
 class ProjectionSurface;
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetTab
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetTab
     : public QFrame,
       public InstrumentWidgetTypes {
   Q_OBJECT

@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/InstrumentView/Shape2D.h"
+#include "MantidQtWidgets/InstrumentView/Shape2D.h"
 
 #include <QPainter>
 #include <QPainterPath>

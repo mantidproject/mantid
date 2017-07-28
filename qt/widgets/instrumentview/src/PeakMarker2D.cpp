@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/InstrumentView/PeakMarker2D.h"
-#include "MantidQtMantidWidgets/InstrumentView/PeakOverlay.h"
+#include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
+#include "MantidQtWidgets/InstrumentView/PeakOverlay.h"
 
 #include <QPainter>
 #include <QPainterPath>

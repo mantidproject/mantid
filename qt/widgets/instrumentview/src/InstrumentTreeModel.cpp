@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentTreeModel.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentTreeModel.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #ifdef _WIN32
 #include <windows.h>
 #endif

@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/InstrumentView/RectF.h"
+#include "MantidQtWidgets/InstrumentView/RectF.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

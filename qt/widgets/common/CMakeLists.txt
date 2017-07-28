@@ -301,7 +301,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h
-  	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h
@@ -341,7 +341,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/ErrorCurve.h
 	inc/MantidQtWidgets/Common/HintStrategy.h
 	inc/MantidQtWidgets/Common/IFunctionBrowser.h
-    inc/MantidQtWidgets/Common/IMuonFitDataModel.h
+  inc/MantidQtWidgets/Common/IMuonFitDataModel.h
 	inc/MantidQtWidgets/Common/IMuonFitDataSelector.h
 	inc/MantidQtWidgets/Common/IMuonFitFunctionModel.h
 	inc/MantidQtWidgets/Common/IProjectSaveView.h
@@ -351,19 +351,38 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
 	inc/MantidQtWidgets/Common/MuonFitDataSelector.h
 	inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
-    inc/MantidQtWidgets/Common/ProgressableView.h
-    inc/MantidQtWidgets/Common/ProgressPresenter.h
-    inc/MantidQtWidgets/Common/ProjectSavePresenter.h
-    inc/MantidQtWidgets/Common/ProjectSaveModel.h
-    inc/MantidQtWidgets/Common/ProgressableView.h
-    inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
-    inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
-    inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h
-    inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
-    inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
-    inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
-    inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
-    inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
+  inc/MantidQtWidgets/Common/ProgressableView.h
+  inc/MantidQtWidgets/Common/ProgressPresenter.h
+  inc/MantidQtWidgets/Common/ProjectSavePresenter.h
+  inc/MantidQtWidgets/Common/ProjectSaveModel.h
+  inc/MantidQtWidgets/Common/ProgressableView.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
+
 )
 
 set ( UI_FILES

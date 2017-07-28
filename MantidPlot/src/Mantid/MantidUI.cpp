@@ -1,5 +1,5 @@
 // Python header must go first
-#include "MantidQtAPI/PythonThreading.h"
+#include "MantidQtWidgets/Common/PythonThreading.h"
 
 #include "AlgorithmDockWidget.h"
 #include "AlgorithmHistoryWindow.h"
@@ -10,8 +10,8 @@
 #include "MantidMDCurveDialog.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixCurve.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include "MantidSampleLogDialog.h"
 #include "MantidSampleMaterialDialog.h"
 #include "MantidTable.h"
@@ -23,7 +23,7 @@
 #include "../ScriptingWindow.h"
 #include "../Spectrogram.h"
 #include "../TiledWindow.h"
-#include "MantidQtAPI/pixmaps.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "MantidAPI/Axis.h"
@@ -40,13 +40,13 @@
 
 #include "InstrumentWidget/InstrumentWindow.h"
 
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/InterfaceManager.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include "MantidQtAPI/VatesViewerInterface.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/VatesViewerInterface.h"
 
-#include "MantidQtMantidWidgets/MantidTreeWidget.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h"
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/DetectorInfo.h"

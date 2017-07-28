@@ -1,9 +1,9 @@
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
-#include "MantidQtAPI/TSVSerialiser.h"
-#include "MantidQtMantidWidgets/InstrumentView/DetXMLFile.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -15,8 +15,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
-#include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1125
@@ -26,8 +26,8 @@
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include "qteditorfactory.h"
-#include "DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -53,7 +53,7 @@
 #include <QToolTip>
 #include <QVBoxLayout>
 
-#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtWidgets/Common/FileDialogHandler.h"
 
 #include <numeric>
 #include <cfloat>

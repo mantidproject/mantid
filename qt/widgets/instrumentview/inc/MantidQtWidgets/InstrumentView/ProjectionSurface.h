@@ -1,11 +1,11 @@
 #ifndef PROJECTIONSURFACE_H
 #define PROJECTIONSURFACE_H
 
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidQtAPI/MantidAlgorithmMetatype.h"
+#include "MantidQtWidgets/Common/MantidAlgorithmMetatype.h"
 
 #include "InstrumentActor.h"
 #include "Shape2DCollection.h"
@@ -58,7 +58,7 @@ the bounding
 * rectangle in surface coordinates.
 */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ProjectionSurface : public QObject {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW ProjectionSurface : public QObject {
   Q_OBJECT
 public:
   enum InteractionMode {

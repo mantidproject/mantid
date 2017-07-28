@@ -2,10 +2,10 @@
 #define INSTRUMENTWIDGETRENDERTAB_H_
 
 #include "InstrumentWidgetTab.h"
-#include <MantidQtMantidWidgets/WidgetDllOption.h>
+#include <MantidQtWidgets/Common/WidgetDllOption.h>
 
-#include "MantidQtAPI/GraphOptions.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/GraphOptions.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 class MantidColorMap;
 
@@ -27,7 +27,7 @@ class ColorMapWidget;
 /**
 * Implements the Render tab in InstrumentWidget.
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetRenderTab
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetRenderTab
     : public InstrumentWidgetTab {
   Q_OBJECT
 

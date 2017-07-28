@@ -1,18 +1,18 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "MantidQtMantidWidgets/InstrumentView/Projection3D.h"
-#include "MantidQtMantidWidgets/InstrumentView/GLActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/GLColor.h"
-#include "MantidQtMantidWidgets/InstrumentView/UnwrappedCylinder.h"
-#include "MantidQtMantidWidgets/InstrumentView/UnwrappedSphere.h"
-#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
+#include "MantidQtWidgets/InstrumentView/Projection3D.h"
+#include "MantidQtWidgets/InstrumentView/GLActor.h"
+#include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
+#include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtMantidWidgets/InputController.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/InputController.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>

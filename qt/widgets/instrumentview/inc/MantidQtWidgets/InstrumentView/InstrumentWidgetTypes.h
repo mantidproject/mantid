@@ -1,11 +1,11 @@
 #ifndef INSTRUMENTWIDGETTYPES_H_
 #define INSTRUMENTWIDGETTYPES_H_
 
-#include <MantidQtMantidWidgets/WidgetDllOption.h>
+#include "DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetTypes {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetTypes {
 
 public:
   enum SurfaceType {

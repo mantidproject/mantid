@@ -88,6 +88,7 @@
 #ifndef QTPROPERTYBROWSER_H
 #define QTPROPERTYBROWSER_H
 
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QtGui/QWidget>
 #include <QtCore/QMap>
 #include <QtCore/QSet>
@@ -96,39 +97,12 @@
 QT_BEGIN_NAMESPACE
 #endif
 
-#if defined(Q_OS_WIN)
-#  if !defined(QT_QTPROPERTYBROWSER_EXPORT) && !defined(QT_QTPROPERTYBROWSER_IMPORT)
-#    define QT_QTPROPERTYBROWSER_EXPORT
-#  elif defined(QT_QTPROPERTYBROWSER_IMPORT)
-#    if defined(QT_QTPROPERTYBROWSER_EXPORT)
-#      undef QT_QTPROPERTYBROWSER_EXPORT
-#    endif
-#    define QT_QTPROPERTYBROWSER_EXPORT __declspec(dllimport)
-#  elif defined(QT_QTPROPERTYBROWSER_EXPORT)
-#    undef QT_QTPROPERTYBROWSER_EXPORT
-#    define QT_QTPROPERTYBROWSER_EXPORT __declspec(dllexport)
-#  endif
-#elif defined(Q_OS_LINUX)
-#  if !defined(QT_QTPROPERTYBROWSER_EXPORT) && !defined(QT_QTPROPERTYBROWSER_IMPORT)
-#    define QT_QTPROPERTYBROWSER_EXPORT
-#  elif defined(QT_QTPROPERTYBROWSER_IMPORT)
-#    if defined(QT_QTPROPERTYBROWSER_EXPORT)
-#      undef QT_QTPROPERTYBROWSER_EXPORT
-#    endif
-#    define QT_QTPROPERTYBROWSER_EXPORT
-#  elif defined(QT_QTPROPERTYBROWSER_EXPORT)
-#    undef QT_QTPROPERTYBROWSER_EXPORT
-#    define QT_QTPROPERTYBROWSER_EXPORT __attribute__ ((visibility ("default")))
-#  endif
-#else
-#  define QT_QTPROPERTYBROWSER_EXPORT
-#endif
 
 
 class QtAbstractPropertyManager;
 class QtPropertyPrivate;
 
-class QT_QTPROPERTYBROWSER_EXPORT QtProperty
+class EXPORT_OPT_MANTIDQT_COMMON QtProperty
 {
 public:
     virtual ~QtProperty();
@@ -186,7 +160,7 @@ public:
     QSet<QtProperty *> m_properties;
 };
 
-class QT_QTPROPERTYBROWSER_EXPORT QtAbstractPropertyManager : public QObject
+class EXPORT_OPT_MANTIDQT_COMMON QtAbstractPropertyManager : public QObject
 {
     Q_OBJECT
 public:
@@ -219,7 +193,7 @@ private:
     Q_DISABLE_COPY(QtAbstractPropertyManager)
 };
 
-class QT_QTPROPERTYBROWSER_EXPORT QtAbstractEditorFactoryBase : public QObject
+class EXPORT_OPT_MANTIDQT_COMMON QtAbstractEditorFactoryBase : public QObject
 {
     Q_OBJECT
 public:
@@ -323,7 +297,7 @@ private:
 class QtAbstractPropertyBrowser;
 class QtBrowserItemPrivate;
 
-class QT_QTPROPERTYBROWSER_EXPORT QtBrowserItem
+class EXPORT_OPT_MANTIDQT_COMMON QtBrowserItem
 {
 public:
     QtProperty *property() const;
@@ -339,7 +313,7 @@ private:
 
 class QtAbstractPropertyBrowserPrivate;
 
-class QT_QTPROPERTYBROWSER_EXPORT QtAbstractPropertyBrowser : public QWidget
+class EXPORT_OPT_MANTIDQT_COMMON QtAbstractPropertyBrowser : public QWidget
 {
     Q_OBJECT
 public:

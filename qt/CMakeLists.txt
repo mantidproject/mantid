@@ -18,6 +18,7 @@ add_subdirectory ( widgets )
 if ( MSVC_IDE )
 #  # Add to the 'MantidQt' group in VS
   set_property ( TARGET qtwidgetscommon PROPERTY FOLDER "MantidQt" )
+  set_property ( TARGET qtwidgetsinstrumentview PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET MantidWidgets PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET CustomDialogs PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET CustomInterfaces PROPERTY FOLDER "MantidQt" )

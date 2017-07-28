@@ -1,10 +1,10 @@
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
-#include "MantidQtAPI/TSVSerialiser.h"
-#include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/InstrumentView/GLActorVisitor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 
 #include <QVBoxLayout>
 #include <QMessageBox>

@@ -1,9 +1,9 @@
 #ifndef INSTRUMENTWIDGETMASKTAB_H_
 #define INSTRUMENTWIDGETMASKTAB_H_
 
-#include <MantidQtMantidWidgets/WidgetDllOption.h>
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h"
-#include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
+#include <MantidQtWidgets/Common/WidgetDllOption.h>
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
+#include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <QFrame>
@@ -51,7 +51,7 @@ class Shape2D;
 *underlying workspace.
 *
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetMaskTab
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetMaskTab
     : public InstrumentWidgetTab {
   Q_OBJECT
 public:

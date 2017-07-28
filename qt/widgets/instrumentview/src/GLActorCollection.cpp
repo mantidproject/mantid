@@ -1,6 +1,6 @@
-#include "MantidQtMantidWidgets/InstrumentView/GLActorCollection.h"
-#include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
-#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
+#include "MantidQtWidgets/InstrumentView/GLActorCollection.h"
+#include "MantidQtWidgets/InstrumentView/GLActorVisitor.h"
+#include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidKernel/Exception.h"
 

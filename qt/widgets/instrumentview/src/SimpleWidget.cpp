@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/InstrumentView/SimpleWidget.h"
-#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtWidgets/InstrumentView/SimpleWidget.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 
 #include <QApplication>
 #include <QPixmap>

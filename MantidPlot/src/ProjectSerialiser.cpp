@@ -15,8 +15,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include "MantidQtAPI/VatesViewerInterface.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/VatesViewerInterface.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 

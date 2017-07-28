@@ -1,12 +1,12 @@
-#include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
-#include "MantidQtMantidWidgets/InstrumentView/GLActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/GLActorCollection.h"
-#include "MantidQtMantidWidgets/InstrumentView/ComponentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/CompAssemblyActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
+#include "MantidQtWidgets/InstrumentView/GLActorVisitor.h"
+#include "MantidQtWidgets/InstrumentView/GLActor.h"
+#include "MantidQtWidgets/InstrumentView/GLActorCollection.h"
+#include "MantidQtWidgets/InstrumentView/ComponentActor.h"
+#include "MantidQtWidgets/InstrumentView/CompAssemblyActor.h"
+#include "MantidQtWidgets/InstrumentView/ObjCompAssemblyActor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/RectangularDetectorActor.h"
+#include "MantidQtWidgets/InstrumentView/StructuredDetectorActor.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

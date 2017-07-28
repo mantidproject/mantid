@@ -4,7 +4,7 @@
 //---------------------------------------
 // Includes
 //--------------------------------------
-#include <MantidQtMantidWidgets/WidgetDllOption.h>
+#include <MantidQtWidgets/Common/WidgetDllOption.h>
 #include <QTreeView>
 #include "InstrumentTreeModel.h"
 #include "MantidGeometry/IComponent.h"
@@ -19,7 +19,7 @@ class InstrumentActor;
 /** The InstrumentTreeWidget is a tree view
 *  of the components of an instrument.
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentTreeWidget
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentTreeWidget
     : public QTreeView {
   Q_OBJECT
 public:

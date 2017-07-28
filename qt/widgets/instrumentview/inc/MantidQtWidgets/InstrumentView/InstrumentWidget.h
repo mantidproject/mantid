@@ -1,6 +1,7 @@
 #ifndef INSTRUMENTWIDGET_H_
 #define INSTRUMENTWIDGET_H_
 
+#include "DllOption.h"
 #include "InstrumentWidgetTypes.h"
 #include "MantidGLWidget.h"
 #include "UnwrappedSurface.h"
@@ -11,10 +12,9 @@
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidQtAPI/GraphOptions.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/GraphOptions.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
-#include <MantidQtMantidWidgets/WidgetDllOption.h>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -63,7 +63,7 @@ http://www.mantidproject.org/MantidPlot:_Instrument_View
 and needs to be updated whenever the instrument view functionality changes.
 
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidget
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget
     : public QWidget,
       public MantidQt::API::WorkspaceObserver,
       public Mantid::API::AlgorithmObserver,

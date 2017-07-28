@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h"
-#include <ui_UCorrectionDialog.h>
+#include "MantidQtWidgets/InstrumentView/UCorrectionDialog.h"
+#include "ui_UCorrectionDialog.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

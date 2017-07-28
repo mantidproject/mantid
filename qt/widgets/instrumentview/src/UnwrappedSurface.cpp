@@ -1,14 +1,14 @@
-#include "MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h"
-#include "MantidQtMantidWidgets/InstrumentView/GLColor.h"
-#include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
-#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
-#include "MantidQtMantidWidgets/InstrumentView/PeakMarker2D.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
+#include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
+#include "MantidQtWidgets/InstrumentView/OpenGLError.h"
+#include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidQtMantidWidgets/InputController.h"
+#include "MantidQtWidgets/Common/InputController.h"
 
 #include <QRgb>
 #include <QSet>

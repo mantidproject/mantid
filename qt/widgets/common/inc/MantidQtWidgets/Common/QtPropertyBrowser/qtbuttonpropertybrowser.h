@@ -100,7 +100,7 @@ class QLabel;
 class QToolButton;
 class QGridLayout;
 
-class QT_QTPROPERTYBROWSER_EXPORT QtButtonPropertyBrowser : public QtAbstractPropertyBrowser
+class EXPORT_OPT_MANTIDQT_COMMON QtButtonPropertyBrowser : public QtAbstractPropertyBrowser
 {
     Q_OBJECT
 public:

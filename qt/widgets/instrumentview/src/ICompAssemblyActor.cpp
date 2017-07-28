@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/InstrumentView/ICompAssemblyActor.h"
+#include "MantidQtWidgets/InstrumentView/ICompAssemblyActor.h"
 #include <cfloat>
 
 #include "MantidKernel/V3D.h"

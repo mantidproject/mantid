@@ -101,7 +101,7 @@ typedef QMap<int, QIcon> QtIconMap;
 class QtVariantPropertyManager;
 class QtVariantPropertyPrivate;
 
-class QT_QTPROPERTYBROWSER_EXPORT QtVariantProperty : public QtProperty
+class EXPORT_OPT_MANTIDQT_COMMON QtVariantProperty : public QtProperty
 {
 public:
   ~QtVariantProperty() override;
@@ -121,7 +121,7 @@ private:
 
 class QtVariantPropertyManagerPrivate;
 
-class QT_QTPROPERTYBROWSER_EXPORT QtVariantPropertyManager : public QtAbstractPropertyManager
+class EXPORT_OPT_MANTIDQT_COMMON QtVariantPropertyManager : public QtAbstractPropertyManager
 {
     Q_OBJECT
 public:
@@ -207,7 +207,7 @@ private:
 
 class QtVariantEditorFactoryPrivate;
 
-class QT_QTPROPERTYBROWSER_EXPORT QtVariantEditorFactory : public QtAbstractEditorFactory<QtVariantPropertyManager>
+class EXPORT_OPT_MANTIDQT_COMMON QtVariantEditorFactory : public QtAbstractEditorFactory<QtVariantPropertyManager>
 {
     Q_OBJECT
 public:

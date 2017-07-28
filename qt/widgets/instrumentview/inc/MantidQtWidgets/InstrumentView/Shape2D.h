@@ -2,7 +2,7 @@
 #define MANTIDPLOT_SHAPE2D_H_
 
 #include "RectF.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include <QColor>
 #include <QPointF>

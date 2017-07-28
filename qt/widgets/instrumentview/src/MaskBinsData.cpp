@@ -1,7 +1,7 @@
-#include "MantidQtMantidWidgets/InstrumentView/MaskBinsData.h"
+#include "MantidQtWidgets/InstrumentView/MaskBinsData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include <vector>
 

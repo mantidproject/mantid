@@ -5,7 +5,7 @@
 #include "qtpropertymanager.h"
 #include <QPushButton>
 
-class QT_QTPROPERTYBROWSER_EXPORT ButtonEditor: public QPushButton
+class EXPORT_OPT_MANTIDQT_COMMON ButtonEditor: public QPushButton
 {
   Q_OBJECT
 public:
@@ -56,7 +56,7 @@ protected:
   }
 };
 
-class QT_QTPROPERTYBROWSER_EXPORT DoubleButtonEditorFactory: public ButtonEditorFactory<ParameterPropertyManager>
+class EXPORT_OPT_MANTIDQT_COMMON DoubleButtonEditorFactory: public ButtonEditorFactory<ParameterPropertyManager>
 {
   Q_OBJECT
 

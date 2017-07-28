@@ -102,7 +102,7 @@ class QGridLayout;
 class QFrame;
 
 
-class QT_QTPROPERTYBROWSER_EXPORT QtGroupBoxPropertyBrowser : public QtAbstractPropertyBrowser
+class EXPORT_OPT_MANTIDQT_COMMON QtGroupBoxPropertyBrowser : public QtAbstractPropertyBrowser
 {
     Q_OBJECT
 public:

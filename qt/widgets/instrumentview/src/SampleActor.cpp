@@ -1,6 +1,6 @@
-#include "MantidQtMantidWidgets/InstrumentView/SampleActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
+#include "MantidQtWidgets/InstrumentView/SampleActor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/IObjComponent.h"

@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTTREEMODEL_H
 #define INSTRUMENTTREEMODEL_H
 
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
 #include <QAbstractItemModel>
 

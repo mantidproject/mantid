@@ -696,8 +696,8 @@ include_directories ( src )
 include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
 
-include_directories ( ../QtPropertyBrowser/src )
 include_directories ( ../qt/widgets/common/inc )
+include_directories ( ../qt/widgets/instrumentview/inc )
 include_directories ( ../qt/widgets/sliceviewer/inc )
 include_directories ( ../qt/widgets/spectrumviewer/inc )
 include_directories ( ../MantidQt/Factory/inc )
@@ -794,8 +794,8 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
             API
-            MantidQtAPI
-            MantidWidgets
+            qtwidgetscommon
+            qtwidgetsinstrumentview
             MantidQtSliceViewer
             MantidQtFactory
             MantidQtSpectrumViewer

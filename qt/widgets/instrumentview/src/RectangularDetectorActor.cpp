@@ -1,7 +1,7 @@
-#include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
+#include "MantidQtWidgets/InstrumentView/RectangularDetectorActor.h"
+#include "MantidQtWidgets/InstrumentView/ObjComponentActor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/GLActorVisitor.h"
 
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"

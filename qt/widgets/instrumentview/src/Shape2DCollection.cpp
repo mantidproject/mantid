@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/InstrumentView/Shape2DCollection.h"
+#include "MantidQtWidgets/InstrumentView/Shape2DCollection.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"

@@ -1,7 +1,7 @@
 //--------------------------------
 // Includes
 //--------------------------------
-#include "MantidQtMantidWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/GLColor.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
 #include <iostream>

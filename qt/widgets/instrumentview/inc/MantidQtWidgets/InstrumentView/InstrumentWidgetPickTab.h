@@ -1,9 +1,9 @@
 #ifndef INSTRUMENTWIDGETPICKTAB_H_
 #define INSTRUMENTWIDGETPICKTAB_H_
 
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h"
-#include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
-#include <MantidQtMantidWidgets/WidgetDllOption.h>
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
+#include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
+#include <MantidQtWidgets/Common/WidgetDllOption.h>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -39,7 +39,7 @@ class DetectorPlotController;
 *  - select and remove peaks
 *
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetPickTab
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetPickTab
     : public InstrumentWidgetTab {
   Q_OBJECT
 public:

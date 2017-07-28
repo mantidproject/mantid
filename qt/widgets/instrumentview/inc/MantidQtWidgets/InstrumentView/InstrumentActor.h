@@ -1,6 +1,7 @@
 #ifndef INSTRUMENTACTOR_H_
 #define INSTRUMENTACTOR_H_
 
+#include "DllOption.h"
 #include "GLActor.h"
 #include "GLActorCollection.h"
 #include "GLActorVisitor.h"
@@ -8,8 +9,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidQtAPI/MantidColorMap.h"
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/MantidColorMap.h"
+#include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "MaskBinsData.h"
 #include "SampleActor.h"
 
@@ -48,7 +49,7 @@ interface for picked ObjComponent and other
 operation for selective rendering of the instrument
 
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentActor : public GLActor {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public GLActor {
   Q_OBJECT
 public:
   /// Constructor
