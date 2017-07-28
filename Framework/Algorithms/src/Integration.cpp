@@ -109,11 +109,12 @@ void Integration::exec() {
   if (isEmpty(maxWsIndex))
     maxWsIndex = numberOfSpectra - 1;
   if (maxWsIndex > numberOfSpectra - 1 || maxWsIndex < minWsIndex) {
-    g_log.warning("EndWorkspaceIndex out of range! Set to max workspace index.");
+    g_log.warning(
+        "EndWorkspaceIndex out of range! Set to max workspace index.");
     maxWsIndex = numberOfSpectra;
   }
-  auto rangeListCheck = [minWsIndex, maxWsIndex](const std::vector<double> &list,
-                                           const char *name) {
+  auto rangeListCheck = [minWsIndex, maxWsIndex](
+      const std::vector<double> &list, const char *name) {
     if (!list.empty() &&
         list.size() != static_cast<size_t>(maxWsIndex - minWsIndex) + 1) {
       std::ostringstream sout;
