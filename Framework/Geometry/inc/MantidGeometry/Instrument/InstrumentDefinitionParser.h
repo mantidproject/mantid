@@ -5,6 +5,7 @@
 #include <vector>
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <MantidGeometry/Objects/ShapeFactory.h>
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
@@ -241,6 +242,19 @@ private:
   /// return 0 if the attribute doesn't exist. This is to follow the
   /// behavior of atof which always returns 0 if there is a problem.
   double attrToDouble(const Poco::XML::Element *pElem, const std::string &name);
+
+  void getTypeAndComponentPointers(
+      const Poco::XML::Element *pRootElem,
+      std::vector<Poco::XML::Element *> &typeElems,
+      std::vector<Poco::XML::Element *> &compElems) const;
+
+  void throwIfTypeNameNotUnique(const std::string &filename,
+                                const std::string &typeName) const;
+
+  void
+  createShapeIfTypeIsNotAnAssembly(Mantid::Geometry::ShapeFactory &shapeCreator,
+                                   size_t iType, Poco::XML::Element *pTypeElem,
+                                   const std::string &typeName);
 
 public: // for testing
   /// return absolute position of point which is set relative to the

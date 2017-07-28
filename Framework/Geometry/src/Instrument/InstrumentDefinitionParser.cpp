@@ -191,6 +191,27 @@ Poco::AutoPtr<Poco::XML::Document> InstrumentDefinitionParser::getDocument() {
   return m_pDoc;
 }
 
+/**
+ * Type names in the IDF must be unique. Throw an exception if this one is not.
+ *
+ * @param filename :: Filename of the IDF, for the exception message
+ * @param typeName :: Name of the type being checked
+ */
+void InstrumentDefinitionParser::throwIfTypeNameNotUnique(
+    const std::string &filename, const std::string &typeName) const {
+  if (getTypeElement.find(typeName) != getTypeElement.end()) {
+    g_log.error(std::string("XML file: ")
+                    .append(filename)
+                    .append("contains more than one type element named ")
+                    .append(typeName));
+    throw Kernel::Exception::InstrumentDefinitionError(
+        std::string(
+            "XML instrument file contains more than one type element named ")
+            .append(typeName)
+            .append(filename));
+  }
+}
+
 //----------------------------------------------------------------------------------------------
 /** Fully parse the IDF XML contents and returns the instrument thus created
  *
@@ -213,24 +234,13 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
 
   setValidityRange(pRootElem);
   readDefaults(pRootElem->getChildElement("defaults"));
-  // create maps: isTypeAssembly and mapTypeNameToShape
   Geometry::ShapeFactory shapeCreator;
 
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
-  // Get all the type and component element pointers.
   std::vector<Element *> typeElems;
   std::vector<Element *> compElems;
-  for (Node *pNode = pRootElem->firstChild(); pNode != nullptr;
-       pNode = pNode->nextSibling()) {
-    auto pElem = dynamic_cast<Element *>(pNode);
-    if (pElem) {
-      if (pElem->tagName() == "type")
-        typeElems.push_back(pElem);
-      else if (pElem->tagName() == "component")
-        compElems.push_back(pElem);
-    }
-  }
+  getTypeAndComponentPointers(pRootElem, typeElems, compElems);
 
   if (typeElems.empty()) {
     g_log.error("XML file: " + filename + "contains no type elements.");
@@ -240,61 +250,31 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
 
   // Collect some information about types for later use including:
   //  * populate directory getTypeElement
-  //  * populate directory isTypeAssemply
+  //  * populate directory isTypeAssembly
   //  * create shapes for all none assembly components and store in
-  //  mapTyepNameToShape
+  //  mapTypeNameToShape
   //  * If 'Outline' attribute set for assembly add attribute object_created=no
-  //  to tell
-  //  create shape for such assembly also later
-  const size_t numberTypes = typeElems.size();
-  for (size_t iType = 0; iType < numberTypes; ++iType) {
+  //  to indicate the shape for this assembly should be created later.
+  const size_t numberOfTypes = typeElems.size();
+  for (size_t iType = 0; iType < numberOfTypes; ++iType) {
     Element *pTypeElem = typeElems[iType];
     std::string typeName = pTypeElem->getAttribute("name");
 
-    // check if contain <combine-components-into-one-shape>. If this then such
-    // types are adjusted after this loop has completed
+    // If type contains <combine-components-into-one-shape> then make adjustment
+    // after this loop has completed
     Poco::AutoPtr<NodeList> pNL_type_combine_into_one_shape =
         pTypeElem->getElementsByTagName("combine-components-into-one-shape");
     if (pNL_type_combine_into_one_shape->length() > 0) {
       continue;
     }
 
-    // Each type in the IDF must be uniquely named, hence return error if type
-    // has already been defined
-    if (getTypeElement.find(typeName) != getTypeElement.end()) {
-      g_log.error(std::string("XML file: ")
-                      .append(filename)
-                      .append("contains more than one type element named ")
-                      .append(typeName));
-      throw Kernel::Exception::InstrumentDefinitionError(
-          std::string(
-              "XML instrument file contains more than one type element named ")
-              .append(typeName)
-              .append(filename));
-    }
+    throwIfTypeNameNotUnique(filename, typeName);
     getTypeElement[typeName] = pTypeElem;
-
-    // identify for now a type to be an assemble by it containing elements
-    // with tag name 'component'
-    Poco::AutoPtr<NodeList> pNL_local =
-        pTypeElem->getElementsByTagName("component");
-    if (pNL_local->length() == 0) {
-      isTypeAssembly[typeName] = false;
-
-      // for now try to create a geometry shape associated with every type
-      // that does not contain any component elements
-      mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-      mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
-    } else {
-      isTypeAssembly[typeName] = true;
-      if (pTypeElem->hasAttribute("outline")) {
-        pTypeElem->setAttribute("object_created", "no");
-      }
-    }
+    createShapeIfTypeIsNotAnAssembly(shapeCreator, iType, pTypeElem, typeName);
   }
 
   // Deal with adjusting types containing <combine-components-into-one-shape>
-  for (size_t iType = 0; iType < numberTypes; ++iType) {
+  for (size_t iType = 0; iType < numberOfTypes; ++iType) {
     Element *pTypeElem = typeElems[iType];
     std::string typeName = pTypeElem->getAttribute("name");
 
@@ -338,16 +318,15 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   m_hasParameterElement.reserve(numParameter);
 
   // It turns out that looping over all nodes and checking if their nodeName is
-  // equal
-  // to "parameter" is much quicker than looping over the pNL_parameter
+  // equal to "parameter" is much quicker than looping over the pNL_parameter
   // NodeList.
   Poco::XML::NodeIterator it(pRootElem, Poco::XML::NodeFilter::SHOW_ELEMENT);
   Poco::XML::Node *pNode = it.nextNode();
   while (pNode) {
     if (pNode->nodeName() == "parameter") {
-      Element *pParameterElem = static_cast<Element *>(pNode);
+      auto pParameterElem = dynamic_cast<Element *>(pNode);
       m_hasParameterElement.push_back(
-          static_cast<Element *>(pParameterElem->parentNode()));
+          dynamic_cast<Element *>(pParameterElem->parentNode()));
     }
     pNode = it.nextNode();
   }
@@ -357,9 +336,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   // See if any parameters set at instrument level
   setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
 
-  //
   // do analysis for each top level component element
-  //
   if (prog)
     prog->resetNumSteps(compElems.size(), 0.0, 1.0);
 
@@ -371,8 +348,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
       IdList idList; // structure to possibly be populated with detector IDs
 
       // Get all <location> and <locations> elements contained in component
-      // element
-      // just for the purpose of a IDF syntax check
+      // element just for the purpose of a IDF syntax check
       Poco::AutoPtr<NodeList> pNL_location =
           pElem->getElementsByTagName("location");
       Poco::AutoPtr<NodeList> pNL_locations =
@@ -392,14 +368,13 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
       }
 
       // Loop through all <location> and <locations> elements of this component
-      // by looping
-      // all the child nodes and then see if any of these nodes are either
-      // <location> or
-      // <locations> elements. Done this way order these locations are processed
-      // is the
-      // order they are listed in the IDF. The latter needed to get detector IDs
-      // assigned
-      // as expected
+      // by looping all the child nodes and then see if any of these nodes are
+      // either
+      // <location> or <locations> elements. Done this way order these locations
+      // are processed
+      // is the order they are listed in the IDF. The latter needed to get
+      // detector IDs
+      // assigned as expected
       for (Node *pNode = pElem->firstChild(); pNode != nullptr;
            pNode = pNode->nextSibling()) {
         auto pChildElem = dynamic_cast<Element *>(pNode);
@@ -470,6 +445,57 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
 
   // And give back what we created
   return m_instrument;
+}
+
+/**
+ * If type does not contain a component element then it is not an assembly
+ * and a shape can be created
+ *
+ * @param shapeCreator :: Factory for creating a shape
+ * @param iType :: The i-th type
+ * @param pTypeElem :: Pointer to the type element
+ * @param typeName :: Name of the type
+ */
+void InstrumentDefinitionParser::createShapeIfTypeIsNotAnAssembly(
+    ShapeFactory &shapeCreator, size_t iType, Element *pTypeElem,
+    const std::string &typeName) {
+  Poco::AutoPtr<NodeList> pNL_local =
+      pTypeElem->getElementsByTagName("component");
+  if (pNL_local->length() == 0) {
+    isTypeAssembly[typeName] = false;
+
+    // for now try to create a geometry shape associated with every type
+    // that does not contain any component elements
+    mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
+    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+  } else {
+    isTypeAssembly[typeName] = true;
+    if (pTypeElem->hasAttribute("outline")) {
+      pTypeElem->setAttribute("object_created", "no");
+    }
+  }
+}
+
+/**
+ * Create vectors of pointers to "types" and "components"
+ *
+ * @param pRootElem :: Pointer to the root element
+ * @param typeElems :: Reference to type vector to populate
+ * @param compElems :: Reference to component vector to populate
+ */
+void InstrumentDefinitionParser::getTypeAndComponentPointers(
+    const Element *pRootElem, std::vector<Element *> &typeElems,
+    std::vector<Element *> &compElems) const {
+  for (auto pNode = pRootElem->firstChild(); pNode != nullptr;
+       pNode = pNode->nextSibling()) {
+    auto pElem = dynamic_cast<Element *>(pNode);
+    if (pElem) {
+      if (pElem->tagName() == "type")
+        typeElems.push_back(pElem);
+      else if (pElem->tagName() == "component")
+        compElems.push_back(pElem);
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------------------------------------------------
