@@ -19,7 +19,7 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
- private slots:
+private slots:
   void modelChanged(const QString &text);
   void singleFit();
   void plotFit(QString wsName = QString(), int specNo = -1);

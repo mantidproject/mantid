@@ -65,8 +65,8 @@ void MSDFit::setup() {
           SLOT(plotFit()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.modelInput, SIGNAL(currentIndexChanged(const QString &)), this, 
-          SLOT(modelChanged(const QString &)));
+  connect(m_uiForm.modelInput, SIGNAL(currentIndexChanged(const QString &)),
+          this, SLOT(modelChanged(const QString &)));
 }
 
 void MSDFit::run() {
@@ -77,8 +77,8 @@ void MSDFit::run() {
   QString model = m_uiForm.modelInput->currentText();
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
   m_pythonExportWsName =
-      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_" 
-    + model.toStdString() + "_msd";
+      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_" +
+      model.toStdString() + "_msd";
 
   QString wsName = m_uiForm.dsSampleInput->getCurrentDataName();
   double xStart = m_dblManager->value(m_properties["Start"]);
@@ -105,11 +105,10 @@ void MSDFit::run() {
 
 void MSDFit::modelChanged(const QString &model) {
   QStringList suffixes = QStringList();
-  
+
   if (model.compare("Gauss") == 0) {
     suffixes << "_eq2.nxs";
-  }
-  else {
+  } else {
     suffixes << "_eq.nxs";
   }
 
