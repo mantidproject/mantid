@@ -250,6 +250,7 @@ void ConjoinWorkspaces::setYUnitAndLabel(API::MatrixWorkspace &ws) const {
   const std::string yLabel = getPropertyValue("YAXisLabel");
   const std::string yUnit = getPropertyValue("YAxisUnit");
 
+  // Unit must be moved before label, as changing the unit resets the label
   if (!yUnit.empty())
     ws.setYUnit(std::move(yUnit));
 
