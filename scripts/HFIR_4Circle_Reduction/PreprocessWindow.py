@@ -217,8 +217,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         # set up the experiment number if it is different
         if exp_number != self._reductionController.get_experiment():
             self._reductionController.set_exp_number(exp_number)
-            self._myControl.set_default_detector_sample_distance()
-            self._myControl.set_default_pixel_size()
+            self._reductionController.set_default_detector_sample_distance()
+            self._reductionController.set_default_pixel_size()
 
         # set up the calibration
         # wave length
