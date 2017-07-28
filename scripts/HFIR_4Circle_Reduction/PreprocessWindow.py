@@ -1,18 +1,19 @@
-import os
-from PyQt4 import QtGui, QtCore
-import ui_preprocess_window
-import reduce4circleControl
 import guiutility as gui_util
 import NTableWidget
+import os
+from PyQt4 import QtCore
+from PyQt4 import QtGui
+import reduce4circleControl
+import ui_preprocess_window
 
 
 class ScanPreProcessWindow(QtGui.QMainWindow):
-    """
-    Main window class to pre-process scans
+    """Main window class to pre-process scans
+
     """
     def __init__(self, parent):
-        """
-        initialization
+        """initialization
+
         :param parent:
         """
         super(ScanPreProcessWindow, self).__init__(parent)
@@ -50,8 +51,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         return
 
     def do_browse_output_dir(self):
-        """
-        browse the output directory
+        """browse the output directory
+
         :return:
         """
         # get scan number or numbers
@@ -78,8 +79,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         return
 
     def do_change_calibration_settings(self):
-        """
-        enable the settings to be modifiable
+        """enable the settings to be modifiable
+
         :return:
         """
         self.enable_calibration_settings(True)
@@ -87,8 +88,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         return
 
     def do_fix_calibration_settings(self):
-        """
-        disable the settings to be modifiable
+        """disable the settings to be modifiable
+
         :return:
         """
         self.enable_calibration_settings(False)
@@ -100,7 +101,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         :return:
         """
-        print '[INFO] Closing {0}'.format(self.objectName())
+        print ('[INFO] Closing {0}'.format(self.objectName()))
 
         if self._myMergePeaksThread is not None:
             self._myMergePeaksThread.terminate()
@@ -108,8 +109,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         return
 
     def do_start_pre_process(self):
-        """
-        start the pre-precessing scans
+        """start the pre-precessing scans
+
         :return:
         """
         import multi_threads_helpers
@@ -156,8 +157,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         return
 
     def enable_calibration_settings(self, to_enable):
-        """
-        enable or disable the calibration settings
+        """enable or disable the calibration settings
+
         :param to_enable:
         :return:
         """
@@ -169,8 +170,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         return
 
     def get_scan_numbers(self):
-        """
-        parse the scan numbers from the scan numbers line editor
+        """parse the scan numbers from the scan numbers line editor
+
         :return: a list of scan numbers. if no scan is given, an empty string is returned
         """
         # scan list
@@ -209,8 +210,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         return scan_list
 
     def set_calibration_to_reduction_controller(self, exp_number):
-        """
-        set user-specified instrument calibrations to the my controller
+        """set user-specified instrument calibrations to the my controller
+
         :param exp_number:
         :return:
         """
@@ -305,8 +306,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         return
 
     def setup(self, controller):
-        """
-        setup the 4-circle reduction controller
+        """setup the 4-circle reduction controller
+
         :param controller:
         :return:
         """
@@ -331,8 +332,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
 
 class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
-    """
-    Extended table widget for scans to process
+    """Extended table widget for scans to process
+
     """
     TableSetup = [('Scan', 'int'),
                   ('Status', 'str'),
@@ -340,8 +341,8 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
                   ('Note', 'str')]
 
     def __init__(self, parent):
-        """
-        Initialization
+        """Initialization
+
         :param parent::
         :return:
         """
@@ -359,8 +360,8 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         return
 
     def setup(self):
-        """
-        Init setup
+        """Init setup
+
         :return:
         """
         self.init_setup(self.Table_Setup)
