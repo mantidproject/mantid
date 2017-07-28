@@ -1,11 +1,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLFROMSTDSTRINGMAP_H
 #define MANTID_CUSTOMINTERFACES_REFLFROMSTDSTRINGMAP_H
+#include "MantidQtCustomInterfaces/DllConfig.h"
+#include <QString>
 #include <algorithm>
 #include <iterator>
 #include <map>
 
 /** 
-This file contains some functions used to convert data structures using std::string
+This file contains some functions used to convert map data structures using std::string
 to those using QString.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -31,7 +33,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace MantidQt {
 namespace CustomInterfaces {
-std::map<QString, QString>
+std::map<QString, QString> MANTIDQT_CUSTOMINTERFACES_DLL 
 fromStdStringMap(std::map<std::string, std::string> const &inMap) {
   std::map<QString, QString> out;
   std::transform(inMap.begin(), inMap.end(), std::inserter(out, out.begin()),
@@ -43,7 +45,7 @@ fromStdStringMap(std::map<std::string, std::string> const &inMap) {
   return out;
 }
 
-std::vector<std::map<QString, QString>> fromStdStringVectorMap(
+std::vector<std::map<QString, QString>> MANTIDQT_CUSTOMINTERFACES_DLL fromStdStringVectorMap(
     std::vector<std::map<std::string, std::string>> const &inVectorMap) {
   std::vector<std::map<QString, QString>> out;
   std::transform(

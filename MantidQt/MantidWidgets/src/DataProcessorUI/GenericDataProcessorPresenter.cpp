@@ -1401,7 +1401,7 @@ void GenericDataProcessorPresenter::setInstrumentList(
 void GenericDataProcessorPresenter::plotRow() {
 
   // Set of workspaces to plot
-  std::set<QString> workspaces;
+  QSet<QString> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 
@@ -1421,7 +1421,7 @@ void GenericDataProcessorPresenter::plotRow() {
     }
   }
 
-  if (!notFound.empty())
+  if (!notFound.isEmpty())
     m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
@@ -1442,7 +1442,7 @@ void GenericDataProcessorPresenter::plotGroup() {
     throw std::runtime_error("Can't plot group.");
 
   // Set of workspaces to plot
-  std::set<QString> workspaces;
+  QSet<QString> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 
@@ -1477,8 +1477,8 @@ Plot a set of workspaces
 * @param workspaces : [input] The list of workspaces as a set
 */
 void GenericDataProcessorPresenter::plotWorkspaces(
-    const std::set<QString> &workspaces) {
-  if (!workspaces.empty()) {
+    const QSet<QString> &workspaces) {
+  if (!workspaces.isEmpty()) {
     QString pythonSrc;
     pythonSrc += "base_graph = None\n";
     for (auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)

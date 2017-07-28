@@ -177,7 +177,7 @@ protected:
   // Plotting
   virtual void plotRow();
   virtual void plotGroup();
-  void plotWorkspaces(const std::set<QString> &workspaces);
+  void plotWorkspaces(const QSet<QString> &workspaces);
 
 protected slots:
   void reductionError(QString ex);

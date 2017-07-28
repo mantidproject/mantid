@@ -312,7 +312,7 @@ void ReflRunsTabPresenter::transfer() {
   }
 
   m_tablePresenters.at(m_view->getSelectedGroup())
-      ->transfer(fromStdStringVectorMap(results.getTransferRuns()));
+      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(results.getTransferRuns()));
 }
 
 /**

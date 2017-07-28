@@ -71,8 +71,8 @@ private:
                       const QString &prefix, const QString &loader,
                       bool &runFound);
   // Get the name of a post-processed workspace
-  std::string getPostprocessedWorkspaceName(const GroupData &groupData,
-                                            const std::string &prefix,
+  QString getPostprocessedWorkspaceName(const GroupData &groupData,
+                                            const QString &prefix,
                                             size_t index);
   // Loads a group of runs
   bool loadGroup(const GroupData &group);
