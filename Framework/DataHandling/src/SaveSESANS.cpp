@@ -88,7 +88,7 @@ void SaveSESANS::exec(){
 	//outfile.precision(5);
 	//outfile << std::fixed;
 
-	for (int i = 0; i < spinEchoLength.size(); ++i) {
+	for (size_t i = 0; i < spinEchoLength.size(); ++i) {
 		outfile << spinEchoLength[i] << " ";
 		outfile << depolarisation[i] << " ";
 		outfile << error[i] << " ";
@@ -177,7 +177,7 @@ Mantid::MantidVec SaveSESANS::calculateError(const HistogramData::HistogramE & e
 	Mantid::MantidVec error;
 
 	// Error is calculated as e / (y * wavelength^2)
-	for (int i = 0; i < eValues.size(); i++) {
+	for (size_t i = 0; i < eValues.size(); i++) {
 		error.push_back(eValues[i] / (yValues[i] * wavelength[i] * wavelength[i]));
 	}
 	return error;

@@ -296,7 +296,7 @@ API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
 	auto &dataY = newWorkspace->mutableY(0);
 	auto &dataE = newWorkspace->mutableE(0);
 
-	for (int i = 0; i < histogramLength; i++) {
+	for (size_t i = 0; i < histogramLength; i++) {
 		dataY[i] = yValues[i];
 		dataE[i] = eValues[i];
 	}
@@ -366,7 +366,7 @@ Column LoadSESANS::calculateYValues(const Column &depolarisation, const Column &
 Column LoadSESANS::calculateEValues(const Column & error, const Column & yValues, const Column & wavelength) const {
 	Column eValues;
 
-	for (int i = 0; i < error.size(); i++) {
+	for (size_t i = 0; i < error.size(); i++) {
 		eValues.push_back(error[i] * yValues[i] * wavelength[i] * wavelength[i]);
 	}
 	return eValues;
