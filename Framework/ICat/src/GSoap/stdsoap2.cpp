@@ -3,6 +3,17 @@
 #pragma clang diagnostic ignored "-Wcast-align"
 #endif
 
+#include "MantidKernel/WarningSuppressions.h"
+// ignore warnings in gSOAP
+// Long-term solution is to use gSOAP as an external library or external
+// project. see issue #19433
+// clang-format off
+GCC_DIAG_OFF(deprecated-declarations)
+CGG_DIAG_OFF(format-overflow=)
+CGG_DIAG_OFF(format-overflow=)
+GCC_DIAG_OFF(implicit-fallthrough=)
+// clang-format on
+
 /*
   stdsoap2.c[pp] 2.8.15
 
@@ -17007,6 +17018,13 @@ soap::~soap() {
 #endif
 
 /******************************************************************************/
+
+// clang-format off
+GCC_DIAG_ON(deprecated-declarations)
+CGG_DIAG_ON(format-overflow=)
+CGG_DIAG_ON(format-overflow=)
+GCC_DIAG_ON(implicit-fallthrough=)
+// clang-format on
 
 #ifdef __clang__
 #pragma clang diagnostic pop
