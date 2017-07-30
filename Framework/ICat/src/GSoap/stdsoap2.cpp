@@ -9,9 +9,9 @@
 // project. see issue #19433
 // clang-format off
 GCC_DIAG_OFF(deprecated-declarations)
-CGG_DIAG_OFF(format-overflow=)
-CGG_DIAG_OFF(format-truncation=)
-GCC_DIAG_OFF(implicit-fallthrough=)
+CGG_DIAG_OFF(format-overflow)
+CGG_DIAG_OFF(format-truncation)
+GCC_DIAG_OFF(implicit-fallthrough)
 // clang-format on
 
 /*
@@ -17021,9 +17021,9 @@ soap::~soap() {
 
 // clang-format off
 GCC_DIAG_ON(deprecated-declarations)
-CGG_DIAG_ON(format-overflow=)
-CGG_DIAG_ON(format-truncation=)
-GCC_DIAG_ON(implicit-fallthrough=)
+CGG_DIAG_ON(format-overflow)
+CGG_DIAG_ON(format-truncation)
+GCC_DIAG_ON(implicit-fallthrough)
 // clang-format on
 
 #ifdef __clang__
