@@ -36,11 +36,10 @@ from StretchedExpFTHelper import surrogate, function1Dcommon
 class PrimStretchedExpFT(IFunction1D):
     # pylint: disable=super-on-old-class
     def __init__(self):
-        """declare some constants"""
-        super(PrimStretchedExpFT, self).__init__()
+        super(self.__class__, self).__init__()
         self._parmList = list()
 
-    def category(function):
+    def category(self):
         return 'QuasiElastic'
 
     @surrogate
@@ -75,6 +74,8 @@ class PrimStretchedExpFT(IFunction1D):
         """
         rf = 16
         parms, de, energies, fourier = function1Dcommon(self, xvals, rf=rf, **optparms)
+        if parms is None:
+            return fourier # return zeros if parameters not valid
         denergies = (energies[-1] - energies[0]) / (len(energies)-1)
         # Find bin boundaries
         boundaries = (xvals[1:]+xvals[:-1])/2  # internal bin boundaries

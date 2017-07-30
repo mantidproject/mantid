@@ -142,9 +142,9 @@ def function1Dcommon(function, xvals, refine_factor=16, **optparms):
     """
     planck_constant = constants.Planck / constants.e * 1E15  # meV*psec
     p = function.validateParams()
-    if not p:
+    if p is None:
         # return zeros if parameters not valid
-        return np.zeros(len(xvals), dtype=float)
+        return p, None, None, np.zeros(len(xvals), dtype=float)
     # override with optparms (used for the numerical derivative)
     if optparms:
         for name in optparms.keys():
@@ -170,7 +170,7 @@ def function1Dcommon(function, xvals, refine_factor=16, **optparms):
     fourier *= 2*p['Tau']*gamma(1./p['Beta']) / (p['Beta']*planck_constant)
     # symmetrize to negative energies
     fourier = np.concatenate([fourier[nt:], fourier[:nt]])  # increasing ordering
-    # Find corresponding energies
+    # Find energy values corresponding to the fourier values
     energies = planck_constant * fftfreq(2 * nt, d=dt)  # standard ordering
     energies = np.concatenate([energies[nt:], energies[:nt]])  # increasing ordering
     return p, de, energies, fourier

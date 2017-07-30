@@ -28,20 +28,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
-import scipy.constants
 
 from mantid.api import IFunction1D, FunctionFactory
 from StretchedExpFTHelper import surrogate, function1Dcommon
 
 
 class StretchedExpFT(IFunction1D):
-    # Class variables
-    _planck_constant = scipy.constants.Planck/scipy.constants.e*1E15  # meV*psec
 
     # pylint: disable=super-on-old-class
     def __init__(self):
-        """declare some constants"""
-        super(StretchedExpFT, self).__init__()
+        super(self.__class__, self).__init__()
         self._parmList = list()
 
     def category(self):
@@ -69,6 +65,8 @@ class StretchedExpFT(IFunction1D):
                 \int_{-infty}^{infty} dE F(E) = 1
         """
         parms, de, energies, fourier = function1Dcommon(self, xvals, **optparms)
+        if parms is None:
+            return fourier  #return zeros if parameters not valid
         transform = parms['Height'] * np.interp(xvals-parms['Centre'], energies, fourier)
         return transform
 
