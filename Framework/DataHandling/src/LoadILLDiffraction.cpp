@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
