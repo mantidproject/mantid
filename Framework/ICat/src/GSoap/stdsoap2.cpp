@@ -8,10 +8,12 @@
 // Long-term solution is to use gSOAP as an external library or external
 // project. see issue #19433
 // clang-format off
+#if defined(__GNUC__) && __GNUC__ >= 7
 GCC_DIAG_OFF(deprecated-declarations)
 GCC_DIAG_OFF(format-overflow)
 GCC_DIAG_OFF(format-truncation)
 GCC_DIAG_OFF(implicit-fallthrough)
+#endif  
 // clang-format on
 
 /*
@@ -17020,10 +17022,12 @@ soap::~soap() {
 /******************************************************************************/
 
 // clang-format off
+#if defined(__GNUC__) && __GNUC__ >= 7
 GCC_DIAG_ON(deprecated-declarations)
 GCC_DIAG_ON(format-overflow)
 GCC_DIAG_ON(format-truncation)
 GCC_DIAG_ON(implicit-fallthrough)
+#endif
 // clang-format on
 
 #ifdef __clang__
