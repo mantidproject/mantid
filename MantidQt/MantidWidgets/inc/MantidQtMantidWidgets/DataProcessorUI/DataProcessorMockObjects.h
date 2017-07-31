@@ -122,7 +122,7 @@ public:
   ~MockDataProcessorPresenter() override {}
 
   MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
-  MOCK_METHOD1(setModel, void(QString name));
+  MOCK_METHOD1(setModel, void(QString const& name));
   MOCK_METHOD1(accept, void(DataProcessorMainPresenter *));
   MOCK_CONST_METHOD0(selectedParents, std::set<int>());
   MOCK_CONST_METHOD0(selectedChildren, std::map<int, std::set<int>>());

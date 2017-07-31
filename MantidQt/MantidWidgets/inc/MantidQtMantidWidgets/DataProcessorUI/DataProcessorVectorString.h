@@ -25,13 +25,24 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-#include <QStringList>
 #include <QString>
+#include <QStringList>
 #include <sstream>
 #include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace {
+template <typename A>
+std::vector<std::string> toStdStringVector(std::vector<QString, A> const &inVec) {
+  std::vector<std::string> outVec;
+  std::transform(inVec.begin(), inVec.end(),
+                 std::back_inserter(outVec), [](auto const &in) -> auto {
+                   return in.toStdString();
+                 });
+  return outVec;
+}
+}
 
 /**
 Create string of comma separated list of values from a vector
@@ -48,6 +59,11 @@ QString vectorString(const std::vector<T, A> &param_vec) {
     separator = ", ";
   }
   return QString::fromStdString(vector_string.str());
+}
+
+template <typename A>
+QString vectorString(const std::vector<QString, A> &param_vec) {
+  return vectorString(toStdStringVector(param_vec));
 }
 
 QString vectorString(const QStringList &param);

@@ -373,7 +373,7 @@ public:
     DataProcessorWorkspaceCommand command(&mockPresenter, "workspace");
 
     // The presenter should set the name of the ws
-    EXPECT_CALL(mockPresenter, setModel("workspace")).Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, setModel(QString("workspace"))).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations

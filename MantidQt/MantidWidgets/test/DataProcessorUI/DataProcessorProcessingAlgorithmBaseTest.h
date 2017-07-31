@@ -26,11 +26,11 @@ public:
     // Test MatrixWorkspace properties
     DataProcessorProcessingAlgorithmBase alg("MultiplyRange");
     TS_ASSERT_EQUALS(alg.getInputWsProperties(),
-                     std::vector<std::string>{"InputWorkspace"});
+                     std::vector<QString>{"InputWorkspace"});
     TS_ASSERT_EQUALS(alg.getOutputWsProperties(),
-                     std::vector<std::string>{"OutputWorkspace"});
+                     std::vector<QString>{"OutputWorkspace"});
     TS_ASSERT_EQUALS(alg.getInputStrListProperties(),
-                     std::vector<std::string>());
+                     std::vector<QString>());
 
     // Add more algorithms to test if needed
   }
@@ -40,7 +40,7 @@ public:
     DataProcessorProcessingAlgorithmBase alg("CompareWorkspaces");
     TS_ASSERT_EQUALS(alg.getInputWsProperties().size(), 2);
     TS_ASSERT_EQUALS(alg.getInputStrListProperties(),
-                     std::vector<std::string>());
+                     std::vector<QString>());
 
     // Add more algorithms to test if needed
   }
@@ -48,10 +48,10 @@ public:
   void test_StrList_properties() {
     DataProcessorProcessingAlgorithmBase alg("Stitch1DMany");
     TS_ASSERT_EQUALS(alg.getInputStrListProperties(),
-                     std::vector<std::string>{"InputWorkspaces"});
+                     std::vector<QString>{"InputWorkspaces"});
     TS_ASSERT_EQUALS(alg.getOutputWsProperties(),
-                     std::vector<std::string>{"OutputWorkspace"});
-    TS_ASSERT_EQUALS(alg.getInputWsProperties(), std::vector<std::string>());
+                     std::vector<QString>{"OutputWorkspace"});
+    TS_ASSERT_EQUALS(alg.getInputWsProperties(), std::vector<QString>());
   }
 };
 
