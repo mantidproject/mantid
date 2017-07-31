@@ -33,8 +33,7 @@ public:
   // Prompt
   MOCK_METHOD0(requestNotebookPath, QString());
   MOCK_METHOD3(askUserString,
-               QString(const QString &, const QString &,
-                           const QString &));
+               QString(const QString &, const QString &, const QString &));
   MOCK_METHOD2(askUserYesNo, bool(QString, QString));
   MOCK_METHOD2(giveUserWarning, void(QString, QString));
   MOCK_METHOD2(giveUserCritical, void(QString, QString));
@@ -90,8 +89,7 @@ public:
 
   // Prompt methods
   MOCK_METHOD3(askUserString,
-               QString(const QString &, const QString &,
-                           const QString &));
+               QString(const QString &, const QString &, const QString &));
   MOCK_METHOD2(askUserYesNo, bool(QString, QString));
   MOCK_METHOD2(giveUserWarning, void(QString, QString));
   MOCK_METHOD2(giveUserCritical, void(QString, QString));
@@ -149,15 +147,11 @@ private:
     publishCommandsMocked();
     return commands;
   };
-  std::set<QString> getTableList() const {
-    return std::set<QString>();
-  };
+  std::set<QString> getTableList() const { return std::set<QString>(); };
   // Calls we don't care about
   void setOptions(const std::map<QString, QVariant> &) override {}
-  void
-  transfer(const std::vector<std::map<QString, QString>> &) override {}
-  void setInstrumentList(const QStringList &,
-                         const QString &) override {}
+  void transfer(const std::vector<std::map<QString, QString>> &) override {}
+  void setInstrumentList(const QStringList &, const QString &) override {}
   // void accept(WorkspaceReceiver *) {};
   void acceptViews(DataProcessorView *, ProgressableView *) override {}
 

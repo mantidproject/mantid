@@ -312,13 +312,14 @@ QString DataProcessorTwoLevelTreeManager::copySelected() {
 }
 
 /// Converts a string denoting a denary integer to it
-int parseDenaryInteger(QString const& in) {
+int parseDenaryInteger(QString const &in) {
   static auto ok = false;
   auto out = in.toInt(&ok, 10);
-  if(ok)
+  if (ok)
     return out;
   else
-    throw std::runtime_error("Failed to parse '" + in.toStdString() + "' as a denary integer.");
+    throw std::runtime_error("Failed to parse '" + in.toStdString() +
+                             "' as a denary integer.");
 }
 
 /** Paste the contents of the clipboard into the currently selected rows, or
@@ -343,7 +344,7 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const QString &text) {
     // Add as many new rows as required
     for (auto i = 0; i < lines.size(); ++i) {
       auto values = lines[i].split("\t");
-      
+
       auto groupId = parseDenaryInteger(values.front());
       int rowId = numRowsInGroup(groupId);
       if (!m_model->insertRow(rowId, m_model->index(groupId, 0)))
