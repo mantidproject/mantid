@@ -22,6 +22,7 @@
 #include <limits>
 #include <regex>
 
+
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
@@ -1154,9 +1155,9 @@ void CrystalFieldFunction::updateMultiSite() const {
 
 /// Update the target function in a single site - single spectrum case.
 void CrystalFieldFunction::updateSingleSiteSingleSpectrum() const {
-  auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
-  auto peakShape = getAttribute("PeakShape").asString();
-  bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
+  auto fwhmVariation = m_control.getAttribute("FWHMVariation").asDouble();
+  auto peakShape = m_control.getAttribute("PeakShape").asString();
+  bool fixAllPeaks = m_control.getAttribute("FixAllPeaks").asBool();
   auto xVec = m_control.getAttribute("FWHMX").asVector();
   auto yVec = m_control.getAttribute("FWHMX").asVector();
   auto &FWHMs = m_control.FWHMs();

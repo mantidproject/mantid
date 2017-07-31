@@ -8,11 +8,16 @@
 #include "MantidAPI/FunctionFactory.h"
 //#include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
+#include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
+using namespace WorkspaceCreationHelper;
 
 class CrystalFieldFunctionTest : public CxxTest::TestSuite {
 public:
@@ -426,29 +431,49 @@ public:
 
   }
 
-  void test_phys_props() {
-    Mantid::CurveFitting::Functions::CrystalFieldFunction cf;
+  void test_fit_ss() {
+    std::string fun = "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,"
+                      "Temperatures=44,FWHMs=2.3,ToleranceIntensity=0.2,B20="
+                      "0.37,B22=3.9,B40=-0.03,B42=-0.1,B44=-0.12,pk0.FWHM=2.2,"
+                      "pk1.FWHM=1.8,ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,"
+                      "BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)";
+    std::string fun1 = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+                      "Temperature=44,FWHM=2.3,ToleranceIntensity=0.2,B20="
+                      "0.37,B22=3.9,B40=-0.03,B42=-0.1,B44=-0.12,f0.FWHM=2.2,"
+                      "f1.FWHM=1.8,ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,"
+                      "BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)";
 
-    cf.setAttributeValue("Ions", "Ce");
-    cf.setAttributeValue("Symmetries", "C2v");
-    cf.setAttributeValue("Temperatures", std::vector<double>({44}));
-    cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-    cf.setAttributeValue("PhysicalProperties", "chi, cv");
-    bool isMultiSpectrum;
-    std::string o_PhysicalProperties;
-    std::vector<std::string> parameterNames;
-    std::vector<std::string> attributeNames;
-    cf.checkSourceFunction();
-    isMultiSpectrum = cf.isMultiSpectrum();
+    auto ws = makeDataSS();
+    Algorithms::Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", fun);
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("WorkspaceIndex", 1);
+    fit.setProperty("Minimizer", "Levenberg-Marquardt");
+    fit.execute();
+    //IFunction_sptr function = fit.getProperty("Function");
+    //for(size_t i = 0; i < function->nParams(); ++i) {
+    //  std::cerr << function->parameterName(i) << "  " << function->getParameter(i) << std::endl;
+    //}
+  }
 
-    o_PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+private:
 
-    parameterNames = cf.getParameterNames();
-    for(auto name: parameterNames) {
-      std::cerr << name << std::endl;
-    }
-
-    attributeNames = cf.getAttributeNames();
+  MatrixWorkspace_sptr makeDataSS() {
+    auto ws = create2DWorkspaceBinned(1, 100, 0.0, 0.276);
+    std::string fun = "name=CrystalFieldSpectrum,Ion=Ce,Temperature=44,"
+                      "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,B40=-0."
+                      "031787,B42=-0.11611,B44=-0.12544,f0.FWHM=1.6,f1.FWHM=2."
+                      "0,f2.FWHM=2.3";
+    Algorithms::EvaluateFunction eval;
+    eval.initialize();
+    eval.setProperty("Function", fun);
+    eval.setProperty("InputWorkspace", ws);
+    eval.setPropertyValue("OutputWorkspace", "out");
+    eval.execute();
+    auto out = API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    API::AnalysisDataService::Instance().clear();
+    return out;
   }
 };
 
