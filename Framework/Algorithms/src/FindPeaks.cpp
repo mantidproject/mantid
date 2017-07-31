@@ -1074,8 +1074,11 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
         "No 7th column for use FindPeakBackground result or not. ");
 
   if (peaklisttablews->rowCount() > 0) {
-    // setting fitresult currently breaks several tests
-    // see issues ##13667, 13950 and 15978
+    /// @todo Allow setting of fitresult. Currently, fitresult is left
+    /// deliberately hidden by creating a new variable here with the same
+    /// name. This should be fixed but it causes different behaviour which
+    /// breaks several unit tests. The issue to deal with this is #13950. Other
+    /// related issues are #13667, #15978 and #19773.
     int fitresult = peaklisttablews->Int(0, 6);
     g_log.information() << "fitresult=" << fitresult << "\n";
   }
@@ -1083,6 +1086,8 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
   // Local check whether FindPeakBackground gives a reasonable value
   vecpeakrange.resize(2);
 
+  /// @todo Remove this cppcheck suppression when #13950 is fixed
+  // cppcheck-suppress knownConditionTrueFalse
   if (fitresult > 0) {
     // Use FitPeakBackgroud's result
     size_t i_peakmin, i_peakmax;

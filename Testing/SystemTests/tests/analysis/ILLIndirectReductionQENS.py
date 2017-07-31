@@ -31,7 +31,8 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
         return ["136553.nxs","136554.nxs",  # calibration vanadium files
                 "136555.nxs","136556.nxs",  # alignment vanadium files
                 "136599.nxs","136600.nxs",  # background (empty can)
-                "136558.nxs","136559.nxs"]  # sample
+                "136558.nxs","136559.nxs",  # sample
+                "140721.nxs","140722.nxs"]  # pathological case with 0 monitor channels
 
     def test_unmirror_0_1_2_3(self):
 
@@ -125,6 +126,8 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         self.runTestBackgroundCalibration()
 
+        self.runTestDifferentZeroMonitorChannels()
+
         self.tolerance = 1e-3
 
         self.disableChecking = ['Instrument']
@@ -150,6 +153,14 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
         self.assertEquals(mtd['out_calib_bg_red'].getItem(0).getNumberHistograms(), 18)
 
         self.assertDelta(mtd['out_calib_bg_red'].getItem(0).readY(0)[580], 0.0035, 0.0001)
+
+    def runTestDifferentZeroMonitorChannels(self):
+
+        out_croped_mon = IndirectILLReductionQENS(Run='140721-140722', CropDeadMonitorChannels=True)
+
+        self.assertEquals(out_croped_mon.getItem(0).getNumberHistograms(), 18)
+
+        self.assertEquals(out_croped_mon.getItem(0).blocksize(), 1018)
 
     def validate(self):
         return ['136558_multiple_out_red','ILLIN16B_QENS.nxs']

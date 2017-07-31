@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/MantidWidget.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
@@ -75,7 +76,8 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
 
   // Connect the model
-  void showTable(boost::shared_ptr<QAbstractItemModel> model) override;
+  void
+  showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) override;
 
   // Dialog/Prompt methods
   std::string requestNotebookPath() override;
@@ -104,6 +106,9 @@ public:
   void expandAll() override;
   void collapseAll() override;
 
+  // Select all rows/groups
+  void selectAll() override;
+
   // Handle pause/resume of data reduction
   void pause() override;
   void resume() override;
@@ -111,7 +116,6 @@ public:
   // Setter methods
   void setSelection(const std::set<int> &groups) override;
   void setTableList(const QSet<QString> &tables) override;
-  void setSelectionModelConnections() override;
   void setInstrumentList(const QString &instruments,
                          const QString &defaultInstrument) override;
   void
@@ -143,7 +147,7 @@ private:
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
-  boost::shared_ptr<QAbstractItemModel> m_model;
+  boost::shared_ptr<AbstractDataProcessorTreeModel> m_model;
   // the interface
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open
@@ -163,10 +167,11 @@ public slots:
 
 private slots:
   void setModel(QString name);
-  void tableUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+  void rowsUpdated(const QModelIndex &parent, int first, int last);
+  void rowDataUpdated(const QModelIndex &topLeft,
+                      const QModelIndex &bottomRight);
   void showContextMenu(const QPoint &pos);
   void processClicked();
-  void newSelection(const QItemSelection &, const QItemSelection &);
 };
 
 } // namespace Mantid

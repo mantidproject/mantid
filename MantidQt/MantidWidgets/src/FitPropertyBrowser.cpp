@@ -1891,8 +1891,7 @@ void FitPropertyBrowser::clear() {
 
 void FitPropertyBrowser::clearBrowser() {
   QList<QtProperty *> props = m_functionsGroup->property()->subProperties();
-  QtProperty *prop;
-  foreach (prop, props) {
+  foreach (QtProperty *prop, props) {
     m_functionsGroup->property()->removeSubProperty(prop);
   }
 }

@@ -1,6 +1,7 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
@@ -29,8 +30,12 @@ GET_POINTER_SPECIALIZATION(Property)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(valueAsPrettyStrOverloader,
                                        valueAsPrettyStr, 0, 2)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
