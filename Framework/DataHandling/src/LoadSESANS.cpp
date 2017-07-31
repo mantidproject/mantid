@@ -291,16 +291,18 @@ API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
 	size_t histogramLength = columns["SpinEchoLength"].size();
 	API::MatrixWorkspace_sptr newWorkspace = API::WorkspaceFactory::Instance().create("Workspace2D", 1, histogramLength, histogramLength);
 
+	auto xValues = columns["Wavelength"];
 	auto yValues = calculateYValues(columns["Depolarisation"], columns["Wavelength"]);
 	auto eValues = calculateEValues(columns["Depolarisation_error"], yValues, columns["Wavelength"]);
-	newWorkspace->setPoints(0, columns["Wavelength"]);
 
+	auto &dataX = newWorkspace->mutableX(0);
 	auto &dataY = newWorkspace->mutableY(0);
 	auto &dataE = newWorkspace->mutableE(0);
-
+	
 	for (size_t i = 0; i < histogramLength; i++) {
-		dataY[i] = yValues[i];
-		dataE[i] = eValues[i];
+	  dataX[i] = xValues[i];
+	  dataY[i] = yValues[i];
+	  dataE[i] = eValues[i];
 	}
 
 	return newWorkspace;

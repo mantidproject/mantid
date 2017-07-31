@@ -7,6 +7,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadSESANS.h"
 #include "MantidKernel/FileDescriptor.h"
+#include <iostream> // REMEMBER TO REMOVE THIS
 
 using Mantid::DataHandling::LoadSESANS;
 
@@ -36,19 +37,20 @@ public:
     TS_ASSERT(testAlg.isInitialized());
     testAlg.setChild(true);
     testAlg.setRethrows(true);
+
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", infileName));
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
-
-	// Execute the algorithm
+    
+    // Execute the algorithm
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
 
-	Mantid::API::MatrixWorkspace_sptr ws = testAlg.getProperty("OutputWorkspace");
-	Mantid::API::Sample sample = ws->sample();
-
-	// Make sure output properties were set correctly
-	TS_ASSERT_EQUALS(ws->getTitle(), "PMMA in Mixed Deuterated decalin");
-	TS_ASSERT_EQUALS(sample.getName(), "Ostensibly 40$ 100nm radius PMMA hard spheres in mixed deuterarted decalin.");
-	TS_ASSERT_EQUALS(sample.getThickness(), 2.0);	
+    Mantid::API::MatrixWorkspace_sptr ws = testAlg.getProperty("OutputWorkspace");
+    Mantid::API::Sample sample = ws->sample();
+    
+    // Make sure output properties were set correctly
+    TS_ASSERT_EQUALS(ws->getTitle(), "PMMA in Mixed Deuterated decalin");
+    TS_ASSERT_EQUALS(sample.getName(), "Ostensibly 40$ 100nm radius PMMA hard spheres in mixed deuterarted decalin.");
+    TS_ASSERT_EQUALS(sample.getThickness(), 2.0);	
   }
 
   void test_confidence() {
