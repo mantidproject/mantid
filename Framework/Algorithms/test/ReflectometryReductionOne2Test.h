@@ -583,20 +583,20 @@ public:
     // Processing instructions : 2
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 39.844321, "2");
+    setupAlgorithm(alg, 1.5, 15.0, "2");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 31);
+    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 11);
 
     // X range in outQ
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.107553, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[3], 0.118817, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.138100, 1e-6);
+    TS_ASSERT_DELTA(outQ->x(0)[0], 0.292253, 1e-6);
+    TS_ASSERT_DELTA(outQ->x(0)[3], 0.393656, 1e-6);
+    TS_ASSERT_DELTA(outQ->x(0)[7], 0.732554, 1e-6);
     // Y counts
-    TS_ASSERT_DELTA(outQ->y(0)[0], 0.000000, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[3], 0.000000, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 0.000000, 1e-6);
+    TS_ASSERT_DELTA(outQ->y(0)[0], 2.891639, 1e-6);
+    TS_ASSERT_DELTA(outQ->y(0)[3], 2.854571, 1e-6);
+    TS_ASSERT_DELTA(outQ->y(0)[7], 2.871364, 1e-6);
   }
 
 private:
