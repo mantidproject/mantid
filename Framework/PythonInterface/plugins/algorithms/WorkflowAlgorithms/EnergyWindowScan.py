@@ -205,7 +205,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
             msdfit_prog = Progress(self, start=0.9, end=1.0, nreports=4)
             msdfit_prog.report('msdFit')
             msd_alg = self.createChildAlgorithm("MSDFit", enableLogging=False)
-            msd_alg.setProperty("InputWorkspace", self._scan_ws + '_el_eq2')
+            msd_alg.setProperty("InputWorkspace", self._scan_ws + '_el_eq')
             msd_alg.setProperty("Xstart", x_values[0])
             msd_alg.setProperty("XEnd", x_values[len(x_values) - 1])
             msd_alg.setProperty("SpecMin", 0)
