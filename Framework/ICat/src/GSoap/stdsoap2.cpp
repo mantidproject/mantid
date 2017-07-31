@@ -13,7 +13,7 @@ GCC_DIAG_OFF(deprecated-declarations)
 GCC_DIAG_OFF(format-overflow)
 GCC_DIAG_OFF(format-truncation)
 GCC_DIAG_OFF(implicit-fallthrough)
-#endif 
+#endif
 // clang-format on
 
 /*
