@@ -3,7 +3,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include <QString>
 #include <map>
-
+#include <vector>
 /**
 This file contains some functions used to convert map data structures using
 std::string

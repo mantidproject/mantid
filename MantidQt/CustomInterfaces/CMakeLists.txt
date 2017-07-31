@@ -112,6 +112,7 @@ set ( SRC_FILES
 	src/Reflectometry/ReflSettingsPresenter.cpp
 	src/Reflectometry/ReflSettingsTabPresenter.cpp
 	src/Reflectometry/ReflTableSchema.cpp
+  src/Reflectometry/ReflFromStdStringMap.cpp
 	src/Reflectometry/TransferResults.cpp
 	src/SANSAddFiles.cpp
 	src/SANSBackgroundCorrectionSettings.cpp
@@ -266,6 +267,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
+  inc/MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h
 	inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h

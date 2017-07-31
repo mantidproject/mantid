@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Reflectomety/ReflFromStdStringMap.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h"
 #include <algorithm>
 #include <iterator>
 namespace MantidQt {

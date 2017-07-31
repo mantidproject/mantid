@@ -21,7 +21,7 @@ class ReflDataProcessorPresenterTest : public CxxTest::TestSuite {
 
 private:
   ITableWorkspace_sptr
-  createWorkspace(const std::string &wsName,
+  createWorkspace(const QString &wsName,
                   const DataProcessorWhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
@@ -31,18 +31,18 @@ private:
     colGroup->setPlotType(0);
 
     for (int col = 0; col < ncols; col++) {
-      auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col));
+      auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
       column->setPlotType(0);
     }
 
     if (wsName.length() > 0)
-      AnalysisDataService::Instance().addOrReplace(wsName, ws);
+      AnalysisDataService::Instance().addOrReplace(wsName.toStdString(), ws);
 
     return ws;
   }
 
   ITableWorkspace_sptr
-  createPrefilledWorkspace(const std::string &wsName,
+  createPrefilledWorkspace(const QString &wsName,
                            const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::vector<std::string> group{"0", "0", "1", "1"};
@@ -63,7 +63,7 @@ private:
   }
 
   ITableWorkspace_sptr
-  createPrefilledMixedWorkspace(const std::string &wsName,
+  createPrefilledMixedWorkspace(const QString &wsName,
                                 const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::string group = "0";
@@ -84,7 +84,7 @@ private:
   }
 
   ITableWorkspace_sptr
-  createPrefilledMinimalWorkspace(const std::string &wsName,
+  createPrefilledMinimalWorkspace(const QString &wsName,
                                   const DataProcessorWhiteList &whitelist) {
 
     auto ws = createWorkspace(wsName, whitelist);
@@ -103,9 +103,9 @@ private:
     return ws;
   }
 
-  void createSampleEventWS(const std::string &wsName) {
+  void createSampleEventWS(const QString &wsName) {
     auto tinyWS = WorkspaceCreationHelper::createEventWorkspace2();
-    AnalysisDataService::Instance().addOrReplace(wsName, tinyWS);
+    AnalysisDataService::Instance().addOrReplace(wsName.toStdString(), tinyWS);
   }
 
   ReflGenericDataProcessorPresenterFactory presenterFactory;
@@ -693,7 +693,7 @@ public:
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
 
-    std::string pythonCode =
+    auto const pythonCode = QString(
         "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_slice_0\", "
         "0, True, window = base_graph)\n"
         "base_graph = plotSpectrum(\"IvsQ_13460_slice_1\", 0, True, window = "
@@ -705,7 +705,7 @@ public:
         "base_graph = plotSpectrum(\"IvsQ_13462_slice_1\", 0, True, window = "
         "base_graph)\n"
         "base_graph = plotSpectrum(\"IvsQ_13462_slice_2\", 0, True, window = "
-        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n");
 
     EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     TS_ASSERT_THROWS_NOTHING(
@@ -768,7 +768,7 @@ public:
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
 
-    std::string pythonCode =
+    auto const pythonCode = QString(
         "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_slice_0\", "
         "0, True, window = base_graph)\n"
         "base_graph = plotSpectrum(\"IvsQ_13460_slice_1\", 0, True, window = "
@@ -780,7 +780,7 @@ public:
         "base_graph = plotSpectrum(\"IvsQ_13462_slice_1\", 0, True, window = "
         "base_graph)\n"
         "base_graph = plotSpectrum(\"IvsQ_13462_slice_2\", 0, True, window = "
-        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n");
 
     EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     TS_ASSERT_THROWS_NOTHING(
