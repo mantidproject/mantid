@@ -45,7 +45,7 @@ cropped in wavelength according to :literal:`WavelengthMin` and
 :literal:`WavelengthMax`, which are both mandatory properties.
 
 If summation is to be done in Q, this is done after the normalisations and
-cropping, but again, only if the original input was not already in wavelength.
+cropping, but again, only if the reduction has not already been done.
 
 Finally, the output workspace in wavelength is converted to momentum transfer
 (Q).
@@ -127,17 +127,20 @@ Sum in Q
 
 If summing in Q, the summation is done now, after all normalisations and
 cropping have been done. As with summation in :math:`\lambda`, the summation is
-only done if the original workspace was not in :math:`\lambda` (otherwise we
-assume the reduction has already been done).
+only done if the reduction has not already been done.
 
 The summation is done using the algorithm proposed by Cubitt et al
 (J. Appl. Crystallogr., 48 (6) (2015)). This involves a projection to an
 arbitrary reference angle, :math:`2\theta_R`, with a "virtual" wavelength,
 :math:`\lambda_v`. This is the wavelength the neutron would have had if it had
-arrived at :math:`2\theta_R` with the same momentum transfer
-(:math:`Q`). Counts are shared out proportionally into the output array in
-:math:`\lambda_v` and the projections from all pixels are summed in
-:math:`\lambda_v`.
+arrived at :math:`2\theta_R` with the same momentum transfer (:math:`Q`).
+
+Counts are considered to be spread evenly over the input pixel, and the
+top-left and bottom-right corner of the pixel are projected onto
+:math:`2\theta_R` giving a range in :math:`\lambda_v` to project onto. Counts
+are shared out proportionally into the output bins that overlap this range, and
+the projected counts from all pixels are summed into the appropriate output
+bins.
 
 The resulting 1D workspace in :math:`\lambda_v` at :math:`2\theta_R` becomes
 the output workspace in wavelength.
@@ -148,17 +151,21 @@ Conversion to Momentum Transfer (Q)
 ###################################
 
 Finally, the output workspace in wavelength is converted to momentum transfer
-(:math:`Q`) using :ref:`algm-ConvertUnits`. Note that the output workspace in Q
-is therefore a workspace with native binning, and no rebin step is applied to
-it.
+(:math:`Q`) using :ref:`algm-ConvertUnits`. The equation used is
+:math:`Q=4\pi sin(\theta_R)/\lambda_v` in the non-flat sample case or
+:math:`Q=4\pi sin(2\theta_R-\theta_0)/\lambda_v` in the divergent beam
+case. This is because the latter needs to take into account the divergence of
+the beam from the assumed direct beam direction.
 
 .. diagram:: ReflectometryReductionOne_ConvertToMomentum-v2_wkflw.dot
 
-If you wish to obtain a rebinned workspace in Q you should consider using algorithm
-:ref:`algm-ReflectometryReductionOneAuto` instead, which is a facade over this algorithm
-and has two extra steps (:ref:`algm-Rebin` and :ref:`algm-Scale`) to produce an additional
-workspace in Q with specified binning and scale factor. Please refer to :ref:`algm-ReflectometryReductionOneAuto`
-for more information.
+Note that the output workspace in Q is a workspace with native binning, and no
+rebin step is applied to it. If you wish to obtain a rebinned workspace in Q
+you should consider using algorithm :ref:`algm-ReflectometryReductionOneAuto`
+instead, which is a facade over this algorithm and has two extra steps
+(:ref:`algm-Rebin` and :ref:`algm-Scale`) to produce an additional workspace in
+Q with specified binning and scale factor. Please refer to
+:ref:`algm-ReflectometryReductionOneAuto` for more information.
 
 Previous Versions
 -----------------

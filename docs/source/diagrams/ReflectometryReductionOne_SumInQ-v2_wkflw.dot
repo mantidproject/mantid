@@ -4,23 +4,29 @@ label = "\n"
 
 subgraph params {
  $param_style
-  inputWorkspace     [label="OutputWorkspaceWavelength", group=g1]
-  outputWorkspaceWav [label="OutputWorkspaceWavelength"]
+  inputWorkspace     [label="OutputWorkspaceWavelength", group=gmain]
+  outputWorkspaceWav [label="OutputWorkspaceWavelength", group=gmain]
+  procCommands       [label="ProcessingInstructions"]
+  wavMin             [label="WavelengthMin"]
+  wavMax             [label="WavelengthMax"]
 }
 
 subgraph decisions {
  $decision_style
-  checkSumInQ        [label="Sum in Q and input X axis was not in &lambda;?"]
+  checkSumInQ        [label="Sum in Q?", group=gmain]
+  checkSumDone       [label="Reduction done?", group=gmain]
 }
 
 subgraph algorithms {
  $algorithm_style
+  cropWav            [label="CropWorkspace", group=gmain]
 }
 
 subgraph processes {
  $process_style
-  projectCounts      [label=<Project input counts to &lambda;<sub>v</sub> at 2&theta;<sub>R</sub>>]
-  sumInQ             [label=<Sum in &lambda;<sub>v</sub>>]
+  projectCounts      [label=<Project input counts to &lambda;<sub>v</sub> at 2&theta;<sub>R</sub>>, group=gsum]
+  projectMinMax      [label=<Project &lambda;<sub>min</sub>,&lambda;<sub>max</sub> to &lambda;<sub>v</sub> at 2&theta;<sub>R</sub>>, group=gsum]
+  sumInQ             [label=<Sum in &lambda;<sub>v</sub>>, group=gsum]
 }
 
 subgraph values {
@@ -28,10 +34,19 @@ subgraph values {
 }
 
 inputWorkspace     -> checkSumInQ
-checkSumInQ        -> projectCounts      [label="Yes"]
 checkSumInQ        -> outputWorkspaceWav [label="No"]
+checkSumInQ        -> checkSumDone       [label="Yes"]
+checkSumDone       -> projectCounts      [label="No"]
+checkSumDone       -> cropWav            [label="Yes"]
+procCommands       -> projectCounts
 projectCounts      -> sumInQ
-sumInQ             -> outputWorkspaceWav
+wavMin             -> projectMinMax
+wavMax             -> projectMinMax
+sumInQ             -> projectMinMax
+projectMinMax      -> cropWav
+cropWav            -> outputWorkspaceWav
+
+{rank=same; wavMin; wavMax}
 
 }
 
