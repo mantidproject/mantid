@@ -159,7 +159,7 @@ signals:
 
 public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);
-  void setModel(QString name) override;
+  void setModel(QString const& name) override;
 
 private slots:
   void rowsUpdated(const QModelIndex &parent, int first, int last);

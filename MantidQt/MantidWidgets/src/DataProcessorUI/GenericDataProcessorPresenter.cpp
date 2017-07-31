@@ -558,7 +558,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
   QStringList inputNames;
 
   // The name to call the post-processed ws
-  const QString outputWSName =
+  auto const outputWSName =
       getPostprocessedWorkspaceName(groupData, m_postprocessor.prefix());
 
   // Go through each row and get the input ws names
@@ -601,9 +601,9 @@ void GenericDataProcessorPresenter::postProcessGroup(
   }
 
   // Options specified via post-process map
-  for (const auto &prop : m_postprocessMap) {
-    const QString propName = prop.second;
-    const QString propValueStr =
+  for (auto const &prop : m_postprocessMap) {
+    auto const propName = prop.second;
+    auto const propValueStr =
         groupData.begin()->second[m_whitelist.colIndexFromColName(prop.first)];
     if (!propValueStr.isEmpty()) {
       // Warning: we take minus the value of the properties because in
@@ -634,7 +634,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     const QString &runStr,
     const DataProcessorPreprocessingAlgorithm &preprocessor,
     const std::map<std::string, std::string> &optionsMap) {
-  const QString instrument = m_view->getProcessInstrument();
+  auto const instrument = m_view->getProcessInstrument();
 
   auto runs = runStr.split(QRegExp("(+|,)"));
   if (runs.isEmpty())
@@ -648,7 +648,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   if (runs.size() == 1)
     return getRun(runs[0], instrument, preprocessor.prefix());
 
-  const QString outputName = preprocessor.prefix() + runs.join(" ");
+  auto const outputName = preprocessor.prefix() + runs.join(" ");
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
   * but that doesn't preserve history nicely, so we'll just take care of tidying
@@ -732,7 +732,7 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
     if (m_whitelist.showValue(col)) {
 
       // Get what's in the column
-      const QString valueStr = data.at(col);
+      auto const valueStr = data.at(col);
 
       // If it's not empty, use it
       if (!valueStr.isEmpty()) {
@@ -783,7 +783,7 @@ QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
  */
 Workspace_sptr GenericDataProcessorPresenter::getRun(const QString &run,
                                                      const QString &instrument,
-                                                     const QString &prefix) {
+                                                     auto const &prefix) {
 
   bool runFound;
   QString outName;
@@ -1198,7 +1198,7 @@ void GenericDataProcessorPresenter::openTable() {
       return;
 
   auto &ads = AnalysisDataService::Instance();
-  auto toOpen = m_view->getWorkspaceToOpen();
+  auto const toOpen = m_view->getWorkspaceToOpen();
 
   if (toOpen.isEmpty())
     return;

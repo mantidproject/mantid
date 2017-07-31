@@ -413,12 +413,11 @@ void ReflDataProcessorPresenter::parseLogValue(const QString &inputStr,
                                                std::vector<double> &startTimes,
                                                std::vector<double> &stopTimes) {
 
-  // auto strMap =
-  // fromStdStringMap(parseKeyValueString(inputStr.toStdString()));
-  // QString timeSlicing = strMap.at("Slicing");
-  // logFilter = strMap.at("LogFilter");
+  auto strMap = fromStdStringMap(parseKeyValueString(inputStr.toStdString()));
+  QString timeSlicing = strMap.at("Slicing");
+  logFilter = strMap.at("LogFilter");
 
-  // parseCustom(timeSlicing, startTimes, stopTimes);
+  parseCustom(timeSlicing, startTimes, stopTimes);
 }
 
 /** Loads an event workspace and puts it into the ADS

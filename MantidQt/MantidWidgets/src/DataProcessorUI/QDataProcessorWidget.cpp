@@ -155,7 +155,7 @@ This slot loads a table workspace model and changes to a LoadedMainView
 presenter
 @param name : the string name of the workspace to be grabbed
 */
-void QDataProcessorWidget::setModel(QString name) {
+void QDataProcessorWidget::setModel(QString const& name) {
   m_toOpen = name;
   m_presenter->notify(DataProcessorPresenter::OpenTableFlag);
 }
@@ -261,7 +261,7 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
 
 void QDataProcessorWidget::ensureHasExtension(QString &filename) const {
   if (!filename.endsWith(".ipynb")) {
-    filename.append("ipynb");
+    filename.append(".ipynb");
   }
 }
 
