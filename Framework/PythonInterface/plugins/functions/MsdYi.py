@@ -64,8 +64,8 @@ class MsdYi(IFunction1D):
 
         for i, x in enumerate(xvals):
             q = msd * x * x
-            f1 = math.exp(-1.0 / (6.0 * x * x * msd))
-            df1 = f1 / (6.0 * x * x * msd * msd)
+            f1 = math.exp(-1.0 / (6.0 * q))
+            df1 = f1 / (6.0 * x * q)
             x4 = math.pow(x, 4)
             f2 = 1.0 + (x4 * sigma / 72.0)
             df2 = x4 / 72.0
