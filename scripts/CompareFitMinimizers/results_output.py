@@ -23,8 +23,6 @@ formats such as RST and plain text.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 from __future__ import (absolute_import, division, print_function)
-
-from plotHelper import *
 import numpy as np
 from docutils.core import publish_string
 import post_processing as postproc
@@ -52,6 +50,7 @@ FILENAME_EXT_HTML = 'html'
 WORKING_DIR = os.getcwd()
 # Directory of this script (e.g. in source)
 SCRIPT_DIR = os.path.dirname(__file__)
+
 
 def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors,
                                simple_text=True, rst=False, save_to_file=False, color_scale=None):
@@ -229,11 +228,8 @@ def build_visual_display_page(prob_results, group_name):
     # Get the best result for a group
     gb = min((result for result in prob_results), key=lambda result: result.fit_chi2)
     file_name = (group_name + '_' + gb.problem.name).lower()
-
     wks = msapi.CreateWorkspace(OutputWorkspace=gb.problem.name, DataX=gb.problem.data_pattern_in, DataY=gb.problem.data_pattern_out)
     plot = qti.plot(wks, 0)
-    ss = mp.screenshot_to_dir(widget=plot, filename=file_name + '.png', screenshot_dir=WORKING_DIR)
-
     # Create various page headings, ensuring the adornment is (at least) the length of the title
     title = '=' * len(gb.problem.name) + '\n'
     title += gb.problem.name + '\n'
@@ -273,7 +269,7 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
     grp_linked_names = build_group_linked_names(group_names)
 
     header = '**************** Accuracy ******** \n\n'
-    #print(header)
+    print(header)
     tbl_all_summary_acc = build_rst_table(minimizers, grp_linked_names, groups_norm_acc,
                                           comparison_type='summary', comparison_dim='accuracy',
                                           using_errors=use_errors)
@@ -282,20 +278,14 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
     if save_to_file:
         save_table_to_file(tbl_all_summary_acc, use_errors, 'summary', FILENAME_SUFFIX_ACCURACY, FILENAME_EXT_TXT)
         save_table_to_file(tbl_all_summary_acc, use_errors, 'summary', FILENAME_SUFFIX_ACCURACY, FILENAME_EXT_HTML)
-
     header = '**************** Runtime ******** \n\n'
-    #print(header)
+    print (header)
     tbl_all_summary_runtime = build_rst_table(minimizers, grp_linked_names, groups_norm_runtime,
                                               comparison_type='summary', comparison_dim='runtime',
                                               using_errors=use_errors)
-    #print(tbl_all_summary_runtime)
-
     if save_to_file:
         save_table_to_file(tbl_all_summary_runtime, use_errors, 'summary', FILENAME_SUFFIX_RUNTIME, FILENAME_EXT_TXT)
         save_table_to_file(tbl_all_summary_runtime, use_errors, 'summary', FILENAME_SUFFIX_RUNTIME, FILENAME_EXT_HTML)
-
-	print("hi ")
-
 
 def weighted_suffix_string(use_errors):
     """
@@ -349,6 +339,7 @@ def calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale=None):
         cell_len = max_header
 
     return cell_len
+
 
 def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_dim,
                     using_errors, color_scale=None):
