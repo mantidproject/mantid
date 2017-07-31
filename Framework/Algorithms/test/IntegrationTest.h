@@ -744,10 +744,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspace", "testSpace"));
-    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_ANYTHING(
         alg.setProperty("StartWorkspaceIndex", startIndex));
-    TS_ASSERT_THROWS(alg.setProperty("EndWorkspaceIndex", endIndex));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("EndWorkspaceIndex", endIndex));
   }
 
   void testStartWSIndexGreaterThanEnd() {
