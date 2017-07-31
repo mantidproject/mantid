@@ -33,23 +33,6 @@ def _attenuate_workspace(instrument, output_file_paths, attenuated_ws):
     return attenuated_ws
 
 
-def _focus_mode_mods(output_file_paths, calibrated_spectra):
-    append = False
-    output_list = []
-    for index, ws in enumerate(calibrated_spectra):
-        output_name = output_file_paths["output_name"] + "_mod" + str(index + 1)
-        tof_ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=output_name,
-                                     Target=WORKSPACE_UNITS.tof)
-        mantid.SaveGSS(InputWorkspace=tof_ws, Filename=output_file_paths["gss_filename"], Append=append, Bank=index + 1)
-        dspacing_ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=output_name,
-                                          Target=WORKSPACE_UNITS.d_spacing)
-        output_list.append(dspacing_ws)
-        mantid.SaveNexus(Filename=output_file_paths["nxs_filename"], InputWorkspace=dspacing_ws, Append=append)
-
-        append = True
-    return output_list
-
-
 def _focus_mode_all(output_file_paths, processed_spectra, perform_attenuation, instrument):
     summed_spectra_name = output_file_paths["output_name"] + "_mods1-9"
     summed_spectra = mantid.MergeRuns(InputWorkspaces=processed_spectra[:9], OutputWorkspace=summed_spectra_name)
@@ -119,6 +102,23 @@ def _focus_mode_groups(output_file_paths, calibrated_spectra):
 
         output_list.append(to_save)
 
+    return output_list
+
+
+def _focus_mode_mods(output_file_paths, calibrated_spectra):
+    append = False
+    output_list = []
+    for index, ws in enumerate(calibrated_spectra):
+        output_name = output_file_paths["output_name"] + "_mod" + str(index + 1)
+        tof_ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=output_name,
+                                     Target=WORKSPACE_UNITS.tof)
+        mantid.SaveGSS(InputWorkspace=tof_ws, Filename=output_file_paths["gss_filename"], Append=append, Bank=index + 1)
+        dspacing_ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=output_name,
+                                          Target=WORKSPACE_UNITS.d_spacing)
+        output_list.append(dspacing_ws)
+        mantid.SaveNexus(Filename=output_file_paths["nxs_filename"], InputWorkspace=dspacing_ws, Append=append)
+
+        append = True
     return output_list
 
 

@@ -90,6 +90,9 @@ private:
   /// process splitters given by a MatrixWorkspace
   void processMatrixSplitterWorkspace();
 
+  /// create event workspace
+  boost::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
+  /// create output workspaces if the splitters are given in SplittersWorkspace
   void createOutputWorkspaces();
   /// create output workspaces in the case of using TableWorlspace for splitters
   void createOutputWorkspacesTableSplitterCase();
@@ -127,6 +130,43 @@ private:
   /// (itarget)
   void convertSplittersWorkspaceToVectors();
 
+  void splitTimeSeriesLogs(
+      const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
+      const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
+      const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector);
+
+  /// get the names of all the time series properties in the input workspace's
+  /// Run object
+  std::vector<std::string> getTimeSeriesLogNames();
+
+  void generateSplitterTSP(
+      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+
+  void generateSplitterTSPalpha(
+      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+
+  /// Add time series property 'Splitter' to each child workspace
+  void mapSplitterTSPtoWorkspaces(
+      const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+
+  void copyNoneSplitLogs(
+      std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
+      std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
+      std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector);
+
+  template <typename TYPE>
+  void
+  splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,
+                          std::vector<Kernel::DateAndTime> &split_datetime_vec,
+                          const int max_target_index);
+
+  void splitDoubleTimeSeriesLogs(
+      const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
+      std::vector<Kernel::DateAndTime> &split_datetime_vec,
+      const int max_target_index);
+
+  void groupOutputWorkspace();
+
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
   DataObjects::TableWorkspace_sptr m_splitterTableWorkspace;
@@ -152,24 +192,6 @@ private:
   bool m_hasInfoWS;
 
   double m_progress;
-
-  /// DOC! TODO
-  std::vector<std::string> getTimeSeriesLogNames();
-
-  Kernel::TimeSplitterType generateSplitters(int wsindex);
-
-  void generateSplitterTSP(
-      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
-
-  void generateSplitterTSPalpha(
-      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
-
-  ///
-  void mapSplitterTSPtoWorkspaces(
-      const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
-
-  void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname,
-                Kernel::TimeSplitterType &splitters);
 
   /// Base of output workspace's name
   std::string m_outputWSNameBase;

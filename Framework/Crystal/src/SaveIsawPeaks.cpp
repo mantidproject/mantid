@@ -162,8 +162,7 @@ void SaveIsawPeaks::exec() {
     const API::Run &run = ws->run();
     double T0 = 0.0;
     if (run.hasProperty("T0")) {
-      Kernel::Property *prop = run.getProperty("T0");
-      T0 = boost::lexical_cast<double, std::string>(prop->value());
+      T0 = run.getPropertyValueAsType<double>("T0");
       if (T0 != 0) {
         g_log.notice() << "T0 = " << T0 << '\n';
       }

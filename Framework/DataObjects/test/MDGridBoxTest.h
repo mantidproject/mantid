@@ -781,7 +781,7 @@ public:
   void xtest_addEvent_with_recursive_gridding_Performance() {
     // Make a 2D box split into 4, 4 levels deep. = 4^4^2 boxes at the bottom =
     // 256^2 boxes.
-    size_t numSplit = 4;
+    const size_t numSplit = 4;
     for (size_t recurseLevels = 1; recurseLevels < 5; recurseLevels++) {
       double boxes_per_side = pow(double(numSplit), double(recurseLevels));
       double spacing = double(numSplit) / boxes_per_side;
@@ -792,8 +792,8 @@ public:
           MDEventsTestHelper::makeRecursiveMDGridBox<2>(numSplit,
                                                         recurseLevels);
 
-      for (double x = 0; x < numSplit; x += spacing)
-        for (double y = 0; y < numSplit; y += spacing) {
+      for (double x = 0; x < static_cast<double>(numSplit); x += spacing)
+        for (double y = 0; y < static_cast<double>(numSplit); y += spacing) {
           for (size_t i = 0; i < num_to_repeat; i++) {
             coord_t centers[2] = {static_cast<coord_t>(x),
                                   static_cast<coord_t>(y)};

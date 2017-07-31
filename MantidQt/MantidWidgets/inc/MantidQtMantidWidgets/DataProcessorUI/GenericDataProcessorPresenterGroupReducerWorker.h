@@ -49,7 +49,10 @@ private slots:
   void startWorker() {
     try {
       m_presenter->postProcessGroup(m_groupData);
-      m_presenter->m_manager->addHighlighted(m_groupIndex);
+      // Group is set processed if all constituent rows are processed
+      if (m_presenter->m_manager->rowCount(m_groupIndex) ==
+          static_cast<int>(m_groupData.size()))
+        m_presenter->m_manager->setProcessed(true, m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
       emit reductionErrorSignal(ex);

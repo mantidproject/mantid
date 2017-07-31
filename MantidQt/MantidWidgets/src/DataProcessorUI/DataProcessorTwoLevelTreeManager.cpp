@@ -447,8 +447,7 @@ TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
 
   if (groups.empty() && rows.empty()) {
 
-    if (options["WarnProcessAll"].toBool() && prompt &&
-        m_presenter->newSelectionMade()) {
+    if (options["WarnProcessAll"].toBool() && prompt) {
       if (!m_presenter->askUserYesNo(
               "This will process all rows in the table. Continue?",
               "Process all rows?"))
@@ -588,20 +587,56 @@ void DataProcessorTwoLevelTreeManager::update(
                      QString::fromStdString(data[col]));
 }
 
-/** Sets a new group to be highlighted
-* @param position : The position of the group
+/** Gets the number of groups in the table
+* @return : Number of groups
 */
-void DataProcessorTwoLevelTreeManager::addHighlighted(int position) {
-  m_model->addHighlighted(position);
+int DataProcessorTwoLevelTreeManager::rowCount() const {
+  return m_model->rowCount();
 }
 
-/** Sets a row to be highlighted
-* @param position : The position of the row
-* @param parent : Parent of the row
+/** Gets the number of rows of a parent group in the table
+* @param parent : Index of the parent group
+* @return : Number of rows of a group
 */
-void DataProcessorTwoLevelTreeManager::addHighlighted(int position,
-                                                      int parent) {
-  m_model->addHighlighted(position, m_model->index(parent, 0));
+int DataProcessorTwoLevelTreeManager::rowCount(int parent) const {
+  return m_model->rowCount(m_model->index(parent, 0));
+}
+
+/** Gets the 'process' status of a group
+* @param position : The row index
+* @return : 'process' status
+*/
+bool DataProcessorTwoLevelTreeManager::isProcessed(int position) const {
+  return m_model->isProcessed(position);
+}
+
+/** Gets the 'process' status of a row
+* @param position : The row index
+* @param parent : The parent of the row
+* @return : 'process' status
+*/
+bool DataProcessorTwoLevelTreeManager::isProcessed(int position,
+                                                   int parent) const {
+  return m_model->isProcessed(position, m_model->index(parent, 0));
+}
+
+/** Sets the 'process' status of a group
+* @param processed : True to set group as processed, false to set unprocessed
+* @param position : The index of the group to be set
+*/
+void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
+                                                    int position) {
+  m_model->setProcessed(processed, position);
+}
+
+/** Sets the 'process' status of a row
+* @param processed : True to set row as processed, false to set unprocessed
+* @param position : The index of the row to be set
+* @param parent : The parent of the row
+*/
+void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
+                                                    int position, int parent) {
+  m_model->setProcessed(processed, position, m_model->index(parent, 0));
 }
 
 /** Return a shared ptr to the model

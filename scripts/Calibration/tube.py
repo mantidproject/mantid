@@ -420,7 +420,12 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         idealTube = IdealTube()
         idealTube.setArray(numpy.array(knownPositions))
 
-    #pylint: disable = raising-bad-type
+    for val in knownPositions:
+        if val >= 100:
+            # Tube is greater than 100m - this is probably wrong so print an error
+            raise ValueError("The following value: " + str(val) + " is greater or equal than 100m in length"
+                             "\nHave you remembered to convert to meters?")
+
     # deal with funcForm parameter
     try:
         nPeaks = len(idealTube.getArray())
