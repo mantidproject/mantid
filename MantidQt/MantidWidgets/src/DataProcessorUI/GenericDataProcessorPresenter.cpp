@@ -761,7 +761,7 @@ QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     const GroupData &groupData, const QString &prefix) {
 
   if (!m_postprocess)
-    return std::string();
+    return QString();
 
   /* This method calculates, for a given set of rows, the name of the output
   * (post-processed) workspace */
