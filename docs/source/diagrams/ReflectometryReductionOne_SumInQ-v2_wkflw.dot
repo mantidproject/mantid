@@ -4,8 +4,8 @@ label = "\n"
 
 subgraph params {
  $param_style
-  inputWorkspace     [label="OutputWorkspaceWavelength", group=gmain]
-  outputWorkspaceWav [label="OutputWorkspaceWavelength", group=gmain]
+  inputWorkspace     [label="OutputWorkspaceWavelength"]
+  outputWorkspaceWav [label="OutputWorkspaceWavelength"]
   procCommands       [label="ProcessingInstructions"]
   wavMin             [label="WavelengthMin"]
   wavMax             [label="WavelengthMax"]
@@ -13,20 +13,20 @@ subgraph params {
 
 subgraph decisions {
  $decision_style
-  checkSumInQ        [label="Sum in Q?", group=gmain]
-  checkSumDone       [label="Reduction done?", group=gmain]
+  checkSumInQ        [label="Sum in Q?"]
+  checkSumDone       [label="Reduction required?"]
 }
 
 subgraph algorithms {
  $algorithm_style
-  cropWav            [label="CropWorkspace", group=gmain]
+  cropWav            [label="CropWorkspace"]
 }
 
 subgraph processes {
  $process_style
-  projectCounts      [label=<Project input counts to &lambda;<sub>v</sub> at 2&theta;<sub>R</sub>>, group=gsum]
-  projectMinMax      [label=<Project &lambda;<sub>min</sub>,&lambda;<sub>max</sub> to &lambda;<sub>v</sub> at 2&theta;<sub>R</sub>>, group=gsum]
-  sumInQ             [label=<Sum in &lambda;<sub>v</sub>>, group=gsum]
+  projectCounts      [label=<Project input counts to &lambda;<sub>v</sub>>]
+  sumInQ             [label=<Sum in &lambda;<sub>v</sub>>]
+  projectMinMax      [label=<Convert crop range to &lambda;<sub>v</sub>>]
 }
 
 subgraph values {
@@ -34,15 +34,20 @@ subgraph values {
 }
 
 inputWorkspace     -> checkSumInQ
+
 checkSumInQ        -> outputWorkspaceWav [label="No"]
 checkSumInQ        -> checkSumDone       [label="Yes"]
-checkSumDone       -> projectCounts      [label="No"]
-checkSumDone       -> cropWav            [label="Yes"]
+
+checkSumDone       -> projectCounts      [label="Yes"]
+checkSumDone       -> projectMinMax      [label="No"]
+
 procCommands       -> projectCounts
 projectCounts      -> sumInQ
+
 wavMin             -> projectMinMax
 wavMax             -> projectMinMax
 sumInQ             -> projectMinMax
+
 projectMinMax      -> cropWav
 cropWav            -> outputWorkspaceWav
 

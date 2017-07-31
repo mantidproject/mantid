@@ -28,7 +28,8 @@ vector must be :math:`2\theta`.
 
 
 The figure below displays a high-level workflow diagram illustrating the main
-steps taking place in the reduction.
+steps taking place in the reduction. For the sake of clarity, all possible
+steps are illustrated, even if some of them are optional.
 
 .. diagram:: ReflectometryReductionOne_HighLvl-v2_wkflw.dot
 
@@ -53,23 +54,43 @@ Finally, the output workspace in wavelength is converted to momentum transfer
 Conversion to Wavelength
 ########################
 
-If the input workspace is in TOF, monitors are extracted using
-:ref:`algm-GroupDetectors` with ``RegionOfDirectBeam`` as input, and region of
-direct beam using :ref:`algm-CropWorkspace` with ``I0MonitorIndex`` as
-input. If summing in wavelength, detectors of interest are extracted and summed
-in TOF using :ref:`algm-GroupDetectors` with ``ProcessingInstructions`` as
-input. If summing in Q, summation is not done yet as it is done in a later step
-after all normalisations have been done.
+If summing in wavelength, detectors of interest are extracted and summed in TOF
+using :ref:`algm-GroupDetectors` with ``ProcessingInstructions`` as input. (If
+summing in Q, summation is not done yet as it is done in a later step after all
+normalisations have been done.) The workspace is then converted to wavelength
+with :literal:`AlignBins` set to :literal:`True`.
 
-Each of the resulting workspaces is converted to wavelength (note that
-:literal:`AlignBins` is set to :literal:`True` in all the three cases). Note
-that the normalization by a direct beam is optional, and only happens if
-``RegionOfDirectBeam`` is provided. In the same way, monitor normalization is
-also optional, and only takes place if ``I0MonitorIndex``,
+Next, normalization by direct beam and monitors is optionally done using
+:ref:`algm-Divide`.  A summary of the steps is shown in the workflow diagram
+below.
+
+.. diagram:: ReflectometryReductionOne_ConvertToWavelength-v2_wkflw.dot
+
+Create Direct Beam Workspace
+############################
+
+Direct Beam and Monitor corrections can be applied to the workspace. These are
+both optional steps and will only take place if the required inputs are
+provided - otherwise, these steps will be skipped.
+
+The region of direct beam is extracted from the input workspace in TOF using
+:ref:`algm-GroupDetectors` with ``RegionOfDirectBeam`` as input. This is only
+done if ``RegionOfDirectBeam`` is specified. The resulting workspace is
+converted to wavelength with :literal:`AlignBins` set to :literal:`True`.
+
+.. diagram:: ReflectometryReductionOne_DirectBeamCorrection-v2_wkflw.dot
+
+Create Monitor Workspace
+########################
+
+Monitors are extracted from the input workspace in TOF using
+:ref:`algm-CropWorkspace` with ``I0MonitorIndex`` as input. The resulting
+workspace is converted to wavelength with :literal:`AlignBins` set to
+:literal:`True`. Monitor normalisation is only done if ``I0MonitorIndex``,
 ``MonitorBackgroundWavelengthMin`` and ``MonitorBackgroundWavelengthMax`` are
 all specified.
 
-Detectors can be normalized by integrated monitors by setting
+Normalisation can be done by integrated monitors by setting
 :literal:`NormalizeByIntegratedMonitors` to true, in which case
 :literal:`MonitorIntegrationWavelengthMin` and
 :literal:`MonitorIntegrationWavelengthMax` are used as the integration
@@ -77,11 +98,7 @@ range. If monitors are not integrated, detectors are rebinned to monitors using
 :ref:`algm-RebinToWorkspace` so that the normalization by monitors can take
 place.
 
-A summary of the steps is shown in the workflow diagram below. For the sake of
-clarity, all possible steps are illustrated, even if some of them are optional.
-
-.. diagram:: ReflectometryReductionOne_ConvertToWavelength-v2_wkflw.dot
-
+.. diagram:: ReflectometryReductionOne_MonitorCorrection-v2_wkflw.dot
 
 Transmission Correction
 #######################

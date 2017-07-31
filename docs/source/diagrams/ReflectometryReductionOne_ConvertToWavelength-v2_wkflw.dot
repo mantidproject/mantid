@@ -9,84 +9,55 @@ subgraph params {
   inputWS             [label="InputWorkspace", group=gmain]
   outputWS            [label="OutputWorkspaceWavelength", group=gmain]
   procCommands        [label="ProcessingInstructions"]
-  monitorIndex        [label="I0MonitorIndex"]
-  regionOfDirectBeam  [label="RegionOf-\nDirectBeam"]
-  monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
-  monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
-  monBackWavMin       [label="MonitorBackground-\nWavelengthMin"]
-  monBackWavMax       [label="MonitorBackground-\nWavelengthMax"]
-  wavMin              [label="WavelengthMin", group=gwav]
-  wavMax              [label="WavelengthMax", group=gwav]
+  wavMin              [label="WavelengthMin"]
+  wavMax              [label="WavelengthMax"]
 }
 
 subgraph decisions {
  $decision_style
   checkSumInLam   [label="Sum in &lambda;?"]
-  checkSumInLam2  [label="Sum in &lambda;?"]
+  checkSumInLam2  [label="Sum in &lambda;?", group=gmain]
 }
 
 subgraph algorithms {
  $algorithm_style
   convertDet    [label="ConvertUnits\n(AlignBins = True)"]
-  convertDB     [label="ConvertUnits\n(AlignBins = True)"]
-  convertMon    [label="ConvertUnits\n(AlignBins = True)", group=gmonitors]
   groupDet      [label="GroupDetectors"]
-  cropMonWS     [label="CropWorkspace", group=gmonitors]
-  calcFlatBg    [label="CalculateFlatBackground", group=gmonitors]
-  intMon        [label="Integration", group=gmonitors]
-  groupDetRDB   [label="GroupDetectors"]
-  divideDetMon  [label="Divide\n(Detectors / Monitors)", group=gmain]
-  divideDetRDB  [label="Divide\n(Detectors / DirectBeam)", group=gmain]
-  cropWav       [label="CropWorkspace", group=gmain]
+  cropWav       [label="CropWorkspace"]
+  divideDetDB   [label="Divide\n(Detectors / DirectBeam)"]
+  divideDetMon  [label="Divide\n(Detectors / Monitors)"]
 }
 
 subgraph processes {
  $process_style
+  createDBWS    [label="Create direct beam\nworkspace"]
+  createMonWS   [label="Create monitor\nworkspace"]
 }
 
 subgraph values {
  $value_style
 }
 
-inputWS			-> checkSumInLam	[label="Detectors"]
-inputWS			-> groupDetRDB		[label="Direct Beam"]
-inputWS			-> cropMonWS		[label="Monitors"]
+inputWS             -> checkSumInLam [label="Detectors"]
+inputWS             -> createDBWS    [label="Direct Beam"]
+inputWS             -> createMonWS   [label="Monitors"]
 
-checkSumInLam           -> convertDet [label="No"]
-checkSumInLam           -> groupDet   [label="Yes"]
-groupDet		-> convertDet
+checkSumInLam       -> convertDet    [label="No"]
+checkSumInLam       -> groupDet      [label="Yes"]
 
-procCommands		-> groupDet
-
-regionOfDirectBeam	-> groupDetRDB
-groupDetRDB		-> convertDB
-
-monitorIndex		-> cropMonWS
-cropMonWS		-> convertMon
-
-convertDet		-> divideDetRDB
-convertDB		-> divideDetRDB
-
-convertMon          -> calcFlatBg
-monBackWavMin       -> calcFlatBg
-monBackWavMax       -> calcFlatBg
-calcFlatBg          -> intMon
-monIntWavMin        -> intMon
-monIntWavMax        -> intMon
-
-divideDetRDB        -> divideDetMon
-intMon              -> divideDetMon
+procCommands        -> groupDet
+groupDet            -> convertDet
+convertDet          -> divideDetDB
+createDBWS          -> divideDetDB
+divideDetDB         -> divideDetMon
+createMonWS         -> divideDetMon
 divideDetMon        -> checkSumInLam2
-checkSumInLam2      -> outputWS [label="No"]
-checkSumInLam2      -> cropWav [label="Yes"]
+
+checkSumInLam2      -> outputWS          [label="No"]
+checkSumInLam2      -> cropWav           [label="Yes"]
 wavMin              -> cropWav
 wavMax              -> cropWav
 cropWav             -> outputWS
 
-{rank=same; groupDet; groupDetRDB; cropMonWS}
-{rank=same; convertDet; convertDB; convertMon}
-{rank=same; monIntWavMin; monIntWavMax}
-{rank=same; divideDetRDB; intMon}
-{rank=same; monBackWavMin; monBackWavMax}
-{rank=same; wavMin; wavMax}
+{rank=same; wavMin; wavMax; checkSumInLam2}
 }
