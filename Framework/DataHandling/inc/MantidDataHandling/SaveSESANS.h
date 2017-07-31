@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAHANDLING_SAVESESANS_H_
 #define MANTID_DATAHANDLING_SAVESESANS_H_
 
-#include "MantidKernel/cow_ptr.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -19,6 +19,7 @@ namespace DataHandling {
   <LI> Theta_zmaz_unit - Unit for theta_znmax</LI>
   <LI> Theta_ymax - TODO : Find a good description for this</LI>
   <LI> Theta_ymaz_unit - Unit for theta_ymax</LI>
+  <LI> Echo_constant - The echo constant
   </UL>
 
   @author Joseph Ramsay, ISIS
@@ -47,26 +48,35 @@ namespace DataHandling {
 */
 class MANTID_DATAHANDLING_DLL SaveSESANS : public API::Algorithm {
 public:
-	const std::string name() const override;
-	const std::string summary() const override;
-	int version() const override;
-	const std::string category() const override;
+  const std::string name() const override;
+  const std::string summary() const override;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-	// Length of the longest attribute name in headers (+4 for readability in the file)
-	const int MAX_HDR_LENGTH = 23;
-	const std::vector<std::string> fileExtensions{ ".ses" , ".SES", ".sesans", ".SESANS" };
+  // Length of the longest attribute name in headers (+4 for readability in the
+  // file)
+  const int MAX_HDR_LENGTH = 23;
+  const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans",
+                                                ".SESANS"};
 
-	void init() override;
-	void exec() override;
+  void init() override;
+  void exec() override;
 
-	void writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const_sptr &ws);
-	void writeHeader(std::ofstream &outfile, const std::string &name, const std::string &value);
+  void writeHeaders(std::ofstream &outfile,
+                    API::MatrixWorkspace_const_sptr &ws);
+  void writeHeader(std::ofstream &outfile, const std::string &name,
+                   const std::string &value);
 
-	std::vector<double> calculateSpinEchoLength(const HistogramData::Points &wavelength) const;
-	std::vector<double> calculateDepolarisation(const HistogramData::HistogramY &yValues, const HistogramData::Points &wavelength) const;
-	Mantid::MantidVec calculateError(const HistogramData::HistogramE & eValues, const HistogramData::HistogramY &yValues, const HistogramData::Points &wavelength) const;
-
+  std::vector<double>
+  calculateSpinEchoLength(const HistogramData::Points &wavelength) const;
+  std::vector<double>
+  calculateDepolarisation(const HistogramData::HistogramY &yValues,
+                          const HistogramData::Points &wavelength) const;
+  Mantid::MantidVec
+  calculateError(const HistogramData::HistogramE &eValues,
+                 const HistogramData::HistogramY &yValues,
+                 const HistogramData::Points &wavelength) const;
 };
 
 } // namespace DataHandling
