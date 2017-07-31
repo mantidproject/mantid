@@ -34,6 +34,7 @@ private slots:
   void unGroupInput(bool error);
   void saveClicked();
   void plotClicked();
+  void plotCurrentPreview();
 
 private:
   Ui::Elwin m_uiForm;

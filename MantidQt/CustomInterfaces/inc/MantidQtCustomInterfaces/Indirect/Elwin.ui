@@ -159,7 +159,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pbPlotPreview">
        <property name="text">
         <string>Plot Current Preview</string>
        </property>

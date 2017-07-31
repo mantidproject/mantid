@@ -101,6 +101,8 @@ void Elwin::setup() {
   // Handle plot and save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+    SLOT(plotCurrentPreview()));
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -510,6 +512,11 @@ void Elwin::saveClicked() {
 
   m_batchAlgoRunner->executeBatchAsync();
 }
+
+void Elwin::plotCurrentPreview() {
+
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

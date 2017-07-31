@@ -385,11 +385,23 @@ void Iqt::plotInput(const QString &wsname) {
       // set default value for width
       m_dblManager->setValue(m_properties["EWidth"], 0.005);
     }
+
+    // Set saved workspace
+    m_IqtInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      wsname.toStdString());
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
 
   calculateBinning();
+}
+
+void Iqt::plotCurrentPreview() {
+  if (!m_IqtInputWS) {
+    return;
+  }
+  
+  IndirectTab::plotSpectrum(QString::fromStdString(m_IqtInputWS->getName()), 0, 0);
 }
 
 /**
