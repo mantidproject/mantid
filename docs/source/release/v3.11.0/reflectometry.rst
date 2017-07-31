@@ -26,6 +26,12 @@ ISIS Reflectometry
 
 - During reduction, rows and groups that have been successfully processed are highlighted green.
 
+- New 'autoreduce' button added for automatically reducing all runs obtained from a given investigation id.
+
+  - With an id supplied, clicking 'autoreduce' searches for runs that are included in the investigation, transfers them to the processing table and processes all runs.
+  - Button disabled while reduction in process. Can be re-enabled by pausing autoreduction, where clicking 'autoreduce' again will continue processing rows.
+  - Changing the instrument, investigation id or transfer method while paused and clicking 'autoreduce' will start a new autoreduction.
+
 
 ISIS Reflectometry (Old)
 ########################
