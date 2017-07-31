@@ -31,7 +31,10 @@ class FunctionWrapper:
       
           :param name: name that appears in the []
       """
-      return self.fun.getParameterValue(name)
+      if type(name) == type('string') and self.fun.hasAttribute(name):
+         return self.fun.getAttributeValue(name)
+      else:
+         return self.fun.getParameterValue(name)
       
   def __setitem__ (self, name, value):
       """ Called from array-like access on LHS
@@ -40,7 +43,10 @@ class FunctionWrapper:
           :param name: name that appears in the []
           :param value: new value of this item
       """
-      self.fun.setParameter(name, value)
+      if type(name) == type('string') and self.fun.hasAttribute(name):
+         self.fun.setAttributeValue(name, value)
+      else:
+         self.fun.setParameter(name, value)
       
   def __str__ (self):
       """ Return string giving contents of function.
