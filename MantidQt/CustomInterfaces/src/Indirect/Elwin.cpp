@@ -346,6 +346,9 @@ void Elwin::newInputFiles() {
 
   // Default to the first file
   m_uiForm.cbPreviewFile->setCurrentIndex(0);
+  QString wsname = m_uiForm.cbPreviewFile->currentText();
+  m_ElInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    wsname.toStdString());
 }
 
 /**
@@ -513,8 +516,16 @@ void Elwin::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
+/**
+* Plots the current spectrum displayed in the preview plot
+*/
 void Elwin::plotCurrentPreview() {
-
+  
+  // Check whether a workspace has been selected
+  if (m_ElInputWS) {
+    int specNo = m_uiForm.spPreviewSpec->value();
+    IndirectTab::plotSpectrum(QString::fromStdString(m_ElInputWS->getName()), specNo, specNo);
+  }
 }
 
 } // namespace IDA

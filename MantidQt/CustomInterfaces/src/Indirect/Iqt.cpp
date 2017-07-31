@@ -76,6 +76,8 @@ void Iqt::setup() {
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbTile, SIGNAL(clicked()), this, SLOT(PlotTiled()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+    SLOT(plotCurrentPreview()));
 }
 
 void Iqt::run() {
@@ -396,12 +398,15 @@ void Iqt::plotInput(const QString &wsname) {
   calculateBinning();
 }
 
+/**
+* Plots the current spectrum displayed in the preview plot
+*/
 void Iqt::plotCurrentPreview() {
-  if (!m_IqtInputWS) {
-    return;
+
+  // Check whether an input workspace has been selected and exists
+  if (m_IqtInputWS) {
+    IndirectTab::plotSpectrum(QString::fromStdString(m_IqtInputWS->getName()), 0, 0);
   }
-  
-  IndirectTab::plotSpectrum(QString::fromStdString(m_IqtInputWS->getName()), 0, 0);
 }
 
 /**

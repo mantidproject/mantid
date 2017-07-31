@@ -39,6 +39,7 @@ private slots:
 private:
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
+  Mantid::API::MatrixWorkspace_sptr m_ElInputWS;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
