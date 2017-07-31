@@ -24,7 +24,7 @@ if ( MSVC_IDE )
   set_property ( TARGET qtwidgetsrefdetectorview PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET qtwidgetsfactory PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET qtwidgetspluginsdesigner PROPERTY FOLDER "MantidQt" )
-#  set_property ( TARGET CustomDialogs PROPERTY FOLDER "MantidQt" )
+  set_property ( TARGET qtwidgetspluginsalgorithm_dialogs PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET CustomInterfaces PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET mantidqtpython PROPERTY FOLDER "MantidQt" )
 else ()
@@ -33,7 +33,8 @@ else ()
                                        qtwidgetsspectrumviewer
                                        qtwidgetsrefdetectorview
                                        qtwidgetsfactory
-#                                       CustomDialogs CustomInterfaces
+                                       qtwidgetspluginsalgorithm_dialogs
+#                                       CustomInterfaces
 #                                       mantidqtpython
   )
 endif ()
