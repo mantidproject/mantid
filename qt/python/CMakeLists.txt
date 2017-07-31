@@ -107,15 +107,14 @@ include_directories ( SYSTEM ${SIP_INCLUDE_DIR} )
 include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 # Other folders that need to be included...
-include_directories ( ../SliceViewer/inc )
-include_directories ( ../MantidWidgets/inc )
-include_directories ( ../MantidWidgets/inc/MantidQtMantidWidgets )
-include_directories ( ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView )
-include_directories ( ../Factory/inc )
-include_directories ( ../SpectrumViewer/inc )
-include_directories ( ../RefDetectorViewer/inc )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../SliceViewer ) # to find the ui_*.h auto-generated files
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../RefDetectorViewer ) # to find the ui_*.h auto-generated files
+include_directories ( ../widgets/sliceviewer/inc )
+include_directories ( ../widgets/common/inc )
+include_directories ( ../widgets/instrumentview/inc )
+include_directories ( ../widgets/factory/inc )
+include_directories ( ../widgets/spectrumviewer/inc )
+include_directories ( ../widgets/refdetectorview/inc )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../widgets/sliceviewer ) # to find the ui_*.h auto-generated files
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../widgets/refdetectorview ) # to find the ui_*.h auto-generated files
 
 # This creates the target library, just for python bindings
 add_library ( mantidqtpython MODULE ${SIP_SRC} )
@@ -151,11 +150,11 @@ endif ()
 
 # ... and links to other required libs ...
 target_link_libraries ( mantidqtpython LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-            MantidQtAPI
-            MantidQtSliceViewer
-            MantidQtFactory
-            MantidQtRefDetectorViewer
-            MantidWidgets
+            qtwidgetscommon
+            qtwidgetssliceviewer
+            qtwidgetsfactory
+            qtwidgetsrefdetectorview
+            qtwidgetsinstrumentview
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}

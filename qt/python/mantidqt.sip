@@ -22,8 +22,8 @@
 %Include qwttypes.sip
 
 %ModuleHeaderCode
-#include "MantidQtAPI/PythonSystemHeader.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/PythonSystemHeader.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 %End
 
 %InitialisationCode
@@ -78,7 +78,7 @@ qRegisterMetaType<std::string>();
 namespace GraphOptions
 {
 %TypeHeaderCode
-#include "MantidQtAPI/GraphOptions.h"
+#include "MantidQtWidgets/Common/GraphOptions.h"
 %End
 
   enum ScaleType {Linear, Log10};
@@ -140,7 +140,7 @@ namespace API
 class AlgorithmDialog : QDialog
 {
 %TypeHeaderCode
-#include "MantidQtAPI/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
 %End
 private:
   AlgorithmDialog();
@@ -149,7 +149,7 @@ private:
 class UserSubWindow : QMainWindow
 {
 %TypeHeaderCode
-#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 %End
 private:
   UserSubWindow();
@@ -158,7 +158,7 @@ private:
 class InterfaceManager
 {
 %TypeHeaderCode
-#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 %End
 public:
   MantidQt::API::AlgorithmDialog* createDialogFromName(const QString&, const int = -1,
@@ -181,7 +181,7 @@ public:
 class MantidDesktopServices
 {
 %TypeHeaderCode
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 %End
 public:
   static bool openUrl(const QUrl &url);
@@ -200,7 +200,7 @@ namespace API
 class MWRunFiles : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtAPI/MWRunFiles.h"
+#include "MantidQtWidgets/Common/MWRunFiles.h"
 %End
 public:
 void setLabelMinWidth(const int);
@@ -230,7 +230,7 @@ namespace SliceViewer
 class SliceViewerWindow : QMainWindow
 {
 %TypeHeaderCode
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 %End
 %Docstring
 
@@ -297,7 +297,7 @@ MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
 class LineViewer : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtSliceViewer/LineViewer.h"
+#include "MantidQtWidgets/SliceViewer/LineViewer.h"
 %End
 
 %Docstring
@@ -574,7 +574,7 @@ int LineViewer::getPlotAxis()
 class PeaksPresenter : QObject
 {
 %TypeHeaderCode
-#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 %End
 
 %Docstring
@@ -641,8 +641,8 @@ void PeaksPresenter::zoomToPeak(const int index)
 class ProxyCompositePeaksPresenter :  QObject
 {
 %TypeHeaderCode
-#include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/ProxyCompositePeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 %End
 private:
     ProxyCompositePeaksPresenter();
@@ -658,7 +658,7 @@ public:
 class SliceViewer : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtSliceViewer/SliceViewer.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 %End
 
 %Docstring
@@ -1304,7 +1304,7 @@ namespace Factory
 class WidgetFactory
 {
 %TypeHeaderCode
-#include "MantidQtFactory/WidgetFactory.h"
+#include "MantidQtWidgets/Factory/WidgetFactory.h"
 #include <QVector>
 %End
 
@@ -1386,7 +1386,7 @@ namespace RefDetectorViewer
 class RefIVConnections: QWidget
 {
 %TypeHeaderCode
-#include "MantidQtRefDetectorViewer/RefIVConnections.h"
+#include "MantidQtWidgets/RefDetectorView/RefIVConnections.h"
 %End
 
 %Docstring
@@ -1406,7 +1406,7 @@ private:
 class RefMatrixWSImageView
 {
 %TypeHeaderCode
-#include "MantidQtRefDetectorViewer/RefMatrixWSImageView.h"
+#include "MantidQtWidgets/RefDetectorView/RefMatrixWSImageView.h"
 %End
 
 %Docstring
@@ -1458,7 +1458,7 @@ namespace MantidWidgets
 class FitPropertyBrowser : QDockWidget
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 %End
 %Docstring
 
@@ -1495,7 +1495,7 @@ namespace MantidWidgets
 class DataProcessorWhiteList
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 %End
 public:
 DataProcessorWhiteList();
@@ -1505,7 +1505,7 @@ void addElement(const QString &, const QString &, const QString &, bool showValu
 class DataProcessorPreprocessMap
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h"
 %End
 public:
 DataProcessorPreprocessMap();
@@ -1515,7 +1515,7 @@ void addElement(const QString &, const QString &, const QString &prefix = "", co
 class DataProcessorProcessingAlgorithm
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 %End
 public:
 DataProcessorProcessingAlgorithm(const QString &, const QString &, const QString &blacklist = "");
@@ -1524,7 +1524,7 @@ DataProcessorProcessingAlgorithm(const QString &, const QString &, const QString
 class DataProcessorPostprocessingAlgorithm
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 %End
 public:
 DataProcessorPostprocessingAlgorithm(const QString &, const QString &, const QString &);
@@ -1533,7 +1533,7 @@ DataProcessorPostprocessingAlgorithm(const QString &, const QString &, const QSt
 class QDataProcessorWidget : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 %End
 public:
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
@@ -1566,7 +1566,7 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 class DataProcessorMainPresenter
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 %End
 public:
 DataProcessorMainPresenter();
@@ -1581,7 +1581,7 @@ virtual void notifyADSChanged(const QSet<QString> &);
 class DataProcessorAppendRowCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
 %End
 public:
 DataProcessorAppendRowCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1600,7 +1600,7 @@ DataProcessorAppendRowCommand(const MantidQt::MantidWidgets::DataProcessorAppend
 class DataProcessorAppendGroupCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendGroupCommand.h"
 %End
 public:
 DataProcessorAppendGroupCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1619,7 +1619,7 @@ DataProcessorAppendGroupCommand(const MantidQt::MantidWidgets::DataProcessorAppe
 class DataProcessorClearSelectedCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
 %End
 public:
 DataProcessorClearSelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1638,7 +1638,7 @@ DataProcessorClearSelectedCommand(const MantidQt::MantidWidgets::DataProcessorCl
 class DataProcessorCopySelectedCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
 %End
 public:
 DataProcessorCopySelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1657,7 +1657,7 @@ DataProcessorCopySelectedCommand(const MantidQt::MantidWidgets::DataProcessorCop
 class DataProcessorCutSelectedCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
 %End
 public:
 DataProcessorCutSelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1676,7 +1676,7 @@ DataProcessorCutSelectedCommand(const MantidQt::MantidWidgets::DataProcessorCutS
 class DataProcessorDeleteGroupCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
 %End
 public:
 DataProcessorDeleteGroupCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1695,7 +1695,7 @@ DataProcessorDeleteGroupCommand(const MantidQt::MantidWidgets::DataProcessorDele
 class DataProcessorDeleteRowCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 %End
 public:
 DataProcessorDeleteRowCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1714,7 +1714,7 @@ DataProcessorDeleteRowCommand(const MantidQt::MantidWidgets::DataProcessorDelete
 class DataProcessorExpandCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
 %End
 public:
 DataProcessorExpandCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1733,7 +1733,7 @@ DataProcessorExpandCommand(const MantidQt::MantidWidgets::DataProcessorExpandCom
 class DataProcessorExportTableCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
 %End
 public:
 DataProcessorExportTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1752,7 +1752,7 @@ DataProcessorExportTableCommand(const MantidQt::MantidWidgets::DataProcessorExpo
 class DataProcessorGroupRowsCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 %End
 public:
 DataProcessorGroupRowsCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1771,7 +1771,7 @@ DataProcessorGroupRowsCommand(const MantidQt::MantidWidgets::DataProcessorGroupR
 class DataProcessorImportTableCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
 %End
 public:
 DataProcessorImportTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1790,7 +1790,7 @@ DataProcessorImportTableCommand(const MantidQt::MantidWidgets::DataProcessorImpo
 class DataProcessorNewTableCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
 %End
 public:
 DataProcessorNewTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1809,7 +1809,7 @@ DataProcessorNewTableCommand(const MantidQt::MantidWidgets::DataProcessorNewTabl
 class DataProcessorOpenTableCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
 %End
 public:
 DataProcessorOpenTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1828,7 +1828,7 @@ DataProcessorOpenTableCommand(const MantidQt::MantidWidgets::DataProcessorOpenTa
 class DataProcessorOptionsCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
 %End
 public:
 DataProcessorOptionsCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1847,7 +1847,7 @@ DataProcessorOptionsCommand(const MantidQt::MantidWidgets::DataProcessorOptionsC
 class DataProcessorPasteSelectedCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
 %End
 public:
 DataProcessorPasteSelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1866,7 +1866,7 @@ DataProcessorPasteSelectedCommand(const MantidQt::MantidWidgets::DataProcessorPa
 class DataProcessorPlotGroupCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 %End
 public:
 DataProcessorPlotGroupCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1885,7 +1885,7 @@ DataProcessorPlotGroupCommand(const MantidQt::MantidWidgets::DataProcessorPlotGr
 class DataProcessorPlotRowCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h"
 %End
 public:
 DataProcessorPlotRowCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1904,7 +1904,7 @@ DataProcessorPlotRowCommand(const MantidQt::MantidWidgets::DataProcessorPlotRowC
 class DataProcessorProcessCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessCommand.h"
 %End
 public:
 DataProcessorProcessCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1923,7 +1923,7 @@ DataProcessorProcessCommand(const MantidQt::MantidWidgets::DataProcessorProcessC
 class DataProcessorSaveTableCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
 %End
 public:
 DataProcessorSaveTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1942,7 +1942,7 @@ DataProcessorSaveTableCommand(const MantidQt::MantidWidgets::DataProcessorSaveTa
 class DataProcessorSaveTableAsCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
 %End
 public:
 DataProcessorSaveTableAsCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1961,7 +1961,7 @@ DataProcessorSaveTableAsCommand(const MantidQt::MantidWidgets::DataProcessorSave
 class DataProcessorSeparatorCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
 %End
 public:
 DataProcessorSeparatorCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
@@ -1980,7 +1980,7 @@ DataProcessorSeparatorCommand(const MantidQt::MantidWidgets::DataProcessorSepara
 class DataProcessorWorkspaceCommand
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 %End
 public:
 DataProcessorWorkspaceCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &, const QString &);
@@ -2007,7 +2007,7 @@ namespace MantidWidgets
 class SlitCalculator : QDialog
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/SlitCalculator.h"
+#include "MantidQtWidgets/Common/SlitCalculator.h"
 %End
 %Docstring
 
@@ -2043,7 +2043,7 @@ namespace API
 class WidgetScrollbarDecorator
 {
 %TypeHeaderCode
-#include "MantidQtAPI/WidgetScrollbarDecorator.h"
+#include "MantidQtWidgets/Common/WidgetScrollbarDecorator.h"
 %End
 %Docstring
 
@@ -2126,7 +2126,7 @@ namespace MantidWidgets
 class InstrumentWidgetTab: QFrame
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 %End
 public:
 	// This is a duplicate from the same enum in InstrumentWidget, just so you
@@ -2141,7 +2141,7 @@ private:
 class InstrumentWidget: QWidget
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 %End
 
 %Docstring
@@ -2238,7 +2238,7 @@ InstrumentWidget(const MantidQt::MantidWidgets::InstrumentWidget &);
 class InstrumentWidgetRenderTab: MantidQt::MantidWidgets::InstrumentWidgetTab
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 %End
 
 public:
@@ -2364,7 +2364,7 @@ private:
 class InstrumentWidgetPickTab: MantidQt::MantidWidgets::InstrumentWidgetTab
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetPickTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 %End
 
 public:
@@ -2386,7 +2386,7 @@ private:
 class InstrumentWidgetMaskTab: MantidQt::MantidWidgets::InstrumentWidgetTab
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
 %End
 
 public:
@@ -2417,7 +2417,7 @@ private:
 class InstrumentWidgetTreeTab: MantidQt::MantidWidgets::InstrumentWidgetTab
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
 %End
 
 public:

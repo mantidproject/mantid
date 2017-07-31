@@ -10,6 +10,7 @@ include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 include_directories ( widgets/common/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/widgets/common )
 add_subdirectory ( widgets )
+add_subdirectory ( python )
 
 ###########################################################################
 # Add a custom target to build all of the MantidQt packages
@@ -26,7 +27,7 @@ if ( MSVC_IDE )
   set_property ( TARGET qtwidgetspluginsdesigner PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET qtwidgetspluginsalgorithm_dialogs PROPERTY FOLDER "MantidQt" )
 #  set_property ( TARGET CustomInterfaces PROPERTY FOLDER "MantidQt" )
-#  set_property ( TARGET mantidqtpython PROPERTY FOLDER "MantidQt" )
+  set_property ( TARGET mantidqtpython PROPERTY FOLDER "MantidQt" )
 else ()
   add_custom_target ( MantidQt DEPENDS qtwidgetscommon 
                                        qtwidgetssliceviewer
@@ -34,7 +35,7 @@ else ()
                                        qtwidgetsrefdetectorview
                                        qtwidgetsfactory
                                        qtwidgetspluginsalgorithm_dialogs
+                                       mantidqtpython
 #                                       CustomInterfaces
-#                                       mantidqtpython
   )
 endif ()

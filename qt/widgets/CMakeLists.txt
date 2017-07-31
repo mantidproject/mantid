@@ -9,8 +9,5 @@ add_subdirectory ( refdetectorview)
 add_subdirectory ( factory )
 add_subdirectory ( plugins )
 
-#add_subdirectory ( CustomDialogs )
 #add_subdirectory ( CustomInterfaces )
-#add_subdirectory ( Python )
-#add_subdirectory ( DesignerPlugins )
 
