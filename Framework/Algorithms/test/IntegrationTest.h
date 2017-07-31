@@ -709,7 +709,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testSpace"));
-    const size_t inputNumSpectra = input->getNumberHistograms();
 
     Integration alg;
     alg.setRethrows(true);
@@ -737,7 +736,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testSpace"));
-    const size_t inputNumSpectra = input->getNumberHistograms();
 
     Integration alg;
     alg.setRethrows(true);
@@ -786,7 +784,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testSpace"));
-    const size_t inputNumSpectra = input->getNumberHistograms();
 
     Integration alg;
     alg.setRethrows(true);
