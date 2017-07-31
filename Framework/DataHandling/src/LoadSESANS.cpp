@@ -170,8 +170,8 @@ void LoadSESANS::consumeHeaders(std::ifstream &infile, std::string &line,
   } while (std::getline(infile, line) && line != "BEGIN_DATA");
 }
 
-/** Read numerical data from the file into a map of the form <column name> ->
-* <column data>. Any lines which are badly formed are ignored, and a warning
+/** Read numerical data from the file into a map of the form [column name] ->
+* [column data]. Any lines which are badly formed are ignored, and a warning
 * passed to the user
 * @param infile Reference to the input file
 * @param line Reference to the line of the file currently being processed
@@ -336,9 +336,8 @@ bool LoadSESANS::space(const char &c) { return c == ' ' || c == '\t'; }
 */
 bool LoadSESANS::notSpace(const char &c) { return !space(c); }
 
-/** Split a string
+/** Split a string on spaces
  * @param str The string to split
- * @param delim The delimiter
  * @return Vector of string segments
  */
 std::vector<std::string> LoadSESANS::split(const std::string &str) {
@@ -402,7 +401,7 @@ Column LoadSESANS::calculateYValues(const Column &depolarisation,
 /**Calculate workspace E values from file columns
  * e = depolError * Y * wavelength ^ 2
  * @param error Depolarisation_error column from the input file
- * @param yValue calculated Y values for the new workspace
+ * @param yValues calculated Y values for the new workspace
  * @param wavelength Wavelength column from the file
  * @return Calculated E values
  */

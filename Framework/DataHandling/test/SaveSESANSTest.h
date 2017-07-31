@@ -64,15 +64,17 @@ public:
     // Make sure we can load the output file with no problems
     DataHandling::LoadSESANS loader;
     loader.initialize();
+	std::string outWSName = "outWS";
+
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", outputPath));
-    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(Poco::File(outputPath).exists());
 
     // Check the file against original data - load it into a workspace
     API::Workspace_sptr loadedWS;
     TS_ASSERT_THROWS_NOTHING(
-        loadedWS = API::AnalysisDataService::Instance().retrieve("ws"));
+        loadedWS = API::AnalysisDataService::Instance().retrieve(outWSName));
     API::MatrixWorkspace_sptr data =
         boost::dynamic_pointer_cast<API::MatrixWorkspace>(loadedWS);
     // Check titles were set
