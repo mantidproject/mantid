@@ -19,8 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 MSDFit::MSDFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_msdTree(NULL),
-      m_msdInputWS() {
+    : IndirectDataAnalysisTab(parent), m_msdTree(NULL), m_msdInputWS() {
   m_uiForm.setupUi(parent);
 }
 
@@ -66,7 +65,7 @@ void MSDFit::setup() {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-    SLOT(plotCurrentPreview()));
+          SLOT(plotCurrentPreview()));
 }
 
 void MSDFit::run() {
@@ -222,8 +221,9 @@ void MSDFit::plotFit(QString wsName, int specNo) {
  * @param wsName Name of new workspace loaded
  */
 void MSDFit::newDataLoaded(const QString wsName) {
-  m_msdInputWS = Mantid::API::AnalysisDataService::Instance()
-    .retrieveWS<MatrixWorkspace>(wsName.toStdString());
+  m_msdInputWS =
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          wsName.toStdString());
   int maxWsIndex = static_cast<int>(m_msdInputWS->getNumberHistograms()) - 1;
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
@@ -335,12 +335,10 @@ void MSDFit::plotCurrentPreview() {
   // Check a workspace has been selected
   if (m_msdInputWS) {
     const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
-    IndirectTab::plotSpectrum(
-      QString::fromStdString(m_msdInputWS->getName()), workspaceIndex,
-      workspaceIndex);
+    IndirectTab::plotSpectrum(QString::fromStdString(m_msdInputWS->getName()),
+                              workspaceIndex, workspaceIndex);
   }
 }
-
 
 } // namespace IDA
 } // namespace CustomInterfaces

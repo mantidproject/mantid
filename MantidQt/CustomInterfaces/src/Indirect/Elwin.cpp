@@ -19,8 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Elwin::Elwin(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_elwTree(NULL),
-      m_ElInputWS() {
+    : IndirectDataAnalysisTab(parent), m_elwTree(NULL), m_ElInputWS() {
   m_uiForm.setupUi(parent);
 }
 
@@ -103,7 +102,7 @@ void Elwin::setup() {
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-    SLOT(plotCurrentPreview()));
+          SLOT(plotCurrentPreview()));
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -349,7 +348,7 @@ void Elwin::newInputFiles() {
   m_uiForm.cbPreviewFile->setCurrentIndex(0);
   QString wsname = m_uiForm.cbPreviewFile->currentText();
   m_ElInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-    wsname.toStdString());
+      wsname.toStdString());
 }
 
 /**
@@ -521,11 +520,12 @@ void Elwin::saveClicked() {
 * Plots the current spectrum displayed in the preview plot
 */
 void Elwin::plotCurrentPreview() {
-  
+
   // Check whether a workspace has been selected
   if (m_ElInputWS) {
     int specNo = m_uiForm.spPreviewSpec->value();
-    IndirectTab::plotSpectrum(QString::fromStdString(m_ElInputWS->getName()), specNo, specNo);
+    IndirectTab::plotSpectrum(QString::fromStdString(m_ElInputWS->getName()),
+                              specNo, specNo);
   }
 }
 

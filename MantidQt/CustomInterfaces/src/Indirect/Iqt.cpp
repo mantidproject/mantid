@@ -78,7 +78,7 @@ void Iqt::setup() {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbTile, SIGNAL(clicked()), this, SLOT(PlotTiled()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-    SLOT(plotCurrentPreview()));
+          SLOT(plotCurrentPreview()));
 }
 
 void Iqt::run() {
@@ -391,7 +391,7 @@ void Iqt::plotInput(const QString &wsname) {
 
     // Set saved workspace
     m_IqtInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsname.toStdString());
+        wsname.toStdString());
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
@@ -406,7 +406,8 @@ void Iqt::plotCurrentPreview() {
 
   // Check whether an input workspace has been selected and exists
   if (m_IqtInputWS) {
-    IndirectTab::plotSpectrum(QString::fromStdString(m_IqtInputWS->getName()), 0, 0);
+    IndirectTab::plotSpectrum(QString::fromStdString(m_IqtInputWS->getName()),
+                              0, 0);
   }
 }
 

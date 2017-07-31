@@ -17,8 +17,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr),
-      m_jfInputWS(), m_specNo(0) {
+    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr), m_jfInputWS(),
+      m_specNo(0) {
   m_uiForm.setupUi(parent);
 }
 
@@ -76,7 +76,7 @@ void JumpFit::setup() {
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-    SLOT(plotCurrentPreview()));
+          SLOT(plotCurrentPreview()));
 }
 
 /**
@@ -565,9 +565,8 @@ void JumpFit::plotCurrentPreview() {
 
   // Check if a workspace has been selected
   if (m_jfInputWS) {
-    IndirectTab::plotSpectrum(
-      QString::fromStdString(m_jfInputWS->getName()), m_specNo,
-      m_specNo);
+    IndirectTab::plotSpectrum(QString::fromStdString(m_jfInputWS->getName()),
+                              m_specNo, m_specNo);
   }
 }
 } // namespace IDA

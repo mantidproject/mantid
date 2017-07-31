@@ -147,7 +147,7 @@ void IqtFit::setup() {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-    SLOT(plotCurrentPreview()));
+          SLOT(plotCurrentPreview()));
 }
 
 void IqtFit::run() {
@@ -282,13 +282,12 @@ void IqtFit::plotCurrentPreview() {
     // Plot only the sample curve
     const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
     IndirectTab::plotSpectrum(
-      QString::fromStdString(m_previewPlotData->getName()), workspaceIndex,
-      workspaceIndex);
-  }
-  else {
+        QString::fromStdString(m_previewPlotData->getName()), workspaceIndex,
+        workspaceIndex);
+  } else {
     // Plot Sample, Fit and Diff curve
     IndirectTab::plotSpectrum(
-      QString::fromStdString(m_previewPlotData->getName()), 0, 2);
+        QString::fromStdString(m_previewPlotData->getName()), 0, 2);
   }
 }
 
