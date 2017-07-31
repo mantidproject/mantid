@@ -86,7 +86,7 @@ QString DataProcessorGenerateNotebook::generateNotebook(const TreeData &data) {
 
     /** Announce the stitch group in the notebook **/
 
-    QString groupTitle = "Group " + groupId;
+    QString groupTitle = "Group " + QString::number(groupId);
     notebook->markdownCell(groupTitle.toStdString());
 
     /**  Reduce all rows **/
