@@ -135,9 +135,11 @@ void LoadSESANS::exec() {
 
   // Make a workspace from the columns and set it as the output
   API::MatrixWorkspace_sptr newWorkspace = makeWorkspace(columns);
+
   newWorkspace->setTitle(attributes["DataFileTitle"]);
   newWorkspace->mutableSample().setName(attributes["Sample"]);
   newWorkspace->mutableSample().setThickness(std::stod(attributes["Thickness"]));
+  
   setProperty("OutputWorkspace", newWorkspace);
 }
 
