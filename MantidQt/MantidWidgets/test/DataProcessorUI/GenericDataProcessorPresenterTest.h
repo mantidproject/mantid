@@ -33,8 +33,8 @@ public:
   // Standard constructor
   GenericDataProcessorPresenterNoThread(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm>
-          &preprocessMap,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
@@ -480,8 +480,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     EXPECT_CALL(mockDataProcessorView,
-                askUserString(_, _, QString("Workspace")))
-        .Times(0);
+                askUserString(_, _, QString("Workspace"))).Times(0);
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -3328,9 +3327,9 @@ public:
         presenter.notify(DataProcessorPresenter::ExpandSelectionFlag));
     TS_ASSERT_THROWS_ANYTHING(
         presenter.notify(DataProcessorPresenter::PlotGroupFlag));
-    TS_ASSERT_THROWS(presenter.getPostprocessedWorkspaceName(
-                         std::map<int, QStringList>()),
-                     std::runtime_error);
+    TS_ASSERT_THROWS(
+        presenter.getPostprocessedWorkspaceName(std::map<int, QStringList>()),
+        std::runtime_error);
   }
 
   void testPostprocessMap() {
@@ -3459,11 +3458,9 @@ public:
     EXPECT_CALL(mockDataProcessorView,
                 setInstrumentList(
                     QString::fromStdString("INTER,SURF,POLREF,OFFSPEC,CRISP"),
-                    QString::fromStdString("INTER")))
-        .Times(1);
+                    QString::fromStdString("INTER"))).Times(1);
     presenter.setInstrumentList(
-        QStringList{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"},
-        "INTER");
+        QStringList{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"}, "INTER");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }

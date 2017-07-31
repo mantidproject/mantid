@@ -31,7 +31,8 @@ private:
     colGroup->setPlotType(0);
 
     for (int col = 0; col < ncols; col++) {
-      auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
+      auto column = ws->addColumn(
+          "str", whitelist.colNameFromColIndex(col).toStdString());
       column->setPlotType(0);
     }
 

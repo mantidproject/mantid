@@ -29,8 +29,7 @@ public:
                      std::vector<QString>{"InputWorkspace"});
     TS_ASSERT_EQUALS(alg.getOutputWsProperties(),
                      std::vector<QString>{"OutputWorkspace"});
-    TS_ASSERT_EQUALS(alg.getInputStrListProperties(),
-                     std::vector<QString>());
+    TS_ASSERT_EQUALS(alg.getInputStrListProperties(), std::vector<QString>());
 
     // Add more algorithms to test if needed
   }
@@ -39,8 +38,7 @@ public:
     // Test Workspace properties
     DataProcessorProcessingAlgorithmBase alg("CompareWorkspaces");
     TS_ASSERT_EQUALS(alg.getInputWsProperties().size(), 2);
-    TS_ASSERT_EQUALS(alg.getInputStrListProperties(),
-                     std::vector<QString>());
+    TS_ASSERT_EQUALS(alg.getInputStrListProperties(), std::vector<QString>());
 
     // Add more algorithms to test if needed
   }
