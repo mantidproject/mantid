@@ -57,11 +57,10 @@ public:
 private:
   // Private constants
   const std::vector<std::string> mandatoryAttributes{
-      "FileFormatVersion", "DataFileTitle",       "Sample",
-      "Thickness",         "Thickness_unit",      "Theta_zmax",
-      "Theta_zmax_unit",   "Theta_ymax",          "Theta_ymax_unit",
-      "Orientation",       "SpinEchoLength_unit", "Depolarisation_unit",
-      "Wavelength_unit"};
+      "FileFormatVersion", "DataFileTitle", "Sample", "Thickness",
+      "Thickness_unit", "Theta_zmax", "Theta_zmax_unit", "Theta_ymax",
+      "Theta_ymax_unit", "Orientation", "SpinEchoLength_unit",
+      "Depolarisation_unit", "Wavelength_unit"};
   const std::vector<std::string> mandatoryColumnHeaders{
       "SpinEchoLength", "Depolarisation", "Depolarisation_error", "Wavelength"};
   const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans",

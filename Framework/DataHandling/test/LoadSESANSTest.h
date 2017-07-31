@@ -62,17 +62,22 @@ public:
 
     double tolerance = 1e-5;
     // Test the first two rows we read
-    // These values are all hard-coded in the sample file in writeGoodFile(), using:
+    // These values are all hard-coded in the sample file in writeGoodFile(),
+    // using:
     // Y = e ^ (depol * wavelength ^2)
     // E = depolError * Y * wavelength ^ 2
     // X = wavelength
     TS_ASSERT_DELTA(ws->x(0)[0], 1.612452, tolerance);
-    TS_ASSERT_DELTA(ws->y(0)[0], exp(-1.42e-3 * 1.612452 * 1.612452), tolerance);
-    TS_ASSERT_DELTA(ws->e(0)[0], 2.04e-3 * ws->y(0)[0] * 1.612452 * 1.612452, tolerance);
+    TS_ASSERT_DELTA(ws->y(0)[0], exp(-1.42e-3 * 1.612452 * 1.612452),
+                    tolerance);
+    TS_ASSERT_DELTA(ws->e(0)[0], 2.04e-3 * ws->y(0)[0] * 1.612452 * 1.612452,
+                    tolerance);
 
     TS_ASSERT_DELTA(ws->x(0)[1], 1.675709, tolerance);
-    TS_ASSERT_DELTA(ws->y(0)[1], exp(-1.45e-3 * 1.675709 * 1.675709), tolerance);
-    TS_ASSERT_DELTA(ws->e(0)[1], 1.87e-3 * ws->y(0)[0] * 1.675709 * 1.675709, tolerance);
+    TS_ASSERT_DELTA(ws->y(0)[1], exp(-1.45e-3 * 1.675709 * 1.675709),
+                    tolerance);
+    TS_ASSERT_DELTA(ws->e(0)[1], 1.87e-3 * ws->y(0)[0] * 1.675709 * 1.675709,
+                    tolerance);
   }
 
   void test_confidence() {
@@ -99,7 +104,6 @@ public:
 
     TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
     deleteFile(testAlg);
-
   }
 
   void test_mandatoryHeaders() {
@@ -225,15 +229,14 @@ private:
         "280.8 -1.45E-3 1.87E-3 1.675709\n";
     std::ofstream file(infileName);
     file << contents;
-    file.close();    
+    file.close();
   }
 
-  void deleteFile(const LoadSESANS &testAlg){
+  void deleteFile(const LoadSESANS &testAlg) {
     std::string outputPath = testAlg.getProperty("Filename");
     TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
     TS_ASSERT(!Poco::File(outputPath).exists());
   }
-  
 };
 
 #endif /* MANTID_DATAHANDLING_LOADSESANSTEST_H_ */

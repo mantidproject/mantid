@@ -71,8 +71,10 @@ public:
 
     // Check the file against original data - load it into a workspace
     API::Workspace_sptr loadedWS;
-    TS_ASSERT_THROWS_NOTHING(loadedWS = API::AnalysisDataService::Instance().retrieve("ws"));
-    API::MatrixWorkspace_sptr data = boost::dynamic_pointer_cast<API::MatrixWorkspace>(loadedWS);
+    TS_ASSERT_THROWS_NOTHING(
+        loadedWS = API::AnalysisDataService::Instance().retrieve("ws"));
+    API::MatrixWorkspace_sptr data =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(loadedWS);
     // Check titles were set
     TS_ASSERT_EQUALS(data->getTitle(), "Sample workspace");
     TS_ASSERT_EQUALS(data->sample().getName(), "Sample sample");
@@ -82,15 +84,16 @@ public:
     auto xValues = data->x(0);
     auto yValues = data->y(0);
     auto eValues = data->e(0);
-    
+
     TS_ASSERT_EQUALS(static_cast<int>(xValues.size()), 10);
     TS_ASSERT_EQUALS(static_cast<int>(yValues.size()), 10);
     TS_ASSERT_EQUALS(static_cast<int>(eValues.size()), 10);
 
     // Check the actual values match
     double tolerance(1e-05);
-    for (size_t i = 0; i < xValues.size(); i++){
-      // X values are 0.5 higher than they were when we set them, as we set the bin edges
+    for (size_t i = 0; i < xValues.size(); i++) {
+      // X values are 0.5 higher than they were when we set them, as we set the
+      // bin edges
       // but are now dealing with bin middles
       TS_ASSERT_DELTA(static_cast<double>(i) + 1.5, xValues[i], tolerance);
       TS_ASSERT_DELTA(yValues[i], 2.0, tolerance);

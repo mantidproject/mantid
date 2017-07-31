@@ -197,9 +197,12 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
 
   // static_cast is safe as realistically our file is never going to have enough
   // columns to overflow
-  std::string rawRegex = "^\\s*" +  repeatAndJoin(numberRegex, "\\s+", static_cast<int>(columnHeaders.size())) + "\\s*$";
+  std::string rawRegex = "^\\s*" +
+                         repeatAndJoin(numberRegex, "\\s+",
+                                       static_cast<int>(columnHeaders.size())) +
+                         "\\s*$";
   std::regex lineRegex(rawRegex);
-  
+
   // Tokens in a line
   std::vector<std::string> tokens;
 
@@ -208,7 +211,7 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
 
   while (std::getline(infile, line)) {
     lineNum++;
-    
+
     if (std::regex_match(line, lineRegex)) {
       tokens = split(line);
 
@@ -358,8 +361,8 @@ std::vector<std::string> LoadSESANS::split(const std::string &str) {
 /** Is a string all whitespace?
  * @param str The string to test
  * @return Whether every character is whitespace
- */     
-bool LoadSESANS::allSpaces(const std::string &str){
+ */
+bool LoadSESANS::allSpaces(const std::string &str) {
   return std::all_of(str.begin(), str.end(), space);
 }
 
