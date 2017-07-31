@@ -392,9 +392,8 @@ void ReflDataProcessorPresenter::parseCustom(const QString &timeSlicing,
 
   auto timeStr = timeSlicing.split(",");
   std::vector<double> times;
-  std::transform(
-      timeStr.begin(), timeStr.end(), std::back_inserter(times),
-      [](const QString &astr) { return parseDouble(astr); });
+  std::transform(timeStr.begin(), timeStr.end(), std::back_inserter(times),
+                 [](const QString &astr) { return parseDouble(astr); });
 
   size_t numSlices = times.size() > 1 ? times.size() - 1 : 1;
 
