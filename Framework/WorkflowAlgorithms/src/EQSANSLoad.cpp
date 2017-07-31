@@ -265,29 +265,39 @@ void EQSANSLoad::getSourceSlitSize() {
   Mantid::Kernel::Property *prop = dataWS->run().getProperty(slit1Name);
   Mantid::Kernel::TimeSeriesProperty<double> *dp =
       dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  if (!dp)
+  Mantid::Kernel::TimeSeriesProperty<int> *ip =
+      dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
+  int slit1;
+  if (dp) slit1 = static_cast<int>(dp->getStatistics().mean);
+  else if (ip) slit1 = static_cast<int>(ip->getStatistics().mean);
+  else
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit1Name + " as a time series property with "
-                                         "floating point values.");
-  int slit1 = static_cast<int>(dp->getStatistics().mean);
+                                         "int or floating point values.");
 
   const std::string slit2Name = "vBeamSlit2";
   prop = dataWS->run().getProperty(slit2Name);
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  if (!dp)
+  ip = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
+  int slit2;
+  if (dp) slit2 = static_cast<int>(dp->getStatistics().mean);
+  else if (ip) slit2 = static_cast<int>(ip->getStatistics().mean);
+  else
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit2Name + " as a time series property with "
-                                         "floating point values.");
-  int slit2 = static_cast<int>(dp->getStatistics().mean);
+                                         "int or floating point values.");
 
   const std::string slit3Name = "vBeamSlit3";
   prop = dataWS->run().getProperty(slit3Name);
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  if (!dp)
+  ip = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
+  int slit3;
+  if (dp) slit3 = static_cast<int>(dp->getStatistics().mean);
+  else if (ip) slit3 = static_cast<int>(ip->getStatistics().mean);
+  else
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit3Name + " as a time series property with "
-                                         "floating point values.");
-  int slit3 = static_cast<int>(dp->getStatistics().mean);
+                                         "int or floating point values.");
 
   if (slit1 < 0 && slit2 < 0 && slit3 < 0) {
     m_output_message += "   Could not determine source aperture diameter\n";
