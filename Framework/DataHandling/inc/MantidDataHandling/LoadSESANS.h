@@ -64,7 +64,8 @@ private:
       "Wavelength_unit"};
   const std::vector<std::string> mandatoryColumnHeaders{
       "SpinEchoLength", "Depolarisation", "Depolarisation_error", "Wavelength"};
-  const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans", ".SESANS"};
+  const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans",
+                                                ".SESANS"};
 
   // Private functions
   void init() override;
@@ -72,20 +73,25 @@ private:
 
   void consumeHeaders(std::ifstream &infile, std::string &line, int &lineNum);
   ColumnMap consumeData(std::ifstream &infile, std::string &line, int &lineNum);
-  std::pair<std::string, std::string> splitHeader(const std::string &line, const int &lineNum);
+  std::pair<std::string, std::string> splitHeader(const std::string &line,
+                                                  const int &lineNum);
   void checkMandatoryHeaders();
 
-  void throwFormatError(const std::string &line, const std::string &message, const int &lineNum);
+  void throwFormatError(const std::string &line, const std::string &message,
+                        const int &lineNum);
 
   API::MatrixWorkspace_sptr makeWorkspace(ColumnMap columns);
-  Column calculateYValues(const Column &depolarisation, const Column &wavelength) const;
-  Column calculateEValues(const Column &error, const Column &yValues, const Column &wavelength) const;
+  Column calculateYValues(const Column &depolarisation,
+                          const Column &wavelength) const;
+  Column calculateEValues(const Column &error, const Column &yValues,
+                          const Column &wavelength) const;
 
   // Private helper functions
   static bool space(const char &c);
   static bool notSpace(const char &c);
   static std::vector<std::string> split(const std::string &str);
-  static std::string repeatAndJoin(const std::string &str, const std::string &delim, const int &n);
+  static std::string repeatAndJoin(const std::string &str,
+                                   const std::string &delim, const int &n);
 
   // Private members
   std::unordered_map<std::string, std::string> attributes;

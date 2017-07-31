@@ -46,7 +46,8 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
     return 0;
 
   // If the file has a SESANS extension
-  if (std::find(fileExtensions.begin(), fileExtensions.end(), descriptor.extension()) != fileExtensions.end())
+  if (std::find(fileExtensions.begin(), fileExtensions.end(),
+                descriptor.extension()) != fileExtensions.end())
     return 70;
 
   // Nothing was obviously right or wrong, so we'll have to dig around a bit in
@@ -117,7 +118,8 @@ void LoadSESANS::exec() {
 
   // First line must be FileFormatVersion:
   if (!boost::starts_with(line, "FileFormatVersion"))
-    throwFormatError(line, "File must begin by providing FileFormatVersion", lineNum);
+    throwFormatError(line, "File must begin by providing FileFormatVersion",
+                     lineNum);
 
   // Read in all the header values, and make sure all the mandatory ones are
   // supplied
@@ -127,7 +129,8 @@ void LoadSESANS::exec() {
 
   // Make sure we haven't reached the end of the file without reading any data
   if (line != "BEGIN_DATA")
-    throwFormatError("<EOF>", "Expected \"BEGIN_DATA\" before EOF", lineNum + 1);
+    throwFormatError("<EOF>", "Expected \"BEGIN_DATA\" before EOF",
+                     lineNum + 1);
 
   // Read file columns into a map - now we can get rid of the file
   ColumnMap columns = consumeData(infile, line, lineNum);
@@ -138,8 +141,9 @@ void LoadSESANS::exec() {
 
   newWorkspace->setTitle(attributes["DataFileTitle"]);
   newWorkspace->mutableSample().setName(attributes["Sample"]);
-  newWorkspace->mutableSample().setThickness(std::stod(attributes["Thickness"]));
-  
+  newWorkspace->mutableSample().setThickness(
+      std::stod(attributes["Thickness"]));
+
   setProperty("OutputWorkspace", newWorkspace);
 }
 
@@ -176,7 +180,8 @@ void LoadSESANS::consumeHeaders(std::ifstream &infile, std::string &line,
 * numbers in that column
 * @throw runtime_error If the 4 mandatory columns are not supplied in the file
 */
-ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line, int &lineNum) {
+ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
+                                  int &lineNum) {
   std::string numberRegex = "-?\\d+(\\.\\d+)?(E-\\d+)?";
 
   std::getline(infile, line);
@@ -208,8 +213,8 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line, int 
     if (std::regex_match(line, lineRegex)) {
       tokens = split(line);
 
-	  for (unsigned int i = 0; i < tokens.size(); i++) 
-		  columns[columnHeaders[i]].push_back(std::stod(tokens[i]));
+      for (unsigned int i = 0; i < tokens.size(); i++)
+        columns[columnHeaders[i]].push_back(std::stod(tokens[i]));
     } else {
       g_log.warning("Line " + std::to_string(lineNum) +
                     " discarded, as it was badly formed. Expected " +
@@ -266,7 +271,8 @@ LoadSESANS::splitHeader(const std::string &line, const int &lineNum) {
 void LoadSESANS::throwFormatError(const std::string &line,
                                   const std::string &message,
                                   const int &lineNum) {
-	std::string output = "Badly formed line at line " + std::to_string(lineNum) + ": \"" + line + "\"\n(" + message + ")";
+  std::string output = "Badly formed line at line " + std::to_string(lineNum) +
+                       ": \"" + line + "\"\n(" + message + ")";
   g_log.error(output);
   throw std::runtime_error(output);
 }
@@ -287,25 +293,33 @@ void LoadSESANS::checkMandatoryHeaders() {
   }
 }
 
+/** Create a new workspace with the columns read from the file
+ * @param columns Data columns from input file
+ * @return A workspace with the corresponding data
+ */
 API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
-	size_t histogramLength = columns["SpinEchoLength"].size();
-	API::MatrixWorkspace_sptr newWorkspace = API::WorkspaceFactory::Instance().create("Workspace2D", 1, histogramLength, histogramLength);
+  size_t histogramLength = columns["SpinEchoLength"].size();
+  API::MatrixWorkspace_sptr newWorkspace =
+      API::WorkspaceFactory::Instance().create(
+          "Workspace2D", 1, histogramLength, histogramLength);
 
-	auto xValues = columns["Wavelength"];
-	auto yValues = calculateYValues(columns["Depolarisation"], columns["Wavelength"]);
-	auto eValues = calculateEValues(columns["Depolarisation_error"], yValues, columns["Wavelength"]);
+  auto xValues = columns["Wavelength"];
+  auto yValues =
+      calculateYValues(columns["Depolarisation"], columns["Wavelength"]);
+  auto eValues = calculateEValues(columns["Depolarisation_error"], yValues,
+                                  columns["Wavelength"]);
 
-	auto &dataX = newWorkspace->mutableX(0);
-	auto &dataY = newWorkspace->mutableY(0);
-	auto &dataE = newWorkspace->mutableE(0);
-	
-	for (size_t i = 0; i < histogramLength; i++) {
-	  dataX[i] = xValues[i];
-	  dataY[i] = yValues[i];
-	  dataE[i] = eValues[i];
-	}
+  auto &dataX = newWorkspace->mutableX(0);
+  auto &dataY = newWorkspace->mutableY(0);
+  auto &dataE = newWorkspace->mutableE(0);
 
-	return newWorkspace;
+  for (size_t i = 0; i < histogramLength; i++) {
+    dataX[i] = xValues[i];
+    dataY[i] = yValues[i];
+    dataE[i] = eValues[i];
+  }
+
+  return newWorkspace;
 }
 
 /** Is a character whitespace (here considered space or tab)?
@@ -358,22 +372,38 @@ std::string LoadSESANS::repeatAndJoin(const std::string &str,
   return result + str;
 }
 
-Column LoadSESANS::calculateYValues(const Column &depolarisation, const Column &wavelength) const {
-	Column yValues;
-	
-	transform(depolarisation.begin(), depolarisation.end(), wavelength.begin(),
-		back_inserter(yValues),
-		[&](double depol, double wave) { return exp(depol * wave * wave); });
-	return yValues;
+/**Calculate workspace Y values from depolarisation and wavelength.
+ * y = e^(depolarisation * wavelength ^ 2)
+ * @param depolarisation Depolarisation column from the input file
+ * @param wavelength Wavelength column from the same
+ * @return Calculated Y values
+ */
+Column LoadSESANS::calculateYValues(const Column &depolarisation,
+                                    const Column &wavelength) const {
+  Column yValues;
+
+  transform(depolarisation.begin(), depolarisation.end(), wavelength.begin(),
+            back_inserter(yValues), [&](double depol, double wave) {
+              return exp(depol * wave * wave);
+            });
+  return yValues;
 }
 
-Column LoadSESANS::calculateEValues(const Column & error, const Column & yValues, const Column & wavelength) const {
-	Column eValues;
+/**Calculate workspace E values from file columns
+ * e = depolError * Y * wavelength ^ 2
+ * @param error Depolarisation_error column from the input file
+ * @param yValue calculated Y values for the new workspace
+ * @param wavelength Wavelength column from the file
+ * @return Calculated E values
+ */
+Column LoadSESANS::calculateEValues(const Column &error, const Column &yValues,
+                                    const Column &wavelength) const {
+  Column eValues;
 
-	for (size_t i = 0; i < error.size(); i++) {
-		eValues.push_back(error[i] * yValues[i] * wavelength[i] * wavelength[i]);
-	}
-	return eValues;
+  for (size_t i = 0; i < error.size(); i++) {
+    eValues.push_back(error[i] * yValues[i] * wavelength[i] * wavelength[i]);
+  }
+  return eValues;
 }
 
 } // namespace DataHandling
