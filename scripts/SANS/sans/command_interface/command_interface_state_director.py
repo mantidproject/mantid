@@ -4,10 +4,10 @@ from sans.user_file.state_director import StateDirectorISIS
 from sans.state.data import get_data_builder
 from sans.user_file.user_file_parser import (UserFileParser)
 from sans.user_file.user_file_reader import (UserFileReader)
-from sans.user_file.setting_tags import (MonId, monitor_spectrum, OtherId, SampleId, GravityId, SetId, position_entry,
-                                         fit_general, FitId, monitor_file, mask_angle_entry, LimitsId, range_entry,
-                                         simple_range, DetectorId, event_binning_string_values, det_fit_range,
-                                         single_entry_with_detector)
+from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, SampleId, GravityId, SetId, position_entry,
+                                          fit_general, FitId, monitor_file, mask_angle_entry, LimitsId, range_entry,
+                                          simple_range, DetectorId, event_binning_string_values, det_fit_range,
+                                          single_entry_with_detector)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Commands
