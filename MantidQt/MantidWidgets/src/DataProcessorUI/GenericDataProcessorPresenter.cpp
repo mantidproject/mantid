@@ -784,7 +784,7 @@ QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
  */
 Workspace_sptr GenericDataProcessorPresenter::getRun(const QString &run,
                                                      const QString &instrument,
-                                                     auto const &prefix) {
+                                                     const QString &prefix) {
 
   bool runFound;
   QString outName;
