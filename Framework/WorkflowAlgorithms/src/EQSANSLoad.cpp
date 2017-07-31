@@ -268,8 +268,10 @@ void EQSANSLoad::getSourceSlitSize() {
   Mantid::Kernel::TimeSeriesProperty<int> *ip =
       dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
   int slit1;
-  if (dp) slit1 = static_cast<int>(dp->getStatistics().mean);
-  else if (ip) slit1 = static_cast<int>(ip->getStatistics().mean);
+  if (dp)
+    slit1 = static_cast<int>(dp->getStatistics().mean);
+  else if (ip)
+    slit1 = static_cast<int>(ip->getStatistics().mean);
   else
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit1Name + " as a time series property with "
@@ -280,8 +282,10 @@ void EQSANSLoad::getSourceSlitSize() {
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
   ip = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
   int slit2;
-  if (dp) slit2 = static_cast<int>(dp->getStatistics().mean);
-  else if (ip) slit2 = static_cast<int>(ip->getStatistics().mean);
+  if (dp)
+    slit2 = static_cast<int>(dp->getStatistics().mean);
+  else if (ip)
+    slit2 = static_cast<int>(ip->getStatistics().mean);
   else
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit2Name + " as a time series property with "
@@ -292,8 +296,10 @@ void EQSANSLoad::getSourceSlitSize() {
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
   ip = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
   int slit3;
-  if (dp) slit3 = static_cast<int>(dp->getStatistics().mean);
-  else if (ip) slit3 = static_cast<int>(ip->getStatistics().mean);
+  if (dp)
+    slit3 = static_cast<int>(dp->getStatistics().mean);
+  else if (ip)
+    slit3 = static_cast<int>(ip->getStatistics().mean);
   else
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit3Name + " as a time series property with "
