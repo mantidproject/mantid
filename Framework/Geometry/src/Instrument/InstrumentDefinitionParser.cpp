@@ -292,9 +292,8 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
  * to indicate the shape for this assembly should be created later.
  *
  * @param filename :: Name of the IDF, for exception message
- * @param typeElems ::
- * @param shapeCreator ::
- * @param numberOfTypes  :: Total number of type elements
+ * @param typeElems :: Vector of pointers to type elements
+ * @param shapeCreator :: Factory for creating a shape
  */
 void InstrumentDefinitionParser::collateTypeInformation(
     const std::string &filename, const std::vector<Element *> &typeElems,
