@@ -269,6 +269,24 @@ void IqtFit::saveResult() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
+void IqtFit::plotCurrentPreview() {
+  if (!m_iqtFInputWS) {
+    return;
+  }
+  if (m_iqtFInputWS->getName().compare(m_previewPlotData->getName()) == 0) {
+    // Plot only the sample curve
+    const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
+    IndirectTab::plotSpectrum(
+      QString::fromStdString(m_previewPlotData->getName()), workspaceIndex,
+      workspaceIndex);
+  }
+  else {
+    // Plot Sample, Fit and Diff curve
+    IndirectTab::plotSpectrum(
+      QString::fromStdString(m_previewPlotData->getName()), 0, 2);
+  }
+}
+
 /**
 * Handles completion of the IqtFitMultiple algorithm.
 * @param error True if the algorithm was stopped due to error, false otherwise
@@ -568,6 +586,7 @@ void IqtFit::updatePlot() {
   int specNo = m_uiForm.spPlotSpectrum->value();
 
   m_uiForm.ppPlot->clear();
+  m_previewPlotData = m_iqtFInputWS;
   m_uiForm.ppPlot->addSpectrum("Sample", m_iqtFInputWS, specNo);
 
   try {
@@ -601,6 +620,7 @@ void IqtFit::updatePlot() {
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         outputGroup->getItem(specNo));
     if (ws) {
+      m_iqtFInputWS = ws;
       if (m_uiForm.ckPlotGuess->isChecked()) {
         m_uiForm.ckPlotGuess->setChecked(false);
       }
