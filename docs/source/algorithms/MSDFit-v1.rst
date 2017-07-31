@@ -30,7 +30,7 @@ Usage
     # Create some data that is similar to the output of ElasticWindowMultiple
     sample = CreateSampleWorkspace(Function='User Defined',
                     UserDefinedFunction='name=ExpDecay,Height=1,Lifetime=6',
-                    NumBanks=1, BankPixelWidth=1, XUnit='QSquared', XMin=0.0,
+                    NumBanks=1, BankPixelWidth=1, XUnit='momentum', XMin=0.0,
                     XMax=5.0, BinWidth=0.1)
 
     msd, param, fit = MSDFit(InputWorkspace=sample,
