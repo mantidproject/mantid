@@ -9,6 +9,7 @@
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidBeamline/Beamline.h"
 
 #include <list>
 #include <mutex>
@@ -26,7 +27,7 @@ class SpectrumInfo;
 namespace Geometry {
 class ComponentInfo;
 class IDetector;
-class InfoComponentVisitor;
+class InstrumentVisitor;
 class ParameterMap;
 class XMLInstrumentParameter;
 }
@@ -197,8 +198,8 @@ protected:
   Geometry::Instrument_const_sptr sptr_instrument;
 
 private:
-  void makeAPIComponentInfo(const Geometry::InfoComponentVisitor &visitor,
-                            const Geometry::Instrument &newInstrument);
+  void makeAPIComponentInfo(const Geometry::InstrumentVisitor &visitor,
+                            Beamline::ComponentInfo &mutableComponentInfo);
 
   boost::shared_ptr<Geometry::Instrument> makeParameterizedInstrument() const;
   /// Fill with given instrument parameter
@@ -226,18 +227,16 @@ private:
   mutable std::unordered_map<detid_t, size_t> m_det2group;
   void cacheDefaultDetectorGrouping() const; // Not thread-safe
   void invalidateAllSpectrumDefinitions();
-  std::unique_ptr<Geometry::InfoComponentVisitor>
-  makeOrRetrieveVisitor(const Geometry::Instrument &parInstrument,
-                        const Geometry::Instrument &newInstrument) const;
   mutable std::once_flag m_defaultDetectorGroupingCached;
 
   /// Mutex to protect against cow_ptr copying
   mutable std::recursive_mutex m_mutex;
 
-  boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
   std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
 
-  boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
+  /// Beamline (instrument 2.0)
+  Beamline::Beamline m_beamline;
+
   boost::shared_ptr<Geometry::ComponentInfo> m_componentInfoWrapper;
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
@@ -245,7 +244,7 @@ private:
   // This vector stores boolean flags but uses char to do so since
   // std::vector<bool> is not thread-safe.
   mutable std::vector<char> m_spectrumDefinitionNeedsUpdate;
-  std::unique_ptr<Geometry::InfoComponentVisitor> m_infoVisitor;
+  std::unique_ptr<Geometry::InstrumentVisitor> m_infoVisitor;
 };
 
 /// Shared pointer to ExperimentInfo

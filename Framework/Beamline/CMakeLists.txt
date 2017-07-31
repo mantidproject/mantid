@@ -1,16 +1,19 @@
 set ( SRC_FILES
+	src/Beamline.cpp
 	src/ComponentInfo.cpp
 	src/DetectorInfo.cpp
 	src/SpectrumInfo.cpp
 )
 
 set ( INC_FILES
+	inc/MantidBeamline/Beamline.h
 	inc/MantidBeamline/ComponentInfo.h
 	inc/MantidBeamline/DetectorInfo.h
 	inc/MantidBeamline/SpectrumInfo.h
 )
 
 set ( TEST_FILES
+	BeamlineTest.h
 	ComponentInfoTest.h
 	DetectorInfoTest.h
 	SpectrumInfoTest.h

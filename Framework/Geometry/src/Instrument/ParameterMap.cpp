@@ -4,8 +4,10 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Cache.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include <cstring>
 #include <nexus/NeXusFile.hpp>
@@ -75,9 +77,8 @@ ParameterMap::ParameterMap(const ParameterMap &other)
       m_boundingBoxMap(
           Kernel::make_unique<Kernel::Cache<const ComponentID, BoundingBox>>(
               *other.m_boundingBoxMap)),
-      m_detectorInfo(other.m_detectorInfo),
-      m_componentInfo(other.m_componentInfo), m_instrument(other.m_instrument) {
-}
+      m_beamline(other.m_beamline), m_componentInfo(other.m_componentInfo),
+      m_instrument(other.m_instrument) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ParameterMap::~ParameterMap() = default;
@@ -1163,7 +1164,7 @@ ParameterMap::create(const std::string &className,
 bool ParameterMap::hasDetectorInfo(const Instrument *instrument) const {
   if (instrument != m_instrument)
     return false;
-  return static_cast<bool>(m_detectorInfo);
+  return !m_beamline.empty();
 }
 
 /** Only for use by ExperimentInfo. Returns returns true if this instrument
@@ -1179,7 +1180,7 @@ bool ParameterMap::hasComponentInfo(const Instrument *instrument) const {
 const Beamline::DetectorInfo &ParameterMap::detectorInfo() const {
   if (!hasDetectorInfo(m_instrument))
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
-  return *m_detectorInfo;
+  return m_beamline.detectorInfo();
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
@@ -1199,15 +1200,19 @@ size_t ParameterMap::componentIndex(const ComponentID componentId) const {
   return m_componentInfo->indexOf(componentId);
 }
 
-/// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
-void ParameterMap::setDetectorInfo(
-    boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
-  m_detectorInfo = std::move(detectorInfo);
+void ParameterMap::setBeamline(Beamline::Beamline &beamline,
+                               const Geometry::InstrumentVisitor &visitor) {
+  // We must share beamline internals
+  m_beamline = beamline.alias();
+  // We reference the internal beamline copy in the following
+  m_componentInfo = boost::make_shared<Geometry::ComponentInfo>(
+      m_beamline.mutableComponentInfo(), visitor.componentIds(),
+      visitor.componentIdToIndexMap());
 }
 
-void ParameterMap::setComponentInfo(
-    boost::shared_ptr<const Geometry::ComponentInfo> componentInfo) {
-  m_componentInfo = std::move(componentInfo);
+void ParameterMap::clearBeamline() {
+  m_beamline = Beamline::Beamline{};
+  m_componentInfo = boost::shared_ptr<Geometry::ComponentInfo>(nullptr);
 }
 
 /// Only for use by Instrument. Sets the pointer to the owning instrument.

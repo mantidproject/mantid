@@ -200,7 +200,14 @@ create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
     retVal->getSpectrum(i).setDetectorID(i);
     retVal->getSpectrum(i).setSpectrumNo(i);
   }
-  retVal = maskSpectra(retVal, maskedWorkspaceIndices);
+  if (maskedWorkspaceIndices.size() > 0) {
+    // This method is a serious problem for instrment 2.0 as it adds a fake
+    // instrument.
+    // Clearly then any reassigned instrument via ExperimentInfo::setInstrument
+    // is
+    // going to fail internal consistency checks.
+    retVal = maskSpectra(retVal, maskedWorkspaceIndices);
+  }
   return retVal;
 }
 

@@ -253,14 +253,6 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_monitor_index_positive() {
-    auto alg = construct_standard_algorithm();
-    auto tempInst = m_TOF->getInstrument();
-    m_TOF->setInstrument(m_dataWorkspace->getInstrument());
-    alg->setProperty("InputWorkspace", m_TOF);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
-    m_TOF->setInstrument(tempInst);
-  }
   void
   test_cannot_set_direct_beam_region_of_interest_without_multidetector_run() {
     auto alg = construct_standard_algorithm();
@@ -504,77 +496,6 @@ public:
     AnalysisDataService::Instance().remove(outWSLamName);
   }
 
-  void test_i0_monitor_index_not_required() {
-    // Prepare instrument
-    //------------------
-    // hold the current instrument assigned to m_dataWorkspace
-    auto m_dataWorkspaceInstHolder = m_dataWorkspace->getInstrument();
-    Instrument_sptr instrument = boost::make_shared<Instrument>();
-    instrument->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
-
-    ObjComponent *source = new ObjComponent("source");
-    source->setPos(V3D(0, 0, 0));
-    instrument->add(source);
-    instrument->markAsSource(source);
-
-    ObjComponent *sample = new ObjComponent("some-surface-holder");
-    source->setPos(V3D(15, 0, 0));
-    instrument->add(sample);
-    instrument->markAsSamplePos(sample);
-
-    Detector *det = new Detector("point-detector", 1, NULL);
-    det->setPos(20, (20 - sample->getPos().X()), 0);
-    instrument->add(det);
-    instrument->markAsDetector(det);
-
-    Detector *monitor = new Detector("Monitor", 2, NULL);
-    monitor->setPos(14, 0, 0);
-    instrument->add(monitor);
-    instrument->markAsMonitor(monitor);
-
-    // Add new instrument to workspace
-    m_dataWorkspace->setInstrument(instrument);
-
-    // Now we can parameterize the instrument
-    // without setting the I0MonitorIndex
-    auto tinyInst = m_dataWorkspace->getInstrument();
-    ParameterMap_sptr params = tinyInst->getParameterMap();
-    params->addDouble(tinyInst.get(), "PointDetectorStart", 0.0);
-    params->addDouble(tinyInst.get(), "PointDetectorStop", 0.0);
-    params->addDouble(tinyInst.get(), "LambdaMin", 0.0);
-    params->addDouble(tinyInst.get(), "LambdaMax", 10.0);
-    params->addDouble(tinyInst.get(), "MonitorBackgroundMin", 0.0);
-    params->addDouble(tinyInst.get(), "MonitorBackgroundMax", 0.0);
-    params->addDouble(tinyInst.get(), "MonitorIntegralMin", 0.0);
-    params->addDouble(tinyInst.get(), "MonitorIntegralMax", 10.0);
-
-    // Reduce
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto", 1);
-    alg->setRethrows(true);
-    alg->setChild(true);
-    TS_ASSERT_THROWS_NOTHING(alg->initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("InputWorkspace", m_dataWorkspace));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("I0MonitorIndex", Mantid::EMPTY_INT()));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", outWSQName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
-    // we have intentionally not set
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(inWSName);
-    AnalysisDataService::Instance().remove(outWSQName);
-    AnalysisDataService::Instance().remove(outWSLamName);
-
-    // reset the instrument associated with m_dataWorkspace
-    m_dataWorkspace->setInstrument(m_dataWorkspaceInstHolder);
-  }
   void test_point_detector_run_with_single_transmission_workspace() {
     ReflectometryReductionOneAuto alg;
     alg.initialize();

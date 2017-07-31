@@ -6,6 +6,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IDTypes.h" //For specnum_t
 #include "MantidGeometry/Instrument/Parameter.h"
+#include "MantidBeamline/Beamline.h"
 
 #include "tbb/concurrent_unordered_map.h"
 
@@ -24,6 +25,7 @@ namespace Geometry {
 class BoundingBox;
 class ComponentInfo;
 class Instrument;
+class InstrumentVisitor;
 
 /** @class ParameterMap ParameterMap.h
 
@@ -351,10 +353,9 @@ public:
   size_t detectorIndex(const detid_t detID) const;
   size_t componentIndex(const Geometry::ComponentID componentId) const;
   const std::vector<Geometry::ComponentID> &componentIds() const;
-  void
-  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
-  void setComponentInfo(
-      boost::shared_ptr<const Geometry::ComponentInfo> componentInfo);
+  void setBeamline(Beamline::Beamline &beamline,
+                   const Geometry::InstrumentVisitor &visitor);
+  void clearBeamline();
   void setInstrument(const Instrument *instrument);
 
 private:
@@ -384,9 +385,8 @@ private:
   std::unique_ptr<Kernel::Cache<const ComponentID, BoundingBox>>
       m_boundingBoxMap;
 
-  /// Pointer to the DetectorInfo object. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+  /// Instrument 2.0
+  Beamline::Beamline m_beamline;
 
   /// Pointer to the ComponentInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.

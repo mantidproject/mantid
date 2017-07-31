@@ -153,8 +153,9 @@ include_directories ( Framework/Parallel/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
 include_directories ( Framework/Types/inc )
+include_directories ( Framework/Beamline/inc )
 
-set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
+set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types Beamline)
 
 if (ENABLE_MANTIDPLOT)
   # Add a target for all GUI tests

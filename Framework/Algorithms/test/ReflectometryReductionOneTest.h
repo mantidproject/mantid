@@ -174,6 +174,11 @@ public:
     instrument->add(det);
     instrument->markAsDetector(det);
 
+    // add a monitor
+    Detector *monitor = new Detector("Monitor", 2, NULL);
+    instrument->add(monitor);
+    instrument->markAsMonitor(monitor);
+
     // set the instrument to this workspace
     m_tinyReflWS->setInstrument(instrument);
     // set this detector ready for processing instructions
@@ -333,6 +338,11 @@ public:
     det->setPos(V3D(0, 1, 1));
     instrument->add(det);
     instrument->markAsDetector(det);
+
+    // add a monitor
+    Detector *monitor = new Detector("Monitor", 2, NULL);
+    instrument->add(monitor);
+    instrument->markAsMonitor(monitor);
 
     // set the instrument to this workspace
     m_tinyReflWS->setInstrument(instrument);

@@ -1,13 +1,17 @@
-#ifndef MANTID_GEOMETRY_INFOCOMPONENTVISITORTEST_H_
-#define MANTID_GEOMETRY_INFOCOMPONENTVISITORTEST_H_
+#ifndef MANTID_GEOMETRY_INSTRUMENTVISITORVISITORTEST_H_
+#define MANTID_GEOMETRY_INSTRUMENTVISITORVISITORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidBeamline/Beamline.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include <set>
@@ -19,14 +23,23 @@ using Mantid::Kernel::V3D;
 using namespace ComponentCreationHelper;
 using Mantid::detid_t;
 
-class InfoComponentVisitorTest : public CxxTest::TestSuite {
+namespace {
+
+boost::shared_ptr<const Instrument>
+makeParameterized(boost::shared_ptr<const Instrument> baseInstrument) {
+  return boost::make_shared<const Instrument>(
+      baseInstrument, boost::make_shared<ParameterMap>());
+}
+}
+
+class InstrumentVisitorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InfoComponentVisitorTest *createSuite() {
-    return new InfoComponentVisitorTest();
+  static InstrumentVisitorTest *createSuite() {
+    return new InstrumentVisitorTest();
   }
-  static void destroySuite(InfoComponentVisitorTest *suite) { delete suite; }
+  static void destroySuite(InstrumentVisitorTest *suite) { delete suite; }
 
   void test_visitor_basic_sanity_check() {
 
@@ -35,12 +48,8 @@ public:
                                            V3D(10, 0, 0) /*sample pos*/
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
-    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
-
+    InstrumentVisitor visitor(makeParameterized(visitee));
     // Visit everything
     visitee->registerContents(visitor);
 
@@ -60,26 +69,24 @@ public:
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
                                            V3D(10, 0, 0) /*sample pos*/,
                                            V3D(11, 0, 0) /*detector position*/);
-    Mantid::Geometry::ParameterMap pmap;
+    auto pmap = boost::make_shared<ParameterMap>();
     auto detector = visitee->getDetector(visitee->getDetectorIDs()[0]);
-    pmap.addV3D(detector->getComponentID(), "pos",
-                Mantid::Kernel::V3D{12, 0, 0});
-    pmap.addV3D(visitee->getComponentID(), "pos",
-                Mantid::Kernel::V3D{13, 0, 0});
+    pmap->addV3D(detector->getComponentID(), "pos",
+                 Mantid::Kernel::V3D{12, 0, 0});
+    pmap->addV3D(visitee->getComponentID(), "pos",
+                 Mantid::Kernel::V3D{13, 0, 0});
 
-    TS_ASSERT_EQUALS(pmap.size(), 2);
+    TS_ASSERT_EQUALS(pmap->size(), 2);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{0}, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
+    InstrumentVisitor visitor(
+        boost::make_shared<const Instrument>(visitee, pmap));
 
     // Visit everything. Purging should happen.
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
-    TSM_ASSERT_EQUALS(
-        "Detectors positions are NOT purged by visitor at present", pmap.size(),
-        1);
+    TSM_ASSERT_EQUALS("Detectors positions are purged by visitor at present",
+                      pmap->size(), 0);
   }
 
   void test_visitor_purges_parameter_map_safely() {
@@ -121,26 +128,24 @@ public:
     TSM_ASSERT_EQUALS("Expect 2 items in the parameter map", paramMap->size(),
                       2);
 
-    const detid_t detectorId = 0;
-    InfoComponentVisitor visitor(std::vector<detid_t>{detectorId}, *paramMap,
-                                 parInstrument->getSource()->getComponentID(),
-                                 parInstrument->getSample()->getComponentID());
-    parInstrument->registerContents(visitor);
+    InstrumentVisitor visitor(parInstrument);
+    visitor.walkInstrument();
 
     TSM_ASSERT_EQUALS("Expect 0 items in the purged parameter map",
                       paramMap->size(), 0);
 
     // Now we check that thing are located where we expect them to be.
-    auto positions = visitor.positions();
-    TSM_ASSERT(
-        "Check source position",
-        (*positions)[0].isApprox(Mantid::Kernel::toVector3d(newSourcePos)));
-    TSM_ASSERT(
-        "Check instrument position",
-        (*positions)[2].isApprox(Mantid::Kernel::toVector3d(newInstrumentPos)));
+    auto beamline = visitor.beamline();
+
+    TSM_ASSERT("Check source position",
+               beamline.componentInfo().position(1).isApprox(
+                   Mantid::Kernel::toVector3d(newSourcePos)));
+    TSM_ASSERT("Check instrument position",
+               beamline.componentInfo().position(3).isApprox(
+                   Mantid::Kernel::toVector3d(newInstrumentPos)));
   }
 
-  void test_visitor_detector_indexes_check() {
+  void test_visitor_detector_sanity_check() {
 
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
@@ -148,24 +153,25 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
     const size_t detectorIndex =
         0; // Internally we expect detector index to start at 0
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
 
+    const size_t instrumentIndex = 3; // Instrument is always hightest index.
+
+    InstrumentVisitor visitor(makeParameterized(visitee));
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
-    /*
-     * Now lets check the cached contents of our visitor to check
-     * it did the job correctly.
-    */
-    TSM_ASSERT_EQUALS("Single detector should have index of 0",
-                      *visitor.assemblySortedDetectorIndices(),
-                      std::vector<size_t>{detectorIndex});
+    auto beamline = visitor.beamline();
+
+    TSM_ASSERT_EQUALS("Detector has parent of instrument",
+                      beamline.componentInfo().parent(detectorIndex),
+                      instrumentIndex);
+    TSM_ASSERT_EQUALS(
+        "Instrument has single detector",
+        beamline.componentInfo().detectorsInSubtree(instrumentIndex),
+        std::vector<size_t>{detectorIndex});
   }
 
   void test_visitor_component_check() {
@@ -175,14 +181,10 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
+    InstrumentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
     std::set<Mantid::Geometry::ComponentID> componentIds(
         visitor.componentIds()->begin(), visitor.componentIds()->end());
@@ -230,35 +232,16 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
+    InstrumentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
-    auto detectorRanges = visitor.componentDetectorRanges();
-    TSM_ASSERT_EQUALS("There are 3 non-detector components",
-                      detectorRanges->size(), 3);
+    auto beamline = visitor.beamline();
 
-    /*
-     * In this instrument there is only a single assembly (the instrument
-     * itself). All other non-detectors are also non-assembly components.
-     * We therefore EXPECT that the ranges provided are all from 0 to 0 for
-     * those generic components. This is important for subsequent correct
-     * working on ComponentInfo.
-     */
-    // Source has no detectors
-    TS_ASSERT_EQUALS((*detectorRanges)[0].first, 0);
-    TS_ASSERT_EQUALS((*detectorRanges)[0].second, 0);
-    // Sample has no detectors
-    TS_ASSERT_EQUALS((*detectorRanges)[1].first, 0);
-    TS_ASSERT_EQUALS((*detectorRanges)[1].second, 0);
-    // Instrument has 1 detector
-    TS_ASSERT_EQUALS((*detectorRanges)[2].first, 0);
-    TS_ASSERT_EQUALS((*detectorRanges)[2].second, 1);
+    TS_ASSERT_EQUALS(beamline.componentInfo().detectorsInSubtree(3),
+                     std::vector<size_t>{0});
   }
 
   void test_visitor_component_ranges_check() {
@@ -268,35 +251,26 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
-
+    InstrumentVisitor visitor(makeParameterized(visitee));
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
-    auto componentRanges = visitor.componentChildComponentRanges();
-    TSM_ASSERT_EQUALS("There are 3 non-detector components",
-                      componentRanges->size(), 3);
+    auto beamline = visitor.beamline();
+    const auto &compInfo = beamline.componentInfo();
+    const auto &detInfo = beamline.detectorInfo();
 
-    /*
-     * In this instrument there is only a single assembly (the instrument
-     * itself). We therefore EXPECT that the ranges provided are all from 0 to 0
-     * for
-     * those non-assembly components. This is important for subsequent correct
-     * working on ComponentInfo.
-     */
-    // Source has no sub-components, range includes only itself
-    TS_ASSERT_EQUALS((*componentRanges)[0].first, 0);
-    TS_ASSERT_EQUALS((*componentRanges)[0].second, 1);
-    // Sample has no sub-components, range includes only itself
-    TS_ASSERT_EQUALS((*componentRanges)[1].first, 1);
-    TS_ASSERT_EQUALS((*componentRanges)[1].second, 2);
-    // Instrument has 1 detector.
-    TS_ASSERT_EQUALS((*componentRanges)[2].first, 0);
-    TS_ASSERT_EQUALS((*componentRanges)[2].second, 4);
+    TS_ASSERT_EQUALS(compInfo.size(), 4); // 4 components in total
+    TS_ASSERT_EQUALS(detInfo.size(), 1);  // 1 component is a detector
+
+    auto subTreeOfRoot = compInfo.componentsInSubtree(3);
+    TS_ASSERT_EQUALS(
+        std::set<size_t>(subTreeOfRoot.begin(), subTreeOfRoot.end()),
+        (std::set<size_t>({0, 1, 2, 3})));
+
+    auto subTreeOfNonRoot = compInfo.componentsInSubtree(1);
+    TS_ASSERT_EQUALS(
+        std::set<size_t>(subTreeOfNonRoot.begin(), subTreeOfNonRoot.end()),
+        (std::set<size_t>({1})));
   }
   void test_visitor_collects_detector_id_to_index_mappings() {
 
@@ -306,13 +280,9 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
-
+    InstrumentVisitor visitor(makeParameterized(visitee));
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
     TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap()->size(), 1);
     TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap()->at(1),
@@ -336,22 +306,23 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    // Create the visitor. Note any access to the indexOf lambda will throw for
-    // detectors.
-    InfoComponentVisitor visitor(
-        std::vector<detid_t>{
-            0 /*sized just 1 to invoke out of range exception*/},
-        pmap);
+    // Create an add a duplicate detector
+    Detector *det =
+        new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
+    visitee->add(det);
+    visitee->markAsDetector(det);
+
+    InstrumentVisitor visitor(makeParameterized(visitee));
 
     // Visit everything
-    visitee->registerContents(visitor);
+    visitor.walkInstrument();
 
     size_t expectedSize = 0;
+    ++expectedSize; // only detector
     ++expectedSize; // source
     ++expectedSize; // sample
     ++expectedSize; // instrument
-    // Note no detector counted
+    // Note no second detector counted
     TS_ASSERT_EQUALS(visitor.size(), expectedSize);
   }
 
@@ -361,9 +332,8 @@ public:
     const int nPixelsWide = 10; // Gives 10*10 detectors in total
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
         1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
-    Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(instrument->getDetectorIDs(), pmap);
-    instrument->registerContents(visitor);
+    InstrumentVisitor visitor(makeParameterized(instrument));
+    visitor.walkInstrument();
 
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
                       visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
@@ -375,81 +345,67 @@ public:
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
         1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
 
-    Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(instrument->getDetectorIDs() /*detector ids*/,
-                                 pmap,
-                                 instrument->getSource()->getComponentID(),
-                                 instrument->getSample()->getComponentID());
+    InstrumentVisitor visitor(makeParameterized(instrument));
 
     // Visit everything
-    instrument->registerContents(visitor);
+    visitor.walkInstrument();
 
-    const auto parentComponentIndices = visitor.parentComponentIndices();
+    auto beamline = visitor.beamline();
 
-    size_t testIndex =
-        visitor.size() -
-        2; // One component down from root. (Has parent of the root itself)
-    TS_ASSERT_EQUALS((*parentComponentIndices)[testIndex], visitor.size() - 1);
-    size_t root = visitor.size() - 1;
-    TS_ASSERT_EQUALS((*parentComponentIndices)[root], root);
+    const auto &compInfo = beamline.componentInfo();
 
-    testIndex = 0; // Check a detector
-    const auto rowAssemblyIndex = (*parentComponentIndices)[testIndex];
-    const auto bankIndex = (*parentComponentIndices)[rowAssemblyIndex];
-    const auto instrumentIndex = (*parentComponentIndices)[bankIndex];
-    // Walk all the way up to the instrument
-    TS_ASSERT_EQUALS(instrumentIndex, visitor.size() - 1);
+    TS_ASSERT_EQUALS(compInfo.parent(compInfo.source()), compInfo.root());
+    TS_ASSERT_EQUALS(compInfo.parent(compInfo.sample()), compInfo.root());
+    TS_ASSERT_EQUALS(compInfo.parent(compInfo.root()), compInfo.root());
   }
 
-  void test_source_and_sample() {
+  void test_binding_and_rebinding_beamline_togther_works() {
+    // This is really a test for of Beamline object
+    using Mantid::Beamline::Beamline;
 
-    // Create a very basic instrument to visit
-    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
-                                           V3D(10, 0, 0) /*sample pos*/
-                                           ,
-                                           V3D(11, 0, 0) /*detector position*/);
+    Beamline target;
+    {
+      Beamline source = makeBeamline(
+          ComponentCreationHelper::createTestInstrumentRectangular(1, 10));
+      target = source;
+      // Now source goes out of scope!
+    }
+    // Has target rebound everyting correctly?.
+    // Getting the position of via ComponentInfo via DetectorInfo. Undefined if
+    // not rebound properly.
+    target.componentInfo().position(0);
 
-    Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
-                                 visitee->getSource()->getComponentID(),
-                                 visitee->getSample()->getComponentID());
-
-    // Visit everything
-    visitee->registerContents(visitor);
-
-    // Detector has component index of 0
-    TS_ASSERT_EQUALS(1, visitor.source());
-    TS_ASSERT_EQUALS(2, visitor.sample());
+    // Gettting the sample pos via DetectorInfo via ComponentInfo. Undefined if
+    // not rebound properly.
+    target.detectorInfo().samplePosition();
   }
 };
 
-class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {
+class InstrumentVisitorTestPerformance : public CxxTest::TestSuite {
 private:
   const int m_nPixels = 1000;
-  boost::shared_ptr<Mantid::Geometry::Instrument> m_instrument;
+  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InfoComponentVisitorTestPerformance *createSuite() {
-    return new InfoComponentVisitorTestPerformance();
+  static InstrumentVisitorTestPerformance *createSuite() {
+    return new InstrumentVisitorTestPerformance();
   }
-  static void destroySuite(InfoComponentVisitorTestPerformance *suite) {
+  static void destroySuite(InstrumentVisitorTestPerformance *suite) {
     delete suite;
   }
 
-  InfoComponentVisitorTestPerformance() {
-    m_instrument = ComponentCreationHelper::createTestInstrumentRectangular(
-        1 /*n banks*/, m_nPixels, 1 /*sample-bank distance*/);
+  InstrumentVisitorTestPerformance() {
+    m_instrument = makeParameterized(
+        ComponentCreationHelper::createTestInstrumentRectangular(
+            1 /*n banks*/, m_nPixels, 1 /*sample-bank distance*/));
   }
 
   void test_process_rectangular_instrument() {
-    Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(m_instrument->getDetectorIDs(), pmap,
-                                 m_instrument->getSource()->getComponentID(),
-                                 m_instrument->getSample()->getComponentID());
-    m_instrument->registerContents(visitor);
+    InstrumentVisitor visitor(m_instrument);
+    visitor.walkInstrument();
     TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
   }
 };
-#endif /* MANTID_API_INFOCOMPONENTVISITORTEST_H_ */
+#endif /* MANTID_API_INSTRUMENTVISITORVISITORTEST_H_ */

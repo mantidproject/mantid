@@ -6,25 +6,22 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-
 #include "MantidKernel/DateAndTime.h"
+#include "MantidBeamline/Beamline.h"
 
 #include <string>
 #include <map>
 #include <tuple>
 #include <vector>
 #include <unordered_map>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 /// Typedef of a map from detector ID to detector shared pointer.
 typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
 
-namespace Beamline {
-class ComponentInfo;
-class DetectorInfo;
-}
 namespace Geometry {
-class InfoComponentVisitor;
+class InstrumentVisitor;
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
@@ -243,23 +240,20 @@ public:
 
   bool isMonitorViaIndex(const size_t index) const;
 
-  bool hasDetectorInfo() const;
-  const Beamline::DetectorInfo &detectorInfo() const;
-  bool hasInfoVisitor() const;
+  const Beamline::Beamline &beamline() const;
+  void setBeamline(Beamline::Beamline beamline);
 
-  bool hasComponentInfo() const;
-  const Beamline::ComponentInfo &componentInfo() const;
+  /// Determine if beamline has been set
+  bool hasBeamline() const;
+
+  /// Determine if instrument visitor has been set
+  bool hasInstrumentVisitor() const;
+
+  const InstrumentVisitor &instrumentVisitor() const;
+
+  void setInstrumentVisitor(const InstrumentVisitor &visitor);
 
   size_t detectorIndex(const detid_t detID) const;
-  void
-  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
-  void setComponentInfo(
-      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-      boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds);
-
-  void setInfoVisitor(const InfoComponentVisitor &visitor);
-
-  const InfoComponentVisitor &infoVisitor() const;
 
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
@@ -283,9 +277,6 @@ private:
   /// Map which holds detector-IDs and pointers to detector components, and
   /// monitor flags.
   std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
-
-  /// Mappings to obtain component index
-  boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentCache;
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component
@@ -346,18 +337,14 @@ private:
   /// Pointer to the reference frame object.
   boost::shared_ptr<ReferenceFrame> m_referenceFrame;
 
-  /// Pointer to the DetectorInfo object. NULL unless the instrument is
+  /// Beamline (Instrument 2.0). NULL unless the instrument is
   /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
-
-  /// Pointer to the ComponentInfo object. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
+  Beamline::Beamline m_beamline;
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};
   /// Component and Detector info relevant cache
-  std::unique_ptr<const InfoComponentVisitor> m_infoVisitor;
+  std::unique_ptr<const InstrumentVisitor> m_instrVisitor;
 };
 namespace Conversion {
 

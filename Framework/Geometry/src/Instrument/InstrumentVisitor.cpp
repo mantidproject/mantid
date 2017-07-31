@@ -1,11 +1,14 @@
-#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidBeamline/Beamline.h"
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 
 #include <numeric>
 #include <algorithm>
@@ -30,55 +33,81 @@ makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
   return std::move(detIdToIndex);
 }
 
-void clearPositionAndRotationParameters(ParameterMap &pmap,
+void clearPositionAndRotationParameters(ParameterMap *pmap,
                                         const IComponent &comp) {
-  pmap.clearParametersByName(ParameterMap::pos(), &comp);
-  pmap.clearParametersByName(ParameterMap::posx(), &comp);
-  pmap.clearParametersByName(ParameterMap::posy(), &comp);
-  pmap.clearParametersByName(ParameterMap::posz(), &comp);
-  pmap.clearParametersByName(ParameterMap::rot(), &comp);
-  pmap.clearParametersByName(ParameterMap::rotx(), &comp);
-  pmap.clearParametersByName(ParameterMap::roty(), &comp);
-  pmap.clearParametersByName(ParameterMap::rotz(), &comp);
+  if (!pmap)
+    return;
+  pmap->clearParametersByName(ParameterMap::pos(), &comp);
+  pmap->clearParametersByName(ParameterMap::posx(), &comp);
+  pmap->clearParametersByName(ParameterMap::posy(), &comp);
+  pmap->clearParametersByName(ParameterMap::posz(), &comp);
+  pmap->clearParametersByName(ParameterMap::rot(), &comp);
+  pmap->clearParametersByName(ParameterMap::rotx(), &comp);
+  pmap->clearParametersByName(ParameterMap::roty(), &comp);
+  pmap->clearParametersByName(ParameterMap::rotz(), &comp);
 }
 }
 
-InfoComponentVisitor::InfoComponentVisitor(
-    std::vector<detid_t> orderedDetectorIds, ParameterMap &pmap,
-    ComponentID sourceId, ComponentID sampleId)
-    : m_componentIds(boost::make_shared<std::vector<ComponentID>>(
-          orderedDetectorIds.size(), nullptr)),
+/**
+ * @brief InstrumentVisitor::registerComponentAssembly
+ * @param instrument : Instrument being visited
+ * @return Component index of this component
+ */
+InstrumentVisitor::InstrumentVisitor(
+    boost::shared_ptr<const Instrument> instrument)
+    : m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(std::move(
+          instrument->getDetectorIDs(false /*Do not skip monitors*/)))),
+      m_componentIds(boost::make_shared<std::vector<ComponentID>>(
+          m_orderedDetectorIds->size(), nullptr)),
       m_assemblySortedDetectorIndices(
           boost::make_shared<std::vector<size_t>>()),
       m_assemblySortedComponentIndices(
           boost::make_shared<std::vector<size_t>>()),
       m_parentComponentIndices(boost::make_shared<std::vector<size_t>>(
-          orderedDetectorIds.size(), 0)),
+          m_orderedDetectorIds->size(), 0)),
       m_detectorRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentIdToIndexMap(boost::make_shared<
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
-      m_detectorIdToIndexMap(makeDetIdToIndexMap(orderedDetectorIds)),
-      m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(
-          std::move(orderedDetectorIds))),
+      m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
+      m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
+          m_orderedDetectorIds->size())),
       m_rotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
-      m_pmap(pmap), m_sourceId(sourceId), m_sampleId(sampleId) {
+      m_detectorRotations(boost::make_shared<std::vector<Eigen::Quaterniond>>(
+          m_orderedDetectorIds->size())),
+      m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
+      m_instrument(std::move(instrument)), m_pmap(nullptr) {
+
+  if (m_instrument->isParametrized()) {
+    m_pmap = m_instrument->getParameterMap().get();
+  }
+
+  m_sourceId = m_instrument->getSource()
+                   ? m_instrument->getSource()->getComponentID()
+                   : nullptr;
+  m_sampleId = m_instrument->getSample()
+                   ? m_instrument->getSample()->getComponentID()
+                   : nullptr;
+
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors);  // Exact
   m_assemblySortedComponentIndices->reserve(nDetectors); // Approximation
-  // m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
+  m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
 }
 
-/**
- * @brief InfoComponentVisitor::registerComponentAssembly
- * @param assembly : ICompAssembly being visited
- * @return Component index of this component
- */
+void InstrumentVisitor::walkInstrument() {
+  if (m_pmap && m_pmap->empty()) {
+    // Go through the base instrument for speed.
+    m_instrument->baseInstrument()->registerContents(*this);
+  } else
+    m_instrument->registerContents(*this);
+}
+
 size_t
-InfoComponentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
+InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
 
   std::vector<IComponent_const_sptr> assemblyChildren;
   assembly.getChildren(assemblyChildren, false /*is recursive*/);
@@ -119,12 +148,12 @@ InfoComponentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
 }
 
 /**
- * @brief InfoComponentVisitor::registerGenericComponent
+ * @brief InstrumentVisitor::registerGenericComponent
  * @param component : IComponent being visited
  * @return Component index of this component
  */
 size_t
-InfoComponentVisitor::registerGenericComponent(const IComponent &component) {
+InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   /*
    * For a generic leaf component we extend the component ids list, but
    * the detector indexes entries will of course be empty
@@ -149,8 +178,8 @@ InfoComponentVisitor::registerGenericComponent(const IComponent &component) {
   return componentIndex;
 }
 
-void InfoComponentVisitor::markAsSourceOrSample(ComponentID componentId,
-                                                const size_t componentIndex) {
+void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId,
+                                             const size_t componentIndex) {
   if (componentId == m_sampleId) {
     m_sampleIndex = componentIndex;
   } else if (componentId == m_sourceId) {
@@ -159,11 +188,11 @@ void InfoComponentVisitor::markAsSourceOrSample(ComponentID componentId,
 }
 
 /**
- * @brief InfoComponentVisitor::registerDetector
+ * @brief InstrumentVisitor::registerDetector
  * @param detector : IDetector being visited
  * @return Component index of this component
  */
-size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
+size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
 
   size_t detectorIndex = 0;
   try {
@@ -191,6 +220,14 @@ size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
     (*m_componentIds)[detectorIndex] = detector.getComponentID();
     m_assemblySortedDetectorIndices->push_back(detectorIndex);
     m_assemblySortedComponentIndices->push_back(detectorIndex);
+    (*m_detectorPositions)[detectorIndex] =
+        Kernel::toVector3d(detector.getPos());
+    (*m_detectorRotations)[detectorIndex] =
+        Kernel::toQuaterniond(detector.getRotation());
+    if (m_instrument->isMonitorViaIndex(detectorIndex)) {
+      m_monitorIndices->push_back(detectorIndex);
+    }
+    clearPositionAndRotationParameters(m_pmap, detector);
   }
   /* Note that positions and rotations for detectors are currently
   NOT stored! These go into DetectorInfo at present. push_back works for other
@@ -206,101 +243,63 @@ size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
 }
 
 /**
- * @brief InfoComponentVisitor::componentDetectorRanges
- * @return index ranges into the detectorIndices vector. Gives the
- * intervals of detectors indices for non-detector components such as banks
- */
-boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-InfoComponentVisitor::componentDetectorRanges() const {
-  return m_detectorRanges;
-}
-
-boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-InfoComponentVisitor::componentChildComponentRanges() const {
-  return m_componentRanges;
-}
-
-/**
- * @brief InfoComponentVisitor::detectorIndices
- * @return detector indices in the order in which they have been visited
- * thus grouped by assembly to form a contiguous range for levels of assemblies.
- */
-boost::shared_ptr<const std::vector<size_t>>
-InfoComponentVisitor::assemblySortedDetectorIndices() const {
-  return m_assemblySortedDetectorIndices;
-}
-
-boost::shared_ptr<const std::vector<size_t>>
-InfoComponentVisitor::assemblySortedComponentIndices() const {
-  return m_assemblySortedComponentIndices;
-}
-
-boost::shared_ptr<const std::vector<size_t>>
-InfoComponentVisitor::parentComponentIndices() const {
-  return m_parentComponentIndices;
-}
-
-/**
- * @brief InfoComponentVisitor::componentIds
+ * @brief InstrumentVisitor::componentIds
  * @return  component ids in the order in which they have been visited.
  * Note that the number of component ids will be >= the number of detector
  * indices
  * since all detectors are components but not all components are detectors
  */
 boost::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>>
-InfoComponentVisitor::componentIds() const {
+InstrumentVisitor::componentIds() const {
   return m_componentIds;
 }
 
 /**
- * @brief InfoComponentVisitor::size
+ * @brief InstrumentVisitor::size
  * @return The total size of the components visited.
  * This will be the same as the number of IDs.
  */
-size_t InfoComponentVisitor::size() const {
+size_t InstrumentVisitor::size() const {
   return m_componentIds->size() - m_droppedDetectors;
 }
 
-bool InfoComponentVisitor::isEmpty() const { return size() == 0; }
+bool InstrumentVisitor::isEmpty() const { return size() == 0; }
 
 boost::shared_ptr<
     const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
-InfoComponentVisitor::componentIdToIndexMap() const {
+InstrumentVisitor::componentIdToIndexMap() const {
   return m_componentIdToIndexMap;
 }
 
 boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-InfoComponentVisitor::detectorIdToIndexMap() const {
+InstrumentVisitor::detectorIdToIndexMap() const {
   return m_detectorIdToIndexMap;
 }
 
-std::unique_ptr<Beamline::ComponentInfo>
-InfoComponentVisitor::componentInfo() const {
-  return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
+Beamline::Beamline InstrumentVisitor::beamline() const {
+
+  Mantid::Beamline::ComponentInfo componentInfo(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_positions, m_rotations, m_sourceIndex,
       m_sampleIndex);
+
+  Mantid::Beamline::DetectorInfo detectorInfo(
+      *m_detectorPositions, *m_detectorRotations, *m_monitorIndices);
+
+  return Beamline::Beamline(std::move(componentInfo), std::move(detectorInfo));
 }
 
-boost::shared_ptr<std::vector<detid_t>>
-InfoComponentVisitor::detectorIds() const {
+boost::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const {
   return m_orderedDetectorIds;
 }
 
-boost::shared_ptr<std::vector<Eigen::Vector3d>>
-InfoComponentVisitor::positions() const {
-  return m_positions;
+Beamline::Beamline
+makeBeamline(boost::shared_ptr<const Instrument> instrument) {
+  InstrumentVisitor visitor(instrument);
+  visitor.walkInstrument();
+  return visitor.beamline();
 }
-
-boost::shared_ptr<std::vector<Eigen::Quaterniond>>
-InfoComponentVisitor::rotations() const {
-  return m_rotations;
-}
-
-int64_t InfoComponentVisitor::sample() const { return m_sampleIndex; }
-
-int64_t InfoComponentVisitor::source() const { return m_sourceIndex; }
 
 } // namespace Geometry
 } // namespace Mantid

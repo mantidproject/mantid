@@ -31,6 +31,7 @@
 
 #include <set>
 #include <unordered_map>
+#include "MantidBeamline/DetectorInfo.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -82,8 +83,8 @@ public:
 
     // ALL of these should be set. Even though we have just an empty instrument
     // stored. See constructor.
-    TS_ASSERT(i->hasInfoVisitor());
-    TS_ASSERT(i->hasDetectorInfo());
+    TS_ASSERT(i->hasInstrumentVisitor());
+    TS_ASSERT(i->hasBeamline());
   }
 
   void test_GetSetInstrument_default() {
@@ -668,7 +669,7 @@ public:
     }
   }
 
-  void test_nexus_intrument_info() {
+  void test_nexus_instrument_info() {
     ExperimentInfo ei;
 
     // We get an instrument group from a test file in the form that would occur
@@ -968,6 +969,33 @@ public:
 
     TS_ASSERT_EQUALS(compInfo.indexOf(inst->getComponentID()),
                      compInfo.parent(compInfo.indexOf(bankId)));
+  }
+
+  void test_creates_self_consistent_parameter_map() {
+
+    // Regression test that instrument can still be used properly after
+    // workspace goes out of scope
+    Instrument_const_sptr instrument;
+
+    {
+      const int nPixels = 10;
+      auto tmpInstr = ComponentCreationHelper::createTestInstrumentRectangular(
+          1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+          1 /*sample-bank distance*/);
+
+      ExperimentInfo tmpExpInfo;
+      tmpExpInfo.setInstrument(tmpInstr);
+      instrument = tmpExpInfo.getInstrument();
+
+      // This call is fine, because Beamline pointed to by API::ComponentInfo
+      // wrapper on ParameterMap owned by Instrument still exists (it's owned by
+      // the ExperimentInfo)
+      (*instrument)[0]->getPos();
+      // ExperimentInfo goes out of scope
+    }
+
+    // ExperimentInfo is gone, but this call should also succeeed
+    (*instrument)[0]->getPos();
   }
 
 private:
