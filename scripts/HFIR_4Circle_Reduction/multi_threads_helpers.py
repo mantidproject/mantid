@@ -378,7 +378,7 @@ class MergePeaksThread(QThread):
             self._outputMDFileList = md_file_list[:]
 
         # link signals
-        self.peakMergeSignal.connect(self._mainWindow.update_merge_value)
+        self.mergeMsgSignal.connect(self._mainWindow.update_merge_value)
         self.mergeMsgSignal.connect(self._mainWindow.update_merge_message)
 
         return

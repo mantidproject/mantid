@@ -51,7 +51,7 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
 
         return
 
-    def add_new_scans(self, scan_numbers):
+    def add_new_scans(self, scan_numbers, append):
         """
         add scans to the
         :param scan_numbers:
