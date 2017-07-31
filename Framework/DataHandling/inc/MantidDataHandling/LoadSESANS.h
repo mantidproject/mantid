@@ -92,7 +92,7 @@ private:
   static std::vector<std::string> split(const std::string &str);
   static std::string repeatAndJoin(const std::string &str,
                                    const std::string &delim, const int &n);
-
+  static bool allSpaces(const std::string &str);
   // Private members
   std::unordered_map<std::string, std::string> attributes;
 };

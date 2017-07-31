@@ -161,7 +161,7 @@ void LoadSESANS::consumeHeaders(std::ifstream &infile, std::string &line,
 
   do {
     lineNum++;
-    if (!line.empty()) {
+    if (!allSpaces(line)) {
       // Split up the line into a key-value pair and add it to our set of
       // attributes
       attr = splitHeader(line, lineNum);
@@ -182,7 +182,7 @@ void LoadSESANS::consumeHeaders(std::ifstream &infile, std::string &line,
 */
 ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
                                   int &lineNum) {
-  std::string numberRegex = "-?\\d+(\\.\\d+)?(E-\\d+)?";
+  std::string numberRegex = "(-?\\d+(\\.\\d+)?(E-?\\d+)?)";
 
   std::getline(infile, line);
   std::vector<std::string> columnHeaders = split(line);
@@ -197,10 +197,9 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
 
   // static_cast is safe as realistically our file is never going to have enough
   // columns to overflow
-  std::regex lineRegex("^\\s*" +
-                       repeatAndJoin(numberRegex, "\\s*",
-                                     static_cast<int>(columnHeaders.size())));
-
+  std::string rawRegex = "^\\s*" +  repeatAndJoin(numberRegex, "\\s+", static_cast<int>(columnHeaders.size())) + "\\s*$";
+  std::regex lineRegex(rawRegex);
+  
   // Tokens in a line
   std::vector<std::string> tokens;
 
@@ -209,7 +208,7 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
 
   while (std::getline(infile, line)) {
     lineNum++;
-
+    
     if (std::regex_match(line, lineRegex)) {
       tokens = split(line);
 
@@ -356,8 +355,16 @@ std::vector<std::string> LoadSESANS::split(const std::string &str) {
   return result;
 }
 
+/** Is a string all whitespace?
+ * @param str The string to test
+ * @return Whether every character is whitespace
+ */     
+bool LoadSESANS::allSpaces(const std::string &str){
+  return std::all_of(str.begin(), str.end(), space);
+}
+
 /** Repeat a string n times, delimited by another string. eg. repeatAndJoin("a",
- * "b", 3) == "ababab"
+ * "b", 3) == "ababa"
  * @param str The string to repeat
  * @param delim The delimiter
  * @param n The number of times to repeat
@@ -366,7 +373,7 @@ std::vector<std::string> LoadSESANS::split(const std::string &str) {
 std::string LoadSESANS::repeatAndJoin(const std::string &str,
                                       const std::string &delim, const int &n) {
   std::string result = "";
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n - 1; i++) {
     result += str + delim;
   }
   return result + str;
