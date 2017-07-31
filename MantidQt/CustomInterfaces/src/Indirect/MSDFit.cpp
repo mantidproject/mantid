@@ -19,7 +19,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 MSDFit::MSDFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_currentWsName(""), m_msdTree(NULL) {
+    : IndirectDataAnalysisTab(parent), m_msdTree(NULL),
+      m_msdInputWS() {
   m_uiForm.setupUi(parent);
 }
 
@@ -64,6 +65,8 @@ void MSDFit::setup() {
           SLOT(plotFit()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+    SLOT(plotCurrentPreview()));
 }
 
 void MSDFit::run() {
@@ -201,6 +204,7 @@ void MSDFit::plotFit(QString wsName, int specNo) {
         // Get the fit workspace
         auto ws =
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+        m_msdInputWS = ws;
         // Plot the new fit
         m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
         // Nothing else to do
@@ -218,9 +222,9 @@ void MSDFit::plotFit(QString wsName, int specNo) {
  * @param wsName Name of new workspace loaded
  */
 void MSDFit::newDataLoaded(const QString wsName) {
-  auto ws = Mantid::API::AnalysisDataService::Instance()
-                .retrieveWS<const MatrixWorkspace>(wsName.toStdString());
-  int maxWsIndex = static_cast<int>(ws->getNumberHistograms()) - 1;
+  m_msdInputWS = Mantid::API::AnalysisDataService::Instance()
+    .retrieveWS<MatrixWorkspace>(wsName.toStdString());
+  int maxWsIndex = static_cast<int>(m_msdInputWS->getNumberHistograms()) - 1;
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm.spPlotSpectrum->setMinimum(0);
@@ -236,21 +240,14 @@ void MSDFit::newDataLoaded(const QString wsName) {
   plotInput();
 }
 
+/**
+ * Plot the supplied input workspace in the mini-plot.
+ */
 void MSDFit::plotInput() {
   m_uiForm.ppPlot->clear();
 
-  QString wsname = m_uiForm.dsSampleInput->getCurrentDataName();
-
-  if (!AnalysisDataService::Instance().doesExist(wsname.toStdString())) {
-    g_log.error("No workspace loaded, cannot create preview plot.");
-    return;
-  }
-
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsname.toStdString());
-
   int wsIndex = m_uiForm.spPlotSpectrum->value();
-  m_uiForm.ppPlot->addSpectrum("Sample", ws, wsIndex);
+  m_uiForm.ppPlot->addSpectrum("Sample", m_msdInputWS, wsIndex);
 
   try {
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
@@ -259,8 +256,6 @@ void MSDFit::plotInput() {
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
-
-  m_currentWsName = wsname;
 }
 
 /**
@@ -331,6 +326,21 @@ void MSDFit::plotClicked() {
       plotSpectrum(wsName, 0, 2);
   }
 }
+
+/**
+* Plots the current spectrum displayed in the preview plot
+*/
+void MSDFit::plotCurrentPreview() {
+
+  // Check a workspace has been selected
+  if (m_msdInputWS) {
+    const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
+    IndirectTab::plotSpectrum(
+      QString::fromStdString(m_msdInputWS->getName()), workspaceIndex,
+      workspaceIndex);
+  }
+}
+
 
 } // namespace IDA
 } // namespace CustomInterfaces

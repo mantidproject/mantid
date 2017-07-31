@@ -68,7 +68,6 @@ private:
   Mantid::API::IAlgorithm_sptr m_fitAlg;
 
   Mantid::API::MatrixWorkspace_sptr m_jfInputWS;
-  Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
   int m_specNo;
 };
 } // namespace IDA

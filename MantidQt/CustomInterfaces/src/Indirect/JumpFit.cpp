@@ -17,7 +17,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr) {
+    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr),
+      m_jfInputWS(), m_specNo(0) {
   m_uiForm.setupUi(parent);
 }
 
@@ -561,19 +562,12 @@ void JumpFit::saveClicked() {
 * Plots the current spectrum displayed in the preview plot
 */
 void JumpFit::plotCurrentPreview() {
-  if (!m_jfInputWS) {
-    return;
-  }
-  if (m_jfInputWS->getName().compare(m_previewPlotData->getName()) == 0) {
-    // Plot only the sample curve
+
+  // Check if a workspace has been selected
+  if (m_jfInputWS) {
     IndirectTab::plotSpectrum(
-      QString::fromStdString(m_previewPlotData->getName()), m_specNo,
+      QString::fromStdString(m_jfInputWS->getName()), m_specNo,
       m_specNo);
-  }
-  else {
-    // Plot Sample, Fit and Diff curve
-    IndirectTab::plotSpectrum(
-      QString::fromStdString(m_previewPlotData->getName()), 0, 2);
   }
 }
 } // namespace IDA
