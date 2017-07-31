@@ -10,8 +10,8 @@
 #include <QApplication>
 #include <QMessageBox>
 
-#include <MantidQtWidgets/Common/InstrumentView/InstrumentWidget.h>
-#include <MantidQtWidgets/Common/InstrumentView/ProjectionSurface.h>
+#include <MantidQtWidgets/InstrumentView/InstrumentWidget.h>
+#include <MantidQtWidgets/InstrumentView/ProjectionSurface.h>
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(InstrumentWindow)

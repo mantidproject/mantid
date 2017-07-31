@@ -18,7 +18,7 @@
 #include "MantidUI.h"
 #include "ProjectSerialiser.h"
 
-#include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
+#include "ui_SequentialFitDialog.h"
 #include "../Folder.h"
 #include "../ScriptingWindow.h"
 #include "../Spectrogram.h"
@@ -91,10 +91,10 @@
 #include <Poco/Thread.h>
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtFactory/WidgetFactory.h"
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtWidgets/Factory/WidgetFactory.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 
-#include "MantidQtSpectrumViewer/SpectrumView.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 #include <typeinfo>
 
 using namespace std;

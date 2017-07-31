@@ -71,7 +71,7 @@
 #include <MantidQtWidgets/Common/MantidTreeWidget.h>
 
 #include "Mantid/MantidMDCurveDialog.h"
-#include "MantidQtSliceViewer/LinePlotOptions.h"
+#include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include <MantidQtWidgets/Common/MantidTreeWidget.h>
 #include <MantidQtWidgets/Common/MantidWSIndexDialog.h>
 #include <gsl/gsl_vector.h>

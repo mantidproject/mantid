@@ -445,7 +445,7 @@ set( SRC_UNITY_IGNORE_FILES )
 # src/sipqti.cpp.rule file.
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
-                          -I ${PYQT4_SIP_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR}/../MantidQt/Python ${PYQT4_SIP_FLAGS}
+                          -I ${PYQT4_SIP_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR}/../qt/python ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
                      DEPENDS src/qti.sip ${SIP_HDRS}
@@ -700,11 +700,10 @@ include_directories ( ../qt/widgets/common/inc )
 include_directories ( ../qt/widgets/instrumentview/inc )
 include_directories ( ../qt/widgets/sliceviewer/inc )
 include_directories ( ../qt/widgets/spectrumviewer/inc )
-include_directories ( ../MantidQt/Factory/inc )
+include_directories ( ../qt/widgets/factory/inc )
 # ui_ files end up in these places
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets )
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/SliceViewer )
+include_directories ( ${CMAKE_BINARY_DIR}/qt/widgets/common )
+include_directories ( ${CMAKE_BINARY_DIR}/qt/widgets/sliceviewer )
 
 
 ###########################################################################
@@ -796,10 +795,9 @@ target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             API
             qtwidgetscommon
             qtwidgetsinstrumentview
-            MantidQtSliceViewer
-            MantidQtFactory
-            MantidQtSpectrumViewer
-            QtPropertyBrowser
+            qtwidgetssliceviewer
+            qtwidgetsfactory
+            qtwidgetsspectrumviewer
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GSL_LIBRARIES}
