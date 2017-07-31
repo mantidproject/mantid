@@ -64,7 +64,7 @@ public:
     // Make sure we can load the output file with no problems
     DataHandling::LoadSESANS loader;
     loader.initialize();
-	std::string outWSName = "outWS";
+    std::string outWSName = "outWS";
 
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", outputPath));
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", outWSName));
