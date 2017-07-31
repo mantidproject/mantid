@@ -210,22 +210,28 @@ void LoadIsawDetCal::exec() {
       else
         center(0.0, 0.0, -mL1, "moderator", ws, componentInfo);
       // mT0 and time of flight are both in microsec
-      if (inputW) {
-        API::Run &run = inputW->mutableRun();
-        // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
-        IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
-        alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-        alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
-        if (run.hasProperty("T0")) {
-          double T0IDF = run.getPropertyValueAsType<double>("T0");
-          alg1->setProperty("Offset", mT0 - T0IDF);
-        } else {
-          alg1->setProperty("Offset", mT0);
+      if (mT0 != 0.0) {
+        if (inputW) {
+          API::Run &run = inputW->mutableRun();
+          // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
+          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
+          alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+          alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
+          if (run.hasProperty("T0")) {
+            double T0IDF = run.getPropertyValueAsType<double>("T0");
+            alg1->setProperty("Offset", mT0 - T0IDF);
+          } else {
+            alg1->setProperty("Offset", mT0);
+          }
+          alg1->executeAsChildAlg();
+          inputW = alg1->getProperty("OutputWorkspace");
+          // set T0 in the run parameters
+          run.addProperty<double>("T0", mT0, true);
+        } else if (inputP) {
+          // set T0 in the run parameters
+          API::Run &run = inputP->mutableRun();
+          run.addProperty<double>("T0", mT0, true);
         }
-        alg1->executeAsChildAlg();
-        inputW = alg1->getProperty("OutputWorkspace");
-        // set T0 in the run parameters
-        run.addProperty<double>("T0", mT0, true);
       }
     }
 
@@ -271,6 +277,28 @@ void LoadIsawDetCal::exec() {
       detScaling.scaleX = CM_TO_M * width / det->xsize();
       detScaling.scaleY = CM_TO_M * height / det->ysize();
       detScaling.componentName = detname;
+      // Scaling will need both scale factors if LoadIsawPeaks or LoadIsawDetCal
+      // has already
+      // applied a calibration
+      if (inputW) {
+        Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+        auto oldscalex = pmap.getDouble(detname, std::string("scalex"));
+        auto oldscaley = pmap.getDouble(detname, std::string("scaley"));
+        if (!oldscalex.empty())
+          detScaling.scaleX *= oldscalex[0];
+        if (!oldscaley.empty())
+          detScaling.scaleY *= oldscaley[0];
+      }
+      if (inputP) {
+        Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+        auto oldscalex = pmap.getDouble(detname, std::string("scalex"));
+        auto oldscaley = pmap.getDouble(detname, std::string("scaley"));
+        if (!oldscalex.empty())
+          detScaling.scaleX *= oldscalex[0];
+        if (!oldscaley.empty())
+          detScaling.scaleY *= oldscaley[0];
+      }
+
       rectangularDetectorScalings.push_back(detScaling);
 
       doRotation(rX, rY, componentInfo, det);

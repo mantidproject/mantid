@@ -163,22 +163,29 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   return std::move(output);
 }
 
-/** Checks that the two input workspace have common binning & size, the same
- * instrument & unit.
- *  Also calls the checkForOverlap method.
- *  @param ws1 :: The first input workspace
- *  @param ws2 :: The second input workspace
- *  @throw std::invalid_argument If the workspaces are not compatible
- */
-void WorkspaceJoiners::validateInputs(const MatrixWorkspace &ws1,
-                                      const MatrixWorkspace &ws2) {
-  // This is the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(ws1) ||
-      !WorkspaceHelpers::commonBoundaries(ws2)) {
-    g_log.error(
-        "Both input workspaces must have common binning for all their spectra");
-    throw std::invalid_argument(
-        "Both input workspaces must have common binning for all their spectra");
+/** Checks that the two input workspace have common size and the same
+* instrument & unit. There is an option to check whether their binning is
+* compatible
+*  Also calls the checkForOverlap method.
+*  @param ws1 :: The first input workspace
+*  @param ws2 :: The second input workspace
+*  @param checkBinning :: A flag for whether to check that the workspaces have
+* compatible binning (default true)
+*  @throw std::invalid_argument If the workspaces are not compatible
+*/
+void Mantid::Algorithms::WorkspaceJoiners::validateInputs(
+    const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2,
+    const bool checkBinning) {
+  // Workspaces with point data are allowed to have different binning
+  if (checkBinning) {
+    // This is the full check for common binning
+    if (!WorkspaceHelpers::commonBoundaries(ws1) ||
+        !WorkspaceHelpers::commonBoundaries(ws2)) {
+      g_log.error("Both input workspaces must have common binning for all "
+                  "their spectra");
+      throw std::invalid_argument("Both input workspaces must have common "
+                                  "binning for all their spectra");
+    }
   }
 
   if (ws1.getInstrument()->getName() != ws2.getInstrument()->getName()) {

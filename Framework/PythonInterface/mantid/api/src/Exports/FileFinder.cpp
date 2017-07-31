@@ -1,4 +1,5 @@
 #include "MantidAPI/FileFinder.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/reference_existing_object.hpp>
@@ -13,7 +14,11 @@ namespace {
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getFullPathOverloader, getFullPath, 1, 2)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

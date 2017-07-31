@@ -690,4 +690,55 @@ On POLARIS this is set to the following:
                               (800, 19995),  # Bank 5
                              ]
 
+.. _vanadium_sample_details_polaris_isis-powder-diffraction-ref:
+  
+Vanadium sample details
+^^^^^^^^^^^^^^^^^^^^^^^
+
+chemical_formula
+================
+
+The chemical formula for the Vanadium rod.
+
+
+On POLARIS this is set to the following:
+
+.. code-block:: python
+
+  chemical_formula = "V"
+		
+cylinder_sample_height
+======================
+
+The height of the Vanadium rod.
+
+On POLARIS this is set to the following:
+
+.. code-block:: python
+		
+  cylinder_sample_height = 4.0
+
+cylinder_sample_radius
+======================
+
+The radius of the Vanadium rod.
+
+On POLARIS this is set to the following:
+
+.. code-block:: python
+		
+  cylinder_sample_radius = 0.4
+
+cylinder_position
+=================
+
+The position of the Vanadium rod in [x, y, z]
+
+On POLARIS this is set to the following:
+
+.. code-block:: python
+
+  cylinder_position = [0.0, 0.0, 0.0]
+
+   
 .. categories:: Techniques
