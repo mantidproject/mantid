@@ -108,8 +108,7 @@ void Integration::exec() {
   }
   if (isEmpty(maxWsIndex))
     maxWsIndex = numberOfSpectra - 1;
-  if (maxWsIndex > numberOfSpectra - 1 || maxWsIndex < minWsIndex ||
-      maxWsIndex < 0) {
+  if (maxWsIndex > numberOfSpectra - 1 || maxWsIndex < minWsIndex) {
     g_log.warning(
         "EndWorkspaceIndex out of range! Set to max workspace index.");
     maxWsIndex = numberOfSpectra - 1;
