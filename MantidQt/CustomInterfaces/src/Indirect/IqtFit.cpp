@@ -146,6 +146,8 @@ void IqtFit::setup() {
           SLOT(checkBoxUpdate(QtProperty *, bool)));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+    SLOT(plotCurrentPreview()));
 }
 
 void IqtFit::run() {
@@ -269,6 +271,9 @@ void IqtFit::saveResult() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
+/**
+* Plots the current spectrum displayed in the preview plot
+*/
 void IqtFit::plotCurrentPreview() {
   if (!m_iqtFInputWS) {
     return;
