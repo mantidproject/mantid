@@ -96,7 +96,8 @@ public:
       TS_ASSERT_DELTA(yValues[i], 2.0, tolerance);
       TS_ASSERT_DELTA(eValues[i], SQRT_2, tolerance);
     }
-    
+
+    // Clean up the file
     TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
     TS_ASSERT(!Poco::File(outputPath).exists());
   }

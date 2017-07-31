@@ -66,10 +66,6 @@ public:
     Mantid::Kernel::FileDescriptor descriptor(
         testAlg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(testAlg.confidence(descriptor), 70);
-    
-    std::string outputPath = testAlg.getProperty("Filename");
-    TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
-    TS_ASSERT(!Poco::File(outputPath).exists());
   }
 
   void test_requireFFV() {
@@ -83,10 +79,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
 
     TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
+    deleteFile(testAlg);
 
-    std::string outputPath = testAlg.getProperty("Filename");
-    TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
-    TS_ASSERT(!Poco::File(outputPath).exists());
   }
 
   void test_mandatoryHeaders() {
@@ -100,10 +94,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
 
     TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
-    
-    std::string outputPath = testAlg.getProperty("Filename");
-    TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
-    TS_ASSERT(!Poco::File(outputPath).exists());
+    deleteFile(testAlg);
   }
 
   void test_mandatoryColumns() {
@@ -117,10 +108,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
 
     TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
-    
-    std::string outputPath = testAlg.getProperty("Filename");
-    TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
-    TS_ASSERT(!Poco::File(outputPath).exists());
+    deleteFile(testAlg);
   }
 
 private:
@@ -218,9 +206,15 @@ private:
         "280.8 -1.45E-3 1.87E-3 1.675709\n";
     std::ofstream file(infileName);
     file << contents;
-    file.close();
-    
+    file.close();    
   }
+
+  void deleteFile(const LoadSESANS &testAlg){
+    std::string outputPath = testAlg.getProperty("Filename");
+    TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
+    TS_ASSERT(!Poco::File(outputPath).exists());
+  }
+  
 };
 
 #endif /* MANTID_DATAHANDLING_LOADSESANSTEST_H_ */
