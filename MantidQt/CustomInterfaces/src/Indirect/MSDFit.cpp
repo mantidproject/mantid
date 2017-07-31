@@ -37,7 +37,6 @@ void MSDFit::setup() {
 
   m_msdTree->addProperty(m_properties["Start"]);
   m_msdTree->addProperty(m_properties["End"]);
-  this->modelChanged(m_uiForm.modelInput->currentText());
 
   auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("MSDRange");
 
