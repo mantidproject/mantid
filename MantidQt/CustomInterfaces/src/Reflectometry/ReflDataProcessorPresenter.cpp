@@ -1,9 +1,9 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
@@ -368,6 +368,18 @@ void ReflDataProcessorPresenter::parseUniform(const QString &timeSlicing,
   }
 }
 
+namespace {
+double parseDouble(QString const &in) {
+  static auto ok = false;
+  auto out = in.toDouble(&ok);
+  if (ok)
+    return out;
+  else
+    throw std::runtime_error("Failed to parse '" + in.toStdString() +
+                             "' as a double numerical value.");
+}
+}
+
 /** Parses a string to extract custom time slicing
  *
  * @param timeSlicing :: The string to parse
@@ -382,7 +394,7 @@ void ReflDataProcessorPresenter::parseCustom(const QString &timeSlicing,
   std::vector<double> times;
   std::transform(
       timeStr.begin(), timeStr.end(), std::back_inserter(times),
-      [](const QString &astr) { return std::stod(astr.toStdString()); });
+      [](const QString &astr) { return parseDouble(astr); });
 
   size_t numSlices = times.size() > 1 ? times.size() - 1 : 1;
 
