@@ -27,7 +27,6 @@ import numpy as np
 from docutils.core import publish_string
 import post_processing as postproc
 import os
-import mantidplot as mp
 import pymantidplot.qtiplot as qti
 import mantid.simpleapi as msapi
 
@@ -229,7 +228,7 @@ def build_visual_display_page(prob_results, group_name):
     gb = min((result for result in prob_results), key=lambda result: result.fit_chi2)
     file_name = (group_name + '_' + gb.problem.name).lower()
     wks = msapi.CreateWorkspace(OutputWorkspace=gb.problem.name, DataX=gb.problem.data_pattern_in, DataY=gb.problem.data_pattern_out)
-    plot = qti.plot(wks, 0)
+    qti.plot(wks, 0)
     # Create various page headings, ensuring the adornment is (at least) the length of the title
     title = '=' * len(gb.problem.name) + '\n'
     title += gb.problem.name + '\n'
@@ -251,7 +250,7 @@ def build_visual_display_page(prob_results, group_name):
     with open(file_name + '.' + FILENAME_EXT_TXT, 'w') as visual_rst:
         print(html, file=visual_rst)
         print('Saved {file_name}.{extension} to {working_directory}'.
-          format(file_name=file_name, extension=FILENAME_EXT_TXT, working_directory=WORKING_DIR))
+              format(file_name=file_name, extension=FILENAME_EXT_TXT, working_directory=WORKING_DIR))
     with open(file_name + '.' + FILENAME_EXT_HTML, 'w') as visual_html:
         print(html, file=visual_html)
         print('Saved {file_name}.{extension} to {working_directory}'.
@@ -286,6 +285,7 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
     if save_to_file:
         save_table_to_file(tbl_all_summary_runtime, use_errors, 'summary', FILENAME_SUFFIX_RUNTIME, FILENAME_EXT_TXT)
         save_table_to_file(tbl_all_summary_runtime, use_errors, 'summary', FILENAME_SUFFIX_RUNTIME, FILENAME_EXT_HTML)
+
 
 def weighted_suffix_string(use_errors):
     """

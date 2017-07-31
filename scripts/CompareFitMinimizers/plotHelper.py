@@ -38,7 +38,7 @@ class data:
         if name is not None:
             self.name = name
             self.x = copy.copy(x)
-            self.y = copy.copy(y)						    
+            self.y = copy.copy(y)
         else:
             self.name ='none'
             self.x = [0.0,0.0,0.0]
@@ -69,6 +69,7 @@ class data:
                     yData[k+1],yData[k]=yData[k],yData[k+1]
                     eData[k+1],eData[k]=eData[k],eData[k+1]
 
+
 class insert(data):
     """
     Minimal information for defining an insert
@@ -90,6 +91,7 @@ class insert(data):
         the default is not to save
         """
         self.data.append(inputData)
+
 
 class plot(data,insert):
     """
@@ -133,11 +135,11 @@ class plot(data,insert):
         for data in self.data:
                 if(data.showError):
                         #plot with errors
-                        plt.errorbar(data.x,data.y,yerr=data.E,label=data.name ,marker=data.markers,color=data.colour, \
-						             linestyle=data.linestyle,markersize=8)
+                        plt.errorbar(data.x,data.y,yerr=data.E,label=data.name ,marker=data.markers,color=data.colour,
+                                     linestyle=data.linestyle,markersize=8)
                 else:
-                        plt.plot(data.x,data.y,label=data.name,marker=data.markers,color=data.colour,\
-						         linestyle=data.linestyle,markersize=8)
+                        plt.plot(data.x,data.y,label=data.name,marker=data.markers,color=data.colour,
+                                 linestyle=data.linestyle,markersize=8)
         plt.legend(loc=self.legend)
         if  self.xrange["start"]!=0.0 or self.xrange["end"]!=0.0:
             plt.xlim([self.xrange["start"],self.xrange["end"]])
@@ -146,7 +148,7 @@ class plot(data,insert):
         if self.logs['x']==True:
             plt.xscale("log")
         if self.logs['y']==True:
-            plt.yscale("log")			     			
+            plt.yscale("log")
         plt.tight_layout()
         if save=="":
             plt.show()
@@ -169,7 +171,7 @@ class plot(data,insert):
     def make_y_labels_safe_part_1(self):
         """
         Ensures that if multiple data sets share some labels (y values)
-        that the plot includes each one once and only once. 
+        that the plot includes each one once and only once.
         """
         labels=[]
         for data in self.data:
@@ -185,7 +187,7 @@ class plot(data,insert):
         @param labels :: the safe y labels
         @param data :: the data object to be made safe
         """
-		#get data in same form
+        #get data in same form
         xData =[]
         eData=[]
         for label in labels:
@@ -211,8 +213,8 @@ class plot(data,insert):
         ax1.set_ylabel(self.labels["y"])
         ax1.set_title(self.labels["title"])
         if self.insert is not None:
-            ax2=fig.add_axes([self.insert.position['left'],self.insert.position['bottom'],\
-			                  self.insert.position['width'], self.insert.position['height']])
+            ax2=fig.add_axes([self.insert.position['left'],self.insert.position['bottom'],
+                              self.insert.position['width'], self.insert.position['height']])
         # get labels
         if safe is True:
             labels=self.make_y_labels_safe_part_1()
@@ -229,7 +231,7 @@ class plot(data,insert):
                 xData,eData=self.get_safe_data(labels,data)
             else:
                 xData=data.x
-                eData=data.E 				  
+                eData=data.E
             ax1.set_yticks(yNum+width*(len(self.data)-1.)/2.)
             ax1.set_yticklabels(labels)
             ax2.set_yticks(yNum+width*(len(self.data)-1.)/2.)
@@ -279,9 +281,9 @@ class plot(data,insert):
                 eData=data.E
             plt.yticks(yNum+width*(len(self.data)-1.)/2.,labels)
             if data.showError:
-                 plt.barh(yNum+k*width,xData,width,log= self.logs['x'],xerr=eData,label=data.name,color=data.colour,align='center')
+                plt.barh(yNum+k*width,xData,width,log= self.logs['x'],xerr=eData,label=data.name,color=data.colour,align='center')
             else:
-                 plt.barh(yNum+k*width,xData,width,log= self.logs['x'],label=data.name,color=data.colour,align='center')           						 				   
+                plt.barh(yNum+k*width,xData,width,log= self.logs['x'],label=data.name,color=data.colour,align='center')
         plt.legend(loc=self.legend)
         plt.tight_layout()
         if  self.xrange["start"]!=0.0 or self.xrange["end"]!=0.0:
@@ -289,5 +291,5 @@ class plot(data,insert):
         if save=="":
             plt.show()
         else:
-           print ("saving to "+save.replace(" ","_"))
-           plt.savefig(save.replace(" ","_"))
+            print ("saving to "+save.replace(" ","_"))
+            plt.savefig(save.replace(" ","_"))
