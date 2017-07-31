@@ -1321,13 +1321,13 @@ Handle ADS replace events
 */
 void GenericDataProcessorPresenter::afterReplaceHandle(
     const std::string &name, Mantid::API::Workspace_sptr workspace) {
-  auto Qname = QString::fromStdString(name);
+  auto qName = QString::fromStdString(name);
   // Erase it
-  m_workspaceList.remove(Qname);
+  m_workspaceList.remove(qName);
 
   // If it's a table workspace, bring it back
   if (m_manager->isValidModel(workspace, m_columns))
-    m_workspaceList.insert(Qname);
+    m_workspaceList.insert(qName);
 
   m_view->setTableList(m_workspaceList);
 }
