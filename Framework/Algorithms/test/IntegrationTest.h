@@ -707,27 +707,26 @@ public:
 
     MatrixWorkspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-      input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "testSpace"));
+        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "testSpace"));
     const size_t inputNumSpectra = input->getNumberHistograms();
 
     Integration alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("InputWorkspace", "testSpace"));
+        alg.setPropertyValue("InputWorkspace", "testSpace"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(
-      alg.setProperty("StartWorkspaceIndex", startIndex));
+        alg.setProperty("StartWorkspaceIndex", startIndex));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", endIndex));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-      output =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
-    TS_ASSERT_EQUALS(output->getNumberHistograms(),
-      endIndex - startIndex + 1);
+        output =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), endIndex - startIndex + 1);
   }
 
   void testEndWsIndexOutOfBounds() {
@@ -736,27 +735,27 @@ public:
 
     MatrixWorkspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-      input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "testSpace"));
+        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "testSpace"));
     const size_t inputNumSpectra = input->getNumberHistograms();
 
     Integration alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("InputWorkspace", "testSpace"));
+        alg.setPropertyValue("InputWorkspace", "testSpace"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(
-      alg.setProperty("StartWorkspaceIndex", startIndex));
+        alg.setProperty("StartWorkspaceIndex", startIndex));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", endIndex));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-      output =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
+        output =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
     TS_ASSERT_EQUALS(output->getNumberHistograms(),
-     input->getNumberHistograms());
+                     input->getNumberHistograms());
   }
 
   void testStartWSIndexGreaterThanEnd() {
