@@ -54,6 +54,25 @@ public:
     TS_ASSERT_EQUALS(sample.getName(), "Ostensibly 40$ 100nm radius PMMA hard "
                                        "spheres in mixed deuterarted decalin.");
     TS_ASSERT_EQUALS(sample.getThickness(), 2.0);
+
+    // Make sure the spectrum was written correctly
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+    // One line should have been dropped, as it did not have enough columns
+    TS_ASSERT_EQUALS(ws->getNPoints(), 5);
+
+    double tolerance = 1e-5;
+    // Test the first two rows we read
+    // These values are all hard-coded in the sample file in writeGoodFile(), using:
+    // Y = e ^ (depol * wavelength ^2)
+    // E = depolError * Y * wavelength ^ 2
+    // X = wavelength
+    TS_ASSERT_DELTA(ws->x(0)[0], 1.612452, tolerance);
+    TS_ASSERT_DELTA(ws->y(0)[0], exp(-1.42e-3 * 1.612452 * 1.612452), tolerance);
+    TS_ASSERT_DELTA(ws->e(0)[0], 2.04e-3 * ws->y(0)[0] * 1.612452 * 1.612452, tolerance);
+
+    TS_ASSERT_DELTA(ws->x(0)[1], 1.675709, tolerance);
+    TS_ASSERT_DELTA(ws->y(0)[1], exp(-1.45e-3 * 1.675709 * 1.675709), tolerance);
+    TS_ASSERT_DELTA(ws->e(0)[1], 1.87e-3 * ws->y(0)[0] * 1.675709 * 1.675709, tolerance);
   }
 
   void test_confidence() {
