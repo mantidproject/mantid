@@ -40,6 +40,8 @@ public:
 
   enum Flag {
     SearchFlag,
+    NewAutoreductionFlag,
+    ResumeAutoreductionFlag,
     ICATSearchCompleteFlag,
     TransferFlag,
     InstrumentChangedFlag,
@@ -48,6 +50,8 @@ public:
 
   // Tell the presenter something happened
   virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
+  // Determine whether to start a new autoreduction
+  virtual bool startNewAutoreduction() const = 0;
 };
 }
 }
