@@ -701,6 +701,64 @@ public:
     }
   }
 
+  void testStartWsIndexOutOfBounds() {
+    const int startIndex = 100;
+    const int endIndex = 4;
+
+    MatrixWorkspace_sptr input;
+    TS_ASSERT_THROWS_NOTHING(
+      input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "testSpace"));
+    const size_t inputNumSpectra = input->getNumberHistograms();
+
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+      alg.setPropertyValue("InputWorkspace", "testSpace"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(
+      alg.setProperty("StartWorkspaceIndex", startIndex));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", endIndex));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+      output =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
+    TS_ASSERT_EQUALS(output->getNumberHistograms(),
+      endIndex - startIndex + 1);
+  }
+
+  void testEndWsIndexOutOfBounds() {
+    const int startIndex = -1;
+    const int endIndex = -2;
+
+    MatrixWorkspace_sptr input;
+    TS_ASSERT_THROWS_NOTHING(
+      input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "testSpace"));
+    const size_t inputNumSpectra = input->getNumberHistograms();
+
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+      alg.setPropertyValue("InputWorkspace", "testSpace"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(
+      alg.setProperty("StartWorkspaceIndex", startIndex));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", endIndex));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+      output =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
+    TS_ASSERT_EQUALS(output->getNumberHistograms(),
+     input->getNumberHistograms());
+  }
+
   void testStartWSIndexGreaterThanEnd() {
     const int startIndex = 4;
     const int endIndex = 2;
@@ -727,7 +785,7 @@ public:
         output =
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
     TS_ASSERT_EQUALS(output->getNumberHistograms(),
-                     inputNumSpectra - startIndex + 1);
+                     inputNumSpectra - startIndex);
   }
 
   void testStartWSIndexEqualsEnd() {
@@ -753,8 +811,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output =
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
-    TS_ASSERT_EQUALS(output->getNumberHistograms(),
-                     inputNumSpectra - index + 1);
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
   }
 
 private:
