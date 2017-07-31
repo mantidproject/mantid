@@ -7,6 +7,7 @@ add_subdirectory ( sliceviewer )
 add_subdirectory ( spectrumviewer )
 add_subdirectory ( refdetectorview)
 add_subdirectory ( factory )
+add_subdirectory ( plugins )
 
 #add_subdirectory ( CustomDialogs )
 #add_subdirectory ( CustomInterfaces )

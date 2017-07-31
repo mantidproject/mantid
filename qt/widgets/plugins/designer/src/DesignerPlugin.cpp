@@ -1,5 +1,5 @@
-#include "MantidQtDesignerPlugins/DesignerPlugin.h"
-#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
+#include "MantidQtWidgets/Plugins/Designer/DesignerPlugin.h"
+#include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
 #include <QDesignerFormEditorInterface>
 #include <QtPlugin>
 #include <iostream>

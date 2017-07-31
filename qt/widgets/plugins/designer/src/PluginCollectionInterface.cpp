@@ -1,7 +1,7 @@
 //-------------------------------------------------------
 // Includes
 //-------------------------------------------------------
-#include "MantidQtDesignerPlugins/PluginCollectionInterface.h"
+#include "MantidQtWidgets/Plugins/Designer/PluginCollectionInterface.h"
 
 Q_EXPORT_PLUGIN2(LIBRARY_NAME, PluginCollectionInterface)
 
