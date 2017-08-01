@@ -13,13 +13,19 @@ def generate_and_save_focus_output(instrument, processed_spectra, run_details, a
     output_file_paths = instrument._generate_out_file_paths(run_details=run_details)
 
     if focus_mode == "all":
-        processed_nexus_files = _focus_mode_all(output_file_paths, processed_spectra, attenuation_filepath)
+        processed_nexus_files = _focus_mode_all(output_file_paths=output_file_paths,
+                                                processed_spectra=processed_spectra,
+                                                attenuation_filepath=attenuation_filepath)
     elif focus_mode == "groups":
-        processed_nexus_files = _focus_mode_groups(output_file_paths, processed_spectra)
+        processed_nexus_files = _focus_mode_groups(output_file_paths=output_file_paths,
+                                                   processed_spectra=processed_spectra)
     elif focus_mode == "trans":
-        processed_nexus_files = _focus_mode_trans(output_file_paths, attenuation_filepath, processed_spectra)
+        processed_nexus_files = _focus_mode_trans(output_file_paths=output_file_paths,
+                                                  processed_spectra=processed_spectra,
+                                                  attenuation_filepath=attenuation_filepath)
     elif focus_mode == "mods":
-        processed_nexus_files = _focus_mode_mods(output_file_paths, processed_spectra)
+        processed_nexus_files = _focus_mode_mods(output_file_paths=output_file_paths,
+                                                 processed_spectra=processed_spectra)
     else:
         raise ValueError("Focus mode '" + str(focus_mode) + "' unknown.")
 
@@ -40,7 +46,7 @@ def _focus_mode_all(output_file_paths, processed_spectra, attenuation_filepath):
     summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111,
                                   OutputWorkspace=summed_spectra_name)
     if attenuation_filepath:
-        summed_spectra = _attenuate_workspace(output_file_paths, summed_spectra,
+        summed_spectra = _attenuate_workspace(output_file_paths=output_file_paths, attenuated_ws=summed_spectra,
                                               attenuation_filepath=attenuation_filepath)
 
     summed_spectra = mantid.ConvertUnits(InputWorkspace=summed_spectra, Target="TOF",
@@ -70,7 +76,7 @@ def _focus_mode_all(output_file_paths, processed_spectra, attenuation_filepath):
 
 def _focus_mode_groups(output_file_paths, calibrated_spectra):
     output_list = []
-    to_save = _sum_groups_of_three_ws(calibrated_spectra, output_file_paths)
+    to_save = _sum_groups_of_three_ws(calibrated_spectra=calibrated_spectra, output_file_names=output_file_paths)
 
     workspaces_4_to_9_name = output_file_paths["output_name"] + "_mods4-9"
     workspaces_4_to_9 = mantid.Plus(LHSWorkspace=to_save[1], RHSWorkspace=to_save[2])
@@ -128,7 +134,7 @@ def _focus_mode_trans(output_file_paths, attenuation_filepath, calibrated_spectr
     summed_ws = mantid.Scale(InputWorkspace=summed_ws, Factor=0.111111111111111)
 
     if attenuation_filepath:
-        summed_ws = _attenuate_workspace(output_file_paths, summed_ws,
+        summed_ws = _attenuate_workspace(output_file_paths=output_file_paths, attenuated_ws=summed_ws,
                                          attenuation_filepath=attenuation_filepath)
 
     summed_ws = mantid.ConvertUnits(InputWorkspace=summed_ws, Target="TOF")
