@@ -8,12 +8,12 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
+#include <boost/regex.hpp>
 #include "boost/algorithm/string/predicate.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-#include <regex>
 
 namespace Mantid {
 namespace DataHandling {
@@ -201,7 +201,7 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
                          repeatAndJoin(numberRegex, "\\s+",
                                        static_cast<int>(columnHeaders.size())) +
                          "\\s*$";
-  std::regex lineRegex(rawRegex);
+  boost::regex lineRegex(rawRegex);
 
   // Tokens in a line
   std::vector<std::string> tokens;
@@ -212,7 +212,7 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
   while (std::getline(infile, line)) {
     lineNum++;
 
-    if (std::regex_match(line, lineRegex)) {
+    if (boost::regex_match(line, lineRegex)) {
       tokens = split(line);
 
       for (unsigned int i = 0; i < tokens.size(); i++)
