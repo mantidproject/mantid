@@ -1,8 +1,6 @@
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
@@ -10,8 +8,10 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -833,8 +833,8 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
-    const Mantid::API::DetectorInfo &detInfo = expInfo.detectorInfo();
+    const auto &compInfo = expInfo.componentInfo();
+    const auto &detInfo = expInfo.detectorInfo();
     // Test one of the detectors
     const auto targetDetectorIndex = 0;
     const auto detCompId =

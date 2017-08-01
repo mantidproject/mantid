@@ -50,6 +50,7 @@ set ( SRC_FILES
         src/Instrument/ComponentInfo.cpp
         src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
+	src/Instrument/DetectorInfo.cpp
 	src/Instrument/DetectorGroup.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
@@ -207,6 +208,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/Detector.h
 	inc/MantidGeometry/Instrument/DetectorGroup.h
+	inc/MantidGeometry/Instrument/DetectorInfo.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
 	inc/MantidGeometry/Instrument/IDFObject.h

@@ -1,10 +1,10 @@
-#ifndef MANTID_API_DETECTORINFOTEST_H_
-#define MANTID_API_DETECTORINFOTEST_H_
+#ifndef MANTID_GEOMETRY_DETECTORINFOTEST_H_
+#define MANTID_GEOMETRY_DETECTORINFOTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
@@ -558,4 +558,4 @@ private:
   WorkspaceTester m_workspace;
 };
 
-#endif /* MANTID_API_DETECTORINFOTEST_H_ */
+#endif /* MANTID_GEOMETRY_DETECTORINFOTEST_H_ */

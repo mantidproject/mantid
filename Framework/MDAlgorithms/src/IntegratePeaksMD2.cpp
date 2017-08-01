@@ -1,7 +1,7 @@
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -672,7 +672,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *
  * @param inst: instrument
  */
-void IntegratePeaksMD2::calculateE1(const API::DetectorInfo &detectorInfo) {
+void IntegratePeaksMD2::calculateE1(
+    const Geometry::DetectorInfo &detectorInfo) {
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (detectorInfo.isMonitor(i))
       continue; // skip monitor

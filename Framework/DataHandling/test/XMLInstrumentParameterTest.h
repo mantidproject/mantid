@@ -5,7 +5,7 @@
 
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"

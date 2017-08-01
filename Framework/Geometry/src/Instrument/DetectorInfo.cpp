@@ -1,7 +1,7 @@
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -9,7 +9,7 @@
 #include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 
 /** Construct DetectorInfo based on an Instrument.
  *
@@ -358,5 +358,5 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
   return m_lastDetector[thread];
 }
 
-} // namespace API
+} // namespace Geometry
 } // namespace Mantid
