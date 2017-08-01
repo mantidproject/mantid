@@ -189,7 +189,7 @@ void QDataProcessorWidget::showTable(
   ui.viewTable->setModel(m_model.get());
 
   // Hide the Hidden Options column
-  ui.viewTable->hideColumn(m_model->columnCount()-1);
+  ui.viewTable->hideColumn(m_model->columnCount() - 1);
 }
 
 /**

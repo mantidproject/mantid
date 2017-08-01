@@ -131,7 +131,6 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "specified via this column and global options "
                              "specified externally, the former prevail.");
 
-
   // Column Hidden Options must be added to the whitelist
   m_whitelist.addElement("HiddenOptions", "HiddenOptions",
                          "<b>Override <samp>" +
@@ -899,7 +898,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // Properties not to be used in processing
   std::set<std::string> restrictedProps;
 
-  // Loop over all columns in the whitelist except 'Options' and 'Hidden Options'
+  // Loop over all columns in the whitelist except 'Options' and 'Hidden
+  // Options'
   for (int i = 0; i < m_columns - 2; i++) {
 
     // The algorithm's property linked to this column
@@ -981,7 +981,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   // Parse and set any user-specified options
   auto hiddenOptionsMap = parseKeyValueString(hiddenOptions);
-  for (auto kvp = hiddenOptionsMap.begin(); kvp != hiddenOptionsMap.end(); ++kvp) {
+  for (auto kvp = hiddenOptionsMap.begin(); kvp != hiddenOptionsMap.end();
+       ++kvp) {
     try {
       alg->setProperty(kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
