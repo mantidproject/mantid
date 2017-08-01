@@ -2,7 +2,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDER_H_
 
 #include "MantidKernel/Statistics.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "DllConfig.h"
 #include <QStringList>
 
 namespace MantidQt {
@@ -32,7 +32,7 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL MDFLogValueFinder {
+class MANTIDQT_MULTIDATASETFIT_DLL MDFLogValueFinder {
 public:
   /// Constructor
   explicit MDFLogValueFinder(const QStringList &wsNames);

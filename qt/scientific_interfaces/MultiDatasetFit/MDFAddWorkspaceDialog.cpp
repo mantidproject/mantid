@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h"
+#include "MDFAddWorkspaceDialog.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"

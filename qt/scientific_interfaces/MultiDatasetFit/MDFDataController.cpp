@@ -1,6 +1,6 @@
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
+#include "MDFDataController.h"
+#include "MDFAddWorkspaceDialog.h"
+#include "MultiDatasetFit.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"

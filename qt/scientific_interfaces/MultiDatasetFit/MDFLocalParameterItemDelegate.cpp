@@ -1,7 +1,7 @@
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
+#include "MDFLocalParameterItemDelegate.h"
+#include "MDFEditLocalParameterDialog.h"
+#include "MDFLocalParameterEditor.h"
+#include "MultiDatasetFit.h"
 
 #include <QPainter>
 

@@ -1,5 +1,5 @@
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
+#include "MDFLocalParameterEditor.h"
+#include "MDFEditLocalParameterDialog.h"
 
 #include <QHBoxLayout>
 #include <QLineEdit>

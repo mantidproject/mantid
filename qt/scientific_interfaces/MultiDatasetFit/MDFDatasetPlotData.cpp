@@ -1,5 +1,5 @@
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h"
-#include "MantidQtMantidWidgets/ErrorCurve.h"
+#include "MDFDatasetPlotData.h"
+#include "MantidQtWidgets/Common/ErrorCurve.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"

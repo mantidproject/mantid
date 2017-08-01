@@ -1,7 +1,7 @@
 #include "MantidKernel/make_unique.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h"
+#include "MDFEditLocalParameterDialog.h"
+#include "MultiDatasetFit.h"
+#include "MDFLocalParameterItemDelegate.h"
 
 #include <QMenu>
 #include <QClipboard>

@@ -2,8 +2,8 @@
 #define MULTIDATASETFIT_H_
 
 #include "MantidKernel/Statistics.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_MultiDatasetFit.h"
 
 namespace Mantid {
@@ -38,7 +38,7 @@ class PlotController;
  * multi-dataset fit
  * and displaying the results.
  */
-class MANTIDQT_CUSTOMINTERFACES_DLL MultiDatasetFit
+class MANTIDQT_MULTIDATASETFIT_DLL MultiDatasetFit
     : public API::UserSubWindow {
   Q_OBJECT
 public:

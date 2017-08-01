@@ -1,6 +1,6 @@
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFFunctionPlotData.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
-#include "MantidQtMantidWidgets/ErrorCurve.h"
+#include "MDFFunctionPlotData.h"
+#include "MultiDatasetFit.h"
+#include "MantidQtWidgets/Common/ErrorCurve.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IFunction.h"

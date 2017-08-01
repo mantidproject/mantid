@@ -88,18 +88,9 @@ set ( UI_FILES
 
 include_directories ( ../../qt/widgets/common/inc )
 
-# Ugly hack to get around issue in Boost version 1.48.0
-# in conjunction with Qt 4.7.4 or greater
-set ( qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH} )
-if ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
-	set( extra_options "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED")
-else ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
-	set ( extra_options "" )
-endif ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
-
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS ${extra_options} )
 
-qt4_add_resources ( RES_FILES icons/CustomInterfacesIcons.qrc )
+#qt4_add_resources ( RES_FILES icons/CustomInterfacesIcons.qrc )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )#${RES_FILES})
 
@@ -113,7 +104,7 @@ add_library ( MantidScientificInterfacesMuon ${ALL_SRC} ${INC_FILES} ${UI_HDRS} 
 # Set the name of the generated library
 set_target_properties ( MantidScientificInterfacesMuon PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_MUONINTERFACE )
 if ( MSVC_IDE )
-#  # Add to the 'MantidQt' group in VS
+#  # Add to the 'ScientificInterfaces' group in VS
   set_property ( TARGET MantidScientificInterfacesMuon PROPERTY FOLDER "ScientificInterfaces" )
 endif()
 

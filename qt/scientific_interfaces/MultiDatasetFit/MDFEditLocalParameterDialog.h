@@ -2,8 +2,8 @@
 #define MDFEDITLOCALPARAMETERDIALOG_H_
 
 #include "ui_EditLocalParameterDialog.h"
-#include "MantidQtMantidWidgets/IFunctionBrowser.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLogValueFinder.h"
+#include "MantidQtWidgets/Common/IFunctionBrowser.h"
+#include "MDFLogValueFinder.h"
 #include <QDialog>
 
 namespace MantidQt {

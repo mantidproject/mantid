@@ -1,7 +1,7 @@
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
+#include "MultiDatasetFit.h"
+#include "MDFDataController.h"
+#include "MDFPlotController.h"
+#include "MDFEditLocalParameterDialog.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -12,9 +12,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtMantidWidgets/FitOptionsBrowser.h"
-#include "MantidQtMantidWidgets/FunctionBrowser.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FunctionBrowser.h"
 
 #include <QMessageBox>
 #include <QToolBar>
