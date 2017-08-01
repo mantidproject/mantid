@@ -5,7 +5,7 @@
 
 #include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidKernel/ConfigService.h"

@@ -2,7 +2,7 @@
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManagerDataService.h"
