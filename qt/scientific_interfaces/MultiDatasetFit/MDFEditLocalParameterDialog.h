@@ -3,6 +3,7 @@
 
 #include "ui_EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
+#include "DllConfig.h"
 #include "MDFLogValueFinder.h"
 #include <QDialog>
 
@@ -18,7 +19,7 @@ namespace MDF {
   * Parameters can be set individually or all to the same value.
   * They also can be fixed and unfixed.
   */
-class EditLocalParameterDialog : public QDialog {
+class MANTIDQT_MULTIDATASETFIT_DLL EditLocalParameterDialog : public QDialog {
   Q_OBJECT
 public:
   EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName);

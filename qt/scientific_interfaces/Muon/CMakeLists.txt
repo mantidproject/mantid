@@ -96,6 +96,7 @@ set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )#${RES_FILES})
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MultiDatasetFit )
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers( PrecompiledHeader.h  ALL_SRC )
@@ -116,6 +117,7 @@ find_Package(Threads)
 
 target_link_libraries ( MantidScientificInterfacesMuon LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             qtwidgetscommon
+            MantidScientificInterfacesMultiDatasetFit
             ${CORE_MANTIDLIBS}
             ${QT_LIBRARIES}
             ${QWT_LIBRARIES}
