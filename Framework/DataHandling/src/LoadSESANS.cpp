@@ -61,11 +61,11 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
   bool ffvFound = boost::starts_with(line, "FileFormatVersion");
 
   // Next few lines should be key-value pairs
-  std::regex kvPair("[\\w_]+\\s+[\\w\\d\\.\\-]+(\\s+[\\w\\d\\.\\-\\$]+)*");
+  boost::regex kvPair("[\\w_]+\\s+[\\w\\d\\.\\-]+(\\s+[\\w\\d\\.\\-\\$]+)*");
   int kvPairsFound = 0;
 
   while (std::getline(file, line) && !line.empty())
-    if (std::regex_match(line, kvPair))
+    if (boost::regex_match(line, kvPair))
       kvPairsFound++;
 
   // There are 13 mandatory key-value pairs. If there are 11 found, a couple may
