@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-import numpy as numpy
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
