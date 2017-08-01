@@ -7,6 +7,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/ParseNumerics.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 using namespace MantidQt::MantidWidgets;
@@ -353,7 +354,7 @@ void ReflDataProcessorPresenter::parseUniform(const QString &timeSlicing,
       numSlices = std::stoi(timeSlicing.toStdString());
       sliceDuration = totalDurationSec / numSlices;
     } else if (slicingType == "Uniform") {
-      sliceDuration = std::stod(timeSlicing.toStdString());
+      sliceDuration = parseDouble(timeSlicing);
       numSlices = static_cast<int>(ceil(totalDurationSec / sliceDuration));
     }
 
@@ -368,17 +369,6 @@ void ReflDataProcessorPresenter::parseUniform(const QString &timeSlicing,
   }
 }
 
-namespace {
-double parseDouble(QString const &in) {
-  static auto ok = false;
-  auto out = in.toDouble(&ok);
-  if (ok)
-    return out;
-  else
-    throw std::runtime_error("Failed to parse '" + in.toStdString() +
-                             "' as a double numerical value.");
-}
-}
 
 /** Parses a string to extract custom time slicing
  *

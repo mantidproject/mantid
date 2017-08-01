@@ -27,6 +27,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/ParseNumerics.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -309,17 +310,6 @@ QString DataProcessorTwoLevelTreeManager::copySelected() {
     }
   }
   return lines.join("\n");
-}
-
-/// Converts a string denoting a denary integer to it
-int parseDenaryInteger(QString const &in) {
-  static auto ok = false;
-  auto out = in.toInt(&ok, 10);
-  if (ok)
-    return out;
-  else
-    throw std::runtime_error("Failed to parse '" + in.toStdString() +
-                             "' as a denary integer.");
 }
 
 /** Paste the contents of the clipboard into the currently selected rows, or

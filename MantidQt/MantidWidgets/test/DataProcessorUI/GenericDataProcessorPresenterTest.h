@@ -3362,7 +3362,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(
         presenter.notify(DataProcessorPresenter::PlotGroupFlag));
     TS_ASSERT(presenter.getPostprocessedWorkspaceName(
-                  std::map<int, QStringList>()) == ""),
+                  std::map<int, QStringList>()) == "");
   }
 
   void testPostprocessMap() {
