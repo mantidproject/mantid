@@ -187,6 +187,9 @@ void QDataProcessorWidget::showTable(
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
+
+  // Hide the Hidden Options column
+  ui.viewTable->hideColumn(m_model->columnCount()-1);
 }
 
 /**
