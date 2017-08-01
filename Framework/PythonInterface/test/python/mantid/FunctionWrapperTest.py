@@ -274,6 +274,42 @@ class FunctionWrapperTest(unittest.TestCase):
         gz_str = str(g)
         self.assertEqual(gz_str.count("constraints="),0)
         
+    def test_pureaddition_and_puremultiplication(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)
+        
+        sum = CompositeFunctionWrapper(g0, g1)
+        self.assertEqual(sum.pureAddition, True)
+        self.assertEqual(sum.pureMultiplication, False)
+        
+        product = ProductFunctionWrapper(g0, g1)
+        self.assertEqual(product.pureAddition, False)
+        self.assertEqual(product.pureMultiplication, True)
+        
+        sum2 = CompositeFunctionWrapper(sum, g1)
+        self.assertEqual(sum2.pureAddition, True)
+        self.assertEqual(sum2.pureMultiplication, False)
+        
+        product2 = ProductFunctionWrapper(product, g1)
+        self.assertEqual(product2.pureAddition, False)
+        self.assertEqual(product2.pureMultiplication, True)
+        
+        mixed1 = CompositeFunctionWrapper(product, g1)
+        self.assertEqual(mixed1.pureAddition, False)
+        self.assertEqual(mixed1.pureMultiplication, False)
+        
+        mixed2 = CompositeFunctionWrapper(g1, product)
+        self.assertEqual(mixed2.pureAddition, False)
+        self.assertEqual(mixed2.pureMultiplication, False)
+        
+        mixed3 = ProductFunctionWrapper(sum, g1)
+        self.assertEqual(mixed3.pureAddition, False)
+        self.assertEqual(mixed3.pureMultiplication, False)
+        
+        mixed4 = ProductFunctionWrapper(g1, sum)
+        self.assertEqual(mixed4.pureAddition, False)
+        self.assertEqual(mixed4.pureMultiplication, False)
+        
     def test_flatten(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)  

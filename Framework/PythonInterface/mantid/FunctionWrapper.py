@@ -148,6 +148,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
        """ Called when creating an instance
            It should not be called directly
        """
+       self.pureAddition = True
+       self.pureMultiplication = False
        return self.initByName("CompositeFunction", *args)
 
     def initByName(self, name, *args):
@@ -169,9 +171,14 @@ class CompositeFunctionWrapper(FunctionWrapper):
           else:
              self.fun = FunctionFactory.createCompositeFunction(name)
    
-          #Add the functions
+          #Add the functions, checking for Composite & Product functions
           for a in args:
              if not isinstance(a, int):
+                if isinstance(a, CompositeFunctionWrapper):
+                   if self.pureAddition:
+                      self.pureAddition = a.pureAddition
+                   if self.pureMultiplication:
+                      self.pureMultiplication = a.pureMultiplication
                 functionToAdd = FunctionFactory.createInitialized( a.fun.__str__() )             
                 self.fun.add(functionToAdd)    
       
@@ -332,6 +339,8 @@ class ProductFunctionWrapper(CompositeFunctionWrapper):
        """ Called when creating an instance
            It should not be called directly.
        """
+       self.pureAddition = False
+       self.pureMultiplication = True
        return self.initByName("ProductFunction", *args)
        
 class ConvolutionWrapper(CompositeFunctionWrapper):
@@ -341,6 +350,8 @@ class ConvolutionWrapper(CompositeFunctionWrapper):
        """ Called when creating an instance
            It should not be called directly.
        """
+       self.pureAddition = False
+       self.pureMultiplication = False
        return self.initByName("Convolution", *args)
        
 class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
@@ -350,6 +361,10 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
        """ Called when creating an instance
            It should not be called directly
        """
+       # Assume it's not safe to flatten
+       self.pureAddition = False
+       self.pureMultiplication = False
+       
        # Create and populate with copied functions
        self.initByName("MultiDomainFunction", *args)
                
