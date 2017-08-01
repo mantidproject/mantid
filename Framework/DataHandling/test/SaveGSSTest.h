@@ -189,18 +189,22 @@ public:
 
     auto dataWs = generateTestMatrixWorkspace(wsName, 2, m_defaultNumBins);
 
+    // Have to do some custom handling of temp files to use extensions
     auto outFileHandle = Poco::TemporaryFile();
     const std::string outFilePath = outFileHandle.path();
+    const std::string outFilePathWithExt = outFilePath + ".gsas";
 
-    auto alg = setupSaveGSSAlg(outFilePath, wsName, "RALF");
+    outFileHandle.registerForDeletion(outFilePathWithExt);
+
+    auto alg = setupSaveGSSAlg(outFilePathWithExt, wsName, "RALF");
     alg->setProperty("Data Format", "FXYE");
     alg->setProperty("SplitFiles", true);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     // The alg will automatically append 0 and 1 when we split the files
-    const std::string fileOnePath = outFilePath + "-0";
-    const std::string fileTwoPath = outFilePath + "-1";
+    const std::string fileOnePath = outFilePath + "-0.gsas";
+    const std::string fileTwoPath = outFilePath + "-1.gsas";
 
     TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
         "SaveGSS-SplitRef-0.gsas", fileOnePath));
