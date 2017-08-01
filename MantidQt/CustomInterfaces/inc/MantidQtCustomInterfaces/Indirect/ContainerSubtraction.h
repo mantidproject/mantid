@@ -45,6 +45,7 @@ private:
 
   std::string m_sampleWorkspaceName;
   std::string m_containerWorkspaceName;
+  /// Loaded workspaces
   Mantid::API::MatrixWorkspace_sptr m_csSampleWS;
   Mantid::API::MatrixWorkspace_sptr m_csContainerWS;
   Mantid::API::MatrixWorkspace_sptr m_csSubtractedWS;

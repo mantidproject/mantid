@@ -204,11 +204,14 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QPushButton" name="pbPlotPreview">
+         <widget class="QLabel" name="lbPreviewSpec">
           <property name="text">
-           <string>Plot Current Preview</string>
+           <string>Spectrum: </string>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spPreviewSpec"/>
         </item>
         <item>
          <spacer name="horizontalSpacer">
@@ -224,14 +227,11 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="lbPreviewSpec">
+         <widget class="QPushButton" name="pbPlotPreview">
           <property name="text">
-           <string>Spectrum: </string>
+           <string>Plot Current Preview</string>
           </property>
          </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="spPreviewSpec"/>
         </item>
        </layout>
       </item>
