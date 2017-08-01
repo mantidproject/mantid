@@ -44,8 +44,8 @@ Output:
 
 .. testoutput:: ExGeneratedDataFit
 
-    A0: [ 0.95908058]
-    A1: [ 0.11014908]
+    A0: [ 0.87079958]
+    A1: [ 0.03278263]
 
 .. categories::
 
