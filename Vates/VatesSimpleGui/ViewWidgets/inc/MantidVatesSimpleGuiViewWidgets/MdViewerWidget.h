@@ -1,6 +1,9 @@
 #ifndef MDVIEWERWIDGET_H_
 #define MDVIEWERWIDGET_H_
 
+#ifdef ERROR
+#undef ERROR
+#endif
 #include "ui_MdViewerWidget.h"
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidQtAPI/MdSettings.h"
