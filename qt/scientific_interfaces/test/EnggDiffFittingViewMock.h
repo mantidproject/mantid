@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGVIEWMOCK_H
 
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingView.h"
+#include "../EnggDiffraction/IEnggDiffFittingView.h"
 
 #include <gmock/gmock.h>
 

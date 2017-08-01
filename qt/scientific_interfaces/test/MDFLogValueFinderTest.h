@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLogValueFinder.h"
+#include "../MultiDatasetFit/MDFLogValueFinder.h"
 
 #include <cxxtest/TestSuite.h>
 #include <QStringList>

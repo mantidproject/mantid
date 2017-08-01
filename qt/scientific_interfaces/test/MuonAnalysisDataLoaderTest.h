@@ -14,7 +14,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h"
+#include "../Muon/MuonAnalysisDataLoader.h"
 
 using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 using MantidQt::CustomInterfaces::Muon::DeadTimesType;

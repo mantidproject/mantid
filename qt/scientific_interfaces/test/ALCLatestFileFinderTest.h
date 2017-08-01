@@ -5,7 +5,7 @@
 
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidQtCustomInterfaces/Muon/ALCLatestFileFinder.h"
+#include "../Muon/ALCLatestFileFinder.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
 #include <Poco/File.h>

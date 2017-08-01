@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableCreator.h"
+#include "../Muon/MuonAnalysisResultTableCreator.h"
 
 #include <cxxtest/TestSuite.h>
 #include <QMap>

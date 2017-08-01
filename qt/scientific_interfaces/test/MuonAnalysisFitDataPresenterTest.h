@@ -15,12 +15,12 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
-#include "MantidQtMantidWidgets/IMuonFitDataModel.h"
-#include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
-#include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
+#include "../Muon/MuonAnalysisDataLoader.h"
+#include "../Muon/MuonAnalysisFitDataPresenter.h"
+#include "../Muon/MuonAnalysisHelper.h"
+#include "MantidQtWidgets/Common/IMuonFitDataModel.h"
+#include "MantidQtWidgets/Common/IMuonFitDataSelector.h"
+#include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
 
 using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;

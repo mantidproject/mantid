@@ -7,8 +7,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include "MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h"
-#include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
+#include "../Muon/IALCDataLoadingView.h"
+#include "../Muon/ALCDataLoadingPresenter.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;

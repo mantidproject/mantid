@@ -2,7 +2,7 @@
 #define MANTID_MANTIDWIDGETS_PROGRESSABLEVIEWMOCKOBJECT_H
 
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtMantidWidgets/ProgressableView.h"
+#include "MantidQtWidgets/Common/ProgressableView.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::MantidWidgets;

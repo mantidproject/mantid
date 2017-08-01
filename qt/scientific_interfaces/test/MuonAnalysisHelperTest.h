@@ -13,7 +13,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "../Muon/MuonAnalysisHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::CustomInterfaces::MuonAnalysisHelper;

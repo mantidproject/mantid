@@ -8,9 +8,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/ProgressableViewMockObject.h"
+#include "../ISISReflectometryOld/ReflGenericDataProcessorPresenterFactory.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;

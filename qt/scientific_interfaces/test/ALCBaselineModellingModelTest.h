@@ -10,7 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 
-#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
+#include "../Muon/ALCBaselineModellingModel.h"
 
 #include <QtTest/QSignalSpy>
 

@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h"
+#include "../ISISReflectometryOld/MeasurementItem.h"
 
 using namespace MantidQt::CustomInterfaces;
 

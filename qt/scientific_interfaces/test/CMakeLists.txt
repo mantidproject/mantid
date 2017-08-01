@@ -5,32 +5,34 @@ set ( TEST_FILES
 	ALCLatestFileFinderTest.h
 	ALCPeakFittingModelTest.h
 	ALCPeakFittingPresenterTest.h
-#	EnggDiffFittingPresenterTest.h
-#	EnggDiffractionPresenterTest.h
-#	IO_MuonGroupingTest.h
-#	MDFLogValueFinderTest.h
-#	MeasurementItemTest.h
+	EnggDiffFittingPresenterTest.h
+	EnggDiffractionPresenterTest.h
+	IO_MuonGroupingTest.h
+	MDFLogValueFinderTest.h
+	MeasurementItemTest.h
 	MuonAnalysisDataLoaderTest.h
 	MuonAnalysisFitDataPresenterTest.h
 	MuonAnalysisFitFunctionPresenterTest.h
 	MuonAnalysisHelperTest.h
 	MuonAnalysisResultTableCreatorTest.h
-#	ReflDataProcessorPresenterTest.h
-#	ReflEventPresenterTest.h
-#	ReflEventTabPresenterTest.h
-#	ReflLegacyTransferStrategyTest.h
-#	ReflMainWindowPresenterTest.h
-#	ReflMeasureTransferStrategyTest.h
-#	ReflNexusMeasurementItemSourceTest.h
-#	ReflRunsTabPresenterTest.h
-#	ReflSaveTabPresenterTest.h
-#	ReflSettingsPresenterTest.h
-#	ReflSettingsTabPresenterTest.h
-#	UserInputValidatorTest.h
+	ReflDataProcessorPresenterTest.h
+	ReflEventPresenterTest.h
+	ReflEventTabPresenterTest.h
+	ReflLegacyTransferStrategyTest.h
+	ReflMainWindowPresenterTest.h
+	ReflMeasureTransferStrategyTest.h
+	ReflNexusMeasurementItemSourceTest.h
+	ReflRunsTabPresenterTest.h
+	ReflSaveTabPresenterTest.h
+	ReflSettingsPresenterTest.h
+	ReflSettingsTabPresenterTest.h
+	UserInputValidatorTest.h
 )
 
 if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../Muon )
+
 
   include_directories( ../../../Framework/TestHelpers/inc ../../../Framework/DataObjects/inc )
 
@@ -43,7 +45,11 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( ScientificInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
   target_link_libraries( ScientificInterfacesTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtMuonInterface
+            MantidScientificInterfacesGeneral
+            MantidScientificInterfacesMuon
+            MantidScientificInterfacesISISReflectometryOld
+            MantidScientificInterfacesEnggDiffraction
+            MantidScientificInterfacesMultiDatasetFit
             qtwidgetscommon
             API
             DataObjects

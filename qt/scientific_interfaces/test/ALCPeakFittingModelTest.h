@@ -9,7 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h"
+#include "../Muon/ALCPeakFittingModel.h"
 
 #include <QtTest/QSignalSpy>
 

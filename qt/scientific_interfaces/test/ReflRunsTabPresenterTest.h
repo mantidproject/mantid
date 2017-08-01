@@ -6,9 +6,9 @@
 #include <gtest/gtest.h>
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/ProgressableViewMockObject.h"
+#include "../ISISReflectometryOld/ReflRunsTabPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;

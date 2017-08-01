@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
+#include "../EnggDiffraction/EnggDiffFittingPresenter.h"
 
 #include "EnggDiffFittingViewMock.h"
 #include <cxxtest/TestSuite.h>

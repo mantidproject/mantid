@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <string>
 
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/UserInputValidator.h"
 
 using namespace MantidQt::CustomInterfaces;
 

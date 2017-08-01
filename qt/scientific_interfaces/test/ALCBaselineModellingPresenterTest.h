@@ -13,7 +13,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
+#include "../Muon/ALCBaselineModellingPresenter.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;

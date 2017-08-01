@@ -2,7 +2,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_REFLNEXUSMEASUREMENTITEMSOURCETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
+#include "../ISISReflectometryOld/ReflNexusMeasurementItemSource.h"
 #include "MantidAPI/FileFinder.h"
 #include <Poco/File.h>
 

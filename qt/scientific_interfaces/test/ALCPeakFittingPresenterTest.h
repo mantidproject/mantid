@@ -10,9 +10,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include "MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h"
-#include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
-#include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
+#include "../Muon/IALCPeakFittingView.h"
+#include "../Muon/IALCPeakFittingModel.h"
+#include "../Muon/ALCPeakFittingPresenter.h"
 
 #include <qwt_data.h>
 

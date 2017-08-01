@@ -3,9 +3,9 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 
 #include <gmock/gmock.h>
 

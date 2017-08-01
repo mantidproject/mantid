@@ -8,9 +8,9 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h"
-#include "MantidQtMantidWidgets/IFunctionBrowser.h"
-#include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
+#include "../Muon/MuonAnalysisFitFunctionPresenter.h"
+#include "MantidQtWidgets/Common/IFunctionBrowser.h"
+#include "MantidQtWidgets/Common/IMuonFitFunctionModel.h"
 
 using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionPresenter;
 using MantidQt::CustomInterfaces::Muon::MultiFitState;
