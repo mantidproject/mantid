@@ -47,17 +47,17 @@ Usage
                                    SpecMin=0, SpecMax=0)
 
     y_msd, y_param, y_fit = MSDFit(InputWorkspace=sample,
-                                   Model="Gauss",
+                                   Model="Yi",
                                    XStart=0.0, XEnd=5.0,
                                    SpecMin=0, SpecMax=0)
 
     print 'Using Gauss Model'
     print 'A0: ' + str(g_msd.readY(0))
     print 'A1: ' + str(g_msd.readY(1))
-    print '\nUsing Peters Model:'
+    print 'Using Peters Model'
     print 'A0: ' + str(p_msd.readY(0))
     print 'A1: ' + str(p_msd.readY(1))
-    print '\nUsing Yi Model:'
+    print 'Using Yi Model:'
     print 'A0: ' + str(y_msd.readY(0))
     print 'A1: ' + str(y_msd.readY(1))
 
@@ -70,12 +70,12 @@ Output:
     A1: [ 0.03278263]
 
     Using Peters Model
-    A0: [ 1.00111629]
-    A1: [ 0.94675489]
+    A0: [ 0.99740813]
+    A1: [ 0.931207]
 
     Using Yi Model
-    A0: [ 0.87079958]
-    A1: [ 0.03278263]
+    A0: [ ]
+    A1: [ ]
 
 .. categories::
 
