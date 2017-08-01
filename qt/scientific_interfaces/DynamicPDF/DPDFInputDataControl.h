@@ -5,9 +5,9 @@
 // Mantid Headers from the same project
 // Mantid headers from other projects
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 // 3rd party library headers
 #include <QObject>
 // system headers
@@ -48,7 +48,7 @@ namespace DynamicPDF {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTIDQT_CUSTOMINTERFACES_DLL InputDataControl
+class MANTIDQT_DYNAMICPDF_DLL InputDataControl
     : public QObject,
       public MantidQt::API::WorkspaceObserver {
   Q_OBJECT

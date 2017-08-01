@@ -1,10 +1,10 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFDisplayControl.h"
+#include "DPDFDisplayControl.h"
 // Mantid Headers from the same project
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h"
+#include "DPDFInputDataControl.h"
 // Mantid headers from other projects
-#include "MantidQtMantidWidgets/DisplayCurveFit.h"
+#include "MantidQtWidgets/Common/DisplayCurveFit.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"

@@ -245,19 +245,19 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::DisplayCurveFit</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/DisplayCurveFit.h</header>
+   <header>MantidQtWidgets/Common/DisplayCurveFit.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::CustomInterfaces::DynamicPDF::FitControl</class>
    <extends>QMainWindow</extends>
-   <header>MantidQtCustomInterfaces/DynamicPDF/DPDFFitControl.h</header>
+   <header>DPDFFitControl.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::CustomInterfaces::DynamicPDF::FourierTransform</class>
    <extends>QWidget</extends>
-   <header>MantidQtCustomInterfaces/DynamicPDF/DPDFFourierTransform.h</header>
+   <header>DPDFFourierTransform.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

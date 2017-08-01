@@ -1,6 +1,6 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h"
+#include "DPDFInputDataControl.h"
 // Mantid Headers from the same project
 // Mantid headers from other projects
 #include "MantidAPI/MatrixWorkspace.h"

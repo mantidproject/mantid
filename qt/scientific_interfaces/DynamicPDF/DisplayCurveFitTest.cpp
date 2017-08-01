@@ -2,10 +2,10 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 // includes for interface functionality
-#include "MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h"
-#include "MantidQtMantidWidgets/DisplayCurveFit.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h"
-#include "MantidQtMantidWidgets/RangeSelector.h"
+#include "DisplayCurveFitTest.h"
+#include "MantidQtWidgets/Common/DisplayCurveFit.h"
+#include "DisplayCurveFitTest.h"
+#include "MantidQtWidgets/Common/RangeSelector.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");

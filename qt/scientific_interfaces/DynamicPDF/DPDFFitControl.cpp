@@ -1,14 +1,14 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFFitControl.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFFitOptionsBrowser.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFDisplayControl.h"
+#include "DPDFFitControl.h"
+#include "DPDFFitOptionsBrowser.h"
+#include "DPDFInputDataControl.h"
+#include "DPDFDisplayControl.h"
 // Mantid headers from other projects
 #include "MantidAPI/IFunction.h"
-#include "MantidQtMantidWidgets/FunctionBrowser.h"
-#include "MantidQtMantidWidgets/FitOptionsBrowser.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/FunctionBrowser.h"
+#include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/AlgorithmManager.h"
 // 3rd party library headers

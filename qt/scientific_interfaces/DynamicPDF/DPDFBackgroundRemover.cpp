@@ -1,15 +1,15 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFBackgroundRemover.h"
+#include "DPDFBackgroundRemover.h"
 // Mantid Headers from the same project
-#include "MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFDisplayControl.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFFitControl.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFFourierTransform.h"
+#include "SliceSelector.h"
+#include "DPDFInputDataControl.h"
+#include "DPDFDisplayControl.h"
+#include "DPDFFitControl.h"
+#include "DPDFFourierTransform.h"
 // Mantid headers from other projects
 #include "MantidKernel/make_unique.h"
-#include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidKernel/UsageService.h"
 // 3rd party library headers
 // System includes

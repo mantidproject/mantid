@@ -17,6 +17,7 @@ add_subdirectory ( ISISReflectometryOld )
 add_subdirectory ( Indirect )
 add_subdirectory ( General )
 add_subdirectory ( EnggDiffraction )
+add_subdirectory ( DynamicPDF )
 
 ###########################################################################
 # Testing

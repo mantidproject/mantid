@@ -5,8 +5,8 @@
 // Mantid Headers from the same project
 #include "ui_DPDFBackgroundRemover.h"
 // Mantid headers from other projects
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 // 3rd party library headers
 #include <QDialog>
 #include <boost/shared_ptr.hpp>
@@ -53,7 +53,7 @@ namespace DynamicPDF {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL BackgroundRemover
+class MANTIDQT_DYNAMICPDF_DLL BackgroundRemover
     : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 

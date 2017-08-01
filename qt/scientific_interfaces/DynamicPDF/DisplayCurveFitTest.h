@@ -2,8 +2,8 @@
 #define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_DISPLAYCURVEFITTEST_H_
 
 // includes for interace functionailty
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_DisplayCurveFitTest.h"
 
 namespace MantidQt {
@@ -36,7 +36,7 @@ namespace DynamicPDF {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL DisplayCurveFitTest
+class MANTIDQT_DYNAMICPDF_DLL DisplayCurveFitTest
     : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 

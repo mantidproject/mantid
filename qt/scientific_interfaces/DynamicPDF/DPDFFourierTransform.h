@@ -5,9 +5,9 @@
 // Mantid Headers from the same project
 #include "ui_DPDFFourierTransform.h"
 // Mantid headers from other projects
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "DoubleEditorFactory.h"
-#include "qteditorfactory.h"
+#include "DllConfig.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 // 3rd party library headers
 #include <QWidget>
 // System headers
@@ -65,7 +65,7 @@ namespace DynamicPDF {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL FourierTransform : public QWidget {
+class MANTIDQT_DYNAMICPDF_DLL FourierTransform : public QWidget {
   Q_OBJECT
 
   friend class BackgroundRemover;

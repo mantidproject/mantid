@@ -6,8 +6,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Unit.h"
 // includes for interface
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "SliceSelector.h"
 #include <qwt_plot_spectrogram.h>
 // Mantid headers from other projects
 #include "MantidKernel/UsageService.h"

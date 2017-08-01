@@ -118,13 +118,13 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::FunctionBrowser</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/FunctionBrowser.h</header>
+   <header>MantidQtWidgets/Common/FunctionBrowser.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::CustomInterfaces::DynamicPDF::DPDFFitOptionsBrowser</class>
    <extends>QWidget</extends>
-   <header>MantidQtCustomInterfaces/DynamicPDF/DPDFFitOptionsBrowser.h</header>
+   <header>DPDFFitOptionsBrowser.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

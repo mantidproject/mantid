@@ -4,8 +4,8 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 // Mantid headers from other projects
-#include "MantidQtMantidWidgets/FitOptionsBrowser.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "DllConfig.h"
 // 3rd party library headers
 // System headers
 
@@ -40,7 +40,7 @@ namespace DynamicPDF {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL DPDFFitOptionsBrowser
+class MANTIDQT_DYNAMICPDF_DLL DPDFFitOptionsBrowser
     : public MantidQt::MantidWidgets::FitOptionsBrowser {
 
   Q_OBJECT

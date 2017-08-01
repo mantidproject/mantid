@@ -65,12 +65,12 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/DataSelector.h</header>
+   <header>MantidQtWidgets/Common/DataSelector.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DisplayCurveFit</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/DisplayCurveFit.h</header>
+   <header>MantidQtWidgets/Common/DisplayCurveFit.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -6,10 +6,10 @@
 #include "ui_SliceSelector.h"
 // Mantid headers from other projects
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 // includes for interface
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include <QMainWindow>
 
 // 3rd party library headers

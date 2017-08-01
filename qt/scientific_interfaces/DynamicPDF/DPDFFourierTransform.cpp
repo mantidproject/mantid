@@ -1,17 +1,17 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFFourierTransform.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h"
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFFitControl.h"
+#include "DPDFFourierTransform.h"
+#include "DPDFInputDataControl.h"
+#include "DPDFFitControl.h"
 // Mantid headers from other projects
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtMantidWidgets/RangeSelector.h"
-#include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
+#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 // 3rd party library headers
 #include <QMessageBox>
 // System headers

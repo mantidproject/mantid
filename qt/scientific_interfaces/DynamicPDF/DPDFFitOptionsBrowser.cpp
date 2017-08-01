@@ -1,9 +1,9 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
-#include "MantidQtCustomInterfaces/DynamicPDF/DPDFFitOptionsBrowser.h"
+#include "DPDFFitOptionsBrowser.h"
 // Mantid headers from other projects
-#include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 // 3rd party library headers
 #include "MantidKernel/Logger.h"
 // System headers

@@ -4,7 +4,7 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 // Mantid headers from other projects
-#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 // 3rd party library headers
 #include <QObject>
@@ -52,7 +52,7 @@ namespace DynamicPDF {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL DisplayControl : public QObject {
+class MANTIDQT_DYNAMICPDF_DLL DisplayControl : public QObject {
   Q_OBJECT
 
 public:

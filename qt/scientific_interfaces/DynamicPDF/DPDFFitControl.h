@@ -6,7 +6,7 @@
 #include "ui_DPDFFitControl.h"
 // Mantid headers from other projects
 #include "MantidAPI/IFunction.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "DllConfig.h"
 // 3rd party library headers
 #include <QWidget>
 // System headers
@@ -66,7 +66,7 @@ namespace DynamicPDF {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL FitControl : public QWidget {
+class MANTIDQT_DYNAMICPDF_DLL FitControl : public QWidget {
   Q_OBJECT
 
   friend class BackgroundRemover;
