@@ -499,10 +499,7 @@ public:
     pw->addPeak(p3);
 
     // number of peaks = 4, now remove 3
-    std::vector<int> badPeaks;
-    badPeaks.push_back(0);
-    badPeaks.push_back(2);
-    badPeaks.push_back(3);
+    std::vector<int> badPeaks {0, 2, 3};
     pw->removePeaks(badPeaks);
     TS_ASSERT_EQUALS(pw->getNumberPeaks(), 1);
   }

@@ -153,16 +153,16 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 /** Removes multiple peaks
 * @param badPeaks peaks to be removed
 */
-void PeaksWorkspace::removePeaks(const std::vector<int> &badPeaks) {
+void PeaksWorkspace::removePeaks(std::vector<int> &badPeaks) {
   if (badPeaks.size() == 0)
     return;
-  int i = 0;
   auto first = peaks.begin();
   auto end = peaks.end();
   auto result = first;
-  for (; first < end; ++first, ++i) {
+  std::sort(badPeaks.begin(), badPeaks.end());
+  for (int i = 0; first < end; ++first, ++i) {
     // if index of peak is not in badPeaks
-    if (std::find(badPeaks.begin(), badPeaks.end(), i) == badPeaks.end()) {
+    if (!std::binary_search(badPeaks.begin(), badPeaks.end(), i)) {
       // include in result
       *result = std::move(*first);
       ++result;
