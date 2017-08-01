@@ -610,7 +610,7 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
   // rescale WS to normalized counts:
   const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
   if (nWorkspaces > 1) {
-	  emit functionUpdateRequested();
+    emit functionUpdateRequested();
   }
   for (int i = 0; i < nWorkspaces; i++) {
     rescaleWS(norms, m_workspacesToFit[i], 1.0);
@@ -640,17 +640,16 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     alg->initialize();
     if (m_compositeFunction->name() == "MultiBG") {
       alg->setPropertyValue("Function", "");
+    } else if (m_compositeFunction->nFunctions() > 1) {
+      IFunction_sptr userFunc = getFittingFunction();
+      auto TFAsymmFunc = getTFAsymmFitFunction(userFunc, normVec);
+      alg->setProperty("Function", TFAsymmFunc);
+    } else {
+      IFunction_sptr userFunc = m_compositeFunction->getFunction(0);
+      auto TFAsymmFunc = getTFAsymmFitFunction(userFunc, normVec);
+      alg->setProperty("Function", TFAsymmFunc);
     }
-	else if (m_compositeFunction->nFunctions() > 1) {
-		IFunction_sptr userFunc = getFittingFunction();
-		auto TFAsymmFunc = getTFAsymmFitFunction(userFunc, normVec);
-		alg->setProperty("Function", TFAsymmFunc);
-	}
-	else {
-		IFunction_sptr userFunc = m_compositeFunction->getFunction(0);
-		auto TFAsymmFunc = getTFAsymmFitFunction(userFunc, normVec);
-		alg->setProperty("Function", TFAsymmFunc);			
-	}if (rawData()) {
+    if (rawData()) {
       alg->setPropertyValue("InputWorkspace", wsName + "_Raw");
     } else {
       alg->setPropertyValue("InputWorkspace", wsName);
@@ -689,7 +688,7 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     std::vector<double> ttt;
     for (int j = 0; j < nWorkspaces; j++) {
       std::string paramName = "f" + std::to_string(j);
-		  paramName += ".f0.f0.A0";
+      paramName += ".f0.f0.A0";
       newNorms.push_back(outputFunction->getParameter(paramName));
       std::string tmpWSName = m_workspacesToFit[j];
       if (rawData()) { // store norms without the raw
