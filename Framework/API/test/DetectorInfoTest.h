@@ -11,6 +11,7 @@
 
 #include <algorithm>
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;

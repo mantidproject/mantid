@@ -38,6 +38,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../../TestHelpers/src/ParallelRunner.cpp
                         )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( AlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}

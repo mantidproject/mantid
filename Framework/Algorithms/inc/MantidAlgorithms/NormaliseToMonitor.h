@@ -152,7 +152,7 @@ public:
                     Kernel::Property *const pProp) override;
 
   // interface needs it but if indeed proper clone used -- do not know.
-  IPropertySettings *clone() override {
+  IPropertySettings *clone() const override {
     return new MonIDPropChanger(hostWSname, SpectraNum, MonitorWorkspaceProp);
   }
 

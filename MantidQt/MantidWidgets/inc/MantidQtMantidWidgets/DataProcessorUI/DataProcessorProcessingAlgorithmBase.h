@@ -79,6 +79,13 @@ private:
   std::vector<std::string> m_inputStrListProperties;
   // Output ws properties
   std::vector<std::string> m_OutputWsProperties;
+
+protected:
+  // Converts a string to a vector of strings
+  static std::vector<std::string>
+  convertStringToVector(const std::string &text);
+  // Converts a string to a set of strings
+  static std::set<std::string> convertStringToSet(const std::string &text);
 };
 }
 }

@@ -94,11 +94,15 @@ void ManageUserDirectories::saveProperties() {
   QStringList userDirs;
 
   for (int i = 0; i < m_uiForm.lwDataSearchDirs->count(); i++) {
-    dataDirs.append(m_uiForm.lwDataSearchDirs->item(i)->text());
+    QString dir = m_uiForm.lwDataSearchDirs->item(i)->text();
+    appendSlashIfNone(dir);
+    dataDirs.append(dir);
   }
 
   for (int i = 0; i < m_uiForm.lwUserSearchDirs->count(); i++) {
-    userDirs.append(m_uiForm.lwUserSearchDirs->item(i)->text());
+    QString dir = m_uiForm.lwUserSearchDirs->item(i)->text();
+    appendSlashIfNone(dir);
+    userDirs.append(dir);
   }
 
   newDataDirs = dataDirs.join(";");
@@ -108,6 +112,7 @@ void ManageUserDirectories::saveProperties() {
 
   newSaveDir = m_uiForm.leDefaultSave->text();
   newSaveDir.replace('\\', '/');
+  appendSlashIfNone(newSaveDir);
 
   Mantid::Kernel::ConfigServiceImpl &config =
       Mantid::Kernel::ConfigService::Instance();
@@ -117,6 +122,21 @@ void ManageUserDirectories::saveProperties() {
   config.setString("defaultsave.directory", newSaveDir.toStdString());
   config.setString("pythonscripts.directories", newUserDirs.toStdString());
   config.saveConfig(m_userPropFile.toStdString());
+}
+
+/**
+ * Appends a forward slash to the end of a path if there is no slash (forward or
+ * back) there already, and strip whitespace from the path.
+ *
+ * @param path :: A reference to the path
+*/
+void ManageUserDirectories::appendSlashIfNone(QString &path) const {
+  path = path.trimmed();
+  if (!(path.endsWith("/") || path.endsWith("\\") || path.isEmpty())) {
+    // Don't need to add to a \\, as it would just get changed to a /
+    // immediately after
+    path.append("/");
+  }
 }
 
 QListWidget *ManageUserDirectories::listWidget() {

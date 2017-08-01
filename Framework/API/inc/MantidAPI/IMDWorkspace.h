@@ -1,7 +1,6 @@
 #ifndef MANTID_API_IMDWORKSPACE_H_
 #define MANTID_API_IMDWORKSPACE_H_
 
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
@@ -69,7 +68,8 @@ static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 
 class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
-  IMDWorkspace();
+  IMDWorkspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   IMDWorkspace &operator=(const IMDWorkspace &other) = delete;
 
   /**

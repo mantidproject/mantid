@@ -74,8 +74,8 @@ AlgorithmDialog *InterfaceManager::createDialog(
 
   // Set the QDialog window flags to ensure the dialog ends up on top
   Qt::WindowFlags flags = 0;
-  flags |= Qt::Dialog;
-  flags |= Qt::WindowContextHelpButtonHint;
+  flags |= Qt::Window;
+  flags |= Qt::WindowCloseButtonHint;
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main
   // application window, but below other applications on Mac
