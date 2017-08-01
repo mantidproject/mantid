@@ -267,7 +267,8 @@ void SCDCalibratePanels::exec() {
       peak.setQSampleFrame(Q2);
       peak.setHKL(hkl);
     } catch (const std::exception &exc) {
-      g_log.notice() << "Problem in applying calibration to peak " << i <<" : "<< exc.what() << "\n";
+      g_log.notice() << "Problem in applying calibration to peak " << i << " : "
+                     << exc.what() << "\n";
     }
     PARALLEL_END_INTERUPT_REGION
   }
