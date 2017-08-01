@@ -59,14 +59,20 @@ class FunctionWrapper:
       
           :param other: functionWrapper to be added to self
       """
-      return CompositeFunctionWrapper(self,other)     
+      sum = CompositeFunctionWrapper(self, other)
+      if sum.pureAddition:
+         sum = sum.flatten()
+      return sum     
         
   def __mul__ (self, other):
       """ Implement * operator for product function
       
           :param other: functionWrapper to multiply self by
       """
-      return ProductFunctionWrapper(self, other)
+      prod = ProductFunctionWrapper(self, other)
+      if prod.pureMultiplication:
+         prod = prod.flatten()
+      return prod
         
   def tie (self, *args, **kwargs):
     """ Add ties.

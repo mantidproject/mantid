@@ -343,6 +343,17 @@ class FunctionWrapperTest(unittest.TestCase):
         self.assertEqual(fc3_str.count("Sigma=1.25"),1)
         self.assertEqual(fc3_str.count("Sigma=1.3"),1)
         
+        # Test product function of depth 1
+        p1 = ProductFunctionWrapper(lb, g0, g1 )
+        p2 = ProductFunctionWrapper(p1, l)
+        fp2 = p2.flatten()
+        self.assertTrue( isinstance (fp2, ProductFunctionWrapper))
+        fp2_str = str(fp2)
+        self.assertEqual(fp2_str.count("("),0)
+        self.assertEqual(fp2_str.count("PeakCentre"),3)
+        self.assertEqual(fp2_str.count("Sigma="),2)
+        self.assertEqual(fp2_str.count("Sigma=1.25"),1)
+        
     def test_add(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)  
