@@ -5,8 +5,8 @@
 #include <QDesktopWidget>
 #include <Poco/Path.h>
 
-#include "MantidQtCustomInterfaces/MantidEV.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidEV.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 

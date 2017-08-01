@@ -11,8 +11,8 @@
 
 #include "ui_MantidEV.h"
 #include "MantidEVWorker.h"
-#include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtAPI/SelectionNotificationService.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/Common/SelectionNotificationService.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

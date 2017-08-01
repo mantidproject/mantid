@@ -1,6 +1,6 @@
 #include "MantidAPI/TextAxis.h"
 #include "Quasi.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/UserInputValidator.h"
 
 using namespace Mantid::API;
 

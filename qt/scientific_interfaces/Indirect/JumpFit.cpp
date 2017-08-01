@@ -5,7 +5,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/UserInputValidator.h"
 
 #include <boost/lexical_cast.hpp>
 #include <string>

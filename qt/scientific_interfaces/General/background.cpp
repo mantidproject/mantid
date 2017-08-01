@@ -1,7 +1,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/Background.h"
+#include "Background.h"
 #include "MantidAPI/FrameworkManager.h"
 #include <QLabel>
 #include <QHBoxLayout>

@@ -1311,12 +1311,12 @@
   <customwidget>
    <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtAPI/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::InstrumentSelector</class>
    <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
+   <header>MantidQtWidgets/Common/InstrumentSelector.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

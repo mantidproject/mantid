@@ -358,12 +358,12 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtAPI/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
    <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/WorkspaceSelector.h</header>
+   <header>MantidQtWidgets/Common/WorkspaceSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

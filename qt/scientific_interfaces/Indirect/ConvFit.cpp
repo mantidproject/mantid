@@ -1,6 +1,6 @@
 #include "ConvFit.h"
 
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/UserInputValidator.h"
 
 #include "MantidQtWidgets/Common/RangeSelector.h"
 

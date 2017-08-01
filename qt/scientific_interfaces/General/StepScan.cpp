@@ -1,5 +1,5 @@
-#include "MantidQtCustomInterfaces/StepScan.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "StepScan.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentDataService.h"

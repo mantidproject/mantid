@@ -2,7 +2,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/UserInputValidator.h"
 
 #include <QFileInfo>
 

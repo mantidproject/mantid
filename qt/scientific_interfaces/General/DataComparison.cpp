@@ -1,8 +1,8 @@
-#include "MantidQtCustomInterfaces/DataComparison.h"
+#include "DataComparison.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 namespace {

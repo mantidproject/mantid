@@ -5,8 +5,8 @@
 // Includes
 //----------------------
 #include "ui_StepScan.h"
-#include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IAlgorithm.h"
 

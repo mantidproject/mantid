@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DELTAECALC_H_
 #define MANTIDQTCUSTOMINTERFACES_DELTAECALC_H_
 
-#include "MantidQtMantidWidgets/pythonCalc.h"
+#include "MantidQtWidgets/Common/pythonCalc.h"
 #include "ui_DirectConvertToEnergy.h"
 #include <QFileInfo>
 

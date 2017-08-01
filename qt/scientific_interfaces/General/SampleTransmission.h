@@ -5,9 +5,9 @@
 // Includes
 //----------------------
 #include "ui_SampleTransmission.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace MantidQt {

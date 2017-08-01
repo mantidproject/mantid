@@ -14,7 +14,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtCustomInterfaces/MantidEVWorker.h"
+#include "MantidEVWorker.h"
 #include <exception>
 
 namespace MantidQt {

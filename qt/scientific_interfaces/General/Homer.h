@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_HOMER_H_
 
 #include "ui_DirectConvertToEnergy.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidAPI/IAlgorithm.h"
 #include <QString>
 #include <QHash>

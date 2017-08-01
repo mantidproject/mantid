@@ -4,7 +4,7 @@
 #include "IndirectDataReductionTab.h"
 #include "ui_ISISEnergyTransfer.h"
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/Background.h"
+#include "../General/Background.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

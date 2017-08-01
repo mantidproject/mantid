@@ -5,8 +5,8 @@
 // Includes
 //----------------------
 #include "ui_DirectConvertToEnergy.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

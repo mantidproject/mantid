@@ -1,7 +1,7 @@
 #include "ILLEnergyTransfer.h"
 
-#include "MantidQtCustomInterfaces/Background.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/Background.h"
+#include "../General/UserInputValidator.h"
 
 #include <QFileInfo>
 #include <QInputDialog>

@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_BACKGROUND_H_
 #define MANTIDQTCUSTOMINTERFACES_BACKGROUND_H_
 
-#include "MantidQtAPI/MantidDialog.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QPair>

@@ -1,5 +1,5 @@
 #include "ContainerSubtraction.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/UserInputValidator.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"

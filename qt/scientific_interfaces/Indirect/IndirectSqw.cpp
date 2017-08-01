@@ -1,5 +1,5 @@
 #include "IndirectSqw.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 

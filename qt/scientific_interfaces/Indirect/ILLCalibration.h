@@ -4,7 +4,7 @@
 #include "IndirectDataReductionTab.h"
 #include "ui_ILLCalibration.h"
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/UserInputValidator.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

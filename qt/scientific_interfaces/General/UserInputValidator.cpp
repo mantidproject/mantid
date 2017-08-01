@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "UserInputValidator.h"
 
 #include <QValidator>
 #include <QLineEdit>

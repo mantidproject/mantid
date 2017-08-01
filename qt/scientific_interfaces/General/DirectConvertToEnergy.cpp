@@ -1,9 +1,9 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/DirectConvertToEnergy.h"
-#include "MantidQtCustomInterfaces/Homer.h" // user interface for Direct instruments
-#include "MantidQtAPI/ManageUserDirectories.h"
+#include "DirectConvertToEnergy.h"
+#include "Homer.h" // user interface for Direct instruments
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"

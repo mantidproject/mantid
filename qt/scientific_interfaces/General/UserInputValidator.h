@@ -1,9 +1,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
 #define MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
 
-#include "MantidQtMantidWidgets/WorkspaceSelector.h"
-#include "MantidQtAPI/MWRunFiles.h"
-#include "MantidQtMantidWidgets/DataSelector.h"
+#include "MantidQtWidgets/Common/WorkspaceSelector.h"
+#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/DataSelector.h"
 
 using MantidQt::API::MWRunFiles;
 using MantidQt::MantidWidgets::WorkspaceSelector;

@@ -197,6 +197,7 @@ find_Package(Threads)
 
 target_link_libraries ( MantidScientificInterfacesIndirect LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             qtwidgetscommon
+            MantidScientificInterfacesGeneral
             ${CORE_MANTIDLIBS}
             ${QT_LIBRARIES}
             ${QWT_LIBRARIES}

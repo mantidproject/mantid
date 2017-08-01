@@ -1,12 +1,12 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/SampleTransmission.h"
+#include "SampleTransmission.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "UserInputValidator.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("SampleTransmission");

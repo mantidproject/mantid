@@ -1,6 +1,6 @@
 #include "IqtFit.h"
 
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/UserInputValidator.h"
 #include "MantidQtWidgets/Common/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"

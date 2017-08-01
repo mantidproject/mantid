@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/deltaECalc.h"
+#include "deltaECalc.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"

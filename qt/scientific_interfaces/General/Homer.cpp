@@ -1,8 +1,8 @@
-#include "MantidQtCustomInterfaces/Homer.h"
-#include "MantidQtCustomInterfaces/Background.h"
-#include "MantidQtCustomInterfaces/deltaECalc.h"
-#include "MantidQtMantidWidgets/MWDiag.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "Homer.h"
+#include "Background.h"
+#include "deltaECalc.h"
+#include "MantidQtWidgets/Common/MWDiag.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"

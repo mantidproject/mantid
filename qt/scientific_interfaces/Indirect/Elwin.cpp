@@ -1,5 +1,5 @@
 #include "Elwin.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "../General/UserInputValidator.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/RangeSelector.h"
