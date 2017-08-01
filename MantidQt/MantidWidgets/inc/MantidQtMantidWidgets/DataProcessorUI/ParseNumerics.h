@@ -3,7 +3,7 @@
 #include <QString>
 /**
 
-DataProcessorPasteSelectedCommand defines the action "Paste Selected"
+This file defines functions for parsing numbers from QStrings.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
