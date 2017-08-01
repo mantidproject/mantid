@@ -2,10 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 from numpy import array
 
 general_params = {
-    "monitor_mask_regions": array([[3.45, 3.7],
-                                   [2.96, 3.2],
-                                   [2.1,  2.26],
-                                   [1.73, 1.98]]),
+    "monitor_mask_regions": array([[3.45, 2.96, 2.1,  1.73],
+                                   [3.7,  3.2,  2.26, 1.98]]),
     "monitor_spectrum_number": 1,
     "monitor_spline_coefficient": 20,
     "spline_coefficient": 60,

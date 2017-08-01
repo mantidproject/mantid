@@ -82,7 +82,7 @@ class Pearl(AbstractInst):
                                                         spline_coeff=self._inst_settings.monitor_spline,
                                                         integration_range=self._inst_settings.monitor_integration_range,
                                                         lambda_values=self._inst_settings.monitor_lambda,
-                                                        ex_regions=self.inst_settings.monitor_mask_regions)
+                                                        ex_regions=self._inst_settings.monitor_mask_regions)
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
 
