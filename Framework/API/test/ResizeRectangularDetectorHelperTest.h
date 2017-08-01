@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/DetectorInfo.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"

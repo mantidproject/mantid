@@ -25,6 +25,7 @@ class SpectrumInfo;
 }
 namespace Geometry {
 class ComponentInfo;
+class DetectorInfo;
 class IDetector;
 class InfoComponentVisitor;
 class ParameterMap;
@@ -33,7 +34,6 @@ class XMLInstrumentParameter;
 
 namespace API {
 class ChopperModel;
-class DetectorInfo;
 class ModeratorModel;
 class Run;
 class Sample;
@@ -161,8 +161,8 @@ public:
   static std::string getInstrumentFilename(const std::string &instrumentName,
                                            const std::string &date = "");
 
-  const DetectorInfo &detectorInfo() const;
-  DetectorInfo &mutableDetectorInfo();
+  const Geometry::DetectorInfo &detectorInfo() const;
+  Geometry::DetectorInfo &mutableDetectorInfo();
 
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
@@ -235,7 +235,7 @@ private:
   mutable std::recursive_mutex m_mutex;
 
   boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
-  std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
+  std::unique_ptr<Geometry::DetectorInfo> m_detectorInfoWrapper;
 
   boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
   boost::shared_ptr<Geometry::ComponentInfo> m_componentInfoWrapper;

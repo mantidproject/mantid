@@ -1,7 +1,7 @@
-#ifndef MANTID_API_DETECTORINFO_H_
-#define MANTID_API_DETECTORINFO_H_
+#ifndef MANTID_GEOMETRY_DETECTORINFO_H_
+#define MANTID_GEOMETRY_DETECTORINFO_H_
 
-#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
@@ -17,17 +17,17 @@ using detid_t = int32_t;
 namespace Beamline {
 class DetectorInfo;
 }
+namespace API {
+class SpectrumInfo;
+}
 namespace Geometry {
 class IComponent;
 class IDetector;
 class Instrument;
 class ParameterMap;
-}
-namespace API {
-class SpectrumInfo;
 
-/** API::DetectorInfo is an intermediate step towards a DetectorInfo that is
-  part of Instrument-2.0. The aim is to provide a nearly identical interface
+/** Geometry::DetectorInfo is an intermediate step towards a DetectorInfo that
+  is part of Instrument-2.0. The aim is to provide a nearly identical interface
   such that we can start refactoring existing code before the full-blown
   implementation of Instrument-2.0 is available.
 
@@ -64,7 +64,7 @@ class SpectrumInfo;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL DetectorInfo {
+class MANTID_GEOMETRY_DLL DetectorInfo {
 public:
   DetectorInfo(Beamline::DetectorInfo &detectorInfo,
                boost::shared_ptr<const Geometry::Instrument> instrument,
@@ -128,7 +128,7 @@ public:
 
   void merge(const DetectorInfo &other);
 
-  friend class SpectrumInfo;
+  friend class API::SpectrumInfo;
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
@@ -148,7 +148,7 @@ private:
   mutable std::vector<size_t> m_lastIndex;
 };
 
-} // namespace API
+} // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_API_DETECTORINFO_H_ */
+#endif /* MANTID_GEOMETRY_DETECTORINFO_H_ */

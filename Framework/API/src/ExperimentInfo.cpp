@@ -1,7 +1,5 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
@@ -9,14 +7,16 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
@@ -77,7 +77,7 @@ ExperimentInfo::ExperimentInfo()
           *m_parmap)) {
   auto parInstrument = makeParameterizedInstrument();
   m_parmap->setDetectorInfo(m_detectorInfo);
-  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+  m_detectorInfoWrapper = Kernel::make_unique<Geometry::DetectorInfo>(
       *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
       m_parmap.get(), m_infoVisitor->detectorIdToIndexMap());
 
@@ -351,7 +351,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
 
-  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+  m_detectorInfoWrapper = Kernel::make_unique<Geometry::DetectorInfo>(
       *m_detectorInfo, makeParameterizedInstrument(),
       m_infoVisitor->detectorIds(), m_parmap.get(),
       m_infoVisitor->detectorIdToIndexMap());
@@ -1218,15 +1218,15 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
  * Setting a new instrument via ExperimentInfo::setInstrument will invalidate
  * this reference.
  */
-const DetectorInfo &ExperimentInfo::detectorInfo() const {
+const Geometry::DetectorInfo &ExperimentInfo::detectorInfo() const {
   populateIfNotLoaded();
   return *m_detectorInfoWrapper;
 }
 
 /** Return a non-const reference to the DetectorInfo object. Not thread safe.
  */
-DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
-  return const_cast<DetectorInfo &>(
+Geometry::DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
+  return const_cast<Geometry::DetectorInfo &>(
       static_cast<const ExperimentInfo &>(*this).detectorInfo());
 }
 
