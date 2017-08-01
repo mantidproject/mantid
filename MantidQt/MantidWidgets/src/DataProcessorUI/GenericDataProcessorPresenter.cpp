@@ -1314,11 +1314,11 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
 
   // if a workspace with oldName exists then replace it for the same workspace
   // with newName
-  auto QoldName = QString::fromStdString(oldName);
-  auto QnewName = QString::fromStdString(newName);
-  if (m_workspaceList.contains(QoldName)) {
-    m_workspaceList.remove(QoldName);
-    m_workspaceList.insert(QnewName);
+  auto qOldName = QString::fromStdString(oldName);
+  auto qNewName = QString::fromStdString(newName);
+  if (m_workspaceList.contains(qOldName)) {
+    m_workspaceList.remove(qOldName);
+    m_workspaceList.insert(qNewName);
     m_view->setTableList(m_workspaceList);
     m_mainPresenter->notifyADSChanged(m_workspaceList);
   }
