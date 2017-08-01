@@ -727,30 +727,29 @@ public:
   }
 
   void testStartWsIndexOutOfBounds() {
-    auto boundsAssert =
-        [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output,
-           int, int endIndex) {
-          TS_ASSERT_EQUALS(output->getNumberHistograms(), endIndex + 1);
-        };
+    auto boundsAssert = [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output,
+                           int, int endIndex) {
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), endIndex + 1);
+    };
 
     wsBoundsTest("testSpace", 100, 4, boundsAssert);
   }
 
   void testStartWSIndexGreaterThanEnd() {
-    auto boundsAssert =
-        [](MatrixWorkspace_sptr input, MatrixWorkspace_sptr output,
-           int startIndex, int) {
-          TS_ASSERT_EQUALS(output->getNumberHistograms(),
-                           input->getNumberHistograms() - startIndex);
-        };
+    auto boundsAssert = [](MatrixWorkspace_sptr input,
+                           MatrixWorkspace_sptr output, int startIndex, int) {
+      TS_ASSERT_EQUALS(output->getNumberHistograms(),
+                       input->getNumberHistograms() - startIndex);
+    };
 
     wsBoundsTest("testSpace", 4, 2, boundsAssert);
   }
 
   void testStartWSIndexEqualsEnd() {
-    auto boundsAssert = [](
-        MatrixWorkspace_sptr, MatrixWorkspace_sptr output, int,
-        int) { TS_ASSERT_EQUALS(output->getNumberHistograms(), 1); };
+    auto boundsAssert =
+        [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output, int, int) {
+          TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+        };
 
     wsBoundsTest("testSpace", 3, 3, boundsAssert);
   }
