@@ -728,8 +728,8 @@ public:
 
   void testStartWsIndexOutOfBounds() {
     auto boundsAssert =
-        [](MatrixWorkspace_sptr input, MatrixWorkspace_sptr output,
-           int startIndex, int endIndex) {
+        [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output,
+           int, int endIndex) {
           TS_ASSERT_EQUALS(output->getNumberHistograms(), endIndex + 1);
         };
 
@@ -739,7 +739,7 @@ public:
   void testStartWSIndexGreaterThanEnd() {
     auto boundsAssert =
         [](MatrixWorkspace_sptr input, MatrixWorkspace_sptr output,
-           int startIndex, int endIndex) {
+           int startIndex, int) {
           TS_ASSERT_EQUALS(output->getNumberHistograms(),
                            input->getNumberHistograms() - startIndex);
         };
@@ -749,8 +749,8 @@ public:
 
   void testStartWSIndexEqualsEnd() {
     auto boundsAssert = [](
-        MatrixWorkspace_sptr input, MatrixWorkspace_sptr output, int startIndex,
-        int endIndex) { TS_ASSERT_EQUALS(output->getNumberHistograms(), 1); };
+        MatrixWorkspace_sptr, MatrixWorkspace_sptr output, int,
+        int) { TS_ASSERT_EQUALS(output->getNumberHistograms(), 1); };
 
     wsBoundsTest("testSpace", 3, 3, boundsAssert);
   }
