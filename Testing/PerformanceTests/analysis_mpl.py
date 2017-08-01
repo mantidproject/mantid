@@ -7,29 +7,17 @@ import os
 import sys
 import sqlresults
 from sqlresults import get_results
-from matplotlib import pyplot as plt
+import matplotlib
+from pylab import *
 import numpy as np
 import datetime
 import random
-import plotly.offline as offline
-import plotly.graph_objs as go
 
 # This is the date string format as returned by the database
 DATE_STR_FORMAT_MICRO = "%Y-%m-%d %H:%M:%S.%f"
 DATE_STR_FORMAT_NO_MICRO = "%Y-%m-%d %H:%M:%S"
-MANTID_ADDRESS = "https://github.com/mantidproject/mantid"
-# The default HTML header
-DEFAULT_HTML_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html>
-<head><LINK href="report.css" rel="stylesheet" type="text/css"></head>
-"""
-DEFAULT_PLOTLY_HEADER = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html>
-    <head><LINK href="report.css" rel="stylesheet" type="text/css"><script src="https://cdn.plot.ly/plotly-latest.min.js"></script></head>
-    """
 
-DEFAULT_HTML_FOOTER = """</body></html>"""
-
-
-# ============================================================================================
+#============================================================================================
 def to_datetime(formatted_str):
     """Return a datetime object from a formatted string
 
@@ -42,18 +30,17 @@ def to_datetime(formatted_str):
 
     return date
 
-
-# ============================================================================================
+#============================================================================================
 def get_orderby_clause(last_num):
     """Returns a order by clause that limits to the last # revisions """
-    if last_num is not None:
+    if last_num > 0:
         return " ORDER BY revision DESC limit %d" % last_num
     else:
         return ''
 
 
-# ============================================================================================
-def get_runtime_data(name='', type='', x_field='revision', last_num=None):
+#============================================================================================
+def get_runtime_data(name='', type='', x_field='revision', last_num=-1):
     """Get the test runtime/iteration as a function of an X variable.
 
     Parameters
@@ -87,7 +74,7 @@ def get_runtime_data(name='', type='', x_field='revision', last_num=None):
 
         if data.has_key(x):
             old = data[x]
-            iters = old[0] + 1  # Iterations
+            iters = old[0] + 1 # Iterations
             runtime = old[1] + res["runtime"]
         else:
             iters = 1
@@ -96,29 +83,28 @@ def get_runtime_data(name='', type='', x_field='revision', last_num=None):
         data[x] = (iters, runtime)
 
     # Now make a sorted list of (x, runtime/iteration)
-    sorted_list = [(x, y[1] / y[0]) for (x, y) in data.items()]
-    sorted_list.sort()
+    sorted = [(x, y[1]/y[0]) for (x,y) in data.items()]
+    sorted.sort()
 
-    x = [a for (a, b) in sorted_list]
+    x = [a for (a,b) in sorted]
     # For index, convert into an integer index
     if x_field == 'index':
-        x = range(len(x))
-    y = [b for (a, b) in sorted_list]
+        x = range( len(x) )
+    y = [b for (a,b) in sorted]
 
-    return (x, y)
+    return (x,y)
 
 
-# ============================================================================================
+#============================================================================================
 def get_unique_fields(results, field):
     """Given a list of TestResult, return a
     list of all unique values of 'field'"""
     out = set()
     for res in results:
-        out.add(res[field])
+        out.add( res[field] )
     return list(out)
 
-
-# ============================================================================================
+#============================================================================================
 def get_results_matching(results, field, value):
     """Given a list of TestResult,
     return a list of TestResult's where 'field' matches 'value'."""
@@ -129,79 +115,147 @@ def get_results_matching(results, field, value):
     return out
 
 
-# ============================================================================================
-def plot_runtime(annotate, saveImage, path, **kwargs):
-    name = kwargs['name']
-    (xData, yData) = get_runtime_data(**kwargs)
-    trace1 = go.Scatter(x=xData, y=yData,
-                        mode='lines+markers',
-                        marker=dict(
-                            size='5',
-                            color="blue"
-                        )
-                        )
-
-    annotations = []
-
-    last_num = kwargs.get('last_num', None)
-
-    if annotate and not saveImage:
-        # retrieve commitids for annotation on the plotly graph
-        results = get_results(name, orderby_clause='ORDER BY revision, variables, date')
-        commitids = ["""<a href="%s/commit/%s">  </a>""" % (MANTID_ADDRESS, res["commitid"]) for res in results]
-
-        if last_num is not None:
-            commitids = commitids[-last_num:]
-
-        for x, y, text in zip(xData, yData, commitids):
-            annotations.append(
-                dict(
-                    x=x,
-                    y=y,
-                    text=text,
-                    showarrow=False,
-                    font=dict(family='sans serif', size=10),
-                    xanchor='center',
-                    yanchor='center'
-                )
-            )
-
-    if last_num is not None:
-        title = "Runtime History of %s (last %d revs)" % (name, last_num)
+#============================================================================================
+def smart_ticks(index, values):
+    """On the current figure, set the ticks at X positions
+    given by index, with value given by values (ints).
+    But it tries to space them out in a reasonable way.
+    """
+    if type(values[0]).__name__ == "unicode":
+        # Make the array of dates
+        dates = []
+        for val in values:
+            try:
+                dates.append(to_datetime(val))
+            except:
+                pass
+        if len(dates) == 0: return
+        td = dates[-1] - dates[0]
+        if (td < datetime.timedelta(hours=1)):
+            values_str = [d.strftime("%M:%S") for d in dates]
+        elif (td < datetime.timedelta(days=1)):
+            values_str = [d.strftime("%H:%M") for d in dates]
+        else:
+            values_str = [d.strftime("%m-%d, %H:%M") for d in dates]
     else:
-        title = "Runtime History of %s (all revs)" % name
+        # convert to list of strings
+        values_str = [str(val) for val in values]
 
-    yAxisTitle = 'Runtime/iteration (sec)'
-    xAxisTitle = kwargs['x_field']
+    if len(values_str) == 0: return
 
-    layout = go.Layout(showlegend=False, annotations=annotations,
-                       title=title,
-                       xaxis=dict(title=xAxisTitle),
-                       yaxis=dict(
-                           title=yAxisTitle,
-                           range=[0, np.amax(yData)]
-                       )
-                       )
-    data = [trace1]
-    fig = go.Figure(data=data, layout=layout)
+    w = gcf().get_figwidth()*gcf().get_dpi()
+    spacing = w/len(index)
 
-    if saveImage:
-        im_filename = name + ".png"
-        plt.ioff()
-        plt.figure()
-        plt.title(title)
-        plt.xlabel(xAxisTitle)
-        plt.ylabel(yAxisTitle)
-        plt.plot(xData, yData, "-b.")
-        plt.ylim(ymin=0)
-        plt.savefig(os.path.join(path, im_filename))
-        plt.close()
-        return """<img src="%s"/>""" % im_filename
+    tick_index = []
+    tick_strings = []
+
+    space_available = 0
+    for i in xrange(len(index)):
+        s = str(values_str[i]);
+        s_width = (len(s)+1) * 12.0 # About 12 pixels per letter? And add a space
+        space_available +=spacing
+        if space_available >= s_width:
+            space_available = 0
+            tick_index.append(i)
+            tick_strings.append(s)
+
+    xticks( tick_index, tick_strings )
+
+
+
+#============================================================================================
+def plot_success_count(type='system', last_num=-1, x_field='revision'):
+    """ Plot the count of successful/failed tests vs revision number
+
+    Parameters
+    ----------
+        type :: 'system', or 'performance'
+    """
+    results = get_results('', type, where_clause='', orderby_clause=get_orderby_clause(last_num))
+    revisions = get_unique_fields(results, x_field)
+
+    # Go through each revision
+    success = []
+    fail = []
+    for revision in revisions:
+        these = get_results_matching(results, x_field, revision)
+        succeeded = 0
+        failed = 0
+        for res in these:
+            if res["success"]:
+                succeeded += 1
+            else:
+                failed += 1
+        # Keep the list of them
+        success.append(succeeded)
+        fail.append(failed)
+
+    figure()
+    revisions = np.array(revisions)
+    fail = np.array(fail)
+    success = np.array(success)
+
+    index = np.arange(len(revisions))
+#    p1 = bar(index, fail, color='r')
+#    p2 = bar(index, success, color='g', bottom=fail)
+#    legend( (p1[0], p2[0]), ('Failure', 'Success') )
+
+    p1 = fill_between(index, fail, 0, color='r')
+    p2 = fill_between(index, success+fail, fail, color='g')
+    #legend( (p1, p2), ('Failure', 'Success') )
+
+    smart_ticks( index, revisions)
+
+
+    ylabel('Success/Fail')
+    xlabel(x_field)
+    revsare = "all revs"
+    if last_num > 0: revsare = "last %d revs" % last_num
+    title("Success/Fail History of %s tests (%s)" % (type, revsare))
+
+
+#============================================================================================
+def plot_runtime(*args, **kwargs):
+    """ Call get_runtime_data()
+
+    Parameters
+    ----------
+        - See get_runtime_data() for the full list
+    """
+    (x,y) = get_runtime_data(*args, **kwargs)
+
+    figure()
+    index = np.arange(len(x))
+    plot(index,y,'-b.')
+    smart_ticks( index, x)
+    ylabel('Runtime/iteration (sec)')
+    xlabel(kwargs['x_field'])
+
+    last_num =kwargs.get('last_num',-1)
+    if last_num > 0:
+        title("Runtime History of %s (last %d revs)" % (kwargs['name'], kwargs["last_num"]) )
     else:
-        return offline.plot(fig, output_type='div', show_link=False, auto_open=False, include_plotlyjs=False)
+        title("Runtime History of %s (all revs)" % kwargs['name'])
 
 
-# ============================================================================================
+
+
+
+
+
+
+
+
+
+
+# The default HTML header
+default_html_header = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html>
+<head><LINK href="report.css" rel="stylesheet" type="text/css"></head>
+"""
+
+default_html_footer =  """</body></html>"""
+
+#============================================================================================
 def make_css_file(path):
     """ Make a save the report.css file to be used by all html """
     default_css = """
@@ -236,8 +290,7 @@ font-weight: bold;
     f.write(default_css)
     f.close()
 
-
-# ============================================================================================
+#============================================================================================
 def make_environment_html(res):
     """Return a HTML string with details of test environment, taken from the
     'res' TestResult object"""
@@ -249,14 +302,13 @@ def make_environment_html(res):
     """ % (res['host'], res['environment'], res['runner'])
     return html
 
-
-# ============================================================================================
+#============================================================================================
 def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
     """ Create a detailed HTML report for the named test """
-    html = DEFAULT_PLOTLY_HEADER
+    html = default_html_header
     html += """<h1>Detailed report for %s</h1><br>""" % (name)
-    html += fig1 + "\n"
-    html += fig2 + "\n"
+    html += """<img src="%s" alt="runtime vs revision number (latest %d entries)" />\n""" % (fig1, last_num)
+    html += """<img src="%s" alt="runtime vs revision number" />\n""" % (fig2)
     html += """<h3>Test Results</h3>"""
 
     fields = ['revision', 'date', 'commitid', 'compare', 'status', 'runtime', 'cpu_fraction', 'variables']
@@ -271,16 +323,16 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
     html += """<table border="1">""" + table_row_header
 
     table_html = ''
-    results = get_results(name, type='', where_clause='', orderby_clause="ORDER BY revision, variables, date")
-    data = [(res["revision"], res["variables"], res["date"], res) for res in results]
-
+    results = get_results(name, type='', where_clause='')
+    sorted = [(res["revision"], res["variables"], res["date"], res) for res in results]
+    sorted.sort(reverse=False)
     count = 0
     last_rev = 0
     commitid = ''
     last_commitid = ''
     row_class = ''
     table_rows = []
-    for (rev, variable, date, res) in data:
+    for (rev, variable, date, res) in sorted:
         table_row_html = ''
         if (rev != last_rev):
             # Changed SVN revision. Swap row color
@@ -304,25 +356,24 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
             if field == 'compare':
                 # Comparison to previous commit, if anything can be done
                 if (last_commitid != ""):
-                    val = """<a href="%s/compare/%s...%s">diff</a>""" % (
-                        MANTID_ADDRESS, last_commitid, commitid)
+                    val = """<a href="https://github.com/mantidproject/mantid/compare/%s...%s">diff</a>""" % (last_commitid, commitid)
 
             else:
                 # Normal fields
                 val = res[field]
 
                 # Trim the fractional seconds
-                if field == "date":
+                if field=="date":
                     val = str(val)[0:19]
 
                 # Add a trac link
-                if field == "commitid":
+                if field=="commitid":
                     commitid = val
                     partial_commitid = val
                     if (len(partial_commitid) > 7): partial_commitid = partial_commitid[0:7];
-                    val = """<a href="%s/commit/%s">%s</a>""" % (MANTID_ADDRESS, commitid, partial_commitid)
+                    val = """<a href="https://github.com/mantidproject/mantid/commit/%s">%s</a>""" % (commitid, partial_commitid)
 
-                if field == "runtime":
+                if field=="runtime":
                     val = "%.3f" % (res["runtime"])
 
             table_row_html += "<td>%s</td>" % val
@@ -333,31 +384,39 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
     table_rows.reverse()
     for row in table_rows:
         html += row
+#        # Add the row header every 30 entries
+#        count += 1
+#        if count % 30 == 0: html += table_row_header
 
     # And one more at the end for good measure
     html += table_row_header
     html += "</table>"
 
-    if results:
+    if len(results)> 0:
         html += """<h3>Environment</h3>
         %s""" % make_environment_html(results[0])
 
-    html += DEFAULT_HTML_FOOTER
+    html += default_html_footer
+
+#    last_date = sorted[-1][1]["date"]
+#    results = get_results(name, type='', get_log=False, where_clause=" date = '%s'" % last_date)
+#    if len(results)>0:
+#        html +=
 
     f = open(os.path.join(basedir, "%s.htm" % name), "w")
-    html = html.replace("\n", os.linesep)  # Fix line endings for windows
+    html = html.replace("\n", os.linesep) # Fix line endings for windows
     f.write(html)
     f.close()
 
 
-# ============================================================================================
+#============================================================================================
 def how_long_ago(timestr):
     """Returns a string giving how long ago something happened,
     in human-friendly way """
     import time
     now = datetime.datetime.now()
     then = to_datetime(timestr)
-    td = (now - then)
+    td = (now-then)
     sec = td.seconds
     min = int(sec / 60)
     hours = int(min / 60)
@@ -369,7 +428,7 @@ def how_long_ago(timestr):
     days = days % 7
 
     if weeks > 0:
-        return "%dw%dd" % (weeks, days)
+        return "%dw%dd" % (weeks,days)
     elif days > 0:
         return "%dd%dh" % (days, hours)
     elif hours > 0:
@@ -382,7 +441,7 @@ def how_long_ago(timestr):
     return ""
 
 
-# ============================================================================================
+#============================================================================================
 def get_html_summary_table(test_names):
     """Returns a html string summarizing the tests with these names """
     html = """
@@ -409,7 +468,7 @@ def get_html_summary_table(test_names):
 
             # Friendly date
             date = to_datetime(res['date'])
-            html += """<td>%s</td>""" % date.strftime("%b %d, %H:%M:%S")
+            html += """<td>%s</td>""" %  date.strftime("%b %d, %H:%M:%S")
 
             html += """<td>%s</td>""" % res['runtime']
             html += """</tr>"""
@@ -418,7 +477,7 @@ def get_html_summary_table(test_names):
     return html
 
 
-# ============================================================================================
+#============================================================================================
 def generate_html_subproject_report(path, last_num, x_field='revision', starts_with=""):
     """ HTML report for a subproject set of tests.
 
@@ -430,19 +489,21 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
     if not os.path.exists(basedir):
         os.mkdir(basedir)
 
+
     # Detect if you can do figures
     dofigs = True
     try:
-        plt.figure()
+        figure()
     except:
         dofigs = False
 
     # Start the HTML
-    overview_html = DEFAULT_HTML_HEADER
-    html = DEFAULT_HTML_HEADER
+    overview_html = ""
+    html = default_html_header
     html += """<h1>Mantid System Tests: %s</h1>""" % starts_with
     if not dofigs:
         html += """<p class="error">There was an error generating plots. No figures will be present in the report.</p>"""
+
 
     # ------ Find the test names of interest ----------------
     # Limit with only those tests that exist in the latest rev
@@ -460,43 +521,53 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
     html += """<h2>Latest Results Summary</h2>"""
     html += get_html_summary_table(test_names)
 
+
     # -------- Report for each test ------------------------
     for name in test_names:
         print "Plotting", name
         html += """<hr><h2>%s</h2>\n""" % name
         overview_html += """<hr><h2>%s</h2>\n""" % name
 
+        # Path to the figures
+        fig1 = "%s.runtime.v.revision.png" % name
+        fig2 = "%s.runtime.v.revision.ALL.png" % name
+
         if dofigs:
             # Only the latest X entries
-            imgTagHtml = plot_runtime(False, True, path, name=name, x_field=x_field, last_num=last_num)
-            divShort = plot_runtime(True, False, path, name=name, x_field=x_field, last_num=last_num)
+            plot_runtime(name=name,x_field=x_field,last_num=last_num)
+            savefig(os.path.join(basedir, fig1))
+            close()
+
             # Plot all svn times
-            divDetailed = plot_runtime(True, False, path, name=name, x_field=x_field, last_num=None)
+            plot_runtime(name=name,x_field=x_field,last_num=-1)
+            savefig(os.path.join(basedir, fig2))
+            close()
 
-            html += divDetailed + "\n"
-            overview_html += imgTagHtml + "\n"
+            #html += """<img src="%s" alt="runtime vs revision number (latest %d entries)" />\n""" % (fig1, last_num)
+            html += """<img src="%s" alt="runtime vs revision number" />\n""" % (fig2)
+            overview_html +=  """<img src="%s" alt="runtime vs revision number" />\n""" % (fig1)
 
-        make_detailed_html_file(basedir, name, divShort, divDetailed, last_num)
+        make_detailed_html_file(basedir, name, fig1, fig2, last_num)
         detailed_html = """<br><a href="%s.htm">Detailed test report for %s</a>
         <br><br>
         """ % (name, name)
         html += detailed_html
-        overview_html += detailed_html
+        overview_html +=  detailed_html
 
-    html += DEFAULT_HTML_FOOTER
-    overview_html += "</body></html>"
+    html += default_html_footer
 
     filename = starts_with + ".htm"
 
-    f = open(os.path.join(basedir, filename), "w")
-    html = html.replace("\n", os.linesep)  # Fix line endings for windows
+    f = open(os.path.join(basedir,filename), "w")
+    html = html.replace("\n", os.linesep) # Fix line endings for windows
     f.write(html)
     f.close()
 
     return (filename, overview_html)
 
 
-# ============================================================================================
+
+#============================================================================================
 def generate_html_report(path, last_num, x_field='revision'):
     """Make a comprehensive HTML report of runtime history for all tests.
     Parameters
@@ -514,8 +585,13 @@ def generate_html_report(path, last_num, x_field='revision'):
 
     # Detect if you can do figures
     dofigs = True
+    try:
+        figure()
+    except:
+        dofigs = False
+
     # --------- Start the HTML --------------
-    html = DEFAULT_HTML_HEADER
+    html = default_html_header
     html += """<h1>Mantid System Tests Auto-Generated Report</h1>"""
     html += """<p><a href="overview_plot.htm">See an overview of performance plots for all tests by clicking here.</a></p> """
     if not dofigs:
@@ -523,7 +599,7 @@ def generate_html_report(path, last_num, x_field='revision'):
 
     html += """<h2>Run Environment</h2>
     %s
-    """ % (make_environment_html(sqlresults.get_latest_result()))
+    """ % ( make_environment_html(sqlresults.get_latest_result()) )
 
     overview_html = ""
 
@@ -538,7 +614,7 @@ def generate_html_report(path, last_num, x_field='revision'):
     for name in test_names:
         n = name.find(".")
         if n > 0:
-            subprojects.add(name[:n])
+            subprojects.add( name[:n] )
     subprojects = list(subprojects)
     subprojects.sort()
     html += """<h2>Test Subprojects</h2>
@@ -556,23 +632,43 @@ def generate_html_report(path, last_num, x_field='revision'):
     html += """<h2>Overall Results Summary</h2>"""
     html += get_html_summary_table(test_names)
 
-    html += DEFAULT_HTML_FOOTER
+    # -------- Overall success history graphs ------------
+    #if dofigs:
+    #    # We report the overall success
+    #    fig_path = "OverallSuccess.png"
+    #    plot_success_count(type='',last_num=last_num, x_field=x_field)
+    #    savefig(os.path.join(basedir, fig_path))
+    #    close()
+    #
+    #    fig_path2 = "OverallSuccess.ALL.png"
+    #    plot_success_count(type='',last_num=-1, x_field=x_field)
+    #    savefig(os.path.join(basedir, fig_path2))
+    #    close()
+    #
+    #    html += """<h2>Overall Success/Failure</h2>
+    #    <img src="%s" />
+    #    <img src="%s" />
+    #    """ % (fig_path, fig_path2)
+
+    html += default_html_footer
 
     f = open(os.path.join(basedir, "report.htm"), "w")
-    html = html.replace("\n", os.linesep)  # Fix line endings for windows
+    html = html.replace("\n", os.linesep) # Fix line endings for windows
     f.write(html)
     f.close()
 
     # -------- Overview of plots ------------
     f = open(os.path.join(basedir, "overview_plot.htm"), "w")
-    overview_html = overview_html.replace("\n", os.linesep)  # Fix line endings for windows
+    overview_html = overview_html.replace("\n", os.linesep) # Fix line endings for windows
     f.write(overview_html)
     f.close()
 
     print "Report complete!"
 
 
-# ============================================================================================
+
+
+#============================================================================================
 if __name__ == "__main__":
     sqlresults.set_database_filename("MyFakeData.db")
     # Make up some test data
@@ -580,4 +676,10 @@ if __name__ == "__main__":
         if os.path.exists("MyFakeData.db"): os.remove("MyFakeData.db")
         sqlresults.generate_fake_data(300)
 
+
     generate_html_report("../Report", 50)
+
+#    plot_runtime(name='MyFakeTest', x_field='revision')
+#    plot_runtime(name='MyFakeTest', x_field='date')
+#    plot_success_count()
+#    show()
