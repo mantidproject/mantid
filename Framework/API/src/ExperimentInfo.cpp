@@ -76,7 +76,7 @@ ExperimentInfo::ExperimentInfo()
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<Geometry::DetectorInfo>(
       *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
-      m_parmap.get(), m_infoVisitor->detectorIdToIndexMap());
+      m_infoVisitor->detectorIdToIndexMap());
 
   m_infoVisitor->walkInstrument();
   makeAPIComponentInfo(*m_infoVisitor, *sptr_instrument);
@@ -292,8 +292,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 
   m_detectorInfoWrapper = Kernel::make_unique<Geometry::DetectorInfo>(
       *m_detectorInfo, makeParameterizedInstrument(),
-      m_infoVisitor->detectorIds(), m_parmap.get(),
-      m_infoVisitor->detectorIdToIndexMap());
+      m_infoVisitor->detectorIds(), m_infoVisitor->detectorIdToIndexMap());
 
   // Cross link Component and Detector info objects
   m_componentInfo->setDetectorInfo(m_detectorInfo.get());

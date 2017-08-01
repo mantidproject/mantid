@@ -1,5 +1,4 @@
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -14,20 +13,15 @@ namespace Geometry {
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument
- * obtained from a workspace. The pointer to the ParameterMap `pmap` can be
- * null. If it is not null, it must refer to the same map as wrapped in
- * `instrument`. Non-const methods of DetectorInfo may only be called if `pmap`
- * is not null. Detector ID -> index map provided as constructor argument.
- *
- * */
+ * obtained from a workspace. Detector ID -> index map provided as constructor
+ * argument. */
 DetectorInfo::DetectorInfo(
     Beamline::DetectorInfo &detectorInfo,
     boost::shared_ptr<const Geometry::Instrument> instrument,
     boost::shared_ptr<std::vector<detid_t>> detectorIds,
-    Geometry::ParameterMap *pmap,
     boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
         detIdToIndexMap)
-    : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
+    : m_detectorInfo(detectorInfo), m_instrument(instrument),
       m_detectorIDs(detectorIds), m_detIDToIndex(detIdToIndexMap),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
