@@ -2,12 +2,12 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
-#include "MantidQtMantidWidgets/PeakPicker.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "DllConfig.h"
+#include "EnggDiffFittingViewQtWidget.h"
+#include "IEnggDiffractionPresenter.h"
+#include "IEnggDiffractionView.h"
+#include "MantidQtWidgets/Common/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
@@ -56,7 +56,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffractionViewQtGUI
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffractionViewQtGUI
     : public MantidQt::API::UserSubWindow,
       public IEnggDiffractionView {
   Q_OBJECT

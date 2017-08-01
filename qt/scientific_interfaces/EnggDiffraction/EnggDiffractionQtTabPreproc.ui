@@ -253,7 +253,7 @@
   <customwidget>
    <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtAPI/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
+#include "EnggDiffractionPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -6,9 +6,9 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidQtAPI/PythonRunner.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+#include "MantidQtWidgets/Common/PythonRunner.h"
+#include "EnggDiffractionPresWorker.h"
+#include "IEnggDiffractionView.h"
 
 #include <algorithm>
 #include <cctype>

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
+#include "EnggDiffCalibSettings.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

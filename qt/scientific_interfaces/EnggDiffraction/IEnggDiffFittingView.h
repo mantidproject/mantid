@@ -1,9 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPythonRunner.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
+#include "IEnggDiffractionPythonRunner.h"
+#include "IEnggDiffractionSettings.h"
+#include "IEnggDiffractionUserMsg.h"
 
 #include <string>
 #include <vector>

@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
+#include "EnggDiffFittingPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -6,8 +6,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresWorker.h"
-#include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
+#include "EnggDiffFittingPresWorker.h"
+#include "../Muon/ALCHelper.h"
 
 #include <boost/lexical_cast.hpp>
 #include <cctype>

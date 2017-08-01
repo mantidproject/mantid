@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPythonRunner.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
+#include "IEnggDiffractionPythonRunner.h"
+#include "IEnggDiffractionSettings.h"
+#include "IEnggDiffractionUserMsg.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

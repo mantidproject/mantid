@@ -2,9 +2,9 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEWQTWIDGET_H_
 
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingPresenter.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingView.h"
+#include "DllConfig.h"
+#include "IEnggDiffFittingPresenter.h"
+#include "IEnggDiffFittingView.h"
 
 #include "ui_EnggDiffractionQtTabFitting.h"
 
@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffFittingViewQtWidget
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingViewQtWidget
     : public QWidget,
       public IEnggDiffFittingView {
   Q_OBJECT

@@ -1,9 +1,9 @@
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h"
+#include "EnggDiffFittingViewQtWidget.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
-#include "MantidQtMantidWidgets/PeakPicker.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "EnggDiffFittingPresenter.h"
+#include "MantidQtWidgets/Common/PeakPicker.h"
 
 #include <array>
 #include <iomanip>

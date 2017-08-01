@@ -1,10 +1,10 @@
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
+#include "EnggDiffractionViewQtGUI.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtAPI/MWRunFiles.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "EnggDiffractionPresenter.h"
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>

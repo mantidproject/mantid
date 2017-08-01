@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGPRESENTER_H_
 
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
+#include "IEnggDiffractionCalibration.h"
+#include "IEnggDiffractionParam.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

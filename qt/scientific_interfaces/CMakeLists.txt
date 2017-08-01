@@ -16,6 +16,7 @@ add_subdirectory ( ISISSANS )
 add_subdirectory ( ISISReflectometryOld )
 add_subdirectory ( Indirect )
 add_subdirectory ( General )
+add_subdirectory ( EnggDiffraction )
 
 ###########################################################################
 # Testing

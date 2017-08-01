@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESWORKER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESWORKER_H_
 
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
+#include "EnggDiffractionPresenter.h"
 
 #include <QThread>
 

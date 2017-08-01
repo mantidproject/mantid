@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_ALCHELPER_H_
 
 #include "MantidKernel/System.h"
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
 
@@ -16,7 +17,7 @@ curveDataFromWs(Mantid::API::MatrixWorkspace_const_sptr ws, size_t wsIndex);
 
 /// Create vector of Qwt curve data from a workspace, used for EnggDiffraction
 /// GUI
-std::vector<boost::shared_ptr<QwtData>>
+MANTIDQT_MUONINTERFACE_DLL std::vector<boost::shared_ptr<QwtData>>
 curveDataFromWs(Mantid::API::MatrixWorkspace_const_sptr ws);
 
 /// Create error vector from a workspace

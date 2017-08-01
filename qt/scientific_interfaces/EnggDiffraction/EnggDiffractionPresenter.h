@@ -4,11 +4,11 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+#include "DllConfig.h"
+#include "IEnggDiffractionCalibration.h"
+#include "IEnggDiffractionParam.h"
+#include "IEnggDiffractionPresenter.h"
+#include "IEnggDiffractionView.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -51,7 +51,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 // needs to be dll-exported for the tests
-class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffractionPresenter
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffractionPresenter
     : public QObject,
       public IEnggDiffractionPresenter,
       public IEnggDiffractionCalibration,
