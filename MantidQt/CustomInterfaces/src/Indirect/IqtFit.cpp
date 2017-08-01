@@ -26,7 +26,7 @@ namespace IDA {
 IqtFit::IqtFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_iqtFTree(NULL),
       m_iqtFRangeManager(NULL), m_fixedProps(), m_iqtFInputWS(),
-      m_iqtFOutputWS(), m_iqtFInputWSName(), m_ties(), m_previewPlotData() {
+      m_iqtFOutputWS(), m_iqtFInputWSName(), m_previewPlotData(), m_ties() {
   m_uiForm.setupUi(parent);
 }
 
