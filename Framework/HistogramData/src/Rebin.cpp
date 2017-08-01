@@ -41,7 +41,7 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
     auto nwidth = xn_high - xn_low;
 
     if (owidth <= 0.0 || nwidth <= 0.0){
-      if (xo_high == -DBL_MAX || xo_low == -DBL_MAX) {
+      if (xo_high == -DBL_MAX && xo_low == -DBL_MAX) {
 	throw InvalidBinEdgesError("One or more x-values was unusually low "
 				   "(below -1e100). This usually occurs when a "
 				   "monitor spectrum has not been masked after "
