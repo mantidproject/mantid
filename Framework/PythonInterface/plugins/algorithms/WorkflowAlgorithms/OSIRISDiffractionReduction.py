@@ -373,7 +373,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             else:
                 self._van_ws_map.addWs(van)
 
-
         # Finished with container now so delete it
         for container in container_ws_names:
             DeleteWorkspace(container)
