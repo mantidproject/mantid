@@ -1,7 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
-from six import iteritems, iterkeys, itervalues
 
 import itertools
+
+from IndirectReductionCommon import load_files
 
 from mantid.kernel import *
 from mantid.api import *
@@ -89,8 +90,8 @@ class DRangeToWorkspaceMap(object):
             self._map[d_range] = [ws_name]
         else:
             # check if x ranges matchs and existing run
-            for ws in self._map[d_range]:
-                map_lastx = mtd[ws].readX(0)[-1]
+            for ws_name in self._map[d_range]:
+                map_lastx = mtd[ws_name].readX(0)[-1]
                 ws_lastx = wrksp.readX(0)[-1]
 
                 # if it matches ignore it
@@ -164,7 +165,7 @@ def find_intersection_of_ranges(rangeA, rangeB):
     raise RuntimeError()
 
 
-def get_intersetcion_of_ranges(range_list):
+def get_intersection_of_ranges(range_list):
     """
     Get the intersections of a list of ranges.  For example, given the ranges:
     [1, 3], [3, 5] and [4, 6], the intersections would be a single range of [4,
@@ -313,22 +314,30 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         """
         Execute the algorithm in diffraction-only mode
         """
+
         # Load all sample, vanadium files
-        for fileName in self._sample_runs + self._vanadium_runs:
-            Load(Filename=fileName,
-                 OutputWorkspace=fileName,
-                 SpectrumMin=self._spec_min,
-                 SpectrumMax=self._spec_max,
-                 LoadLogFiles=self._load_logs)
+        ipf_file_name = 'OSIRIS_diffraction_diffonly_Parameters.xml'
+        sample_ws_names, _ = load_files(self._sample_runs,
+                                        ipf_file_name,
+                                        self._spec_min,
+                                        self._spec_max,
+                                        load_logs=self._load_logs)
+        vanadium_ws_names, _ = load_files(self._vanadium_runs,
+                                          ipf_file_name,
+                                          self._spec_min,
+                                          self._spec_max,
+                                          load_logs=self._load_logs)
+        container_ws_names = []
 
         # Load the container run
         if self._container_files:
-            for container in self._container_files:
-                Load(Filename=container,
-                     OutputWorkspace=container,
-                     SpectrumMin=self._spec_min,
-                     SpectrumMax=self._spec_max,
-                     LoadLogFiles=self._load_logs)
+            container_ws_names, _ = load_files(self._container_files,
+                                               ipf_file_name,
+                                               self._spec_min,
+                                               self._spec_max,
+                                               load_logs=self._load_logs)
+
+            for container in container_ws_names:
 
                 # Scale the container run if required
                 if self._container_scale_factor != 1.0:
@@ -364,13 +373,14 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             else:
                 self._van_ws_map.addWs(van)
 
+
         # Finished with container now so delete it
-        if self._container_files:
-            for container in self._container_files:
-                DeleteWorkspace(container)
+        for container in container_ws_names:
+            DeleteWorkspace(container)
+            DeleteWorkspace(container + "_mon")
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
-        for d_range in iterkeys(self._sam_ws_map.getMap()):
+        for d_range in self._sam_ws_map.getMap():
             if d_range not in self._van_ws_map.getMap():
                 raise RuntimeError("There is no van file that covers the " + str(d_range) + " DRange.")
 
@@ -378,14 +388,14 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # This will mean our map of DRanges to list of workspaces becomes a map
         # of DRanges, each to a *single* workspace.
         temp_sam_map = DRangeToWorkspaceMap()
-        for d_range, ws_list in iteritems(self._sam_ws_map.getMap()):
+        for d_range, ws_list in self._sam_ws_map.getMap().items():
             self._rebin_to_smallest(ws_list)
             temp_sam_map.setItem(d_range, average_ws_list(ws_list))
         self._sam_ws_map = temp_sam_map
 
         # Now do the same to the vanadium workspaces.
         temp_van_map = DRangeToWorkspaceMap()
-        for d_range, ws_list in iteritems(self._van_ws_map.getMap()):
+        for d_range, ws_list in self._van_ws_map.getMap().items():
             self._rebin_to_smallest(ws_list)
             temp_van_map.setItem(d_range, average_ws_list(ws_list))
         self._van_ws_map = temp_van_map
@@ -407,9 +417,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                           XMax=d_range[1])
 
         # Divide all sample files by the corresponding vanadium files.
-        for d_range in iterkeys(self._sam_ws_map.getMap()):
-            sam_ws = self._sam_ws_map.getMap()[d_range]
-            van_ws = self._van_ws_map.getMap()[d_range]
+        for sam_ws, van_ws in zip(self._sam_ws_map.getMap().values(),
+                                  self._van_ws_map.getMap().values()):
             ws_list = self._rebin_to_smallest([sam_ws, van_ws])
             sam_ws, van_ws = ws_list[0], ws_list[1]
             Divide(LHSWorkspace=sam_ws,
@@ -421,9 +430,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                  InfinityValue=0.0)
 
         # Create a list of sample workspace NAMES, since we need this for MergeRuns.
-        samWsNamesList = []
-        for sam in itervalues(self._sam_ws_map.getMap()):
-            samWsNamesList.append(sam)
+        samWsNamesList = list(self._sam_ws_map.getMap().values())
 
         if len(samWsNamesList) > 1:
             # Merge the sample files into one.
@@ -431,6 +438,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                       OutputWorkspace=self._output_ws_name)
             for name in samWsNamesList:
                 DeleteWorkspace(Workspace=name)
+                DeleteWorkspace(Workspace=name + "_mon")
         else:
             RenameWorkspace(InputWorkspace=samWsNamesList[0],
                             OutputWorkspace=self._output_ws_name)
@@ -438,7 +446,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         result = mtd[self._output_ws_name]
 
         # Create scalar data to cope with where merge has combined overlapping data.
-        intersections = get_intersetcion_of_ranges(list(self._sam_ws_map.getMap().keys()))
+        intersections = get_intersection_of_ranges(list(self._sam_ws_map.getMap().keys()))
 
         dataX = result.dataX(0)
         dataY = []
@@ -466,6 +474,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Delete all workspaces we've created, except the result.
         for wrksp in self._van_ws_map.getMap().values():
             DeleteWorkspace(Workspace=wrksp)
+            DeleteWorkspace(Workspace=wrksp + "_mon")
 
         self.setProperty("OutputWorkspace", result)
 
