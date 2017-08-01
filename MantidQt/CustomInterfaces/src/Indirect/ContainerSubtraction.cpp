@@ -31,7 +31,7 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-    SLOT(plotCurrentPreview()));
+          SLOT(plotCurrentPreview()));
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -275,9 +275,8 @@ void ContainerSubtraction::newSample(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Sample");
 
   // Get new workspace
-  m_csSampleWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          dataName.toStdString());
+  m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
   m_uiForm.spPreviewSpec->setMaximum(
       static_cast<int>(m_csSampleWS->getNumberHistograms()) - 1);
 
@@ -303,9 +302,8 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Container");
 
   // Get new workspace
-  m_csContainerWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          dataName.toStdString());
+  m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
 
   // Clone container for use in preprocessing
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
@@ -427,8 +425,9 @@ void ContainerSubtraction::absCorComplete(bool error) {
 
   // Convert back to original sample units
   if (m_originalSampleUnits != "Wavelength") {
-    m_csSubtractedWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        m_pythonExportWsName);
+    m_csSubtractedWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            m_pythonExportWsName);
     std::string eMode("");
     if (m_originalSampleUnits == "dSpacing")
       eMode = "Elastic";
@@ -500,7 +499,7 @@ void ContainerSubtraction::plotCurrentPreview() {
   if (m_csContainerWS) {
     workspaces.append(QString::fromStdString(m_csContainerWS->getName()));
   }
-  
+
   // Check whether a subtracted workspace has been generated
   if (m_csSubtractedWS) {
     workspaces.append(QString::fromStdString(m_csSubtractedWS->getName()));

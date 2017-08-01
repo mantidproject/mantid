@@ -41,7 +41,7 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-    SLOT(plotCurrentPreview()));
+          SLOT(plotCurrentPreview()));
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -60,9 +60,8 @@ void ApplyPaalmanPings::newSample(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Corrected");
 
   // Get workspace
-  m_ppSampleWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          dataName.toStdString());
+  m_ppSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
 
   // Plot the curve
   m_uiForm.ppPreview->addSpectrum("Sample", m_ppSampleWS, 0, Qt::black);
@@ -81,9 +80,8 @@ void ApplyPaalmanPings::newContainer(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Corrected");
 
   // get Workspace
-  m_ppContainerWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          dataName.toStdString());
+  m_ppContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
   // Clone for use in plotting and alg
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->initialize();
@@ -593,7 +591,7 @@ void ApplyPaalmanPings::plotCurrentPreview() {
   if (m_ppContainerWS) {
     workspaces.append(QString::fromStdString(m_ppContainerWS->getName()));
   }
-  
+
   // Check whether a subtracted workspace has been generated
   if (!m_pythonExportWsName.empty()) {
     workspaces.append(QString::fromStdString(m_pythonExportWsName));
