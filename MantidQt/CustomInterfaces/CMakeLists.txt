@@ -459,37 +459,6 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
 )
 
-set ( TEST_FILES
-	ALCBaselineModellingModelTest.h
-	ALCBaselineModellingPresenterTest.h
-	ALCDataLoadingPresenterTest.h
-	ALCLatestFileFinderTest.h
-	ALCPeakFittingModelTest.h
-	ALCPeakFittingPresenterTest.h
-	EnggDiffFittingPresenterTest.h
-	EnggDiffractionPresenterTest.h
-	IO_MuonGroupingTest.h
-	MDFLogValueFinderTest.h
-	MeasurementItemTest.h
-	MuonAnalysisDataLoaderTest.h
-	MuonAnalysisFitDataPresenterTest.h
-	MuonAnalysisFitFunctionPresenterTest.h
-	MuonAnalysisHelperTest.h
-	MuonAnalysisResultTableCreatorTest.h
-	ReflDataProcessorPresenterTest.h
-	ReflEventPresenterTest.h
-	ReflEventTabPresenterTest.h
-	ReflLegacyTransferStrategyTest.h
-	ReflMainWindowPresenterTest.h
-	ReflMeasureTransferStrategyTest.h
-	ReflNexusMeasurementItemSourceTest.h
-	ReflRunsTabPresenterTest.h
-	ReflSaveTabPresenterTest.h
-	ReflSettingsPresenterTest.h
-	ReflSettingsTabPresenterTest.h
-	UserInputValidatorTest.h
-)
-
 include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
 

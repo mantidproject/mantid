@@ -11,6 +11,7 @@ include_directories ( widgets/common/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/widgets/common )
 add_subdirectory ( widgets )
 add_subdirectory ( python )
+add_subdirectory ( scientific_interfaces )
 
 ###########################################################################
 # Add a custom target to build all of the MantidQt packages
