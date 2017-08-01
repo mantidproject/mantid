@@ -44,11 +44,11 @@ void SaveSESANS::init() {
                   "The name to use when saving the file");
 
   // TODO : find out good descriptions (and validators) for these properties
-  declareProperty("Theta_zmax", -1.0, Kernel::Direction::Input);
-  declareProperty("Theta_zmax_unit", "radians", Kernel::Direction::Input);
-  declareProperty("Theta_ymax", -1.0, Kernel::Direction::Input);
-  declareProperty("Theta_ymax_unit", "radians", Kernel::Direction::Input);
-  declareProperty("Echo_constant", -1.0, Kernel::Direction::Input);
+  declareProperty("ThetaZMax", -1.0, Kernel::Direction::Input);
+  declareProperty("ThetaZMax_unit", "radians", Kernel::Direction::Input);
+  declareProperty("ThetaYMax", -1.0, Kernel::Direction::Input);
+  declareProperty("ThetaYMax_unit", "radians", Kernel::Direction::Input);
+  declareProperty("EchoConstant", -1.0, Kernel::Direction::Input);
 
   declareProperty<std::string>("Orientation", "",
                                "Orientation of the instrument");
@@ -110,15 +110,15 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile,
   writeHeader(outfile, "Sample", sample.getName());
   writeHeader(outfile, "Thickness", std::to_string(sample.getThickness()));
   writeHeader(outfile, "Thickness_unit", "mm");
-  writeHeader(outfile, "Theta_zmax", getPropertyValue("Theta_zmax"));
-  writeHeader(outfile, "Theta_zmax_unit", getPropertyValue("Theta_zmax_unit"));
-  writeHeader(outfile, "Theta_ymax", getPropertyValue("Theta_ymax"));
-  writeHeader(outfile, "Theta_ymax_unit", getPropertyValue("Theta_ymax_unit"));
+  writeHeader(outfile, "Theta_zmax", getPropertyValue("ThetaZMax"));
+  writeHeader(outfile, "Theta_zmax_unit", getPropertyValue("ThetaZMax_unit"));
+  writeHeader(outfile, "Theta_ymax", getPropertyValue("ThetaYMax"));
+  writeHeader(outfile, "Theta_ymax_unit", getPropertyValue("ThetaYMax_unit"));
   writeHeader(outfile, "Orientation", "Z");
   writeHeader(outfile, "SpinEchoLength_unit", "A");
   writeHeader(outfile, "Depolarisation_unit", "A-2 cm-1");
   writeHeader(outfile, "Wavelength_unit", "A");
-  writeHeader(outfile, "Echo_constant", getPropertyValue("Echo_constant"));
+  writeHeader(outfile, "Echo_constant", getPropertyValue("EchoConstant"));
 }
 
 /**
@@ -142,7 +142,7 @@ void SaveSESANS::writeHeader(std::ofstream &outfile, const std::string &name,
 std::vector<double> SaveSESANS::calculateSpinEchoLength(
     const HistogramData::Points &wavelength) const {
   std::vector<double> spinEchoLength;
-  const double echoConstant = getProperty("Echo_constant");
+  const double echoConstant = getProperty("EchoConstant");
 
   // SEL is calculated as wavelength^2 * echoConstant
   transform(wavelength.begin(), wavelength.end(), back_inserter(spinEchoLength),

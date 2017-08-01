@@ -31,8 +31,8 @@ public:
     testAlg.setChild(true);
     testAlg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", outfileName));
-    testAlg.setProperty("Theta_zmax", 0.09);
-    testAlg.setProperty("Theta_ymax", 0.09);
+    testAlg.setProperty("ThetaZMax", 0.09);
+    testAlg.setProperty("ThetaYMax", 0.09);
   }
 
   void test_rejectTooManySpectra() {
