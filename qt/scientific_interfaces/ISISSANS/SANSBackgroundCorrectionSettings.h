@@ -2,7 +2,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONSETTINGS_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "DllConfig.h"
 
 #include <QString>
 #include <boost/optional.hpp>
@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL SANSBackgroundCorrectionSettings {
+class MANTIDQT_ISISSANS_DLL SANSBackgroundCorrectionSettings {
 public:
   SANSBackgroundCorrectionSettings(QString runNumber, bool useMean, bool useMon,
                                    QString monNumber);

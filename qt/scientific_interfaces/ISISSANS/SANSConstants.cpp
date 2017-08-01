@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/SANSConstants.h"
+#include "SANSConstants.h"
 #include <limits>
 
 namespace MantidQt {

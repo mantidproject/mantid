@@ -4684,17 +4684,17 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtAPI/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::MessageDisplay</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MessageDisplay.h</header>
+   <header>MantidQtWidgets/Common/MessageDisplay.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::CustomInterfaces::SANSBackgroundCorrectionWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h</header>
+   <header>SANSBackgroundCorrectionWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

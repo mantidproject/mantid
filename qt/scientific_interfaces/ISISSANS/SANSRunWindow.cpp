@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/SANSRunWindow.h"
+#include "SANSRunWindow.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DetectorInfo.h"
@@ -20,11 +20,11 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/V3D.h"
 
-#include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
-#include "MantidQtCustomInterfaces/SANSAddFiles.h"
-#include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
-#include "MantidQtCustomInterfaces/SANSEventSlicing.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "SANSAddFiles.h"
+#include "SANSBackgroundCorrectionSettings.h"
+#include "SANSEventSlicing.h"
 
 #include <QClipboard>
 #include <QFileDialog>

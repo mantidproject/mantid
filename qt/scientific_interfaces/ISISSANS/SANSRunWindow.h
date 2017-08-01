@@ -4,12 +4,12 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtCustomInterfaces/SANSAddFiles.h"
-#include "MantidQtCustomInterfaces/SANSConstants.h"
-#include "MantidQtCustomInterfaces/SANSDiagnostics.h"
-#include "MantidQtCustomInterfaces/SANSPlotSpecial.h"
-#include "MantidQtMantidWidgets/SaveWorkspaces.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "SANSAddFiles.h"
+#include "SANSConstants.h"
+#include "SANSDiagnostics.h"
+#include "SANSPlotSpecial.h"
+#include "MantidQtWidgets/Common/SaveWorkspaces.h"
 #include "ui_SANSRunWindow.h"
 
 #include "MantidAPI/AnalysisDataService.h"

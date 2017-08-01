@@ -12,6 +12,7 @@ endif ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 
 ###########################################################################
 add_subdirectory ( Muon )
 add_subdirectory ( MultiDatasetFit )
+add_subdirectory ( ISISSANS )
 
 ###########################################################################
 # Testing

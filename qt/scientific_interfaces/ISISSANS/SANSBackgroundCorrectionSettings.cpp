@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
+#include "SANSBackgroundCorrectionSettings.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

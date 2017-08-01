@@ -2,8 +2,8 @@
 #define MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_
 
 #include "ui_SANSRunWindow.h"
-#include "MantidQtCustomInterfaces/SANSConstants.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "SANSConstants.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/NObserver.h>
 #include <QString>

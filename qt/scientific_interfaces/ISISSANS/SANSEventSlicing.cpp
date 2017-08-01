@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/SANSEventSlicing.h"
+#include "SANSEventSlicing.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "ui_SANSEventSlicing.h"
 #include <QSettings>

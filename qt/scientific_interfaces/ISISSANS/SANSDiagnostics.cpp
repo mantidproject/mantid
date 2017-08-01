@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/SANSDiagnostics.h"
+#include "SANSDiagnostics.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UserStringParser.h"
 #include "MantidKernel/EmptyValues.h"

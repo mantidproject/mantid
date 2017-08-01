@@ -1,11 +1,11 @@
-#include "MantidQtCustomInterfaces/SANSPlotSpecial.h"
+#include "SANSPlotSpecial.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MantidQtWidgets/Common/RangeSelector.h"
 
 #include "qwt_plot_curve.h"
 #include <QLineEdit>

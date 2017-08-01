@@ -2,7 +2,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONWIDGET_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "DllConfig.h"
 #include "ui_SANSBackgroundCorrectionWidget.h"
 
 #include <QWidget>
@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL SANSBackgroundCorrectionWidget
+class MANTIDQT_ISISSANS_DLL SANSBackgroundCorrectionWidget
     : public QWidget {
   Q_OBJECT
 public:

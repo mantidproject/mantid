@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_SANSEVENTSLICING_H_
 
 #include "ui_SANSEventSlicing.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include <QString>
 
 namespace MantidQt {

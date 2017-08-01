@@ -1,6 +1,6 @@
 #include "MantidKernel/Logger.h"
-#include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
-#include "MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h"
+#include "SANSBackgroundCorrectionSettings.h"
+#include "SANSBackgroundCorrectionWidget.h"
 namespace {
 bool convertQtInt(int state) { return state == 2 ? true : false; }
 }
