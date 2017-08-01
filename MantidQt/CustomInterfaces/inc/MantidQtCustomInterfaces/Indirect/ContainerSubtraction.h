@@ -29,6 +29,8 @@ private slots:
   void saveClicked();
   /// Handles mantid plotting
   void plotClicked();
+  /// Handles plotting the preview.
+  void plotCurrentPreview();
 
 private:
   void setup() override;
@@ -43,6 +45,11 @@ private:
 
   std::string m_sampleWorkspaceName;
   std::string m_containerWorkspaceName;
+  Mantid::API::MatrixWorkspace_sptr m_csSampleWS;
+  Mantid::API::MatrixWorkspace_sptr m_csContainerWS;
+  Mantid::API::MatrixWorkspace_sptr m_csSubtractedWS;
+
+  int m_spectrum;
 };
 
 } // namespace CustomInterfaces
