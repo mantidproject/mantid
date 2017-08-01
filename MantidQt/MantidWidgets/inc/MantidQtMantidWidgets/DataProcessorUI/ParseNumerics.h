@@ -1,5 +1,6 @@
 #ifndef MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H
 #define MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H
+#include <QString>
 /** 
 
 DataProcessorPasteSelectedCommand defines the action "Paste Selected"

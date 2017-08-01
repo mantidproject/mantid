@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataProcessorUI/DataProcessorVectorString.cpp
+	src/DataProcessorUI/ParseNumerics.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DisplayCurveFit.cpp

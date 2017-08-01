@@ -1,3 +1,5 @@
+#include "MantidQtMantidWidgets/DataProcessorUI/ParseNumerics.h"
+#include <stdexcept>
 namespace MantidQt {
 namespace MantidWidgets {
 double parseDouble(QString const &in) {
@@ -10,7 +12,7 @@ double parseDouble(QString const &in) {
                              "' as a double numerical value.");
 }
 
-int parseDenaryInteger(QString const &in); {
+int parseDenaryInteger(QString const &in) {
   static auto ok = false;
   auto constexpr BASE = 10;
   auto out = in.toInt(&ok, BASE);
