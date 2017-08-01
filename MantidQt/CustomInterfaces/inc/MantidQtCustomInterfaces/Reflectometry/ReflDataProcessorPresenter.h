@@ -92,6 +92,7 @@ private:
   void parseLogValue(const QString &inputStr, QString &logFilter,
                      std::vector<double> &minValues,
                      std::vector<double> &maxValues);
+  bool workspaceExists(QString const& workspaceName) const;
 
   // Load a run as event workspace
   bool loadEventRun(const QString &runNo);
@@ -103,7 +104,10 @@ private:
                     double stopTime, const QString &logFilter = "");
 
   Mantid::API::IEventWorkspace_sptr
-  retrieveWorkspaceByName(QString const &name) const;
+  retrieveWorkspaceOrCritical(QString const &name) const;
+
+  Mantid::API::IEventWorkspace_sptr
+  retrieveWorkspace(QString const &name) const;
 
   // Asks user if they wish to proceed if a type of workspace exists in the ADS
   bool proceedIfWSTypeInADS(const MantidQt::MantidWidgets::TreeData &data,
