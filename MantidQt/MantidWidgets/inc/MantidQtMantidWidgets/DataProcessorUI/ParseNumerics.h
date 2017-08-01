@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H
 #define MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H
 #include <QString>
-/** 
+/**
 
 DataProcessorPasteSelectedCommand defines the action "Paste Selected"
 
@@ -29,10 +29,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace MantidWidgets {
 // Converts a string denoting a floating point value to a double.
-double parseDouble(QString const &in); 
+double parseDouble(QString const &in);
 
 /// Converts a string denoting a denary integer to it
-int parseDenaryInteger(QString const &in); 
+int parseDenaryInteger(QString const &in);
 }
 }
 #endif // MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H

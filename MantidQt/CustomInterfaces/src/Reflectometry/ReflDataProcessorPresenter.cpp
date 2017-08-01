@@ -300,7 +300,8 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
   return errors;
 }
 
-Mantid::API::IEventWorkspace_sptr ReflDataProcessorPresenter::retrieveWorkspace(QString const &name) const {
+Mantid::API::IEventWorkspace_sptr
+ReflDataProcessorPresenter::retrieveWorkspace(QString const &name) const {
   return AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
       name.toStdString());
 }

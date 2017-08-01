@@ -942,8 +942,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
       auto preprocessor = m_preprocessMap.at(columnName);
 
       auto const globalOptionsForColumn = globalOptions.count(columnName) > 0
-                                                 ? globalOptions.at(columnName)
-                                                 : "";
+                                              ? globalOptions.at(columnName)
+                                              : "";
 
       auto optionsMap =
           parseKeyValueString(globalOptionsForColumn.toStdString());

@@ -92,7 +92,7 @@ private:
   void parseLogValue(const QString &inputStr, QString &logFilter,
                      std::vector<double> &minValues,
                      std::vector<double> &maxValues);
-  bool workspaceExists(QString const& workspaceName) const;
+  bool workspaceExists(QString const &workspaceName) const;
 
   // Load a run as event workspace
   bool loadEventRun(const QString &runNo);
