@@ -132,6 +132,7 @@ protected slots:
                        std::string sourceType);
   /// reset state of all the views
   void onResetViewsStateToAllData();
+  void showOutputWidget();
 
 protected:
   /// Handle workspace preDeletion tasks.

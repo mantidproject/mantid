@@ -225,6 +225,13 @@ void MdViewerWidget::setupUiAndConnections() {
   QObject::connect(this->ui.resetCenterToPointButton, SIGNAL(clicked()), this,
                    SLOT(onRotationPoint()));
 
+  QObject::connect(this->ui.outputWidget,
+                   SIGNAL(messageDisplayed(const QString &, int)),
+                   SLOT(showOutputWidget()));
+
+  this->ui.outputWidgetDock->setFloating(true);
+  this->ui.outputWidgetDock->setHidden(true);
+
   /// Provide access to the color-editor panel for the application.
   if (!m_colorMapEditorPanel) {
     m_colorMapEditorPanel = new ColorMapEditorPanel(this);
@@ -1793,6 +1800,26 @@ bool MdViewerWidget::areGridAxesOn() {
   } else {
     return true;
   }
+}
+
+//-----------------------------------------------------------------------------
+void MdViewerWidget::showOutputWidget() {
+  QDockWidget *dock = this->ui.outputWidgetDock;
+  if (!dock->isVisible()) {
+    // if dock is not visible, we always pop it up as a floating dialog. This
+    // avoids causing re-renders which may cause more errors and more confusion.
+    QRect rectApp = this->geometry();
+
+    QRect rectDock(QPoint(0, 0), QSize(static_cast<int>(rectApp.width() * 0.4),
+                                       dock->sizeHint().height()));
+    rectDock.moveCenter(
+        QPoint(rectApp.center().x(),
+               rectApp.bottom() - dock->sizeHint().height() / 2));
+    dock->setFloating(true);
+    dock->setGeometry(rectDock);
+  }
+  dock->show();
+  dock->raise();
 }
 
 } // namespace SimpleGui
