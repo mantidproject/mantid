@@ -45,9 +45,9 @@ void SaveSESANS::init() {
 
   // TODO : find out good descriptions (and validators) for these properties
   declareProperty("ThetaZMax", -1.0, Kernel::Direction::Input);
-  declareProperty("ThetaZMax_unit", "radians", Kernel::Direction::Input);
+  declareProperty("ThetaZMaxUnit", "radians", Kernel::Direction::Input);
   declareProperty("ThetaYMax", -1.0, Kernel::Direction::Input);
-  declareProperty("ThetaYMax_unit", "radians", Kernel::Direction::Input);
+  declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
   declareProperty("EchoConstant", -1.0, Kernel::Direction::Input);
 
   declareProperty<std::string>("Orientation", "",
@@ -111,9 +111,9 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile,
   writeHeader(outfile, "Thickness", std::to_string(sample.getThickness()));
   writeHeader(outfile, "Thickness_unit", "mm");
   writeHeader(outfile, "Theta_zmax", getPropertyValue("ThetaZMax"));
-  writeHeader(outfile, "Theta_zmax_unit", getPropertyValue("ThetaZMax_unit"));
+  writeHeader(outfile, "Theta_zmax_unit", getPropertyValue("ThetaZMaxUnit"));
   writeHeader(outfile, "Theta_ymax", getPropertyValue("ThetaYMax"));
-  writeHeader(outfile, "Theta_ymax_unit", getPropertyValue("ThetaYMax_unit"));
+  writeHeader(outfile, "Theta_ymax_unit", getPropertyValue("ThetaYMaxUnit"));
   writeHeader(outfile, "Orientation", "Z");
   writeHeader(outfile, "SpinEchoLength_unit", "A");
   writeHeader(outfile, "Depolarisation_unit", "A-2 cm-1");

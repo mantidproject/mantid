@@ -16,9 +16,9 @@ namespace DataHandling {
   <LI> InputWorkspace - The name of the workspace to save</LI>
   <LI> Filename - The path to save the file</LI>
   <LI> ThetaZMax - TODO : Find a good description for this</LI>
-  <LI> ThetaZMaz_unit - Unit for theta_znmax</LI>
+  <LI> ThetaZMazUnit - Unit for theta_znmax</LI>
   <LI> ThetaYMax - TODO : Find a good description for this</LI>
-  <LI> ThetaYMaz_unit - Unit for theta_ymax</LI>
+  <LI> ThetaYMazUnit - Unit for theta_ymax</LI>
   <LI> EchoConstant - The echo constant
   </UL>
 
