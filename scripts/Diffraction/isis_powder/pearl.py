@@ -81,7 +81,8 @@ class Pearl(AbstractInst):
         normalised_ws = pearl_algs.normalise_ws_current(ws_to_correct=ws_to_correct, monitor_ws=monitor_ws,
                                                         spline_coeff=self._inst_settings.monitor_spline,
                                                         integration_range=self._inst_settings.monitor_integration_range,
-                                                        lambda_values=self._inst_settings.monitor_lambda)
+                                                        lambda_values=self._inst_settings.monitor_lambda,
+                                                        ex_regions=self.inst_settings.monitor_mask_regions)
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
 
