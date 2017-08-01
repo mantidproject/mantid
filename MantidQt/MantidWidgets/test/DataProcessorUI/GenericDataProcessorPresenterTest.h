@@ -3356,9 +3356,8 @@ public:
         presenter.notify(DataProcessorPresenter::ExpandSelectionFlag));
     TS_ASSERT_THROWS_ANYTHING(
         presenter.notify(DataProcessorPresenter::PlotGroupFlag));
-    TS_ASSERT_THROWS(presenter.getPostprocessedWorkspaceName(
-                         std::map<int, std::vector<std::string>>()),
-                     std::runtime_error);
+    TS_ASSERT(presenter.getPostprocessedWorkspaceName(
+                  std::map<int, std::vector<std::string>>()) == "");
   }
 
   void testPostprocessMap() {
