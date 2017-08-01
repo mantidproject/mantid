@@ -38,7 +38,7 @@ std::vector<std::string>
 toStdStringVector(std::vector<QString, A> const &inVec) {
   std::vector<std::string> outVec;
   std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec),
-                 [](auto const &in) -> auto { return in.toStdString(); });
+                 [](QString const &in) -> std::string { return in.toStdString(); });
   return outVec;
 }
 }
