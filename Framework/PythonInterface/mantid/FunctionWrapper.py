@@ -102,7 +102,9 @@ class FunctionWrapper:
   def untieAllParameters(self):
       """ Remove ties from all parameters.
       """
-      self.fun.freeAll()
+      for i in range(0, self.fun.numParams()):  
+          self.fun.removeTie(self.getParameterName(i))  
+
           
   def constrain(self, expressions):
       """ Add constraints
