@@ -857,8 +857,8 @@ QString GenericDataProcessorPresenter::loadRun(const QString &run,
                                                bool &runFound) {
 
   runFound = true;
-  const QString fileName = instrument + run;
-  const QString outputName = prefix + run;
+  auto const fileName = instrument + run;
+  auto const outputName = prefix + run;
 
   IAlgorithm_sptr algLoadRun =
       AlgorithmManager::Instance().create(loader.toStdString());
@@ -941,7 +941,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
       auto preprocessor = m_preprocessMap.at(columnName);
 
-      const QString globalOptionsForColumn = globalOptions.count(columnName) > 0
+      auto const globalOptionsForColumn = globalOptions.count(columnName) > 0
                                                  ? globalOptions.at(columnName)
                                                  : "";
 
@@ -1170,7 +1170,7 @@ void GenericDataProcessorPresenter::saveTable() {
 Press changes to a new item in the ADS
 */
 void GenericDataProcessorPresenter::saveTableAs() {
-  const QString userString =
+  auto const userString =
       m_view->askUserString("Save As", "Enter a workspace name:", "Workspace");
   if (!userString.isEmpty()) {
     m_wsName = userString;
@@ -1248,7 +1248,7 @@ void GenericDataProcessorPresenter::importTable() {
   pythonSrc += "except:\n";
   pythonSrc += "  pass\n";
 
-  const QString result = m_view->runPythonAlgorithm(pythonSrc);
+  auto const result = m_view->runPythonAlgorithm(pythonSrc);
 
   // result will hold the name of the output workspace
   // otherwise this should be an empty string.
@@ -1369,7 +1369,7 @@ void GenericDataProcessorPresenter::cutSelected() {
 
 /** Paste the contents of the clipboard */
 void GenericDataProcessorPresenter::pasteSelected() {
-  const QString text = m_view->getClipboard();
+  auto const text = m_view->getClipboard();
 
   if (!text.isEmpty())
     m_manager->pasteSelected(text);
@@ -1413,7 +1413,7 @@ void GenericDataProcessorPresenter::plotRow() {
 
     for (const auto &run : item.second) {
 
-      const QString wsName =
+      auto const wsName =
           getReducedWorkspaceName(run.second, m_processor.prefix(0));
 
       if (workspaceExists(wsName))
@@ -1452,7 +1452,7 @@ void GenericDataProcessorPresenter::plotGroup() {
 
   for (const auto &item : items) {
     if (item.second.size() > 1) {
-      const QString wsName =
+      auto const wsName =
           getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix());
 
       if (workspaceExists(wsName))
