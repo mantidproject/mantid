@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_SANSDIAGNOSTICS_H_
 
 #include "ui_SANSRunWindow.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/Common/Common/UserSubWindow.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
