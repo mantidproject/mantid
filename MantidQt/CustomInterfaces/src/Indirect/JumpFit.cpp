@@ -245,7 +245,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   if (m_spectraList.size() > 0) {
     m_uiForm.cbWidth->setEnabled(true);
     std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-    int m_specNo = m_spectraList[currentWidth];
+    m_specNo = m_spectraList[currentWidth];
     m_uiForm.ppPlot->clear();
     m_uiForm.ppPlot->addSpectrum("Sample", sample, m_specNo);
 
