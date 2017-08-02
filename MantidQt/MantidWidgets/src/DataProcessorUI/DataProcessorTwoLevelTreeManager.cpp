@@ -28,6 +28,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseNumerics.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/ToStdStringMap.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -548,7 +549,7 @@ void DataProcessorTwoLevelTreeManager::transfer(
 
     TableRow newRow = ws->appendRow();
     try {
-      newRow << row.at("Group");
+      newRow << (row.at("Group")).toStdString();
     } catch (std::out_of_range &) {
       throw std::invalid_argument("Data cannot be transferred to the "
                                   "processing table. Group information is "
@@ -557,7 +558,7 @@ void DataProcessorTwoLevelTreeManager::transfer(
 
     try {
       for (int i = 0; i < static_cast<int>(whitelist.size()); i++)
-        newRow << row.at(whitelist.colNameFromColIndex(i));
+        newRow << (row.at(whitelist.colNameFromColIndex(i))).toStdString();
     } catch (std::out_of_range &) {
       // OK, this column will not be populated
       continue;

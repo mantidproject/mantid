@@ -637,7 +637,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     const std::map<std::string, std::string> &optionsMap) {
   auto const instrument = m_view->getProcessInstrument();
 
-  auto runs = runStr.split(QRegExp("(+|,)"));
+  auto runs = runStr.split(QRegExp("[+,]"));
   if (runs.isEmpty())
     throw std::runtime_error("No runs given");
 

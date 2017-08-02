@@ -19,6 +19,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/ToStdStringMap.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorOneLevelTreeModel.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string/classification.hpp>
@@ -350,7 +351,7 @@ void DataProcessorOneLevelTreeManager::transfer(
     for (auto i = 0; i < static_cast<int>(whitelist.size()); i++) {
       const QString columnName = whitelist.colNameFromColIndex(i);
       if (row.count(columnName)) {
-        newRow << row.at(columnName);
+        newRow << (row.at(columnName)).toStdString();
       } else {
         newRow << "";
       }

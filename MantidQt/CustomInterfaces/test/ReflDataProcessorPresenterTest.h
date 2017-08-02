@@ -180,6 +180,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         presenter->notify(DataProcessorPresenter::ProcessFlag));
 
+    for(auto& item : AnalysisDataService::Instance().getObjects())
+        std::cout << item->getName() << std::endl;
+
     // Check output workspaces were created as expected
     for (size_t i = 0; i < 3; i++) {
       std::string sliceIndex = std::to_string(i);
