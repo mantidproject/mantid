@@ -1,6 +1,6 @@
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
 
 #include <map>
 #include <algorithm>

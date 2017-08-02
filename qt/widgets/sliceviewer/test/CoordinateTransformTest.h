@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtSliceViewer/CoordinateTransform.h"
+#include "MantidQtWidgets/SliceViewer/CoordinateTransform.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidGeometry/MDGeometry/HKL.h"

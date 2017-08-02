@@ -4,9 +4,9 @@
 #include <QMainWindow>
 #include <QtGui>
 
-#include "MantidQtSpectrumViewer/SVUtils.h"
-#include "MantidQtRefDetectorViewer/RefImageView.h"
-#include "MantidQtSpectrumViewer/ArrayDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
+#include "MantidQtWidgets/RefDetectorView/RefImageView.h"
+#include "MantidQtWidgets/SpectrumViewer/ArrayDataSource.h"
 
 using namespace MantidQt;
 using namespace RefDetectorViewer;

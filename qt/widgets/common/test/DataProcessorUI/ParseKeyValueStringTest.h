@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_PARSEKEYVALUESTRINGTEST_H
 #define MANTID_MANTIDWIDGETS_PARSEKEYVALUESTRINGTEST_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
 #include <cxxtest/TestSuite.h>
 
 class ParseKeyValueStringTest : public CxxTest::TestSuite {

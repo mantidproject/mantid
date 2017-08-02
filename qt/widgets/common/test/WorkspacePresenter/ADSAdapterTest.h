@@ -1,7 +1,7 @@
-#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockMockObjects.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceDockMockObjects.h"
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/WorkspaceGroup.h>
-#include <MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h>
+#include <MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h>
 #include <MantidTestHelpers/WorkspaceCreationHelper.h>
 #include <cxxtest/TestSuite.h>
 

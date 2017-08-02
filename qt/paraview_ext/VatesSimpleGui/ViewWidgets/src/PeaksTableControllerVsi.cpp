@@ -16,8 +16,8 @@
 #include "MantidVatesAPI/NullPeaksPresenterVsi.h"
 #include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
 #include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
-#include "MantidQtSliceViewer/PeakPalette.h"
-#include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.

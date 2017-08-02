@@ -2,7 +2,7 @@
 #define BACKGROUNDRGB_PROVIDER_H_
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
 #include <vector>
 #include <map>
 #include <string>

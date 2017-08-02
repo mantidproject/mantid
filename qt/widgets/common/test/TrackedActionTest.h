@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidQtMantidWidgets/TrackedAction.h"
+#include "MantidQtWidgets/Common/TrackedAction.h"
 #include <QCoreApplication>
 
 using MantidQt::MantidWidgets::TrackedAction;

@@ -7,8 +7,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidQtMantidWidgets/HintStrategy.h"
-#include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
+#include "MantidQtWidgets/Common/HintStrategy.h"
+#include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 
 #include <boost/scoped_ptr.hpp>
 

@@ -10,8 +10,8 @@
 #include <boost/algorithm/string/split.hpp>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;

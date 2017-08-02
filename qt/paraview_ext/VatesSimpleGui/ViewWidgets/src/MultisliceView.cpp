@@ -2,8 +2,8 @@
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
 #include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
-#include "MantidQtFactory/WidgetFactory.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
+#include "MantidQtWidgets/Factory/WidgetFactory.h"
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 
 #include <pqActiveObjects.h>

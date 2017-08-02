@@ -1,7 +1,7 @@
 #ifndef MANTIDQT_API_FILEDIALOGHANDLERTEST_H_
 #define MANTIDQT_API_FILEDIALOGHANDLERTEST_H_
 
-#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include <cxxtest/TestSuite.h>
 
 class FileDialogHandlerTest : public CxxTest::TestSuite {

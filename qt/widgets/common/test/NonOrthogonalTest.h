@@ -9,7 +9,7 @@
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidQtAPI/NonOrthogonal.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

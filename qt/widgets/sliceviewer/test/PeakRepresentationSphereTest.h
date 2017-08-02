@@ -1,7 +1,7 @@
 #ifndef SLICE_VIEWER_PEAK_REPRESENTATION_SPHERE_TEST_H_
 #define SLICE_VIEWER_PEAK_REPRESENTATION_SPHERE_TEST_H_
 
-#include "MantidQtSliceViewer/PeakRepresentationSphere.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 

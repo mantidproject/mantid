@@ -1,7 +1,7 @@
 #ifndef MANTIDQT_API_MANTIDQWTWORKSPACEBINDATA_H_
 #define MANTIDQT_API_MANTIDQWTWORKSPACEBINDATA_H_
 
-#include "MantidQtAPI/QwtWorkspaceBinData.h"
+#include "MantidQtWidgets/Common/QwtWorkspaceBinData.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MatrixWorkspace.h"

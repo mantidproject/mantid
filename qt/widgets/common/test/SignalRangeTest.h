@@ -5,7 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtAPI/SignalRange.h"
+#include "MantidQtWidgets/Common/SignalRange.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

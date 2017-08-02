@@ -1,6 +1,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/PeaksWidget.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidQtSliceViewer/QPeaksTableModel.h"
+#include "MantidQtWidgets/SliceViewer/QPeaksTableModel.h"
 
 #include <QWidget>
 #include <QItemSelectionModel>

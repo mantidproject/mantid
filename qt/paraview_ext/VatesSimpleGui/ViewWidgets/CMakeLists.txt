@@ -8,7 +8,6 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorUpdater.h
-  inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/pqCameraToolbarNonOrthogonalAxes.h
@@ -105,12 +104,12 @@ qt4_add_resources( RES_FILES icons/ViewWidgetsIcons.qrc )
 # Setup the include locations.
 include_directories(
   inc
-  ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
-  ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
-  ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets
-  ${CMAKE_SOURCE_DIR}/MantidQt/SliceViewer/inc
-  ${CMAKE_BINARY_DIR}/MantidQt/SliceViewer
-  ${CMAKE_SOURCE_DIR}/MantidQt/Factory/inc
+  ${CMAKE_SOURCE_DIR}/qt/widgets/sliceviewer/inc
+  ${CMAKE_BINARY_DIR}/qt/widgets/sliceviewer
+  ${CMAKE_SOURCE_DIR}/qt/widgets/factory/inc
+#  ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
+#  ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
+#  ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${CMAKE_SOURCE_DIR}/MantidPlot/src
@@ -149,15 +148,15 @@ vtkRenderingFreeType
 vtksys
 ${QT_LIBRARIES}
 VatesSimpleGuiQtWidgets
-MantidQtAPI
+qtwidgetscommon
 VatesAPI
-${MANTID_SUBPROJECT_LIBS}
-MantidQtSliceViewer
-MantidQtFactory
+qtwidgetssliceviewer
+qtwidgetsfactory
 ${PYTHON_LIBRARIES}
-MantidWidgets
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
+${CORE_MANTIDLIBS}
+DataObjects
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
@@ -167,12 +166,12 @@ endif ()
 # Create test file projects
 include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc)
-set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-                      ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-                      ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-                      ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
-                      ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
+include_directories( inc ../../../../Framework/TestHelpers/inc ../../../../Framework/DataHandling/inc ../../../../Framework/DataObjects/inc)
+set ( TESTHELPER_SRCS ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+                      ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+                      ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                      ../../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
+                      ../../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
 cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
 
 target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -182,8 +181,8 @@ target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIB
   Kernel
   HistogramData
   DataObjects
-  MantidQtAPI
-  ${MANTID_SUBPROJECT_LIBS}
+  qtwidgetscommon
+  ${CORE_MANTIDLIBS}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
   ${GMOCK_LIBRARIES}
@@ -192,9 +191,6 @@ target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIB
 add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
 # Add to the 'UnitTests' group in VS
 set_property ( TARGET VatesSimpleGuiViewWidgetsTest PROPERTY FOLDER "UnitTests" )
-
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h.in
-                 ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h )
 
 if( SQUISH_FOUND )
   # Need to set the AUT first

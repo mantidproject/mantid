@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
-#include "MantidQtSliceViewer/CompositePeaksPresenter.h"
-#include "MantidQtSliceViewer/NullPeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/NullPeaksPresenter.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MockObjects.h"

@@ -1,7 +1,7 @@
 #ifndef SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
 #define SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
 
-#include "MantidQtSliceViewer/PeakRepresentationEllipsoid.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 

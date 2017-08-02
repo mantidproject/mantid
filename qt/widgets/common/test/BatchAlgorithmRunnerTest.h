@@ -8,7 +8,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidQtAPI/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;

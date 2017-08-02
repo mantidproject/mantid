@@ -1,5 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
-#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidKernel/Logger.h"
 
 #include <array>

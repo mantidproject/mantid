@@ -6,7 +6,7 @@
 #include <QRgb>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
 
 class QwtWorkspaceSpectrumDataTest : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr ws;

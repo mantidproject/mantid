@@ -4,8 +4,8 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtAPI/TSVSerialiser.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.

@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"

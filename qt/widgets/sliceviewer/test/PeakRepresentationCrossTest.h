@@ -2,7 +2,7 @@
 #define SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidQtSliceViewer/PeakRepresentationCross.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
 #include "MockObjects.h"
 
 using namespace MantidQt::SliceViewer;

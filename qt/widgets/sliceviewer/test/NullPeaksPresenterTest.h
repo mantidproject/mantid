@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MockObjects.h"
 #include <gmock/gmock.h>
-#include "MantidQtSliceViewer/NullPeaksPresenter.h"
+#include "MantidQtWidgets/SliceViewer/NullPeaksPresenter.h"
 
 using namespace MantidQt::SliceViewer;
 

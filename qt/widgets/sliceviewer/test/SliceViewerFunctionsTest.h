@@ -3,7 +3,7 @@
 
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidQtSliceViewer/SliceViewerFunctions.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerFunctions.h"
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 

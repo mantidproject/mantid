@@ -164,25 +164,6 @@ if ( UNIX )
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
 endif ( UNIX )
 
-if (ENABLE_MANTIDPLOT AND MAKE_VATES )
-  add_subdirectory ( Vates )
-  if (NOT APPLE)
-    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-          "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
-    )
-    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-          "${ParaView_DIR}" "VTK Runtime Libs" "RuntimeLibraries" "${INBUNDLE}/"
-    )
-    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-          "${ParaView_DIR}" "HDF5 Core Library" "libraries" "${INBUNDLE}/"
-    )
-    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-          "${ParaView_DIR}" "HDF5 HL Library" "hllibraries" "${INBUNDLE}/"
-    )
-  endif()
-
-endif ( ENABLE_MANTIDPLOT AND MAKE_VATES )
-
 if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()

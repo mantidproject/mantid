@@ -7,7 +7,7 @@
 #include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
 #include "MantidGeometry/Crystal/PeakTransformSelector.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
-#include "MantidQtSliceViewer/PeakPalette.h"
+#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 
 #include <map>

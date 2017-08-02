@@ -5,7 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace testing;

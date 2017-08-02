@@ -2,8 +2,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockMockObjects.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceDockMockObjects.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 
 #include <MantidAPI/AlgorithmManager.h>
 #include <MantidAPI/AnalysisDataService.h>

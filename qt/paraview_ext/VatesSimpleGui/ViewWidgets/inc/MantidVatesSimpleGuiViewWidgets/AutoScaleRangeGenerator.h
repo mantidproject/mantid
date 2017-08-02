@@ -31,8 +31,8 @@
 
 */
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include "MantidQtAPI/MdConstants.h"
-#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
 #include <qlist.h>
 
 class pqPipelineSource;

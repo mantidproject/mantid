@@ -1,5 +1,4 @@
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
-#include "MantidVatesSimpleGuiViewWidgets/LibHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include <Poco/Path.h>

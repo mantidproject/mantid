@@ -6,8 +6,8 @@
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidQtAPI/AlgorithmDialog.h"
-#include "MantidQtMantidWidgets/SlicingAlgorithmDialog.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/SlicingAlgorithmDialog.h"
 
 namespace Mantid {
 namespace Vates {

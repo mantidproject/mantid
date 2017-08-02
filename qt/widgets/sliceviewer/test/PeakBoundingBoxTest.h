@@ -2,7 +2,7 @@
 #define SLICE_VIEWER_PEAKBOUNDINGBOX_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidQtSliceViewer/PeakBoundingBox.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 
 using namespace MantidQt::SliceViewer;
 

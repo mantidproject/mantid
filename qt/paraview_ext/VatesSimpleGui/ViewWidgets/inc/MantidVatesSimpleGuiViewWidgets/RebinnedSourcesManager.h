@@ -2,7 +2,7 @@
 #define REBINNEDSOURCESMANAGER_H_
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidAPI/Workspace_fwd.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.

@@ -5,12 +5,12 @@ set( PROJECT_NAME VatesSimpleGui )
 # Setup the include locations.
 include_directories(
   inc
-  ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
+#  ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${CMAKE_CURRENT_BINARY_DIR}/../ViewWidgets
-  ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
-  ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets
+#  ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
+#  ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets
 )
 
 # These are the C++ files to be compiled.

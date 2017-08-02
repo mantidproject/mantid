@@ -4,7 +4,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorOneLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorOneLevelTreeModel.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::MantidWidgets;

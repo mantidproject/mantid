@@ -9,7 +9,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
+#include "MantidQtWidgets/Common/ProjectSavePresenter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProjectSaveMockObjects.h"
 

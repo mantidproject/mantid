@@ -3,7 +3,7 @@
 
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
+#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <math.h>

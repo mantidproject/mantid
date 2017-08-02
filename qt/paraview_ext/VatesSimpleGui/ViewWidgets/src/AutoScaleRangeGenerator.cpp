@@ -1,5 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
-#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1170
@@ -28,7 +28,7 @@
 
 #include <cfloat>
 #include <QPair>
-#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
 
 namespace Mantid {
 namespace Vates {

@@ -9,7 +9,7 @@
 #define INTERFACEMANAGERTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidKernel/Exception.h"
 
 using namespace MantidQt::API;

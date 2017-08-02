@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;

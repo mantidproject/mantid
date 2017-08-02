@@ -4,8 +4,8 @@
 #include "ui_ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
-#include "MantidQtAPI/MdConstants.h"
-#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
 #include "boost/scoped_ptr.hpp"
 #include <QWidget>
 

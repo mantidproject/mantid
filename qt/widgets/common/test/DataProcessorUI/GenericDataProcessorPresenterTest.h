@@ -9,10 +9,10 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/ProgressableViewMockObject.h"
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
+#include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::MantidWidgets;

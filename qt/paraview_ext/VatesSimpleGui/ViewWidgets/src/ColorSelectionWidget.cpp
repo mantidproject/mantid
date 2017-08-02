@@ -1,8 +1,8 @@
 #include <cfloat>
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/MdConstants.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 

@@ -2,7 +2,7 @@
 #define SLICE_VIEWER_PEAKPALETTE_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidQtSliceViewer/PeakPalette.h"
+#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
 #include <sstream>
 
 using namespace MantidQt::SliceViewer;
