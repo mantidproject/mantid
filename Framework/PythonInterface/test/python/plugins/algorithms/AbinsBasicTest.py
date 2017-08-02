@@ -56,7 +56,7 @@ class AbinsBasicTest(unittest.TestCase):
 
     def tearDown(self):
         AbinsTestHelpers.remove_output_files(list_of_names=["Abins", "explicit",  "default", "total",
-                                                            "squaricn_scale", "benzene_exp"])
+                                                            "squaricn_scale", "benzene_exp", "experimental"])
         mtd.clear()
 
     def test_wrong_input(self):
