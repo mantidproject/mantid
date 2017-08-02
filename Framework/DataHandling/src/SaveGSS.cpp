@@ -536,24 +536,28 @@ bool SaveGSS::isInstrumentValid() const {
   * logs the system reported error as a Mantid error.
   * @return :: The opened file stream at the user specified path
   */
-std::ofstream SaveGSS::openFileStream(const std::string &outFilePath) {
+std::unique_ptr<std::ofstream> SaveGSS::openFileStream(const std::string &outFilePath) {
   const bool append = getProperty("Append");
 
   // Select to append to current stream or override
   using std::ios_base;
   const ios_base::openmode mode = (append ? (ios_base::out | ios_base::app)
                                           : (ios_base::out | ios_base::trunc));
+  
+  // Have to wrap this in a unique pointer as GCC 4.x (RHEL 7) does
+  // not support the move operator on iostreams
+  auto outStream = Kernel::make_unique<std::ofstream>(outFilePath, mode);
 
-  auto outStream = std::ofstream(outFilePath, mode);
-  if (outStream.fail()) {
+  if (outStream->fail()) {
     // Get the error message from library and log before throwing
     const std::string error = strerror(errno);
     g_log.error("Failed to open file. Error was: " + error);
     throw std::runtime_error("Could not open the file at the following path: " +
                              outFilePath);
   }
-  // Stream is good - return to caller through a std::move
-  return std::move(outStream);
+
+  // Stream is good - return to caller
+  return outStream;
 }
 
 /** Ensures that when a workspace group is passed as output to this workspace
@@ -643,9 +647,9 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
       // Write each spectra when there are multiple
       const size_t index = specIndex + fileIndex;
       assert(m_outputBuffer[index].str().size() > 0);
-      outFile << m_outputBuffer[index].rdbuf();
+      *outFile << m_outputBuffer[index].rdbuf();
     }
-    outFile.close();
+    outFile->close();
   }
 }
 

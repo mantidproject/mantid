@@ -11,6 +11,7 @@
 #include "MantidKernel/cow_ptr.h"
 
 #include <iosfwd>
+#include <memory>
 #include <vector>
 
 // Forward declare
@@ -123,7 +124,7 @@ private:
   bool isInstrumentValid() const;
 
   /// Opens a new file stream at the path specified.
-  std::ofstream openFileStream(const std::string &outFilePath);
+  std::unique_ptr<std::ofstream> openFileStream(const std::string &outFilePath);
 
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
