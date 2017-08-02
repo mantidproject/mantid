@@ -34,6 +34,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", "dummy.ses"));
     testAlg.setProperty("ThetaZMax", 0.09);
     testAlg.setProperty("ThetaYMax", 0.09);
+    testAlg.setProperty("EchoConstant", "1");
   }
 
   void test_rejectTooManySpectra() {
