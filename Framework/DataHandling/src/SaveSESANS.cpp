@@ -4,12 +4,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/make_unique.h"
 
 #include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
+#include <map>
 #include <string>
 
 namespace Mantid {
@@ -33,9 +35,28 @@ int SaveSESANS::version() const { return 1; }
 const std::string SaveSESANS::category() const { return "DataHandling\\Text"; }
 
 /**
+ * Validate user inputs
+ * @return A map containing the names of any invalid properties and a description of the error
+ */
+std::map<std::string, std::string> SaveSESANS::validateInputs(){
+  std::map<std::string, std::string> invalidProperties;
+
+  for (auto propertyName: nonEmptyDoubleProperties){
+    //    if (getProperty(propertyName) == EMPTY_DBL()){
+    //invalidProperties[propertyName] = propertyName + " must be set";
+    //}
+  }
+
+  return invalidProperties;
+}
+  
+/**
  * Initialise the algorithm
  */
 void SaveSESANS::init() {
+  auto notDBL_MIN = boost::make_shared<Kernel::BoundedValidator<double>>();
+  notDBL_MIN->setLower(DBL_MIN);
+  
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "The name of the workspace to save");
@@ -43,12 +64,11 @@ void SaveSESANS::init() {
                       "Filename", "", API::FileProperty::Save, fileExtensions),
                   "The name to use when saving the file");
 
-  // TODO : find out good descriptions (and validators) for these properties
-  declareProperty("ThetaZMax", -1.0, Kernel::Direction::Input);
+  declareProperty("ThetaZMax", DBL_MIN, notDBL_MIN, "Theta_zmax", Kernel::Direction::Input);
   declareProperty("ThetaZMaxUnit", "radians", Kernel::Direction::Input);
-  declareProperty("ThetaYMax", -1.0, Kernel::Direction::Input);
+  declareProperty("ThetaYMax", DBL_MIN, notDBL_MIN, "Theta_ymax", Kernel::Direction::Input);
   declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
-  declareProperty("EchoConstant", -1.0, Kernel::Direction::Input);
+  declareProperty("EchoConstant", DBL_MIN, notDBL_MIN, "Echo_constant", Kernel::Direction::Input);
 
   declareProperty<std::string>("Orientation", "",
                                "Orientation of the instrument");
@@ -83,8 +103,6 @@ void SaveSESANS::exec() {
   const auto error = calculateError(eValues, yValues, wavelength);
 
   outfile << "SpinEchoLength Depolarisation Depolarisation_error Wavelength\n";
-  // outfile.precision(5);
-  // outfile << std::fixed;
 
   for (size_t i = 0; i < spinEchoLength.size(); ++i) {
     outfile << spinEchoLength[i] << " ";

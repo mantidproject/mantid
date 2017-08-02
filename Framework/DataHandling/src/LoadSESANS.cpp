@@ -8,12 +8,75 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "boost/algorithm/string/predicate.hpp"
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+
+
+namespace { // Anonymous namespace for helper functions
+  
+/** Is a character whitespace (here considered space or tab)?
+ * @param c The character
+ * @return Whether it is whitespace
+ */
+bool space(const char &c) { return c == ' ' || c == '\t'; }
+
+/** Is a character not whitespace (here considered space or tab)?
+* @param c The character
+* @return Whether it is not whitespace
+*/
+bool notSpace(const char &c) { return !space(c); }
+
+/** Split a string on spaces
+ * @param str The string to split
+ * @return Vector of string segments
+ */
+std::vector<std::string> split(const std::string &str) {
+  std::vector<std::string> result;
+
+  auto i = str.begin();
+  i = find_if(i, str.end(), &notSpace);
+
+  auto j = find_if(i, str.end(), &space);
+
+  while (i != str.end()) {
+    result.push_back(std::string(i, j));
+    i = find_if(j, str.end(), &notSpace);
+    j = find_if(i, str.end(), &space);
+  }
+
+  return result;
+}
+
+/** Is a string all whitespace?
+ * @param str The string to test
+ * @return Whether every character is whitespace
+ */
+bool allSpaces(const std::string &str) {
+  return std::all_of(str.begin(), str.end(), space);
+}
+
+/** Repeat a string n times, delimited by another string. eg. repeatAndJoin("a",
+ * "b", 3) == "ababa"
+ * @param str The string to repeat
+ * @param delim The delimiter
+ * @param n The number of times to repeat
+ * @return The repeated string
+*/
+std::string repeatAndJoin(const std::string &str,
+			  const std::string &delim, const int &n) {
+  std::string result = "";
+  for (int i = 0; i < n - 1; i++) {
+    result += str + delim;
+  }
+  return result + str;
+}
+} // Anonymous namespace
+
 
 namespace Mantid {
 namespace DataHandling {
@@ -55,7 +118,7 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
 
   auto &file = descriptor.data();
   std::string line;
-
+  
   // First line should be FileFormatVersion
   std::getline(file, line);
   bool ffvFound = boost::starts_with(line, "FileFormatVersion");
@@ -64,9 +127,12 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
   boost::regex kvPair("[\\w_]+\\s+[\\w\\d\\.\\-]+(\\s+[\\w\\d\\.\\-\\$]+)*");
   int kvPairsFound = 0;
 
-  while (std::getline(file, line) && !line.empty())
-    if (boost::regex_match(line, kvPair))
+  for (int i = 0; i < 3 && !line.empty(); i++){
+    if (boost::regex_match(line, kvPair)){
       kvPairsFound++;
+    }
+    std::getline(file, line);
+  }
 
   // There are 13 mandatory key-value pairs. If there are 11 found, a couple may
   // just have been missed off, but if there are fewer than we're probably
@@ -78,7 +144,7 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
   while (std::getline(file, line) && line.empty())
     ;
 
-  bool beginFound = line == "BEGIN_DATA";
+  bool beginFound = line == BEGIN_DATA;
 
   // Return something which takes us above other ASCII formats, as long as
   // FileFormatVersion and BEGIN_DATA were found
@@ -128,8 +194,8 @@ void LoadSESANS::exec() {
   checkMandatoryHeaders(attributes);
 
   // Make sure we haven't reached the end of the file without reading any data
-  if (line != "BEGIN_DATA")
-    throwFormatError("<EOF>", "Expected \"BEGIN_DATA\" before EOF",
+  if (line != BEGIN_DATA)
+    throwFormatError("<EOF>", "Expected \"" + BEGIN_DATA + "\" before EOF",
                      lineNum + 1);
 
   // Read file columns into a map - now we can get rid of the file
@@ -169,7 +235,7 @@ AttributeMap LoadSESANS::consumeHeaders(std::ifstream &infile,
       attr = splitHeader(line, lineNum);
       attributes.insert(attr);
     }
-  } while (std::getline(infile, line) && line != "BEGIN_DATA");
+  } while (std::getline(infile, line) && line != BEGIN_DATA);
   return attributes;
 }
 
@@ -185,10 +251,10 @@ AttributeMap LoadSESANS::consumeHeaders(std::ifstream &infile,
 */
 ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
                                   int &lineNum) {
-  std::string numberRegex = "(-?\\d+(\\.\\d+)?(E-?\\d+)?)";
+  std::string numberRegex = "(-?\\d+(\\.\\d+)?([Ee]-?\\d+)?)";
 
   std::getline(infile, line);
-  std::vector<std::string> columnHeaders = split(line);
+  const auto &columnHeaders = split(line);
 
   // Make sure all 4 mandatory columns have been supplied
   for (std::string header : mandatoryColumnHeaders)
@@ -218,7 +284,7 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
     if (boost::regex_match(line, lineRegex)) {
       tokens = split(line);
 
-      for (unsigned int i = 0; i < tokens.size(); i++)
+      for (size_t i = 0; i < tokens.size(); i++)
         columns[columnHeaders[i]].push_back(std::stod(tokens[i]));
     } else {
       g_log.warning("Line " + std::to_string(lineNum) +
@@ -242,26 +308,25 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
 * @throw runtime_error If the line contains less than two tokens
 */
 std::pair<std::string, std::string>
-LoadSESANS::splitHeader(const std::string &line, const int &lineNum) {
+LoadSESANS::splitHeader(const std::string &untrimmedLine, const int &lineNum) {
   std::pair<std::string, std::string> attribute;
-  auto i = line.begin();
+  const auto &line = boost::trim_copy(untrimmedLine);
 
-  // Discard leading whitespace
-  i = find_if(i, line.end(), &notSpace);
+  auto i = line.begin();
   // Find the end of the first word
-  auto j = find_if(i, line.end(), &space);
+  auto j = find_if(i, line.end(), space);
 
   if (j == line.end())
     throwFormatError(line, "Expected key-value pair", lineNum);
 
   attribute.first = std::string(i, j);
 
-  // Find start of second word
+  // Find start of the second word
   i = find_if(j, line.end(), notSpace);
   if (i == line.end())
     throwFormatError(line, "Expected key-value pair", lineNum);
 
-  // Grab from there to the end of the line
+  // Grab from start of second word to the end of the line
   attribute.second = std::string(i, line.end());
 
   return attribute;
@@ -300,16 +365,16 @@ void LoadSESANS::checkMandatoryHeaders(const AttributeMap &attributes) {
  * @return A workspace with the corresponding data
  */
 API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
-  size_t histogramLength = columns["SpinEchoLength"].size();
+  size_t histogramLength = columns[SPIN_ECHO_LENGTH].size();
   API::MatrixWorkspace_sptr newWorkspace =
       API::WorkspaceFactory::Instance().create(
           "Workspace2D", 1, histogramLength, histogramLength);
 
-  auto xValues = columns["Wavelength"];
+  auto xValues = columns[WAVELENGTH];
   auto yValues =
-      calculateYValues(columns["Depolarisation"], columns["Wavelength"]);
-  auto eValues = calculateEValues(columns["Depolarisation_error"], yValues,
-                                  columns["Wavelength"]);
+      calculateYValues(columns[DEPOLARISATION], columns[WAVELENGTH]);
+  auto eValues = calculateEValues(columns[DEPOLARISATION_ERROR], yValues,
+                                  columns[WAVELENGTH]);
 
   auto &dataX = newWorkspace->mutableX(0);
   auto &dataY = newWorkspace->mutableY(0);
@@ -322,63 +387,6 @@ API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
   }
 
   return newWorkspace;
-}
-
-/** Is a character whitespace (here considered space or tab)?
- * @param c The character
- * @return Whether it is whitespace
- */
-bool LoadSESANS::space(const char &c) { return c == ' ' || c == '\t'; }
-
-/** Is a character not whitespace (here considered space or tab)?
-* @param c The character
-* @return Whether it is not whitespace
-*/
-bool LoadSESANS::notSpace(const char &c) { return !space(c); }
-
-/** Split a string on spaces
- * @param str The string to split
- * @return Vector of string segments
- */
-std::vector<std::string> LoadSESANS::split(const std::string &str) {
-  std::vector<std::string> result;
-
-  auto i = str.begin();
-  i = find_if(i, str.end(), &notSpace);
-
-  auto j = find_if(i, str.end(), &space);
-
-  while (i != str.end()) {
-    result.push_back(std::string(i, j));
-    i = find_if(j, str.end(), &notSpace);
-    j = find_if(i, str.end(), &space);
-  }
-
-  return result;
-}
-
-/** Is a string all whitespace?
- * @param str The string to test
- * @return Whether every character is whitespace
- */
-bool LoadSESANS::allSpaces(const std::string &str) {
-  return std::all_of(str.begin(), str.end(), space);
-}
-
-/** Repeat a string n times, delimited by another string. eg. repeatAndJoin("a",
- * "b", 3) == "ababa"
- * @param str The string to repeat
- * @param delim The delimiter
- * @param n The number of times to repeat
- * @return The repeated string
-*/
-std::string LoadSESANS::repeatAndJoin(const std::string &str,
-                                      const std::string &delim, const int &n) {
-  std::string result = "";
-  for (int i = 0; i < n - 1; i++) {
-    result += str + delim;
-  }
-  return result + str;
 }
 
 /**Calculate workspace Y values from depolarisation and wavelength.
@@ -417,3 +425,4 @@ Column LoadSESANS::calculateEValues(const Column &error, const Column &yValues,
 
 } // namespace DataHandling
 } // namespace Mantid
+

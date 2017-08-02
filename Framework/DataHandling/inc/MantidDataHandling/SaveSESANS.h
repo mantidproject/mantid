@@ -52,6 +52,7 @@ public:
   const std::string summary() const override;
   int version() const override;
   const std::string category() const override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Length of the longest attribute name in headers (+4 for readability in the
@@ -59,6 +60,7 @@ private:
   const int MAX_HDR_LENGTH = 23;
   const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans",
                                                 ".SESANS"};
+  const std::vector<std::string> nonEmptyDoubleProperties{"ThetaZMax", "ThetaYMax", "EchoConstant"};
 
   void init() override;
   void exec() override;

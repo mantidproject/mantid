@@ -105,7 +105,7 @@ private:
     TS_ASSERT(!Poco::File(outputPath).exists());
   }
 
-  std::string infileName = "temp.ses";
+  std::string infileName = "tempIn.ses";
   LoadSESANS testAlg;
 
   std::string goodFile =

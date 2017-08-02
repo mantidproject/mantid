@@ -5,7 +5,6 @@
 #include "MantidDataHandling/DllConfig.h"
 
 #include <unordered_map>
-#include <utility>
 
 typedef std::vector<double> Column;
 typedef std::unordered_map<std::string, Column> ColumnMap;
@@ -57,15 +56,22 @@ public:
 
 private:
   // Private constants
+
+  const std::string SPIN_ECHO_LENGTH = "SpinEchoLength";
+  const std::string WAVELENGTH = "Wavelength";
+  const std::string DEPOLARISATION = "Depolarisation";
+  const std::string DEPOLARISATION_ERROR = "Depolarisation_error";
+  const std::string BEGIN_DATA = "BEGIN_DATA";
+
   const std::vector<std::string> mandatoryAttributes{
       "FileFormatVersion", "DataFileTitle", "Sample", "Thickness",
       "Thickness_unit", "Theta_zmax", "Theta_zmax_unit", "Theta_ymax",
       "Theta_ymax_unit", "Orientation", "SpinEchoLength_unit",
       "Depolarisation_unit", "Wavelength_unit"};
   const std::vector<std::string> mandatoryColumnHeaders{
-      "SpinEchoLength", "Depolarisation", "Depolarisation_error", "Wavelength"};
+    SPIN_ECHO_LENGTH, WAVELENGTH, DEPOLARISATION, DEPOLARISATION_ERROR};
   const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans",
-                                                ".SESANS"};
+      ".SESANS"};
 
   // Private functions
   void init() override;
@@ -87,14 +93,6 @@ private:
                           const Column &wavelength) const;
   Column calculateEValues(const Column &error, const Column &yValues,
                           const Column &wavelength) const;
-
-  // Private helper functions
-  static bool space(const char &c);
-  static bool notSpace(const char &c);
-  static std::vector<std::string> split(const std::string &str);
-  static std::string repeatAndJoin(const std::string &str,
-                                   const std::string &delim, const int &n);
-  static bool allSpaces(const std::string &str);
 };
 
 } // namespace DataHandling

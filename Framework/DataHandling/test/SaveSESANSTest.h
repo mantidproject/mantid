@@ -109,7 +109,7 @@ public:
 
 private:
   SaveSESANS testAlg;
-  const std::string outfileName = "temp.ses";
+  const std::string outfileName = "tempOut.ses";
   const double SQRT_2 = std::sqrt(2.0);
 };
 
