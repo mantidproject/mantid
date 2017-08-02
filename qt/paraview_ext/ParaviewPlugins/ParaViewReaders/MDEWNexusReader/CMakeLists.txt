@@ -12,7 +12,9 @@ include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
 target_link_libraries( MantidParaViewMDEWNexusReaderSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${vtkjsoncpp_LIBRARIES}
-${MANTID_SUBPROJECT_LIBS} 
+${CORE_MANTIDLIBS}
+DataObjects
+VatesAPI
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
 ${QWT_LIBRARIES}

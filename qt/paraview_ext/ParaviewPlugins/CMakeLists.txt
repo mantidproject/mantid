@@ -1,5 +1,5 @@
 # bring in Mantid/VATES API dependencies
-set_mantid_subprojects( Vates/VatesAPI )
+set_mantid_subprojects( qt/paraview_ext/VatesAPI )
 
 # NonOrthogonalSourcePlugin is necessary for viewing materials with nonorthogonal basis vectors.
 # Copy it over to the pvplugins dir
