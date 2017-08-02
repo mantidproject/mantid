@@ -32,6 +32,16 @@ const std::string ALT("ALT");
 /// Determines the tolerance when comparing two doubles for equality
 const double m_TOLERANCE = 1.e-10;
 
+void assertNumFilesAndSpectraIsValid(size_t numOutFiles, size_t numOutSpectra) {
+#ifndef NDEBUG
+  // If either numOutFiles or numOutSpectra are not 1 we need to check
+  // that we are conforming to the expected storage layout.
+  if ((numOutFiles != 1) || (numOutSpectra != 1)) {
+    assert(numOutFiles > 1 != numOutSpectra > 1);
+  }
+#endif
+}
+
 bool doesFileExist(const std::string &filePath) {
   auto file = Poco::File(filePath);
   return file.exists();
@@ -294,7 +304,7 @@ void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
   // Because of the storage layout we can either handle files > 0
   // XOR spectra per file > 0. Compensate for the fact that is will be
   // 1 thing per thing as far as users are concerned.
-  assert(numOutFiles > 1 != numOutSpectra > 1);
+  assertNumFilesAndSpectraIsValid(numOutFiles, numOutSpectra);
 
   // If all detectors are not valid we use the no instrument case and
   // set l1 to 0
@@ -623,7 +633,7 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   // When there are multiple files we can open them all in parallel
   // Check that either the number of files or spectra is greater than
   // 1 otherwise our storage method is no longer valid
-  assert(numOutFiles > 1 != numSpectra > 1);
+  assertNumFilesAndSpectraIsValid(numOutFiles, numSpectra);
 
   const auto numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
 
