@@ -9,6 +9,7 @@
 #include "MantidKernel/FileDescriptor.h"
 
 #include <Poco/File.h>
+#include <Poco/TemporaryFile.h>
 
 using Mantid::DataHandling::LoadSESANS;
 
@@ -21,20 +22,22 @@ public:
   static void destroySuite(LoadSESANSTest *suite) { delete suite; }
 
   void test_init() {
-    writeFile(goodFile);
+    const auto &tempFileName = createTemporaryFile();
+    writeFile(goodFile, tempFileName);
 
     TS_ASSERT_THROWS_NOTHING(testAlg.initialize());
     TS_ASSERT(testAlg.isInitialized());
     testAlg.setChild(true);
     testAlg.setRethrows(true);
 
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", infileName));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
-	deleteFile(testAlg);
   }
 
   void test_exec() {
-	writeFile(goodFile);
+    const auto &tempFileName = createTemporaryFile();
+    writeFile(goodFile, tempFileName);
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
     // Execute the algorithm
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
 
@@ -71,15 +74,16 @@ public:
                     tolerance);
     TS_ASSERT_DELTA(ws->e(0)[1], 1.87e-3 * ws->y(0)[0] * 1.675709 * 1.675709,
                     tolerance);
-	deleteFile(testAlg);
   }
 
   void test_confidence() {
-	writeFile(goodFile);
-    Mantid::Kernel::FileDescriptor descriptor(
-        testAlg.getPropertyValue("Filename"));
+    writeFile(goodFile, "confidence.ses");
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", "confidence.ses"));
+    std::string tempFileName = testAlg.getPropertyValue("Filename");
+    Mantid::Kernel::FileDescriptor descriptor(tempFileName);
     TS_ASSERT_EQUALS(testAlg.confidence(descriptor), 70);
-	deleteFile(testAlg);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(tempFileName).remove());
+    TS_ASSERT(!Poco::File(tempFileName).exists());
   }
 
   void test_requireFFV() { attemptToLoadBadFile(fileMissingFFV); }
@@ -91,26 +95,25 @@ public:
 private:
   /// Try and fail to load a file which violates the allowed format
   void attemptToLoadBadFile(std::string fileContents) {
-    writeFile(fileContents);
+    const auto &tempFileName = createTemporaryFile();
+    writeFile(fileContents, tempFileName);
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
     TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
-
-    deleteFile(testAlg);
   }
 
-  void writeFile(std::string fileContents) {
+  std::string createTemporaryFile() {
+    Poco::TemporaryFile tempFile;
+    tempFile.keepUntilExit();
+    return tempFile.path();
+  }
+
+  void writeFile(std::string fileContents, std::string filepath) {
     // Write a file to our temporary file
-    std::ofstream file(infileName);
+    std::ofstream file(filepath);
     file << fileContents;
     file.close();
   }
 
-  void deleteFile(const LoadSESANS &testAlg) {
-    std::string outputPath = testAlg.getProperty("Filename");
-    TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
-    TS_ASSERT(!Poco::File(outputPath).exists());
-  }
-
-  std::string infileName = "tempIn.ses";
   LoadSESANS testAlg;
 
   std::string goodFile =

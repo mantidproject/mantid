@@ -10,8 +10,9 @@
 #include "MantidDataHandling/SaveSESANS.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "boost/algorithm/string/predicate.hpp"
+#include <boost/algorithm/string/predicate.hpp>
 #include <Poco/File.h>
+#include <Poco/TemporaryFile.h>
 #include <fstream>
 #include <cmath>
 
@@ -30,7 +31,7 @@ public:
     TS_ASSERT(testAlg.isInitialized());
     testAlg.setChild(true);
     testAlg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", outfileName));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", "dummy.ses"));
     testAlg.setProperty("ThetaZMax", 0.09);
     testAlg.setProperty("ThetaYMax", 0.09);
   }
@@ -55,6 +56,11 @@ public:
 
     testAlg.setProperty("InputWorkspace", ws);
 
+    // Make a temporary file
+    Poco::TemporaryFile tempFile;
+    const auto &tempFileName = tempFile.path();
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
+    
     // Execute the algorithm
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
 
@@ -109,7 +115,6 @@ public:
 
 private:
   SaveSESANS testAlg;
-  const std::string outfileName = "tempOut.ses";
   const double SQRT_2 = std::sqrt(2.0);
 };
 
