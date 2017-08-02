@@ -1,19 +1,20 @@
 #include "MantidDataHandling/PDLoadCharacterizations.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 #include <fstream>
-#include <set>
 #include <iostream>
+#include <set>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -250,11 +251,15 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
   for (const auto &filename : filenames) {
     if (filename.empty())
       continue;
-    boost::filesystem::path path(filename);
-    if (!boost::filesystem::exists(path))
+
+    Poco::File file(filename);
+    if (!file.exists())
       throw Exception::FileError("File does not exist", filename);
-    if (!boost::filesystem::is_regular(path))
+    Poco::Path path(filename);
+    if (!path.isFile())
       throw Exception::FileError("File is not a regular file", filename);
+    if (!file.canRead())
+      throw Exception::FileError("Cannot read file", filename);
   }
   return filenames;
 }
