@@ -24,7 +24,6 @@ class ComponentInfo;
 class DetectorInfo;
 }
 namespace Geometry {
-class InstrumentVisitor;
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
@@ -338,8 +337,6 @@ private:
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};
-  /// Component and Detector info relevant cache
-  std::unique_ptr<const InstrumentVisitor> m_instrVisitor;
 };
 namespace Conversion {
 

@@ -8,7 +8,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
