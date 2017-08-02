@@ -23,6 +23,7 @@ class ComponentInfo;
 }
 
 namespace Geometry {
+class ParameterMap;
 
 /** ComponentInfo : Provides a component centric view on to the instrument.
   Indexes are per component.
@@ -85,6 +86,12 @@ public:
   size_t sample() const;
   double l1() const;
   size_t root();
+
+  const IComponent *componentID(const size_t componentIndex) const {
+    return m_componentIds->operator[](componentIndex);
+  }
+
+  friend class ParameterMap;
 };
 
 } // namespace Geometry

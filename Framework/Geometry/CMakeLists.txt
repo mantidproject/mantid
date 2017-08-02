@@ -310,7 +310,6 @@ set ( TEST_FILES
 	BraggScattererTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
-	ComponentHelperTest.h
 	ComponentInfoTest.h
 	ComponentParserTest.h
 	ComponentTest.h

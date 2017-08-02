@@ -18,7 +18,7 @@ namespace Geometry {
 DetectorInfo::DetectorInfo(
     Beamline::DetectorInfo &detectorInfo,
     boost::shared_ptr<const Geometry::Instrument> instrument,
-    boost::shared_ptr<std::vector<detid_t>> detectorIds,
+    boost::shared_ptr<const std::vector<detid_t>> detectorIds,
     boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
         detIdToIndexMap)
     : m_detectorInfo(detectorInfo), m_instrument(instrument),

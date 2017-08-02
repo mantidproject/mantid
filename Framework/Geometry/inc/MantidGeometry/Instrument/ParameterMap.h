@@ -18,11 +18,13 @@ namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 }
 namespace Beamline {
+class ComponentInfo;
 class DetectorInfo;
 }
 namespace Geometry {
 class BoundingBox;
 class ComponentInfo;
+class DetectorInfo;
 class Instrument;
 
 /** @class ParameterMap ParameterMap.h
@@ -346,15 +348,13 @@ public:
 
   bool hasDetectorInfo(const Instrument *instrument) const;
   bool hasComponentInfo(const Instrument *instrument) const;
-  const Beamline::DetectorInfo &detectorInfo() const;
+  const Geometry::DetectorInfo &detectorInfo() const;
+  Geometry::DetectorInfo &mutableDetectorInfo();
   const Geometry::ComponentInfo &componentInfo() const;
+  Geometry::ComponentInfo &mutableComponentInfo();
   size_t detectorIndex(const detid_t detID) const;
   size_t componentIndex(const Geometry::ComponentID componentId) const;
   const std::vector<Geometry::ComponentID> &componentIds() const;
-  void
-  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
-  void setComponentInfo(
-      boost::shared_ptr<const Geometry::ComponentInfo> componentInfo);
   void setInstrument(const Instrument *instrument);
 
 private:
@@ -386,11 +386,19 @@ private:
 
   /// Pointer to the DetectorInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+  std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;
 
   /// Pointer to the ComponentInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Geometry::ComponentInfo> m_componentInfo{nullptr};
+  std::unique_ptr<Beamline::ComponentInfo> m_componentInfo;
+
+  /// Pointer to the DetectorInfo wrapper. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  std::unique_ptr<Geometry::DetectorInfo> m_detectorInfoWrapper;
+
+  /// Pointer to the ComponentInfo wrapper. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  std::unique_ptr<Geometry::ComponentInfo> m_componentInfoWrapper;
 
   /// Pointer to the owning instrument for translating detector IDs into
   /// detector indices when accessing the DetectorInfo object. If the workspace

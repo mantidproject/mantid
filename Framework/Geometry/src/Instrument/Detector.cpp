@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidBeamline/DetectorInfo.h"
@@ -131,15 +132,14 @@ det_topology Detector::getTopology(V3D &center) const {
 /// Return the relative position to the parent
 Kernel::V3D Detector::getRelativePos() const {
   if (m_map && hasDetectorInfo())
-    return Kernel::toV3D(m_map->detectorInfo().position(index())) -
-           getParent()->getPos();
+    return m_map->detectorInfo().position(index()) - getParent()->getPos();
   return ObjComponent::getRelativePos();
 }
 
 /// Return the absolute position of the Detector
 Kernel::V3D Detector::getPos() const {
   if (m_map && hasDetectorInfo())
-    return Kernel::toV3D(m_map->detectorInfo().position(index()));
+    return m_map->detectorInfo().position(index());
   return ObjComponent::getPos();
 }
 
@@ -150,8 +150,7 @@ Kernel::Quat Detector::getRelativeRot() const {
     inverseParentRot.inverse();
     // Note the unusual order. This matches the convention in Component::getPos
     // (child rotations first, then parent, then grandparent, ...).
-    return inverseParentRot *
-           Kernel::toQuat(m_map->detectorInfo().rotation(index()));
+    return inverseParentRot * m_map->detectorInfo().rotation(index());
   }
   return ObjComponent::getRelativeRot();
 }
@@ -159,7 +158,7 @@ Kernel::Quat Detector::getRelativeRot() const {
 /// Return the absolute rotation of the Detector
 Kernel::Quat Detector::getRotation() const {
   if (m_map && hasDetectorInfo())
-    return Kernel::toQuat(m_map->detectorInfo().rotation(index()));
+    return m_map->detectorInfo().rotation(index());
   return ObjComponent::getRotation();
 }
 

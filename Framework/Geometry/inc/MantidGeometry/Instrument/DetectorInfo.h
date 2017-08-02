@@ -23,6 +23,7 @@ class SpectrumInfo;
 namespace Geometry {
 class IDetector;
 class Instrument;
+class ParameterMap;
 
 /** Geometry::DetectorInfo is an intermediate step towards a DetectorInfo that
   is part of Instrument-2.0. The aim is to provide a nearly identical interface
@@ -66,7 +67,7 @@ class MANTID_GEOMETRY_DLL DetectorInfo {
 public:
   DetectorInfo(Beamline::DetectorInfo &detectorInfo,
                boost::shared_ptr<const Geometry::Instrument> instrument,
-               boost::shared_ptr<std::vector<detid_t>> detectorIds,
+               boost::shared_ptr<const std::vector<detid_t>> detectorIds,
                boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
                    detIdToIndexMap);
 
@@ -126,6 +127,7 @@ public:
   void merge(const DetectorInfo &other);
 
   friend class API::SpectrumInfo;
+  friend class ParameterMap;
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;

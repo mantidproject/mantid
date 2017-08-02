@@ -7,8 +7,9 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -97,8 +98,6 @@ public:
      *level
      * components calculate their positions/rotations from their parents.
      */
-    using namespace ComponentHelper;
-
     const V3D sourcePos(0, 0, 0);
     const V3D samplePos(10, 0, 0);
     const V3D detectorPos(11, 0, 0);
@@ -106,44 +105,36 @@ public:
     auto baseInstrument = ComponentCreationHelper::createMinimalInstrument(
         sourcePos, samplePos, detectorPos);
     auto paramMap = boost::make_shared<Mantid::Geometry::ParameterMap>();
-    auto parInstrument = boost::make_shared<Mantid::Geometry::Instrument>(
-        baseInstrument, paramMap);
 
     TSM_ASSERT_EQUALS("Expect 0 items in the parameter map to start with",
                       paramMap->size(), 0);
-    auto source = parInstrument->getComponentByName("source");
+    auto source = baseInstrument->getComponentByName("source");
     const V3D newInstrumentPos(-10, 0, 0);
-    ComponentHelper::moveComponent(*parInstrument, *paramMap, newInstrumentPos,
-                                   TransformType::Absolute);
+    paramMap->addV3D(baseInstrument.get(), "pos", newInstrumentPos);
     const V3D newSourcePos(-1, 0, 0);
-    ComponentHelper::moveComponent(*source, *paramMap, newSourcePos,
-                                   TransformType::Absolute);
+    paramMap->addV3D(source.get(), "pos", newSourcePos - newInstrumentPos);
 
     // Test the moved things are where we expect them to be an that the
     // parameter map is populated.
-    TS_ASSERT_EQUALS(newSourcePos,
-                     parInstrument->getComponentByName("source")->getPos());
-    TS_ASSERT_EQUALS(newInstrumentPos, parInstrument->getPos());
     TSM_ASSERT_EQUALS("Expect 2 items in the parameter map", paramMap->size(),
                       2);
 
-    InstrumentVisitor visitor(parInstrument);
-    visitor.walkInstrument();
+    auto parInstrument = boost::make_shared<Mantid::Geometry::Instrument>(
+        baseInstrument, paramMap);
 
     TSM_ASSERT_EQUALS("Expect 0 items in the purged parameter map",
                       paramMap->size(), 0);
 
-    // Now we check that thing are located where we expect them to be.
-    auto compInfo = visitor.componentInfo();
-    auto detInfo = visitor.detectorInfo();
-    compInfo->setDetectorInfo(detInfo.get());
-    detInfo->setComponentInfo(compInfo.get());
+    TS_ASSERT_EQUALS(newSourcePos,
+                     parInstrument->getComponentByName("source")->getPos());
+    TS_ASSERT_EQUALS(newInstrumentPos, parInstrument->getPos());
 
+    auto &compInfo = paramMap->componentInfo();
     TSM_ASSERT("Check source position",
-               compInfo->position(1)
+               Mantid::Kernel::toVector3d(compInfo.position(1))
                    .isApprox(Mantid::Kernel::toVector3d(newSourcePos)));
     TSM_ASSERT("Check instrument position",
-               compInfo->position(3)
+               Mantid::Kernel::toVector3d(compInfo.position(3))
                    .isApprox(Mantid::Kernel::toVector3d(newInstrumentPos)));
   }
 

@@ -242,25 +242,7 @@ public:
   ContainsState containsRectDetectors() const;
 
   bool isMonitorViaIndex(const size_t index) const;
-
-  bool hasDetectorInfo() const;
-  const Beamline::DetectorInfo &detectorInfo() const;
-  bool hasInstrumentVisitor() const;
-
-  bool hasComponentInfo() const;
-  const Beamline::ComponentInfo &componentInfo() const;
-
   size_t detectorIndex(const detid_t detID) const;
-  void
-  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
-  void setComponentInfo(
-      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-      boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds);
-
-  void setInstrumentVisitor(const InstrumentVisitor &visitor);
-
-  const InstrumentVisitor &instrumentVisitor() const;
-
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
   bool isEmptyInstrument() const;

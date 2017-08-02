@@ -68,21 +68,8 @@ Kernel::Logger g_log("ExperimentInfo");
 ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
-      sptr_instrument(new Instrument()),
-      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
-      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()),
-      m_infoVisitor(Kernel::make_unique<InstrumentVisitor>(sptr_instrument)) {
-  auto parInstrument = makeParameterizedInstrument();
-  m_parmap->setDetectorInfo(m_detectorInfo);
-  m_detectorInfoWrapper = Kernel::make_unique<Geometry::DetectorInfo>(
-      *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
-      m_infoVisitor->detectorIdToIndexMap());
-
-  m_infoVisitor->walkInstrument();
-  makeAPIComponentInfo(*m_infoVisitor, *sptr_instrument);
-  m_parmap->setComponentInfo(m_componentInfoWrapper);
-  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
-  m_detectorInfo->setComponentInfo(m_componentInfo.get());
+      sptr_instrument(new Instrument()) {
+  m_parmap->setInstrument(sptr_instrument.get());
 }
 
 /**
@@ -188,76 +175,13 @@ const std::string ExperimentInfo::toString() const {
 // Helpers for setInstrument and getInstrument
 namespace {
 void checkDetectorInfoSize(const Instrument &instr,
-                           const Beamline::DetectorInfo &detInfo) {
+                           const Geometry::DetectorInfo &detInfo) {
   const auto numDets = instr.getNumberDetectors();
   if (numDets != detInfo.size())
     throw std::runtime_error("ExperimentInfo: size mismatch between "
                              "DetectorInfo and number of detectors in "
                              "instrument");
 }
-
-std::unique_ptr<Beamline::DetectorInfo>
-makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr,
-                 const InstrumentVisitor &visitor) {
-
-  if (newInstr.hasDetectorInfo()) {
-    // We allocate a new DetectorInfo in case there is an Instrument holding a
-    // reference to our current DetectorInfo.
-    const auto &detInfo = newInstr.detectorInfo();
-    checkDetectorInfoSize(oldInstr, detInfo);
-    // Implicit copy constructor ensures that all other info. Masking, etc, is
-    // copied.
-    return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
-  } else {
-    return visitor.detectorInfo();
-  }
-}
-
-std::unique_ptr<Geometry::InstrumentVisitor>
-makeOrRetrieveVisitor(boost::shared_ptr<const Instrument> parInstrument,
-                      const Instrument &newInstrument) {
-  if (!newInstrument.hasInstrumentVisitor() ||
-      newInstrument.isEmptyInstrument()) {
-
-    auto visitor = Kernel::make_unique<InstrumentVisitor>(parInstrument);
-    // Collect everything
-    visitor->walkInstrument();
-    return visitor;
-  } else {
-    return Kernel::make_unique<InstrumentVisitor>(
-        newInstrument.instrumentVisitor());
-  }
-}
-}
-
-/**
- * Make the beamline and API ComponentInfo
- * @param visitor : Component visitor to query. Visitor MUST have been filled
- * via registerContents.
- * @param newInstrument : unparametrised new instrument
- */
-void ExperimentInfo::makeAPIComponentInfo(const InstrumentVisitor &visitor,
-                                          const Instrument &newInstrument) {
-
-  if (newInstrument.hasComponentInfo()) {
-    /*
-     * Copy existing ComponentInfo. That way we take updates to positions
-     * rotation etc that have happened on newInstrument. These are lost when
-     * we go back to the infoComponentVisitor.
-    */
-    // TODO checkComponentInfo compatibility like is done for DetectorInfo.
-    m_componentInfo = Kernel::make_unique<Beamline::ComponentInfo>(
-        newInstrument.componentInfo());
-
-  } else {
-    // We have to make the internal Beamline ComponentInfo
-    m_componentInfo = visitor.componentInfo();
-  }
-
-  // Wrapper API ComponentInfo
-  m_componentInfoWrapper = boost::make_shared<Geometry::ComponentInfo>(
-      *m_componentInfo, visitor.componentIds(),
-      visitor.componentIdToIndexMap());
 }
 
 /** Set the instrument
@@ -275,28 +199,8 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   } else {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
+    m_parmap->setInstrument(sptr_instrument.get());
   }
-  const auto parInstrument = Geometry::ParComponentFactory::createInstrument(
-      sptr_instrument, m_parmap);
-
-  // Make the ComponentInfo first
-  m_infoVisitor = makeOrRetrieveVisitor(parInstrument, *instr);
-
-  makeAPIComponentInfo(*m_infoVisitor, *instr);
-  m_parmap->setComponentInfo(m_componentInfoWrapper);
-
-  // Make the DetectorInfo. ComponentInfo needs to be set
-  // on the Parameter map before doing this.
-  m_detectorInfo = makeDetectorInfo(*parInstrument, *instr, *m_infoVisitor);
-  m_parmap->setDetectorInfo(m_detectorInfo);
-
-  m_detectorInfoWrapper = Kernel::make_unique<Geometry::DetectorInfo>(
-      *m_detectorInfo, makeParameterizedInstrument(),
-      m_infoVisitor->detectorIds(), m_infoVisitor->detectorIdToIndexMap());
-
-  // Cross link Component and Detector info objects
-  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
-  m_detectorInfo->setComponentInfo(m_componentInfo.get());
 
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
@@ -305,26 +209,16 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   invalidateAllSpectrumDefinitions();
 }
 
-Instrument_sptr ExperimentInfo::makeParameterizedInstrument() const {
-  populateIfNotLoaded();
-  checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
-  return Geometry::ParComponentFactory::createInstrument(sptr_instrument,
-                                                         m_parmap);
-}
-
 /** Get a shared pointer to the parametrized instrument associated with this
 *workspace
 *
 *  @return The instrument class
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
-  auto instrument = makeParameterizedInstrument();
-  instrument->setDetectorInfo(m_detectorInfo);
-  instrument->setInstrumentVisitor(
-      *m_infoVisitor); // TODO. We actually only need the
-                       // ID->index part of this mapping
-  instrument->setComponentInfo(m_componentInfo, m_infoVisitor->componentIds());
-  return instrument;
+  populateIfNotLoaded();
+  checkDetectorInfoSize(*sptr_instrument, detectorInfo());
+  return Geometry::ParComponentFactory::createInstrument(sptr_instrument,
+                                                         m_parmap);
 }
 
 /**  Returns a new copy of the instrument parameters
@@ -1159,14 +1053,13 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
  */
 const Geometry::DetectorInfo &ExperimentInfo::detectorInfo() const {
   populateIfNotLoaded();
-  return *m_detectorInfoWrapper;
+  return m_parmap->detectorInfo();
 }
 
-/** Return a non-const reference to the DetectorInfo object. Not thread safe.
- */
+/** Return a non-const reference to the DetectorInfo object. */
 Geometry::DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
-  return const_cast<Geometry::DetectorInfo &>(
-      static_cast<const ExperimentInfo &>(*this).detectorInfo());
+  populateIfNotLoaded();
+  return m_parmap->mutableDetectorInfo();
 }
 
 /** Return a reference to the SpectrumInfo object.
@@ -1183,7 +1076,7 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
     if (!m_spectrumInfoWrapper) {
       static_cast<void>(detectorInfo());
       m_spectrumInfoWrapper = Kernel::make_unique<SpectrumInfo>(
-          *m_spectrumInfo, *this, *m_detectorInfoWrapper);
+          *m_spectrumInfo, *this, m_parmap->mutableDetectorInfo());
     }
   }
   // Rebuild any spectrum definitions that are out of date. Accessing
@@ -1228,11 +1121,11 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
 }
 
 const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const {
-  return *m_componentInfoWrapper;
+  return m_parmap->componentInfo();
 }
 
 ComponentInfo &ExperimentInfo::mutableComponentInfo() {
-  return *m_componentInfoWrapper;
+  return m_parmap->mutableComponentInfo();
 }
 
 /// Sets the SpectrumDefinition for all spectra.
@@ -1655,9 +1548,10 @@ void ExperimentInfo::populateWithParameter(
       if (!componentInfo().isDetector(componentIndex))
         throw std::runtime_error(
             "Found masking for a non-detector component. This is not possible");
-      m_detectorInfo->setMasked(componentIndex,
-                                paramValue); // all detector indexes have same
-                                             // component index (guarantee)
+      mutableDetectorInfo().setMasked(componentIndex,
+                                      paramValue); // all detector indexes have
+                                                   // same component index
+                                                   // (guarantee)
     }
   } else if (name == "x" || name == "y" || name == "z") {
     paramMapForPosAndRot.addPositionCoordinate(paramInfo.m_component, name,
