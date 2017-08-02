@@ -119,12 +119,13 @@ public:
     TSM_ASSERT_EQUALS("Expect 2 items in the parameter map", paramMap->size(),
                       2);
 
-    auto parInstrument = boost::make_shared<Mantid::Geometry::Instrument>(
-        baseInstrument, paramMap);
+    paramMap->setInstrument(baseInstrument.get());
 
     TSM_ASSERT_EQUALS("Expect 0 items in the purged parameter map",
                       paramMap->size(), 0);
 
+    auto parInstrument = boost::make_shared<Mantid::Geometry::Instrument>(
+        baseInstrument, paramMap);
     TS_ASSERT_EQUALS(newSourcePos,
                      parInstrument->getComponentByName("source")->getPos());
     TS_ASSERT_EQUALS(newInstrumentPos, parInstrument->getPos());

@@ -53,12 +53,7 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
       m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
-      m_detectorInfo(instr->m_detectorInfo) {
-  bool isPhysicalInstrument =
-      m_map ? m_instr->m_isPhysicalInstrument : m_isPhysicalInstrument;
-  if (!isPhysicalInstrument)
-    m_map_nonconst->setInstrument(m_instr.get());
-}
+      m_detectorInfo(instr->m_detectorInfo) {}
 
 /** Copy constructor
  *  This method was added to deal with having distinct neutronic and physical

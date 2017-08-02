@@ -187,7 +187,6 @@ void checkDetectorInfoSize(const Instrument &instr,
 * @param instr :: Shared pointer to an instrument.
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
-
   m_spectrumInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
@@ -198,8 +197,8 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   } else {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
-    m_parmap->setInstrument(sptr_instrument.get());
   }
+  m_parmap->setInstrument(sptr_instrument.get());
 
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
