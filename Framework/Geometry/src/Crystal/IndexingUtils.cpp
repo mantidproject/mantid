@@ -918,18 +918,19 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
   auto b = cell.b();
   auto c = cell.c();
 
-  auto alpha = cell.alpha();
-  auto beta = cell.beta();
-  auto gamma = cell.gamma();
+  // Precompute required trigonometric functions
+  const auto cosAlpha = std::cos(cell.alpha() * DEG_TO_RAD);
+  const auto cosBeta = std::cos(cell.beta() * DEG_TO_RAD);
+  const auto cosGamma = std::cos(cell.gamma() * DEG_TO_RAD);
+  const auto sinGamma = std::sin(cell.gamma() * DEG_TO_RAD);
+  const auto gamma_degrees = cell.gamma();
 
   V3D a_dir;
   V3D b_dir;
   V3D c_dir;
 
   double num_a_steps = std::round(90.0 / degrees_per_step);
-  double gamma_radians = gamma * DEG_TO_RAD;
-
-  int num_b_steps = boost::math::iround(4.0 * sin(gamma_radians) * num_a_steps);
+  int num_b_steps = boost::math::iround(4.0 * sinGamma * num_a_steps);
 
   std::vector<V3D> a_dir_list =
       MakeHemisphereDirections(boost::numeric_cast<int>(num_a_steps));
@@ -957,13 +958,14 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
     a_dir_temp *= a;
 
     b_dir_list = MakeCircleDirections(boost::numeric_cast<int>(num_b_steps),
-                                      a_dir_temp, gamma);
+                                      a_dir_temp, gamma_degrees);
 
     for (auto &b_dir_num : b_dir_list) {
       b_dir_temp = b_dir_num;
       b_dir_temp = V3D(b_dir_temp);
       b_dir_temp *= b;
-      c_dir_temp = Make_c_dir(a_dir_temp, b_dir_temp, c, alpha, beta, gamma);
+      c_dir_temp = makeCDir(a_dir_temp, b_dir_temp, c, cosAlpha, cosBeta,
+                            cosGamma, sinGamma);
       int num_indexed = 0;
       for (const auto &q_vector : q_vectors) {
         bool indexes_peak = true;
@@ -1681,25 +1683,23 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
     @param  b_dir   V3D object with length "b" in the direction of the rotated
                     cell edge "b"
     @param  c       The length of the third cell edge, c.
-    @param  alpha   angle between edges b and c in degrees.
-    @param  beta    angle between edges c and a in degrees.
-    @param  gamma   angle between edges a and b in degrees.
+    @param  cosAlpha   cos angle between edges b and c in radians.
+    @param  cosBeta    cos angle between edges c and a in radians.
+    @param  cosGamma   cos angle between edges a and b in radians.
+    @param  sinGamma   sin angle between edges a and b in radians.
 
     @return A new V3D object with length "c", in the direction of the third
             rotated unit cell edge, "c".
  */
-V3D IndexingUtils::Make_c_dir(const V3D &a_dir, const V3D &b_dir, double c,
-                              double alpha, double beta, double gamma) {
-  double cos_alpha = cos(DEG_TO_RAD * alpha);
-  double cos_beta = cos(DEG_TO_RAD * beta);
-  double cos_gamma = cos(DEG_TO_RAD * gamma);
-  double sin_gamma = sin(DEG_TO_RAD * gamma);
+V3D IndexingUtils::makeCDir(const V3D &a_dir, const V3D &b_dir, const double &c,
+                            const double &cosAlpha, const double &cosBeta,
+                            const double &cosGamma, const double &sinGamma) {
 
-  double c1 = c * cos_beta;
-  double c2 = c * (cos_alpha - cos_gamma * cos_beta) / sin_gamma;
-  double V = sqrt(1 - cos_alpha * cos_alpha - cos_beta * cos_beta -
-                  cos_gamma * cos_gamma + 2 * cos_alpha * cos_beta * cos_gamma);
-  double c3 = c * V / sin_gamma;
+  double c1 = c * cosBeta;
+  double c2 = c * (cosAlpha - cosGamma * cosBeta) / sinGamma;
+  double V = sqrt(1 - cosAlpha * cosAlpha - cosBeta * cosBeta -
+                  cosGamma * cosGamma + 2 * cosAlpha * cosBeta * cosGamma);
+  double c3 = c * V / sinGamma;
 
   auto basis_1 = Kernel::toVector3d(a_dir).normalized();
   auto basis_3 =
