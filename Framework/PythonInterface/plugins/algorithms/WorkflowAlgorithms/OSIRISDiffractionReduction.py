@@ -347,7 +347,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                           Operation='Multiply')
 
         # Add the sample workspaces to the dRange to sample map
-        for idx, sample in enumerate(self._sample_runs):
+        for idx, sample in enumerate(sample_ws_names):
 
             if self._container_files:
                 RebinToWorkspace(WorkspaceToRebin=self._container_files[idx],
@@ -364,7 +364,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 self._sam_ws_map.addWs(sample)
 
         # Add the vanadium workspaces to the dRange to vanadium map
-        self._add_to_drange_map(self._vanadium_runs, self._van_ws_map)
+        self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
 
         # Finished with container now so delete it
         for container in container_ws_names:
