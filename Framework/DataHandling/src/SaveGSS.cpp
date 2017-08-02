@@ -33,13 +33,11 @@ const std::string ALT("ALT");
 const double m_TOLERANCE = 1.e-10;
 
 void assertNumFilesAndSpectraIsValid(size_t numOutFiles, size_t numOutSpectra) {
-#ifndef NDEBUG
   // If either numOutFiles or numOutSpectra are not 1 we need to check
   // that we are conforming to the expected storage layout.
   if ((numOutFiles != 1) || (numOutSpectra != 1)) {
     assert(numOutFiles > 1 != numOutSpectra > 1);
   }
-#endif
 }
 
 bool doesFileExist(const std::string &filePath) {
@@ -314,7 +312,7 @@ void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
 
   // Create the various output files we will need in a loop
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
+  for (int64_t fileIndex = 0; fileIndex < numOutFilesInt64; fileIndex++) {
     // Add header to new files (e.g. doesn't exist or overwriting)
     if (!doesFileExist(m_outFileNames[fileIndex]) || !append) {
       generateInstrumentHeader(m_outputBuffer[fileIndex], l1);

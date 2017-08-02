@@ -45,7 +45,7 @@ Usage
 
     import os
     # Create a workspace to save
-    ws = CreateSampleWorkspace(OuputWorkspace="SaveGSSWorkspace")
+    ws = CreateSampleWorkspace(OutputWorkspace="SaveGSSWorkspace")
     ws = ExtractSingleSpectrum(ws, WorkspaceIndex=0)
 
     # Save to the users home directory
@@ -65,8 +65,8 @@ Output:
 
 .. testcleanup:: ExSaveGSSSimple
 
-    import mantid
     import os
+
     def removeFiles(files):
       for ws in files:
         try:
@@ -76,7 +76,7 @@ Output:
           pass
 
     removeFiles([file_name])
-    mantid.simpleapi.DeleteWorkspace("SaveGSSWorkspace")
+    DeleteWorkspace("SaveGSSWorkspace")
 
 **Example - an example using SaveGSS with additonal options.**
 
@@ -113,7 +113,7 @@ Output:
           pass
 
     removeFiles([file_name])
-    mantid.simpleapi.DeleteWorkspace("SaveGSSWorkspace")
+    DeleteWorkspace("SaveGSSWorkspace")
 
 
 .. categories::
