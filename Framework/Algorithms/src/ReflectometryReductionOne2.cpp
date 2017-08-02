@@ -984,7 +984,7 @@ void ReflectometryReductionOne2::findWavelengthMinMax(
 * @param detectorWS [in] : the workspace containing the values to project
 * @param detectors [in] : the workspace indices of the detectors of interest
 * @param lambdaMin [in] : the start of the range to project
-* @param lambdaMin [in] : the end of the range to project
+* @param lambdaMax [in] : the end of the range to project
 * @param projectedMin [out] : the start of the resulting projected range
 * @param projectedMax [out] : the end of the resulting projected range
 */
