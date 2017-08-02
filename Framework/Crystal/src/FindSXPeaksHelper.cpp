@@ -111,7 +111,7 @@ Getter for LabQ
 Mantid::Kernel::V3D SXPeak::getQ() const {
   double qSign = 1.0;
   if (_convention == "Crystallography") {
-	  qSign = -1.0;
+    qSign = -1.0;
   }
   double vi = _Ltot / (_t * 1e-6);
   // wavenumber = h_bar / mv

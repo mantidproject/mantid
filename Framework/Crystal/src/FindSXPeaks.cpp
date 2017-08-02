@@ -312,7 +312,7 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
       if (peak) {
         peak->setIntensity(finalPeak.getIntensity());
         peak->setDetectorID(finalPeak.getDetectorId());
-		peak->setGoniometerMatrix(goniometerMatrix);
+        peak->setGoniometerMatrix(goniometerMatrix);
         m_peaks->addPeak(*peak);
         delete peak;
       }

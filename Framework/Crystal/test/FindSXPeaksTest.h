@@ -37,11 +37,11 @@ void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
 
 // Helper method to round a double value to ten decimal place
 double roundTo10Places(double toRound) {
-	int scaleFactor = 10e10;
-	double result = toRound * scaleFactor;
-	result = round(result);
-	result = result / scaleFactor;
-	return result;
+  int scaleFactor = 10e10;
+  double result = toRound * scaleFactor;
+  result = round(result);
+  result = result / scaleFactor;
+  return result;
 }
 
 //=====================================================================================
@@ -267,57 +267,57 @@ public:
   }
 
   void testSetGoniometer() {
-	  // creates a workspace where all y-values are 2
-	  Workspace2D_sptr workspace =
-		  WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-	  // Stick a peak in histoIndex = 1.
-	  makeOnePeak(1, 40, 5, workspace);
+    // creates a workspace where all y-values are 2
+    Workspace2D_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    // Stick a peak in histoIndex = 1.
+    makeOnePeak(1, 40, 5, workspace);
 
-	  // Get baseline for Q of Peak
-	  FindSXPeaks alg;
-	  alg.initialize();
-	  alg.setProperty("InputWorkspace", workspace);
-	  alg.setProperty("OutputWorkspace", "found_peaks");
-	  alg.execute();
-	  TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    // Get baseline for Q of Peak
+    FindSXPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "found_peaks");
+    alg.execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
 
-	  IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
-		  Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
-	  TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
+    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
 
-	  Mantid::Kernel::V3D qNoRot = result->getPeak(0).getQSampleFrame();
-	  double qxNoRot = qNoRot.X();
-	  double qyNoRot = qNoRot.Y();
-	  double qzNoRot = qNoRot.Z();
+    Mantid::Kernel::V3D qNoRot = result->getPeak(0).getQSampleFrame();
+    double qxNoRot = qNoRot.X();
+    double qyNoRot = qNoRot.Y();
+    double qzNoRot = qNoRot.Z();
 
-	  // Set Goniometer to 180 degrees
-	  Mantid::Geometry::Goniometer gonio;
-	  gonio.makeUniversalGoniometer();
-	  gonio.setRotationAngle(1, 180);
-	  workspace->mutableRun().setGoniometer(gonio, false);
+    // Set Goniometer to 180 degrees
+    Mantid::Geometry::Goniometer gonio;
+    gonio.makeUniversalGoniometer();
+    gonio.setRotationAngle(1, 180);
+    workspace->mutableRun().setGoniometer(gonio, false);
 
-	  // Find peaks again
-	  FindSXPeaks alg2;
-	  alg2.initialize();
-	  alg2.setProperty("InputWorkspace", workspace);
-	  alg2.setProperty("OutputWorkspace", "found_peaks");
-	  alg2.execute();
-	  TSM_ASSERT("FindSXPeak should have been executed.", alg2.isExecuted());
+    // Find peaks again
+    FindSXPeaks alg2;
+    alg2.initialize();
+    alg2.setProperty("InputWorkspace", workspace);
+    alg2.setProperty("OutputWorkspace", "found_peaks");
+    alg2.execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg2.isExecuted());
 
-	  result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
-		  Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
-	  TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
-	  
-      // Round value to allow for minor error introduced by deg/rad conversion
-	  Mantid::Kernel::V3D qRot = result->getPeak(0).getQSampleFrame();
-	  double qxRot = roundTo10Places(qRot.X());
-	  double qyRot = roundTo10Places(qRot.Y());
-	  double qzRot = roundTo10Places(qRot.Z());
+    result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
 
-	  // Peak should be rotated by 180 degrees around y in Q compared to baseline
-	  TSM_ASSERT_EQUALS("Q_x should be unchanged!", qxNoRot , qRot.X());
-	  TSM_ASSERT_EQUALS("Q_y should be inverted!", qyNoRot * (-1), qRot.Y());
-	  TSM_ASSERT_EQUALS("Q_z should be unchanged!", qzNoRot, qRot.Z());
+    // Round value to allow for minor error introduced by deg/rad conversion
+    Mantid::Kernel::V3D qRot = result->getPeak(0).getQSampleFrame();
+    double qxRot = roundTo10Places(qRot.X());
+    double qyRot = roundTo10Places(qRot.Y());
+    double qzRot = roundTo10Places(qRot.Z());
+
+    // Peak should be rotated by 180 degrees around y in Q compared to baseline
+    TSM_ASSERT_EQUALS("Q_x should be unchanged!", qxNoRot, qRot.X());
+    TSM_ASSERT_EQUALS("Q_y should be inverted!", qyNoRot * (-1), qRot.Y());
+    TSM_ASSERT_EQUALS("Q_z should be unchanged!", qzNoRot, qRot.Z());
   }
 };
 
