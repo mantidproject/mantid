@@ -285,10 +285,11 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
 
+	// Round value to allow for minor error introduced by deg/rad conversion
     Mantid::Kernel::V3D qNoRot = result->getPeak(0).getQSampleFrame();
-    double qxNoRot = qNoRot.X();
-    double qyNoRot = qNoRot.Y();
-    double qzNoRot = qNoRot.Z();
+    double qxNoRot = roundTo10Places(qNoRot.X());
+    double qyNoRot = roundTo10Places(qNoRot.Y());
+    double qzNoRot = roundTo10Places(qNoRot.Z());
 
     // Set Goniometer to 180 degrees
     Mantid::Geometry::Goniometer gonio;
@@ -315,9 +316,9 @@ public:
     double qzRot = roundTo10Places(qRot.Z());
 
     // Peak should be rotated by 180 degrees around y in Q compared to baseline
-    TSM_ASSERT_EQUALS("Q_x should be unchanged!", qxNoRot, qRot.X());
-    TSM_ASSERT_EQUALS("Q_y should be inverted!", qyNoRot * (-1), qRot.Y());
-    TSM_ASSERT_EQUALS("Q_z should be unchanged!", qzNoRot, qRot.Z());
+    TSM_ASSERT_EQUALS("Q_x should be unchanged!", qxNoRot, qxRot);
+    TSM_ASSERT_EQUALS("Q_y should be inverted!", qyNoRot * (-1), qyRot);
+    TSM_ASSERT_EQUALS("Q_z should be unchanged!", qzNoRot, qzRot);
   }
 };
 
