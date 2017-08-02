@@ -349,13 +349,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Add the sample workspaces to the dRange to sample map
         for idx, sample in enumerate(sample_ws_names):
 
-            if self._container_files:
-                RebinToWorkspace(WorkspaceToRebin=self._container_files[idx],
+            if self._container_ws_names:
+                RebinToWorkspace(WorkspaceToRebin=self._container_ws_names[idx],
                                  WorkspaceToMatch=sample,
-                                 OutputWorkspace=self._container_files[idx])
+                                 OutputWorkspace=self._container_ws_names[idx])
 
                 Minus(LHSWorkspace=sample,
-                      RHSWorkspace=self._container_files[idx],
+                      RHSWorkspace=self._container_ws_names[idx],
                       OutputWorkspace=sample)
 
             if self._man_d_range is not None and idx < len(self._man_d_range):
