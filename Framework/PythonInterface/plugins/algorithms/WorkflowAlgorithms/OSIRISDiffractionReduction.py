@@ -101,6 +101,21 @@ class DRangeToWorkspaceMap(object):
 
             self._map[d_range].append(ws_name)
 
+    def averageAcrossDRanges(self):
+        """
+        Averages workspaces which are mapped to the same drange,
+        removing them from the map and mapping the averaged workspace
+        to that drange.
+        """
+        temp_map = {}
+
+        for d_range, ws_list in self._map.items():
+            ws_list = self._rebin_to_smallest(ws_list)
+            temp_map[d_range] = average_ws_list(ws_list)
+
+        self._map = temp_map
+
+
     def setItem(self, d_range, ws_name):
         """
         Set a dRange and corresponding *single* ws.
@@ -364,7 +379,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 self._sam_ws_map.addWs(sample)
 
         # Add the vanadium workspaces to the dRange to vanadium map
-        self._van_ws_map = self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
+        self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
 
         # Finished with container now so delete it
         for container in container_ws_names:
@@ -379,10 +394,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Average together any sample workspaces with the same DRange.
         # This will mean our map of DRanges to list of workspaces becomes a map
         # of DRanges, each to a *single* workspace.
-        self._sam_ws_map = self._average_across_dranges(self._sam_ws_map)
+        self._sam_ws_map.averageAcrossDRanges()
 
         # Now do the same to the vanadium workspaces.
-        self._van_ws_map = self._average_across_dranges(self._van_ws_map)
+        self._van_ws_map.averageAcrossDRanges()
 
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
         for d_range, wrksp in list(self._sam_ws_map.getMap().items()) + list(self._van_ws_map.getMap().items()):
@@ -472,7 +487,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         :param drange_map:      The drange map to add the workspaces to.
         :param do_log_found:    If True print the found workspaces to log.
                                 Else don't print to log.
-        :return:                The drange map with the workspaces added.
         """
 
         for idx, ws in enumerate(workspaces):
@@ -481,23 +495,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 drange_map.addWs(ws, self._man_d_range[idx])
             else:
                 drange_map.addWs(ws)
-        return drange_map
-
-    def _average_across_dranges(self, drange_map):
-        """
-        Averages workspaces which are mapped to the same drange and
-        returns a drange map of the averaged workspaces.
-
-        :param drange_map:  The drange map to average across.
-        :return:            A drange map containing the averaged
-                            workspaces for each drange.
-        """
-
-        temp_map = DRangeToWorkspaceMap()
-        for d_range, ws_list in drange_map.getMap().items():
-            ws_list = self._rebin_to_smallest(ws_list)
-            temp_map.setItem(d_range, average_ws_list(ws_list))
-        return temp_map
 
     def _parse_string_array(self, string):
         """
