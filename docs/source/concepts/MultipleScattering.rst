@@ -71,6 +71,7 @@ Documentation for this algorithm can found within the
 References
 ~~~~~~~~~~
 .. [1] Lindley, E.J., & Mayers, J. Cywinski, R. (Ed.). (1988). Experimental method and corrections to data. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
+.. [2] 'ATLAS - Analysis of Time-of-Flight Diffraction Data from Liquid and Amorphous Samples’, A.K.Soper, W.S.Howells and A.C.Hannon, Rutherford Appleton Laboratory Report RAL-89-046. (1989). - http://wwwisis2.isis.rl.ac.uk/disordered/Manuals/ATLAS/ATLAS_manual.htm
 
 
 .. categories:: Concepts
