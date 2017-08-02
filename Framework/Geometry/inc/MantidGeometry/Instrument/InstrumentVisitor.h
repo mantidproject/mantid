@@ -12,7 +12,8 @@
 
 namespace Mantid {
 using detid_t = int32_t;
-namespace Beamline {class ComponentInfo;
+namespace Beamline {
+class ComponentInfo;
 class DetectorInfo;
 }
 namespace Geometry {
