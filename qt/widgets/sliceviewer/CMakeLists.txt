@@ -140,9 +140,9 @@ include_directories ( inc )
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 # --- Add icons qrc ------
-qt4_add_resources ( RES_FILES icons/SliceViewerIcons.qrc )
+qt4_add_resources ( RES_FILES_SLICEVIEWER ../../resources/icons/SliceViewerIcons.qrc )
 
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} ${RES_FILES_SLICEVIEWER})
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 

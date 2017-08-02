@@ -46,7 +46,7 @@ set ( UI_FILES
 include_directories ( ../../qt/widgets/common/inc )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS ${extra_options} )
-qt4_add_resources ( RES_FILES_MULTIDATASETFIT ../icons/CustomInterfacesIcons.qrc )
+qt4_add_resources ( RES_FILES_MULTIDATASETFIT ../../resources/icons/MultiDatasetFitIcons.qrc )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} ${RES_FILES_MULTIDATASETFIT})
 

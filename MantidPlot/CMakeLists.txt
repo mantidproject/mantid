@@ -661,8 +661,6 @@ qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/images.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/MantidWidgets.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images//fonts/fonts.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/qt/widgets/sliceviewer/icons/SliceViewerIcons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/qt/paraview_ext/VatesSimpleGui/ViewWidgets/icons/ViewWidgetsIcons.qrc )
 
 ###########################################################################
 # Add the dependencies

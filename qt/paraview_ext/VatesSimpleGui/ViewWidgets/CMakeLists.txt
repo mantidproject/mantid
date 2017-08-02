@@ -99,7 +99,7 @@ qt4_wrap_ui( UI_BUILT_SOURCES
 )
 
 # Add the QtWidgets icons
-qt4_add_resources( RES_FILES icons/ViewWidgetsIcons.qrc )
+qt4_add_resources ( RES_FILES ../../../resources/icons/ViewWidgetsIcons.qrc )
 
 # Setup the include locations.
 include_directories(
@@ -107,9 +107,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/qt/widgets/sliceviewer/inc
   ${CMAKE_BINARY_DIR}/qt/widgets/sliceviewer
   ${CMAKE_SOURCE_DIR}/qt/widgets/factory/inc
-#  ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
-#  ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
-#  ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${CMAKE_SOURCE_DIR}/MantidPlot/src
