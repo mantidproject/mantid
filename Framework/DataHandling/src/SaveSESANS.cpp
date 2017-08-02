@@ -5,6 +5,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
 
 #include <algorithm>
@@ -12,6 +13,7 @@
 #include <fstream>
 #include <iomanip>
 #include <map>
+#include <set>
 #include <string>
 
 namespace Mantid {
@@ -56,6 +58,8 @@ std::map<std::string, std::string> SaveSESANS::validateInputs(){
 void SaveSESANS::init() {
   auto notDBL_MIN = boost::make_shared<Kernel::BoundedValidator<double>>();
   notDBL_MIN->setLower(DBL_MIN);
+
+  auto validOrientation = boost::make_shared<Kernel::StringListValidator>(std::set<std::string>{"X", "Y", "Z"});
   
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
@@ -70,7 +74,7 @@ void SaveSESANS::init() {
   declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
   declareProperty("EchoConstant", DBL_MIN, notDBL_MIN, "Echo_constant", Kernel::Direction::Input);
 
-  declareProperty<std::string>("Orientation", "",
+  declareProperty<std::string>("Orientation", "Z", validOrientation,
                                "Orientation of the instrument");
 }
 

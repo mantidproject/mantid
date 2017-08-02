@@ -56,21 +56,20 @@ public:
 
 private:
   // Private constants
+  const std::string m_spinEchoLength = "SpinEchoLength";
+  const std::string m_wavelength = "Wavelength";
+  const std::string m_depolarisation = "Depolarisation";
+  const std::string m_depolarisationError = "Depolarisation_error";
+  const std::string m_beginData = "BEGIN_DATA";
 
-  const std::string SPIN_ECHO_LENGTH = "SpinEchoLength";
-  const std::string WAVELENGTH = "Wavelength";
-  const std::string DEPOLARISATION = "Depolarisation";
-  const std::string DEPOLARISATION_ERROR = "Depolarisation_error";
-  const std::string BEGIN_DATA = "BEGIN_DATA";
-
-  const std::vector<std::string> mandatoryAttributes{
+  const std::vector<std::string> m_mandatoryAttributes{
       "FileFormatVersion", "DataFileTitle", "Sample", "Thickness",
       "Thickness_unit", "Theta_zmax", "Theta_zmax_unit", "Theta_ymax",
       "Theta_ymax_unit", "Orientation", "SpinEchoLength_unit",
       "Depolarisation_unit", "Wavelength_unit"};
-  const std::vector<std::string> mandatoryColumnHeaders{
-    SPIN_ECHO_LENGTH, WAVELENGTH, DEPOLARISATION, DEPOLARISATION_ERROR};
-  const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans",
+  const std::vector<std::string> m_mandatoryColumnHeaders{
+	  m_spinEchoLength, m_wavelength, m_depolarisation, m_depolarisationError };
+  const std::vector<std::string> m_fileExtensions{".ses", ".SES", ".sesans",
       ".SESANS"};
 
   // Private functions

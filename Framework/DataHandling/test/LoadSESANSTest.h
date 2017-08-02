@@ -30,9 +30,11 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", infileName));
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
+	deleteFile(testAlg);
   }
 
   void test_exec() {
+	writeFile(goodFile);
     // Execute the algorithm
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
 
@@ -69,12 +71,15 @@ public:
                     tolerance);
     TS_ASSERT_DELTA(ws->e(0)[1], 1.87e-3 * ws->y(0)[0] * 1.675709 * 1.675709,
                     tolerance);
+	deleteFile(testAlg);
   }
 
   void test_confidence() {
+	writeFile(goodFile);
     Mantid::Kernel::FileDescriptor descriptor(
         testAlg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(testAlg.confidence(descriptor), 70);
+	deleteFile(testAlg);
   }
 
   void test_requireFFV() { attemptToLoadBadFile(fileMissingFFV); }

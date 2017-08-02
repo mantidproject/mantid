@@ -109,8 +109,8 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
     return 0;
 
   // If the file has a SESANS extension
-  if (std::find(fileExtensions.begin(), fileExtensions.end(),
-                descriptor.extension()) != fileExtensions.end())
+  if (std::find(m_fileExtensions.begin(), m_fileExtensions.end(),
+                descriptor.extension()) != m_fileExtensions.end())
     return 70;
 
   // Nothing was obviously right or wrong, so we'll have to dig around a bit in
@@ -144,7 +144,7 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
   while (std::getline(file, line) && line.empty())
     ;
 
-  bool beginFound = line == BEGIN_DATA;
+  bool beginFound = line == m_beginData;
 
   // Return something which takes us above other ASCII formats, as long as
   // FileFormatVersion and BEGIN_DATA were found
@@ -156,7 +156,7 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
  */
 void LoadSESANS::init() {
   declareProperty(Kernel::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load, fileExtensions),
+                      "Filename", "", API::FileProperty::Load, m_fileExtensions),
                   "Name of the SESANS file to load");
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
@@ -194,8 +194,8 @@ void LoadSESANS::exec() {
   checkMandatoryHeaders(attributes);
 
   // Make sure we haven't reached the end of the file without reading any data
-  if (line != BEGIN_DATA)
-    throwFormatError("<EOF>", "Expected \"" + BEGIN_DATA + "\" before EOF",
+  if (line != m_beginData)
+    throwFormatError("<EOF>", "Expected \"" + m_beginData + "\" before EOF",
                      lineNum + 1);
 
   // Read file columns into a map - now we can get rid of the file
@@ -235,7 +235,7 @@ AttributeMap LoadSESANS::consumeHeaders(std::ifstream &infile,
       attr = splitHeader(line, lineNum);
       attributes.insert(attr);
     }
-  } while (std::getline(infile, line) && line != BEGIN_DATA);
+  } while (std::getline(infile, line) && line != m_beginData);
   return attributes;
 }
 
@@ -257,7 +257,7 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
   const auto &columnHeaders = split(line);
 
   // Make sure all 4 mandatory columns have been supplied
-  for (std::string header : mandatoryColumnHeaders)
+  for (std::string header : m_mandatoryColumnHeaders)
     if (std::find(columnHeaders.begin(), columnHeaders.end(), header) ==
         columnHeaders.end())
       throwFormatError(line, "Failed to supply mandatory column header: \"" +
@@ -351,7 +351,7 @@ void LoadSESANS::throwFormatError(const std::string &line,
 * @throw runtime_error If any other the mandatory headers are missing
 */
 void LoadSESANS::checkMandatoryHeaders(const AttributeMap &attributes) {
-  for (std::string attr : mandatoryAttributes) {
+  for (std::string attr : m_mandatoryAttributes) {
     if (!attributes.count(attr)) {
       std::string err = "Failed to supply parameter: \"" + attr + "\"";
       g_log.error(err);
@@ -365,16 +365,16 @@ void LoadSESANS::checkMandatoryHeaders(const AttributeMap &attributes) {
  * @return A workspace with the corresponding data
  */
 API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
-  size_t histogramLength = columns[SPIN_ECHO_LENGTH].size();
+  size_t histogramLength = columns[m_spinEchoLength].size();
   API::MatrixWorkspace_sptr newWorkspace =
       API::WorkspaceFactory::Instance().create(
           "Workspace2D", 1, histogramLength, histogramLength);
 
-  auto xValues = columns[WAVELENGTH];
+  auto xValues = columns[m_wavelength];
   auto yValues =
-      calculateYValues(columns[DEPOLARISATION], columns[WAVELENGTH]);
-  auto eValues = calculateEValues(columns[DEPOLARISATION_ERROR], yValues,
-                                  columns[WAVELENGTH]);
+      calculateYValues(columns[m_depolarisation], columns[m_wavelength]);
+  auto eValues = calculateEValues(columns[m_depolarisationError], yValues,
+                                  columns[m_wavelength]);
 
   auto &dataX = newWorkspace->mutableX(0);
   auto &dataY = newWorkspace->mutableY(0);
