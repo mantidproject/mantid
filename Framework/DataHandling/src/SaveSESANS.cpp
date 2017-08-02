@@ -36,18 +36,18 @@ int SaveSESANS::version() const { return 1; }
 /// Get the algorithm's category
 const std::string SaveSESANS::category() const { return "DataHandling\\Text"; }
 
-std::map<std::string, std::string> SaveSESANS::validateInputs(){
+std::map<std::string, std::string> SaveSESANS::validateInputs() {
   std::map<std::string, std::string> invalidInputs;
 
-  for (const auto &propertyName : mandatoryDoubleProperties){
+  for (const auto &propertyName : mandatoryDoubleProperties) {
     double value = getProperty(propertyName);
-    if (value == EMPTY_DBL()){
+    if (value == EMPTY_DBL()) {
       invalidInputs[propertyName] = propertyName + " must be set";
     }
   }
   return invalidInputs;
 }
-  
+
 /**
  * Initialise the algorithm
  */

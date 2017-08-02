@@ -55,7 +55,7 @@ public:
   int version() const override;
   const std::string category() const override;
   std::map<std::string, std::string> validateInputs() override;
-  
+
 private:
   // Length of the longest attribute name in headers (+4 for readability in the
   // file)
