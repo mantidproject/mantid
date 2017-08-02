@@ -6,6 +6,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -16,12 +17,12 @@ namespace Geometry {
  * obtained from a workspace. Detector ID -> index map provided as constructor
  * argument. */
 DetectorInfo::DetectorInfo(
-    Beamline::DetectorInfo &detectorInfo,
+    std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
     boost::shared_ptr<const Geometry::Instrument> instrument,
     boost::shared_ptr<const std::vector<detid_t>> detectorIds,
     boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
         detIdToIndexMap)
-    : m_detectorInfo(detectorInfo), m_instrument(instrument),
+    : m_detectorInfo(std::move(detectorInfo)), m_instrument(instrument),
       m_detectorIDs(detectorIds), m_detIDToIndex(detIdToIndexMap),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
@@ -38,6 +39,18 @@ DetectorInfo::DetectorInfo(
   }
 }
 
+/** Copy constructor. Use with EXTREME CARE.
+ *
+ * Public copy should not be used since proper links between DetectorInfo and
+ * ComponentInfo must be set up. */
+DetectorInfo::DetectorInfo(const DetectorInfo &other)
+    : m_detectorInfo(
+          Kernel::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)),
+      m_instrument(other.m_instrument), m_detectorIDs(other.m_detectorIDs),
+      m_detIDToIndex(other.m_detIDToIndex),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
+
 /// Assigns the contents of the non-wrapping part of `rhs` to this.
 DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
   if (detectorIDs() != rhs.detectorIDs())
@@ -46,9 +59,12 @@ DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
                              "possible");
   // Do NOT assign anything in the "wrapping" part of DetectorInfo. We simply
   // assign the underlying Beamline::DetectorInfo.
-  m_detectorInfo = rhs.m_detectorInfo;
+  *m_detectorInfo = *rhs.m_detectorInfo;
   return *this;
 }
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+DetectorInfo::~DetectorInfo() = default;
 
 /** Returns true if the content of this is equivalent to the content of other.
  *
@@ -60,7 +76,7 @@ DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
  * Note that in both cases the actual limit may be lower, but it is guarenteed
  * that any LARGER differences are NOT considered equivalent. */
 bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
-  return m_detectorInfo.isEquivalent(other.m_detectorInfo);
+  return m_detectorInfo->isEquivalent(*other.m_detectorInfo);
 }
 
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the
@@ -68,26 +84,26 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 size_t DetectorInfo::size() const { return m_detectorIDs->size(); }
 
 /// Returns true if the beamline has scanning detectors.
-bool DetectorInfo::isScanning() const { return m_detectorInfo.isScanning(); }
+bool DetectorInfo::isScanning() const { return m_detectorInfo->isScanning(); }
 
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
-  return m_detectorInfo.isMonitor(index);
+  return m_detectorInfo->isMonitor(index);
 }
 
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const std::pair<size_t, size_t> &index) const {
-  return m_detectorInfo.isMonitor(index);
+  return m_detectorInfo->isMonitor(index);
 }
 
 /// Returns true if the detector is masked.
 bool DetectorInfo::isMasked(const size_t index) const {
-  return m_detectorInfo.isMasked(index);
+  return m_detectorInfo->isMasked(index);
 }
 
 /// Returns true if the detector is masked.
 bool DetectorInfo::isMasked(const std::pair<size_t, size_t> &index) const {
-  return m_detectorInfo.isMasked(index);
+  return m_detectorInfo->isMasked(index);
 }
 
 /** Returns L2 (distance from sample to spectrum).
@@ -209,35 +225,35 @@ DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) const {
 
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
-  return Kernel::toV3D(m_detectorInfo.position(index));
+  return Kernel::toV3D(m_detectorInfo->position(index));
 }
 
 /// Returns the position of the detector with given index.
 Kernel::V3D
 DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
-  return Kernel::toV3D(m_detectorInfo.position(index));
+  return Kernel::toV3D(m_detectorInfo->position(index));
 }
 
 /// Returns the rotation of the detector with given index.
 Kernel::Quat DetectorInfo::rotation(const size_t index) const {
-  return Kernel::toQuat(m_detectorInfo.rotation(index));
+  return Kernel::toQuat(m_detectorInfo->rotation(index));
 }
 
 /// Returns the rotation of the detector with given index.
 Kernel::Quat
 DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
-  return Kernel::toQuat(m_detectorInfo.rotation(index));
+  return Kernel::toQuat(m_detectorInfo->rotation(index));
 }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
 void DetectorInfo::setMasked(const size_t index, bool masked) {
-  m_detectorInfo.setMasked(index, masked);
+  m_detectorInfo->setMasked(index, masked);
 }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
 void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
                              bool masked) {
-  m_detectorInfo.setMasked(index, masked);
+  m_detectorInfo->setMasked(index, masked);
 }
 
 /** Sets all mask flags to false (unmasked). Not thread safe.
@@ -246,31 +262,31 @@ void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
  *future. */
 void DetectorInfo::clearMaskFlags() {
   for (size_t i = 0; i < size(); ++i)
-    m_detectorInfo.setMasked(i, false);
+    m_detectorInfo->setMasked(i, false);
 }
 
 /// Set the absolute position of the detector with given index. Not thread safe.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
-  m_detectorInfo.setPosition(index, Kernel::toVector3d(position));
+  m_detectorInfo->setPosition(index, Kernel::toVector3d(position));
 }
 
 /// Set the absolute position of the detector with given index. Not thread safe.
 void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index,
                                const Kernel::V3D &position) {
-  m_detectorInfo.setPosition(index, Kernel::toVector3d(position));
+  m_detectorInfo->setPosition(index, Kernel::toVector3d(position));
 }
 
 /// Set the absolute rotation of the detector with given index. Not thread safe.
 void DetectorInfo::setRotation(const size_t index,
                                const Kernel::Quat &rotation) {
-  m_detectorInfo.setRotation(index, Kernel::toQuaterniond(rotation));
+  m_detectorInfo->setRotation(index, Kernel::toQuaterniond(rotation));
 }
 
 /// Set the absolute rotation of the detector with given index. Not thread safe.
 void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index,
                                const Kernel::Quat &rotation) {
-  m_detectorInfo.setRotation(index, Kernel::toQuaterniond(rotation));
+  m_detectorInfo->setRotation(index, Kernel::toQuaterniond(rotation));
 }
 
 /// Return a const reference to the detector with given index.
@@ -280,16 +296,16 @@ const Geometry::IDetector &DetectorInfo::detector(const size_t index) const {
 
 /// Returns the source position.
 Kernel::V3D DetectorInfo::sourcePosition() const {
-  return Kernel::toV3D(m_detectorInfo.sourcePosition());
+  return Kernel::toV3D(m_detectorInfo->sourcePosition());
 }
 
 /// Returns the sample position.
 Kernel::V3D DetectorInfo::samplePosition() const {
-  return Kernel::toV3D(m_detectorInfo.samplePosition());
+  return Kernel::toV3D(m_detectorInfo->samplePosition());
 }
 
 /// Returns L1 (distance from source to sample).
-double DetectorInfo::l1() const { return m_detectorInfo.l1(); }
+double DetectorInfo::l1() const { return m_detectorInfo->l1(); }
 
 /// Returns a sorted vector of all detector IDs.
 const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
@@ -298,7 +314,7 @@ const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
 
 /// Returns the scan count of the detector with given detector index.
 size_t DetectorInfo::scanCount(const size_t index) const {
-  return m_detectorInfo.scanCount(index);
+  return m_detectorInfo->scanCount(index);
 }
 
 /** Returns the scan interval of the detector with given index.
@@ -307,7 +323,7 @@ size_t DetectorInfo::scanCount(const size_t index) const {
  * since 1990, as in Kernel::DateAndTime. */
 std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
 DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
-  const auto &interval = m_detectorInfo.scanInterval(index);
+  const auto &interval = m_detectorInfo->scanInterval(index);
   return {interval.first, interval.second};
 }
 
@@ -321,8 +337,8 @@ DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
 void DetectorInfo::setScanInterval(
     const size_t index,
     const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval) {
-  m_detectorInfo.setScanInterval(index, {interval.first.totalNanoseconds(),
-                                         interval.second.totalNanoseconds()});
+  m_detectorInfo->setScanInterval(index, {interval.first.totalNanoseconds(),
+                                          interval.second.totalNanoseconds()});
 }
 
 /** Merges the contents of other into this.
@@ -331,7 +347,7 @@ void DetectorInfo::setScanInterval(
  * identical or non-overlapping. If they are identical all other parameters (for
  * that index) must match. */
 void DetectorInfo::merge(const DetectorInfo &other) {
-  m_detectorInfo.merge(other.m_detectorInfo);
+  m_detectorInfo->merge(*other.m_detectorInfo);
 }
 
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {

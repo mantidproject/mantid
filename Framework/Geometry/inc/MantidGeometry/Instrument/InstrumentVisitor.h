@@ -12,20 +12,17 @@
 
 namespace Mantid {
 using detid_t = int32_t;
-namespace Geometry {
-class IComponent;
-class ICompAssembly;
-class IDetector;
-class ParameterMap;
-}
-namespace Beamline {
-class ComponentInfo;
+namespace Beamline {class ComponentInfo;
 class DetectorInfo;
 }
-
 namespace Geometry {
-
+class ComponentInfo;
+class DetectorInfo;
+class ICompAssembly;
+class IComponent;
+class IDetector;
 class Instrument;
+class ParameterMap;
 /** InstrumentVisitor : Visitor for components with access to Info wrapping
   features.
 
@@ -154,10 +151,12 @@ public:
   bool isEmpty() const;
 
   std::unique_ptr<Beamline::ComponentInfo> componentInfo() const;
-
   std::unique_ptr<Beamline::DetectorInfo> detectorInfo() const;
 
   boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
+
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+  makeWrappers() const;
 };
 } // namespace Geometry
 } // namespace Mantid

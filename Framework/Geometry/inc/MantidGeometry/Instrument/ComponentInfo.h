@@ -52,7 +52,7 @@ class ParameterMap;
 class MANTID_GEOMETRY_DLL ComponentInfo {
 private:
   /// Reference to the actual ComponentInfo object (non-wrapping part).
-  Beamline::ComponentInfo &m_componentInfo;
+  std::unique_ptr<Beamline::ComponentInfo> m_componentInfo;
   /// Collection of component ids
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
       m_componentIds;
@@ -62,11 +62,14 @@ private:
 
 public:
   ComponentInfo(
-      Mantid::Beamline::ComponentInfo &componentInfo,
+      std::unique_ptr<Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds,
       boost::shared_ptr<const std::unordered_map<
           Geometry::IComponent *, size_t>> componentIdToIndexMap);
+  ComponentInfo(const ComponentInfo &other);
+  ~ComponentInfo();
+
   std::vector<size_t> detectorsInSubtree(size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   size_t size() const;

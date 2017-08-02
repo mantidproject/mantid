@@ -1,3 +1,5 @@
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
@@ -14,10 +16,7 @@
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
-
 namespace Geometry {
-
-using namespace Mantid::Geometry;
 
 namespace {
 boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
@@ -292,6 +291,22 @@ InstrumentVisitor::detectorInfo() const {
 
 boost::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const {
   return m_orderedDetectorIds;
+}
+
+std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+InstrumentVisitor::makeWrappers() const {
+  auto compInfo = componentInfo();
+  auto detInfo = detectorInfo();
+  // Cross link Component and Detector info objects
+  compInfo->setDetectorInfo(detInfo.get());
+  detInfo->setComponentInfo(compInfo.get());
+
+  auto compInfoWrapper = Kernel::make_unique<ComponentInfo>(
+      std::move(compInfo), componentIds(), componentIdToIndexMap());
+  auto detInfoWrapper = Kernel::make_unique<DetectorInfo>(
+      std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
+
+  return {std::move(compInfoWrapper), std::move(detInfoWrapper)};
 }
 
 } // namespace Geometry

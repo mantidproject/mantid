@@ -17,10 +17,6 @@ namespace Mantid {
 namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 }
-namespace Beamline {
-class ComponentInfo;
-class DetectorInfo;
-}
 namespace Geometry {
 class BoundingBox;
 class ComponentInfo;
@@ -384,21 +380,13 @@ private:
   std::unique_ptr<Kernel::Cache<const ComponentID, BoundingBox>>
       m_boundingBoxMap;
 
-  /// Pointer to the DetectorInfo object. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;
-
-  /// Pointer to the ComponentInfo object. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  std::unique_ptr<Beamline::ComponentInfo> m_componentInfo;
-
   /// Pointer to the DetectorInfo wrapper. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
-  std::unique_ptr<Geometry::DetectorInfo> m_detectorInfoWrapper;
+  std::unique_ptr<Geometry::DetectorInfo> m_detectorInfo;
 
   /// Pointer to the ComponentInfo wrapper. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
-  std::unique_ptr<Geometry::ComponentInfo> m_componentInfoWrapper;
+  std::unique_ptr<Geometry::ComponentInfo> m_componentInfo;
 
   /// Pointer to the owning instrument for translating detector IDs into
   /// detector indices when accessing the DetectorInfo object. If the workspace

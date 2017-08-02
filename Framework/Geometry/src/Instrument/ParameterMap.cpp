@@ -54,9 +54,6 @@ void checkIsNotMaskingParameter(const std::string &name) {
                              "ParameterMap. Use DetectorInfo instead");
 }
 }
-//--------------------------------------------------------------------------
-// Public method
-//--------------------------------------------------------------------------
 /**
  * Default constructor
  */
@@ -82,24 +79,12 @@ ParameterMap::ParameterMap(const ParameterMap &other)
       m_instrument(other.m_instrument) {
   if (!other.m_detectorInfo)
     return;
-  m_detectorInfo =
-      Kernel::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo);
-  m_componentInfo =
-      Kernel::make_unique<Beamline::ComponentInfo>(*other.m_componentInfo);
-  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
-  m_detectorInfo->setComponentInfo(m_componentInfo.get());
-
-  m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
-      *m_componentInfo, other.m_componentInfoWrapper->m_componentIds,
-      other.m_componentInfoWrapper->m_compIDToIndex);
-
-  auto parInstrument = ParComponentFactory::createInstrument(
-      boost::shared_ptr<const Instrument>(m_instrument, NoDeleting()),
-      boost::shared_ptr<ParameterMap>(this, NoDeleting()));
-  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-      *m_detectorInfo, parInstrument,
-      other.m_detectorInfoWrapper->m_detectorIDs,
-      other.m_detectorInfoWrapper->m_detIDToIndex);
+  m_detectorInfo = Kernel::make_unique<DetectorInfo>(*other.m_detectorInfo);
+  m_componentInfo = Kernel::make_unique<ComponentInfo>(*other.m_componentInfo);
+  m_componentInfo->m_componentInfo->setDetectorInfo(
+      m_detectorInfo->m_detectorInfo.get());
+  m_detectorInfo->m_detectorInfo->setComponentInfo(
+      m_componentInfo->m_componentInfo.get());
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -1202,14 +1187,14 @@ bool ParameterMap::hasComponentInfo(const Instrument *instrument) const {
 const Geometry::DetectorInfo &ParameterMap::detectorInfo() const {
   if (!hasDetectorInfo(m_instrument))
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
-  return *m_detectorInfoWrapper;
+  return *m_detectorInfo;
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
 Geometry::DetectorInfo &ParameterMap::mutableDetectorInfo() {
   if (!hasDetectorInfo(m_instrument))
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
-  return *m_detectorInfoWrapper;
+  return *m_detectorInfo;
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
@@ -1217,7 +1202,7 @@ const Geometry::ComponentInfo &ParameterMap::componentInfo() const {
   if (!hasComponentInfo(m_instrument)) {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
-  return *m_componentInfoWrapper;
+  return *m_componentInfo;
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
@@ -1225,7 +1210,7 @@ Geometry::ComponentInfo &ParameterMap::mutableComponentInfo() {
   if (!hasComponentInfo(m_instrument)) {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
-  return *m_componentInfoWrapper;
+  return *m_componentInfo;
 }
 
 /// Only for use by Detector. Returns a detector index for a detector ID.
@@ -1234,7 +1219,7 @@ size_t ParameterMap::detectorIndex(const detid_t detID) const {
 }
 
 size_t ParameterMap::componentIndex(const ComponentID componentId) const {
-  return m_componentInfoWrapper->indexOf(componentId);
+  return m_componentInfo->indexOf(componentId);
 }
 
 /// Only for use by Instrument. Sets the pointer to the owning instrument.
@@ -1243,39 +1228,24 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
     return;
   if (!instrument) {
     m_componentInfo = nullptr;
-    m_componentInfoWrapper = nullptr;
     m_detectorInfo = nullptr;
-    m_detectorInfoWrapper = nullptr;
     return;
   }
   if (m_instrument)
     throw std::logic_error("ParameterMap::setInstrument: Cannot change "
                            "instrument once it has been set.");
-
   if (instrument->isParametrized())
     throw std::logic_error("ParameterMap::setInstrument must be called with "
                            "base instrument, not a parametrized instrument");
   m_instrument = instrument;
+
   const auto parInstrument = ParComponentFactory::createInstrument(
       boost::shared_ptr<const Instrument>(m_instrument, NoDeleting()),
       boost::shared_ptr<ParameterMap>(this, NoDeleting()));
 
   InstrumentVisitor visitor(parInstrument);
   visitor.walkInstrument();
-
-  m_componentInfo = visitor.componentInfo();
-  m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
-      *m_componentInfo, visitor.componentIds(),
-      visitor.componentIdToIndexMap());
-
-  m_detectorInfo = visitor.detectorInfo();
-  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-      *m_detectorInfo, parInstrument, visitor.detectorIds(),
-      visitor.detectorIdToIndexMap());
-
-  // Cross link Component and Detector info objects
-  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
-  m_detectorInfo->setComponentInfo(m_componentInfo.get());
+  std::tie(m_componentInfo, m_detectorInfo) = visitor.makeWrappers();
 }
 
 } // Namespace Geometry
