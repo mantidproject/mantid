@@ -60,7 +60,6 @@ Output:
     Using Gauss Model
     A0: [ 0.87079958]
     A1: [ 0.03278263]
-
     Using Yi Model
     A0: [ 0.75677983]
     A1: [ 1.76943372]
