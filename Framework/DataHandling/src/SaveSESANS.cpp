@@ -36,13 +36,22 @@ int SaveSESANS::version() const { return 1; }
 /// Get the algorithm's category
 const std::string SaveSESANS::category() const { return "DataHandling\\Text"; }
 
+std::map<std::string, std::string> SaveSESANS::validateInputs(){
+  std::map<std::string, std::string> invalidInputs;
+
+  for (const auto &propertyName : mandatoryDoubleProperties){
+    double value = getProperty(propertyName);
+    if (value == EMPTY_DBL()){
+      invalidInputs[propertyName] = propertyName + " must be set";
+    }
+  }
+  return invalidInputs;
+}
+  
 /**
  * Initialise the algorithm
  */
 void SaveSESANS::init() {
-  auto notSentinel = boost::make_shared<Kernel::BoundedValidator<double>>();
-  notSentinel->setLower(-DBL_MAX);
-
   auto validOrientation = boost::make_shared<Kernel::StringListValidator>(
       std::set<std::string>{"X", "Y", "Z"});
 
@@ -53,13 +62,13 @@ void SaveSESANS::init() {
                       "Filename", "", API::FileProperty::Save, fileExtensions),
                   "The name to use when saving the file");
 
-  declareProperty("ThetaZMax", -DBL_MAX, notSentinel, "Theta_zmax",
+  declareProperty("ThetaZMax", EMPTY_DBL(), "Theta_zmax",
                   Kernel::Direction::Input);
   declareProperty("ThetaZMaxUnit", "radians", Kernel::Direction::Input);
-  declareProperty("ThetaYMax", -DBL_MAX, notSentinel, "Theta_ymax",
+  declareProperty("ThetaYMax", EMPTY_DBL(), "Theta_ymax",
                   Kernel::Direction::Input);
   declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
-  declareProperty("EchoConstant", -DBL_MAX, notSentinel, "Echo_constant",
+  declareProperty("EchoConstant", EMPTY_DBL(), "Echo_constant",
                   Kernel::Direction::Input);
   
   declareProperty<std::string>("Orientation", "Z", validOrientation,

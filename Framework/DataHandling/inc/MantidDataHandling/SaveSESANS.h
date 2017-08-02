@@ -6,6 +6,8 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include <map>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -52,14 +54,15 @@ public:
   const std::string summary() const override;
   int version() const override;
   const std::string category() const override;
-
+  std::map<std::string, std::string> validateInputs() override;
+  
 private:
   // Length of the longest attribute name in headers (+4 for readability in the
   // file)
   const int MAX_HDR_LENGTH = 23;
   const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans",
                                                 ".SESANS"};
-  const std::vector<std::string> nonEmptyDoubleProperties{
+  const std::vector<std::string> mandatoryDoubleProperties{
       "ThetaZMax", "ThetaYMax", "EchoConstant"};
 
   void init() override;
