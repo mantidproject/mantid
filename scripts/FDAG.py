@@ -14,6 +14,7 @@ def qapp():
 
 app = qapp()
 
-reducer =test.Form() #the main ui class in this file is called MainWindow
-reducer.show()
+ex =test.Form() #the main ui class in this file is called MainWindow
+ex.resize(700,700)
+ex.show()
 app.exec_()
