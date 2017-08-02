@@ -364,14 +364,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 self._sam_ws_map.addWs(sample)
 
         # Add the vanadium workspaces to the dRange to vanadium map
-        for idx, van in enumerate(self._vanadium_runs):
-
-            if self._man_d_range is not None and \
-                            idx < len(self._man_d_range):
-                self.log().information("Found: " + str(van))
-                self._van_ws_map.addWs(van, self._man_d_range[idx])
-            else:
-                self._van_ws_map.addWs(van)
+        self._add_to_drange_map(self._vanadium_runs, self._van_ws_map)
 
         # Finished with container now so delete it
         for container in container_ws_names:
@@ -386,18 +379,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Average together any sample workspaces with the same DRange.
         # This will mean our map of DRanges to list of workspaces becomes a map
         # of DRanges, each to a *single* workspace.
-        temp_sam_map = DRangeToWorkspaceMap()
-        for d_range, ws_list in self._sam_ws_map.getMap().items():
-            ws_list = self._rebin_to_smallest(ws_list)
-            temp_sam_map.setItem(d_range, average_ws_list(ws_list))
-        self._sam_ws_map = temp_sam_map
+        self._sam_ws_map = self._average_across_dranges(self._sam_ws_map)
 
         # Now do the same to the vanadium workspaces.
-        temp_van_map = DRangeToWorkspaceMap()
-        for d_range, ws_list in self._van_ws_map.getMap().items():
-            ws_list = self._rebin_to_smallest(ws_list)
-            temp_van_map.setItem(d_range, average_ws_list(ws_list))
-        self._van_ws_map = temp_van_map
+        self._van_ws_map = self._average_across_dranges(self._van_ws_map)
 
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
         for d_range, wrksp in list(self._sam_ws_map.getMap().items()) + list(self._van_ws_map.getMap().items()):
@@ -476,6 +461,41 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             DeleteWorkspace(Workspace=wrksp + "_mon")
 
         self.setProperty("OutputWorkspace", result)
+
+    def _add_to_drange_map(self, workspaces, drange_map):
+        """
+        Adds the specified workspaces to the specified drange map.
+        Attempts to add using the manually entered dranges where
+        possible.
+
+        :param workspaces:      The workspaces to add to the drange map.
+        :param drange_map:      The drange map to add the workspaces to.
+        :param do_log_found:    If True print the found workspaces to log.
+                                Else don't print to log.
+        """
+
+        for idx, ws in enumerate(workspaces):
+            if self._man_d_range is not None and \
+                            idx < len(self._man_d_range):
+                drange_map.addWs(ws, self._man_d_range[idx])
+            else:
+                drange_map.addWs(ws)
+
+    def _average_across_dranges(self, drange_map):
+        """
+        Averages workspaces which are mapped to the same drange and
+        returns a drange map of the averaged workspaces.
+
+        :param drange_map:  The drange map to average across.
+        :return:            A drange map containing the averaged
+                            workspaces for each drange.
+        """
+
+        temp_map = DRangeToWorkspaceMap()
+        for d_range, ws_list in drange_map.getMap().items():
+            ws_list = self._rebin_to_smallest(ws_list)
+            temp_map.setItem(d_range, average_ws_list(ws_list))
+        return temp_map
 
     def _parse_string_array(self, string):
         """
