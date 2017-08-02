@@ -364,7 +364,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 self._sam_ws_map.addWs(sample)
 
         # Add the vanadium workspaces to the dRange to vanadium map
-        self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
+        self._van_ws_map = self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
 
         # Finished with container now so delete it
         for container in container_ws_names:
@@ -466,12 +466,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         """
         Adds the specified workspaces to the specified drange map.
         Attempts to add using the manually entered dranges where
-        possible.
+        possible - if not, automatically finds the drange.
 
         :param workspaces:      The workspaces to add to the drange map.
         :param drange_map:      The drange map to add the workspaces to.
         :param do_log_found:    If True print the found workspaces to log.
                                 Else don't print to log.
+        :return:                The drange map with the workspaces added.
         """
 
         for idx, ws in enumerate(workspaces):
@@ -480,6 +481,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 drange_map.addWs(ws, self._man_d_range[idx])
             else:
                 drange_map.addWs(ws)
+        return drange_map
 
     def _average_across_dranges(self, drange_map):
         """
