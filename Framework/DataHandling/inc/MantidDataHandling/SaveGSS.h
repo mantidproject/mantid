@@ -124,7 +124,7 @@ private:
   bool isInstrumentValid() const;
 
   /// Opens a new file stream at the path specified.
-  std::unique_ptr<std::ofstream> openFileStream(const std::string &outFilePath);
+  void openFileStream(const std::string &outFilePath, std::ofstream &outStream);
 
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,

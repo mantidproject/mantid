@@ -532,24 +532,27 @@ bool SaveGSS::isInstrumentValid() const {
   * responsible for closing to stream when finished.
   *
   * @param outFilePath :: The full path of the file to open a stream out
+  * @param outStream :: The stream to open at the specified file
   * @throws :: If the fail bit is set on the out stream. Additionally
   * logs the system reported error as a Mantid error.
-  * @return :: The opened file stream at the user specified path
   */
-std::unique_ptr<std::ofstream>
-SaveGSS::openFileStream(const std::string &outFilePath) {
-  const bool append = getProperty("Append");
+void SaveGSS::openFileStream(const std::string &outFilePath,
+                             std::ofstream &outStream) {
+  // We have to take the ofstream as a parameter instead of returning
+  // as GCC 4.X (RHEL7) does not allow a ioStream to be moved or have
+  // NRVO applied
 
   // Select to append to current stream or override
+  const bool append = getProperty("Append");
   using std::ios_base;
   const ios_base::openmode mode = (append ? (ios_base::out | ios_base::app)
                                           : (ios_base::out | ios_base::trunc));
 
   // Have to wrap this in a unique pointer as GCC 4.x (RHEL 7) does
   // not support the move operator on iostreams
-  auto outStream = Kernel::make_unique<std::ofstream>(outFilePath, mode);
+  outStream.open(outFilePath, mode);
 
-  if (outStream->fail()) {
+  if (outStream.fail()) {
     // Get the error message from library and log before throwing
     const std::string error = strerror(errno);
     g_log.error("Failed to open file. Error was: " + error);
@@ -557,8 +560,7 @@ SaveGSS::openFileStream(const std::string &outFilePath) {
                              outFilePath);
   }
 
-  // Stream is good - return to caller
-  return outStream;
+  // Stream is good at this point
 }
 
 /** Ensures that when a workspace group is passed as output to this workspace
@@ -643,14 +645,23 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t fileIndex = 0; fileIndex < numOutFilesInt64; fileIndex++) {
     // Open each file when there are multiple
-    auto outFile = openFileStream(m_outFileNames[fileIndex]);
+    std::ofstream fileStream;
+    openFileStream(m_outFileNames[fileIndex], fileStream);
     for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
       // Write each spectra when there are multiple
       const size_t index = specIndex + fileIndex;
       assert(m_outputBuffer[index].str().size() > 0);
-      *outFile << m_outputBuffer[index].rdbuf();
+      fileStream << m_outputBuffer[index].rdbuf();
     }
-    outFile->close();
+
+    fileStream.close();
+    if (fileStream.fail()) {
+      const std::string error = strerror(errno);
+      g_log.error("Failed to close file. Error was: " + error);
+      throw std::runtime_error(
+          "Failed to close the file at " + m_outFileNames[fileIndex] +
+          " - this file may be empty, corrupted or incorrect.");
+    }
   }
 }
 
