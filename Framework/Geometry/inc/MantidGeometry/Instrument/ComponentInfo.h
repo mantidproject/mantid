@@ -51,7 +51,7 @@ class ParameterMap;
 */
 class MANTID_GEOMETRY_DLL ComponentInfo {
 private:
-  /// Reference to the actual ComponentInfo object (non-wrapping part).
+  /// Pointer to the actual ComponentInfo object (non-wrapping part).
   std::unique_ptr<Beamline::ComponentInfo> m_componentInfo;
   /// Collection of component ids
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>

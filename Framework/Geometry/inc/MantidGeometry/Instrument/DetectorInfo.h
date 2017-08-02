@@ -135,7 +135,7 @@ private:
   boost::shared_ptr<const Geometry::IDetector>
   getDetectorPtr(const size_t index) const;
 
-  /// Reference to the actual DetectorInfo object (non-wrapping part).
+  /// Pointer to the actual DetectorInfo object (non-wrapping part).
   std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;
 
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
