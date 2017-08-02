@@ -85,6 +85,11 @@ ParameterMap::ParameterMap(const ParameterMap &other)
       m_detectorInfo->m_detectorInfo.get());
   m_detectorInfo->m_detectorInfo->setComponentInfo(
       m_componentInfo->m_componentInfo.get());
+
+  const auto parInstrument = ParComponentFactory::createInstrument(
+      boost::shared_ptr<const Instrument>(m_instrument, NoDeleting()),
+      boost::shared_ptr<ParameterMap>(this, NoDeleting()));
+  m_detectorInfo->m_instrument = parInstrument;
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
