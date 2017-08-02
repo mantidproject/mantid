@@ -578,7 +578,7 @@ QString ReflDataProcessorPresenter::takeSlice(const QString &runNo,
   AnalysisDataService::Instance().remove("__" + monName.toStdString() +
                                          "_temp");
 
-  return sliceName.left(4);
+  return sliceName.mid(4);
 }
 
 
