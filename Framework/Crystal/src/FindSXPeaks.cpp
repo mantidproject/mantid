@@ -69,14 +69,15 @@ void FindSXPeaks::init() {
   // ---------------------------------------------------------------
   std::vector<std::string> peakFindingStrategy = {strongestPeakStrategy,
                                                   allPeaksStrategy};
-  declareProperty("PeakFindingStrategy", strongestPeakStrategy,
-                  boost::make_shared<StringListValidator>(peakFindingStrategy),
-                  "Different options for peak finding."
-                  "1. StrongestPeakOnly: This is a much more performant way of "
-                  "finding the strongest peak per spectrum (provided there is "
-                  "one).\n"
-                  "2. AllPeaks: This strategy will find all peaks in each "
-                  "spectrum. This is slower than StrongestPeakOnly.\n");
+  declareProperty(
+      "PeakFindingStrategy", strongestPeakStrategy,
+      boost::make_shared<StringListValidator>(peakFindingStrategy),
+      "Different options for peak finding."
+      "1. StrongestPeakOnly: Looks only for the the strongest peak in each "
+      "spectrum (provided there is "
+      "one). This options is more performant than the AllPeaks option.\n"
+      "2. AllPeaks: This strategy will find all peaks in each "
+      "spectrum. This is slower than StrongestPeakOnly.\n");
 
   // Declare
   declareProperty(
@@ -90,7 +91,10 @@ void FindSXPeaks::init() {
   declareProperty(
       "AbsoluteBackground", 10.0,
       "Peaks which are below the specified absolute background are discarded."
-      " The background is specified for all spectra.");
+      " The background is gloabally specified for all spectra. Inspect your "
+      "data in the InstrumentView to get a good feeling for the background "
+      "threshold.\n"
+      "Background thresholds which are too low will mistake noise for peaks.");
 
   // Enable
   setPropertySettings("SignalBackground",
@@ -292,6 +296,7 @@ void FindSXPeaks::exec() {
 Reduce the peak list by removing duplicates
 then convert SXPeaks objects to PeakObjects and add them to the output workspace
 @param pcv : current peak list containing potential duplicates
+@param progress: a progress object
 */
 void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
