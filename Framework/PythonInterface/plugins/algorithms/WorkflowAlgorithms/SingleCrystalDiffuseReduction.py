@@ -8,7 +8,7 @@ from mantid.simpleapi import (LoadIsawUB, MaskDetectors, ConvertUnits,
                               CropWorkspace, LoadInstrument,
                               SetGoniometer, SetUB, ConvertToMD,
                               MDNormSCD, DivideMD, MinusMD, Load,
-                              DeleteWorkspace,
+                              DeleteWorkspace, RenameWorkspaces,
                               CreateSingleValuedWorkspace, LoadNexus,
                               MultiplyMD, LoadIsawDetCal, MaskBTP)
 from mantid.geometry import SpaceGroupFactory, SymmetryOperationFactory
@@ -98,6 +98,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                              "comma-separated list of values with the"
                              "format: 'minimum,maximum,number_of_bins'.")
 
+        self.declareProperty('KeepTemporaryWorkspaces', False,
+                             "If True the normalization and data workspaces in addition to the normalized data will be outputted")
+
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
@@ -161,8 +164,6 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
 
         UBList = self._generate_UBList()
 
-        progress = Progress(self, 0.0, 1.0, len(UBList)*len(self.getProperty("Filename").value))
-
         dim0_min, dim0_max, dim0_bins = self.getProperty('BinningDim0').value
         dim1_min, dim1_max, dim1_bins = self.getProperty('BinningDim1').value
         dim2_min, dim2_max, dim2_bins = self.getProperty('BinningDim2').value
@@ -197,6 +198,8 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
             ConvertUnits(InputWorkspace='__bkg',OutputWorkspace='__bkg',Target='Momentum')
             CropWorkspace(InputWorkspace='__bkg',OutputWorkspace='__bkg',XMin=XMin,XMax=XMax)
 
+        progress = Progress(self, 0.0, 1.0, len(UBList)*len(self.getProperty("Filename").value))
+
         for run in self.getProperty("Filename").value:
             logger.notice("Working on " + run)
 
@@ -224,7 +227,6 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                 mtd['__bkg'].run().getGoniometer().setR(mtd['__run'].run().getGoniometer().getR())
 
             for ub in UBList:
-                progress.report()
                 SetUB(Workspace='__run', UB=ub)
                 ConvertToMD(InputWorkspace='__run',
                             OutputWorkspace='__md',
@@ -275,21 +277,29 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                               AlignedDim1=mtd['__bkg_md'].getDimension(1).name+AlignedDim1,
                               AlignedDim2=mtd['__bkg_md'].getDimension(2).name+AlignedDim2)
                     DeleteWorkspace('__bkg_md')
+                progress.report()
             DeleteWorkspace('__run')
 
         if _background:
             # outWS = data / norm - bkg_data / bkg_norm * BackgroundScale
-            DivideMD(LHSWorkspace='__data',RHSWorkspace='__norm',OutputWorkspace=_outWS_name+'_data')
-            DivideMD(LHSWorkspace='__bkg_data',RHSWorkspace='__bkg_norm',OutputWorkspace=_outWS_name+'_background')
+            DivideMD(LHSWorkspace='__data',RHSWorkspace='__norm',OutputWorkspace=_outWS_name+'_normalizedData')
+            DivideMD(LHSWorkspace='__bkg_data',RHSWorkspace='__bkg_norm',OutputWorkspace=_outWS_name+'_normalizedBackground')
             CreateSingleValuedWorkspace(OutputWorkspace='__scale', DataValue=self.getProperty('BackgroundScale').value)
-            MultiplyMD(LHSWorkspace=_outWS_name+'_background',
+            MultiplyMD(LHSWorkspace=_outWS_name+'_normalizedBackground',
                        RHSWorkspace='__scale',
                        OutputWorkspace='__scaled_background')
             DeleteWorkspace('__scale')
-            MinusMD(LHSWorkspace=_outWS_name+'_data',RHSWorkspace='__scaled_background',OutputWorkspace=_outWS_name)
+            MinusMD(LHSWorkspace=_outWS_name+'_normalizedData',RHSWorkspace='__scaled_background',OutputWorkspace=_outWS_name)
+            if self.getProperty('KeepTemporaryWorkspaces').value:
+                RenameWorkspaces(InputWorkspaces=['__data','__norm','__bkg_data','__bkg_norm'],
+                                 WorkspaceNames=[_outWS_name+'_data', _outWS_name+'_normalization',
+                                                 _outWS_name+'_background_data',_outWS_name+'_background_normalization'])
         else:
             # outWS = data / norm
             DivideMD(LHSWorkspace='__data',RHSWorkspace='__norm',OutputWorkspace=_outWS_name)
+            if self.getProperty('KeepTemporaryWorkspaces').value:
+                RenameWorkspaces(InputWorkspaces=['__data','__norm'],
+                                 WorkspaceNames=[_outWS_name+'_data', _outWS_name+'_normalization'])
 
         self.setProperty("OutputWorkspace", mtd[_outWS_name])
 

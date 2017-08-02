@@ -43,9 +43,9 @@ The background is processed the same as the data except that the
 Goniometer is copied from the data before setting the UB. If a
 background is included three workspaces are create.
 
-"OutputWorkspace" + '_background' containing the normalised background.
+"OutputWorkspace" + '_normalizedBackground' containing the normalised background.
 
-"OutputWorkspace" + '_data' containing the normalised data.
+"OutputWorkspace" + '_normalizedData' containing the normalised data.
 
 And "OutputWorkspace" where OutputWorkspace = OutputWorkspace\_data - OutputWorkspace\_background * BackgroundScale
 
@@ -66,6 +66,23 @@ groups>` to apply.
 For example setting SymmetryOps to "P 31 2 1", "152" or "x,y,z;
 -y,x-y,z+1/3; -x+y,-x,z+2/3; y,x,-z; x-y,-y,-z+2/3; -x,-x+y,-z+1/3"
 are equivalent.
+
+Temporary Workspaces
+####################
+
+If the KeepTemporaryWorkspaces option is True the data and the
+normalization in addition to the nomalized data will be
+outputted. This allows you to run separate instances of
+SingleCrystalDiffuseReduction and combine the results. They will have
+names "OutputWorkspace" + '_data' and "OutputWorkspace" +
+'_normalization' respectively.
+
+Where "OutputWorkspace" = OutputWorkspace"+'_data' /
+"OutputWorkspace"+'_normalization'.
+
+If background is subtracted there will be similar "OutputWorkspace" +
+'_background_data' and "OutputWorkspace" +
+'_background_normalization' for the background.
 
 Workflow
 --------
