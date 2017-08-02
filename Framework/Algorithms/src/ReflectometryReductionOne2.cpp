@@ -957,7 +957,7 @@ void ReflectometryReductionOne2::findWavelengthMinMax(
   const size_t numGroups = detectorGroups().size();
 
   // Find the projected min/max wavelength for all detector groups
-  double first = true;
+  bool first = true;
   for (size_t groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
     // Get the detectors in this group
     auto &detectors = detectorGroups()[groupIdx];
