@@ -388,14 +388,14 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # of DRanges, each to a *single* workspace.
         temp_sam_map = DRangeToWorkspaceMap()
         for d_range, ws_list in self._sam_ws_map.getMap().items():
-            self._rebin_to_smallest(ws_list)
+            ws_list = self._rebin_to_smallest(ws_list)
             temp_sam_map.setItem(d_range, average_ws_list(ws_list))
         self._sam_ws_map = temp_sam_map
 
         # Now do the same to the vanadium workspaces.
         temp_van_map = DRangeToWorkspaceMap()
         for d_range, ws_list in self._van_ws_map.getMap().items():
-            self._rebin_to_smallest(ws_list)
+            ws_list = self._rebin_to_smallest(ws_list)
             temp_van_map.setItem(d_range, average_ws_list(ws_list))
         self._van_ws_map = temp_van_map
 
