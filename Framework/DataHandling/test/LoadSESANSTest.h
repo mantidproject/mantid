@@ -103,7 +103,7 @@ private:
   }
 
   std::string createTemporaryFile() {
-    Poco::TemporaryFile tempFile;
+    Poco::TemporaryFile tempFile(".");
     tempFile.keepUntilExit();
     return tempFile.path();
   }

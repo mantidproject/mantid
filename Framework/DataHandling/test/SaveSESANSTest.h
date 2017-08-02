@@ -58,7 +58,7 @@ public:
     testAlg.setProperty("InputWorkspace", ws);
 
     // Make a temporary file
-    Poco::TemporaryFile tempFile;
+    Poco::TemporaryFile tempFile(".");
     const auto &tempFileName = tempFile.path();
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
 
