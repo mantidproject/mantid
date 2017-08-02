@@ -1,11 +1,13 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/NiggliCell.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include <algorithm>
 #include <cmath>
 #include <boost/math/special_functions/round.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <stdexcept>
+#include <Eigen/Geometry>
 
 extern "C" {
 #include <gsl/gsl_errno.h>
@@ -1679,9 +1681,9 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
     @param  b_dir   V3D object with length "b" in the direction of the rotated
                     cell edge "b"
     @param  c       The length of the third cell edge, c.
-    @param  alpha   angle between edges b and c.
-    @param  beta    angle between edges c and a.
-    @param  gamma   angle between edges a and b.
+    @param  alpha   angle between edges b and c in degrees.
+    @param  beta    angle between edges c and a in degrees.
+    @param  gamma   angle between edges a and b in degrees.
 
     @return A new V3D object with length "c", in the direction of the third
             rotated unit cell edge, "c".
@@ -1699,20 +1701,12 @@ V3D IndexingUtils::Make_c_dir(const V3D &a_dir, const V3D &b_dir, double c,
                   cos_gamma * cos_gamma + 2 * cos_alpha * cos_beta * cos_gamma);
   double c3 = c * V / sin_gamma;
 
-  V3D basis_1(a_dir);
-  basis_1.normalize();
+  auto basis_1 = Kernel::toVector3d(a_dir).normalized();
+  auto basis_3 =
+      Kernel::toVector3d(a_dir).cross(Kernel::toVector3d(b_dir)).normalized();
+  auto basis_2 = basis_3.cross(basis_1).normalized();
 
-  V3D basis_3(a_dir);
-  basis_3 = basis_3.cross_prod(b_dir);
-  basis_3.normalize();
-
-  V3D basis_2(basis_3);
-  basis_2 = basis_2.cross_prod(basis_1);
-  basis_2.normalize();
-
-  V3D c_dir = basis_1 * c1 + basis_2 * c2 + basis_3 * c3;
-
-  return c_dir;
+  return Kernel::toV3D(basis_1 * c1 + basis_2 * c2 + basis_3 * c3);
 }
 
 /**
