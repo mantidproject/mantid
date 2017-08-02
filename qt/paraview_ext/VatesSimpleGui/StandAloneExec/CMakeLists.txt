@@ -43,10 +43,11 @@ include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 target_link_libraries( ${PROJECT_NAME} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 pqCore pqComponents pqApplicationComponents
 ${QT_LIBRARIES}
-${MANTID_SUBPROJECT_LIBS}
+Kernel
+VatesAPI
 VatesSimpleGuiQtWidgets
 VatesSimpleGuiViewWidgets
-MantidQtAPI
+qtwidgetscommon
 vtkInteractionStyle
 vtkRenderingFreeType
 ${POCO_LIBRARIES}
