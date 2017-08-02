@@ -9,6 +9,7 @@
 
 typedef std::vector<double> Column;
 typedef std::unordered_map<std::string, Column> ColumnMap;
+typedef std::unordered_map<std::string, std::string> AttributeMap;
 
 namespace Mantid {
 namespace DataHandling {
@@ -57,10 +58,11 @@ public:
 private:
   // Private constants
   const std::vector<std::string> mandatoryAttributes{
-      "FileFormatVersion", "DataFileTitle", "Sample", "Thickness",
-      "Thickness_unit", "Theta_zmax", "Theta_zmax_unit", "Theta_ymax",
-      "Theta_ymax_unit", "Orientation", "SpinEchoLength_unit",
-      "Depolarisation_unit", "Wavelength_unit"};
+      "FileFormatVersion", "DataFileTitle",       "Sample",
+      "Thickness",         "Thickness_unit",      "Theta_zmax",
+      "Theta_zmax_unit",   "Theta_ymax",          "Theta_ymax_unit",
+      "Orientation",       "SpinEchoLength_unit", "Depolarisation_unit",
+      "Wavelength_unit"};
   const std::vector<std::string> mandatoryColumnHeaders{
       "SpinEchoLength", "Depolarisation", "Depolarisation_error", "Wavelength"};
   const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans",
@@ -70,11 +72,13 @@ private:
   void init() override;
   void exec() override;
 
-  void consumeHeaders(std::ifstream &infile, std::string &line, int &lineNum);
+  AttributeMap consumeHeaders(std::ifstream &infile, std::string &line,
+                              int &lineNum);
   ColumnMap consumeData(std::ifstream &infile, std::string &line, int &lineNum);
   std::pair<std::string, std::string> splitHeader(const std::string &line,
                                                   const int &lineNum);
-  void checkMandatoryHeaders();
+
+  void checkMandatoryHeaders(const AttributeMap &attributes);
 
   void throwFormatError(const std::string &line, const std::string &message,
                         const int &lineNum);
@@ -92,8 +96,6 @@ private:
   static std::string repeatAndJoin(const std::string &str,
                                    const std::string &delim, const int &n);
   static bool allSpaces(const std::string &str);
-  // Private members
-  std::unordered_map<std::string, std::string> attributes;
 };
 
 } // namespace DataHandling

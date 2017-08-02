@@ -23,26 +23,16 @@ public:
   void test_init() {
     writeFile(goodFile);
 
-    LoadSESANS testAlg;
     TS_ASSERT_THROWS_NOTHING(testAlg.initialize());
     TS_ASSERT(testAlg.isInitialized());
     testAlg.setChild(true);
     testAlg.setRethrows(true);
+
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", infileName));
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
   }
 
   void test_exec() {
-    // Setup the algorithm
-    LoadSESANS testAlg;
-    TS_ASSERT_THROWS_NOTHING(testAlg.initialize());
-    TS_ASSERT(testAlg.isInitialized());
-    testAlg.setChild(true);
-    testAlg.setRethrows(true);
-
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", infileName));
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
-
     // Execute the algorithm
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
 
@@ -82,12 +72,6 @@ public:
   }
 
   void test_confidence() {
-    LoadSESANS testAlg;
-    TS_ASSERT_THROWS_NOTHING(testAlg.initialize());
-    TS_ASSERT(testAlg.isInitialized());
-    testAlg.setChild(true);
-    testAlg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", infileName));
     Mantid::Kernel::FileDescriptor descriptor(
         testAlg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(testAlg.confidence(descriptor), 70);
@@ -100,20 +84,9 @@ public:
   void test_mandatoryColumns() { attemptToLoadBadFile(fileMissingColumns); }
 
 private:
-  std::string infileName = "temp.ses";
-
   /// Try and fail to load a file which violates the allowed format
   void attemptToLoadBadFile(std::string fileContents) {
     writeFile(fileContents);
-
-    LoadSESANS testAlg;
-    TS_ASSERT_THROWS_NOTHING(testAlg.initialize());
-    TS_ASSERT(testAlg.isInitialized());
-    testAlg.setChild(true);
-    testAlg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", infileName));
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
-
     TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
 
     deleteFile(testAlg);
@@ -125,6 +98,15 @@ private:
     file << fileContents;
     file.close();
   }
+
+  void deleteFile(const LoadSESANS &testAlg) {
+    std::string outputPath = testAlg.getProperty("Filename");
+    TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
+    TS_ASSERT(!Poco::File(outputPath).exists());
+  }
+
+  std::string infileName = "temp.ses";
+  LoadSESANS testAlg;
 
   std::string goodFile =
       "FileFormatVersion       1.0\n"
@@ -200,12 +182,6 @@ private:
       "SpinEchoLength Depolarisation Depolarisation_error SomethingElse\n"
       "260.0 -1.42E-3 2.04E-3 1.612452\n"
       "280.8 -1.45E-3 1.87E-3 1.675709\n";
-
-  void deleteFile(const LoadSESANS &testAlg) {
-    std::string outputPath = testAlg.getProperty("Filename");
-    TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
-    TS_ASSERT(!Poco::File(outputPath).exists());
-  }
 };
 
 #endif /* MANTID_DATAHANDLING_LOADSESANSTEST_H_ */

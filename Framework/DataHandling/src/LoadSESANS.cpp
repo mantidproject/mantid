@@ -8,8 +8,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include <boost/regex.hpp>
 #include "boost/algorithm/string/predicate.hpp"
+#include <boost/regex.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -123,9 +123,9 @@ void LoadSESANS::exec() {
 
   // Read in all the header values, and make sure all the mandatory ones are
   // supplied
-  consumeHeaders(infile, line, lineNum);
+  AttributeMap attributes = consumeHeaders(infile, line, lineNum);
   lineNum++;
-  checkMandatoryHeaders();
+  checkMandatoryHeaders(attributes);
 
   // Make sure we haven't reached the end of the file without reading any data
   if (line != "BEGIN_DATA")
@@ -152,11 +152,13 @@ void LoadSESANS::exec() {
 * @param infile Reference to the input file
 * @param line Reference to the line currently being processed
 * @param lineNum Number of the line currently being processed
+* @return Map of attributes read
 * @throw runtime_error If incorrectly formatted headers are found (empty lines
 * are permitted)
 */
-void LoadSESANS::consumeHeaders(std::ifstream &infile, std::string &line,
-                                int &lineNum) {
+AttributeMap LoadSESANS::consumeHeaders(std::ifstream &infile,
+                                        std::string &line, int &lineNum) {
+  AttributeMap attributes;
   std::pair<std::string, std::string> attr;
 
   do {
@@ -168,6 +170,7 @@ void LoadSESANS::consumeHeaders(std::ifstream &infile, std::string &line,
       attributes.insert(attr);
     }
   } while (std::getline(infile, line) && line != "BEGIN_DATA");
+  return attributes;
 }
 
 /** Read numerical data from the file into a map of the form [column name] ->
@@ -282,11 +285,8 @@ void LoadSESANS::throwFormatError(const std::string &line,
 /** Make sure that all mandatory headers are supplied in the file
 * @throw runtime_error If any other the mandatory headers are missing
 */
-void LoadSESANS::checkMandatoryHeaders() {
+void LoadSESANS::checkMandatoryHeaders(const AttributeMap &attributes) {
   for (std::string attr : mandatoryAttributes) {
-    // if (std::find(attributes.begin(), attributes.end(), attr) ==
-    // attributes.end()){
-    // if (attributes.find(attr) == attributes.end()) {
     if (!attributes.count(attr)) {
       std::string err = "Failed to supply parameter: \"" + attr + "\"";
       g_log.error(err);
