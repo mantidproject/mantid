@@ -5,7 +5,6 @@
 #include "pqInterfaceTracker.h"
 #include "pqStandardPropertyWidgetInterface.h"
 #include "pqStandardViewFrameActionsImplementation.h"
-#include "pqQtMessageHandlerBehavior.h"
 #include "pqDataTimeStepBehavior.h"
 #include "pqSpreadSheetVisibilityBehavior.h"
 #include "pqPipelineContextMenuBehavior.h"
@@ -87,7 +86,6 @@ void VatesParaViewApplication::setupParaViewBehaviors() {
   pqApplicationCore::instance()->loadDistributedPlugins();
 
   // Define application behaviors.
-  new pqQtMessageHandlerBehavior(this);
   new pqDataTimeStepBehavior(this);
   new pqSpreadSheetVisibilityBehavior(this);
   new pqPipelineContextMenuBehavior(this);

@@ -88,7 +88,6 @@
 #include <pqPipelineSource.h>
 #include <pqPluginManager.h>
 #include <pqPluginSettingsBehavior.h>
-#include <pqQtMessageHandlerBehavior.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqSpreadSheetVisibilityBehavior.h>
