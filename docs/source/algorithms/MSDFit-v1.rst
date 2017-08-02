@@ -49,7 +49,7 @@ Usage
     print 'Using Gauss Model'
     print 'A0: ' + str(g_msd.readY(0))
     print 'A1: ' + str(g_msd.readY(1))
-    print 'Using Yi Model:'
+    print 'Using Yi Model'
     print 'A0: ' + str(y_msd.readY(0))
     print 'A1: ' + str(y_msd.readY(1))
 
