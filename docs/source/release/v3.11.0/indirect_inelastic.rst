@@ -11,6 +11,8 @@ New features
 Algorithms
 ##########
 
+- :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
+
 Data Analysis
 #############
 
