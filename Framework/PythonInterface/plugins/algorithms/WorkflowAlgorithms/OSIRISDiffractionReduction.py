@@ -115,7 +115,6 @@ class DRangeToWorkspaceMap(object):
 
         self._map = temp_map
 
-
     def setItem(self, d_range, ws_name):
         """
         Set a dRange and corresponding *single* ws.
