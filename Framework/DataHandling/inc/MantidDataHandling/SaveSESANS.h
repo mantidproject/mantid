@@ -60,7 +60,8 @@ private:
   const int MAX_HDR_LENGTH = 23;
   const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans",
                                                 ".SESANS"};
-  const std::vector<std::string> nonEmptyDoubleProperties{"ThetaZMax", "ThetaYMax", "EchoConstant"};
+  const std::vector<std::string> nonEmptyDoubleProperties{
+      "ThetaZMax", "ThetaYMax", "EchoConstant"};
 
   void init() override;
   void exec() override;

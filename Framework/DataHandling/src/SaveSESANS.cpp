@@ -38,20 +38,21 @@ const std::string SaveSESANS::category() const { return "DataHandling\\Text"; }
 
 /**
  * Validate user inputs
- * @return A map containing the names of any invalid properties and a description of the error
+ * @return A map containing the names of any invalid properties and a
+ * description of the error
  */
-std::map<std::string, std::string> SaveSESANS::validateInputs(){
+std::map<std::string, std::string> SaveSESANS::validateInputs() {
   std::map<std::string, std::string> invalidProperties;
 
-  for (auto propertyName: nonEmptyDoubleProperties){
+  for (auto propertyName : nonEmptyDoubleProperties) {
     //    if (getProperty(propertyName) == EMPTY_DBL()){
-    //invalidProperties[propertyName] = propertyName + " must be set";
+    // invalidProperties[propertyName] = propertyName + " must be set";
     //}
   }
 
   return invalidProperties;
 }
-  
+
 /**
  * Initialise the algorithm
  */
@@ -59,8 +60,9 @@ void SaveSESANS::init() {
   auto notDBL_MIN = boost::make_shared<Kernel::BoundedValidator<double>>();
   notDBL_MIN->setLower(DBL_MIN);
 
-  auto validOrientation = boost::make_shared<Kernel::StringListValidator>(std::set<std::string>{"X", "Y", "Z"});
-  
+  auto validOrientation = boost::make_shared<Kernel::StringListValidator>(
+      std::set<std::string>{"X", "Y", "Z"});
+
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "The name of the workspace to save");
@@ -68,11 +70,14 @@ void SaveSESANS::init() {
                       "Filename", "", API::FileProperty::Save, fileExtensions),
                   "The name to use when saving the file");
 
-  declareProperty("ThetaZMax", DBL_MIN, notDBL_MIN, "Theta_zmax", Kernel::Direction::Input);
+  declareProperty("ThetaZMax", DBL_MIN, notDBL_MIN, "Theta_zmax",
+                  Kernel::Direction::Input);
   declareProperty("ThetaZMaxUnit", "radians", Kernel::Direction::Input);
-  declareProperty("ThetaYMax", DBL_MIN, notDBL_MIN, "Theta_ymax", Kernel::Direction::Input);
+  declareProperty("ThetaYMax", DBL_MIN, notDBL_MIN, "Theta_ymax",
+                  Kernel::Direction::Input);
   declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
-  declareProperty("EchoConstant", DBL_MIN, notDBL_MIN, "Echo_constant", Kernel::Direction::Input);
+  declareProperty("EchoConstant", DBL_MIN, notDBL_MIN, "Echo_constant",
+                  Kernel::Direction::Input);
 
   declareProperty<std::string>("Orientation", "Z", validOrientation,
                                "Orientation of the instrument");

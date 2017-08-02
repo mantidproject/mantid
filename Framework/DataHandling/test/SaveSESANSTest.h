@@ -60,7 +60,7 @@ public:
     Poco::TemporaryFile tempFile;
     const auto &tempFileName = tempFile.path();
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
-    
+
     // Execute the algorithm
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
 

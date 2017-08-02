@@ -16,9 +16,8 @@
 #include <cmath>
 #include <fstream>
 
-
 namespace { // Anonymous namespace for helper functions
-  
+
 /** Is a character whitespace (here considered space or tab)?
  * @param c The character
  * @return Whether it is whitespace
@@ -67,8 +66,8 @@ bool allSpaces(const std::string &str) {
  * @param n The number of times to repeat
  * @return The repeated string
 */
-std::string repeatAndJoin(const std::string &str,
-			  const std::string &delim, const int &n) {
+std::string repeatAndJoin(const std::string &str, const std::string &delim,
+                          const int &n) {
   std::string result = "";
   for (int i = 0; i < n - 1; i++) {
     result += str + delim;
@@ -76,7 +75,6 @@ std::string repeatAndJoin(const std::string &str,
   return result + str;
 }
 } // Anonymous namespace
-
 
 namespace Mantid {
 namespace DataHandling {
@@ -118,7 +116,7 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
 
   auto &file = descriptor.data();
   std::string line;
-  
+
   // First line should be FileFormatVersion
   std::getline(file, line);
   bool ffvFound = boost::starts_with(line, "FileFormatVersion");
@@ -127,8 +125,8 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
   boost::regex kvPair("[\\w_]+\\s+[\\w\\d\\.\\-]+(\\s+[\\w\\d\\.\\-\\$]+)*");
   int kvPairsFound = 0;
 
-  for (int i = 0; i < 3 && !line.empty(); i++){
-    if (boost::regex_match(line, kvPair)){
+  for (int i = 0; i < 3 && !line.empty(); i++) {
+    if (boost::regex_match(line, kvPair)) {
       kvPairsFound++;
     }
     std::getline(file, line);
@@ -155,9 +153,10 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadSESANS::init() {
-  declareProperty(Kernel::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load, m_fileExtensions),
-                  "Name of the SESANS file to load");
+  declareProperty(
+      Kernel::make_unique<API::FileProperty>(
+          "Filename", "", API::FileProperty::Load, m_fileExtensions),
+      "Name of the SESANS file to load");
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
@@ -425,4 +424,3 @@ Column LoadSESANS::calculateEValues(const Column &error, const Column &yValues,
 
 } // namespace DataHandling
 } // namespace Mantid
-

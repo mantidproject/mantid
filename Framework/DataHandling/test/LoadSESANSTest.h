@@ -77,6 +77,7 @@ public:
   }
 
   void test_confidence() {
+    // Cannot use Poco::TemporaryFile, as we need to specify the file extension
     writeFile(goodFile, "confidence.ses");
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", "confidence.ses"));
     std::string tempFileName = testAlg.getPropertyValue("Filename");

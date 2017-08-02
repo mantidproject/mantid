@@ -68,9 +68,9 @@ private:
       "Theta_ymax_unit", "Orientation", "SpinEchoLength_unit",
       "Depolarisation_unit", "Wavelength_unit"};
   const std::vector<std::string> m_mandatoryColumnHeaders{
-	  m_spinEchoLength, m_wavelength, m_depolarisation, m_depolarisationError };
+      m_spinEchoLength, m_wavelength, m_depolarisation, m_depolarisationError};
   const std::vector<std::string> m_fileExtensions{".ses", ".SES", ".sesans",
-      ".SESANS"};
+                                                  ".SESANS"};
 
   // Private functions
   void init() override;
