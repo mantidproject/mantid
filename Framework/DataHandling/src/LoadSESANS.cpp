@@ -301,7 +301,8 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
 /**
 * Split a header into a key-value pair delimited by whitespace, where the first
 * token is the key and the remainder the value
-* @param untrimmedLine A string containing the line to split, possibly with whitespace at each end
+* @param untrimmedLine A string containing the line to split, possibly with
+* whitespace at each end
 * @param lineNum The number of the line in the file, used for error messaging
 * @return A key-value pair
 * @throw runtime_error If the line contains less than two tokens

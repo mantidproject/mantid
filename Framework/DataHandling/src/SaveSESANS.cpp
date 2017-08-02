@@ -61,7 +61,7 @@ void SaveSESANS::init() {
   declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
   declareProperty("EchoConstant", -DBL_MAX, notSentinel, "Echo_constant",
                   Kernel::Direction::Input);
-  
+
   declareProperty<std::string>("Orientation", "Z", validOrientation,
                                "Orientation of the instrument");
 }
