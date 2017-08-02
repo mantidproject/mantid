@@ -247,14 +247,14 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
   }
 
   // check that things exist
-  for (const auto &filename: filenames) {
-      if (filename.empty())
-          continue;
-      boost::filesystem::path path(filename);
-      if (!boost::filesystem::exists(path))
-          throw Exception::FileError("File does not exist", filename);
-      if (!boost::filesystem::is_regular(path))
-          throw Exception::FileError("File is not a regular file", filename);
+  for (const auto &filename : filenames) {
+    if (filename.empty())
+      continue;
+    boost::filesystem::path path(filename);
+    if (!boost::filesystem::exists(path))
+      throw Exception::FileError("File does not exist", filename);
+    if (!boost::filesystem::is_regular(path))
+      throw Exception::FileError("File is not a regular file", filename);
   }
   return filenames;
 }
