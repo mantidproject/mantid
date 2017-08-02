@@ -9,6 +9,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 #include <fstream>
 #include <set>
@@ -183,18 +184,18 @@ void PDLoadCharacterizations::exec() {
 
 int getVersion(const std::string &filename) {
   std::ifstream file(filename.c_str());
-  if (!file) {
+  if (!file.is_open()) {
     throw Exception::FileError("Unable to open file", filename);
   }
   // first line must be version string
   std::string line = Strings::getLine(file);
+  file.close(); // cleanup
 
   boost::smatch result;
   if (boost::regex_search(line, result, VERSION_REG_EXP) &&
       result.size() == 2) {
     return boost::lexical_cast<int>(result[1]);
   }
-  file.close();
 
   // otherwise it is a version=0
   return 0;
@@ -243,6 +244,17 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
   std::string iniFilename = this->getProperty("ExpIniFilename");
   if (!iniFilename.empty()) {
     filenames[F_INDEX_EXPINI] = iniFilename;
+  }
+
+  // check that things exist
+  for (const auto &filename: filenames) {
+      if (filename.empty())
+          continue;
+      boost::filesystem::path path(filename);
+      if (!boost::filesystem::exists(path))
+          throw Exception::FileError("File does not exist", filename);
+      if (!boost::filesystem::is_regular(path))
+          throw Exception::FileError("File is not a regular file", filename);
   }
   return filenames;
 }
@@ -362,8 +374,8 @@ void PDLoadCharacterizations::readVersion0(const std::string &filename,
     return;
 
   std::ifstream file(filename.c_str());
-  if (!file) {
-    throw Exception::FileError("Unable to open file", filename);
+  if (!file.is_open()) {
+    throw Exception::FileError("Unable to open version 0 file", filename);
   }
 
   // read the first line and decide what to do
@@ -434,8 +446,8 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
 
   g_log.information() << "Opening \"" << filename << "\" as a version 1 file\n";
   std::ifstream file(filename.c_str());
-  if (!file) {
-    throw Exception::FileError("Unable to open file", filename);
+  if (!file.is_open()) {
+    throw Exception::FileError("Unable to open version 1 file", filename);
   }
 
   // first line must be version string
@@ -525,14 +537,13 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
   if (filename.empty())
     return;
 
-  std::cout << "readExpIni(" << filename << ")" << std::endl;
   if (wksp->rowCount() == 0)
     throw std::runtime_error("Characterizations file does not have any "
                              "characterizations information");
 
   std::ifstream file(filename.c_str());
-  if (!file) {
-    throw Exception::FileError("Unable to open file", filename);
+  if (!file.is_open()) {
+    throw Exception::FileError("Unable to open exp.ini file", filename);
   }
 
   // parse the file
