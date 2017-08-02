@@ -37,23 +37,6 @@ int SaveSESANS::version() const { return 1; }
 const std::string SaveSESANS::category() const { return "DataHandling\\Text"; }
 
 /**
- * Validate user inputs
- * @return A map containing the names of any invalid properties and a
- * description of the error
- */
-std::map<std::string, std::string> SaveSESANS::validateInputs() {
-  std::map<std::string, std::string> invalidProperties;
-
-  for (auto propertyName : nonEmptyDoubleProperties) {
-    //    if (getProperty(propertyName) == EMPTY_DBL()){
-    // invalidProperties[propertyName] = propertyName + " must be set";
-    //}
-  }
-
-  return invalidProperties;
-}
-
-/**
  * Initialise the algorithm
  */
 void SaveSESANS::init() {
