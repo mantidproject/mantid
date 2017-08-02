@@ -74,8 +74,8 @@ Output:
     A1: [ 0.931207]
 
     Using Yi Model
-    A0: [ ]
-    A1: [ ]
+    A0: [ 0.75677983]
+    A1: [ 1.76943372]
 
 .. categories::
 
