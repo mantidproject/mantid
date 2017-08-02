@@ -536,14 +536,15 @@ bool SaveGSS::isInstrumentValid() const {
   * logs the system reported error as a Mantid error.
   * @return :: The opened file stream at the user specified path
   */
-std::unique_ptr<std::ofstream> SaveGSS::openFileStream(const std::string &outFilePath) {
+std::unique_ptr<std::ofstream>
+SaveGSS::openFileStream(const std::string &outFilePath) {
   const bool append = getProperty("Append");
 
   // Select to append to current stream or override
   using std::ios_base;
   const ios_base::openmode mode = (append ? (ios_base::out | ios_base::app)
                                           : (ios_base::out | ios_base::trunc));
-  
+
   // Have to wrap this in a unique pointer as GCC 4.x (RHEL 7) does
   // not support the move operator on iostreams
   auto outStream = Kernel::make_unique<std::ofstream>(outFilePath, mode);
