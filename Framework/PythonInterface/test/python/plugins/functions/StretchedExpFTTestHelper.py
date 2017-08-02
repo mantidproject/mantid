@@ -2,11 +2,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
 from scipy import constants
-from scipy.special import erfc
 
 from mantid.simpleapi import Fit, CreateWorkspace, SaveNexus, SaveAscii, EvaluateFunction
 from mantid.api import mtd, FunctionFactory
-from pdb import set_trace as tr
 
 planck_constant = constants.Planck/constants.e*1E15  # meV*psec
 
