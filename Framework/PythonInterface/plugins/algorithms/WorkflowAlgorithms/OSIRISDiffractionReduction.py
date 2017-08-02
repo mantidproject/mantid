@@ -370,7 +370,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for container in container_ws_names:
             DeleteWorkspace(container)
             DeleteWorkspace(container + "_mon")
-            DeleteWorkspace(container + "_mon")
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
         for d_range in self._sam_ws_map.getMap():
