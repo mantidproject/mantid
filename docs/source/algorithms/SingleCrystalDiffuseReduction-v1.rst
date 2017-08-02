@@ -41,18 +41,21 @@ Background
 
 The background is processed the same as the data except that the
 Goniometer is copied from the data before setting the UB. If a
-background is included three workspaces are create.
+background is included three workspaces are create. If
+"OutputWorkspace" is set to "ws" you will get the following.
 
-"OutputWorkspace" + '_normalizedBackground' containing the normalised background.
+"ws_normalizedBackground" containing the normalised background.
 
-"OutputWorkspace" + '_normalizedData' containing the normalised data.
+"ws_normalizedData" containing the normalised data.
 
-And "OutputWorkspace" where OutputWorkspace = OutputWorkspace\_data - OutputWorkspace\_background * BackgroundScale
+And "ws" where
+
+.. math:: ws = ws\_normalizedData - ws\_normalizedBackground * BackgroundScale
 
 Should the background scale not be correct this allows you to redo the
 background subtraction without rerunning the reduction.
 
-If no background is used then the "OutputWorkspace" is just the normalised data.
+If no background is used then the "ws" is just the normalised data.
 
 Symmetries
 ##########
@@ -74,15 +77,20 @@ If the KeepTemporaryWorkspaces option is True the data and the
 normalization in addition to the nomalized data will be
 outputted. This allows you to run separate instances of
 SingleCrystalDiffuseReduction and combine the results. They will have
-names "OutputWorkspace" + '_data' and "OutputWorkspace" +
-'_normalization' respectively.
+names "ws_data" and "ws_normalization"
+respectively.
 
-Where "OutputWorkspace" = OutputWorkspace"+'_data' /
-"OutputWorkspace"+'_normalization'.
+Where
 
-If background is subtracted there will be similar "OutputWorkspace" +
-'_background_data' and "OutputWorkspace" +
-'_background_normalization' for the background.
+.. math:: ws\_normalizedData = \frac{ws\_data}{ws\_normalization}
+
+If background is subtracted there will be similar
+"ws_background_data" and
+"ws_background_normalization" for the background.
+
+Where
+
+.. math:: ws\_normalizedBackground = \frac{ws\_background\_data}{ws\_backgournd\_normalization}
 
 Workflow
 --------
