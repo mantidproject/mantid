@@ -1255,8 +1255,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
   const auto &baseInstr = m_map ? *m_instr : *this;
 
-  if (!getParameterMap()->hasDetectorInfo(&baseInstr) &&
-      !getParameterMap()->hasComponentInfo(&baseInstr))
+  if (!getParameterMap()->hasComponentInfo(&baseInstr))
     return pmap;
 
   // Tolerance 1e-9 m with rotation center at a distance of L = 1000 m as in
