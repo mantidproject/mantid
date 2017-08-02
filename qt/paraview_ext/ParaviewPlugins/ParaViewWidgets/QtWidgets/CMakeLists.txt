@@ -29,7 +29,7 @@ set_property( TARGET MantidParaViewQtWidgets PROPERTY FOLDER "MantidVates" )
 target_link_libraries( MantidParaViewQtWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 vtkRenderingFreeType
 ${QT_LIBRARIES} 
-${MANTID_SUBPROJECT_LIBS} )
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidParaViewQtWidgets PROPERTIES INSTALL_RPATH "@loader_path/../Libraries;@loader_path/../MacOS")

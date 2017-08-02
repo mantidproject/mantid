@@ -9,7 +9,9 @@ add_paraview_plugin( MantidParaViewPeaksReaderSMPlugin "1.0"
 set_property( TARGET MantidParaViewPeaksReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
 target_link_libraries( MantidParaViewPeaksReaderSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-${MANTID_SUBPROJECT_LIBS} 
+${CORE_MANTIDLIBS}
+DataObjects
+VatesAPI
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
 )

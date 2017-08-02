@@ -403,7 +403,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
    <extends>QComboBox</extends>
-   <header>MantidQtWidgets/Common/Common/WorkspaceSelector.h</header>
+   <header>MantidQtWidgets/Common/WorkspaceSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

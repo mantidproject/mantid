@@ -20,8 +20,8 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/V3D.h"
 
-#include "MantidQtWidgets/Common/Common/ManageUserDirectories.h"
-#include "MantidQtWidgets/Common/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "SANSAddFiles.h"
 #include "SANSBackgroundCorrectionSettings.h"
 #include "SANSEventSlicing.h"

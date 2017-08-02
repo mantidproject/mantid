@@ -7,7 +7,9 @@ SERVER_MANAGER_SOURCES vtkPeaksFilter.cxx vtkPeaksFilter.h)
 set_property( TARGET MantidParaViewPeaksFilterSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins")
 
 target_link_libraries( MantidParaViewPeaksFilterSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-${MANTID_SUBPROJECT_LIBS} 
+${CORE_MANTIDLIBS}
+DataObjects
+VatesAPI
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
 ${vtkjsoncpp_LIBRARIES}

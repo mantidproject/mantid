@@ -7,7 +7,9 @@ SERVER_MANAGER_SOURCES vtkScaleWorkspace.cxx)
 set_property( TARGET MantidParaViewScaleWorkspaceSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins")
 
 target_link_libraries( MantidParaViewScaleWorkspaceSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-${MANTID_SUBPROJECT_LIBS} 
+${CORE_MANTIDLIBS}
+DataObjects
+VatesAPI
 ${vtkjsoncpp_LIBRARIES}
 )
 

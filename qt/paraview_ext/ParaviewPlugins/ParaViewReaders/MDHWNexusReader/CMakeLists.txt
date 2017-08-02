@@ -11,7 +11,9 @@ set_property( TARGET MantidParaViewMDHWNexusReaderSMPlugin PROPERTY FOLDER "Mant
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
 target_link_libraries( MantidParaViewMDHWNexusReaderSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-${MANTID_SUBPROJECT_LIBS} 
+${CORE_MANTIDLIBS}
+DataObjects
+VatesAPI
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
 ${vtkjsoncpp_LIBRARIES}

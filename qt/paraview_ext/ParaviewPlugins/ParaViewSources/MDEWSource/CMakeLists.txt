@@ -9,7 +9,9 @@ set_property( TARGET MantidParaViewMDEWSourceSMPlugin PROPERTY FOLDER "MantidVat
 
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 target_link_libraries( MantidParaViewMDEWSourceSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-${MANTID_SUBPROJECT_LIBS} 
+${CORE_MANTIDLIBS}
+DataObjects
+VatesAPI
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
 ${vtkjsoncpp_LIBRARIES}
