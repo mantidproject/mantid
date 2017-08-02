@@ -255,7 +255,6 @@ public:
   }
 
   void testLoadWorkspaceStringThreeRunsWithOptions() {
-
     DataProcessorPreprocessingAlgorithm preprocessor("WeightedMean");
     auto output = loadWorkspaceString("RUN1+RUN2,RUN3", "INST_", preprocessor,
                                       "Property1 = 1, Property2 = 2");
@@ -270,8 +269,9 @@ public:
         "RUN3 = Load(Filename = 'INST_RUN3')",
         "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
         "InputWorkspace2 = 'RUN3', Property1 = 1, Property2 = 2)"};
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
       TS_ASSERT_EQUALS(outputLines[i], result[i]);
+    }
 
     // The loaded workspace
     TS_ASSERT_EQUALS(boost::get<1>(output), "RUN1_RUN2_RUN3");
@@ -350,6 +350,8 @@ public:
         "ReflectometryReductionOneAuto(InputWorkspace = 'RUN_1000_1001', "
         "ThetaIn = 0.5)",
         ""};
+
+    std::cout << boost::get<1>(output).toStdString() << std::endl;
 
     // Check the names of the reduced workspaces
     TS_ASSERT_EQUALS(boost::get<1>(output), "IvsQ_binned_1000_1001_angle_0.5, "

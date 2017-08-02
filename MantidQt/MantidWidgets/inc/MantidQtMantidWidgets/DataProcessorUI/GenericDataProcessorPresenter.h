@@ -175,11 +175,12 @@ protected:
   // Plotting
   virtual void plotRow();
   virtual void plotGroup();
-  void plotWorkspaces(const QSet<QString> &workspaces);
+  void plotWorkspaces(const QMap<QString, nullptr_t> &workspaces);
 
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);
+  void issueNotFoundWarning(QString const& granule, QSet<QString> const& missingWorkspaces);
 
 private:
   // the name of the workspace/table/model in the ADS, blank if unsaved

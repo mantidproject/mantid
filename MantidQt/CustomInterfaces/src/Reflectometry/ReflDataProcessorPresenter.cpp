@@ -581,6 +581,7 @@ QString ReflDataProcessorPresenter::takeSlice(const QString &runNo,
   return sliceName.left(4);
 }
 
+
 /** Plots any currently selected rows */
 void ReflDataProcessorPresenter::plotRow() {
 
@@ -597,7 +598,7 @@ void ReflDataProcessorPresenter::plotRow() {
   }
 
   // Set of workspaces to plot
-  QSet<QString> workspaces;
+  QMap<QString, nullptr_t> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 
@@ -609,9 +610,10 @@ void ReflDataProcessorPresenter::plotRow() {
       const auto wsName = getReducedWorkspaceName(run.second, "IvsQ_");
 
       for (size_t slice = 0; slice < numSlices; slice++) {
+        std::cout << "wsName is " << wsName.toStdString() << std::endl;
         const auto sliceName = wsName + "_slice_" + QString::number(slice);
         if (workspaceExists(sliceName))
-          workspaces.insert(sliceName);
+          workspaces.insert(sliceName, nullptr);
         else
           notFound.insert(sliceName);
       }
@@ -619,13 +621,7 @@ void ReflDataProcessorPresenter::plotRow() {
   }
 
   if (!notFound.isEmpty())
-    m_view->giveUserWarning(
-        "The following workspaces were not plotted because they were not "
-        "found:\n" +
-            QStringList(QStringList::fromSet(notFound)).join("\n") +
-            "\n\nPlease check that the rows you are trying to plot have been "
-            "fully processed.",
-        "Error plotting rows.");
+    issueNotFoundWarning("rows", notFound);
 
   plotWorkspaces(workspaces);
 }
@@ -665,7 +661,7 @@ void ReflDataProcessorPresenter::plotGroup() {
   }
 
   // Set of workspaces to plot
-  QSet<QString> workspaces;
+  QMap<QString, nullptr_t> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 
@@ -681,7 +677,7 @@ void ReflDataProcessorPresenter::plotGroup() {
             getPostprocessedWorkspaceName(item.second, "IvsQ_", slice);
 
         if (workspaceExists(wsName))
-          workspaces.insert(wsName);
+          workspaces.insert(wsName, nullptr);
         else
           notFound.insert(wsName);
       }
@@ -689,13 +685,7 @@ void ReflDataProcessorPresenter::plotGroup() {
   }
 
   if (!notFound.isEmpty())
-    m_view->giveUserWarning(
-        "The following workspaces were not plotted because they were not "
-        "found:\n" +
-            QStringList(QStringList::fromSet(notFound)).join("\n") +
-            "\n\nPlease check that the groups you are trying to plot have been "
-            "fully processed.",
-        "Error plotting groups.");
+    issueNotFoundWarning("groups", notFound);
 
   plotWorkspaces(workspaces);
 }

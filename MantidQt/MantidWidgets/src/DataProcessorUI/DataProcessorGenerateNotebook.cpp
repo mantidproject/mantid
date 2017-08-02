@@ -12,6 +12,7 @@
 #include <fstream>
 #include <memory>
 #include <sstream>
+#include <iostream>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -368,7 +369,7 @@ QString getReducedWorkspaceName(const RowData &data,
       const QString valueStr = data.at(col);
       if (!valueStr.isEmpty()) {
         // But we may have things like '1+2' which we want to replace with '1_2'
-        auto value = valueStr.split(QRegExp("(+|,)"), QString::SkipEmptyParts);
+        auto value = valueStr.split(QRegExp("[+,]"), QString::SkipEmptyParts);
         names.append(whitelist.prefix(col) + value.join("_"));
       }
     }
@@ -523,13 +524,14 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
                     const DataProcessorPreprocessingAlgorithm &preprocessor,
                     const QString &options) {
 
-  auto runs = runStr.split(QRegExp("(+|,)"));
+  auto runs = runStr.split(QRegExp("[+,]"));
 
   QString loadStrings;
 
   // Remove leading/trailing whitespace from each run
-  for (auto &run : runs)
+  for (auto &run : runs) {
     run = run.trimmed();
+  }
 
   const QString prefix = preprocessor.prefix();
   const QString outputName = prefix + runs.join("_");

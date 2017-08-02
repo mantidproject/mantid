@@ -424,11 +424,6 @@ public:
     auto data = manager.selectedData(false);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
-    std::cout << "Printing Row, Size: " << data[0][1].size() << std::endl;
-    for(auto& s : data[0][1])
-      std::cout << "Row:" << s.toStdString() << std::endl;
-
-
     TS_ASSERT_EQUALS(data.size(), 2);
     QStringList firstRow = {"12345", "0.5",                       "20000",
                             "0.1",   "0.2",                       "0.04",

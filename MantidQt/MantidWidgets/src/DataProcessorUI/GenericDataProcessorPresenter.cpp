@@ -30,6 +30,8 @@
 #include <iterator>
 #include <sstream>
 
+#include <iostream>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -737,16 +739,25 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
 
       // If it's not empty, use it
       if (!valueStr.isEmpty()) {
+        std::cout << "valueStr: " << valueStr.toStdString() << std::endl;
 
         // But we may have things like '1+2' which we want to replace with '1_2'
-        auto value = valueStr.split("+");
+        auto value = valueStr.split("+", QString::SkipEmptyParts);
         names.append(m_whitelist.prefix(col) + value.join("_"));
       }
     }
   } // Columns
 
-  QString wsname = prefix;
+  for(auto&& name : names) {
+    std::cout << "Name: '" << name.toStdString() << '\'' << std::endl; 
+  }
+
+  std::cout << "Joined Names Are: " << names.join("_").toStdString() << "." << std::endl;
+
+  auto wsname = prefix;
   wsname += names.join("_");
+  std::cout << "Prefix Is: " << prefix.toStdString() << std::endl;
+  std::cout << "Workspace Name is: " << wsname.toStdString() << "." << std::endl;
 
   return wsname;
 }
@@ -1403,7 +1414,7 @@ void GenericDataProcessorPresenter::setInstrumentList(
 void GenericDataProcessorPresenter::plotRow() {
 
   // Set of workspaces to plot
-  QSet<QString> workspaces;
+  QMap<QString, nullptr_t> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 
@@ -1417,22 +1428,27 @@ void GenericDataProcessorPresenter::plotRow() {
           getReducedWorkspaceName(run.second, m_processor.prefix(0));
 
       if (workspaceExists(wsName))
-        workspaces.insert(wsName);
+        workspaces.insert(wsName, nullptr);
       else
         notFound.insert(wsName);
     }
   }
 
   if (!notFound.isEmpty())
-    m_view->giveUserWarning(
-        "The following workspaces were not plotted because they were not "
-        "found:\n" +
-            QStringList(QStringList::fromSet(notFound)).join("\n") +
-            "\n\nPlease check that the rows you are trying to plot have been "
-            "fully processed.",
-        "Error plotting rows.");
+    issueNotFoundWarning("rows", notFound);
 
   plotWorkspaces(workspaces);
+}
+
+
+void GenericDataProcessorPresenter::issueNotFoundWarning(QString const& granule, QSet<QString> const& missingWorkspaces) {
+  m_view->giveUserWarning(
+        "The following workspaces were not plotted because they were not "
+        "found:\n" +
+            QStringList(QStringList::fromSet(missingWorkspaces)).join("\n") +
+            "\n\nPlease check that the " + granule + " you are trying to plot have been "
+            "fully processed.",
+        "Error plotting "+ granule + ".");
 }
 
 /** Plots any currently selected groups */
@@ -1444,7 +1460,7 @@ void GenericDataProcessorPresenter::plotGroup() {
     throw std::runtime_error("Can't plot group.");
 
   // Set of workspaces to plot
-  QSet<QString> workspaces;
+  QMap<QString, nullptr_t> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 
@@ -1456,20 +1472,14 @@ void GenericDataProcessorPresenter::plotGroup() {
           getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix());
 
       if (workspaceExists(wsName))
-        workspaces.insert(wsName);
+        workspaces.insert(wsName, nullptr);
       else
         notFound.insert(wsName);
     }
   }
 
   if (!notFound.empty())
-    m_view->giveUserWarning(
-        "The following workspaces were not plotted because they were not "
-        "found:\n" +
-            QStringList(QStringList::fromSet(notFound)).join("\n") +
-            "\n\nPlease check that the groups you are trying to plot have been "
-            "fully processed.",
-        "Error plotting groups.");
+    issueNotFoundWarning("groups", notFound);
 
   plotWorkspaces(workspaces);
 }
@@ -1479,16 +1489,17 @@ Plot a set of workspaces
 * @param workspaces : [input] The list of workspaces as a set
 */
 void GenericDataProcessorPresenter::plotWorkspaces(
-    const QSet<QString> &workspaces) {
+    const QMap<QString, nullptr_t> &workspaces) {
   if (!workspaces.isEmpty()) {
     QString pythonSrc;
     pythonSrc += "base_graph = None\n";
     for (auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
-      pythonSrc += "base_graph = plotSpectrum(\"" + *ws +
+      pythonSrc += "base_graph = plotSpectrum(\"" + ws.key() +
                    "\", 0, True, window = base_graph)\n";
 
     pythonSrc += "base_graph.activeLayer().logLogAxes()\n";
 
+    //std::cout << "Actual:" << pythonSrc.toStdString() << std::endl;
     m_view->runPythonAlgorithm(pythonSrc);
   }
 }
