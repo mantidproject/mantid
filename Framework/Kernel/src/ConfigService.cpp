@@ -116,6 +116,12 @@ public:
 
   /** Constructor with a class to wrap
    *  @param F :: The object to wrap
+   *
+   * Note that this constructor can hide the copy constructor because it takes
+   * precedence over the copy constructor if supplied with a non-const
+   * WrappedObject argument. However, it just calls the base class copy
+   * constructor and sets m_pPtr, so the behaviour is the same as the copy
+   * constructor.
    */
   template <typename Field> explicit WrappedObject(Field &F) : T(F) {
     m_pPtr = static_cast<T *>(this);
@@ -126,6 +132,15 @@ public:
     m_pPtr = static_cast<T *>(this);
   }
 
+  /// Overloaded = operator sets the pointer to the wrapped class
+  /// and copies over the contents
+  WrappedObject<T> &operator=(const WrappedObject<T> &rhs) {
+    if (this != &rhs) {
+      m_pPtr = static_cast<T *>(this);
+      *m_pPtr = rhs;
+    }
+    return *this;
+  }
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
   /// Overloaded * operator returns the wrapped object pointer
