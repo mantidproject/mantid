@@ -90,6 +90,7 @@ public:
   using Kernel::PropertyWithValue<std::string>::operator=;
 
 private:
+
   /// Returns a string depending on whether an empty value is valid
   std::string isEmptyValueValid() const;
   /// Do the allowed values match the facility preference extensions for run
@@ -99,7 +100,7 @@ private:
   std::string setLoadProperty(const std::string &propValue);
   /// Handles the filename if this is a save property
   std::string setSaveProperty(const std::string &propValue);
-  /// Check that a given directory exists
+  /// The action type of this property, i.e. load/save
   unsigned int m_action;
   /// The default file extension associated with the type of file this property
   /// will handle

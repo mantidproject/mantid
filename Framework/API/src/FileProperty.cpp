@@ -55,7 +55,31 @@ void addExtension(const std::string &extension,
   else
     extensions.push_back(extension);
 }
- 
+
+/**
+ * Get the path to the user's home directory (associated with ~) if it is set
+ * as an environment variable, and cache it
+ * @return The user's home path
+ */
+const std::string &getHomePath() {
+  static std::string homePath;
+  static bool initialised(false);
+
+  if (initialised) {
+    return homePath;
+  }
+  initialised = true;
+
+  homePath = std::getenv("HOME"); // Usually set on Windows and UNIX
+  if (!homePath.empty()) {
+    return homePath;
+  }
+
+  homePath = std::getenv("USERPROFILE"); // Not usually set on UNIX
+  // Return even if it's an empty string, as we can do no better
+  return homePath;
+}
+
 /** Expand user variables in file path.
  *  On Windows and UNIX, ~ is replaced by the user's home directory, if found.
  *  If the path contains no user variables, or expansion fails, the path is
@@ -68,27 +92,21 @@ void addExtension(const std::string &extension,
  */
 std::string expandUser(const std::string &filepath) {
   auto start = filepath.begin();
+  auto end = filepath.end();
 
-  if (*start != '~') // No user variables in filepath
+  // Filepath empty or contains no user variables
+  if (start == end || *start != '~')
     return filepath;
 
   // Position of the first slash after the variable
-  auto nextSlash = find_if(start, filepath.end(),
-			   [](const char &c){
-			     return c == '/' || c == '\\';});
+  auto nextSlash =
+      find_if(start, end, [](const char &c) { return c == '/' || c == '\\'; });
 
   // ~user/blah format - no support for this as yet
   if (std::distance(start, nextSlash) != 1)
     return filepath;
 
-  char *home;
-  if (!(home = std::getenv("HOME")))          // Usually set on Windows and UNIX
-    if (!(home = std::getenv("USERPROFILE"))) // Not usually set on UNIX
-      // Couldn't find any relevant environment variables
-      return filepath;
-
-  std::string homeStr = std::string(home);
-  return homeStr + std::string(nextSlash, filepath.end());
+  return getHomePath() + std::string(nextSlash, end);
 }
 
 /**
@@ -119,21 +137,21 @@ std::string createDirectory(const std::string &path) {
   }
   return ""; // everything went fine
 }
-}
+} // Anonymous namespace
 
 //-----------------------------------------------------------------
 // Public member functions
 //-----------------------------------------------------------------
 /**
- * Constructor
- * @param name The name of the property
- * @param defaultValue A default value for the property
- * @param action Inndicate whether this should be a load/save
- * property
- * @param exts The allowed extensions. The front entry in the vector
- * will be the default extension
- * @param direction An optional direction (default=Input)
- */
+* Constructor
+* @param name The name of the property
+* @param defaultValue A default value for the property
+* @param action Inndicate whether this should be a load/save
+* property
+* @param exts The allowed extensions. The front entry in the vector
+* will be the default extension
+* @param direction An optional direction (default=Input)
+*/
 FileProperty::FileProperty(const std::string &name,
                            const std::string &defaultValue, unsigned int action,
                            const std::vector<std::string> &exts,
@@ -407,7 +425,5 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
   }
   return errorMsg;
 }
-
 }
 }
-
