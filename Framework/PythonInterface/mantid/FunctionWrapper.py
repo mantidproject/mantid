@@ -228,7 +228,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
             :param name: name or index in the []
             :param newValue: new value for item
         """
-        self.fun[name] = newValue
+        comp = self.fun.castToComposite()
+        comp[name] = newValue
                     
     def __iadd__ (self, other):
        """ Implement += operator.
