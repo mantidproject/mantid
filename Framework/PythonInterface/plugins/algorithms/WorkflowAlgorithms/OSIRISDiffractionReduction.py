@@ -552,7 +552,7 @@ def rebin_to_smallest(workspaces):
     :param workspaces: The list of workspaces to rebin to the smallest.
     :return:           The rebinned list of workspaces.
     """
-    smallest_ws = min(workspaces)
+    smallest_ws = min(workspaces, key=lambda ws: mtd[ws].blocksize())
 
     return [RebinToWorkspace(
         WorkspaceToRebin=ws,
