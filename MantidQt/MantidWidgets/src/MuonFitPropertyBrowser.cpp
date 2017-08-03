@@ -685,7 +685,6 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     // get norms
     std::vector<double> newNorms;
     IFunction_sptr outputFunction = alg->getProperty("Function");
-    std::vector<double> ttt;
     for (int j = 0; j < nWorkspaces; j++) {
       std::string paramName = "f" + std::to_string(j);
       paramName += ".f0.f0.A0";
