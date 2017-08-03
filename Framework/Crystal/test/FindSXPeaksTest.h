@@ -285,7 +285,7 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
 
-	// Round value to allow for minor error introduced by deg/rad conversion
+    // Round value to allow for minor error introduced by deg/rad conversion
     Mantid::Kernel::V3D qNoRot = result->getPeak(0).getQSampleFrame();
     double qxNoRot = roundTo10Places(qNoRot.X());
     double qyNoRot = roundTo10Places(qNoRot.Y());
