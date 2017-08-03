@@ -23,19 +23,19 @@ public:
   static void destroySuite(LoadSESANSTest *suite) { delete suite; }
 
   void test_init() {
-	TS_ASSERT_THROWS_NOTHING(testAlg.initialize());
+    TS_ASSERT_THROWS_NOTHING(testAlg.initialize());
     TS_ASSERT(testAlg.isInitialized());
     testAlg.setChild(true);
     testAlg.setRethrows(true);
 
-	TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", 
-		getTestFilePath("LoadSESANSTest_goodFile.ses")));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty(
+        "Filename", getTestFilePath("LoadSESANSTest_goodFile.ses")));
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
   }
 
   void test_exec() {
-	  TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename",
-		  getTestFilePath("LoadSESANSTest_goodFile.ses")));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty(
+        "Filename", getTestFilePath("LoadSESANSTest_goodFile.ses")));
     // Execute the algorithm
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
 
@@ -76,29 +76,37 @@ public:
 
   void test_confidence() {
     // Cannot use Poco::TemporaryFile, as we need to specify the file extension
-	  TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename",
-		  getTestFilePath("LoadSESANSTest_goodFile.ses")));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty(
+        "Filename", getTestFilePath("LoadSESANSTest_goodFile.ses")));
 
-	  Mantid::Kernel::FileDescriptor descriptor(testAlg.getPropertyValue("Filename"));
+    Mantid::Kernel::FileDescriptor descriptor(
+        testAlg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(testAlg.confidence(descriptor), 70);
   }
 
-  void test_requireFFV() { attemptToLoadBadFile("LoadSESANSTest_missingFFV.ses"); }
+  void test_requireFFV() {
+    attemptToLoadBadFile("LoadSESANSTest_missingFFV.ses");
+  }
 
-  void test_mandatoryHeaders() { attemptToLoadBadFile("LoadSESANSTest_missingHeaders.ses"); }
+  void test_mandatoryHeaders() {
+    attemptToLoadBadFile("LoadSESANSTest_missingHeaders.ses");
+  }
 
-  void test_mandatoryColumns() { attemptToLoadBadFile("LoadSESANSTest_missingColumns.ses"); }
+  void test_mandatoryColumns() {
+    attemptToLoadBadFile("LoadSESANSTest_missingColumns.ses");
+  }
 
 private:
   std::string getTestFilePath(const std::string &filename) {
-		const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
-		TS_ASSERT_DIFFERS(filepath, "");
-		return filepath;
+    const std::string filepath =
+        Mantid::API::FileFinder::Instance().getFullPath(filename);
+    TS_ASSERT_DIFFERS(filepath, "");
+    return filepath;
   }
 
   /// Try and fail to load a file which violates the allowed format
   void attemptToLoadBadFile(const std::string &filename) {
-	  const std::string filepath = getTestFilePath(filename);
+    const std::string filepath = getTestFilePath(filename);
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", filepath));
     TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
   }
@@ -111,25 +119,26 @@ private:
 
   Poco::File writeFile(std::string fileContents, std::string filepath) {
     // Write a file to our temporary file
-	Poco::File pFile(filepath);
+    Poco::File pFile(filepath);
     std::ofstream file(pFile.path());
-	if (file.fail()) {
-		const std::string errorString = strerror(errno);
-		throw new std::runtime_error("Failed to open file " + filepath + 
-			" in LoadSESANSTest.\n The error returned was " + errorString);
-	}
+    if (file.fail()) {
+      const std::string errorString = strerror(errno);
+      throw new std::runtime_error(
+          "Failed to open file " + filepath +
+          " in LoadSESANSTest.\n The error returned was " + errorString);
+    }
     file << fileContents;
     file.close();
-	if (file.fail()) {
-		const std::string errorString = strerror(errno);
-		throw new std::runtime_error("Failed to close file " + filepath +
-			" in LoadSESANSTest.\n The error returned was " + errorString);
-	}
-	return pFile;
+    if (file.fail()) {
+      const std::string errorString = strerror(errno);
+      throw new std::runtime_error(
+          "Failed to close file " + filepath +
+          " in LoadSESANSTest.\n The error returned was " + errorString);
+    }
+    return pFile;
   }
 
   LoadSESANS testAlg;
-
 };
 
 #endif /* MANTID_DATAHANDLING_LOADSESANSTEST_H_ */
