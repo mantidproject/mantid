@@ -1,11 +1,10 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h"
 namespace MantidQt {
 namespace MantidWidgets {
-/**
-Create string of comma separated list of values from a QStringList
-@param param_vec : vector of values
-@return string of comma separated list of values
+/** Create a comma separated list of items from a QStringList.
+@param items : The strings in the list.
+@return The comma separated list of items.
 */
-QString vectorString(const QStringList &param) { return param.join(", "); }
+QString vectorString(const QStringList &items) { return param.join(", "); }
 }
 }
