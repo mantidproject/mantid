@@ -182,7 +182,8 @@ public:
   void testTableStringOneRow() {
 
     // Create some tree data
-    RowData rowData = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", "" /*Hidden Option*/};
+    RowData rowData = {"24682", "1.5", "", "1.4", "2.9",
+                       "0.04",  "1",   "", "" /*Hidden Option*/};
     TreeData treeData = {{1, {{0, rowData}}}};
 
     std::string output = tableString(treeData, reflWhitelist());
@@ -309,7 +310,8 @@ public:
     std::map<std::string, std::string> userPreProcessingOptions = {
         {"Run(s)", ""}, {"Transmission Run(s)", ""}};
 
-    const RowData data = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
+    const RowData data = {"12346", "1.5", "", "1.4", "2.9",
+                          "0.04",  "1",   "", ""};
 
     boost::tuple<std::string, std::string> output = reduceRowString(
         data, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
@@ -394,7 +396,8 @@ public:
         emptyPreProcessMap;
     std::map<std::string, std::string> emptyPreProcessingOptions;
 
-    const RowData data = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
+    const RowData data = {"12346", "1.5", "", "1.4", "2.9",
+                          "0.04",  "1",   "", ""};
 
     boost::tuple<std::string, std::string> output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
@@ -427,8 +430,8 @@ public:
     whitelist.addElement("Trans", "", "", false, "");
 
     // Create some data
-    const RowData data = {"1000,1001", "0.5",  "2000,2001", "1.4",
-                          "2.9",       "0.04", "1",         "", ""};
+    const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
+                          "0.04",      "1",   "",          ""};
 
     TS_ASSERT_THROWS_ANYTHING(
         getReducedWorkspaceName(data, whitelist, "IvsQ_"));
@@ -448,10 +451,9 @@ public:
     whitelist.addElement("Options", "Options", "");
     whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
-
     // Create some data
-    const RowData data = {"1000,1001", "0.5",  "2000,2001", "1.4",
-                          "2.9",       "0.04", "1",         "", ""};
+    const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
+                          "0.04",      "1",   "",          ""};
 
     std::string name = getReducedWorkspaceName(data, whitelist, "IvsQ_");
     TS_ASSERT_EQUALS(name, "IvsQ_run_1000_1001")
@@ -471,10 +473,9 @@ public:
     whitelist.addElement("Options", "Options", "");
     whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
-
     // Create some data
-    const RowData data = {"1000,1001", "0.5",  "2000,2001", "1.4",
-                          "2.9",       "0.04", "1",         "", ""};
+    const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
+                          "0.04",      "1",   "",          ""};
 
     std::string name = getReducedWorkspaceName(data, whitelist, "Prefix_");
     TS_ASSERT_EQUALS(name, "Prefix_run_1000_1001_trans_2000_2001")
@@ -494,8 +495,8 @@ public:
     whitelist.addElement("Options", "Options", "");
     whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
-    const RowData data = {"1000,1001", "0.5",  "2000+2001", "1.4",
-                          "2.9",       "0.04", "1",         "", ""};
+    const RowData data = {"1000,1001", "0.5", "2000+2001", "1.4", "2.9",
+                          "0.04",      "1",   "",          ""};
 
     std::string name = getReducedWorkspaceName(data, whitelist, "Prefix_");
     TS_ASSERT_EQUALS(name, "Prefix_2000_2001")

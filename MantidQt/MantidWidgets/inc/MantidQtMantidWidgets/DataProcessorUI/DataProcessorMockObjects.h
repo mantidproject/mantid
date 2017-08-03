@@ -24,7 +24,6 @@ const int ScaleCol = 7;
 const int OptionsCol = 8;
 const int HiddenOptionsCol = 9;
 
-
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockDataProcessorView : public DataProcessorView {
