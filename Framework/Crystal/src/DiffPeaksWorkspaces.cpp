@@ -96,7 +96,7 @@ void DiffPeaksWorkspaces::exec() {
 
     progress.report();
   }
-  output->removePeaks(badPeaks);
+  output->removePeaks(std::move(badPeaks));
   setProperty("OutputWorkspace", output);
 }
 

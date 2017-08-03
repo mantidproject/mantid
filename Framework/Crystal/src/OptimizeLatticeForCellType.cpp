@@ -87,7 +87,7 @@ void OptimizeLatticeForCellType::exec() {
         badPeaks.push_back(i);
       }
     }
-    ws->removePeaks(badPeaks);
+    ws->removePeaks(std::move(badPeaks));
   }
   runWS.push_back(ws);
 

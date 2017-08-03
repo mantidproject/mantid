@@ -608,7 +608,7 @@ void SaveHKL::exec() {
   for (auto it = banned.crbegin(); it != banned.crend(); ++it) {
     badPeaks.push_back(static_cast<int>(*it));
   }
-  peaksW->removePeaks(badPeaks);
+  peaksW->removePeaks(std::move(badPeaks));
   setProperty("OutputWorkspace", peaksW);
 }
 /**

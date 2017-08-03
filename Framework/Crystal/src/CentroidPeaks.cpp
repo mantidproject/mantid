@@ -340,18 +340,19 @@ void CentroidPeaks::removeEdgePeaks(
     Mantid::DataObjects::PeaksWorkspace *peakWS) {
   int Edge = getProperty("EdgePixels");
   std::vector<int> badPeaks;
-  for (int i = int(peakWS->getNumberPeaks()) - 1; i >= 0; --i) {
+  size_t numPeaks = peakWS->getNumberPeaks() - 1;
+  for (size_t i = 0; i < numPeaks;  i++) {
     // Get a direct ref to that peak.
-    auto &peak = peakWS->getPeak(i);
+    const auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
     int row = peak.getRow();
-    std::string bankName = peak.getBankName();
+    const std::string &bankName = peak.getBankName();
 
     if (edgePixel(inst, bankName, col, row, Edge)) {
       badPeaks.push_back(i);
     }
   }
-  peakWS->removePeaks(badPeaks);
+  peakWS->removePeaks(std::move(badPeaks));
 }
 
 } // namespace Mantid

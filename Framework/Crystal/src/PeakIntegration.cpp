@@ -118,7 +118,7 @@ void PeakIntegration::exec() {
         if (i + 1 > MinPeaks)
       MinPeaks = i + 1;
   }
-  peaksW->removePeaks(badPeaks);
+  peaksW->removePeaks(std::move(badPeaks));
   NumberPeaks = peaksW->getNumberPeaks();
   if (NumberPeaks <= 0) {
     g_log.error(

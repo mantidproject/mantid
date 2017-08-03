@@ -500,7 +500,7 @@ public:
 
     // number of peaks = 4, now remove 3
     std::vector<int> badPeaks{0, 2, 3};
-    pw->removePeaks(badPeaks);
+    pw->removePeaks(std::move(badPeaks));
     TS_ASSERT_EQUALS(pw->getNumberPeaks(), 1);
   }
 
