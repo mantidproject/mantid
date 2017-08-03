@@ -12,29 +12,27 @@ GET_POINTER_SPECIALIZATION(CompositeFunction)
 
 namespace {
 
-  /// An object for constructing a shared_ptr that won't ever delete its pointee
-  class NoDeleting {
-  public:
-    /// Does nothing
-    void operator()(void *) {}
-    /// Does nothing
-    void operator()(const void *) {}
-  };
+/// An object for constructing a shared_ptr that won't ever delete its pointee
+class NoDeleting {
+public:
+  /// Does nothing
+  void operator()(void *) {}
+  /// Does nothing
+  void operator()(const void *) {}
+};
 
-
-  //------------------------------------------------------------------------------------------------------
-  /**
-  * Something that makes composite function return to python a composite function
-  * for Product function, Convolution or
-  * any similar superclass of composite function.
-  * @param self :: Enables it to be called as a member function on the
-  * Composite Function class
-  */
-  Mantid::API::CompositeFunction_sptr
-    castToCompositeFunction(CompositeFunction &self) {
-    return boost::shared_ptr<Mantid::API::CompositeFunction>(&self, NoDeleting());
-  }
-
+//------------------------------------------------------------------------------------------------------
+/**
+* Something that makes composite function return to python a composite function
+* for Product function, Convolution or
+* any similar superclass of composite function.
+* @param self :: Enables it to be called as a member function on the
+* Composite Function class
+*/
+Mantid::API::CompositeFunction_sptr
+castToCompositeFunction(CompositeFunction &self) {
+  return boost::shared_ptr<Mantid::API::CompositeFunction>(&self, NoDeleting());
+}
 
 typedef double (CompositeFunction::*getParameterType1)(size_t) const;
 typedef double (CompositeFunction::*getParameterType2)(
