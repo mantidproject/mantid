@@ -81,7 +81,7 @@ public:
     writeFile(goodFile, "confidence.ses");
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", "confidence.ses"));
     std::string tempFileName = testAlg.getProperty("Filename");
-    
+
     Mantid::Kernel::FileDescriptor descriptor(tempFileName);
     TS_ASSERT_EQUALS(testAlg.confidence(descriptor), 70);
     TS_ASSERT_THROWS_NOTHING(Poco::File(tempFileName).remove());
