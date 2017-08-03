@@ -11,60 +11,60 @@ set ( SIP_SRC_AUTO sipmantidqtpythonpart0.cpp )
 
 # Sip needs to have a dependency on all headers within it
 set ( SIP_HDRS
-  ../API/inc/MantidQtAPI/PythonSystemHeader.h
-  ../API/inc/MantidQtAPI/WorkspaceObserver.h
-  ../API/inc/MantidQtAPI/GraphOptions.h
-  ../API/inc/MantidQtAPI/AlgorithmDialog.h
-  ../API/inc/MantidQtAPI/UserSubWindow.h
-  ../API/inc/MantidQtAPI/InterfaceManager.h
-  ../API/inc/MantidQtAPI/MantidDesktopServices.h
-  ../API/inc/MantidQtAPI/MWRunFiles.h
-  ../API/inc/MantidQtAPI/WidgetScrollbarDecorator.h
-  ../SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h
-  ../SliceViewer/inc/MantidQtSliceViewer/LineViewer.h
-  ../SliceViewer/inc/MantidQtSliceViewer/PeaksPresenter.h
-  ../SliceViewer/inc/MantidQtSliceViewer/ProxyCompositePeaksPresenter.h
-  ../SliceViewer/inc/MantidQtSliceViewer/PeaksPresenter.h
-  ../SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h
-  ../Factory/inc/MantidQtFactory/WidgetFactory.h
-  ../RefDetectorViewer/inc/MantidQtRefDetectorViewer/RefIVConnections.h
-  ../RefDetectorViewer/inc/MantidQtRefDetectorViewer/RefMatrixWSImageView.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/FitPropertyBrowser.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessMap.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/SlitCalculator.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetRenderTab.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetPickTab.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h
-  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h
+  ../widgets/common/inc/MantidQtWidgets/Common/PythonSystemHeader.h
+  ../widgets/common/inc/MantidQtWidgets/Common/WorkspaceObserver.h
+  ../widgets/common/inc/MantidQtWidgets/Common/GraphOptions.h
+  ../widgets/common/inc/MantidQtWidgets/Common/AlgorithmDialog.h
+  ../widgets/common/inc/MantidQtWidgets/Common/UserSubWindow.h
+  ../widgets/common/inc/MantidQtWidgets/Common/InterfaceManager.h
+  ../widgets/common/inc/MantidQtWidgets/Common/MantidDesktopServices.h
+  ../widgets/common/inc/MantidQtWidgets/Common/MWRunFiles.h
+  ../widgets/common/inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
+  ../widgets/sliceviewer/inc/MantidQtWidgets/SliceViewer/SliceViewerWindow.h
+  ../widgets/sliceviewer/inc/MantidQtWidgets/SliceViewer/LineViewer.h
+  ../widgets/sliceviewer/inc/MantidQtWidgets/SliceViewer/PeaksPresenter.h
+  ../widgets/sliceviewer/inc/MantidQtWidgets/SliceViewer/ProxyCompositePeaksPresenter.h
+  ../widgets/sliceviewer/inc/MantidQtWidgets/SliceViewer/PeaksPresenter.h
+  ../widgets/sliceviewer/inc/MantidQtWidgets/SliceViewer/SliceViewer.h
+  ../widgets/factory/inc/MantidQtWidgets/Factory/WidgetFactory.h
+  ../widgets/refdetectorview/inc/MantidQtWidgets/RefDetectorView/RefIVConnections.h
+  ../widgets/refdetectorview/inc/MantidQtWidgets/RefDetectorView/RefMatrixWSImageView.h
+  ../widgets/common/inc/MantidQtWidgets/Common/FitPropertyBrowser.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendGroupCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableAsCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/SlitCalculator.h
+  ../widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h
+  ../widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
+  ../widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h
+  ../widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h
+  ../widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h
+  ../widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h
 )
 
 set( SRC_UNITY_IGNORE_FILES )
@@ -169,4 +169,3 @@ target_link_libraries ( mantidqtpython LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIM
 ###########################################################################
 
 install ( TARGETS mantidqtpython DESTINATION ${BIN_DIR} )
-

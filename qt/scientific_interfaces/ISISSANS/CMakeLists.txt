@@ -41,7 +41,7 @@ set ( UI_FILES
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS ${extra_options} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES})
 
