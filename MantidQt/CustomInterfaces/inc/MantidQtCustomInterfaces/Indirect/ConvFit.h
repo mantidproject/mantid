@@ -73,6 +73,8 @@ private:
   void initFABADAOptions();
   void showFABADA(bool advanced);
   void hideFABADA();
+  Mantid::API::IAlgorithm_sptr sequentialFit(const std::string specMin, const std::string specMax,
+    QString &outputWSName);
 
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;

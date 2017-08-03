@@ -279,53 +279,64 @@ void ConvFit::initFABADAOptions() {
 */
 void ConvFit::run() {
   // Get input from interface
-  const auto func = createFunction(m_uiForm.ckTieCentres->isChecked());
-  const auto function = std::string(func->asString());
   m_runMin = m_uiForm.spSpectraMin->value();
   m_runMax = m_uiForm.spSpectraMax->value();
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
-
-  // Construct expected name
-  m_baseName = QString::fromStdString(m_cfInputWS->getName());
-  // Remove _red
-  const auto cutIndex = m_baseName.lastIndexOf("_");
-  if (cutIndex != -1) {
-    m_baseName = m_baseName.left(cutIndex + 1);
-  }
-  // Add fit specific suffix
-  const auto bgType = backgroundString();
-  const auto fitType = fitTypeString();
-  m_baseName += "conv_";
-  m_baseName += fitType;
-  m_baseName += bgType;
-  m_baseName += QString::fromStdString(specMin);
-  m_baseName += "_to_";
-  m_baseName += QString::fromStdString(specMax);
-
-  // Run ConvolutionFitSequential Algorithm
-  auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
-  cfs->initialize();
-  cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
-  cfs->setProperty("Function", function);
-  cfs->setProperty("BackgroundType",
-                   m_uiForm.cbBackground->currentText().toStdString());
-  cfs->setProperty("StartX", m_properties["StartX"]->valueText().toStdString());
-  cfs->setProperty("EndX", m_properties["EndX"]->valueText().toStdString());
-  cfs->setProperty("SpecMin", specMin);
-  cfs->setProperty("SpecMax", specMax);
-  cfs->setProperty("Convolve", true);
-  cfs->setProperty("Minimizer",
-                   minimizerString("$outputname_$wsindex").toStdString());
-  cfs->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(
-                                        m_properties["MaxIterations"])));
-  cfs->setProperty("OutputWorkspace", (m_baseName.toStdString() + "_Result"));
+  auto cfs = sequentialFit(specMin, specMax, m_baseName);
 
   // Add to batch alg runner and execute
   m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+IAlgorithm_sptr ConvFit::sequentialFit(const std::string specMin, const std::string specMax, 
+  QString &outputWSName) {
+  const auto func = createFunction(m_uiForm.ckTieCentres->isChecked());
+  const auto function = std::string(func->asString());
+
+  // Construct expected name
+  outputWSName = QString::fromStdString(m_cfInputWS->getName());
+
+  // Remove _red
+  const auto cutIndex = outputWSName.lastIndexOf("_");
+  if (cutIndex != -1) {
+    outputWSName = outputWSName.left(cutIndex + 1);
+  }
+
+  // Add fit specific suffix
+  const auto bgType = backgroundString();
+  const auto fitType = fitTypeString();
+  outputWSName += "conv_";
+  outputWSName += fitType;
+  outputWSName += bgType;
+  outputWSName += QString::fromStdString(specMin);
+
+  if (specMin.compare(specMax) != 0) {
+    outputWSName += "_to_";
+    outputWSName += QString::fromStdString(specMax);
+  }
+  
+  // Run ConvolutionFitSequential Algorithm
+  auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  cfs->initialize();
+  cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
+  cfs->setProperty("Function", function);
+  cfs->setProperty("BackgroundType",
+    m_uiForm.cbBackground->currentText().toStdString());
+  cfs->setProperty("StartX", m_properties["StartX"]->valueText().toStdString());
+  cfs->setProperty("EndX", m_properties["EndX"]->valueText().toStdString());
+  cfs->setProperty("SpecMin", specMin);
+  cfs->setProperty("SpecMax", specMax);
+  cfs->setProperty("Convolve", true);
+  cfs->setProperty("Minimizer",
+    minimizerString("$outputname_$wsindex").toStdString());
+  cfs->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(
+    m_properties["MaxIterations"])));
+  cfs->setProperty("OutputWorkspace", (outputWSName.toStdString() + "_Result"));
+  return cfs;
 }
 
 /**
@@ -1234,46 +1245,9 @@ void ConvFit::singleFit() {
              SLOT(singleFit(bool)));
   // ensure algorithm was successful
   m_uiForm.ckPlotGuess->setChecked(false);
+  std::string specNo = m_uiForm.spPlotSpectrum->text().toStdString();
 
-  CompositeFunction_sptr function =
-      createFunction(m_uiForm.ckTieCentres->isChecked());
-
-  // get output name
-  QString fitType = fitTypeString();
-  QString bgType = backgroundString();
-
-  if (fitType == "") {
-    g_log.error("No fit type defined.");
-  }
-  m_singleFitOutputName =
-      runPythonCode(
-          QString(
-              "from IndirectCommon import getWSprefix\nprint getWSprefix('") +
-          m_cfInputWSName + QString("')\n")).trimmed();
-  m_singleFitOutputName +=
-      QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
-  int maxIterations =
-      static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
-
-  // Run fit algorithm
-  m_singleFitAlg = AlgorithmManager::Instance().create("Fit");
-  m_singleFitAlg->initialize();
-  m_singleFitAlg->setPropertyValue("Function", function->asString());
-  m_singleFitAlg->setPropertyValue("InputWorkspace",
-                                   m_cfInputWSName.toStdString());
-  m_singleFitAlg->setProperty<int>("WorkspaceIndex",
-                                   m_uiForm.spPlotSpectrum->text().toInt());
-  m_singleFitAlg->setProperty<double>(
-      "StartX", m_dblManager->value(m_properties["StartX"]));
-  m_singleFitAlg->setProperty<double>(
-      "EndX", m_dblManager->value(m_properties["EndX"]));
-  m_singleFitAlg->setProperty("Output", m_singleFitOutputName.toStdString());
-  m_singleFitAlg->setProperty("CreateOutput", true);
-  m_singleFitAlg->setProperty("OutputCompositeMembers", true);
-  m_singleFitAlg->setProperty("ConvolveMembers", true);
-  m_singleFitAlg->setProperty("MaxIterations", maxIterations);
-  m_singleFitAlg->setProperty(
-      "Minimizer", minimizerString(m_singleFitOutputName).toStdString());
+  m_singleFitAlg = sequentialFit(specNo, specNo, m_singleFitOutputName);
 
   // Connection to singleFitComplete SLOT (post algorithm completion)
   m_batchAlgoRunner->addAlgorithm(m_singleFitAlg);
