@@ -14,7 +14,7 @@ Mantid::Kernel::Logger g_log("ContainerSubtraction");
 namespace MantidQt {
 namespace CustomInterfaces {
 ContainerSubtraction::ContainerSubtraction(QWidget *parent)
-    : CorrectionsTab(parent), m_spectrum(0) {
+    : CorrectionsTab(parent), m_spectra(0) {
   m_uiForm.setupUi(parent);
 
   // Connect slots
@@ -314,7 +314,9 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   m_containerWorkspaceName = "__processed_can";
 
   // Plot new container
-  m_uiForm.ppPreview->addSpectrum("Container", m_csContainerWS, 0, Qt::red);
+  if (m_csContainerWS->getNumberHistograms() > m_spectra) {
+    m_uiForm.ppPreview->addSpectrum("Container", m_csContainerWS, m_spectra, Qt::red);
+  }
   m_containerWorkspaceName = "__processed_can";
 }
 
@@ -378,7 +380,7 @@ void ContainerSubtraction::plotPreview(int wsIndex) {
       "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
       Qt::red);
 
-  m_spectrum = wsIndex;
+  m_spectra = wsIndex;
 }
 
 void ContainerSubtraction::postProcessComplete(bool error) {
@@ -505,7 +507,7 @@ void ContainerSubtraction::plotCurrentPreview() {
     workspaces.append(QString::fromStdString(m_csSubtractedWS->getName()));
   }
 
-  IndirectTab::plotSpectrum(workspaces, m_spectrum);
+  IndirectTab::plotSpectrum(workspaces, m_spectra);
 }
 
 } // namespace CustomInterfaces

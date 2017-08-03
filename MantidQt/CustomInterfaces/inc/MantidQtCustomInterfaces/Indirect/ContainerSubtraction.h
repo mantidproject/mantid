@@ -50,7 +50,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_csContainerWS;
   Mantid::API::MatrixWorkspace_sptr m_csSubtractedWS;
 
-  int m_spectrum;
+  int m_spectra;
 };
 
 } // namespace CustomInterfaces
