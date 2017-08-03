@@ -11,6 +11,10 @@ New features
 Algorithms
 ##########
 
+Bayes
+#####
+
+- Removed fit option from plot options drop-down menu.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 
 Data Analysis
