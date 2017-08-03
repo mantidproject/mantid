@@ -349,8 +349,12 @@ void ConvolutionFitSequential::exec() {
   Progress renamerProg(this, 0.98, 1.0, specMax + 1);
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
-    auto outName = outputWsName + "_";
-    outName += std::to_string(i);
+    auto outName = outputWsName;
+
+    // Check if multiple spectrum were fit.
+    if (specMin != specMax) {
+      outName += "_" + std::to_string(i);
+    }
     outName += "_Workspace";
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();
