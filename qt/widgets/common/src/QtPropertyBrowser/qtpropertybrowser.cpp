@@ -1835,14 +1835,12 @@ QtBrowserItem *QtAbstractPropertyBrowser::insertProperty(QtProperty *property,
     QList<QtProperty *> pendingList = properties();
     int pos = 0;
     int newPos = 0;
-    QtProperty *properAfterProperty = 0;
     while (pos < pendingList.count()) {
         QtProperty *prop = pendingList.at(pos);
         if (prop == property)
             return 0;
         if (prop == afterProperty) {
             newPos = pos + 1;
-            properAfterProperty = afterProperty;
         }
         pos++;
     }
@@ -1852,7 +1850,6 @@ QtBrowserItem *QtAbstractPropertyBrowser::insertProperty(QtProperty *property,
     d_ptr->insertSubTree(property, 0);
 
     d_ptr->m_subItems.insert(newPos, property);
-    //propertyInserted(property, 0, properAfterProperty);
     return topLevelItem(property);
 }
 
