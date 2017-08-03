@@ -326,6 +326,7 @@ void GenericDataProcessorPresenter::process() {
 
   // Create progress reporter bar
   if (maxProgress > 0)
+    int progress = 0;
     m_progressReporter = new ProgressPresenter(progress, maxProgress,
                                                maxProgress, m_progressView);
 

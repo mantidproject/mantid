@@ -185,11 +185,6 @@
           </item>
           <item>
            <property name="text">
-            <string>Fit</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>All</string>
            </property>
           </item>

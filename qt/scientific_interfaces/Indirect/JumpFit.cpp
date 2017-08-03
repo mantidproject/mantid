@@ -17,7 +17,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr) {
+    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr), m_jfInputWS(),
+      m_specNo(0) {
   m_uiForm.setupUi(parent);
 }
 
@@ -74,6 +75,8 @@ void JumpFit::setup() {
   // Handle plotting and saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 }
 
 /**
@@ -233,17 +236,18 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
 
   auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(
       sample.toStdString());
-  auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  m_jfInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
-  findAllWidths(mws);
+  findAllWidths(m_jfInputWS);
 
   auto qRangeSelector = m_uiForm.ppPlot->getRangeSelector("JumpFitQ");
 
   if (m_spectraList.size() > 0) {
     m_uiForm.cbWidth->setEnabled(true);
     std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
+    m_specNo = m_spectraList[currentWidth];
     m_uiForm.ppPlot->clear();
-    m_uiForm.ppPlot->addSpectrum("Sample", sample, m_spectraList[currentWidth]);
+    m_uiForm.ppPlot->addSpectrum("Sample", sample, m_specNo);
 
     QPair<double, double> res;
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
@@ -552,6 +556,18 @@ void JumpFit::saveClicked() {
   checkADSForPlotSaveWorkspace(outWsName, false);
   addSaveWorkspaceToQueue(QString::fromStdString(outWsName));
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+* Plots the current spectrum displayed in the preview plot
+*/
+void JumpFit::plotCurrentPreview() {
+
+  // Check if a workspace has been selected
+  if (m_jfInputWS) {
+    IndirectTab::plotSpectrum(QString::fromStdString(m_jfInputWS->getName()),
+                              m_specNo, m_specNo);
+  }
 }
 } // namespace IDA
 } // namespace CustomInterfaces
