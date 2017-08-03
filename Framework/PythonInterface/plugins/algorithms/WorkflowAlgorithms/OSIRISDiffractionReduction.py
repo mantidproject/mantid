@@ -110,7 +110,7 @@ class DRangeToWorkspaceMap(object):
         temp_map = {}
 
         for d_range, ws_list in self._map.items():
-            ws_list = self._rebin_to_smallest(ws_list)
+            ws_list = rebin_to_smallest(ws_list)
             temp_map[d_range] = average_ws_list(ws_list)
 
         self._map = temp_map
@@ -417,7 +417,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Divide all sample files by the corresponding vanadium files.
         for sam_ws, van_ws in zip(self._sam_ws_map.getMap().values(),
                                   self._van_ws_map.getMap().values()):
-            ws_list = self._rebin_to_smallest([sam_ws, van_ws])
+            ws_list = rebin_to_smallest([sam_ws, van_ws])
             sam_ws, van_ws = ws_list[0], ws_list[1]
             Divide(LHSWorkspace=sam_ws,
                    RHSWorkspace=van_ws,
@@ -543,21 +543,22 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         return run_files
 
-    def _rebin_to_smallest(self, workspaces):
-        """
-        Rebins the specified list to the workspace with the smallest
-        x-range in the list.
 
-        :param workspaces: The list of workspaces to rebin to the smallest.
-        :return:           The rebinned list of workspaces.
-        """
-        smallest_ws = min(workspaces)
+def rebin_to_smallest(workspaces):
+    """
+    Rebins the specified list to the workspace with the smallest
+    x-range in the list.
 
-        return [RebinToWorkspace(
-            WorkspaceToRebin=ws,
-            WorkspaceToMatch=smallest_ws,
-            OutputWorkspace=ws
-        ) for ws in workspaces]
+    :param workspaces: The list of workspaces to rebin to the smallest.
+    :return:           The rebinned list of workspaces.
+    """
+    smallest_ws = min(workspaces)
+
+    return [RebinToWorkspace(
+        WorkspaceToRebin=ws,
+        WorkspaceToMatch=smallest_ws,
+        OutputWorkspace=ws
+    ) for ws in workspaces]
 
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
