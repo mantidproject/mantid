@@ -38,6 +38,8 @@ public:
     return "Optimization\\PeakFinding;MDAlgorithms\\Peaks";
   }
 
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   /// Initialise the properties
   void init() override;
@@ -97,6 +99,15 @@ private:
   eDimensionType dimType;
   /// Goniometer matrix
   Mantid::Kernel::Matrix<double> m_goniometer;
+
+  /// Use number of events normalization for event workspaces.
+  bool m_useNumberOfEventsNormalization = false;
+  /// Signal density factor
+  double m_signalThresholdFactor = 1.5;
+  /// VolumeNormalization
+  static const std::string volumeNormalization;
+  /// NumberOfEventNormalization
+  static const std::string numberOfEventsNormalization;
 };
 
 } // namespace Mantid

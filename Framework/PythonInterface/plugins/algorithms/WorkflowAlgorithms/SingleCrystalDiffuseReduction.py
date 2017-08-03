@@ -10,7 +10,7 @@ from mantid.simpleapi import (LoadIsawUB, MaskDetectors, ConvertUnits,
                               MDNormSCD, DivideMD, MinusMD, Load,
                               DeleteWorkspace,
                               CreateSingleValuedWorkspace, LoadNexus,
-                              MultiplyMD, LoadIsawDetCal, MaskBTP)
+                              MultiplyMD, LoadIsawDetCal, LoadMask)
 from mantid.geometry import SpaceGroupFactory, SymmetryOperationFactory
 from mantid.kernel import VisibleWhenProperty, PropertyCriterion, FloatArrayLengthValidator, FloatArrayProperty, Direction
 from mantid import logger
@@ -76,8 +76,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="DetCal",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".detcal"]),
                              "Load an ISAW DetCal calibration onto the data from a file. See :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>`")
-
-        self.copyProperties('MaskBTP', ['Bank', 'Tube', 'Pixel'])
+        self.declareProperty(FileProperty(name="MaskFile",defaultValue="",action=FileAction.OptionalLoad,
+                                          extensions=[".xml",".msk"]),
+                             "Masking file for masking. Supported file format is XML and ISIS ASCII. See :ref:`LoadMask <algm-LoadMask>`")
 
         # SymmetryOps, name, group unmber or list symmetries
         self.declareProperty("SymmetryOps", "",
@@ -121,9 +122,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         # Corrections
         self.setPropertyGroup("LoadInstrument","Corrections")
         self.setPropertyGroup("DetCal","Corrections")
-        self.setPropertyGroup("Bank","Corrections")
-        self.setPropertyGroup("Tube","Corrections")
-        self.setPropertyGroup("Pixel","Corrections")
+        self.setPropertyGroup("MaskFile","Corrections")
 
         # Projection and binning
         self.setPropertyGroup("Uproj","Projection and binning")
@@ -156,8 +155,8 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         _background = bool(self.getProperty("Background").value)
         _load_inst = bool(self.getProperty("LoadInstrument").value)
         _detcal = bool(self.getProperty("DetCal").value)
+        _masking = bool(self.getProperty("MaskFile").value)
         _outWS_name = self.getPropertyValue("OutputWorkspace")
-        _masking = bool(self.getProperty("Bank").value) or bool(self.getProperty("Tube").value) or bool(self.getProperty("Pixel").value)
 
         UBList = self._generate_UBList()
 
@@ -176,10 +175,11 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         LoadNexus(Filename=self.getProperty("Flux").value, OutputWorkspace='__flux')
 
         if _masking:
-            MaskBTP(Workspace='__sa',
-                    Bank=self.getProperty("Bank").value,
-                    Tube=self.getProperty("Tube").value,
-                    Pixel=self.getProperty("Pixel").value)
+            LoadMask(Instrument=mtd['__sa'].getInstrument().getName(),
+                     InputFile=self.getProperty("MaskFile").value,
+                     OutputWorkspace='__mask')
+            MaskDetectors(Workspace='__sa',MaskedWorkspace='__mask')
+            DeleteWorkspace('__mask')
 
         XMin = mtd['__sa'].getXDimension().getMinimum()
         XMax = mtd['__sa'].getXDimension().getMaximum()
