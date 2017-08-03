@@ -292,8 +292,9 @@ void ConvFit::run() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-IAlgorithm_sptr ConvFit::sequentialFit(const std::string specMin, const std::string specMax, 
-  QString &outputWSName) {
+IAlgorithm_sptr ConvFit::sequentialFit(const std::string specMin,
+                                       const std::string specMax,
+                                       QString &outputWSName) {
   const auto func = createFunction(m_uiForm.ckTieCentres->isChecked());
   const auto function = std::string(func->asString());
 
@@ -318,30 +319,30 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string specMin, const std::str
     outputWSName += "_to_";
     outputWSName += QString::fromStdString(specMax);
   }
-  
+
   // Run ConvolutionFitSequential Algorithm
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
   cfs->setProperty("BackgroundType",
-    m_uiForm.cbBackground->currentText().toStdString());
+                   m_uiForm.cbBackground->currentText().toStdString());
   cfs->setProperty("StartX", m_properties["StartX"]->valueText().toStdString());
   cfs->setProperty("EndX", m_properties["EndX"]->valueText().toStdString());
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("Convolve", true);
   cfs->setProperty("Minimizer",
-    minimizerString("$outputname_$wsindex").toStdString());
+                   minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(
-    m_properties["MaxIterations"])));
+                                        m_properties["MaxIterations"])));
   cfs->setProperty("OutputWorkspace", (outputWSName.toStdString() + "_Result"));
   return cfs;
 }
 
 void ConvFit::sequentialFitComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-    SLOT(sequentialFitComplete(bool)));
+             SLOT(sequentialFitComplete(bool)));
   algorithmComplete(error, m_baseName);
 }
 
@@ -428,7 +429,8 @@ void ConvFit::plotCurrentPreview() {
 * Handles completion of the ConvolutionFitSequential algorithm.
 *
 * @param error True if the algorithm was stopped due to error, false otherwise
-* @param outputWsName The name of the output workspace created from running the algorithm.
+* @param outputWsName The name of the output workspace created from running the
+*algorithm.
 */
 void ConvFit::algorithmComplete(bool error, QString &outputWSName) {
 

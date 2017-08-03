@@ -73,8 +73,9 @@ private:
   void initFABADAOptions();
   void showFABADA(bool advanced);
   void hideFABADA();
-  Mantid::API::IAlgorithm_sptr sequentialFit(const std::string specMin, const std::string specMax,
-    QString &outputWSName);
+  Mantid::API::IAlgorithm_sptr sequentialFit(const std::string specMin,
+                                             const std::string specMax,
+                                             QString &outputWSName);
   void algorithmComplete(bool error, QString &outputWSName);
 
   Ui::ConvFit m_uiForm;
