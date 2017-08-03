@@ -229,7 +229,10 @@ class CompositeFunctionWrapper(FunctionWrapper):
             :param newValue: new value for item
         """
         comp = self.fun.castToComposite()
-        comp[name] = newValue
+        if isinstance( newValue, FunctionWrapper):
+           comp[name] = newValue.fun
+        else:
+           comp[name] = newValue
                     
     def __iadd__ (self, other):
        """ Implement += operator.
