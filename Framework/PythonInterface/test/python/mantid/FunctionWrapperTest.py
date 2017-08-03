@@ -450,7 +450,7 @@ class FunctionWrapperTest(unittest.TestCase):
         
         self.assertTrue( isinstance( p, ProductFunctionWrapper) )
         p_str = str(p)
-        #self.assertEqual(p_str.count("("),0)
+        self.assertEqual(p_str.count("("),0)
         self.assertEqual(p_str.count("LinearBackground"),1)
         self.assertEqual(p_str.count("Gaussian"),2)
         

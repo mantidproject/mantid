@@ -168,7 +168,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
            
           :param name: name of class calling this.
        """
-       if len(args) == 1 and hasattr(args[0],'nFunctions'):
+       if len(args) == 1 and  not isinstance(args[0], FunctionWrapper):
           # We have a composite function to wrap
           self.fun = args[0]
        else:
@@ -208,13 +208,17 @@ class CompositeFunctionWrapper(FunctionWrapper):
       
             :param name: name or index in the []
         """
-        item = self.fun[nameorindex]
+        comp = self.fun.castToComposite()
+        item = comp[nameorindex]
         if isinstance(item, float):
            return  item
-        elif hasattr(item, 'nFunctions'):
-           # item is a CompositeFunction
+        elif item.name() == "CompositeFunction":
            return CompositeFunctionWrapper(item)
-        else:           
+        elif item.name() == "ProductFunction":
+           return ProductFunctionWrapper(item)
+        elif item.name() == "Convolution":
+           return ConvolutionWrapper(item)
+        else:       
            return FunctionWrapper(item)
 
     def __setitem__ (self, name, newValue):
@@ -248,7 +252,11 @@ class CompositeFunctionWrapper(FunctionWrapper):
            Implement len() function.
            It should not be called directly.
        """
-       return self.fun.__len__()
+
+       composite = self.fun.castToComposite()
+       if(composite):
+           return composite.__len__()
+       raise RuntimeError("Not a composite Function")
        
     def tieAll (self, name):
        """ For each member function, tie the parameter of the given name 
@@ -327,7 +335,12 @@ class CompositeFunctionWrapper(FunctionWrapper):
        if not needToFlatten :
           return self
        
-       flatSelf = CompositeFunctionWrapper()
+       # Now we know there is a composite function.
+       if isinstance(self,ProductFunctionWrapper):
+          flatSelf = ProductFunctionWrapper()
+       else:
+          flatSelf = CompositeFunctionWrapper()
+          
        for i in range(0, len(self)):
           if isinstance(self[i],CompositeFunctionWrapper):
              currentFunction = self[i].flatten()
