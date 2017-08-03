@@ -53,8 +53,7 @@ template <typename T, typename A>
 QString vectorString(const std::vector<T, A> &items) {
   std::ostringstream vector_string;
   const char *separator = "";
-  for (auto paramIt = items.begin(); paramIt != items.end();
-       ++paramIt) {
+  for (auto paramIt = items.begin(); paramIt != items.end(); ++paramIt) {
     vector_string << separator << *paramIt;
     separator = ", ";
   }
