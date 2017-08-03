@@ -599,7 +599,7 @@ void ApplyPaalmanPings::plotCurrentPreview() {
     workspaces.append(QString::fromStdString(m_pythonExportWsName));
   }
 
-  IndirectTab::plotSpectrum(workspaces, m_spectra);
+  IndirectTab::plotSpectrum(workspaces, boost::numeric_cast<int>(m_spectra));
 }
 
 /*
@@ -624,7 +624,7 @@ void ApplyPaalmanPings::plotInPreview(const QString &curveName,
   } else if (m_ppSampleWS || m_ppContainerWS) {
     int specNo = std::min(m_ppContainerWS->getNumberHistograms(),
                           m_ppSampleWS->getNumberHistograms()) -
-                 1;
+                          boost::numeric_cast<size_t>(1);
     m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
     m_uiForm.spPreviewSpec->setValue(specNo);
   }
