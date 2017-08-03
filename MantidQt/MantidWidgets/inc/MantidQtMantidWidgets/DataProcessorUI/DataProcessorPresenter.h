@@ -72,8 +72,8 @@ public:
     PlotGroupFlag,
     ExpandAllGroupsFlag,
     CollapseAllGroupsFlag,
-    PauseFlag,
-    SelectionChangedFlag
+    SelectAllFlag,
+    PauseFlag
   };
 
   // Tell the presenter something happened
@@ -92,11 +92,11 @@ public:
   virtual void setModel(std::string name) = 0;
   virtual ParentItems selectedParents() const = 0;
   virtual ChildItems selectedChildren() const = 0;
-  virtual bool newSelectionMade() const = 0;
   virtual bool askUserYesNo(const std::string &prompt,
                             const std::string &title) const = 0;
   virtual void giveUserWarning(const std::string &prompt,
                                const std::string &title) const = 0;
+  virtual bool isProcessing() const = 0;
 };
 }
 }
