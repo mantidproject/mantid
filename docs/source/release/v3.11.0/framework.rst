@@ -38,6 +38,7 @@ MD Algorithms (VATES CLI)
 
 Performance
 -----------
+- Performance of UB indexing routines addressed. `:ref:`FindUBUsingLatticeParameters` running 2x faster than before.
 
 CurveFitting
 ------------
