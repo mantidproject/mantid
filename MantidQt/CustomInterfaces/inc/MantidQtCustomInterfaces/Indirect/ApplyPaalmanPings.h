@@ -41,6 +41,8 @@ private:
 
   void addInterpolationStep(Mantid::API::MatrixWorkspace_sptr toInterpolate,
                             std::string toMatch);
+  void plotInPreview(const QString &curveName, MatrixWorkspace_sptr &ws,
+    const QColor &curveColor);
 
   Ui::ApplyPaalmanPings m_uiForm;
 
@@ -52,7 +54,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_ppSampleWS;
   Mantid::API::MatrixWorkspace_sptr m_ppContainerWS;
 
-  int m_spectrum;
+  int m_spectra;
 };
 
 } // namespace CustomInterfaces

@@ -16,7 +16,7 @@ Mantid::Kernel::Logger g_log("ApplyPaalmanPings");
 namespace MantidQt {
 namespace CustomInterfaces {
 ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
-  m_spectrum = 0;
+  m_spectra = 0;
   m_uiForm.setupUi(parent);
   connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
           SLOT(handleGeometryChange(int)));
@@ -64,7 +64,7 @@ void ApplyPaalmanPings::newSample(const QString &dataName) {
       dataName.toStdString());
 
   // Plot the curve
-  m_uiForm.ppPreview->addSpectrum("Sample", m_ppSampleWS, 0, Qt::black);
+  plotInPreview("Sample", m_ppSampleWS, Qt::black);
   m_uiForm.spPreviewSpec->setMaximum(
       static_cast<int>(m_ppSampleWS->getNumberHistograms()) - 1);
   m_sampleWorkspaceName = dataName.toStdString();
@@ -88,8 +88,10 @@ void ApplyPaalmanPings::newContainer(const QString &dataName) {
   clone->setProperty("InputWorkspace", m_ppContainerWS);
   clone->setProperty("Outputworkspace", "__processed_can");
   clone->execute();
-  m_uiForm.ppPreview->addSpectrum("Container", m_ppContainerWS, 0, Qt::red);
   m_containerWorkspaceName = "__processed_can";
+
+  // Plot the container
+  plotInPreview("Container", m_ppContainerWS, Qt::red);
 }
 
 void ApplyPaalmanPings::updateContainer() {
@@ -547,7 +549,7 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
         Qt::red);
   }
 
-  m_spectrum = wsIndex;
+  m_spectra = wsIndex;
 }
 /**
  * Handles saving of the workspace
@@ -597,7 +599,22 @@ void ApplyPaalmanPings::plotCurrentPreview() {
     workspaces.append(QString::fromStdString(m_pythonExportWsName));
   }
 
-  IndirectTab::plotSpectrum(workspaces, m_spectrum);
+  IndirectTab::plotSpectrum(workspaces, m_spectra);
+}
+
+void ApplyPaalmanPings::plotInPreview(const QString &curveName, MatrixWorkspace_sptr &ws,
+  const QColor &curveColor) {
+
+  // Plot new container
+  if (ws->getNumberHistograms() > m_spectra) {
+    m_uiForm.ppPreview->addSpectrum(curveName, ws, m_spectra, curveColor);
+  }
+  else if (m_ppSampleWS || m_ppContainerWS) {
+    int specNo = std::min(m_ppContainerWS->getNumberHistograms(),
+      m_ppSampleWS->getNumberHistograms()) - 1;
+    m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
+    m_uiForm.spPreviewSpec->setValue(specNo);
+  }
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

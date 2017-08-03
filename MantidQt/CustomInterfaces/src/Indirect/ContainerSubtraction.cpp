@@ -281,7 +281,7 @@ void ContainerSubtraction::newSample(const QString &dataName) {
       static_cast<int>(m_csSampleWS->getNumberHistograms()) - 1);
 
   // Plot the sample curve
-  m_uiForm.ppPreview->addSpectrum("Sample", m_csSampleWS, 0, Qt::black);
+  plotInPreview("Sample", m_csSampleWS, Qt::black);
   m_sampleWorkspaceName = dataName.toStdString();
 
   // Set min/max container shift
@@ -314,10 +314,7 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   m_containerWorkspaceName = "__processed_can";
 
   // Plot new container
-  if (m_csContainerWS->getNumberHistograms() > m_spectra) {
-    m_uiForm.ppPreview->addSpectrum("Container", m_csContainerWS, m_spectra, Qt::red);
-  }
-  m_containerWorkspaceName = "__processed_can";
+  plotInPreview("Container", m_csContainerWS, Qt::red);
 }
 
 /**
@@ -508,6 +505,21 @@ void ContainerSubtraction::plotCurrentPreview() {
   }
 
   IndirectTab::plotSpectrum(workspaces, m_spectra);
+}
+
+void ContainerSubtraction::plotInPreview(const QString &curveName, MatrixWorkspace_sptr &ws, 
+  const QColor &curveColor) {
+
+  // Plot new container
+  if (ws->getNumberHistograms() > m_spectra) {
+    m_uiForm.ppPreview->addSpectrum(curveName, ws, m_spectra, curveColor);
+  }
+  else if (m_csSampleWS || m_csContainerWS) {
+    int specNo = std::min(m_csContainerWS->getNumberHistograms(),
+      m_csSampleWS->getNumberHistograms()) - 1;
+    m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
+    m_uiForm.spPreviewSpec->setValue(specNo);
+  }
 }
 
 } // namespace CustomInterfaces
