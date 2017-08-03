@@ -505,12 +505,7 @@ void ReflectometryReductionOne2::outputDebugWorkspace(
   if (debug) {
     // Clone the workspace because otherwise we can end up outputting the same
     // workspace twice with different names, which is confusing.
-    auto cloneAlg = this->createChildAlgorithm("CloneWorkspace");
-    cloneAlg->initialize();
-    cloneAlg->setProperty("InputWorkspace", ws);
-    cloneAlg->execute();
-    auto cloneWS = cloneAlg->getProperty("OutputWorkspace");
-
+    MatrixWorkspace_sptr cloneWS = ws->clone();
     AnalysisDataService::Instance().addOrReplace(
         wsName + "_" + std::to_string(step) + wsSuffix, cloneWS);
     ++step;
