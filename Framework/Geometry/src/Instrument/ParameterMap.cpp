@@ -81,15 +81,7 @@ ParameterMap::ParameterMap(const ParameterMap &other)
     return;
   m_detectorInfo = Kernel::make_unique<DetectorInfo>(*other.m_detectorInfo);
   m_componentInfo = Kernel::make_unique<ComponentInfo>(*other.m_componentInfo);
-  m_componentInfo->m_componentInfo->setDetectorInfo(
-      m_detectorInfo->m_detectorInfo.get());
-  m_detectorInfo->m_detectorInfo->setComponentInfo(
-      m_componentInfo->m_componentInfo.get());
-
-  const auto parInstrument = ParComponentFactory::createInstrument(
-      boost::shared_ptr<const Instrument>(m_instrument, NoDeleting()),
-      boost::shared_ptr<ParameterMap>(this, NoDeleting()));
-  m_detectorInfo->m_instrument = parInstrument;
+  relinkWrappers();
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -1244,13 +1236,29 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
                            "base instrument, not a parametrized instrument");
   m_instrument = instrument;
 
+  if (empty() && instrument->componentInfo()) {
+    m_detectorInfo =
+        Kernel::make_unique<DetectorInfo>(*instrument->detectorInfo());
+    m_componentInfo =
+        Kernel::make_unique<ComponentInfo>(*instrument->componentInfo());
+    relinkWrappers();
+  } else {
+    std::tie(m_componentInfo, m_detectorInfo) =
+        InstrumentVisitor::makeWrappers(*m_instrument, this);
+  }
+}
+
+/// Sets up links between m_detectorInfo, m_componentInfo, and m_instrument.
+void ParameterMap::relinkWrappers() {
+  m_componentInfo->m_componentInfo->setDetectorInfo(
+      m_detectorInfo->m_detectorInfo.get());
+  m_detectorInfo->m_detectorInfo->setComponentInfo(
+      m_componentInfo->m_componentInfo.get());
+
   const auto parInstrument = ParComponentFactory::createInstrument(
       boost::shared_ptr<const Instrument>(m_instrument, NoDeleting()),
       boost::shared_ptr<ParameterMap>(this, NoDeleting()));
-
-  InstrumentVisitor visitor(parInstrument);
-  visitor.walkInstrument();
-  std::tie(m_componentInfo, m_detectorInfo) = visitor.makeWrappers();
+  m_detectorInfo->m_instrument = parInstrument;
 }
 
 } // Namespace Geometry

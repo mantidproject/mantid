@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -52,8 +53,11 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_sampleCache(instr->m_sampleCache), m_defaultView(instr->m_defaultView),
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
-      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
-      m_detectorInfo(instr->m_detectorInfo) {}
+      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame) {
+  // Note that we do not copy m_detectorInfo and m_componentInfo into the
+  // parametrized instrument since the ParameterMap will make a copy, if
+  // applicable.
+}
 
 /** Copy constructor
  *  This method was added to deal with having distinct neutronic and physical
@@ -69,8 +73,11 @@ Instrument::Instrument(const Instrument &instr)
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
       m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
-      m_referenceFrame(instr.m_referenceFrame),
-      m_detectorInfo(instr.m_detectorInfo) {
+      m_referenceFrame(instr.m_referenceFrame) {
+  // Note that we do not copy m_detectorInfo and m_componentInfo into the new
+  // instrument since they are only non-NULL for the base instrument, which
+  // should usually not be copied.
+
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
@@ -1336,6 +1343,28 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   }
 
   return pmap;
+}
+
+/** Parse the instrument tree and create ComponentInfo and DetectorInfo.
+ *
+ * This can be called for the base instrument once it is completely created, in
+ * particular when it is stored in the InstrumentDataService for reusing it
+ * later and avoiding repeated tree walks if several workspaces with the same
+ * instrument are loaded. */
+void Instrument::parseTree() {
+  if (isParametrized())
+    throw std::logic_error("Instrument::parseTree must be called with the base "
+                           "instrument, not a parametrized instrument");
+  std::tie(m_componentInfo, m_detectorInfo) =
+      InstrumentVisitor::makeWrappers(*this);
+}
+
+const ComponentInfo *Instrument::componentInfo() const {
+  return m_componentInfo.get();
+}
+
+const DetectorInfo *Instrument::detectorInfo() const {
+  return m_detectorInfo.get();
 }
 
 namespace Conversion {

@@ -6,6 +6,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidBeamline/ComponentInfo.h"
@@ -307,6 +308,19 @@ InstrumentVisitor::makeWrappers() const {
       std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
 
   return {std::move(compInfoWrapper), std::move(detInfoWrapper)};
+}
+
+std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+InstrumentVisitor::makeWrappers(const Instrument &instrument,
+                                ParameterMap *pmap) {
+  const auto parInstrument =
+      pmap ? ParComponentFactory::createInstrument(
+                 boost::shared_ptr<const Instrument>(&instrument, NoDeleting()),
+                 boost::shared_ptr<ParameterMap>(pmap, NoDeleting()))
+           : boost::shared_ptr<const Instrument>(&instrument, NoDeleting());
+    InstrumentVisitor visitor(parInstrument);
+    visitor.walkInstrument();
+    return visitor.makeWrappers();
 }
 
 } // namespace Geometry
