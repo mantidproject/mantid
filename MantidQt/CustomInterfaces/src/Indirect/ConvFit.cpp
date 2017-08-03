@@ -288,7 +288,7 @@ void ConvFit::run() {
   // Add to batch alg runner and execute
   m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+          SLOT(sequentialFitComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -337,6 +337,12 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string specMin, const std::str
     m_properties["MaxIterations"])));
   cfs->setProperty("OutputWorkspace", (outputWSName.toStdString() + "_Result"));
   return cfs;
+}
+
+void ConvFit::sequentialFitComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+    SLOT(sequentialFitComplete(bool)));
+  algorithmComplete(error, m_baseName);
 }
 
 /**
@@ -422,20 +428,19 @@ void ConvFit::plotCurrentPreview() {
 * Handles completion of the ConvolutionFitSequential algorithm.
 *
 * @param error True if the algorithm was stopped due to error, false otherwise
+* @param outputWsName The name of the output workspace created from running the algorithm.
 */
-void ConvFit::algorithmComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(algorithmComplete(bool)));
+void ConvFit::algorithmComplete(bool error, QString &outputWSName) {
 
   if (error)
     return;
 
-  const auto resultName = m_baseName.toStdString() + "_Result";
+  const auto resultName = outputWSName.toStdString() + "_Result";
   MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
 
   // Name for GroupWorkspace
-  const auto groupName = m_baseName.toStdString() + "_Workspaces";
+  const auto groupName = outputWSName.toStdString() + "_Workspaces";
   // Add Sample logs for ResolutionFiles
   const auto resFile = m_uiForm.dsResInput->getCurrentDataName().toStdString();
   addSampleLogsToWorkspace(resultName, "resolution_filename", resFile,
@@ -1265,117 +1270,7 @@ void ConvFit::singleFitComplete(bool error) {
   // Disconnect signal for single fit complete
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(singleFitComplete(bool)));
-
-  if (error) {
-    showMessageBox("Fit algorithm failed.");
-    return;
-  }
-
-  // Plot the line on the mini plot
-  m_uiForm.ppPlot->removeSpectrum("Guess");
-  const auto resultName = m_singleFitOutputName + "_Workspace";
-  m_previewPlotData =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          resultName.toStdString());
-  m_uiForm.ppPlot->addSpectrum("Fit", resultName, 1, Qt::red);
-  m_uiForm.ppPlot->addSpectrum("Diff", resultName, 2, Qt::blue);
-
-  IFunction_const_sptr outputFunc = m_singleFitAlg->getProperty("Function");
-
-  QString functionName = m_uiForm.cbFitType->currentText();
-
-  // Get params.
-  QMap<QString, double> parameters;
-  const std::vector<std::string> parNames = outputFunc->getParameterNames();
-  std::vector<double> parVals;
-
-  QStringList params = getFunctionParameters(functionName);
-  params.reserve(static_cast<int>(parNames.size()));
-
-  for (size_t i = 0; i < parNames.size(); ++i)
-    parVals.push_back(outputFunc->getParameter(parNames[i]));
-
-  for (size_t i = 0; i < parNames.size(); ++i)
-    parameters[QString(parNames[i].c_str())] = parVals[i];
-
-  // Populate Tree widget with values
-  // Background should always be f0
-  m_dblManager->setValue(m_properties["BGA0"], parameters["f0.A0"]);
-  m_dblManager->setValue(m_properties["BGA1"], parameters["f0.A1"]);
-
-  const int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
-
-  int funcIndex = 0;
-  int subIndex = 0;
-
-  // check if we're using a temperature correction
-  if (m_uiForm.ckTempCorrection->isChecked() &&
-      !m_uiForm.leTempCorrection->text().isEmpty()) {
-    subIndex++;
-  }
-
-  const bool usingDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
-
-  // If using a delta function with any fit type or using two Lorentzians
-  const bool usingCompositeFunc =
-      ((usingDeltaFunc && fitTypeIndex > 0) || fitTypeIndex == 2);
-
-  const QString prefBase = "f1.f1.";
-
-  if (usingDeltaFunc) {
-    QString key = prefBase;
-    if (usingCompositeFunc) {
-      key += "f0.";
-    }
-
-    m_dblManager->setValue(m_properties["DeltaHeight"],
-                           parameters[key + "Height"]);
-    m_dblManager->setValue(m_properties["DeltaCentre"],
-                           parameters[key + "Centre"]);
-    funcIndex++;
-  }
-
-  QString pref = prefBase;
-
-  if (usingCompositeFunc) {
-    pref += "f" + QString::number(funcIndex) + ".f" +
-            QString::number(subIndex) + ".";
-  } else {
-    pref += "f" + QString::number(subIndex) + ".";
-  }
-
-  if (fitTypeIndex == 2) {
-    functionName = "Lorentzian 1";
-    for (auto it = params.begin(); it != params.end() - 3; ++it) {
-      const QString functionParam = functionName + "." + *it;
-      const QString paramValue = pref + *it;
-      m_dblManager->setValue(m_properties[functionParam],
-                             parameters[paramValue]);
-    }
-    funcIndex++;
-    pref = prefBase;
-    pref += "f" + QString::number(funcIndex) + ".f" +
-            QString::number(subIndex) + ".";
-
-    functionName = "Lorentzian 2";
-
-    for (auto it = params.begin() + 3; it != params.end(); ++it) {
-      const QString functionParam = functionName + "." + *it;
-      const QString paramValue = pref + *it;
-      m_dblManager->setValue(m_properties[functionParam],
-                             parameters[paramValue]);
-    }
-
-  } else {
-    for (auto it = params.begin(); it != params.end(); ++it) {
-      const QString functionParam = functionName + "." + *it;
-      const QString paramValue = pref + *it;
-      m_dblManager->setValue(m_properties[functionParam],
-                             parameters[paramValue]);
-    }
-  }
-
-  m_pythonExportWsName = "";
+  algorithmComplete(error, m_singleFitOutputName);
 }
 
 /**
