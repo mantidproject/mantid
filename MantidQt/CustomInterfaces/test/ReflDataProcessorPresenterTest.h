@@ -706,8 +706,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    // TS_ASSERT_THROWS_NOTHING(
-    //  presenter->notify(DataProcessorPresenter::OpenTableFlag));
+    TS_ASSERT_THROWS_NOTHING(
+      presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
     // The following code sets up the desired workspaces without having to
     // process any runs to obtain them
