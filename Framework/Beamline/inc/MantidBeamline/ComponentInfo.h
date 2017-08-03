@@ -38,8 +38,24 @@ class DetectorInfo;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_BEAMLINE_DLL ComponentInfo {
-
 private:
+  class Range {
+  private:
+    const std::vector<size_t>::const_iterator m_begin;
+    const std::vector<size_t>::const_iterator m_end;
+
+  public:
+    Range(std::vector<size_t>::const_iterator &&begin,
+          std::vector<size_t>::const_iterator &&end)
+        : m_begin(std::move(begin)), m_end(std::move(end)) {}
+    bool empty() const { return m_begin == m_end; }
+    auto begin() const -> decltype(m_begin) { return m_begin; }
+    auto end() const -> decltype(m_end) { return m_end; }
+  };
+
+  Range detectorRangeInSubtree(const size_t index) const;
+  Range componentRangeInSubtree(const size_t index) const;
+
   boost::shared_ptr<const std::vector<size_t>> m_assemblySortedDetectorIndices;
   /// Contains only indices of non-detector components
   boost::shared_ptr<const std::vector<size_t>> m_assemblySortedComponentIndices;

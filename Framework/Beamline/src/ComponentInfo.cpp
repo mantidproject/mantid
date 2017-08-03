@@ -184,28 +184,18 @@ void ComponentInfo::setPosition(const size_t componentIndex,
 
   // Optimization: Not using detectorsInSubtree and componentsInSubtree to avoid
   // memory allocations.
-  const auto rangesIndex = compOffsetIndex(componentIndex);
-
   // Optimization: Split loop over detectors and other components.
-  const auto detRange = (*m_detectorRanges)[rangesIndex];
-  auto it = m_assemblySortedDetectorIndices->begin() + detRange.first;
-  auto end = m_assemblySortedDetectorIndices->begin() + detRange.second;
-  if (it != end)
+  const auto range = detectorRangeInSubtree(componentIndex);
+  if (!range.empty())
     failIfScanning();
-  for (; it != end; ++it) {
-    const auto &index = *it;
-    // Optimzation: After failIfScanning() we know that the time index is always
-    // 0 so we use slightly faster access with index pair instead of only
-    // detector index.
+  // Optimization: After failIfScanning() we know that the time index is always
+  // 0 so we use faster access with index pair instead of only detector index.
+  for (const auto &index : range) {
     m_detectorInfo->setPosition({index, 0},
                                 m_detectorInfo->position({index, 0}) + offset);
   }
 
-  const auto compRange = (*m_componentRanges)[rangesIndex];
-  it = m_assemblySortedComponentIndices->begin() + compRange.first;
-  end = m_assemblySortedComponentIndices->begin() + compRange.second;
-  for (; it != end; ++it) {
-    const auto &index = *it;
+  for (const auto &index : componentRangeInSubtree(componentIndex)) {
     size_t offsetIndex = compOffsetIndex(index);
     m_positions.access()[offsetIndex] += offset;
   }
@@ -233,17 +223,12 @@ void ComponentInfo::setRotation(const size_t componentIndex,
   const Eigen::Quaterniond currentRotInv = rotation(componentIndex).inverse();
   const Eigen::Quaterniond rotDelta =
       (newRotation * currentRotInv).normalized();
-
   auto transform = Eigen::Matrix3d(rotDelta);
-  const auto rangesIndex = compOffsetIndex(componentIndex);
 
-  const auto detRange = (*m_detectorRanges)[rangesIndex];
-  auto it = m_assemblySortedDetectorIndices->begin() + detRange.first;
-  auto end = m_assemblySortedDetectorIndices->begin() + detRange.second;
-  if (it != end)
+  const auto range = detectorRangeInSubtree(componentIndex);
+  if (!range.empty())
     failIfScanning();
-  for (; it != end; ++it) {
-    const auto &index = *it;
+  for (const auto &index : range) {
     auto newPos =
         transform * (m_detectorInfo->position({index, 0}) - compPos) + compPos;
     auto newRot = rotDelta * m_detectorInfo->rotation({index, 0});
@@ -251,11 +236,7 @@ void ComponentInfo::setRotation(const size_t componentIndex,
     m_detectorInfo->setRotation({index, 0}, newRot);
   }
 
-  const auto compRange = (*m_componentRanges)[rangesIndex];
-  it = m_assemblySortedComponentIndices->begin() + compRange.first;
-  end = m_assemblySortedComponentIndices->begin() + compRange.second;
-  for (; it != end; ++it) {
-    const auto &index = *it;
+  for (const auto &index : componentRangeInSubtree(componentIndex)) {
     auto newPos = transform * (position(index) - compPos) + compPos;
     auto newRot = rotDelta * rotation(index);
     const size_t childCompIndexOffset = compOffsetIndex(index);
@@ -331,6 +312,25 @@ size_t ComponentInfo::root() const {
 
 double ComponentInfo::l1() const {
   return (sourcePosition() - samplePosition()).norm();
+}
+
+/// Returns a Range containing all detectors in the subtree specified by index.
+ComponentInfo::Range
+ComponentInfo::detectorRangeInSubtree(const size_t index) const {
+  const auto rangesIndex = compOffsetIndex(index);
+  const auto range = (*m_detectorRanges)[rangesIndex];
+  return {m_assemblySortedDetectorIndices->begin() + range.first,
+          m_assemblySortedDetectorIndices->begin() + range.second};
+}
+
+/// Returns a Range containing all non-detectors in the subtree specified by
+/// index.
+ComponentInfo::Range
+ComponentInfo::componentRangeInSubtree(const size_t index) const {
+  const auto rangesIndex = compOffsetIndex(index);
+  const auto range = (*m_componentRanges)[rangesIndex];
+  return {m_assemblySortedComponentIndices->begin() + range.first,
+          m_assemblySortedComponentIndices->begin() + range.second};
 }
 
 } // namespace Beamline
