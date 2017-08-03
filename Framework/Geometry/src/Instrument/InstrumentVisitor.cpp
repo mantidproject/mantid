@@ -318,9 +318,9 @@ InstrumentVisitor::makeWrappers(const Instrument &instrument,
                  boost::shared_ptr<const Instrument>(&instrument, NoDeleting()),
                  boost::shared_ptr<ParameterMap>(pmap, NoDeleting()))
            : boost::shared_ptr<const Instrument>(&instrument, NoDeleting());
-    InstrumentVisitor visitor(parInstrument);
-    visitor.walkInstrument();
-    return visitor.makeWrappers();
+  InstrumentVisitor visitor(parInstrument);
+  visitor.walkInstrument();
+  return visitor.makeWrappers();
 }
 
 } // namespace Geometry
