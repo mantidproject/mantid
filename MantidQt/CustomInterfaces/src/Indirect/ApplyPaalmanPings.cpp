@@ -603,25 +603,28 @@ void ApplyPaalmanPings::plotCurrentPreview() {
 }
 
 /*
- * Plots the selected spectra (selected by the Spectrum spinner) of the specified
- * workspace. The resultant curve will be given the specified name and the specified
+ * Plots the selected spectra (selected by the Spectrum spinner) of the
+ *specified
+ * workspace. The resultant curve will be given the specified name and the
+ *specified
  * colour.
  *
  * @param curveName   The name of the curve to plot in the preview.
  * @param ws          The workspace whose spectra to plot in the preview.
  * @param curveColor  The color of the curve to plot in the preview.
  */
-void ApplyPaalmanPings::plotInPreview(const QString &curveName, MatrixWorkspace_sptr &ws,
-  const QColor &curveColor) {
+void ApplyPaalmanPings::plotInPreview(const QString &curveName,
+                                      MatrixWorkspace_sptr &ws,
+                                      const QColor &curveColor) {
 
   // Check whether the selected spectra is now out of bounds with
   // respect to the specified workspace.
   if (ws->getNumberHistograms() > m_spectra) {
     m_uiForm.ppPreview->addSpectrum(curveName, ws, m_spectra, curveColor);
-  }
-  else if (m_ppSampleWS || m_ppContainerWS) {
+  } else if (m_ppSampleWS || m_ppContainerWS) {
     int specNo = std::min(m_ppContainerWS->getNumberHistograms(),
-      m_ppSampleWS->getNumberHistograms()) - 1;
+                          m_ppSampleWS->getNumberHistograms()) -
+                 1;
     m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
     m_uiForm.spPreviewSpec->setValue(specNo);
   }

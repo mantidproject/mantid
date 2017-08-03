@@ -39,8 +39,8 @@ private:
   void loadSettings(const QSettings &settings) override;
 
   void addRebinStep(QString toRebin, QString toMatch);
-  void plotInPreview(const QString &curveName, MatrixWorkspace_sptr &ws, 
-    const QColor &curveColor);
+  void plotInPreview(const QString &curveName, MatrixWorkspace_sptr &ws,
+                     const QColor &curveColor);
 
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;
