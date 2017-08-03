@@ -1691,9 +1691,9 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
     @return A new V3D object with length "c", in the direction of the third
             rotated unit cell edge, "c".
  */
-V3D IndexingUtils::makeCDir(const V3D &a_dir, const V3D &b_dir, const double &c,
-                            const double &cosAlpha, const double &cosBeta,
-                            const double &cosGamma, const double &sinGamma) {
+V3D IndexingUtils::makeCDir(const V3D &a_dir, const V3D &b_dir, const double c,
+                            const double cosAlpha, const double cosBeta,
+                            const double cosGamma, const double sinGamma) {
 
   double c1 = c * cosBeta;
   double c2 = c * (cosAlpha - cosGamma * cosBeta) / sinGamma;
