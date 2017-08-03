@@ -507,10 +507,20 @@ void ContainerSubtraction::plotCurrentPreview() {
   IndirectTab::plotSpectrum(workspaces, m_spectra);
 }
 
+/*
+* Plots the selected spectra (selected by the Spectrum spinner) of the specified
+* workspace. The resultant curve will be given the specified name and the specified
+* colour.
+*
+* @param curveName   The name of the curve to plot in the preview.
+* @param ws          The workspace whose spectra to plot in the preview.
+* @param curveColor  The color of the curve to plot in the preview.
+*/
 void ContainerSubtraction::plotInPreview(const QString &curveName, MatrixWorkspace_sptr &ws, 
   const QColor &curveColor) {
 
-  // Plot new container
+  // Check whether the selected spectra is now out of bounds with
+  // respect to the specified workspace.
   if (ws->getNumberHistograms() > m_spectra) {
     m_uiForm.ppPreview->addSpectrum(curveName, ws, m_spectra, curveColor);
   }
