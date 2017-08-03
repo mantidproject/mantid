@@ -56,8 +56,7 @@ private:
   const int64_t m_sampleIndex = -1;
   DetectorInfo *m_detectorInfo; // ExperimentInfo is the owner.
 
-  void scanningCheck(size_t componentIndex) const;
-  void checkDetectorInfo() const;
+  void failIfScanning() const;
 
 public:
   ComponentInfo();

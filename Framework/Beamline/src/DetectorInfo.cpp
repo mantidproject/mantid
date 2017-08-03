@@ -136,30 +136,6 @@ void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
   m_isMasked.access()[linearIndex(index)] = masked;
 }
 
-/// Returns the position of the detector with given index.
-Eigen::Vector3d
-DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
-  return (*m_positions)[linearIndex(index)];
-}
-
-/// Returns the rotation of the detector with given index.
-Eigen::Quaterniond
-DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
-  return (*m_rotations)[linearIndex(index)];
-}
-
-/// Set the position of the detector with given index.
-void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index,
-                               const Eigen::Vector3d &position) {
-  m_positions.access()[linearIndex(index)] = position;
-}
-
-/// Set the rotation of the detector with given index.
-void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index,
-                               const Eigen::Quaterniond &rotation) {
-  m_rotations.access()[linearIndex(index)] = rotation.normalized();
-}
-
 /// Returns the scan count of the detector with given detector index.
 size_t DetectorInfo::scanCount(const size_t index) const {
   if (!m_scanCounts)
@@ -277,17 +253,6 @@ Eigen::Vector3d DetectorInfo::samplePosition() const {
                              "cannot determine samplePosition");
   }
   return m_componentInfo->samplePosition();
-}
-
-/// Returns the linear index for a pair of detector index and time index.
-size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
-  // The most common case are beamlines with static detectors. In that case the
-  // time index is always 0 and we avoid expensive map lookups. Linear indices
-  // are ordered such that the first block contains everything for time index 0
-  // so even in the time dependent case no translation is necessary.
-  if (index.second == 0)
-    return index.first;
-  return (*m_indexMap)[index.first][index.second];
 }
 
 void DetectorInfo::initScanCounts() {

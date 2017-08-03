@@ -92,7 +92,6 @@ InstrumentVisitor::InstrumentVisitor(
 
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors);  // Exact
-  m_assemblySortedComponentIndices->reserve(nDetectors); // Approximation
   m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
 }
 
@@ -217,7 +216,6 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
     (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
     (*m_componentIds)[detectorIndex] = detector.getComponentID();
     m_assemblySortedDetectorIndices->push_back(detectorIndex);
-    m_assemblySortedComponentIndices->push_back(detectorIndex);
     (*m_detectorPositions)[detectorIndex] =
         Kernel::toVector3d(detector.getPos());
     (*m_detectorRotations)[detectorIndex] =
