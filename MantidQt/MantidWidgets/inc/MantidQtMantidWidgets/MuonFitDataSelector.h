@@ -105,7 +105,7 @@ public slots:
   void fitTypeChanged(bool state);
   /// Called when group/period box selection changes
   void checkForMultiGroupPeriodSelection();
-  void updateNormalisationFromDropDown(int);
+  void updateNormalizationFromDropDown(int);
 signals:
   /// Edited the start or end fields
   void dataPropertiesChanged();

@@ -1804,7 +1804,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   runPythonCode(pyS);
-  m_fitDataPresenter->storeNormalisation(safeWSName.toStdString());
+  m_fitDataPresenter->storeNormalization(safeWSName.toStdString());
 }
 
 /**
@@ -2180,7 +2180,7 @@ void MuonAnalysis::loadFittings() {
   connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked()), this,
           SLOT(handlePeriodBox()));
   connect(m_dataSelector, SIGNAL(nameChanged(QString)), this,
-          SLOT(updateNormalisation(QString)));
+          SLOT(updateNormalization(QString)));
 
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
@@ -2569,7 +2569,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 
   m_currentTab = newTab;
 }
-void MuonAnalysis::updateNormalisation(QString name) {
+void MuonAnalysis::updateNormalization(QString name) {
   m_uiForm.fitBrowser->setNormalization(name.toStdString());
 }
 
@@ -2964,7 +2964,7 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
 
     groupAlg->execute();
-    m_fitDataPresenter->storeNormalisation(wsName);
+    m_fitDataPresenter->storeNormalization(wsName);
 
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
