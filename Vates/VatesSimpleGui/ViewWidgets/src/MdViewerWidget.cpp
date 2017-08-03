@@ -228,7 +228,7 @@ void MdViewerWidget::setupUiAndConnections() {
                    SIGNAL(messageDisplayed(const QString &, int)),
                    SLOT(showOutputWidget()));
 
-  this->ui.outputWidget->setParent(nullptr);
+  this->ui.outputWidget->setWindowFlags(Qt::Window);
   this->ui.outputWidget->setWindowTitle("Output Messages");
   this->ui.outputWidget->hide();
 
