@@ -296,7 +296,6 @@ void GenericDataProcessorPresenter::process() {
   m_gqueue = GroupQueue();
 
   // Progress: each group and each row within count as a progress step.
-  int progress = 0;
   int maxProgress = 0;
 
   for (const auto &item : m_selectedData) {
@@ -343,10 +342,11 @@ void GenericDataProcessorPresenter::process() {
   }
 
   // Create progress reporter bar
-  if (maxProgress > 0)
+  if (maxProgress > 0) {
+    int progress = 0;
     m_progressReporter = new ProgressPresenter(progress, maxProgress,
                                                maxProgress, m_progressView);
-
+  }
   // Start processing the first group
   m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
   resume();
