@@ -81,11 +81,6 @@ void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
   alg->setProperty(name, value);
 }
 
-void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
-                          QString const &value) {
-  setAlgorithmProperty(alg, name, value.toStdString());
-}
-
 void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
                           std::string const &value) {
   setAlgorithmProperty(alg, name.toStdString(), value);
