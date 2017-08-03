@@ -41,7 +41,7 @@ private:
 
   void addInterpolationStep(Mantid::API::MatrixWorkspace_sptr toInterpolate,
                             std::string toMatch);
-  void plotInPreview(const QString &curveName, MatrixWorkspace_sptr &ws,
+  void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws,
                      const QColor &curveColor);
 
   Ui::ApplyPaalmanPings m_uiForm;
