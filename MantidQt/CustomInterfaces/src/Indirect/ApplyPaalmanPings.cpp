@@ -549,7 +549,7 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
         Qt::red);
   }
 
-  m_spectra = wsIndex;
+  m_spectra = boost::numeric_cast<size_t>(wsIndex);
 }
 /**
  * Handles saving of the workspace

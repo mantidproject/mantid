@@ -377,7 +377,7 @@ void ContainerSubtraction::plotPreview(int wsIndex) {
       "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
       Qt::red);
 
-  m_spectra = wsIndex;
+  m_spectra = boost::numeric_cast<size_t>(wsIndex);
 }
 
 void ContainerSubtraction::postProcessComplete(bool error) {

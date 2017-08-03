@@ -55,7 +55,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_ppSampleWS;
   Mantid::API::MatrixWorkspace_sptr m_ppContainerWS;
 
-  int m_spectra;
+  size_t m_spectra;
 };
 
 } // namespace CustomInterfaces
