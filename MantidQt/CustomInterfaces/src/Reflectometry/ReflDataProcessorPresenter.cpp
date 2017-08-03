@@ -610,7 +610,6 @@ void ReflDataProcessorPresenter::plotRow() {
       const auto wsName = getReducedWorkspaceName(run.second, "IvsQ_");
 
       for (size_t slice = 0; slice < numSlices; slice++) {
-        std::cout << "wsName is " << wsName.toStdString() << std::endl;
         const auto sliceName = wsName + "_slice_" + QString::number(slice);
         if (workspaceExists(sliceName))
           workspaces.insert(sliceName, nullptr);

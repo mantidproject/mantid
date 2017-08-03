@@ -651,7 +651,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   if (runs.size() == 1)
     return getRun(runs[0], instrument, preprocessor.prefix());
 
-  auto const outputName = preprocessor.prefix() + runs.join(" ");
+  auto const outputName = preprocessor.prefix() + runs.join("_");
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
   * but that doesn't preserve history nicely, so we'll just take care of tidying
@@ -739,8 +739,6 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
 
       // If it's not empty, use it
       if (!valueStr.isEmpty()) {
-        std::cout << "valueStr: " << valueStr.toStdString() << std::endl;
-
         // But we may have things like '1+2' which we want to replace with '1_2'
         auto value = valueStr.split("+", QString::SkipEmptyParts);
         names.append(m_whitelist.prefix(col) + value.join("_"));
@@ -748,17 +746,8 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
     }
   } // Columns
 
-  for(auto&& name : names) {
-    std::cout << "Name: '" << name.toStdString() << '\'' << std::endl; 
-  }
-
-  std::cout << "Joined Names Are: " << names.join("_").toStdString() << "." << std::endl;
-
   auto wsname = prefix;
   wsname += names.join("_");
-  std::cout << "Prefix Is: " << prefix.toStdString() << std::endl;
-  std::cout << "Workspace Name is: " << wsname.toStdString() << "." << std::endl;
-
   return wsname;
 }
 
@@ -874,8 +863,8 @@ QString GenericDataProcessorPresenter::loadRun(const QString &run,
   IAlgorithm_sptr algLoadRun =
       AlgorithmManager::Instance().create(loader.toStdString());
   algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", fileName);
-  algLoadRun->setProperty("OutputWorkspace", outputName);
+  algLoadRun->setProperty("Filename", fileName.toStdString());
+  algLoadRun->setProperty("OutputWorkspace", outputName.toStdString());
   algLoadRun->execute();
   if (!algLoadRun->isExecuted()) {
     // Run not loaded from disk
@@ -1499,7 +1488,6 @@ void GenericDataProcessorPresenter::plotWorkspaces(
 
     pythonSrc += "base_graph.activeLayer().logLogAxes()\n";
 
-    //std::cout << "Actual:" << pythonSrc.toStdString() << std::endl;
     m_view->runPythonAlgorithm(pythonSrc);
   }
 }
