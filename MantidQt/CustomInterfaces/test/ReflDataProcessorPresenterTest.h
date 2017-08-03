@@ -518,70 +518,69 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
-    void testProcessWithNotebookWarn() {
-      NiceMock<MockDataProcessorView> mockDataProcessorView;
-      NiceMock<MockProgressableView> mockProgress;
-      NiceMock<MockMainPresenter> mockMainPresenter;
-      auto presenter = presenterFactory.create();
-      presenter->acceptViews(&mockDataProcessorView, &mockProgress);
-      presenter->accept(&mockMainPresenter);
+  void testProcessWithNotebookWarn() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = presenterFactory.create();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
 
-      createPrefilledMinimalWorkspace("TestWorkspace",
-      presenter->getWhiteList());
-      EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
-          .Times(1)
-          .WillRepeatedly(Return("TestWorkspace"));
-      TS_ASSERT_THROWS_NOTHING(
-          presenter->notify(DataProcessorPresenter::OpenTableFlag));
+    createPrefilledMinimalWorkspace("TestWorkspace", presenter->getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
-      std::set<int> groupList;
-      groupList.insert(0);
+    std::set<int> groupList;
+    groupList.insert(0);
 
-      // We should be warned
-      EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(1);
+    // We should be warned
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(1);
 
-      // The user hits the "process" button with the first group selected
-      EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-          .Times(1)
-          .WillRepeatedly(Return(std::map<int, std::set<int>>()));
-      EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-          .Times(1)
-          .WillRepeatedly(Return(groupList));
-      EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
-          .Times(1)
-          .WillOnce(Return("0,10"));
-      EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
-          .Times(1)
-          .WillOnce(Return("Custom"));
-      EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-          .Times(1)
-          .WillOnce(Return(QString()));
-      EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-          .Times(1)
-          .WillOnce(Return(QString()));
-      EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-          .Times(1)
-          .WillOnce(Return(QString()));
-      EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-          .Times(1)
-          .WillOnce(Return(QString()));
-      EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
-          .Times(2)
-          .WillRepeatedly(Return("INTER"));
-      EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-          .Times(1)
-          .WillOnce(Return(true));
-      EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(groupList));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+        .Times(1)
+        .WillOnce(Return("0,10"));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+        .Times(1)
+        .WillOnce(Return("Custom"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+        .Times(1)
+        .WillOnce(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(1)
+        .WillOnce(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(1)
+        .WillOnce(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(1)
+        .WillOnce(Return(QString()));
+    EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+        .Times(2)
+        .WillRepeatedly(Return("INTER"));
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
-      TS_ASSERT_THROWS_NOTHING(
-          presenter->notify(DataProcessorPresenter::ProcessFlag));
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::ProcessFlag));
 
-      // Tidy up
-      AnalysisDataService::Instance().clear();
+    // Tidy up
+    AnalysisDataService::Instance().clear();
 
-      TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-      TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
-    }
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
 
   void testProcessMixedWorkspacesWarn() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
