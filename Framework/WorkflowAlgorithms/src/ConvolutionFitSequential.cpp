@@ -178,8 +178,11 @@ void ConvolutionFitSequential::exec() {
   }
   outputWsName += backType + "_s";
   outputWsName += std::to_string(specMin);
-  outputWsName += "_to_";
-  outputWsName += std::to_string(specMax);
+
+  if (specMin != specMax) {
+    outputWsName += "_to_";
+    outputWsName += std::to_string(specMax);
+  }
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
