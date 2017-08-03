@@ -429,7 +429,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
         for d_range, wrksp in itertools.chain(self._sam_ws_map.items(), self._van_ws_map.items()):
-            self.log().information('Wrksp:' + str(wrksp) + ' Cal:' + str(self._cal))
             NormaliseByCurrent(InputWorkspace=wrksp,
                                OutputWorkspace=wrksp)
             AlignDetectors(InputWorkspace=wrksp,
@@ -438,8 +437,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             DiffractionFocussing(InputWorkspace=wrksp,
                                  OutputWorkspace=wrksp,
                                  GroupingFileName=self._cal)
-            self.log().information('Drange (min): ' + d_range[0])
-            self.log().information('Drange (max): ' + d_range[1])
             CropWorkspace(InputWorkspace=wrksp,
                           OutputWorkspace=wrksp,
                           XMin=d_range[0],
@@ -573,6 +570,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 raise RuntimeError("Could not locate sample file: " + run)
 
         return run_files
+
 
 def rebin_to_smallest(workspaces):
     """
