@@ -80,6 +80,10 @@ class FunctionWrapperTest(unittest.TestCase):
         c[1]["Height"] = 11.0
         self.assertAlmostEqual(c[1]["Height"], 11.0,10)
         
+        g0a = FunctionWrapper( "Gaussian", Height=7.0, Sigma=1.2, PeakCentre=9)
+        c[1] = g0a
+        self.assertAlmostEqual(c[1]["Height"], 7.0,10)
+        
     def test_attributes(self):
         testhelpers.assertRaisesNothing(self, FunctionWrapper, "Polynomial", attributes={'n': 3}, A0=4, A1=3, A2=2, A3=1)
         testhelpers.assertRaisesNothing(self, FunctionWrapper, "Polynomial", n=3, A0=4, A1=3, A2=2, A3=1)
