@@ -17,7 +17,7 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
-std::ostream& operator<<(std::ostream& os, QString const& str) {
+std::ostream &operator<<(std::ostream &os, QString const &str) {
   os << str.toStdString();
   return os;
 }
@@ -706,8 +706,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    //TS_ASSERT_THROWS_NOTHING(
-      //  presenter->notify(DataProcessorPresenter::OpenTableFlag));
+    // TS_ASSERT_THROWS_NOTHING(
+    //  presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
     // The following code sets up the desired workspaces without having to
     // process any runs to obtain them
@@ -732,10 +732,11 @@ public:
 
     // We should not be warned
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _))
-      .WillRepeatedly(::testing::Invoke([](QString const& m1, QString const& m2) -> void {
-            EXPECT_EQ("M1", m1.toStdString());
-            EXPECT_EQ("M2", m2.toStdString());
-        }));
+        .WillRepeatedly(
+            ::testing::Invoke([](QString const &m1, QString const &m2) -> void {
+              EXPECT_EQ("M1", m1.toStdString());
+              EXPECT_EQ("M2", m2.toStdString());
+            }));
 
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())

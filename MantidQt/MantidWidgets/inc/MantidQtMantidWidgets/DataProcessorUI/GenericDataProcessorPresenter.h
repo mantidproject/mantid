@@ -180,7 +180,8 @@ protected:
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);
-  void issueNotFoundWarning(QString const& granule, QSet<QString> const& missingWorkspaces);
+  void issueNotFoundWarning(QString const &granule,
+                            QSet<QString> const &missingWorkspaces);
 
 private:
   // the name of the workspace/table/model in the ADS, blank if unsaved

@@ -1429,15 +1429,16 @@ void GenericDataProcessorPresenter::plotRow() {
   plotWorkspaces(workspaces);
 }
 
-
-void GenericDataProcessorPresenter::issueNotFoundWarning(QString const& granule, QSet<QString> const& missingWorkspaces) {
+void GenericDataProcessorPresenter::issueNotFoundWarning(
+    QString const &granule, QSet<QString> const &missingWorkspaces) {
   m_view->giveUserWarning(
-        "The following workspaces were not plotted because they were not "
-        "found:\n" +
-            QStringList(QStringList::fromSet(missingWorkspaces)).join("\n") +
-            "\n\nPlease check that the " + granule + " you are trying to plot have been "
-            "fully processed.",
-        "Error plotting "+ granule + ".");
+      "The following workspaces were not plotted because they were not "
+      "found:\n" +
+          QStringList(QStringList::fromSet(missingWorkspaces)).join("\n") +
+          "\n\nPlease check that the " + granule +
+          " you are trying to plot have been "
+          "fully processed.",
+      "Error plotting " + granule + ".");
 }
 
 /** Plots any currently selected groups */

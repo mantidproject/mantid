@@ -581,7 +581,6 @@ QString ReflDataProcessorPresenter::takeSlice(const QString &runNo,
   return sliceName.mid(4);
 }
 
-
 /** Plots any currently selected rows */
 void ReflDataProcessorPresenter::plotRow() {
 
