@@ -48,6 +48,14 @@ The input workspaces must come from the same instrument, have common
 units and bins and no detectors that contribute to spectra should
 overlap.
 
+Y axis units and labels
+#######################
+
+The optional parameters YAxisUnit and YAxisLabel can be used to change the
+y axis unit and label when conjoining workspaces. Changing YAxisUnit updates
+YAxisLabel automatically with the value of YAxisUnit, unless a separate value 
+is supplied.
+
 Exception
 #########
 
@@ -63,19 +71,24 @@ Usage
 .. testcode:: ConjoinWorkspacesEx
 
     ws1 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, BinWidth=10, Xmax=50)
-    print "Number of spectra in first workspace", ws1.getNumberHistograms()
+    print("Number of spectra in first workspace = " +  str(ws1.getNumberHistograms()))
     ws2 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=3, BankPixelWidth=1, BinWidth=10, Xmax=50)
-    print "Number of spectra in second workspace", ws2.getNumberHistograms()
-    ConjoinWorkspaces(InputWorkspace1=ws1, InputWorkspace2=ws2, CheckOverlapping=False)
-    print "Number of spectra after ConjoinWorkspaces", mtd['ws1'].getNumberHistograms()
+    print("Number of spectra in second workspace = " +  str(ws2.getNumberHistograms()))
+    ConjoinWorkspaces(InputWorkspace1=ws1, InputWorkspace2=ws2, CheckOverlapping=False, YAxisUnit="New unit", YAxisLabel="New label")
+    ws = mtd['ws1'] # Have to update workspace from ADS, as it is an in-out parameter
+    print("Number of spectra after ConjoinWorkspaces = " + str(ws.getNumberHistograms()))
+    print("Y unit is " + ws.YUnit())
+    print("Y label " + ws.YUnitLabel())
 
 Output:
 
 .. testoutput:: ConjoinWorkspacesEx
 
-    Number of spectra in first workspace 2
-    Number of spectra in second workspace 3
-    Number of spectra after ConjoinWorkspaces 5
+    Number of spectra in first workspace = 2
+    Number of spectra in second workspace = 3
+    Number of spectra after ConjoinWorkspaces = 5
+    Y unit is New unit
+    Y label New label
 
 .. categories::
 
