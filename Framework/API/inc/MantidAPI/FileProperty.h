@@ -90,7 +90,6 @@ public:
   using Kernel::PropertyWithValue<std::string>::operator=;
 
 private:
-
   /// Returns a string depending on whether an empty value is valid
   std::string isEmptyValueValid() const;
   /// Do the allowed values match the facility preference extensions for run

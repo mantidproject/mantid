@@ -185,16 +185,14 @@ public:
     dir.remove(); // clean up your folder
   }
 
-  void testExpandUserVariables(){
+  void testExpandUserVariables() {
     FileProperty fp("Dir", "", FileProperty::Directory);
     std::string msg = fp.setValue("~");
 
-    if (std::getenv("HOME") ||
-	std::getenv("USERPROFILE")){
+    if (std::getenv("HOME") || std::getenv("USERPROFILE")) {
       // User variables set, so should be successful
       TS_ASSERT(msg.empty());
-    }
-    else{
+    } else {
       // Variables not set, so there should be an error
       TS_ASSERT(!msg.empty());
     }
