@@ -197,7 +197,7 @@ inline void DetectorInfo::setRotation(const size_t index,
 
 /// Set the rotation of the detector with given index.
 inline void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index,
-                               const Eigen::Quaterniond &rotation) {
+                                      const Eigen::Quaterniond &rotation) {
   m_rotations.access()[linearIndex(index)] = rotation.normalized();
 }
 
