@@ -429,7 +429,7 @@ void ConvFit::plotCurrentPreview() {
 * Handles completion of the ConvolutionFitSequential algorithm.
 *
 * @param error True if the algorithm was stopped due to error, false otherwise
-* @param outputWsName The name of the output workspace created from running the
+* @param outputWSName The name of the output workspace created from running the
 *algorithm.
 */
 void ConvFit::algorithmComplete(bool error, QString &outputWSName) {
