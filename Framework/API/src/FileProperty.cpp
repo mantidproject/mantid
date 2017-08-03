@@ -55,6 +55,70 @@ void addExtension(const std::string &extension,
   else
     extensions.push_back(extension);
 }
+ 
+/** Expand user variables in file path.
+ *  On Windows and UNIX, ~ is replaced by the user's home directory, if found.
+ *  If the path contains no user variables, or expansion fails, the path is
+ *  returned unchanged, for errors to be dealt with by the calling function.
+ *  Note: this function does not support the "~user/blah" format for a named
+ *  user's home directory - if this is encountered, the filepath is returned
+ *  unchanged.
+ *  @param filepath The path to expand
+ *  @return The expanded path
+ */
+std::string expandUser(const std::string &filepath) {
+  auto start = filepath.begin();
+
+  if (*start != '~') // No user variables in filepath
+    return filepath;
+
+  // Position of the first slash after the variable
+  auto nextSlash = find_if(start, filepath.end(),
+			   [](const char &c){
+			     return c == '/' || c == '\\';});
+
+  // ~user/blah format - no support for this as yet
+  if (std::distance(start, nextSlash) != 1)
+    return filepath;
+
+  char *home;
+  if (!(home = std::getenv("HOME")))          // Usually set on Windows and UNIX
+    if (!(home = std::getenv("USERPROFILE"))) // Not usually set on UNIX
+      // Couldn't find any relevant environment variables
+      return filepath;
+
+  std::string homeStr = std::string(home);
+  return homeStr + std::string(nextSlash, filepath.end());
+}
+
+/**
+ * Create a given directory if it does not already exist.
+ * @param path :: The path to the directory, which can include file stem
+ * @returns A string indicating a problem if one occurred
+ */
+std::string createDirectory(const std::string &path) {
+  Poco::Path stempath(path);
+  if (stempath.isFile()) {
+    stempath.makeParent();
+  }
+
+  if (!stempath.toString().empty()) {
+    Poco::File stem(stempath);
+    if (!stem.exists()) {
+      try {
+        stem.createDirectories();
+      } catch (Poco::Exception &e) {
+        std::stringstream msg;
+        msg << "Failed to create directory \"" << stempath.toString()
+            << "\": " << e.what();
+        return msg.str();
+      }
+    }
+  } else {
+    return "Invalid directory.";
+  }
+  return ""; // everything went fine
+}
 }
 
 //-----------------------------------------------------------------
@@ -344,98 +408,6 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
   return errorMsg;
 }
 
-/**
- * Create a given directory if it does not already exist.
- * @param path :: The path to the directory, which can include file stem
- * @returns A string indicating a problem if one occurred
- */
-std::string FileProperty::createDirectory(const std::string &path) const {
-  Poco::Path stempath(path);
-  if (stempath.isFile()) {
-    stempath.makeParent();
-  }
-
-  if (!stempath.toString().empty()) {
-    Poco::File stem(stempath);
-    if (!stem.exists()) {
-      try {
-        stem.createDirectories();
-      } catch (Poco::Exception &e) {
-        std::stringstream msg;
-        msg << "Failed to create directory \"" << stempath.toString()
-            << "\": " << e.what();
-        return msg.str();
-      }
-    }
-  } else {
-    return "Invalid directory.";
-  }
-  return ""; // everything went fine
-}
-
-/**
- * Check file extension to see if a lower- or upper-cased version will also
- * match if the given one does not exist
- * @param filepath :: A filename whose extension is checked and converted to
- * lower/upper case if necessary.
- * @returns The new filename
- */
-std::string FileProperty::convertExtension(const std::string &filepath) const {
-  Poco::Path fullpath(filepath);
-  std::string ext = fullpath.getExtension();
-  if (ext.empty())
-    return filepath;
-  const size_t nchars = ext.size();
-  for (size_t i = 0; i < nchars; ++i) {
-    int c = static_cast<int>(ext[i]);
-    if (std::islower(c)) {
-      ext[i] = static_cast<char>(std::toupper(c));
-    } else if (std::isupper(c)) {
-      ext[i] = static_cast<char>(std::tolower(c));
-    } else {
-    }
-  }
-  fullpath.setExtension(ext);
-  return fullpath.toString();
-}
-
-/** Expand user variables in file path.
- *  On Windows and UNIX, ~ is replaced by the user's home directory, if found.
- *  If the path contains no user variables, or expansion fails, the path is
- *  returned unchanged, for errors to be dealt with by the calling function.
- *  Note: this function does not support the "~user/blah" format for a named
- *  user's home directory - if this is encountered, the filepath is returned
- *  unchanged.
- *  @param filepath The path to expand
- *  @return The expanded path
- */
-std::string FileProperty::expandUser(const std::string &filepath) const {
-  auto start = filepath.begin();
-
-  if (*start != '~') // No user variables in filepath
-    return filepath;
-
-  // Position of the first slash after the variable
-  auto nextSlash = find_if(start, filepath.end(), &isSlash);
-
-  // ~user/blah format - no support for this as yet
-  if (std::distance(start, nextSlash) != 1)
-    return filepath;
-
-  char *home;
-  if (!(home = std::getenv("HOME")))          // Usually set on Windows and UNIX
-    if (!(home = std::getenv("USERPROFILE"))) // Not usually set on UNIX
-      // Couldn't find any relevant environment variables
-      return filepath;
-
-  std::string homeStr = std::string(home);
-  return homeStr + std::string(nextSlash, filepath.end());
-}
-
-/** Is a character either a forward- or back-slash? Helper for expandUser
- *  @param c The character to test
- *  @return True if c is "\" or "/"
- */
-bool FileProperty::isSlash(const char &c) { return c == '/' || c == '\\'; }
 }
 }
+
