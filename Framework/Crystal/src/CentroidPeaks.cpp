@@ -341,7 +341,7 @@ void CentroidPeaks::removeEdgePeaks(
   int Edge = getProperty("EdgePixels");
   std::vector<int> badPeaks;
   size_t numPeaks = peakWS->getNumberPeaks() - 1;
-  for (size_t i = 0; i < numPeaks;  i++) {
+  for (size_t i = 0; i < numPeaks; i++) {
     // Get a direct ref to that peak.
     const auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
