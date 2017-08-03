@@ -23,6 +23,7 @@ class ComponentInfo;
 }
 
 namespace Geometry {
+class ParameterMap;
 
 /** ComponentInfo : Provides a component centric view on to the instrument.
   Indexes are per component.
@@ -50,8 +51,8 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL ComponentInfo {
 private:
-  /// Reference to the actual ComponentInfo object (non-wrapping part).
-  Beamline::ComponentInfo &m_componentInfo;
+  /// Pointer to the actual ComponentInfo object (non-wrapping part).
+  std::unique_ptr<Beamline::ComponentInfo> m_componentInfo;
   /// Collection of component ids
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
       m_componentIds;
@@ -61,11 +62,14 @@ private:
 
 public:
   ComponentInfo(
-      Mantid::Beamline::ComponentInfo &componentInfo,
+      std::unique_ptr<Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds,
       boost::shared_ptr<const std::unordered_map<
           Geometry::IComponent *, size_t>> componentIdToIndexMap);
+  ComponentInfo(const ComponentInfo &other);
+  ~ComponentInfo();
+
   std::vector<size_t> detectorsInSubtree(size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   size_t size() const;
@@ -85,6 +89,12 @@ public:
   size_t sample() const;
   double l1() const;
   size_t root();
+
+  const IComponent *componentID(const size_t componentIndex) const {
+    return m_componentIds->operator[](componentIndex);
+  }
+
+  friend class ParameterMap;
 };
 
 } // namespace Geometry

@@ -342,7 +342,6 @@ public:
     }
 
     const auto &instrument = instWS->getInstrument();
-    TS_ASSERT(instrument->hasDetectorInfo())
 
     auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
     TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges))

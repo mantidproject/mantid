@@ -9,7 +9,6 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -1843,9 +1842,9 @@ public:
     // future updates
     while (count < 10) {
       // Rotate the bank
-      ComponentHelper::rotateComponent(
-          *m_sansBank, *m_paramMap, m_zRotation,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_zRotation);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -1869,9 +1868,9 @@ public:
     // future updates
     while (count < 10) {
       // move the bank
-      ComponentHelper::moveComponent(
-          *m_sansBank, *m_paramMap, m_pos,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_pos);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -1886,9 +1885,9 @@ public:
     int count = 0;
     while (count < 10) {
       // Rotate the bank
-      ComponentHelper::rotateComponent(
-          *m_sansBank, *m_paramMap, m_zRotation,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_zRotation);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
@@ -1904,9 +1903,9 @@ public:
     int count = 0;
     while (count < 10) {
       // move the bank
-      ComponentHelper::moveComponent(
-          *m_sansBank, *m_paramMap, m_pos,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_pos);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();

@@ -8,6 +8,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 
@@ -69,7 +70,7 @@ public:
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
 
-    Mantid::Beamline::ComponentInfo internalInfo(
+    auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
         parentIndices, positions, rotations, -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
@@ -78,7 +79,7 @@ public:
     auto componentIds =
         boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2});
-    ComponentInfo info(internalInfo, componentIds,
+    ComponentInfo info(std::move(internalInfo), componentIds,
                        makeComponentIDMap(componentIds));
     TS_ASSERT_EQUALS(info.indexOf(comp1.getComponentID()), 0);
     TS_ASSERT_EQUALS(info.indexOf(comp2.getComponentID()), 1);

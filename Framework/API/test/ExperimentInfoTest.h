@@ -80,10 +80,8 @@ public:
     TS_ASSERT(i->isEmptyInstrument());
     TS_ASSERT_EQUALS(ws.getInstrument()->type(), "Instrument");
 
-    // ALL of these should be set. Even though we have just an empty instrument
-    // stored. See constructor.
-    TS_ASSERT(i->hasInfoVisitor());
-    TS_ASSERT(i->hasDetectorInfo());
+    // Should be set even though we have just an empty instrument.
+    TS_ASSERT(i->getParameterMap()->hasDetectorInfo(i->baseInstrument().get()));
   }
 
   void test_GetSetInstrument_default() {
@@ -668,7 +666,7 @@ public:
     }
   }
 
-  void test_nexus_intrument_info() {
+  void test_nexus_instrument_info() {
     ExperimentInfo ei;
 
     // We get an instrument group from a test file in the form that would occur

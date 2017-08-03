@@ -21,7 +21,6 @@ namespace API {
 class SpectrumInfo;
 }
 namespace Geometry {
-class IComponent;
 class IDetector;
 class Instrument;
 class ParameterMap;
@@ -66,14 +65,14 @@ class ParameterMap;
 */
 class MANTID_GEOMETRY_DLL DetectorInfo {
 public:
-  DetectorInfo(Beamline::DetectorInfo &detectorInfo,
+  DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
                boost::shared_ptr<const Geometry::Instrument> instrument,
-               boost::shared_ptr<std::vector<detid_t>> detectorIds,
-               Geometry::ParameterMap *pmap,
+               boost::shared_ptr<const std::vector<detid_t>> detectorIds,
                boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
                    detIdToIndexMap);
-
+  DetectorInfo(const DetectorInfo &other);
   DetectorInfo &operator=(const DetectorInfo &rhs);
+  ~DetectorInfo();
 
   bool isEquivalent(const DetectorInfo &other) const;
 
@@ -129,16 +128,16 @@ public:
   void merge(const DetectorInfo &other);
 
   friend class API::SpectrumInfo;
+  friend class ParameterMap;
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   boost::shared_ptr<const Geometry::IDetector>
   getDetectorPtr(const size_t index) const;
 
-  /// Reference to the actual DetectorInfo object (non-wrapping part).
-  Beamline::DetectorInfo &m_detectorInfo;
+  /// Pointer to the actual DetectorInfo object (non-wrapping part).
+  std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;
 
-  Geometry::ParameterMap *m_pmap;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   boost::shared_ptr<const std::vector<detid_t>> m_detectorIDs;
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
