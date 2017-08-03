@@ -39,7 +39,8 @@ private:
   void loadSettings(const QSettings &settings) override;
 
   void addRebinStep(QString toRebin, QString toMatch);
-  void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws,
+  void plotInPreview(const QString &curveName,
+                     Mantid::API::MatrixWorkspace_sptr &ws,
                      const QColor &curveColor);
 
   Ui::ContainerSubtraction m_uiForm;
