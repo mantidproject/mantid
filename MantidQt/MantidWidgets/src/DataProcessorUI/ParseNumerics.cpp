@@ -1,6 +1,5 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseNumerics.h"
 #include <stdexcept>
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
 namespace MantidQt {
 namespace MantidWidgets {
 double EXPORT_OPT_MANTIDQT_MANTIDWIDGETS parseDouble(QString const &in) {

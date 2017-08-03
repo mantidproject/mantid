@@ -1,6 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H
 #define MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H
 #include <QString>
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 /**
 
 This file defines functions for parsing numbers from QStrings.
@@ -29,10 +30,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace MantidWidgets {
 // Converts a string denoting a floating point value to a double.
-double parseDouble(QString const &in);
+double EXPORT_OPT_MANTIDQT_MANTIDWIDGETS parseDouble(QString const &in);
 
 /// Converts a string denoting a denary integer to it
-int parseDenaryInteger(QString const &in);
+int EXPORT_OPT_MANTIDQT_MANTIDWIDGETS parseDenaryInteger(QString const &in);
 }
 }
 #endif // MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H
