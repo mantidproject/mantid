@@ -5,6 +5,6 @@ namespace MantidWidgets {
 @param items : The strings in the list.
 @return The comma separated list of items.
 */
-QString vectorString(const QStringList &items) { return param.join(", "); }
+QString vectorString(const QStringList &items) { return items.join(", "); }
 }
 }

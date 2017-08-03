@@ -45,15 +45,15 @@ toStdStringVector(std::vector<QString, A> const &inVec) {
 }
 
 /**
-Create string of comma separated list of values from a vector
-@param param_vec : vector of values
-@return string of comma separated list of values
+Create string of comma separated list of items from a vector
+@param items : Values in the list.
+@return The comma separated list of items.
 */
 template <typename T, typename A>
-QString vectorString(const std::vector<T, A> &param_vec) {
+QString vectorString(const std::vector<T, A> &items) {
   std::ostringstream vector_string;
   const char *separator = "";
-  for (auto paramIt = param_vec.begin(); paramIt != param_vec.end();
+  for (auto paramIt = items.begin(); paramIt != items.end();
        ++paramIt) {
     vector_string << separator << *paramIt;
     separator = ", ";
@@ -62,8 +62,8 @@ QString vectorString(const std::vector<T, A> &param_vec) {
 }
 
 template <typename A>
-QString vectorString(const std::vector<QString, A> &param_vec) {
-  return vectorString(toStdStringVector(param_vec));
+QString vectorString(const std::vector<QString, A> &items) {
+  return vectorString(toStdStringVector(items));
 }
 
 QString vectorString(const QStringList &param);
