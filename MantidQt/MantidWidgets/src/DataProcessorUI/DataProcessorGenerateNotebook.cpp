@@ -498,7 +498,6 @@ boost::tuple<std::string, std::string> reduceRowString(
   // Parse and set any user-specified options
   auto hiddenOptionsMap = parseKeyValueString(hiddenOptionsStr);
   // Options specified via 'Hidden Options' column will be preferred
-  hiddenOptionsMap.insert(options.begin(), options.end());
   for (auto kvp = hiddenOptionsMap.begin(); kvp != hiddenOptionsMap.end();
        ++kvp) {
     algProperties.push_back(kvp->first + " = " + kvp->second);
