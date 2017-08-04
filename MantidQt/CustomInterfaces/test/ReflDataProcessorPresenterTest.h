@@ -728,12 +728,7 @@ public:
     groupList.insert(0);
 
     // We should not be warned
-    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _))
-        .WillRepeatedly(
-            ::testing::Invoke([](QString const &m1, QString const &m2) -> void {
-              EXPECT_EQ("M1", m1.toStdString());
-              EXPECT_EQ("M2", m2.toStdString());
-            }));
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0)
 
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
