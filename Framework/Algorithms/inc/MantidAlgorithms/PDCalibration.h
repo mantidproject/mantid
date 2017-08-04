@@ -63,9 +63,13 @@ private:
                                    const double tzero);
   void setCalibrationValues(const detid_t detid, const double difc,
                             const double difa, const double tzero);
-  void fitDIFCtZeroDIFA(const std::vector<double> &d,
-                        const std::vector<double> &tof, double &difc,
-                        double &t0, double &difa);
+  void fitDIFCtZeroDIFA_BLUE(const std::vector<double> &d,
+                             const std::vector<double> &tof, double &difc,
+                             double &t0, double &difa);
+  void fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
+                           const std::vector<double> &tof,
+                           const std::vector<double> &height2, double &difc,
+                           double &t0, double &difa);
   API::MatrixWorkspace_sptr m_uncalibratedWS;
   API::ITableWorkspace_sptr m_calibrationTable;
   API::ITableWorkspace_sptr m_peakPositionTable;

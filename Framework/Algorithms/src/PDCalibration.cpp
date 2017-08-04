@@ -18,8 +18,12 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/make_unique.h"
+#include <algorithm>
 #include <cassert>
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_multimin.h>
 #include <limits>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
@@ -435,6 +439,7 @@ void PDCalibration::exec() {
     std::vector<double> tof_vec_full(m_peaksInDspacing.size(), std::nan(""));
     std::vector<double> d_vec;
     std::vector<double> tof_vec;
+    std::vector<double> height2; // the square of the peak height
     for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
       // Get peak value
       double centre = fittedTable->getRef<double>("centre", i);
@@ -471,6 +476,7 @@ void PDCalibration::exec() {
 
       d_vec.push_back(peaks.inDPos[i]);
       tof_vec.push_back(centre);
+      height2.push_back(height * height);
       tof_vec_full[i + peaks.badPeakOffset] = centre;
     }
 
@@ -478,8 +484,18 @@ void PDCalibration::exec() {
       maskWS->setMaskedIndex(wkspIndex, true);
       continue;
     } else {
+      {
+        double difc = 0., t0 = 0., difa = 0.;
+        fitDIFCtZeroDIFA_BLUE(d_vec, tof_vec, difc, t0, difa);
+        if (peaks.detid == 75967 || peaks.detid == 75968) // REMOVE
+          g_log.warning() << peaks.detid << " BLUE: difc=" << difc
+                          << " t0=" << t0 << " difa=" << difa << "\n"; // REMOVE
+      }
       double difc = 0., t0 = 0., difa = 0.;
-      fitDIFCtZeroDIFA(d_vec, tof_vec, difc, t0, difa);
+      fitDIFCtZeroDIFA_LM(d_vec, tof_vec, height2, difc, t0, difa);
+      if (peaks.detid == 75967 || peaks.detid == 75968) // REMOVE
+        g_log.warning() << peaks.detid << " LM:   difc=" << difc << " t0=" << t0
+                        << " difa=" << difa << "\n"; // REMOVE
 
       const auto rowNum = m_detidToRow[peaks.detid];
       double chisq = 0.;
@@ -538,9 +554,10 @@ void PDCalibration::exec() {
   setProperty("DiagnosticWorkspaces", diagnosticGroup);
 }
 
-void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
-                                     const std::vector<double> &tof,
-                                     double &difc, double &t0, double &difa) {
+void PDCalibration::fitDIFCtZeroDIFA_BLUE(const std::vector<double> &d,
+                                          const std::vector<double> &tof,
+                                          double &difc, double &t0,
+                                          double &difa) {
   double num_peaks = static_cast<double>(d.size());
   double sumX = 0.;
   double sumY = 0.;
@@ -683,6 +700,153 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
     t0 = tZero2;
     difa = difa2;
   }
+}
+
+namespace { // anonymous namespace
+/**
+ * Helper function for calculating costs in gsl.
+ * @param v vector of parameters that are being modified by gsl (difc, tzero,
+ * difa)
+ * @param params The parameters being used for the fit
+ * @return Sum of the errors
+ */
+double gsl_costFunction(const gsl_vector *v, void *peaks) {
+  // this array is [numPeaks, numParams, vector<tof>, vector<dspace>,
+  // vector<height^2>]
+  // index as      [0,        1,         2,         , 2+n           , 2+2n]
+  const std::vector<double> *peakVec =
+      reinterpret_cast<std::vector<double> *>(peaks);
+  // number of peaks being fit
+  const size_t numPeaks = static_cast<size_t>(peakVec->at(0));
+  // number of parameters
+  const size_t numParams = static_cast<size_t>(peakVec->at(1));
+  //  std::cout << "numPeaks=" << numPeaks << " numParams=" << numParams <<
+  //  std::endl;
+
+  // isn't strictly necessary, but makes reading the code much easier
+  const std::vector<double> tofObs(peakVec->begin() + 2,
+                                   peakVec->begin() + 2 + numPeaks);
+  const std::vector<double> dspace(peakVec->begin() + (2 + numPeaks),
+                                   peakVec->begin() + (2 + 2 * numPeaks));
+  const std::vector<double> height2(peakVec->begin() + (2 + 2 * numPeaks),
+                                    peakVec->begin() + (2 + 3 * numPeaks));
+  //  std::cout << "tofObs=";
+  //  for (const auto &tof : tofObs)
+  //      std::cout << tof << " ";
+  //  std::cout << std::endl;
+
+  // create the function to convert tof to dspacing
+  double difc = gsl_vector_get(v, 0);
+  double tzero = 0.;
+  double difa = 0.;
+  if (numParams > 1) {
+    tzero = gsl_vector_get(v, 1);
+    if (numParams > 1)
+      difa = gsl_vector_get(v, 2);
+  }
+  auto converter =
+      Kernel::Diffraction::getDToTofConversionFunc(difc, difa, tzero);
+
+  // calculate the sum of the residuals from observed peaks
+  double errsum = 0.0;
+  for (size_t i = 0; i < numPeaks; ++i) {
+    const double tofCalib = converter(dspace[i]);
+    const double errsum_i = std::fabs(tofObs[i] - tofCalib) * height2[i];
+    errsum += errsum_i;
+  }
+
+  //  std::cout << "difc=" << difc << " tzero=" << tzero << " difa=" << difa <<
+  //  " errsum=" << errsum << std::endl;
+  return errsum;
+}
+} // end of anonymous namespace
+
+void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
+                                        const std::vector<double> &tof,
+                                        const std::vector<double> &height2,
+                                        double &difc, double &t0,
+                                        double &difa) {
+  // number of fit parameters 1=[DIFC], 2=[DIFC,TZERO], 3=[DIFC,TZERO,DIFA]
+  const size_t numParams = 1;
+  // this must have the same layout as the unpacking in gsl_costFunction above
+  const size_t numPeaks = d.size();
+  std::vector<double> peaks(numPeaks * 3 + 2, 0.);
+  peaks[0] = static_cast<double>(d.size());
+  peaks[1] = numParams;
+  for (size_t i = 0; i < numPeaks; ++i) {
+    peaks[i + 2] = tof[i];
+    peaks[i + 2 + numPeaks] = d[i];
+    peaks[i + 2 + 2 * numPeaks] = height2[i];
+  }
+
+  double difc_local = difc;
+  if (difc_local == 0.) {
+    const double d_sum = std::accumulate(d.begin(), d.end(), 0.);
+    const double tof_sum = std::accumulate(tof.begin(), tof.end(), 0.);
+    difc_local = tof_sum / d_sum;
+  }
+
+  // Set up GSL minimzer
+  const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
+  gsl_multimin_fminimizer *s = nullptr;
+  gsl_vector *ss, *x;
+  gsl_multimin_function minex_func;
+
+  // Finally do the fitting
+  size_t iter = 0;
+  int status = 0;
+  double size;
+
+  // Starting point
+  x = gsl_vector_alloc(numParams);
+  gsl_vector_set_all(x, 0.0); // set all parameters to zero
+  gsl_vector_set(x, 0, difc_local);
+
+  /* Set initial step sizes to 0.001 */
+  ss = gsl_vector_alloc(numParams);
+  gsl_vector_set_all(ss, 0.001);
+
+  /* Initialize method and iterate */
+  minex_func.n = numParams;
+  minex_func.f = &gsl_costFunction;
+  minex_func.params = &peaks;
+
+  s = gsl_multimin_fminimizer_alloc(T, numParams);
+  gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
+
+  do {
+    iter++;
+    status = gsl_multimin_fminimizer_iterate(s);
+    if (status)
+      break;
+
+    size = gsl_multimin_fminimizer_size(s);
+    status = gsl_multimin_test_size(size, 1e-4);
+
+  } while (status == GSL_CONTINUE && iter < 50);
+
+  // Output summary
+  std::string status_msg = gsl_strerror(status);
+
+  if (status_msg == "success") {
+    difc = gsl_vector_get(s->x, 0);
+    if (numParams > 1) {
+      t0 = gsl_vector_get(s->x, 1);
+      if (numParams > 1) {
+        difa = gsl_vector_get(s->x, 2);
+      }
+    }
+  } else {
+    g_log.information(status_msg);
+  }
+
+  //    fitresult.fitSum = s->fval;
+  //    fitresult.fitoffsetstatus = reportOfDiffractionEventCalibrateDetectors;
+  //    fitresult.chi2 = s->fval;
+
+  gsl_vector_free(x);
+  gsl_vector_free(ss);
+  gsl_multimin_fminimizer_free(s);
 }
 
 vector<double>
