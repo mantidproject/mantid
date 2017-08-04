@@ -4,6 +4,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/TreeData.h"
 #include <map>
 #include <memory>
 #include <set>
@@ -15,10 +16,6 @@ namespace MantidWidgets {
 
 class DataProcessorCommand;
 class DataProcessorWhiteList;
-
-using RowData = QStringList;
-using GroupData = std::map<int, RowData>;
-using TreeData = std::map<int, GroupData>;
 
 /** @class DataProcessorTreeManager
 

@@ -33,6 +33,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/TreeData.h"
 
 #include <boost/tuple/tuple.hpp>
 #include <QStringList>
@@ -43,10 +44,6 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-
-using RowData = QStringList;
-using GroupData = std::map<int, RowData>;
-using TreeData = std::map<int, GroupData>;
 
 QStringList DLLExport splitByCommas(const QString &namesString);
 
