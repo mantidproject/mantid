@@ -36,10 +36,6 @@ second order scattering events and computing the ratio of second order and first
 Since we have assumed the ratio is the same between succesive orders, the :math:`\frac{1}{1-\beta}` 
 factor simply comes from taking the sum of a geometric series.
 
-The input time-of-flight (energy) range combined with the cylinder radius (:math:`r`) and scattering 
-cross-sections gives a range of :math:`\mu r` for the cylinder, where :math:`\mu = \mu(E)` is the inverse 
-attenuation length.
-
 The cylinder radius :math:`r` combined with the inverse attenuation length :math:`\mu = \mu(E)` 
 (derived from the total scattering cross-section) gives a range of :math:`\mu r` against input 
 time-of-flight ("energy") for the cylinder.
