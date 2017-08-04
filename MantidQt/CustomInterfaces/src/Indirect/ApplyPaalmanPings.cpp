@@ -624,7 +624,7 @@ void ApplyPaalmanPings::plotInPreview(const QString &curveName,
   } else if (m_ppSampleWS || m_ppContainerWS) {
     size_t specNo = std::min(m_ppContainerWS->getNumberHistograms(),
                              m_ppSampleWS->getNumberHistograms()) -
-                             1;
+                    1;
     m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
     m_uiForm.spPreviewSpec->setValue(boost::numeric_cast<int>(specNo));
   }
