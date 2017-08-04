@@ -588,9 +588,9 @@ TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
               });
 
     // Remove top 1% of background
-    const size_t endIndex =
-        static_cast<size_t>(0.99 * static_cast<double>(vals.size()));
-
+   // const size_t endIndex =
+   //     static_cast<size_t>(0.99 * static_cast<double>(vals.size()));
+    const size_t endIndex = vals.size();
     for (size_t k = 0; k < endIndex; k++) {
       signal += vals[k].first;
       errorSquared += vals[k].second;
