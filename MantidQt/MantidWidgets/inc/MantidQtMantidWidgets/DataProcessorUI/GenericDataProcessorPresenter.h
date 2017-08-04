@@ -15,6 +15,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterThread.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/TreeData.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
@@ -23,8 +24,6 @@
 
 #include <QObject>
 
-using RowData = QStringList;
-using GroupData = std::map<int, RowData>;
 using RowItem = std::pair<int, RowData>;
 using RowQueue = std::queue<RowItem>;
 using GroupQueue = std::queue<std::pair<int, RowQueue>>;
