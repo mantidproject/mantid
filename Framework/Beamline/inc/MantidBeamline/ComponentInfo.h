@@ -38,9 +38,26 @@ class DetectorInfo;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_BEAMLINE_DLL ComponentInfo {
-
 private:
+  class Range {
+  private:
+    const std::vector<size_t>::const_iterator m_begin;
+    const std::vector<size_t>::const_iterator m_end;
+
+  public:
+    Range(std::vector<size_t>::const_iterator &&begin,
+          std::vector<size_t>::const_iterator &&end)
+        : m_begin(std::move(begin)), m_end(std::move(end)) {}
+    bool empty() const { return m_begin == m_end; }
+    auto begin() const -> decltype(m_begin) { return m_begin; }
+    auto end() const -> decltype(m_end) { return m_end; }
+  };
+
+  Range detectorRangeInSubtree(const size_t index) const;
+  Range componentRangeInSubtree(const size_t index) const;
+
   boost::shared_ptr<const std::vector<size_t>> m_assemblySortedDetectorIndices;
+  /// Contains only indices of non-detector components
   boost::shared_ptr<const std::vector<size_t>> m_assemblySortedComponentIndices;
   /// Ranges of component ids that are contiguous blocks of detectors.
   boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
@@ -56,8 +73,7 @@ private:
   const int64_t m_sampleIndex = -1;
   DetectorInfo *m_detectorInfo; // ExperimentInfo is the owner.
 
-  void scanningCheck(size_t componentIndex) const;
-  void checkDetectorInfo() const;
+  void failIfScanning() const;
 
 public:
   ComponentInfo();
