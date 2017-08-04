@@ -11,11 +11,13 @@ public:
   vtkPeaksReader(const vtkPeaksReader &) = delete;
 
   void operator=(const vtkPeaksReader &) = delete;
-  vtkTypeMacro(vtkPeaksReader,
-               vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
-                                                    vtkIndent indent) override;
-  vtkSetStringMacro(FileName)
-      vtkGetStringMacro(FileName) int CanReadFile(const char *fname);
+  // clang-format off
+  vtkTypeMacro(vtkPeaksReader, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream &os, vtkIndent indent) override;
+  // clang-format on
+  vtkSetStringMacro(FileName);
+  vtkGetStringMacro(FileName);
+  int CanReadFile(const char *fname);
   void SetDimensions(int dimensions);
   /// Setter for the unitegrated peak marker size
   void SetUnintPeakMarkerSize(double mSize);
