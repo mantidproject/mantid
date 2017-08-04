@@ -121,7 +121,7 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/DynamicPDF \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/EnggDiffraction \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/General \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/ISISREflectometryOld \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/ISISReflectometryOld \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/ISISSANS \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/MultiDatasetFit \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/Muon \
