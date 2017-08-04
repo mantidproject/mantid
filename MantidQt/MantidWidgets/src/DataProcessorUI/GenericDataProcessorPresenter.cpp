@@ -1398,7 +1398,7 @@ void GenericDataProcessorPresenter::setInstrumentList(
 void GenericDataProcessorPresenter::plotRow() {
 
   // Set of workspaces to plot
-  QMap<QString, nullptr_t> workspaces;
+  QOrderedSet<QString> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 
@@ -1445,7 +1445,7 @@ void GenericDataProcessorPresenter::plotGroup() {
     throw std::runtime_error("Can't plot group.");
 
   // Set of workspaces to plot
-  QMap<QString, nullptr_t> workspaces;
+  QOrderedSet<QString> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 
@@ -1474,7 +1474,7 @@ Plot a set of workspaces
 * @param workspaces : [input] The list of workspaces as a set
 */
 void GenericDataProcessorPresenter::plotWorkspaces(
-    const QMap<QString, nullptr_t> &workspaces) {
+    const QOrderedSet<QString> &workspaces) {
   if (!workspaces.isEmpty()) {
     QString pythonSrc;
     pythonSrc += "base_graph = None\n";

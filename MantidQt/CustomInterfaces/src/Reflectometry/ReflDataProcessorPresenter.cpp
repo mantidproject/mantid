@@ -597,7 +597,7 @@ void ReflDataProcessorPresenter::plotRow() {
   }
 
   // Set of workspaces to plot
-  QMap<QString, nullptr_t> workspaces;
+  QOrderedSet<QString> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 
@@ -659,7 +659,7 @@ void ReflDataProcessorPresenter::plotGroup() {
   }
 
   // Set of workspaces to plot
-  QMap<QString, nullptr_t> workspaces;
+  QOrderedSet<QString> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 

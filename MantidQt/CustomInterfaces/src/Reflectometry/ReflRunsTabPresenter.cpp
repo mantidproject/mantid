@@ -292,7 +292,6 @@ void ReflRunsTabPresenter::transfer() {
   }
 
   for (auto&& row : selectedRows) {
-    const int row = *rowIt;
     const auto run = m_searchModel->data(m_searchModel->index(row, 0))
                                 .toString()
                                 .toStdString();
@@ -420,7 +419,7 @@ QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
   auto optionsStr =
       QString("Transmission Run(s),") +
-      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
+      QString::fromStdString(m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup()));
 
   return optionsStr;
 }

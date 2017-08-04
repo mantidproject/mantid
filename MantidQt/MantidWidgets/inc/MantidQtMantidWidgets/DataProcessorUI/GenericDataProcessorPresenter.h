@@ -141,6 +141,8 @@ public:
   bool isProcessing() const override;
 
 protected:
+  template <typename T>
+  using QOrderedSet = QMap<T, std::nullptr_t>;
   // The table view we're managing
   DataProcessorView *m_view;
   // The progress view
@@ -175,7 +177,7 @@ protected:
   // Plotting
   virtual void plotRow();
   virtual void plotGroup();
-  void plotWorkspaces(const QMap<QString, nullptr_t> &workspaces);
+  void plotWorkspaces(const QOrderedSet<QString> &workspaces);
 
 protected slots:
   void reductionError(QString ex);
