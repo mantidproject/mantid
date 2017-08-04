@@ -37,9 +37,9 @@ class ConvFitMembers(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
 
-        axis = ws.getAxis(1)
+        axis = self._result_ws[0].getAxis(1)
         paras = axis.extractValues()
-        run = ws.getRun()
+        run = self._result_ws[0].getRun()
 
         # Check whether delta function and/or lorentzian members
         # were used in the convolution fitting. Log how many of each
