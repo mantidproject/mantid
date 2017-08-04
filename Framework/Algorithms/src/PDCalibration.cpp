@@ -484,13 +484,6 @@ void PDCalibration::exec() {
       maskWS->setMaskedIndex(wkspIndex, true);
       continue;
     } else {
-      {
-        double difc = 0., t0 = 0., difa = 0.;
-        fitDIFCtZeroDIFA_BLUE(d_vec, tof_vec, difc, t0, difa);
-        if (peaks.detid == 75967 || peaks.detid == 75968) // REMOVE
-          g_log.warning() << peaks.detid << " BLUE: difc=" << difc
-                          << " t0=" << t0 << " difa=" << difa << "\n"; // REMOVE
-      }
       double difc = 0., t0 = 0., difa = 0.;
       fitDIFCtZeroDIFA_LM(d_vec, tof_vec, height2, difc, t0, difa);
       if (peaks.detid == 75967 || peaks.detid == 75968) // REMOVE
@@ -552,154 +545,6 @@ void PDCalibration::exec() {
       partials_prefix + "_dspacing", m_peakPositionTable);
   diagnosticGroup->addWorkspace(m_peakPositionTable);
   setProperty("DiagnosticWorkspaces", diagnosticGroup);
-}
-
-void PDCalibration::fitDIFCtZeroDIFA_BLUE(const std::vector<double> &d,
-                                          const std::vector<double> &tof,
-                                          double &difc, double &t0,
-                                          double &difa) {
-  double num_peaks = static_cast<double>(d.size());
-  double sumX = 0.;
-  double sumY = 0.;
-  double sumX2 = 0.;
-  double sumXY = 0.;
-  double sumX2Y = 0.;
-  double sumX3 = 0.;
-  double sumX4 = 0.;
-
-  for (size_t i = 0; i < d.size(); ++i) {
-    sumX2 += d[i] * d[i];
-    sumXY += d[i] * tof[i];
-  }
-
-  // DIFC only
-  double difc0 = sumXY / sumX2;
-  // Get out early if only DIFC is needed.
-  if (calParams == "DIFC" || num_peaks < 3) {
-    difc = difc0;
-    return;
-  }
-
-  // DIFC and t0
-  for (size_t i = 0; i < d.size(); ++i) {
-    sumX += d[i];
-    sumY += tof[i];
-  }
-
-  double difc1 = 0;
-  double tZero1 = 0;
-  double determinant = num_peaks * sumX2 - sumX * sumX;
-  if (determinant != 0) {
-    difc1 = (num_peaks * sumXY - sumX * sumY) / determinant;
-    tZero1 = sumY / num_peaks - difc1 * sumX / num_peaks;
-  }
-
-  // calculated chi squared for each fit
-  double chisq0 = 0;
-  double chisq1 = 0;
-  for (size_t i = 0; i < d.size(); ++i) {
-    // difc chi-squared
-    double temp = difc0 * d[i] - tof[i];
-    chisq0 += (temp * temp);
-
-    // difc and t0 chi-squared
-    temp = tZero1 + difc1 * d[i] - tof[i];
-    chisq1 += (temp * temp);
-  }
-
-  // Get reduced chi-squared
-  chisq0 = chisq0 / (num_peaks - 1);
-  chisq1 = chisq1 / (num_peaks - 2);
-
-  // check that the value is reasonable, only need to check minimum
-  // side since difa is not in play - shift to a higher minimum
-  // means something went wrong
-  if (m_tofMin < Kernel::Diffraction::calcTofMin(difc1, 0., tZero1, m_tofMin) ||
-      difc1 <= 0. || tZero1 < m_tzeroMin || tZero1 > m_tzeroMax) {
-    difc1 = 0;
-    tZero1 = 0;
-    chisq1 = CHISQ_BAD;
-  }
-
-  // Select difc, t0 depending on CalibrationParameters chosen and
-  // number of peaks fitted.
-  if (calParams == "DIFC+TZERO" || num_peaks == 3) {
-    // choose best one according to chi-squared
-    if (chisq0 < chisq1) {
-      difc = difc0;
-    } else {
-      difc = difc1;
-      t0 = tZero1;
-    }
-    return;
-  }
-
-  // DIFC, t0 and DIFA
-  for (size_t i = 0; i < d.size(); ++i) {
-    sumX2Y += d[i] * d[i] * tof[i];
-    sumX3 += d[i] * d[i] * d[i];
-    sumX4 += d[i] * d[i] * d[i] * d[i];
-  }
-
-  double tZero2 = 0;
-  double difc2 = 0;
-  double difa2 = 0;
-  determinant = num_peaks * sumX2 * sumX4 + sumX * sumX3 * sumX2 +
-                sumX2 * sumX * sumX3 - sumX2 * sumX2 * sumX2 -
-                sumX * sumX * sumX4 - num_peaks * sumX3 * sumX3;
-  if (determinant != 0) {
-    tZero2 =
-        (sumY * sumX2 * sumX4 + sumX * sumX3 * sumX2Y + sumX2 * sumXY * sumX3 -
-         sumX2 * sumX2 * sumX2Y - sumX * sumXY * sumX4 - sumY * sumX3 * sumX3) /
-        determinant;
-    difc2 = (num_peaks * sumXY * sumX4 + sumY * sumX3 * sumX2 +
-             sumX2 * sumX * sumX2Y - sumX2 * sumXY * sumX2 -
-             sumY * sumX * sumX4 - num_peaks * sumX3 * sumX2Y) /
-            determinant;
-    difa2 = (num_peaks * sumX2 * sumX2Y + sumX * sumXY * sumX2 +
-             sumY * sumX * sumX3 - sumY * sumX2 * sumX2 - sumX * sumX * sumX2Y -
-             num_peaks * sumXY * sumX3) /
-            determinant;
-  }
-
-  // calculated reduced chi squared for each fit
-  double chisq2 = 0;
-  for (size_t i = 0; i < d.size(); ++i) {
-    double temp = tZero2 + difc2 * d[i] + difa2 * d[i] * d[i] - tof[i];
-    chisq2 += (temp * temp);
-  }
-  chisq2 = chisq2 / (num_peaks - 3);
-
-  // check that the value is reasonable, only need to check minimum
-  // side since difa is not in play - shift to a higher minimum
-  // or a lower maximum means something went wrong
-  if (m_tofMin <
-          Kernel::Diffraction::calcTofMin(difc2, difa2, tZero2, m_tofMin) ||
-      m_tofMax <
-          Kernel::Diffraction::calcTofMax(difc2, difa2, tZero2, m_tofMax) ||
-      difc2 <= 0. || tZero2 < m_tzeroMin || tZero2 > m_tzeroMax ||
-      difa2 < m_difaMin || difa2 > m_difaMax) {
-    tZero2 = 0;
-    difc2 = 0;
-    difa2 = 0;
-    chisq2 = CHISQ_BAD;
-  }
-
-  // Select difc, t0 and difa depending on CalibrationParameters chosen and
-  // number of peaks fitted.
-  if ((chisq0 < chisq1) && (chisq0 < chisq2)) {
-    difc = difc0;
-    t0 = 0.;
-    difa = 0.;
-  } else if ((chisq1 < chisq0) && (chisq1 < chisq2)) {
-    difc = difc1;
-    t0 = tZero1;
-    difa = 0.;
-  } else {
-    difc = difc2;
-    t0 = tZero2;
-    difa = difa2;
-  }
 }
 
 namespace { // anonymous namespace
@@ -786,7 +631,7 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
     difc_local = tof_sum / d_sum;
   }
 
-  // Set up GSL minimzer
+  // Set up GSL minimzer - simplex is overkill
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
   gsl_multimin_fminimizer *s = nullptr;
   gsl_vector *ss, *x;
@@ -823,11 +668,10 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
     size = gsl_multimin_fminimizer_size(s);
     status = gsl_multimin_test_size(size, 1e-4);
 
-  } while (status == GSL_CONTINUE && iter < 50);
+  } while (status == GSL_CONTINUE && iter < 50); // 50 iterations maximum
 
-  // Output summary
+  // only update calibration values on successful fit
   std::string status_msg = gsl_strerror(status);
-
   if (status_msg == "success") {
     difc = gsl_vector_get(s->x, 0);
     if (numParams > 1) {
@@ -836,14 +680,10 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
         difa = gsl_vector_get(s->x, 2);
       }
     }
-  } else {
-    g_log.information(status_msg);
   }
+  // return from gsl_costFunction can be accessed as s->fval
 
-  //    fitresult.fitSum = s->fval;
-  //    fitresult.fitoffsetstatus = reportOfDiffractionEventCalibrateDetectors;
-  //    fitresult.chi2 = s->fval;
-
+  // free memory
   gsl_vector_free(x);
   gsl_vector_free(ss);
   gsl_multimin_fminimizer_free(s);
