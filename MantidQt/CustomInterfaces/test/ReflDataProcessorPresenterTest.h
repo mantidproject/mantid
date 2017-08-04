@@ -728,10 +728,11 @@ public:
     groupList.insert(0);
 
     // We should not be warned
-    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0)
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _))
+        .Times(0)
 
-    // The user hits "plot rows" with the first row selected
-    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        // The user hits "plot rows" with the first row selected
+        EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
