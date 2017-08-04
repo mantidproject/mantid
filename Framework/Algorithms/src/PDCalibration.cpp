@@ -409,7 +409,7 @@ void PDCalibration::exec() {
       continue;
 
     auto alg = createChildAlgorithm("FindPeaks");
-    alg->setLoggingOffset(2);
+    alg->setLoggingOffset(3);
     alg->setProperty("InputWorkspace", m_uncalibratedWS);
     alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
     alg->setProperty("PeakPositions", peaks.inTofPos);
@@ -509,6 +509,7 @@ void PDCalibration::exec() {
   // sort the calibration workspaces
   { // limit scope
     auto alg = createChildAlgorithm("SortTableWorkspace");
+    alg->setLoggingOffset(1);
     alg->setProperty("InputWorkspace", m_calibrationTable);
     alg->setProperty("OutputWorkspace", m_calibrationTable);
     alg->setProperty("Columns", "detid");
@@ -520,6 +521,7 @@ void PDCalibration::exec() {
   // fix-up the diagnostic workspaces
   { // limit scope
     auto alg = createChildAlgorithm("SortTableWorkspace");
+    alg->setLoggingOffset(1);
     alg->setProperty("InputWorkspace", m_peakPositionTable);
     alg->setProperty("OutputWorkspace", m_peakPositionTable);
     alg->setProperty("Columns", "detid");
@@ -766,6 +768,7 @@ MatrixWorkspace_sptr PDCalibration::load(const std::string filename) {
   const double filterBadPulses = getProperty("FilterBadPulses");
 
   auto alg = createChildAlgorithm("LoadEventAndCompress");
+  alg->setLoggingOffset(1);
   alg->setProperty("Filename", filename);
   alg->setProperty("MaxChunkSize", maxChunkSize);
   alg->setProperty("FilterByTofMin", m_tofMin);
@@ -800,6 +803,7 @@ MatrixWorkspace_sptr PDCalibration::loadAndBin() {
 
     g_log.information("Subtracting background");
     auto algMinus = createChildAlgorithm("Minus");
+    algMinus->setLoggingOffset(1);
     algMinus->setProperty("LHSWorkspace", signalWS);
     algMinus->setProperty("RHSWorkspace", backWS);
     algMinus->setProperty("OutputWorkspace", signalWS);
@@ -809,6 +813,7 @@ MatrixWorkspace_sptr PDCalibration::loadAndBin() {
 
     g_log.information("Compressing data");
     auto algCompress = createChildAlgorithm("CompressEvents");
+    algCompress->setLoggingOffset(1);
     algCompress->setProperty("InputWorkspace", signalWS);
     algCompress->setProperty("OutputWorkspace", signalWS);
     algCompress->executeAsChildAlg();
@@ -823,6 +828,7 @@ MatrixWorkspace_sptr PDCalibration::loadAndBin() {
 API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
   g_log.information("Binning data in time-of-flight");
   auto rebin = createChildAlgorithm("Rebin");
+  rebin->setLoggingOffset(1);
   rebin->setProperty("InputWorkspace", wksp);
   rebin->setProperty("OutputWorkspace", wksp);
   rebin->setProperty("Params", getPropertyValue("TofBinning"));
@@ -846,6 +852,7 @@ void PDCalibration::loadOldCalibration() {
   // load the old one
   std::string filename = getProperty("PreviousCalibration");
   auto alg = createChildAlgorithm("LoadDiffCal");
+  alg->setLoggingOffset(1);
   alg->setProperty("Filename", filename);
   alg->setProperty("WorkspaceName", "NOMold"); // TODO
   alg->setProperty("MakeGroupingWorkspace", false);
@@ -902,6 +909,7 @@ void PDCalibration::createNewCalTable() {
   // create new calibraion table for when an old one isn't loaded
   // using the signal workspace and CalculateDIFC
   auto alg = createChildAlgorithm("CalculateDIFC");
+  alg->setLoggingOffset(1);
   alg->setProperty("InputWorkspace", m_uncalibratedWS);
   alg->executeAsChildAlg();
   API::MatrixWorkspace_const_sptr difcWS = alg->getProperty("OutputWorkspace");
