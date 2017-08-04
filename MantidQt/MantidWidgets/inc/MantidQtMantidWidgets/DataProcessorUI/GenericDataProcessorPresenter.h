@@ -141,8 +141,7 @@ public:
   bool isProcessing() const override;
 
 protected:
-  template <typename T>
-  using QOrderedSet = QMap<T, std::nullptr_t>;
+  template <typename T> using QOrderedSet = QMap<T, std::nullptr_t>;
   // The table view we're managing
   DataProcessorView *m_view;
   // The progress view

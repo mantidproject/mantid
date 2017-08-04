@@ -100,8 +100,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   } else {
     m_view->setInstrumentList(instruments, "INTER");
     for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(fromStdStringVector(instruments),
-                                   "INTER");
+      presenter->setInstrumentList(fromStdStringVector(instruments), "INTER");
   }
 }
 
@@ -291,10 +290,10 @@ void ReflRunsTabPresenter::transfer() {
     return;
   }
 
-  for (auto&& row : selectedRows) {
+  for (auto &&row : selectedRows) {
     const auto run = m_searchModel->data(m_searchModel->index(row, 0))
-                                .toString()
-                                .toStdString();
+                         .toString()
+                         .toStdString();
     SearchResult searchResult;
 
     searchResult.description = m_searchModel->data(m_searchModel->index(row, 1))
@@ -406,8 +405,8 @@ void ReflRunsTabPresenter::notifyADSChanged(
 */
 QString ReflRunsTabPresenter::getPreprocessingProperties() const {
 
-  auto properties = QString(
-      "Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun");
+  auto properties =
+      QString("Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun");
   return properties;
 }
 
@@ -417,9 +416,9 @@ QString ReflRunsTabPresenter::getPreprocessingProperties() const {
   */
 QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
-  auto optionsStr =
-      QString("Transmission Run(s),") +
-      QString::fromStdString(m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup()));
+  auto optionsStr = QString("Transmission Run(s),") +
+                    QString::fromStdString(m_mainPresenter->getTransmissionRuns(
+                        m_view->getSelectedGroup()));
 
   return optionsStr;
 }
