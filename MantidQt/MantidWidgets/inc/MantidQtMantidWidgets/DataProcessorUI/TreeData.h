@@ -1,6 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEDATA_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEDATA_H
-/** This file defines the RowData, GroupData and TreeData type aliases used by the
+/** This file defines the RowData, GroupData and TreeData type aliases used by
+   the
     DataProcessor widget.
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
