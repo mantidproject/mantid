@@ -24,10 +24,6 @@
 
 #include <QObject>
 
-using RowItem = std::pair<int, RowData>;
-using RowQueue = std::queue<RowItem>;
-using GroupQueue = std::queue<std::pair<int, RowQueue>>;
-
 namespace MantidQt {
 namespace MantidWidgets {
 // Forward decs
@@ -35,6 +31,10 @@ class ProgressableView;
 class DataProcessorView;
 class DataProcessorTreeManager;
 class GenericDataProcessorPresenterThread;
+
+using RowItem = std::pair<int, RowData>;
+using RowQueue = std::queue<RowItem>;
+using GroupQueue = std::queue<std::pair<int, RowQueue>>;
 
 /** @class GenericDataProcessorPresenter
 
