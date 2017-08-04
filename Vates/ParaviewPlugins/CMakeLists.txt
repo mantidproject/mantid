@@ -1,5 +1,5 @@
 # bring in Mantid/VATES API dependencies
-set_mantid_subprojects( qt/paraview_ext/VatesAPI )
+set_mantid_subprojects( Vates/VatesAPI )
 
 # vtktypemacro doesn't play nicely with -Wpedantic
 string(REPLACE "-Wpedantic" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})

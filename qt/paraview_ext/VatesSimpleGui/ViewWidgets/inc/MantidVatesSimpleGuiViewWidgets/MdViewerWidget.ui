@@ -111,6 +111,9 @@
     </layout>
    </item>
    <item>
+    <widget class="pqOutputWidget" name="outputWidget" native="true"/>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="spacing">
       <number>1</number>
@@ -256,7 +259,7 @@
                <x>0</x>
                <y>0</y>
                <width>98</width>
-               <height>28</height>
+               <height>34</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -347,6 +350,12 @@
    <class>pqAxesToolbar</class>
    <extends>QWidget</extends>
    <header>pqAxesToolbar.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>pqOutputWidget</class>
+   <extends>QWidget</extends>
+   <header>pqOutputWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

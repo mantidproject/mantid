@@ -5,10 +5,10 @@
 #undef ERROR
 #endif
 #include "ui_MdViewerWidget.h"
-#include "MantidQtWidgets/Common/MdConstants.h"
-#include "MantidQtWidgets/Common/MdSettings.h"
-#include "MantidQtWidgets/Common/VatesViewerInterface.h"
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtAPI/VatesViewerInterface.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
