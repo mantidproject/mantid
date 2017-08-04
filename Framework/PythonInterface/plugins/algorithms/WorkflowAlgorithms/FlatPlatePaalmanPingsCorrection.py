@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, Progress)
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
-                           FloatBoundedValidator, Direction, logger, MaterialBuilder)
+                           FloatBoundedValidator, Direction, logger)
 
 
 class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
@@ -328,16 +328,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
         if density_type == 'Mass Density':
             set_material_alg.setProperty('SampleMassDensity', density)
-            builder = MaterialBuilder()
-            mat = builder.setFormula(chemical_formula).setMassDensity(density).build()
-            number_density = mat.numberDensity
         else:
-            number_density = density
+            set_material_alg.setProperty('SampleNumberDensity', density)
         set_material_alg.setProperty('InputWorkspace', ws_name)
         set_material_alg.setProperty('ChemicalFormula', chemical_formula)
-        set_material_alg.setProperty('SampleNumberDensity', number_density)
         set_material_alg.execute()
-        return number_density
+        ws = set_material_alg.getProperty('InputWorkspace').value
+        return ws.sample().getMaterial().numberDensity
 
     # ------------------------------------------------------------------------------
 

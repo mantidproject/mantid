@@ -60,6 +60,8 @@ Improved
 Python
 ------
 
+- :py:obj:`mantid.kernel.MaterialBuilder` had an issue when setting the mass density with more than one atom in the chemical formula. This is now fixed, so the number density is correctly set in :py:obj:`mantid.kernel.Material` and the cross sections correctly calculated.
+
 Python Algorithms
 #################
 
