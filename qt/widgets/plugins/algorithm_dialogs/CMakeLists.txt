@@ -54,9 +54,9 @@ set ( UI_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog
                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SortTableWorkspaceDialog.ui
 )
 
-include_directories ( inc )
+include_directories ( inc inc/MantidQtWidgets/Plugins/AlgorithmDialogs )
 
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
+qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS -p.)
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
