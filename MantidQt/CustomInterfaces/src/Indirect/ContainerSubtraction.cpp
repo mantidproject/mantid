@@ -526,11 +526,11 @@ void ContainerSubtraction::plotInPreview(const QString &curveName,
   if (ws->getNumberHistograms() > m_spectra) {
     m_uiForm.ppPreview->addSpectrum(curveName, ws, m_spectra, curveColor);
   } else if (m_csSampleWS || m_csContainerWS) {
-    int specNo = std::min(m_csContainerWS->getNumberHistograms(),
-                          m_csSampleWS->getNumberHistograms()) -
-                 boost::numeric_cast<size_t>(1);
+    size_t specNo = std::min(m_csContainerWS->getNumberHistograms(),
+                             m_csSampleWS->getNumberHistograms()) -
+                             1;
     m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
-    m_uiForm.spPreviewSpec->setValue(specNo);
+    m_uiForm.spPreviewSpec->setValue(boost::numeric_cast<int>(specNo));
   }
 }
 
