@@ -72,11 +72,11 @@ class ConvFitMembers(DataProcessorAlgorithm):
         ax = NumericAxis.create(idx+1)
         for i in range(idx+1):
             ax.setValue(i, self._qvalues[i])
-        for ws in ws_names:
+        for ws in self._ws_names:
             mtd[ws].replaceAxis(1, ax)
             mtd[ws].setYUnitLabel("MomentumTransfer")
         group_alg = self.createChildAlgorithm("GroupWorkspaces", enableLogging=False)
-        group_alg.setProperty("InputWorkspaces", ws_names)
+        group_alg.setProperty("InputWorkspaces", self._ws_names)
         group_alg.setProperty("OutputWorkspace", self._output_ws)
         group_alg.execute()
         mtd.addOrReplace(self._output_ws, group_alg.getProperty("OutputWorkspace").value)
