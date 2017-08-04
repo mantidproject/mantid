@@ -32,59 +32,42 @@ class ConvFitMembers(DataProcessorAlgorithm):
         self._output_ws = self.getProperty('OutputWorkspace').value
         self._qvalues = GetQsInQENSData(InputWorkspace=self._sample_ws,
                                         EnableLogging=False)
+        self._ws_names = []
 
     def PyExec(self):
         self._setup()
 
-        ws_names = []
+        axis = ws.getAxis(1)
+        paras = axis.extractValues()
+        run = ws.getRun()
+
+        # Check whether delta function and/or lorentzian members
+        # were used in the convolution fitting. Log how many of each
+        # and if used, add them to the member list.
+        log_name = 'delta_function'
+        delta = run[log_name].value
+        log_name = 'lorentzians'
+        lorentzians = run[log_name].value
+        logger.information('Lorentzians = %i ; Delta = %s' % (lorentzians, delta))
+        members = []
+        numb_members = 4
+        for i in range(numb_members):
+            members.append(paras[i])
+        if delta == 'true':
+            members.append('Delta')
+            numb_members += 1
+        for i in range(lorentzians):
+            members.append('Lorentzian' + str(i + 1))
+            numb_members += 1
+        logger.information('Members : %s' % (members))
+        if numb_members != len(paras):
+            raise ValueError('Number of members incorrect')
+
         for idx, ws in enumerate(self._result_ws):
 
-            if idx == 0:
-                axis = ws.getAxis(1)
-                paras = axis.extractValues()
-                numb_paras = len(paras)
-                run = ws.getRun()
-                log_name = 'delta_function'
-                delta = run[log_name].value
-                log_name = 'lorentzians'
-                lorentzians = run[log_name].value
-                logger.information('Lorentzians = %i ; Delta = %s' % (lorentzians, delta))
-                members = []
-                for i in range(4):
-                    members.append(paras[i])
-                numb_members = 4
-                if delta == 'true':
-                    members.append('Delta')
-                    numb_members += 1
-                for i in range(lorentzians):
-                    members.append('Lorentzian' + str(i+1))
-                    numb_members += 1
-                logger.information('Members : %s' % (members))
-                if numb_members != numb_paras:
-                    raise ValueError('Number of members incorrect')
-
-            for ndx in range(numb_paras):
-                    output_ws = self._output_ws + '_' + members[ndx]
-                    extract_alg = self.createChildAlgorithm("ExtractSpectra", enableLogging=False)
-                    extract_alg.setProperty("InputWorkspace", ws)
-                    extract_alg.setProperty("OutputWorkspace", '__temp')
-                    extract_alg.setProperty("StartWorkspaceIndex", ndx)
-                    extract_alg.setProperty("EndWorkspaceIndex", ndx)
-                    extract_alg.execute()
-                    if idx == 0:
-                        ws_names.append(output_ws)
-                        clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
-                        clone_alg.setProperty("InputWorkspace", extract_alg.getProperty("OutputWorkspace").value)
-                        clone_alg.setProperty("OutputWorkspace", output_ws)
-                        clone_alg.execute()
-                        mtd.addOrReplace(output_ws, clone_alg.getProperty("OutputWorkspace").value)
-                    else:
-                        append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=False)
-                        append_alg.setProperty("InputWorkspace1", output_ws)
-                        append_alg.setProperty("InputWorkspace2", extract_alg.getProperty("OutputWorkspace").value)
-                        append_alg.setProperty("OutputWorkspace", output_ws)
-                        append_alg.execute()
-                        mtd.addOrReplace(output_ws, append_alg.getProperty("OutputWorkspace").value)
+            # Extract each of the convolution members from the current
+            # workspace and add them to an output workspace.
+            self._extract_members(ws, members, idx==0)
 
         ax = NumericAxis.create(idx+1)
         for i in range(idx+1):
@@ -97,5 +80,46 @@ class ConvFitMembers(DataProcessorAlgorithm):
         group_alg.setProperty("OutputWorkspace", self._output_ws)
         group_alg.execute()
         mtd.addOrReplace(self._output_ws, group_alg.getProperty("OutputWorkspace").value)
+
+    def _extract_members(self, input_ws, members, create_output_ws):
+        """
+        Extracts the convolution fit members from the input workspace.
+        If create_output_ws is True, a new workspace is created for each
+        of these members. Else, the values for these members are appended
+        to an existing working output workspace - as defined by this object.
+
+        :param input_ws:            The input workspace.
+        :param members:             The members to extract.
+        :param create_output_ws:    Whether to create a new output workspace.
+        """
+
+        # Iterate through all specified members.
+        for idx, member in enumerate(members):
+
+            # Extract the current member into a temporary workspace.
+            output_ws = self._output_ws + '_' + member
+            extract_alg = self.createChildAlgorithm("ExtractSpectra", enableLogging=False)
+            extract_alg.setProperty("InputWorkspace", input_ws)
+            extract_alg.setProperty("OutputWorkspace", '__temp')
+            extract_alg.setProperty("StartWorkspaceIndex", idx)
+            extract_alg.setProperty("EndWorkspaceIndex", idx)
+            extract_alg.execute()
+
+            # Check whether to create a new workspace.
+            if create_output_ws:
+                self._ws_names.append(output_ws)
+                clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
+                clone_alg.setProperty("InputWorkspace", extract_alg.getProperty("OutputWorkspace").value)
+                clone_alg.setProperty("OutputWorkspace", output_ws)
+                clone_alg.execute()
+                mtd.addOrReplace(output_ws, clone_alg.getProperty("OutputWorkspace").value)
+            else:
+                append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=False)
+                append_alg.setProperty("InputWorkspace1", output_ws)
+                append_alg.setProperty("InputWorkspace2", extract_alg.getProperty("OutputWorkspace").value)
+                append_alg.setProperty("OutputWorkspace", output_ws)
+                append_alg.execute()
+                mtd.addOrReplace(output_ws, append_alg.getProperty("OutputWorkspace").value)
+
 
 AlgorithmFactory.subscribe(ConvFitMembers)
