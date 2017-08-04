@@ -72,15 +72,15 @@ bool isConstantDelta(const HistogramData::BinEdges &xAxis) {
   return true;
 }
 
-std::unique_ptr<std::stringstream> makeStringStream(){
-	// This and all unique_ptrs wrapping streams is a workaround
-	// for GCC 4.x. The standard allowing streams to be moved was
-	// added after the 4 series was released. Allowing this would
-	// break the ABI (hence GCC 5 onwards doesn't have this fault)
-	// so there are lots of restrictions in place with stream.
-	// Instead we can work around this by using pointers to streams.
-	// Tl;dr - This is a workaround for GCC 4.x (RHEL7)
-	return std::move(std::unique_ptr<std::stringstream>(new std::stringstream()));
+std::unique_ptr<std::stringstream> makeStringStream() {
+  // This and all unique_ptrs wrapping streams is a workaround
+  // for GCC 4.x. The standard allowing streams to be moved was
+  // added after the 4 series was released. Allowing this would
+  // break the ABI (hence GCC 5 onwards doesn't have this fault)
+  // so there are lots of restrictions in place with stream.
+  // Instead we can work around this by using pointers to streams.
+  // Tl;dr - This is a workaround for GCC 4.x (RHEL7)
+  return std::move(std::unique_ptr<std::stringstream>(new std::stringstream()));
 }
 
 void writeBankHeader(std::stringstream &out, const std::string &bintype,
@@ -168,10 +168,9 @@ void SaveGSS::exec() {
   m_allDetectorsValid = (isInstrumentValid() && areAllDetectorsValid());
   generateOutFileNames(numOfOutFiles);
   m_outputBuffer.resize(nHist);
-  for (auto &entry : m_outputBuffer){
-	  entry = makeStringStream();
+  for (auto &entry : m_outputBuffer) {
+    entry = makeStringStream();
   }
-
 
   // Check the user input
   validateUserInput();
@@ -769,7 +768,7 @@ void SaveGSS::writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < static_cast<int64_t>(datasize); i++) {
-	outLines[i] = makeStringStream();
+    outLines[i] = makeStringStream();
     auto &outLine = *outLines[i];
     const double binWidth = xVals[i + 1] - xVals[i];
     const double outYVal{MultiplyByBinWidth ? yVals[i] * binWidth : yVals[i]};
@@ -827,7 +826,7 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < static_cast<int64_t>(datasize); i++) {
-	outLines[i] = makeStringStream();
+    outLines[i] = makeStringStream();
     auto &outLine = *outLines[i];
     const double binWidth = xVals[i + 1] - xVals[i];
     const double yValue{MultiplyByBinWidth ? yVals[i] * binWidth : yVals[i]};
