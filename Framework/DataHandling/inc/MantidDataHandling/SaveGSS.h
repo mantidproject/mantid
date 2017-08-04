@@ -159,7 +159,7 @@ private:
   API::MatrixWorkspace_const_sptr m_inputWS;
   /// The output buffer. This is either n spectra in one file,
   /// or n files with 1 spectra
-  std::vector<std::stringstream> m_outputBuffer{};
+  std::vector<std::unique_ptr<std::stringstream>> m_outputBuffer{};
   /// The output filename(s)
   std::vector<std::string> m_outFileNames{};
   /// Indicates whether all spectra have valid detectors

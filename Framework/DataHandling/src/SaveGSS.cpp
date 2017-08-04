@@ -36,13 +36,23 @@ void assertNumFilesAndSpectraIsValid(size_t numOutFiles, size_t numOutSpectra) {
   // If either numOutFiles or numOutSpectra are not 1 we need to check
   // that we are conforming to the expected storage layout.
   if ((numOutFiles != 1) || (numOutSpectra != 1)) {
-    assert(numOutFiles > 1 != numOutSpectra > 1);
+    assert((numOutFiles > 1) != (numOutSpectra > 1));
   }
 }
 
 bool doesFileExist(const std::string &filePath) {
   auto file = Poco::File(filePath);
   return file.exists();
+}
+
+double fixErrorValue(const double value) {
+  // Fix error if value is less than zero or infinity
+  // Negative errors cannot be read by GSAS
+  if (value <= 0. || !std::isfinite(value)) {
+    return 0.;
+  } else {
+    return value;
+  }
 }
 
 bool isEqual(const double left, const double right) {
@@ -62,14 +72,15 @@ bool isConstantDelta(const HistogramData::BinEdges &xAxis) {
   return true;
 }
 
-double fixErrorValue(const double value) {
-  // Fix error if value is less than zero or infinity
-  // Negative errors cannot be read by GSAS
-  if (value <= 0. || !std::isfinite(value)) {
-    return 0.;
-  } else {
-    return value;
-  }
+std::unique_ptr<std::stringstream> makeStringStream(){
+	// This and all unique_ptrs wrapping streams is a workaround
+	// for GCC 4.x. The standard allowing streams to be moved was
+	// added after the 4 series was released. Allowing this would
+	// break the ABI (hence GCC 5 onwards doesn't have this fault)
+	// so there are lots of restrictions in place with stream.
+	// Instead we can work around this by using pointers to streams.
+	// Tl;dr - This is a workaround for GCC 4.x (RHEL7)
+	return std::move(std::unique_ptr<std::stringstream>(new std::stringstream()));
 }
 
 void writeBankHeader(std::stringstream &out, const std::string &bintype,
@@ -157,6 +168,10 @@ void SaveGSS::exec() {
   m_allDetectorsValid = (isInstrumentValid() && areAllDetectorsValid());
   generateOutFileNames(numOfOutFiles);
   m_outputBuffer.resize(nHist);
+  for (auto &entry : m_outputBuffer){
+	  entry = makeStringStream();
+  }
+
 
   // Check the user input
   validateUserInput();
@@ -315,7 +330,7 @@ void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
   for (int64_t fileIndex = 0; fileIndex < numOutFilesInt64; fileIndex++) {
     // Add header to new files (e.g. doesn't exist or overwriting)
     if (!doesFileExist(m_outFileNames[fileIndex]) || !append) {
-      generateInstrumentHeader(m_outputBuffer[fileIndex], l1);
+      generateInstrumentHeader(*m_outputBuffer[fileIndex], l1);
     }
 
     // Then add each spectra to buffer
@@ -329,9 +344,9 @@ void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
       // split files is a boolean operator on the input side
       const int64_t index = specIndex + fileIndex;
       // Add bank header and details to buffer
-      generateBankHeader(m_outputBuffer[index], spectrumInfo, index);
+      generateBankHeader(*m_outputBuffer[index], spectrumInfo, index);
       // Add data to buffer
-      generateBankData(m_outputBuffer[index], index);
+      generateBankData(*m_outputBuffer[index], index);
       m_progress->report();
     }
   }
@@ -650,8 +665,8 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
     for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
       // Write each spectra when there are multiple
       const size_t index = specIndex + fileIndex;
-      assert(m_outputBuffer[index].str().size() > 0);
-      fileStream << m_outputBuffer[index].rdbuf();
+      assert(m_outputBuffer[index]->str().size() > 0);
+      fileStream << m_outputBuffer[index]->rdbuf();
     }
 
     fileStream.close();
@@ -702,12 +717,13 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
   const int64_t numberOfOutLines =
       (datasize + dataEntriesPerLine - 1) / dataEntriesPerLine;
 
-  std::vector<std::stringstream> outLines;
+  std::vector<std::unique_ptr<std::stringstream>> outLines;
   outLines.resize(numberOfOutLines);
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < numberOfOutLines; i++) {
-    auto &outLine = outLines[i];
+    outLines[i] = makeStringStream();
+    auto &outLine = *outLines[i];
 
     size_t dataPosition = i * dataEntriesPerLine;
     const size_t endPosition = dataPosition + dataEntriesPerLine;
@@ -733,7 +749,7 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
 
   for (const auto &outLine : outLines) {
     // Ensure the output order is preserved
-    out << outLine.rdbuf();
+    out << outLine->rdbuf();
   }
 }
 
@@ -748,12 +764,13 @@ void SaveGSS::writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
 
   writeRALFHeader(out, bank, histo);
 
-  std::vector<std::stringstream> outLines;
+  std::vector<std::unique_ptr<std::stringstream>> outLines;
   outLines.resize(datasize);
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < static_cast<int64_t>(datasize); i++) {
-    auto &outLine = outLines[i];
+	outLines[i] = makeStringStream();
+    auto &outLine = *outLines[i];
     const double binWidth = xVals[i + 1] - xVals[i];
     const double outYVal{MultiplyByBinWidth ? yVals[i] * binWidth : yVals[i]};
     const double epos =
@@ -769,7 +786,7 @@ void SaveGSS::writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
 
   for (const auto &outLine : outLines) {
     // Ensure the output order is preserved
-    out << outLine.rdbuf();
+    out << outLine->rdbuf();
   }
 }
 
@@ -805,12 +822,13 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
       << std::fixed << " " << std::setprecision(7) << std::setw(10) << bc3
       << std::fixed << " 0 FXYE\n";
 
-  std::vector<std::stringstream> outLines;
+  std::vector<std::unique_ptr<std::stringstream>> outLines;
   outLines.resize(datasize);
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < static_cast<int64_t>(datasize); i++) {
-    auto &outLine = outLines[i];
+	outLines[i] = makeStringStream();
+    auto &outLine = *outLines[i];
     const double binWidth = xVals[i + 1] - xVals[i];
     const double yValue{MultiplyByBinWidth ? yVals[i] * binWidth : yVals[i]};
     const double eValue{
@@ -825,7 +843,7 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
   }
 
   for (const auto &outLine : outLines) {
-    out << outLine.rdbuf();
+    out << outLine->rdbuf();
   }
 }
 
