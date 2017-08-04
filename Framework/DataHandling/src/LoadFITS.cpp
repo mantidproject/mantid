@@ -29,6 +29,7 @@ namespace {
  * @param Pointer to byte src
  */
 template <typename InterpretType> double toDouble(uint8_t *src) {
+  // cppcheck-suppress invalidPointerCast
   return static_cast<double>(*reinterpret_cast<InterpretType *>(src));
 }
 }

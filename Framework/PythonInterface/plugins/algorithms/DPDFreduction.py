@@ -243,9 +243,10 @@ class DPDFreduction(api.PythonAlgorithm):
             self._qbins.append(maxs[0])  # append maximum Q
 
         # Delete sample and empty can event workspaces to free memory.
-        sapi.DeleteWorkspace(wn_data)
-        if self._ecruns:
-            sapi.DeleteWorkspace(wn_ec_data)
+        if self._clean:
+            sapi.DeleteWorkspace(wn_data)
+            if self._ecruns:
+                sapi.DeleteWorkspace(wn_ec_data)
 
         # Convert to S(theta,E)
         ki = numpy.sqrt(Ei / ENERGY_TO_WAVEVECTOR)
@@ -417,13 +418,13 @@ class DPDFreduction(api.PythonAlgorithm):
         # split the high_zero_fraction indexes into chunks of consecutive indexes
         #  Example: if high_zero_fraction=[3,7,8,9,11,15,16], then we split into [3],[7,8,9], [11], [15,16]
         gaps = list()  # intensity gaps, because high zero fraction means low overall intensity
-        gap = [high_zero_fraction[0], ]
+        gap = [numpy.asscalar(high_zero_fraction[0]), ]
         for index in range(1, len(high_zero_fraction)):
             if high_zero_fraction[index] - high_zero_fraction[index - 1] == 1:
-                gap.append(high_zero_fraction[index])  # two consecutive indexes
+                gap.append(numpy.asscalar(high_zero_fraction[index]))  # two consecutive indexes
             else:
                 gaps.append(gap)
-                gap = [high_zero_fraction[index], ]
+                gap = [numpy.asscalar(high_zero_fraction[index]), ]
         gaps.append(gap)  # final dangling gap has to be appended
         return gaps  # a list of lists
 
