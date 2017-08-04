@@ -2,7 +2,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include <iostream>
-#include <cfloat>
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already
