@@ -1,7 +1,6 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
