@@ -61,7 +61,8 @@ void export_CompositeFunction() {
       .def("__getitem__", &CompositeFunction::getFunction,
            (arg("self"), arg("i")), "Get the i-th function.")
       .def("__setitem__", &CompositeFunction::replaceFunction,
-           (arg("self"), arg("i"), arg("f")), "Put function in place of the i-th function.")
+           (arg("self"), arg("i"), arg("f")),
+           "Put function in place of the i-th function.")
       .def("add", &CompositeFunction::addFunction,
            (arg("self"), arg("function")), "Add a member function.")
       .def("getParameterValue",
