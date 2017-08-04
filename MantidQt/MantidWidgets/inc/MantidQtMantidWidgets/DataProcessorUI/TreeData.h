@@ -1,9 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEDATA_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEDATA_H
-/** @class DataProcessorGenerateNotebook
-
-    This class creates ipython notebooks from the ISIS DataProcessorUI
-    (Polref) interface
+/** This file defines the RowData, GroupData and TreeData type aliases used by the
+    DataProcessor widget.
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
     National Laboratory & European Spallation Source
