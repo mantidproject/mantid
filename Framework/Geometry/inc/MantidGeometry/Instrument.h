@@ -19,11 +19,9 @@ namespace Mantid {
 /// Typedef of a map from detector ID to detector shared pointer.
 typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
 
-namespace Beamline {
+namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
-}
-namespace Geometry {
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
@@ -249,6 +247,10 @@ public:
   /// Add a component to the instrument
   virtual int add(IComponent *component) override;
 
+  void parseTreeAndCacheBeamline();
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+  makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
+
 private:
   /// Save information about a set of detectors to Nexus
   void saveDetectorSetInfoToNexus(::NeXus::File *file,
@@ -261,12 +263,13 @@ private:
   void appendPlottable(const CompAssembly &ca,
                        std::vector<IObjComponent_const_sptr> &lst) const;
 
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+  makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
+               const DetectorInfo &detectorInfo) const;
+
   /// Map which holds detector-IDs and pointers to detector components, and
   /// monitor flags.
   std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
-
-  /// Mappings to obtain component index
-  boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentCache;
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component
@@ -327,13 +330,11 @@ private:
   /// Pointer to the reference frame object.
   boost::shared_ptr<ReferenceFrame> m_referenceFrame;
 
-  /// Pointer to the DetectorInfo object. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+  /// Pointer to the DetectorInfo object. May be NULL.
+  boost::shared_ptr<const DetectorInfo> m_detectorInfo{nullptr};
 
-  /// Pointer to the ComponentInfo object. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
+  /// Pointer to the ComponentInfo object. May be NULL.
+  boost::shared_ptr<const ComponentInfo> m_componentInfo{nullptr};
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};

@@ -1,13 +1,10 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Cache.h"
-#include "MantidBeamline/ComponentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
@@ -77,19 +74,9 @@ ParameterMap::ParameterMap(const ParameterMap &other)
           Kernel::make_unique<Kernel::Cache<const ComponentID, BoundingBox>>(
               *other.m_boundingBoxMap)),
       m_instrument(other.m_instrument) {
-  if (!other.m_detectorInfo)
-    return;
-  m_detectorInfo = Kernel::make_unique<DetectorInfo>(*other.m_detectorInfo);
-  m_componentInfo = Kernel::make_unique<ComponentInfo>(*other.m_componentInfo);
-  m_componentInfo->m_componentInfo->setDetectorInfo(
-      m_detectorInfo->m_detectorInfo.get());
-  m_detectorInfo->m_detectorInfo->setComponentInfo(
-      m_componentInfo->m_componentInfo.get());
-
-  const auto parInstrument = ParComponentFactory::createInstrument(
-      boost::shared_ptr<const Instrument>(m_instrument, NoDeleting()),
-      boost::shared_ptr<ParameterMap>(this, NoDeleting()));
-  m_detectorInfo->m_instrument = parInstrument;
+  if (m_instrument)
+    std::tie(m_componentInfo, m_detectorInfo) =
+        m_instrument->makeBeamline(*this, &other);
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -1243,14 +1230,7 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
     throw std::logic_error("ParameterMap::setInstrument must be called with "
                            "base instrument, not a parametrized instrument");
   m_instrument = instrument;
-
-  const auto parInstrument = ParComponentFactory::createInstrument(
-      boost::shared_ptr<const Instrument>(m_instrument, NoDeleting()),
-      boost::shared_ptr<ParameterMap>(this, NoDeleting()));
-
-  InstrumentVisitor visitor(parInstrument);
-  visitor.walkInstrument();
-  std::tie(m_componentInfo, m_detectorInfo) = visitor.makeWrappers();
+  std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this);
 }
 
 } // Namespace Geometry

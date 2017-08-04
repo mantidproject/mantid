@@ -6,11 +6,14 @@
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <boost/make_shared.hpp>
@@ -52,8 +55,11 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_sampleCache(instr->m_sampleCache), m_defaultView(instr->m_defaultView),
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
-      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
-      m_detectorInfo(instr->m_detectorInfo) {}
+      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame) {
+  // Note that we do not copy m_detectorInfo and m_componentInfo into the
+  // parametrized instrument since the ParameterMap will make a copy, if
+  // applicable.
+}
 
 /** Copy constructor
  *  This method was added to deal with having distinct neutronic and physical
@@ -69,8 +75,11 @@ Instrument::Instrument(const Instrument &instr)
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
       m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
-      m_referenceFrame(instr.m_referenceFrame),
-      m_detectorInfo(instr.m_detectorInfo) {
+      m_referenceFrame(instr.m_referenceFrame) {
+  // Note that we do not copy m_detectorInfo and m_componentInfo into the new
+  // instrument since they are only non-NULL for the base instrument, which
+  // should usually not be copied.
+
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
@@ -1336,6 +1345,53 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   }
 
   return pmap;
+}
+
+/** Parse the instrument tree and create ComponentInfo and DetectorInfo.
+ *
+ * This can be called for the base instrument once it is completely created, in
+ * particular when it is stored in the InstrumentDataService for reusing it
+ * later and avoiding repeated tree walks if several workspaces with the same
+ * instrument are loaded. */
+void Instrument::parseTreeAndCacheBeamline() {
+  if (isParametrized())
+    throw std::logic_error("Instrument::parseTreeAndCacheBeamline must be "
+                           "called with the base instrument, not a "
+                           "parametrized instrument");
+  std::tie(m_componentInfo, m_detectorInfo) =
+      InstrumentVisitor::makeWrappers(*this);
+}
+
+/** Return ComponentInfo and DetectorInfo for instrument given by pmap.
+ *
+ * If suitable ComponentInfo and DetectorInfo are found in this or the
+ * (optional) `source` pmap they are simply copied, otherwise the instrument
+ * tree is parsed. */
+std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
+  // If we have source and it has Beamline objects just copy them
+  if (source && source->hasComponentInfo(this))
+    return makeWrappers(pmap, source->componentInfo(), source->detectorInfo());
+  // If pmap is empty and base instrument has Beamline objects just copy them
+  if (pmap.empty() && m_componentInfo)
+    return makeWrappers(pmap, *m_componentInfo, *m_detectorInfo);
+  // pmap not empty and/or no cached Beamline objects found
+  return InstrumentVisitor::makeWrappers(*this, &pmap);
+}
+
+/// Sets up links between m_detectorInfo, m_componentInfo, and m_instrument.
+std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
+                         const DetectorInfo &detectorInfo) const {
+  auto compInfo = Kernel::make_unique<ComponentInfo>(componentInfo);
+  auto detInfo = Kernel::make_unique<DetectorInfo>(detectorInfo);
+  compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
+  detInfo->m_detectorInfo->setComponentInfo(compInfo->m_componentInfo.get());
+  const auto parInstrument = ParComponentFactory::createInstrument(
+      boost::shared_ptr<const Instrument>(this, NoDeleting()),
+      boost::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
+  detInfo->m_instrument = parInstrument;
+  return {std::move(compInfo), std::move(detInfo)};
 }
 
 namespace Conversion {

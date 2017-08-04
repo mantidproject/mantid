@@ -125,6 +125,9 @@ private:
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
                             const size_t componentIndex);
 
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+  makeWrappers() const;
+
 public:
   InstrumentVisitor(boost::shared_ptr<const Instrument> instrument);
 
@@ -156,8 +159,9 @@ public:
 
   boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
 
-  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
-  makeWrappers() const;
+  static std::pair<std::unique_ptr<ComponentInfo>,
+                   std::unique_ptr<DetectorInfo>>
+  makeWrappers(const Instrument &instrument, ParameterMap *pmap = nullptr);
 };
 } // namespace Geometry
 } // namespace Mantid

@@ -23,7 +23,7 @@ class ComponentInfo;
 }
 
 namespace Geometry {
-class ParameterMap;
+class Instrument;
 
 /** ComponentInfo : Provides a component centric view on to the instrument.
   Indexes are per component.
@@ -94,7 +94,7 @@ public:
     return m_componentIds->operator[](componentIndex);
   }
 
-  friend class ParameterMap;
+  friend class Instrument;
 };
 
 } // namespace Geometry

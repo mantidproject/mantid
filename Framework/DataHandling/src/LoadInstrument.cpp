@@ -179,6 +179,13 @@ void LoadInstrument::exec() {
       // Really create the instrument
       Progress prog(this, 0.0, 1.0, 100);
       instrument = parser.parseXML(&prog);
+      // Parse the instrument tree (internally create ComponentInfo and
+      // DetectorInfo). This is an optimization that avoids duplicate parsing of
+      // the instrument tree when loading multiple workspaces with the same
+      // instrument. As a consequence less time is spent and less memory is
+      // used. Note that this is only possible since the tree in `instrument`
+      // will not be modified once we add it to the IDS.
+      instrument->parseTreeAndCacheBeamline();
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
