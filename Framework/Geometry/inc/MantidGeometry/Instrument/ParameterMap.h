@@ -367,8 +367,6 @@ private:
   component_map_cit positionOf(const IComponent *comp, const char *name,
                                const char *type) const;
 
-  void relinkWrappers();
-
   /// internal list of parameter files loaded
   std::vector<std::string> m_parameterFileNames;
 

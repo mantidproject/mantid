@@ -247,9 +247,9 @@ public:
   /// Add a component to the instrument
   virtual int add(IComponent *component) override;
 
-  void parseTree();
-  const ComponentInfo *componentInfo() const;
-  const DetectorInfo *detectorInfo() const;
+  void parseTreeAndCacheBeamline();
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+  makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
 
 private:
   /// Save information about a set of detectors to Nexus
@@ -262,6 +262,10 @@ private:
   /// Add a plottable component
   void appendPlottable(const CompAssembly &ca,
                        std::vector<IObjComponent_const_sptr> &lst) const;
+
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+  makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
+               const DetectorInfo &detectorInfo) const;
 
   /// Map which holds detector-IDs and pointers to detector components, and
   /// monitor flags.

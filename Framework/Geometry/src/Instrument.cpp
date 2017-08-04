@@ -12,6 +12,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <boost/make_shared.hpp>
@@ -1351,20 +1353,45 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
  * particular when it is stored in the InstrumentDataService for reusing it
  * later and avoiding repeated tree walks if several workspaces with the same
  * instrument are loaded. */
-void Instrument::parseTree() {
+void Instrument::parseTreeAndCacheBeamline() {
   if (isParametrized())
-    throw std::logic_error("Instrument::parseTree must be called with the base "
-                           "instrument, not a parametrized instrument");
+    throw std::logic_error("Instrument::parseTreeAndCacheBeamline must be "
+                           "called with the base instrument, not a "
+                           "parametrized instrument");
   std::tie(m_componentInfo, m_detectorInfo) =
       InstrumentVisitor::makeWrappers(*this);
 }
 
-const ComponentInfo *Instrument::componentInfo() const {
-  return m_componentInfo.get();
+/** Return ComponentInfo and DetectorInfo for instrument given by pmap.
+ *
+ * If suitable ComponentInfo and DetectorInfo are found in this or the
+ * (optional) `source` pmap they are simply copied, otherwise the instrument
+ * tree is parsed. */
+std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
+  // If we have source and it has Beamline objects just copy them
+  if (source && source->hasComponentInfo(this))
+    return makeWrappers(pmap, source->componentInfo(), source->detectorInfo());
+  // If pmap is empty and base instrument has Beamline objects just copy them
+  if (pmap.empty() && m_componentInfo)
+    return makeWrappers(pmap, *m_componentInfo, *m_detectorInfo);
+  // pmap not empty and/or no cached Beamline objects found
+  return InstrumentVisitor::makeWrappers(*this, &pmap);
 }
 
-const DetectorInfo *Instrument::detectorInfo() const {
-  return m_detectorInfo.get();
+/// Sets up links between m_detectorInfo, m_componentInfo, and m_instrument.
+std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
+                         const DetectorInfo &detectorInfo) const {
+  auto compInfo = Kernel::make_unique<ComponentInfo>(componentInfo);
+  auto detInfo = Kernel::make_unique<DetectorInfo>(detectorInfo);
+  compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
+  detInfo->m_detectorInfo->setComponentInfo(compInfo->m_componentInfo.get());
+  const auto parInstrument = ParComponentFactory::createInstrument(
+      boost::shared_ptr<const Instrument>(this, NoDeleting()),
+      boost::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
+  detInfo->m_instrument = parInstrument;
+  return {std::move(compInfo), std::move(detInfo)};
 }
 
 namespace Conversion {
