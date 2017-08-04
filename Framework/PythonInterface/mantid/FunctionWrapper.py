@@ -200,6 +200,47 @@ class CompositeFunctionWrapper(FunctionWrapper):
             given name of member function of given index
         """
         return "f"+str(index)+"."+name
+        
+    def getIndexOfFunction (self, name):
+        """ get index of function specified by name,
+            such as "LinearBackground" for the only
+            LinearBackground function or
+            "Gaussian1" for the second Gaussian function.
+      
+            :param name: name specifying the function
+        """
+        # Only a shallow search is done.
+        
+        delimiter = " "
+        if name.count(delimiter) == 0:
+           fname = name
+           occurrence = 0
+        else:
+           fname, n = name.split(delimiter)
+           occurrence = int(n)
+           
+        index = 0
+        count = 0
+        for f in self:
+           if f.fun.name() == fname:
+              if( count == occurrence):
+                 return index
+              else:
+                 count += 1
+           index += 1
+         
+        raise RuntimeError("Specified function not found.")
+        
+    def f (self, name):
+        """ get function specified by name,
+            such as "LinearBackground" for the only
+            LinearBackground function or
+            "Gaussian1" for the second Gaussian function.
+      
+            :param name: name specifying the function
+        """
+        index = self.getIndexOfFunction(name)
+        return self[index]
 
     def __getitem__ (self, nameorindex):
         """ get function of specified index or parameter of specified name
@@ -208,6 +249,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
       
             :param name: name or index in the []
         """
+
         comp = self.fun.castToComposite()
         item = comp[nameorindex]
         if isinstance(item, float):

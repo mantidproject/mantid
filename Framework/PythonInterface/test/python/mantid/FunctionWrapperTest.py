@@ -49,6 +49,34 @@ class FunctionWrapperTest(unittest.TestCase):
         # Check that the composite function remains unmodified.
         self.assertAlmostEqual( c["f0.Height"],7.5)
         self.assertAlmostEqual( c["f1.Height"],8.5)
+        
+    def test_getindexoffunction_in_compositefunction(self):
+        lb = FunctionWrapper("LinearBackground", A0=0.5, A1=1.5)
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
+        c = CompositeFunctionWrapper( lb, g0, g1 )
+        index_lb = c.getIndexOfFunction("LinearBackground")
+        self.assertEqual( index_lb, 0)
+        index_g0 = c.getIndexOfFunction("Gaussian 0")
+        self.assertEqual( index_g0, 1)
+        index_g1 = c.getIndexOfFunction("Gaussian 1")
+        self.assertEqual( index_g1, 2)
+        
+    def test_compositefunction_f (self):
+        lb = FunctionWrapper("LinearBackground", A0=0.5, A1=1.5)
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
+        c = CompositeFunctionWrapper( lb, g0, g1 )
+        
+        lbx = c.f("LinearBackground")
+        lbx_str = str(lbx)
+        lb_str = str(lb)
+        self.assertEqual(lbx_str, lb_str)
+        
+        g1x = c.f("Gaussian 1")
+        g1x_str = str(g1x)
+        g1_str = str(g1)
+        self.assertEqual(g1x_str, g1_str)
 
     def test_compositefunction_read_array_elements(self):
         lb = FunctionWrapper("LinearBackground", A0=0.5, A1=1.5)
