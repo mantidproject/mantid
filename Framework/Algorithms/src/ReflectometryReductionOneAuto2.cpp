@@ -204,6 +204,9 @@ void ReflectometryReductionOneAuto2::init() {
   setPropertyGroup("CRho", "Polarization Corrections");
   setPropertyGroup("CAlpha", "Polarization Corrections");
 
+  // Init properties for diagnostics
+  initDebugProperties();
+
   // Output workspace in Q
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceBinned", "", Direction::Output),
@@ -233,6 +236,7 @@ void ReflectometryReductionOneAuto2::exec() {
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
   alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
+  alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
