@@ -624,48 +624,45 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
     peaks[i + 2 + 2 * numPeaks] = height2[i];
   }
 
+  // calculate a starting DIFC
   double difc_local = difc;
   if (difc_local == 0.) {
     const double d_sum = std::accumulate(d.begin(), d.end(), 0.);
     const double tof_sum = std::accumulate(tof.begin(), tof.end(), 0.);
-    difc_local = tof_sum / d_sum;
+    difc_local = tof_sum / d_sum; // number of peaks falls out of division
   }
 
-  // Set up GSL minimzer - simplex is overkill
-  const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *s = nullptr;
-  gsl_vector *ss, *x;
+  // initial starting point as [DIFC, 0, 0]
+  gsl_vector *fitParams = gsl_vector_alloc(numParams);
+  gsl_vector_set_all(fitParams, 0.0); // set all parameters to zero
+  gsl_vector_set(fitParams, 0, difc_local);
+
+  // Set initial step sizes to 0.001
+  gsl_vector *stepSizes = gsl_vector_alloc(numParams);
+  gsl_vector_set_all(stepSizes, 0.001);
+
+  // Initialize method and iterate
   gsl_multimin_function minex_func;
+  minex_func.n = numParams;
+  minex_func.f = &gsl_costFunction;
+  minex_func.params = &peaks;
+
+  // Set up GSL minimzer - simplex is overkill
+  const gsl_multimin_fminimizer_type *minimizerType = gsl_multimin_fminimizer_nmsimplex;
+  gsl_multimin_fminimizer *minimizer = gsl_multimin_fminimizer_alloc(minimizerType, numParams);
+  gsl_multimin_fminimizer_set(minimizer, &minex_func, fitParams, stepSizes);
 
   // Finally do the fitting
   size_t iter = 0;
   int status = 0;
   double size;
-
-  // Starting point
-  x = gsl_vector_alloc(numParams);
-  gsl_vector_set_all(x, 0.0); // set all parameters to zero
-  gsl_vector_set(x, 0, difc_local);
-
-  /* Set initial step sizes to 0.001 */
-  ss = gsl_vector_alloc(numParams);
-  gsl_vector_set_all(ss, 0.001);
-
-  /* Initialize method and iterate */
-  minex_func.n = numParams;
-  minex_func.f = &gsl_costFunction;
-  minex_func.params = &peaks;
-
-  s = gsl_multimin_fminimizer_alloc(T, numParams);
-  gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
-
   do {
     iter++;
-    status = gsl_multimin_fminimizer_iterate(s);
+    status = gsl_multimin_fminimizer_iterate(minimizer);
     if (status)
       break;
 
-    size = gsl_multimin_fminimizer_size(s);
+    size = gsl_multimin_fminimizer_size(minimizer);
     status = gsl_multimin_test_size(size, 1e-4);
 
   } while (status == GSL_CONTINUE && iter < 50); // 50 iterations maximum
@@ -673,20 +670,20 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
   // only update calibration values on successful fit
   std::string status_msg = gsl_strerror(status);
   if (status_msg == "success") {
-    difc = gsl_vector_get(s->x, 0);
+    difc = gsl_vector_get(minimizer->x, 0);
     if (numParams > 1) {
-      t0 = gsl_vector_get(s->x, 1);
+      t0 = gsl_vector_get(minimizer->x, 1);
       if (numParams > 1) {
-        difa = gsl_vector_get(s->x, 2);
+        difa = gsl_vector_get(minimizer->x, 2);
       }
     }
   }
   // return from gsl_costFunction can be accessed as s->fval
 
   // free memory
-  gsl_vector_free(x);
-  gsl_vector_free(ss);
-  gsl_multimin_fminimizer_free(s);
+  gsl_vector_free(fitParams);
+  gsl_vector_free(stepSizes);
+  gsl_multimin_fminimizer_free(minimizer);
 }
 
 vector<double>
