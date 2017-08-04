@@ -7,9 +7,9 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
-
 #include <boost/make_shared.hpp>
 
 using Mantid::Geometry::ComponentInfo;
@@ -79,8 +79,14 @@ public:
     auto componentIds =
         boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2});
+
+    auto shapes = boost::make_shared<
+        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+    shapes->push_back(boost::make_shared<const Geometry::Object>());
+    shapes->push_back(boost::make_shared<const Geometry::Object>());
+
     ComponentInfo info(std::move(internalInfo), componentIds,
-                       makeComponentIDMap(componentIds));
+                       makeComponentIDMap(componentIds), shapes);
     TS_ASSERT_EQUALS(info.indexOf(comp1.getComponentID()), 0);
     TS_ASSERT_EQUALS(info.indexOf(comp2.getComponentID()), 1);
   }

@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -322,6 +323,15 @@ void ObjComponent::initDraw() const {
   if (shape() != nullptr)
     shape()->initDraw();
   Handle()->Initialize();
+}
+
+/**
+ * Register the contents of this ObjComponent
+ */
+size_t
+ObjComponent::registerContents(class ComponentVisitor &componentVisitor) const {
+
+  return componentVisitor.registerGenericObjComponent(*this);
 }
 
 } // namespace Geometry

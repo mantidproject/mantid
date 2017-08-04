@@ -14,8 +14,8 @@ class V3D;
 }
 
 namespace Geometry {
-
 class IComponent;
+class Object;
 }
 
 namespace Beamline {
@@ -54,19 +54,24 @@ private:
   /// Pointer to the actual ComponentInfo object (non-wrapping part).
   std::unique_ptr<Beamline::ComponentInfo> m_componentInfo;
   /// Collection of component ids
-  boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
-      m_componentIds;
+  boost::shared_ptr<const std::vector<Geometry::IComponent *>> m_componentIds;
   /// Map of component ids to indexes
   boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
       m_compIDToIndex;
+
+  /// Shapes for each component
+  boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+      m_shapes;
 
 public:
   ComponentInfo(
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds,
-      boost::shared_ptr<const std::unordered_map<
-          Geometry::IComponent *, size_t>> componentIdToIndexMap);
+      boost::shared_ptr<const std::unordered_map<Geometry::IComponent *,
+                                                 size_t>> componentIdToIndexMap,
+      boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+          shapes);
   ComponentInfo(const ComponentInfo &other);
   ~ComponentInfo();
 
@@ -93,7 +98,7 @@ public:
   const IComponent *componentID(const size_t componentIndex) const {
     return m_componentIds->operator[](componentIndex);
   }
-
+  const Geometry::Object &shape(const size_t componentIndex) const;
   friend class Instrument;
 };
 

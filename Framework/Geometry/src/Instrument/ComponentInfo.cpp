@@ -21,10 +21,13 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
         componentIds,
     boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
-        componentIdToIndexMap)
+        componentIdToIndexMap,
+    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+        shapes)
     : m_componentInfo(std::move(componentInfo)),
       m_componentIds(std::move(componentIds)),
-      m_compIDToIndex(std::move(componentIdToIndexMap)) {
+      m_compIDToIndex(std::move(componentIdToIndexMap)),
+      m_shapes(std::move(shapes)) {
 
   if (m_componentIds->size() != m_compIDToIndex->size()) {
     throw std::invalid_argument("Inconsistent ID and Mapping input containers "
@@ -121,5 +124,10 @@ void ComponentInfo::setRotation(const size_t componentIndex,
   m_componentInfo->setRotation(componentIndex,
                                Kernel::toQuaterniond(newRotation));
 }
+
+const Object &ComponentInfo::shape(const size_t componentIndex) const {
+  return *(*m_shapes)[componentIndex];
+}
+
 } // namespace Geometry
 } // namespace Mantid

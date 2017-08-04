@@ -4,9 +4,11 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidBeamline/ComponentInfo.h"
@@ -78,7 +80,10 @@ InstrumentVisitor::InstrumentVisitor(
       m_detectorRotations(boost::make_shared<std::vector<Eigen::Quaterniond>>(
           m_orderedDetectorIds->size())),
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
-      m_instrument(std::move(instrument)), m_pmap(nullptr) {
+      m_instrument(std::move(instrument)), m_pmap(nullptr),
+      m_shapes(
+          boost::make_shared<std::vector<boost::shared_ptr<const Object>>>()),
+      m_nullShape(boost::make_shared<const Object>()) {
 
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
@@ -102,6 +107,7 @@ InstrumentVisitor::InstrumentVisitor(
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors); // Exact
   m_componentIdToIndexMap->reserve(nDetectors);         // Approximation
+  m_shapes->reserve(nDetectors);                         // Approximation
 }
 
 void InstrumentVisitor::walkInstrument() {
@@ -150,6 +156,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
     (*m_parentComponentIndices)[child] = componentIndex;
   }
   markAsSourceOrSample(assembly.getComponentID(), componentIndex);
+  m_shapes->emplace_back(m_nullShape);
   return componentIndex;
 }
 
@@ -181,6 +188,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_parentComponentIndices->push_back(componentIndex);
   clearPositionAndRotationParameters(m_pmap, component);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
+  m_shapes->emplace_back(m_nullShape);
   return componentIndex;
 }
 
@@ -191,6 +199,18 @@ void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId,
   } else if (componentId == m_sourceId) {
     m_sourceIndex = componentIndex;
   }
+}
+
+/**
+ * @brief InstrumentVisitor::registerGenericObjComponent
+ * @param objComponent : IObjComponent being visited
+ * @return Component index of this component
+ */
+size_t InstrumentVisitor::registerGenericObjComponent(
+    const Mantid::Geometry::IObjComponent &objComponent) {
+  auto index = registerGenericComponent(objComponent);
+  (*m_shapes)[index] = objComponent.shape();
+  return index;
 }
 
 /**
@@ -229,6 +249,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
         Kernel::toVector3d(detector.getPos());
     (*m_detectorRotations)[detectorIndex] =
         Kernel::toQuaterniond(detector.getRotation());
+    m_shapes->emplace_back(std::move(detector.shape()));
     if (m_instrument->isMonitorViaIndex(detectorIndex)) {
       m_monitorIndices->push_back(detectorIndex);
     }
@@ -309,7 +330,7 @@ InstrumentVisitor::makeWrappers() const {
   detInfo->setComponentInfo(compInfo.get());
 
   auto compInfoWrapper = Kernel::make_unique<ComponentInfo>(
-      std::move(compInfo), componentIds(), componentIdToIndexMap());
+      std::move(compInfo), componentIds(), componentIdToIndexMap(), m_shapes);
   auto detInfoWrapper = Kernel::make_unique<DetectorInfo>(
       std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
 
