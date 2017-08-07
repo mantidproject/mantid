@@ -157,6 +157,9 @@ signals:
   void processButtonClicked();
   void processingFinished();
 
+  // Force re-processing of rows
+  void setForcedReProcessing(bool forceReProcessing) override;
+
 private:
   // initialise the interface
   void createTable();

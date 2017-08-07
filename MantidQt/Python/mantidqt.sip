@@ -1557,6 +1557,7 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
 void accept(MantidQt::MantidWidgets::DataProcessorMainPresenter *);
 void setInstrumentList(const QString &instruments, const QString &defaultInstrument);
 void transfer(const QList<QString> &);
+void setForcedReProcessing(bool);
 void setCell(const QString &, int, int, int parentRow = 0, int parentColumn = 0);
 QString getCell(int, int, int parentRow = 0, int parentColumn = 0);
 int getNumberOfRows();

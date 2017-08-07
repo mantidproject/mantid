@@ -704,5 +704,9 @@ void QDataProcessorWidget::clearTable() {
   m_presenter->clearTable();
 }
 
+void QDataProcessorWidget::setForcedReProcessing(bool forceReProcessing) {
+  m_presenter->setForcedReProcessing(forceReProcessing);
+}
+
 } // namespace MantidWidgets
 } // namespace Mantid

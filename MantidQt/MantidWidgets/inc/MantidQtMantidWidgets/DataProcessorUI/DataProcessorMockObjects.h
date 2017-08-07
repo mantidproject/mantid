@@ -64,6 +64,9 @@ public:
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
 
+  // Processing options
+  MOCK_METHOD1(setForcedReProcessing, void(bool));
+
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
   // copyable which means we have to mock addActions() via a proxy method
@@ -138,6 +141,7 @@ public:
   MOCK_CONST_METHOD2(giveUserWarning,
                      void(const std::string &prompt, const std::string &title));
   MOCK_METHOD0(publishCommandsMocked, void());
+  MOCK_METHOD1(setForcedReProcessing, void(bool));
 
 private:
   // Calls we don't care about
