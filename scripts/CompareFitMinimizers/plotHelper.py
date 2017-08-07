@@ -133,7 +133,7 @@ class plot(data,insert):
         plt.ylabel(self.labels["y"])
         plt.title(self.labels["title"],fontsize=self.title_size)
         for data in self.data:
-                print (self.labels["title"],)
+            if len(data.x)==len(data.y):
                 if(data.showError):
                         #plot with errors
                         plt.errorbar(data.x,data.y,yerr=data.E,label=data.name ,marker=data.markers,color=data.colour,
@@ -141,6 +141,8 @@ class plot(data,insert):
                 else:
                         plt.plot(data.x,data.y,label=data.name,marker=data.markers,color=data.colour,
                                  linestyle=data.linestyle,markersize=8)
+            else:
+                print ("Data "+data.name+" contains data of unequal lengths ",len(data.x),len(data.y))
         plt.legend(loc=self.legend)
         if  self.xrange["start"]!=0.0 or self.xrange["end"]!=0.0:
             plt.xlim([self.xrange["start"],self.xrange["end"]])

@@ -251,7 +251,8 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
                 sum_err_sq = sum_of_squares(fit_wks.readY(2))
                 # print " output simulated values: {0}".format(fit_wks.readY(1))
                 if sum_err_sq <min_sum_err_sq:
-                    best_fit=data(minimizer_name,fit_wks.readX(1),fit_wks.readY(1))
+                    tmp=msapi.ConvertToPointData(fit_wks)
+                    best_fit=data(minimizer_name,tmp.readX(1),tmp.readY(1))
                     min_sum_err_sq=sum_err_sq
             else:
                 sum_err_sq = float("inf")
@@ -276,9 +277,10 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         best_fit.colour='green'
         best_fit.order_data()
         fig.add_data(best_fit)
-        xData = wks.readX(0)
-        yData = wks.readY(0)
-        eData = wks.readE(0)
+        tmp=msapi.ConvertToPointData(wks)
+        xData = tmp.readX(0)
+        yData = tmp.readY(0)
+        eData = tmp.readE(0)
         raw=data("Data",xData,yData,eData)
         raw.showError=True
         raw.linestyle=''
@@ -297,8 +299,9 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
                                                                 Minimizer='Levenberg-Marquardt',
                                                                 CostFunction='Least squares',IgnoreInvalidData=True,
                                                                 StartX=prob.start_x, EndX=prob.end_x,MaxIterations=0)
-        xData = fit_wks.readX(1)
-        yData = fit_wks.readY(1)
+        tmp=msapi.ConvertToPointData(fit_wks)
+        xData = tmp.readX(1)
+        yData = tmp.readY(1)
         startData=data("Start Guess",xData,yData)
         startData.order_data()
         startData.colour="blue"
