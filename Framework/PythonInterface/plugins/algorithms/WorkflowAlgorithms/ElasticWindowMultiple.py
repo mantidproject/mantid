@@ -4,22 +4,26 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 
+import numpy as np
 
-def _normalize_to_lowest_temp(elt_ws_name):
+
+def _normalize_by_index(workspace, index):
     """
-    Normalise a workspace to the lowest temperature run.
+    Normalize each spectra of the specified workspace by the
+    y-value at the specified index in that spectra.
 
-    @param elt_ws_name Name of the ELT workspace
+    @param workspace    The workspace to normalize.
+    @param index        The index of the y-value to normalize by.
     """
 
-    num_hist = elt_ws_name.getNumberHistograms()
+    num_hist = workspace.getNumberHistograms()
 
     # Normalize each spectrum in the workspace
     for idx in range(0, num_hist):
-        y_vals = elt_ws_name.readY(idx)
-        scale = 1.0 / y_vals[0]
+        y_vals = workspace.readY(idx)
+        scale = 1.0 / y_vals[index]
         y_vals_scaled = scale * y_vals
-        elt_ws_name.setY(idx, y_vals_scaled)
+        workspace.setY(idx, y_vals_scaled)
 
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):
@@ -84,10 +88,12 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         background_range_end = self.getProperty('BackgroundRangeEnd').value
 
         if background_range_start != Property.EMPTY_DBL and background_range_end == Property.EMPTY_DBL:
-            issues['BackgroundRangeEnd'] = 'If background range start was given and background range end must also be provided.'
+            issues['BackgroundRangeEnd'] = 'If background range start was given and ' \
+                                           'background range end must also be provided.'
 
         if background_range_start == Property.EMPTY_DBL and background_range_end != Property.EMPTY_DBL:
-            issues['BackgroundRangeStart'] = 'If background range end was given and background range start must also be provided.'
+            issues['BackgroundRangeStart'] = 'If background range end was given and background ' \
+                                             'range start must also be provided.'
 
         return issues
 
@@ -148,7 +154,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 sample_param.append(sample)
             else:
                 # No need to output a temperature workspace if there are no temperatures
-                self._elt_workspace = ''
+                self._elt_ws_name = ''
 
         logger.information('Creating Q and Q^2 workspaces')
         progress.report('Creating Q workspaces')
@@ -218,42 +224,42 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
         sort_alg = self.createChildAlgorithm("SortXAxis", enableLogging=False)
         # Process the ELF workspace
-        if self._elf_workspace != '':
+        if self._elf_ws_name != '':
             logger.information('Creating ELF workspace')
             transpose_alg.setProperty("InputWorkspace", self._q_workspace)
-            transpose_alg.setProperty("OutputWorkspace", self._elf_workspace)
+            transpose_alg.setProperty("OutputWorkspace", self._elf_ws_name)
             transpose_alg.execute()
 
-            sort_alg.setProperty("InputWorkspace",transpose_alg.getProperty("OutputWorkspace").value)
-            sort_alg.setProperty("OutputWorkspace", self._elf_workspace)
+            sort_alg.setProperty("InputWorkspace", transpose_alg.getProperty("OutputWorkspace").value)
+            sort_alg.setProperty("OutputWorkspace", self._elf_ws_name)
             sort_alg.execute()
 
             self.setProperty('OutputELF', sort_alg.getProperty("OutputWorkspace").value)
 
         # Do temperature normalisation
-        if self._elt_workspace != '':
+        if self._elt_ws_name != '':
             logger.information('Creating ELT workspace')
 
-            # If the ELT workspace was not already created then create it here,
-            # otherwise just clone it
-            if self._elf_workspace == '':
+            # If the ELF workspace was not created, create the ELT workspace
+            # from the Q workspace. Else, clone the ELF workspace.
+            if self._elf_ws_name == '':
                 transpose_alg.setProperty("InputWorkspace", self._q_workspace)
-                transpose_alg.setProperty("OutputWorkspace", self._elt_workspace)
+                transpose_alg.setProperty("OutputWorkspace", self._elt_ws_name)
                 transpose_alg.execute()
-                sort_alg.setProperty("InputWorkspace", self._elt_workspace)
-                sort_alg.setProperty("OutputWorkspace", self._elt_workspace)
+                sort_alg.setProperty("InputWorkspace", self._elt_ws_name)
+                sort_alg.setProperty("OutputWorkspace", self._elt_ws_name)
                 sort_alg.execute()
-                self._elt_workspace = sort_alg.getProperty("OutputWorkspace").value
+                elt_workspace = sort_alg.getProperty("OutputWorkspace").value
             else:
                 clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
                 clone_alg.setProperty("InputWorkspace", self.getProperty("OutputELF").value)
-                clone_alg.setProperty("OutputWorkspace", self._elt_workspace)
+                clone_alg.setProperty("OutputWorkspace", self._elt_ws_name)
                 clone_alg.execute()
-                self._elt_workspace = clone_alg.getProperty("OutputWorkspace").value
+                elt_workspace = clone_alg.getProperty("OutputWorkspace").value
 
-            _normalize_to_lowest_temp(self._elt_workspace)
+            _normalize_by_index(elt_workspace, np.argmin(sample_param))
 
-            self.setProperty('OutputELT', self._elt_workspace)
+            self.setProperty('OutputELT', elt_workspace)
 
         # Set the output workspace
         self.setProperty('OutputInQ', self._q_workspace)
@@ -270,8 +276,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self._input_workspaces = self.getProperty('InputWorkspaces').value
         self._q_workspace = self.getPropertyValue('OutputInQ')
         self._q2_workspace = self.getPropertyValue('OutputInQSquared')
-        self._elf_workspace = self.getPropertyValue('OutputELF')
-        self._elt_workspace = self.getPropertyValue('OutputELT')
+        self._elf_ws_name = self.getPropertyValue('OutputELF')
+        self._elt_ws_name = self.getPropertyValue('OutputELT')
 
         self._integration_range_start = self.getProperty('IntegrationRangeStart').value
         self._integration_range_end = self.getProperty('IntegrationRangeEnd').value
@@ -303,7 +309,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # Look for sample changer position in logs in workspace
             if self._sample_log_name in run:
                 tmp = run[self._sample_log_name].value
-                value_action = {'last_value': lambda x: x[len(x) - 1],
+                value_action = {'last_value': lambda x: x[-1],
                                 'average': lambda x: x.mean()}
                 position = value_action['last_value'](tmp)
                 if position == 0:
@@ -318,7 +324,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
             tmp = run[self._sample_log_name].value
-            value_action = {'last_value': lambda x: x[len(x) - 1],
+            value_action = {'last_value': lambda x: x[-1],
                             'average': lambda x: x.mean()}
             sample = value_action[self._sample_log_value](tmp)
             unit = run[self._sample_log_name].units
