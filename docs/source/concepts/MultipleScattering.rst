@@ -38,9 +38,9 @@ and compare the techniques currently available in Mantid to perform these correc
 Theory
 ~~~~~~
 The figure [2]__ shows how a general double scattering process might occur. The neutron travels 
-a certain distance :math:`\l_1` through the sample before the first scattering event. The second 
-scattering occurs after a distance :math:`\l_{12}` has been traversed following which the 
-neutron travels a final length :math:`\l_2` before leaving the sample and being picked up by 
+a certain distance :math:`l_1` through the sample before the first scattering event. The second 
+scattering occurs after a distance :math:`l_{12}` has been traversed following which the 
+neutron travels a final length :math:`l_2` before leaving the sample and being picked up by 
 a detector.
 
 .. figure:: ../images/MultipleScatteringVolume.png
