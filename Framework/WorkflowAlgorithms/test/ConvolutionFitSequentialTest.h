@@ -247,6 +247,54 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_exec_with_extract_members() {
+    const int totalBins = 6;
+    auto resWs = create2DWorkspace(5, 1);
+    auto redWs = create2DWorkspace(totalBins, 5);
+    createConvFitResWorkspace(5, totalBins);
+    AnalysisDataService::Instance().add("ResolutionWs_", resWs);
+    AnalysisDataService::Instance().add("ReductionWs_", redWs);
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("InputWorkspace", redWs);
+    alg.setProperty("Function",
+      "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+      "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+      "name=Resolution,Workspace=__ConvFit_Resolution,"
+      "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+      "0175)))");
+    alg.setProperty("BackgroundType", "Fixed Flat");
+    alg.setProperty("StartX", 0.0);
+    alg.setProperty("EndX", 3.0);
+    alg.setProperty("SpecMin", 0);
+    alg.setProperty("SpecMax", 5);
+    alg.setProperty("Convolve", true);
+    alg.setProperty("ExtractMembers", true);
+    alg.setProperty("Minimizer", "Levenberg-Marquardt");
+    alg.setProperty("MaxIterations", 500);
+    alg.setProperty("OutputWorkspace", "Result");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    WorkspaceGroup_const_sptr membersGroupWs;
+
+    TS_ASSERT_THROWS_NOTHING(
+        membersGroupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            "ReductionWs_conv_1LFixF_s0_to_5_Members"));
+
+    std::unordered_set<std::string> members = {"Data", "Calc", "Diff", "LinearBackground", "Lorentzian1"};
+
+    for (int i = 0; i < membersGroupWs->size(); i++) {
+      MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(membersGroupWs->getItem(i));
+      TS_ASSERT(ws->getNumberHistograms() == redWs->getNumberHistograms());
+      members.erase(ws->getName());
+    }
+
+    TS_ASSERT(members.empty());
+    AnalysisDataService::Instance().clear();
+  }
+
   //------------------------ Private Functions---------------------------
 
   MatrixWorkspace_sptr createGenericWorkspace(const std::string &wsName,
