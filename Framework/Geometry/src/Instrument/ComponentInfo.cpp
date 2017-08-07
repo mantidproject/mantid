@@ -14,8 +14,8 @@ namespace Geometry {
  * @param componentInfo : Internal Beamline ComponentInfo
  * @param componentIds : ComponentIDs ordered by component
  * @param componentIdToIndexMap : ID -> index translation map
- * index
- */
+ * @param shapes : Shapes for each component
+ * */
 ComponentInfo::ComponentInfo(
     std::unique_ptr<Beamline::ComponentInfo> componentInfo,
     boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>

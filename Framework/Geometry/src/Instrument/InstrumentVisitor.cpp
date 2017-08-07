@@ -81,9 +81,9 @@ InstrumentVisitor::InstrumentVisitor(
           m_orderedDetectorIds->size())),
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr),
-      m_shapes(
-          boost::make_shared<std::vector<boost::shared_ptr<const Object>>>()),
-      m_nullShape(boost::make_shared<const Object>()) {
+      m_nullShape(boost::make_shared<const Object>()),
+      m_shapes(boost::make_shared<std::vector<boost::shared_ptr<const Object>>>(
+          m_orderedDetectorIds->size(), m_nullShape)) {
 
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
@@ -243,7 +243,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
         Kernel::toVector3d(detector.getPos());
     (*m_detectorRotations)[detectorIndex] =
         Kernel::toQuaterniond(detector.getRotation());
-    m_shapes->emplace_back(std::move(detector.shape()));
+    (*m_shapes)[detectorIndex] = std::move(detector.shape());
     if (m_instrument->isMonitorViaIndex(detectorIndex)) {
       m_monitorIndices->push_back(detectorIndex);
     }
