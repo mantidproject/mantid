@@ -160,8 +160,10 @@ public:
                peaks.get()[1].getIntensity() == 11.);
   }
 
-  void testThatThrowsWhenBackgroundStrategyIsNotAbsoluteBackgroundStrategyWhenUsingAllPeaksStrategy() {
-    // Note that the AllPeaksStrategy is currently only supporting the absolute background strategy
+  void
+  testThatThrowsWhenBackgroundStrategyIsNotAbsoluteBackgroundStrategyWhenUsingAllPeaksStrategy() {
+    // Note that the AllPeaksStrategy is currently only supporting the absolute
+    // background strategy
     // GIVEN
     auto backgroundStrategy =
         Mantid::Kernel::make_unique<PerSpectrumBackgroundStrategy>(3.);

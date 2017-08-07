@@ -146,10 +146,10 @@ void FindSXPeaks::init() {
                   "in microseconds.");
 
   declareProperty("PhiResolution", 1., mustBePositiveDouble,
-                                       "Absolute tolerance in the phi "
-                                       "coordinate needed to avoid peak "
-                                       "duplication in number of pixels. The "
-                                       "values are specified in degrees.");
+                  "Absolute tolerance in the phi "
+                  "coordinate needed to avoid peak "
+                  "duplication in number of pixels. The "
+                  "values are specified in degrees.");
 
   declareProperty("TwoThetaResolution", 1., mustBePositiveDouble,
                   "Absolute tolerance of two theta value needed to avoid peak "

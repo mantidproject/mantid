@@ -393,8 +393,8 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
 
   const auto lowY = y.begin() + distanceMin;
   auto highY = distanceMax < static_cast<int>(y.size())
-                         ? y.begin() + distanceMax
-                         : y.end();
+                   ? y.begin() + distanceMax
+                   : y.end();
 
   for (auto it = lowY; it != highY; ++it) {
     const auto signal = *it;
