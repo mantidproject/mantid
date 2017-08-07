@@ -278,7 +278,6 @@ class DataCatalog(object):
                 for extension in self.extension:
                     if f.endswith(extension):
                         file_path = os.path.join(data_dir, f)
-    
                         if hasattr(self.data_set_cls, "find_with_api"):
                             d = self.data_set_cls.find_with_api(file_path, c,
                                                                 process_files=process_files)
