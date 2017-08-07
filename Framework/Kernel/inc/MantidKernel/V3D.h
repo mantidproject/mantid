@@ -2,7 +2,6 @@
 #define MANTID_KERNEL_V3D_H_
 
 #include <cmath>
-#include <cfloat>
 #include <iosfwd>
 #include <vector>
 #include "MantidKernel/DllConfig.h"
