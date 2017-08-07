@@ -71,7 +71,6 @@ private:
   API::ITableWorkspace_sptr m_calibrationTable;
   API::ITableWorkspace_sptr m_peakPositionTable;
   std::vector<double> m_peaksInDspacing;
-  std::string calParams;
   std::map<detid_t, size_t> m_detidToRow;
   double m_tofMin{0.};
   double m_tofMax{0.};
@@ -80,6 +79,7 @@ private:
   double m_difaMin{0.};
   double m_difaMax{0.};
   bool m_hasDasIds{false};
+  size_t m_numberMaxParams{0};
 };
 
 } // namespace Algorithms

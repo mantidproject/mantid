@@ -366,7 +366,16 @@ void PDCalibration::exec() {
   double minPeakHeight = getProperty("MinimumPeakHeight");
   double maxChiSquared = getProperty("MaxChiSq");
 
-  calParams = getPropertyValue("CalibrationParameters");
+  const std::string calParams = getPropertyValue("CalibrationParameters");
+  if (calParams == "DIFC")
+    m_numberMaxParams = 1;
+  else if ("DIFC+TZERO")
+    m_numberMaxParams = 2;
+  else if ("DIFC+TZERO+DIFA")
+    m_numberMaxParams = 3;
+  else
+    throw std::runtime_error(
+        "Encountered impossible CalibrationParameters value");
 
   m_uncalibratedWS = loadAndBin();
   setProperty("SignalWorkspace", m_uncalibratedWS);
@@ -565,8 +574,8 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
   const size_t numPeaks = static_cast<size_t>(peakVec->at(0));
   // number of parameters
   const size_t numParams = static_cast<size_t>(peakVec->at(1));
-  //  std::cout << "numPeaks=" << numPeaks << " numParams=" << numParams <<
-  //  std::endl;
+  // std::cout << "numPeaks=" << numPeaks << " numParams=" << numParams <<
+  // std::endl;
 
   // isn't strictly necessary, but makes reading the code much easier
   const std::vector<double> tofObs(peakVec->begin() + 2,
@@ -575,10 +584,10 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
                                    peakVec->begin() + (2 + 2 * numPeaks));
   const std::vector<double> height2(peakVec->begin() + (2 + 2 * numPeaks),
                                     peakVec->begin() + (2 + 3 * numPeaks));
-  //  std::cout << "tofObs=";
-  //  for (const auto &tof : tofObs)
-  //      std::cout << tof << " ";
-  //  std::cout << std::endl;
+  // std::cout << "tofObs=";
+  // for (const auto &tof : tofObs)
+  //    std::cout << tof << " ";
+  // std::cout << std::endl;
 
   // create the function to convert tof to dspacing
   double difc = gsl_vector_get(v, 0);
@@ -600,42 +609,22 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
     errsum += errsum_i;
   }
 
-  //  std::cout << "difc=" << difc << " tzero=" << tzero << " difa=" << difa <<
-  //  " errsum=" << errsum << std::endl;
+  // std::cout << "difc=" << difc << " tzero=" << tzero << " difa=" << difa
+  //          << " errsum=" << errsum << std::endl;
   return errsum;
 }
-} // end of anonymous namespace
 
-void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
-                                        const std::vector<double> &tof,
-                                        const std::vector<double> &height2,
-                                        double &difc, double &t0,
-                                        double &difa) {
-  // number of fit parameters 1=[DIFC], 2=[DIFC,TZERO], 3=[DIFC,TZERO,DIFA]
-  const size_t numParams = 1;
-  // this must have the same layout as the unpacking in gsl_costFunction above
-  const size_t numPeaks = d.size();
-  std::vector<double> peaks(numPeaks * 3 + 2, 0.);
-  peaks[0] = static_cast<double>(d.size());
-  peaks[1] = numParams;
-  for (size_t i = 0; i < numPeaks; ++i) {
-    peaks[i + 2] = tof[i];
-    peaks[i + 2 + numPeaks] = d[i];
-    peaks[i + 2 + 2 * numPeaks] = height2[i];
-  }
-
-  // calculate a starting DIFC
-  double difc_local = difc;
-  if (difc_local == 0.) {
-    const double d_sum = std::accumulate(d.begin(), d.end(), 0.);
-    const double tof_sum = std::accumulate(tof.begin(), tof.end(), 0.);
-    difc_local = tof_sum / d_sum; // number of peaks falls out of division
-  }
+// returns the errsum, the conversion parameters are done by in/out parameters
+// to the function
+// if the fit fails it returns 0.
+double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0,
+                        double &difa) {
+  const size_t numParams = static_cast<size_t>(peaks[1]);
 
   // initial starting point as [DIFC, 0, 0]
   gsl_vector *fitParams = gsl_vector_alloc(numParams);
   gsl_vector_set_all(fitParams, 0.0); // set all parameters to zero
-  gsl_vector_set(fitParams, 0, difc_local);
+  gsl_vector_set(fitParams, 0, difc);
 
   // Set initial step sizes to 0.001
   gsl_vector *stepSizes = gsl_vector_alloc(numParams);
@@ -648,8 +637,10 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
   minex_func.params = &peaks;
 
   // Set up GSL minimzer - simplex is overkill
-  const gsl_multimin_fminimizer_type *minimizerType = gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *minimizer = gsl_multimin_fminimizer_alloc(minimizerType, numParams);
+  const gsl_multimin_fminimizer_type *minimizerType =
+      gsl_multimin_fminimizer_nmsimplex;
+  gsl_multimin_fminimizer *minimizer =
+      gsl_multimin_fminimizer_alloc(minimizerType, numParams);
   gsl_multimin_fminimizer_set(minimizer, &minex_func, fitParams, stepSizes);
 
   // Finally do the fitting
@@ -668,6 +659,7 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
   } while (status == GSL_CONTINUE && iter < 50); // 50 iterations maximum
 
   // only update calibration values on successful fit
+  double errsum = 0.; // return 0. if fit didn't work
   std::string status_msg = gsl_strerror(status);
   if (status_msg == "success") {
     difc = gsl_vector_get(minimizer->x, 0);
@@ -677,13 +669,84 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
         difa = gsl_vector_get(minimizer->x, 2);
       }
     }
+    // return from gsl_costFunction can be accessed as fval
+    errsum = minimizer->fval;
   }
-  // return from gsl_costFunction can be accessed as s->fval
 
   // free memory
   gsl_vector_free(fitParams);
   gsl_vector_free(stepSizes);
   gsl_multimin_fminimizer_free(minimizer);
+
+  return errsum;
+}
+
+} // end of anonymous namespace
+
+void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
+                                        const std::vector<double> &tof,
+                                        const std::vector<double> &height2,
+                                        double &difc, double &t0,
+                                        double &difa) {
+  const size_t numPeaks = d.size();
+  if (numPeaks <= 1) {
+    return; // don't do anything
+  }
+  // number of fit parameters 1=[DIFC], 2=[DIFC,TZERO], 3=[DIFC,TZERO,DIFA]
+  // set the maximum number of parameters that will be used
+  // statistics doesn't support having too few peaks
+  size_t maxParams = std::min<size_t>(numPeaks - 1, m_numberMaxParams);
+
+  // this must have the same layout as the unpacking in gsl_costFunction above
+  std::vector<double> peaks(numPeaks * 3 + 2, 0.);
+  peaks[0] = static_cast<double>(d.size());
+  peaks[1] = 1.; // number of parameters to fit
+  for (size_t i = 0; i < numPeaks; ++i) {
+    peaks[i + 2] = tof[i];
+    peaks[i + 2 + numPeaks] = d[i];
+    peaks[i + 2 + 2 * numPeaks] = height2[i];
+  }
+
+  // calculate a starting DIFC
+  double difc_start = difc;
+  if (difc_start == 0.) {
+    const double d_sum = std::accumulate(d.begin(), d.end(), 0.);
+    const double tof_sum = std::accumulate(tof.begin(), tof.end(), 0.);
+    difc_start = tof_sum / d_sum; // number of peaks falls out of division
+  }
+
+  // save the best values so far
+  double best_errsum = std::numeric_limits<double>::max();
+  double best_difc = 0.;
+  double best_t0 = 0.;
+  double best_difa = 0.;
+
+  // loop over possible number of parameters
+  for (size_t numParams = 1; numParams <= maxParams; ++numParams) {
+    peaks[1] = static_cast<double>(numParams);
+    double difc_local = difc_start;
+    double t0_local = 0.;
+    double difa_local = 0.;
+    double errsum = fitDIFCtZeroDIFA(peaks, difc_local, t0_local, difa_local);
+    if (errsum > 0.) {
+      // normalize by degrees of freedom
+      errsum = errsum / static_cast<double>(numPeaks - numParams);
+      // save the best and forget the rest
+      if (errsum < best_errsum) {
+        best_errsum = errsum;
+        best_difc = difc_local;
+        best_t0 = t0_local;
+        best_difa = difa_local;
+      }
+    }
+  }
+
+  // check that something actually fit and set to the best result
+  if (best_difc > 0. && best_errsum < std::numeric_limits<double>::max()) {
+    difc = best_difc;
+    t0 = best_t0;
+    difa = best_difa;
+  }
 }
 
 vector<double>
