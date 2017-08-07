@@ -189,7 +189,7 @@ public:
     FileProperty fp("Dir", "", FileProperty::Directory);
     std::string msg = fp.setValue("~");
 
-    char* homepath = std::getenv("HOME");
+    char *homepath = std::getenv("HOME");
     if (!homepath) {
       homepath = std::getenv("USERPROFILE");
     }
