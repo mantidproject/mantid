@@ -75,9 +75,8 @@ public:
   MOCK_METHOD0(addActionsProxy, void());
 
   // Calls we don't care about
-  void showTable(
-      boost::shared_ptr<
-          MantidQt::MantidWidgets::AbstractDataProcessorTreeModel>) override{};
+  void showTable(boost::shared_ptr<
+      MantidQt::MantidWidgets::AbstractDataProcessorTreeModel>) override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
