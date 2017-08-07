@@ -181,33 +181,34 @@ def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
 
     return problems, results_per_problem
 
+
 def splitByString(name,min_length,loop=0,splitter=0):
     """
     A simple function for splitting via characters in a long string
     @param name :: input string
     @param min_length :: minimum length of a linestyle
-    @param loop :: number of time cycled through the split options 
+    @param loop :: number of time cycled through the split options   
     @param splitter :: index of which split pattern to use
-	@returns :: the split string 	 
+    @returns :: the split string 	 
     """
-    tmp = name[min_length:]    
+    tmp = name[min_length:]
     split_at=[";","+",","]
-   
     if splitter+1 >len(split_at):
         if loop>3:
             print ("failed ",name)
             return "..."
-        else:    
+        else:
             return splitByString(name,min_length,loop+1)
     loc=tmp.find(split_at[splitter])+min_length
-    if loc ==-1+min_length or loc > min_length*2: 
+    if loc ==-1+min_length or loc > min_length*2:
         if len(tmp)>min_length:
             return splitByString(name,min_length,loop,splitter+1)
         return name
-    else:    
+    else:
         tmp = splitByString(name[loc+1:],min_length,loop,splitter)
         title=name[:loc+1]+"\n"+tmp
         return title
+
 
 def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,previous_name="none"):
     """
