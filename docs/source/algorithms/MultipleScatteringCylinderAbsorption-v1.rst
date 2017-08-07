@@ -15,12 +15,12 @@ out by Jack Carpenter and Asfia Huq and implemented in Java by Alok
 Chatterjee. The java code was translated to C++ in Mantid by Dennis
 Mikkelson.
 
-*Elastic scattering is assumed
+* Elastic scattering is assumed
 
 In [1]__ we see that the calculation of the attenuation factor F involves 
-an integral over the sample cylinder. By Taylor expanding the integrands, 
-we get a form calculable independently of the scattering cross section. 
-These integral expansions are denoted by Z_{mn} and so we may write:
+an integral over the sample cylinder. By expanding the integrands as a power series, 
+we can factor out any dependence on scattering cross section and radius. 
+These integral terms are denoted by :math:`Z_{mn}` and so we may write:
 
 .. math::
    \frac{1}{F} = \sum_{m=0}^\infty\sum_{n=0}^\infty\frac{(-1)^{m+n}}{m!n!}(\mu R)^{m+n} Z_{mn}(\theta)
@@ -34,7 +34,7 @@ expansion coefficients:
   Z_{mn}(\theta) = \sum_{s=0}^\infty c_{s}(m,n)cos(s\theta)
   
 where the Chebyshev coefficients :math:`c_{s}(m,n)` up to  m + n 
-:math:`\leqslant` 5 have been tabulated and are stored as an array.
+:math:`\leqslant` 5 have been tabulated and are stored as an array by the algorithm.
 
 Usage
 -----
