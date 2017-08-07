@@ -23,6 +23,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
+    boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
     int64_t sourceIndex, int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(
@@ -31,6 +32,7 @@ ComponentInfo::ComponentInfo(
       m_componentRanges(std::move(componentRanges)),
       m_parentIndices(std::move(parentIndices)),
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
+      m_scaleFactors(std::move(scaleFactors)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
       m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex) {
@@ -53,6 +55,11 @@ ComponentInfo::ComponentInfo(
     throw std::invalid_argument("ComponentInfo must have component indices "
                                 "input of same size as the sum of "
                                 "non-detector and detector components");
+  }
+  if (m_scaleFactors->size() != m_size) {
+    throw std::invalid_argument(
+        "ComponentInfo should have been provided same "
+        "number of scale factors as number of components");
   }
 }
 
@@ -308,6 +315,15 @@ size_t ComponentInfo::root() const {
 
 double ComponentInfo::l1() const {
   return (sourcePosition() - samplePosition()).norm();
+}
+
+Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
+  return (*m_scaleFactors)[componentIndex];
+}
+
+void ComponentInfo::setScaleFactor(const size_t componentIndex,
+                                   const Eigen::Vector3d &scaleFactor) {
+  m_scaleFactors.access()[componentIndex] = scaleFactor;
 }
 
 } // namespace Beamline

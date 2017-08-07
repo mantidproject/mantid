@@ -93,6 +93,9 @@ public:
   size_t source() const;
   size_t sample() const;
   double l1() const;
+  Kernel::V3D scaleFactor(const size_t componentIndex) const;
+  void setScaleFactor(const size_t componentIndex,
+                      const Kernel::V3D &scaleFactor);
   size_t root();
 
   const IComponent *componentID(const size_t componentIndex) const {

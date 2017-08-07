@@ -129,5 +129,15 @@ const Object &ComponentInfo::shape(const size_t componentIndex) const {
   return *(*m_shapes)[componentIndex];
 }
 
+Kernel::V3D ComponentInfo::scaleFactor(const size_t componentIndex) const {
+  return Kernel::toV3D(m_componentInfo->scaleFactor(componentIndex));
+}
+
+void ComponentInfo::setScaleFactor(const size_t componentIndex,
+                                   const Kernel::V3D &scaleFactor) {
+  m_componentInfo->setScaleFactor(componentIndex,
+                                  Kernel::toVector3d(scaleFactor));
+}
+
 } // namespace Geometry
 } // namespace Mantid

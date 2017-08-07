@@ -131,6 +131,9 @@ private:
   boost::shared_ptr<
       std::vector<boost::shared_ptr<const Mantid::Geometry::Object>>> m_shapes;
 
+  /// Scale factors
+  boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
+
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
                             const size_t componentIndex);
 
