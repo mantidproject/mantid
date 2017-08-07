@@ -69,6 +69,11 @@ void ConvFit::setup() {
   m_cfTree->addProperty(m_properties["Convolve"]);
   m_blnManager->setValue(m_properties["Convolve"], true);
 
+  // Option to extract members
+  m_properties["ExtractMembers"] = m_blnManager->addProperty("ExtractMembers");
+  m_cfTree->addProperty(m_properties["ExtractMembers"]);
+  m_blnManager->setValue(m_properties["ExtractMembers"], false);
+
   // Max iterations option
   m_properties["MaxIterations"] = m_dblManager->addProperty("Max Iterations");
   m_dblManager->setDecimals(m_properties["MaxIterations"], 0);
@@ -315,6 +320,8 @@ void ConvFit::run() {
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("Convolve", true);
+  cfs->setProperty("ExtractMembers", static_cast<bool>(m_blnManager->value(
+                                        m_properties["ExtractMembers"])));
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(
