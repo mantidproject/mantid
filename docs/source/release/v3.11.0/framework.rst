@@ -24,7 +24,7 @@ Improved
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information.
 - :ref:`GroupDetectors <algm-GroupDetectors-v2>` now supports workspaces with detector scans.
 - :ref:`Load <algm-Load-v1>` now supports use of tilde in file paths in Python, for example Load(Filename="~/data/test.nxs", ...)
-- :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces-v1` provides option to change Y axis unit and label.
+- :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces-v1>` provides option to change Y axis unit and label.
 - :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays.
 - :ref:`FindPeaksMD <algm-FindPeaksMD-v1>` allows now to normalize by the number of events. This can improve results for data that was originally based on histogram data which has been converted to event-mode.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` has refactored on splitting sample logs.
@@ -60,6 +60,8 @@ Improved
 
 Python
 ------
+
+- :py:obj:`mantid.kernel.MaterialBuilder` had an issue when setting the mass density with more than one atom in the chemical formula. This is now fixed, so the number density is correctly set in :py:obj:`mantid.kernel.Material` and the cross sections correctly calculated.
 
 Python Algorithms
 #################
