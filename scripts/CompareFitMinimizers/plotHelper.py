@@ -22,7 +22,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-
 class data:
 
     """
@@ -133,11 +132,12 @@ class plot(data,insert):
         plt.ylabel(self.labels["y"])
         plt.title(self.labels["title"],fontsize=self.title_size)
         for data in self.data:
+                print (self.labels["title"],)
                 if(data.showError):
                         #plot with errors
                         plt.errorbar(data.x,data.y,yerr=data.E,label=data.name ,marker=data.markers,color=data.colour,
                                      linestyle=data.linestyle,markersize=8)
-                else:
+                else: 
                         plt.plot(data.x,data.y,label=data.name,marker=data.markers,color=data.colour,
                                  linestyle=data.linestyle,markersize=8)
         plt.legend(loc=self.legend)

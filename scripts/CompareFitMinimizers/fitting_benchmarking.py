@@ -181,6 +181,33 @@ def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
 
     return problems, results_per_problem
 
+def splitByString(name,min_length,loop=0,splitter=0):
+    """
+    A simple function for splitting via characters in a long string
+    @param name :: input string
+    @param min_length :: minimum length of a linestyle
+    @param loop :: number of time cycled through the split options 
+    @param splitter :: index of which split pattern to use
+	@returns :: the split string 	 
+    """
+    tmp = name[min_length:]    
+    split_at=[";","+",","]
+   
+    if splitter+1 >len(split_at):
+        if loop>3:
+            print ("failed ",name)
+            return "..."
+        else:    
+            return splitByString(name,min_length,loop+1)
+    loc=tmp.find(split_at[splitter])+min_length
+    if loc ==-1+min_length or loc > min_length*2: 
+        if len(tmp)>min_length:
+            return splitByString(name,min_length,loop,splitter+1)
+        return name
+    else:    
+        tmp = splitByString(name[loc+1:],min_length,loop,splitter)
+        title=name[:loc+1]+"\n"+tmp
+        return title
 
 def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,previous_name="none"):
     """
@@ -255,13 +282,14 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         raw.showError=True
         raw.linestyle=''
         fig.add_data(raw)
+        fig.labels['y']="Arbitrary units"
         fig.labels['x']="Time ($\mu s$)"
         if prob.name == previous_name:
             count+=1
         else:
             count =1
             previous_name=prob.name
-        fig.labels['y']="something "
+        #fig.labels['y']="something "
         fig.labels['title']=prob.name[:-4]+" "+str(count)
         fig.title_size=10
         status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(user_func, wks, Output='ws_fitting_test',
@@ -279,15 +307,9 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         start_fig.add_data(raw)
         start_fig.add_data(startData)
         start_fig.labels['x']="Time ($\mu s$)"
-        start_fig.labels['y']="something"
+        start_fig.labels['y']="Arbitrary units"
         title=user_func[27:-1]
-        loc=title.find(",")
-        if loc > 35:
-            tmp=title[30:]
-            tmploc = tmp.find("+")+30
-            title=title[:tmploc+1]+"\n"+title[tmploc+2:]
-
-        title=title[:loc+1]+"\n"+title[loc+2:]
+        title=splitByString(title,30)
         start_fig.labels['title']=prob.name[:-4]+" "+str(count)+"\n"+title
         start_fig.title_size=10
         fig.make_scatter_plot("Fit for "+prob.name[:-4]+" "+str(count)+".pdf")
