@@ -258,7 +258,7 @@ std::vector<double> getMomentsAboutMeanNumpy(const NumPy::NdArray &indep,
 #endif
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion(
+GCC_DIAG_OFF(conversion)
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads,
                                 getMomentsAboutMeanNumpy, 2, 3)
