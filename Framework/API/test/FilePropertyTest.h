@@ -189,12 +189,12 @@ public:
     FileProperty fp("Dir", "", FileProperty::Directory);
     std::string msg = fp.setValue("~");
 
-    std::string homepath = std::getenv("HOME");
-    if (homepath.empty()) {
+    char* homepath = std::getenv("HOME");
+    if (!homepath) {
       homepath = std::getenv("USERPROFILE");
     }
 
-    if (!homepath.empty() && Poco::File(homepath).exists()) {
+    if (homepath && Poco::File(homepath).exists()) {
       // User home variable is set and points to a valid directory
       // We should have no errors
       TS_ASSERT(msg.empty());

@@ -70,13 +70,15 @@ const std::string &getHomePath() {
   }
   initialised = true;
 
-  homePath = std::getenv("HOME"); // Usually set on Windows and UNIX
-  if (!homePath.empty()) {
+  char* home = std::getenv("HOME"); // Usually set on Windows and UNIX
+  if (home) {
+	homePath = std::string(home);
     return homePath;
   }
 
-  homePath = std::getenv("USERPROFILE"); // Not usually set on UNIX
+  char* userProfile = std::getenv("USERPROFILE"); // Not usually set on UNIX
   // Return even if it's an empty string, as we can do no better
+  homePath = std::string(userProfile);
   return homePath;
 }
 
