@@ -63,6 +63,9 @@ static const double Z_initial[] = {
 
 static const double LAMBDA_REF =
     1.81; ///< Wavelength that the calculations are based on
+// Badly named constants, no explanation of the origin of these
+// values. They appear to be used when calculating the multiple
+// scattering correction factor.
 static const double COEFF4 = 1.1967;
 static const double COEFF5 = -0.8667;
 } // end of anonymous
