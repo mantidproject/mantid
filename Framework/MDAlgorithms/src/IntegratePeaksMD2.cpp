@@ -144,11 +144,10 @@ void IntegratePeaksMD2::init() {
       "If false, correct for volume off edge for both background and "
       "intensity.");
 
-  declareProperty(
-        "UseOnePercentBackgroundCorrection", false,
-        "If this options is enabled, then the the top 1% of the background will be removed"
-        "before the background subtraction.");
-
+  declareProperty("UseOnePercentBackgroundCorrection", false,
+                  "If this options is enabled, then the the top 1% of the "
+                  "background will be removed"
+                  "before the background subtraction.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -191,7 +190,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   /// Start radius of the background
   double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
   /// One percent background correction
-  bool useOnePercentBackgroundCorrection = getProperty("UseOnePercentBackgroundCorrection");
+  bool useOnePercentBackgroundCorrection =
+      getProperty("UseOnePercentBackgroundCorrection");
 
   if (BackgroundInnerRadius < PeakRadius)
     BackgroundInnerRadius = PeakRadius;
@@ -376,7 +376,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // Perform the integration into whatever box is contained within.
       ws->getBox()->integrateSphere(
           sphere, static_cast<coord_t>(adaptiveRadius * adaptiveRadius), signal,
-          errorSquared, 0.0 /* innerRadiusSquared */, useOnePercentBackgroundCorrection);
+          errorSquared, 0.0 /* innerRadiusSquared */,
+          useOnePercentBackgroundCorrection);
 
       // Integrate around the background radius
 

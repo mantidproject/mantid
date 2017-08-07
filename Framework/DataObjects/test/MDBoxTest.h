@@ -445,9 +445,12 @@ public:
     TS_ASSERT_DELTA(errorSquared, 1.5 * numExpected, 1e-5);
   }
 
-  void dotest_integrateSphereWithInnerRadius(MDBox<MDLeanEvent<3>, 3> &box, coord_t x,
-                              coord_t y, coord_t z, const coord_t radius, const coord_t innerRadius, const bool useOnePercent,
-                              double numExpected) {
+  void dotest_integrateSphereWithInnerRadius(MDBox<MDLeanEvent<3>, 3> &box,
+                                             coord_t x, coord_t y, coord_t z,
+                                             const coord_t radius,
+                                             const coord_t innerRadius,
+                                             const bool useOnePercent,
+                                             double numExpected) {
     // The sphere transformation
     bool dimensionsUsed[3] = {true, true, true};
     coord_t center[3] = {x, y, z};
@@ -455,7 +458,8 @@ public:
 
     signal_t signal = 0;
     signal_t errorSquared = 0;
-    box.integrateSphere(sphere, radius * radius, signal, errorSquared, innerRadius, useOnePercent);
+    box.integrateSphere(sphere, radius * radius, signal, errorSquared,
+                        innerRadius, useOnePercent);
     TS_ASSERT_DELTA(signal, 1.0 * numExpected, 1e-5);
     TS_ASSERT_DELTA(errorSquared, 1.5 * numExpected, 1e-5);
   }
@@ -481,7 +485,6 @@ public:
     dotest_integrateSphere(box, 5.0, 5.0, 5.0, 10., 9 * 9 * 9);
   }
 
-
   void test_integrateSphereWithLowerRadiusBoundAndOnePercentCutoff() {
     // One event at each integer coordinate value between 1 and 9
     MDBox<MDLeanEvent<3>, 3> box(sc.get());
@@ -495,23 +498,22 @@ public:
           box.addEvent(ev);
         }
 
-
     TS_ASSERT_EQUALS(box.getNPoints(), 9 * 9 * 9);
 
     // Too small shell
-    dotest_integrateSphereWithInnerRadius(box, 5.0f, 5.0f, 5.0f, 0.5f, 0.4f, false, 0.0);
+    dotest_integrateSphereWithInnerRadius(box, 5.0f, 5.0f, 5.0f, 0.5f, 0.4f,
+                                          false, 0.0);
 
     // The 0.7 shell contains 2 but the 1.15 inner shell excludes one of them
-    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.5f, false, 1.0);
+    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.5f,
+                                          false, 1.0);
 
     // The 1.3 shell contains 2 and the 1.05 inner shell contains 2
-    //dotest_integrateSphereWithInnerRadius(box, 5.11, 5.0, 5.0, 1.3f, 1.05f, false, 2.0);
+    // dotest_integrateSphereWithInnerRadius(box, 5.11, 5.0, 5.0, 1.3f, 1.05f,
+    // false, 2.0);
   }
 
-  void test_integrateSphereWithLowerRadiusBoundAndNoOnePercentCutoff() {
-
-  }
-
+  void test_integrateSphereWithLowerRadiusBoundAndNoOnePercentCutoff() {}
 
   //-----------------------------------------------------------------------------------------
   /** refreshCache() tracks the centroid */
