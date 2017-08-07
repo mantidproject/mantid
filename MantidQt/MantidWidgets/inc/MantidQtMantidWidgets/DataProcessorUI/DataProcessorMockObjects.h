@@ -27,7 +27,10 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockDataProcessorView : public DataProcessorView {
 public:
-  MockDataProcessorView() {}
+  MockDataProcessorView() {
+    ON_CALL(*this, runPythonAlgorithm(::testing::_))
+        .WillByDefault(::testing::Return(QString()));
+  }
   ~MockDataProcessorView() override {}
 
   // Prompt
@@ -72,8 +75,9 @@ public:
   MOCK_METHOD0(addActionsProxy, void());
 
   // Calls we don't care about
-  void showTable(boost::shared_ptr<
-      MantidQt::MantidWidgets::AbstractDataProcessorTreeModel>) override{};
+  void showTable(
+      boost::shared_ptr<
+          MantidQt::MantidWidgets::AbstractDataProcessorTreeModel>) override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
