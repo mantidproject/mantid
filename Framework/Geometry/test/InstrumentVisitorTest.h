@@ -370,11 +370,13 @@ public:
         InstrumentVisitor::makeWrappers(*instrument, nullptr /*parameter map*/);
     auto componentInfo = std::move(std::get<0>(wrappers));
 
+    // Instrument
     const auto &instrumentShape = componentInfo->shape(componentInfo->root());
     TSM_ASSERT("CompAssemblies should have no shape",
                !instrumentShape.hasValidShape());
+    // Bank 1
     const auto &subAssemblyShape =
-        componentInfo->shape(componentInfo->root() - 1);
+        componentInfo->shape(componentInfo->root() - 3);
     TSM_ASSERT("CompAssemblies should have no shape",
                !subAssemblyShape.hasValidShape());
     const auto &detectorShape =

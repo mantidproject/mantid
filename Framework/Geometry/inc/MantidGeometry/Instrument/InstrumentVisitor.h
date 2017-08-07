@@ -124,12 +124,12 @@ private:
   /// Sample index to set
   int64_t m_sampleIndex = -1;
 
+  /// Null shared (empty shape)
+  boost::shared_ptr<const Mantid::Geometry::Object> m_nullShape;
+
   /// Shapes stored in fly-weight fashion
   boost::shared_ptr<
       std::vector<boost::shared_ptr<const Mantid::Geometry::Object>>> m_shapes;
-
-  /// Null shared (empty shape)
-  boost::shared_ptr<const Mantid::Geometry::Object> m_nullShape;
 
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
                             const size_t componentIndex);
