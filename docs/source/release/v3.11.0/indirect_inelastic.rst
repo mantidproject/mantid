@@ -20,6 +20,9 @@ Bayes
 Data Analysis
 #############
 
+- Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
+  convolution fitting into their own workspaces.
+
 Jump Fit
 ~~~~~~~~
 
