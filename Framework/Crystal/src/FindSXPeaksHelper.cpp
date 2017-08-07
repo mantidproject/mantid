@@ -392,7 +392,7 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
   auto distanceMax = std::distance(x.begin(), high);
 
   const auto lowY = y.begin() + distanceMin;
-  const auto highY = distanceMax < static_cast<int>(y.size())
+  auto highY = distanceMax < static_cast<int>(y.size())
                          ? y.begin() + distanceMax
                          : y.end();
 
@@ -424,7 +424,10 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
 
   // Handle a peak on the edge if it exists
   if (isRecording) {
-    currentPeak->stopRecord(high);
+    if (highY == y.end()) {
+      --highY;
+    }
+    currentPeak->stopRecord(highY);
     peaks.push_back(std::move(currentPeak));
     currentPeak = nullptr;
   }
