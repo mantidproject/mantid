@@ -499,19 +499,13 @@ public:
     TS_ASSERT_EQUALS(box.getNPoints(), 9 * 9 * 9);
 
     // Too small shell
-    dotest_integrateSphereWithInnerRadius(box, 5.0, 5.0, 5.0, 0.5f, 0.4f, false, 0.0);
+    dotest_integrateSphereWithInnerRadius(box, 5.0f, 5.0f, 5.0f, 0.5f, 0.4f, false, 0.0);
 
     // The 0.7 shell contains 2 but the 1.15 inner shell excludes one of them
-    dotest_integrateSphereWithInnerRadius(box, 5.6, 5.0, 5.0, 0.7f, 0.31f, false, 1.0);
+    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.5f, false, 1.0);
 
     // The 1.3 shell contains 2 and the 1.05 inner shell contains 2
     //dotest_integrateSphereWithInnerRadius(box, 5.11, 5.0, 5.0, 1.3f, 1.05f, false, 2.0);
-
-
-
-    //dotest_integrateSphereWithInnerRadius(box, 0.5, 0.5, 0.5, 0.5, 0.0);
-   // dotest_integrateSphereWithInnerRadius(box, 5.0, 5.0, 5.0, 1.1f, 7.0);
-   // dotest_integrateSphereWithInnerRadius(box, 5.0, 5.0, 5.0, 10., 9 * 9 * 9);
   }
 
   void test_integrateSphereWithLowerRadiusBoundAndNoOnePercentCutoff() {
