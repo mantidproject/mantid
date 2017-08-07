@@ -31,12 +31,13 @@ private slots:
   void updateRS(QtProperty *prop, double val);
   void saveClicked();
   void plotClicked();
+  void plotCurrentPreview();
   void algorithmComplete(bool error);
 
 private:
   Ui::MSDFit m_uiForm;
-  QString m_currentWsName;
   QtTreePropertyBrowser *m_msdTree;
+  Mantid::API::MatrixWorkspace_sptr m_msdInputWS;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
