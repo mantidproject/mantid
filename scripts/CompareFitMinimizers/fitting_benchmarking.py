@@ -187,9 +187,9 @@ def splitByString(name,min_length,loop=0,splitter=0):
     A simple function for splitting via characters in a long string
     @param name :: input string
     @param min_length :: minimum length of a linestyle
-    @param loop :: number of time cycled through the split options   
+    @param loop :: number of time cycled through the split options
     @param splitter :: index of which split pattern to use
-    @returns :: the split string 	 
+    @returns :: the split string
     """
     tmp = name[min_length:]
     split_at=[";","+",","]
