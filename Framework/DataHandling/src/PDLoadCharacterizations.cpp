@@ -258,8 +258,6 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
     Poco::Path path(filename);
     if (!path.isFile())
       throw Exception::FileError("File is not a regular file", filename);
-    if (!file.canRead())
-      throw Exception::FileError("Cannot read file", filename);
   }
   return filenames;
 }
