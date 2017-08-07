@@ -22,7 +22,9 @@ namespace { // Anonymous namespace for helper functions
  * @param c The character
  * @return Whether it is whitespace
  */
-bool space(const char &c) { return c == ' ' || c == '\t'; }
+bool space(const char &c) {
+  return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
 
 /** Is a character not whitespace (here considered space or tab)?
 * @param c The character
@@ -193,7 +195,7 @@ void LoadSESANS::exec() {
   checkMandatoryHeaders(attributes);
 
   // Make sure we haven't reached the end of the file without reading any data
-  if (line != m_beginData)
+  if (!boost::starts_with(line, m_beginData))
     throwFormatError("<EOF>", "Expected \"" + m_beginData + "\" before EOF",
                      lineNum + 1);
 
@@ -234,7 +236,9 @@ AttributeMap LoadSESANS::consumeHeaders(std::ifstream &infile,
       attr = splitHeader(line, lineNum);
       attributes.insert(attr);
     }
-  } while (std::getline(infile, line) && line != m_beginData);
+  } while (std::getline(infile, line) &&
+           !boost::starts_with(line, m_beginData));
+
   return attributes;
 }
 
