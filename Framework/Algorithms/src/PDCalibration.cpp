@@ -733,6 +733,10 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
       errsum = errsum / static_cast<double>(numPeaks - numParams);
       // save the best and forget the rest
       if (errsum < best_errsum) {
+        if (difa_local > m_difaMax || difa_local < m_difaMin)
+          continue; // unphysical fit
+        if (t0_local > m_tzeroMax || t0_local < m_tzeroMin)
+          continue; // unphysical fit
         best_errsum = errsum;
         best_difc = difc_local;
         best_t0 = t0_local;
