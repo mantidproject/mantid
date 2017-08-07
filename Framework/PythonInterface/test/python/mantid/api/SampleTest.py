@@ -52,7 +52,7 @@ class SampleTest(unittest.TestCase):
         SetSampleMaterial(self._ws,"Al2 O3",SampleMassDensity=4)
         material = self._ws.sample().getMaterial()
 
-        self.assertAlmostEqual(material.numberDensity, 0.0236, places=4)
+        self.assertAlmostEqual(material.numberDensity, 0.1181, places=4)
         self.assertAlmostEqual(material.relativeMolecularMass(), 101.961, places=3)
 
         atoms, numatoms = material.chemicalFormula()
