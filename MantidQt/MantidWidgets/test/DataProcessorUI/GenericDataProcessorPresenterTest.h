@@ -1080,10 +1080,10 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
-        .WillOnce(Return("Params = \"0.1\""));
+        .WillOnce(Return(QString("Params = \"0.1\"")));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
     EXPECT_CALL(mockMainPresenter, resume()).Times(1);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -3409,7 +3409,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
+        .WillOnce(Return(QString("")));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return("Params='-0.10'"));
