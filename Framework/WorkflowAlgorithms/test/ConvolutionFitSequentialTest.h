@@ -277,21 +277,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
+    // Check members group workspace was created
     WorkspaceGroup_const_sptr membersGroupWs;
-
     TS_ASSERT_THROWS_NOTHING(
         membersGroupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             "ReductionWs_conv_1LFixF_s0_to_5_Members"));
 
+    // Check all members have been extracted into their own workspace and grouped 
+    // inside the members group workspace.
     std::unordered_set<std::string> members = {"Data", "Calc", "Diff", "LinearBackground", "Lorentzian1"};
-
     for (int i = 0; i < membersGroupWs->size(); i++) {
       MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(membersGroupWs->getItem(i));
       TS_ASSERT(ws->getNumberHistograms() == redWs->getNumberHistograms());
       members.erase(ws->getName());
     }
-
     TS_ASSERT(members.empty());
+
     AnalysisDataService::Instance().clear();
   }
 
