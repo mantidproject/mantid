@@ -290,6 +290,11 @@ double calculate_msa_factor(const double radius, const double Q2,
 
   const double sigabs = Q2 * wavelength;
   const double sigir = (sigabs + sigsct) * radius;
+  /** 
+  * By setting the incident and scattered cross sections to be equal 
+  * we implicitly assume elastic scattering because in general these will
+  * vary with neutron energy.
+  **/
   const double sigsr = sigir;
 
   const double delta = COEFF4 * sigir + COEFF5 * sigir * sigir;
