@@ -83,7 +83,9 @@ InstrumentVisitor::InstrumentVisitor(
       m_instrument(std::move(instrument)), m_pmap(nullptr),
       m_nullShape(boost::make_shared<const Object>()),
       m_shapes(boost::make_shared<std::vector<boost::shared_ptr<const Object>>>(
-          m_orderedDetectorIds->size(), m_nullShape)) {
+          m_orderedDetectorIds->size(), m_nullShape)),
+      m_scaleFactors(boost::make_shared<std::vector<Eigen::Vector3d>>(
+          m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})) {
 
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
@@ -157,6 +159,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   }
   markAsSourceOrSample(assembly.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
+  m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
   return componentIndex;
 }
 
@@ -189,6 +192,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   clearPositionAndRotationParameters(m_pmap, component);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
+  m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
   return componentIndex;
 }
 
@@ -250,6 +254,8 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
     (*m_detectorRotations)[detectorIndex] =
         Kernel::toQuaterniond(detector.getRotation());
     (*m_shapes)[detectorIndex] = std::move(detector.shape());
+    (*m_scaleFactors)[detectorIndex] =
+        Kernel::toVector3d(detector.getScaleFactor());
     if (m_instrument->isMonitorViaIndex(detectorIndex)) {
       m_monitorIndices->push_back(detectorIndex);
     }
@@ -307,8 +313,8 @@ InstrumentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
-      m_parentComponentIndices, m_positions, m_rotations, m_sourceIndex,
-      m_sampleIndex);
+      m_parentComponentIndices, m_positions, m_rotations, m_scaleFactors,
+      m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
