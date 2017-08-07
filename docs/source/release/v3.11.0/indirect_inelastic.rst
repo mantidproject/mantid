@@ -27,6 +27,7 @@ Improvements
 ------------
 - The *S(Q, W)* interface now automatically replaces NaN values with 0.
 
+- :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` now supports `Direct` and `Indirect` modes.
 
 Bugfixes
 --------
