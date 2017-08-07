@@ -32,7 +32,8 @@ using std::vector;
 using namespace Mantid::PhysicalConstants;
 using namespace Geometry;
 
-// Constants required internally only, so make them static
+// Constants required internally only, so make them static. These are
+// Chebyshev expansion coefficients copied directly from Carpenter 1969 Table 1
 namespace { // anonymous
 static const double C[] = {
     0.730284,  -0.249987, 0.019448,  -0.000006, 0.000249,  -0.000004, 0.848859,
