@@ -34,8 +34,7 @@ makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
   return std::move(detIdToIndex);
 }
 
-void clearPositionAndRotationParameters(ParameterMap *pmap,
-                                        const IComponent &comp) {
+void clearLegacyParameters(ParameterMap *pmap, const IComponent &comp) {
   if (!pmap)
     return;
   pmap->clearParametersByName(ParameterMap::pos(), &comp);
@@ -46,6 +45,7 @@ void clearPositionAndRotationParameters(ParameterMap *pmap,
   pmap->clearParametersByName(ParameterMap::rotx(), &comp);
   pmap->clearParametersByName(ParameterMap::roty(), &comp);
   pmap->clearParametersByName(ParameterMap::rotz(), &comp);
+  pmap->clearParametersByName(ParameterMap::scale(), &comp);
 }
 }
 
@@ -151,7 +151,6 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   m_componentIds->emplace_back(assembly.getComponentID());
   m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
-  clearPositionAndRotationParameters(m_pmap, assembly);
   // Now that we know what the index of the parent is we can apply it to the
   // children
   for (const auto &child : children) {
@@ -160,6 +159,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   markAsSourceOrSample(assembly.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
   m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
+  clearLegacyParameters(m_pmap, assembly);
   return componentIndex;
 }
 
@@ -189,10 +189,10 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
   m_parentComponentIndices->push_back(componentIndex);
-  clearPositionAndRotationParameters(m_pmap, component);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
   m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
+  clearLegacyParameters(m_pmap, component);
   return componentIndex;
 }
 
@@ -259,7 +259,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
     if (m_instrument->isMonitorViaIndex(detectorIndex)) {
       m_monitorIndices->push_back(detectorIndex);
     }
-    clearPositionAndRotationParameters(m_pmap, detector);
+    clearLegacyParameters(m_pmap, detector);
   }
   /* Note that positions and rotations for detectors are currently
   NOT stored! These go into DetectorInfo at present. push_back works for other

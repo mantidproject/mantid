@@ -389,6 +389,34 @@ public:
     TSM_ASSERT_EQUALS("Shape object should be reused", &detectorShape,
                       &componentInfo->shape(1 /*another detector*/));
   }
+
+  void test_purge_scale_factors() {
+
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/,
+                                           V3D(11, 0, 0) /*detector position*/);
+    auto pmap = boost::make_shared<ParameterMap>();
+    auto detector = visitee->getDetector(visitee->getDetectorIDs()[0]);
+    // Add a scale factor for the detector
+
+    Mantid::Kernel::V3D detScaling{2, 2, 2};
+    pmap->addV3D(detector->getComponentID(), "sca", detScaling);
+    // Add as scale factor for the instrument
+    Mantid::Kernel::V3D instrScaling{3, 3, 3};
+    pmap->addV3D(visitee->getComponentID(), "sca", instrScaling);
+    // Sanity check inputs
+    TS_ASSERT_EQUALS(pmap->size(), 2);
+
+    auto wrappers = InstrumentVisitor::makeWrappers(*visitee, pmap.get());
+
+    TSM_ASSERT_EQUALS("Detectors positions are purged by visitor at present",
+                      pmap->size(), 0);
+
+    auto compInfo = std::move(std::get<0>(wrappers));
+    TS_ASSERT_EQUALS(detScaling, compInfo->scaleFactor(0));
+    TS_ASSERT_EQUALS(instrScaling, compInfo->scaleFactor(compInfo->root()));
+  }
 };
 
 class InstrumentVisitorTestPerformance : public CxxTest::TestSuite {
