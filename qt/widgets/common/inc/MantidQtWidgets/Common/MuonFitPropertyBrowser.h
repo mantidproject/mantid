@@ -99,8 +99,7 @@ public:
 
   /// Enable/disable the Fit button;
   virtual void setFitEnabled(bool yes) override;
-
-  void doTFAsymmFit(int maxIterations);
+  void doTFAsymmFit();
   void setAvailableGroups(const QStringList &groups);
   void setAvailablePeriods(const QStringList &periods);
 
@@ -118,7 +117,7 @@ public:
   void setAllPeriods();
   void setChosenPeriods(const QString &period);
   void setSingleFitLabel(std::string name);
-
+  void setNormalization(const std::string name);
 public slots:
   /// Perform the fit algorithm
   void fit() override;
@@ -155,6 +154,7 @@ protected:
   void showEvent(QShowEvent *e) override;
   double normalization() const;
   void setNormalization();
+
 private slots:
   void doubleChanged(QtProperty *prop) override;
   void boolChanged(QtProperty *prop) override;
@@ -165,7 +165,14 @@ private:
   QAction *m_fitActionTFAsymm;
   /// override populating fit menu
   void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
-
+  void rescaleWS(const std::map<std::string, double> norm,
+                 const std::string wsName, const double shift);
+  void rescaleWS(const double norm, const std::string wsName,
+                 const double shift);
+  Mantid::API::IFunction_sptr
+  getTFAsymmFitFunction(Mantid::API::IFunction_sptr original,
+                        const std::vector<double> norms);
+  void updateMultipleNormalization(std::map<std::string, double> norms);
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
@@ -224,6 +231,7 @@ private:
   std::vector<std::string> m_groupsList;
 };
 
+std::map<std::string, double> readMultipleNormalization();
 std::vector<double> readNormalization();
 } // MantidQt
 } // API

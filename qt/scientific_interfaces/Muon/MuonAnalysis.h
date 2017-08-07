@@ -257,6 +257,8 @@ private slots:
   void setTFAsymm(Muon::TFAsymmState);
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
+  // update the displayed normalization
+  void updateNormalization(QString name);
 
 private:
   /// Initialize local Python environment
