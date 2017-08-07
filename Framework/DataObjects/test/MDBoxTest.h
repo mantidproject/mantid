@@ -459,7 +459,7 @@ public:
     signal_t signal = 0;
     signal_t errorSquared = 0;
     box.integrateSphere(sphere, radius * radius, signal, errorSquared,
-                        innerRadius*innerRadius, useOnePercent);
+                        innerRadius * innerRadius, useOnePercent);
     TS_ASSERT_DELTA(signal, 1.0 * numExpected, 1e-5);
     TS_ASSERT_DELTA(errorSquared, 1.5 * numExpected, 1e-5);
   }
@@ -510,7 +510,7 @@ public:
 
     // The 1.3 shell contains 2 and the 1.05 inner shell contains 2
     dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.4f,
-					  false, 2.0);
+                                          false, 2.0);
   }
 
   //-----------------------------------------------------------------------------------------
