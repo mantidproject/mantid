@@ -43,7 +43,6 @@ set( SOURCE_FILES
   src/PeaksWidget.cpp
   src/pqCameraToolbarNonOrthogonalAxes.cpp
   src/pqCameraReactionNonOrthogonalAxes.cpp
-  src/SaveScreenshotReaction.cpp
   src/RebinnedSourcesManager.cpp
   src/VisibleAxesColor.cpp
   src/StandardView.cpp
@@ -70,7 +69,6 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/pqCameraToolbarNonOrthogonalAxes.h
   inc/MantidVatesSimpleGuiViewWidgets/pqCameraReactionNonOrthogonalAxes.h
-  inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
