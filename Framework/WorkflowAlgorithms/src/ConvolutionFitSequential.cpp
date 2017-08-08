@@ -721,29 +721,31 @@ void ConvolutionFitSequential::extractMembersFrom(
   for (int i = 0; i < members.size(); i++) {
     std::string memberWsName = outputWsName + "_" + members[i];
     std::string extractedWsName = "__temp";
-    m_log.warning("Member workspace name - " + memberWsName);
 
-    // Check whether to create a new workspace for the current spectra
-    if (createMemberWs) {
-      extractedWsName = memberWsName;
-      memberWorkspaces.push_back(memberWsName);
-    }
-
-    auto extractAlg = AlgorithmManager::Instance().create("ExtractSpectra");
+    // Extract spectra from the result workspace
+    auto extractAlg = createChildAlgorithm("ExtractSpectra", -1.0, -1.0, false);
     extractAlg->setProperty("InputWorkspace", resultWs);
     extractAlg->setProperty("OutputWorkspace", extractedWsName);
     extractAlg->setProperty("StartWorkspaceIndex", i);
     extractAlg->setProperty("EndWorkspaceIndex", i);
-    extractAlg->execute();
+    extractAlg->executeAsChildAlg();
+
+    MatrixWorkspace_sptr memberWs = extractAlg->getProperty("OutputWorkspace");
 
     // Check whether to append the spectra to an existing output workspace
-    if (!createMemberWs) {
-      auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
-      appendAlg->setProperty("InputWorkspace1", memberWsName);
-      appendAlg->setProperty("InputWorkspace2", extractedWsName);
-      appendAlg->setProperty("OutputWorkspace", memberWsName);
-      appendAlg->execute();
+    if (createMemberWs) {
+      memberWorkspaces.push_back(memberWsName);
     }
+    else {
+      auto appendAlg = createChildAlgorithm("AppendSpectra", -1.0, -1.0, false);
+      appendAlg->setProperty("InputWorkspace1", memberWsName);
+      appendAlg->setProperty("InputWorkspace2", memberWs);
+      appendAlg->setProperty("OutputWorkspace", memberWsName);
+      appendAlg->executeAsChildAlg();
+      memberWs = appendAlg->getProperty("OutputWorkspace");
+    }
+
+    AnalysisDataService::Instance().addOrReplace(memberWsName, memberWs);
   }
 }
 
