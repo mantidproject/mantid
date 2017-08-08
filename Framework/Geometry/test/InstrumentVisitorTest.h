@@ -401,10 +401,11 @@ public:
     // Add a scale factor for the detector
 
     Mantid::Kernel::V3D detScaling{2, 2, 2};
-    pmap->addV3D(detector->getComponentID(), "sca", detScaling);
+    pmap->addV3D(detector->getComponentID(), ParameterMap::scale(), detScaling);
     // Add as scale factor for the instrument
     Mantid::Kernel::V3D instrScaling{3, 3, 3};
-    pmap->addV3D(visitee->getComponentID(), "sca", instrScaling);
+    pmap->addV3D(visitee->getComponentID(), ParameterMap::scale(),
+                 instrScaling);
     // Sanity check inputs
     TS_ASSERT_EQUALS(pmap->size(), 2);
 
