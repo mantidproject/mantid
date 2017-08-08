@@ -9,10 +9,12 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <fstream>
 
@@ -23,7 +25,7 @@ namespace { // Anonymous namespace for helper functions
  * @return Whether it is whitespace
  */
 bool space(const char &c) {
-  return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+  return isspace(c);
 }
 
 /** Is a character not whitespace (here considered space or tab)?
@@ -31,27 +33,6 @@ bool space(const char &c) {
 * @return Whether it is not whitespace
 */
 bool notSpace(const char &c) { return !space(c); }
-
-/** Split a string on spaces
- * @param str The string to split
- * @return Vector of string segments
- */
-std::vector<std::string> split(const std::string &str) {
-  std::vector<std::string> result;
-
-  auto i = str.begin();
-  i = find_if(i, str.end(), &notSpace);
-
-  auto j = find_if(i, str.end(), &space);
-
-  while (i != str.end()) {
-    result.push_back(std::string(i, j));
-    i = find_if(j, str.end(), &notSpace);
-    j = find_if(i, str.end(), &space);
-  }
-
-  return result;
-}
 
 /** Is a string all whitespace?
  * @param str The string to test
@@ -254,19 +235,20 @@ AttributeMap LoadSESANS::consumeHeaders(std::ifstream &infile,
 */
 ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
                                   int &lineNum) {
-  std::string numberRegex = "(-?\\d+(\\.\\d+)?([Ee]-?\\d+)?)";
-
   std::getline(infile, line);
-  const auto &columnHeaders = split(line);
+  std::vector<std::string> columnHeaders;
+  boost::trim(line);
+  boost::split(columnHeaders, line, isspace, boost::token_compress_on);
 
   // Make sure all 4 mandatory columns have been supplied
-  for (std::string header : m_mandatoryColumnHeaders)
+  for (const std::string &header : m_mandatoryColumnHeaders)
     if (std::find(columnHeaders.begin(), columnHeaders.end(), header) ==
         columnHeaders.end())
       throwFormatError(line, "Failed to supply mandatory column header: \"" +
                                  header + "\"",
                        lineNum);
 
+  std::string numberRegex = "(-?\\d+(\\.\\d+)?([Ee]-?\\d+)?)";
   // static_cast is safe as realistically our file is never going to have enough
   // columns to overflow
   std::string rawRegex = "^\\s*" +
@@ -275,17 +257,18 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
                          "\\s*$";
   boost::regex lineRegex(rawRegex);
 
-  // Tokens in a line
-  std::vector<std::string> tokens;
-
   // Map of column name -> column values
   ColumnMap columns;
 
   while (std::getline(infile, line)) {
     lineNum++;
 
+    // Tokens in a line
+    std::vector<std::string> tokens;
+
     if (boost::regex_match(line, lineRegex)) {
-      tokens = split(line);
+      boost::trim(line);
+      boost::split(tokens, line, isspace, boost::token_compress_on);
 
       for (size_t i = 0; i < tokens.size(); i++)
         columns[columnHeaders[i]].push_back(std::stod(tokens[i]));
@@ -355,7 +338,7 @@ void LoadSESANS::throwFormatError(const std::string &line,
 * @throw runtime_error If any other the mandatory headers are missing
 */
 void LoadSESANS::checkMandatoryHeaders(const AttributeMap &attributes) {
-  for (std::string attr : m_mandatoryAttributes) {
+  for (const std::string &attr : m_mandatoryAttributes) {
     if (!attributes.count(attr)) {
       std::string err = "Failed to supply parameter: \"" + attr + "\"";
       g_log.error(err);
@@ -374,7 +357,7 @@ API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
       API::WorkspaceFactory::Instance().create(
           "Workspace2D", 1, histogramLength, histogramLength);
 
-  auto xValues = columns[m_wavelength];
+  auto &xValues = columns[m_wavelength];
   auto yValues =
       calculateYValues(columns[m_depolarisation], columns[m_wavelength]);
   auto eValues = calculateEValues(columns[m_depolarisationError], yValues,
