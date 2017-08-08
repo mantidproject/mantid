@@ -183,7 +183,6 @@ void MuonAnalysis::initLayout() {
 
   m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
   m_fitDataTab->init();
-
   m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
   connect(m_resultTableTab, SIGNAL(runPythonCode(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
@@ -1098,7 +1097,6 @@ void MuonAnalysis::handleInputFileChanges() {
     inputFileChanged(m_uiForm.mwRunFiles->getFilenames());
 
     m_textToDisplay = m_uiForm.mwRunFiles->getText();
-
     // save selected browse file directory to be reused next time interface is
     // started up
     m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
@@ -1226,7 +1224,6 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
     return;
   }
-
   // At this point we are sure that new data was loaded successfully, so we can
   // safely overwrite
   // previous one.
@@ -1528,12 +1525,25 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
   if (currentI >= m_uiForm.frontGroupGroupPairComboBox->count()) {
     currentI = 0;
   }
-  m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
-
+  setGroupsAndPairs();
   if (updateIndexAndPlot) {
     setGroupOrPairIndexToPlot(currentI);
     plotCurrentGroupAndPairs();
   }
+}
+/**
+* sets the selected groups and pairs
+*/
+void MuonAnalysis::setGroupsAndPairs() {
+  auto names = m_groupingHelper.parseGroupingTable().pairNames;
+  auto tmp = m_groupingHelper.parseGroupingTable().groupNames;
+  names.insert(std::end(names), std::make_move_iterator(tmp.begin()),
+               std::make_move_iterator(tmp.end()));
+  QStringList GroupsAndPairsNames;
+  for (const auto &name : names) {
+    GroupsAndPairsNames << QString::fromStdString(name);
+  }
+  m_uiForm.fitBrowser->setAvailableGroups(GroupsAndPairsNames);
 }
 
 /**
@@ -1794,6 +1804,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   runPythonCode(pyS);
+  m_fitDataPresenter->storeNormalization(safeWSName.toStdString());
 }
 
 /**
@@ -1885,7 +1896,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
-    m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
+    setGroupsAndPairs();
     m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
@@ -2168,6 +2179,8 @@ void MuonAnalysis::loadFittings() {
           SLOT(handleGroupBox()));
   connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked()), this,
           SLOT(handlePeriodBox()));
+  connect(m_dataSelector, SIGNAL(nameChanged(QString)), this,
+          SLOT(updateNormalization(QString)));
 
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
@@ -2555,6 +2568,9 @@ void MuonAnalysis::changeTab(int newTabIndex) {
   }
 
   m_currentTab = newTab;
+}
+void MuonAnalysis::updateNormalization(QString name) {
+  m_uiForm.fitBrowser->setNormalization(name.toStdString());
 }
 
 /**
@@ -2948,11 +2964,12 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
 
     groupAlg->execute();
+    m_fitDataPresenter->storeNormalization(wsName);
+
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
                              std::string(e.what()));
   }
-
   return outputEntry.retrieve();
 }
 
@@ -3153,15 +3170,6 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   const Muon::MultiFitState multiFitState = state == Qt::CheckState::Checked
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
-  // If both multiFit and TFAsymm are checked
-  // uncheck the TFAsymm
-  if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
-    // uncheck the box
-    m_uiForm.chkTFAsymm->setChecked(false);
-    changedTFAsymmCheckbox(0);
-    // reset the view
-    setTFAsymm(Muon::TFAsymmState::Disabled);
-  }
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
 }
 /**
@@ -3172,14 +3180,10 @@ void MuonAnalysis::changedTFAsymmCheckbox(int state) {
   const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
                                               ? Muon::TFAsymmState::Enabled
                                               : Muon::TFAsymmState::Disabled;
-  // If both multiFit and TFAsymm are checked
-  // uncheck the multiFit
-  if (m_uiForm.chkTFAsymm->isChecked() && state != 0) {
-    // uncheck the box
-    m_uiForm.chkEnableMultiFit->setChecked(false);
-    multiFitCheckboxChanged(0);
-    // reset the view
-    m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
+  if (TFAsymmState == Muon::TFAsymmState::Enabled) {
+    m_fitDataPresenter->setTFAsymmState(true);
+  } else {
+    m_fitDataPresenter->setTFAsymmState(false);
   }
   setTFAsymm(TFAsymmState);
 }
@@ -3193,16 +3197,6 @@ void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
     m_uiForm.chkTFAsymm->setChecked(true);
   } else {
     m_uiForm.chkTFAsymm->setChecked(false);
-  }
-  // If both multiFit and TFAsymm are checked
-  // uncheck the multiFit
-  if (m_uiForm.chkEnableMultiFit->isChecked() &&
-      TFAsymmState == Muon::TFAsymmState::Enabled) {
-    // uncheck the box
-    m_uiForm.chkEnableMultiFit->setChecked(false);
-    multiFitCheckboxChanged(0);
-    // reset the view
-    m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
   }
   m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
 }

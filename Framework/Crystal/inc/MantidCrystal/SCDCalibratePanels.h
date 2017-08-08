@@ -69,12 +69,16 @@ private:
   void saveNexus(std::string outputFile, API::MatrixWorkspace_sptr outputWS);
   /// Function to optimize L1
   void findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
+  /// Function to optimize T0
+  void findT0(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
 
   void exec() override;
 
   void init() override;
 
   API::ITableWorkspace_sptr Result;
+
+  double mT0 = 0.0;
 
   /**
    * Saves the new instrument to an xml file that can be used with the

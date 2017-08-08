@@ -26,7 +26,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
-#include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
@@ -37,10 +36,6 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/scoped_ptr.hpp"
 
-// Have to deal with ParaView warnings and Intel compiler the hard way.
-#if defined(__INTEL_COMPILER)
-#pragma warning disable 1170
-#endif
 #include <pqActiveObjects.h>
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
@@ -56,6 +51,7 @@
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
 #include <pqRenderView.h>
+#include <pqSaveScreenshotReaction.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqSettings.h>
@@ -86,17 +82,12 @@
 #include <pqDataTimeStepBehavior.h>
 #include <pqDataRepresentation.h>
 #include <pqDefaultViewBehavior.h>
-#include <pqFixPathsInStateFilesBehavior.h>
 #include <pqInterfaceTracker.h>
 #include <pqObjectPickingBehavior.h>
-//#include <pqPersistentMainWindowStateBehavior.h>
 #include <pqPipelineContextMenuBehavior.h>
 #include <pqPipelineSource.h>
-//#include <pqPluginActionGroupBehavior.h>
-//#include <pqPluginDockWidgetsBehavior.h>
 #include <pqPluginManager.h>
 #include <pqPluginSettingsBehavior.h>
-#include <pqQtMessageHandlerBehavior.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqSpreadSheetVisibilityBehavior.h>
@@ -104,13 +95,9 @@
 #include <pqStandardViewFrameActionsImplementation.h>
 #include <pqUndoRedoBehavior.h>
 #include <pqView.h>
-//#include <pqViewFrameActionsBehavior.h>
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 #include <pqSaveDataReaction.h>
-#if defined(__INTEL_COMPILER)
-#pragma warning enable 1170
-#endif
 
 #include <QAction>
 #include <QDragEnterEvent>
@@ -236,6 +223,14 @@ void MdViewerWidget::setupUiAndConnections() {
   // Setup rotation point button
   QObject::connect(this->ui.resetCenterToPointButton, SIGNAL(clicked()), this,
                    SLOT(onRotationPoint()));
+
+  QObject::connect(this->ui.outputWidget,
+                   SIGNAL(messageDisplayed(const QString &, int)),
+                   SLOT(showOutputWidget()));
+
+  this->ui.outputWidget->setWindowFlags(Qt::Window);
+  this->ui.outputWidget->setWindowTitle("Output Messages");
+  this->ui.outputWidget->hide();
 
   /// Provide access to the color-editor panel for the application.
   if (!m_colorMapEditorPanel) {
@@ -1375,7 +1370,7 @@ void MdViewerWidget::createMenus() {
   screenShotAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+R"));
   screenShotAction->setStatusTip(
       QApplication::tr("Save a screenshot of the current view."));
-  this->screenShot = new SaveScreenshotReaction(screenShotAction);
+  this->screenShot = new pqSaveScreenshotReaction(screenShotAction);
   viewMenu->addAction(screenShotAction);
 
   QAction *settingsAction = new QAction(QApplication::tr("Settings..."), this);
@@ -1805,6 +1800,12 @@ bool MdViewerWidget::areGridAxesOn() {
   } else {
     return true;
   }
+}
+
+//-----------------------------------------------------------------------------
+void MdViewerWidget::showOutputWidget() {
+  this->ui.outputWidget->raise();
+  this->ui.outputWidget->show();
 }
 
 } // namespace SimpleGui
