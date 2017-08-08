@@ -59,5 +59,15 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              doc='Number of neutron events')
 
         self.declareProperty(name='Interpolation', defaultValue='Linear',
-                             validator=StringListValidator(['Linear', 'CSpline']),
+                             validator=StringListValidator(
+                                 ['Linear', 'CSpline']),
                              doc='Type of interpolation')
+
+        # Sample options
+        self.declareProperty(MatrixWorkspaceProperty(
+            'SampleWorkspace', '', direction=Direction.Input), doc='Sample Workspace')
+
+        self.declareProperty(name='SampleChemicalFormula', '', doc='Chemical formaula for the sample material')
+        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density', validator=StringListValidator(
+            ['Mass Density', 'Number Density']), doc='Sample density type')
+        self.declareProperty(name='SampleDensity',defaultValue=0.0,validator=Flo
