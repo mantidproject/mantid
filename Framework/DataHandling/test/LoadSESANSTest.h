@@ -111,33 +111,6 @@ private:
     TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
   }
 
-  std::string createTemporaryFile() {
-    Poco::TemporaryFile tempFile(".");
-    tempFile.keepUntilExit();
-    return tempFile.path();
-  }
-
-  Poco::File writeFile(std::string fileContents, std::string filepath) {
-    // Write a file to our temporary file
-    Poco::File pFile(filepath);
-    std::ofstream file(pFile.path());
-    if (file.fail()) {
-      const std::string errorString = strerror(errno);
-      throw new std::runtime_error(
-          "Failed to open file " + filepath +
-          " in LoadSESANSTest.\n The error returned was " + errorString);
-    }
-    file << fileContents;
-    file.close();
-    if (file.fail()) {
-      const std::string errorString = strerror(errno);
-      throw new std::runtime_error(
-          "Failed to close file " + filepath +
-          " in LoadSESANSTest.\n The error returned was " + errorString);
-    }
-    return pFile;
-  }
-
   LoadSESANS testAlg;
 };
 
