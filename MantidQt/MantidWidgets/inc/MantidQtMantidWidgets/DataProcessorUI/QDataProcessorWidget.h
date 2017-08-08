@@ -140,6 +140,9 @@ public:
   // Forward a main presenter to this view's presenter
   void accept(DataProcessorMainPresenter *);
 
+  // Force re-processing of rows
+  void setForcedReProcessing(bool forceReProcessing) override;
+
   // Get value in a cell
   QString getCell(int row, int column, int parentRow = 0, int parentColumn = 0);
   // Set value in a cell
@@ -156,9 +159,6 @@ public:
 signals:
   void processButtonClicked();
   void processingFinished();
-
-  // Force re-processing of rows
-  void setForcedReProcessing(bool forceReProcessing) override;
 
 private:
   // initialise the interface
