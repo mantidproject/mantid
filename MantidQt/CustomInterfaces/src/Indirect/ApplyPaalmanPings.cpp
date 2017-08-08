@@ -619,17 +619,17 @@ void ApplyPaalmanPings::plotInPreview(const QString &curveName,
   // respect to the specified workspace.
   if (ws->getNumberHistograms() > m_spectra) {
     m_uiForm.ppPreview->addSpectrum(curveName, ws, m_spectra, curveColor);
-  }
-  else {
+  } else {
     size_t specNo = 0;
 
     if (m_ppSampleWS) {
       specNo = std::min(ws->getNumberHistograms(),
-        m_ppSampleWS->getNumberHistograms()) - 1;
-    }
-    else if (m_ppContainerWS) {
+                        m_ppSampleWS->getNumberHistograms()) -
+               1;
+    } else if (m_ppContainerWS) {
       specNo = std::min(ws->getNumberHistograms(),
-        m_ppContainerWS->getNumberHistograms()) - 1;
+                        m_ppContainerWS->getNumberHistograms()) -
+               1;
     }
 
     m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);

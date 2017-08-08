@@ -524,17 +524,17 @@ void ContainerSubtraction::plotInPreview(const QString &curveName,
   // respect to the specified workspace.
   if (ws->getNumberHistograms() > m_spectra) {
     m_uiForm.ppPreview->addSpectrum(curveName, ws, m_spectra, curveColor);
-  }
-  else {
+  } else {
     size_t specNo = 0;
 
     if (m_csSampleWS) {
       specNo = std::min(ws->getNumberHistograms(),
-        m_csSampleWS->getNumberHistograms()) - 1;
-    }
-    else if (m_csContainerWS) {
+                        m_csSampleWS->getNumberHistograms()) -
+               1;
+    } else if (m_csContainerWS) {
       specNo = std::min(ws->getNumberHistograms(),
-        m_csContainerWS->getNumberHistograms()) - 1;
+                        m_csContainerWS->getNumberHistograms()) -
+               1;
     }
 
     m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
