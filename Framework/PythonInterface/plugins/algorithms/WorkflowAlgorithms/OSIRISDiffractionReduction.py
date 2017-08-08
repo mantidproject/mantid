@@ -169,17 +169,13 @@ def average_ws_list(ws_list):
         return ws_list[0]
 
     # Generate the final name of the averaged workspace.
-    avName = "avg"
-    for name in ws_list:
-        avName += "_" + name
+    avName = "avg" + "_" + "_".join(ws_list)
 
     numWorkspaces = len(ws_list)
 
     # Compute the average and put into "__temp_avg".
-    __temp_avg = mtd[ws_list[0]]
-    for i in range(1, numWorkspaces):
-        __temp_avg += mtd[ws_list[i]]
-
+    temperatures = map(lambda index : mtd[ws_list[index]], range(1, numWorkspaces))
+    __temp_avg = sum(temperatures)
     __temp_avg /= numWorkspaces
 
     # Rename the average ws and return it.
@@ -219,11 +215,13 @@ def get_intersection_of_ranges(range_list):
     """
     # Find all combinations of ranges, and see where they intersect.
     rangeCombos = list(itertools.combinations(range_list, 2))
-    intersections = []
-    for rangePair in rangeCombos:
-        intersection = find_intersection_of_ranges(rangePair[0], rangePair[1])
-        if intersection is not None:
-            intersections.append(intersection)
+
+    # Retrieve all intersections
+    intersections = map(lambda rangePair : find_intersection_of_ranges(rangePair[0], rangePair[1]),
+                        rangeCombos)
+
+    # Filter out None type intersections
+    intersections = filter(lambda intersection : intersection is not None, intersections)
 
     # Return the sorted intersections.
     intersections.sort()
@@ -231,11 +229,7 @@ def get_intersection_of_ranges(range_list):
 
 
 def is_in_ranges(range_list, val):
-    for myrange in range_list:
-        if myrange[0] < val < myrange[1]:
-            return True
-    return False
-
+    return any(arange[0] < val < arange[1] for arange in range_list)
 
 # pylint: disable=no-init,too-many-instance-attributes
 class OSIRISDiffractionReduction(PythonAlgorithm):
@@ -380,14 +374,12 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                                self._spec_max,
                                                load_logs=self._load_logs)
 
-            for container in container_ws_names:
-
-                # Scale the container run if required
-                if self._container_scale_factor != 1.0:
-                    Scale(InputWorkspace=container,
-                          OutputWorkspace=container,
-                          Factor=self._container_scale_factor,
-                          Operation='Multiply')
+            # Scale the container run if required
+            if self._container_scale_factor != 1.0:
+                map(lambda container : Scale(InputWorkspace=container,
+                                             OutputWorkspace=container,
+                                             Factor=self._container_scale_factor,
+                                             Operator='Multiply'), container_ws_names)
 
         # Add the sample workspaces to the dRange to sample map
         for idx, sample in enumerate(sample_ws_names):
