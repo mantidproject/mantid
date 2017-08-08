@@ -102,7 +102,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerDensityType', 'Container Options')
         self.setPropertyGroup('ContainerDensity', 'Container Options')
 
-        # Sample shape options
+        # Shape options
         self.declareProperty(name='Shape', defaultValue='FlatPlate', validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
                              doc='Geometric shape of the sample environment')
 
@@ -117,8 +117,10 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('Shape', 'Shape Options')
         self.setPropertyGroup('Height', 'Shape Options')
 
+        # ---------------------------Sample---------------------------
         # Flat Plate
-        self.declareProperty(name='SampleWidth', defaultValue=0.0, validator=FloatBoundedValidator(0.0),
+        self.declareProperty(name='SampleWidth', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
                              doc='Width of the sample environment (cm)')
         self.declareProperty(name='SampleThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
@@ -138,6 +140,31 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleThickness', 'Sample Shape Options')
         self.setPropertyGroup('SampleCenter', 'Sample Shape Options')
         self.setPropertyGroup('SampleAngle', 'Sample Shape Options')
+
+        # Cylinder
+        self.declareProperty(name='SampleRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Radius of the sample environment (cm)')
+
+        self.setPropertySettings('SampleRadius', cylinderCondition)
+        self.setPropertyGroup('SampleRadius', 'Sample Shape Options')
+
+        # Annulus
+        self.declareProperty(name='SampleInnerRadius',defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Inner radius of the sample environment (cm)')
+        self.declareProperty(name='SampleOuterRadius',defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Outer radius of the sample environment (cm)')
+
+        self.setPropertySettings('SampleInnerRadius', annulusCondition)
+        self.setPropertySettings('SampleOuterRadius', annulusCondition)
+
+        self.setPropertyGroup('SampleInnerRadius', 'Sample Shape Options')
+        self.setPropertyGroup('SampleOuterRadius', 'Sample Shape Options')
+
+
+
 
     def pyExec(self):
         pass
