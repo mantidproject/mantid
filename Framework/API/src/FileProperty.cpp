@@ -78,7 +78,7 @@ const std::string &getHomePath() {
 
   char *userProfile = std::getenv("USERPROFILE"); // Not usually set on UNIX
   // Return even if it's an empty string, as we can do no better
-  homePath = std::string(userProfile);
+  homePath = userProfile ? std::string(userProfile) : "";
   return homePath;
 }
 
