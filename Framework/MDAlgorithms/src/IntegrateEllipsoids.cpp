@@ -286,6 +286,11 @@ void IntegrateEllipsoids::init() {
                   "PeakRadius + AdaptiveQMultiplier * **|Q|** "
                   "so each peak has a "
                   "different integration radius.  Q includes the 2*pi factor.");
+
+  declareProperty("UseOnePercentBackgroundCorrection", true,
+                  "If this options is enabled, then the the top 1% of the "
+                  "background will be removed"
+                  "before the background subtraction.");
 }
 
 //---------------------------------------------------------------------
@@ -326,6 +331,7 @@ void IntegrateEllipsoids::exec() {
   bool adaptiveQBackground = getProperty("AdaptiveQBackground");
   double adaptiveQMultiplier = getProperty("AdaptiveQMultiplier");
   double adaptiveQBackgroundMultiplier = 0.0;
+  double useOnePercentBackgroundCorrection = getProperty("UseOnePercentBackgroundCorrection");
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
   if (!integrateEdge) {
@@ -401,7 +407,7 @@ void IntegrateEllipsoids::exec() {
   }
 
   // make the integrator
-  Integrate3DEvents integrator(qList, UBinv, radius);
+  Integrate3DEvents integrator(qList, UBinv, radius, useOnePercentBackgroundCorrection);
 
   // get the events and add
   // them to the inegrator
