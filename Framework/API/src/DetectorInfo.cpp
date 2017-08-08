@@ -446,6 +446,18 @@ void DetectorInfo::merge(const DetectorInfo &other) {
   m_detectorInfo.merge(other.m_detectorInfo);
 }
 
+/**
+ * Creates a time indexded DetectorInfo object based on the scan intervals
+ *given. The DetectorInfo object must not be currently time indexded.
+ *
+ * @param scanIntervals A vector of sequential, non-overlapping start and end
+ *time pairs given in nanoseconds
+ */
+void DetectorInfo::convertToTimeIndexded(
+    const std::vector<std::pair<int64_t, int64_t>> &scanIntervals) {
+  m_detectorInfo.convertToTimeIndexded(scanIntervals);
+}
+
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] != index) {

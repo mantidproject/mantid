@@ -263,6 +263,51 @@ void DetectorInfo::merge(const DetectorInfo &other) {
   m_scanCounts = std::move(scanCounts);
 }
 
+/**
+ * Creates a time indexded DetectorInfo object based on the scan intervals
+ *given. The DetectorInfo object must not be currently time indexded.
+ *
+ * @param scanIntervals A vector of sequential, non-overlapping start and end
+ *time pairs given in nanoseconds
+ */
+void DetectorInfo::convertToTimeIndexded(
+    const std::vector<std::pair<int64_t, int64_t>> &scanIntervals) {
+
+  // TODO: Check scan intervals do not overlap
+
+  if (isScanning())
+    throw std::runtime_error(
+        "Can not convert a workspace that is already scanning.");
+
+  if (!m_scanCounts)
+    initScanCounts();
+  if (!m_indexMap)
+    initIndices();
+
+  auto scanCounts(m_scanCounts);
+  const auto size = m_positions->size();
+
+  std::cout << "Scan interval size:" << m_scanIntervals.access().size()
+            << std::endl;
+  m_scanIntervals.access().push_back(scanIntervals[0]);
+
+  for (size_t scanIndex = 1; scanIndex < scanIntervals.size(); ++scanIndex) {
+    for (size_t linearIndex = 0; linearIndex < size; ++linearIndex) {
+      auto newIndex1 = getIndex(m_indices, linearIndex);
+      auto newIndex = std::pair<size_t, size_t>(newIndex1.first, scanIndex);
+      const size_t detIndex = newIndex.first;
+      scanCounts.access()[detIndex]++;
+      m_indexMap.access()[detIndex].push_back((*m_indices).size());
+      m_indices.access().push_back(newIndex);
+      m_isMasked.access().push_back((*m_isMasked)[linearIndex]);
+      m_positions.access().push_back((*m_positions)[linearIndex]);
+      m_rotations.access().push_back((*m_rotations)[linearIndex]);
+      m_scanIntervals.access().push_back(scanIntervals[scanIndex]);
+    }
+  }
+  m_scanCounts = std::move(scanCounts);
+}
+
 /// Returns the linear index for a pair of detector index and time index.
 size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   // The most common case are beamlines with static detectors. In that case the
