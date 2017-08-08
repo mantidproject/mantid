@@ -190,7 +190,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalDeriv,
     }
     m_dirtyDeriv = false;
   }
-
+   
   if (evalHessian) {
     if (m_includePenalty) {
       size_t i = 0;
