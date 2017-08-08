@@ -49,46 +49,62 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the beam (cm)')
 
+        self.setPropertyGroup('BeamHeight','Beam Options')
+        self.setPropertyGroup('BeamWidth', 'Beam Options')
+
         # Monte Carlo options
         self.declareProperty(name='NumberOfWavelengthPoints', defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
-
         self.declareProperty(name='EventsPerPoint', defaultValue=1000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
-
         self.declareProperty(name='Interpolation', defaultValue='Linear',
                              validator=StringListValidator(
                                  ['Linear', 'CSpline']),
                              doc='Type of interpolation')
 
+        self.setPropertyGroup('NumberOfWavelengthPoints', 'Monte Carlo Options')
+        self.setPropertyGroup('EventsPerPoint', 'Monte Carlo Options')
+        self.setPropertyGroup('Interpolation', 'Monte Carlo Options')
+
         # Sample options
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Sample Workspace')
-
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              doc='Chemical formula for the sample material')
-
         self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Sample density type')
-
         self.declareProperty(name='SampleDensity', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample density')
         
+        self.setPropertyGroup('SampleWorkspace', 'Sample Options')
+        self.setPropertyGroup('SampleChemicalFormula', 'Sample Options')
+        self.setPropertyGroup('SampleDensityType', 'Sample Options')
+        self.setPropertyGroup('SampleDensity', 'Sample Options')
+        
         # Container options
         self.declareProperty(MatrixWorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input),
                              doc='Container Workspace')
-
         self.declareProperty(name='ContainerChemicalFormula', defaultValue='',
                              doc='Chemical formula for the container material')
-
         self.declareProperty(name='ContainerDensityType', defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Container density type')
-
         self.declareProperty(name='ContainerDensity', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container density')
+        
+        self.setPropertyGroup('ContainerWorkspace', 'Container Options')
+        self.setPropertyGroup('ContainerChemicalFormula', 'Container Options')
+        self.setPropertyGroup('ContainerDensityType', 'Container Options')
+        self.setPropertyGroup('ContainerDensity', 'Container Options')
+
+    def pyExec(self):
+        pass
+
+
+# Register algorithm with Mantid
+AlgorithmFactory.subscribe(CalculateMonteCarloAbsorption)
