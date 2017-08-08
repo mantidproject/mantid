@@ -510,8 +510,7 @@ void ContainerSubtraction::plotCurrentPreview() {
 /*
 * Plots the selected spectra (selected by the Spectrum spinner) of the specified
 * workspace. The resultant curve will be given the specified name and the
-*specified
-* colour.
+* specified colour.
 *
 * @param curveName   The name of the curve to plot in the preview.
 * @param ws          The workspace whose spectra to plot in the preview.
@@ -525,12 +524,22 @@ void ContainerSubtraction::plotInPreview(const QString &curveName,
   // respect to the specified workspace.
   if (ws->getNumberHistograms() > m_spectra) {
     m_uiForm.ppPreview->addSpectrum(curveName, ws, m_spectra, curveColor);
-  } else if (m_csSampleWS || m_csContainerWS) {
-    size_t specNo = std::min(m_csContainerWS->getNumberHistograms(),
-                             m_csSampleWS->getNumberHistograms()) -
-                    1;
+  }
+  else {
+    size_t specNo = 0;
+
+    if (m_csSampleWS) {
+      specNo = std::min(ws->getNumberHistograms(),
+        m_csSampleWS->getNumberHistograms()) - 1;
+    }
+    else if (m_csContainerWS) {
+      specNo = std::min(ws->getNumberHistograms(),
+        m_csContainerWS->getNumberHistograms()) - 1;
+    }
+
     m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
     m_uiForm.spPreviewSpec->setValue(boost::numeric_cast<int>(specNo));
+    m_spectra = specNo;
   }
 }
 
