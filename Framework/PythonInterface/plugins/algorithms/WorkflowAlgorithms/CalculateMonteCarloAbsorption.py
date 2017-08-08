@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as s_api
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress)
-from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
+from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, StringMandatoryValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator)
 
 
@@ -49,7 +49,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the beam (cm)')
 
-        self.setPropertyGroup('BeamHeight','Beam Options')
+        self.setPropertyGroup('BeamHeight', 'Beam Options')
         self.setPropertyGroup('BeamWidth', 'Beam Options')
 
         # Monte Carlo options
@@ -79,12 +79,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='SampleDensity', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample density')
-        
+
         self.setPropertyGroup('SampleWorkspace', 'Sample Options')
         self.setPropertyGroup('SampleChemicalFormula', 'Sample Options')
         self.setPropertyGroup('SampleDensityType', 'Sample Options')
         self.setPropertyGroup('SampleDensity', 'Sample Options')
-        
+
         # Container options
         self.declareProperty(MatrixWorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input),
                              doc='Container Workspace')
@@ -96,11 +96,48 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='ContainerDensity', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container density')
-        
+
         self.setPropertyGroup('ContainerWorkspace', 'Container Options')
         self.setPropertyGroup('ContainerChemicalFormula', 'Container Options')
         self.setPropertyGroup('ContainerDensityType', 'Container Options')
         self.setPropertyGroup('ContainerDensity', 'Container Options')
+
+        # Sample shape options
+        self.declareProperty(name='Shape', defaultValue='FlatPlate', validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
+                             doc='Geometric shape of the sample environment')
+
+        flatPlateCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
+        cylinderCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
+        annulusCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
+
+        # height is common to all, and should be the same for sample and container
+        self.declareProperty('Height', defaultValue=0.0, validator=FloatBoundedValidator(0.0),
+                             doc='Height of the sample environment (cm)')
+
+        self.setPropertyGroup('Shape', 'Shape Options')
+        self.setPropertyGroup('Height', 'Shape Options')
+
+        # Flat Plate
+        self.declareProperty(name='SampleWidth', defaultValue=0.0, validator=FloatBoundedValidator(0.0),
+                             doc='Width of the sample environment (cm)')
+        self.declareProperty(name='SampleThickness', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Thickness of the sample environment (cm)')
+        self.declareProperty(name='SampleCenter', defaultValue=0.0,
+                             doc='Center of the sample environment')
+        self.declareProperty(name='SampleAngle', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Angle of the sample environment with respect to the beam (degrees)')
+
+        self.setPropertySettings('SampleWidth', flatPlateCondition)
+        self.setPropertySettings('SampleThickness', flatPlateCondition)
+        self.setPropertySettings('SampleCenter', flatPlateCondition)
+        self.setPropertySettings('SampleAngle', flatPlateCondition)
+
+        self.setPropertyGroup('SampleWidth', 'Sample Shape Options')
+        self.setPropertyGroup('SampleThickness', 'Sample Shape Options')
+        self.setPropertyGroup('SampleCenter', 'Sample Shape Options')
+        self.setPropertyGroup('SampleAngle', 'Sample Shape Options')
 
     def pyExec(self):
         pass
