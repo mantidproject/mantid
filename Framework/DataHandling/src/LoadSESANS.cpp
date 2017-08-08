@@ -24,9 +24,7 @@ namespace { // Anonymous namespace for helper functions
  * @param c The character
  * @return Whether it is whitespace
  */
-bool space(const char &c) {
-  return isspace(c);
-}
+bool space(const char &c) { return isspace(c); }
 
 /** Is a character not whitespace (here considered space or tab)?
 * @param c The character
