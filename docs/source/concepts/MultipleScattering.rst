@@ -7,8 +7,8 @@ Introduction
 ~~~~~~~~~~~~
 Determination of the structure of samples depends on the analysis of single scattering data. 
 Small but unwanted higher-order scattering is always present although in many typical 
-experiments multiple scattering effects are negligible however in some cases the dataset may 
-from significant multiple scattering. To get an idea of when and why multiple scattering 
+experiments multiple scattering effects are negligible however in some cases the data may 
+contain a significant contribution from multiple scattering. To get an idea of when and why multiple scattering 
 corrections are needed let us first define the total cross section per atom as the sum of its 
 scattering and absorption cross sections:
 
@@ -46,9 +46,9 @@ a detector.
 .. figure:: ../images/MultipleScatteringVolume.png
    :alt: MultipleScatteringVolume.png
 
-The difficulty in correcting multiple scattering arises from the fact the for each order of scattering
+The difficulty in correcting multiple scattering arises from the fact that for each order of scattering
 we must perform m volume integrals :math:`dV_1dV_2...dV_m` over the sample to compute the contribution term 
-for that order (although luckily these terms quickly tend to zero thanks as seen in the introduction). 
+for that order (although these terms tend to zero as explained in the introduction). 
 This kind of calculation is incredibly difficult for all but the simplest of geometries 
 (i.e. cylindrical, planar and spherical) although Monte Carlo integration 
 methods may be utilised for the multiple scattering calculations of more general shapes.
