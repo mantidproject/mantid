@@ -70,8 +70,7 @@ This is a Carpenter style correction. For more details see :ref:`here <algm-Mult
 
 References
 ~~~~~~~~~~
-.. [1] Lindley, E.J., & Mayers, J. Cywinski, R. (Ed.). (1988). Experimental method and corrections to data. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
-.. [2] A.K.Soper, W.S.Howells and A.C.Hannon *ATLAS - Analysis of Time-of-Flight Diffraction Data from Liquid and Amorphous Samples* Rutherford Appleton Laboratory Report (1989): `RAL-89-046 <http://wwwisis2.isis.rl.ac.uk/disordered/Manuals/ATLAS/ATLAS%20manual%20v1.0.pdf>`__
-
+.. [1] A.K.Soper, W.S.Howells and A.C.Hannon *ATLAS - Analysis of Time-of-Flight Diffraction Data from Liquid and Amorphous Samples* Rutherford Appleton Laboratory Report (1989): `RAL-89-046 <http://wwwisis2.isis.rl.ac.uk/disordered/Manuals/ATLAS/ATLAS%20manual%20v1.0.pdf>`__
+.. [2] Lindley, E.J., & Mayers, J. Cywinski, R. (Ed.). (1988). Experimental method and corrections to data. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
 
 .. categories:: Concepts
