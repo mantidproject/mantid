@@ -102,11 +102,12 @@ void ConvolutionFitSequential::init() {
                   "If true, the fit is treated as a convolution workspace.",
                   Direction::Input);
 
-  declareProperty("ExtractMembers", false,
-                  "If true, then each member of the convolution fit will be extracted" 
-                  ", into their own workspace. These workspaces will have a histogram"
-                  " for each spectrum (Q-value) and will be grouped.",
-                  Direction::Input);
+  declareProperty(
+      "ExtractMembers", false,
+      "If true, then each member of the convolution fit will be extracted"
+      ", into their own workspace. These workspaces will have a histogram"
+      " for each spectrum (Q-value) and will be grouped.",
+      Direction::Input);
 
   declareProperty("Minimizer", "Levenberg-Marquardt",
                   boost::make_shared<MandatoryValidator<std::string>>(),
@@ -602,19 +603,23 @@ void ConvolutionFitSequential::calculateEISF(
 }
 
 /*
- * Extracts the convolution fit members from the specified result group workspace,
- * given the specified input workspace used for the fit, each into a workspace, stored
+ * Extracts the convolution fit members from the specified result group
+ *workspace,
+ * given the specified input workspace used for the fit, each into a workspace,
+ *stored
  * inside a group workspace of the specified name.
  *
  * @param inputWs       The input workspace used in the convolution fit.
- * @param resultGroupWs The result group workspace produced by the convolution fit;
+ * @param resultGroupWs The result group workspace produced by the convolution
+ *fit;
  *                      from which to extract the members.
- * @param outputWsName  The name of the output group workspace to store the member
+ * @param outputWsName  The name of the output group workspace to store the
+ *member
  *                      workspaces.
  */
-void ConvolutionFitSequential::extractMembers(Workspace_sptr inputWs,
-                                              WorkspaceGroup_const_sptr resultGroupWs,
-                                              const std::string &outputWsName) {
+void ConvolutionFitSequential::extractMembers(
+    Workspace_sptr inputWs, WorkspaceGroup_const_sptr resultGroupWs,
+    const std::string &outputWsName) {
   // Get Q values from the input workspace.
   auto getQs = createChildAlgorithm("GetQsInQENSData", -1.0, -1.0, false);
   getQs->setProperty("InputWorkspace", inputWs);
@@ -623,7 +628,8 @@ void ConvolutionFitSequential::extractMembers(Workspace_sptr inputWs,
 
   // Get the delta function property and number of lorentzians from
   // the first workspace in the result GroupWorkspace.
-  MatrixWorkspace_sptr firstSpectraWs = boost::dynamic_pointer_cast<MatrixWorkspace>(resultGroupWs->getItem(0));
+  MatrixWorkspace_sptr firstSpectraWs =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(resultGroupWs->getItem(0));
   TextAxis *axis = dynamic_cast<TextAxis *>(firstSpectraWs->getAxis(1));
   const Run run = firstSpectraWs->run();
   std::string delta = run.getProperty("delta_function")->value();
@@ -636,10 +642,10 @@ void ConvolutionFitSequential::extractMembers(Workspace_sptr inputWs,
   for (size_t i = 0; i < axis->length(); i++) {
     params.push_back(axis->label(i));
   }
-  
+
   // First four axis labels are always members.
-  std::vector<std::string> members = 
-    std::vector<std::string>(params.begin(), params.begin()+4);
+  std::vector<std::string> members =
+      std::vector<std::string>(params.begin(), params.begin() + 4);
 
   // Check whether a delta function member was a member in
   // the convolution fitting.
@@ -663,7 +669,8 @@ void ConvolutionFitSequential::extractMembers(Workspace_sptr inputWs,
   size_t resultSize = resultGroupWs->size();
   std::vector<std::string> memberWorkspaces = {};
   for (int i = 0; i < resultSize; i++) {
-    extractMembersFrom(resultGroupWs->getItem(i), outputWsName, members, i==0, memberWorkspaces);
+    extractMembersFrom(resultGroupWs->getItem(i), outputWsName, members, i == 0,
+                       memberWorkspaces);
   }
 
   // Update the y-axis of each created member workspace - set to
@@ -674,7 +681,9 @@ void ConvolutionFitSequential::extractMembers(Workspace_sptr inputWs,
   }
 
   for (auto &memberWsName : memberWorkspaces) {
-    MatrixWorkspace_sptr memberWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(memberWsName);
+    MatrixWorkspace_sptr memberWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            memberWsName);
     memberWs->replaceAxis(1, new NumericAxis(*qAxis));
     memberWs->setYUnitLabel("MomentumTransfer");
   }
@@ -691,21 +700,23 @@ void ConvolutionFitSequential::extractMembers(Workspace_sptr inputWs,
  * output workspaces (one for each member), with the specified prefix. The names
  * of the member workspaces are appended to the specified vector.
  *
- * @param resultWs          Workspace containing result of the fit, from which to extract
+ * @param resultWs          Workspace containing result of the fit, from which
+ *to extract
  *                          members.
  * @param outputWsName      The prefix of the output member workspaces.
  *                          Format: outputWsName + NameOfMember
- * @param members           The list (vector) of members to extract from the result workspace.
+ * @param members           The list (vector) of members to extract from the
+ *result workspace.
  * @param createMemberWs    If True, create a new workspace for each member.
  *                          Else, append to existing workspace.
- * @param memberWorkspaces  The list (vector) of member workspaces to append output workspace
+ * @param memberWorkspaces  The list (vector) of member workspaces to append
+ *output workspace
  *                          names to.
  */
-void ConvolutionFitSequential::extractMembersFrom(Mantid::API::Workspace_sptr resultWs, 
-                                                  const std::string &outputWsName,
-                                                  const std::vector<std::string> &members, 
-                                                  bool createMemberWs,
-                                                  std::vector<std::string> &memberWorkspaces) {
+void ConvolutionFitSequential::extractMembersFrom(
+    Mantid::API::Workspace_sptr resultWs, const std::string &outputWsName,
+    const std::vector<std::string> &members, bool createMemberWs,
+    std::vector<std::string> &memberWorkspaces) {
   // Iterate over all the members in the fit
   for (int i = 0; i < members.size(); i++) {
     std::string memberWsName = outputWsName + "_" + members[i];
@@ -726,7 +737,7 @@ void ConvolutionFitSequential::extractMembersFrom(Mantid::API::Workspace_sptr re
     extractAlg->execute();
 
     // Check whether to append the spectra to an existing output workspace
-    if(!createMemberWs) {
+    if (!createMemberWs) {
       auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
       appendAlg->setProperty("InputWorkspace1", memberWsName);
       appendAlg->setProperty("InputWorkspace2", extractedWsName);

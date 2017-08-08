@@ -321,7 +321,7 @@ void ConvFit::run() {
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("Convolve", true);
   cfs->setProperty("ExtractMembers", static_cast<bool>(m_blnManager->value(
-                                        m_properties["ExtractMembers"])));
+                                         m_properties["ExtractMembers"])));
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(

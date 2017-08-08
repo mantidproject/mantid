@@ -258,12 +258,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", redWs);
     alg.setProperty("Function",
-      "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-      "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-      "name=Resolution,Workspace=__ConvFit_Resolution,"
-      "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-      "0175)))");
+                    "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+                    "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                    "name=Resolution,Workspace=__ConvFit_Resolution,"
+                    "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+                    "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+                    "0175)))");
     alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
@@ -280,14 +280,19 @@ public:
     // Check members group workspace was created
     WorkspaceGroup_const_sptr membersGroupWs;
     TS_ASSERT_THROWS_NOTHING(
-        membersGroupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            "ReductionWs_conv_1LFixF_s0_to_5_Members"));
+        membersGroupWs =
+            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+                "ReductionWs_conv_1LFixF_s0_to_5_Members"));
 
-    // Check all members have been extracted into their own workspace and grouped 
+    // Check all members have been extracted into their own workspace and
+    // grouped
     // inside the members group workspace.
-    std::unordered_set<std::string> members = {"Data", "Calc", "Diff", "LinearBackground", "Lorentzian1"};
+    std::unordered_set<std::string> members = {
+        "Data", "Calc", "Diff", "LinearBackground", "Lorentzian1"};
     for (int i = 0; i < membersGroupWs->size(); i++) {
-      MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(membersGroupWs->getItem(i));
+      MatrixWorkspace_const_sptr ws =
+          boost::dynamic_pointer_cast<const MatrixWorkspace>(
+              membersGroupWs->getItem(i));
       TS_ASSERT(ws->getNumberHistograms() == redWs->getNumberHistograms());
       members.erase(ws->getName());
     }
