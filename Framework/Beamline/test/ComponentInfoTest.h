@@ -41,8 +41,7 @@ makeTreeExampleAndReturnGeometricArguments() {
       boost::make_shared<const std::vector<size_t>>(
           std::vector<size_t>{0, 2, 1});
   auto bankSortedComponentIndices =
-      boost::make_shared<const std::vector<size_t>>(
-          std::vector<size_t>{0, 1, 3, 2, 4});
+      boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{3, 4});
   auto parentIndices = boost::make_shared<const std::vector<size_t>>(
       std::vector<size_t>{3, 3, 4, 4, 4});
 
@@ -54,9 +53,9 @@ makeTreeExampleAndReturnGeometricArguments() {
 
   std::vector<std::pair<size_t, size_t>> componentRanges;
   componentRanges.push_back(
-      std::make_pair(0, 3)); // sub-assembly (contains two detectors and self)
+      std::make_pair(0, 1)); // sub-assembly (contains self)
   componentRanges.push_back(std::make_pair(
-      0, 5)); // instrument assembly (with 4 sub-components and self)
+      0, 2)); // instrument assembly (with 1 sub-component and self)
 
   // Set non-detectors at different positions
   auto compPositions = boost::make_shared<std::vector<Eigen::Vector3d>>();
@@ -106,8 +105,7 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
       boost::make_shared<const std::vector<size_t>>(
           std::vector<size_t>{0, 2, 1});
   auto bankSortedComponentIndices =
-      boost::make_shared<const std::vector<size_t>>(
-          std::vector<size_t>{0, 2, 3, 1, 4});
+      boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{3, 4});
   auto parentIndices = boost::make_shared<const std::vector<size_t>>(
       std::vector<size_t>{3, 3, 4, 4, 4});
   std::vector<std::pair<size_t, size_t>> detectorRanges;
@@ -116,9 +114,9 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
 
   std::vector<std::pair<size_t, size_t>> componentRanges;
   componentRanges.push_back(
-      std::make_pair(0, 3)); // sub-assembly (contains two detectors and self)
+      std::make_pair(0, 1)); // sub-assembly (contains self)
   componentRanges.push_back(std::make_pair(
-      0, 5)); // instrument assembly (with 4 sub-components and self)
+      0, 2)); // instrument assembly (with 1 sub-component and self)
 
   auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
       2, Eigen::Vector3d{0, 0, 0}); // 2 positions provided. 2 non-detectors
@@ -173,8 +171,7 @@ public:
         boost::make_shared<const std::vector<size_t>>(
             std::vector<size_t>{0, 1, 2});
     auto bankSortedComponentIndices =
-        boost::make_shared<const std::vector<size_t>>(
-            std::vector<size_t>{0, 1, 2});
+        boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{});
     auto parentIndices = boost::make_shared<const std::vector<size_t>>(
         std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
                                        // ok as not being tested here
@@ -471,7 +468,7 @@ public:
     TS_ASSERT_EQUALS(
         compInfo.componentsInSubtree(4 /*component index of root*/),
         std::vector<size_t>(
-            {0, 2, 3, 1, 4})); // Note inclusion of self comp index
+            {0, 2, 1, 3, 4})); // Note inclusion of self comp index
 
     TS_ASSERT_EQUALS(
         compInfo.componentsInSubtree(3 /*component index of sub-assembly*/),

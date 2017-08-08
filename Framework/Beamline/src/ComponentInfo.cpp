@@ -51,7 +51,9 @@ ComponentInfo::ComponentInfo(
                                 "and rotations as assembly sorted component "
                                 "ranges");
   }
-  if (m_assemblySortedComponentIndices->size() != m_size) {
+  if (m_assemblySortedComponentIndices->size() +
+          m_assemblySortedDetectorIndices->size() !=
+      m_size) {
     throw std::invalid_argument("ComponentInfo must have component indices "
                                 "input of same size as the sum of "
                                 "non-detector and detector components");
@@ -90,19 +92,23 @@ ComponentInfo::componentsInSubtree(const size_t componentIndex) const {
   }
   // Calculate index into our ranges (non-detector) component items.
   const auto rangesIndex = compOffsetIndex(componentIndex);
-  const auto range = (*m_componentRanges)[rangesIndex];
+  const auto detRange = (*m_detectorRanges)[rangesIndex];
+  const auto compRange = (*m_componentRanges)[rangesIndex];
 
   // Extract as a block
-  return std::vector<size_t>(
-      m_assemblySortedComponentIndices->begin() + range.first,
-      m_assemblySortedComponentIndices->begin() + range.second);
+  std::vector<size_t> indices(
+      m_assemblySortedDetectorIndices->begin() + detRange.first,
+      m_assemblySortedDetectorIndices->begin() + detRange.second);
+  indices.insert(indices.end(),
+                 m_assemblySortedComponentIndices->begin() + compRange.first,
+                 m_assemblySortedComponentIndices->begin() + compRange.second);
+  return indices;
 }
 
 size_t ComponentInfo::size() const { return m_size; }
 
 Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
-    checkDetectorInfo();
     return m_detectorInfo->position(componentIndex);
   }
   const auto rangesIndex = compOffsetIndex(componentIndex);
@@ -111,7 +117,6 @@ Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
 
 Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
-    checkDetectorInfo();
     return m_detectorInfo->rotation(componentIndex);
   }
   const auto rangesIndex = compOffsetIndex(componentIndex);
@@ -177,22 +182,29 @@ ComponentInfo::relativeRotation(const size_t componentIndex) const {
  */
 void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Eigen::Vector3d &newPosition) {
+  // This method is performance critical for some client code. Optimizations are
+  // explained below.
   if (isDetector(componentIndex))
     return m_detectorInfo->setPosition(componentIndex, newPosition);
 
-  scanningCheck(componentIndex);
   const Eigen::Vector3d offset = newPosition - position(componentIndex);
-  const auto indices = this->componentsInSubtree(
-      componentIndex); // Includes requested component index
-  for (auto &index : indices) {
-    if (isDetector(index)) {
-      checkDetectorInfo();
-      m_detectorInfo->setPosition(index,
-                                  m_detectorInfo->position(index) + offset);
-    } else {
-      size_t offsetIndex = compOffsetIndex(index);
-      m_positions.access()[offsetIndex] += offset;
-    }
+
+  // Optimization: Not using detectorsInSubtree and componentsInSubtree to avoid
+  // memory allocations.
+  // Optimization: Split loop over detectors and other components.
+  const auto range = detectorRangeInSubtree(componentIndex);
+  if (!range.empty())
+    failIfScanning();
+  // Optimization: After failIfScanning() we know that the time index is always
+  // 0 so we use faster access with index pair instead of only detector index.
+  for (const auto &index : range) {
+    m_detectorInfo->setPosition({index, 0},
+                                m_detectorInfo->position({index, 0}) + offset);
+  }
+
+  for (const auto &index : componentRangeInSubtree(componentIndex)) {
+    size_t offsetIndex = compOffsetIndex(index);
+    m_positions.access()[offsetIndex] += offset;
   }
 }
 
@@ -209,47 +221,39 @@ void ComponentInfo::setPosition(const size_t componentIndex,
  */
 void ComponentInfo::setRotation(const size_t componentIndex,
                                 const Eigen::Quaterniond &newRotation) {
+  // This method is performance critical for some client code. Optimizations are
+  // as in setRotation.
   if (isDetector(componentIndex))
     return m_detectorInfo->setRotation(componentIndex, newRotation);
 
-  using namespace Eigen;
-  scanningCheck(componentIndex);
   const Eigen::Vector3d compPos = position(componentIndex);
   const Eigen::Quaterniond currentRotInv = rotation(componentIndex).inverse();
   const Eigen::Quaterniond rotDelta =
       (newRotation * currentRotInv).normalized();
-
   auto transform = Eigen::Matrix3d(rotDelta);
 
-  const auto indices = this->componentsInSubtree(
-      componentIndex); // Includes requested component index
-  for (auto &index : indices) {
-    if (isDetector(index)) {
-      checkDetectorInfo();
-      auto newPos =
-          transform * (m_detectorInfo->position(index) - compPos) + compPos;
-      auto newRot = rotDelta * m_detectorInfo->rotation(index);
-      m_detectorInfo->setPosition(index, newPos);
-      m_detectorInfo->setRotation(index, newRot);
-    } else {
-      auto newPos = transform * (position(index) - compPos) + compPos;
-      auto newRot = rotDelta * rotation(index);
-      const size_t childCompIndexOffset = compOffsetIndex(index);
-      m_positions.access()[childCompIndexOffset] = newPos;
-      m_rotations.access()[childCompIndexOffset] = newRot;
-    }
+  const auto range = detectorRangeInSubtree(componentIndex);
+  if (!range.empty())
+    failIfScanning();
+  for (const auto &index : range) {
+    auto newPos =
+        transform * (m_detectorInfo->position({index, 0}) - compPos) + compPos;
+    auto newRot = rotDelta * m_detectorInfo->rotation({index, 0});
+    m_detectorInfo->setPosition({index, 0}, newPos);
+    m_detectorInfo->setRotation({index, 0}, newRot);
+  }
+
+  for (const auto &index : componentRangeInSubtree(componentIndex)) {
+    auto newPos = transform * (position(index) - compPos) + compPos;
+    auto newRot = rotDelta * rotation(index);
+    const size_t childCompIndexOffset = compOffsetIndex(index);
+    m_positions.access()[childCompIndexOffset] = newPos;
+    m_rotations.access()[childCompIndexOffset] = newRot.normalized();
   }
 }
 
-void ComponentInfo::checkDetectorInfo() const {
-  if (!hasDetectorInfo()) {
-    throw std::runtime_error("No DetectorInfo set on this ComponentInfo");
-  }
-}
-
-void ComponentInfo::scanningCheck(size_t compIndex) const {
-  if (!detectorsInSubtree(compIndex).empty() && hasDetectorInfo() &&
-      m_detectorInfo->isScanning()) {
+void ComponentInfo::failIfScanning() const {
+  if (m_detectorInfo->isScanning()) {
     throw std::runtime_error(
         "Cannot move or rotate parent component containing "
         "detectors since the beamline has "
@@ -324,6 +328,25 @@ Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
 void ComponentInfo::setScaleFactor(const size_t componentIndex,
                                    const Eigen::Vector3d &scaleFactor) {
   m_scaleFactors.access()[componentIndex] = scaleFactor;
+}
+
+/// Returns a Range containing all detectors in the subtree specified by index.
+ComponentInfo::Range
+ComponentInfo::detectorRangeInSubtree(const size_t index) const {
+  const auto rangesIndex = compOffsetIndex(index);
+  const auto range = (*m_detectorRanges)[rangesIndex];
+  return {m_assemblySortedDetectorIndices->begin() + range.first,
+          m_assemblySortedDetectorIndices->begin() + range.second};
+}
+
+/// Returns a Range containing all non-detectors in the subtree specified by
+/// index.
+ComponentInfo::Range
+ComponentInfo::componentRangeInSubtree(const size_t index) const {
+  const auto rangesIndex = compOffsetIndex(index);
+  const auto range = (*m_componentRanges)[rangesIndex];
+  return {m_assemblySortedComponentIndices->begin() + range.first,
+          m_assemblySortedComponentIndices->begin() + range.second};
 }
 
 } // namespace Beamline
