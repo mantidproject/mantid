@@ -29,7 +29,7 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents-v1>` has refactored on splitting sample logs.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
-- :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` allows now to for optional culling of the top one percent of the background events.
+- :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` makes the culling of the top one percent of the background events optional.
 
 Deprecated
 ##########

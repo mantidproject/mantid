@@ -144,7 +144,7 @@ void IntegratePeaksMD2::init() {
       "If false, correct for volume off edge for both background and "
       "intensity.");
 
-  declareProperty("UseOnePercentBackgroundCorrection", false,
+  declareProperty("UseOnePercentBackgroundCorrection", true,
                   "If this options is enabled, then the the top 1% of the "
                   "background will be removed"
                   "before the background subtraction.");
