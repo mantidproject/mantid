@@ -735,8 +735,7 @@ void ConvolutionFitSequential::extractMembersFrom(
     // Check whether to append the spectra to an existing output workspace
     if (createMemberWs) {
       memberWorkspaces.push_back(memberWsName);
-    }
-    else {
+    } else {
       auto appendAlg = createChildAlgorithm("AppendSpectra", -1.0, -1.0, false);
       appendAlg->setProperty("InputWorkspace1", memberWsName);
       appendAlg->setProperty("InputWorkspace2", memberWs);
