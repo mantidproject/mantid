@@ -51,12 +51,14 @@ highlighted in red.
 :alt: McStasGUIConfigSettings.png
 
 Where for Windows mcdisplay-pl --format=Mantid currently needs to selected currently as described in this 
-issue <https://github.com/McStasMcXtrace/McCode/issues/459>`__. On other platforms one may simply 
+`issue <https://github.com/McStasMcXtrace/McCode/issues/459>`__. On other platforms one may simply 
 use mcdisplay --format=Mantid.
 
 Under C flags we need to ensure the compiler can find the NeXus libraries and headers so for Windows this 
-is usually '-DUSE_NEXUS -lNeXus-0  -L"C:\Program Files (x86)\NeXus Data Format\bin" -L"C:\Program Files (x86)\NeXus Data Format\lib\nexus" -I"C:\Program Files (x86)\NeXus Data Format\include"' 
-and for Mac `-DUSE_NEXUS -lNeXus -L/usr/local/lib -I/usr/local/include`.
+is usually:
+`-DUSE_NEXUS -lNeXus-0  -L"C:\Program Files (x86)\NeXus Data Format\bin" -L"C:\Program Files (x86)\NeXus Data Format\lib\nexus" -I"C:\Program Files (x86)\NeXus Data Format\include"` 
+and for Mac:
+`-DUSE_NEXUS -lNeXus -L/usr/local/lib -I/usr/local/include`.
 
 Creating Instrument Definition Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
