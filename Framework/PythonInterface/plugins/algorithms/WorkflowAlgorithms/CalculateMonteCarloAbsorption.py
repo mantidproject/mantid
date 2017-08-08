@@ -150,10 +150,10 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleRadius', 'Sample Shape Options')
 
         # Annulus
-        self.declareProperty(name='SampleInnerRadius',defaultValue=0.0,
+        self.declareProperty(name='SampleInnerRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Inner radius of the sample environment (cm)')
-        self.declareProperty(name='SampleOuterRadius',defaultValue=0.0,
+        self.declareProperty(name='SampleOuterRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the sample environment (cm)')
 
@@ -163,8 +163,59 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleInnerRadius', 'Sample Shape Options')
         self.setPropertyGroup('SampleOuterRadius', 'Sample Shape Options')
 
+        # ---------------------------Container---------------------------
+        # Flat Plate
+        self.declareProperty(name='ContainerWidth', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Width of the container environment (cm)')
+        self.declareProperty(name='ContainerThickness', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Thickness of the container environment (cm)')
+        self.declareProperty(name='ContainerCenter', defaultValue=0.0,
+                             doc='Center of the container environment')
+        self.declareProperty(name='ContainerAngle', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Angle of the container environment with respect to the beam (degrees)')
 
+        self.setPropertySettings('ContainerWidth', flatPlateCondition)
+        self.setPropertySettings('ContainerThickness', flatPlateCondition)
+        self.setPropertySettings('ContainerCenter', flatPlateCondition)
+        self.setPropertySettings('ContainerAngle', flatPlateCondition)
 
+        self.setPropertyGroup('ContainerWidth', 'Container Shape Options')
+        self.setPropertyGroup('ContainerThickness', 'Container Shape Options')
+        self.setPropertyGroup('ContainerCenter', 'Container Shape Options')
+        self.setPropertyGroup('ContainerAngle', 'Container Shape Options')
+
+        # Cylinder
+        self.declareProperty(name='ContainerRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Radius of the container environment (cm)')
+
+        self.setPropertySettings('ContainerRadius', cylinderCondition)
+        self.setPropertyGroup('ContainerRadius', 'Container Shape Options')
+
+        # Annulus
+        self.declareProperty(name='ContainerInnerRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Inner radius of the container environment (cm)')
+        self.declareProperty(name='ContainerOuterRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Outer radius of the container environment (cm)')
+
+        self.setPropertySettings('ContainerInnerRadius', annulusCondition)
+        self.setPropertySettings('ContainerOuterRadius', annulusCondition)
+
+        self.setPropertyGroup('ContainerInnerRadius', 'Container Shape Options')
+        self.setPropertyGroup('ContainerOuterRadius', 'Container Shape Options')
+
+        # output
+        self.declareProperty(WorkspaceGroupProperty(name='CorrectionsWorkspace',
+                                                    defaultValue='corrections',
+                                                    direction=Direction.Output,
+                                                    optional=PropertyMode.Optional),
+                             doc='Name of the workspace group to save correction factors')
+        self.setPropertyGroup('CorrectionsWorkspace','Output Options')
 
     def pyExec(self):
         pass
