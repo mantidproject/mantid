@@ -42,7 +42,6 @@ class Form(QDialog):
  
             widgetHelper.setName(self.table,4,"Auto shift")        
 	    self.shiftBox= widgetHelper.createCheckTable(self.table,True,4)        
-            self.table.cellClicked.connect(self.Clicked) 
 
             widgetHelper.setName(self.table,5,"Shift")        
 	    self.shift= widgetHelper.createDoubleTable(self.table,0.0,5)        
@@ -60,6 +59,7 @@ class Form(QDialog):
             self.button.setStyleSheet("background-color:lightgrey")
 
             self.button.clicked.connect(self.handleButton)
+            self.table.cellClicked.connect(self.view.Clicked) 
 
 
             grid.addWidget(self.button)
@@ -67,41 +67,23 @@ class Form(QDialog):
             self.setLayout(grid)
 
  
-     def Clicked(self,row,col):
-         if row == 4 and col ==1:
-		self.shiftChanged()
-     
-     def shiftChanged(self):
-      
-        if self.shiftBox.checkState() == QtCore.Qt.Checked:
-            self.table.hideRow(5)
-        else:
-            self.table.showRow(5)
-
      def handleButton(self):
 
+        inputs = self.view.get_FFT_input()
+        print (inputs[0])
+        WS=str( self.WS.currentText()).replace(";","; ")
+        ImWS=str( self.ImWS.currentText()).replace(";","; ")
         if self.shiftBox.checkState() == QtCore.Qt.Checked:
-           output=mantid.FFT(InputWorkspace=str( self.WS.currentText()),OutputWorkspace="MuonFFT",
-                             InputImagWorkspace=str( self.ImWS.currentText()),Real=int(self.RePart.text()),
+           output=mantid.FFT(InputWorkspace=WS, OutputWorkspace="MuonFFT",
+                             InputImagWorkspace=ImWS,Real=int(self.RePart.text()),
                              Imaginary=int(self.ImPart.text()),AutoShift=True,  
                              AcceptXRoundingErrors=True)
 
         else:
-           output=mantid.FFT(InputWorkspace=str( self.WS.currentText()),OutputWorkspace="MuonFFT",
-                             InputImagWorkspace=str( self.ImWS.currentText()),Real=int(self.RePart.text()),
+           output=mantid.FFT(InputWorkspace=WS,OutputWorkspace="MuonFFT",
+                             InputImagWorkspace=ImWS,Real=int(self.RePart.text()),
                              Imaginary=int(self.ImPart.text()),AutoShift=False,  
                              Shift=float(self.shift.text()),AcceptXRoundingErrors=True)
 
 
 
-#        a =        print (a)[1;5B
-#        print (a)
-#        a =str( self.RePart.text())
-#        print (a)
-#        a =str( self.ImPart.text())
-#        print (a)
-#        if self.shiftBox.checkState() == QtCore.Qt.Checked:
-#	   a =str( self.ImPart.text())
-#           print (self.shift.text())
-# 	
-#	print ("done")
