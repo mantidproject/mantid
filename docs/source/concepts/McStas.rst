@@ -66,9 +66,11 @@ and for Mac:
 
 Creating Instrument Definition Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If we now load up our .instr file in McStas and select Run then understand Simulation set Simulation/Trace to Trace. 
-When we start this simulation McStas should now automatically output an Instrument Definition File with a .xml extension.
+If we now load up our .instr file in McStas and select Run then unders Simulation set Simulation/Trace to Trace. 
+When we start this simulation McStas should now automatically output an Instrument Definition File with a .xml extension containing the minimal information required by Mantid to lay out the instrument. If we want to include all components then we can run from the mcshell:
 
+* Windows: `mcdisplay-pl templateSANS_Mantid.instr --format=Mantid -n0 --complete`
+* Mac/Linux: `mccdisplay templateSANS_Mantid.instr --format=Mantid -n0 --complete`
 
 With the configurations above, running a regular simulation will now produce a NeXus file with the .h5 extension which can 
 be loaded into Mantid using :ref:`LoadMcStas <algm-LoadMcStas>`__.
