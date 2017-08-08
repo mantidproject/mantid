@@ -578,35 +578,44 @@ void ConvFit::newDataLoaded(const QString wsName) {
 
 /**
 * Create a resolution workspace with the same number of histograms as in the
-* sample.
+* sample, if the resolution and sample differ in their number of histograms.
 *
 * Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as
-* they need
-* to have the WorkspaceIndex attribute set.
+* they need to have the WorkspaceIndex attribute set.
 */
 void ConvFit::extendResolutionWorkspace() {
   if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
     const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
-    API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
-    appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
-
+    // Check spectra consistency between resolution and sample
+    auto resolutionInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            resWsName.toStdString());
+    size_t resolutionNumHist = resolutionInputWS->getNumberHistograms();
     size_t numHist = m_cfInputWS->getNumberHistograms();
-    for (size_t i = 0; i < numHist; i++) {
-      IAlgorithm_sptr appendAlg =
-          AlgorithmManager::Instance().create("AppendSpectra");
-      appendAlg->setLogging(false);
-      appendAlg->initialize();
-      appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
-      appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
-
-      if (i == 0) {
-        appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
+    if(resolutionNumHist != 1 && resolutionNumHist != numHist) {
+      std::string msg("Resolution must have either one or as many spectra as the sample");
+      throw std::runtime_error(msg);
+    }
+    // Clone resolution workspace
+    IAlgorithm_sptr cloneAlg =
+            AlgorithmManager::Instance().create("CloneWorkspace");
+    cloneAlg->setLogging(false);
+    cloneAlg->initialize();
+    cloneAlg->setProperty("InputWorkspace", resWsName.toStdString());
+    cloneAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
+    m_batchAlgoRunner->addAlgorithm(cloneAlg);
+    // Append to cloned workspace if neccessary
+    if (resolutionNumHist == 1) {
+      for (size_t i = 1; i < numHist; i++) {
+        IAlgorithm_sptr appendAlg =
+                AlgorithmManager::Instance().create("AppendSpectra");
+        appendAlg->setLogging(false);
+        appendAlg->initialize();
+        appendAlg->setProperty("InputWorkspace1", "__ConvFit_Resolution");
+        appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
+        appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
         m_batchAlgoRunner->addAlgorithm(appendAlg);
-      } else {
-        m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
       }
     }
-
     m_batchAlgoRunner->executeBatchAsync();
   }
 }
