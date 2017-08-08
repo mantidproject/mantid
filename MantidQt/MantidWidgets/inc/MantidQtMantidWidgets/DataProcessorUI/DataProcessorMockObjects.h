@@ -27,10 +27,7 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockDataProcessorView : public DataProcessorView {
 public:
-  MockDataProcessorView() {
-    ON_CALL(*this, runPythonAlgorithm(::testing::_))
-        .WillByDefault(::testing::Return(QString()));
-  }
+  MockDataProcessorView() {}
   ~MockDataProcessorView() override {}
 
   // Prompt
