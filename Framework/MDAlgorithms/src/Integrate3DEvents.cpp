@@ -34,6 +34,8 @@ using Mantid::Kernel::V3D;
  * @param   radius       The maximum distance from a peak's Q-vector, for
  *                       an event to be stored in the list associated with
  *                       that peak.
+ * @param   useOnePercentBackgroundCorrection flag if one percent background
+                         correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
     std::vector<std::pair<double, V3D>> const &peak_q_list,
@@ -465,6 +467,8 @@ double Integrate3DEvents::numInEllipsoid(
  *                     of the three axes of the ellisoid.
  * @param  sizesIn       List of three values a,b,c giving half the length
  *                     of the three inner axes of the ellisoid.
+ * @param  useOnePercentBackgroundCorrection  flag if one percent background
+                       correction should be used.
  * @return Then number of events that are in or on the specified ellipsoid.
  */
 double Integrate3DEvents::numInEllipsoidBkg(
