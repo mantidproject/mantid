@@ -37,9 +37,10 @@ using Mantid::Kernel::V3D;
  */
 Integrate3DEvents::Integrate3DEvents(
     std::vector<std::pair<double, V3D>> const &peak_q_list,
-    DblMatrix const &UBinv, double radius, const bool useOnePercentBackgroundCorrection) :m_UBinv(UBinv),
-                                                                                          m_radius(radius),
-                                                                                          m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
+    DblMatrix const &UBinv, double radius,
+    const bool useOnePercentBackgroundCorrection)
+    : m_UBinv(UBinv), m_radius(radius),
+      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hkl_key = getHklKey(peak_q_list[it].second);
     if (hkl_key != 0) // only save if hkl != (0,0,0)
@@ -485,7 +486,6 @@ double Integrate3DEvents::numInEllipsoidBkg(
     if (sum <= 1 && sumIn >= 1)
       eventVec.push_back(event.first);
   }
-
 
   auto endIndex = eventVec.size();
   if (useOnePercentBackgroundCorrection) {

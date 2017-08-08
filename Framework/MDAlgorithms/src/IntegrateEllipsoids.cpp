@@ -331,7 +331,8 @@ void IntegrateEllipsoids::exec() {
   bool adaptiveQBackground = getProperty("AdaptiveQBackground");
   double adaptiveQMultiplier = getProperty("AdaptiveQMultiplier");
   double adaptiveQBackgroundMultiplier = 0.0;
-  double useOnePercentBackgroundCorrection = getProperty("UseOnePercentBackgroundCorrection");
+  double useOnePercentBackgroundCorrection =
+      getProperty("UseOnePercentBackgroundCorrection");
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
   if (!integrateEdge) {
@@ -407,7 +408,8 @@ void IntegrateEllipsoids::exec() {
   }
 
   // make the integrator
-  Integrate3DEvents integrator(qList, UBinv, radius, useOnePercentBackgroundCorrection);
+  Integrate3DEvents integrator(qList, UBinv, radius,
+                               useOnePercentBackgroundCorrection);
 
   // get the events and add
   // them to the inegrator

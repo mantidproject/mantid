@@ -198,7 +198,8 @@ void IntegrateEllipsoidsTwoStep::exec() {
   }
 
   const bool integrateInHKL = getProperty("IntegrateInHKL");
-  double useOnePercentBackgroundCorrection = getProperty("UseOnePercentBackgroundCorrection");
+  double useOnePercentBackgroundCorrection =
+      getProperty("UseOnePercentBackgroundCorrection");
   Integrate3DEvents integrator(qList, UBinv, getProperty("RegionRadius"),
                                useOnePercentBackgroundCorrection);
 

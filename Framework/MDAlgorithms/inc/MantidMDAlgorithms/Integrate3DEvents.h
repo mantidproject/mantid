@@ -77,7 +77,7 @@ public:
   Integrate3DEvents(
       std::vector<std::pair<double, Mantid::Kernel::V3D>> const &peak_q_list,
       Kernel::DblMatrix const &UBinv, double radius,
-      const bool useOnePercentBackgroundCorrection=true);
+      const bool useOnePercentBackgroundCorrection = true);
 
   /// Add event Q's to lists of events near peaks
   void
@@ -181,7 +181,8 @@ private:
   EventListMap m_event_lists; // hashtable with lists of events for each peak
   Kernel::DblMatrix m_UBinv;  // matrix mapping from Q to h,k,l
   double m_radius;            // size of sphere to use for events around a peak
-  const bool m_useOnePercentBackgroundCorrection = true; // if one perecent culling of the background should be performed.
+  const bool m_useOnePercentBackgroundCorrection =
+      true; // if one perecent culling of the background should be performed.
 };
 
 } // namespace MDAlgorithms

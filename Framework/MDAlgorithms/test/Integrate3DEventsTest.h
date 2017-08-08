@@ -296,7 +296,7 @@ public:
     doTestSignalToNoiseRatio(false, 160.33, 1.088, 0.094);
   }
 
- private:
+private:
   void doTestSignalToNoiseRatio(const bool useOnePercentBackgroundCorrection,
                                 const double expectedRatio1,
                                 const double expectedRatio2,
@@ -322,7 +322,8 @@ public:
     generateUniformBackground(event_Qs, 10, -30, 30);
 
     // Create integraton region + events & UB
-    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5, useOnePercentBackgroundCorrection);
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5,
+                                 useOnePercentBackgroundCorrection);
     integrator.addEvents(event_Qs, false);
 
     IntegrationParameters params;
