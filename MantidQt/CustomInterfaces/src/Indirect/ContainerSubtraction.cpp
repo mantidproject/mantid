@@ -540,7 +540,7 @@ void ContainerSubtraction::plotInPreview(const QString &curveName,
     m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
     m_uiForm.spPreviewSpec->setValue(boost::numeric_cast<int>(specNo));
     m_spectra = specNo;
-    m_uiForm.spPreviewSpec->setMaximum(m_spectra);
+    m_uiForm.spPreviewSpec->setMaximum(boost::numeric_cast<int>(m_spectra));
   }
 }
 
