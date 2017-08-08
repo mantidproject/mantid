@@ -64,10 +64,31 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              doc='Type of interpolation')
 
         # Sample options
-        self.declareProperty(MatrixWorkspaceProperty(
-            'SampleWorkspace', '', direction=Direction.Input), doc='Sample Workspace')
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
+                             doc='Sample Workspace')
 
-        self.declareProperty(name='SampleChemicalFormula', '', doc='Chemical formaula for the sample material')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density', validator=StringListValidator(
-            ['Mass Density', 'Number Density']), doc='Sample density type')
-        self.declareProperty(name='SampleDensity',defaultValue=0.0,validator=Flo
+        self.declareProperty(name='SampleChemicalFormula', defaultValue='',
+                             doc='Chemical formula for the sample material')
+
+        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc='Sample density type')
+
+        self.declareProperty(name='SampleDensity', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Sample density')
+        
+        # Container options
+        self.declareProperty(MatrixWorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input),
+                             doc='Container Workspace')
+
+        self.declareProperty(name='ContainerChemicalFormula', defaultValue='',
+                             doc='Chemical formula for the container material')
+
+        self.declareProperty(name='ContainerDensityType', defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc='Container density type')
+
+        self.declareProperty(name='ContainerDensity', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Container density')
