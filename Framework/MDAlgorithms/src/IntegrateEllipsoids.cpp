@@ -331,7 +331,7 @@ void IntegrateEllipsoids::exec() {
   bool adaptiveQBackground = getProperty("AdaptiveQBackground");
   double adaptiveQMultiplier = getProperty("AdaptiveQMultiplier");
   double adaptiveQBackgroundMultiplier = 0.0;
-  double useOnePercentBackgroundCorrection =
+  bool useOnePercentBackgroundCorrection =
       getProperty("UseOnePercentBackgroundCorrection");
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
