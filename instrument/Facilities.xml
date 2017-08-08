@@ -756,6 +756,7 @@
   </instrument>
 
   <instrument name="TOFTOF">
+    <zeropadding size="8" startRunNumber="69750"/>
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
