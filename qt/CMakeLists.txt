@@ -12,24 +12,8 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/widgets/common )
 add_subdirectory ( widgets )
 add_subdirectory ( python )
 add_subdirectory ( scientific_interfaces )
-
 if ( MAKE_VATES )
   add_subdirectory ( paraview_ext )
-  if (NOT APPLE)
-    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-          "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
-    )
-    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-          "${ParaView_DIR}" "VTK Runtime Libs" "RuntimeLibraries" "${INBUNDLE}/"
-    )
-    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-          "${ParaView_DIR}" "HDF5 Core Library" "libraries" "${INBUNDLE}/"
-    )
-    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-          "${ParaView_DIR}" "HDF5 HL Library" "hllibraries" "${INBUNDLE}/"
-    )
-  endif()
-
 endif ( MAKE_VATES )
 
 ###########################################################################

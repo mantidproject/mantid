@@ -159,6 +159,25 @@ if (ENABLE_MANTIDPLOT)
   add_dependencies ( AllTests FrameworkTests GUITests )
 endif()
 
+if (ENABLE_MANTIDPLOT AND MAKE_VATES )
+
+  if (NOT APPLE)
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
+    )
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "VTK Runtime Libs" "RuntimeLibraries" "${INBUNDLE}/"
+    )
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "HDF5 Core Library" "libraries" "${INBUNDLE}/"
+    )
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "HDF5 HL Library" "hllibraries" "${INBUNDLE}/"
+    )
+  endif()
+
+endif ( MAKE_VATES )
+
 if ( UNIX )
   #Experimental feature. Unix only at this point.
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
