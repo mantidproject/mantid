@@ -11,7 +11,7 @@
 
 #include <boost/make_shared.hpp>
 
-#include <cstdlib>
+//#include <cstdlib>
 #include <iterator>
 
 namespace Mantid {
