@@ -56,9 +56,13 @@ use mcdisplay --format=Mantid.
 
 Under C flags we need to ensure the compiler can find the NeXus libraries and headers so for Windows this 
 is usually:
+
 `-DUSE_NEXUS -lNeXus-0  -L"C:\Program Files (x86)\NeXus Data Format\bin" -L"C:\Program Files (x86)\NeXus Data Format\lib\nexus" -I"C:\Program Files (x86)\NeXus Data Format\include"` 
+
 and for Mac:
-`-DUSE_NEXUS -lNeXus -L/usr/local/lib -I/usr/local/include`.
+
+`-DUSE_NEXUS -lNeXus -L/usr/local/lib -I/usr/local/include`
+
 
 Creating Instrument Definition Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
