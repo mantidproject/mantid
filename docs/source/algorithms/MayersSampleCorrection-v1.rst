@@ -9,8 +9,8 @@
 Description
 -----------
 
-Calculates and applies corrections due to the effects of absorption and single (plus optionally multiple) 
-scattering to the signal and error values for a given workspace. The full background to the algorithm 
+Calculates and applies corrections due to the effects of absorption (plus optionally multiple scattering) 
+on the signal and error values for a given workspace. The full background to the algorithm 
 is described by Lindley et al. [1]__ and is briefly described here.
 
 The following assumptions are made:
