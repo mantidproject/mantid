@@ -76,5 +76,8 @@ digraph ConvolutionFitSequential {
   FitWorkspace                   -> CopyLogs
   ParameterTable                 -> RenameWorkspace                [label="Change name to expected name for table"]
   FitWorkspaces                  -> RenameWorkspace                [label="Renames to match input names"]
-  ExtractMembers                 -> extract_members
+  ExtractMembers                 -> do_extract_members
+  ResultWorkspace                -> do_extract_members
+  InputWorkspace                 -> do_extract_members
+  do_extract_members             -> extract_members                [label="Yes"]
 }

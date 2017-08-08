@@ -14,7 +14,7 @@ class GetQsInQENSData(PythonAlgorithm):
         return "Inelastic\\Indirect"
 
     def name(self):
-        return GetQsInQENSData
+        return "GetQsInQENSData"
 
     def summary(self):
         return "Get Q-values in the vertical axis of a MatrixWorkspace containing QENS S(Q,E) of S(theta,E) data"
