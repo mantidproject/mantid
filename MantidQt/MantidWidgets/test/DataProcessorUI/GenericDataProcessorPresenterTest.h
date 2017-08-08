@@ -381,13 +381,9 @@ public:
     delete suite;
   }
 
-  void setUp() override {
-    DefaultValue<QString>::Set(QString());
-  }
+  void setUp() override { DefaultValue<QString>::Set(QString()); }
 
-  void tearDown() override {
-    DefaultValue<QString>::Clear();
-  }
+  void tearDown() override { DefaultValue<QString>::Clear(); }
 
   GenericDataProcessorPresenterTest() { FrameworkManager::Instance(); }
 
