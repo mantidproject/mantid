@@ -84,12 +84,20 @@ InstrumentVisitor::InstrumentVisitor(
     m_pmap = m_instrument->getParameterMap().get();
   }
 
+  m_sourceId = nullptr;
+  m_sampleId = nullptr;
+
+  // To prevent warning generation. Do not even try to get the source or sample
+  // id if the instrument is empty.
+  if (!m_instrument->isEmptyInstrument()) {
+
   m_sourceId = m_instrument->getSource()
                    ? m_instrument->getSource()->getComponentID()
                    : nullptr;
   m_sampleId = m_instrument->getSample()
                    ? m_instrument->getSample()->getComponentID()
                    : nullptr;
+  }
 
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors); // Exact
@@ -311,12 +319,13 @@ InstrumentVisitor::makeWrappers() const {
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 InstrumentVisitor::makeWrappers(const Instrument &instrument,
                                 ParameterMap *pmap) {
-  const auto parInstrument =
+  // Visitee instrument is base instrument if no ParameterMap
+  const auto visiteeInstrument =
       pmap ? ParComponentFactory::createInstrument(
                  boost::shared_ptr<const Instrument>(&instrument, NoDeleting()),
                  boost::shared_ptr<ParameterMap>(pmap, NoDeleting()))
            : boost::shared_ptr<const Instrument>(&instrument, NoDeleting());
-  InstrumentVisitor visitor(parInstrument);
+  InstrumentVisitor visitor(visiteeInstrument);
   visitor.walkInstrument();
   return visitor.makeWrappers();
 }
