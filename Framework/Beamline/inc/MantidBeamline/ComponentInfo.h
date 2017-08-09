@@ -71,7 +71,7 @@ private:
   const size_t m_size = 0;
   const int64_t m_sourceIndex = -1;
   const int64_t m_sampleIndex = -1;
-  DetectorInfo *m_detectorInfo; // ExperimentInfo is the owner.
+  DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
 
   void failIfScanning() const;
 
