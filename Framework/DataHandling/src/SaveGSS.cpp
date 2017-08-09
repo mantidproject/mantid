@@ -692,7 +692,7 @@ void SaveGSS::writeRALFHeader(std::stringstream &out, int bank,
 
   // Write out the data header
   writeBankHeader(out, "RALF", bank, datasize);
-  const std::string bankDataType = getPropertyValue("Data Format");
+  const std::string bankDataType = getPropertyValue("DataFormat");
   out << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc2
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
