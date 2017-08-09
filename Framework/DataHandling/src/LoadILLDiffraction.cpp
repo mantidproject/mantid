@@ -529,7 +529,7 @@ std::vector<double> LoadILLDiffraction::getAxis(const NXDouble &scan) const {
 }
 
 /**
- * Returns the durations in second for each scan point
+ * Returns the durations in seconds for each scan point
  * @param scan : scan data
  * @return vector of durations
  */

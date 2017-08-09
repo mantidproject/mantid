@@ -24,7 +24,7 @@ For D20 1-dimensional detector, it supports 3 resolution modes:
 
 - **high** is when each pixel is split by 3, resulting in 4608 pixels. This corresponds to IDF *D20_hr*.
 
-Note, that all the IDFs contain only active pixels, and do not count the first and last banks went dead recently.
+Note, that all the IDFs contain only active pixels, and do not count the first and last banks which are inactive.
 These are the first and last 32 pixels in low resolution mode.
 The *2theta* value of the first pixel is read from the file, and the whole detector is rotated correspondingly.
 

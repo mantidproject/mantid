@@ -45,7 +45,6 @@ Bug fixes
 #########
 
 - :ref:`CubicSpline <func-CubicSpline>` is fixed to sort the y-values and x-values correctly.
-- A bug in :ref:`LoadILLDiffraction <algm-LoadILLDiffraction-v1>`, concerning the dimensions of the 1D or 2D detector data, has been fixed.
 
 Improved
 ########
