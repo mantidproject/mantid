@@ -56,6 +56,8 @@ private:
   double findMaxValue(size_t wi, double left_window_boundary,
                       double right_window_boundary, double b1, double b0);
 
+  void generateOutputWorkspaces();
+
   void setOutputProperties();
 
   API::MatrixWorkspace_const_sptr m_inputWS;
@@ -67,6 +69,13 @@ private:
 
   size_t m_numPeaksToFit;
   double m_minPeakMaxValue;
+
+  API::MatrixWorkspace_sptr m_peakPosWS;  // output workspace
+  API::MatrixWorkspace_sptr m_peakParamsWS;  // output workspace for all peak parameters
+
+  size_t m_startWorkspaceIndex;
+  size_t m_stopWorkspaceIndex;
+
 };
 
 } // namespace Algorithms

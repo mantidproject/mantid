@@ -15,6 +15,7 @@
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -76,6 +77,8 @@ void FitPeaks::init()
 void FitPeaks::exec()
 {
   processInputs();
+
+  generateOutputWorkspaces();
 
   fitPeaks();
 
@@ -196,7 +199,21 @@ double FitPeaks::findMaxValue(size_t wi, double left_window_boundary,
   return 0;
 }
 
-void FitPeaks::setOutputProperties() {}
+void FitPeaks::generateOutputWorkspaces(){
+  // MatrixWorkspace_sptr outputWS
+  //  size_t NVectors, size_t XLength,
+  //  size_t YLength)
+  size_t num_hist = m_inputWS->getNumberHistograms();
+  m_peakPosWS = WorkspaceFactory::Instance().create("Workspace2D", num_hist, m_numPeaksToFit, m_numPeaksToFit);
+  m_peakParamsWS = WorkspaceFactory::Instance().create("Workspace2D", m_numPeaksToFit*6, (m_stopWorkspaceIndex-m_startWorkspaceIndex),
+                                                       (m_stopWorkspaceIndex-m_startWorkspaceIndex));
+
+}
+
+void FitPeaks::setOutputProperties() {
+  setProperty("OutputWorkspace", m_peakPosWS);
+  setProperty("OutputPeakParametersWorkspace", m_peakParamsWS);
+}
 
 DECLARE_ALGORITHM(FitPeaks)
 
