@@ -587,17 +587,19 @@ void ConvFit::extendResolutionWorkspace() {
   if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
     const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
     // Check spectra consistency between resolution and sample
-    auto resolutionInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    auto resolutionInputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             resWsName.toStdString());
     size_t resolutionNumHist = resolutionInputWS->getNumberHistograms();
     size_t numHist = m_cfInputWS->getNumberHistograms();
-    if(resolutionNumHist != 1 && resolutionNumHist != numHist) {
-      std::string msg("Resolution must have either one or as many spectra as the sample");
+    if (resolutionNumHist != 1 && resolutionNumHist != numHist) {
+      std::string msg(
+          "Resolution must have either one or as many spectra as the sample");
       throw std::runtime_error(msg);
     }
     // Clone resolution workspace
     IAlgorithm_sptr cloneAlg =
-            AlgorithmManager::Instance().create("CloneWorkspace");
+        AlgorithmManager::Instance().create("CloneWorkspace");
     cloneAlg->setLogging(false);
     cloneAlg->initialize();
     cloneAlg->setProperty("InputWorkspace", resWsName.toStdString());
@@ -607,7 +609,7 @@ void ConvFit::extendResolutionWorkspace() {
     if (resolutionNumHist == 1) {
       for (size_t i = 1; i < numHist; i++) {
         IAlgorithm_sptr appendAlg =
-                AlgorithmManager::Instance().create("AppendSpectra");
+            AlgorithmManager::Instance().create("AppendSpectra");
         appendAlg->setLogging(false);
         appendAlg->initialize();
         appendAlg->setProperty("InputWorkspace1", "__ConvFit_Resolution");
