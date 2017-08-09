@@ -4,4 +4,4 @@ include (UiToPy)
 set( UI_FILES
 )
 
-UiToPy( UI_FILES CompileUIFDAG)
+UiToPy( UI_FILES CompileUIFrequency_Domain_Analysis)

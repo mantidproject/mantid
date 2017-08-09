@@ -14,7 +14,7 @@ add_custom_target(CompilePyUI DEPENDS
   CompileUITofConverter
   CompileUIUI
   CompileUIHFIR_4Circle_Reduction
-  CompileUIFDAG
+  CompileUIFrequency_Domain_Analysis
 )
 
 # Put them into the 'CompileUI' folder or group in VS and the like, for convenience
@@ -24,7 +24,7 @@ set_property ( TARGET CompileUIHFIRPowderReduction PROPERTY FOLDER "CompilePyUI"
 set_property ( TARGET CompileUITofConverter PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIHFIR_4Circle_Reduction PROPERTY FOLDER "CompilePyUI" )
-set_property ( TARGET CompileUIFDAG PROPERTY FOLDER "CompilePyUI" )
+set_property ( TARGET CompileUIFrequency_Domain_Analysis PROPERTY FOLDER "CompilePyUI" )
 
 set ( TEST_PY_FILES
       test/AbinsAtomsDataTest.py
