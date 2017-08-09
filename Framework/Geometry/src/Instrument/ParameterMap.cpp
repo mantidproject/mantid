@@ -1218,7 +1218,7 @@ size_t ParameterMap::componentIndex(const ComponentID componentId) const {
 void ParameterMap::setInstrument(const Instrument *instrument) {
   if (instrument == m_instrument)
     return;
-  if (!instrument) {
+  if (!instrument || instrument->isEmptyInstrument()) {
     m_componentInfo = nullptr;
     m_detectorInfo = nullptr;
     return;
