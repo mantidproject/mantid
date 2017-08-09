@@ -20,6 +20,14 @@ Bayes
 Data Analysis
 #############
 
+ConvFit
+~~~~~~~
+
+Bugfixes
+--------
+- Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
+- Backend :ref:`algm-ConvolutionFitSequential` now passes the workspace index by default to :ref:`algm-PlotPeakByLogValue`.
+
 Jump Fit
 ~~~~~~~~
 
