@@ -7,6 +7,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
+#include <cstdlib>
 #include <fstream>
 
 using Mantid::API::FileProperty;
@@ -182,6 +183,25 @@ public:
     TS_ASSERT_EQUALS(msg, "");
 
     dir.remove(); // clean up your folder
+  }
+
+  void testExpandUserVariables() {
+    FileProperty fp("Dir", "", FileProperty::Directory);
+    std::string msg = fp.setValue("~");
+
+    char *homepath = std::getenv("HOME");
+    if (!homepath) {
+      homepath = std::getenv("USERPROFILE");
+    }
+
+    if (homepath && Poco::File(homepath).exists()) {
+      // User home variable is set and points to a valid directory
+      // We should have no errors
+      TS_ASSERT(msg.empty());
+    } else {
+      // No user variables were set, so we should have an error
+      TS_ASSERT(!msg.empty());
+    }
   }
 
 private:

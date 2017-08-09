@@ -139,7 +139,7 @@ class CreateCacheFilename(PythonAlgorithm):
 
 def _hash(s):
     import hashlib
-    return hashlib.sha1(s).hexdigest()
+    return hashlib.sha1(str(s).encode('utf-8')).hexdigest()
 
 
 def matched(keys, patterns):
