@@ -226,8 +226,8 @@ void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
     DetectorInfo &outputDetectorInfo) const {
   std::vector<std::pair<int64_t, int64_t>> scanIntervals;
   for (const auto &scanInterval : m_scanIntervals) {
-    scanIntervals.push_back(
-        {scanInterval.first.nanoseconds(), scanInterval.second.nanoseconds()});
+    scanIntervals.push_back({scanInterval.first.totalNanoseconds(),
+                             scanInterval.second.totalNanoseconds()});
   }
 
   outputDetectorInfo.convertToDetectorScan(scanIntervals);
