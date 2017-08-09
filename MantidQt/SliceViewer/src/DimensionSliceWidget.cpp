@@ -13,11 +13,11 @@ DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
 
   QObject::connect(ui.horizontalSlider, SIGNAL(valueChanged(double)), this,
                    SLOT(sliderMoved()));
-  QObject::connect(ui.doubleSpinBox, SIGNAL(valueChanged(double)), this,
+  QObject::connect(ui.doubleSpinBox, SIGNAL(editingFinished()), this,
                    SLOT(spinBoxChanged()));
-  QObject::connect(ui.spinThickness, SIGNAL(valueChanged(double)), this,
+  QObject::connect(ui.spinThickness, SIGNAL(editingFinished()), this,
                    SLOT(spinThicknessChanged()));
-  QObject::connect(ui.spinBins, SIGNAL(valueChanged(int)), this,
+  QObject::connect(ui.spinBins, SIGNAL(editingFinished()), this,
                    SLOT(spinBinsChanged()));
   QObject::connect(ui.btnX, SIGNAL(toggled(bool)), this, SLOT(btnXYChanged()));
   QObject::connect(ui.btnY, SIGNAL(toggled(bool)), this, SLOT(btnXYChanged()));
