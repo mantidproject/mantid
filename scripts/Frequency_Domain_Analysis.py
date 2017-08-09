@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from Muon import FFTPresenter #test
-from Muon import FFTView #test
+from Muon import FFTPresenter 
+from Muon import FFTView 
 from PyQt4.QtGui import *
 import sys
 
