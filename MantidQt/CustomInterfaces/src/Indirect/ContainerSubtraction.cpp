@@ -363,19 +363,25 @@ void ContainerSubtraction::plotPreview(int wsIndex) {
   m_uiForm.ppPreview->clear();
 
   // Plot sample
-  m_uiForm.ppPreview->addSpectrum("Sample",
-                                  QString::fromStdString(m_sampleWorkspaceName),
-                                  wsIndex, Qt::black);
-
-  // Plot result
-  if (!m_pythonExportWsName.empty())
+  if (m_csSampleWS) {
+    m_uiForm.ppPreview->addSpectrum("Sample",
+      QString::fromStdString(m_sampleWorkspaceName),
+      wsIndex, Qt::black);
+  }
+  
+  // Plot container
+  if (m_csContainerWS) {
     m_uiForm.ppPreview->addSpectrum(
-        "Subtracted", QString::fromStdString(m_pythonExportWsName), wsIndex,
-        Qt::green);
-
-  m_uiForm.ppPreview->addSpectrum(
       "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
       Qt::red);
+  }
+
+  // Plot result
+  if (!m_pythonExportWsName.empty()) {
+    m_uiForm.ppPreview->addSpectrum(
+      "Subtracted", QString::fromStdString(m_pythonExportWsName), wsIndex,
+      Qt::green);
+  }
 
   m_spectra = boost::numeric_cast<size_t>(wsIndex);
 }
