@@ -287,9 +287,9 @@ void DetectorInfo::convertToTimeIndexded(
   auto scanCounts(m_scanCounts);
   const auto size = m_positions->size();
 
-  std::cout << "Scan interval size:" << m_scanIntervals.access().size()
-            << std::endl;
-  m_scanIntervals.access().push_back(scanIntervals[0]);
+  // Safely set the time range for the first entries
+  for (size_t linearIndex = 0; linearIndex < size; ++linearIndex)
+    setScanInterval(linearIndex, scanIntervals[0]);
 
   for (size_t scanIndex = 1; scanIndex < scanIntervals.size(); ++scanIndex) {
     for (size_t linearIndex = 0; linearIndex < size; ++linearIndex) {

@@ -521,6 +521,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(a2.merge(b));
     TS_ASSERT(a1.isEquivalent(a2));
   }
+
+  void test_convert_to_scanning() {
+    DetectorInfo a(PosVec(2), RotVec(2), {1});
+    auto scanIntervals = std::vector<std::pair<int64_t, int64_t>>();
+    std::pair<int64_t, int64_t> interval1(0, 1);
+    std::pair<int64_t, int64_t> interval2(1, 2);
+    std::pair<int64_t, int64_t> interval3(2, 3);
+    scanIntervals.push_back(interval1);
+    scanIntervals.push_back(interval2);
+    scanIntervals.push_back(interval3);
+    TS_ASSERT_THROWS_NOTHING(a.convertToTimeIndexded(scanIntervals));
+    TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
+    TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
+    TS_ASSERT_EQUALS(a.scanInterval({0, 2}), interval3);
+  }
 };
 
 #endif /* MANTID_BEAMLINE_DETECTORINFOTEST_H_ */
