@@ -551,7 +551,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
   loadStrings += "\n";
 
   // Load each subsequent run and add it to the first run
-  for (auto runIt = std::next(runs.begin()); runIt != runs.end(); ++runIt) {
+  for (auto runIt = runs.begin() + 1; runIt != runs.end(); ++runIt) {
     loadString = loadRunString(*runIt, instrument, prefix);
     loadStrings += boost::get<0>(loadString);
     loadStrings += plusString(boost::get<1>(loadString), outputName,
