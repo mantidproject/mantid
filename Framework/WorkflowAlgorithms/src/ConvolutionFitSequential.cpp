@@ -198,12 +198,9 @@ void ConvolutionFitSequential::exec() {
     plotPeakStringProg.report("Constructing PlotPeak name");
   }
 
-  // passWSIndex
-  auto passIndex = false;
-  if (funcName.find("Diff") != std::string::npos ||
-      funcName.find("Stretched") != std::string::npos) {
-    passIndex = true;
-  }
+  // We should always pass the workspace index, since it has no effect if
+  // the fit function does not contain parameter WorkspaceIndex
+  auto passIndex = true;
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
