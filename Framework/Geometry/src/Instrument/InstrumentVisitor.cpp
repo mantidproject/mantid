@@ -91,12 +91,12 @@ InstrumentVisitor::InstrumentVisitor(
   // id if the instrument is empty.
   if (!m_instrument->isEmptyInstrument()) {
 
-  m_sourceId = m_instrument->getSource()
-                   ? m_instrument->getSource()->getComponentID()
-                   : nullptr;
-  m_sampleId = m_instrument->getSample()
-                   ? m_instrument->getSample()->getComponentID()
-                   : nullptr;
+    m_sourceId = m_instrument->getSource()
+                     ? m_instrument->getSource()->getComponentID()
+                     : nullptr;
+    m_sampleId = m_instrument->getSample()
+                     ? m_instrument->getSample()->getComponentID()
+                     : nullptr;
   }
 
   const auto nDetectors = m_orderedDetectorIds->size();
