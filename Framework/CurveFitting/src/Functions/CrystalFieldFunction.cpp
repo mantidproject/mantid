@@ -238,6 +238,16 @@ double CrystalFieldFunction::getParameter(size_t i) const {
   }
 }
 
+/// Check if function has a parameter with this name.
+bool CrystalFieldFunction::hasParameter(const std::string &name) const{
+  try {
+    getParameterReference(name);
+    return true;
+  } catch (std::invalid_argument&) {
+    return false;
+  }
+}
+
 /// Set parameter by name.
 void CrystalFieldFunction::setParameter(const std::string &name,
                                         const double &value,
