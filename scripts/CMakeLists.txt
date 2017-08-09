@@ -76,6 +76,7 @@ set ( TEST_PY_FILES
 
 # Addition tests for SANS components
 add_subdirectory(test/SANS)
+add_subdirectory(test/Muon)
 
 # python unit tests
 if (PYUNITTEST_FOUND)

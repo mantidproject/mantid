@@ -1,7 +1,8 @@
-from PyQt4 import QtGui
+import mantid
 import mock
-from Muon import FFTPresenter #test
-from Muon import FFTView #test
+#from . import Muon
+from  Muon import FFTPresenter 
+from  Muon import FFTView 
 import unittest
 import sys
 
