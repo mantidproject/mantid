@@ -52,7 +52,7 @@ class DRangeToWorkspaceMap(object):
     def __init__(self):
         self._map = {}
 
-    def addWs(self, ws_name, d_range=None):
+    def add_ws(self, ws_name, d_range=None):
         """
         Takes in the given workspace and lists it alongside its time regime
         value.  If the time regime has yet to be created, it will create it,
@@ -89,7 +89,8 @@ class DRangeToWorkspaceMap(object):
         if d_range not in self._map:
             self._map[d_range] = [ws_name]
         else:
-            # check if x ranges matchs and existing run
+
+            # Check if x ranges match an existing run
             for ws_name in self._map[d_range]:
                 map_lastx = mtd[ws_name].readX(0)[-1]
                 ws_lastx = wrksp.readX(0)[-1]
@@ -101,7 +102,7 @@ class DRangeToWorkspaceMap(object):
 
             self._map[d_range].append(ws_name)
 
-    def averageAcrossDRanges(self):
+    def average_across_dranges(self):
         """
         Averages workspaces which are mapped to the same drange,
         removing them from the map and mapping the averaged workspace
@@ -115,7 +116,7 @@ class DRangeToWorkspaceMap(object):
 
         self._map = temp_map
 
-    def setItem(self, d_range, ws_name):
+    def set_item(self, d_range, ws_name):
         """
         Set a dRange and corresponding *single* ws.
         """
@@ -169,17 +170,17 @@ def average_ws_list(ws_list):
         return ws_list[0]
 
     # Generate the final name of the averaged workspace.
-    avName = "avg" + "_" + "_".join(ws_list)
+    av_name = "avg" + "_" + "_".join(ws_list)
 
-    numWorkspaces = len(ws_list)
+    num_workspaces = len(ws_list)
 
     # Compute the average and put into "__temp_avg".
-    temperatures = map(lambda index : mtd[ws_list[index]], range(1, numWorkspaces))
+    temperatures = map(lambda index: mtd[ws_list[index]], range(1, num_workspaces))
     __temp_avg = sum(temperatures)
-    __temp_avg /= numWorkspaces
+    __temp_avg /= num_workspaces
 
     # Rename the average ws and return it.
-    RenameWorkspace(InputWorkspace=__temp_avg, OutputWorkspace=avName)
+    RenameWorkspace(InputWorkspace=__temp_avg, OutputWorkspace=av_name)
     return avName
 
 
@@ -214,14 +215,14 @@ def get_intersection_of_ranges(range_list):
     the same point.  Also, all ranges should obey range[0] <= range[1].
     """
     # Find all combinations of ranges, and see where they intersect.
-    rangeCombos = list(itertools.combinations(range_list, 2))
+    range_combos = list(itertools.combinations(range_list, 2))
 
     # Retrieve all intersections
-    intersections = map(lambda rangePair : find_intersection_of_ranges(rangePair[0], rangePair[1]),
-                        rangeCombos)
+    intersections = map(lambda range_pair: find_intersection_of_ranges(range_pair[0], range_pair[1]),
+                        range_combos)
 
     # Filter out None type intersections
-    intersections = filter(lambda intersection : intersection is not None, intersections)
+    intersections = filter(lambda intersection: intersection is not None, intersections)
 
     # Return the sorted intersections.
     intersections.sort()
@@ -230,6 +231,7 @@ def get_intersection_of_ranges(range_list):
 
 def is_in_ranges(range_list, val):
     return any(arange[0] < val < arange[1] for arange in range_list)
+
 
 # pylint: disable=no-init,too-many-instance-attributes
 class OSIRISDiffractionReduction(PythonAlgorithm):
@@ -376,10 +378,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
             # Scale the container run if required
             if self._container_scale_factor != 1.0:
-                map(lambda container : Scale(InputWorkspace=container,
-                                             OutputWorkspace=container,
-                                             Factor=self._container_scale_factor,
-                                             Operator='Multiply'), container_ws_names)
+                map(lambda container_ws: Scale(InputWorkspace=container_ws,
+                                               OutputWorkspace=container_ws,
+                                               Factor=self._container_scale_factor,
+                                               Operator='Multiply'), container_ws_names)
 
         # Add the sample workspaces to the dRange to sample map
         for idx, sample in enumerate(sample_ws_names):
@@ -394,9 +396,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                       OutputWorkspace=sample)
 
             if self._man_d_range is not None and idx < len(self._man_d_range):
-                self._sam_ws_map.addWs(sample, self._man_d_range[idx])
+                self._sam_ws_map.add_ws(sample, self._man_d_range[idx])
             else:
-                self._sam_ws_map.addWs(sample)
+                self._sam_ws_map.add_ws(sample)
 
         # Add the vanadium workspaces to the dRange to vanadium map
         self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
@@ -414,10 +416,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Average together any sample workspaces with the same DRange.
         # This will mean our map of DRanges to list of workspaces becomes a map
         # of DRanges, each to a *single* workspace.
-        self._sam_ws_map.averageAcrossDRanges()
+        self._sam_ws_map.average_across_dranges()
 
         # Now do the same to the vanadium workspaces.
-        self._van_ws_map.averageAcrossDRanges()
+        self._van_ws_map.average_across_dranges()
 
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
         for d_range, wrksp in itertools.chain(self._sam_ws_map.items(), self._van_ws_map.items()):
@@ -448,17 +450,17 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                  InfinityValue=0.0)
 
         # Create a list of sample workspace NAMES, since we need this for MergeRuns.
-        samWsNamesList = list(self._sam_ws_map.values())
+        sam_ws_names_list = list(self._sam_ws_map.values())
 
-        if len(samWsNamesList) > 1:
+        if len(sam_ws_names_list) > 1:
             # Merge the sample files into one.
-            MergeRuns(InputWorkspaces=samWsNamesList,
+            MergeRuns(InputWorkspaces=sam_ws_names_list,
                       OutputWorkspace=self._output_ws_name)
-            for name in samWsNamesList:
+            for name in sam_ws_names_list:
                 DeleteWorkspace(Workspace=name)
                 DeleteWorkspace(Workspace=name + "_mon")
         else:
-            RenameWorkspace(InputWorkspace=samWsNamesList[0],
+            RenameWorkspace(InputWorkspace=sam_ws_names_list[0],
                             OutputWorkspace=self._output_ws_name)
 
         result = mtd[self._output_ws_name]
@@ -466,28 +468,28 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Create scalar data to cope with where merge has combined overlapping data.
         intersections = get_intersection_of_ranges(list(self._sam_ws_map.keys()))
 
-        dataX = result.dataX(0)
-        dataY = []
-        dataE = []
-        for i in range(0, len(dataX) - 1):
-            x_val = (dataX[i] + dataX[i + 1]) / 2.0
+        data_x = result.dataX(0)
+        data_y = []
+        data_e = []
+        for i in range(0, len(data_x) - 1):
+            x_val = (data_x[i] + data_x[i + 1]) / 2.0
             if is_in_ranges(intersections, x_val):
-                dataY.append(2)
-                dataE.append(2)
+                data_y.append(2)
+                data_e.append(2)
             else:
-                dataY.append(1)
-                dataE.append(1)
+                data_y.append(1)
+                data_e.append(1)
 
         # apply scalar data to result workspace
         for i in range(0, result.getNumberHistograms()):
-            resultY = result.dataY(i)
-            resultE = result.dataE(i)
+            result_y = result.dataY(i)
+            result_e = result.dataE(i)
 
-            resultY = resultY / dataY
-            resultE = resultE / dataE
+            result_y = result_y / data_y
+            result_e = result_e / data_e
 
-            result.setY(i, resultY)
-            result.setE(i, resultE)
+            result.setY(i, result_y)
+            result.setE(i, result_e)
 
         # Delete all workspaces we've created, except the result.
         for wrksp in self._van_ws_map.values():
@@ -511,9 +513,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for idx, ws in enumerate(workspaces):
             if self._man_d_range is not None and \
                             idx < len(self._man_d_range):
-                drange_map.addWs(ws, self._man_d_range[idx])
+                drange_map.add_ws(ws, self._man_d_range[idx])
             else:
-                drange_map.addWs(ws)
+                drange_map.add_ws(ws)
 
     def _parse_string_array(self, string):
         """
@@ -531,20 +533,16 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         str_ranges = string.replace(" ", "").split(",")
         str_ranges = [x.split("-") for x in str_ranges]
 
-        range_array = []
+        # Convert string ranges to integer ranges.
+        int_ranges = map(lambda str_range: [int(x) for x in str_range], str_ranges)
 
-        # Iterate over each range/element (represented as a string).
-        for str_range in str_ranges:
-            length = len(str_range)
+        # Expand integer ranges formed from a string 'a-b', to a range from a to b
+        int_ranges = map(lambda int_range:  range(int_range[0], int_range[1])
+                                            if len(int_range) > 1
+                                            else int_range, int_ranges)
 
-            # Check whether the current range has one element or
-            # two.
-            if length == 1:
-                range_array.append(int(str_range[0]))
-            elif length == 2:
-                range_array += list(range(int(str_range[0]), int(str_range[1])))
-
-        return range_array
+        # Return flattened list of range values
+        return [range_value for int_range in int_ranges for range_value in int_range]
 
     def _find_runs(self, runs):
         """
