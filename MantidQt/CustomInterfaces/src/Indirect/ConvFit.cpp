@@ -292,8 +292,8 @@ void ConvFit::run() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-IAlgorithm_sptr ConvFit::sequentialFit(const std::string specMin,
-                                       const std::string specMax,
+IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
+                                       const std::string &specMax,
                                        QString &outputWSName) {
   const auto func = createFunction(m_uiForm.ckTieCentres->isChecked());
   const auto function = std::string(func->asString());
@@ -315,7 +315,7 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string specMin,
   outputWSName += bgType;
   outputWSName += QString::fromStdString(specMin);
 
-  if (specMin.compare(specMax) != 0) {
+  if (specMin != specMax) {
     outputWSName += "_to_";
     outputWSName += QString::fromStdString(specMax);
   }
@@ -430,9 +430,9 @@ void ConvFit::plotCurrentPreview() {
 *
 * @param error True if the algorithm was stopped due to error, false otherwise
 * @param outputWSName The name of the output workspace created from running the
-*algorithm.
+*                     algorithm.
 */
-void ConvFit::algorithmComplete(bool error, QString &outputWSName) {
+void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
 
   if (error)
     return;
