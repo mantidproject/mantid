@@ -38,6 +38,7 @@ void DimensionSliceWidget::sliderMoved() {
 
   // This will, in turn, emit the changedSlicePoint() signal
   ui.doubleSpinBox->setValue(m_slicePoint);
+  spinBoxChanged();
 }
 
 //-------------------------------------------------------------------------------------------------
