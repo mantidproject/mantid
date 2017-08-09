@@ -6,13 +6,13 @@ from PyQt4.QtGui import *
 import sys
 
 
-class FDAG(QDialog):
+class FDAG(QMainWindow):
     def __init__(self,parent=None):
         super(FDAG,self).__init__(parent)
-        view =FFTView.FFTView() 
+        view =FFTView.FFTView(self) 
         self.presenter =FFTPresenter.FFTPresenter(view) #the main ui class in this file is called MainWindow
-        self.setLayout(view.grid)
-   
+        self.setCentralWidget(view)
+        self.setWindowTitle("Frequency Domain Analysis")
 
 
 def qapp():
@@ -24,7 +24,6 @@ def qapp():
 
 app = qapp()
 ex= FDAG()
-#ex =test.Form() #the main ui class in this file is called MainWindow
 ex.resize(700,700)
 ex.show()
 app.exec_()
