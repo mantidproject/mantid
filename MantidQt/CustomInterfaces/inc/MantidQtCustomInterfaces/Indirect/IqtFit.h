@@ -50,6 +50,7 @@ private slots:
   void algorithmComplete(bool error);
   void plotWorkspace();
   void saveResult();
+  void plotCurrentPreview();
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -73,6 +74,7 @@ private:
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   Mantid::API::MatrixWorkspace_sptr m_iqtFInputWS;
   Mantid::API::MatrixWorkspace_sptr m_iqtFOutputWS;
+  Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
   QString m_iqtFInputWSName;
   QString m_ties;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;

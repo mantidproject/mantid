@@ -28,8 +28,15 @@ Plotting Improvements
 Algorithm Toolbox
 #################
 
-Scripting Window
-################
+Workspace History Window
+########################
+
+.. figure:: ../../images/WorkspaceHistoryShortenedValues.png
+   :class: screenshot
+   :align: right
+
+- Algorithm proprties with long values are now shown in a shortened format both in this display and the log.  The full history is still retained, and genereated python scripts will still work as before.
+
 
 Documentation
 #############
@@ -45,6 +52,10 @@ Bugs Resolved
 
 SliceViewer Improvements
 ------------------------
+
+VSI Improvments
+---------------
+- ParaView has been updated to to `v5.4.0 <https://blog.kitware.com/paraview-5-4-0-release-notes/>`_.
 
 |
 

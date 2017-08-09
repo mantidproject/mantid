@@ -1,0 +1,74 @@
+digraph isisPowderCreateVanadium{
+    label="ISISPowder - Save Focused Banks"
+    $global_style
+
+    // **Labels
+    label_saveFocusedGeneric                    [label="Save Focused Banks - Generic"]
+
+    // **Parameters
+    subgraph params {
+        $param_style
+
+        param_processedBanksGeneric             [label="Processed banks"]
+
+        // PEARL params
+        param_focusModePearl                    [label="User param: focus mode"]
+    }
+
+    // **Processes (inc. bespoke inst steps)
+    subgraph {
+        $process_style
+
+        // Bespoke
+        proc_focusModeAllPearl                  [label="Focus mode: All"]
+        proc_focusModeGroupsPearl               [label="Focus mode: Groups"]
+        proc_focusModeTransPearl                [label="Focus mode: Trans"]
+        proc_focusModeModsPearl                 [label="Focus mode: Mods"]
+    }
+
+    // **Algorithms
+    subgraph algorithms{
+        $algorithm_style
+
+        // Generic
+        alg_SaveNexusProcessedGeneric           [label="Save Nexus Processed - TOF"]
+        alg_SaveGSSProcessedGeneric             [label="Save GSS - TOF"]
+        alg_SaveXyeDSpacing                     [label="Save GSS - dSpacing"]
+        alg_SaveXyeTofGeneric                   [label="Save XYE - TOF"]
+    }
+
+    // **Decisions
+    subgraph decisions{
+        $decision_style
+
+        // Pearl
+        if_focusModePearl                       [label="If: focus mode"]
+    }
+
+    // **Graph layout - Generic method
+    subgraph SaveFocusedBanksGeneric{
+        // NXS
+        label_saveFocusedGeneric        -> alg_SaveNexusProcessedGeneric
+        param_processedBanksGeneric     -> alg_SaveNexusProcessedGeneric
+
+        // GSS
+        alg_SaveNexusProcessedGeneric   -> alg_SaveGSSProcessedGeneric
+
+        // XYE
+        alg_SaveGSSProcessedGeneric     -> alg_SaveXyeDSpacing  [label="XYE files saved into subdirectory"]
+        alg_SaveXyeDSpacing             -> alg_SaveXyeTofGeneric
+
+    }
+
+    subgraph SaveFocusedBankPearl{
+        // Determine focus mode from user input
+        label_saveFocusedPearl          -> if_focusModePearl
+        param_focusModePearl            -> if_focusModePearl
+
+        // Switch to various sub-processes detailed in different file
+        if_focusModePearl               -> proc_focusModeAllPearl
+        if_focusModePearl               -> proc_focusModeGroupsPearl
+        if_focusModePearl               -> proc_focusModeModsPearl
+        if_focusModePearl               -> proc_focusModeTransPearl
+    }
+}

@@ -224,12 +224,12 @@ public:
     QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
 
     // Non-existent row
-    TS_ASSERT_EQUALS(model.addHighlighted(10), false);
-    TS_ASSERT_EQUALS(model.addHighlighted(-1), false);
+    TS_ASSERT_EQUALS(model.setProcessed(true, 10), false);
+    TS_ASSERT_EQUALS(model.setProcessed(true, -1), false);
 
-    // Highlight the 1st and 3rd rows
-    TS_ASSERT_EQUALS(model.addHighlighted(0), true);
-    TS_ASSERT_EQUALS(model.addHighlighted(2), true);
+    // Set the 1st and 3rd rows processed
+    TS_ASSERT_EQUALS(model.setProcessed(true, 0), true);
+    TS_ASSERT_EQUALS(model.setProcessed(true, 2), true);
 
     // Only 1st and 3rd rows are highlighted
     TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
@@ -250,34 +250,23 @@ public:
                      "");
   }
 
-  void testClearHighlightFourRowTable() {
+  void testIsProcessedFourRowTable() {
     auto ws = fourRowTable();
     QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
 
-    // Highlight the 1st and 3rd rows
-    TS_ASSERT_EQUALS(model.addHighlighted(0), true);
-    TS_ASSERT_EQUALS(model.addHighlighted(2), true);
+    // Set the 1st and 3rd rows processed
+    model.setProcessed(true, 0);
+    model.setProcessed(true, 2);
 
-    // Clear all highlighted rows
-    model.clearHighlighted();
+    // Non-existent row
+    TS_ASSERT_THROWS(model.isProcessed(10), std::invalid_argument);
+    TS_ASSERT_THROWS(model.isProcessed(-1), std::invalid_argument);
 
-    // No rows should be highlighted
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     "");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     "");
-    TS_ASSERT_EQUALS(model.data(model.index(2, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     "");
-    TS_ASSERT_EQUALS(model.data(model.index(3, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     "");
+    // Only 1st and 3rd rows are processed
+    TS_ASSERT_EQUALS(model.isProcessed(0), true);
+    TS_ASSERT_EQUALS(model.isProcessed(1), false);
+    TS_ASSERT_EQUALS(model.isProcessed(2), true);
+    TS_ASSERT_EQUALS(model.isProcessed(3), false);
   }
 
 private:

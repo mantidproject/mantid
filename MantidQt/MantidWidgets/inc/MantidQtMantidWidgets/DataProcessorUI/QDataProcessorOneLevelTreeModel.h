@@ -62,6 +62,9 @@ public:
   // Get the index for a given column, row and parent
   QModelIndex index(int row, int column,
                     const QModelIndex &parent = QModelIndex()) const override;
+  // Get the 'processed' status of a row
+  bool isProcessed(int position,
+                   const QModelIndex &parent = QModelIndex()) const override;
   // Get the underlying data structure
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
@@ -79,18 +82,13 @@ public:
   // Remove rows from the model
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
-
-  // Miscellaneous model functions
-
-  // Add a row to the list of rows to be highlighted
-  bool addHighlighted(int position,
-                      const QModelIndex &parent = QModelIndex()) override;
-  // Clear the list of highlighted items
-  void clearHighlighted() override;
+  // Set the 'processed' status of a row
+  bool setProcessed(bool processed, int position,
+                    const QModelIndex &parent = QModelIndex()) override;
 
 private:
-  /// List of row indexes that should be highlighted
-  std::vector<int> m_highlightRows;
+  /// Vector containing process status for each row
+  std::vector<bool> m_rows;
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorOneLevelTreeModel
