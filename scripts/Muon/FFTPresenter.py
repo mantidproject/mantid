@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 import mantid.simpleapi as mantid
-from Muon import FFTView
 
 
 class FFTPresenter(object):
@@ -22,17 +21,17 @@ class FFTPresenter(object):
         options=options.split("','")
         final_options=[]
         for pick in options:
-             if ";" in pick and "Raw" not in pick: 
-                 final_options.append(pick)
+            if ";" in pick and "Raw" not in pick:
+                final_options.append(pick)
         self.view.addItems(final_options)
 
     #functions
     def tableClicked(self,row,col):
         if row == self.view.getImBoxRow() and col ==1:
-             self.view.changedHideUnTick(self.view.getImBox(),self.view.getImBoxRow()+1)
+            self.view.changedHideUnTick(self.view.getImBox(),self.view.getImBoxRow()+1)
         elif  row == self.view.getShiftBoxRow() and col ==1:
-             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
- 
+            self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
+
     def handleButton(self):
         inputs = self.get_FFT_input()
         alg=mantid.AlgorithmManager.create("FFT")
