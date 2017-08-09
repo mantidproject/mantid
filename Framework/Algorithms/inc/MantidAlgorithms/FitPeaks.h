@@ -45,11 +45,28 @@ private:
 
   void fitSpectraPeaks(size_t wi);
 
+  double fitSinglePeak(API::IFunction_sptr fitfunc,
+                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                       double xmin, double xmax);
+
+  void estimateLinearBackground(size_t wi, double left_window_boundary,
+                                double right_window_boundary, double &bkgd_a1,
+                                double &bkgd_a0);
+
+  double findMaxValue(size_t wi, double left_window_boundary,
+                      double right_window_boundary, double b1, double b0);
+
+  void setOutputProperties();
+
   API::MatrixWorkspace_const_sptr m_inputWS;
 
   std::vector<double> m_peakWindowLeft;
   std::vector<double> m_peakWindowRight;
 
+  std::vector<double> m_initParamValues;
+
+  size_t m_numPeaksToFit;
+  double m_minPeakMaxValue;
 };
 
 } // namespace Algorithms
