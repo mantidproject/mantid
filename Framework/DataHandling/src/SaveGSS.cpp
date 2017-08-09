@@ -131,11 +131,11 @@ void SaveGSS::init() {
 
   const std::vector<std::string> ralfDataFormats{FXYE, ALT};
   declareProperty(
-      "Data Format", FXYE,
+      "DataFormat", FXYE,
       boost::make_shared<Kernel::StringListValidator>(ralfDataFormats),
       "Saves RALF data as either FXYE or alternative format");
   setPropertySettings(
-      "Data Format",
+      "DataFormat",
       Kernel::make_unique<Kernel::VisibleWhenProperty>(
           "Format", Kernel::ePropertyCriterion::IS_EQUAL_TO, RALF));
 
@@ -240,7 +240,7 @@ void SaveGSS::generateBankData(std::stringstream &outBuf,
   const bool multiplyByBinWidth = getProperty("MultiplyByBinWidth");
   const int userStartingBankNumber = getProperty("Bank");
   const std::string outputFormat = getPropertyValue("Format");
-  const std::string ralfDataFormat = getPropertyValue("Data Format");
+  const std::string ralfDataFormat = getPropertyValue("DataFormat");
 
   int bankid;
   if (useSpecAsBank) {

@@ -173,7 +173,7 @@ public:
     const std::string outFilePath = outFileHandle.path();
 
     auto alg = setupSaveGSSAlg(outFilePath, wsName, "RALF");
-    alg->setProperty("Data Format", "ALT");
+    alg->setProperty("DataFormat", "ALT");
     alg->setProperty("SplitFiles", false);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
@@ -197,7 +197,7 @@ public:
     outFileHandle.registerForDeletion(outFilePathWithExt);
 
     auto alg = setupSaveGSSAlg(outFilePathWithExt, wsName, "RALF");
-    alg->setProperty("Data Format", "FXYE");
+    alg->setProperty("DataFormat", "FXYE");
     alg->setProperty("SplitFiles", true);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
