@@ -46,6 +46,20 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QPushButton" name="expand_button">
+       <property name="text">
+        <string>Expand</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="collapse_button">
+       <property name="text">
+        <string>Collapse</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -53,6 +67,12 @@
      <property name="animated">
       <bool>true</bool>
      </property>
+     <attribute name="headerDefaultSectionSize">
+      <number>350</number>
+     </attribute>
+     <attribute name="headerMinimumSectionSize">
+      <number>350</number>
+     </attribute>
      <attribute name="headerStretchLastSection">
       <bool>true</bool>
      </attribute>

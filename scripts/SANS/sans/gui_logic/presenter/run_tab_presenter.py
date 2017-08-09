@@ -14,7 +14,7 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiag
 from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_reduction_mode_strings_for_gui,
-                                       OPTIONS_SEPARATOR, OPTIONS_INDEX, OPTIONS_EQUAL)
+                                       OPTIONS_SEPARATOR, OPTIONS_INDEX, OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX)
 
 from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RebinType, RangeStepType, SampleShape,
                                FitType)
@@ -211,9 +211,9 @@ class RunTabPresenter(object):
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
 
-    def _add_to_options(self, row, property_name, property_value):
+    def _add_to_hidden_options(self, row, property_name, property_value):
         """
-        Adds a new property to the Options column
+        Adds a new property to the Hidden Options column
 
         @param row: The row where the Options column is being altered
         @param property_name: The property name on the GUI algorithm.
@@ -222,18 +222,21 @@ class RunTabPresenter(object):
 
         """
         entry = property_name + OPTIONS_EQUAL + str(property_value)
-        options = self._get_options(row)
+        options = self._get_hidden_options(row)
         if options:
             options += OPTIONS_SEPARATOR + entry
         else:
             options = entry
-        self._set_options(options, row)
+        self._set_hidden_options(options, row)
 
-    def _set_options(self, value, row):
-        self._view.set_cell(value, row, OPTIONS_INDEX)
+    def _set_hidden_options(self, value, row):
+        self._view.set_cell(value, row, HIDDEN_OPTIONS_INDEX)
 
     def _get_options(self, row):
         return self._view.get_cell(row, OPTIONS_INDEX, convert_to=str)
+
+    def _get_hidden_options(self, row):
+        return self._view.get_cell(row, HIDDEN_OPTIONS_INDEX, convert_to=str)
 
     def is_empty_row(self, row):
         indices = range(OPTIONS_INDEX + 1)
@@ -243,8 +246,8 @@ class RunTabPresenter(object):
                 return False
         return True
 
-    def _remove_from_options(self, row, property_name):
-        options = self._get_options(row)
+    def _remove_from_hidden_options(self, row, property_name):
+        options = self._get_hidden_options(row)
         # Remove the property entry and the value
         individual_options = options.split(",")
         clean_options = []
@@ -252,7 +255,7 @@ class RunTabPresenter(object):
             if property_name not in individual_option:
                 clean_options.append(individual_option)
         clean_options = ",".join(clean_options)
-        self._set_options(clean_options, row)
+        self._set_hidden_options(clean_options, row)
 
     def _validate_rows(self):
         # If SampleScatter is empty, then don't run the reduction.
@@ -670,6 +673,8 @@ class RunTabPresenter(object):
             can_direct = self._view.get_cell(row=row, column=5, convert_to=str)
 
             # Get the options string
+            # We don't have to add the hidden column here, since it only contains information for the SANS
+            # workflow to operate properly. It however does not contain information for the
             options_string = self._get_options(row)
 
             table_index_model = TableIndexModel(row, sample_scatter, sample_transmission, sample_direct,
@@ -760,19 +765,19 @@ class RunTabPresenter(object):
     def _remove_dummy_workspaces_and_row_index(self):
         number_of_rows = self._view.get_number_of_rows()
         for row in range(number_of_rows):
-            self._remove_from_options(row, "InputWorkspace")
-            self._remove_from_options(row, "RowIndex")
+            self._remove_from_hidden_options(row, "InputWorkspace")
+            self._remove_from_hidden_options(row, "RowIndex")
 
     def _set_indices(self):
         number_of_rows = self._view.get_number_of_rows()
         for row in range(number_of_rows):
             to_set = Property.EMPTY_INT if self.is_empty_row(row) else row
-            self._add_to_options(row, "RowIndex", to_set)
+            self._add_to_hidden_options(row, "RowIndex", to_set)
 
     def _set_dummy_workspace(self):
         number_of_rows = self._view.get_number_of_rows()
         for row in range(number_of_rows):
-            self._add_to_options(row, "InputWorkspace", SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME)
+            self._add_to_hidden_options(row, "InputWorkspace", SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME)
 
     @staticmethod
     def _create_dummy_input_workspace():

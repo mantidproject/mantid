@@ -51,6 +51,12 @@ QGroupBox::title {
             <height>16777215</height>
            </size>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
          </widget>
         </item>
        </layout>
@@ -58,7 +64,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">

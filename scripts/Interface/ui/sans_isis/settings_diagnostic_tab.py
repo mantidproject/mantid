@@ -17,6 +17,14 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         def on_update_rows(self):
             pass
 
+        @abstractmethod
+        def on_collapse(self):
+            pass
+
+        @abstractmethod
+        def on_expand(self):
+            pass
+
     def __init__(self):
         super(SettingsDiagnosticTab, self).__init__()
         self.setupUi(self)
@@ -41,6 +49,12 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         for listener in self._settings_diagnostic_listeners:
             target(listener)
 
+    def on_expand(self):
+        self._call_settings_diagnostic_listeners(lambda listener: listener.on_expand())
+
+    def on_collapse(self):
+        self._call_settings_diagnostic_listeners(lambda listener: listener.on_collapse())
+
     def on_row_changed(self):
         self._call_settings_diagnostic_listeners(lambda listener: listener.on_row_changed())
 
@@ -50,6 +64,8 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
     def connect_signals(self):
         self.select_row_combo_box.currentIndexChanged.connect(self.on_row_changed)
         self.select_row_push_button.clicked.connect(self.on_update_rows)
+        self.collapse_button.clicked.connect(self.on_collapse)
+        self.expand_button.clicked.connect(self.on_expand)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
@@ -105,3 +121,13 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         if not value:
             value = -1
         return int(value)
+
+    def collapse(self):
+        for index in range(self.tree_widget.topLevelItemCount()):
+            top_level_item = self.tree_widget.topLevelItem(index)
+            self.tree_widget.collapseItem(top_level_item)
+
+    def expand(self):
+        for index in range(self.tree_widget.topLevelItemCount()):
+            top_level_item = self.tree_widget.topLevelItem(index)
+            self.tree_widget.expandItem(top_level_item)

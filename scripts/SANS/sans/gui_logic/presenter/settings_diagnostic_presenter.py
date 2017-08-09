@@ -2,6 +2,7 @@ from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 
 from mantid.kernel import logger
 
+
 class SettingsDiagnosticPresenter(object):
     class ConcreteSettingsDiagnosticTabListener(SettingsDiagnosticTab.SettingsDiagnosticTabListener):
         def __init__(self, presenter):
@@ -14,10 +15,22 @@ class SettingsDiagnosticPresenter(object):
         def on_update_rows(self):
             self._presenter.on_update_rows()
 
+        def on_collapse(self):
+            self._presenter.on_collapse()
+
+        def on_expand(self):
+            self._presenter.on_expand()
+
     def __init__(self, parent_presenter):
         super(SettingsDiagnosticPresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
+
+    def on_collapse(self):
+        self._view.collapse()
+
+    def on_expand(self):
+        self._view.expand()
 
     def on_row_changed(self):
         row_index = self._view.get_current_row()
@@ -42,6 +55,7 @@ class SettingsDiagnosticPresenter(object):
 
         if new_row_index != -1:
             self.set_row(new_row_index)
+            self.on_row_changed()
 
     def set_row(self, index):
         self._view.set_row(index)

@@ -7,7 +7,7 @@ from collections import namedtuple
 OPTIONS_INDEX = 6
 OPTIONS_SEPARATOR = ","
 OPTIONS_EQUAL = "="
-
+HIDDEN_OPTIONS_INDEX = 7
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Other Globals
