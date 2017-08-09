@@ -27,7 +27,7 @@ class FFTView(QtGui.QWidget):
         options=['test']
 
         widgetHelper.setName(self.table,0,"Workspace")
-        self.ws= widgetHelper.createComboTable(self.table,0,options)   
+        self.ws= widgetHelper.createComboTable(self.table,0,options)
         self.Im_box_row=1
         widgetHelper.setName(self.table,self.Im_box_row,"Imaginary Data")
         self.Im_box= widgetHelper.createCheckTable(self.table,True,self.Im_box_row)
@@ -36,7 +36,7 @@ class FFTView(QtGui.QWidget):
         self.Im_ws= widgetHelper.createComboTable(self.table,2,options)
 
         self.shift_box_row=3
-        widgetHelper.setName(self.table,self.shift_box_row,"Auto shift") 
+        widgetHelper.setName(self.table,self.shift_box_row,"Auto shift")
         self.shift_box= widgetHelper.createCheckTable(self.table,True,self.shift_box_row)
 
         widgetHelper.setName(self.table,4,"Shift")

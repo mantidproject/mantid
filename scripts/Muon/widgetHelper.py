@@ -11,7 +11,7 @@ def setName(table,row,name):
 def createComboTable(table,row,options):
     combo=QtGui.QComboBox()
     combo.addItems(options)
-    table.setCellWidget(row,1,combo )    
+    table.setCellWidget(row,1,combo)
     return combo
 
 
