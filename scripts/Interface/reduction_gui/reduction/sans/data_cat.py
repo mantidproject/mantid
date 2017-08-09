@@ -177,7 +177,7 @@ class DataCatalog(object):
     """
         Data catalog
     """
-    extension = "nxs"
+    extension = ["nxs"]
     data_set_cls = DataSet
 
     def __init__(self, replace_db=True):
@@ -275,22 +275,22 @@ class DataCatalog(object):
 
         try:
             for f in os.listdir(data_dir):
-                if f.endswith(self.extension):
-                    file_path = os.path.join(data_dir, f)
-
-                    if hasattr(self.data_set_cls, "find_with_api"):
-                        d = self.data_set_cls.find_with_api(file_path, c,
-                                                            process_files=process_files)
-                    else:
-                        d = self.data_set_cls.find(file_path, c,
-                                                   process_files=process_files)
-                    if d is not None:
-                        if call_back is not None:
-                            attr_list = d.as_string_list()
-                            type_id = self.data_set_cls.data_type_cls.get_likely_type(d.id, c)
-                            attr_list += (type_id,)
-                            call_back(attr_list)
-                        self.catalog.append(d)
+                for extension in self.extension:
+                    if f.endswith(extension):
+                        file_path = os.path.join(data_dir, f)
+                        if hasattr(self.data_set_cls, "find_with_api"):
+                            d = self.data_set_cls.find_with_api(file_path, c,
+                                                                process_files=process_files)
+                        else:
+                            d = self.data_set_cls.find(file_path, c,
+                                                       process_files=process_files)
+                        if d is not None:
+                            if call_back is not None:
+                                attr_list = d.as_string_list()
+                                type_id = self.data_set_cls.data_type_cls.get_likely_type(d.id, c)
+                                attr_list += (type_id,)
+                                call_back(attr_list)
+                            self.catalog.append(d)
 
             self.db.commit()
             c.close()
