@@ -54,13 +54,20 @@ void FitPeaks::init()
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace for peak fitting.");
 
-  declareProperty("StartWorkspaceIndex", -1,
+  declareProperty("StartWorkspaceIndex", 0,
                   "Starting workspace index for fit");
-  declareProperty("StopWorkspaceIndex", -1,
+  declareProperty("StopWorkspaceIndex", 0,
                   "Last workspace index to fit (not included)");
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("PeakParameterValues"),
       "List of (back-to-back exponential) peak parameters' value");
+
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakCenters"),
+                  "List of peak centers to fit against.");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("FitWindowLeftBoundary"),
+                  "List of left boundaries of the peak fitting window corresponding to PeakCenters.");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("FitWindowRightBoundary"),
+                  "List of right boundaries of the peak fitting window corresponding to PeakCenters.");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -85,11 +92,33 @@ void FitPeaks::exec()
   setOutputProperties();
 }
 
+void FitPeaks::processInputs()
+{
+    m_inputWS = getProperty("InputWorkspace");
+
+    int start_wi = getProperty("StartWorkspaceIndex");
+    int stop_wi = getProperty("StopWorkspaceIndex");
+    m_startWorkspaceIndex = static_cast<size_t>(start_wi);
+    m_stopWorkspaceIndex = static_cast<size_t>(stop_wi);
+    if (m_stopWorkspaceIndex == 0)
+        m_stopWorkspaceIndex = m_inputWS->getNumberHistograms();
+
+    m_peakCenters = getProperty("PeakCenters");
+    m_peakWindowLeft = getProperty("FitWindowLeftBoundary");
+    m_peakWindowRight = getProperty("FitWindowRightBoundary");
+    m_numPeaksToFit = m_peakCenters.size();
+
+    m_initParamValues = getProperty("PeakParameterValues");
+
+
+    return;
+}
+
 void FitPeaks::fitPeaks()
 {
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
 
-    for (size_t wi = 0; wi < m_inputWS->getNumberHistograms(); ++wi) {
+    for (size_t wi = m_startWorkspaceIndex; wi < m_stopWorkspaceIndex; ++wi) {
 
       PARALLEL_START_INTERUPT_REGION
 
@@ -101,8 +130,17 @@ void FitPeaks::fitPeaks()
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
+/**
+  *FitPeak(InputWorkspace='diamond_high_res_d', OutputWorkspace='peak0_19999',
+  * ParameterTableWorkspace='peak0_19999_Param', WorkspaceIndex=19999,
+  * PeakFunctionType='BackToBackExponential', PeakParameterNames='I,A,B,X0,S', PeakParameterValues='2.5e+06,5400,1700,1.07,0.000355', FittedPeakParameterValues='145.234,1.07953e+10,772.662,1.07432,0.000641613', BackgroundParameterNames='A0,A1', BackgroundParameterValues='-3500,3000', FittedBackgroundParameterValues='1499.37,-1296.47', FitWindow='1.05,1.14', PeakRange='1.05,1.09', MinGuessedPeakWidth=10, MaxGuessedPeakWidth=30, GuessedPeakWidthStep=1, PeakPositionTolerance=0.02)
+ * @brief FitPeaks::fitSpectraPeaks
+ * @param wi
+ */
 void FitPeaks::fitSpectraPeaks(size_t wi)
 {
+
+    g_log.notice() << "[DB] Fit peaks on workspace index :" << wi << "\n";
 
   std::vector<double> lastPeakParameters = m_initParamValues;
 
@@ -189,6 +227,9 @@ void FitPeaks::estimateLinearBackground(size_t wi, double left_window_boundary,
 
   bkgd_a0 = 0.;
   bkgd_a1 = 0.;
+
+  g_log.notice() << "[DB] Estimate background between " << left_window_boundary
+                 << " to " << right_window_boundary << "\n";
 
   return;
 }

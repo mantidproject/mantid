@@ -62,6 +62,7 @@ private:
 
   API::MatrixWorkspace_const_sptr m_inputWS;
 
+  std::vector<double> m_peakCenters;
   std::vector<double> m_peakWindowLeft;
   std::vector<double> m_peakWindowRight;
 
