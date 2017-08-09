@@ -94,7 +94,7 @@ class FFTView(QtGui.QWidget):
 
     def addRaw(self,inputs,key):
         inputs[key]+="_Raw"
-    
+
     # get methods
     def isAutoShift(self):
         return self.shift_box.checkState() == QtCore.Qt.Checked
