@@ -1,13 +1,35 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include <exception>
 #include <string>
+#include <Eigen/Geometry>
 
 namespace Mantid {
 namespace Geometry {
+
+namespace {
+  /**
+   * Rotate point by inverse of rotation held at componentIndex
+   */
+  const Eigen::Vector3d undoRotation(const Eigen::Vector3d& point, const Beamline::ComponentInfo& compInfo, const size_t componentIndex){
+    auto unRotateTransform = Eigen::Affine3d(compInfo.rotation(componentIndex).inverse());
+    auto tmp = Eigen::AngleAxisd(compInfo.rotation(componentIndex));
+    auto tmp1 = tmp.angle() * 180 / M_PI;
+    return unRotateTransform * point;
+  }
+  /**
+   * Put the point into the frame of the shape.
+   * 1. Subtract component position (puts component pos at origin, same as shape coordinate system).
+   * 2. Apply inverse rotation of component to point. Unrotates the component into shape coordinate frame, with observer reorientated.
+   */
+  const Kernel::V3D toShapeFrame(const Kernel::V3D& point, const Beamline::ComponentInfo& compInfo, const size_t componentIndex) {
+    return Kernel::toV3D(undoRotation(Kernel::toVector3d(point)-compInfo.position(componentIndex), compInfo, componentIndex)); 
+  }
+}
 
 /**
  * Constructor.
@@ -139,5 +161,18 @@ void ComponentInfo::setScaleFactor(const size_t componentIndex,
                                   Kernel::toVector3d(scaleFactor));
 }
 
+double  ComponentInfo::solidAngle(const size_t componentIndex, const Kernel::V3D& observer) const{
+
+  // This is the observer position in the shape's coordinate system.
+  const Kernel::V3D relativeObserver = toShapeFrame(observer, *m_componentInfo, componentIndex);
+  const Kernel::V3D scaleFactor = this->scaleFactor(componentIndex);
+  if ((scaleFactor - Kernel::V3D(1.0, 1.0, 1.0)).norm() < 1e-12)
+    return shape(componentIndex).solidAngle(relativeObserver);
+  else {
+    // This function will scale the object shape when calculating the solid
+    // angle.
+    return shape(componentIndex).solidAngle(relativeObserver, scaleFactor);
+  }
+}
 } // namespace Geometry
 } // namespace Mantid
