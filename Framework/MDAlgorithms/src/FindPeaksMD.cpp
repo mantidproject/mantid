@@ -313,7 +313,9 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Make sure all centroids are fresh
   // ws->getBox()->refreshCentroid();
 
-  if (ws->getNumExperimentInfo() == 0)
+  uint16_t nexp = ws->getNumExperimentInfo();
+
+  if (nexp == 0)
     throw std::runtime_error(
         "No instrument was found in the MDEventWorkspace. Cannot find peaks.");
 
@@ -444,8 +446,9 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       //  If no events from this experimental contribute to the box then skip
       MDBox<MDE, nd> *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
       typename std::vector<MDE> &events = mdbox->getEvents();
-      if (std::none_of(events.cbegin(), events.cend(), [&iexp](MDE event) {
-            return event.getRunIndex() == iexp;
+      if (std::none_of(events.cbegin(), events.cend(), [&iexp, &nexp](
+                                                           MDE event) {
+            return event.getRunIndex() == iexp || event.getRunIndex() > nexp;
           }))
         continue;
 
