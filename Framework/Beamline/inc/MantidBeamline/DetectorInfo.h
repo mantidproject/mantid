@@ -119,7 +119,7 @@ private:
       nullptr};
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
   Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
-  ComponentInfo *m_componentInfo = nullptr;
+  ComponentInfo *m_componentInfo = nullptr; // Geometry::ComponentInfo owner
 };
 
 /** Returns the number of detectors in the instrument.
