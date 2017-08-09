@@ -7,8 +7,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ChangePulsetime2)
+// Algorithm not registered as this will be used for testing MPI
+// DECLARE_ALGORITHM(ChangePulsetime2)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
