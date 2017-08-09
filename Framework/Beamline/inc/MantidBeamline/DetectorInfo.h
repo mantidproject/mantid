@@ -94,7 +94,7 @@ public:
                        const std::pair<int64_t, int64_t> &interval);
 
   void merge(const DetectorInfo &other);
-  void convertToTimeIndexded(
+  void convertToDetectorScan(
       const std::vector<std::pair<int64_t, int64_t>> &timeRanges);
 
 private:

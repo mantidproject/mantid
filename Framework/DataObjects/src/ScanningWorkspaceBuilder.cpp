@@ -230,7 +230,7 @@ void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
         {scanInterval.first.nanoseconds(), scanInterval.second.nanoseconds()});
   }
 
-  outputDetectorInfo.convertToTimeIndexded(scanIntervals);
+  outputDetectorInfo.convertToDetectorScan(scanIntervals);
 }
 
 void ScanningWorkspaceBuilder::buildRotations(

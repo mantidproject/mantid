@@ -130,7 +130,7 @@ public:
       const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval);
 
   void merge(const DetectorInfo &other);
-  void convertToTimeIndexded(
+  void convertToDetectorScan(
       const std::vector<std::pair<int64_t, int64_t>> &timeRanges);
 
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>>

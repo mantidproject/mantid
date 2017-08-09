@@ -265,38 +265,46 @@ void DetectorInfo::merge(const DetectorInfo &other) {
 
 /**
  * Creates a time indexded DetectorInfo object based on the scan intervals
- *given. The DetectorInfo object must not be currently time indexded.
+ *given. The DetectorInfo object must not be currently time indexded. The scan
+ *intervals must be the same for every detector, and they must not overlap and
+ *must be in a chronological order.
+ *
+ * These restrictions cover the currently required cases of detector scans. More
+ *complex scans can still be built up using DetectorInfo::merge().
  *
  * @param scanIntervals A vector of sequential, non-overlapping start and end
- *time pairs given in nanoseconds
+ *scan time pairs given in nanoseconds
  */
-void DetectorInfo::convertToTimeIndexded(
+void DetectorInfo::convertToDetectorScan(
     const std::vector<std::pair<int64_t, int64_t>> &scanIntervals) {
-
-  // TODO: Check scan intervals do not overlap
 
   if (isScanning())
     throw std::runtime_error(
         "Can not convert a workspace that is already scanning.");
+
+  for (size_t i = 1; i < scanIntervals.size(); ++i)
+    if (scanIntervals[i].first < scanIntervals[i - 1].second)
+      throw std::runtime_error(
+          "Scan intervals given overlap or are unordered.");
 
   if (!m_scanCounts)
     initScanCounts();
   if (!m_indexMap)
     initIndices();
 
-  auto scanCounts(m_scanCounts);
-  const auto size = m_positions->size();
+  const auto detectorInfoSize = m_positions->size();
 
   // Safely set the time range for the first entries
-  for (size_t linearIndex = 0; linearIndex < size; ++linearIndex)
+  for (size_t linearIndex = 0; linearIndex < detectorInfoSize; ++linearIndex)
     setScanInterval(linearIndex, scanIntervals[0]);
 
   for (size_t scanIndex = 1; scanIndex < scanIntervals.size(); ++scanIndex) {
-    for (size_t linearIndex = 0; linearIndex < size; ++linearIndex) {
+    for (size_t linearIndex = 0; linearIndex < detectorInfoSize;
+         ++linearIndex) {
       auto newIndex1 = getIndex(m_indices, linearIndex);
       auto newIndex = std::pair<size_t, size_t>(newIndex1.first, scanIndex);
       const size_t detIndex = newIndex.first;
-      scanCounts.access()[detIndex]++;
+      m_scanCounts.access()[detIndex]++;
       m_indexMap.access()[detIndex].push_back((*m_indices).size());
       m_indices.access().push_back(newIndex);
       m_isMasked.access().push_back((*m_isMasked)[linearIndex]);
@@ -305,7 +313,6 @@ void DetectorInfo::convertToTimeIndexded(
       m_scanIntervals.access().push_back(scanIntervals[scanIndex]);
     }
   }
-  m_scanCounts = std::move(scanCounts);
 }
 
 /// Returns the linear index for a pair of detector index and time index.

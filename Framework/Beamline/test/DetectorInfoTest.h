@@ -524,17 +524,86 @@ public:
 
   void test_convert_to_scanning() {
     DetectorInfo a(PosVec(2), RotVec(2), {1});
-    auto scanIntervals = std::vector<std::pair<int64_t, int64_t>>();
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
     std::pair<int64_t, int64_t> interval3(2, 3);
+    auto scanIntervals = std::vector<std::pair<int64_t, int64_t>>();
     scanIntervals.push_back(interval1);
     scanIntervals.push_back(interval2);
     scanIntervals.push_back(interval3);
-    TS_ASSERT_THROWS_NOTHING(a.convertToTimeIndexded(scanIntervals));
+    Eigen::Vector3d pos1(1, 0, 0);
+    Eigen::Vector3d pos2(2, 0, 0);
+    a.setPosition(0, pos1);
+    a.setPosition(1, pos2);
+    Eigen::Quaterniond rot1{1, 2, 3, 4};
+    Eigen::Quaterniond rot2{2, 3, 4, 5};
+    a.setRotation(0, rot1);
+    a.setRotation(1, rot2);
+    a.setMasked(1, true);
+
+    TS_ASSERT_THROWS_NOTHING(a.convertToDetectorScan(scanIntervals));
+
     TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
     TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
     TS_ASSERT_EQUALS(a.scanInterval({0, 2}), interval3);
+    TS_ASSERT_EQUALS(a.position({0, 0}), pos1);
+    TS_ASSERT_EQUALS(a.position({0, 1}), pos1);
+    TS_ASSERT_EQUALS(a.position({1, 0}), pos2);
+    TS_ASSERT_EQUALS(a.position({1, 1}), pos2);
+    TS_ASSERT_EQUALS(a.rotation({0, 0}).coeffs(), rot1.normalized().coeffs());
+    TS_ASSERT_EQUALS(a.rotation({0, 1}).coeffs(), rot1.normalized().coeffs());
+    TS_ASSERT_EQUALS(a.rotation({1, 0}).coeffs(), rot2.normalized().coeffs());
+    TS_ASSERT_EQUALS(a.rotation({1, 1}).coeffs(), rot2.normalized().coeffs());
+    TS_ASSERT_EQUALS(a.isMasked({0, 0}), false);
+    TS_ASSERT_EQUALS(a.isMasked({0, 1}), false);
+    TS_ASSERT_EQUALS(a.isMasked({1, 0}), true);
+    TS_ASSERT_EQUALS(a.isMasked({1, 1}), true);
+  }
+
+  void test_convert_already_scanning_workspace_to_scanning() {
+    DetectorInfo a(PosVec(2), RotVec(2), {1});
+    auto b(a);
+    std::pair<int64_t, int64_t> interval1(0, 1);
+    std::pair<int64_t, int64_t> interval2(1, 2);
+    a.setScanInterval(0, interval1);
+    b.setScanInterval(0, interval2);
+    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    auto scanIntervals = std::vector<std::pair<int64_t, int64_t>>();
+    scanIntervals.push_back(interval1);
+    scanIntervals.push_back(interval2);
+
+    TS_ASSERT_THROWS_EQUALS(
+        a.convertToDetectorScan(scanIntervals), const std::runtime_error &e,
+        std::string(e.what()),
+        "Can not convert a workspace that is already scanning.")
+  }
+
+  void test_convert_scanning_workspace_with_overlapping_scan_intervals() {
+    DetectorInfo a(PosVec(2), RotVec(2), {1});
+    auto b(a);
+    std::pair<int64_t, int64_t> interval1(0, 2);
+    std::pair<int64_t, int64_t> interval2(1, 3);
+    auto scanIntervals = std::vector<std::pair<int64_t, int64_t>>();
+    scanIntervals.push_back(interval1);
+    scanIntervals.push_back(interval2);
+
+    TS_ASSERT_THROWS_EQUALS(a.convertToDetectorScan(scanIntervals),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "Scan intervals given overlap or are unordered.")
+  }
+
+  void test_convert_scanning_workspace_with_unordered_scan_intervals() {
+    DetectorInfo a(PosVec(2), RotVec(2), {1});
+    auto b(a);
+    std::pair<int64_t, int64_t> interval1(1, 2);
+    std::pair<int64_t, int64_t> interval2(0, 1);
+    auto scanIntervals = std::vector<std::pair<int64_t, int64_t>>();
+    scanIntervals.push_back(interval1);
+    scanIntervals.push_back(interval2);
+
+    TS_ASSERT_THROWS_EQUALS(a.convertToDetectorScan(scanIntervals),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "Scan intervals given overlap or are unordered.")
   }
 };
 
