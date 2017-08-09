@@ -26,7 +26,7 @@ namespace IDA {
 IqtFit::IqtFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_iqtFTree(NULL),
       m_iqtFRangeManager(NULL), m_fixedProps(), m_iqtFInputWS(),
-      m_iqtFOutputWS(), m_iqtFInputWSName(), m_ties() {
+      m_iqtFOutputWS(), m_previewPlotData(), m_iqtFInputWSName(), m_ties() {
   m_uiForm.setupUi(parent);
 }
 
@@ -146,6 +146,8 @@ void IqtFit::setup() {
           SLOT(checkBoxUpdate(QtProperty *, bool)));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 }
 
 void IqtFit::run() {
@@ -267,6 +269,26 @@ void IqtFit::saveResult() {
   addSaveWorkspaceToQueue(QString::fromStdString(m_baseName + "_Result"),
                           QString::fromStdString(filepath));
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+* Plots the current spectrum displayed in the preview plot
+*/
+void IqtFit::plotCurrentPreview() {
+  if (!m_iqtFInputWS) {
+    return;
+  }
+  if (m_iqtFInputWS->getName().compare(m_previewPlotData->getName()) == 0) {
+    // Plot only the sample curve
+    const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
+    IndirectTab::plotSpectrum(
+        QString::fromStdString(m_previewPlotData->getName()), workspaceIndex,
+        workspaceIndex);
+  } else {
+    // Plot Sample, Fit and Diff curve
+    IndirectTab::plotSpectrum(
+        QString::fromStdString(m_previewPlotData->getName()), 0, 2);
+  }
 }
 
 /**
@@ -568,6 +590,7 @@ void IqtFit::updatePlot() {
   int specNo = m_uiForm.spPlotSpectrum->value();
 
   m_uiForm.ppPlot->clear();
+  m_previewPlotData = m_iqtFInputWS;
   m_uiForm.ppPlot->addSpectrum("Sample", m_iqtFInputWS, specNo);
 
   try {
@@ -601,6 +624,7 @@ void IqtFit::updatePlot() {
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         outputGroup->getItem(specNo));
     if (ws) {
+      m_iqtFInputWS = ws;
       if (m_uiForm.ckPlotGuess->isChecked()) {
         m_uiForm.ckPlotGuess->setChecked(false);
       }

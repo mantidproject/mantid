@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Power.h"
 #include "MantidKernel/Exception.h"
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -34,20 +34,22 @@ class DataProcessorOpenTableCommand : public DataProcessorCommandBase {
 public:
   DataProcessorOpenTableCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorOpenTableCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorOpenTableCommand(){};
 
   void execute() override{
       // This action should do nothing
   };
-  std::string name() override { return std::string("Open Table"); }
-  std::string icon() override { return std::string("://multiload.png"); }
-  std::string tooltip() override { return std::string("Open Table"); }
-  std::string whatsthis() override {
-    return std::string("Loads a table into the interface. Table must exist in "
-                       "the ADS and be compatible in terms of the number and "
-                       "type of columns");
+  QString name() override { return QString("Open Table"); }
+  QString icon() override { return QString("://multiload.png"); }
+  QString tooltip() override { return QString("Open Table"); }
+  QString whatsthis() override {
+    return QString("Loads a table into the interface. Table must exist in "
+                   "the ADS and be compatible in terms of the number and "
+                   "type of columns");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

@@ -184,20 +184,16 @@ def get_first_run_number(run_number_string):
     return run_numbers
 
 
-def get_monitor_ws(ws_to_process, run_number_string, instrument):
+def extract_single_spectrum(ws_to_process, spectrum_number_to_extract):
     """
     Extracts the monitor spectrum into its own individual workspaces from the input workspace
-    based on the number of this spectrum in the instrument object. The run number is used
-    to determine the monitor spectrum number on instruments who potentially have differing
-    monitor numbers depending on the age of the run.
+    based on the number of the spectrum given
     :param ws_to_process: The workspace to extract the monitor from
-    :param run_number_string: The run number as a string to determine the correct monitor position
-    :param instrument: The instrument to query for the monitor position
+    :param spectrum_number_to_extract: The spectrum of the workspace to extract
     :return: The extracted monitor as a workspace
     """
-    first_run_number = get_first_run_number(run_number_string)
-    monitor_spectra = instrument._get_monitor_spectra_index(first_run_number)
-    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
+    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process,
+                                                   WorkspaceIndex=spectrum_number_to_extract)
     return load_monitor_ws
 
 
@@ -430,7 +426,7 @@ def _normalise_workspaces(ws_list, instrument, run_details):
     """
     output_list = []
     for ws in ws_list:
-        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws, run_details=run_details))
+        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws))
 
     return output_list
 

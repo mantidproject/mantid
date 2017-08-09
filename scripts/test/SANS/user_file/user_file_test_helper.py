@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-import os
+import tempfile
 import mantid
 
 sample_user_file = ("PRINT for changer\n"
@@ -79,12 +79,8 @@ sample_user_file = ("PRINT for changer\n"
 
 
 def create_user_file(user_file_content):
-    user_file_path = os.path.join(mantid.config.getString('defaultsave.directory'), 'sample_sans_user_file.txt')
-    if os.path.exists(user_file_path):
-        os.remove(user_file_path)
-
-    with open(user_file_path, 'w') as f:
-        f.write(user_file_content)
-
+    temp = tempfile.NamedTemporaryFile(mode='w+', delete=False)
+    temp.write(user_file_content)
+    user_file_path = temp.name
+    temp.close()
     return user_file_path
-

@@ -409,6 +409,28 @@ void MultiDatasetFit::editLocalParameterValues(const QString &parName) {
   }
 }
 
+/// Set the fit status info string after a fit is finished.
+/// @param status :: The Fit's status property.
+/// @param chiSquared :: The chi squared value returned by Fit.
+void MultiDatasetFit::setFitStatusInfo(const QString &status,
+                                       const QString &chiSquared) {
+  auto text(status);
+  text.replace("\n", "<br>");
+  QString color("green");
+  if (status != "success") {
+    color = "red";
+  }
+  m_fitStatus = QString("Status: <span style='color:%2'>%1</span>"
+                        "<br>Chi Squared: %4").arg(text, color, chiSquared);
+  showInfo("");
+}
+
+/// Clear the fit status info string.
+void MultiDatasetFit::clearFitStatusInfo() {
+  m_fitStatus.clear();
+  showInfo("");
+}
+
 /// Slot called on completion of the Fit algorithm.
 /// @param error :: Set to true if Fit finishes with an error.
 void MultiDatasetFit::finishFit(bool error) {
@@ -416,11 +438,17 @@ void MultiDatasetFit::finishFit(bool error) {
     m_plotController->clear();
     m_plotController->update();
     Mantid::API::IFunction_sptr fun;
+    auto algorithm = m_fitRunner->getAlgorithm();
     if (m_fitOptionsBrowser->getCurrentFittingType() ==
         MantidWidgets::FitOptionsBrowser::Simultaneous) {
       // After a simultaneous fit
-      fun = m_fitRunner->getAlgorithm()->getProperty("Function");
+      fun = algorithm->getProperty("Function");
       updateParameters(*fun);
+      auto status =
+          QString::fromStdString(algorithm->getPropertyValue("OutputStatus"));
+      auto chiSquared = QString::fromStdString(
+          algorithm->getPropertyValue("OutputChi2overDoF"));
+      setFitStatusInfo(status, chiSquared);
     } else {
       // After a sequential fit
       auto paramsWSName =
@@ -449,6 +477,7 @@ void MultiDatasetFit::finishFit(bool error) {
       }
       updateParameters(*fun);
       showParameterPlot();
+      clearFitStatusInfo();
     }
   }
   m_uiForm.btnFit->setEnabled(true);
@@ -462,7 +491,11 @@ void MultiDatasetFit::updateParameters(const Mantid::API::IFunction &fun) {
 
 /// Show a message in the info bar at the bottom of the interface.
 void MultiDatasetFit::showInfo(const QString &text) {
-  m_uiForm.infoBar->setText(text);
+  QString info(text);
+  if (!m_fitStatus.isEmpty()) {
+    info += "<br>" + m_fitStatus;
+  }
+  m_uiForm.infoBar->setText(info);
 }
 
 /// Intersept mouse-enter events to display context-specific info

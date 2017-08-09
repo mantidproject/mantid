@@ -20,6 +20,7 @@ private:
   virtual void initLayout();
   void loadProperties();
   void saveProperties();
+  void appendSlashIfNone(QString &path) const;
   QListWidget *listWidget();
 
 private slots:

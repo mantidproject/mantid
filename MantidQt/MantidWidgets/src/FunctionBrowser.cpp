@@ -308,7 +308,7 @@ void FunctionBrowser::removeProperty(QtProperty *prop) {
 
   // remove references to the children
   auto children = prop->subProperties();
-  foreach (QtProperty *child, children) { m_properties.remove(child); }
+  foreach (QtProperty *child, children) { removeProperty(child); }
   m_properties.erase(p);
 
   if (isFunction(prop)) {
@@ -1537,8 +1537,11 @@ FunctionBrowser::getParameterProperty(const QString &funcIndex,
       }
     }
   }
-  throw std::runtime_error("Unknown function parameter " +
-                           (funcIndex + paramName).toStdString());
+  std::string message = "Unknown function parameter " +
+                        (funcIndex + paramName).toStdString() +
+                        "\n\n This may happen if there is a CompositeFunction "
+                        "containing only one function.";
+  throw std::runtime_error(message);
 }
 
 /**
@@ -1576,6 +1579,7 @@ void FunctionBrowser::removeFunction() {
   QtProperty *prop = item->property();
   if (!isFunction(prop))
     return;
+
   removeProperty(prop);
   updateFunctionIndices();
 
@@ -1609,6 +1613,24 @@ void FunctionBrowser::removeFunction() {
         setFunction(func);
       }
     }
+  }
+
+  auto fun = getFunction();
+  if (fun) {
+    // Remove local parameters that were deleted with the function
+    // or renamed due to change in the structure of the composite
+    // function
+    for (auto iter = m_localParameterValues.begin();
+         iter != m_localParameterValues.end();) {
+      auto param = iter.key();
+      if (!fun->hasParameter(param.toStdString())) {
+        iter = m_localParameterValues.erase(iter);
+      } else {
+        ++iter;
+      }
+    }
+  } else {
+    m_localParameterValues.clear();
   }
 
   emit functionStructureChanged();
