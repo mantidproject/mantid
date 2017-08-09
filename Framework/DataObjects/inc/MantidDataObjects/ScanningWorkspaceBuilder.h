@@ -87,7 +87,8 @@ private:
 
   HistogramData::Histogram m_histogram;
 
-  std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_scanIntervals;
+  std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>>
+      m_scanIntervals;
   std::vector<std::vector<Kernel::V3D>> m_positions;
   std::vector<std::vector<Kernel::Quat>> m_rotations;
 
