@@ -264,8 +264,8 @@ void DetectorInfo::merge(const DetectorInfo &other) {
 }
 
 /**
- * Creates a time indexded DetectorInfo object based on the scan intervals
- *given. The DetectorInfo object must not be currently time indexded. The scan
+ * Creates a time indexed DetectorInfo object based on the scan intervals
+ *given. The DetectorInfo object must not be currently time indexed. The scan
  *intervals must be the same for every detector, and they must not overlap and
  *must be in a chronological order.
  *

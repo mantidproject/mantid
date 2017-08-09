@@ -605,6 +605,21 @@ public:
                             const std::runtime_error &e, std::string(e.what()),
                             "Scan intervals given overlap or are unordered.")
   }
+
+  void test_convert_scanning_workspace_with_start_after_end_scan_interval() {
+    DetectorInfo a(PosVec(2), RotVec(2), {1});
+    auto b(a);
+    std::pair<int64_t, int64_t> interval1(1, 0);
+    std::pair<int64_t, int64_t> interval2(0, 1);
+    auto scanIntervals = std::vector<std::pair<int64_t, int64_t>>();
+    scanIntervals.push_back(interval1);
+    scanIntervals.push_back(interval2);
+
+    TS_ASSERT_THROWS_EQUALS(
+        a.convertToDetectorScan(scanIntervals), const std::runtime_error &e,
+        std::string(e.what()),
+        "DetectorInfo: cannot set scan interval with start >= end")
+  }
 };
 
 #endif /* MANTID_BEAMLINE_DETECTORINFOTEST_H_ */
