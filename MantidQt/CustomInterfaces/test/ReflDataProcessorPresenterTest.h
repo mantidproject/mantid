@@ -132,6 +132,10 @@ public:
     return AnalysisDataService::Instance().doesExist(name);
   }
 
+  void setUp() override { DefaultValue<QString>::Set(QString()); }
+
+  void tearDown() override { DefaultValue<QString>::Clear(); }
+
   void testProcessEventWorkspacesUniformEvenSlicing() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;

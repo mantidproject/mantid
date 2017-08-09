@@ -352,7 +352,7 @@ void DataProcessorOneLevelTreeManager::transfer(
       if (row.count(columnName)) {
         newRow << (row.at(columnName)).toStdString();
       } else {
-        newRow << "";
+        newRow << std::string();
       }
     }
   }
