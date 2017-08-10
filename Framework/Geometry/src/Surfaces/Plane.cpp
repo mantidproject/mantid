@@ -3,6 +3,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include <iostream>
+#include <limits>
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already
@@ -393,8 +394,8 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
   // now sort the vertices to find the  mins and max
   //	std::cout<<listOfPoints.size()<<'\n';
   if (!listOfPoints.empty()) {
-    xmin = ymin = zmin = DBL_MAX;
-    xmax = ymax = zmax = -DBL_MAX;
+    xmin = ymin = zmin = std::numeric_limits<double>::max();
+    xmax = ymax = zmax = -std::numeric_limits<double>::max();
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
          it != listOfPoints.end(); ++it) {
       //			std::cout<<(*it)<<'\n';

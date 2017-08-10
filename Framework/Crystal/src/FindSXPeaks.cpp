@@ -1,9 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -21,6 +18,7 @@ using namespace Mantid::Crystal::FindSXPeaksHelper;
 
 namespace Mantid {
 namespace Crystal {
+
 
 const std::string FindSXPeaks::strongestPeakStrategy = "StrongestPeakOnly";
 const std::string FindSXPeaks::allPeaksStrategy = "AllPeaks";

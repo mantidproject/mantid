@@ -34,13 +34,15 @@ using Mantid::Kernel::V3D;
  * @param   radius       The maximum distance from a peak's Q-vector, for
  *                       an event to be stored in the list associated with
  *                       that peak.
+ * @param   useOnePercentBackgroundCorrection flag if one percent background
+                         correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
     std::vector<std::pair<double, V3D>> const &peak_q_list,
-    DblMatrix const &UBinv, double radius) {
-  m_UBinv = UBinv;
-  m_radius = radius;
-
+    DblMatrix const &UBinv, double radius,
+    const bool useOnePercentBackgroundCorrection)
+    : m_UBinv(UBinv), m_radius(radius),
+      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hkl_key = getHklKey(peak_q_list[it].second);
     if (hkl_key != 0) // only save if hkl != (0,0,0)
@@ -136,7 +138,8 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
                           make_tuple(0.0, 0.0, 0.));
 
   const auto backgrd = numInEllipsoidBkg(
-      events, eigen_vectors, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
+      events, eigen_vectors, abcBackgroundOuterRadii, abcBackgroundInnerRadii,
+      m_useOnePercentBackgroundCorrection);
   const auto core = numInEllipsoid(events, eigen_vectors, sigmas);
   const auto peak = numInEllipsoid(events, eigen_vectors, peakRadii);
   const auto ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
@@ -202,7 +205,8 @@ Integrate3DEvents::integrateWeakPeak(
 
   // integrate
   double backgrd = numInEllipsoidBkg(
-      events, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
+      events, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii,
+      m_useOnePercentBackgroundCorrection);
   double peak_w_back = numInEllipsoid(events, directions, abcRadii);
   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
 
@@ -267,7 +271,8 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
 
   // Background / Peak / Background
   double backgrd = numInEllipsoidBkg(
-      events, eigen_vectors, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
+      events, eigen_vectors, abcBackgroundOuterRadii, abcBackgroundInnerRadii,
+      m_useOnePercentBackgroundCorrection);
 
   double peak_w_back = numInEllipsoid(events, eigen_vectors, peakRadii);
 
@@ -462,12 +467,15 @@ double Integrate3DEvents::numInEllipsoid(
  *                     of the three axes of the ellisoid.
  * @param  sizesIn       List of three values a,b,c giving half the length
  *                     of the three inner axes of the ellisoid.
+ * @param  useOnePercentBackgroundCorrection  flag if one percent background
+                       correction should be used.
  * @return Then number of events that are in or on the specified ellipsoid.
  */
 double Integrate3DEvents::numInEllipsoidBkg(
     std::vector<std::pair<double, V3D>> const &events,
     std::vector<V3D> const &directions, std::vector<double> const &sizes,
-    std::vector<double> const &sizesIn) {
+    std::vector<double> const &sizesIn,
+    const bool useOnePercentBackgroundCorrection) {
   double count = 0;
   std::vector<double> eventVec;
   for (const auto &event : events) {
@@ -482,11 +490,15 @@ double Integrate3DEvents::numInEllipsoidBkg(
     if (sum <= 1 && sumIn >= 1)
       eventVec.push_back(event.first);
   }
-  std::sort(eventVec.begin(), eventVec.end());
-  // Remove top 1% of background
-  for (size_t k = 0;
-       k < static_cast<size_t>(0.99 * static_cast<double>(eventVec.size()));
-       k++) {
+
+  auto endIndex = eventVec.size();
+  if (useOnePercentBackgroundCorrection) {
+    // Remove top 1% of background
+    std::sort(eventVec.begin(), eventVec.end());
+    endIndex = static_cast<size_t>(0.99 * static_cast<double>(endIndex));
+  }
+
+  for (size_t k = 0; k < endIndex; ++k) {
     count += eventVec[k];
   }
 
@@ -814,7 +826,8 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
   }
 
   double backgrd = numInEllipsoidBkg(
-      ev_list, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
+      ev_list, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii,
+      m_useOnePercentBackgroundCorrection);
 
   double peak_w_back = numInEllipsoid(ev_list, directions, axes_radii);
 

@@ -45,6 +45,11 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
     set(GNUFLAGS "${GNUFLAGS} -Wsuggest-override")
   endif()
+  if (NOT (GCC_COMPILER_VERSION VERSION_LESS "7.1"))
+    # Consider enabling once [[fallthrough]] is available on all platforms.
+    # https://developers.redhat.com/blog/2017/03/10/wimplicit-fallthrough-in-gcc-7/
+    set(GNUFLAGS "${GNUFLAGS} -Wimplicit-fallthrough=0")
+  endif()
 elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
   set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
 endif()
