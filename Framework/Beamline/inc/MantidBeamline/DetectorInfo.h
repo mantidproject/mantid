@@ -92,6 +92,7 @@ public:
   scanInterval(const std::pair<size_t, size_t> &index) const;
   void setScanInterval(const size_t index,
                        const std::pair<int64_t, int64_t> &interval);
+  void setScanInterval(const std::pair<int64_t, int64_t> &interval);
 
   void merge(const DetectorInfo &other);
 
@@ -102,6 +103,7 @@ private:
   void initScanIntervals();
   void initIndices();
   std::vector<bool> buildMergeIndices(const DetectorInfo &other) const;
+  bool isSyncScan() const;
 
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};

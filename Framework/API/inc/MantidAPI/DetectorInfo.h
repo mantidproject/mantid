@@ -128,6 +128,8 @@ public:
   void setScanInterval(
       const size_t index,
       const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval);
+  void setScanInterval(
+      const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval);
 
   void merge(const DetectorInfo &other);
 
