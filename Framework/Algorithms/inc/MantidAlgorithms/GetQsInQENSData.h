@@ -12,8 +12,10 @@ namespace Algorithms {
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the workspace to extract the Q-values from </LI>
-    <LI> RaiseMode - If set to true, exceptions will be raised, instead of an empty list being returned </LI>
+    <LI> InputWorkspace - The name of the workspace to extract the Q-values from
+   </LI>
+    <LI> RaiseMode - If set to true, exceptions will be raised, instead of an
+   empty list being returned </LI>
     <LI> Qvalues - The Q-values extracted from the input workspace </LI>
     </UL>
 
@@ -38,29 +40,22 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport GetQsInQENSData : public API::Algorithm
-{
+class DLLExport GetQsInQENSData : public API::Algorithm {
 public:
-
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string category() const override {
-    return "Inelastic\\Indirect";
-  }
+  const std::string category() const override { return "Inelastic\\Indirect"; }
 
   /// Algorithm's version for identification. @see Algorithm::version
-  int version() const override {
-    return 1;
-  }
+  int version() const override { return 1; }
 
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
   const std::string summary() const override {
-    return "Get Q-values in the vertical axis of a MatrixWorkspace containing QENS S(Q,E) of S(theta,E) data.";
+    return "Get Q-values in the vertical axis of a MatrixWorkspace containing "
+           "QENS S(Q,E) of S(theta,E) data.";
   }
 
   /// Algorithms name for identification. @see Algorithm::name
-  const std::string name() const override {
-    return "GetQsInQENSData";
-  }
+  const std::string name() const override { return "GetQsInQENSData"; }
 
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
@@ -73,9 +68,9 @@ private:
   void exec() override;
 
   /// Extracts Q-values from the specified matrix workspace
-  std::vector<double> extractQValues(const Mantid::API::MatrixWorkspace_sptr workspace);
+  std::vector<double>
+  extractQValues(const Mantid::API::MatrixWorkspace_sptr workspace);
 };
-
 }
 }
 
