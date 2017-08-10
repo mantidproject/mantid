@@ -268,32 +268,40 @@ void DetectorInfo::merge(const DetectorInfo &other) {
   const auto &merge = buildMergeIndices(other);
   if (!m_scanCounts)
     initScanCounts();
+  if (isSyncScan()) {
+    auto &scanIntervals = m_scanIntervals.access();
+    auto &isMasked = m_isMasked.access();
+    auto &positions = m_positions.access();
+    auto &rotations = m_rotations.access();
+    m_scanCounts.access().front() += other.scanCount(0);
+    scanIntervals.insert(scanIntervals.end(), other.m_scanIntervals->begin(),
+                         other.m_scanIntervals->end());
+    isMasked.insert(isMasked.end(), other.m_isMasked->begin(),
+                    other.m_isMasked->end());
+    positions.insert(positions.end(), other.m_positions->begin(),
+                     other.m_positions->end());
+    rotations.insert(rotations.end(), other.m_rotations->begin(),
+                     other.m_rotations->end());
+    return;
+  }
   if (!m_indexMap)
     initIndices();
   // Temporary to accumulate scan counts (need original for index offset).
   auto scanCounts(m_scanCounts);
   for (size_t linearIndex = 0; linearIndex < other.m_positions->size();
        ++linearIndex) {
+    if (!merge[linearIndex])
+      continue;
     auto newIndex = getIndex(other.m_indices, linearIndex);
     const size_t detIndex = newIndex.first;
-    if (!other.isSyncScan()) {
-      if (!merge[linearIndex])
-        continue;
-      scanCounts.access()[detIndex]++;
-      m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
-    }
     newIndex.second += scanCount(detIndex);
+    scanCounts.access()[detIndex]++;
     m_indexMap.access()[detIndex].push_back((*m_indices).size());
     m_indices.access().push_back(newIndex);
     m_isMasked.access().push_back((*other.m_isMasked)[linearIndex]);
     m_positions.access().push_back((*other.m_positions)[linearIndex]);
     m_rotations.access().push_back((*other.m_rotations)[linearIndex]);
-  }
-  if (other.isSyncScan()) {
-    scanCounts.access().front() += other.scanCount(0);
-    m_scanIntervals.access().insert(m_scanIntervals->end(),
-                                    other.m_scanIntervals->begin(),
-                                    other.m_scanIntervals->end());
+    m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
   }
   m_scanCounts = std::move(scanCounts);
 }
@@ -306,6 +314,8 @@ size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   // so even in the time dependent case no translation is necessary.
   if (index.second == 0)
     return index.first;
+  if (isSyncScan())
+    return index.first + size() * index.second;
   return (*m_indexMap)[index.first][index.second];
 }
 
