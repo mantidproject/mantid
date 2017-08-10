@@ -8,7 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "../ISISReflectometryOld/ReflSettingsTabPresenter.h"
+#include "../ISISReflectometry/ReflSettingsTabPresenter.h"
 #include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;

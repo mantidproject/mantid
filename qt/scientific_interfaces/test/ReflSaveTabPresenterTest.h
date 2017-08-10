@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "../ISISReflectometryOld/ReflSaveTabPresenter.h"
+#include "../ISISReflectometry/ReflSaveTabPresenter.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"

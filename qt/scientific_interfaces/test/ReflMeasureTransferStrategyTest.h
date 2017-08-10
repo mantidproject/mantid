@@ -3,9 +3,9 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
-#include "../ISISReflectometryOld/ReflMeasureTransferStrategy.h"
-#include "../ISISReflectometryOld/ReflMeasurementItemSource.h"
-#include "../ISISReflectometryOld/ReflTableSchema.h"
+#include "../ISISReflectometry/ReflMeasureTransferStrategy.h"
+#include "../ISISReflectometry/ReflMeasurementItemSource.h"
+#include "../ISISReflectometry/ReflTableSchema.h"
 #include "ReflMockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

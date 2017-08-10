@@ -13,7 +13,7 @@ endif ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 
 add_subdirectory ( Muon )
 add_subdirectory ( MultiDatasetFit )
 add_subdirectory ( ISISSANS )
-add_subdirectory ( ISISReflectometryOld )
+add_subdirectory ( ISISReflectometry )
 add_subdirectory ( Indirect )
 add_subdirectory ( General )
 add_subdirectory ( EnggDiffraction )

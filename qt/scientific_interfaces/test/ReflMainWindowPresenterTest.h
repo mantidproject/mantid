@@ -5,7 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "../ISISReflectometryOld/ReflMainWindowPresenter.h"
+#include "../ISISReflectometry/ReflMainWindowPresenter.h"
 #include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;

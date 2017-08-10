@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "../ISISReflectometryOld/ReflLegacyTransferStrategy.h"
-#include "../ISISReflectometryOld/ReflTableSchema.h"
+#include "../ISISReflectometry/ReflLegacyTransferStrategy.h"
+#include "../ISISReflectometry/ReflTableSchema.h"
 #include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;

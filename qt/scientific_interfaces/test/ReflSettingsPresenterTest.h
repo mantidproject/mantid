@@ -7,7 +7,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "../ISISReflectometryOld/ReflSettingsPresenter.h"
+#include "../ISISReflectometry/ReflSettingsPresenter.h"
 #include "ReflMockObjects.h"
 #include <boost/algorithm/string.hpp>
 
