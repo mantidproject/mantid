@@ -25,6 +25,8 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
 - :ref:`FindPeaksMD <algm-FindPeaksMD-v1>` allows now to normalize by the number of events. This can improve results for data that was originally based on histogram data which has been converted to event-mode.
 - :ref:`GroupDetectors <algm-GroupDetectors-v2>` now supports workspaces with detector scans.
+- :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` has the culling of the top one percent of the background events now as an optional input.
+- :ref:`IntegrateEllipsoidsTwoStep <algm-IntegrateEllipsoidsTwoStep-v1>` has the culling of the top one percent of the background events now as an optional input.
 - :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` makes the culling of the top one percent of the background events optional.
 - :ref:`Load <algm-Load-v1>` now supports use of tilde in file paths in Python, for example Load(Filename="~/data/test.nxs", ...)
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information.
@@ -70,6 +72,10 @@ Python
 Python Algorithms
 #################
 
+Bugfixes
+########
+
+- :ref:`MatchPeaks <algm-MatchPeaks-v1>` is fixed to not to leave temporary hidden workspaces behind.
 
 Python Fit Functions
 ####################
