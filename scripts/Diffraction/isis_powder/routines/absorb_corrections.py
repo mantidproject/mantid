@@ -78,7 +78,7 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
                                                   sample_details_obj=sample_details_obj)
     ws_to_correct = _do_cylinder_absorb_corrections(ws_to_correct=ws_to_correct,
                                                     multiple_scattering=multiple_scattering,
-                                           is_vanadium=is_vanadium, sample_details=sample_details_obj)
+                                                    is_vanadium=is_vanadium)
     return ws_to_correct
 
 
@@ -99,36 +99,24 @@ def _setup_sample_for_cylinder_absorb_corrections(ws_to_correct, sample_details_
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
 
 
-def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium, sample_details):
+def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium):
     previous_units = ws_to_correct.getAxis(0).getUnit().unitID()
     ws_units = common_enums.WORKSPACE_UNITS
 
+    # Mayers Sample correction must be completed in TOF, convert if needed. Then back to original units afterwards
+    if previous_units != ws_units.tof:
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=ws_units.tof)
+
     if is_vanadium:
-        # Mayers Sample correction must be completed in TOF, convert if needed. Then back to original units afterwards
-        if previous_units != ws_units.tof:
-            ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=ws_units.tof)
         ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct,
                                                       MultipleScattering=multiple_scattering)
-        if previous_units != ws_units.tof:
-            ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units)
-        return ws_to_correct
+    else:
+        # Ensure we never do multiple scattering if the sample is not isotropic (e.g. not a Vanadium)
+        ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct,
+                                                      MultipleScattering=False)
+    if previous_units != ws_units.tof:
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units)
+    return ws_to_correct
 
-    else:  # Sample is not vanadium
-        # Cylinder Absorption correction must be in units of wavelength, convert if needed, then back afterwards
-        if previous_units != ws_units.wavelength:
-            ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=ws_units.wavelength,
-                                                OutputWorkspace=ws_to_correct)
 
-        attenuation_factors_ws = mantid.CloneWorkspace(InputWorkspace=ws_to_correct)
-        attenuation_factors_ws = mantid.CylinderAbsorption(InputWorkspace=attenuation_factors_ws,
-                                                           CylinderSampleHeight=sample_details.height,
-                                                           CylinderSampleRadius=sample_details.radius)
-        ws_to_correct = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=attenuation_factors_ws,
-                                      OutputWorkspace=ws_to_correct)
-        common.remove_intermediate_workspace(attenuation_factors_ws)
 
-        if previous_units != ws_units.wavelength:
-            ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units,
-                                                OutputWorkspace=ws_to_correct)
-
-        return ws_to_correct
