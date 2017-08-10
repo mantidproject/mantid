@@ -24,14 +24,14 @@ void DataProcessorPreprocessMap::addElement(const QString &column,
                                             const QString &prefix,
                                             const QString &blacklist) {
 
-  m_map[column.toStdString()] = DataProcessorPreprocessingAlgorithm(
-      algorithm.toStdString(), prefix.toStdString(), blacklist.toStdString());
+  m_map[column] =
+      DataProcessorPreprocessingAlgorithm(algorithm, prefix, blacklist);
 }
 
 /** Return a map where keys are columns and values pre-processing algorithms
 * @return :: Pre-processing instructions as a map
 */
-std::map<std::string, DataProcessorPreprocessingAlgorithm>
+std::map<QString, DataProcessorPreprocessingAlgorithm>
 DataProcessorPreprocessMap::asMap() const {
   return m_map;
 }

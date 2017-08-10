@@ -5,9 +5,13 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-ConvertToReflectometryQ
------------------------
+Algorithms
+----------
 
+- The following bugs have been fixed in the summation in Q functionality in :ref:`algm-ReflectometryReductionOne`:
+  - the incorrect angle was being used in the final conversion to Q in the divergent beam case
+  - the input was being cropped, causing loss of counts
+- A new property, ``Diagnostics``, has been added to :ref:`algm-ReflectometryReductionOne` to allow the output of additional interim workspaces for debug purposes.
 
 Reflectometry Reduction Interface
 ---------------------------------
@@ -25,6 +29,12 @@ ISIS Reflectometry
   - Deleting or renaming output workspaces of processed rows/groups will set that row/group unprocessed.
 
 - During reduction, rows and groups that have been successfully processed are highlighted green.
+
+- New 'autoreduce' button added for automatically reducing all runs obtained from a given investigation id.
+
+  - With an id supplied, clicking 'autoreduce' searches for runs that are included in the investigation, transfers them to the processing table and processes all runs.
+  - Button disabled while reduction in process. Can be re-enabled by pausing autoreduction, where clicking 'autoreduce' again will continue processing rows.
+  - Changing the instrument, investigation id or transfer method while paused and clicking 'autoreduce' will start a new autoreduction.
 
 
 ISIS Reflectometry (Old)

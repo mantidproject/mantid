@@ -14,15 +14,19 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
+#include <QStringList>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <algorithm>
+#include <iterator>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -33,6 +37,13 @@ namespace CustomInterfaces {
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
+
+QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
+  QStringList outVec;
+  std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec),
+                 &QString::fromStdString);
+  return outVec;
+}
 }
 
 /** Constructor
@@ -47,7 +58,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenters(tablePresenters), m_mainPresenter(),
-      m_searcher(searcher) {
+      m_searcher(searcher), m_instrumentChanged(false) {
 
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenters will notify this
@@ -84,11 +95,12 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
       instruments.end()) {
     m_view->setInstrumentList(instruments, defaultInst);
     for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(instruments, defaultInst);
+      presenter->setInstrumentList(fromStdStringVector(instruments),
+                                   QString::fromStdString(defaultInst));
   } else {
     m_view->setInstrumentList(instruments, "INTER");
     for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(instruments, "INTER");
+      presenter->setInstrumentList(fromStdStringVector(instruments), "INTER");
   }
 }
 
@@ -110,6 +122,12 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   switch (flag) {
   case IReflRunsTabPresenter::SearchFlag:
     search();
+    break;
+  case IReflRunsTabPresenter::NewAutoreductionFlag:
+    autoreduce(true);
+    break;
+  case IReflRunsTabPresenter::ResumeAutoreductionFlag:
+    autoreduce(false);
     break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     auto algRunner = m_view->getAlgorithmRunner();
@@ -144,7 +162,7 @@ void ReflRunsTabPresenter::pushCommands() {
     throw std::runtime_error("Invalid list of commands");
   }
   // The index at which "row" commands start
-  const size_t rowCommStart = 10;
+  const size_t rowCommStart = 10u;
   // We want to have two menus
   // Populate the "Reflectometry" menu
   std::vector<DataProcessorCommand_uptr> tableCommands;
@@ -160,7 +178,7 @@ void ReflRunsTabPresenter::pushCommands() {
 
 /** Searches for runs that can be used */
 void ReflRunsTabPresenter::search() {
-  const std::string searchString = m_view->getSearchString();
+  auto const searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return;
@@ -198,9 +216,9 @@ void ReflRunsTabPresenter::search() {
   algSearch->initialize();
   algSearch->setChild(true);
   algSearch->setLogging(false);
+  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
   algSearch->setProperty("Session", sessionId);
   algSearch->setProperty("InvestigationId", searchString);
-  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
 }
@@ -211,11 +229,40 @@ void ReflRunsTabPresenter::search() {
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+    m_instrumentChanged = false;
     m_currentTransferMethod = m_view->getTransferMethod();
     m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
         *getTransferStrategy(), results, m_view->getSearchInstrument()));
     m_view->showSearch(m_searchModel);
   }
+}
+
+/** Searches ICAT for runs with given instrument and investigation id, transfers
+* runs to table and processes them
+* @param startNew : Boolean on whether to start a new autoreduction
+*/
+void ReflRunsTabPresenter::autoreduce(bool startNew) {
+  m_autoSearchString = m_view->getSearchString();
+  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+
+  // If a new autoreduction is being made, we must remove all existing rows and
+  // transfer the new ones (obtained by ICAT search) in
+  if (startNew) {
+    notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
+
+    // Select all rows / groups in existing table and delete them
+    tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
+    tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
+
+    // Select and transfer all rows to the table
+    m_view->setAllSearchRowsSelected();
+    if (m_view->getSelectedSearchRows().size() > 0)
+      transfer();
+  }
+
+  tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
+  if (tablePresenter->selectedParents().size() > 0)
+    tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
 /** Transfers the selected runs in the search results to the processing table
@@ -243,12 +290,10 @@ void ReflRunsTabPresenter::transfer() {
     return;
   }
 
-  for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
-       ++rowIt) {
-    const int row = *rowIt;
-    const std::string run = m_searchModel->data(m_searchModel->index(row, 0))
-                                .toString()
-                                .toStdString();
+  for (auto &&row : selectedRows) {
+    const auto run = m_searchModel->data(m_searchModel->index(row, 0))
+                         .toString()
+                         .toStdString();
     SearchResult searchResult;
 
     searchResult.description = m_searchModel->data(m_searchModel->index(row, 1))
@@ -302,7 +347,8 @@ void ReflRunsTabPresenter::transfer() {
   }
 
   m_tablePresenters.at(m_view->getSelectedGroup())
-      ->transfer(results.getTransferRuns());
+      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
+          results.getTransferRuns()));
 }
 
 /**
@@ -359,9 +405,9 @@ void ReflRunsTabPresenter::notifyADSChanged(
 */
 QString ReflRunsTabPresenter::getPreprocessingProperties() const {
 
-  std::string properties =
-      "Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun";
-  return QString::fromStdString(properties);
+  auto properties =
+      QString("Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun");
+  return properties;
 }
 
 /** Requests global pre-processing options as a string. Options are supplied by
@@ -370,11 +416,11 @@ QString ReflRunsTabPresenter::getPreprocessingProperties() const {
   */
 QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
-  std::string optionsStr =
-      "Transmission Run(s)," +
-      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
+  auto optionsStr = QString("Transmission Run(s),") +
+                    QString::fromStdString(m_mainPresenter->getTransmissionRuns(
+                        m_view->getSelectedGroup()));
 
-  return QString::fromStdString(optionsStr);
+  return optionsStr;
 }
 
 /** Requests global processing options. Options are supplied by the main
@@ -413,11 +459,14 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
-/** Disables the 'pause' button when data reduction is paused
+/** Tells view to enable all 'process' buttons and disable the 'pause' button
+* when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() const {
+  m_view->setRowActionEnabled(PROCESS, true);
+  m_view->setRowActionEnabled(PAUSE, false);
   m_view->setTransferEnabled(true);
-  m_view->setRowActionEnabled(PROCESS, false);
+  m_view->setAutoreduceButtonEnabled(true);
 }
 
 /** Disables the 'process' button and enables the 'pause' button when data
@@ -425,33 +474,54 @@ void ReflRunsTabPresenter::pause() const {
  * confirmed to be resumed.
 */
 void ReflRunsTabPresenter::resume() const {
-
   m_view->setRowActionEnabled(PROCESS, false);
-  m_view->setTransferEnabled(false);
   m_view->setRowActionEnabled(PAUSE, true);
+  m_view->setTransferEnabled(false);
+  m_view->setAutoreduceButtonEnabled(false);
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
 
-/** Enables 'process' button and notifies main presenter that data reduction is
-* confirmed to be paused
+/** Determines whether to start a new autoreduction. Starts a new one if the
+* either the search number, transfer method or instrument has changed
+* @return : Boolean on whether to start a new autoreduction
+*/
+bool ReflRunsTabPresenter::startNewAutoreduction() const {
+  bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
+  bool transferMethodChanged =
+      m_currentTransferMethod != m_view->getTransferMethod();
+
+  return searchNumChanged || transferMethodChanged || m_instrumentChanged;
+}
+
+/** Notifies main presenter that data reduction is confirmed to be paused
+>>>>>>> 20073_fix_no_error_message_when_exception_on_refl_gui
 */
 void ReflRunsTabPresenter::confirmReductionPaused() const {
 
-  m_view->setRowActionEnabled(PROCESS, true);
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
 }
 
-/** Changes the current instrument in the data processor widget. Also updates
- * the config service and prints an information message
+/** Notifies main presenter that data reduction is confirmed to be resumed
+*/
+void ReflRunsTabPresenter::confirmReductionResumed() const {
+  m_view->setRowActionEnabled(PROCESS, true);
+  m_mainPresenter->notify(
+      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
+}
+
+/** Changes the current instrument in the data processor widget. Also clears the
+* and the table selection model and updates the config service, printing an
+* information message
 */
 void ReflRunsTabPresenter::changeInstrument() {
-  const std::string instrument = m_view->getSearchInstrument();
+  auto const instrument = m_view->getSearchInstrument();
   m_mainPresenter->setInstrumentName(instrument);
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;
+  m_instrumentChanged = true;
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

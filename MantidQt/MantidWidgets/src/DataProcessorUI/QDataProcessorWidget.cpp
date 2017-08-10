@@ -155,20 +155,9 @@ This slot loads a table workspace model and changes to a LoadedMainView
 presenter
 @param name : the string name of the workspace to be grabbed
 */
-void QDataProcessorWidget::setModel(QString name) {
-  m_toOpen = name.toStdString();
+void QDataProcessorWidget::setModel(QString const &name) {
+  m_toOpen = name;
   m_presenter->notify(DataProcessorPresenter::OpenTableFlag);
-}
-
-/**
-This method loads a table workspace model. Unlike
-QDataProcessorWidget::setModel(QString name),
-this method is public and takes a std::string as argument. The reason is that
-this method is intended to be called by the presenter
-@param name : the string name of the workspace to be grabbed
-*/
-void QDataProcessorWidget::setModel(const std::string &name) {
-  setModel(QString::fromStdString(name));
 }
 
 /**
@@ -266,16 +255,20 @@ This slot is triggered when the user right clicks on the table
 */
 void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   // If the user didn't right-click on anything, don't show a context menu.
-  if (!ui.viewTable->indexAt(pos).isValid())
-    return;
+  if (ui.viewTable->indexAt(pos).isValid())
+    m_contextMenu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+}
 
-  m_contextMenu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+void QDataProcessorWidget::ensureHasExtension(QString &filename) const {
+  if (!filename.endsWith(".ipynb")) {
+    filename.append(".ipynb");
+  }
 }
 
 /**
 Show the user file dialog to choose save location of notebook
 */
-std::string QDataProcessorWidget::requestNotebookPath() {
+QString QDataProcessorWidget::requestNotebookPath() {
 
   // We won't use QFileDialog directly here as using the NativeDialog option
   // causes problems on MacOS.
@@ -288,16 +281,8 @@ std::string QDataProcessorWidget::requestNotebookPath() {
   // from the dialog doesn't always the file extension appended.
   // So we'll have to ensure this ourselves.
   // Important, notebooks can't be loaded without this extension.
-  std::string filename = qfilename.toStdString();
-  if (filename.size() > 6) {
-    if (filename.substr(filename.size() - 6) != ".ipynb") {
-      filename.append(".ipynb");
-    }
-  } else {
-    filename.append(".ipynb");
-  }
-
-  return filename;
+  ensureHasExtension(qfilename);
+  return qfilename;
 }
 
 /**
@@ -309,6 +294,11 @@ void QDataProcessorWidget::expandAll() { ui.viewTable->expandAll(); }
 Collapse all currently expanded groups
 */
 void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
+
+/**
+Select all rows/groups
+*/
+void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 
 /**
 Handle interface when data reduction paused
@@ -351,11 +341,11 @@ Save settings
 @param options : map of user options to save
 */
 void QDataProcessorWidget::saveSettings(
-    const std::map<std::string, QVariant> &options) {
+    const std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
   for (auto it = options.begin(); it != options.end(); ++it)
-    settings.setValue(QString::fromStdString(it->first), it->second);
+    settings.setValue(it->first, it->second);
   settings.endGroup();
 }
 
@@ -363,13 +353,12 @@ void QDataProcessorWidget::saveSettings(
 Load settings
 @param options : map of user options to load into
 */
-void QDataProcessorWidget::loadSettings(
-    std::map<std::string, QVariant> &options) {
+void QDataProcessorWidget::loadSettings(std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
   QStringList keys = settings.childKeys();
   for (auto it = keys.begin(); it != keys.end(); ++it)
-    options[it->toStdString()] = settings.value(*it);
+    options[*it] = settings.value(*it);
   settings.endGroup();
 }
 
@@ -450,21 +439,22 @@ void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy,
 Sets the contents of the system's clipboard
 @param text The contents of the clipboard
 */
-void QDataProcessorWidget::setClipboard(const std::string &text) {
-  QApplication::clipboard()->setText(QString::fromStdString(text));
+void QDataProcessorWidget::setClipboard(const QString &text) {
+  QApplication::clipboard()->setText(text);
 }
 
 /**
 Get the selected instrument for processing
 @returns the selected instrument to process with
 */
-std::string QDataProcessorWidget::getProcessInstrument() const {
-  return ui.comboProcessInstrument->currentText().toStdString();
+QString QDataProcessorWidget::getProcessInstrument() const {
+  return ui.comboProcessInstrument->currentText();
 }
 
 /**
 Get the indices of the highlighted items that have a valid parent
-@returns :: a map where keys are parents of selected items and values are sets
+.what()@returns :: a map where keys are parents of selected items and values are
+sets
 containing the highlighted children
 */
 std::map<int, std::set<int>> QDataProcessorWidget::getSelectedChildren() const {
@@ -473,7 +463,6 @@ std::map<int, std::set<int>> QDataProcessorWidget::getSelectedChildren() const {
   if (selectionModel) {
     auto selectedRows = selectionModel->selectedRows();
     for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
-
       if (it->parent().isValid()) {
         int children = it->row();
         int parent = it->parent().row();
@@ -506,9 +495,7 @@ std::set<int> QDataProcessorWidget::getSelectedParents() const {
 Get the name of the workspace that the user wishes to open as a table
 @returns The name of the workspace to open
 */
-std::string QDataProcessorWidget::getWorkspaceToOpen() const {
-  return m_toOpen;
-}
+QString QDataProcessorWidget::getWorkspaceToOpen() const { return m_toOpen; }
 
 /**
 Get a pointer to the presenter that's currently controlling this view.
@@ -522,8 +509,8 @@ DataProcessorPresenter *QDataProcessorWidget::getPresenter() const {
 Gets the contents of the system's clipboard
 @returns The contents of the clipboard
 */
-std::string QDataProcessorWidget::getClipboard() const {
-  return QApplication::clipboard()->text().toStdString();
+QString QDataProcessorWidget::getClipboard() const {
+  return QApplication::clipboard()->text();
 }
 
 /**
@@ -544,12 +531,9 @@ void QDataProcessorWidget::accept(DataProcessorMainPresenter *mainPresenter) {
 * @param prompt : The prompt to appear on the dialog
 * @param title : The text for the title bar of the dialog
 */
-void QDataProcessorWidget::giveUserCritical(std::string prompt,
-                                            std::string title) {
+void QDataProcessorWidget::giveUserCritical(QString prompt, QString title) {
 
-  QMessageBox::critical(this, QString::fromStdString(title),
-                        QString::fromStdString(prompt), QMessageBox::Ok,
-                        QMessageBox::Ok);
+  QMessageBox::critical(this, title, prompt, QMessageBox::Ok, QMessageBox::Ok);
 }
 
 /** Shows a warning dialog
@@ -557,12 +541,9 @@ void QDataProcessorWidget::giveUserCritical(std::string prompt,
 * @param prompt : The prompt to appear on the dialog
 * @param title : The text for the title bar of the dialog
 */
-void QDataProcessorWidget::giveUserWarning(std::string prompt,
-                                           std::string title) {
+void QDataProcessorWidget::giveUserWarning(QString prompt, QString title) {
 
-  QMessageBox::warning(this, QString::fromStdString(title),
-                       QString::fromStdString(prompt), QMessageBox::Ok,
-                       QMessageBox::Ok);
+  QMessageBox::warning(this, title, prompt, QMessageBox::Ok, QMessageBox::Ok);
 }
 
 /** Asks the user a Yes/No question
@@ -571,11 +552,11 @@ void QDataProcessorWidget::giveUserWarning(std::string prompt,
 * @param title : The text for the title bar of the dialog
 * @returns a boolean true if Yes, false if No
 */
-bool QDataProcessorWidget::askUserYesNo(std::string prompt, std::string title) {
+bool QDataProcessorWidget::askUserYesNo(QString prompt, QString title) {
 
-  auto response = QMessageBox::question(
-      this, QString::fromStdString(title), QString::fromStdString(prompt),
-      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+  auto response = QMessageBox::question(this, title, prompt,
+                                        QMessageBox::Yes | QMessageBox::No,
+                                        QMessageBox::Yes);
   if (response == QMessageBox::Yes) {
     return true;
   }
@@ -589,18 +570,14 @@ bool QDataProcessorWidget::askUserYesNo(std::string prompt, std::string title) {
 * @param defaultValue : The default value entered.
 * @returns The user's string if submitted, or an empty string
 */
-std::string
-QDataProcessorWidget::askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) {
+QString QDataProcessorWidget::askUserString(const QString &prompt,
+                                            const QString &title,
+                                            const QString &defaultValue) {
 
   bool ok;
-  QString text = QInputDialog::getText(
-      this, QString::fromStdString(title), QString::fromStdString(prompt),
-      QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
-  if (ok)
-    return text.toStdString();
-  return "";
+  QString text = QInputDialog::getText(this, title, prompt, QLineEdit::Normal,
+                                       defaultValue, &ok);
+  return ok ? text : QString("");
 }
 
 /** Runs python code
@@ -608,14 +585,11 @@ QDataProcessorWidget::askUserString(const std::string &prompt,
 * @param pythonCode :: the python code to run
 * @return :: output from execution
 */
-std::string
-QDataProcessorWidget::runPythonAlgorithm(const std::string &pythonCode) {
+QString QDataProcessorWidget::runPythonAlgorithm(const QString &pythonCode) {
 
-  QString output = runPythonCode(QString::fromStdString(pythonCode));
-
-  emit runPythonAlgorithm(QString::fromStdString(pythonCode));
-
-  return output.toStdString();
+  QString output = runPythonCode(pythonCode);
+  emit ranPythonAlgorithm(pythonCode);
+  return output;
 }
 
 /** Transfer runs to the table
@@ -623,27 +597,20 @@ QDataProcessorWidget::runPythonAlgorithm(const std::string &pythonCode) {
  */
 void QDataProcessorWidget::transfer(const QList<QString> &runs) {
 
-  std::vector<std::map<std::string, std::string>> runsMap(runs.size());
+  std::vector<std::map<QString, QString>> runsMap(runs.size());
   size_t row = 0;
 
-  for (QList<QString>::const_iterator it = runs.begin(); it != runs.end();
-       ++it) {
-
+  for (auto it = runs.constBegin(); it != runs.constEnd(); ++it) {
     QStringList map = (*it).split(",");
-
-    for (QList<QString>::iterator jt = map.begin(); jt != map.end(); ++jt) {
-
+    for (auto jt = map.begin(); jt != map.end(); ++jt) {
       QStringList pair = (*jt).split(":");
-
       if (pair.size() != 2) {
         giveUserCritical("Could not transfer runs to processing table",
                          "Transfer failed");
         return;
       }
-
-      runsMap[row][pair[0].toStdString()] = pair[1].toStdString();
+      runsMap[row][pair[0]] = pair[1];
     }
-
     row++;
   }
 

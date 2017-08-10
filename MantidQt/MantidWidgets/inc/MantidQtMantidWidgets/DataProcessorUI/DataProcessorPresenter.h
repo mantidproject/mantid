@@ -72,29 +72,30 @@ public:
     PlotGroupFlag,
     ExpandAllGroupsFlag,
     CollapseAllGroupsFlag,
+    SelectAllFlag,
     PauseFlag
   };
 
   // Tell the presenter something happened
   virtual void notify(DataProcessorPresenter::Flag flag) = 0;
-  virtual const std::map<std::string, QVariant> &options() const = 0;
-  virtual void setOptions(const std::map<std::string, QVariant> &options) = 0;
+  virtual const std::map<QString, QVariant> &options() const = 0;
+  virtual void setOptions(const std::map<QString, QVariant> &options) = 0;
   virtual void
-  transfer(const std::vector<std::map<std::string, std::string>> &runs) = 0;
-  virtual void setInstrumentList(const std::vector<std::string> &instruments,
-                                 const std::string &defaultInstrument) = 0;
+  transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
+  virtual void setInstrumentList(const QStringList &instruments,
+                                 const QString &defaultInstrument) = 0;
   virtual std::vector<std::unique_ptr<DataProcessorCommand>>
   publishCommands() = 0;
   virtual void accept(DataProcessorMainPresenter *mainPresenter) = 0;
   virtual void acceptViews(DataProcessorView *tableView,
                            ProgressableView *progressView) = 0;
-  virtual void setModel(std::string name) = 0;
+  virtual void setModel(QString const &name) = 0;
   virtual ParentItems selectedParents() const = 0;
   virtual ChildItems selectedChildren() const = 0;
-  virtual bool askUserYesNo(const std::string &prompt,
-                            const std::string &title) const = 0;
-  virtual void giveUserWarning(const std::string &prompt,
-                               const std::string &title) const = 0;
+  virtual bool askUserYesNo(const QString &prompt,
+                            const QString &title) const = 0;
+  virtual void giveUserWarning(const QString &prompt,
+                               const QString &title) const = 0;
   virtual bool isProcessing() const = 0;
 };
 }
