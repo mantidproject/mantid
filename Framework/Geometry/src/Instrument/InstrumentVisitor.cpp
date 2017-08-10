@@ -109,7 +109,7 @@ InstrumentVisitor::InstrumentVisitor(
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors); // Exact
   m_componentIdToIndexMap->reserve(nDetectors);         // Approximation
-  m_shapes->reserve(nDetectors);                         // Approximation
+  m_shapes->reserve(nDetectors);                        // Approximation
 }
 
 void InstrumentVisitor::walkInstrument() {
