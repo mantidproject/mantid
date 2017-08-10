@@ -49,6 +49,7 @@ public:
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
+  MOCK_METHOD0(selectAll, void());
   MOCK_METHOD0(pause, void());
   MOCK_METHOD0(resume, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
@@ -62,6 +63,9 @@ public:
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
+
+  // Processing options
+  MOCK_METHOD1(setForcedReProcessing, void(bool));
 
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
@@ -134,6 +138,7 @@ public:
   MOCK_CONST_METHOD2(giveUserWarning,
                      void(const std::string &prompt, const std::string &title));
   MOCK_METHOD0(publishCommandsMocked, void());
+  MOCK_METHOD1(setForcedReProcessing, void(bool));
 
 private:
   // Calls we don't care about

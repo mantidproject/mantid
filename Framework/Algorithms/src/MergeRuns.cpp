@@ -486,11 +486,10 @@ bool MergeRuns::validateInputsForEventWorkspaces(
     const std::vector<std::string> &inputWorkspaces) {
   m_inEventWS.clear();
 
-  // Going to check that name of instrument matches - think that's the best
-  // possible at the moment
-  //   because if instrument is created from raw file it'll be a different
-  //   object
-  std::string instrument;
+  // TODO: Check that name of instrument matches - think that's the best
+  // possible at the moment because if instrument is created from raw file it'll
+  // be a different object
+  // std::string instrument;
 
   RunCombinationHelper combHelper;
 
