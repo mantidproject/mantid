@@ -325,6 +325,7 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
   cfs->initialize();
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
+  cfs->setProperty("PassWSIndexToFunction", true);
   cfs->setProperty("BackgroundType",
                    m_uiForm.cbBackground->currentText().toStdString());
   cfs->setProperty("StartX", m_properties["StartX"]->valueText().toStdString());

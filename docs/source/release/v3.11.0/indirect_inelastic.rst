@@ -26,7 +26,7 @@ ConvFit
 Bugfixes
 --------
 - Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
-- Backend :ref:`algm-ConvolutionFitSequential` now passes the workspace index by default to :ref:`algm-PlotPeakByLogValue`.
+- Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
 
 Jump Fit
 ~~~~~~~~

@@ -67,6 +67,10 @@ void ConvolutionFitSequential::init() {
                   "The function that describes the parameters of the fit.",
                   Direction::Input);
 
+  declareProperty("PassWSIndexToFunction", false,
+                  "For each spectrum in Input pass its workspace index to all "
+                  "functions that have attribute WorkspaceIndex.");
+
   std::vector<std::string> backType{"Fixed Flat", "Fit Flat", "Fit Linear"};
 
   declareProperty("BackgroundType", "Fixed Flat",
@@ -96,7 +100,8 @@ void ConvolutionFitSequential::init() {
                   Direction::Input);
 
   declareProperty("Convolve", true,
-                  "If true, the fit is treated as a convolution workspace.",
+                  "If true, output fitted model components will be convolved with "
+                  "the resolution.",
                   Direction::Input);
 
   declareProperty("Minimizer", "Levenberg-Marquardt",
@@ -130,6 +135,7 @@ void ConvolutionFitSequential::exec() {
   // Initialise variables with properties
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   const std::string function = getProperty("Function");
+  const bool passIndex = getProperty("PassWSIndexToFunction");
   const std::string backType =
       convertBackToShort(getProperty("backgroundType"));
   const double startX = getProperty("StartX");
@@ -197,10 +203,6 @@ void ConvolutionFitSequential::exec() {
     plotPeakInput += nextWs + ";";
     plotPeakStringProg.report("Constructing PlotPeak name");
   }
-
-  // We should always pass the workspace index, since it has no effect if
-  // the fit function does not contain parameter WorkspaceIndex
-  auto passIndex = true;
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);

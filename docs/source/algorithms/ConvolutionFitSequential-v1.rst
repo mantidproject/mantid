@@ -49,7 +49,7 @@ Usage
 
   # Run algorithm
   result_ws = ConvolutionFitSequential(InputWorkspace=sample,
-      Function=function, BackgroundType=bgType,
+      Function=function, PassWSIndexToFunction=True, BackgroundType=bgType,
       StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
       Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt)
   

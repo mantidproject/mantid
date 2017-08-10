@@ -1019,6 +1019,7 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
         ConvolutionFitSequential(
             InputWorkspace=self.sample,
             Function=self.func,
+            PassWSIndexToFunction=self.passWSIndexToFunction
             StartX=self.startx,
             EndX=self.endx,
             BackgroundType=self.bg,
@@ -1062,6 +1063,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
                     'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,FWHM=0.002,ties=(PeakCentre=0)'\
                     ',constraints=(FWHM>0.002))' % self.resolution
+        self.passWSIndexToFunction = False  # osi97935_graphite002_res is single histogram
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
@@ -1089,7 +1091,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
                     '(composite=Convolution,FixResolution=true,NumDeriv=true;' \
                     'name=Resolution,Workspace="%s";name=Lorentzian,Amplitude=1.033150,FWHM=0.001576,'\
                     'ties=(PeakCentre=0.0),constraints=(FWHM>0.001))' % self.resolution
-
+        self.passWSIndexToFunction = False  # irs53664_graphite002_res is single histogram
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
