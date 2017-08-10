@@ -31,7 +31,7 @@ def create_vanadium_sample_details_obj(config_dict):
     return vanadium_sample_details
 
 
-def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_details_obj):
+def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_details_obj, is_vanadium):
     """
     Sets a cylindrical sample from the user specified config dictionary and performs Mayers
     sample correction on the workspace. The SampleDetails object defines the sample, material
@@ -40,6 +40,7 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_d
     :param ws_to_correct: The workspace to perform Mayers sample correction on
     :param multiple_scattering: Boolean of whether to account for the effects of multiple scattering
     :param sample_details_obj: The object containing the sample details
+    :param is_vanadium: Whether the sample is a vanadium
     :return: The corrected workspace
     """
 
@@ -56,12 +57,11 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_d
 
     ws_to_correct = _calculate__cylinder_absorb_corrections(
         ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering,
-        sample_details_obj=sample_details_obj)
-
+        sample_details_obj=sample_details_obj, is_vanadium=is_vanadium)
     return ws_to_correct
 
 
-def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_details_obj):
+def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_details_obj, is_vanadium):
     """
     Calculates vanadium absorption corrections for the specified workspace. The workspace
     should have any monitor spectra masked before being passed into this method. Additionally
@@ -71,9 +71,18 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
     :param multiple_scattering: True if the effects of multiple scattering should be accounted for, else False
     :param sample_details_obj: The SampleDetails object in a checked state which describes the sample
     to ensure a none elemental formula has associated number density
+    :param is_vanadium: Whether the sample is a vanadium
     :return: The workspace with corrections applied
     """
+    _setup_sample_for_cylinder_absorb_corrections(ws_to_correct=ws_to_correct,
+                                                  sample_details_obj=sample_details_obj)
+    ws_to_correct = _do_cylinder_absorb_corrections(ws_to_correct=ws_to_correct,
+                                                    multiple_scattering=multiple_scattering,
+                                           is_vanadium=is_vanadium, sample_details=sample_details_obj)
+    return ws_to_correct
 
+
+def _setup_sample_for_cylinder_absorb_corrections(ws_to_correct, sample_details_obj):
     geometry_json = {'Shape': 'Cylinder',
                      'Height': sample_details_obj.height, 'Radius': sample_details_obj.radius,
                      'Center': sample_details_obj.center}
@@ -89,17 +98,37 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
 
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
 
+
+def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium, sample_details):
     previous_units = ws_to_correct.getAxis(0).getUnit().unitID()
     ws_units = common_enums.WORKSPACE_UNITS
 
-    # Mayers Sample correction must be completed in TOF, convert if needed. Then back to original units afterwards
-    if previous_units != ws_units.tof:
-        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
-                                            Target=ws_units.tof)
-    ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
-                                                  MultipleScattering=multiple_scattering)
-    if previous_units != ws_units.tof:
-        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
-                                            Target=previous_units)
+    if is_vanadium:
+        # Mayers Sample correction must be completed in TOF, convert if needed. Then back to original units afterwards
+        if previous_units != ws_units.tof:
+            ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=ws_units.tof)
+        ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct,
+                                                      MultipleScattering=multiple_scattering)
+        if previous_units != ws_units.tof:
+            ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units)
+        return ws_to_correct
 
-    return ws_to_correct
+    else:  # Sample is not vanadium
+        # Cylinder Absorption correction must be in units of wavelength, convert if needed, then back afterwards
+        if previous_units != ws_units.wavelength:
+            ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=ws_units.wavelength,
+                                                OutputWorkspace=ws_to_correct)
+
+        attenuation_factors_ws = mantid.CloneWorkspace(InputWorkspace=ws_to_correct)
+        attenuation_factors_ws = mantid.CylinderAbsorption(InputWorkspace=attenuation_factors_ws,
+                                                           CylinderSampleHeight=sample_details.height,
+                                                           CylinderSampleRadius=sample_details.radius)
+        ws_to_correct = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=attenuation_factors_ws,
+                                      OutputWorkspace=ws_to_correct)
+        common.remove_intermediate_workspace(attenuation_factors_ws)
+
+        if previous_units != ws_units.wavelength:
+            ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units,
+                                                OutputWorkspace=ws_to_correct)
+
+        return ws_to_correct

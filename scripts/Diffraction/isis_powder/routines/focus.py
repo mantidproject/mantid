@@ -42,7 +42,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm, absorb):
 
     # Correct for absorption / multiple scattering if required
     if absorb:
-        input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
+        aligned_ws = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=aligned_ws)
 
     # Focus the spectra into banks
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
