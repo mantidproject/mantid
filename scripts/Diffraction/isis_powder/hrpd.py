@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
+import os
+
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.routines import instrument_settings
 from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
@@ -16,6 +18,12 @@ class HRPD(AbstractInst):
                                    calibration_dir=self._inst_settings.calibration_dir,
                                    output_dir=self._inst_settings.output_dir,
                                    inst_prefix="HRPD")
+
+        # Cannot load older .nxs files into Mantid from HRPD
+        # because of a long-term bug which was not reported.
+        # Instead, ask Mantid to use .raw files in this case
+        if not self._inst_settings.file_extension:
+            self._inst_settings.file_extension = ".raw"
 
         self._cached_run_details = {}
 
@@ -38,7 +46,13 @@ class HRPD(AbstractInst):
         if run_number_string_key in self._cached_run_details:
             return self._cached_run_details[run_number_string_key]
 
-        self._cached_run_details[run_number_string_key] = hrpd_algs.create_run_details_object(
-            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
+        self._cached_run_details[run_number_string_key] = hrpd_algs.get_run_details(
+            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium=self._is_vanadium)
 
         return self._cached_run_details[run_number_string_key]
+
+    def _spline_vanadium_ws(self, focused_vanadium_banks, instrument_version=''):
+        spline_coeff = self._inst_settings.spline_coeff
+        output = hrpd_algs.process_vanadium_for_focusing(bank_spectra=focused_vanadium_banks,
+                                                         spline_number=spline_coeff)
+        return output

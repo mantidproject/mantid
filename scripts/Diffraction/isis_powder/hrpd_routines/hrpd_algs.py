@@ -1,10 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
+import mantid.simpleapi as mantid
+
+from isis_powder.routines import common
 from isis_powder.routines.run_details import create_run_details_object, \
                                              RunDetailsWrappedCommonFuncs, CustomFuncForRunDetails
 
-def hrpd_get_inst_mode(forwarded_value, inst_settings):
-    raise NotImplementedError("hrpd_get_inst_mode")
 
 def get_run_details(run_number_string, inst_settings, is_vanadium):
     cal_mapping_callable = CustomFuncForRunDetails().add_to_func_chain(
@@ -23,3 +24,46 @@ def get_run_details(run_number_string, inst_settings, is_vanadium):
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
                                      is_vanadium_run=is_vanadium, empty_run_call=empty_run_callable,
                                      vanadium_run_call=vanadium_run_callable)
+
+
+def hrpd_get_inst_mode(forwarded_value, inst_settings):
+    cal_mapping = forwarded_value
+    return common.cal_map_dictionary_key_helper(dictionary=cal_mapping, key=inst_settings.mode)
+
+
+def process_vanadium_for_focusing(bank_spectra, spline_number):
+    output = common.spline_workspaces(num_splines=spline_number, focused_vanadium_spectra=bank_spectra)
+    return output
+
+
+# The following 2 functions may be moved to common
+def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
+    output_workspaces = list(workspaces_to_mask)
+
+    for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
+        output_name = "masked_vanadium-" + str(ws_index + 1)
+        for mask_params in bank_mask_list:
+            output_workspaces[ws_index] = mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
+                                                          OutputWorkspace=output_name,
+                                                          XMin=mask_params[0], XMax=mask_params[1])
+    return output_workspaces
+
+
+def _read_masking_file(masking_file_path):
+    all_banks_masking_list = []
+    bank_masking_list = []
+    ignore_line_prefixes = (' ', '\n', '\t', '#') # Matches whitespace or # symbol
+    with open(masking_file_path) as mask_file:
+        for line in mask_file:
+            if line.startswith(ignore_line_prefixes):
+                # Push back onto new bank
+                if bank_masking_list:
+                    all_banks_masking_list.append(bank_masking_list)
+                bank_masking_list = []
+            else:
+                # Parse and store in current list
+                line.rstrip()
+                bank_masking_list.append(line.split())
+    if bank_masking_list:
+        all_banks_masking_list.append(bank_masking_list)
+    return all_banks_masking_list

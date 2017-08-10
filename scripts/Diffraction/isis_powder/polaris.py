@@ -72,8 +72,7 @@ class Polaris(AbstractInst):
     def _generate_auto_vanadium_calibration(self, run_details):
         self.create_vanadium(run_in_range=run_details.run_number)
 
-    @staticmethod
-    def _generate_input_file_name(run_number):
+    def _generate_input_file_name(self, run_number):
         polaris_old_name = "POL"
         polaris_new_name = "POLARIS"
         first_run_new_name = 96912
@@ -95,9 +94,6 @@ class Polaris(AbstractInst):
 
             prefix = polaris_new_name if use_new_name else polaris_old_name
             return prefix + str(run_number)
-
-    def _generate_output_file_name(self, run_number_string):
-        return self._generate_input_file_name(run_number=run_number_string)
 
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode
