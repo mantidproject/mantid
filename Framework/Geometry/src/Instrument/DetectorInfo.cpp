@@ -347,7 +347,7 @@ void DetectorInfo::setScanInterval(
  * internal performance optimization. See also overload for other details. */
 void DetectorInfo::setScanInterval(
     const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval) {
-  m_detectorInfo.setScanInterval(
+  m_detectorInfo->setScanInterval(
       {interval.first.totalNanoseconds(), interval.second.totalNanoseconds()});
 }
 
