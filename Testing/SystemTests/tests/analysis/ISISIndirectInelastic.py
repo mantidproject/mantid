@@ -1019,7 +1019,7 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
         ConvolutionFitSequential(
             InputWorkspace=self.sample,
             Function=self.func,
-            PassWSIndexToFunction=self.passWSIndexToFunction
+            PassWSIndexToFunction=self.passWSIndexToFunction,
             StartX=self.startx,
             EndX=self.endx,
             BackgroundType=self.bg,

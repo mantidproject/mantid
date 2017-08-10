@@ -99,10 +99,11 @@ void ConvolutionFitSequential::init() {
                                           "negative",
                   Direction::Input);
 
-  declareProperty("Convolve", true,
-                  "If true, output fitted model components will be convolved with "
-                  "the resolution.",
-                  Direction::Input);
+  declareProperty(
+      "Convolve", true,
+      "If true, output fitted model components will be convolved with "
+      "the resolution.",
+      Direction::Input);
 
   declareProperty("Minimizer", "Levenberg-Marquardt",
                   boost::make_shared<MandatoryValidator<std::string>>(),
