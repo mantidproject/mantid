@@ -1,9 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -20,8 +17,9 @@ namespace {
 using namespace Mantid;
 using WsIndexToDetIds = std::unordered_map<size_t, std::vector<detid_t>>;
 
-WsIndexToDetIds mapDetectorsToWsIndexes(const API::DetectorInfo &detectorInfo,
-                                        const detid2index_map &mapping) {
+WsIndexToDetIds
+mapDetectorsToWsIndexes(const Geometry::DetectorInfo &detectorInfo,
+                        const detid2index_map &mapping) {
   const auto &detectorIds = detectorInfo.detectorIDs();
   WsIndexToDetIds indexToDetMapping;
 
