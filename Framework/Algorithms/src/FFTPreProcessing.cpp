@@ -117,23 +117,23 @@ void FFTPreProcessing::exec() {
                                   std::to_string(spectra[i]) +
                                   " is greater than the number of spectra!");
     }
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-   
     // Create output ws
 	outputWS->setHistogram(
 		specNum, applyApodizationFunction(addPadding(inputWS->histogram(specNum), padding),decayConstant,apodizationFunction));
-
-   // outputWS->mutableY(specNum) /= normConst;
-   // outputWS->mutableE(specNum) /= normConst;
-   // norm[i] = normConst;
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
   setProperty("OutputWorkspace", outputWS);
 }
+
 typedef double(*fptr)(const double time, const double decayConstant);
+/**
+* Gets a pointer to the relevant 
+* apodization function
+* @param method :: [input] The name of the chosen function
+* @returns :: pointer to the function
+*/
 fptr FFTPreProcessing::getApodizationFunction(const std::string method) {
 	if (method == "None") {
 		return none;
@@ -158,6 +158,13 @@ fptr FFTPreProcessing::getApodizationFunction(const std::string method) {
 	}
 	return none;
 }
+/**
+* Applies the appodization function to the data. 
+* @param histogram :: [input] Input histogram.
+* @param padding :: [input] the decay constant for the apodization
+* @param function :: [input] the apodization function 
+* @returns :: Histogram of the apodized data
+*/
 HistogramData::Histogram
 FFTPreProcessing::applyApodizationFunction(const HistogramData::Histogram &histogram,const double decayConstant,fptr function) {
 	HistogramData::Histogram result(histogram);
@@ -173,12 +180,13 @@ FFTPreProcessing::applyApodizationFunction(const HistogramData::Histogram &histo
 	return result;
 }
 /**
-* Corrects the data and errors for one spectrum.
-* The muon lifetime is in microseconds, not seconds, because the data is in
-* microseconds.
+* Adds padding to the data. The padding is
+* an integer multiple of the original data set.
+* i.e. padding =0 => none
+* padding = 2 => 2/3 of the output will be zero. 
 * @param histogram :: [input] Input histogram
-* @param numGoodFrames :: [input] the number of good frames
-* @returns :: Histogram of the normalised counts
+* @param padding :: [input] the amount of padding to add
+* @returns :: Histogram of the padded data
 */
 HistogramData::Histogram
 FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,

@@ -16,6 +16,7 @@ New
 ###
 
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` performs concatenation of the workspaces into a single one by handling the sample logs merging as in :ref:`MergeRuns <algm-MergeRuns>`.
+- :ref:`FFTPreProcessing <algm-FFTPreProcessing-v1>` a new algorithm for padding data and adding an apodization function.
 
 Improved
 ########
@@ -33,7 +34,6 @@ Improved
 - :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` makes the culling of the top one percent of the background events optional.
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` has the culling of the top one percent of the background events now as an optional input.
 - :ref:`IntegrateEllipsoidsTwoStep <algm-IntegrateEllipsoidsTwoStep-v1>` has the culling of the top one percent of the background events now as an optional input.
-
 
 Deprecated
 ##########
