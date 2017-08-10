@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/AlphaCalc.cpp
 	src/AnnularRingAbsorption.cpp
 	src/AnyShapeAbsorption.cpp
+	src/ApodizationFunctionHelper.cpp
 	src/AppendSpectra.cpp
 	src/ApplyCalibration.cpp
 	src/ApplyDeadTimeCorr.cpp
@@ -122,6 +123,7 @@ set ( SRC_FILES
 	src/FFTDerivative.cpp
 	src/FFTSmooth.cpp
 	src/FFTSmooth2.cpp
+	src/FFTPreProcessing.cpp
 	src/FilterBadPulses.cpp
 	src/FilterByLogValue.cpp
 	src/FilterByTime.cpp
@@ -326,6 +328,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AnnularRingAbsorption.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/AppendSpectra.h
+    inc/MantidAlgorithms/ApodizationFunctionHelper.h
 	inc/MantidAlgorithms/ApplyCalibration.h
 	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
@@ -439,6 +442,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FFTDerivative.h
 	inc/MantidAlgorithms/FFTSmooth.h
 	inc/MantidAlgorithms/FFTSmooth2.h
+	inc/MantidAlgorithms/FFTPreProcessing.h
 	inc/MantidAlgorithms/FilterBadPulses.h
 	inc/MantidAlgorithms/FilterByLogValue.h
 	inc/MantidAlgorithms/FilterByTime.h
@@ -767,6 +771,7 @@ set ( TEST_FILES
 	ExtractSpectraTest.h
 	ExtractUnmaskedSpectraTest.h
 	FFTDerivativeTest.h
+	FFTPreProcessingTest.h
 	FFTSmooth2Test.h
 	FFTTest.h
 	FilterBadPulsesTest.h
