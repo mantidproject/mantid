@@ -198,7 +198,10 @@ bool DimensionSliceWidget::showRebinControls() const {
 int DimensionSliceWidget::getNumBins() const { return ui.spinBins->value(); }
 
 /** Sets the number of bins to rebin to */
-void DimensionSliceWidget::setNumBins(int val) { ui.spinBins->setValue(val); }
+void DimensionSliceWidget::setNumBins(int val) {
+  ui.spinBins->setValue(val);
+  spinBinsChanged();
+}
 
 //-------------------------------------------------------------------------------------------------
 /** @return the thickness to integrate when rebinning */
@@ -209,6 +212,7 @@ double DimensionSliceWidget::getThickness() const {
 /** Sets the thickness to integrate when rebinning */
 void DimensionSliceWidget::setThickness(double val) {
   ui.spinThickness->setValue(val);
+  spinThicknessChanged();
 }
 
 //-------------------------------------------------------------------------------------------------
