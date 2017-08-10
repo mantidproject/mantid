@@ -103,7 +103,7 @@ private:
   void initScanIntervals();
   void initIndices();
   std::vector<bool> buildMergeIndices(const DetectorInfo &other) const;
-  bool isSyncScan() const;
+  bool m_isSyncScan{true};
 
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
