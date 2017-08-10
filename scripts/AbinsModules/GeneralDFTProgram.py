@@ -52,7 +52,7 @@ class GeneralDFTProgram(object):
 
               The datasets should be a dictionary with the following entries:
 
-                        "frequencies"  - frequencies for all k-points grouped in one numpy.array
+                        "frequencies"  - frequencies for all k-points grouped in one numpy.array in cm^-1
 
                         "weights"      - weights of all k-points in one numpy.array
 
@@ -63,7 +63,7 @@ class GeneralDFTProgram(object):
 
                         "atomic_displacements" - atomic displacements for all atoms and all k-points in one numpy array
 
-                        "unit_cell"      -   numpy array with unit cell vectors
+                        "unit_cell"      -   numpy array with unit cell vectors in Angstroms
 
               The following structured datasets should be also defined:
 
@@ -82,8 +82,8 @@ class GeneralDFTProgram(object):
                                                           **Notice at the moment this parameter is not functional
                                                             in LoadCastep**
 
-                                               "fract_coord" - equilibrium position of atom; it has a form of numpy
-                                                               array with three floats
+                                               "fract_coord" - equilibrium position of atom in terms of lattice vectors;
+                                                               (fractional coordinates) it has a form of numpy array with three floats
 
                                                "mass" - mass of atom
 
