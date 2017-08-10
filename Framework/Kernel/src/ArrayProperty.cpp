@@ -96,8 +96,12 @@ std::string ArrayProperty<T>::setValue(const std::string &value) {
   return PropertyWithValue<std::vector<T>>::setValue(value);
 }
 
+template <typename T> void ArrayProperty<T>::visualStudioC4661Workaround() {}
+
 /// @cond
-template class DLLExport ArrayProperty<int32_t>;
+// export macro not needed for int32_t due to explicit specialization in header.
+template class ArrayProperty<int32_t>;
+
 template class DLLExport ArrayProperty<uint32_t>;
 template class DLLExport ArrayProperty<int64_t>;
 template class DLLExport ArrayProperty<uint64_t>;
@@ -123,9 +127,7 @@ template class DLLExport ArrayProperty<std::vector<unsigned long>>;
 /// @endcond
 
 template <>
-MANTID_KERNEL_DLL ArrayProperty<int> *ArrayProperty<int>::clone() const {
-  return new ArrayProperty<int>(*this);
-}
+MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround() {}
 
 } // namespace Kernel
 } // namespace Mantid
