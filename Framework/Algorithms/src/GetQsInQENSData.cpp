@@ -41,7 +41,7 @@ std::map<std::string, std::string> GetQsInQENSData::validateInputs() {
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
   // Check whether the input workspace could be found
-  if (inputWs) {
+  if (!inputWs) {
     issues["InputWorkspace"] = "InputWorkspace is not a MatrixWorkspace";
   }
 
