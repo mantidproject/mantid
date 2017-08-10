@@ -11,7 +11,7 @@
  * decay constant tau:
  * f = 1 - abs(t)/tau
  * @param time :: [input] current time (t)
- * @param decayConstnat :: [input] the decay constant (tau)
+ * @param decayConstant :: [input] the decay constant (tau)
  * @returns :: Function evaluation
  */
 double bartlett(const double time, const double decayConstant) {
@@ -24,7 +24,7 @@ double bartlett(const double time, const double decayConstant) {
 * decay constant tau:
 * f = exp(-t/tau)
 * @param time :: [input] current time (t)
-* @param decayConstnat :: [input] the decay constant (tau)
+* @param decayConstant :: [input] the decay constant (tau)
 * @returns :: Function evaluation
 */
 double lorentz(const double time, const double decayConstant) {
@@ -36,7 +36,7 @@ double lorentz(const double time, const double decayConstant) {
 * decay constant tau:
 * f = (1 - t^2/tau^2)^2
 * @param time :: [input] current time (t)
-* @param decayConstnat :: [input] the decay constant (tau)
+* @param decayConstant :: [input] the decay constant (tau)
 * @returns :: Function evaluation
 */
 double connes(const double time, const double decayConstant) {
@@ -49,7 +49,7 @@ double connes(const double time, const double decayConstant) {
 * decay constant tau:
 * f = cos(pi*t/(2.*tau))
 * @param time :: [input] current time (t)
-* @param decayConstnat :: [input] the decay constant (tau)
+* @param decayConstant :: [input] the decay constant (tau)
 * @returns :: Function evaluation
 */
 double cosine(const double time, const double decayConstant) {
@@ -61,7 +61,7 @@ double cosine(const double time, const double decayConstant) {
 * decay constant tau:
 * f =exp(-time^2/(2*tau^2))
 * @param time :: [input] current time (t)
-* @param decayConstnat :: [input] the decay constant (tau)
+* @param decayConstant :: [input] the decay constant (tau)
 * @returns :: Function evaluation
 */
 double gaussian(const double time, const double decayConstant) {
@@ -74,7 +74,7 @@ double gaussian(const double time, const double decayConstant) {
 * decay constant tau:
 * f = 1 - t^2/tau^2
 * @param time :: [input] current time (t)
-* @param decayConstnat :: [input] the decay constant (tau)
+* @param decayConstant :: [input] the decay constant (tau)
 * @returns :: Function evaluation
 */
 double welch(const double time, const double decayConstant) {
@@ -84,7 +84,7 @@ double welch(const double time, const double decayConstant) {
 * Returns no
 * apodization function. i.e. the data is unchanged
 * @param time :: [input] current time (t)
-* @param decayConstnat :: [input] the decay constant (tau)
+* @param decayConstant :: [input] the decay constant (tau)
 * @returns :: Function evaluation
 */
 double none(const double , const double ) {
