@@ -272,6 +272,21 @@ public:
     info.setScanInterval(0, {1, 2});
     TS_ASSERT_EQUALS(info.scanInterval({0, 0}),
                      (std::pair<int64_t, int64_t>(1, 2)));
+    info.setScanInterval(0, {1, 3});
+    TS_ASSERT_EQUALS(info.scanInterval({0, 0}),
+                     (std::pair<int64_t, int64_t>(1, 3)));
+  }
+
+  void test_setScanInterval_sync() {
+    DetectorInfo info(PosVec(2), RotVec(2));
+    std::pair<int64_t, int64_t> interval(1, 2);
+    info.setScanInterval(interval);
+    TS_ASSERT_EQUALS(info.scanInterval({0, 0}), interval);
+    TS_ASSERT_EQUALS(info.scanInterval({1, 0}), interval);
+    interval = {1,3};
+    info.setScanInterval(interval);
+    TS_ASSERT_EQUALS(info.scanInterval({0, 0}), interval);
+    TS_ASSERT_EQUALS(info.scanInterval({1, 0}), interval);
   }
 
   void test_setScanInterval_failures() {
@@ -284,6 +299,38 @@ public:
         info.setScanInterval(0, {2, 1}), const std::runtime_error &e,
         std::string(e.what()),
         "DetectorInfo: cannot set scan interval with start >= end");
+  }
+
+  void test_setScanInterval_sync_failures() {
+    DetectorInfo info(PosVec(1), RotVec(1));
+    TS_ASSERT_THROWS_EQUALS(
+        info.setScanInterval({1, 1}), const std::runtime_error &e,
+        std::string(e.what()),
+        "DetectorInfo: cannot set scan interval with start >= end");
+    TS_ASSERT_THROWS_EQUALS(
+        info.setScanInterval({2, 1}), const std::runtime_error &e,
+        std::string(e.what()),
+        "DetectorInfo: cannot set scan interval with start >= end");
+  }
+
+  void test_setScanInterval_sync_async_fail() {
+    DetectorInfo info(PosVec(1), RotVec(1));
+    info.setScanInterval({1, 2});
+    TS_ASSERT_THROWS_EQUALS(info.setScanInterval(0, {1, 2}),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "DetectorInfo has been initialized with a "
+                            "synchonous scan, cannot set scan interval for "
+                            "individual detector.");
+  }
+
+  void test_setScanInterval_async_sync_fail() {
+    DetectorInfo info(PosVec(1), RotVec(1));
+    info.setScanInterval(0, {1, 2});
+    TS_ASSERT_THROWS_EQUALS(info.setScanInterval({1, 2}),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "DetectorInfo has been initialized with a "
+                            "asynchonous scan, cannot set synchronous scan "
+                            "interval.");
   }
 
   void test_merge_fail_size() {
@@ -314,6 +361,21 @@ public:
         "Cannot merge DetectorInfo: scan intervals not defined");
   }
 
+  void test_merge_fail_sync_async_mismatch() {
+    DetectorInfo a(PosVec(1), RotVec(1));
+    DetectorInfo b(PosVec(1), RotVec(1));
+    a.setScanInterval(0, {0, 1});
+    b.setScanInterval({0, 1});
+    TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "both or none of the scans "
+                                                   "must be synchronous");
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "both or none of the scans "
+                                                   "must be synchronous");
+  }
+
   void test_merge_fail_monitor_mismatch() {
     DetectorInfo a(PosVec(2), RotVec(2));
     DetectorInfo b(PosVec(2), RotVec(2), {1});
@@ -324,6 +386,28 @@ public:
     TS_ASSERT_THROWS_EQUALS(
         a.merge(b), const std::runtime_error &e, std::string(e.what()),
         "Cannot merge DetectorInfo: monitor flags mismatch");
+  }
+
+  void test_merge_fail_overlap_sync() {
+    DetectorInfo a(PosVec(2), RotVec(2));
+    a.setScanInterval({0, 10});
+    auto b(a);
+    TS_ASSERT_THROWS_EQUALS(
+        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
+    b = a;
+    b.setScanInterval({-1, 5});
+    TS_ASSERT_THROWS_EQUALS(
+        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
+    b.setScanInterval({1, 5});
+    TS_ASSERT_THROWS_EQUALS(
+        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
+    b.setScanInterval({1, 11});
+    TS_ASSERT_THROWS_EQUALS(
+        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
   }
 
   void test_merge_identical_interval_failures() {
@@ -426,7 +510,7 @@ public:
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanCount(0), 2);
-    // Note that the order is not guaranteed, currently these are just int the
+    // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
     TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
     TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
@@ -434,6 +518,33 @@ public:
     TS_ASSERT_EQUALS(a.position({0, 1}), pos2);
     // Monitor is not scanning
     TS_ASSERT_EQUALS(a.scanCount(1), 1);
+  }
+
+  void test_merge_sync() {
+    DetectorInfo a(PosVec(2), RotVec(2), {1});
+    auto b(a);
+    Eigen::Vector3d pos1(1, 0, 0);
+    Eigen::Vector3d pos2(2, 0, 0);
+    a.setPosition(0, pos1);
+    b.setPosition(0, pos2);
+    std::pair<int64_t, int64_t> interval1(0, 1);
+    std::pair<int64_t, int64_t> interval2(1, 2);
+    a.setScanInterval(interval1);
+    b.setScanInterval(interval2);
+    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    TS_ASSERT(a.isScanning());
+    TS_ASSERT(!a.isEquivalent(b));
+    TS_ASSERT_EQUALS(a.size(), 2);
+    TS_ASSERT_EQUALS(a.scanCount(0), 2);
+    TS_ASSERT_EQUALS(a.scanCount(1), 2);
+    // Note that the order is not guaranteed, currently these are just in the
+    // order in which the are merged.
+    TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
+    TS_ASSERT_EQUALS(a.scanInterval({1, 0}), interval1);
+    TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
+    TS_ASSERT_EQUALS(a.scanInterval({1, 1}), interval2);
+    TS_ASSERT_EQUALS(a.position({0, 0}), pos1);
+    TS_ASSERT_EQUALS(a.position({0, 1}), pos2);
   }
 
   void test_merge_idempotent() {
