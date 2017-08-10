@@ -52,7 +52,7 @@ public:
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load");
-  ~ReflDataProcessorPresenter() override;
+  ~ReflDataProcessorPresenter() override = default;
 
   // The following methods are public for testing purposes only
   // Add entry for the number of slices for a row in a group

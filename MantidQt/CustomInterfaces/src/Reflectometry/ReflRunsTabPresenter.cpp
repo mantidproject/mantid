@@ -10,23 +10,23 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <QStringList>
+#include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
+#include <iterator>
 #include <sstream>
 #include <vector>
-#include <algorithm>
-#include <iterator>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -80,12 +80,8 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   m_currentTransferMethod = m_view->getTransferMethod();
 
   // Set up the instrument selectors
-  std::vector<std::string> instruments;
-  instruments.emplace_back("INTER");
-  instruments.emplace_back("SURF");
-  instruments.emplace_back("CRISP");
-  instruments.emplace_back("POLREF");
-  instruments.emplace_back("OFFSPEC");
+  std::vector<std::string> instruments{
+      {"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}};
 
   // If the user's configured default instrument is in this list, set it as the
   // default, otherwise use INTER
@@ -103,8 +99,6 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
       presenter->setInstrumentList(fromStdStringVector(instruments), "INTER");
   }
 }
-
-ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
 
 /** Accept a main presenter
 * @param mainPresenter :: [input] A main presenter
@@ -265,12 +259,30 @@ void ReflRunsTabPresenter::autoreduce(bool startNew) {
     tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
+SearchResultMap ReflRunsTabPresenter::querySelectedRunsToTransfer(
+    std::set<int> const &selectedRows) const {
+  SearchResultMap runs;
+  for (auto &&row : selectedRows) {
+    const auto run = m_searchModel->data(m_searchModel->index(row, 0))
+                         .toString()
+                         .toStdString();
+    auto resultDescription = m_searchModel->data(m_searchModel->index(row, 1))
+                                 .toString()
+                                 .toStdString();
+
+    auto resultLocation = m_searchModel->data(m_searchModel->index(row, 2))
+                              .toString()
+                              .toStdString();
+    runs[run] = SearchResult(resultDescription, resultLocation);
+  }
+  return runs;
+}
+
 /** Transfers the selected runs in the search results to the processing table
 * @return : The runs to transfer as a vector of maps
 */
 void ReflRunsTabPresenter::transfer() {
   // Build the input for the transfer strategy
-  SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
 
   // Do not begin transfer if nothing is selected or if the transfer method does
@@ -279,7 +291,6 @@ void ReflRunsTabPresenter::transfer() {
     m_mainPresenter->giveUserCritical(
         "Error: Please select at least one run to transfer.",
         "No runs selected");
-    return;
   } else if (m_currentTransferMethod != m_view->getTransferMethod()) {
     m_mainPresenter->giveUserCritical(
         "Error: Method selected for transferring runs (" +
@@ -287,49 +298,27 @@ void ReflRunsTabPresenter::transfer() {
             ") must match the method used for searching runs (" +
             m_currentTransferMethod + ").",
         "Transfer method mismatch");
-    return;
-  }
+  } else {
+    auto runs = querySelectedRunsToTransfer(selectedRows);
+    ProgressPresenter progress(0, static_cast<double>(selectedRows.size()),
+                               static_cast<int64_t>(selectedRows.size()),
+                               this->m_progressView);
 
-  for (auto &&row : selectedRows) {
-    const auto run = m_searchModel->data(m_searchModel->index(row, 0))
-                         .toString()
-                         .toStdString();
-    SearchResult searchResult;
+    TransferResults results =
+        getTransferStrategy()->transferRuns(runs, progress);
 
-    searchResult.description = m_searchModel->data(m_searchModel->index(row, 1))
-                                   .toString()
-                                   .toStdString();
+    auto invalidRuns =
+        results.getErrorRuns(); // grab our invalid runs from the transfer
 
-    searchResult.location = m_searchModel->data(m_searchModel->index(row, 2))
-                                .toString()
-                                .toStdString();
-    runs[run] = searchResult;
-  }
-
-  ProgressPresenter progress(0, static_cast<double>(selectedRows.size()),
-                             static_cast<int64_t>(selectedRows.size()),
-                             this->m_progressView);
-
-  TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
-
-  auto invalidRuns =
-      results.getErrorRuns(); // grab our invalid runs from the transfer
-
-  // iterate through invalidRuns to set the 'invalid transfers' in the search
-  // model
-  if (!invalidRuns.empty()) { // check if we have any invalid runs
-    for (auto invalidRowIt = invalidRuns.begin();
-         invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
-      auto &error = *invalidRowIt; // grab row from vector
+    // iterate through invalidRuns to set the 'invalid transfers' in the search
+    // model
+    for (auto &error : invalidRuns) {
       // iterate over row containing run number and reason why it's invalid
-      for (auto errorRowIt = error.begin(); errorRowIt != error.end();
-           ++errorRowIt) {
-        const std::string runNumber = errorRowIt->first; // grab run number
+      for (const auto &errorRowIt : error) {
+        const auto &runNumber = errorRowIt.first; // grab run number
 
         // iterate over rows that are selected in the search table
-        for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
-             ++rowIt) {
-          const int row = *rowIt;
+        for (const auto row : selectedRows) {
           // get the run number from that selected row
           const auto searchRun =
               m_searchModel->data(m_searchModel->index(row, 0))
@@ -344,11 +333,11 @@ void ReflRunsTabPresenter::transfer() {
         }
       }
     }
-  }
 
-  m_tablePresenters.at(m_view->getSelectedGroup())
-      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
-          results.getTransferRuns()));
+    m_tablePresenters.at(m_view->getSelectedGroup())
+        ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
+            results.getTransferRuns()));
+  }
 }
 
 /**
@@ -358,30 +347,26 @@ void ReflRunsTabPresenter::transfer() {
 */
 std::unique_ptr<ReflTransferStrategy>
 ReflRunsTabPresenter::getTransferStrategy() {
-  std::unique_ptr<ReflTransferStrategy> rtnStrategy;
   if (m_currentTransferMethod == MeasureTransferMethod) {
 
     // We need catalog info overrides from the user-based config service
-    std::unique_ptr<CatalogConfigService> catConfigService(
-        makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+    auto catalogConfigService =
+        makeCatalogConfigServiceAdapter(ConfigService::Instance());
 
     // We make a user-based Catalog Info object for the transfer
-    std::unique_ptr<ICatalogInfo> catInfo = make_unique<UserCatalogInfo>(
+    auto catalogInfo = make_unique<UserCatalogInfo>(
         ConfigService::Instance().getFacility().catalogInfo(),
-        *catConfigService);
+        *catalogConfigService);
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
-    std::unique_ptr<ReflMeasurementItemSource> source =
-        make_unique<ReflNexusMeasurementItemSource>();
+    auto source = make_unique<ReflNexusMeasurementItemSource>();
 
     // Finally make and return the Measure based transfer strategy.
-    rtnStrategy = Mantid::Kernel::make_unique<ReflMeasureTransferStrategy>(
-        std::move(catInfo), std::move(source));
-    return rtnStrategy;
+    return Mantid::Kernel::make_unique<ReflMeasureTransferStrategy>(
+        std::move(catalogInfo), std::move(source));
   } else if (m_currentTransferMethod == LegacyTransferMethod) {
-    rtnStrategy = make_unique<ReflLegacyTransferStrategy>();
-    return rtnStrategy;
+    return make_unique<ReflLegacyTransferStrategy>();
   } else {
     throw std::runtime_error("Unknown tranfer method selected: " +
                              m_currentTransferMethod);
@@ -404,10 +389,8 @@ void ReflRunsTabPresenter::notifyADSChanged(
 * @return :: Pre-processing property names.
 */
 QString ReflRunsTabPresenter::getPreprocessingProperties() const {
-
-  auto properties =
-      QString("Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun");
-  return properties;
+  return QString(
+      "Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun");
 }
 
 /** Requests global pre-processing options as a string. Options are supplied by
@@ -416,11 +399,9 @@ QString ReflRunsTabPresenter::getPreprocessingProperties() const {
   */
 QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
-  auto optionsStr = QString("Transmission Run(s),") +
-                    QString::fromStdString(m_mainPresenter->getTransmissionRuns(
-                        m_view->getSelectedGroup()));
-
-  return optionsStr;
+  return QString("Transmission Run(s),") +
+         QString::fromStdString(
+             m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup()));
 }
 
 /** Requests global processing options. Options are supplied by the main
@@ -463,10 +444,18 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 * when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() const {
-  m_view->setRowActionEnabled(PROCESS, true);
-  m_view->setRowActionEnabled(PAUSE, false);
+  enableRowAction(PROCESS);
+  disableRowAction(PAUSE);
   m_view->setTransferEnabled(true);
   m_view->setAutoreduceButtonEnabled(true);
+}
+
+void ReflRunsTabPresenter::enableRowAction(int index) const {
+  m_view->setRowActionEnabled(index, true);
+}
+
+void ReflRunsTabPresenter::disableRowAction(int index) const {
+  m_view->setRowActionEnabled(index, false);
 }
 
 /** Disables the 'process' button and enables the 'pause' button when data
@@ -474,8 +463,8 @@ void ReflRunsTabPresenter::pause() const {
  * confirmed to be resumed.
 */
 void ReflRunsTabPresenter::resume() const {
-  m_view->setRowActionEnabled(PROCESS, false);
-  m_view->setRowActionEnabled(PAUSE, true);
+  disableRowAction(PROCESS);
+  enableRowAction(PAUSE);
   m_view->setTransferEnabled(false);
   m_view->setAutoreduceButtonEnabled(false);
   m_mainPresenter->notify(
@@ -495,7 +484,6 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
->>>>>>> 20073_fix_no_error_message_when_exception_on_refl_gui
 */
 void ReflRunsTabPresenter::confirmReductionPaused() const {
 

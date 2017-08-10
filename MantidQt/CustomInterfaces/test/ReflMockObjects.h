@@ -63,6 +63,7 @@ public:
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
   MOCK_METHOD2(setRowActionEnabled, void(int, bool));
+  MOCK_METHOD1(setTransferEnabled, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
 
   // Calls we don't care about

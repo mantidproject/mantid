@@ -4,6 +4,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include <boost/shared_ptr.hpp>
 
@@ -62,7 +63,7 @@ public:
                        std::vector<DataProcessorPresenter *> tablePresenter,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
-  ~ReflRunsTabPresenter() override;
+  ~ReflRunsTabPresenter() override = default;
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
@@ -81,6 +82,7 @@ public:
   bool startNewAutoreduction() const override;
   /// Reduction paused/resumed confirmation handler
   void confirmReductionPaused() const override;
+  void confirmReductionResumed() const override;
 
 private:
   static auto constexpr PROCESS = 0;
@@ -114,10 +116,13 @@ private:
   void autoreduce(bool startNew);
   void transfer();
   void pushCommands();
+  void enableRowAction(int index) const;
+  void disableRowAction(int index) const;
   /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument
   void changeInstrument();
+  SearchResultMap querySelectedRunsToTransfer(std::set<int> const& selectedRows) const;
 };
 }
 }

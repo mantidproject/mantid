@@ -307,12 +307,8 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setRowActionEnabled(1, true))
         .Times(Exactly(1));
-<<<<<<< HEAD
-
-=======
     EXPECT_CALL(mockRunsTabView, setAutoreduceButtonEnabled(false))
         .Times(Exactly(1));
->>>>>>> 20073_fix_no_error_message_when_exception_on_refl_gui
     // Resume presenter
     presenter.resume();
 

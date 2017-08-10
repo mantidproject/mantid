@@ -68,6 +68,7 @@ public:
   virtual void resume() const {};
   /// Handle data reduction paused confirmation
   virtual void confirmReductionPaused() const {};
+  virtual void confirmReductionResumed() const {};
 };
 }
 }

@@ -73,6 +73,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
   friend class GenericDataProcessorPresenterGroupReducerWorker;
 
 public:
+  using Options = std::map<QString, QVariant>;
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
@@ -108,11 +109,11 @@ public:
       const DataProcessorWhiteList &whitelist,
       const DataProcessorPreprocessMap &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
-      const DataProcessorPostprocessingAlgorithm &postprocessor);
-  virtual ~GenericDataProcessorPresenter() override;
+       const DataProcessorPostprocessingAlgorithm &postprocessor);
+  ~GenericDataProcessorPresenter() override = default;
   void notify(DataProcessorPresenter::Flag flag) override;
-  const std::map<QString, QVariant> &options() const override;
-  void setOptions(const std::map<QString, QVariant> &options) override;
+  const Options &options() const override;
+  void setOptions(const Options &options) override;
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   void setInstrumentList(const QStringList &instruments,
                          const QString &defaultInstrument) override;
@@ -215,7 +216,7 @@ private:
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores the user options for the presenter
-  std::map<QString, QVariant> m_options;
+  Options m_options;
   // Thread to run reducer worker in
   std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
   // A boolean that can be set to pause reduction of the current item
@@ -274,9 +275,9 @@ private:
   // options
   void showOptionsDialog();
   void initOptions();
+  void setDefaultOptions();
 
-  // actions/commands
-  void addCommands();
+  void addActionsToToolbar();
 
   // decide between processing next row or group
   void doNextAction();

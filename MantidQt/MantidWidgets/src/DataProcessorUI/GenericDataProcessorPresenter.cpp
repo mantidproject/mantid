@@ -195,17 +195,12 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
           whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
           processor, DataProcessorPostprocessingAlgorithm()) {}
 
-/**
-* Destructor
-*/
-GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
-
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
-  std::transform(std::begin(in), std::end(in), std::inserter(out, out.begin()),
-                 [](QString const &inStr)
-                     -> std::string { return inStr.toStdString(); });
+  std::transform(
+      std::begin(in), std::end(in), std::inserter(out, out.begin()),
+      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
   return out;
 }
 }
@@ -221,8 +216,7 @@ void GenericDataProcessorPresenter::acceptViews(
   m_view = tableView;
   m_progressView = progressView;
 
-  // Add actions to toolbar
-  addCommands();
+  addActionsToToolbar();
 
   // Initialise options
   // Load saved values from disk
@@ -1011,8 +1005,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                             ? propValue.right(propValue.indexOf("e"))
                             : "";
           propValue =
-              propValue.mid(0, propValue.indexOf(".") +
-                                   m_options["RoundPrecision"].toInt() + 1) +
+              propValue.mid(0,
+                            propValue.indexOf(".") +
+                                m_options["RoundPrecision"].toInt() + 1) +
               exp;
         }
 
@@ -1504,42 +1499,41 @@ void GenericDataProcessorPresenter::showOptionsDialog() {
 /** Gets the options used by the presenter
 @returns The options used by the presenter
 */
-const std::map<QString, QVariant> &
-GenericDataProcessorPresenter::options() const {
+const GenericDataProcessorPresenter::Options &GenericDataProcessorPresenter::options() const {
   return m_options;
 }
 
 /** Sets the options used by the presenter
 @param options : The new options for the presenter to use
 */
-void GenericDataProcessorPresenter::setOptions(
-    const std::map<QString, QVariant> &options) {
+void GenericDataProcessorPresenter::setOptions(const Options &options) {
   // Overwrite the given options
-  for (auto it = options.begin(); it != options.end(); ++it)
-    m_options[it->first] = it->second;
+  for (const auto &optionKeyValue : options)
+    m_options[optionKeyValue.first] = optionKeyValue.second;
 
   // Save any changes to disk
   m_view->saveSettings(m_options);
 }
 
-/** Load options from disk if possible, or set to defaults */
-void GenericDataProcessorPresenter::initOptions() {
-  m_options.clear();
-
-  // Set defaults
+void GenericDataProcessorPresenter::setDefaultOptions() {
   m_options["WarnProcessAll"] = true;
   m_options["WarnDiscardChanges"] = true;
   m_options["WarnProcessPartialGroup"] = true;
   m_options["Round"] = false;
   m_options["RoundPrecision"] = 3;
+}
 
+/** Load options from disk if possible, or set to defaults */
+void GenericDataProcessorPresenter::initOptions() {
+  m_options.clear();
+  setDefaultOptions();
   // Load saved values from disk
   m_view->loadSettings(m_options);
 }
 
 /** Tells the view which of the actions should be added to the toolbar
 */
-void GenericDataProcessorPresenter::addCommands() {
+void GenericDataProcessorPresenter::addActionsToToolbar() {
 
   auto commands = m_manager->publishCommands();
   std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;
