@@ -1,4 +1,4 @@
-set ( SRC_FILES
+﻿set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
 	src/BankPulseTimes.cpp
@@ -54,7 +54,7 @@ set ( SRC_FILES
 	src/LoadILLIndirect.cpp
 	src/LoadILLIndirect2.cpp
 	src/LoadILLReflectometry.cpp
-  src/LoadILLSANS.cpp
+    src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadInstrument.cpp
@@ -75,7 +75,8 @@ set ( SRC_FILES
 	src/LoadNXSPE.cpp
 	src/LoadNXcanSAS.cpp
 	src/LoadNexus.cpp
-	src/LoadNexusLogs.cpp
+    src/LoadNexusGeometry.cpp
+    src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusMonitors2.cpp
 	src/LoadNexusProcessed.cpp
@@ -227,7 +228,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadILLIndirect.h
 	inc/MantidDataHandling/LoadILLIndirect2.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
-  inc/MantidDataHandling/LoadILLSANS.h
+    inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadILLTOF2.h
 	inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadInstrument.h
@@ -248,6 +249,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNXSPE.h
 	inc/MantidDataHandling/LoadNXcanSAS.h
 	inc/MantidDataHandling/LoadNexus.h
+    inc/MantidDataHandling/LoadNexusGeometry.h
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusMonitors2.h
@@ -414,6 +416,7 @@ set ( TEST_FILES
 	LoadMuonNexus2Test.h
 	LoadNXSPETest.h
 	LoadNXcanSASTest.h
+    LoadNexusGeometryTest.h
 	LoadNexusLogsTest.h
 	LoadNexusMonitorsTest.h
 	LoadNexusProcessedTest.h
