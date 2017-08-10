@@ -45,16 +45,18 @@ private:
 
   void fitSpectraPeaks(size_t wi);
 
-  double fitSinglePeak(API::IFunction_sptr fitfunc,
-                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                       double xmin, double xmax);
+  double fitSinglePeak(size_t peakindex, size_t wsindex,
+                       std::vector<double> &init_peak_values,
+                       std::vector<double> &init_bkgd_values,
+                       std::vector<double> &fit_window,
+                       std::vector<double> &peak_range);
 
   void estimateLinearBackground(size_t wi, double left_window_boundary,
                                 double right_window_boundary, double &bkgd_a1,
                                 double &bkgd_a0);
 
-  double findMaxValue(size_t wi, double left_window_boundary,
-                      double right_window_boundary, double b1, double b0);
+  void findMaxValue(size_t wi, double left_window_boundary,
+                      double right_window_boundary, double b1, double b0, double &peak_center, double &max_value);
 
   void generateOutputWorkspaces();
 
@@ -65,6 +67,8 @@ private:
   std::vector<double> m_peakCenters;
   std::vector<double> m_peakWindowLeft;
   std::vector<double> m_peakWindowRight;
+
+  std::vector<std::vector<double>> m_peakWindows;
 
   std::vector<double> m_initParamValues;
 
