@@ -11,8 +11,6 @@ New features
 Algorithms
 ##########
 
-Bayes
-#####
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 
 Data Analysis
