@@ -1,7 +1,7 @@
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
@@ -623,7 +623,8 @@ void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
  *
  * @param inst: instrument
  */
-void IntegrateEllipsoids::calculateE1(const API::DetectorInfo &detectorInfo) {
+void IntegrateEllipsoids::calculateE1(
+    const Geometry::DetectorInfo &detectorInfo) {
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (detectorInfo.isMonitor(i))
       continue; // skip monitor

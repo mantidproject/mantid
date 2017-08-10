@@ -5,8 +5,8 @@
 #include "MantidQtWidgets/InstrumentView/RectangularDetectorActor.h"
 #include "MantidQtWidgets/InstrumentView/StructuredDetectorActor.h"
 
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Tolerance.h"
