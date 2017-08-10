@@ -14,7 +14,7 @@ Mantid::Kernel::Logger g_log("ContainerSubtraction");
 namespace MantidQt {
 namespace CustomInterfaces {
 ContainerSubtraction::ContainerSubtraction(QWidget *parent)
-    : CorrectionsTab(parent) {
+    : CorrectionsTab(parent), m_spectra(0) {
   m_uiForm.setupUi(parent);
 
   // Connect slots
@@ -30,6 +30,8 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
           SLOT(updateCan()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -273,19 +275,18 @@ void ContainerSubtraction::newSample(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Sample");
 
   // Get new workspace
-  const MatrixWorkspace_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          dataName.toStdString());
+  m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
   m_uiForm.spPreviewSpec->setMaximum(
-      static_cast<int>(sampleWs->getNumberHistograms()) - 1);
+      static_cast<int>(m_csSampleWS->getNumberHistograms()) - 1);
 
   // Plot the sample curve
-  m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
+  plotInPreview("Sample", m_csSampleWS, Qt::black);
   m_sampleWorkspaceName = dataName.toStdString();
 
   // Set min/max container shift
-  auto min = sampleWs->getXMin();
-  auto max = sampleWs->getXMax();
+  auto min = m_csSampleWS->getXMin();
+  auto max = m_csSampleWS->getXMax();
 
   m_uiForm.spShift->setMinimum(min);
   m_uiForm.spShift->setMaximum(max);
@@ -301,21 +302,19 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Container");
 
   // Get new workspace
-  const MatrixWorkspace_sptr containerWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          dataName.toStdString());
+  m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
 
   // Clone container for use in preprocessing
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->initialize();
-  clone->setProperty("InputWorkspace", containerWs);
+  clone->setProperty("InputWorkspace", m_csContainerWS);
   clone->setProperty("Outputworkspace", "__processed_can");
   clone->execute();
   m_containerWorkspaceName = "__processed_can";
 
   // Plot new container
-  m_uiForm.ppPreview->addSpectrum("Container", containerWs, 0, Qt::red);
-  m_containerWorkspaceName = "__processed_can";
+  plotInPreview("Container", m_csContainerWS, Qt::red);
 }
 
 /**
@@ -364,19 +363,27 @@ void ContainerSubtraction::plotPreview(int wsIndex) {
   m_uiForm.ppPreview->clear();
 
   // Plot sample
-  m_uiForm.ppPreview->addSpectrum("Sample",
-                                  QString::fromStdString(m_sampleWorkspaceName),
-                                  wsIndex, Qt::black);
+  if (m_csSampleWS) {
+    m_uiForm.ppPreview->addSpectrum(
+        "Sample", QString::fromStdString(m_sampleWorkspaceName), wsIndex,
+        Qt::black);
+  }
+
+  // Plot container
+  if (m_csContainerWS) {
+    m_uiForm.ppPreview->addSpectrum(
+        "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
+        Qt::red);
+  }
 
   // Plot result
-  if (!m_pythonExportWsName.empty())
+  if (!m_pythonExportWsName.empty()) {
     m_uiForm.ppPreview->addSpectrum(
         "Subtracted", QString::fromStdString(m_pythonExportWsName), wsIndex,
         Qt::green);
+  }
 
-  m_uiForm.ppPreview->addSpectrum(
-      "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
-      Qt::red);
+  m_spectra = boost::numeric_cast<size_t>(wsIndex);
 }
 
 void ContainerSubtraction::postProcessComplete(bool error) {
@@ -423,12 +430,13 @@ void ContainerSubtraction::absCorComplete(bool error) {
 
   // Convert back to original sample units
   if (m_originalSampleUnits != "Wavelength") {
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        m_pythonExportWsName);
+    m_csSubtractedWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            m_pythonExportWsName);
     std::string eMode("");
     if (m_originalSampleUnits == "dSpacing")
       eMode = "Elastic";
-    addConvertUnitsStep(ws, m_originalSampleUnits, "", eMode);
+    addConvertUnitsStep(m_csSubtractedWS, m_originalSampleUnits, "", eMode);
   }
 
   if (m_uiForm.ckShiftCan->isChecked()) {
@@ -478,6 +486,67 @@ void ContainerSubtraction::plotClicked() {
 
     if (plotType == "Contour" || plotType == "Both")
       plot2D(QString::fromStdString(m_pythonExportWsName));
+  }
+}
+
+/**
+* Plots the current spectrum displayed in the preview plot
+*/
+void ContainerSubtraction::plotCurrentPreview() {
+  QStringList workspaces = QStringList();
+
+  // Check whether a sample workspace has been specified
+  if (m_csSampleWS) {
+    workspaces.append(QString::fromStdString(m_csSampleWS->getName()));
+  }
+
+  // Check whether a container workspace has been specified
+  if (m_csContainerWS) {
+    workspaces.append(QString::fromStdString(m_csContainerWS->getName()));
+  }
+
+  // Check whether a subtracted workspace has been generated
+  if (m_csSubtractedWS) {
+    workspaces.append(QString::fromStdString(m_csSubtractedWS->getName()));
+  }
+
+  IndirectTab::plotSpectrum(workspaces, boost::numeric_cast<int>(m_spectra));
+}
+
+/*
+* Plots the selected spectra (selected by the Spectrum spinner) of the specified
+* workspace. The resultant curve will be given the specified name and the
+* specified colour.
+*
+* @param curveName   The name of the curve to plot in the preview.
+* @param ws          The workspace whose spectra to plot in the preview.
+* @param curveColor  The color of the curve to plot in the preview.
+*/
+void ContainerSubtraction::plotInPreview(const QString &curveName,
+                                         MatrixWorkspace_sptr &ws,
+                                         const QColor &curveColor) {
+
+  // Check whether the selected spectra is now out of bounds with
+  // respect to the specified workspace.
+  if (ws->getNumberHistograms() > m_spectra) {
+    m_uiForm.ppPreview->addSpectrum(curveName, ws, m_spectra, curveColor);
+  } else {
+    size_t specNo = 0;
+
+    if (m_csSampleWS) {
+      specNo = std::min(ws->getNumberHistograms(),
+                        m_csSampleWS->getNumberHistograms()) -
+               1;
+    } else if (m_csContainerWS) {
+      specNo = std::min(ws->getNumberHistograms(),
+                        m_csContainerWS->getNumberHistograms()) -
+               1;
+    }
+
+    m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
+    m_uiForm.spPreviewSpec->setValue(boost::numeric_cast<int>(specNo));
+    m_spectra = specNo;
+    m_uiForm.spPreviewSpec->setMaximum(boost::numeric_cast<int>(m_spectra));
   }
 }
 
