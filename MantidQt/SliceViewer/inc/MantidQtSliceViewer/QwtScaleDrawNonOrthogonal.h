@@ -42,8 +42,8 @@ private:
   void applyGridLinesX(const QwtValueList &majorTicksXyz) const;
   void applyGridLinesY(const QwtValueList &majorTicksXyz) const;
 
-  Mantid::coord_t m_fromHklToXyz[9];
-  Mantid::coord_t m_fromXyzToHkl[9];
+  std::array<Mantid::coord_t, 9> m_fromHklToXyz;
+  std::array<Mantid::coord_t, 9> m_fromXyzToHkl;
 
   // Non-owning pointer to the QwtPlot
   QwtPlot *m_plot;

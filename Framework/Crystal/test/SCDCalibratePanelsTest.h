@@ -54,14 +54,14 @@ public:
     // rounding errors in the algorithm LoadIsawPeaks and floating point math in
     // the instrument code. Ideally the assertions should be on something else.
     TS_ASSERT_DELTA(-0.0050, results->cell<double>(0, 1), 1e-3);
-    TS_ASSERT_DELTA(0.0013, results->cell<double>(1, 1), 3e-4);
-    TS_ASSERT_DELTA(0.0012, results->cell<double>(2, 1), 2e-4);
-    TS_ASSERT_DELTA(0.0, results->cell<double>(3, 1), 1.0);
+    TS_ASSERT_DELTA(0.0013, results->cell<double>(1, 1), 4e-4);
+    TS_ASSERT_DELTA(0.0008, results->cell<double>(2, 1), 2e-4);
+    TS_ASSERT_DELTA(0.0, results->cell<double>(3, 1), 1.2);
     TS_ASSERT_DELTA(0.0, results->cell<double>(4, 1), 1.0);
     TS_ASSERT_DELTA(0.1133, results->cell<double>(5, 1), 0.36);
     TS_ASSERT_DELTA(1.0024, results->cell<double>(6, 1), 3e-3);
     TS_ASSERT_DELTA(0.9986, results->cell<double>(7, 1), 1e-2);
-    TS_ASSERT_DELTA(0.2710, results->cell<double>(8, 1), 0.2);
+    TS_ASSERT_DELTA(0.2710, results->cell<double>(9, 1), 0.2);
     ITableWorkspace_sptr resultsL1 =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
             "params_L1");

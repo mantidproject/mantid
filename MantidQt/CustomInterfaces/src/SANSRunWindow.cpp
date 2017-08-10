@@ -16,6 +16,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/V3D.h"
 

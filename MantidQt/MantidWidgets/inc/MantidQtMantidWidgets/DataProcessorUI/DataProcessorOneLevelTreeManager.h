@@ -85,13 +85,22 @@ public:
   /// Update row with new data
   void update(int parent, int child,
               const std::vector<std::string> &data) override;
+  /// Get the number of rows of a given parent
+  int rowCount() const override;
+  int rowCount(int parent) const override;
+  /// Get the 'processed' status of a data item
+  bool isProcessed(int position) const override;
+  bool isProcessed(int position, int parent) const override;
+  /// Set the 'processed' status of a data item
+  void setProcessed(bool processed, int position) override;
+  void setProcessed(bool processed, int position, int parent) override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,
                     size_t whitelistColumns) const override;
 
   /// Return the model
-  boost::shared_ptr<QAbstractItemModel> getModel() override;
+  boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() override;
   /// Return the table workspace
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
@@ -100,8 +109,6 @@ private:
   DataProcessorPresenter *m_presenter;
   /// The model
   boost::shared_ptr<QDataProcessorOneLevelTreeModel> m_model;
-  /// The workspace the model is currently representing
-  Mantid::API::ITableWorkspace_sptr m_ws;
 
   /// Insert a row in the model
   void insertRow(int rowIndex);

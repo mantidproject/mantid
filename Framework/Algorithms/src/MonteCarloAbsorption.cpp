@@ -3,24 +3,20 @@
 #include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -28,12 +24,6 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
-
-#include "MantidHistogramData/HistogramX.h"
-#include "MantidHistogramData/Interpolate.h"
-
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -50,7 +40,7 @@ namespace {
 
 constexpr int DEFAULT_NEVENTS = 300;
 constexpr int DEFAULT_SEED = 123456789;
-constexpr int DEFAULT_LATITUDINAL_DETS = 4;
+constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 
 /// Energy (meV) to wavelength (angstroms)
@@ -81,332 +71,6 @@ private:
   const DeltaEMode::Type m_emode;
   double m_value;
 };
-
-/** Calculate latitude and longitude for given vector.
- *  @param p A Mantid vector.
- *  @return A pair containing the latitude and longitude values.
- */
-std::pair<double, double> geographicalAngles(const V3D &p) {
-  const double lat = std::atan2(p.Y(), std::hypot(p.X(), p.Z()));
-  const double lon = std::atan2(p.X(), p.Z());
-  return std::pair<double, double>(lat, lon);
-}
-
-/** Find the latitude and longitude intervals the detectors
- *  of the given workspace spawn.
- *  @param ws A workspace.
- *  @return A tuple containing the latitude and longitude ranges.
- */
-std::tuple<double, double, double, double>
-extremeAngles(const MatrixWorkspace &ws) {
-  const auto &spectrumInfo = ws.spectrumInfo();
-  double minLat = std::numeric_limits<double>::max();
-  double maxLat = std::numeric_limits<double>::lowest();
-  double minLong = std::numeric_limits<double>::max();
-  double maxLong = std::numeric_limits<double>::lowest();
-  for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-    double lat, lon;
-    std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
-    if (lat < minLat) {
-      minLat = lat;
-    } else if (lat > maxLat) {
-      maxLat = lat;
-    }
-    if (lon < minLong) {
-      minLong = lon;
-    } else if (lon > maxLong) {
-      maxLong = lon;
-    }
-  }
-  return std::tie(minLat, maxLat, minLong, maxLong);
-}
-
-/** Find the maximum and minimum wavelength points over the entire workpace.
- *  @param ws A workspace to investigate.
- *  @return A tuple containing the wavelength range.
- */
-std::tuple<double, double> extremeWavelengths(const MatrixWorkspace &ws) {
-  double currentMin = std::numeric_limits<double>::max();
-  double currentMax = std::numeric_limits<double>::lowest();
-  if (ws.histogram(0).xMode() ==
-      Mantid::HistogramData::Histogram::XMode::BinEdges) {
-    // Really deal with point data.
-    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      const auto &xs = ws.x(i);
-      const auto x0 = (xs[0] + xs[1]) / 2.0;
-      if (x0 < currentMin)
-        currentMin = x0;
-      const auto x1 = (xs[xs.size() - 2] + xs[xs.size() - 1]) / 2.0;
-      if (x1 > currentMax)
-        currentMax = x1;
-    }
-  } else {
-    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      const auto &xs = ws.x(i);
-      const auto x0 = xs.front();
-      if (x0 < currentMin)
-        currentMin = x0;
-      const auto x1 = xs.back();
-      if (x1 > currentMax)
-        currentMax = x1;
-    }
-  }
-  return std::tie(currentMin, currentMax);
-}
-
-/** Create a template histogram for the sparse instrument workspace.
- *  @param modelWS A workspace the sparse instrument is approximating.
- *  @param wavelengthPoints Number of points in the output histogram.
- *  @return A template histogram.
- */
-Mantid::HistogramData::Histogram modelHistogram(const MatrixWorkspace &modelWS,
-                                                const size_t wavelengthPoints) {
-  double minWavelength, maxWavelength;
-  std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
-  Mantid::HistogramData::Frequencies ys(wavelengthPoints, 0.0);
-  Mantid::HistogramData::FrequencyVariances es(wavelengthPoints, 0.0);
-  Mantid::HistogramData::Points ps(wavelengthPoints, 0.0);
-  Mantid::HistogramData::Histogram h(ps, ys, es);
-  auto &xs = h.mutableX();
-  if (wavelengthPoints > 1) {
-    const double step = (maxWavelength - minWavelength) /
-                        static_cast<double>(wavelengthPoints - 1);
-    for (size_t i = 0; i < xs.size(); ++i) {
-      xs[i] = minWavelength + step * static_cast<double>(i);
-    }
-  } else {
-    xs.front() = (minWavelength + maxWavelength) / 2.0;
-  }
-  return h;
-}
-
-/** Check all detectors have the same EFixed value.
- *  @param eFixed An EFixedProvider object.
- *  @param detIDs A vector containing detector ids.
- *  @return True, if all EFixed values match, false otherwise.
- */
-bool constantEFixed(const EFixedProvider &eFixed,
-                    const std::vector<Mantid::detid_t> &detIDs) {
-  const auto e = eFixed.value(detIDs[0]);
-  for (size_t i = 1; i < detIDs.size(); ++i) {
-    if (e != eFixed.value(detIDs[i])) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/** Creates a rectangular cuboid shape.
- *  @return A cube shape.
- */
-Object_sptr makeCubeShape() {
-  using namespace Poco::XML;
-  const double dimension = 0.05;
-  AutoPtr<Document> shapeDescription = new Document;
-  AutoPtr<Element> typeElement = shapeDescription->createElement("type");
-  typeElement->setAttribute("name", "detector");
-  AutoPtr<Element> shapeElement = shapeDescription->createElement("cuboid");
-  shapeElement->setAttribute("id", "cube");
-  const std::string posCoord = std::to_string(dimension / 2);
-  const std::string negCoord = std::to_string(-dimension / 2);
-  AutoPtr<Element> element =
-      shapeDescription->createElement("left-front-bottom-point");
-  element->setAttribute("x", negCoord);
-  element->setAttribute("y", negCoord);
-  element->setAttribute("z", posCoord);
-  shapeElement->appendChild(element);
-  element = shapeDescription->createElement("left-front-top-point");
-  element->setAttribute("x", negCoord);
-  element->setAttribute("y", posCoord);
-  element->setAttribute("z", posCoord);
-  shapeElement->appendChild(element);
-  element = shapeDescription->createElement("left-back-bottom-point");
-  element->setAttribute("x", negCoord);
-  element->setAttribute("y", negCoord);
-  element->setAttribute("z", negCoord);
-  shapeElement->appendChild(element);
-  element = shapeDescription->createElement("right-front-bottom-point");
-  element->setAttribute("x", posCoord);
-  element->setAttribute("y", negCoord);
-  element->setAttribute("z", posCoord);
-  shapeElement->appendChild(element);
-  typeElement->appendChild(shapeElement);
-  AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
-  algebraElement->setAttribute("val", "cube");
-  typeElement->appendChild(algebraElement);
-  ShapeFactory shapeFactory;
-  return shapeFactory.createShape(typeElement);
-}
-
-/** Create a workspace whose instrument approximates that of modelWS.
- *  @param modelWS A workspace to model.
- *  @param grid An object defining the detector grid of the output workspace.
- *  @param wavelengthPoints Number of points in the output workspace.
- *  @return A workspace with sparse instrument.
- */
-MatrixWorkspace_uptr
-createSparseWS(const MatrixWorkspace &modelWS,
-               const Mantid::Algorithms::DetectorGridDefinition &grid,
-               const size_t wavelengthPoints) {
-  // Build a quite standard and somewhat complete instrument.
-  auto instrument = boost::make_shared<Instrument>("MC_simulation_instrument");
-  instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
-  // Add sample to origin.
-  const V3D samplePos{0.0, 0.0, 0.0};
-  auto sample = Mantid::Kernel::make_unique<ObjComponent>("sample", nullptr,
-                                                          instrument.get());
-  sample->setPos(samplePos);
-  instrument->add(sample.get());
-  instrument->markAsSamplePos(sample.release());
-  const double R = 1.0; // This will be the default L2 distance.
-  // Add source behing the sample.
-  const V3D sourcePos{0.0, 0.0, -2.0 * R};
-  auto source = Mantid::Kernel::make_unique<ObjComponent>("source", nullptr,
-                                                          instrument.get());
-  source->setPos(sourcePos);
-  instrument->add(source.get());
-  instrument->markAsSource(source.release());
-  // Add detectors and link them to spectra.
-  const size_t numSpectra = grid.numberColumns() * grid.numberRows();
-  const auto h = modelHistogram(modelWS, wavelengthPoints);
-  auto ws = Mantid::DataObjects::create<Workspace2D>(numSpectra, h);
-  auto detShape = makeCubeShape();
-  for (size_t col = 0; col < grid.numberColumns(); ++col) {
-    const auto lon = grid.longitudeAt(col);
-    for (size_t row = 0; row < grid.numberRows(); ++row) {
-      const auto lat = grid.latitudeAt(row);
-      const size_t index = col * grid.numberRows() + row;
-      const int detID = static_cast<int>(index);
-      std::ostringstream detName;
-      detName << "det-" << detID;
-      auto det = Mantid::Kernel::make_unique<Detector>(
-          detName.str(), detID, detShape, instrument.get());
-      const double x = R * std::sin(lon) * std::cos(lat);
-      const double y = R * std::sin(lat);
-      const double z = R * std::cos(lon) * std::cos(lat);
-      det->setPos(x, y, z);
-      ws->getSpectrum(index).setDetectorID(detID);
-      instrument->add(det.get());
-      instrument->markAsDetector(det.release());
-    }
-  }
-  ws->setInstrument(instrument);
-  // Copy things needed for the simulation from the model workspace.
-  auto &paramMap = ws->instrumentParameters();
-  auto parametrizedInstrument = ws->getInstrument();
-  // Copy beam parameters.
-  const auto modelSource = modelWS.getInstrument()->getSource();
-  const auto beamWidthParam = modelSource->getNumberParameter("beam-width");
-  const auto beamHeightParam = modelSource->getNumberParameter("beam-height");
-  if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
-    auto parametrizedSource = parametrizedInstrument->getSource();
-    paramMap.add("double", parametrizedSource.get(), "beam-width",
-                 beamWidthParam[0]);
-    paramMap.add("double", parametrizedSource.get(), "beam-height",
-                 beamHeightParam[0]);
-  }
-  // Add information about EFixed in a proper place.
-  EFixedProvider eFixed(modelWS);
-  ws->mutableRun().addProperty(
-      "deltaE-mode", Mantid::Kernel::DeltaEMode::asString(eFixed.emode()));
-  if (eFixed.emode() == Mantid::Kernel::DeltaEMode::Direct) {
-    ws->mutableRun().addProperty("Ei", eFixed.value(0));
-  } else if (eFixed.emode() == Mantid::Kernel::DeltaEMode::Indirect) {
-    const auto &detIDs = modelWS.detectorInfo().detectorIDs();
-    if (!constantEFixed(eFixed, detIDs)) {
-      throw std::runtime_error(
-          "Sparse instrument with variable EFixed not supported.");
-    }
-    const auto e = eFixed.value(detIDs[0]);
-    const auto &sparseDetIDs = ws->detectorInfo().detectorIDs();
-    for (size_t i = 0; i < sparseDetIDs.size(); ++i) {
-      ws->setEFixed(sparseDetIDs[i], e);
-    }
-  }
-  return MatrixWorkspace_uptr(ws.release());
-}
-
-/** Calculate the distance between two points on a unit sphere.
- *  @param lat1 Latitude of the first point.
- *  @param long1 Longitude of the first point.
- *  @param lat2 Latitude of the second point.
- *  @param long2 Longitude of the second point.
- *  @return The distance between the points.
- */
-double greatCircleDistance(const double lat1, const double long1,
-                           const double lat2, const double long2) {
-  const double latD = std::sin((lat2 - lat1) / 2.0);
-  const double longD = std::sin((long2 - long1) / 2.0);
-  const double S =
-      latD * latD + std::cos(lat1) * std::cos(lat2) * longD * longD;
-  return 2.0 * std::asin(std::sqrt(S));
-}
-
-/** Calculate the inverse distance weights for the given distances.
- *  @param distances The distances.
- *  @return An array of inverse distance weights.
- */
-std::array<double, 4>
-inverseDistanceWeights(const std::array<double, 4> &distances) {
-  std::array<double, 4> weights;
-  for (size_t i = 0; i < weights.size(); ++i) {
-    if (distances[i] == 0.0) {
-      weights.fill(0.0);
-      weights[i] = 1.0;
-      return weights;
-    }
-    weights[i] = 1.0 / distances[i] / distances[i];
-  }
-  return weights;
-}
-
-/** Spatially interpolate a single histogram from four nearby detectors.
- *  @param lat Latitude of the interpolated detector.
- *  @param lon Longitude of the interpolated detector.
- *  @param ws A workspace containing the detectors used for the interpolation.
- *  @param indices Indices to the nearest neighbour detectors.
- *  @return An interpolated histogram.
- */
-Mantid::HistogramData::Histogram
-interpolateFromDetectorGrid(const double lat, const double lon,
-                            const MatrixWorkspace &ws,
-                            const std::array<size_t, 4> &indices) {
-  auto h = ws.histogram(0);
-  const auto &spectrumInfo = ws.spectrumInfo();
-  std::array<double, 4> distances;
-  for (size_t i = 0; i < 4; ++i) {
-    double detLat, detLong;
-    std::tie(detLat, detLong) =
-        geographicalAngles(spectrumInfo.position(indices[i]));
-    distances[i] = greatCircleDistance(lat, lon, detLat, detLong);
-  }
-  const auto weights = inverseDistanceWeights(distances);
-  auto weightSum = weights[0];
-  h.mutableY() = weights[0] * ws.y(indices[0]);
-  for (size_t i = 1; i < 4; ++i) {
-    weightSum += weights[i];
-    h.mutableY() += weights[i] * ws.y(indices[i]);
-  }
-  h.mutableY() /= weightSum;
-  return h;
-}
-
-/** Creates a detector grid definition for a sparse instrument.
- *  @param modelWS A workspace the sparse instrument approximates.
- *  @param rows Number of rows in the detector grid.
- *  @param columns Number of columns in the detector gris.
- *  @return A unique pointer pointing to the grid definition.
- */
-std::unique_ptr<const Mantid::Algorithms::DetectorGridDefinition>
-createDetectorGridDefinition(const MatrixWorkspace &modelWS, const size_t rows,
-                             const size_t columns) {
-  double minLat, maxLat, minLong, maxLong;
-  std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
-  return Mantid::Kernel::make_unique<
-      Mantid::Algorithms::DetectorGridDefinition>(minLat, maxLat, rows, minLong,
-                                                  maxLong, columns);
-}
 }
 /// @endcond
 
@@ -439,7 +103,7 @@ void MonteCarloAbsorption::init() {
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "
-                  "atttempted (default: all points)");
+                  "attempted (default: all points)");
   declareProperty(
       "EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
       "The number of \"neutron\" events to generate per simulated point");
@@ -452,15 +116,17 @@ void MonteCarloAbsorption::init() {
                                              "instrument with a sparse grid of "
                                              "detectors interpolating the "
                                              "results to the real instrument.");
-  auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
-  twoOrMore->setLower(2);
+  auto threeOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  threeOrMore->setLower(3);
   declareProperty(
-      "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, twoOrMore,
+      "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, threeOrMore,
       "Number of detector rows in the detector grid of the sparse instrument.");
   setPropertySettings(
       "NumberOfDetectorRows",
       Kernel::make_unique<EnabledWhenProperty>(
           "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
+  auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  twoOrMore->setLower(2);
   declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS,
                   twoOrMore, "Number of detector columns in the detector grid "
                              "of the sparse instrument.");
@@ -517,9 +183,9 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   if (useSparseInstrument) {
     const int latitudinalDets = getProperty("NumberOfDetectorRows");
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
-    detGrid = createDetectorGridDefinition(inputWS, latitudinalDets,
-                                           longitudinalDets);
-    sparseWS = createSparseWS(inputWS, *detGrid, nlambda);
+    detGrid = SparseInstrument::createDetectorGridDefinition(
+        inputWS, latitudinalDets, longitudinalDets);
+    sparseWS = SparseInstrument::createSparseWS(inputWS, *detGrid, nlambda);
   }
   MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
   const MatrixWorkspace &instrumentWS =
@@ -653,14 +319,19 @@ void MonteCarloAbsorption::interpolateFromSparse(
     const Mantid::Algorithms::InterpolationOption &interpOpt,
     const DetectorGridDefinition &detGrid) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
+  const auto samplePos = spectrumInfo.samplePosition();
+  const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
+    const auto detPos = spectrumInfo.position(i) - samplePos;
     double lat, lon;
-    std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
+    std::tie(lat, lon) =
+        SparseInstrument::geographicalAngles(detPos, *refFrame);
     const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
     const auto spatiallyInterpHisto =
-        interpolateFromDetectorGrid(lat, lon, sparseWS, nearestIndices);
+        SparseInstrument::interpolateFromDetectorGrid(lat, lon, sparseWS,
+                                                      nearestIndices);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
       interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);

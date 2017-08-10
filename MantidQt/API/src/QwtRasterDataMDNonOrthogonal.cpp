@@ -8,22 +8,9 @@ using namespace Mantid;
 using namespace Mantid::API;
 
 QwtRasterDataMDNonOrthogonal::QwtRasterDataMDNonOrthogonal()
-    : m_lookPoint(nullptr) {
-  m_fromHklToXyz[0] = 1.0;
-  m_fromHklToXyz[1] = 0.0;
-  m_fromHklToXyz[2] = 0.0;
-  m_fromHklToXyz[3] = 0.0;
-  m_fromHklToXyz[4] = 1.0;
-  m_fromHklToXyz[5] = 0.0;
-  m_fromHklToXyz[6] = 0.0;
-  m_fromHklToXyz[7] = 0.0;
-  m_fromHklToXyz[8] = 1.0;
-  m_missingHKLdim = 0;
-}
-
-QwtRasterDataMDNonOrthogonal::~QwtRasterDataMDNonOrthogonal() {
-  delete[] m_lookPoint;
-}
+    : m_lookPoint(),
+      m_fromHklToXyz({{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}}),
+      m_missingHKLdim(0) {}
 
 //-------------------------------------------------------------------------
 /** Return the data value to plot at the given position
@@ -37,8 +24,7 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
     return 0;
 
   // Generate the vector of coordinates, filling in X and Y
-  for (size_t d = 0; d < m_nd;
-       d++) { // m_nd is number dimensions in the workplace
+  for (size_t d = 0; d < m_nd; d++) {
     if (d == m_dimX)
       m_lookPoint[d] = static_cast<coord_t>(x);
     else if (d == m_dimY)
@@ -58,10 +44,11 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
   if (m_overlayWS && m_overlayInSlice && (x >= m_overlayXMin) &&
       (x < m_overlayXMax) && (y >= m_overlayYMin) && (y < m_overlayYMax)) {
     // Point is in the overlaid workspace
-    value = m_overlayWS->getSignalWithMaskAtCoord(m_lookPoint, m_normalization);
+    value = m_overlayWS->getSignalWithMaskAtCoord(m_lookPoint.data(),
+                                                  m_normalization);
   } else {
     // No overlay, or not within range of that workspace
-    value = m_ws->getSignalWithMaskAtCoord(m_lookPoint, m_normalization);
+    value = m_ws->getSignalWithMaskAtCoord(m_lookPoint.data(), m_normalization);
   }
 
   // Special case for 0 = show as NAN
@@ -79,13 +66,10 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
 void QwtRasterDataMDNonOrthogonal::setWorkspace(IMDWorkspace_const_sptr ws) {
   QwtRasterDataMD::setWorkspace(ws);
   // Create a lookpoint
-  if (m_lookPoint) {
-    delete[] m_lookPoint;
-  }
-  m_lookPoint = new coord_t[m_nd];
+  m_lookPoint.resize(m_nd);
   // Add the skewMatrix for the basis
   Mantid::Kernel::DblMatrix skewMatrix(m_nd, m_nd, true);
-  provideSkewMatrix(skewMatrix, ws);
+  provideSkewMatrix(skewMatrix, *ws);
   transformFromDoubleToCoordT(skewMatrix, m_fromHklToXyz);
 }
 
@@ -137,14 +121,10 @@ void QwtRasterDataMDNonOrthogonal::copyFrom(
   dest.m_overlayYMax = source.m_overlayYMax;
   dest.m_overlayInSlice = source.m_overlayInSlice;
   dest.m_missingHKLdim = source.m_missingHKLdim;
-  dest.m_lookPoint = new coord_t[m_nd];
-  for (size_t d = 0; d < m_nd; ++d) {
-    dest.m_lookPoint[d] = source.m_lookPoint[d];
-  }
+  dest.m_lookPoint = source.m_lookPoint;
 
-  for (size_t d = 0; d < 9; ++d) {
-    dest.m_fromHklToXyz[d] = source.m_fromHklToXyz[d];
-  }
+  std::copy(std::begin(source.m_fromHklToXyz), std::end(source.m_fromHklToXyz),
+            std::begin(dest.m_fromHklToXyz));
 }
 
 } // namespace

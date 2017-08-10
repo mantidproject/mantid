@@ -53,15 +53,21 @@ public:
 
   void test_Build_From_Name_And_Chemical_Formula_MultiAtom() {
     MaterialBuilder builder;
-    Material mat = builder.setName("Nickel").setFormula("Al2-O3").build();
-    TS_ASSERT_DELTA(mat.numberDensity(), Mantid::EMPTY_DBL(), 0.0001);
+    Material mat = builder.setName("Nickel")
+                       .setFormula("Al2-O3")
+                       .setNumberDensity(0.1)
+                       .build();
+    TS_ASSERT_DELTA(mat.numberDensity(), 0.1, 0.0001);
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 3.1404, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 0.092514, 0.0001);
   }
 
   void test_Build_From_Atomic_Number() {
     MaterialBuilder builder;
-    Material mat = builder.setName("Nickel").setAtomicNumber(28).build();
+    Material mat = builder.setName("Nickel")
+                       .setAtomicNumber(28)
+                       .setNumberDensity(0.1)
+                       .build();
     // Default isotope
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 18.5, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.49, 0.0001);
@@ -90,7 +96,7 @@ public:
                    .setMassDensity(4)
                    .build();
 
-    TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252, 0.001);
+    TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252 * 5, 0.001);
   }
 
   void test_Number_Density_Set_By_AtomicNumber_MassDensity() {
@@ -150,6 +156,16 @@ public:
                      std::runtime_error);
     TS_ASSERT_THROWS(builder.setUnitCellVolume(6).setMassDensity(4),
                      std::runtime_error);
+  }
+
+  void test_MultiAtom_with_no_number_density_throws() {
+    MaterialBuilder builder;
+    builder.setName("Nickel").setFormula("Al2-O3");
+    TS_ASSERT_THROWS_EQUALS(
+        builder.build(), const std::runtime_error &e, std::string(e.what()),
+        "The number density could not be determined. Please "
+        "provide the number density, ZParameter and unit "
+        "cell volume or mass density.")
   }
 };
 

@@ -18,6 +18,7 @@ ParallelRunner::ParallelRunner() {
         std::max(3, static_cast<int>(std::thread::hardware_concurrency()));
     m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
   }
+  m_serialBackend = boost::make_shared<detail::ThreadingBackend>(1);
 }
 
 ParallelRunner::ParallelRunner(const int threads) {
@@ -28,6 +29,7 @@ ParallelRunner::ParallelRunner(const int threads) {
     throw("ParallelRunner: number of requested threads does not match number "
           "of MPI ranks");
   m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
+  m_serialBackend = boost::make_shared<detail::ThreadingBackend>(1);
 }
 
 int ParallelRunner::size() const {

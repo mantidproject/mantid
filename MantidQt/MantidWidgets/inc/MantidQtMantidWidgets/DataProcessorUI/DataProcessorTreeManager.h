@@ -3,12 +3,11 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
-
-class QAbstractItemModel;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -91,6 +90,15 @@ public:
   /// Update row with new data
   virtual void update(int parent, int child,
                       const std::vector<std::string> &data) = 0;
+  /// Get the number of rows of a given parent
+  virtual int rowCount() const = 0;
+  virtual int rowCount(int parent) const = 0;
+  /// Get the 'processed' status of a data item
+  virtual bool isProcessed(int position) const = 0;
+  virtual bool isProcessed(int position, int parent) const = 0;
+  /// Set the 'processed' status of a data item
+  virtual void setProcessed(bool processed, int position) = 0;
+  virtual void setProcessed(bool processed, int position, int parent) = 0;
 
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,
@@ -99,7 +107,7 @@ public:
   /// Return member variables
 
   /// Return the model
-  virtual boost::shared_ptr<QAbstractItemModel> getModel() = 0;
+  virtual boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() = 0;
   /// Return the table ws
   virtual Mantid::API::ITableWorkspace_sptr getTableWorkspace() = 0;
 

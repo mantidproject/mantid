@@ -5,7 +5,7 @@ import os
 
 import mantid.simpleapi as api
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, \
-    FileAction, FileProperty, ITableWorkspaceProperty, PropertyMode, WorkspaceProperty, \
+    FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceProperty, \
     ITableWorkspace, MatrixWorkspace
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
@@ -179,10 +179,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                           extensions=[".h5", ".hd5", ".hdf", ".cal"]))  # CalFileName
         self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml"]), "Overrides grouping from CalibrationFile")
-        self.declareProperty(FileProperty(name="CharacterizationRunsFile",
-                                          defaultValue="",
-                                          action=FileAction.OptionalLoad,
-                                          extensions=["txt"]), "File with characterization runs denoted")
+        self.declareProperty(MultipleFileProperty(name="CharacterizationRunsFile",
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=["txt"]), "File with characterization runs denoted")
         self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=[".ini"]))
         self.copyProperties('AlignAndFocusPowderFromFiles',
@@ -514,6 +513,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     def _loadCharacterizations(self):
         self._focusPos = {}
         charFilename = self.getProperty("CharacterizationRunsFile").value
+        charFilename = ','.join(charFilename)
         expIniFilename = self.getProperty("ExpIniFilename").value
 
         self._charTable = ''
@@ -723,7 +723,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # Normalize by current with new name
         if self._normalisebycurrent is True:
-            self.log().warning('[SPECIAL DB] Normalize current to workspace %s' % sample_ws_name)
+            self.log().information('Normalize current to workspace %s' % sample_ws_name)
             # temp_ws = self.get_workspace(sample_ws_name)
             if not (is_event_workspace(sample_ws_name) and get_workspace(sample_ws_name).getNumberEvents() == 0):
                 api.NormaliseByCurrent(InputWorkspace=sample_ws_name,
@@ -891,9 +891,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                         ReductionProperties="__snspowderreduction",
                                         **self._focusPos)
                 # logging (ignorable)
-                #for iws in range(out_ws_c_s.getNumberHistograms()):
-                #    spec = out_ws_c_s.getSpectrum(iws)
-                #    self.log().debug("[DBx131] ws %d: spectrum No = %d. " % (iws, spec.getSpectrumNo()))
                 if is_event_workspace(out_ws_name_chunk_split):
                     self.log().information('After being aligned and focused, workspace %s: Number of events = %d '
                                            'of chunk %d ' % (out_ws_name_chunk_split,
@@ -1447,7 +1444,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.log().information("SplitterWorkspace = %s, Information Workspace = %s. " % (
             split_ws_name, str(self._splitinfotablews)))
 
-        base_name = raw_ws_name
+        base_name = raw_ws_name + '_split'
 
         # find out whether the splitters are relative time or epoch time
         split_ws = AnalysisDataService.retrieve(split_ws_name)

@@ -17,6 +17,7 @@ attr_mapping = \
         ParamMapEntry(ext_name="long_mode",                  int_name="long_mode"),
         ParamMapEntry(ext_name="monitor_lambda_crop_range",  int_name="monitor_lambda"),
         ParamMapEntry(ext_name="monitor_integration_range",  int_name="monitor_integration_range"),
+        ParamMapEntry(ext_name="monitor_mask_regions",       int_name="monitor_mask_regions"),
         ParamMapEntry(ext_name="monitor_spectrum_number",    int_name="monitor_spec_no"),
         ParamMapEntry(ext_name="monitor_spline_coefficient", int_name="monitor_spline"),
         ParamMapEntry(ext_name="output_directory",           int_name="output_dir"),
