@@ -64,7 +64,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -82,6 +82,9 @@ QGroupBox::title {
                 </property>
                 <property name="text">
                  <string>User File:</string>
+                </property>
+                <property name="buddy">
+                 <cstring>masking_table</cstring>
                 </property>
                </widget>
               </item>
@@ -264,9 +267,6 @@ QGroupBox::title {
                    <item>
                     <layout class="QGridLayout" name="gridLayout">
                      <item row="0" column="0">
-                      <widget class="QLineEdit" name="save_line_edit"/>
-                     </item>
-                     <item row="1" column="0">
                       <widget class="QCheckBox" name="save_zero_error_free">
                        <property name="toolTip">
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled it will replace all entries with zero-valued errors with errors of magnitude 1e6. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -279,14 +279,7 @@ QGroupBox::title {
                        </property>
                       </widget>
                      </item>
-                     <item row="0" column="1">
-                      <widget class="QPushButton" name="save_push_button">
-                       <property name="text">
-                        <string>Save</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="1">
+                     <item row="1" column="0">
                       <widget class="QCheckBox" name="use_optimizations_checkbox">
                        <property name="toolTip">
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When optimizations are turned on then data is being stored in RAM and reused. The optimizations affect the raw data files and can reductions. Most of the time you will want these optimizations enabled. Disable the optimizations if you run a very long batch reduction where there might be the danger  that your RAM will max out.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -795,37 +788,15 @@ QGroupBox::title {
              </attribute>
              <layout class="QHBoxLayout" name="horizontalLayout_7">
               <item>
-               <layout class="QVBoxLayout" name="mask_tab_left_layout">
-                <item>
-                 <widget class="QGroupBox" name="groupBox_5">
-                  <property name="title">
-                   <string>Masking</string>
-                  </property>
-                  <layout class="QGridLayout" name="gridLayout_21">
-                   <item row="0" column="1">
-                    <spacer name="horizontalSpacer">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>40</width>
-                       <height>20</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_10">
-                     <property name="text">
-                      <string>Add mask table here</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="MaskingTable" name="masking_table" native="true">
+                <property name="minimumSize">
+                 <size>
+                  <width>400</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <layout class="QVBoxLayout" name="mask_tab_left_layout"/>
+               </widget>
               </item>
               <item>
                <layout class="QVBoxLayout" name="mask_tab_right_layout">
@@ -1932,6 +1903,12 @@ QGroupBox::title {
    <class>SettingsDiagnosticTab</class>
    <extends>QWidget</extends>
    <header>settings_diagnostic_tab.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MaskingTable</class>
+   <extends>QWidget</extends>
+   <header>masking_table.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

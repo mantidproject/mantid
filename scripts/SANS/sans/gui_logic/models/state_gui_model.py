@@ -978,3 +978,14 @@ class StateGuiModel(object):
     @radius_limit_max.setter
     def radius_limit_max(self, value):
         self._set_radius_limit(max_value=value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Output name
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def output_name(self):
+        return self.get_simple_element(element_id=OtherId.user_specified_output_name, default_value="")
+
+    @output_name.setter
+    def output_name(self, value):
+        self.set_simple_element(element_id=OtherId.user_specified_output_name, value=value)

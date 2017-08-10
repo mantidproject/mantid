@@ -78,27 +78,27 @@ def get_file_and_period_information_from_data(data):
     file_information_factory = SANSFileInformationFactory()
     file_information = dict()
     period_information = dict()
-    if data.sample_scatter is not None:
+    if data.sample_scatter:
         update_file_information(file_information, file_information_factory,
                                 SANSDataType.SampleScatter, data.sample_scatter)
         period_information.update({SANSDataType.SampleScatter: data.sample_scatter_period})
-    if data.sample_transmission is not None:
+    if data.sample_transmission:
         update_file_information(file_information, file_information_factory,
                                 SANSDataType.SampleTransmission, data.sample_transmission)
         period_information.update({SANSDataType.SampleTransmission: data.sample_transmission_period})
-    if data.sample_direct is not None:
+    if data.sample_direct:
         update_file_information(file_information, file_information_factory,
                                 SANSDataType.SampleDirect, data.sample_direct)
         period_information.update({SANSDataType.SampleDirect: data.sample_direct_period})
-    if data.can_scatter is not None:
+    if data.can_scatter:
         update_file_information(file_information, file_information_factory,
                                 SANSDataType.CanScatter, data.can_scatter)
         period_information.update({SANSDataType.CanScatter: data.can_scatter_period})
-    if data.can_transmission is not None:
+    if data.can_transmission:
         update_file_information(file_information, file_information_factory,
                                 SANSDataType.CanTransmission, data.can_transmission)
         period_information.update({SANSDataType.CanTransmission: data.can_transmission_period})
-    if data.can_direct is not None:
+    if data.can_direct:
         update_file_information(file_information, file_information_factory,
                                 SANSDataType.CanDirect, data.can_direct)
         period_information.update({SANSDataType.CanDirect: data.can_direct_period})

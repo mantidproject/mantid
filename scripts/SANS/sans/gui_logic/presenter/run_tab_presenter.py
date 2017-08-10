@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import copy
 from mantid.kernel import Logger
-
+import time
 from mantid.api import (AlgorithmManager, AnalysisDataService, FileFinder)
 from mantid.kernel import (Property)
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
@@ -11,6 +11,7 @@ from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
+from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_reduction_mode_strings_for_gui,
@@ -71,6 +72,9 @@ class RunTabPresenter(object):
         # Settings diagnostic tab presenter
         self._settings_diagnostic_tab_presenter = SettingsDiagnosticPresenter(self)
 
+        # Masking table presenter
+        self._masking_table_presenter = MaskingTablePresenter(self)
+
     def __del__(self):
         self._delete_dummy_input_workspace()
 
@@ -119,37 +123,40 @@ class RunTabPresenter(object):
             # Set appropriate view for the state diagnostic tab presenter
             self._settings_diagnostic_tab_presenter.set_view(self._view.settings_diagnostic_tab)
 
+            # Set appropriate view for the masking table presenter
+            self._masking_table_presenter.set_view(self._view.masking_table)
+
     def on_user_file_load(self):
         """
         Loads the user file. Populates the models and the view.
         """
-        # try:
-        # 1. Get the user file path from the view
-        user_file_path = self._view.get_user_file_path()
+        try:
+            # 1. Get the user file path from the view
+            user_file_path = self._view.get_user_file_path()
 
-        if not user_file_path:
-            return
+            if not user_file_path:
+                return
 
-        # 2. Get the full file path
-        user_file_path = FileFinder.getFullPath(user_file_path)
-        if not os.path.exists(user_file_path):
-            raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
-                               " has been specified.".format(user_file_path))
+            # 2. Get the full file path
+            user_file_path = FileFinder.getFullPath(user_file_path)
+            if not os.path.exists(user_file_path):
+                raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
+                                   " has been specified.".format(user_file_path))
 
-        # Clear out the current view
-        self._view.reset_all_fields_to_default()
+            # Clear out the current view
+            self._view.reset_all_fields_to_default()
 
-        # 3. Read and parse the user file
-        user_file_reader = UserFileReader(user_file_path)
-        user_file_items = user_file_reader.read_user_file()
+            # 3. Read and parse the user file
+            user_file_reader = UserFileReader(user_file_path)
+            user_file_items = user_file_reader.read_user_file()
 
-        # 4. Populate the model
-        self._state_model = StateGuiModel(user_file_items)
+            # 4. Populate the model
+            self._state_model = StateGuiModel(user_file_items)
 
-        # 5. Update the views.
-        self._update_view_from_state_model()
-        # except Exception as e:
-        #     sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
+            # 5. Update the views.
+            self._update_view_from_state_model()
+        except Exception as e:
+             sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
 
     def on_batch_file_load(self):
         """
@@ -179,6 +186,10 @@ class RunTabPresenter(object):
 
             # 5. Populate the selected instrument and the correct detector selection
             self._setup_instrument_specific_settings()
+
+            # 6. Perform calls on child presenters
+            self._masking_table_presenter.on_update_rows()
+            self._settings_diagnostic_tab_presenter.on_update_rows()
 
         except RuntimeError as e:
             sans_logger.error("Loading of the batch file failed. See here for more details: {}".format(str(e)))
@@ -309,6 +320,8 @@ class RunTabPresenter(object):
         """
         Gathers the state information and performs a reduction
         """
+        start_time_state_generation = time.time()
+
         # 1. Update the state model
         state_model_with_view_update = self._get_state_model_with_view_update()
 
@@ -317,6 +330,10 @@ class RunTabPresenter(object):
 
         # 3. Go through each row and construct a state object
         states = self._create_states(state_model_with_view_update, table_model)
+
+        stop_time_state_generation = time.time()
+        time_taken = stop_time_state_generation - start_time_state_generation
+        sans_logger.debug("The generation of all states took {}s".format(time_taken))
         return states
 
     def get_row_indices(self):
@@ -671,6 +688,7 @@ class RunTabPresenter(object):
             can_scatter = self._view.get_cell(row=row, column=3, convert_to=str)
             can_transmission = self._view.get_cell(row=row, column=4, convert_to=str)
             can_direct = self._view.get_cell(row=row, column=5, convert_to=str)
+            output_name = self._view.get_cell(row=row, column=6, convert_to=str)
 
             # Get the options string
             # We don't have to add the hidden column here, since it only contains information for the SANS
@@ -678,7 +696,7 @@ class RunTabPresenter(object):
             options_string = self._get_options(row)
 
             table_index_model = TableIndexModel(row, sample_scatter, sample_transmission, sample_direct,
-                                                can_scatter, can_transmission, can_direct,
+                                                can_scatter, can_transmission, can_direct, output_name=output_name,
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model

@@ -1,4 +1,3 @@
-#from __future__ import (absolute_import, division, print_function)
 try:
     from mantidplot import *
 except ImportError:
@@ -23,7 +22,6 @@ canMantidPlot = True
 # Globals
 # ----------------------------------------------------------------------------------------------------------------------
 gui_logger = Logger("SANS GUI LOGGER")
-BAD_POLYNOMAIL = -1
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -163,6 +161,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Main Tab
         # --------------------------------------------------------------------------------------------------------------
         self.data_processor_table = MantidQt.MantidWidgets.QDataProcessorWidget(white_list, alg, self)
+        self.data_processor_table.setForcedReProcessing(True)
         self._setup_main_tab()
 
         # --------------------------------------------------------------------------------------------------------------
@@ -1296,10 +1295,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.transmission_radius_line_edit.setValidator(positive_double_validator)
         self.transmission_m4_shift_line_edit.setValidator(double_validator)
 
-        #self.fit_sample_wavelength_min_line_edit.setValidator(positive_double_validator)
-        #self.fit_sample_wavelength_max_line_edit.setValidator(positive_double_validator)
-        #self.fit_can_wavelength_min_line_edit.setValidator(positive_double_validator)
-        #self.fit_can_wavelength_max_line_edit.setValidator(positive_double_validator)
+        self.fit_sample_wavelength_min_line_edit.setValidator(positive_double_validator)
+        self.fit_sample_wavelength_max_line_edit.setValidator(positive_double_validator)
+        self.fit_can_wavelength_min_line_edit.setValidator(positive_double_validator)
+        self.fit_can_wavelength_max_line_edit.setValidator(positive_double_validator)
 
         # --------------------------------
         # Q tab

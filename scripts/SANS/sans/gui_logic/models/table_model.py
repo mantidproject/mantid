@@ -49,7 +49,8 @@ class TableModel(object):
 
 class TableIndexModel(object):
     def __init__(self, index, sample_scatter, sample_transmission, sample_direct,
-                 can_scatter, can_transmission, can_direct, options_column_string=""):
+                 can_scatter, can_transmission, can_direct, output_name="",
+                 options_column_string=""):
         super(TableIndexModel, self).__init__()
         self.index = index
         self.sample_scatter = sample_scatter
@@ -61,7 +62,7 @@ class TableIndexModel(object):
         self.can_direct = can_direct
 
         self.user_file = ""
-        self.output_name = ""
+        self.output_name = output_name
 
         # Options column entries
         self.options_column_model = OptionsColumnModel(options_column_string)
