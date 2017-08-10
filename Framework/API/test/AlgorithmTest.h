@@ -876,7 +876,7 @@ public:
         "InputWorkspace", wksp, IndexType::WorkspaceIndex, "1:5");
 
     MatrixWorkspace_sptr wsTest;
-    SpectrumIndexSet indexSet(0);
+    SpectrumIndexSet indexSet;
 
     TS_ASSERT_THROWS_NOTHING(
         std::tie(wsTest, indexSet) =

@@ -34,7 +34,7 @@ void ChangePulsetime2::init() {
  */
 void ChangePulsetime2::exec() {
   EventWorkspace_const_sptr in_ws;
-  Indexing::SpectrumIndexSet indexSet(0);
+  Indexing::SpectrumIndexSet indexSet;
 
   std::tie(in_ws, indexSet) =
       getWorkspaceAndIndices<EventWorkspace>("InputWorkspace");
