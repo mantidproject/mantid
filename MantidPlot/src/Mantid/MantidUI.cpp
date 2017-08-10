@@ -1423,7 +1423,7 @@ Table *MantidUI::createDetectorTable(
             double efixed = ws->getEFixed(det);
             double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
-            double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+            double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta, efixed);
             colValues << QVariant(q);
           } catch (std::runtime_error &) {
             colValues << QVariant("No Efixed");

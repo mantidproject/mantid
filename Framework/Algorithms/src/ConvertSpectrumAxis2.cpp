@@ -172,7 +172,7 @@ void ConvertSpectrumAxis2::createElasticQMap(
     }
 
     // Convert to MomentumTransfer
-    double elasticQInAngstroms = Kernel::UnitConversion::run(theta, efixed);
+    double elasticQInAngstroms = Kernel::UnitConversion::convertToElasticQ(theta, efixed);
 
     if (targetUnit == "ElasticQ") {
       m_indexMap.emplace(elasticQInAngstroms, i);
