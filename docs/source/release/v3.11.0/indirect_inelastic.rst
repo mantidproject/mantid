@@ -11,10 +11,22 @@ New features
 Algorithms
 ##########
 
+Bayes
+#####
+
+- Removed fit option from plot options drop-down menu.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 
 Data Analysis
 #############
+
+ConvFit
+~~~~~~~
+
+Bugfixes
+--------
+- Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
+- Backend :ref:`algm-ConvolutionFitSequential` now passes the workspace index by default to :ref:`algm-PlotPeakByLogValue`.
 
 Jump Fit
 ~~~~~~~~
@@ -22,11 +34,13 @@ Jump Fit
 Improvements
 ------------
 - The *S(Q, W)* interface now automatically replaces NaN values with 0.
+- EISF is now generated when performing a Single Fit, with a delta function, in the ConvFit interface.
 
 
 Bugfixes
 --------
 - ElasticWindowMultiple now correctly normalizes by the lowest temperature - rather than the first one.
+- A number of Python indirect algorithms that use :py:obj:`mantid.kernel.MaterialBuilder` allowed setting the mass density for a material. The density was set incorrectly where the chemical formula had more than one atom, this is now fixed.
 - An issue has been fixed in :ref:`algm-IndirectILLEnergyTransfer` when handling the data with mirror sense, that have shifted 0 monitor counts in the left and right wings. This was causing the left and right workspaces to have different x-axis binning and to fail to sum during the unmirroring step. 
 - An issue has been fixed in :ref:`algm-IndirectILLReductionFWS` when the scaling of the data after vanadium calibration was not applied.
 
