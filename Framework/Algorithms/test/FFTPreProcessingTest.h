@@ -11,9 +11,9 @@
 
 using namespace Mantid::API;
 using Mantid::MantidVec;
-using Mantid::Algorithms::EstimateMuonAsymmetryFromCounts;
+using Mantid::Algorithms::FFTPreProcessing;
 
-const std::string outputName = "FFTPRePRocessing_Output";
+const std::string outputName = "FFTPReProcessing_Output";
 
 namespace {
 struct yData {
@@ -25,12 +25,11 @@ struct yData {
 struct eData {
   double operator()(const double, size_t) { return 0.005; }
 };
-
 MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
           yData(), static_cast<int>(nspec), 0.0, 10.0,
-          (10.0 / static_cast<double>(maxt)), true, eData());
+          10.0 * (1.0 / static_cast<double>(maxt)), true, eData());
   return ws;
 }
 
@@ -44,18 +43,18 @@ IAlgorithm_sptr setUpAlg() {
 }
 }
 
-class FFTPrePRocessingTest : public CxxTest::TestSuite {
+class FFTPreProcessingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FFTPrePRocessing *createSuite() {
-    return new FFTPrePRocessingTest();
+  static FFTPreProcessingTest *createSuite() {
+    return new FFTPreProcessingTest();
   }
-  static void destroySuite(FFTPrePRocessingTest *suite) {
+  static void destroySuite(FFTPreProcessingTest *suite) {
     delete suite;
   }
 
-  FFTPrePRocessingTest() { FrameworkManager::Instance(); }
+  FFTPreProcessingTest() { FrameworkManager::Instance(); }
 
   void testInit() {
     IAlgorithm_sptr alg = setUpAlg();
@@ -89,17 +88,17 @@ public:
     double Delta = 0.0001;
     for (int j = 0; j < 2; j++) {
       // Test some X values
-      TS_ASSERT_DELTA(outWS->x(j)[10], 0.2000, Delta);
-      TS_ASSERT_DELTA(outWS->x(j)[19], 0.3800, Delta);
-      TS_ASSERT_DELTA(outWS->x(j)[49], 0.9800, Delta);
+      TS_ASSERT_DELTA(outWS->x(j)[10], 2.000, Delta);
+      TS_ASSERT_DELTA(outWS->x(j)[19], 3.800, Delta);
+      TS_ASSERT_DELTA(outWS->x(j)[49], 9.800, Delta);
       // Test some Y values
-      TS_ASSERT_DELTA(outWS->y(j)[10], 0.0366, Delta);
-      TS_ASSERT_DELTA(outWS->y(j)[19], -0.0961, Delta);
-      TS_ASSERT_DELTA(outWS->y(j)[49], 0.0871, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[10], 2.000, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[19], 3.800, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[49], 9.800, Delta);
       // Test some E values
-      TS_ASSERT_DELTA(outWS->e(j)[10], 0.0002, Delta);
-      TS_ASSERT_DELTA(outWS->e(j)[19], 0.0003, Delta);
-      TS_ASSERT_DELTA(outWS->e(j)[49], 0.0004, Delta);
+      TS_ASSERT_DELTA(outWS->e(j)[10], 0.005, Delta);
+      TS_ASSERT_DELTA(outWS->e(j)[19], 0.005, Delta);
+      TS_ASSERT_DELTA(outWS->e(j)[49], 0.005, Delta);
     }
   }
   void test_SpectrumList() {
@@ -161,8 +160,8 @@ public:
     TS_ASSERT_DELTA(outWS->x(0)[49], 9.800, Delta);
     // Test some Y values
     TS_ASSERT_DELTA(outWS->y(0)[10],0.0, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[19], 0.9*3.8, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[49],3.9*9.8, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[19], -0.9*3.8, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[49],-3.9*9.8, Delta);
   }
   void test_Lorentz() {
 
@@ -288,8 +287,8 @@ public:
 
 	  double Delta = 0.0001;
 	  // Test padding is applied
-	  TS_ASSERT_EQUALS(outWS->x(0).size()*2,ws->x(0).size());
-	  TS_ASSERT_DELTA(outWS->y(0)[x(0).size()], 0.0, Delta);
+	  TS_ASSERT_EQUALS(outWS->x(0).size(),100 );
+	  TS_ASSERT_DELTA(outWS->y(0)[ws->x(0).size()], 0.0, Delta);
   }
   void test_PaddingTwelve() {
 
@@ -305,13 +304,10 @@ public:
 
 	  double Delta = 0.0001;
 	  // Test padding is applied
-	  TS_ASSERT_EQUALS(outWS->x(0).size() * 12, ws->x(0).size());
-	  TS_ASSERT_DELTA(outWS->y(0)[x(0).size()], 0.0, Delta);
-	  TS_ASSERT_DELTA(outWS->y(0)[x(0).size()*4], 0.0, Delta);
+	  TS_ASSERT_EQUALS(outWS->x(0).size() ,650);
+	  TS_ASSERT_DELTA(outWS->y(0)[ws->x(0).size()], 0.0, Delta);
+	  TS_ASSERT_DELTA(outWS->y(0)[ws->x(0).size()*4], 0.0, Delta);
   }
 };
 
-private:
-
-};
 #endif /*FFTPREPROCESSINGTSTEST_H_*/

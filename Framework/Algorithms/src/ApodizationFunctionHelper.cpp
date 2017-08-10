@@ -87,6 +87,6 @@ double welch(const double time, const double decayConstant) {
 * @param decayConstnat :: [input] the decay constant (tau)
 * @returns :: Function evaluation
 */
-double none(const double time, const double decayConstant) {
+double none(const double , const double ) {
 	return 1.;
 }

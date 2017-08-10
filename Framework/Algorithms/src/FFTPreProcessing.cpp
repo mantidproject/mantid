@@ -46,7 +46,7 @@ void FFTPreProcessing::init() {
 		  std::vector<std::string>{"None", "Bartlett", "Lorentz", "Connes", "Cosine", "Gaussian", "Welch"}),
 	  "The apodization function to apply to the data");
   declareProperty(
-      "DecayConstant", 2.44,
+      "DecayConstant", 1.5,
       "The decay constant for the apodization function.");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
@@ -203,7 +203,7 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
 		newEData.push_back(eData[i]);
 	}
 	double xValue = xData[xData.size() - 1] + dx;
-	for (size_t j = 0; j < padding; j++) {
+	for (int j = 0; j < padding; j++) {
 
 		for (size_t i = 0; i < yData.size(); ++i) {
 			newXData.push_back(xValue);

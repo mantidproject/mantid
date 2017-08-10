@@ -39,6 +39,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 	double cosine(double time, double decayConstant);
 	double gaussian(const double time, const double decayConstant);
 	double welch(const double time, const double decayConstant);
-	double none(const double time, const double decayConstant);
+	double none(const double, const double);
 
 #endif /*MANTID_APODIZATIONFUNCTIONHELPER_H_*/
