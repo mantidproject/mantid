@@ -19,7 +19,6 @@ set ( SRC_FILES
 	src/Column.cpp
 	src/ColumnFactory.cpp
 	src/CommonBinsValidator.cpp
-	src/ComponentInfo.cpp
 	src/CompositeCatalog.cpp
 	src/CompositeDomainMD.cpp
 	src/CompositeFunction.cpp
@@ -28,7 +27,6 @@ set ( SRC_FILES
 	src/CostFunctionFactory.cpp
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
-	src/DetectorInfo.cpp
 	src/DetectorSearcher.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
@@ -181,7 +179,6 @@ set ( INC_FILES
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
 	inc/MantidAPI/CommonBinsValidator.h
-	inc/MantidAPI/ComponentInfo.h
 	inc/MantidAPI/CompositeCatalog.h
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
@@ -192,7 +189,6 @@ set ( INC_FILES
 	inc/MantidAPI/DataProcessorAlgorithm.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
-	inc/MantidAPI/DetectorInfo.h
 	inc/MantidAPI/DetectorSearcher.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
@@ -366,7 +362,6 @@ set ( TEST_FILES
 	BinEdgeAxisTest.h
 	BoxControllerTest.h
 	CommonBinsValidatorTest.h
-	ComponentInfoTest.h
 	CompositeFunctionTest.h
 	CoordTransformTest.h
 	CostFunctionFactoryTest.h

@@ -101,7 +101,7 @@ public:
   /** Return how many entries in the Y MRU list are used.
    * Only used in tests. It only returns the 0-th MRU list size.
    * @return :: number of entries in the MRU list. */
-  size_t MRUSize() const { return this->m_bufferedDataY[0]->size(); }
+  size_t MRUSize() const;
 
 protected:
   /// The most-recently-used list of dataY histograms

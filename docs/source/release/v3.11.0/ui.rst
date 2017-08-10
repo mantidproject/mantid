@@ -53,6 +53,10 @@ Bugs Resolved
 SliceViewer Improvements
 ------------------------
 
+VSI Improvments
+---------------
+- ParaView has been updated to to `v5.4.0 <https://blog.kitware.com/paraview-5-4-0-release-notes/>`_.
+
 |
 
 Full list of

@@ -49,6 +49,8 @@ public:
 
   ~MantidMDCurve() override;
 
+  MantidMDCurve &operator=(const MantidMDCurve &rhs) = delete;
+
   MantidMDCurve *clone(const Graph *) const override;
 
   /// Curve type. Used in the QtiPlot API.

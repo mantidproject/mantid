@@ -914,8 +914,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
     return;
 
   // load grouping file if it was already specified
-  bool loadMask = !m_maskWS;
-  if (loadMask && !groupFilename.empty()) {
+  if (!groupFilename.empty()) {
     g_log.information() << "Loading Grouping file \"" << groupFilename
                         << "\"\n";
     if (groupFilename.find(".cal") != std::string::npos) {
@@ -948,8 +947,9 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   g_log.information() << "Loading Calibration file \"" << calFilename << "\"\n";
 
   // bunch of booleans to keep track of things
-  bool loadGrouping = !m_groupWS;
-  bool loadCalibration = !m_calibrationWS;
+  const bool loadMask = !m_maskWS;
+  const bool loadGrouping = !m_groupWS;
+  const bool loadCalibration = !m_calibrationWS;
 
   IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", m_inputW);

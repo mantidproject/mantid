@@ -82,6 +82,9 @@ public:
   virtual void expandAll() = 0;
   virtual void collapseAll() = 0;
 
+  // Select all rows/groups
+  virtual void selectAll() = 0;
+
   // Handle pause/resume of data reduction
   virtual void pause() = 0;
   virtual void resume() = 0;
@@ -104,6 +107,9 @@ public:
   virtual std::string getClipboard() const = 0;
   virtual std::string getProcessInstrument() const = 0;
   virtual DataProcessorPresenter *getPresenter() const = 0;
+
+  // Force re-processing of rows
+  virtual void setForcedReProcessing(bool forceReProcessing) = 0;
 };
 }
 }

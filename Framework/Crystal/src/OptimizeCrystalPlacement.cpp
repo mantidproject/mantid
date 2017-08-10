@@ -7,6 +7,7 @@
  */
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
 
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -424,9 +425,9 @@ void OptimizeCrystalPlacement::exec() {
   V3D newSampPos(Results["SampleXOffset"], Results["SampleYOffset"],
                  Results["SampleZOffset"]);
 
-  auto &detectorInfo = outPeaks->mutableDetectorInfo();
+  auto &componentInfo = outPeaks->mutableComponentInfo();
   CalibrationHelpers::adjustUpSampleAndSourcePositions(
-      *peaks->getInstrument(), detectorInfo.l1(), newSampPos, detectorInfo);
+      componentInfo.l1(), newSampPos, componentInfo);
 
   Matrix<double> GonTilt =
       PeakHKLErrors::RotationMatrixAboutRegAxis(Results["GonRotx"], 'x') *

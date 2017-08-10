@@ -8,7 +8,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
