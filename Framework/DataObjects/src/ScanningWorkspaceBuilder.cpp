@@ -1,10 +1,10 @@
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -221,7 +221,7 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
 }
 
 void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
-    DetectorInfo &outputDetectorInfo) const {
+    Geometry::DetectorInfo &outputDetectorInfo) const {
   outputDetectorInfo.setScanInterval(m_timeRanges[0]);
   auto mergeWorkspace =
       create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
@@ -233,7 +233,7 @@ void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
 }
 
 void ScanningWorkspaceBuilder::buildRotations(
-    DetectorInfo &outputDetectorInfo) const {
+    Geometry::DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 0; i < m_nDetectors; ++i) {
     for (size_t j = 0; j < m_nTimeIndexes; ++j) {
       outputDetectorInfo.setRotation({i, j}, m_rotations[i][j]);
@@ -242,7 +242,7 @@ void ScanningWorkspaceBuilder::buildRotations(
 }
 
 void ScanningWorkspaceBuilder::buildPositions(
-    DetectorInfo &outputDetectorInfo) const {
+    Geometry::DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 0; i < m_nDetectors; ++i) {
     for (size_t j = 0; j < m_nTimeIndexes; ++j) {
       outputDetectorInfo.setPosition({i, j}, m_positions[i][j]);
@@ -251,7 +251,7 @@ void ScanningWorkspaceBuilder::buildPositions(
 }
 
 void ScanningWorkspaceBuilder::buildRelativeRotationsForScans(
-    DetectorInfo &outputDetectorInfo) const {
+    Geometry::DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 0; i < outputDetectorInfo.size(); ++i) {
     for (size_t j = 0; j < outputDetectorInfo.scanCount(i); ++j) {
       if (outputDetectorInfo.isMonitor({i, j}))

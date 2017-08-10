@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
@@ -23,10 +24,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(detInfo = Kernel::make_unique<DetectorInfo>());
     TS_ASSERT_EQUALS(detInfo->size(), 0);
     TS_ASSERT(!detInfo->isScanning());
+    TS_ASSERT(!detInfo->hasComponentInfo());
+
     TS_ASSERT_THROWS_NOTHING(
         detInfo = Kernel::make_unique<DetectorInfo>(PosVec(1), RotVec(1)));
     TS_ASSERT_EQUALS(detInfo->size(), 1);
     TS_ASSERT(!detInfo->isScanning());
+    TS_ASSERT(!detInfo->hasComponentInfo());
   }
 
   void test_constructor_with_monitors() {
@@ -45,6 +49,14 @@ public:
 
   void test_constructor_length_mismatch() {
     TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)), std::runtime_error);
+  }
+
+  void test_assign_componentInfo() {
+    DetectorInfo detInfo;
+    TS_ASSERT(!detInfo.hasComponentInfo());
+    Mantid::Beamline::ComponentInfo compInfo;
+    detInfo.setComponentInfo(&compInfo);
+    TS_ASSERT(detInfo.hasComponentInfo());
   }
 
   void test_comparison_length() {

@@ -31,6 +31,7 @@ private slots:
   /// Handles mantid plot and save
   void saveClicked();
   void plotClicked();
+  void plotCurrentPreview();
 
 private:
   void setup() override;
@@ -38,9 +39,11 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
-  void addRebinStep(QString toRebin, QString toMatch);
   void addInterpolationStep(Mantid::API::MatrixWorkspace_sptr toInterpolate,
                             std::string toMatch);
+  void plotInPreview(const QString &curveName,
+                     Mantid::API::MatrixWorkspace_sptr &ws,
+                     const QColor &curveColor);
 
   Ui::ApplyPaalmanPings m_uiForm;
 
@@ -48,6 +51,11 @@ private:
 
   std::string m_sampleWorkspaceName;
   std::string m_containerWorkspaceName;
+  /// Loaded workspaces
+  Mantid::API::MatrixWorkspace_sptr m_ppSampleWS;
+  Mantid::API::MatrixWorkspace_sptr m_ppContainerWS;
+
+  size_t m_spectra;
 };
 
 } // namespace CustomInterfaces

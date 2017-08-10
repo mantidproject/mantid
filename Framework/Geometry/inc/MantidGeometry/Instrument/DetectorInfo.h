@@ -1,7 +1,7 @@
-#ifndef MANTID_API_DETECTORINFO_H_
-#define MANTID_API_DETECTORINFO_H_
+#ifndef MANTID_GEOMETRY_DETECTORINFO_H_
+#define MANTID_GEOMETRY_DETECTORINFO_H_
 
-#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
@@ -17,17 +17,15 @@ using detid_t = int32_t;
 namespace Beamline {
 class DetectorInfo;
 }
-namespace Geometry {
-class IComponent;
-class IDetector;
-class Instrument;
-class ParameterMap;
-}
 namespace API {
 class SpectrumInfo;
+}
+namespace Geometry {
+class IDetector;
+class Instrument;
 
-/** API::DetectorInfo is an intermediate step towards a DetectorInfo that is
-  part of Instrument-2.0. The aim is to provide a nearly identical interface
+/** Geometry::DetectorInfo is an intermediate step towards a DetectorInfo that
+  is part of Instrument-2.0. The aim is to provide a nearly identical interface
   such that we can start refactoring existing code before the full-blown
   implementation of Instrument-2.0 is available.
 
@@ -64,16 +62,16 @@ class SpectrumInfo;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL DetectorInfo {
+class MANTID_GEOMETRY_DLL DetectorInfo {
 public:
-  DetectorInfo(Beamline::DetectorInfo &detectorInfo,
+  DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
                boost::shared_ptr<const Geometry::Instrument> instrument,
-               boost::shared_ptr<std::vector<detid_t>> detectorIds,
-               Geometry::ParameterMap *pmap,
+               boost::shared_ptr<const std::vector<detid_t>> detectorIds,
                boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
                    detIdToIndexMap);
-
+  DetectorInfo(const DetectorInfo &other);
   DetectorInfo &operator=(const DetectorInfo &rhs);
+  ~DetectorInfo();
 
   bool isEquivalent(const DetectorInfo &other) const;
 
@@ -106,9 +104,6 @@ public:
   void setRotation(const std::pair<size_t, size_t> &index,
                    const Kernel::Quat &rotation);
 
-  void setPosition(const Geometry::IComponent &comp, const Kernel::V3D &pos);
-  void setRotation(const Geometry::IComponent &comp, const Kernel::Quat &rot);
-
   const Geometry::IDetector &detector(const size_t index) const;
 
   // This does not really belong into DetectorInfo, but it seems to be useful
@@ -133,57 +128,27 @@ public:
 
   void merge(const DetectorInfo &other);
 
-  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-  detIdToIndexMap() const;
-  friend class SpectrumInfo;
+  friend class API::SpectrumInfo;
+  friend class Instrument;
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   boost::shared_ptr<const Geometry::IDetector>
   getDetectorPtr(const size_t index) const;
-  const Geometry::IComponent &getSource() const;
-  const Geometry::IComponent &getSample() const;
-  const std::vector<size_t> &
-  getAssemblyDetectorIndices(const Geometry::IComponent &comp) const;
 
-  void cacheSource() const;
-  void cacheSample() const;
+  /// Pointer to the actual DetectorInfo object (non-wrapping part).
+  std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;
 
-  // These cache init functions are not thread-safe! Use only in combination
-  // with std::call_once!
-  void doCacheSource() const;
-  void doCacheSample() const;
-  void cacheL1() const;
-
-  /// Reference to the actual DetectorInfo object (non-wrapping part).
-  Beamline::DetectorInfo &m_detectorInfo;
-
-  Geometry::ParameterMap *m_pmap;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   boost::shared_ptr<const std::vector<detid_t>> m_detectorIDs;
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
-  // The following variables are mutable, since they are initialized (cached)
-  // only on demand, by const getters.
-  mutable boost::shared_ptr<const Geometry::IComponent> m_source;
-  mutable boost::shared_ptr<const Geometry::IComponent> m_sample;
-  mutable bool m_sourceGood{false};
-  mutable bool m_sampleGood{false};
-  mutable Kernel::V3D m_sourcePos;
-  mutable Kernel::V3D m_samplePos;
-  mutable double m_L1;
-  mutable std::once_flag m_sourceCached;
-  mutable std::once_flag m_sampleCached;
-  mutable std::once_flag m_L1Cached;
 
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
-  mutable std::vector<
-      std::pair<const Geometry::IComponent *, std::vector<size_t>>>
-      m_lastAssemblyDetectorIndices;
   mutable std::vector<size_t> m_lastIndex;
 };
 
-} // namespace API
+} // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_API_DETECTORINFO_H_ */
+#endif /* MANTID_GEOMETRY_DETECTORINFO_H_ */
