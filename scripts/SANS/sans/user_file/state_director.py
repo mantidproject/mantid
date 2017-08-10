@@ -6,13 +6,9 @@ from sans.common.file_information import find_full_file_path
 from sans.common.general_functions import (get_ranges_for_rebin_setting, get_ranges_for_rebin_array,
                                            get_ranges_from_event_slice_setting)
 from sans.user_file.user_file_reader import UserFileReader
-from sans.user_file.user_file_common import (DetectorId, BackId, LimitsId,
-                                             simple_range, complex_range, MaskId,
-                                             rebin_string_values, SampleId, SetId,
-                                             TransId, TubeCalibrationFileId, QResolutionId, FitId,
-                                             MonId, GravityId,
-                                             OtherId)
-
+from sans.user_file.settings_tags import (DetectorId, BackId, LimitsId, simple_range, complex_range, MaskId,
+                                          rebin_string_values, SampleId, SetId, TransId, TubeCalibrationFileId,
+                                          QResolutionId, FitId, MonId, GravityId, OtherId)
 from sans.state.automatic_setters import set_up_setter_forwarding_from_director_to_builder
 from sans.state.state import get_state_builder
 from sans.state.mask import get_mask_builder
@@ -163,9 +159,9 @@ def set_single_entry(builder, method_name, tag, all_entries, apply_to_value=None
         method(entry)
 
 
-class UserFileStateDirectorISIS(object):
+class StateDirectorISIS(object):
     def __init__(self, data_info):
-        super(UserFileStateDirectorISIS, self).__init__()
+        super(StateDirectorISIS, self).__init__()
         data_info.validate()
         self._data = data_info
 

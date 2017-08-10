@@ -296,6 +296,7 @@ if ( ENABLE_CPACK )
                            "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-serialization${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+                           "libboost-filesystem${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libnexus0 (>= 4.3),"
                            "libgsl0ldbl,"
                            "libqtcore4 (>= 4.2),"

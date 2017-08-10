@@ -63,7 +63,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
     : public QObject,
       public DataProcessorPresenter,
       public MantidQt::API::WorkspaceObserver {
@@ -141,6 +141,7 @@ public:
   void giveUserWarning(const std::string &prompt,
                        const std::string &title) const override;
   bool isProcessing() const override;
+  void setForcedReProcessing(bool forceReProcessing) override;
 
 protected:
   // The table view we're managing
@@ -296,6 +297,11 @@ private:
   // pause/resume reduction
   void pause();
   void resume();
+
+  // Check if run has been processed
+  bool isProcessed(int position) const;
+  bool isProcessed(int position, int parent) const;
+  bool m_forceProcessing = false;
 
   // List of workspaces the user can open
   QSet<QString> m_workspaceList;
