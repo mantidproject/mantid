@@ -1,15 +1,121 @@
 #include "MantidAlgorithms/GetQsInQENSData.h"
 
+#include "MantidGeometry/IDetector.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/Unit.h"
+
+namespace {
+  Mantid::Kernel::Logger g_log("ConvolutionFitSequential");
+}
+
 namespace Mantid {
 namespace Algorithms {
+
+using namespace API;
+using namespace Kernel;
+
+// Register the Algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(GetQsInQENSData);
 
 GetQsInQENSData::GetQsInQENSData()
 {
 }
 
+// Initializes the Algorithm
+void GetQsInQENSData::init() {
+  declareProperty(
+    make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      "InputWorkspace", "", Direction::Input, "Input QENS data as MatrixWorkspace"));
 
-GetQsInQENSData::~GetQsInQENSData()
-{
+  declareProperty("RaiseMode", false, "Set to True if an Exception, instead of any empty list of Q values, is desired.");
+
+  declareProperty(
+    make_unique<ArrayProperty<double>>("Qvalues", Direction::Output));
+}
+
+/*
+ * Validates the input properties
+ */
+std::map<std::string, std::string> GetQsInQENSData::validateInputs() {
+  std::map<std::string, std::string> issues;
+  MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
+
+  // Check whether the input workspace could be found
+  if (inputWs) {
+    issues["InputWorkspace"] = "InputWorkspace is not a MatrixWorkspace";
+  }
+
+  return issues;
+}
+
+/*
+ * Executes the Algorithm
+ */
+void GetQsInQENSData::exec() {
+  MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
+
+  try {
+    setProperty("Qvalues", extractQValues(inputWs));
+  } 
+  catch (std::exception &e) {
+    g_log.error(e.what());
+
+    // If the RaiseMode property has been set to true, raise any
+    // exception which is thrown.
+    bool inRaiseMode = getProperty("RaiseMode");
+    if (inRaiseMode) {
+      throw e;
+    }
+    
+    setProperty("Qvalues", std::vector<double>());
+  }
+}
+
+/*
+ * Extracts Q-values from the specified workspace.
+ *
+ * @param workspace The workspace from which to extract Q-values.
+ * @return          The extracted Q-values as a vector.
+ */
+std::vector<double> GetQsInQENSData::extractQValues(const Mantid::API::MatrixWorkspace_sptr workspace) {
+  size_t numSpectra = workspace->getNumberHistograms();
+  NumericAxis *qAxis;
+  MantidVec qValues;
+
+  try {
+    qAxis = dynamic_cast<NumericAxis *>(workspace->getAxis(1));
+    qAxis->unit();
+  }
+  catch (std::exception &e) {
+    throw std::exception("Vertical axis is empty or is not a numeric axis.");
+  }
+
+  // Check if the specified workspace is already in Q-space.
+  if (qAxis->unit()->unitID() == "MomentumTransfer") {
+    qValues = qAxis->getValues();
+
+    // Check if the Q-values are stored as histogram data.
+    if (qValues.size() == numSpectra + 1) {
+      // Convert Q-values to point values.
+      qValues.erase(qValues.begin());
+      std::transform(qValues.begin(), qValues.end(), qValues.begin(), 
+                     std::bind2nd(std::divides<double>(), 2.0));
+    }
+  }
+  else {
+
+    // Iterate over all spectrum in the specified workspace.
+    for (int i = 0; i < numSpectra; i++) {
+      Geometry::IDetector_const_sptr detector = workspace->getDetector(i);
+      double efixed = workspace->getEFixed(detector->getID());
+      double theta = 0.5 * workspace->detectorTwoTheta(*detector);
+      qValues.push_back(UnitConversion::convertToElasticQ(theta, efixed));
+    }
+  }
+
+  return qValues;
 }
 
 }
