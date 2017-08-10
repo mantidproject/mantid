@@ -341,7 +341,10 @@ void DetectorInfo::setScanInterval(
                                           interval.second.totalNanoseconds()});
 }
 
-/** Set the scan interval for all detectors. See overload for details. */
+/** Set the scan interval for all detectors.
+ *
+ * Prefer this over setting intervals for individual detectors since it enables
+ * internal performance optimization. See also overload for other details. */
 void DetectorInfo::setScanInterval(
     const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval) {
   m_detectorInfo.setScanInterval(

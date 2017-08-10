@@ -186,7 +186,10 @@ void DetectorInfo::setScanInterval(
   m_scanIntervals.access()[index] = interval;
 }
 
-/** Set the scan interval for all detectors. See overload for details. */
+/** Set the scan interval for all detectors.
+ *
+ * Prefer this over setting intervals for individual detectors since it enables
+ * internal performance optimization. See also overload for other details. */
 void DetectorInfo::setScanInterval(
     const std::pair<int64_t, int64_t> &interval) {
   checkNoTimeDependence();
