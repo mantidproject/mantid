@@ -19,15 +19,11 @@ using namespace Kernel;
 // Register the Algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GetQsInQENSData);
 
-GetQsInQENSData::GetQsInQENSData()
-{
-}
-
 // Initializes the Algorithm
 void GetQsInQENSData::init() {
   declareProperty(
     make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "InputWorkspace", "", Direction::Input, "Input QENS data as MatrixWorkspace"));
+      "InputWorkspace", "", Direction::Input), "Input QENS data as MatrixWorkspace");
 
   declareProperty("RaiseMode", false, "Set to True if an Exception, instead of any empty list of Q values, is desired.");
 
@@ -88,7 +84,7 @@ std::vector<double> GetQsInQENSData::extractQValues(const Mantid::API::MatrixWor
     qAxis = dynamic_cast<NumericAxis *>(workspace->getAxis(1));
     qAxis->unit();
   }
-  catch (std::exception &e) {
+  catch (std::exception &) {
     throw std::exception("Vertical axis is empty or is not a numeric axis.");
   }
 
@@ -107,7 +103,7 @@ std::vector<double> GetQsInQENSData::extractQValues(const Mantid::API::MatrixWor
   else {
 
     // Iterate over all spectrum in the specified workspace.
-    for (int i = 0; i < numSpectra; i++) {
+    for (size_t i = 0; i < numSpectra; i++) {
       Geometry::IDetector_const_sptr detector = workspace->getDetector(i);
       double efixed = workspace->getEFixed(detector->getID());
       double theta = 0.5 * workspace->detectorTwoTheta(*detector);
