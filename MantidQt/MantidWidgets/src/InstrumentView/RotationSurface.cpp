@@ -1,7 +1,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/RotationSurface.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include <QCursor>
 #include <QMessageBox>
