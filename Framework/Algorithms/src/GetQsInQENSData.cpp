@@ -76,7 +76,7 @@ void GetQsInQENSData::exec() {
  * @param workspace The workspace from which to extract Q-values.
  * @return          The extracted Q-values as a vector.
  */
-std::vector<double> GetQsInQENSData::extractQValues(
+MantidVec GetQsInQENSData::extractQValues(
     const Mantid::API::MatrixWorkspace_sptr workspace) {
   size_t numSpectra = workspace->getNumberHistograms();
   NumericAxis *qAxis;
@@ -84,14 +84,13 @@ std::vector<double> GetQsInQENSData::extractQValues(
 
   try {
     qAxis = dynamic_cast<NumericAxis *>(workspace->getAxis(1));
-    qAxis->unit();
   } catch (std::exception &) {
     throw std::exception("Vertical axis is empty or is not a numeric axis.");
   }
 
   // Check if the specified workspace is already in Q-space.
   if (qAxis->unit()->unitID() == "MomentumTransfer") {
-    qValues = qAxis->getValues();
+    qValues = MantidVec(qAxis->getValues());
 
     // Check if the Q-values are stored as histogram data.
     if (qValues.size() == numSpectra + 1) {
