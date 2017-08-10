@@ -153,8 +153,8 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 /** Removes multiple peaks
 * @param badPeaks peaks to be removed. Takes ownership of container.
 */
-void PeaksWorkspace::removePeaks(std::vector<int> &&badPeaks) {
-  if (badPeaks.size() == 0)
+void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
+  if (badPeaks.empty())
     return;
   std::sort(badPeaks.begin(), badPeaks.end());
   auto index = peaks.begin();

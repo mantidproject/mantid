@@ -168,7 +168,7 @@ void CentroidPeaks::integrate() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  removeEdgePeaks(peakWS.get());
+  removeEdgePeaks(*peakWS);
 
   // Save the output
   setProperty("OutPeaksWorkspace", peakWS);
@@ -287,7 +287,7 @@ void CentroidPeaks::integrateEvent() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  removeEdgePeaks(peakWS.get());
+  removeEdgePeaks(*peakWS);
 
   // Save the output
   setProperty("OutPeaksWorkspace", peakWS);
@@ -337,13 +337,13 @@ int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
 }
 
 void CentroidPeaks::removeEdgePeaks(
-    Mantid::DataObjects::PeaksWorkspace *peakWS) {
+    Mantid::DataObjects::PeaksWorkspace &peakWS) {
   int Edge = getProperty("EdgePixels");
   std::vector<int> badPeaks;
-  size_t numPeaks = peakWS->getNumberPeaks() - 1;
+  size_t numPeaks = peakWS.getNumberPeaks() - 1;
   for (int i = 0; i < static_cast<int>(numPeaks); i++) {
     // Get a direct ref to that peak.
-    const auto &peak = peakWS->getPeak(i);
+    const auto &peak = peakWS.getPeak(i);
     int col = peak.getCol();
     int row = peak.getRow();
     const std::string &bankName = peak.getBankName();
@@ -352,7 +352,7 @@ void CentroidPeaks::removeEdgePeaks(
       badPeaks.push_back(i);
     }
   }
-  peakWS->removePeaks(std::move(badPeaks));
+  peakWS.removePeaks(std::move(badPeaks));
 }
 
 } // namespace Mantid
