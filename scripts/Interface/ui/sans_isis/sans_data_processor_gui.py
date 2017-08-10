@@ -127,12 +127,20 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # --------------------------------------------------------------------------------------------------------------
         # Tab selection
         # --------------------------------------------------------------------------------------------------------------
-        self.tab_choice_list.addItem("Runs")
-        self.tab_choice_list.addItem("Settings")
+        # QtGui.QWi
         self.tab_choice_list.setAlternatingRowColors(True)
         self.tab_choice_list.setSpacing(10)
         self.tab_choice_list.currentRowChanged.connect(self.set_current_page)
         self.set_current_page(0)
+
+        path = os.path.dirname(__file__)
+        runs_icon_path = os.path.join(path, "icons", "run.png")
+        runs_icon = QtGui.QIcon(runs_icon_path)
+        _ = QtGui.QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)
+
+        settings_icon_path = os.path.join(path, "icons", "settings.png")
+        settings_icon = QtGui.QIcon(settings_icon_path)
+        _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)
 
         # --------------------------------------------------------------------------------------------------------------
         # Algorithm setup
@@ -528,7 +536,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         if self.output_mode_memory_radio_button.isChecked():
             return OutputMode.PublishToADS
         elif self.output_mode_file_radio_button.isChecked():
-            return OutputMode.SaveToFile()
+            return OutputMode.SaveToFile
         elif self.output_mode_both_radio_button.isChecked():
             return OutputMode.Both
         else:
@@ -794,11 +802,11 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     # Transmission
     # ------------------------------------------------------------------------------------------------------------------
     @property
-    def normalization_incident_monitor(self):
+    def transmission_incident_monitor(self):
         return self.get_simple_line_edit_field(line_edit="transmission_line_edit", expected_type=int)
 
-    @normalization_incident_monitor.setter
-    def normalization_incident_monitor(self, value):
+    @transmission_incident_monitor.setter
+    def transmission_incident_monitor(self, value):
         self.update_simple_line_edit_field(line_edit="transmission_line_edit", value=value)
 
     @property

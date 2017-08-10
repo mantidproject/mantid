@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import copy
 from sans.state.data import get_data_builder
-from sans.user_file.user_file_state_director import UserFileStateDirectorISIS
+from sans.user_file.state_director import StateDirectorISIS
 
 
 class GuiStateDirector(object):
@@ -31,7 +31,7 @@ class GuiStateDirector(object):
         self._apply_column_options_to_state(options_column_model, state_gui_model)
 
         # 3. Create the rest of the state based on the builder.
-        user_file_state_director = UserFileStateDirectorISIS(data)
+        user_file_state_director = StateDirectorISIS(data)
         settings = copy.deepcopy(state_gui_model.settings)
         user_file_state_director.add_state_settings(settings)
 

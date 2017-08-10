@@ -1,8 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
-from sans.user_file.user_file_common import (OtherId, DetectorId, LimitsId, SetId, SampleId, MonId, TransId, GravityId,
-                                             QResolutionId, FitId, event_binning_string_values, set_scales_entry,
-                                             monitor_spectrum, simple_range, monitor_file, det_fit_range,
-                                             q_rebin_values, fit_general, mask_angle_entry, range_entry)
+from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, SampleId, MonId, TransId, GravityId,
+                                          QResolutionId, FitId, event_binning_string_values, set_scales_entry,
+                                          monitor_spectrum, simple_range, monitor_file, det_fit_range,
+                                          q_rebin_values, fit_general, mask_angle_entry, range_entry)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
                                DetectorType, DataType, FitType)
 
