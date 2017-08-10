@@ -64,7 +64,7 @@ void ScanningWorkspaceBuilder::setHistogram(
 void ScanningWorkspaceBuilder::setTimeRanges(const std::vector<
     std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> timeRanges) {
   verifyTimeIndexSize(timeRanges.size(), "start time, end time pairs");
-  m_timeRanges = std::move(timeRanges);
+  m_scanIntervals = std::move(timeRanges);
 }
 
 /**
@@ -193,7 +193,7 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
 
   auto &outputDetectorInfo = outputWorkspace->mutableDetectorInfo();
   for (size_t i = 0; i < m_nDetectors; ++i)
-    outputDetectorInfo.setScanInterval(i, m_timeRanges[0]);
+    outputDetectorInfo.setScanInterval(i, m_scanIntervals[0]);
 
   buildOutputDetectorInfo(outputDetectorInfo);
 
@@ -224,15 +224,13 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
 
 void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
     DetectorInfo &outputDetectorInfo) const {
-  auto mergeWorkspace =
-      create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
-  for (size_t i = 1; i < m_nTimeIndexes; ++i) {
-    auto &mergeDetectorInfo = mergeWorkspace->mutableDetectorInfo();
-    for (size_t j = 0; j < m_nDetectors; ++j) {
-      mergeDetectorInfo.setScanInterval(j, m_timeRanges[i]);
-    }
-    outputDetectorInfo.merge(mergeDetectorInfo);
+  std::vector<std::pair<int64_t, int64_t>> scanIntervals;
+  for (const auto &scanInterval : m_scanIntervals) {
+    scanIntervals.push_back({scanInterval.first.totalNanoseconds(),
+                             scanInterval.second.totalNanoseconds()});
   }
+
+  outputDetectorInfo.convertToDetectorScan(scanIntervals);
 }
 
 void ScanningWorkspaceBuilder::buildRotations(
@@ -323,7 +321,7 @@ void ScanningWorkspaceBuilder::verifyDetectorSize(
 }
 
 void ScanningWorkspaceBuilder::validateInputs() const {
-  if (m_timeRanges.empty())
+  if (m_scanIntervals.empty())
     throw std::logic_error("Can not build workspace - time ranges have not "
                            "been set. Please call setTimeRanges() before "
                            "building.");

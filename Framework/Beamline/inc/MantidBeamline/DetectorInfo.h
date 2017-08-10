@@ -94,6 +94,8 @@ public:
                        const std::pair<int64_t, int64_t> &interval);
 
   void merge(const DetectorInfo &other);
+  void convertToDetectorScan(
+      const std::vector<std::pair<int64_t, int64_t>> &timeRanges);
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;

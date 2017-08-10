@@ -446,6 +446,23 @@ void DetectorInfo::merge(const DetectorInfo &other) {
   m_detectorInfo.merge(other.m_detectorInfo);
 }
 
+/**
+ * Creates a time indexed DetectorInfo object based on the scan intervals
+ *given. The DetectorInfo object must not be currently time indexed. The scan
+ *intervals must be the same for every detector, and they must not overlap and
+ *must be in a chronological order.
+ *
+ * These restrictions cover the currently required cases of detector scans. More
+ *complex scans can still be built up using DetectorInfo::merge().
+ *
+ * @param scanIntervals A vector of sequential, non-overlapping start and end
+ *scan time pairs given in nanoseconds
+ */
+void DetectorInfo::convertToDetectorScan(
+    const std::vector<std::pair<int64_t, int64_t>> &scanIntervals) {
+  m_detectorInfo.convertToDetectorScan(scanIntervals);
+}
+
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] != index) {
