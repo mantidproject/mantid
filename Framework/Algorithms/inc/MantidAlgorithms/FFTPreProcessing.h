@@ -10,7 +10,7 @@
 
 namespace Mantid {
 namespace Algorithms {
-/**Takes a workspace as input and applies a 
+/**Takes a workspace as input and applies a
 apodization function and/or padding
 
 Required Properties:
@@ -52,9 +52,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport FFTPreProcessing : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override {
-    return "FFTPreProcessing";
-  }
+  const std::string name() const override { return "FFTPreProcessing"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm applies apodization and/or padding to input data.";
@@ -69,11 +67,13 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  typedef double(*fptr)(const double time,const double decayConstant);
-  fptr getApodizationFunction(const std::string method); 
-  HistogramData::Histogram applyApodizationFunction(const HistogramData::Histogram &histogram, const double decayConstant, fptr function);
+  typedef double (*fptr)(const double time, const double decayConstant);
+  fptr getApodizationFunction(const std::string method);
+  HistogramData::Histogram
+  applyApodizationFunction(const HistogramData::Histogram &histogram,
+                           const double decayConstant, fptr function);
   HistogramData::Histogram addPadding(const HistogramData::Histogram &histogram,
-	  const int padding);
+                                      const int padding);
 };
 
 } // namespace Algorithm

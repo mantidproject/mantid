@@ -41,21 +41,22 @@ void FFTPreProcessing::init() {
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
       "The workspace indices to preProcess.");
-  declareProperty("ApodizationFunction", "None",
-	  boost::make_shared<Mantid::Kernel::StringListValidator>(
-		  std::vector<std::string>{"None", "Bartlett", "Lorentz", "Connes", "Cosine", "Gaussian", "Welch"}),
-	  "The apodization function to apply to the data");
   declareProperty(
-      "DecayConstant", 1.5,
-      "The decay constant for the apodization function.");
+      "ApodizationFunction", "None",
+      boost::make_shared<Mantid::Kernel::StringListValidator>(
+          std::vector<std::string>{"None", "Bartlett", "Lorentz", "Connes",
+                                   "Cosine", "Gaussian", "Welch"}),
+      "The apodization function to apply to the data");
+  declareProperty("DecayConstant", 1.5,
+                  "The decay constant for the apodization function.");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("Padding", 0, mustBePositive->clone(), 
-	              "The amount of padding to add to the data,"
-                  "it is the number of multiples of the data set."
-                  "i.e 0 means no padding and 1 will double the number of data points.");
+  declareProperty(
+      "Padding", 0, mustBePositive->clone(),
+      "The amount of padding to add to the data,"
+      "it is the number of multiples of the data set."
+      "i.e 0 means no padding and 1 will double the number of data points.");
 }
-
 
 /** Executes the algorithm
  *
@@ -118,8 +119,10 @@ void FFTPreProcessing::exec() {
                                   " is greater than the number of spectra!");
     }
     // Create output ws
-	outputWS->setHistogram(
-		specNum, applyApodizationFunction(addPadding(inputWS->histogram(specNum), padding),decayConstant,apodizationFunction));
+    outputWS->setHistogram(specNum,
+                           applyApodizationFunction(
+                               addPadding(inputWS->histogram(specNum), padding),
+                               decayConstant, apodizationFunction));
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
@@ -127,103 +130,99 @@ void FFTPreProcessing::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-typedef double(*fptr)(const double time, const double decayConstant);
+typedef double (*fptr)(const double time, const double decayConstant);
 /**
-* Gets a pointer to the relevant 
+* Gets a pointer to the relevant
 * apodization function
 * @param method :: [input] The name of the chosen function
 * @returns :: pointer to the function
 */
 fptr FFTPreProcessing::getApodizationFunction(const std::string method) {
-	if (method == "None") {
-		return none;
-	}
-	else if (method == "Bartlett") {
-		return bartlett;
-	}
-	else if (method == "Lorentz") {
-		return lorentz;
-	}
-	else if (method == "Connes") {
-		return connes;
-	}
-	else if (method == "Cosine") {
-		return cosine;
-	}
-	else if (method == "Gaussian") {
-		return gaussian;
-	}
-	else if (method == "Welch") {
-		return welch;
-	}
-	return none;
+  if (method == "None") {
+    return none;
+  } else if (method == "Bartlett") {
+    return bartlett;
+  } else if (method == "Lorentz") {
+    return lorentz;
+  } else if (method == "Connes") {
+    return connes;
+  } else if (method == "Cosine") {
+    return cosine;
+  } else if (method == "Gaussian") {
+    return gaussian;
+  } else if (method == "Welch") {
+    return welch;
+  }
+  return none;
 }
 /**
-* Applies the appodization function to the data. 
+* Applies the appodization function to the data.
 * @param histogram :: [input] Input histogram.
 * @param padding :: [input] the decay constant for the apodization
-* @param function :: [input] the apodization function 
+* @param function :: [input] the apodization function
 * @returns :: Histogram of the apodized data
 */
-HistogramData::Histogram
-FFTPreProcessing::applyApodizationFunction(const HistogramData::Histogram &histogram,const double decayConstant,fptr function) {
-	HistogramData::Histogram result(histogram);
-	result.points();
-	auto &xData = result.mutableX();
-	auto &yData = result.mutableY();
-	auto &eData = result.mutableE();
+HistogramData::Histogram FFTPreProcessing::applyApodizationFunction(
+    const HistogramData::Histogram &histogram, const double decayConstant,
+    fptr function) {
+  HistogramData::Histogram result(histogram);
+  result.points();
+  auto &xData = result.mutableX();
+  auto &yData = result.mutableY();
+  auto &eData = result.mutableE();
 
-	for (size_t i = 0; i < yData.size(); ++i) {
-		yData[i] *= function(xData[i], decayConstant);
-		eData[i] *= function(xData[i], decayConstant);
-	}
-	return result;
+  for (size_t i = 0; i < yData.size(); ++i) {
+    yData[i] *= function(xData[i], decayConstant);
+    eData[i] *= function(xData[i], decayConstant);
+  }
+  return result;
 }
 /**
 * Adds padding to the data. The padding is
 * an integer multiple of the original data set.
 * i.e. padding =0 => none
-* padding = 2 => 2/3 of the output will be zero. 
+* padding = 2 => 2/3 of the output will be zero.
 * @param histogram :: [input] Input histogram
 * @param padding :: [input] the amount of padding to add
 * @returns :: Histogram of the padded data
 */
 HistogramData::Histogram
 FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
-	const int padding) {
+                             const int padding) {
 
-	HistogramData::Histogram result(histogram);
-	//make sure point data
-	result.points();
-	auto &xData = result.mutableX();
-	auto &yData = result.mutableY();
-	auto &eData = result.mutableE();
-	//assume approx evenly spaced
-	double dx = xData[1]-xData[0];
-	std::vector<double> newXData;
-	std::vector<double>  newYData;
-	std::vector<double>  newEData;
+  HistogramData::Histogram result(histogram);
+  // make sure point data
+  result.points();
+  auto &xData = result.mutableX();
+  auto &yData = result.mutableY();
+  auto &eData = result.mutableE();
+  // assume approx evenly spaced
+  double dx = xData[1] - xData[0];
+  std::vector<double> newXData;
+  std::vector<double> newYData;
+  std::vector<double> newEData;
 
-	//store original data
-	for (size_t i = 0; i < yData.size(); ++i) {
-		newXData.push_back(xData[i]);
-		newYData.push_back(yData[i]);
-		newEData.push_back(eData[i]);
-	}
-	double xValue = xData[xData.size() - 1] + dx;
-	for (int j = 0; j < padding; j++) {
+  // store original data
+  for (size_t i = 0; i < yData.size(); ++i) {
+    newXData.push_back(xData[i]);
+    newYData.push_back(yData[i]);
+    newEData.push_back(eData[i]);
+  }
+  double xValue = xData[xData.size() - 1] + dx;
+  for (int j = 0; j < padding; j++) {
 
-		for (size_t i = 0; i < yData.size(); ++i) {
-			newXData.push_back(xValue);
-			newYData.push_back(0.0);
-			newEData.push_back(0.0);
-			xValue += dx;
-		}
-	}
+    for (size_t i = 0; i < yData.size(); ++i) {
+      newXData.push_back(xValue);
+      newYData.push_back(0.0);
+      newEData.push_back(0.0);
+      xValue += dx;
+    }
+  }
 
-	result = HistogramData::Histogram(HistogramData::Points(newXData), HistogramData::Counts(newYData), HistogramData::CountStandardDeviations(newEData));
-   	return result;
-	
+  result = HistogramData::Histogram(
+      HistogramData::Points(newXData), HistogramData::Counts(newYData),
+      HistogramData::CountStandardDeviations(newEData));
+  return result;
 }
 
 } // namespace Algorithm
