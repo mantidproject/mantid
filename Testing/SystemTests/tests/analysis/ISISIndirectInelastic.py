@@ -676,8 +676,8 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
             SaveNexusProcessed(Filename=filename,
                                InputWorkspace=ws)
 
-        eq2_file = elwin_results[1]
-        msdfit_result = MSDFit(InputWorkspace=eq2_file,
+        eq_file = elwin_results[0]
+        msdfit_result = MSDFit(InputWorkspace=eq_file,
                                XStart=self.startX,
                                XEnd=self.endX,
                                SpecMax=1)
