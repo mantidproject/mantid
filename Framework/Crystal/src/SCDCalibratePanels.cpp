@@ -54,8 +54,8 @@ void SCDCalibratePanels::exec() {
   peaksWs->sort(criteria);
   // Remove peaks on edge
   int edge = this->getProperty("EdgePixels");
+  Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
   if (edge > 0) {
-    Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
     std::vector<Peak> &peaks = peaksWs->getPeaks();
     auto it = std::remove_if(peaks.begin(), peaks.end(), [&peaksWs, edge, inst](
                                                              const Peak &pk) {
@@ -83,7 +83,17 @@ void SCDCalibratePanels::exec() {
 
   boost::container::flat_set<string> MyBankNames;
   for (int i = 0; i < nPeaks; ++i) {
-    MyBankNames.insert(peaksWs->getPeak(i).getBankName());
+    std::string name = peaksWs->getPeak(i).getBankName();
+    try {
+    IComponent_const_sptr det = inst->getComponentByName(name);
+    IComponent_const_sptr parent = det->getParent();
+    IComponent_const_sptr grandparent = parent->getParent();
+    name = grandparent->getName();
+    } catch (const std::exception &exc) {
+      g_log.notice() << "Problem in finding panel for " << name << " : "
+                     << exc.what() << "\n";
+    }
+    MyBankNames.insert(name);
   }
 
   std::vector<std::string> fit_workspaces(MyBankNames.size(), "fit_");
@@ -96,11 +106,11 @@ void SCDCalibratePanels::exec() {
     const std::string bankName = "__PWS_" + iBank;
     PeaksWorkspace_sptr local = peaksWs->clone();
     AnalysisDataService::Instance().addOrReplace(bankName, local);
-    std::vector<Peak> &localPeaks = local->getPeaks();
+    /*std::vector<Peak> &localPeaks = local->getPeaks();
     auto lit = std::remove_if(
         localPeaks.begin(), localPeaks.end(),
         [&iBank](const Peak &pk) { return pk.getBankName() != iBank; });
-    localPeaks.erase(lit, localPeaks.end());
+    localPeaks.erase(lit, localPeaks.end());*/
 
     int nBankPeaks = local->getNumberPeaks();
     if (nBankPeaks < 6) {
@@ -250,8 +260,8 @@ void SCDCalibratePanels::exec() {
   groupAlg->execute();
 
   // Use new instrument for PeaksWorkspace
-  Geometry::Instrument_sptr inst =
-      boost::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
+  Geometry::Instrument_sptr inst2 =
+      boost::const_pointer_cast<Geometry::Instrument>(inst);
   Geometry::OrientedLattice lattice0 =
       peaksWs->mutableSample().getOrientedLattice();
   PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
@@ -263,7 +273,7 @@ void SCDCalibratePanels::exec() {
             boost::math::iround(peak.getL()));
     V3D Q2 = lattice0.qFromHKL(hkl);
     try {
-      peak.setInstrument(inst);
+      peak.setInstrument(inst2);
       peak.setQSampleFrame(Q2);
       peak.setHKL(hkl);
     } catch (const std::exception &exc) {
@@ -283,24 +293,24 @@ void SCDCalibratePanels::exec() {
   if (run.hasProperty("T0")) {
     mT0 = run.getPropertyValueAsType<double>("T0");
   }
-  saveIsawDetCal(inst, MyBankNames, mT0, DetCalFileName);
+  saveIsawDetCal(inst2, MyBankNames, mT0, DetCalFileName);
   string XmlFileName = getProperty("XmlFilename");
-  saveXmlFile(XmlFileName, MyBankNames, *inst);
+  saveXmlFile(XmlFileName, MyBankNames, *inst2);
   // create table of theoretical vs calculated
   //----------------- Calculate & Create Calculated vs Theoretical
   // workspaces------------------,);
   MatrixWorkspace_sptr ColWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
-  ColWksp->setInstrument(inst);
+  ColWksp->setInstrument(inst2);
   MatrixWorkspace_sptr RowWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
-  RowWksp->setInstrument(inst);
+  RowWksp->setInstrument(inst2);
   MatrixWorkspace_sptr TofWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
-  TofWksp->setInstrument(inst);
+  TofWksp->setInstrument(inst2);
   OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
   const DblMatrix &UB = lattice.getUB();
   // sort again since edge peaks can trace to other banks
@@ -325,7 +335,7 @@ void SCDCalibratePanels::exec() {
     int icount = 0;
     for (int j = 0; j < nPeaks; j++) {
       Peak peak = peaksWs->getPeak(j);
-      if (peak.getBankName() == bankName) {
+      //if (peak.getBankName() == bankName) {
         try {
           V3D q_lab =
               (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
@@ -340,7 +350,7 @@ void SCDCalibratePanels::exec() {
           // g_log.debug() << "Problem only in printing peaks\n";
         }
         icount++;
-      }
+      //}
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -541,7 +551,7 @@ void SCDCalibratePanels::saveIsawDetCal(
   alg->setProperty("InputWorkspace", wksp);
   alg->setProperty("Filename", filename);
   alg->setProperty("TimeOffset", T0);
-  alg->setProperty("BankNames", banknames);
+//  alg->setProperty("BankNames", banknames);
   alg->executeAsChildAlg();
 }
 
