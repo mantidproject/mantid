@@ -124,11 +124,6 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
 def _test_splined_vanadium_exists(instrument, run_details):
     # Check the necessary splined vanadium file has been created
     if not os.path.isfile(run_details.splined_vanadium_file_path):
-        if instrument._can_auto_gen_vanadium_cal():
-            warnings.warn("\nAttempting to automatically generate vanadium calibration at this path: "
-                          + str(run_details.splined_vanadium_file_path) + " for these settings.\n")
-            instrument._generate_auto_vanadium_calibration(run_details=run_details)
-        else:
-            raise ValueError("Processed vanadium runs not found at this path: "
-                             + str(run_details.splined_vanadium_file_path) +
-                             " \nHave you created a vanadium calibration with these settings yet?\n")
+        raise ValueError("Processed vanadium runs not found at this path: "
+                         + str(run_details.splined_vanadium_file_path) +
+                         " \nHave you run the method to create a Vanadium spline with these settings yet?\n")
