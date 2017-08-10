@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import io
+import six
 from math import sqrt
 
 import numpy as np
@@ -46,7 +47,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
         # read data from output CRYSTAL file
         filename = self._clerk.get_input_filename()
-        with io.open(filename, "r", encoding="utf8") as crystal_file:
+        with io.open(filename, "rb") as crystal_file:
             logger.notice("Reading from " + filename)
 
             if system is AbinsModules.AbinsConstants.CRYSTAL:
@@ -75,15 +76,16 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Determines whether the system is a molecule or a crystal.
         """
-        with io.open(self._clerk.get_input_filename(), "r", encoding="utf8") as crystal_file:
+        with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
             lines = crystal_file.read()
 
-        if "MOLECULAR CALCULATION" in lines or "0D - MOLECULE" in lines:
+        if b"MOLECULAR CALCULATION" in lines or b"0D - MOLECULE" in lines:
             molecular = True
-        elif "CRYSTAL CALCULATION" in lines or "3D - CRYSTAL" in lines:
+        elif b"CRYSTAL CALCULATION" in lines or b"3D - CRYSTAL" in lines:
             molecular = False
         else:
             raise ValueError("Only molecular or 3D CRYSTAL systems can be processed")
+
 
         if molecular:
             logger.notice("This run is for a MOLECULAR system")
@@ -97,17 +99,17 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         Checks if we have data for more than one k-point.
         :return: True if many k-points included in calculations otherwise False
         """
-        with io.open(self._clerk.get_input_filename(), "r", encoding="utf8") as crystal_file:
+        with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
             lines = crystal_file.read()
-        phonon_dispersion = lines.count("DISPERSION K ") > 1
+
+        phonon_dispersion = lines.count(b"DISPERSION K ") > 1
 
         if phonon_dispersion:
             # In case there is more than one k-point super-cell is constructed. In order to obtain metric tensor we
             # need to find expansion transformation.
-            with io.open(self._clerk.get_input_filename(), "r", encoding="utf8") as crystal_file:
+            with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
                 self._find(file_obj=crystal_file, msg="EXPANSION MATRIX OF PRIMITIVE CELL")
                 dim = 3
-
                 vectors = []
                 for i in range(dim):
                     vec = []
@@ -150,15 +152,16 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         file_obj.readline()  # Line: *******************************************************************************
 
         while not self._file_end(file_obj=file_obj):
-            line = file_obj.readline().replace("T", "")
+            line = file_obj.readline().replace(b"T", b"")
             # At the end of this section there is always empty line.
             if not line.strip():
                 break
-            coord_lines += [line.strip("\n")]
+            coord_lines += [line.strip(b"\n")]
 
         for line in coord_lines:
             # convert from unicode to str in case of Python 2
-            temp = str(line.strip("\n"))
+            temp = str(line.strip(b"\n"))
+
             logger.debug(temp)
 
         return coord_lines
@@ -190,13 +193,16 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 ydisp = []
                 zdisp = []
 
-                local_line = line.replace("(", " ").replace(")", " ").split()
+                local_line = line.replace(b"(", b" ").replace(b")", b" ").split()
+
+
                 k_coordinates.append([float(local_line[7]), float(local_line[8]), float(local_line[9])])
                 weights.append(float(local_line[11]))
                 k_point_type = local_line[6]
 
+
                 # parse for k-points for which atomic displacements are real
-                if k_point_type == "R":
+                if k_point_type == b"R":
 
                     while not self._file_end(file_obj=file_obj):
 
@@ -208,8 +214,8 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                         if self._check_kpoints_end(file_obj=file_obj):
                             break
 
-                #  parse for k-points for which atomic displacements are complex
-                elif k_point_type == "C":
+                # parse for k-points for which atomic displacements are complex
+                elif k_point_type == b"C":
 
                     real_partial_xdisp = []
                     real_partial_ydisp = []
@@ -241,7 +247,6 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
                     # reconstruct complex atomic displacements
                     for el in range(len(real_partial_xdisp)):
-
                         xdisp.append(real_partial_xdisp[el] + complex_partial_xdisp[el])
                         ydisp.append(real_partial_ydisp[el] + complex_partial_ydisp[el])
                         zdisp.append(real_partial_zdisp[el] + complex_partial_zdisp[el])
@@ -297,7 +302,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         line = self._find(file_obj=file_obj, msg="FREQ(CM**-1)")
 
         if append:
-            for item in line.replace("\n", " ").replace("FREQ(CM**-1)", " ").split():
+            for item in line.replace(b"\n", b" ").replace(b"FREQ(CM**-1)", b" ").split():
                 freq.append(float(item))
 
     def _read_coord_block(self, file_obj=None, xdisp=None, ydisp=None, zdisp=None, part="real"):
@@ -314,14 +319,14 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
             line = file_obj.readline()
 
             if line.strip():
-                if " X " in line:
-                    for item in line[14:].strip("\n").split():
+                if b" X " in line:
+                    for item in line[14:].strip(b"\n").split():
                         self._parse_item(item=item, container=xdisp, part=part)
-                elif " Y " in line:
-                    for item in line[14:].strip("\n").split():
+                elif b" Y " in line:
+                    for item in line[14:].strip(b"\n").split():
                         self._parse_item(item=item, container=ydisp, part=part)
-                elif " Z " in line:
-                    for item in line[14:].strip("\n").split():
+                elif b" Z " in line:
+                    for item in line[14:].strip(b"\n").split():
                         self._parse_item(item=item, container=zdisp, part=part)
                 else:
                     file_obj.seek(pos)
@@ -341,6 +346,8 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
+        if six.PY3:
+            msg = bytes(msg, "utf8")
         while not self._file_end(file_obj=file_obj):
             pos = file_obj.tell()
             line = file_obj.readline()
@@ -355,6 +362,8 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :param msg: keyword to find
         :return: line with the msg keyword
         """
+        if six.PY3:
+            msg = bytes(msg, "utf8")
         while not self._file_end(file_obj=file_obj):
             line = file_obj.readline()
             if line.strip() and msg in line:
@@ -366,7 +375,8 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :param file_obj: file object from which we read
         :return: True if end of block otherwise False
         """
-        allowed_keywords = [" X ", " Y ", " Z ", "-", "REAL", "IMAGINARY", "MODES", "DISPERSION"]
+        allowed_keywords = [b" X ", b" Y ", b" Z ", b"-", b"REAL", b"IMAGINARY", b"MODES", b"DISPERSION"]
+
         # remove empty lines:
         pos = None
         while not self._file_end(file_obj=file_obj):
@@ -410,6 +420,9 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         pos = file_obj.tell()
         line = file_obj.readline()
         file_obj.seek(pos)
+        if six.PY3:
+            msg = bytes(msg, "utf8")
+
         return msg in line
 
     def _get_num_kpoints(self, file_obj=None):
@@ -417,7 +430,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         num_k = 0
         while not self._file_end(file_obj=file_obj):
             line = file_obj.readline()
-            if "WITH SHRINKING FACTORS:" in line:
+            if b"WITH SHRINKING FACTORS:" in line:
                 return num_k
             num_k += 1
 
@@ -429,7 +442,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         data.update({"atoms": dict()})
         for i, line in enumerate(coord_lines):
             l = line.split()
-            symbol = str(l[2].capitalize())
+            symbol = str(l[2].decode("utf-8").capitalize())
             atom = Atom(symbol=symbol)
             data["atoms"]["atom_%s" % i] = {
                 "symbol": symbol, "mass": atom.mass, "sort": i,
@@ -556,7 +569,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         norm = 0.0
 
         for item in normalised_coordinates:
-            atom = Atom(symbol=str(item[1]).capitalize())
+            atom = Atom(symbol=str(item[1].decode("utf-8").capitalize()))
             mass = atom.mass
             x = item[3] / norm_const1 * sqrt(mass)
             y = item[4] / norm_const1 * sqrt(mass)
