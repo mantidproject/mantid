@@ -70,6 +70,7 @@ Python
 Python Algorithms
 #################
 
+- Changed array bounded validator to use a single upper or lower argument to be consistent with bounded validator.
 
 Python Fit Functions
 ####################

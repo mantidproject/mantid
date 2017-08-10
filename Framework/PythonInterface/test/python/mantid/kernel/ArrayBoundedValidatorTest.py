@@ -43,6 +43,28 @@ class ArrayBoundedValidatorTest(unittest.TestCase):
         self.assertFalse(validator.hasLower())
         self.assertFalse(validator.hasUpper())
 
+    def test_keyword_arguments(self):
+        lower = 7.0
+        upper = 10.0
+        validator = FloatArrayBoundedValidator(lower=lower, upper=upper)
+        self.assertTrue(validator.hasLower())
+        self.assertTrue(validator.hasUpper())
+        self.assertEquals(validator.lower(), lower)
+        self.assertEquals(validator.upper(), upper)
+    
+    def test_keyword_arguments_only_upper(self):
+        upper = 10.0
+        validator = FloatArrayBoundedValidator(upper=upper)
+        self.assertFalse(validator.hasLower())
+        self.assertTrue(validator.hasUpper())
+        self.assertEquals(validator.upper(), upper)
+
+    def test_keyword_arguments_only_lower(self):
+        lower = 7.0
+        validator = FloatArrayBoundedValidator(lower=lower)
+        self.assertTrue(validator.hasLower())
+        self.assertFalse(validator.hasUpper())
+        self.assertEquals(validator.lower(), lower)
 
     def test_values_within_array_bounds_are_accepted_by_validator(self):
        alg = self._create_alg_with_ArrayBoundedValidator(5.1, 10.4)
