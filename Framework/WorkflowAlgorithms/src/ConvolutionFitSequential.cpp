@@ -618,7 +618,7 @@ void ConvolutionFitSequential::calculateEISF(
  *                      workspaces.
  */
 void ConvolutionFitSequential::extractMembers(
-    Workspace_sptr inputWs, WorkspaceGroup_const_sptr resultGroupWs,
+    MatrixWorkspace_sptr inputWs, WorkspaceGroup_const_sptr resultGroupWs,
     const std::string &outputWsName) {
   // Get Q values from the input workspace.
   auto getQs = createChildAlgorithm("GetQsInQENSData", -1.0, -1.0, false);
