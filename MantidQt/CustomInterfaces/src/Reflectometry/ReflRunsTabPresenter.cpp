@@ -443,7 +443,7 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 /** Tells view to enable all 'process' buttons and disable the 'pause' button
 * when data reduction is paused
 */
-void ReflRunsTabPresenter::pause() const {
+void ReflRunsTabPresenter::pause() {
   enableRowAction(PROCESS);
   disableRowAction(PAUSE);
   m_view->setTransferEnabled(true);
@@ -458,15 +458,25 @@ void ReflRunsTabPresenter::disableRowAction(int index) const {
   m_view->setRowActionEnabled(index, false);
 }
 
+void ReflRunsTabPresenter::preventTableModification() {
+  m_view->setAutoreduceButtonEnabled(false);
+  m_view->setTransferEnabled(false);
+}
+
+void ReflRunsTabPresenter::allowTableModification() {
+  m_view->setAutoreduceButtonEnabled(true);
+  m_view->setTransferEnabled(true);
+
+}
+
 /** Disables the 'process' button and enables the 'pause' button when data
  * reduction is resumed. Also notifies main presenter that data reduction is
  * confirmed to be resumed.
 */
-void ReflRunsTabPresenter::resume() const {
+void ReflRunsTabPresenter::resume() {
   disableRowAction(PROCESS);
   enableRowAction(PAUSE);
-  m_view->setTransferEnabled(false);
-  m_view->setAutoreduceButtonEnabled(false);
+  preventTableModification();
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
@@ -485,15 +495,16 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
 
 /** Notifies main presenter that data reduction is confirmed to be paused
 */
-void ReflRunsTabPresenter::confirmReductionPaused() const {
+void ReflRunsTabPresenter::confirmReductionPaused() {
 
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
+  allowTableModification();
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
-void ReflRunsTabPresenter::confirmReductionResumed() const {
+void ReflRunsTabPresenter::confirmReductionResumed() {
   m_view->setRowActionEnabled(PROCESS, true);
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);

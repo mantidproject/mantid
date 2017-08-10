@@ -109,16 +109,17 @@ public:
   MOCK_CONST_METHOD0(getTimeSlicingType, QString());
 
   // Data reduction paused/resumed handling
-  MOCK_CONST_METHOD0(pause, void());
-  MOCK_CONST_METHOD0(resume, void());
-  MOCK_CONST_METHOD0(confirmReductionPaused, void());
+  MOCK_METHOD0(pause, void());
+  MOCK_METHOD0(resume, void());
+  MOCK_METHOD0(confirmReductionPaused, void());
+  MOCK_METHOD0(confirmReductionResumed, void());
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
 
 public:
   MockDataProcessorPresenter(){};
-  ~MockDataProcessorPresenter() override {}
+  ~MockDataProcessorPresenter() override = default;
 
   MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
   MOCK_METHOD1(setModel, void(QString const &name));

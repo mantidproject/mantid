@@ -76,13 +76,13 @@ public:
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;
   /// Handle data reduction paused/resumed
-  void pause() const override;
-  void resume() const override;
+  void pause() override;
+  void resume() override;
   /// Determine whether to start a new autoreduction
   bool startNewAutoreduction() const override;
   /// Reduction paused/resumed confirmation handler
-  void confirmReductionPaused() const override;
-  void confirmReductionResumed() const override;
+  void confirmReductionPaused() override;
+  void confirmReductionResumed() override;
 
 private:
   static auto constexpr PROCESS = 0;
@@ -123,6 +123,8 @@ private:
   /// change the instrument
   void changeInstrument();
   SearchResultMap querySelectedRunsToTransfer(std::set<int> const& selectedRows) const;
+  void preventTableModification();
+  void allowTableModification();
 };
 }
 }
