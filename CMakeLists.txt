@@ -159,7 +159,7 @@ if (ENABLE_MANTIDPLOT)
   add_dependencies ( AllTests FrameworkTests GUITests )
 endif()
 
-if (ENABLE_MANTIDPLOT AND MAKE_VATES )
+if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
@@ -176,7 +176,7 @@ if (ENABLE_MANTIDPLOT AND MAKE_VATES )
     )
   endif()
 
-endif ( MAKE_VATES )
+endif ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
 if ( UNIX )
   #Experimental feature. Unix only at this point.
