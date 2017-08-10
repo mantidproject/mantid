@@ -32,11 +32,11 @@ set ( SRC_FILES
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/FitMW.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
+	src/FuncMinimizers/DTRSMinimizer.cpp
 	src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
-	src/FuncMinimizers/DTRSMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
 	src/FuncMinimizers/MoreSorensenMinimizer.cpp
@@ -58,14 +58,14 @@ set ( SRC_FILES
 	src/Functions/ComptonScatteringCountRate.cpp
 	src/Functions/Convolution.cpp
 	src/Functions/CrystalElectricField.cpp
-	src/Functions/CrystalFieldPeaks.cpp
-	src/Functions/CrystalFieldPeaksBase.cpp
-	src/Functions/CrystalFieldMultiSpectrum.cpp
-	src/Functions/CrystalFieldPeakUtils.cpp
-	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CrystalFieldHeatCapacity.cpp
 	src/Functions/CrystalFieldMagnetisation.cpp
 	src/Functions/CrystalFieldMoment.cpp
+	src/Functions/CrystalFieldMultiSpectrum.cpp
+	src/Functions/CrystalFieldPeakUtils.cpp
+	src/Functions/CrystalFieldPeaks.cpp
+	src/Functions/CrystalFieldPeaksBase.cpp
+	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CrystalFieldSusceptibility.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
@@ -86,18 +86,19 @@ set ( SRC_FILES
 	src/Functions/GausOsc.cpp
 	src/Functions/Gaussian.cpp
 	src/Functions/GaussianComptonProfile.cpp
+	src/Functions/GramCharlier.cpp
 	src/Functions/GramCharlierComptonProfile.cpp
 	src/Functions/IkedaCarpenterPV.cpp
 	src/Functions/InelasticDiffRotDiscreteCircle.cpp
 	src/Functions/InelasticDiffSphere.cpp
 	src/Functions/InelasticIsoRotDiff.cpp
 	src/Functions/IsoRotDiff.cpp
-    src/Functions/Keren.cpp
+	src/Functions/Keren.cpp
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
-	src/Functions/MuonFInteraction.cpp
 	src/Functions/MultivariateGaussianComptonProfile.cpp
+	src/Functions/MuonFInteraction.cpp
 	src/Functions/NeutronBk2BkExpConvPVoigt.cpp
 	src/Functions/PawleyFunction.cpp
 	src/Functions/PeakParameterFunction.cpp
@@ -188,11 +189,11 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FortranMatrix.h
 	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h
@@ -214,14 +215,14 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
-	inc/MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h
-	inc/MantidCurveFitting/Functions/CrystalFieldPeaks.h
-	inc/MantidCurveFitting/Functions/CrystalFieldPeaksBase.h
-	inc/MantidCurveFitting/Functions/CrystalFieldPeakUtils.h
-	inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
 	inc/MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h
 	inc/MantidCurveFitting/Functions/CrystalFieldMagnetisation.h
 	inc/MantidCurveFitting/Functions/CrystalFieldMoment.h
+	inc/MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h
+	inc/MantidCurveFitting/Functions/CrystalFieldPeakUtils.h
+	inc/MantidCurveFitting/Functions/CrystalFieldPeaks.h
+	inc/MantidCurveFitting/Functions/CrystalFieldPeaksBase.h
+	inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
 	inc/MantidCurveFitting/Functions/CrystalFieldSusceptibility.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
@@ -242,18 +243,19 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/GausOsc.h
 	inc/MantidCurveFitting/Functions/Gaussian.h
 	inc/MantidCurveFitting/Functions/GaussianComptonProfile.h
+	inc/MantidCurveFitting/Functions/GramCharlier.h
 	inc/MantidCurveFitting/Functions/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/Functions/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/Functions/InelasticDiffSphere.h
 	inc/MantidCurveFitting/Functions/InelasticIsoRotDiff.h
 	inc/MantidCurveFitting/Functions/IsoRotDiff.h
-    inc/MantidCurveFitting/Functions/Keren.h
+	inc/MantidCurveFitting/Functions/Keren.h
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
-	inc/MantidCurveFitting/Functions/MuonFInteraction.h
 	inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
+	inc/MantidCurveFitting/Functions/MuonFInteraction.h
 	inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
 	inc/MantidCurveFitting/Functions/PawleyFunction.h
 	inc/MantidCurveFitting/Functions/PeakParameterFunction.h
@@ -284,15 +286,13 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/UserFunction1D.h
 	inc/MantidCurveFitting/Functions/VesuvioResolution.h
 	inc/MantidCurveFitting/Functions/Voigt.h
-	inc/MantidCurveFitting/RalNlls/TrustRegion.h
-	inc/MantidCurveFitting/RalNlls/Workspaces.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
 	inc/MantidCurveFitting/GSLVector.h
 	inc/MantidCurveFitting/GeneralDomainCreator.h
-	inc/MantidCurveFitting/HistogramDomainCreator.h
 	inc/MantidCurveFitting/HalfComplex.h
+	inc/MantidCurveFitting/HistogramDomainCreator.h
 	inc/MantidCurveFitting/IFittingAlgorithm.h
 	inc/MantidCurveFitting/IMWDomainCreator.h
 	inc/MantidCurveFitting/Jacobian.h
@@ -302,6 +302,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/MultiDomainCreator.h
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/ParameterEstimator.h
+	inc/MantidCurveFitting/RalNlls/TrustRegion.h
+	inc/MantidCurveFitting/RalNlls/Workspaces.h
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SeqDomainSpectrumCreator.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
@@ -338,6 +340,7 @@ set ( TEST_FILES
 	ComplexVectorTest.h
 	CompositeFunctionTest.h
 	Constraints/BoundaryConstraintTest.h
+	CostFunctions/CostFuncFittingTest.h
 	CostFunctions/CostFuncUnweightedLeastSquaresTest.h
 	CostFunctions/LeastSquaresTest.h
 	FitMWTest.h
@@ -345,6 +348,7 @@ set ( TEST_FILES
 	FortranVectorTest.h
 	FuncMinimizers/BFGSTest.h
 	FuncMinimizers/DampedGaussNewtonMinimizerTest.h
+	FuncMinimizers/ErrorMessagesTest.h
 	FuncMinimizers/FABADAMinimizerTest.h
 	FuncMinimizers/FRConjugateGradientTest.h
 	FuncMinimizers/LevenbergMarquardtMDTest.h
@@ -366,21 +370,21 @@ set ( TEST_FILES
 	Functions/ComptonScatteringCountRateTest.h
 	Functions/ConvolutionTest.h
 	Functions/CrystalFieldEnergiesTest.h
-	Functions/CrystalFieldPeaksTest.h
-	Functions/CrystalFieldTest.h
-	Functions/CrystalFieldMultiSpectrumTest.h
-	Functions/CrystalFieldSpectrumTest.h
 	Functions/CrystalFieldHeatCapacityTest.h
-	Functions/CrystalFieldSusceptibilityTest.h
 	Functions/CrystalFieldMagnetisationTest.h
 	Functions/CrystalFieldMomentTest.h
+	Functions/CrystalFieldMultiSpectrumTest.h
+	Functions/CrystalFieldPeaksTest.h
+	Functions/CrystalFieldSpectrumTest.h
+	Functions/CrystalFieldSusceptibilityTest.h
+	Functions/CrystalFieldTest.h
 	Functions/CubicSplineTest.h
 	Functions/DeltaFunctionTest.h
 	Functions/DiffRotDiscreteCircleTest.h
 	Functions/DiffSphereTest.h
 	Functions/DynamicKuboToyabeTest.h
 	Functions/ElasticIsoRotDiffTest.h
-    Functions/EndErfcTest.h
+	Functions/EndErfcTest.h
 	Functions/ExpDecayMuonTest.h
 	Functions/ExpDecayOscTest.h
 	Functions/ExpDecayTest.h
@@ -393,14 +397,14 @@ set ( TEST_FILES
 	Functions/GaussianTest.h
 	Functions/GramCharlierComptonProfileTest.h
 	Functions/IkedaCarpenterPVTest.h
-    Functions/InelasticIsoRotDiffTest.h
-    Functions/IsoRotDiffTest.h
-    Functions/KerenTest.h
+	Functions/InelasticIsoRotDiffTest.h
+	Functions/IsoRotDiffTest.h
+	Functions/KerenTest.h
 	Functions/LinearBackgroundTest.h
 	Functions/LogNormalTest.h
 	Functions/LorentzianTest.h
-	Functions/MuonFInteractionTest.h
 	Functions/MultivariateGaussianComptonProfileTest.h
+	Functions/MuonFInteractionTest.h
 	Functions/NeutronBk2BkExpConvPVoigtTest.h
 	Functions/PawleyFunctionTest.h
 	Functions/PeakParameterFunctionTest.h
@@ -421,7 +425,7 @@ set ( TEST_FILES
 	Functions/StretchExpMuonTest.h
 	Functions/StretchExpTest.h
 	Functions/TabulatedFunctionTest.h
-    Functions/TeixeiraWaterSQETest.h
+	Functions/TeixeiraWaterSQETest.h
 	Functions/ThermalNeutronBk2BkExpAlphaTest.h
 	Functions/ThermalNeutronBk2BkExpBetaTest.h
 	Functions/ThermalNeutronBk2BkExpConvPVoigtTest.h
@@ -431,10 +435,10 @@ set ( TEST_FILES
 	Functions/UserFunctionTest.h
 	Functions/VesuvioResolutionTest.h
 	Functions/VoigtTest.h
-	RalNlls/NLLSTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h
 	GeneralDomainCreatorTest.h
+	GramCharlierTest.h
 	HistogramDomainCreatorTest.h
 	IPeakFunctionCentreParameterNameTest.h
 	IPeakFunctionIntensityTest.h
@@ -443,6 +447,7 @@ set ( TEST_FILES
 	MultiDomainCreatorTest.h
 	MultiDomainFunctionTest.h
 	ParameterEstimatorTest.h
+	RalNlls/NLLSTest.h
 	SpecialFunctionSupportTest.h
 )
 

@@ -47,7 +47,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenters(tablePresenters), m_mainPresenter(),
-      m_searcher(searcher) {
+      m_searcher(searcher), m_instrumentChanged(false) {
 
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenters will notify this
@@ -110,6 +110,12 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   switch (flag) {
   case IReflRunsTabPresenter::SearchFlag:
     search();
+    break;
+  case IReflRunsTabPresenter::NewAutoreductionFlag:
+    autoreduce(true);
+    break;
+  case IReflRunsTabPresenter::ResumeAutoreductionFlag:
+    autoreduce(false);
     break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     auto algRunner = m_view->getAlgorithmRunner();
@@ -198,9 +204,9 @@ void ReflRunsTabPresenter::search() {
   algSearch->initialize();
   algSearch->setChild(true);
   algSearch->setLogging(false);
+  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
   algSearch->setProperty("Session", sessionId);
   algSearch->setProperty("InvestigationId", searchString);
-  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
 }
@@ -211,11 +217,40 @@ void ReflRunsTabPresenter::search() {
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+    m_instrumentChanged = false;
     m_currentTransferMethod = m_view->getTransferMethod();
     m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
         *getTransferStrategy(), results, m_view->getSearchInstrument()));
     m_view->showSearch(m_searchModel);
   }
+}
+
+/** Searches ICAT for runs with given instrument and investigation id, transfers
+* runs to table and processes them
+* @param startNew : Boolean on whether to start a new autoreduction
+*/
+void ReflRunsTabPresenter::autoreduce(bool startNew) {
+  m_autoSearchString = m_view->getSearchString();
+  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+
+  // If a new autoreduction is being made, we must remove all existing rows and
+  // transfer the new ones (obtained by ICAT search) in
+  if (startNew) {
+    notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
+
+    // Select all rows / groups in existing table and delete them
+    tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
+    tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
+
+    // Select and transfer all rows to the table
+    m_view->setAllSearchRowsSelected();
+    if (m_view->getSelectedSearchRows().size() > 0)
+      transfer();
+  }
+
+  tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
+  if (tablePresenter->selectedParents().size() > 0)
+    tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
 /** Transfers the selected runs in the search results to the processing table
@@ -342,97 +377,84 @@ ReflRunsTabPresenter::getTransferStrategy() {
   }
 }
 
-/**
-Used to tell the presenter something has changed
+/** Used to tell the presenter something has changed in the ADS
+*
+* @param workspaceList :: the list of table workspaces in the ADS that could be
+* loaded into the interface
 */
-void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
+void ReflRunsTabPresenter::notifyADSChanged(
+    const QSet<QString> &workspaceList) {
 
-  switch (flag) {
-  case DataProcessorMainPresenter::Flag::ADSChangedFlag:
-    pushCommands();
-    break;
-  }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
-  // a flag we aren't handling.
-}
-
-/** Requests pre-processing values. Values are supplied by the main
-* presenter
-* @return :: Pre-processing values
-*/
-std::map<std::string, std::string>
-ReflRunsTabPresenter::getPreprocessingValues() const {
-
-  std::map<std::string, std::string> valuesMap;
-  valuesMap["Transmission Run(s)"] =
-      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
-
-  return valuesMap;
+  UNUSED_ARG(workspaceList);
+  pushCommands();
 }
 
 /** Requests property names associated with pre-processing values.
 * @return :: Pre-processing property names.
 */
-std::map<std::string, std::set<std::string>>
-ReflRunsTabPresenter::getPreprocessingProperties() const {
+QString ReflRunsTabPresenter::getPreprocessingProperties() const {
 
-  std::map<std::string, std::set<std::string>> propertiesMap;
-  propertiesMap["Transmission Run(s)"] = {"FirstTransmissionRun",
-                                          "SecondTransmissionRun"};
-
-  return propertiesMap;
+  std::string properties =
+      "Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun";
+  return QString::fromStdString(properties);
 }
 
-/** Requests global pre-processing options. Options are supplied by the main
-* presenter
-* @return :: Global pre-processing options
-*/
-std::map<std::string, std::string>
-ReflRunsTabPresenter::getPreprocessingOptions() const {
+/** Requests global pre-processing options as a string. Options are supplied by
+  * the main presenter.
+  * @return :: Global pre-processing options
+  */
+QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
-  std::map<std::string, std::string> options;
-  options["Transmission Run(s)"] =
-      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
+  std::string optionsStr =
+      "Transmission Run(s)," +
+      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
 
-  return options;
+  return QString::fromStdString(optionsStr);
 }
 
 /** Requests global processing options. Options are supplied by the main
 * presenter
 * @return :: Global processing options
 */
-std::string ReflRunsTabPresenter::getProcessingOptions() const {
-  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getProcessingOptions() const {
+
+  return QString::fromStdString(
+      m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
 }
 
 /** Requests global post-processing options. Options are supplied by the main
 * presenter
 * @return :: Global post-processing options
 */
-std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
-  return m_mainPresenter->getStitchOptions(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getPostprocessingOptions() const {
+
+  return QString::fromStdString(
+      m_mainPresenter->getStitchOptions(m_view->getSelectedGroup()));
 }
 
 /** Requests time-slicing values. Values are supplied by the main presenter
 * @return :: Time-slicing values
 */
-std::string ReflRunsTabPresenter::getTimeSlicingValues() const {
-  return m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getTimeSlicingValues() const {
+  return QString::fromStdString(
+      m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup()));
 }
 
 /** Requests time-slicing type. Type is supplied by the main presenter
 * @return :: Time-slicing values
 */
-std::string ReflRunsTabPresenter::getTimeSlicingType() const {
-  return m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getTimeSlicingType() const {
+  return QString::fromStdString(
+      m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
-/** Tells view to enable the 'process' button and disable the 'pause' button
+/** Tells view to enable all 'process' buttons and disable the 'pause' button
 * when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() const {
 
   m_view->setRowActionEnabled(0, true);
+  m_view->setAutoreduceButtonEnabled(true);
   m_view->setRowActionEnabled(1, false);
 }
 
@@ -442,7 +464,20 @@ void ReflRunsTabPresenter::pause() const {
 void ReflRunsTabPresenter::resume() const {
 
   m_view->setRowActionEnabled(0, false);
+  m_view->setAutoreduceButtonEnabled(false);
   m_view->setRowActionEnabled(1, true);
+}
+
+/** Determines whether to start a new autoreduction. Starts a new one if the
+* either the search number, transfer method or instrument has changed
+* @return : Boolean on whether to start a new autoreduction
+*/
+bool ReflRunsTabPresenter::startNewAutoreduction() const {
+  bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
+  bool transferMethodChanged =
+      m_currentTransferMethod != m_view->getTransferMethod();
+
+  return searchNumChanged || transferMethodChanged || m_instrumentChanged;
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
@@ -461,67 +496,9 @@ void ReflRunsTabPresenter::confirmReductionResumed() const {
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
 
-/**
-Tells the view to show an critical error dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void ReflRunsTabPresenter::giveUserCritical(std::string prompt,
-                                            std::string title) {
-
-  m_mainPresenter->giveUserCritical(prompt, title);
-}
-
-/**
-Tells the view to show a warning dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void ReflRunsTabPresenter::giveUserWarning(std::string prompt,
-                                           std::string title) {
-
-  m_mainPresenter->giveUserWarning(prompt, title);
-}
-
-/**
-Tells the view to ask the user a Yes/No question
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@returns a boolean true if Yes, false if No
-*/
-bool ReflRunsTabPresenter::askUserYesNo(std::string prompt, std::string title) {
-
-  return m_mainPresenter->askUserYesNo(prompt, title);
-}
-
-/**
-Tells the view to ask the user to enter a string.
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@param defaultValue : The default value entered.
-@returns The user's string if submitted, or an empty string
-*/
-std::string
-ReflRunsTabPresenter::askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) {
-
-  return m_mainPresenter->askUserString(prompt, title, defaultValue);
-}
-
-/**
-Tells the main presenter to run an algorithm as python code
-* @param pythonCode : [input] The algorithm as python code
-* @return : The result of the execution
-*/
-std::string
-ReflRunsTabPresenter::runPythonAlgorithm(const std::string &pythonCode) {
-
-  return m_mainPresenter->runPythonAlgorithm(pythonCode);
-}
-
-/** Changes the current instrument in the data processor widget. Also updates
- * the config service and prints an information message
+/** Changes the current instrument in the data processor widget. Also clears the
+* and the table selection model and updates the config service, printing an
+* information message
 */
 void ReflRunsTabPresenter::changeInstrument() {
   const std::string instrument = m_view->getSearchInstrument();
@@ -529,6 +506,7 @@ void ReflRunsTabPresenter::changeInstrument() {
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;
+  m_instrumentChanged = true;
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

@@ -102,6 +102,13 @@ void MDNormSCD::init() {
                   "An input workspace containing momentum integrated vanadium "
                   "(a measure of the solid angle).");
 
+  declareProperty(make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false,
+                                                       Direction::Input),
+                  "If set to true, the algorithm does "
+                  "not check history if the workspace was modified since the"
+                  "ConvertToMD algorithm was run, and assume that the elastic "
+                  "mode is used.");
+
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryNormalizationWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
@@ -159,7 +166,8 @@ void MDNormSCD::exec() {
  */
 void MDNormSCD::cacheInputs() {
   m_inputWS = getProperty("InputWorkspace");
-  if (inputEnergyMode() != "Elastic") {
+  bool skipCheck = getProperty("SkipSafetyCheck");
+  if (!skipCheck && inputEnergyMode() != "Elastic") {
     throw std::invalid_argument("Invalid energy transfer mode. Algorithm "
                                 "currently only supports elastic data.");
   }
@@ -230,7 +238,8 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
     const auto &propName = prop->name();
     if (propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
         propName != "TemporaryNormalizationWorkspace" &&
-        propName != "OutputNormalizationWorkspace") {
+        propName != "OutputNormalizationWorkspace" &&
+        propName != "SkipSafetyCheck") {
       binMD->setPropertyValue(propName, prop->value());
     }
   }
@@ -424,6 +433,7 @@ void MDNormSCD::calculateNormalization(
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
+  // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION

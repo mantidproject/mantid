@@ -9,7 +9,9 @@
 namespace Mantid {
 namespace API {
 
-Workspace::Workspace() : m_history(Kernel::make_unique<WorkspaceHistory>()) {}
+Workspace::Workspace(const Parallel::StorageMode storageMode)
+    : m_history(Kernel::make_unique<WorkspaceHistory>()),
+      m_storageMode(storageMode) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 Workspace::~Workspace() = default;

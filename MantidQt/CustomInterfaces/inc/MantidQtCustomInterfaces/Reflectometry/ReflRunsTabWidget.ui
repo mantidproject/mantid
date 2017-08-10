@@ -179,6 +179,29 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QPushButton" name="buttonAutoreduce">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Autoreduce</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+              <normaloff>:/play2.png</normaloff>:/play2.png</iconset>
+            </property>
+            <property name="toolTip">
+             <string>Autoreduce</string>
+            </property>
+            <property name="whatsThis">
+             <string>Automatically searches ICAT for runs with given instrument and investigation id, transfers runs to table and processes them.</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -270,6 +293,11 @@
     <string>Search</string>
    </property>
   </action>
+  <action name="actionAutoreduce">
+   <property name="text">
+    <string>Autoreduce</string>
+   </property>
+  </action>
   <action name="actionTransfer">
    <property name="icon">
     <iconset resource="../../../../MantidPlot/icons/icons.qrc">
@@ -327,5 +355,11 @@
     </hint>
    </hints>
   </connection>
+   <connection>
+     <sender>buttonAutoreduce</sender>
+     <signal>clicked()</signal>
+     <receiver>actionAutoreduce</receiver>
+     <slot>trigger()</slot>
+   </connection>
  </connections>
 </ui>

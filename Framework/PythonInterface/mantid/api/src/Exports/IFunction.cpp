@@ -1,3 +1,4 @@
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 
@@ -42,6 +43,9 @@ typedef void (IFunction::*setParameterType1)(size_t, const double &value, bool);
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
                                        setParameter, 2, 3)
 // setProperty(index,value,explicit)
@@ -56,6 +60,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixParameter_Overloads, fixParameter, 1,
                                        2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fix_Overloads, fix, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixAll_Overloads, fixAll, 0, 1)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

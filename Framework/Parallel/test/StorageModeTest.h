@@ -30,6 +30,28 @@ public:
     TS_ASSERT_EQUALS(toString(map), "\nA Parallel::StorageMode::Cloned\nB "
                                     "Parallel::StorageMode::Distributed\n");
   }
+
+  void test_fromString() {
+    TS_ASSERT_EQUALS(fromString("Parallel::StorageMode::Cloned"),
+                     StorageMode::Cloned);
+    TS_ASSERT_EQUALS(fromString("Parallel::StorageMode::Distributed"),
+                     StorageMode::Distributed);
+    TS_ASSERT_EQUALS(fromString("Parallel::StorageMode::MasterOnly"),
+                     StorageMode::MasterOnly);
+    TS_ASSERT_THROWS_EQUALS(fromString(""), const std::invalid_argument &e,
+                            std::string(e.what()),
+                            "Parallel::fromString could not convert provided "
+                            "input into a Parallel::StorageMode.");
+  }
+
+  void test_fromString_toString() {
+    TS_ASSERT_EQUALS(fromString(toString(StorageMode::Cloned)),
+                     StorageMode::Cloned);
+    TS_ASSERT_EQUALS(fromString(toString(StorageMode::Distributed)),
+                     StorageMode::Distributed);
+    TS_ASSERT_EQUALS(fromString(toString(StorageMode::MasterOnly)),
+                     StorageMode::MasterOnly);
+  }
 };
 
 #endif /* MANTID_PARALLEL_STORAGEMODETEST_H_ */

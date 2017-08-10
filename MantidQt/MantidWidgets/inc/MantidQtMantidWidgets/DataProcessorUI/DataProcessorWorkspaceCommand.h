@@ -33,22 +33,25 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DataProcessorWorkspaceCommand : public DataProcessorCommandBase {
 public:
   DataProcessorWorkspaceCommand(DataProcessorPresenter *tablePresenter,
-                                const std::string &name)
+                                const QString &name)
       : DataProcessorCommandBase(tablePresenter), m_name(name){};
+  DataProcessorWorkspaceCommand(const QDataProcessorWidget &widget,
+                                const QString &name)
+      : DataProcessorCommandBase(widget), m_name(name){};
   virtual ~DataProcessorWorkspaceCommand(){};
 
   void execute() override {
     // Tell the presenter which of the available workspaces was selected
-    m_presenter->setModel(m_name);
+    m_presenter->setModel(m_name.toStdString());
   };
-  std::string name() override { return m_name; }
-  std::string icon() override { return std::string("://worksheet.png"); }
-  std::string tooltip() override { return std::string("Table Workspace"); }
-  std::string whatsthis() override { return std::string("Table Workspace"); }
-  std::string shortcut() override { return std::string(); }
+  QString name() override { return m_name; }
+  QString icon() override { return QString("://worksheet.png"); }
+  QString tooltip() override { return QString("Table Workspace"); }
+  QString whatsthis() override { return QString("Table Workspace"); }
+  QString shortcut() override { return QString(); }
 
 private:
-  std::string m_name;
+  QString m_name;
 };
 }
 }

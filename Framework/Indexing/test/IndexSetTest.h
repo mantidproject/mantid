@@ -63,6 +63,11 @@ public:
     TS_ASSERT_EQUALS(set2.size(), 2);
   }
 
+  void test_empty() {
+    TS_ASSERT(IndexSetTester(0).empty());
+    TS_ASSERT(!IndexSetTester(1).empty());
+  }
+
   void test_fullRange() {
     IndexSetTester set(3);
     TS_ASSERT_EQUALS(set.size(), 3);
