@@ -338,7 +338,6 @@ ComponentInfo::componentRangeInSubtree(const size_t index) const {
   const auto range = (*m_componentRanges)[rangesIndex];
   return {m_assemblySortedComponentIndices->begin() + range.first,
           m_assemblySortedComponentIndices->begin() + range.second};
-
 }
 Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return (*m_scaleFactors)[componentIndex];

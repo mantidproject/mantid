@@ -102,7 +102,8 @@ public:
     return m_componentIds->operator[](componentIndex);
   }
   const Geometry::Object &shape(const size_t componentIndex) const;
-  double solidAngle(const size_t componentIndex, const Kernel::V3D& observer) const;
+  double solidAngle(const size_t componentIndex,
+                    const Kernel::V3D &observer) const;
   friend class Instrument;
 };
 

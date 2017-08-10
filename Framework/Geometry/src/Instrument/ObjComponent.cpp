@@ -140,8 +140,8 @@ int ObjComponent::interceptSurface(Track &track) const {
 * set
 */
 double ObjComponent::solidAngle(const V3D &observer) const {
-  if(m_map){
-    if(hasComponentInfo()){
+  if (m_map) {
+    if (hasComponentInfo()) {
       return m_map->componentInfo().solidAngle(index(), observer);
     }
   }
