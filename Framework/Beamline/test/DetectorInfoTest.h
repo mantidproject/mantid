@@ -283,7 +283,7 @@ public:
     info.setScanInterval(interval);
     TS_ASSERT_EQUALS(info.scanInterval({0, 0}), interval);
     TS_ASSERT_EQUALS(info.scanInterval({1, 0}), interval);
-    interval = {1,3};
+    interval = {1, 3};
     info.setScanInterval(interval);
     TS_ASSERT_EQUALS(info.scanInterval({0, 0}), interval);
     TS_ASSERT_EQUALS(info.scanInterval({1, 0}), interval);
@@ -606,6 +606,41 @@ public:
     TS_ASSERT_EQUALS(a.scanCount(1), 1);
   }
 
+  void test_merge_multiple_sync() {
+    DetectorInfo a(PosVec(2), RotVec(2), {1});
+    auto b(a);
+    auto c(a);
+    Eigen::Vector3d pos1(1, 0, 0);
+    Eigen::Vector3d pos2(2, 0, 0);
+    Eigen::Vector3d pos3(3, 0, 0);
+    a.setPosition(0, pos1);
+    b.setPosition(0, pos2);
+    c.setPosition(0, pos3);
+    std::pair<int64_t, int64_t> interval1(0, 1);
+    std::pair<int64_t, int64_t> interval2(1, 2);
+    std::pair<int64_t, int64_t> interval3(2, 3);
+    a.setScanInterval(interval1);
+    b.setScanInterval(interval2);
+    c.setScanInterval(interval3);
+    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    TS_ASSERT_THROWS_NOTHING(a.merge(c));
+    TS_ASSERT(a.isScanning());
+    TS_ASSERT(!a.isEquivalent(b));
+    TS_ASSERT(!a.isEquivalent(c));
+    TS_ASSERT_EQUALS(a.size(), 2);
+    TS_ASSERT_EQUALS(a.scanCount(0), 3);
+    TS_ASSERT_EQUALS(a.scanCount(1), 3);
+    TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
+    TS_ASSERT_EQUALS(a.scanInterval({1, 0}), interval1);
+    TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
+    TS_ASSERT_EQUALS(a.scanInterval({1, 1}), interval2);
+    TS_ASSERT_EQUALS(a.scanInterval({0, 2}), interval3);
+    TS_ASSERT_EQUALS(a.scanInterval({1, 2}), interval3);
+    TS_ASSERT_EQUALS(a.position({0, 0}), pos1);
+    TS_ASSERT_EQUALS(a.position({0, 1}), pos2);
+    TS_ASSERT_EQUALS(a.position({0, 2}), pos3);
+  }
+
   void test_merge_multiple_associative() {
     // Test that (A + B) + C == A + (B + C)
     // This is implied by the ordering guaranteed by merge().
@@ -625,6 +660,33 @@ public:
     a1.setScanInterval(0, interval1);
     b.setScanInterval(0, interval2);
     c.setScanInterval(0, interval3);
+    auto a2(a1);
+    TS_ASSERT_THROWS_NOTHING(a1.merge(b));
+    TS_ASSERT_THROWS_NOTHING(a1.merge(c));
+    TS_ASSERT_THROWS_NOTHING(b.merge(c));
+    TS_ASSERT_THROWS_NOTHING(a2.merge(b));
+    TS_ASSERT(a1.isEquivalent(a2));
+  }
+
+  void test_merge_multiple_associative_sync() {
+    // Test that (A + B) + C == A + (B + C)
+    // This is implied by the ordering guaranteed by merge().
+    DetectorInfo a1(PosVec(1), RotVec(1));
+    a1.setRotation(0, Eigen::Quaterniond::Identity());
+    auto b(a1);
+    auto c(a1);
+    Eigen::Vector3d pos1(1, 0, 0);
+    Eigen::Vector3d pos2(2, 0, 0);
+    Eigen::Vector3d pos3(3, 0, 0);
+    a1.setPosition(0, pos1);
+    b.setPosition(0, pos2);
+    c.setPosition(0, pos3);
+    std::pair<int64_t, int64_t> interval1(0, 1);
+    std::pair<int64_t, int64_t> interval2(1, 2);
+    std::pair<int64_t, int64_t> interval3(2, 3);
+    a1.setScanInterval(interval1);
+    b.setScanInterval(interval2);
+    c.setScanInterval(interval3);
     auto a2(a1);
     TS_ASSERT_THROWS_NOTHING(a1.merge(b));
     TS_ASSERT_THROWS_NOTHING(a1.merge(c));
