@@ -5,7 +5,7 @@
 
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
@@ -342,7 +342,6 @@ public:
     }
 
     const auto &instrument = instWS->getInstrument();
-    TS_ASSERT(instrument->hasDetectorInfo())
 
     auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
     TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges))

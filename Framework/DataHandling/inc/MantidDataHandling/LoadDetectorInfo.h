@@ -1,11 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADDETECTORINFO_H_
 #define MANTID_DATAHANDLING_LOADDETECTORINFO_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
@@ -79,7 +76,7 @@ private:
   void readNXSDotDat(::NeXus::File &nxsFile, DetectorInfo &detInfo) const;
 
   /// Update the parameter map with the new values for the given detector
-  void updateParameterMap(API::DetectorInfo &detectorInfo,
+  void updateParameterMap(Geometry::DetectorInfo &detectorInfo,
                           const size_t detIndex, Geometry::ParameterMap &pmap,
                           const double l2, const double theta, const double phi,
                           const double delay, const double pressure,

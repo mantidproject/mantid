@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -351,7 +352,7 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
   for (size_t i = NUMBER_MONITORS;
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim1;
+      const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim2;
       const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
                             static_cast<int>(pixelInTubeNumber));
@@ -391,7 +392,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
-    const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim1;
+    const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim2;
     const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
@@ -443,8 +444,7 @@ void LoadILLDiffraction::loadScanVars() {
 void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
   auto absoluteTimes = getAbsoluteTimes(scan);
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if (m_scanVar[i].axis != 1 &&
-        !boost::starts_with(m_scanVar[i].property, "Monitor")) {
+    if (!boost::starts_with(m_scanVar[i].property, "Monitor")) {
       auto property =
           Kernel::make_unique<TimeSeriesProperty<double>>(m_scanVar[i].name);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
@@ -530,7 +530,7 @@ std::vector<double> LoadILLDiffraction::getAxis(const NXDouble &scan) const {
 }
 
 /**
- * Returns the durations for each scan point
+ * Returns the durations in seconds for each scan point
  * @param scan : scan data
  * @return vector of durations
  */
@@ -554,13 +554,13 @@ LoadILLDiffraction::getDurations(const NXDouble &scan) const {
  */
 std::vector<DateAndTime>
 LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
-  std::vector<DateAndTime> times; // in units of ns
+  std::vector<DateAndTime> times;
   std::vector<double> durations = getDurations(scan);
   DateAndTime time = m_startTime;
   times.emplace_back(time);
   size_t timeIndex = 1;
   while (timeIndex < m_numberScanPoints) {
-    time += durations[timeIndex - 1] * 1E9; // from sec to ns
+    time += durations[timeIndex - 1];
     times.push_back(time);
     ++timeIndex;
   }
@@ -673,7 +673,10 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   }
   Quat rotation(twoTheta0Actual, V3D(0, 1, 0));
   g_log.debug() << "Setting 2theta0 to " << twoTheta0Actual;
-  m_outWorkspace->mutableDetectorInfo().setRotation(*component, rotation);
+  auto &componentInfo = m_outWorkspace->mutableComponentInfo();
+  const auto componentIndex =
+      componentInfo.indexOf(component->getComponentID());
+  componentInfo.setRotation(componentIndex, rotation);
 }
 
 /**

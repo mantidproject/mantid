@@ -5,6 +5,8 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
@@ -698,7 +700,6 @@ private:
     auto origParameter = pmap.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(origTypedValue, origParameter->value<ValueType>());
   }
-
   // private instrument
   Instrument_sptr m_testInstrument;
 };
