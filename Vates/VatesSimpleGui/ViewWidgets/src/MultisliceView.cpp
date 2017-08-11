@@ -6,6 +6,7 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 
+#include "vtkSMPVRepresentationProxy.h"
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
@@ -22,6 +23,7 @@
 #include <vtkPVArrayInformation.h>
 #include <vtkPVChangeOfBasisHelper.h>
 #include <vtkPVDataInformation.h>
+#include <vtkSMMultiSliceViewProxy.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkVector.h>
@@ -67,7 +69,7 @@ MultiSliceView::MultiSliceView(QWidget *parent,
   if (createRenderProxy) {
     pqRenderView *tmp =
         this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
-
+    this->setupData();
     this->m_mainView = qobject_cast<pqMultiSliceView *>(tmp);
     QObject::connect(this->m_mainView,
                      SIGNAL(sliceClicked(int, double, int, int)), this,
@@ -92,8 +94,16 @@ void MultiSliceView::setupData() {
   // Make sure that origsrc exists
   if (this->origSrc) {
     pqDataRepresentation *drep = builder->createDataRepresentation(
-        this->origSrc->getOutputPort(0), this->m_mainView);
+        this->origSrc->getOutputPort(0), this->m_mainView,
+        "CompositeMySpecialRepresentation");
     vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
+    if (!this->isPeaksWorkspace(this->origSrc)) {
+      vtkSMPVRepresentationProxy::SetScalarColoring(
+          drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+      vtkSMMultiSliceViewProxy *viewPxy =
+          vtkSMMultiSliceViewProxy::SafeDownCast(this->m_mainView->getProxy());
+      viewPxy->CreateDefaultRepresentation(this->origSrc->getProxy(), 0);
+    }
     drep->getProxy()->UpdateVTKObjects();
   }
 }

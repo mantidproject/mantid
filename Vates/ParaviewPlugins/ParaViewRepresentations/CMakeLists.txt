@@ -3,7 +3,6 @@ include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 ADD_PARAVIEW_PLUGIN(MantidParaViewRepresentationSMPlugin "1.0"
   SERVER_MANAGER_XML Representation.xml
   SERVER_MANAGER_SOURCES
-    vtkMySpecialPolyDataMapper.cxx
     vtkMySpecialRepresentation.cxx)
 
 # Add to the 'VatesParaViewPlugins' group in VS
