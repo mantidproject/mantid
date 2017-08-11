@@ -534,7 +534,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         str_ranges = [x.split("-") for x in str_ranges]
 
         # Convert string ranges to integer ranges.
-        int_ranges = map(lambda str_range: [int(x) for x in str_range], str_ranges)
+        try:
+            int_ranges = map(lambda str_range: [int(x) for x in str_range], str_ranges)
+        except RuntimeError:
+            raise ValueError("Provided d-range was incorrectly formatted.")
 
         # Expand integer ranges formed from a string 'a-b', to a range from a to b
         # Single provided integers remain the same
