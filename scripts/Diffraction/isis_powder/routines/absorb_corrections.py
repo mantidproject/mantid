@@ -117,4 +117,3 @@ def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanad
     if previous_units != ws_units.tof:
         ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units)
     return ws_to_correct
-	
