@@ -82,8 +82,8 @@ double welch(const double time, const double decayConstant) {
 /**
 * Returns no
 * apodization function. i.e. the data is unchanged
-* @param time :: [input] current time (t)
-* @param decayConstant :: [input] the decay constant (tau)
+* @param :: [input] current time (t)
+* @param :: [input] the decay constant (tau)
 * @returns :: Function evaluation
 */
 double none(const double, const double) { return 1.; }
