@@ -263,11 +263,11 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
   vtkNew<vtkIdList> ids;
   if (AxisNumber == 0) {
     pts->Allocate(4*celldims[1]*celldims[2]);
-    scalars->Allocate(celldims[1])*celldims[2]);
+    scalars->Allocate(celldims[1]*celldims[2]);
     for (int j = 0; j < celldims[1]; ++j) {
       for (int k=0; k < celldims[2]; ++k) {
         input->GetCell(min, j, k, cell.Get());
-        if (cell && cell->GetCellType() != VTK_EMPTY_CELL) {
+        if (cell.Get() && cell->GetCellType() != VTK_EMPTY_CELL) {
           scalars->InsertNextTuple(inscalars->GetTuple(min + j * celldims[0] + k*celldims[0]*celldims[1]));
           ids->Reset();
           vtkCell *face = cell->GetFace(0);
@@ -281,11 +281,11 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     }
   } else if (AxisNumber == 1) {
     pts->Allocate(4*celldims[0]*celldims[2]);
-    scalars->Allocate(celldims[0])*celldims[2]);
+    scalars->Allocate(celldims[0]*celldims[2]);
     for (int i = 0; i < celldims[0]; ++i) {
       for (int k=0; k < celldims[2]; ++k) {
         input->GetCell(i, min, k, cell.Get());
-        if (cell && cell->GetCellType() != VTK_EMPTY_CELL) {
+        if (cell.Get() && cell->GetCellType() != VTK_EMPTY_CELL) {
           scalars->InsertNextTuple(inscalars->GetTuple(i + min * celldims[0] + k*celldims[0]*celldims[1]));
           ids->Reset();
           vtkCell *face = cell->GetFace(2);
@@ -299,11 +299,11 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     }
   } else if (AxisNumber == 2) {
     pts->Allocate(4*celldims[0]*celldims[1]);
-    scalars->Allocate(celldims[0])*celldims[1]);
+    scalars->Allocate(celldims[0]*celldims[1]);
     for (int i = 0; i < celldims[0]; ++i) {
       for (int j=0; j < celldims[1]; ++j) {
         input->GetCell(i, j, min, cell.Get());
-        if (cell && cell->GetCellType() != VTK_EMPTY_CELL) {
+        if (cell.Get() && cell->GetCellType() != VTK_EMPTY_CELL) {
           ids->Reset();
           vtkCell *face = cell->GetFace(4);
           vtkPoints *cellPts = face->GetPoints();
