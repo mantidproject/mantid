@@ -13,11 +13,11 @@ DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
 
   QObject::connect(ui.horizontalSlider, SIGNAL(valueChanged(double)), this,
                    SLOT(sliderMoved()));
-  QObject::connect(ui.doubleSpinBox, SIGNAL(valueChanged(double)), this,
+  QObject::connect(ui.doubleSpinBox, SIGNAL(editingFinished()), this,
                    SLOT(spinBoxChanged()));
-  QObject::connect(ui.spinThickness, SIGNAL(valueChanged(double)), this,
+  QObject::connect(ui.spinThickness, SIGNAL(editingFinished()), this,
                    SLOT(spinThicknessChanged()));
-  QObject::connect(ui.spinBins, SIGNAL(valueChanged(int)), this,
+  QObject::connect(ui.spinBins, SIGNAL(editingFinished()), this,
                    SLOT(spinBinsChanged()));
   QObject::connect(ui.btnX, SIGNAL(toggled(bool)), this, SLOT(btnXYChanged()));
   QObject::connect(ui.btnY, SIGNAL(toggled(bool)), this, SLOT(btnXYChanged()));
@@ -38,6 +38,7 @@ void DimensionSliceWidget::sliderMoved() {
 
   // This will, in turn, emit the changedSlicePoint() signal
   ui.doubleSpinBox->setValue(m_slicePoint);
+  spinBoxChanged();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -197,7 +198,10 @@ bool DimensionSliceWidget::showRebinControls() const {
 int DimensionSliceWidget::getNumBins() const { return ui.spinBins->value(); }
 
 /** Sets the number of bins to rebin to */
-void DimensionSliceWidget::setNumBins(int val) { ui.spinBins->setValue(val); }
+void DimensionSliceWidget::setNumBins(int val) {
+  ui.spinBins->setValue(val);
+  spinBinsChanged();
+}
 
 //-------------------------------------------------------------------------------------------------
 /** @return the thickness to integrate when rebinning */
@@ -208,6 +212,7 @@ double DimensionSliceWidget::getThickness() const {
 /** Sets the thickness to integrate when rebinning */
 void DimensionSliceWidget::setThickness(double val) {
   ui.spinThickness->setValue(val);
+  spinThicknessChanged();
 }
 
 //-------------------------------------------------------------------------------------------------
