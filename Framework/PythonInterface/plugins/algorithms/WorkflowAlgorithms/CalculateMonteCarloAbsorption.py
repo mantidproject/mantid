@@ -5,6 +5,7 @@ from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, 
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, StringMandatoryValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator, LogicOperator)
 
+
 class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     # General variables
     _unit = None
@@ -85,11 +86,10 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # Container options
         self.declareProperty(MatrixWorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input,
-                                                     optional=PropertyMode.Optional), 
+                                                     optional=PropertyMode.Optional),
                              doc='Container Workspace')
-                             
+
         containerCondition = VisibleWhenProperty('ContainerWorkspace', PropertyCriterion.IsNotDefault)
-                             
 
         self.declareProperty(name='ContainerChemicalFormula', defaultValue='',
                              doc='Chemical formula for the container material')
@@ -104,7 +104,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerChemicalFormula', 'Container Options')
         self.setPropertyGroup('ContainerDensityType', 'Container Options')
         self.setPropertyGroup('ContainerDensity', 'Container Options')
-        
+
         self.setPropertySettings('ContainerChemicalFormula', containerCondition)
         self.setPropertySettings('ContainerDensityType', containerCondition)
         self.setPropertySettings('ContainerDensity', containerCondition)
@@ -185,7 +185,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Angle of the container environment with respect to the beam (degrees)')
 
-        containerFlatPlateCondition = VisibleWhenProperty(containerCondition,flatPlateCondition,LogicOperator.And)
+        containerFlatPlateCondition = VisibleWhenProperty(containerCondition, flatPlateCondition, LogicOperator.And)
 
         self.setPropertySettings('ContainerWidth', containerFlatPlateCondition)
         self.setPropertySettings('ContainerThickness', containerFlatPlateCondition)
@@ -197,16 +197,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerCenter', 'Container Shape Options')
         self.setPropertyGroup('ContainerAngle', 'Container Shape Options')
 
-        # Cylinder
-        self.declareProperty(name='ContainerRadius', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Radius of the container environment (cm)')
+        # Both cylinder and annulus have an annulus container
 
-        containerCylinderCondition = VisibleWhenProperty(containerCondition, cylinderCondition, LogicOperator.And)
-        self.setPropertySettings('ContainerRadius', containerCylinderCondition)
-        self.setPropertyGroup('ContainerRadius', 'Container Shape Options')
+        notFlatPlateCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsNotEqualTo, 'FlatPlate')
 
-        # Annulus
+        containerNFPCondition = VisibleWhenProperty(containerCondition, notFlatPlateCondition, LogicOperator.And)
+
         self.declareProperty(name='ContainerInnerRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Inner radius of the container environment (cm)')
@@ -214,10 +210,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the container environment (cm)')
 
-        containerAnnulusCondition = VisibleWhenProperty(containerCondition, annulusCondition, LogicOperator.And)
-
-        self.setPropertySettings('ContainerInnerRadius', containerAnnulusCondition)
-        self.setPropertySettings('ContainerOuterRadius', containerAnnulusCondition)
+        self.setPropertySettings('ContainerInnerRadius', containerNFPCondition)
+        self.setPropertySettings('ContainerOuterRadius', containerNFPCondition)
 
         self.setPropertyGroup('ContainerInnerRadius', 'Container Shape Options')
         self.setPropertyGroup('ContainerOuterRadius', 'Container Shape Options')
@@ -278,6 +272,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 self._container_kwargs['Thickness'] = self.getProperty('ContainerThickness').value
                 self._container_kwargs['Angle'] = self.getProperty('ContainerAngle').value
                 self._container_kwargs['Center'] = self.getProperty('ContainerCenter').value
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CalculateMonteCarloAbsorption)
