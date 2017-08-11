@@ -82,7 +82,7 @@ const std::string OUTER_RADIUS("OuterRadius");
   * @param axis The index of the height-axis of the cylinder
   */
 V3D getShapeBaseCoordinates(const std::vector<double> &cylCentre, double height,
-                  Geometry::PointingAlong axisIdx) {
+                            Geometry::PointingAlong axisIdx) {
   const V3D halfHeight = [&]() {
     switch (axisIdx) {
     case 0:
@@ -377,11 +377,10 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
 
   if (shape == ShapeArgs::CSG) {
     result = args.getPropertyValue("Value");
-  }
-  else if (shape == ShapeArgs::FLAT_PLATE) {
-	  result = createFlatPlateXML(args, refFrame);
-  } else if (shape == ShapeArgs::SPHERE){
-	  result = createSphereXML(args, refFrame);
+  } else if (shape == ShapeArgs::FLAT_PLATE) {
+    result = createFlatPlateXML(args, refFrame);
+  } else if (shape == ShapeArgs::SPHERE) {
+    result = createSphereXML(args, refFrame);
   } else if (boost::algorithm::ends_with(shape, ShapeArgs::CYLINDER)) {
     result = createCylinderLikeXML(
         args, refFrame,
@@ -507,34 +506,36 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   return xmlShapeStream.str();
 }
 
-std::string SetSample::createSphereXML(const Kernel::PropertyManager &args,
-									const Geometry::ReferenceFrame &refFrame) const {
+std::string
+SetSample::createSphereXML(const Kernel::PropertyManager &args,
+                           const Geometry::ReferenceFrame &refFrame) const {
 
-	// We have to do a cast to double to help the compiler select the correct
-	// overload for the return type. 
-	// Convert to meters when getting the radius
-	const double radius = static_cast<double>(args.getProperty(ShapeArgs::RADIUS)) * 0.01;
-	std::vector<double> centre = args.getProperty(ShapeArgs::CENTER);
-	// convert to meters
-	std::transform(centre.begin(), centre.end(), centre.begin(),
-		[](double val) { return val *= 0.01; });
+  // We have to do a cast to double to help the compiler select the correct
+  // overload for the return type.
+  // Convert to meters when getting the radius
+  const double radius =
+      static_cast<double>(args.getProperty(ShapeArgs::RADIUS)) * 0.01;
+  std::vector<double> centre = args.getProperty(ShapeArgs::CENTER);
+  // convert to meters
+  std::transform(centre.begin(), centre.end(), centre.begin(),
+                 [](double val) { return val *= 0.01; });
 
-	// XML needs center position of bottom base but user specifies center of
-	// sphere
-	const auto axisIdx = refFrame.pointingUp();
+  // XML needs center position of bottom base but user specifies center of
+  // sphere
+  const auto axisIdx = refFrame.pointingUp();
 
-	// Multiple radius by 2 to convert into height (diameter)
-	const V3D baseCentre = getShapeBaseCoordinates(centre, (radius * 2), axisIdx);
-	const std::string tag{ "sphere" };
+  // Multiple radius by 2 to convert into height (diameter)
+  const V3D baseCentre = getShapeBaseCoordinates(centre, (radius * 2), axisIdx);
+  const std::string tag{"sphere"};
 
-	std::ostringstream xmlShapeStream;
-	xmlShapeStream << "<" << tag << " id=\"sample-shape\"> "
-		<< "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
-		<< baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\" /> "
-		<< axisXML(axisIdx) << "<radius val=\"" << radius << "\" /> ";
+  std::ostringstream xmlShapeStream;
+  xmlShapeStream << "<" << tag << " id=\"sample-shape\"> "
+                 << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
+                 << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\" /> "
+                 << axisXML(axisIdx) << "<radius val=\"" << radius << "\" /> ";
 
-	xmlShapeStream << "</" << tag << ">";
-	return xmlShapeStream.str();
+  xmlShapeStream << "</" << tag << ">";
+  return xmlShapeStream.str();
 }
 
 /**

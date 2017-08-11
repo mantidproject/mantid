@@ -286,6 +286,44 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, -0.001)));
   }
 
+  void test_Setting_Geometry_As_Sphere() {
+    // This is the test using correct expected case
+    run_Geometry_As_Sphere_Test("Sphere");
+  }
+
+  void test_Setting_Uppercase_Geometry_As_Sphere() {
+    run_Geometry_As_Sphere_Test("SPHERE");
+  }
+
+  void test_Setting_Lowercase_Geometry_As_Sphere() {
+    run_Geometry_As_Sphere_Test("sphere");
+  }
+
+  void run_Geometry_As_Sphere_Test(const std::string &sphereTag) {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createSphereGeometryProps(sphereTag));
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    auto tag = sampleShape.getShapeXML().find("sphere");
+    TS_ASSERT(tag != std::string::npos);
+
+    // Check some random points inside sphere
+    // Check boundary
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0.049, 0., 0.)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0., 0.049, 0.)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0., 0., 0.049)));
+    // Check outside boundary
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0., 0., 0.06)));
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -547,6 +585,25 @@ private:
         Mantid::Kernel::make_unique<DoubleProperty>("InnerRadius", 3), "");
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleProperty>("OuterRadius", 4), "");
+    std::vector<double> center{0, 0, 1};
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
+
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr
+  createSphereGeometryProps(const std::string &sphereTag) {
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    using DoubleProperty = PropertyWithValue<double>;
+    using StringProperty = PropertyWithValue<std::string>;
+
+    auto props = boost::make_shared<PropertyManager>();
+    props->declareProperty(
+        Mantid::Kernel::make_unique<StringProperty>("Shape", sphereTag), "");
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleProperty>("Radius", 5), "");
     std::vector<double> center{0, 0, 1};
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
