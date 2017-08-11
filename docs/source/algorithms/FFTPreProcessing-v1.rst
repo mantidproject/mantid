@@ -2,7 +2,7 @@
 
 .. summary::
 
-Allows the user to generate data that has padding (extra measurements of zeros) and/or apply an apodization function.
+Allows the user to generate data that has padding (extra measurements of zero) and/or apply an apodization function.
 
 .. alias::
 
@@ -15,18 +15,21 @@ Description
 This algorithm can prepare data for 
   :ref:`FFT <algm-FFT>` by applying padding and/or applying an apodization function. 
 
-Padding is when the input data is extended by adding extra measurments of zero at regular intervals after the ned of the input data. 
+Padding is when the input data is extended by adding extra measurments of zero at regular intervals. For real data this is only done after the end of the input data. However, for complex data the padding should be shared between the start and end of the input data.
 
 `Apodization functions <http://mathworld.wolfram.com/ApodizationFunction.html>`_ can be used to remove data with large errors. These are usualy
-found at large time scales. The current implementation includes the following functions:
+found at large time scales. These take a decay constant 
+(:math:`\tau` ) that determines the rate at which the data goes to zero. 
+The time the function is evaluated at is denoted by :math:`R`.
+The current implementation includes the following functions:
 
 - None.
-- Bartlett.
-- Lorentz.
-- Connes.
-- Cosine.
-- Gaussian.
-- Welch.
+- Bartlett :math:`1-\frac{\abs({t}}{\tau}`.
+- Lorentz :math:`\exp\left(-\frac{t}{\tau}\right)`.
+- Connes :math:`\left(1-\frac{t^2}{\tau^2}\right)^2`.
+- Cosine :math:`\cos\left(\frac{\pi t}{2 tau}\right)`.
+- Gaussian :math:`\exp\left(-\frac{t^2}{2\tau^2}\right)`.
+- Welch :math:`1-\frac{t^2}{\tau^2}`.
  
 Usage
 -----
