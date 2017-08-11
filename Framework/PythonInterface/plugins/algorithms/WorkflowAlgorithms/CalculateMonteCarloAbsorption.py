@@ -1,14 +1,13 @@
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as s_api
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress)
+                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress, mtd)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, StringMandatoryValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator, LogicOperator)
 
 
 class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     # General variables
-    _unit = None
     _emode = None
     _efixed = None
     _general_kwargs = None
@@ -242,14 +241,44 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     def PyExec(self):
 
         # set up progress reporting
-        self.prog = Progress(self, 0, 1, 10)
-        self._setup()
+        prog = Progress(self, 0, 1, 10)
 
-        pass
+        prog.report('Converting to wavelength')
+        sample_wave_ws = self._convert_to_wavelength(self._sample_ws, '__sample_wave')
+        print(sample_wave_ws)
+
+        prog.report('Calculating absorption factors for sample')
+
+        sample_kwargs = dict()
+        sample_kwargs.update(self._general_kwargs)
+        sample_kwargs['ChemicalFormula'] = self._sample_chemical_formula
+        sample_kwargs['DensityType'] = self._sample_density_type
+        sample_kwargs['Density'] = self._sample_density
+        sample_kwargs['Height'] = self._height
+        sample_kwargs['Shape'] = self._shape
+
+        if self._shape == 'FlatPlate':
+            sample_kwargs['Width'] = self._sample_width
+            sample_kwargs['Thickness'] = self._sample_thickness
+            sample_kwargs['Angle'] = self._sample_angle
+            sample_kwargs['Center'] = self._sample_center
+
+        if self._shape == 'Cylinder':
+            sample_kwargs['Radius'] = self._sample_radius
+
+        if self._shape == 'Annulus':
+            sample_kwargs['InnerRadius'] = self._sample_inner_radius
+            sample_kwargs['OuterRadius'] = self._sample_outer_radius
+
+        s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=sample_wave_ws,
+                                              OutputWorkspace=self._ass_ws,
+                                              **sample_kwargs)
+
+        self.setProperty('CorrectionsWorkspace', self._ass_ws)
 
     def _setup(self):
 
-        # The beam properties and monte carlo properties are simply passed on to the
+        # The beam properties and monte carlo properties are simply passed straight on to the
         # SimpleShapeMonteCarloAbsorptionCorrection algorithm so they are being put into
         # a dictionary for simplicity
 
@@ -266,8 +295,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self._height = self.getProperty('Height').value
 
         self._sample_unit = self._sample_ws.getAxis(0).getUnit().unitID()
-        logger.information('Input X-unit is {}'.format(self._unit))
-        if self._unit == 'dSpacing':
+        logger.information('Input X-unit is {}'.format(self._sample_unit))
+        if self._sample_unit == 'dSpacing':
             self._emode = 'Elastic'
         else:
             self._emode = str(self._sample_ws.getEMode())
@@ -306,10 +335,18 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 self._container_inner_radius = self.getProperty('ContainerInnerRadius').value
                 self._container_outer_radius = self.getProperty('ContainerOuterRadius').value
 
+        self._output_ws = self.getPropertyValue('CorrectionsWorkspace')
+        self._ass_ws = self._output_ws + '_ass'
+        self._acc_ws = self._output_ws + '_acc'
+
     def validateInputs(self):
 
         self._setup()
         issues = dict()
+
+        if self._shape == 'Annulus':
+            if self._sample_inner_radius >= self._sample_outer_radius:
+                issues['SampleOuterRadius'] = 'Must be greater than SampleInnerRadius'
 
         if self._container_ws_name:
             container_unit = mtd[self._container_ws_name].getAxis(0).getUnit().unitID()
@@ -328,9 +365,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 if self._container_outer_radius <= self._sample_outer_radius:
                     issues['ContainerOuterRadius'] = 'Must be greater than SampleOuterRadius'
 
-        if self._shape == 'Annulus':
-            if self._sample_inner_radius >= self._sample_outer_radius:
-                issues['SampleOuterRadius'] = 'Must be greater than SampleInnerRadius'
+        return issues
 
     def _get_efixed(self):
         """
@@ -348,6 +383,33 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 return analyser_comp.getNumberParameter('EFixed')[0]
 
         raise ValueError('No Efixed parameter found')
+
+    # ------------------------------- Converting to/from wavelength -------------------------------
+
+    def _convert_to_wavelength(self, input_ws, output_ws):
+
+        if self._sample_unit == 'Wavelength':
+            return self._clone_ws(input_ws, output_ws)
+
+        else:
+            convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
+            convert_unit_alg.setProperty("InputWorkspace", input_ws)
+            convert_unit_alg.setProperty("OutputWorkspace", output_ws)
+            convert_unit_alg.setProperty("Target", 'Wavelength')
+            convert_unit_alg.setProperty("EMode", self._emode)
+            if self._emode == 'Indirect':
+                convert_unit_alg.setProperty("EFixed", self._efixed)
+            convert_unit_alg.execute()
+            return convert_unit_alg.getProperty("OutputWorkspace").value
+
+    # ------------------------------- Child algorithms -------------------------------
+
+    def _clone_ws(self, input_ws, output_ws):
+        clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
+        clone_alg.setProperty("InputWorkspace", input_ws)
+        clone_alg.setProperty("OutputWorkspace", output_ws)
+        clone_alg.execute()
+        return clone_alg.getProperty("OutputWorkspace").value
 
 
 # Register algorithm with Mantid
