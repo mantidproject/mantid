@@ -29,6 +29,7 @@ namespace {
  * @param Pointer to byte src
  */
 template <typename InterpretType> double toDouble(uint8_t *src) {
+  // cppcheck-suppress invalidPointerCast
   return static_cast<double>(*reinterpret_cast<InterpretType *>(src));
 }
 }
@@ -47,12 +48,8 @@ struct FITSInfo {
   int offset;
   int headerSizeMultiplier;
   std::vector<size_t> axisPixelLengths;
-  double tof;
-  double timeBin;
   double scale;
   std::string imageKey;
-  long int countsInImage;
-  long int numberOfTriggers;
   std::string extension;
   std::string filePath;
   bool isFloat;
@@ -942,9 +939,11 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
         val = static_cast<double>(*reinterpret_cast<uint64_t *>(tmp));
       // cppcheck doesn't realise that these are safe casts
       if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
+        // cppcheck-suppress invalidPointerCast
         val = static_cast<double>(*reinterpret_cast<float *>(tmp));
       }
       if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
+        // cppcheck-suppress invalidPointerCast
         val = *reinterpret_cast<double *>(tmp);
       }
       val = fileInfo.scale * val - fileInfo.offset;

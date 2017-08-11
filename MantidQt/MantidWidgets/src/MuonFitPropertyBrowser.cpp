@@ -393,6 +393,22 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     int j = m_enumManager->value(m_workspace);
     std::string option = m_workspaceNames[j].toStdString();
     setOutputName(option);
+    if (m_periodBoxes.size() > 1) {
+      size_t end = 0;
+      // assumed structure of name
+      // isolate the period
+      for (int k = 0; k < 4; k++) {
+        end = option.find_first_of(";");
+        option = option.substr(end + 1, option.size());
+      }
+      end = option.find_first_of(";");
+      QString selectedPeriod = QString::fromStdString(option.substr(0, end));
+      // turn on only the relevant box
+      for (auto iter = m_periodBoxes.constBegin();
+           iter != m_periodBoxes.constEnd(); ++iter) {
+        m_boolManager->setValue(iter.value(), selectedPeriod == iter.key());
+      }
+    }
   } else {
     FitPropertyBrowser::enumChanged(prop);
   }
@@ -605,8 +621,9 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
   // TFAsymm calculation -> there is already some estimated data
   // rescale WS to normalized counts:
   const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
-  emit functionUpdateRequested();
-
+  if (nWorkspaces > 1) {
+    emit functionUpdateRequested();
+  }
   for (int i = 0; i < nWorkspaces; i++) {
     rescaleWS(norms, m_workspacesToFit[i], 1.0);
     std::string tmp = m_workspacesToFit[i];
@@ -635,8 +652,12 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     alg->initialize();
     if (m_compositeFunction->name() == "MultiBG") {
       alg->setPropertyValue("Function", "");
-    } else {
+    } else if (m_compositeFunction->nFunctions() > 1) {
       IFunction_sptr userFunc = getFittingFunction();
+      auto TFAsymmFunc = getTFAsymmFitFunction(userFunc, normVec);
+      alg->setProperty("Function", TFAsymmFunc);
+    } else {
+      IFunction_sptr userFunc = m_compositeFunction->getFunction(0);
       auto TFAsymmFunc = getTFAsymmFitFunction(userFunc, normVec);
       alg->setProperty("Function", TFAsymmFunc);
     }
@@ -676,7 +697,6 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     // get norms
     std::vector<double> newNorms;
     IFunction_sptr outputFunction = alg->getProperty("Function");
-    std::vector<double> ttt;
     for (int j = 0; j < nWorkspaces; j++) {
       std::string paramName = "f" + std::to_string(j);
       paramName += ".f0.f0.A0";
@@ -735,6 +755,7 @@ void MuonFitPropertyBrowser::updateMultipleNormalization(
 */
 Mantid::API::IFunction_sptr MuonFitPropertyBrowser::getTFAsymmFitFunction(
     Mantid::API::IFunction_sptr original, const std::vector<double> norms) {
+
   auto multi = boost::make_shared<MultiDomainFunction>();
   auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(original);
   size_t numDomains = original->getNumberDomains();

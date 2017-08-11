@@ -1,0 +1,77 @@
+.. _Multiple Scattering:
+
+Multiple Scattering
+===================
+
+Introduction
+~~~~~~~~~~~~
+Determination of the structure of samples depends on the analysis of single scattering data. 
+Small but unwanted higher-order scattering is always present although in many typical 
+experiments multiple scattering effects are negligible however in some cases the dataset may 
+from significant multiple scattering. To get an idea of when and why multiple scattering 
+corrections are needed let us first define the total cross section per atom as the sum of its 
+scattering and absorption cross sections:
+
+.. math::
+    
+   \sigma_t = \sigma_s + \sigma_a
+   
+If :math:`\sigma_m` is the likelihood of a neutron being scattered m times then it is possible 
+to show that:
+
+.. math::
+
+	\sigma_m \sim (\frac{\sigma_s}{\sigma_t})^m
+   
+Where practical, the shape and thickness of a sample are carefully chosen to minimise as much 
+unwanted multiple scattering as possible. We can see from the above relation that this may be 
+done most easily either by using a sample that is small in comparison with its mean free path or one that is 
+strongly absorbing (the absorption cross section is much greater than the scattering cross 
+section). Usually this means the dimensions of a sample are chosen to ensure that between 10% and 
+20% of incident neutrons end up being scattered [1]__. Increasing the absorption cross 
+section is not always attainable, due to the type of material in question, or desirable, due to 
+the accompanying intensity losses becoming overly prohibitive. 
+
+The rest of this document shall explain the theory behind multiple scattering and then outline 
+and compare the techniques currently available in Mantid to perform these corrections.
+
+Theory
+~~~~~~
+The figure [2]__ shows how a general double scattering process might occur. The neutron travels 
+a certain distance :math:`\l_1` through the sample before the first scattering event. The second 
+scattering occurs after a distance :math:`\l_{12}` has been traversed following which the 
+neutron travels a final length :math:`\l_2` before leaving the sample and being picked up by 
+a detector.
+
+.. figure:: ../images/MultipleScatteringVolume.png
+   :alt: MultipleScatteringVolume.png
+
+The difficulty in correcting multiple scattering arises from the fact the for each order of scattering
+we must perform m volume integrals :math:`dV_1dV_2...dV_m` over the sample to compute the contribution term 
+for that order (although luckily these terms quickly tend to zero thanks as seen in the introduction). 
+This kind of calculation is incredibly difficult for all but the simplest of geometries 
+(i.e. cylindrical, planar and spherical) although Monte Carlo integration 
+methods may be utilised for the multiple scattering calculations of more general shapes.
+
+Some simplifying approximations can make the calculations somewhat more tractable and it is common 
+to assume that scattering is isotropic and elastic (for something like vanadium this is usually 
+reasonable).
+
+Mantid solutions
+~~~~~~~~~~~~~~~~
+
+Mayers Sample Correction
+------------------------
+Documentation for this algorithm can found :ref:`here <algm-MayersSampleCorrection>`.
+
+Multiple Scattering Cylinder Absorption
+---------------------------------------
+This is a Carpenter style correction. For more details see :ref:`here <algm-MultipleScatteringCylinderAbsorption>`.
+
+References
+~~~~~~~~~~
+.. [1] Lindley, E.J., & Mayers, J. Cywinski, R. (Ed.). (1988). Experimental method and corrections to data. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
+.. [2] A.K.Soper, W.S.Howells and A.C.Hannon *ATLAS - Analysis of Time-of-Flight Diffraction Data from Liquid and Amorphous Samples* Rutherford Appleton Laboratory Report (1989): `RAL-89-046 <http://wwwisis2.isis.rl.ac.uk/disordered/Manuals/ATLAS/ATLAS%20manual%20v1.0.pdf>`__
+
+
+.. categories:: Concepts

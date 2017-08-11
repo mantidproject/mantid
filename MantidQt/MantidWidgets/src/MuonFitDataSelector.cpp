@@ -64,7 +64,7 @@ void MuonFitDataSelector::setUpConnections() {
   connect(m_ui.cbDataset, SIGNAL(currentIndexChanged(int)), this,
           SIGNAL(datasetIndexChanged(int)));
   connect(m_ui.cbDataset, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateNormFromDropDown(int)));
+          SLOT(updateNormalizationFromDropDown(int)));
   connect(m_ui.btnNextDataset, SIGNAL(clicked()), this, SLOT(setNextDataset()));
   connect(m_ui.btnPrevDataset, SIGNAL(clicked()), this,
           SLOT(setPreviousDataset()));
@@ -410,7 +410,7 @@ void MuonFitDataSelector::setDatasetNames(const QStringList &datasetNames) {
     m_ui.cbDataset->setCurrentIndex(0);
   }
 }
-void MuonFitDataSelector::updateNormFromDropDown(int j) {
+void MuonFitDataSelector::updateNormalizationFromDropDown(int j) {
   for (int i = 0; i < m_ui.cbDataset->count(); i++) {
     if (i == j) {
       auto name = m_ui.cbDataset->itemText(i);

@@ -254,8 +254,8 @@ private slots:
 
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
-  // update norm
-  void updateNorm(QString name);
+  // update the displayed normalization
+  void updateNormalization(QString name);
 
 private:
   /// Initialize local Python environment

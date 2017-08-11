@@ -368,7 +368,7 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 * do nothing.
 * @param name :: the name of the workspace to add.
 */
-void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
+void MuonAnalysisFitDataPresenter::storeNormalization(std::string name) const {
   if (m_isItTFAsymm) {
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(
             "MuonAnalysisTFNormalizations")) {
@@ -479,7 +479,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     err << "Failed to create analysis workspace " << name << ": " << ex.what();
     g_log.error(err.str());
   }
-  storeNorm(name);
+  storeNormalization(name);
 
   return outputWS;
 }

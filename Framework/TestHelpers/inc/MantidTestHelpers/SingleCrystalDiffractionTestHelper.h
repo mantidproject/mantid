@@ -1,7 +1,7 @@
 #ifndef SINGLECRYSTALDIFFRACTIONHELPER_H_
 #define SINGLECRYSTALDIFFRACTIONHELPER_H_
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

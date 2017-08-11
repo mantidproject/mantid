@@ -1528,14 +1528,15 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
 * sets the selected groups and pairs
 */
 void MuonAnalysis::setGroupsAndPairs() {
-	auto names = m_groupingHelper.parseGroupingTable().pairNames;
-	auto tmp = m_groupingHelper.parseGroupingTable().groupNames;
-	names.insert(std::end(names), std::make_move_iterator(tmp.begin()), std::make_move_iterator(tmp.end()));
-	QStringList GroupsAndPairsNames;
-	for (const auto &name : names) {
-		GroupsAndPairsNames << QString::fromStdString(name);
-	}
-	m_uiForm.fitBrowser->setAvailableGroups(GroupsAndPairsNames);
+  auto names = m_groupingHelper.parseGroupingTable().pairNames;
+  auto tmp = m_groupingHelper.parseGroupingTable().groupNames;
+  names.insert(std::end(names), std::make_move_iterator(tmp.begin()),
+               std::make_move_iterator(tmp.end()));
+  QStringList GroupsAndPairsNames;
+  for (const auto &name : names) {
+    GroupsAndPairsNames << QString::fromStdString(name);
+  }
+  m_uiForm.fitBrowser->setAvailableGroups(GroupsAndPairsNames);
 }
 
 /**
@@ -1796,8 +1797,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   runPythonCode(pyS);
-  // store the norm
-  m_fitDataPresenter->storeNorm(safeWSName.toStdString());
+  m_fitDataPresenter->storeNormalization(safeWSName.toStdString());
 }
 
 /**
@@ -1889,7 +1889,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
-	setGroupsAndPairs();
+    setGroupsAndPairs();
     m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
@@ -2173,7 +2173,7 @@ void MuonAnalysis::loadFittings() {
   connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked()), this,
           SLOT(handlePeriodBox()));
   connect(m_dataSelector, SIGNAL(nameChanged(QString)), this,
-          SLOT(updateNorm(QString)));
+          SLOT(updateNormalization(QString)));
 
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
@@ -2567,7 +2567,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 
   m_currentTab = newTab;
 }
-void MuonAnalysis::updateNorm(QString name) {
+void MuonAnalysis::updateNormalization(QString name) {
   m_uiForm.fitBrowser->setNormalization(name.toStdString());
 }
 
@@ -2960,7 +2960,7 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
 
     groupAlg->execute();
-    m_fitDataPresenter->storeNorm(wsName);
+    m_fitDataPresenter->storeNormalization(wsName);
 
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +

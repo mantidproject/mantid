@@ -279,6 +279,8 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setRowActionEnabled(1, false))
         .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setAutoreduceButtonEnabled(true))
+        .Times(Exactly(1));
     // Pause presenter
     presenter.pause();
 
@@ -303,6 +305,8 @@ public:
     EXPECT_CALL(mockRunsTabView, setRowActionEnabled(0, false))
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setRowActionEnabled(1, true))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setAutoreduceButtonEnabled(false))
         .Times(Exactly(1));
     // Resume presenter
     presenter.resume();
