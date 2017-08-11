@@ -537,9 +537,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         int_ranges = map(lambda str_range: [int(x) for x in str_range], str_ranges)
 
         # Expand integer ranges formed from a string 'a-b', to a range from a to b
-        int_ranges = map(lambda int_range:  range(int_range[0], int_range[1])
-                                            if len(int_range) > 1
-                                            else int_range, int_ranges)
+        # Single provided integers remain the same
+        int_ranges = map(list_to_range, int_ranges)
 
         # Return flattened list of range values
         return [range_value for int_range in int_ranges for range_value in int_range]
@@ -560,6 +559,25 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 raise RuntimeError("Could not locate sample file: " + run)
 
         return run_files
+
+
+def list_to_range(arrayToConvert):
+    """
+    Converts a specified array to a range representation, based on the
+    following specification -
+
+    Array with one element          : Array is returned immediately
+    Array with two or more elements : A range from the first to second element
+                                      (inclusive) is returned.
+
+    :param arrayToConvert:  The array to convert to a range.
+    :return:                The generated range.
+    """
+
+    if len(arrayToConvert) == 1:
+        return arrayToConvert
+    else:
+        return range(arrayToConvert[0], arrayToConvert[1] + 1)
 
 
 def rebin_to_smallest(workspaces):
