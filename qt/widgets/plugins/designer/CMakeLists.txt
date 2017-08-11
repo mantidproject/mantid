@@ -31,22 +31,22 @@ set( LIB_NAME MantidWidgetPlugins )
 add_definitions( -DLIBRARY_NAME=${LIB_NAME} )
 
 # Create the library
-add_library ( qtwidgetspluginsdesigner ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} )
+add_library ( MantidQtWidgetsPluginsDesigner ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} )
 
 # Change the destination of the target as Qt expects this in a directory called "designer"
 # if you set QT_PLUGIN_PATH environment variable this might put it there???
-SET_TARGET_OUTPUT_DIRECTORY( qtwidgetspluginsdesigner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/designer )
+SET_TARGET_OUTPUT_DIRECTORY( MantidQtWidgetsPluginsDesigner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/designer )
 
 # Set the name of the generated library
-set_target_properties ( qtwidgetspluginsdesigner PROPERTIES OUTPUT_NAME ${LIB_NAME} )
+set_target_properties ( MantidQtWidgetsPluginsDesigner PROPERTIES OUTPUT_NAME ${LIB_NAME} )
 
 # Remove from the 'all' target as most people don't care about them
-set_target_properties( qtwidgetspluginsdesigner PROPERTIES EXCLUDE_FROM_ALL TRUE )
+set_target_properties( MantidQtWidgetsPluginsDesigner PROPERTIES EXCLUDE_FROM_ALL TRUE )
 
 # Set the library dependencies
-target_link_libraries ( qtwidgetspluginsdesigner LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-            qtwidgetscommon
-            qtwidgetssliceviewer
+target_link_libraries ( MantidQtWidgetsPluginsDesigner LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+            MantidQtWidgetsCommon
+            MantidQtWidgetsSliceViewer
             ${QT_LIBRARIES}
             ${QWT_LIBRARIES}
             ${QSCINTILLA_LIBRARIES}

@@ -150,11 +150,11 @@ endif ()
 
 # ... and links to other required libs ...
 target_link_libraries ( mantidqtpython LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-            qtwidgetscommon
-            qtwidgetssliceviewer
-            qtwidgetsfactory
-            qtwidgetsrefdetectorview
-            qtwidgetsinstrumentview
+            MantidQtWidgetsCommon
+            MantidQtWidgetsSliceViewer
+            MantidQtWidgetsFactory
+            MantidQtWidgetsRefDetectorView
+            MantidQtWidgetsInstrumentView
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}

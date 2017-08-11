@@ -790,11 +790,11 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
             API
-            qtwidgetscommon
-            qtwidgetsinstrumentview
-            qtwidgetssliceviewer
-            qtwidgetsfactory
-            qtwidgetsspectrumviewer
+            MantidQtWidgetsCommon
+            MantidQtWidgetsInstrumentView
+            MantidQtWidgetsSliceViewer
+            MantidQtWidgetsFactory
+            MantidQtWidgetsSpectrumViewer
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GSL_LIBRARIES}

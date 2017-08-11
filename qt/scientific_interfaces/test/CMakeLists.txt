@@ -50,7 +50,7 @@ if ( CXXTEST_FOUND )
             MantidScientificInterfacesISISReflectometryOld
             MantidScientificInterfacesEnggDiffraction
             MantidScientificInterfacesMultiDatasetFit
-            qtwidgetscommon
+            MantidQtWidgetsCommon
             API
             DataObjects
             Geometry

@@ -52,15 +52,15 @@ include_directories ( inc )
 add_definitions ( -DIN_MANTIDQT_REFDETECTORVIEWER )
 
 # This creates the target library
-add_library ( qtwidgetsrefdetectorview ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( MantidQtWidgetsRefDetectorView ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( qtwidgetsrefdetectorview PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( MantidQtWidgetsRefDetectorView PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( qtwidgetsrefdetectorview LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            qtwidgetsspectrumviewer
+target_link_libraries ( MantidQtWidgetsRefDetectorView LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            MantidQtWidgetsSpectrumViewer
             ${CORE_MANTIDLIBS}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
@@ -74,8 +74,8 @@ target_link_libraries ( qtwidgetsrefdetectorview LINK_PRIVATE ${TCMALLOC_LIBRARI
 
 add_executable ( RefDetectorViewDemo EXCLUDE_FROM_ALL src/RefDetectorViewDemo.cpp )
 target_link_libraries ( RefDetectorViewDemo LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            qtwidgetsrefdetectorview
-            qtwidgetsspectrumviewer
+            MantidQtWidgetsRefDetectorView
+            MantidQtWidgetsSpectrumViewer
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${QT_LIBRARIES}
@@ -90,4 +90,4 @@ target_link_libraries ( RefDetectorViewDemo LINK_PRIVATE ${TCMALLOC_LIBRARIES_LI
 # Installation settings
 ###########################################################################
 
-install ( TARGETS qtwidgetsrefdetectorview ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidQtWidgetsRefDetectorView ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

@@ -74,14 +74,14 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 add_definitions ( -DIN_MANTIDQT_SPECTRUMVIEWER )
 
 # This creates the target library
-add_library ( qtwidgetsspectrumviewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( MantidQtWidgetsSpectrumViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( qtwidgetsspectrumviewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( MantidQtWidgetsSpectrumViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 # ... and links to other required libs
-target_link_libraries ( qtwidgetsspectrumviewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            qtwidgetscommon
+target_link_libraries ( MantidQtWidgetsSpectrumViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            MantidQtWidgetsCommon
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
@@ -93,4 +93,4 @@ target_link_libraries ( qtwidgetsspectrumviewer LINK_PRIVATE ${TCMALLOC_LIBRARIE
 # Installation settings
 ###########################################################################
 
-install ( TARGETS qtwidgetsspectrumviewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidQtWidgetsSpectrumViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

@@ -65,19 +65,19 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(qtwidgetspluginsalgorithm_dialogs SRC_FILES SRC_UNITY_IGNORE_FILES 10)
+  enable_unity_build(MantidQtWidgetsPluginsAlgorithmDialogs SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h ALL_SRC )
-add_library ( qtwidgetspluginsalgorithm_dialogs ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( MantidQtWidgetsPluginsAlgorithmDialogs ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( qtwidgetspluginsalgorithm_dialogs PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
+  set_target_properties ( MantidQtWidgetsPluginsAlgorithmDialogs PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
 endif () 
 
-target_link_libraries ( qtwidgetspluginsalgorithm_dialogs LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-            qtwidgetscommon
+target_link_libraries ( MantidQtWidgetsPluginsAlgorithmDialogs LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+            MantidQtWidgetsCommon
             ${CORE_MANTIDLIBS}
             ${QT_LIBRARIES}
             ${POCO_LIBRARIES}
@@ -89,4 +89,4 @@ target_link_libraries ( qtwidgetspluginsalgorithm_dialogs LINK_PRIVATE ${TCMALLO
 # Installation settings
 ###########################################################################
 
-install ( TARGETS qtwidgetspluginsalgorithm_dialogs ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )
+install ( TARGETS MantidQtWidgetsPluginsAlgorithmDialogs ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )

@@ -142,10 +142,10 @@ vtkRenderingFreeType
 vtksys
 ${QT_LIBRARIES}
 VatesSimpleGuiQtWidgets
-qtwidgetscommon
+MantidQtWidgetsCommon
 VatesAPI
-qtwidgetssliceviewer
-qtwidgetsfactory
+MantidQtWidgetsSliceViewer
+MantidQtWidgetsFactory
 ${PYTHON_LIBRARIES}
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
@@ -175,7 +175,7 @@ target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIB
   Kernel
   HistogramData
   DataObjects
-  qtwidgetscommon
+  MantidQtWidgetsCommon
   ${CORE_MANTIDLIBS}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}

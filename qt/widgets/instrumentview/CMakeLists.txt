@@ -133,16 +133,16 @@ qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 include_directories ( inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
-add_library ( qtwidgetsinstrumentview ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( MantidQtWidgetsInstrumentView ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
-set_target_properties ( qtwidgetsinstrumentview PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_INSTRUMENTVIEW )
+set_target_properties ( MantidQtWidgetsInstrumentView PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_INSTRUMENTVIEW )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( qtwidgetsinstrumentview PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
+  set_target_properties ( MantidQtWidgetsInstrumentView PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
 endif ()
 
-target_link_libraries ( qtwidgetsinstrumentview LINK_PRIVATE 
-  qtwidgetscommon
+target_link_libraries ( MantidQtWidgetsInstrumentView LINK_PRIVATE 
+  MantidQtWidgetsCommon
   ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS}
   ${QT_LIBRARIES}
@@ -153,4 +153,4 @@ target_link_libraries ( qtwidgetsinstrumentview LINK_PRIVATE
   ${OPENGL_LIBRARIES}
 )
 
-install ( TARGETS qtwidgetsinstrumentview ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidQtWidgetsInstrumentView ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

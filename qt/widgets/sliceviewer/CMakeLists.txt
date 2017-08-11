@@ -154,15 +154,15 @@ include_directories ( ../../Framework/DataObjects/inc )
 add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
 
 # This creates the target library
-add_library ( qtwidgetssliceviewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( MantidQtWidgetsSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( qtwidgetssliceviewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( MantidQtWidgetsSliceViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( qtwidgetssliceviewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            qtwidgetscommon
+target_link_libraries ( MantidQtWidgetsSliceViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            MantidQtWidgetsCommon
             DataObjects
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
@@ -191,7 +191,7 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
   target_link_libraries( SliceViewerTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            qtwidgetssliceviewer
+            MantidQtWidgetsSliceViewer
             DataObjects
             Crystal
             ${CORE_MANTIDLIBS}
@@ -211,4 +211,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS qtwidgetssliceviewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidQtWidgetsSliceViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

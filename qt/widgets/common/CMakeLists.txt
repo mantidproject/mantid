@@ -563,21 +563,21 @@ if(MAKE_VATES AND ParaView_FOUND)
 endif()
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtWidgets/Common/PrecompiledHeader.h ALL_SRC )
-add_library ( qtwidgetscommon ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( MantidQtWidgetsCommon ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
-set_target_properties ( qtwidgetscommon PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_COMMON )
+set_target_properties ( MantidQtWidgetsCommon PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_COMMON )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( qtwidgetscommon PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
+  set_target_properties ( MantidQtWidgetsCommon PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
 endif ()
 
-target_link_libraries ( qtwidgetscommon LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+target_link_libraries ( MantidQtWidgetsCommon LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES}
   ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${QSCINTILLA_LIBRARIES}
 )
 
 if(MAKE_VATES AND ParaView_FOUND)
-  target_link_libraries (qtwidgetscommon LINK_PRIVATE
+  target_link_libraries (MantidQtWidgetsCommon LINK_PRIVATE
   vtkPVServerManagerRendering
   ${vtkjsoncpp_LIBRARIES}
   )
@@ -593,7 +593,7 @@ endif()
 if ( WIN32 )
   set ( QT_CONF qt.conf )
   configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
-  add_custom_command ( TARGET qtwidgetscommon POST_BUILD
+  add_custom_command ( TARGET MantidQtWidgetsCommon POST_BUILD
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
                                ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
                                ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
@@ -610,7 +610,7 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS qtwidgetscommon ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidQtWidgetsCommon ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 
 set ( TEST_FILES
