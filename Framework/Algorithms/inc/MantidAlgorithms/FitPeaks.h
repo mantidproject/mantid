@@ -60,6 +60,9 @@ private:
 
   void generateOutputWorkspaces();
 
+  double processFitResult(DataObjects::TableWorkspace_sptr param_table,
+                                  std::vector<double> &param_values, std::vector<double> &param_errors);
+
   void setOutputProperties();
 
   API::MatrixWorkspace_const_sptr m_inputWS;
@@ -69,6 +72,7 @@ private:
   std::vector<double> m_peakWindowRight;
 
   std::vector<std::vector<double>> m_peakWindows;
+  std::vector<std::vector<double>> m_peakRangeVec;
 
   std::vector<double> m_initParamValues;
 

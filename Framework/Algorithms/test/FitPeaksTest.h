@@ -60,6 +60,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS");

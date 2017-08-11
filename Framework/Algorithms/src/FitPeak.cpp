@@ -93,6 +93,8 @@ void FitOneSinglePeak::setFitWindow(double leftwindow, double rightwindow) {
   i_minFitX = getIndex(vecX, m_minFitX);
   i_maxFitX = getIndex(vecX, m_maxFitX);
 
+  //  g_log.warning() << "[DB] Fit window " << m_minFitX << ", " << m_maxFitX << " (" << i_minFitX << ", " << i_maxFitX << "\n";
+
   m_peakWindowSet = true;
 }
 
@@ -111,6 +113,8 @@ void FitOneSinglePeak::setPeakRange(double xpeakleft, double xpeakright) {
 
   i_minPeakX = getIndex(vecX, m_minPeakX);
   i_maxPeakX = getIndex(vecX, m_maxPeakX);
+
+  // g_log.warning() << "[DB] Peak range " << m_minPeakX << ", " << m_maxPeakX << " (" << i_minPeakX << ", " << i_maxPeakX << "\n";
 
   m_peakRangeSet = true;
 }
@@ -481,10 +485,11 @@ void FitOneSinglePeak::highBkgdFit() {
     // User's input peak range cannot be trusted.  Data might be noisy
     stringstream outss;
     outss << "User specified peak range cannot be trusted!  Because peak range "
-             "overlap fit window. "
+          << i_minPeakX << ", " << i_maxFitX << "overlap fit window " << i_minFitX
+          << ", " << i_maxFitX << ". "
           << "Number of data points in fitting window = "
           << i_maxFitX - i_minFitX
-          << ". A UNRELIABLE algorithm is used to guess peak range. ";
+          << ". A UNRELIABLE algorithm will be used to guess peak range. ";
     g_log.warning(outss.str());
 
     size_t numpts = i_maxFitX - i_minFitX;
