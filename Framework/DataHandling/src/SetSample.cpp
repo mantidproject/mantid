@@ -19,6 +19,9 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <Poco/Path.h>
 
+#include <algorithm>
+#include <string>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -54,10 +57,11 @@ const std::string SHAPE("Shape");
 
 /// Private namespace storing sample environment args
 namespace ShapeArgs {
-const std::string FLAT_PLATE("FlatPlate");
-const std::string CYLINDER("Cylinder");
-const std::string HOLLOW_CYLINDER("HollowCylinder");
-const std::string SPHERE("Sphere");
+// By using capitals we only have to convert user inputs to uppercase
+const std::string FLAT_PLATE("FLATPLATE");
+const std::string CYLINDER("CYLINDER");
+const std::string HOLLOW_CYLINDER("HOLLOWCYLINDER");
+const std::string SPHERE("SPHERE");
 const std::string CSG("CSG");
 const std::string WIDTH("Width");
 const std::string HEIGHT("Height");
@@ -367,7 +371,9 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
     return result;
   }
 
-  const auto shape = args.getPropertyValue(GeometryArgs::SHAPE);
+  std::string shape = args.getPropertyValue(GeometryArgs::SHAPE);
+  // Make case comparison case-insensitive
+  std::transform(shape.begin(), shape.end(), shape.begin(), ::toupper);
 
   if (shape == ShapeArgs::CSG) {
     result = args.getPropertyValue("Value");
