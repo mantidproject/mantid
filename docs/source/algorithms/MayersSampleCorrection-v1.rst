@@ -11,7 +11,7 @@ Description
 
 Calculates and applies corrections due to the effects of absorption (plus optionally multiple scattering) 
 on the signal and error values for a given workspace. The full background to the algorithm 
-is described by Lindley et al. [1]__ and is briefly described here.
+is described by Lindley et al. [1]_ and is briefly described here.
 
 The following assumptions are made:
 
@@ -94,7 +94,7 @@ Output:
 References
 ----------
 
-#. [1] Lindley, E.J., & Mayers, J. Cywinski, R. (Ed.). (1988). Experimental method and corrections to data. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
+.. [1] Lindley, E.J., & Mayers, J. Cywinski, R. (Ed.). (1988). Experimental method and corrections to data. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
 
 
 .. seealso :: Algorithm :ref:`algm-MultipleScatteringCylinderAbsorption`
