@@ -68,12 +68,15 @@ Specifies the shape of the sample. This can be specified in 1 of 2 ways:
 - a full definition of the shape.
 
 For defining the full shape a key called ``Shape`` specifying the desired shape is
-expected along with additional keys specifying the values (all values are assumed to
-be in centimeters):
+expected along with additional keys specifying the values. This value is case insensitive
+(e.g. *sphere*, *Sphere* and *SPHERE* work). 
+
+**Note: all values are assumed to be in centimeters**:
 
 - ``FlatPlate``: Width, Height, Thick, Center, Angle
 - ``Cylinder``: Height, Radius, Center
 - ``HollowCylinder``: Height, InnerRadius, OuterRadius, Center
+- ``Sphere`` : Radius and Center
 - ``CSG``: Value is a string containing any generic shape as detailed in
   :ref:`HowToDefineGeometricShape`
 
@@ -98,7 +101,7 @@ Usage
 The following example uses a test file called ``CRYO-01.xml`` in the
 ``[INSTALLDIR]/instrument/sampleenvironments/TEST_LIVE/ISIS_Histogram/`` directory.
 
-**Example - Container with preset cylinderical sample geometry**
+
 
 .. testsetup:: *
 
@@ -112,23 +115,37 @@ The following example uses a test file called ``CRYO-01.xml`` in the
    config['default.facility'] = FACILITY_AT_START
    config['default.instrument'] = INSTRUMENT_AT_START
 
+**Example - Setting a basic shape and material**
+
 .. testcode:: Ex1
 
-   # A fake host workspace, replace this with your real one.
+   # A fake workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
 
-   # Use geometry as is from environment defintion
+   # Setting a simple shape and formula
+   SetSample(InputWorkspace=ws, 
+             Geometry={'Shape' : 'Sphere', 'Center': [0., 0., 0.], 'Radius' : 1.0}, 
+             Material={'ChemicalFormula': 'V'})
+
+**Example - Container with preset cylindrical sample geometry**
+
+.. testcode:: Ex2
+
+   # A fake workspace, replace this with your real one.
+   ws = CreateSampleWorkspace()
+
+   # Use geometry as is from environment definition
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
                        'SampleNumberDensity': 0.1})
 
 **Example - Override height of preset cylinder sample**
 
-.. testcode:: Ex2
+.. testcode:: Ex3
 
-   # A fake host workspace, replace this with your real one.
+   # A fake workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
-   # Use geometry from environment but set differnet height for sample
+   # Use geometry from environment but set different height for sample
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Geometry={'Height': 4.0},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
@@ -136,9 +153,9 @@ The following example uses a test file called ``CRYO-01.xml`` in the
 
 **Example - Override complete sample geometry**
 
-.. testcode:: Ex3
+.. testcode:: Ex4
 
-   # A fake host workspace, replace this with your real one.
+   # A fake workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
    # Use geometry from environment but set different height for sample
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
