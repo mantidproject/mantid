@@ -244,10 +244,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         prog = Progress(self, 0, 1, 10)
 
         prog.report('Converting to wavelength')
-        sample_wave_ws = self._convert_to_wavelength(self._sample_ws, '__sample_wave')
-        print(sample_wave_ws)
+        sample_wave_ws = self._convert_to_wavelength(self._sample_ws_name, '__sample_wave')
 
-        prog.report('Calculating absorption factors for sample')
+        prog.report('Calculating sample absorption factors')
 
         sample_kwargs = dict()
         sample_kwargs.update(self._general_kwargs)
@@ -273,6 +272,39 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=sample_wave_ws,
                                               OutputWorkspace=self._ass_ws,
                                               **sample_kwargs)
+
+        self._ass_ws = self._convert_from_wavelength(self._ass_ws, self._ass_ws)
+
+        if self._container_ws_name:
+
+            prog.report('Calculating container absorption factors')
+
+            container_kwargs = dict()
+            container_kwargs.update(self._general_kwargs)
+            container_kwargs['ChemicalFormula'] = self._container_chemical_formula
+            container_kwargs['DensityType'] = self._container_density_type
+            container_kwargs['Density'] = self._container_density
+            container_kwargs['Height'] = self._height
+            container_kwargs['Shape'] = self._shape
+
+            if self._shape == 'FlatPlate':
+                container_kwargs['Width'] = self._container_width
+                container_kwargs['Thickness'] = self._container_thickness
+                container_kwargs['Angle'] = self._container_angle
+                container_kwargs['Center'] = self._container_center
+
+            if self._shape == 'Cylinder':
+                container_kwargs['InnerRadius'] = self._container_inner_radius
+                container_kwargs['OuterRadius'] = self._container_outer_radius
+
+            if self._shape == 'Annulus':
+                container_kwargs['InnerRadius'] = self._container_inner_radius
+                container_kwargs['OuterRadius'] = self._sample_inner_radius
+
+            container_wave_1 = self._convert_to_wavelength(self._container_ws_name, '__container_wave_1')
+            container_wave_2 = self._clone_ws(container_wave_1, '__container_wave_2')
+
+            s_api.SimpleShapeMonteCarloAbsorption()
 
         self.setProperty('CorrectionsWorkspace', self._ass_ws)
 
@@ -401,6 +433,23 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 convert_unit_alg.setProperty("EFixed", self._efixed)
             convert_unit_alg.execute()
             return convert_unit_alg.getProperty("OutputWorkspace").value
+
+    def _convert_from_wavelength(self, input_ws, output_ws):
+
+        convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
+
+        if self._unit != 'Wavelength':
+            convert_unit_alg.setProperty("InputWorkspace", input_ws)
+            convert_unit_alg.setProperty("OutputWorkspace", output_ws)
+            convert_unit_alg.setProperty("Target", self._unit)
+            convert_unit_alg.setProperty("EMode", self._emode)
+            if self._emode == 'Indirect':
+                convert_unit_alg.setProperty("EFixed", self._efixed)
+            convert_unit_alg.execute()
+            return convert_unit_alg.getProperty("OutputWorkspace").value
+
+        else:
+            return input_ws
 
     # ------------------------------- Child algorithms -------------------------------
 
