@@ -86,7 +86,6 @@ public:
   /// Return multiple fitting mode on/off selection
   Muon::MultiFitState getMultiFitState() const;
 
-
 signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
@@ -96,7 +95,6 @@ signals:
 
   /// Emitted when multi fitting mode is turned on/off
   void multiFitStateChanged(int state);
-
 
 private:
   /// Default widget values

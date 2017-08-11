@@ -240,7 +240,8 @@ void MuonFitPropertyBrowser::init() {
   m_parameterManager->setErrorsEnabled(showParamErrors);
 
   m_TFAsymmMode = m_boolManager->addProperty("TF Asymmetry Mode");
-  bool TFAsymmMode = settings.value("TF Asymmetry Mode", QVariant(false)).toBool();
+  bool TFAsymmMode =
+      settings.value("TF Asymmetry Mode", QVariant(false)).toBool();
   m_boolManager->setValue(m_TFAsymmMode, TFAsymmMode);
 
   customSettingsGroup->addSubProperty(m_minimizer);
@@ -282,9 +283,8 @@ void MuonFitPropertyBrowser::init() {
   // Update tooltips when function structure is (or might've been) changed in
   // any way
   connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
-  //disable TFAsymm mode by default
+  // disable TFAsymm mode by default
   setTFAsymmMode(TFAsymmMode);
-
 }
 // Set up the execution of the muon fit menu
 void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
@@ -517,8 +517,8 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
     emit fitRawDataClicked(val);
   }
   if (prop == m_TFAsymmMode) {
-	  const bool val = m_boolManager->value(prop);
-	  setTFAsymmMode(val);
+    const bool val = m_boolManager->value(prop);
+    setTFAsymmMode(val);
   }
   if (prop == m_keepNorm) {
     const bool val = m_boolManager->value(prop);
@@ -1664,8 +1664,7 @@ void MuonFitPropertyBrowser::setGroupNames(
   m_groupsList = groupNames;
 }
 void MuonFitPropertyBrowser::setTFAsymm(bool state) {
-	m_boolManager->setValue(m_TFAsymmMode, state);
-
+  m_boolManager->setValue(m_TFAsymmMode, state);
 }
 
 } // MantidQt

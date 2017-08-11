@@ -394,7 +394,6 @@ Muon::MultiFitState MuonAnalysisOptionTab::getMultiFitState() const {
     return Muon::MultiFitState::Disabled;
   }
 }
-
 }
 }
 }
