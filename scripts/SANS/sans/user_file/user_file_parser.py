@@ -1439,8 +1439,8 @@ class QResolutionParser(UserFileComponentParser):
         self._w2_pattern = re.compile(start_string + self._w2 + float_number + end_string)
 
         # Moderator
-        self._moderator = "\\s*MODERATOR\\s*=\\s*"
-        self._file = "[\\w]+(\\.TXT)"
+        self._moderator = "\\s*MODERATOR\\s*=\\s*(\")?"
+        self._file = "[\\w]+(\\.TXT)(\")?"
         self._moderator_pattern = re.compile(start_string + self._moderator + self._file)
 
     def parse_line(self, line):
@@ -1532,7 +1532,9 @@ class QResolutionParser(UserFileComponentParser):
 
     def _extract_moderator(self, line, original_line):
         moderator_capital = re.sub(self._moderator, "", line)
+        moderator_capital = re.sub("\"", "", moderator_capital)
         moderator = re.search(moderator_capital, original_line, re.IGNORECASE).group(0)
+        # Remove quotation marks
         return {QResolutionId.moderator: moderator}
 
     @staticmethod
