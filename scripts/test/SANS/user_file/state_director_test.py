@@ -4,7 +4,7 @@ import unittest
 import mantid
 
 
-from sans.user_file.user_file_state_director import UserFileStateDirectorISIS
+from sans.user_file.state_director import StateDirectorISIS
 from sans.common.enums import (SANSFacility, ISISReductionMode, RangeStepType, RebinType, DataType, FitType,
                                DetectorType)
 from sans.common.configurations import Configurations
@@ -171,7 +171,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         data_builder.set_sample_scatter_period(3)
         data_state = data_builder.build()
 
-        director = UserFileStateDirectorISIS(data_state)
+        director = StateDirectorISIS(data_state)
         user_file_path = create_user_file(sample_user_file)
 
         director.set_user_file(user_file_path)
@@ -198,7 +198,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         data_builder.set_sample_scatter_period(3)
         data_state = data_builder.build()
 
-        director = UserFileStateDirectorISIS(data_state)
+        director = StateDirectorISIS(data_state)
         user_file_path = create_user_file(sample_user_file)
         director.set_user_file(user_file_path)
 
