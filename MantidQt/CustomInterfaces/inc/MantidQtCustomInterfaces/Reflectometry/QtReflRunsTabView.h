@@ -80,7 +80,11 @@ public:
   void clearCommands() override;
   void setRowActionEnabled(int index, bool enabled) override;
   void setTransferEnabled(bool enabled) override;
+  void enableTransferButton() override;
+  void disableTransferButton() override;
   void setAutoreduceButtonEnabled(bool enabled) override;
+  void enableAutoreduceButton() override;
+  void disableAutoreduceButton() override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;

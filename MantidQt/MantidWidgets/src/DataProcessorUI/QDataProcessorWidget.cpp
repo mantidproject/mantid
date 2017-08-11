@@ -6,6 +6,7 @@
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
+#include <iterator>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -92,8 +93,9 @@ QDataProcessorWidget::QDataProcessorWidget(
               whitelist, preprocessMap.asMap(), algorithm, postprocessor),
           parent) {}
 
-/** Destructor
-*/
+/*
+ Destructor
+ */
 QDataProcessorWidget::~QDataProcessorWidget() {}
 
 /**
@@ -304,37 +306,68 @@ void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 Handle interface when data reduction paused
 */
 void QDataProcessorWidget::pause() {
+  disablePauseButtons();
+  enableResumeButtons();
+}
 
-  // Disable 'pause' buttons
-  ui.rowToolBar->actions()[1]->setEnabled(false);
-  m_contextMenu->actions()[1]->setEnabled(false);
+void QDataProcessorWidget::disablePauseButtons() {
+  disableActionOnWidget(*ui.rowToolBar, PAUSE_ACTION_INDEX);
+  disableActionOnWidget(*m_contextMenu, PAUSE_ACTION_INDEX);
+}
+
+void QDataProcessorWidget::disableActionOnWidget(QWidget &widget, int index) {
+  disable(*(widget.actions()[index]));
+}
+
+void QDataProcessorWidget::disable(QAction &toDisable) {
+  toDisable.setEnabled(false);
+}
+
+void QDataProcessorWidget::disable(QWidget &toDisable) {
+  toDisable.setEnabled(false);
+}
+
+void QDataProcessorWidget::enablePauseButtons() {
+  enableActionOnWidget(*ui.rowToolBar, PAUSE_ACTION_INDEX);
+  enableActionOnWidget(*m_contextMenu, PAUSE_ACTION_INDEX);
+}
+
+void QDataProcessorWidget::enableActionOnWidget(QWidget &widget, int index) {
+  enable(*(widget.actions()[index]));
+}
+
+void QDataProcessorWidget::enable(QAction &toEnable) {
+  toEnable.setEnabled(true);
+}
+
+void QDataProcessorWidget::enable(QWidget &toEnable) {
+  toEnable.setEnabled(true);
 }
 
 /**
 Handle interface when data reduction resumed
 */
 void QDataProcessorWidget::resume() {
+  disableResumeButtons();
+  enablePauseButtons();
+}
 
-  // Disable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(false);
-  m_contextMenu->actions()[0]->setEnabled(false);
-  ui.buttonProcess->setEnabled(false);
+void QDataProcessorWidget::disableResumeButtons() {
+  disableActionOnWidget(*ui.rowToolBar, RESUME_ACTION_INDEX);
+  disableActionOnWidget(*m_contextMenu, RESUME_ACTION_INDEX);
+  disable(*ui.buttonProcess);
+}
 
-  // Enable 'pause' buttons
-  ui.rowToolBar->actions()[1]->setEnabled(true);
-  m_contextMenu->actions()[1]->setEnabled(true);
+void QDataProcessorWidget::enableResumeButtons() {
+  enableActionOnWidget(*ui.rowToolBar, RESUME_ACTION_INDEX);
+  enableActionOnWidget(*m_contextMenu, RESUME_ACTION_INDEX);
+  enable(*ui.buttonProcess);
 }
 
 /**
 Handle interface when data reduction confirmed to be paused
 */
-void QDataProcessorWidget::confirmReductionPaused() {
-  
-  // Enable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(true);
-  m_contextMenu->actions()[0]->setEnabled(true);
-  ui.buttonProcess->setEnabled(true);
-}
+void QDataProcessorWidget::confirmReductionPaused() { enableResumeButtons(); }
 
 /**
 Save settings
@@ -344,8 +377,8 @@ void QDataProcessorWidget::saveSettings(
     const std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
-  for (auto it = options.begin(); it != options.end(); ++it)
-    settings.setValue(it->first, it->second);
+  for (auto &&option : options)
+    settings.setValue(option.first, option.second);
   settings.endGroup();
 }
 
@@ -357,8 +390,8 @@ void QDataProcessorWidget::loadSettings(std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
   QStringList keys = settings.childKeys();
-  for (auto it = keys.begin(); it != keys.end(); ++it)
-    options[*it] = settings.value(*it);
+  for (auto &&key : keys)
+    options[key] = settings.value(key);
   settings.endGroup();
 }
 

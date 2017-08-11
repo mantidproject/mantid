@@ -141,9 +141,22 @@ public:
   // Forward a main presenter to this view's presenter
   void accept(DataProcessorMainPresenter *);
 
+  static const constexpr auto RESUME_ACTION_INDEX = 0;
+  static const constexpr auto PAUSE_ACTION_INDEX = 1;
+
 private:
   // initialise the interface
   void createTable();
+  void disablePauseButtons();
+  void enablePauseButtons();
+  void disableResumeButtons();
+  void enableResumeButtons();
+  static void disableActionOnWidget(QWidget& widget, int index);
+  static void enableActionOnWidget(QWidget& widget, int index);
+  static void disable(QWidget& widget);
+  static void disable(QAction& widget);
+  static void enable(QWidget& widget);
+  static void enable(QAction& widget);
 
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;

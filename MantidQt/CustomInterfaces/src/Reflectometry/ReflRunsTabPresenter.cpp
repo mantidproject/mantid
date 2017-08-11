@@ -28,6 +28,8 @@
 #include <sstream>
 #include <vector>
 
+#include <iostream>
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
@@ -149,25 +151,26 @@ void ReflRunsTabPresenter::pushCommands() {
   m_view->clearCommands();
 
   // The expected number of commands
-  const size_t nCommands = 31;
+  const constexpr auto nCommands = 31u;
   auto commands =
       m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
-  if (commands.size() != nCommands) {
+  if (commands.size() == nCommands) {
+    // The index at which "row" commands start
+    const constexpr auto rowCommStart = 10u;
+    // We want to have two menus
+    // Populate the "Reflectometry" menu
+    std::vector<DataProcessorCommand_uptr> tableCommands;
+    for (auto i = 0u; i < rowCommStart; i++)
+      tableCommands.push_back(std::move(commands[i]));
+    m_view->setTableCommands(std::move(tableCommands));
+    // Populate the "Edit" menu
+    std::vector<DataProcessorCommand_uptr> rowCommands;
+    for (auto i = rowCommStart; i < nCommands; i++)
+      rowCommands.push_back(std::move(commands[i]));
+    m_view->setRowCommands(std::move(rowCommands));
+  } else {
     throw std::runtime_error("Invalid list of commands");
   }
-  // The index at which "row" commands start
-  const size_t rowCommStart = 10u;
-  // We want to have two menus
-  // Populate the "Reflectometry" menu
-  std::vector<DataProcessorCommand_uptr> tableCommands;
-  for (size_t i = 0; i < rowCommStart; i++)
-    tableCommands.push_back(std::move(commands[i]));
-  m_view->setTableCommands(std::move(tableCommands));
-  // Populate the "Edit" menu
-  std::vector<DataProcessorCommand_uptr> rowCommands;
-  for (size_t i = rowCommStart; i < nCommands; i++)
-    rowCommands.push_back(std::move(commands[i]));
-  m_view->setRowCommands(std::move(rowCommands));
 }
 
 /** Searches for runs that can be used */
@@ -446,8 +449,8 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 void ReflRunsTabPresenter::pause() {
   enableRowAction(PROCESS);
   disableRowAction(PAUSE);
-  m_view->setTransferEnabled(true);
-  m_view->setAutoreduceButtonEnabled(true);
+  m_view->enableTransferButton();
+  m_view->enableAutoreduceButton();
 }
 
 void ReflRunsTabPresenter::enableRowAction(int index) const {
@@ -459,14 +462,13 @@ void ReflRunsTabPresenter::disableRowAction(int index) const {
 }
 
 void ReflRunsTabPresenter::preventTableModification() {
-  m_view->setAutoreduceButtonEnabled(false);
-  m_view->setTransferEnabled(false);
+  m_view->disableAutoreduceButton();
+  m_view->disableTransferButton();
 }
 
 void ReflRunsTabPresenter::allowTableModification() {
-  m_view->setAutoreduceButtonEnabled(true);
-  m_view->setTransferEnabled(true);
-
+  m_view->enableAutoreduceButton();
+  m_view->enableTransferButton();
 }
 
 /** Disables the 'process' button and enables the 'pause' button when data
@@ -474,6 +476,7 @@ void ReflRunsTabPresenter::allowTableModification() {
  * confirmed to be resumed.
 */
 void ReflRunsTabPresenter::resume() {
+  std::cout << "Resume" << std::endl;
   disableRowAction(PROCESS);
   enableRowAction(PAUSE);
   preventTableModification();

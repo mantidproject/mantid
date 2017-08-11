@@ -189,6 +189,22 @@ void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
   ui.buttonAutoreduce->setEnabled(enabled);
 }
 
+void QtReflRunsTabView::disableAutoreduceButton() {
+    setAutoreduceButtonEnabled(false);
+}
+
+void QtReflRunsTabView::enableAutoreduceButton() {
+    setAutoreduceButtonEnabled(true);
+}
+
+void QtReflRunsTabView::disableTransferButton() {
+    setTransferEnabled(false);
+}
+
+void QtReflRunsTabView::enableTransferButton() {
+    setTransferEnabled(true);
+}
+
 /**
 * Set all possible tranfer methods
 * @param methods : All possible transfer methods.

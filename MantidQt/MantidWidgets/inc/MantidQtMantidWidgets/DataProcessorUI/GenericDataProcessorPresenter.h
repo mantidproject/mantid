@@ -293,6 +293,8 @@ private:
 
   // end reduction
   void endReduction();
+  bool wasSuccessful(const int exitCode) const;
+  void handleReductionErrorOnThreadCompletion();
 
   // pause/resume reduction
   void pause();

@@ -68,7 +68,11 @@ public:
   virtual void clearCommands() = 0;
   virtual void setRowActionEnabled(int index, bool enabled) = 0;
   virtual void setTransferEnabled(bool transferEnabled) = 0;
+  virtual void enableTransferButton() = 0;
+  virtual void disableTransferButton() = 0;
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
+  virtual void enableAutoreduceButton() = 0;
+  virtual void disableAutoreduceButton() = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;

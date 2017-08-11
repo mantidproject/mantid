@@ -496,13 +496,21 @@ void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
 
   m_workerThread.release();
 
-  if (exitCode == 0) { // Success
+  if (wasSuccessful(exitCode)) {
     m_progressReporter->report();
     doNextAction();
-  } else { // Error
-    m_progressReporter->clear();
-    endReduction();
+  } else {
+    handleReductionErrorOnThreadCompletion();
   }
+}
+
+bool GenericDataProcessorPresenter::wasSuccessful(const int exitCode) const {
+    return exitCode == 0;
+}
+
+void GenericDataProcessorPresenter::handleReductionErrorOnThreadCompletion() {
+  m_progressReporter->clear();
+  endReduction();
 }
 
 /**

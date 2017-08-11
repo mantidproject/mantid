@@ -64,7 +64,11 @@ public:
                void(const std::vector<std::string> &, const std::string &));
   MOCK_METHOD2(setRowActionEnabled, void(int, bool));
   MOCK_METHOD1(setTransferEnabled, void(bool));
+  MOCK_METHOD0(enableTransferButton, void());
+  MOCK_METHOD0(disableTransferButton, void());
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
+  MOCK_METHOD0(enableAutoreduceButton, void());
+  MOCK_METHOD0(disableAutoreduceButton, void());
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
