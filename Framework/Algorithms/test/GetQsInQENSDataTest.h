@@ -3,11 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAlgorithms/DeleteWorkspace.h"
 #include "MantidAlgorithms/GetQsInQENSData.h"
 
+using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
@@ -43,21 +45,25 @@ public:
 
     // Create the input workspace, without detectors
     CreateWorkspace createAlg;
+    createAlg.initialize();
     createAlg.setProperty("OutputWorkspace", outputWsName);
     createAlg.setProperty("DataX", dataX);
     createAlg.setProperty("DataY", dataY);
     createAlg.setProperty("NSpec", numSpectra);
     createAlg.setProperty("VerticalAxisUnit", verticalAxisUnit);
     createAlg.setProperty("VerticalAxisValues", verticalAxisValues);
-    createAlg.initialize();
     createAlg.execute();
 
-    MatrixWorkspace_sptr workspace = createAlg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr workspace =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outputWsName);
+    TS_ASSERT(workspace);
     const std::string expectedErrorMsg =
         "Detectors are missing from the input workspace";
 
     try {
       GetQsInQENSData alg;
+      alg.initialize();
       alg.setProperty("InputWorkspace", workspace);
       alg.setProperty("RaiseMode", true);
       alg.execute();
@@ -65,8 +71,6 @@ public:
       std::string errorMsg = e.what();
       TS_ASSERT(errorMsg.find(expectedErrorMsg) != std::string::npos);
     }
-
-    TS_ASSERT(false);
   }
 };
 
