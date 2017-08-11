@@ -348,6 +348,9 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
+        PROPGROUP_FLAT_BKG = 'Flat Time-Independent Background'
+        PROPGROUP_INCIDENT_ENERGY_CALIBRATION = 'Indicent Energy Calibration'
+        PROPGROUP_MON_NORMALISATION = 'Neutron Flux Normalisation'
         # Validators.
         mandatoryPositiveInt = CompositeValidator()
         mandatoryPositiveInt.add(IntMandatoryValidator())
@@ -442,7 +445,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  common.INCIDENT_ENERGY_CALIBRATION_OFF]),
                              direction=Direction.Input,
                              doc='Control the incident energy calibration.')
-        self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_CALIBRATION, common.PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
+        self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_CALIBRATION, PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_INCIDENT_ENERGY_WS,
             defaultValue='',
@@ -450,7 +453,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='A single-valued workspace holding the calibrated ' +
                 'incident energy.')
-        self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_WS, common.PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
+        self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_WS, PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
         self.declareProperty(name=common.PROP_FLAT_BKG,
                              defaultValue=common.BKG_AUTO,
                              validator=StringListValidator([
@@ -459,26 +462,27 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  common.BKG_OFF]),
                              direction=Direction.Input,
                              doc='Control flat background subtraction.')
+        self.setPropertyGroup(common.PROP_FLAT_BKG, PROPGROUP_FLAT_BKG)
         self.declareProperty(name=common.PROP_FLAT_BKG_SCALING,
                              defaultValue=1.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Flat background scaling constant')
-        self.setPropertyGroup(common.PROP_FLAT_BKG_SCALING, common.PROPGROUP_FLAT_BKG)
+        self.setPropertyGroup(common.PROP_FLAT_BKG_SCALING, PROPGROUP_FLAT_BKG)
         self.declareProperty(name=common.PROP_FLAT_BKG_WINDOW,
                              defaultValue=30,
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
                              doc='Running average window width (in bins) ' +
                                  'for flat background.')
-        self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, common.PROPGROUP_FLAT_BKG)
+        self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, PROPGROUP_FLAT_BKG)
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_FLAT_BKG_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Workspace from which to get flat background data.')
-        self.setPropertyGroup(common.PROP_FLAT_BKG_WS, common.PROPGROUP_FLAT_BKG)
+        self.setPropertyGroup(common.PROP_FLAT_BKG_WS, PROPGROUP_FLAT_BKG)
         self.declareProperty(name=common.PROP_NORMALISATION,
                              defaultValue=common.NORM_METHOD_MON,
                              validator=StringListValidator([
@@ -487,14 +491,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  common.NORM_METHOD_OFF]),
                              direction=Direction.Input,
                              doc='Normalisation method.')
-        self.setPropertyGroup(common.PROP_NORMALISATION, common.PROPGROUP_MON_NORMALISATION)
+        self.setPropertyGroup(common.PROP_NORMALISATION, PROPGROUP_MON_NORMALISATION)
         self.declareProperty(name=common.PROP_MON_PEAK_SIGMA_MULTIPLIER,
                              defaultValue=3.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc="Width of the monitor peak in multiples " +
                                  " of 'Sigma' in monitor's EPP table.")
-        self.setPropertyGroup(common.PROP_MON_PEAK_SIGMA_MULTIPLIER, common.PROPGROUP_MON_NORMALISATION)
+        self.setPropertyGroup(common.PROP_MON_PEAK_SIGMA_MULTIPLIER, PROPGROUP_MON_NORMALISATION)
         # Rest of the output properties.
         self.declareProperty(WorkspaceProperty(
             name=common.PROP_OUTPUT_RAW_WS,

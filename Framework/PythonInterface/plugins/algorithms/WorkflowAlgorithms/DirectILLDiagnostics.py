@@ -400,6 +400,10 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
+        PROPGROUP_BEAM_STOP_DIAGNOSTICS = 'Beam Stop Diagnostics'
+        PROPGROUP_BKG_DIAGNOSTICS = 'Background Diagnostics'
+        PROPGROUP_PEAK_DIAGNOSTICS = 'Elastic Peak Diagnostics'
+        PROPGROUP_USER_MASK = 'Additional Masking'
         greaterThanUnityFloat = FloatBoundedValidator(lower=1)
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
@@ -450,7 +454,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Enable or disable elastic peak diagnostics.')
         self.setPropertyGroup(common.PROP_ELASTIC_PEAK_DIAGNOSTICS,
-                              common.PROPGROUP_PEAK_DIAGNOSTICS)
+                              PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
                              defaultValue=3.0,
                              validator=positiveFloat,
@@ -458,7 +462,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              doc="Integration width of the elastic peak in multiples " +
                                  " of 'Sigma' in the EPP table.")
         self.setPropertyGroup(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
-                              common.PROPGROUP_PEAK_DIAGNOSTICS)
+                              PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
                              defaultValue=0.1,
                              validator=scalingFactor,
@@ -466,7 +470,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              doc='Multiplier for lower acceptance limit ' +
                                  'used in elastic peak diagnostics.')
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
-                              common.PROPGROUP_PEAK_DIAGNOSTICS)
+                              PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
                              defaultValue=3.0,
                              validator=greaterThanUnityFloat,
@@ -474,7 +478,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              doc='Multiplier for higher acceptance limit ' +
                                  'used in elastic peak diagnostics.')
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
-                              common.PROPGROUP_PEAK_DIAGNOSTICS)
+                              PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
                              defaultValue=3.3,
                              validator=positiveFloat,
@@ -482,7 +486,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              doc='Error bar multiplier for significance ' +
                                  'test in the elastic peak diagnostics.')
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
-                              common.PROPGROUP_PEAK_DIAGNOSTICS)
+                              PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS,
                              defaultValue=common.BKG_DIAGNOSTICS_AUTO,
                              validator=StringListValidator([
@@ -491,7 +495,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                  common.BKG_DIAGNOSTICS_OFF]),
                              direction=Direction.Input,
                              doc='Control the background diagnostics.')
-        self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS, common.PROPGROUP_BKG_DIAGNOSTICS)
+        self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS, PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_SIGMA_MULTIPLIER,
                              defaultValue=10.0,
                              validator=positiveFloat,
@@ -499,7 +503,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              doc="Width of the range excluded from background integration around " +
                                  "the elastic peaks in multiplies of 'Sigma' in the EPP table")
         self.setPropertyGroup(common.PROP_BKG_SIGMA_MULTIPLIER,
-                              common.PROPGROUP_BKG_DIAGNOSTICS)
+                              PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
                              defaultValue=0.1,
                              validator=scalingFactor,
@@ -507,7 +511,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              doc='Multiplier for lower acceptance limit ' +
                                  'used in noisy background diagnostics.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
-                              common.PROPGROUP_BKG_DIAGNOSTICS)
+                              PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
                              defaultValue=3.3,
                              validator=greaterThanUnityFloat,
@@ -515,7 +519,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              doc='Multiplier for higher acceptance limit ' +
                                  'used in noisy background diagnostics.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
-                              common.PROPGROUP_BKG_DIAGNOSTICS)
+                              PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
                              defaultValue=3.3,
                              validator=positiveFloat,
@@ -523,7 +527,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              doc='Error bar multiplier for significance ' +
                                  'test in the noisy background diagnostics.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
-                              common.PROPGROUP_BKG_DIAGNOSTICS)
+                              PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BEAM_STOP_DIAGNOSTICS,
                              defaultValue=common.BEAM_STOP_DIAGNOSTICS_AUTO,
                              validator=StringListValidator([
@@ -532,13 +536,13 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                  common.BEAM_STOP_DIAGNOSTICS_OFF]),
                              direction=Direction.Input,
                              doc='Control the beam stop diagnostics.')
-        self.setPropertyGroup(common.PROP_BEAM_STOP_DIAGNOSTICS, common.PROPGROUP_BEAM_STOP_DIAGNOSTICS)
+        self.setPropertyGroup(common.PROP_BEAM_STOP_DIAGNOSTICS, PROPGROUP_BEAM_STOP_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BEAM_STOP_THRESHOLD,
                              defaultValue=0.67,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Multiplier for the lower acceptance limit for beam stop diagnostics.')
-        self.setPropertyGroup(common.PROP_BEAM_STOP_THRESHOLD, common.PROPGROUP_BEAM_STOP_DIAGNOSTICS)
+        self.setPropertyGroup(common.PROP_BEAM_STOP_THRESHOLD, PROPGROUP_BEAM_STOP_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_DEFAULT_MASK,
                              defaultValue=common.DEFAULT_MASK_ON,
                              validator=StringListValidator([
@@ -551,13 +555,13 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                               validator=positiveIntArray,
                                               direction=Direction.Input),
                              doc='List of spectra to mask.')
-        self.setPropertyGroup(common.PROP_USER_MASK, common.PROPGROUP_USER_MASK)
+        self.setPropertyGroup(common.PROP_USER_MASK, PROPGROUP_USER_MASK)
         self.declareProperty(
             StringArrayProperty(name=common.PROP_USER_MASK_COMPONENTS,
                                 values='',
                                 direction=Direction.Input),
             doc='List of instrument components to mask.')
-        self.setPropertyGroup(common.PROP_USER_MASK_COMPONENTS, common.PROPGROUP_USER_MASK)
+        self.setPropertyGroup(common.PROP_USER_MASK_COMPONENTS, PROPGROUP_USER_MASK)
         # Rest of the output properties
         self.declareProperty(ITableWorkspaceProperty(
             name=common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS,

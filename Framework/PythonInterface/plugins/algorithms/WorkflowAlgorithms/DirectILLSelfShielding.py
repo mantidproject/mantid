@@ -51,6 +51,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
+        PROPGROUP_SIMULATION_INSTRUMENT = 'Simulation Instrument Settings'
         greaterThanOneInt = IntBoundedValidator(lower=2)
         greaterThanTwoInt = IntBoundedValidator(lower=3)
         inputWorkspaceValidator = CompositeValidator()
@@ -91,13 +92,13 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                  common.SIMULATION_INSTRUMENT_FULL]),
                              direction=Direction.Input,
                              doc='Select if the simulation should be performed on full or approximated instrument.')
-        self.setPropertyGroup(common.PROP_SIMULATION_INSTRUMENT, common.PROPGROUP_SIMULATION_INSTRUMENT)
+        self.setPropertyGroup(common.PROP_SIMULATION_INSTRUMENT, PROPGROUP_SIMULATION_INSTRUMENT)
         self.declareProperty(name=common.PROP_SPARSE_INSTRUMENT_ROWS,
                              defaultValue=5,
                              validator=greaterThanTwoInt,
                              direction=Direction.Input,
                              doc='Number of detector rows in sparse simulation instrument.')
-        self.setPropertyGroup(common.PROP_SPARSE_INSTRUMENT_ROWS, common.PROPGROUP_SIMULATION_INSTRUMENT)
+        self.setPropertyGroup(common.PROP_SPARSE_INSTRUMENT_ROWS, PROPGROUP_SIMULATION_INSTRUMENT)
         self.setPropertySettings(common.PROP_SPARSE_INSTRUMENT_ROWS, EnabledWhenProperty(common.PROP_SIMULATION_INSTRUMENT,
                                  PropertyCriterion.IsEqualTo, common.SIMULATION_INSTRUMEN_SPARSE))
         self.declareProperty(name=common.PROP_SPARSE_INSTRUMENT_COLUMNS,
@@ -105,7 +106,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                              validator=greaterThanOneInt,
                              direction=Direction.Input,
                              doc='Number of detector columns in sparse simulation instrument.')
-        self.setPropertyGroup(common.PROP_SPARSE_INSTRUMENT_COLUMNS, common.PROPGROUP_SIMULATION_INSTRUMENT)
+        self.setPropertyGroup(common.PROP_SPARSE_INSTRUMENT_COLUMNS, PROPGROUP_SIMULATION_INSTRUMENT)
         self.setPropertySettings(common.PROP_SPARSE_INSTRUMENT_COLUMNS, EnabledWhenProperty(common.PROP_SIMULATION_INSTRUMENT,
                                  PropertyCriterion.IsEqualTo, common.SIMULATION_INSTRUMEN_SPARSE))
         self.declareProperty(name=common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS,

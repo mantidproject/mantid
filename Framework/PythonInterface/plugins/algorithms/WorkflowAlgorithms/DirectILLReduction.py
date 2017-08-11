@@ -241,6 +241,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
+        PROPGROUP_REBINNING = 'Rebinning for SofQW'
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
@@ -294,10 +295,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 'reduction run.')
         self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W),
                              doc='Manual energy rebinning parameters.')
-        self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, common.PROPGROUP_REBINNING)
+        self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, PROPGROUP_REBINNING)
         self.declareProperty(FloatArrayProperty(name=common.PROP_BINNING_PARAMS_Q),
                              doc='Manual q rebinning parameters.')
-        self.setPropertyGroup(common.PROP_BINNING_PARAMS_Q, common.PROPGROUP_REBINNING)
+        self.setPropertyGroup(common.PROP_BINNING_PARAMS_Q, PROPGROUP_REBINNING)
         self.declareProperty(name=common.PROP_TRANSPOSE_SAMPLE_OUTPUT,
                              defaultValue=common.TRANSPOSING_ON,
                              validator=StringListValidator([
