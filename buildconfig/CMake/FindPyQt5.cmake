@@ -1,9 +1,9 @@
 # Find PyQt5
 # ~~~~~~~~~~
 #
-# PyQt4 website: http://www.riverbankcomputing.co.uk/pyqt/index.php
+# PyQt5 website: http://www.riverbankcomputing.co.uk/pyqt/index.php
 #
-# Find the installed version of PyQt4. FindPyQt5 should only be called after
+# Find the installed version of PyQt5. FindPyQt5 should only be called after
 # Python has been found.
 #
 # This file defines the following variables, which can also be overriden by
