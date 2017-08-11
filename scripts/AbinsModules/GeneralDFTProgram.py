@@ -82,8 +82,8 @@ class GeneralDFTProgram(object):
                                                           **Notice at the moment this parameter is not functional
                                                             in LoadCastep**
 
-                                               "fract_coord" - equilibrium position of atom in terms of lattice vectors;
-                                                               (fractional coordinates) it has a form of numpy array with three floats
+                                               "coord" - equilibrium position of atom in Angstroms;
+                                                         it has a form of numpy array with three floats
 
                                                "mass" - mass of atom
 

@@ -52,7 +52,7 @@ ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
 ALL_KEYWORDS_K_DATA = ["weights", "k_vectors", "frequencies", "atomic_displacements", "unit_cell"]
 
 # keywords which define data structure of AtomsData
-ALL_KEYWORDS_ATOMS_DATA = ["symbol", "fract_coord", "sort", "mass"]
+ALL_KEYWORDS_ATOMS_DATA = ["symbol", "coord", "sort", "mass"]
 # keywords which define data structure for PowderData
 ALL_KEYWORDS_POWDER_DATA = ["b_tensors", "a_tensors"]
 

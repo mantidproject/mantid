@@ -29,8 +29,8 @@ def skip_if(skipping_criteria):
 
 @skip_if(old_python)
 class AbinsAtomsDataTest(unittest.TestCase):
-    _good_data = {"atom_0": {'sort': 0, 'symbol': 'Si', 'fract_coord': np.asarray([0.,  0.,  0.]), 'mass': 28.085500},
-                  "atom_1": {'sort': 1, 'symbol': 'Si', 'fract_coord': np.asarray([0.25,  0.25,  0.25]), 
+    _good_data = {"atom_0": {'sort': 0, 'symbol': 'Si', 'coord': np.asarray([0.,  0.,  0.]), 'mass': 28.085500},
+                  "atom_1": {'sort': 1, 'symbol': 'Si', 'coord': np.asarray([0.25,  0.25,  0.25]), 
                              'mass': 28.085500}}
 
     def setUp(self):
@@ -48,7 +48,7 @@ class AbinsAtomsDataTest(unittest.TestCase):
         # too large
         wrong_data = {"atom_0": {"sort": 3,
                                  "symbol":  self._good_data["atom_0"]["symbol"],
-                                 "fract_coord": self._good_data["atom_0"]["fract_coord"],
+                                 "coord": self._good_data["atom_0"]["coord"],
                                  "mass": self._good_data["atom_0"]["mass"]
                                  }}
         with self.assertRaises(ValueError):
@@ -73,32 +73,32 @@ class AbinsAtomsDataTest(unittest.TestCase):
     def test_wrong_symbol(self):
         wrong_data = {"atom_0": {"sort": self._good_data["atom_0"]["sort"],
                                  "symbol": "CA",  # valid is Ca not CA
-                                 "fract_coord": self._good_data["atom_0"]["fract_coord"],
+                                 "coord": self._good_data["atom_0"]["coord"],
                                  "mass": self._good_data["atom_0"]["mass"]
                                  }}
         with self.assertRaises(ValueError):
             self._tester._append(item=wrong_data)
 
-    def test_wrong_fract_coord(self):
+    def test_wrong_coord(self):
         wrong_data = {"atom_0": {"sort": self._good_data["atom_0"]["sort"],
                                  "symbol": self._good_data["atom_0"]["symbol"],
-                                 "fract_coord": "wrong", "mass": self._good_data["atom_0"]["mass"]
+                                 "coord": "wrong", "mass": self._good_data["atom_0"]["mass"]
                                  }}
         with self.assertRaises(ValueError):
             self._tester._append(item=wrong_data)
 
-        wrong_data["fract_coord"] = np.asarray([[1, 2], [4]])
+        wrong_data["coord"] = np.asarray([[1, 2], [4]])
         with self.assertRaises(ValueError):
             self._tester._append(item=wrong_data)
 
-        wrong_data["fract_coord"] = np.asarray([1, 2])
+        wrong_data["coord"] = np.asarray([1, 2])
         with self.assertRaises(ValueError):
             self._tester._append(item=wrong_data)
 
     def test_wrong_atom(self):
         wrong_data = {"atom_0": {"sort": self._good_data["atom_0"]["sort"],
                                  "symbol": self._good_data["atom_0"]["symbol"],
-                                 "fract_coord": self._good_data["atom_0"]["fract_coord"],
+                                 "coord": self._good_data["atom_0"]["coord"],
                                  "mass": self._good_data["atom_0"]["mass"]}}
 
         with self.assertRaises(ValueError):
@@ -116,7 +116,7 @@ class AbinsAtomsDataTest(unittest.TestCase):
 
         wrong_data = {"atom_0": {"sort": self._good_data["atom_0"]["sort"],
                                  "symbol": self._good_data["atom_0"]["symbol"],
-                                 "fract_coord": self._good_data["atom_0"]["fract_coord"],
+                                 "coord": self._good_data["atom_0"]["coord"],
                                  "mass": -1.0
                                  }}
         with self.assertRaises(ValueError):
@@ -139,7 +139,7 @@ class AbinsAtomsDataTest(unittest.TestCase):
         self._tester._append(self._good_data["atom_1"])
 
         with self.assertRaises(ValueError):
-            self._tester._append({'sort': 1, 'symbol': 'Si', 'fract_coord': np.asarray([0.25,  0.25,  0.25]),
+            self._tester._append({'sort': 1, 'symbol': 'Si', 'coord': np.asarray([0.25,  0.25,  0.25]),
                                   'mass': 28.085500})
 
     def test_wrong_set(self):
@@ -166,8 +166,8 @@ class AbinsAtomsDataTest(unittest.TestCase):
         for el in range(elements):
             self.assertEqual(self._good_data["atom_%s" % el]["sort"], data["atom_%s" % el]["sort"])
             self.assertEqual(self._good_data["atom_%s" % el]["symbol"], data["atom_%s" % el]["symbol"])
-            self.assertEqual(True, np.allclose(self._good_data["atom_%s" % el]["fract_coord"],
-                                               data["atom_%s" % el]["fract_coord"]))
+            self.assertEqual(True, np.allclose(self._good_data["atom_%s" % el]["coord"],
+                                               data["atom_%s" % el]["coord"]))
             self.assertEqual(self._good_data["atom_%s" % el]["mass"], data["atom_%s" % el]["mass"])
 
     def test_good_set(self):
@@ -178,8 +178,8 @@ class AbinsAtomsDataTest(unittest.TestCase):
         for el in range(elements):
             self.assertEqual(self._good_data["atom_%s" % el]["sort"], data["atom_%s" % el]["sort"])
             self.assertEqual(self._good_data["atom_%s" % el]["symbol"], data["atom_%s" % el]["symbol"])
-            self.assertEqual(True, np.allclose(self._good_data["atom_%s" % el]["fract_coord"],
-                                               data["atom_%s" % el]["fract_coord"]))
+            self.assertEqual(True, np.allclose(self._good_data["atom_%s" % el]["coord"],
+                                               data["atom_%s" % el]["coord"]))
             self.assertEqual(self._good_data["atom_%s" % el]["mass"], data["atom_%s" % el]["mass"])
 
 if __name__ == '__main__':

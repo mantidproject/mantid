@@ -16,7 +16,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
     """
     def __init__(self, input_dft_filename=None):
         """
-        :param input_dft_filename: name of a file with phonon data (foo.phonon)
+        :param input_dft_filename: name of a file with phonon data (foo.out)
         """
         super(LoadCRYSTAL, self).__init__(input_dft_filename=input_dft_filename)
 
@@ -108,7 +108,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
             # In case there is more than one k-point super-cell is constructed. In order to obtain metric tensor we
             # need to find expansion transformation.
             with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
-                self._find(file_obj=crystal_file, msg="EXPANSION MATRIX OF PRIMITIVE CELL")
+                self._find_first(file_obj=crystal_file, msg="EXPANSION MATRIX OF PRIMITIVE CELL")
                 dim = 3
                 vectors = []
                 for i in range(dim):
@@ -128,7 +128,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :param obj_file:  file object from which we read
         :return: list with lattice vectors
         """
-        self._find(file_obj=obj_file, msg="DIRECT LATTICE VECTORS CARTESIAN COMPONENTS (ANGSTROM)")
+        self._find_first(file_obj=obj_file, msg="DIRECT LATTICE VECTORS CARTESIAN COMPONENTS (ANGSTROM)")
         obj_file.readline()  # Line: X                    Y                    Z
         dim = 3
         vectors = []
@@ -148,7 +148,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :return: list with atomic coordinates
         """
         coord_lines = []
-        self._find(file_obj=file_obj, msg="ATOM          X(ANGSTROM)         Y(ANGSTROM)         Z(ANGSTROM)")
+        self._find_first(file_obj=file_obj, msg="ATOM          X(ANGSTROM)         Y(ANGSTROM)         Z(ANGSTROM)")
         file_obj.readline()  # Line: *******************************************************************************
 
         while not self._file_end(file_obj=file_obj):
@@ -186,7 +186,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
             # parse all k-points
             for k in range(num_k):
 
-                line = self._find(file_obj=file_obj, msg="DISPERSION K POINT NUMBER")
+                line = self._find_first(file_obj=file_obj, msg="DISPERSION K POINT NUMBER")
 
                 partial_freq = []
                 xdisp = []
@@ -201,7 +201,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 k_point_type = local_line[6]
 
 
-                # parse for k-points for which atomic displacements are real
+                # parse k-points for which atomic displacements are real
                 if k_point_type == b"R":
 
                     while not self._file_end(file_obj=file_obj):
@@ -214,7 +214,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                         if self._check_kpoints_end(file_obj=file_obj):
                             break
 
-                # parse for k-points for which atomic displacements are complex
+                # parse k-points for which atomic displacements are complex
                 elif k_point_type == b"C":
 
                     real_partial_xdisp = []
@@ -294,12 +294,12 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _read_freq_block(self, file_obj=None, freq=None, append=True):
         """
-        Parsing block with frequencies.
+        Parses block with frequencies.
         :param append:
         :param file_obj: file object from which we read
         :param freq: list with frequencies which we update
         """
-        line = self._find(file_obj=file_obj, msg="FREQ(CM**-1)")
+        line = self._find_first(file_obj=file_obj, msg="FREQ(CM**-1)")
 
         if append:
             for item in line.replace(b"\n", b" ").replace(b"FREQ(CM**-1)", b" ").split():
@@ -307,7 +307,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _read_coord_block(self, file_obj=None, xdisp=None, ydisp=None, zdisp=None, part="real"):
         """
-        Parsing block with coordinates.
+        Parses block with coordinates.
         :param file_obj: file object from which we read
         :param xdisp: list with x coordinates which we update
         :param ydisp: list with y coordinates which we update
@@ -342,7 +342,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _move_to(self, file_obj=None, msg=None):
         """
-        Finds the first line with msg. Moves file current position to the found line line which includes .
+        Finds the first line with msg and moves read file pointer to the line before.
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
@@ -355,9 +355,9 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 file_obj.seek(pos)
                 return
 
-    def _find(self, file_obj=None, msg=None):
+    def _find_first(self, file_obj=None, msg=None):
         """
-        Finds the first line with msg. Moves file current position to the next line.
+        Finds the first line with msg. Moves a file pointer current position to the next line.
         :param file_obj: file object from which we read
         :param msg: keyword to find
         :return: line with the msg keyword
@@ -371,7 +371,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _check_kpoints_end(self, file_obj=None):
         """
-
+        Checks if end of k-points block.
         :param file_obj: file object from which we read
         :return: True if end of block otherwise False
         """
@@ -397,7 +397,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _file_end(self, file_obj=None):
         """
-        Checks end of text file.
+        Checks end of a file.
         :param file_obj: file object which was open in "r" mode
         :return: True if end of file, otherwise False
         """
@@ -412,9 +412,9 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _check_block_end(self, file_obj=None, msg=None):
         """
-
+        Checks if end of k-point block.
         :param file_obj: file object from which we read
-        :param msg: message which end kpoint block.
+        :param msg: message which ends k-point block.
         :return: True if end of block otherwise False
         """
         pos = file_obj.tell()
@@ -426,7 +426,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         return msg in line
 
     def _get_num_kpoints(self, file_obj=None):
-        self._find(file_obj=file_obj, msg="K       WEIGHT       COORD")
+        self._find_first(file_obj=file_obj, msg="K       WEIGHT       COORD")
         num_k = 0
         while not self._file_end(file_obj=file_obj):
             line = file_obj.readline()
@@ -437,7 +437,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
     def _create_atoms_data(self, data=None, coord_lines=None):
         """
         Creates Python dictionary with atoms data which can be easily converted to AbinsData object.
-        :return: Python dictionary which can easily be converted to AbinsData object
+        :return: Python dictionary which can be easily  converted to AbinsData object
         """
         data.update({"atoms": dict()})
         for i, line in enumerate(coord_lines):
@@ -446,13 +446,13 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
             atom = Atom(symbol=symbol)
             data["atoms"]["atom_{}".format(i)] = {
                 "symbol": symbol, "mass": atom.mass, "sort": i,
-                "fract_coord": np.asarray(l[3:6]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)}
+                "coord": np.asarray(l[3:6]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)}
 
     def _create_kpoints_data(self, data=None, freq=None, atomic_displacements=None, atomic_coordinates=None,
                              weights=None, k_coordinates=None, unit_cell=None):
         """
         Creates Python dictionary with k-points data which can  be easily converted to AbinsData object.
-        :param data: Python dictionary for in k points  data will be stored
+        :param data: Python dictionary to which found k points data should be added
         :param freq: normal modes
         :param atomic_displacements: atomic displacements
         :param atomic_coordinates: atomic coordinates
@@ -479,10 +479,11 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _create_kpoint_data(self, freq=None, atomic_displacements=None, atomic_coordinates=None):
         """
-         Normalises atomic displacement.  Saves result to data Python dictionary.
+        Normalises atomic displacements.
         :param freq: normal modes for the given k-point
         :param atomic_displacements: atomic displacements for the given k-point
         :param atomic_coordinates: atomic coordinates
+        :return normalised atomic displacements in the form of numpy array
         """
         #  Normalise atomic displacements and put them into data dictionary for the given k-point
         column_num = -1

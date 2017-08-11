@@ -77,7 +77,9 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
                     indx = int(line_data[0]) - 1  # -1 to convert to zero based indexing
                     symbol = line_data[4]
                     ion = {"symbol": symbol,
-                           "fract_coord": np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])]),
+                           "coord": np.array(float(line_data[1]) * file_data['unit_cell'][0] +
+                                             float(line_data[2]) * file_data['unit_cell'][1] +
+                                             float(line_data[3]) * file_data['unit_cell'][2]),
                            # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
                            "sort": indx,
                            "mass": float(line_data[5])}

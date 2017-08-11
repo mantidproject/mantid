@@ -142,8 +142,8 @@ class AbinsLoadCRYSTALTest(unittest.TestCase):
             self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"],
                                    delta=0.00001)  # delta in amu units
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
-            self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["fract_coord"]),
-                                               atoms["atom_%s" % item]["fract_coord"]))
+            self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
+                                               atoms["atom_%s" % item]["coord"]))
 
         # check attributes
         self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
@@ -181,8 +181,8 @@ class AbinsLoadCRYSTALTest(unittest.TestCase):
             self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"],
                                    delta=0.00001)
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
-            self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["fract_coord"]),
-                                               atoms["atom_%s" % item]["fract_coord"]))
+            self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
+                                               atoms["atom_%s" % item]["coord"]))
 
     # noinspection PyMethodMayBeStatic
     def _get_reader_data(self, crystal_reader=None):
