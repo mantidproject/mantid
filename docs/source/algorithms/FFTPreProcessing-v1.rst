@@ -20,7 +20,7 @@ Padding is when the input data is extended by adding extra measurments of zero a
 `Apodization functions <http://mathworld.wolfram.com/ApodizationFunction.html>`_ can be used to remove data with large errors. These are usualy
 found at large time scales. These take a decay constant 
 (:math:`\tau` ) that determines the rate at which the data goes to zero. 
-The time the function is evaluated at is denoted by :math:`R`.
+The time the function is evaluated at is denoted by :math:`t`.
 The current implementation includes the following functions:
 
 - None.
