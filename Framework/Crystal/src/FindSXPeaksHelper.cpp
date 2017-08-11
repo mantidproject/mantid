@@ -12,6 +12,29 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 
+namespace {
+
+const double TWO_PI = 2 * M_PI;
+
+bool isDifferenceLargerThanTolerance(const double angle1, const double angle2,
+                                     const double tolerance) {
+  auto difference = std::abs(angle1 - angle2);
+
+  // If we have more than 360 degree angle difference then we need to wrap it
+  // back to 360
+  if (difference > TWO_PI) {
+    difference = std::fmod(difference, TWO_PI);
+  }
+
+  // If we have more than 180 degrees then we must take the smaller angle
+  if (difference > M_PI) {
+    difference = TWO_PI - difference;
+  }
+
+  return difference > tolerance;
+}
+}
+
 using namespace boost;
 
 namespace Mantid {
@@ -95,10 +118,11 @@ bool SXPeak::compare(const SXPeak &rhs, const double tofTolerance,
   if (std::abs(_t - rhs._t) > tofTolerance) {
     return false;
   }
-  if (std::abs(_phi - rhs._phi) > phiTolerance) {
+
+  if (isDifferenceLargerThanTolerance(_phi, rhs._phi, phiTolerance)) {
     return false;
   }
-  if (std::abs(_th2 - rhs._th2) > thetaTolerance) {
+  if (isDifferenceLargerThanTolerance(_th2, rhs._th2, thetaTolerance)) {
     return false;
   }
   return true;
@@ -398,9 +422,9 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
   auto distanceMax = std::distance(x.begin(), high);
 
   const auto lowY = y.begin() + distanceMin;
-  const auto highY = distanceMax < static_cast<int>(y.size())
-                         ? y.begin() + distanceMax
-                         : y.end();
+  auto highY = distanceMax < static_cast<int>(y.size())
+                   ? y.begin() + distanceMax
+                   : y.end();
 
   for (auto it = lowY; it != highY; ++it) {
     const auto signal = *it;
@@ -430,7 +454,10 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
 
   // Handle a peak on the edge if it exists
   if (isRecording) {
-    currentPeak->stopRecord(high);
+    if (highY == y.end()) {
+      --highY;
+    }
+    currentPeak->stopRecord(highY);
     peaks.push_back(std::move(currentPeak));
     currentPeak = nullptr;
   }

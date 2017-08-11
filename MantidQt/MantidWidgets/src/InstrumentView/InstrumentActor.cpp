@@ -10,7 +10,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -19,6 +18,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"

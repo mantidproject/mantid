@@ -1,9 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -67,6 +64,9 @@ void FindSXPeaks::init() {
   // ---------------------------------------------------------------
   // Peak strategies + Threshold
   // ---------------------------------------------------------------
+  auto mustBePositiveDouble = boost::make_shared<BoundedValidator<double>>();
+  mustBePositiveDouble->setLower(0.0);
+
   std::vector<std::string> peakFindingStrategy = {strongestPeakStrategy,
                                                   allPeaksStrategy};
   declareProperty(
@@ -77,11 +77,12 @@ void FindSXPeaks::init() {
       "spectrum (provided there is "
       "one). This options is more performant than the AllPeaks option.\n"
       "2. AllPeaks: This strategy will find all peaks in each "
-      "spectrum. This is slower than StrongestPeakOnly.\n");
+      "spectrum. This is slower than StrongestPeakOnly. Note that the "
+      "recommended ResolutionStrategy in this mode is AbsoluteResolution.\n");
 
   // Declare
   declareProperty(
-      "SignalBackground", 10.0,
+      "SignalBackground", 10.0, mustBePositiveDouble,
       "Multiplication factor for the signal background. Peaks which are"
       " below the estimated background are discarded. The background is "
       "estimated"
@@ -89,7 +90,7 @@ void FindSXPeaks::init() {
       " by the SignalBackground property.\n");
 
   declareProperty(
-      "AbsoluteBackground", 10.0,
+      "AbsoluteBackground", 30.0, mustBePositiveDouble,
       "Peaks which are below the specified absolute background are discarded."
       " The background is gloabally specified for all spectra. Inspect your "
       "data in the InstrumentView to get a good feeling for the background "
@@ -135,20 +136,21 @@ void FindSXPeaks::init() {
                   "ThetaResolution.\n");
 
   declareProperty(
-      "Resolution", 0.01,
+      "Resolution", 0.01, mustBePositiveDouble,
       "Tolerance needed to avoid peak duplication in number of pixels");
 
-  declareProperty("TofResolution", 5000.,
+  declareProperty("TofResolution", 5000., mustBePositiveDouble,
                   "Absolute tolerance in time-of-flight needed to avoid peak "
                   "duplication in number of pixels. The values are specified "
                   "in microseconds.");
 
-  declareProperty("PhiResolution", 1., "Absolute tolerance in the phi "
-                                       "coordinate needed to avoid peak "
-                                       "duplication in number of pixels. The "
-                                       "values are specified in degrees.");
+  declareProperty("PhiResolution", 1., mustBePositiveDouble,
+                  "Absolute tolerance in the phi "
+                  "coordinate needed to avoid peak "
+                  "duplication in number of pixels. The "
+                  "values are specified in degrees.");
 
-  declareProperty("TwoThetaResolution", 1.,
+  declareProperty("TwoThetaResolution", 1., mustBePositiveDouble,
                   "Absolute tolerance of two theta value needed to avoid peak "
                   "duplication in number of pixels. The values are specified "
                   "in degrees.");

@@ -7,7 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidCrystal/FindSXPeaksHelper.h"

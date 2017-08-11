@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import AbinsModules
+import  gc
 try:
     # noinspection PyUnresolvedReferences
     from pathos.multiprocessing import ProcessingPool
@@ -54,7 +55,7 @@ class SPowderSemiEmpiricalCalculator(object):
             self._abins_data = abins_data
         else:
             raise ValueError("Object of type AbinsData was expected.")
-
+        self._q2_indices = list(self._abins_data.get_kpoints_data().extract()["k_vectors"].keys())
         self._atoms = self._abins_data.get_atoms_data().extract()
 
         if isinstance(abins_data, AbinsModules.AbinsData):
@@ -118,12 +119,20 @@ class SPowderSemiEmpiricalCalculator(object):
 
     def _calculate_s(self):
 
+        # calculate powder data
         powder_calculator = AbinsModules.CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
-        powder_data = powder_calculator.get_formatted_data()
+        powder_calculator.get_formatted_data()
+
+        # free memory
+        self._abins_data = None
+        gc.collect()
+
+        # calculate S
         calculate_s_powder = None
         if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
             calculate_s_powder = self._calculate_s_powder_1d
-        s_data = calculate_s_powder(powder_data=powder_data)
+
+        s_data = calculate_s_powder()
 
         return s_data
 
@@ -226,48 +235,48 @@ class SPowderSemiEmpiricalCalculator(object):
         self._s_current_threshold = np.copy(self._s_threshold_ref)
         self._total_s_correction_num_attempt = 0
 
-    def _get_gamma_data(self, k_data=None):
+    def _calculate_s_powder_over_k(self):
         """
-        Extracts k points data only for Gamma point.
-        :return: dictionary with data only for Gamma point
+        Helper function. It calculates S for all q points  and all atoms.
+        :return: dictionary with S
         """
-        gamma_pkt_index = -1
+        data = self._calculate_s_powder_over_atoms(q_indx=self._q2_indices[0])
 
-        # look for index of Gamma point
-        for k in k_data["k_vectors"]:
-            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsModules.AbinsConstants.SMALL_K:
-                gamma_pkt_index = k
-                break
-        if gamma_pkt_index == -1:
-            raise ValueError("Gamma point not found.")
+        # iterate over remaining q-points
+        for q in self._q2_indices[1:]:
+            local_data = self._calculate_s_powder_over_atoms(q_indx=q)
+            self._sum_s(current_val=data, addition=local_data)
+        return data
 
-        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
+    def _sum_s(self, current_val=None, addition=None):
+        """
+        Helper functions which sums S for all atoms and all quantum events taken into account.
+        :param current_val: S accumulated so far
+        :param addition: S to be added
+        """
+        for atom in range(self._num_atoms):
+            for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
+                               self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
+                temp = addition["atom_%s" % atom]["s"]["order_%s" % order]
+                current_val["atom_%s" % atom]["s"]["order_%s" % order] += temp
 
-        k_points = {"weights": {gamma: k_data["weights"][gamma_pkt_index]},
-                    "k_vectors": {gamma: k_data["k_vectors"][gamma_pkt_index]},
-                    "frequencies": {gamma: k_data["frequencies"][gamma_pkt_index]},
-                    "atomic_displacements": {gamma: k_data["atomic_displacements"][gamma_pkt_index]}
-                    }
-
-        return k_points
-
-    def _calculate_s_powder_1d(self, powder_data=None):
+    def _calculate_s_powder_1d(self):
         """
         Calculates 1D S for the powder case.
 
-        @param powder_data: object of type PowderData with mean square displacements and Debye-Waller factors for
-                            the case of powder
-        @return: object of type SData with 1D dynamical structure factors for the powder case
+        :return: object of type SData with 1D dynamical structure factors for the powder case
         """
-        s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
-        self._powder_atoms_data = powder_data.extract()
-        data = self._calculate_s_powder_over_atoms()
+        # calculate data
+        data = self._calculate_s_powder_over_k()
         data.update({"frequencies": self._frequencies})
+
+        # put data to SData object
+        s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
         s_data.set(items=data)
 
         return s_data
 
-    def _calculate_s_powder_over_atoms(self):
+    def _calculate_s_powder_over_atoms(self, q_indx=None):
         """
         Evaluates S for all atoms for the given q-point and checks if S is consistent.
         :return: Python dictionary with S data
@@ -277,7 +286,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
             try:
 
-                s_all_atoms = self._calculate_s_powder_over_atoms_core()
+                s_all_atoms = self._calculate_s_powder_over_atoms_core(q_indx=q_indx)
                 self._check_tot_s(tot_s=s_all_atoms)
                 return s_all_atoms
 
@@ -287,13 +296,14 @@ class SPowderSemiEmpiricalCalculator(object):
                 self._total_s_correction_num_attempt += 1
                 self._s_threshold_up()
 
-    def _calculate_s_powder_over_atoms_core(self):
+    def _calculate_s_powder_over_atoms_core(self, q_indx=None):
         """
         Helper function for _calculate_s_powder_1d.
         :return: Python dictionary with S data
         """
-        atoms_items = dict()
-        num_atoms, atoms = self._prepare_data()
+        atoms_items = {}
+        atoms = range(self._num_atoms)
+        self._prepare_data(k_point=q_indx)
 
         if PATHOS_FOUND:
             p_local = ProcessingPool(nodes=AbinsModules.AbinsParameters.threads)
@@ -303,34 +313,38 @@ class SPowderSemiEmpiricalCalculator(object):
             for atom in atoms:
                 result.append(self._calculate_s_powder_one_atom(atom=atom))
 
-        for atom in range(num_atoms):
+        for atom in range(self._num_atoms):
             atoms_items["atom_%s" % atom] = {"s": result[atoms.index(atom)]}
             self._report_progress(msg="S for atom %s" % atom + " has been calculated.")
         return atoms_items
 
-    def _prepare_data(self):
+    def _prepare_data(self, k_point=None):
         """
         Sets all necessary fields for 1D calculations. Sorts atom indices to improve parallelism.
         :return: number of atoms, sorted atom indices
         """
-        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
-        num_atoms = self._powder_atoms_data["a_tensors"][gamma].shape[0]
-        self._a_traces = np.trace(a=self._powder_atoms_data["a_tensors"][gamma], axis1=1, axis2=2)
-        self._b_traces = np.trace(a=self._powder_atoms_data["b_tensors"][gamma], axis1=2, axis2=3)
-        abins_data_extracted = self._abins_data.extract()
-        self._atoms_data = abins_data_extracted["atoms_data"]
-        k_points_data = self._get_gamma_data(abins_data_extracted["k_points_data"])
-        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
-        self._fundamentals_freq = k_points_data["frequencies"][gamma]
+        # load powder data for one k
+        clerk = AbinsModules.IOmodule(input_filename=self._input_filename,
+                                      group_name=AbinsModules.AbinsParameters.powder_data_group)
+        powder_data = clerk.load(list_of_datasets=["powder_data"])
+        self._a_tensors = powder_data["datasets"]["powder_data"]["a_tensors"][k_point]
+        self._b_tensors = powder_data["datasets"]["powder_data"]["b_tensors"][k_point]
+        self._a_traces = np.trace(a=self._a_tensors, axis1=1, axis2=2)
+        self._b_traces = np.trace(a=self._b_tensors, axis1=2, axis2=3)
 
-        # sort atoms over atom type so that parallelisation is more efficient
-        symbols = []
-        unsorted_atoms = range(num_atoms)
-        for i in unsorted_atoms:
-            symbols.append(self._atoms_data["atom_%s" % i]["symbol"])
-        symbols, sorted_atoms = (list(x) for x in zip(*sorted(zip(symbols, unsorted_atoms))))
+        # load dft data for one k point
+        clerk = AbinsModules.IOmodule(input_filename=self._input_filename,
+                                      group_name=AbinsModules.AbinsParameters.dft_group)
+        dft_data = clerk.load(list_of_datasets=["frequencies", "weights"])
 
-        return len(sorted_atoms), sorted_atoms
+        frequencies = dft_data["datasets"]["frequencies"][int(k_point)]
+        indx = frequencies > AbinsModules.AbinsConstants.ACOUSTIC_PHONON_THRESHOLD
+        self._fundamentals_freq = frequencies[indx]
+
+        self._weight = dft_data["datasets"]["weights"][int(k_point)]
+
+        # free memory
+        gc.collect()
 
     def _report_progress(self, msg):
         """
@@ -451,8 +465,6 @@ class SPowderSemiEmpiricalCalculator(object):
             fundamentals_coefficients=fund_coeff,
             quantum_order=order)
 
-        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
-
         if local_freq.any():  # check if local_freq has non-zero values
 
             q2 = None
@@ -462,9 +474,9 @@ class SPowderSemiEmpiricalCalculator(object):
             value_dft = self._calculate_order[order](q2=q2,
                                                      frequencies=local_freq,
                                                      indices=local_coeff,
-                                                     a_tensor=self._powder_atoms_data["a_tensors"][gamma][atom],
+                                                     a_tensor=self._a_tensors[atom],
                                                      a_trace=self._a_traces[atom],
-                                                     b_tensor=self._powder_atoms_data["b_tensors"][gamma][atom],
+                                                     b_tensor=self._b_tensors[atom],
                                                      b_trace=self._b_traces[atom])
 
             rebined_freq, rebined_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
@@ -484,7 +496,8 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             rebined_broad_spectrum = self._fix_empty_array()
 
-        rebined_broad_spectrum = rebined_broad_spectrum / AbinsModules.AbinsParameters.bin_width
+        # multiply by k-point weight
+        rebined_broad_spectrum = rebined_broad_spectrum * self._weight / AbinsModules.AbinsParameters.bin_width
         return local_freq, local_coeff, rebined_broad_spectrum
 
     # noinspection PyUnusedLocal

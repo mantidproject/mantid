@@ -36,7 +36,7 @@ public:
   static void destroySuite(FindSXPeaksHelperTest *suite) { delete suite; }
 
   /* ------------------------------------------------------------------------------------------
-   * Single Cruystal peak representation
+   * Single Crystal peak representation
    * ------------------------------------------------------------------------------------------
    */
 
@@ -77,7 +77,6 @@ public:
                       peak.getIntensity());
     TSM_ASSERT_EQUALS("Detector Id getter is not wired-up correctly", 2,
                       peak.getDetectorId());
-    // QSpace is also a getter, but is tested more thouroughly below.
   }
 
   /* ------------------------------------------------------------------------------------------
@@ -153,15 +152,18 @@ public:
     auto peaks = peakFindingStrategy->findSXPeaks(x, y, workspaceIndex);
 
     // THEN
-    TSM_ASSERT("There should only be one peak that is found.",
+    TSM_ASSERT("There should be two peaks that are found.",
                peaks.get().size() == 2);
     TSM_ASSERT("The first peak should have a signal value of 7.",
                peaks.get()[0].getIntensity() == 7.);
-    TSM_ASSERT("The first peak should have a signal value of 11.",
+    TSM_ASSERT("The second peak should have a signal value of 11.",
                peaks.get()[1].getIntensity() == 11.);
   }
 
-  void testThatThrowsWhenBackgroundStrategyIsNotAbsoluteBackgroundStrategy() {
+  void
+  testThatThrowsWhenBackgroundStrategyIsNotAbsoluteBackgroundStrategyWhenUsingAllPeaksStrategy() {
+    // Note that the AllPeaksStrategy is currently only supporting the absolute
+    // background strategy
     // GIVEN
     auto backgroundStrategy =
         Mantid::Kernel::make_unique<PerSpectrumBackgroundStrategy>(3.);
