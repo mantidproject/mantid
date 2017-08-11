@@ -245,9 +245,19 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                                 'Interpolation': self.getProperty('Interpolation').value}
 
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
+        self._sample_ws = mtd[self._sample_ws_name]
         self._container_ws_name = self.getPropertyValue('ContainerWorkspace')
         self._shape = self.getProperty('Shape').value
         self._height = self.getProperty('Height').value
+
+        self._sample_unit = self._sample_ws.getAxis(0).getUnit().unitID()
+        logger.information('Input X-unit is {}'.format(self._unit))
+        if self._unit == 'dSpacing':
+            self._emode = 'Elastic'
+        else:
+            self._emode = str(self._sample_ws.getEMode())
+        if self._emode == 'Indirect' or 'Direct':
+            self._efixed = self._getEfixed()
 
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
         self._sample_density_type = self.getPropertyValue('SampleDensityType')
@@ -271,17 +281,41 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             self._sample_inner_radius = self.getProperty('SampleInnerRadius').value
             self._sample_outer_radius = self.getProperty('SampleOuterRadius').value
 
-            if self._container_ws_name:
-                if self._shape == 'FlatPlate':
-                    self._container_width = self.getProperty('ContainerWidth').value
-                    self._container_thickness = self.getProperty('ContainerThickness').value
-                    self._container_angle = self.getProperty('ContainerAngle').value
-                    self._container_center = self.getProperty('ContainerCenter').value
-                    self._container_shape = 'FlatPlate'
-                else:
-                    self._container_inner_radius = self.getProperty('ContainerInnerRadius').value
-                    self._container_outer_radius = self.getProperty('ContainerOuterRadius').value
+        if self._container_ws_name:
+            if self._shape == 'FlatPlate':
+                self._container_width = self.getProperty('ContainerWidth').value
+                self._container_thickness = self.getProperty('ContainerThickness').value
+                self._container_angle = self.getProperty('ContainerAngle').value
+                self._container_center = self.getProperty('ContainerCenter').value
+            else:
+                self._container_inner_radius = self.getProperty('ContainerInnerRadius').value
+                self._container_outer_radius = self.getProperty('ContainerOuterRadius').value
 
+    def validateInputs(self):
+
+        self._setup()
+        issues = dict()
+
+        if self._container_ws_name:
+            container_unit = mtd[self._container_ws_name].getAxis(0).getUnit().unitID()
+            if container_unit != self._sample_unit:
+                raise ValueError('Sample and Container units must be the same!')
+
+            if self._shape == 'Cylinder':
+                if self._container_inner_radius <= self._sample_radius:
+                    issues['ContainerInnerRadius'] = 'Must be greater than SampleRadius'
+                if self._container_outer_radius <= self._container_inner_radius:
+                    issues['ContainerOuterRadius'] = 'Must be greater than ContainerInnerRadius'
+
+            if self._shape == 'Annulus':
+                if self._container_inner_radius >= self._sample_inner_radius:
+                    issues['ContainerInnerRadius'] = 'Must be less than SampleInnerRadius'
+                if self._container_outer_radius <= self._sample_outer_radius:
+                    issues['ContainerOuterRadius'] = 'Must be greater than SampleOuterRadius'
+
+        if self._shape == 'Annulus':
+            if self._sample_inner_radius >= self._sample_outer_radius:
+                issues['SampleOuterRadius'] = 'Must be greater than SampleInnerRadius'
 
                 
 # Register algorithm with Mantid
