@@ -56,6 +56,9 @@ void FFTPreProcessing::init() {
       "The amount of padding to add to the data,"
       "it is the number of multiples of the data set."
       "i.e 0 means no padding and 1 will double the number of data points.");
+  declareProperty("NegativePadding", false, "If true padding is added to "
+	  "the both sides of the original data. Both sides "
+	  "will be padded by the amount given by Padding");
 }
 
 /** Executes the algorithm
@@ -89,11 +92,15 @@ void FFTPreProcessing::exec() {
 
     // Copy all the Y and E data
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-    for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
-      PARALLEL_START_INTERUPT_REGION
-      const auto index = static_cast<size_t>(i);
-      outputWS->setSharedY(index, inputWS->sharedY(index));
-      outputWS->setSharedE(index, inputWS->sharedE(index));
+    for (int64_t i = 0; i < int64_t(numSpectra); ++i) {			
+		PARALLEL_START_INTERUPT_REGION
+
+		if (std::find(spectra.begin(), spectra.end(), i) != spectra.end())
+		{
+				const auto index = static_cast<size_t>(i);
+			outputWS->setSharedY(index, inputWS->sharedY(index));
+			outputWS->setSharedE(index, inputWS->sharedE(index));
+		}
       prog.report();
       PARALLEL_END_INTERUPT_REGION
     }
@@ -112,8 +119,6 @@ void FFTPreProcessing::exec() {
     const auto specNum = static_cast<size_t>(spectra[i]);
 
     if (spectra[i] > static_cast<int>(numSpectra)) {
-      g_log.error("The spectral index " + std::to_string(spectra[i]) +
-                  " is greater than the number of spectra!");
       throw std::invalid_argument("The spectral index " +
                                   std::to_string(spectra[i]) +
                                   " is greater than the number of spectra!");
@@ -153,12 +158,15 @@ fptr FFTPreProcessing::getApodizationFunction(const std::string method) {
   } else if (method == "Welch") {
     return welch;
   }
-  return none;
+  throw std::invalid_argument("The apodization function selected "+
+	  method +
+	  " is not a valid option");
 }
 /**
 * Applies the appodization function to the data.
 * @param histogram :: [input] Input histogram.
 * @param function :: [input] the apodization function
+* @param decayConstantn :: [input] the decay constant for apodization function
 * @returns :: Histogram of the apodized data
 */
 HistogramData::Histogram FFTPreProcessing::applyApodizationFunction(
@@ -174,6 +182,7 @@ HistogramData::Histogram FFTPreProcessing::applyApodizationFunction(
     yData[i] *= function(xData[i], decayConstant);
     eData[i] *= function(xData[i], decayConstant);
   }
+  result.binEdges();
   return result;
 }
 /**
@@ -192,20 +201,33 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
   HistogramData::Histogram result(histogram);
   // make sure point data
   result.points();
-  auto &xData = result.mutableX();
-  auto &yData = result.mutableY();
-  auto &eData = result.mutableE();
+  auto &xData = result.x();
+  auto &yData = result.y();
+  auto &eData = result.e();
   // assume approx evenly spaced
   double dx = xData[1] - xData[0];
   std::vector<double> newXData;
   std::vector<double> newYData;
   std::vector<double> newEData;
 
+  if (getProperty("NegativePadding")) {
+	  double xValue = xData[0] - dx*yData.size()*padding;
+	  for (int j = 0; j < padding; j++) {
+
+		  for (size_t i = 0; i < yData.size(); ++i) {
+			  newXData.push_back(xValue);
+			  newYData.push_back(0.0);
+			  newEData.push_back(0.0);
+			  xValue += dx;
+		  }
+	  }
+
+  }
   // store original data
   for (size_t i = 0; i < yData.size(); ++i) {
-    newXData.push_back(xData[i]);
-    newYData.push_back(yData[i]);
-    newEData.push_back(eData[i]);
+    newXData.push_back(std::move(xData[i]));
+    newYData.push_back(std::move(yData[i]));
+    newEData.push_back(std::move(eData[i]));
   }
   double xValue = xData[xData.size() - 1] + dx;
   for (int j = 0; j < padding; j++) {
