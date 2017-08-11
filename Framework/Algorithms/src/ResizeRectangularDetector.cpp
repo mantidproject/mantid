@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/ResizeRectangularDetector.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
@@ -122,8 +122,9 @@ void ResizeRectangularDetector::exec() {
     relscalex /= oldscalex[0];
   if (!oldscaley.empty())
     relscaley /= oldscaley[0];
-  applyRectangularDetectorScaleToDetectorInfo(input->mutableDetectorInfo(),
-                                              *det, relscalex, relscaley);
+  applyRectangularDetectorScaleToComponentInfo(input->mutableComponentInfo(),
+                                               comp->getComponentID(),
+                                               relscalex, relscaley);
 }
 
 } // namespace Mantid

@@ -19,11 +19,9 @@ namespace Mantid {
 /// Typedef of a map from detector ID to detector shared pointer.
 typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
 
-namespace Beamline {
-class DetectorInfo;
-}
 namespace Geometry {
-class InfoComponentVisitor;
+class ComponentInfo;
+class DetectorInfo;
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
@@ -241,21 +239,17 @@ public:
   ContainsState containsRectDetectors() const;
 
   bool isMonitorViaIndex(const size_t index) const;
-
-  bool hasDetectorInfo() const;
-  const Beamline::DetectorInfo &detectorInfo() const;
-  bool hasInfoVisitor() const;
-
   size_t detectorIndex(const detid_t detID) const;
-  void
-  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
-  void setInfoVisitor(const InfoComponentVisitor &visitor);
-
-  const InfoComponentVisitor &infoVisitor() const;
-
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
   bool isEmptyInstrument() const;
+
+  /// Add a component to the instrument
+  virtual int add(IComponent *component) override;
+
+  void parseTreeAndCacheBeamline();
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+  makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
 
 private:
   /// Save information about a set of detectors to Nexus
@@ -268,6 +262,10 @@ private:
   /// Add a plottable component
   void appendPlottable(const CompAssembly &ca,
                        std::vector<IObjComponent_const_sptr> &lst) const;
+
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+  makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
+               const DetectorInfo &detectorInfo) const;
 
   /// Map which holds detector-IDs and pointers to detector components, and
   /// monitor flags.
@@ -332,14 +330,14 @@ private:
   /// Pointer to the reference frame object.
   boost::shared_ptr<ReferenceFrame> m_referenceFrame;
 
-  /// Pointer to the DetectorInfo object. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+  /// Pointer to the DetectorInfo object. May be NULL.
+  boost::shared_ptr<const DetectorInfo> m_detectorInfo{nullptr};
+
+  /// Pointer to the ComponentInfo object. May be NULL.
+  boost::shared_ptr<const ComponentInfo> m_componentInfo{nullptr};
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};
-  /// Component and Detector info relevant cache
-  std::unique_ptr<const InfoComponentVisitor> m_infoVisitor;
 };
 namespace Conversion {
 

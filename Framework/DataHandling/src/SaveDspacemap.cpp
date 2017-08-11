@@ -1,7 +1,7 @@
 #include "MantidDataHandling/SaveDspacemap.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include <fstream>
 

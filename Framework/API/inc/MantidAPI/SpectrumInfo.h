@@ -16,13 +16,13 @@ namespace Beamline {
 class SpectrumInfo;
 }
 namespace Geometry {
+class DetectorInfo;
 class IDetector;
 class Instrument;
 class ParameterMap;
 }
 namespace API {
 
-class DetectorInfo;
 class ExperimentInfo;
 
 /** API::SpectrumInfo is an intermediate step towards a SpectrumInfo that is
@@ -68,7 +68,7 @@ class MANTID_API_DLL SpectrumInfo {
 public:
   SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
                const ExperimentInfo &experimentInfo,
-               DetectorInfo &detectorInfo);
+               Geometry::DetectorInfo &detectorInfo);
   ~SpectrumInfo();
 
   size_t size() const;
@@ -107,7 +107,7 @@ private:
   checkAndGetSpectrumDefinition(const size_t index) const;
 
   const ExperimentInfo &m_experimentInfo;
-  DetectorInfo &m_detectorInfo;
+  Geometry::DetectorInfo &m_detectorInfo;
   const Beamline::SpectrumInfo &m_spectrumInfo;
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
