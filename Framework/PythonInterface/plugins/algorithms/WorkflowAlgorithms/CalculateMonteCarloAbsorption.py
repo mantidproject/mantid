@@ -5,16 +5,14 @@ from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, 
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, StringMandatoryValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator)
 
-
 class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     # General variables
-    _beam_height = None
-    _beam_width = None
     _unit = None
     _emode = None
     _efixed = None
-    _number_wavelengths = None
-    _events = None
+    _general_kwargs = None
+    _container_kwargs = None
+    _shape = None
 
     # Sample variables
     _sample_ws_name = None
@@ -86,7 +84,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleDensity', 'Sample Options')
 
         # Container options
-        self.declareProperty(MatrixWorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc='Container Workspace')
         self.declareProperty(name='ContainerChemicalFormula', defaultValue='',
                              doc='Chemical formula for the container material')
@@ -103,7 +102,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerDensity', 'Container Options')
 
         # Shape options
-        self.declareProperty(name='Shape', defaultValue='FlatPlate', validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
+        self.declareProperty(name='Shape', defaultValue='FlatPlate',
+                             validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
                              doc='Geometric shape of the sample environment')
 
         flatPlateCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
@@ -215,10 +215,55 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='Name of the workspace group to save correction factors')
-        self.setPropertyGroup('CorrectionsWorkspace','Output Options')
+        self.setPropertyGroup('CorrectionsWorkspace', 'Output Options')
 
     def pyExec(self):
+
+        # set up progress reporting
+        self.prog = Progress(self, 0, 1, 10)
+
         pass
+
+    def _setup(self):
+
+        # The beam properties and monte carlo properties are simply passed on to the
+        # SimpleShapeMonteCarloAbsorptionCorrection algorithm so they are being put into
+        # a dictionary for simplicity
+
+        self._general_kwargs = {'BeamHeight': self.getProperty('BeamHeight').value,
+                                'BeamWidth': self.getProperty('BeamWidth').value,
+                                'NumberOfWavelengthPoints': self.getProperty('NumberOfWavelengthPoints').value,
+                                'EventsPerPoint': self.getProperty('EventsPerPoint').value,
+                                'Interpolation': self.getProperty('Interpolation').value}
+
+        self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
+        self._container_ws_name = self.getPropertyValue('ContainerWorkspace')
+        self._shape = self.getProperty('Shape').value
+
+        self._sample_kwargs = {'ChemicalFormula': self.getPropertyValue('SampleChemicalFormula'),
+                               'DensityType': self.getPropertyValue('SampleDensityType'),
+                               'Density': self.getPropertyValue('SampleDensity'),
+                               'Shape': self._shape,
+                               'Height': self.getProperty('Height').value}
+
+        if self._container_ws_name:
+            self._container_kwargs = {'ChemicalFormula': self.getPropertyValue('ContainerChemicalFormula'),
+                                      'DensityType': self.getPropertyValue('ContainerDensityType'),
+                                      'Density': self.getPropertyValue('ContainerDensity'),
+                                      'Height': self.getProperty('Height').value}
+
+        if self._shape == 'FlatPlate':
+
+            self._sample_kwargs['Width'] = self.getProperty('SampleWidth').value
+            self._sample_kwargs['Thickness'] = self.getProperty('SampleThickness').value
+            self._sample_kwargs['Angle'] = self.getProperty('SampleAngle').value
+            self._sample_kwargs['Center'] = self.getProperty('SampleCenter').value
+
+            if self._container_ws_name:
+                self._container_kwargs['Width'] = self.getProperty('ContainerWidth').value
+                self._container_kwargs['Thickness'] = self.getProperty('ContainerThickness').value
+                self._container_kwargs['Angle'] = self.getProperty('ContainerAngle').value
+                self._container_kwargs['Center'] = self.getProperty('ContainerCenter').value
 
 
 # Register algorithm with Mantid
