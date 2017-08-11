@@ -190,26 +190,22 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='ContainerWidth', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the container environment (cm)')
-        self.declareProperty(name='ContainerThickness', defaultValue=0.0,
+        self.declareProperty(name='ContainerFrontThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Thickness of the container environment (cm)')
-        self.declareProperty(name='ContainerCenter', defaultValue=0.0,
-                             doc='Center of the container environment')
-        self.declareProperty(name='ContainerAngle', defaultValue=0.0,
+                             doc='Front thickness of the container environment (cm)')
+        self.declareProperty(name='ContainerBackThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Angle of the container environment with respect to the beam (degrees)')
+                             doc='Back thickness of the container environment (cm)')
 
         containerFlatPlateCondition = VisibleWhenProperty(containerCondition, flatPlateCondition, LogicOperator.And)
 
         self.setPropertySettings('ContainerWidth', containerFlatPlateCondition)
-        self.setPropertySettings('ContainerThickness', containerFlatPlateCondition)
-        self.setPropertySettings('ContainerCenter', containerFlatPlateCondition)
-        self.setPropertySettings('ContainerAngle', containerFlatPlateCondition)
+        self.setPropertySettings('ContainerFrontThickness', containerFlatPlateCondition)
+        self.setPropertySettings('ContainerBackThickness', containerFlatPlateCondition)
 
         self.setPropertyGroup('ContainerWidth', 'Container Shape Options')
-        self.setPropertyGroup('ContainerThickness', 'Container Shape Options')
-        self.setPropertyGroup('ContainerCenter', 'Container Shape Options')
-        self.setPropertyGroup('ContainerAngle', 'Container Shape Options')
+        self.setPropertyGroup('ContainerFrontThickness', 'Container Shape Options')
+        self.setPropertyGroup('ContainerBackThickness', 'Container Shape Options')
 
         # Both cylinder and annulus have an annulus container
 
@@ -279,6 +275,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
             prog.report('Calculating container absorption factors')
 
+            container_wave_1 = self._convert_to_wavelength(self._container_ws_name, '__container_wave_1')
+            container_wave_2 = self._clone_ws(container_wave_1, '__container_wave_2')
+
             container_kwargs = dict()
             container_kwargs.update(self._general_kwargs)
             container_kwargs['ChemicalFormula'] = self._container_chemical_formula
@@ -289,22 +288,23 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
             if self._shape == 'FlatPlate':
                 container_kwargs['Width'] = self._container_width
-                container_kwargs['Thickness'] = self._container_thickness
-                container_kwargs['Angle'] = self._container_angle
-                container_kwargs['Center'] = self._container_center
+                container_kwargs['Angle'] = self._sample_angle
+                offset_front = 0.5 * (self._container_front_thickness + self._container_back_thickness)
+                container_kwargs['Thickness'] = self._container_front_thickness
+                container_kwargs['Center'] = -1 * offset_front
 
             if self._shape == 'Cylinder':
                 container_kwargs['InnerRadius'] = self._container_inner_radius
                 container_kwargs['OuterRadius'] = self._container_outer_radius
+                container_kwargs['Shape'] = 'Annulus'
 
             if self._shape == 'Annulus':
                 container_kwargs['InnerRadius'] = self._container_inner_radius
                 container_kwargs['OuterRadius'] = self._sample_inner_radius
 
-            container_wave_1 = self._convert_to_wavelength(self._container_ws_name, '__container_wave_1')
-            container_wave_2 = self._clone_ws(container_wave_1, '__container_wave_2')
-
-            s_api.SimpleShapeMonteCarloAbsorption()
+            s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
+                                                  OutputWorkspace=self._acc_ws,
+                                                  **container_kwargs)
 
         self.setProperty('CorrectionsWorkspace', self._ass_ws)
 
@@ -360,9 +360,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         if self._container_ws_name:
             if self._shape == 'FlatPlate':
                 self._container_width = self.getProperty('ContainerWidth').value
-                self._container_thickness = self.getProperty('ContainerThickness').value
-                self._container_angle = self.getProperty('ContainerAngle').value
-                self._container_center = self.getProperty('ContainerCenter').value
+                self._container_front_thickness = self.getProperty('ContainerFrontThickness').value
+                self._container_back_thickness = self.getProperty('ContainerBackThickness').value
+
             else:
                 self._container_inner_radius = self.getProperty('ContainerInnerRadius').value
                 self._container_outer_radius = self.getProperty('ContainerOuterRadius').value
