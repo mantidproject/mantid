@@ -80,20 +80,21 @@ MantidVec GetQsInQENSData::extractQValues(
     const Mantid::API::MatrixWorkspace_sptr workspace) {
   size_t numSpectra = workspace->getNumberHistograms();
   Axis *qAxis;
-  MantidVec qValues;
 
   try {
     qAxis = workspace->getAxis(1);
   } catch (std::exception &) {
-    throw std::exception("Vertical axis is empty or is not a numeric axis.");
+    throw std::exception("Vertical axis is empty");
   }
+
+  MantidVec qValues(qAxis->length());
 
   // Check if the specified workspace is already in Q-space.
   if (qAxis->unit()->unitID() == "MomentumTransfer") {
 
     // Add axis values to vector of Q-values
     for (size_t i = 0; i < qAxis->length(); i++) {
-      qValues.push_back(qAxis->getValue(i));
+      qValues[i] = qAxis->getValue(i);
     }
 
     // Check if the Q-values are stored as histogram data.
@@ -106,11 +107,16 @@ MantidVec GetQsInQENSData::extractQValues(
   } else {
 
     // Iterate over all spectrum in the specified workspace.
-    for (size_t i = 0; i < numSpectra; i++) {
-      Geometry::IDetector_const_sptr detector = workspace->getDetector(i);
-      double efixed = workspace->getEFixed(detector->getID());
-      double theta = 0.5 * workspace->detectorTwoTheta(*detector);
-      qValues.push_back(UnitConversion::convertToElasticQ(theta, efixed));
+    try {
+      for (size_t i = 0; i < numSpectra; i++) {
+        Geometry::IDetector_const_sptr detector = workspace->getDetector(i);
+        double efixed = workspace->getEFixed(detector->getID());
+        double theta = 0.5 * workspace->detectorTwoTheta(*detector);
+        qValues.push_back(UnitConversion::convertToElasticQ(theta, efixed));
+      }
+    }
+    catch (std::exception &e) {
+      throw std::exception("Detectors are missing from the input workspace");
     }
   }
 
