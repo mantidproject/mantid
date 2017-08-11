@@ -114,8 +114,7 @@ MantidVec GetQsInQENSData::extractQValues(
         double theta = 0.5 * workspace->detectorTwoTheta(*detector);
         qValues.push_back(UnitConversion::convertToElasticQ(theta, efixed));
       }
-    }
-    catch (std::exception &e) {
+    } catch (std::exception &e) {
       throw std::exception("Detectors are missing from the input workspace");
     }
   }
