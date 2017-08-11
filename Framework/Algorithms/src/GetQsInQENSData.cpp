@@ -1,7 +1,8 @@
 #include "MantidAlgorithms/GetQsInQENSData.h"
 
-#include "MantidGeometry/IDetector.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/Unit.h"
@@ -15,6 +16,7 @@ namespace Algorithms {
 
 using namespace API;
 using namespace Kernel;
+using namespace Geometry;
 
 // Register the Algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GetQsInQENSData);
@@ -108,9 +110,11 @@ MantidVec GetQsInQENSData::extractQValues(
 
     // Iterate over all spectrum in the specified workspace.
     try {
+      const DetectorInfo detInf = workspace->detectorInfo();
+
       for (size_t i = 0; i < numSpectra; i++) {
-        Geometry::IDetector_const_sptr detector = workspace->getDetector(i);
-        double efixed = workspace->getEFixed(detector->getID());
+        IDetector_const_sptr detector = boost::make_shared<IDetector>(detInf.detector(i));
+        double efixed = workspace->getEFixed(detector);
         double theta = 0.5 * workspace->detectorTwoTheta(*detector);
         qValues[i] = UnitConversion::convertToElasticQ(theta, efixed);
       }
