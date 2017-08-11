@@ -69,4 +69,4 @@ public:
   }
 };
 
-#endif 
+#endif /* GETQSINQENSDATATEST_H_ */
