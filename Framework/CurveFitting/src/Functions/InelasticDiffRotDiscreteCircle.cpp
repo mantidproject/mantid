@@ -1,7 +1,7 @@
 #include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"

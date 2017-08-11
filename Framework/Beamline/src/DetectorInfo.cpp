@@ -1,4 +1,5 @@
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/make_cow.h"
 
 #include <algorithm>
@@ -90,23 +91,6 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   return true;
 }
 
-/** Returns the number of detectors in the instrument.
- *
- * If a detector is moving, i.e., has more than one associated position, it is
- * nevertheless only counted as a single detector. */
-size_t DetectorInfo::size() const {
-  if (!m_isMonitor)
-    return 0;
-  return m_isMonitor->size();
-}
-
-/// Returns true if the beamline has scanning detectors.
-bool DetectorInfo::isScanning() const {
-  if (!m_positions)
-    return false;
-  return size() != m_positions->size();
-}
-
 /// Returns true if the detector with given detector index is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   // No check for time dependence since monitor flags are not time dependent.
@@ -150,30 +134,6 @@ void DetectorInfo::setMasked(const size_t index, bool masked) {
 void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
                              bool masked) {
   m_isMasked.access()[linearIndex(index)] = masked;
-}
-
-/// Returns the position of the detector with given index.
-Eigen::Vector3d
-DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
-  return (*m_positions)[linearIndex(index)];
-}
-
-/// Returns the rotation of the detector with given index.
-Eigen::Quaterniond
-DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
-  return (*m_rotations)[linearIndex(index)];
-}
-
-/// Set the position of the detector with given index.
-void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index,
-                               const Eigen::Vector3d &position) {
-  m_positions.access()[linearIndex(index)] = position;
-}
-
-/// Set the rotation of the detector with given index.
-void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index,
-                               const Eigen::Quaterniond &rotation) {
-  m_rotations.access()[linearIndex(index)] = rotation.normalized();
 }
 
 /// Returns the scan count of the detector with given detector index.
@@ -263,22 +223,36 @@ void DetectorInfo::merge(const DetectorInfo &other) {
   m_scanCounts = std::move(scanCounts);
 }
 
-/// Returns the linear index for a pair of detector index and time index.
-size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
-  // The most common case are beamlines with static detectors. In that case the
-  // time index is always 0 and we avoid expensive map lookups. Linear indices
-  // are ordered such that the first block contains everything for time index 0
-  // so even in the time dependent case no translation is necessary.
-  if (index.second == 0)
-    return index.first;
-  return (*m_indexMap)[index.first][index.second];
+void DetectorInfo::setComponentInfo(ComponentInfo *componentInfo) {
+  m_componentInfo = componentInfo;
 }
 
-/// Throws if this has time-dependent data.
-void DetectorInfo::checkNoTimeDependence() const {
-  if (isScanning())
-    throw std::runtime_error("DetectorInfo accessed without time index but the "
-                             "beamline has time-dependent (moving) detectors.");
+bool DetectorInfo::hasComponentInfo() const {
+  return m_componentInfo != nullptr;
+}
+
+double DetectorInfo::l1() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error(
+        "DetectorInfo has no valid ComponentInfo thus cannot determine l1");
+  }
+  return m_componentInfo->l1();
+}
+
+Eigen::Vector3d DetectorInfo::sourcePosition() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
+                             "cannot determine sourcePosition");
+  }
+  return m_componentInfo->sourcePosition();
+}
+
+Eigen::Vector3d DetectorInfo::samplePosition() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
+                             "cannot determine samplePosition");
+  }
+  return m_componentInfo->samplePosition();
 }
 
 void DetectorInfo::initScanCounts() {

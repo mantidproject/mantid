@@ -1,6 +1,6 @@
 #include "MantidCurveFitting/Functions/InelasticDiffSphere.h"
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"

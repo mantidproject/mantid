@@ -559,11 +559,16 @@ public:
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 20483);
     TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitors().size(), 3);
     auto params = inst->getParameterMap();
-    // Previously this was 49. Rotations are now stored in DetectorInfo so the
-    // following two parameters are no longer in the map:
-    // HYSPECA/Tank;double;rotz;0|HYSPECA/Tank;Quat;rot;[1,0,0,0]
-    // HYSPECA/Tank;double;rotx;0|HYSPECA/Tank;V3D;pos;[0,0,0]
-    TS_ASSERT_EQUALS(params->size(), 47);
+    // Previously this was 49. Position/rotations are now stored in
+    // ComponentInfo and DetectorInfo so the following four parameters are no
+    // longer in the map:
+    // HYSPECA/Tank;double;rotz;0
+    // HYSPECA/Tank;double;rotx;0
+    // HYSPECA/Tank;Quat;rot;[1,0,0,0]
+    // HYSPECA/Tank;V3D;pos;[0,0,0]
+    TS_ASSERT_EQUALS(params->size(), 45);
+    std::cout << params->asString();
+
     TS_ASSERT_EQUALS(params->getString(inst.get(), "deltaE-mode"), "direct");
   }
 
