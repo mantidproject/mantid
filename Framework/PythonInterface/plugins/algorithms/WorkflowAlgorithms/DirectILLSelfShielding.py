@@ -94,7 +94,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_SIMULATION_INSTRUMENT, common.PROPGROUP_SIMULATION_INSTRUMENT)
         self.declareProperty(name=common.PROP_SPARSE_INSTRUMENT_ROWS,
                              defaultValue=5,
-                             validator=greaterThanOneInt,
+                             validator=greaterThanTwoInt,
                              direction=Direction.Input,
                              doc='Number of detector rows in sparse simulation instrument.')
         self.setPropertyGroup(common.PROP_SPARSE_INSTRUMENT_ROWS, common.PROPGROUP_SIMULATION_INSTRUMENT)

@@ -40,7 +40,7 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
             'SimulationInstrument': 'Sparse Instrument',
-            'SparseInstrumentRows': 2,
+            'SparseInstrumentRows': 3,
             'SparseInstrumentColumns': 2,
             'NumberOfSimulatedWavelengths': 3,
             'rethrow': True
