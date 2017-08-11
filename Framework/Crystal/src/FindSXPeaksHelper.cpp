@@ -11,16 +11,16 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 
-
 namespace {
-
 
 const double TWO_PI = 2 * M_PI;
 
-bool isDifferenceLargerThanTolerance(const double angle1, const double angle2, const double tolerance) {
+bool isDifferenceLargerThanTolerance(const double angle1, const double angle2,
+                                     const double tolerance) {
   auto difference = std::abs(angle1 - angle2);
 
-  // If we have more than 360 degree angle difference then we need to wrap it back to 360
+  // If we have more than 360 degree angle difference then we need to wrap it
+  // back to 360
   if (difference > TWO_PI) {
     difference = std::fmod(difference, TWO_PI);
   }
@@ -32,10 +32,7 @@ bool isDifferenceLargerThanTolerance(const double angle1, const double angle2, c
 
   return difference > tolerance;
 }
-
-
 }
-
 
 using namespace boost;
 
