@@ -39,8 +39,8 @@ void FFTPreProcessing::init() {
                   "The name of the output 2D workspace.");
   std::vector<int> empty;
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
-      "The workspace indices to preProcess.");
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("WorkspaceIndices", empty),
+      "The workspace indices to process.");
   declareProperty(
       "ApodizationFunction", "None",
       boost::make_shared<Mantid::Kernel::StringListValidator>(
@@ -65,7 +65,7 @@ void FFTPreProcessing::init() {
  *
  */
 void FFTPreProcessing::exec() {
-  std::vector<int> spectra = getProperty("Spectra");
+  std::vector<int> spectra = getProperty("WorkspaceIndices");
 
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -209,10 +209,10 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
   std::vector<double> newXData;
   std::vector<double> newYData;
   std::vector<double> newEData;
-  int amountOfPadding = yData.size();
+  size_t amountOfPadding = yData.size();
   if (getProperty("NegativePadding")) {
-	  amountOfPadding = std::floor(0.5*double(yData.size()));
-	  double xValue = xData[0] - dx*amountOfPadding*padding;
+	  amountOfPadding = size_t(std::floor(0.5*double(yData.size())));
+	  double xValue = xData[0] - dx*double(amountOfPadding*padding);
 	  for (int j = 0; j < padding; j++) {
 
 		  for (size_t i = 0; i < amountOfPadding; ++i) {

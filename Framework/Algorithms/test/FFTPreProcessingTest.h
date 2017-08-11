@@ -126,7 +126,7 @@ public:
         TS_ASSERT_EQUALS(workspaces[j]->getNumberHistograms(),
                          workspaces[0]->getNumberHistograms());
       }
-      if (j != 2) { // check results match
+      if (j == 1) { // check results match
         TS_ASSERT_EQUALS(workspaces[j]->x(j).rawData(),
                          workspaces[2]->x(j).rawData());
         TS_ASSERT_EQUALS(workspaces[j]->y(j).rawData(),
@@ -269,7 +269,7 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[19], -2.61 * 3.8, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[49], -23.01 * 9.8, Delta);
   }
-  void test_PaddingOne() {
+   void test_PaddingOne() {
 
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
@@ -303,6 +303,46 @@ public:
     TS_ASSERT_EQUALS(outWS->x(0).size(), 650);
     TS_ASSERT_DELTA(outWS->y(0)[ws->x(0).size()], 0.0, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[ws->x(0).size() * 4], 0.0, Delta);
+  }
+
+  void test_PaddingOneBothSides() {
+
+    auto ws = createWorkspace(1, 50);
+    IAlgorithm_sptr alg = setUpAlg();
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", outputName);
+    alg->setProperty("Padding", 1);
+    alg->setProperty("NegativePAdding",true);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+
+    double Delta = 0.0001;
+    // Test padding is applied
+    TS_ASSERT_EQUALS(outWS->x(0).size(), 100);
+    TS_ASSERT_DELTA(outWS->y(0)[1], 0.0, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[75], 0.0, Delta);
+  }
+  void test_PaddingTwelveBoth() {
+
+    auto ws = createWorkspace(1, 50);
+    IAlgorithm_sptr alg = setUpAlg();
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", outputName);
+    alg->setProperty("Padding", 12);
+    alg->setProperty("NegativePAdding",true);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+
+    double Delta = 0.0001;
+    // Test padding is applied
+    TS_ASSERT_EQUALS(outWS->x(0).size(), 650);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.0, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[300], ws->y(0)[0], Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[350], 0.0, Delta);
   }
 };
 
