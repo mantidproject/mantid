@@ -112,7 +112,7 @@ MantidVec GetQsInQENSData::extractQValues(
         Geometry::IDetector_const_sptr detector = workspace->getDetector(i);
         double efixed = workspace->getEFixed(detector->getID());
         double theta = 0.5 * workspace->detectorTwoTheta(*detector);
-        qValues.push_back(UnitConversion::convertToElasticQ(theta, efixed));
+        qValues[i] = UnitConversion::convertToElasticQ(theta, efixed);
       }
     } catch (std::exception &e) {
       throw std::exception("Detectors are missing from the input workspace");
