@@ -1789,10 +1789,6 @@ int GenericDataProcessorPresenter::getNumberOfRows() {
 /**
   * Clear the table
  **/
-void GenericDataProcessorPresenter::clearTable() {
-  m_manager->deleteRow();
-
-}
-
+void GenericDataProcessorPresenter::clearTable() { m_manager->deleteRow(); }
 }
 }

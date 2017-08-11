@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.user_file.user_file_common import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
+from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
                                FitType)
 

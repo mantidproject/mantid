@@ -15,7 +15,7 @@ class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
     def _get_table_model(option_string=""):
         table_index_model = TableIndexModel(0, "SANS2D00022024", "", "",
-                                            "", "", "", option_string)
+                                            "", "", "", "", option_string)
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
         return table_model
@@ -57,6 +57,7 @@ class GuiStateDirectorTest(unittest.TestCase):
         table_model = self._get_table_model(option_string="WavelengthMin=3.14,WavelengthMax=10.3")
         state_model = self._get_state_gui_model()
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
+
         state = director.create_state(0)
         self.assertTrue(isinstance(state, State))
         self.assertTrue(state.wavelength.wavelength_low == 3.14)

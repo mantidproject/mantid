@@ -26,7 +26,7 @@ def assert_valid_result(result, expected, assert_true):
     for key in keys_result:
         assert_true(key in keys_expected)
         if result[key] != expected[key]:
-        assert_true(result[key] == expected[key])
+            assert_true(result[key] == expected[key])
 
 
 def assert_valid_parse(parser, to_parse, expected, assert_true):

@@ -565,6 +565,5 @@ std::string DataProcessorOneLevelTreeManager::getCell(int row, int column,
 int DataProcessorOneLevelTreeManager::getNumberOfRows() {
   return m_model->rowCount();
 }
-
 }
 }

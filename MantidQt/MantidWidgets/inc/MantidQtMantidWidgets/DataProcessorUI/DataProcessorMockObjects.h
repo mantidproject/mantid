@@ -81,8 +81,8 @@ public:
       MantidQt::MantidWidgets::AbstractDataProcessorTreeModel>) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
 
-  void emitProcessClicked() override {};
-  void emitProcessingFinished() override {};
+  void emitProcessClicked() override{};
+  void emitProcessingFinished() override{};
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
 };
@@ -176,12 +176,9 @@ private:
                       int parentColumn) override {
     return "";
   };
-  int getNumberOfRows() override {
-    return 2;
-  }
+  int getNumberOfRows() override { return 2; }
 
-  void clearTable() override {
-  }
+  void clearTable() override {}
 
   std::map<std::string, QVariant> m_options;
 };

@@ -54,8 +54,8 @@ DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm(
 * workspaces' names, as a string
 * @param blacklist : The list of properties we do not want to show, as a string
 */
-DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm() : m_prefix(), 
-m_inputProperties(), m_outputProperties() {}
+DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm()
+    : m_prefix(), m_inputProperties(), m_outputProperties() {}
 
 // Destructor
 DataProcessorProcessingAlgorithm::~DataProcessorProcessingAlgorithm() {}

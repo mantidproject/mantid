@@ -751,9 +751,8 @@ std::string DataProcessorTwoLevelTreeManager::getCell(int row, int column,
                                                       int parentRow,
                                                       int parentColumn) {
 
-  return m_model
-      ->data(
-          m_model->index(row, column, m_model->index(parentRow, parentColumn)))
+  return m_model->data(m_model->index(row, column,
+                                      m_model->index(parentRow, parentColumn)))
       .toString()
       .toStdString();
 }
@@ -765,6 +764,5 @@ std::string DataProcessorTwoLevelTreeManager::getCell(int row, int column,
 int DataProcessorTwoLevelTreeManager::getNumberOfRows() {
   return m_model->rowCount();
 }
-
 }
 }

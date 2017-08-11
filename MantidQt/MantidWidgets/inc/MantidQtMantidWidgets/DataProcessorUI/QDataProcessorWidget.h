@@ -154,7 +154,7 @@ public:
   // Methods to emit signals
   void emitProcessClicked() override { emit processButtonClicked(); };
 
-  void emitProcessingFinished() override {emit processingFinished(); }
+  void emitProcessingFinished() override { emit processingFinished(); }
 
 signals:
   void processButtonClicked();
