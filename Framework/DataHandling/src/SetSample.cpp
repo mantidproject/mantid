@@ -44,52 +44,41 @@ const std::string ENVIRONMENT("Environment");
 }
 /// Private namespace storing sample environment args
 namespace SEArgs {
-/// Static Name string
 const std::string NAME("Name");
-/// Static Container string
 const std::string CONTAINER("Container");
 }
-/// Provate namespace storing geometry args
+/// Private namespace storing geometry args
 namespace GeometryArgs {
-/// Static Shape string
 const std::string SHAPE("Shape");
 }
 
 /// Private namespace storing sample environment args
 namespace ShapeArgs {
-/// Static FlatPlate string
 const std::string FLAT_PLATE("FlatPlate");
-/// Static Cylinder string
 const std::string CYLINDER("Cylinder");
-/// Static HollowCylinder string
 const std::string HOLLOW_CYLINDER("HollowCylinder");
-/// Static CSG string
+const std::string SPHERE("Sphere");
 const std::string CSG("CSG");
-/// Static Width string
 const std::string WIDTH("Width");
-/// Static Height string
 const std::string HEIGHT("Height");
-/// Static Thick string
 const std::string THICK("Thick");
-/// Static Center string
 const std::string CENTER("Center");
-/// Static Radius string
 const std::string RADIUS("Radius");
-/// Static InnerRadius string
 const std::string INNER_RADIUS("InnerRadius");
-/// Static OuterRadius string
 const std::string OUTER_RADIUS("OuterRadius");
 }
 
 /**
-  * Return the centre coordinates of the base of a cylinder given the
-  * coordinates of the centre of the cylinder
-  * @param cylCentre Coordinates of centre of the cylinder (X,Y,Z) (in metres)
-  * @param height Height of the cylinder (in metres)
+  * Return the centre coordinates of the base of a shape given the
+  * coordinates of the centre of the shape. This is to transform
+  * from a user friendly input (centre of a shape) to what Mantid
+  * expects (base of a shape)
+  * @param Centre Coordinates of centre of the shape (X,Y,Z) (in metres)
+  * @param height The full height of the cylinder (in metres)
   * @param axis The index of the height-axis of the cylinder
   */
-V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
-                  unsigned axisIdx) {
+V3D getShapeBaseCoordinates(const std::vector<double> &cylCentre, double height,
+                  Geometry::PointingAlong axisIdx) {
   const V3D halfHeight = [&]() {
     switch (axisIdx) {
     case 0:
@@ -331,7 +320,7 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
     }
   }
   // Any arguments in the args dict are assumed to be values that should
-  // override the default set by the sampleEnv samplegeometry if it exists
+  // override the default set by the sampleEnv sample geometry if it exists
   if (sampleEnv) {
     if (sampleEnv->container()->hasSampleShape()) {
       const auto &can = sampleEnv->container();
@@ -379,10 +368,14 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
   }
 
   const auto shape = args.getPropertyValue(GeometryArgs::SHAPE);
+
   if (shape == ShapeArgs::CSG) {
     result = args.getPropertyValue("Value");
-  } else if (shape == ShapeArgs::FLAT_PLATE) {
-    result = createFlatPlateXML(args, refFrame);
+  }
+  else if (shape == ShapeArgs::FLAT_PLATE) {
+	  result = createFlatPlateXML(args, refFrame);
+  } else if (shape == ShapeArgs::SPHERE){
+	  result = createSphereXML(args, refFrame);
   } else if (boost::algorithm::ends_with(shape, ShapeArgs::CYLINDER)) {
     result = createCylinderLikeXML(
         args, refFrame,
@@ -391,7 +384,7 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
     throw std::invalid_argument(
         "Unknown 'Shape' argument provided in "
         "'Geometry'. Allowed "
-        "values=FlatPlate,CSG,Cylinder,HollowCylinder.");
+        "values are: CSG, Cylinder, FlatPlate, HollowCylinder and Sphere.");
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     g_log.debug("XML shape definition:\n" + result + '\n');
@@ -489,8 +482,8 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
                  [](double val) { return val *= 0.01; });
   // XML needs center position of bottom base but user specifies center of
   // cylinder
-  const unsigned axisIdx = static_cast<unsigned>(refFrame.pointingUp());
-  const V3D baseCentre = cylBaseCentre(centre, height, axisIdx);
+  const auto axisIdx = refFrame.pointingUp();
+  const V3D baseCentre = getShapeBaseCoordinates(centre, height, axisIdx);
 
   std::ostringstream xmlShapeStream;
   xmlShapeStream << "<" << tag << " id=\"sample-shape\"> "
@@ -506,6 +499,36 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   }
   xmlShapeStream << "</" << tag << ">";
   return xmlShapeStream.str();
+}
+
+std::string SetSample::createSphereXML(const Kernel::PropertyManager &args,
+									const Geometry::ReferenceFrame &refFrame) const {
+
+	// We have to do a cast to double to help the compiler select the correct
+	// overload for the return type. 
+	// Convert to meters when getting the radius
+	const double radius = static_cast<double>(args.getProperty(ShapeArgs::RADIUS)) * 0.01;
+	std::vector<double> centre = args.getProperty(ShapeArgs::CENTER);
+	// convert to meters
+	std::transform(centre.begin(), centre.end(), centre.begin(),
+		[](double val) { return val *= 0.01; });
+
+	// XML needs center position of bottom base but user specifies center of
+	// sphere
+	const auto axisIdx = refFrame.pointingUp();
+
+	// Multiple radius by 2 to convert into height (diameter)
+	const V3D baseCentre = getShapeBaseCoordinates(centre, (radius * 2), axisIdx);
+	const std::string tag{ "sphere" };
+
+	std::ostringstream xmlShapeStream;
+	xmlShapeStream << "<" << tag << " id=\"sample-shape\"> "
+		<< "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
+		<< baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\" /> "
+		<< axisXML(axisIdx) << "<radius val=\"" << radius << "\" /> ";
+
+	xmlShapeStream << "</" << tag << ">";
+	return xmlShapeStream.str();
 }
 
 /**
