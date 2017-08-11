@@ -281,9 +281,7 @@ void AlignedThreeSliceFilter::Process(
 
   // Update components in parallel
   CutWorker worker(this->Slices);
-  //vtkSMPTools::Initialize(1);
-  //vtkSMPTools::For(0, 3, 1, worker);
-  worker(0,3);
+  vtkSMPTools::For(0, 3, 1, worker);
   // Update the internal pipeline
   this->CombinedFilteredInput->Update();
 
