@@ -55,8 +55,8 @@ public:
     createAlg.execute();
 
     MatrixWorkspace_sptr workspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputWsName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputWsName);
     TS_ASSERT(workspace);
     const std::string expectedErrorMsg =
         "Detectors are missing from the input workspace";
