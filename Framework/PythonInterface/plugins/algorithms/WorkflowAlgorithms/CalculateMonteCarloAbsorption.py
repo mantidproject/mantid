@@ -12,20 +12,35 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     _emode = None
     _efixed = None
     _general_kwargs = None
-    _container_kwargs = None
     _shape = None
+    _height = None
 
     # Sample variables
-    _sample_ws_name = None
+    _sample_angle = None
+    _sample_center = None
     _sample_chemical_formula = None
-    _sample_density_type = None
     _sample_density = None
+    _sample_density_type = None
+    _sample_inner_radius = None
+    _sample_outer_radius = None
+    _sample_radius = None
+    _sample_thickness = None
+    _sample_unit = None
+    _sample_width = None
+    _sample_ws = None
+    _sample_ws_name = None
 
     # Container variables
-    _can_ws_name = None
-    _can_chemical_formula = None
-    _can_density_type = None
-    _can_density = None
+    _container_angle = None
+    _container_center = None
+    _container_chemical_formula = None
+    _container_density = None
+    _container_density_type = None
+    _container_inner_radius = None
+    _container_outer_radius = None
+    _container_thickness = None
+    _container_width = None
+    _container_ws_name = None
 
     # Output workspaces
     _ass_ws = None
@@ -257,7 +272,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         else:
             self._emode = str(self._sample_ws.getEMode())
         if self._emode == 'Indirect' or 'Direct':
-            self._efixed = self._getEfixed()
+            self._efixed = self._get_efixed()
 
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
         self._sample_density_type = self.getPropertyValue('SampleDensityType')
@@ -317,6 +332,23 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             if self._sample_inner_radius >= self._sample_outer_radius:
                 issues['SampleOuterRadius'] = 'Must be greater than SampleInnerRadius'
 
-                
+    def _get_efixed(self):
+        """
+        Returns the efixed value relating to the sample workspace
+        """
+        inst = self._sample_ws.getInstrument()
+
+        if inst.hasParameter('Efixed'):
+            return inst.getNumberParameter('Efixed')[0]
+
+        if inst.hasParameter('analyser'):
+            analyser_comp = inst.getComponentByName(inst.getStringParameter('analyser')[0])
+
+            if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
+                return analyser_comp.getNumberParameter('EFixed')[0]
+
+        raise ValueError('No Efixed parameter found')
+
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CalculateMonteCarloAbsorption)
