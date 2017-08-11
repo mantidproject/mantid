@@ -7,7 +7,7 @@
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/Unit.h"
 
-#include <stdexcept>
+#include <exception>
 
 namespace {
 Mantid::Kernel::Logger g_log("ConvolutionFitSequential");
