@@ -38,9 +38,9 @@ void FFTPreProcessing::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output 2D workspace.");
   std::vector<int> empty;
-  declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("WorkspaceIndices", empty),
-      "The workspace indices to process.");
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<int>>(
+                      "WorkspaceIndices", empty),
+                  "The workspace indices to process.");
   declareProperty(
       "ApodizationFunction", "None",
       boost::make_shared<Mantid::Kernel::StringListValidator>(
@@ -56,9 +56,10 @@ void FFTPreProcessing::init() {
       "The amount of padding to add to the data,"
       "it is the number of multiples of the data set."
       "i.e 0 means no padding and 1 will double the number of data points.");
-  declareProperty("NegativePadding", false, "If true padding is added to "
-	  "both sides of the original data. Both sides "
-	  "share the padding");
+  declareProperty("NegativePadding", false,
+                  "If true padding is added to "
+                  "both sides of the original data. Both sides "
+                  "share the padding");
 }
 
 /** Executes the algorithm
@@ -92,15 +93,14 @@ void FFTPreProcessing::exec() {
 
     // Copy all the Y and E data
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-    for (int64_t i = 0; i < int64_t(numSpectra); ++i) {			
-		PARALLEL_START_INTERUPT_REGION
+    for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
+      PARALLEL_START_INTERUPT_REGION
 
-		if (std::find(spectra.begin(), spectra.end(), i) != spectra.end())
-		{
-				const auto index = static_cast<size_t>(i);
-			outputWS->setSharedY(index, inputWS->sharedY(index));
-			outputWS->setSharedE(index, inputWS->sharedE(index));
-		}
+      if (std::find(spectra.begin(), spectra.end(), i) != spectra.end()) {
+        const auto index = static_cast<size_t>(i);
+        outputWS->setSharedY(index, inputWS->sharedY(index));
+        outputWS->setSharedE(index, inputWS->sharedE(index));
+      }
       prog.report();
       PARALLEL_END_INTERUPT_REGION
     }
@@ -158,9 +158,8 @@ fptr FFTPreProcessing::getApodizationFunction(const std::string method) {
   } else if (method == "Welch") {
     return welch;
   }
-  throw std::invalid_argument("The apodization function selected "+
-	  method +
-	  " is not a valid option");
+  throw std::invalid_argument("The apodization function selected " + method +
+                              " is not a valid option");
 }
 /**
 * Applies the appodization function to the data.
@@ -211,18 +210,17 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
   std::vector<double> newEData;
   size_t amountOfPadding = yData.size();
   if (getProperty("NegativePadding")) {
-	  amountOfPadding = size_t(std::floor(0.5*double(yData.size())));
-	  double xValue = xData[0] - dx*double(amountOfPadding*padding);
-	  for (int j = 0; j < padding; j++) {
+    amountOfPadding = size_t(std::floor(0.5 * double(yData.size())));
+    double xValue = xData[0] - dx * double(amountOfPadding * padding);
+    for (int j = 0; j < padding; j++) {
 
-		  for (size_t i = 0; i < amountOfPadding; ++i) {
-			  newXData.push_back(xValue);
-			  newYData.push_back(0.0);
-			  newEData.push_back(0.0);
-			  xValue += dx;
-		  }
-	  }
-
+      for (size_t i = 0; i < amountOfPadding; ++i) {
+        newXData.push_back(xValue);
+        newYData.push_back(0.0);
+        newEData.push_back(0.0);
+        xValue += dx;
+      }
+    }
   }
   // store original data
   for (size_t i = 0; i < yData.size(); ++i) {

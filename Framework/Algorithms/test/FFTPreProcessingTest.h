@@ -269,7 +269,7 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[19], -2.61 * 3.8, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[49], -23.01 * 9.8, Delta);
   }
-   void test_PaddingOne() {
+  void test_PaddingOne() {
 
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
@@ -312,7 +312,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 1);
-    alg->setProperty("NegativePAdding",true);
+    alg->setProperty("NegativePAdding", true);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
@@ -331,7 +331,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 12);
-    alg->setProperty("NegativePAdding",true);
+    alg->setProperty("NegativePAdding", true);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
