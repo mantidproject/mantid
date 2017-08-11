@@ -11,8 +11,10 @@ attr_mapping = \
         ParamMapEntry(ext_name="grouping_file_name",        int_name="grouping_file_name"),
         ParamMapEntry(ext_name="output_directory",          int_name="output_dir"),
         ParamMapEntry(ext_name="spline_coefficient",        int_name="spline_coeff"),
-        ParamMapEntry(ext_name="run_in_cycle",              int_name="run_in_range"),
+        ParamMapEntry(ext_name="first_cycle_run_no",        int_name="run_in_range"),
         ParamMapEntry(ext_name="run_number",                int_name="run_number"),
+        ParamMapEntry(ext_name="sample_empty",              int_name="sample_empty", optional=True),
+        ParamMapEntry(ext_name="sample_empty_scale",        int_name="sample_empty_scale"),
         ParamMapEntry(ext_name="user_name",                 int_name="user_name"),
         ParamMapEntry(ext_name="vanadium_normalisation",    int_name="do_van_norm"),
         ParamMapEntry(ext_name="window",                    int_name="mode")
