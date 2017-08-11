@@ -230,7 +230,7 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     {
       double x[3];
       dataArrayInput->GetTuple(i,x);
-      double FuncVal = this->CutFunction->EvaluateFunction();
+      double FuncVal = this->CutFunction->EvaluateFunction(x);
       cutScalars->InsertNextTuple1(std::abs(FuncVal - value));
     }
   } else if (AxisNumber == 1) {
@@ -238,7 +238,7 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     {
       double x[3];
       dataArrayInput->GetTuple(i,x);
-      double FuncVal = this->CutFunction->EvaluateFunction();
+      double FuncVal = this->CutFunction->EvaluateFunction(x);
       cutScalars->InsertNextTuple1(std::abs(FuncVal - value));
     }
   } else if (AxisNumber == 2) {
@@ -246,7 +246,7 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     {
       double x[3];
       dataArrayInput->GetTuple(i,x);
-      double FuncVal = this->CutFunction->EvaluateFunction();
+      double FuncVal = this->CutFunction->EvaluateFunction(x);
       cutScalars->InsertNextTuple1(std::abs(FuncVal - value));
     }
   }
