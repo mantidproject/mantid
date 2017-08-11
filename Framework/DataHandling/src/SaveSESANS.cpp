@@ -4,8 +4,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/make_unique.h"
 
 #include <algorithm>
@@ -45,6 +45,10 @@ std::map<std::string, std::string> SaveSESANS::validateInputs() {
       invalidInputs[propertyName] = propertyName + " must be set";
     }
   }
+  auto sampleName = getPropertyValue("Sample");
+  if (sampleName.empty()) {
+    invalidInputs["Sample"] = "Sample must be set";
+  }
   return invalidInputs;
 }
 
@@ -70,6 +74,8 @@ void SaveSESANS::init() {
   declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
   declareProperty("EchoConstant", EMPTY_DBL(), "Echo_constant",
                   Kernel::Direction::Input);
+  API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+  declareProperty("Sample", ws->sample().getName(), "The name of the sample", Kernel::Direction::Input);
 
   declareProperty<std::string>("Orientation", "Z", validOrientation,
                                "Orientation of the instrument");
@@ -126,7 +132,7 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile,
 
   writeHeader(outfile, "FileFormatVersion", "1.0");
   writeHeader(outfile, "DataFileTitle", ws->getTitle());
-  writeHeader(outfile, "Sample", sample.getName());
+  writeHeader(outfile, "Sample", getPropertyValue("Sample"));
   writeHeader(outfile, "Thickness", std::to_string(sample.getThickness()));
   writeHeader(outfile, "Thickness_unit", "mm");
   writeHeader(outfile, "Theta_zmax", getPropertyValue("ThetaZMax"));
