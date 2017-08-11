@@ -87,4 +87,3 @@ def create_user_file(user_file_content):
         f.write(user_file_content)
 
     return user_file_path
-

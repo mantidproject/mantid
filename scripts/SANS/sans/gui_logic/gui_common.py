@@ -1,5 +1,5 @@
 from sans.common.enums import SANSInstrument, ISISReductionMode
-from collections import namedtuple
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Option column globals
@@ -67,12 +67,9 @@ def get_reduction_mode_from_gui_selection(gui_selection):
         return ISISReductionMode.Merged
     elif gui_selection == ALL:
         return ISISReductionMode.All
-    elif gui_selection == SANS2D_LAB or gui_selection == LOQ_LAB or\
-                    gui_selection == LARMOR_LAB or gui_selection == DEFAULT_LAB:
+    elif gui_selection == SANS2D_LAB or gui_selection == LOQ_LAB or gui_selection == LARMOR_LAB or gui_selection == DEFAULT_LAB:  # noqa
         return ISISReductionMode.LAB
     elif gui_selection == SANS2D_HAB or gui_selection == LOQ_HAB:
         return ISISReductionMode.HAB
     else:
         raise RuntimeError("Reduction mode selection is not valid.")
-
-

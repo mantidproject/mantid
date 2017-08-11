@@ -65,4 +65,3 @@ class GuiStateDirector(object):
 
         if "WavelengthMax" in options.keys():
             state_gui_model.wavelength_max = options["WavelengthMax"]
-

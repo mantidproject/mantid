@@ -12,10 +12,10 @@ from abc import ABCMeta, abstractmethod
 from six import with_metaclass
 from inspect import isclass
 from mantidqtpython import MantidQt
-from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument, RebinType,
+from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, SampleShape, ReductionMode, FitType)
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
-                                       get_string_for_gui_from_reduction_mode, OPTIONS_SEPARATOR)
+                                       get_string_for_gui_from_reduction_mode)
 canMantidPlot = True
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -134,11 +134,11 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         path = os.path.dirname(__file__)
         runs_icon_path = os.path.join(path, "icons", "run.png")
         runs_icon = QtGui.QIcon(runs_icon_path)
-        _ = QtGui.QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)
+        _ = QtGui.QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
         settings_icon_path = os.path.join(path, "icons", "settings.png")
         settings_icon = QtGui.QIcon(settings_icon_path)
-        _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)
+        _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
         # --------------------------------------------------------------------------------------------------------------
         # Algorithm setup

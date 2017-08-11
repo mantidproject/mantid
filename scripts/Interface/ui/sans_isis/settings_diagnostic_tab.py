@@ -1,5 +1,5 @@
 import ui_settings_diagnostic_tab
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
 

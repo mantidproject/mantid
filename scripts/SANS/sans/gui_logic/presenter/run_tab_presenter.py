@@ -14,12 +14,10 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiag
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_reduction_mode_strings_for_gui,
-                                       OPTIONS_SEPARATOR, OPTIONS_INDEX, OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX)
-
-from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RebinType, RangeStepType, SampleShape,
-                               FitType)
-from sans.common.file_information import (find_sans_file, SANSFileInformationFactory)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, OPTIONS_SEPARATOR, OPTIONS_INDEX,
+                                       OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX)
+from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RangeStepType, SampleShape, FitType)
+from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 
@@ -156,7 +154,7 @@ class RunTabPresenter(object):
             # 5. Update the views.
             self._update_view_from_state_model()
         except Exception as e:
-             sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
+            sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
 
     def on_batch_file_load(self):
         """

@@ -3,7 +3,7 @@ from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, 
                                           QResolutionId, FitId, event_binning_string_values, set_scales_entry,
                                           monitor_spectrum, simple_range, monitor_file, det_fit_range,
                                           q_rebin_values, fit_general, mask_angle_entry, range_entry)
-from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
+from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SaveType,
                                DetectorType, DataType, FitType)
 
 
@@ -554,7 +554,6 @@ class StateGuiModel(object):
             else:
                 new_settings.append(setting)
         self._user_file_items.update({FitId.general: new_settings})
-        a = self._user_file_items
 
     def has_transmission_fit_got_separate_settings_for_sample_and_can(self):
         if FitId.general in self._user_file_items:

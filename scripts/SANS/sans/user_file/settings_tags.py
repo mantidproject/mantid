@@ -140,4 +140,3 @@ class BackId(object):
                    "sample_thickness", "sample_shape")
 class OtherId(object):
     pass
-

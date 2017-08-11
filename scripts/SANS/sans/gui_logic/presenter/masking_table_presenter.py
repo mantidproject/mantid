@@ -1,7 +1,7 @@
 from ui.sans_isis.masking_table import MaskingTable
 from collections import namedtuple
 import copy
-from mantid.api import (AnalysisDataService, IEventWorkspace)
+from mantid.api import (AnalysisDataService)
 import mantidplot
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME

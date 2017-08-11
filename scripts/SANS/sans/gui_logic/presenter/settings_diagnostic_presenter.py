@@ -1,7 +1,5 @@
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 
-from mantid.kernel import logger
-
 
 class SettingsDiagnosticPresenter(object):
     class ConcreteSettingsDiagnosticTabListener(SettingsDiagnosticTab.SettingsDiagnosticTabListener):
