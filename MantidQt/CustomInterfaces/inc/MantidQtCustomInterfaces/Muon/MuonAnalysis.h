@@ -257,6 +257,8 @@ private slots:
   void setTFAsymm(Muon::TFAsymmState);
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
+  // update the displayed normalization
+  void updateNormalization(QString name);
 
 private:
   /// Initialize local Python environment
@@ -339,6 +341,8 @@ private:
 
   /// set labels for a single data set
   void updateLabels(std::string &name);
+
+  void setGroupsAndPairs();
 
   /// Get current plot style parameters. wsName and wsIndex are used to get
   /// default values if

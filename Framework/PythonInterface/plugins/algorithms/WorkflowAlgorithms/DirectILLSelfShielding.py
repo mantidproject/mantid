@@ -5,8 +5,8 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, IntBoundedValidator,
-                           Property, StringListValidator)
+from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, IntBoundedValidator,
+                           Property, PropertyCriterion, StringListValidator)
 from mantid.simpleapi import (ConvertUnits, MonteCarloAbsorption)
 
 
@@ -52,6 +52,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
         greaterThanOneInt = IntBoundedValidator(lower=2)
+        greaterThanTwoInt = IntBoundedValidator(lower=3)
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
@@ -83,11 +84,35 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to ' +
                                  'print in the logs.')
-        self.declareProperty(name=common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS,
-                             defaultValue=Property.EMPTY_INT,
+        self.declareProperty(name=common.PROP_SIMULATION_INSTRUMENT,
+                             defaultValue=common.SIMULATION_INSTRUMEN_SPARSE,
+                             validator=StringListValidator([
+                                 common.SIMULATION_INSTRUMEN_SPARSE,
+                                 common.SIMULATION_INSTRUMENT_FULL]),
+                             direction=Direction.Input,
+                             doc='Select if the simulation should be performed on full or approximated instrument.')
+        self.setPropertyGroup(common.PROP_SIMULATION_INSTRUMENT, common.PROPGROUP_SIMULATION_INSTRUMENT)
+        self.declareProperty(name=common.PROP_SPARSE_INSTRUMENT_ROWS,
+                             defaultValue=5,
+                             validator=greaterThanTwoInt,
+                             direction=Direction.Input,
+                             doc='Number of detector rows in sparse simulation instrument.')
+        self.setPropertyGroup(common.PROP_SPARSE_INSTRUMENT_ROWS, common.PROPGROUP_SIMULATION_INSTRUMENT)
+        self.setPropertySettings(common.PROP_SPARSE_INSTRUMENT_ROWS, EnabledWhenProperty(common.PROP_SIMULATION_INSTRUMENT,
+                                 PropertyCriterion.IsEqualTo, common.SIMULATION_INSTRUMEN_SPARSE))
+        self.declareProperty(name=common.PROP_SPARSE_INSTRUMENT_COLUMNS,
+                             defaultValue=20,
                              validator=greaterThanOneInt,
                              direction=Direction.Input,
-                             doc='Number of points where the calculation is performed (default: all).')
+                             doc='Number of detector columns in sparse simulation instrument.')
+        self.setPropertyGroup(common.PROP_SPARSE_INSTRUMENT_COLUMNS, common.PROPGROUP_SIMULATION_INSTRUMENT)
+        self.setPropertySettings(common.PROP_SPARSE_INSTRUMENT_COLUMNS, EnabledWhenProperty(common.PROP_SIMULATION_INSTRUMENT,
+                                 PropertyCriterion.IsEqualTo, common.SIMULATION_INSTRUMEN_SPARSE))
+        self.declareProperty(name=common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS,
+                             defaultValue=Property.EMPTY_INT,
+                             validator=greaterThanTwoInt,
+                             direction=Direction.Input,
+                             doc='Number of wavelength points where the simulation is performed (default: all).')
 
     def validateInputs(self):
         """Check for issues with user input."""
@@ -115,11 +140,25 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                     EnableLogging=subalgLogging)
         wavelengthPoints = self.getProperty(common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS).value
         correctionWSName = wsNames.withSuffix('correction')
-        correctionWS = MonteCarloAbsorption(InputWorkspace=wavelengthWS,
-                                            OutputWorkspace=correctionWSName,
-                                            NumberOfWavelengthPoints=wavelengthPoints,
-                                            Interpolation='CSpline',
-                                            EnableLogging=subalgLogging)
+        useFullInstrument = self.getProperty(common.PROP_SIMULATION_INSTRUMENT).value == common.SIMULATION_INSTRUMENT_FULL
+        if useFullInstrument:
+            correctionWS = MonteCarloAbsorption(InputWorkspace=wavelengthWS,
+                                                OutputWorkspace=correctionWSName,
+                                                SparseInstrument=False,
+                                                NumberOfWavelengthPoints=wavelengthPoints,
+                                                Interpolation='CSpline',
+                                                EnableLogging=subalgLogging)
+        else:
+            rows = self.getProperty(common.PROP_SPARSE_INSTRUMENT_ROWS).value
+            columns = self.getProperty(common.PROP_SPARSE_INSTRUMENT_COLUMNS).value
+            correctionWS = MonteCarloAbsorption(InputWorkspace=wavelengthWS,
+                                                OutputWorkspace=correctionWSName,
+                                                SparseInstrument=True,
+                                                NumberOfDetectorRows=rows,
+                                                NumberOfDetectorColumns=columns,
+                                                NumberOfWavelengthPoints=wavelengthPoints,
+                                                Interpolation='CSpline',
+                                                EnableLogging=subalgLogging)
         wsCleanup.cleanup(wavelengthWS)
         correctionWS = ConvertUnits(InputWorkspace=correctionWS,
                                     OutputWorkspace=correctionWSName,

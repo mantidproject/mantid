@@ -40,6 +40,11 @@ class TOFTOFSetupWidget(BaseWidget):
                 else:
                     break
 
+        def _removeEmptyRows(self):
+            for row in reversed(range(self._numRows())):
+                if self._isRowEmpty(row):
+                    del self.dataRuns[row]
+
         def _ensureHasRows(self, numRows):
             while self._numRows() < numRows:
                 self.dataRuns.append(('', ''))
@@ -62,7 +67,19 @@ class TOFTOFSetupWidget(BaseWidget):
         # reimplemented QAbstractTableModel methods
 
         headers    = ('Data runs', 'Comment')
-        selectCell = pyqtSignal(int, int)
+        selectCell = pyqtSignal(QModelIndex)
+
+        def emptyCells(self, indexes):
+            for index in indexes:
+                row = index.row()
+                col = index.column()
+
+                self._setCellText(row, col, '')
+
+            self._removeEmptyRows()
+            self.reset()
+            # indexes is never empty
+            self.selectCell.emit(indexes[0])
 
         def rowCount(self, _ = QModelIndex()):
             # one additional row for new data
@@ -101,12 +118,28 @@ class TOFTOFSetupWidget(BaseWidget):
                 col = 0
 
             row = min(row, self.rowCount() - 1)
-            self.selectCell.emit(row, col)
+
+            self.selectCell.emit(self.index(row, col))
 
             return True
 
         def flags(self, _):
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
+
+    class DataRunView(QTableView):
+
+        def keyPressEvent(self, QKeyEvent):
+            if self.state() == QAbstractItemView.EditingState:
+                index = self.currentIndex()
+                if QKeyEvent.key() in [Qt.Key_Down, Qt.Key_Up]:
+                    self.setFocus()
+                    self.setCurrentIndex(self.model().index(index.row(), index.column()))
+                else:
+                    QTableView.keyPressEvent(self, QKeyEvent)
+            if QKeyEvent.key() in [Qt.Key_Delete, Qt.Key_Backspace]:
+                self.model().emptyCells(self.selectedIndexes())
+            else:
+                QTableView.keyPressEvent(self, QKeyEvent)
 
     # tooltips
     TIP_prefix  = ''
@@ -148,9 +181,9 @@ class TOFTOFSetupWidget(BaseWidget):
 
         inf = float('inf')
 
-        def set_spin(spin, minVal = -inf, maxVal = +inf):
+        def set_spin(spin, minVal = -inf, maxVal = +inf, decimals = 3):
             spin.setRange(minVal, maxVal)
-            spin.setDecimals(3)
+            spin.setDecimals(decimals)
             spin.setSingleStep(0.01)
 
         def tip(widget, text):
@@ -176,7 +209,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.binEend   = tip(QDoubleSpinBox(), self.TIP_binEend)
 
         set_spin(self.binEstart)
-        set_spin(self.binEstep)
+        set_spin(self.binEstep, decimals = 4)
         set_spin(self.binEend)
 
         self.binQon    = tip(QCheckBox(),      self.TIP_binQon)
@@ -190,7 +223,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.maskDetectors = tip(QLineEdit(), self.TIP_maskDetectors)
 
-        self.dataRunsView  = tip(QTableView(self), self.TIP_dataRunsView)
+        self.dataRunsView  = tip(self.DataRunView(self), self.TIP_dataRunsView)
         self.dataRunsView.horizontalHeader().setStretchLastSection(True)
         self.dataRunsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
@@ -332,8 +365,7 @@ class TOFTOFSetupWidget(BaseWidget):
         for widget in (self.binQstart, self.binQstep, self.binQend):
             widget.setEnabled(onVal)
 
-    def _onSelectedCell(self, row, col):
-        index = self.runDataModel.index(row, col)
+    def _onSelectedCell(self, index):
         self.dataRunsView.setCurrentIndex(index)
         self.dataRunsView.setFocus()
 

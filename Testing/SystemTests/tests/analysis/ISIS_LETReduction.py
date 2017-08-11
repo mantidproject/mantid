@@ -106,7 +106,6 @@ class ReduceLET_OneRep(ReductionWrapper):
         LoadEventNexus(Filename='LET00006278.nxs',OutputWorkspace=sample_ws,
                        SingleBankPixelsOnly='0',LoadMonitors='1',
                        MonitorsAsEvents='1')
-        ConjoinWorkspaces(InputWorkspace1=sample_ws, InputWorkspace2=monitors_ws)
         #prop.sample_run = sample_ws
 
         ebin = prop.energy_bins
@@ -114,7 +113,9 @@ class ReduceLET_OneRep(ReductionWrapper):
 
         (energybin,tbin,t_elastic) = find_binning_range(ei,ebin)
         Rebin(InputWorkspace=sample_ws,OutputWorkspace=sample_ws, Params=tbin, PreserveEvents='1')
+        Rebin(InputWorkspace=monitors_ws,OutputWorkspace=monitors_ws, Params=tbin, PreserveEvents='1')
 
+        ConjoinWorkspaces(InputWorkspace1=sample_ws, InputWorkspace2=monitors_ws)
         prop.bkgd_range=[int(t_elastic),int(tbin[2])]
 
         ebinstring = str(energybin[0])+','+str(energybin[1])+','+str(energybin[2])

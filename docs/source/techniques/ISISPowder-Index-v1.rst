@@ -53,4 +53,8 @@ Instrument Reference
 - :ref:`isis-powder-diffraction-pearl-ref`
 - :ref:`isis-powder-diffraction-polaris-ref`
 
+Workflow Diagrams
+-----------------
+:ref:`isis-powder-diffraction-workflow-ref`
+
 .. categories:: Techniques

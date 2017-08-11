@@ -72,6 +72,10 @@ echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
 echo "usagereports.enabled = 0" >> $userprops
 echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 
+# Remove mismatch files which have not been cleaned up yet
+default_save_directory=${WORKSPACE}/build/Testing/SystemTests/scripts/
+find ${default_save_directory} -name "*-mismatch*" -delete
+
 # Run
 PKGDIR=${WORKSPACE}/build
 python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR $EXTRA_ARGS
