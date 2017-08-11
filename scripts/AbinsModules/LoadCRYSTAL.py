@@ -444,7 +444,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
             l = line.split()
             symbol = str(l[2].decode("utf-8").capitalize())
             atom = Atom(symbol=symbol)
-            data["atoms"]["atom_%s" % i] = {
+            data["atoms"]["atom_{}".format(i)] = {
                 "symbol": symbol, "mass": atom.mass, "sort": i,
                 "fract_coord": np.asarray(l[3:6]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)}
 
