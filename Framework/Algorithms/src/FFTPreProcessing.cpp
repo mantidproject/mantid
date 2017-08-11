@@ -57,8 +57,8 @@ void FFTPreProcessing::init() {
       "it is the number of multiples of the data set."
       "i.e 0 means no padding and 1 will double the number of data points.");
   declareProperty("NegativePadding", false, "If true padding is added to "
-	  "the both sides of the original data. Both sides "
-	  "will be padded by the amount given by Padding");
+	  "both sides of the original data. Both sides "
+	  "share the padding");
 }
 
 /** Executes the algorithm
@@ -209,12 +209,13 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
   std::vector<double> newXData;
   std::vector<double> newYData;
   std::vector<double> newEData;
-
+  int amountOfPadding = yData.size();
   if (getProperty("NegativePadding")) {
-	  double xValue = xData[0] - dx*yData.size()*padding;
+	  amountOfPadding = std::floor(0.5*double(yData.size()));
+	  double xValue = xData[0] - dx*amountOfPadding*padding;
 	  for (int j = 0; j < padding; j++) {
 
-		  for (size_t i = 0; i < yData.size(); ++i) {
+		  for (size_t i = 0; i < amountOfPadding; ++i) {
 			  newXData.push_back(xValue);
 			  newYData.push_back(0.0);
 			  newEData.push_back(0.0);
@@ -232,7 +233,7 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
   double xValue = xData[xData.size() - 1] + dx;
   for (int j = 0; j < padding; j++) {
 
-    for (size_t i = 0; i < yData.size(); ++i) {
+    for (size_t i = 0; i < amountOfPadding; ++i) {
       newXData.push_back(xValue);
       newYData.push_back(0.0);
       newEData.push_back(0.0);
