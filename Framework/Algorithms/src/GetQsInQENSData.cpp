@@ -102,6 +102,7 @@ MantidVec GetQsInQENSData::extractQValues(
     // Check if the Q-values are stored as histogram data.
     if (qValues.size() == numSpectra + 1) {
       // Convert Q-values to point values.
+      qValues.pop_back();
       qValues.erase(qValues.begin());
       std::transform(qValues.begin(), qValues.end(), qValues.begin(),
                      std::bind2nd(std::divides<double>(), 2.0));
