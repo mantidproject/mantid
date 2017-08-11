@@ -108,7 +108,7 @@ SplineBackground::calculateNumBinsToProcess(const API::MatrixWorkspace *ws) {
 void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
                                          const size_t specNum,
                                          int expectedNumBins) {
-  const auto &xPointData = ws->points(specNum);
+  const auto xPointData = ws->points(specNum);
   const auto &yInputVals = ws->y(specNum);
   const auto &eInputVals = ws->e(specNum);
   const bool hasMaskedBins = ws->hasMaskedBins(specNum);
