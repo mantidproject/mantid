@@ -54,8 +54,8 @@ void clearPositionAndRotationParameters(ParameterMap *pmap,
  */
 InstrumentVisitor::InstrumentVisitor(
     boost::shared_ptr<const Instrument> instrument)
-    : m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(std::move(
-          instrument->getDetectorIDs(false /*Do not skip monitors*/)))),
+    : m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(
+          instrument->getDetectorIDs(false /*Do not skip monitors*/))),
       m_componentIds(boost::make_shared<std::vector<ComponentID>>(
           m_orderedDetectorIds->size(), nullptr)),
       m_assemblySortedDetectorIndices(
