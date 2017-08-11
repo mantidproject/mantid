@@ -38,7 +38,7 @@
 #include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
 #include "vtkStringArray.h"
-#include "vtkThreeSliceFilter.h"
+#include "AlignedThreeSliceFilter.h"
 #include "vtkVector.h"
 
 #include <cassert>
@@ -130,7 +130,7 @@ public:
     vtkVector3d sliceNormals[3];
     GetNormalsToBasisPlanes(changeOfBasisMatrix, sliceNormals);
 
-    vtkNew<vtkThreeSliceFilter> slicer;
+    vtkNew<AlignedThreeSliceFilter> slicer;
     slicer->SetInputDataObject(inputDO);
     slicer->SetCutOrigins(0, 0, 0);
     for (int axis = 0; axis < 3; axis++)
