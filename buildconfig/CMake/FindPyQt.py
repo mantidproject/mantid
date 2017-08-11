@@ -23,7 +23,7 @@ class PyQtConfig(object):
     pyuic_path = None
 
     def __init__(self, name):
-      qtcore = __import__(name + '.QtCore', globals(), locals(), ['QtCore'], -1)
+      qtcore = __import__(name + '.QtCore', globals(), locals(), ['QtCore'], 0)
       self.version_hex = qtcore.PYQT_VERSION
       self.version_str = qtcore.PYQT_VERSION_STR
       self.sip_flags = qtcore.PYQT_CONFIGURATION['sip_flags']
@@ -36,7 +36,7 @@ class PyQtConfig(object):
       else:
           self.sip_dir = os.path.join(sys.prefix, 'share', 'sip', name)
       # Assume uic script is in uic submodule
-      uic = __import__(name + '.uic', globals(), locals(), ['uic'], -1)
+      uic = __import__(name + '.uic', globals(), locals(), ['uic'], 0)
       self.pyuic_path = os.path.join(os.path.dirname(uic.__file__), 'pyuic.py')
 
     def _get_qt_tag(self, sip_flags):
