@@ -116,7 +116,7 @@ public:
     IAlgorithm_sptr alg2 = setUpAlg();
     alg2->setProperty("InputWorkspace", workspaces[0]);
     alg2->setPropertyValue("OutputWorkspace", outputName);
-    alg2->setPropertyValue("Spectra", "1");
+    alg2->setPropertyValue("WorkspaceIndices", "1");
     TS_ASSERT_THROWS_NOTHING(alg2->execute());
     TS_ASSERT(alg2->isExecuted());
     workspaces.push_back(alg2->getProperty("OutputWorkspace"));
@@ -135,29 +135,6 @@ public:
                          workspaces[2]->e(j).rawData());
       }
     }
-  }
-
-  void test_Bartlett() {
-
-    auto ws = createWorkspace(1, 50);
-    IAlgorithm_sptr alg = setUpAlg();
-    alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setProperty("ApodizationFunction", "Bartlett");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
-
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-
-    double Delta = 0.0001;
-    // Test some X values
-    TS_ASSERT_DELTA(outWS->x(0)[10], 2.000, Delta);
-    TS_ASSERT_DELTA(outWS->x(0)[19], 3.800, Delta);
-    TS_ASSERT_DELTA(outWS->x(0)[49], 9.800, Delta);
-    // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(0)[10], 0.0, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[19], -0.9 * 3.8, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[49], -3.9 * 9.8, Delta);
   }
   void test_Lorentz() {
 
@@ -181,51 +158,7 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[19], exp(-3.8 / 2.) * 3.8, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[49], exp(-9.8 / 2.) * 9.8, Delta);
   }
-  void test_Connes() {
-
-    auto ws = createWorkspace(1, 50);
-    IAlgorithm_sptr alg = setUpAlg();
-    alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setProperty("ApodizationFunction", "Connes");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
-
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-
-    double Delta = 0.0001;
-    // Test some X values
-    TS_ASSERT_DELTA(outWS->x(0)[10], 2.000, Delta);
-    TS_ASSERT_DELTA(outWS->x(0)[19], 3.800, Delta);
-    TS_ASSERT_DELTA(outWS->x(0)[49], 9.800, Delta);
-    // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(0)[10], 0.0, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[19], 6.8121 * 3.8, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[49], 529.4601 * 9.8, Delta);
-  }
-  void test_Cosine() {
-
-    auto ws = createWorkspace(1, 50);
-    IAlgorithm_sptr alg = setUpAlg();
-    alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setProperty("ApodizationFunction", "Cosine");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
-
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-
-    double Delta = 0.0001;
-    // Test some X values
-    TS_ASSERT_DELTA(outWS->x(0)[10], 2.000, Delta);
-    TS_ASSERT_DELTA(outWS->x(0)[19], 3.800, Delta);
-    TS_ASSERT_DELTA(outWS->x(0)[49], 9.800, Delta);
-    // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(0)[10], 0.0 * 2.0, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[19], -0.987688 * 3.8, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[49], 0.1564345 * 9.8, Delta);
-  }
-  void test_Gaussian() {
+ void test_Gaussian() {
 
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
@@ -247,29 +180,7 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[19], 0.164474 * 3.8, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[49], 6.11e-6 * 9.8, Delta);
   }
-  void test_Welch() {
-
-    auto ws = createWorkspace(1, 50);
-    IAlgorithm_sptr alg = setUpAlg();
-    alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setProperty("ApodizationFunction", "Welch");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
-
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-
-    double Delta = 0.0001;
-    // Test some X values
-    TS_ASSERT_DELTA(outWS->x(0)[10], 2.000, Delta);
-    TS_ASSERT_DELTA(outWS->x(0)[19], 3.800, Delta);
-    TS_ASSERT_DELTA(outWS->x(0)[49], 9.800, Delta);
-    // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(0)[10], 0.0 * 2.0, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[19], -2.61 * 3.8, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[49], -23.01 * 9.8, Delta);
-  }
-  void test_PaddingOne() {
+ void test_PaddingOne() {
 
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();

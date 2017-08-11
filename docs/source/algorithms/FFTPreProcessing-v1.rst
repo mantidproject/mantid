@@ -24,12 +24,8 @@ The time the function is evaluated at is denoted by :math:`t`.
 The current implementation includes the following functions:
 
 - None.
-- Bartlett :math:`1-\frac{\abs({t}}{\tau}`.
 - Lorentz :math:`\exp\left(-\frac{t}{\tau}\right)`.
-- Connes :math:`\left(1-\frac{t^2}{\tau^2}\right)^2`.
-- Cosine :math:`\cos\left(\frac{\pi t}{2 tau}\right)`.
 - Gaussian :math:`\exp\left(-\frac{t^2}{2\tau^2}\right)`.
-- Welch :math:`1-\frac{t^2}{\tau^2}`.
  
 Usage
 -----

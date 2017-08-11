@@ -44,8 +44,7 @@ void FFTPreProcessing::init() {
   declareProperty(
       "ApodizationFunction", "None",
       boost::make_shared<Mantid::Kernel::StringListValidator>(
-          std::vector<std::string>{"None", "Bartlett", "Lorentz", "Connes",
-                                   "Cosine", "Gaussian", "Welch"}),
+          std::vector<std::string>{"None", "Lorentz","Gaussian"}),
       "The apodization function to apply to the data");
   declareProperty("DecayConstant", 1.5,
                   "The decay constant for the apodization function.");
@@ -145,18 +144,10 @@ typedef double (*fptr)(const double time, const double decayConstant);
 fptr FFTPreProcessing::getApodizationFunction(const std::string method) {
   if (method == "None") {
     return none;
-  } else if (method == "Bartlett") {
-    return bartlett;
   } else if (method == "Lorentz") {
     return lorentz;
-  } else if (method == "Connes") {
-    return connes;
-  } else if (method == "Cosine") {
-    return cosine;
   } else if (method == "Gaussian") {
     return gaussian;
-  } else if (method == "Welch") {
-    return welch;
   }
   throw std::invalid_argument("The apodization function selected " + method +
                               " is not a valid option");
