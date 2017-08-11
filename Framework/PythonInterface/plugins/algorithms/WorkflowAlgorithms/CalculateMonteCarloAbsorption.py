@@ -247,44 +247,42 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
         self._container_ws_name = self.getPropertyValue('ContainerWorkspace')
         self._shape = self.getProperty('Shape').value
+        self._height = self.getProperty('Height').value
 
-        self._sample_kwargs = {'ChemicalFormula': self.getPropertyValue('SampleChemicalFormula'),
-                               'DensityType': self.getPropertyValue('SampleDensityType'),
-                               'Density': self.getProperty('SampleDensity').value,
-                               'Shape': self._shape,
-                               'Height': self.getProperty('Height').value}
+        self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
+        self._sample_density_type = self.getPropertyValue('SampleDensityType')
+        self._sample_density = self.getProperty('SampleDensity').value
 
         if self._container_ws_name:
-            self._container_kwargs = {'ChemicalFormula': self.getPropertyValue('ContainerChemicalFormula'),
-                                      'DensityType': self.getPropertyValue('ContainerDensityType'),
-                                      'Density': self.getProperty('ContainerDensity').value,
-                                      'Height': self.getProperty('Height').value}
+            self._container_chemical_formula = self.getPropertyValue('ContainerChemicalFormula')
+            self._container_density_type = self.getPropertyValue('ContainerDensityType')
+            self._container_density = self.getProperty('ContainerDensity').value
 
         if self._shape == 'FlatPlate':
-
-            self._sample_kwargs['Width'] = self.getProperty('SampleWidth').value
-            self._sample_kwargs['Thickness'] = self.getProperty('SampleThickness').value
-            self._sample_kwargs['Angle'] = self.getProperty('SampleAngle').value
-            self._sample_kwargs['Center'] = self.getProperty('SampleCenter').value
+            self._sample_width = self.getProperty('SampleWidth').value
+            self._sample_thickness = self.getProperty('SampleThickness').value
+            self._sample_angle = self.getProperty('SampleAngle').value
+            self._sample_center = self.getProperty('SampleCenter').value
 
         if self._shape == 'Cylinder':
-            self._sample_kwargs['Radius'] = self.getProperty('SampleRadius').value
+            self._sample_radius = self.getProperty('SampleRadius').value
 
         if self._shape == 'Annulus':
-            self._sample_kwargs['InnerRadius'] = self.getProperty('SampleInnerRadius').value
-            self._sample_kwargs['OuterRadius'] = self.getProperty('SampleOuterRadius').value
+            self._sample_inner_radius = self.getProperty('SampleInnerRadius').value
+            self._sample_outer_radius = self.getProperty('SampleOuterRadius').value
 
             if self._container_ws_name:
                 if self._shape == 'FlatPlate':
-                    self._container_kwargs['Width'] = self.getProperty('ContainerWidth').value
-                    self._container_kwargs['Thickness'] = self.getProperty('ContainerThickness').value
-                    self._container_kwargs['Angle'] = self.getProperty('ContainerAngle').value
-                    self._container_kwargs['Center'] = self.getProperty('ContainerCenter').value
-                    self._container_kwargs['Shape'] = 'FlatPlate'
+                    self._container_width = self.getProperty('ContainerWidth').value
+                    self._container_thickness = self.getProperty('ContainerThickness').value
+                    self._container_angle = self.getProperty('ContainerAngle').value
+                    self._container_center = self.getProperty('ContainerCenter').value
+                    self._container_shape = 'FlatPlate'
                 else:
-                    self._container_kwargs['InnerRadius'] = self.getProperty('ContainerInnerRadius').value
-                    self._container_kwargs['OuterRadius'] = self.getProperty('ContainerOuterRadius').value
-                    self._container_kwargs['Shape'] = 'Annulus'
+                    self._container_inner_radius = self.getProperty('ContainerInnerRadius').value
+                    self._container_outer_radius = self.getProperty('ContainerOuterRadius').value
+
+
                 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CalculateMonteCarloAbsorption)
