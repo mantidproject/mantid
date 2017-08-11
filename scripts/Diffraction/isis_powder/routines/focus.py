@@ -5,7 +5,6 @@ import mantid.simpleapi as mantid
 import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
 import os
-import warnings
 
 
 def focus(run_number_string, instrument, perform_vanadium_norm, absorb):
