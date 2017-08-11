@@ -38,7 +38,7 @@ public:
     const std::string verticalAxisUnit = "Label";
     const std::vector<double> dataX = {0, 1};
     const std::vector<double> dataY = {0, 0};
-    const std::vector<double> verticalAxisValues = {0, 1};
+    const std::vector<std::string> verticalAxisValues = {"0", "1"};
     const size_t numSpectra = 2;
 
     // Create the input workspace, without detectors
