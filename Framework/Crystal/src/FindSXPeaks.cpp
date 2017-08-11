@@ -19,7 +19,6 @@ using namespace Mantid::Crystal::FindSXPeaksHelper;
 namespace Mantid {
 namespace Crystal {
 
-
 const std::string FindSXPeaks::strongestPeakStrategy = "StrongestPeakOnly";
 const std::string FindSXPeaks::allPeaksStrategy = "AllPeaks";
 
