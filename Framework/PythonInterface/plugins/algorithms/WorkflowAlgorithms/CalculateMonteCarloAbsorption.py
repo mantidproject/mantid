@@ -267,12 +267,24 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             self._sample_kwargs['Angle'] = self.getProperty('SampleAngle').value
             self._sample_kwargs['Center'] = self.getProperty('SampleCenter').value
 
+        if self._shape == 'Cylinder':
+            self._sample_kwargs['Radius'] = self.getProperty('SampleRadius').value
+
+        if self._shape == 'Annulus':
+            self._sample_kwargs['InnerRadius'] = self.getProperty('SampleInnerRadius').value
+            self._sample_kwargs['OuterRadius'] = self.getProperty('SampleOuterRadius').value
+
             if self._container_ws_name:
-                self._container_kwargs['Width'] = self.getProperty('ContainerWidth').value
-                self._container_kwargs['Thickness'] = self.getProperty('ContainerThickness').value
-                self._container_kwargs['Angle'] = self.getProperty('ContainerAngle').value
-                self._container_kwargs['Center'] = self.getProperty('ContainerCenter').value
-
-
+                if self._shape == 'FlatPlate':
+                    self._container_kwargs['Width'] = self.getProperty('ContainerWidth').value
+                    self._container_kwargs['Thickness'] = self.getProperty('ContainerThickness').value
+                    self._container_kwargs['Angle'] = self.getProperty('ContainerAngle').value
+                    self._container_kwargs['Center'] = self.getProperty('ContainerCenter').value
+                    self._container_kwargs['Shape'] = 'FlatPlate'
+                else:
+                    self._container_kwargs['InnerRadius'] = self.getProperty('ContainerInnerRadius').value
+                    self._container_kwargs['OuterRadius'] = self.getProperty('ContainerOuterRadius').value
+                    self._container_kwargs['Shape'] = 'Annulus'
+                
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CalculateMonteCarloAbsorption)
