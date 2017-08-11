@@ -7,6 +7,8 @@
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/Unit.h"
 
+#include <stdexcept>
+
 namespace {
 Mantid::Kernel::Logger g_log("ConvolutionFitSequential");
 }
@@ -19,7 +21,7 @@ using namespace Kernel;
 using namespace Geometry;
 
 // Register the Algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(GetQsInQENSData);
+DECLARE_ALGORITHM(GetQsInQENSData)
 
 // Initializes the Algorithm
 void GetQsInQENSData::init() {
@@ -115,7 +117,7 @@ MantidVec GetQsInQENSData::extractQValues(
 
       for (size_t i = 0; i < numSpectra; i++) {
         IDetector_const_sptr detector =
-            boost::make_shared<IDetector>(detInf.detector(i));
+            boost::make_shared<const IDetector>(detInf.detector(i));
         double efixed = workspace->getEFixed(detector);
         double theta = 0.5 * workspace->detectorTwoTheta(*detector);
         qValues[i] = UnitConversion::convertToElasticQ(theta, efixed);
