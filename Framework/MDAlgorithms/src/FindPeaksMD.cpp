@@ -444,14 +444,15 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // --- Convert the "boxes" to peaks ----
     for (auto box : peakBoxes) {
       //  If no events from this experimental contribute to the box then skip
-      MDBox<MDE, nd> *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
-      typename std::vector<MDE> &events = mdbox->getEvents();
-      if (std::none_of(events.cbegin(), events.cend(), [&iexp, &nexp](
-                                                           MDE event) {
-            return event.getRunIndex() == iexp || event.getRunIndex() > nexp;
-          }))
-        continue;
-
+      if (nexp > 1) {
+        MDBox<MDE, nd> *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
+        typename std::vector<MDE> &events = mdbox->getEvents();
+        if (std::none_of(events.cbegin(), events.cend(), [&iexp, &nexp](
+                                                             MDE event) {
+              return event.getRunIndex() == iexp || event.getRunIndex() >= nexp;
+            }))
+          continue;
+      }
 // The center of the box = Q in the lab frame
 
 #ifndef MDBOX_TRACK_CENTROID
