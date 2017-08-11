@@ -423,14 +423,14 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
         for d_range, wrksp in itertools.chain(self._sam_ws_map.items(), self._van_ws_map.items()):
-            NormaliseByCurrent(InputWorkspace=wrksp,
-                               OutputWorkspace=wrksp)
-            AlignDetectors(InputWorkspace=wrksp,
-                           OutputWorkspace=wrksp,
-                           CalibrationFile=self._cal)
-            DiffractionFocussing(InputWorkspace=wrksp,
-                                 OutputWorkspace=wrksp,
-                                 GroupingFileName=self._cal)
+            wrksp = NormaliseByCurrent(InputWorkspace=wrksp,
+                                       OutputWorkspace=wrksp)
+            wrksp = AlignDetectors(InputWorkspace=wrksp,
+                                   OutputWorkspace=wrksp,
+                                   CalibrationFile=self._cal)
+            wrksp = DiffractionFocussing(InputWorkspace=wrksp,
+                                         OutputWorkspace=wrksp,
+                                         GroupingFileName=self._cal)
             CropWorkspace(InputWorkspace=wrksp,
                           OutputWorkspace=wrksp,
                           XMin=d_range[0],
