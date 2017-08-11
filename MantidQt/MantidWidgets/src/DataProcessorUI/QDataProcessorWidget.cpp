@@ -416,7 +416,7 @@ void QDataProcessorWidget::setProgress(int progress) {
 Get status of checkbox which determines whether an ipython notebook is produced
 @return true if a notebook should be output on process, false otherwise
 */
-bool QDataProcessorWidget::getEnableNotebook() {
+bool QDataProcessorWidget::isNotebookEnabled() {
   return ui.checkEnableNotebook->isChecked();
 }
 

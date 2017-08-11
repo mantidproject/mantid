@@ -100,7 +100,7 @@ public:
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
-  bool getEnableNotebook() override;
+  bool isNotebookEnabled() override;
 
   // Expand/Collapse all groups
   void expandAll() override;

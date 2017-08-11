@@ -442,7 +442,7 @@ void GenericDataProcessorPresenter::nextGroup() {
       doNextAction();
   } else {
     // If "Output Notebook" checkbox is checked then create an ipython notebook
-    if (m_view->getEnableNotebook())
+    if (m_view->isNotebookEnabled())
       saveNotebook(m_selectedData);
     endReduction();
   }

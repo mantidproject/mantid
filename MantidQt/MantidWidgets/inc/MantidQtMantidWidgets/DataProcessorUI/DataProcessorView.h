@@ -75,7 +75,7 @@ public:
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
-  virtual bool getEnableNotebook() = 0;
+  virtual bool isNotebookEnabled() = 0;
 
   // Expand/Collapse all groups
   virtual void expandAll() = 0;

@@ -45,7 +45,7 @@ public:
   MOCK_CONST_METHOD0(getSelectedParents, std::set<int>());
   MOCK_CONST_METHOD0(getClipboard, QString());
   MOCK_CONST_METHOD0(getProcessInstrument, QString());
-  MOCK_METHOD0(getEnableNotebook, bool());
+  MOCK_METHOD0(isNotebookEnabled, bool());
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD0(selectAll, void());
