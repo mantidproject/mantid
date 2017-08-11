@@ -41,11 +41,10 @@ void FFTPreProcessing::init() {
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<int>>(
                       "WorkspaceIndices", empty),
                   "The workspace indices to process.");
-  declareProperty(
-      "ApodizationFunction", "None",
-      boost::make_shared<Mantid::Kernel::StringListValidator>(
-          std::vector<std::string>{"None", "Lorentz","Gaussian"}),
-      "The apodization function to apply to the data");
+  declareProperty("ApodizationFunction", "None",
+                  boost::make_shared<Mantid::Kernel::StringListValidator>(
+                      std::vector<std::string>{"None", "Lorentz", "Gaussian"}),
+                  "The apodization function to apply to the data");
   declareProperty("DecayConstant", 1.5,
                   "The decay constant for the apodization function.");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();

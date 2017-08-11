@@ -158,7 +158,7 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[19], exp(-3.8 / 2.) * 3.8, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[49], exp(-9.8 / 2.) * 9.8, Delta);
   }
- void test_Gaussian() {
+  void test_Gaussian() {
 
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
@@ -180,7 +180,7 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[19], 0.164474 * 3.8, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[49], 6.11e-6 * 9.8, Delta);
   }
- void test_PaddingOne() {
+  void test_PaddingOne() {
 
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
