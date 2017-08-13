@@ -207,6 +207,7 @@ def get_instrument_paths_for_sans_file(file_name):
     file_information_factory = SANSFileInformationFactory()
     file_information = file_information_factory.create_sans_file_information(file_name)
     measurement_time = file_information.get_date()
+
     # For some odd reason the __str__ method of DateAndTime adds a space which we need to strip here. It seems
     # to be on purpose though since the export method is called IS08601StringPlusSpace --> hence we need to strip it
     # ourselves
@@ -217,8 +218,15 @@ def get_instrument_paths_for_sans_file(file_name):
     instrument_as_string = SANSInstrument.to_string(instrument)
 
     # Get the idf file path
+    # IMPORTANT NOTE: I profiled the call to ExperimentInfo.getInstrumentFilename and it dominates
+    #                 the state creation. Ironically this routine is exported from C++. The problem is
+    #                 that we are performing XML parsing on the C++ side, which is costly. There is a
+    #                 movement currently towards making the IDF redundant and storing instrument info
+    #                 as native nexus information.
     idf_path = ExperimentInfo.getInstrumentFilename(instrument_as_string, measurement_time_as_string)
     idf_path = os.path.normpath(idf_path)
+
+
 
     if not os.path.exists(idf_path):
         raise RuntimeError("SANSFileInformation: The instrument definition file {0} does not seem to "

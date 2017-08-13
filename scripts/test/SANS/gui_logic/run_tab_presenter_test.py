@@ -3,107 +3,167 @@ from __future__ import (absolute_import, division, print_function)
 import mantid
 import unittest
 import os
+import mock
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (SANSFacility, ReductionDimensionality)
+from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, OutputMode, ISISReductionMode,
+                               RangeStepType, FitType)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file)
-from sans.test_helper.mock_objects import (MockRunTabView, MockStateModel)
+from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file, save_to_csv)
+from mantid.kernel import PropertyManagerDataService
 
 
 class RunTabPresenterTest(unittest.TestCase):
     def test_that_will_load_user_file(self):
         # Setup presenter and mock view
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = MockRunTabView()
         user_file_path = create_user_file(sample_user_file)
-        view.set_user_file_path(user_file_path)
+        view, settings_diagnostic_tab, _ = create_mock_view(user_file_path)
+        presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
 
         # Act
-        view.on_user_file_load()
+        presenter.on_user_file_load()
 
         # Assert
         # Note that the event slices are not set in the user file
-        self.assertTrue(not view.event_slices)
+        self.assertFalse(view.event_slices)
         self.assertTrue(view.reduction_dimensionality is ReductionDimensionality.OneDim)
-        # Add future fields that will be populated here
+        self.assertTrue(view.save_types[0] is SaveType.NXcanSAS)
+        self.assertTrue(view.zero_error_free)
+        self.assertTrue(view.use_optimizations)
+        self.assertTrue(view.reduction_mode is ISISReductionMode.LAB)
+        self.assertTrue(view.merge_scale == 1.)
+        self.assertTrue(view.merge_shift == 0.)
+        self.assertFalse(view.merge_scale_fit)
+        self.assertFalse(view.merge_shift_fit)
+        self.assertTrue(view.event_binning == "7000.0,500.0,60000.0")
+        self.assertTrue(view.wavelength_step_type is RangeStepType.Lin)
+        self.assertTrue(view.wavelength_min == 1.5)
+        self.assertTrue(view.wavelength_max == 12.5)
+        self.assertTrue(view.wavelength_step == 0.125)
+        self.assertTrue(view.absolute_scale == 0.074)
+        self.assertTrue(view.z_offset == 53.)
+        self.assertTrue(view.normalization_incident_monitor == 1)
+        self.assertTrue(view.normalization_interpolate)
+        self.assertTrue(view.transmission_incident_monitor == 1)
+        self.assertTrue(view.transmission_interpolate)
+        self.assertTrue(view.transmission_roi_files == "test2.xml")
+        self.assertTrue(view.transmission_mask_files == "test4.xml")
+        self.assertTrue(view.transmission_radius == 7.)
+        self.assertTrue(view.transmission_monitor == 4)
+        self.assertTrue(view.transmission_m4_shift == -70)
+        self.assertTrue(view.transmission_sample_use_fit)
+        self.assertTrue(view.transmission_sample_fit_type is FitType.Logarithmic)
+        self.assertTrue(view.transmission_sample_polynomial_order == 2)
+        self.assertTrue(view.transmission_sample_wavelength_min == 1.5)
+        self.assertTrue(view.transmission_sample_wavelength_max == 12.5)
+        self.assertTrue(view.transmission_sample_use_wavelength)
+        self.assertFalse(view.pixel_adjustment_det_1)
+        self.assertFalse(view.pixel_adjustment_det_2)
+        self.assertFalse(view.wavelength_adjustment_det_1)
+        self.assertFalse(view.wavelength_adjustment_det_2)
+        self.assertTrue(view.q_1d_min == 0.001)
+        self.assertTrue(view.q_1d_max == 0.2)
+        self.assertTrue(view.q_1d_step == 0.001)
+        self.assertTrue(view.q_xy_max == 0.05)
+        self.assertTrue(view.q_xy_step == 0.001)
+        self.assertTrue(view.q_xy_step_type == RangeStepType.Lin)
+        self.assertTrue(view.gravity_on_off)
+        self.assertTrue(view.use_q_resolution)
+        self.assertTrue(view.q_resolution_sample_a == 14.)
+        self.assertTrue(view.q_resolution_source_a == 13.)
+        self.assertTrue(view.q_resolution_delta_r == 11.)
+        self.assertTrue(view.q_resolution_collimation_length == 12.)
+        self.assertTrue(view.q_resolution_moderator_file == "moderator_rkh_file.txt")
+        self.assertFalse(view.phi_limit_use_mirror)
+        self.assertTrue(view.radius_limit_min == 12.)
+        self.assertTrue(view.radius_limit_min == 12.)
+        self.assertTrue(view.radius_limit_max == 15.)
+
+        # Assert certain function calls
+        self.assertTrue(view.get_user_file_path.call_count == 3)
+        self.assertTrue(view.get_batch_file_path.call_count == 2)  # called twice for the sub presenter updates (masking table and settings diagnostic tab)  # noqa
+        self.assertTrue(view.get_cell.call_count == 40)
+        self.assertTrue(view.get_number_of_rows.call_count == 6)
+
+        # Assert call of other presenters
 
         # clean up
         remove_file(user_file_path)
 
     def test_fails_silently_when_user_file_does_not_exist(self):
+        view, _, _ = create_mock_view("non_existent_user_file")
+
         presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = MockRunTabView()
-        view.set_user_file_path("non_existent_user_file")
         presenter.set_view(view)
 
         try:
-            view.on_user_file_load()
-            view.set_user_file_path("")
-            view.on_user_file_load()
+            presenter.on_user_file_load()
             has_raised = False
-        except:
+        except:  # noqa
             has_raised = True
         self.assertFalse(has_raised)
 
     def test_that_loads_batch_file_and_places_it_into_table(self):
         # Arrange
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = MockRunTabView()
         content = "# MANTID_BATCH_FILE add more text here\n" \
                   "sample_sans,1,sample_trans,2,sample_direct_beam,3," \
                   "output_as,test_file,user_file,user_test_file\n" \
                   "sample_sans,1,can_sans,2,output_as,test_file2\n"
         batch_file_path = save_to_csv(content)
-        view.set_batch_file_path(batch_file_path)
+        user_file_path = create_user_file(sample_user_file)
+        view, settings_diagnostic_tab, masking_table = create_mock_view(user_file_path, batch_file_path)
+        presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
 
         # Act
-        view.on_batch_file_load()
+        presenter.on_batch_file_load()
 
         # Assert
-        rows = view.get_rows()
-        self.assertTrue(len(rows) == 2)
+        self.assertTrue(view.add_row.call_count == 2)
         expected_first_row = "SampleScatter:1,SampleTransmission:2,SampleDirect:3," \
                              "CanScatter:,CanTransmission:,CanDirect:"
-        self.assertTrue(expected_first_row == rows[0])
         expected_second_row = "SampleScatter:1,SampleTransmission:,SampleDirect:," \
                               "CanScatter:2,CanTransmission:,CanDirect:"
-        self.assertTrue(expected_second_row == rows[1])
+
+        calls = [mock.call(expected_first_row), mock.call(expected_second_row)]
+        view.add_row.assert_has_calls(calls)
 
         # Clean up
         remove_file(batch_file_path)
+        remove_file(user_file_path)
 
     def test_fails_silently_when_batch_file_does_not_exist(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = MockRunTabView()
-        view.set_batch_file_path("non_existent_batch_file")
+        user_file_path = create_user_file(sample_user_file)
+        view, settings_diagnostic_tab, masking_table = create_mock_view(user_file_path, "non_existent_batch_file")
         presenter.set_view(view)
 
         try:
-            view.on_batch_file_load()
-            view.set_batch_file_path("")
-            view.on_batch_file_load()
+            presenter.on_batch_file_load()
             has_raised = False
-        except:
+        except:  # noqa
             has_raised = True
         self.assertFalse(has_raised)
 
+        # Clean up
+        remove_file(user_file_path)
+
     def test_that_gets_states_from_view(self):
         # Arrange
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = MockRunTabView()
         content = "# MANTID_BATCH_FILE add more text here\n" \
                   "sample_sans,SANS2D00022024,sample_trans,SANS2D00022048," \
                   "sample_direct_beam,SANS2D00022048,output_as,test_file\n" \
                   "sample_sans,SANS2D00022024,output_as,test_file2\n"
         batch_file_path = save_to_csv(content)
-        view.set_batch_file_path(batch_file_path)
         user_file_path = create_user_file(sample_user_file)
-        view.set_user_file_path(user_file_path)
+        view, _, _ = create_mock_view(user_file_path, batch_file_path)
+
+        presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
-        view.on_user_file_load()
-        view.on_batch_file_load()
+
+        presenter.on_user_file_load()
+        presenter.on_batch_file_load()
 
         # Act
         states = presenter.get_states()
@@ -114,7 +174,7 @@ class RunTabPresenterTest(unittest.TestCase):
             try:
                 state.validate()
                 has_raised = False
-            except:
+            except:  # noqa
                 has_raised = True
             self.assertFalse(has_raised)
 
@@ -145,41 +205,21 @@ class RunTabPresenterTest(unittest.TestCase):
         remove_file(batch_file_path)
         remove_file(user_file_path)
 
-    def test_that_raises_runtime_error_if_states_are_not_valid(self):
-        # Arrange
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = MockRunTabView()
-        content = "# MANTID_BATCH_FILE add more text here\n" \
-                  "sample_sans,SANS2D00022024,sample_trans,SANS2D00022048," \
-                  "sample_direct_beam,SANS2D00022048,output_as,test_file\n" \
-                  "sample_sans,SANS2D00022024,output_as,test_file2\n"
-        batch_file_path = save_to_csv(content)
-        view.set_batch_file_path(batch_file_path)
-        presenter.set_view(view)
-        presenter._state_model = MockStateModel()
-        view.on_batch_file_load()
-
-        # Act
-        self.assertRaises(RuntimeError, presenter.get_states)
-
-        # Clean up
-        remove_file(batch_file_path)
-
     def test_that_can_get_state_for_index_if_index_exists(self):
         # Arrange
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = MockRunTabView()
         content = "# MANTID_BATCH_FILE add more text here\n" \
                   "sample_sans,SANS2D00022024,sample_trans,SANS2D00022048," \
                   "sample_direct_beam,SANS2D00022048,output_as,test_file\n" \
                   "sample_sans,SANS2D00022024,output_as,test_file2\n"
         batch_file_path = save_to_csv(content)
-        view.set_batch_file_path(batch_file_path)
         user_file_path = create_user_file(sample_user_file)
-        view.set_user_file_path(user_file_path)
+        view, _, _ = create_mock_view(user_file_path, batch_file_path)
+
+        presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
-        view.on_user_file_load()
-        view.on_batch_file_load()
+
+        presenter.on_user_file_load()
+        presenter.on_batch_file_load()
 
         # Act
         state = presenter.get_state_for_row(1)
@@ -192,21 +232,26 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(state.data.can_transmission is None)
         self.assertTrue(state.data.can_direct is None)
 
+        # Clean up
+        remove_file(batch_file_path)
+        remove_file(user_file_path)
+
     def test_that_returns_none_when_index_does_not_exist(self):
         # Arrange
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = MockRunTabView()
+        # Arrange
         content = "# MANTID_BATCH_FILE add more text here\n" \
                   "sample_sans,SANS2D00022024,sample_trans,SANS2D00022048," \
                   "sample_direct_beam,SANS2D00022048,output_as,test_file\n" \
                   "sample_sans,SANS2D00022024,output_as,test_file2\n"
         batch_file_path = save_to_csv(content)
-        view.set_batch_file_path(batch_file_path)
         user_file_path = create_user_file(sample_user_file)
-        view.set_user_file_path(user_file_path)
+        view, _, _ = create_mock_view(user_file_path, batch_file_path)
+
+        presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
-        view.on_user_file_load()
-        view.on_batch_file_load()
+
+        presenter.on_user_file_load()
+        presenter.on_batch_file_load()
 
         # Act
         state = presenter.get_state_for_row(3)
@@ -214,8 +259,47 @@ class RunTabPresenterTest(unittest.TestCase):
         # Assert
         self.assertTrue(state is None)
 
+        # Clean up
+        remove_file(batch_file_path)
+        remove_file(user_file_path)
+
+    def test_that_populates_the_property_manager_data_service_when_processing_is_called(self):
+        # Arrange
+        self._clear_property_manager_data_service()
+        content = "# MANTID_BATCH_FILE add more text here\n" \
+                  "sample_sans,SANS2D00022024,sample_trans,SANS2D00022048," \
+                  "sample_direct_beam,SANS2D00022048,output_as,test_file\n" \
+                  "sample_sans,SANS2D00022024,output_as,test_file2\n"
+        batch_file_path = save_to_csv(content)
+        user_file_path = create_user_file(sample_user_file)
+        view, _, _ = create_mock_view(user_file_path, batch_file_path)
+
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(view)
+
+        # This is not the nicest of tests, but better to test this functionality than not
+        presenter.on_user_file_load()
+        presenter.on_batch_file_load()
+
+        # Act
+        presenter.on_processed_clicked()
+
+        # Assert
+        # We should have two states in the PropertyManagerDataService
+        self.assertTrue(len(PropertyManagerDataService.getObjectNames()) == 2)
+
+        # clean up
+        remove_file(sample_user_file)
+        remove_file(user_file_path)
+
+        self._clear_property_manager_data_service()
+
+    @staticmethod
+    def _clear_property_manager_data_service():
+        for element in PropertyManagerDataService.getObjectNames():
+            if PropertyManagerDataService.doesExist(element):
+                PropertyManagerDataService.remove(element)
+
 
 if __name__ == '__main__':
     unittest.main()
-
-

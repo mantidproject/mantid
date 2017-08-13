@@ -77,6 +77,9 @@ class RunTabPresenter(object):
         self._delete_dummy_input_workspace()
 
     def _default_gui_setup(self):
+        """
+        Provides a default setup of the GUI. This is important for the initial start up, when the view is being set.
+        """
         # Set the possible reduction modes
         reduction_mode_list = get_reduction_mode_strings_for_gui()
         self._view.set_reduction_modes(reduction_mode_list)
@@ -108,6 +111,10 @@ class RunTabPresenter(object):
     # Table + Actions
     # ------------------------------------------------------------------------------------------------------------------
     def set_view(self, view):
+        """
+        Sets the view
+        :param view: the view is the SANSDataProcessorGui. The presenter needs to access some of the API
+        """
         if view is not None:
             self._view = view
 
@@ -153,12 +160,17 @@ class RunTabPresenter(object):
 
             # 5. Update the views.
             self._update_view_from_state_model()
+
+            # 6. Perform calls on child presenters
+            self._masking_table_presenter.on_update_rows()
+            self._settings_diagnostic_tab_presenter.on_update_rows()
+
         except Exception as e:
             sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
 
     def on_batch_file_load(self):
         """
-        Loads a batch file and populates the batch table based on that
+        Loads a batch file and populates the batch table based on that.
         """
         try:
             # 1. Get the batch file from the view
@@ -207,6 +219,9 @@ class RunTabPresenter(object):
 
         # 1. Set up the states and convert them into property managers
         states = self.get_states()
+        if not states:
+            raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
+                               "has been loaded")
         property_manager_service = PropertyManagerService()
         property_manager_service.add_states_to_pmds(states)
 
@@ -227,8 +242,6 @@ class RunTabPresenter(object):
         @param row: The row where the Options column is being altered
         @param property_name: The property name on the GUI algorithm.
         @param property_value: The value which is being set for the property.
-        Returns:
-
         """
         entry = property_name + OPTIONS_EQUAL + str(property_value)
         options = self._get_hidden_options(row)
@@ -248,6 +261,11 @@ class RunTabPresenter(object):
         return self._view.get_cell(row, HIDDEN_OPTIONS_INDEX, convert_to=str)
 
     def is_empty_row(self, row):
+        """
+        Checks if a row has no entries. These rows will be ignored.
+        :param row: the row index
+        :return: True if the row is empty.
+        """
         indices = range(OPTIONS_INDEX + 1)
         for index in indices:
             cell_value = self._view.get_cell(row, index, convert_to=str)
@@ -256,6 +274,11 @@ class RunTabPresenter(object):
         return True
 
     def _remove_from_hidden_options(self, row, property_name):
+        """
+        Remove the entries in the hidden options column
+        :param row: the row index
+        :param property_name: the property name which is to be removed
+        """
         options = self._get_hidden_options(row)
         # Remove the property entry and the value
         individual_options = options.split(",")
@@ -267,6 +290,9 @@ class RunTabPresenter(object):
         self._set_hidden_options(clean_options, row)
 
     def _validate_rows(self):
+        """
+        Validation of the rows. A minimal setup requires that ScatterSample is set.
+        """
         # If SampleScatter is empty, then don't run the reduction.
         # We allow empty rows for now, since we cannot remove them from Python.
         number_of_rows = self._view.get_number_of_rows()
@@ -280,7 +306,7 @@ class RunTabPresenter(object):
         """
         Creates a processing string for the data processor widget
 
-        Returns: A processing string for the data processor widget
+        :return: A processing string for the data processor widget
         """
         global_options = ""
 
@@ -316,7 +342,8 @@ class RunTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
     def get_states(self):
         """
-        Gathers the state information and performs a reduction
+        Gathers the state information for all rows.
+        :return: a list of states
         """
         start_time_state_generation = time.time()
 
@@ -327,14 +354,20 @@ class RunTabPresenter(object):
         table_model = self._get_table_model()
 
         # 3. Go through each row and construct a state object
-        states = self._create_states(state_model_with_view_update, table_model)
-
+        if table_model and state_model_with_view_update:
+            states = self._create_states(state_model_with_view_update, table_model)
+        else:
+            states = None
         stop_time_state_generation = time.time()
         time_taken = stop_time_state_generation - start_time_state_generation
         sans_logger.debug("The generation of all states took {}s".format(time_taken))
         return states
 
     def get_row_indices(self):
+        """
+        Gets the indices of row which are not empty.
+        :return: a list of row indices.
+        """
         row_indices_which_are_not_empty = []
         number_of_rows = self._view.get_number_of_rows()
         for row in range(number_of_rows):
@@ -343,16 +376,21 @@ class RunTabPresenter(object):
         return row_indices_which_are_not_empty
 
     def get_state_for_row(self, row_index):
+        """
+        Creates the state for a particular row.
+        :param row_index: the row index
+        :return: a state if the index is valid and there is a state else None
+        """
         states = self.get_states()
-        if row_index in list(states.keys()):
-            return states[row_index]
-        else:
+        if states is None:
             return None
 
+        if row_index in list(states.keys()):
+            if states:
+                return states[row_index]
+        return None
+
     def _update_view_from_state_model(self):
-        """
-        Goes through all sub presenters and update the views based on the state model
-        """
         # Front tab view
         self._set_on_view("zero_error_free")
         self._set_on_view("save_types")
@@ -523,6 +561,10 @@ class RunTabPresenter(object):
         in the view and the model. This can be easily changed, but it also provides a good cohesion.
         """
         state_model = copy.deepcopy(self._state_model)
+
+        # If we don't have a state model then return None
+        if state_model is None:
+            return state_model
 
         # Run tab view
         self._set_on_state_model("zero_error_free", state_model)

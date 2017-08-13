@@ -2,7 +2,10 @@ from ui.sans_isis.masking_table import MaskingTable
 from collections import namedtuple
 import copy
 from mantid.api import (AnalysisDataService)
-import mantidplot
+try:
+    import mantidplot
+except ImportError:
+    pass
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm

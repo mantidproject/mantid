@@ -1,5 +1,6 @@
 try:
     from mantidplot import *
+    canMantidPlot = True
 except ImportError:
     canMantidPlot = False
 
@@ -16,7 +17,6 @@ from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SA
                                RangeStepType, SampleShape, ReductionMode, FitType)
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_string_for_gui_from_reduction_mode)
-canMantidPlot = True
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Globals

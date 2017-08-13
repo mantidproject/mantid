@@ -32,7 +32,7 @@ def get_example_state():
 class PropertyManagerServiceTest(unittest.TestCase):
     def test_that_add_states_to_pmds(self):
         self.assertTrue(len(PropertyManagerDataService.getObjectNames()) == 0)
-        states = [get_example_state(), get_example_state()]
+        states = {0: get_example_state(), 1: get_example_state()}
         pms = PropertyManagerService()
         pms.add_states_to_pmds(states)
         self.assertTrue(len(PropertyManagerDataService.getObjectNames()) == 2)
@@ -40,7 +40,7 @@ class PropertyManagerServiceTest(unittest.TestCase):
 
     def test_that_removes_sans_property_managers_from_pmds(self):
         self.assertTrue(len(PropertyManagerDataService.getObjectNames()) == 0)
-        states = [get_example_state(), get_example_state()]
+        states = {0: get_example_state(), 1: get_example_state()}
         pms = PropertyManagerService()
         pms.add_states_to_pmds(states)
         pms.remove_sans_property_managers()
@@ -49,7 +49,7 @@ class PropertyManagerServiceTest(unittest.TestCase):
 
     def test_that_can_retrieve_states_from_pmds(self):
         self.assertTrue(len(PropertyManagerDataService.getObjectNames()) == 0)
-        states = [get_example_state(), get_example_state()]
+        states = {0: get_example_state(), 1: get_example_state()}
         pms = PropertyManagerService()
         pms.add_states_to_pmds(states)
         retrieved_states = pms.get_states_from_pmds()
@@ -69,7 +69,7 @@ class PropertyManagerServiceTest(unittest.TestCase):
     def test_that_it_adds_nothing_when_empty_list_is_passed_in(self):
         pms = PropertyManagerService()
         number_of_elements_on_pmds_after = len(PropertyManagerDataService.getObjectNames())
-        pms.add_states_to_pmds([])
+        pms.add_states_to_pmds({})
         self.assertTrue(number_of_elements_on_pmds_after == 0)
         self._remove_all_property_managers()
 
