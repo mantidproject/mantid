@@ -12,7 +12,7 @@ from mantid.kernel import Atom, logger
 
 class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
     """
-    Class for loading CRYSTAL DFT phonon data. Main author of this module is Leonardo Bernasconi.
+    Class for loading CRYSTAL DFT phonon data. Special thanks to Leonardo Bernasconi for contributing to this module.
     """
     def __init__(self, input_dft_filename=None):
         """
@@ -51,7 +51,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
             logger.notice("Reading from " + filename)
 
             if system is AbinsModules.AbinsConstants.CRYSTAL:
-                lattice_vectors = self._read_lattice_vectors(obj_file=crystal_file)
+                lattice_vectors = self._read_lattice_vectors(file_obj=crystal_file)
             else:
                 lattice_vectors = [[0, 0, 0]] * 3
 
@@ -75,6 +75,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
     def _determine_system(self):
         """
         Determines whether the system is a molecule or a crystal.
+        :return: True if calculation for molecule otherwise False
         """
         with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
             lines = crystal_file.read()
@@ -86,7 +87,6 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         else:
             raise ValueError("Only molecular or 3D CRYSTAL systems can be processed")
 
-
         if molecular:
             logger.notice("This run is for a MOLECULAR system")
         else:
@@ -96,7 +96,8 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _determine_dispersion(self):
         """
-        Checks if we have data for more than one k-point.
+        Checks if we have data for more than one k-point. If data for more than one k-point then calculates
+        transformation matrix to primitive unit cell from super cell.
         :return: True if many k-points included in calculations otherwise False
         """
         with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
@@ -122,18 +123,18 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
         return phonon_dispersion
 
-    def _read_lattice_vectors(self, obj_file=None):
+    def _read_lattice_vectors(self, file_obj=None):
         """
         Reads lattice vectors from .out CRYSTAL file.
-        :param obj_file:  file object from which we read
+        :param file_obj:  file object from which we read
         :return: list with lattice vectors
         """
-        self._find_first(file_obj=obj_file, msg="DIRECT LATTICE VECTORS CARTESIAN COMPONENTS (ANGSTROM)")
-        obj_file.readline()  # Line: X                    Y                    Z
+        self._find_first(file_obj=file_obj, msg="DIRECT LATTICE VECTORS CARTESIAN COMPONENTS (ANGSTROM)")
+        file_obj.readline()  # Line: X                    Y                    Z
         dim = 3
         vectors = []
         for i in range(dim):
-            line = obj_file.readline()
+            line = file_obj.readline()
             line = line.split()
             vector = []
             for item in line:
@@ -143,7 +144,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _read_atomic_coordinates(self, file_obj=None):
         """
-        Reads atomic coordinates from .out file.
+        Reads atomic coordinates from .out CRYSTAL file.
         :param file_obj:  file object from which we read
         :return: list with atomic coordinates
         """
@@ -195,11 +196,9 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
                 local_line = line.replace(b"(", b" ").replace(b")", b" ").split()
 
-
                 k_coordinates.append([float(local_line[7]), float(local_line[8]), float(local_line[9])])
                 weights.append(float(local_line[11]))
                 k_point_type = local_line[6]
-
 
                 # parse k-points for which atomic displacements are real
                 if k_point_type == b"R":
@@ -342,7 +341,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _move_to(self, file_obj=None, msg=None):
         """
-        Finds the first line with msg and moves read file pointer to the line before.
+        Finds the first line with msg and moves read file pointer to that line.
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
@@ -437,7 +436,8 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
     def _create_atoms_data(self, data=None, coord_lines=None):
         """
         Creates Python dictionary with atoms data which can be easily converted to AbinsData object.
-        :return: Python dictionary which can be easily  converted to AbinsData object
+        :param data: Python dictionary to which found atoms data should be added
+        :param coord_lines: list with information about atoms
         """
         data.update({"atoms": dict()})
         for i, line in enumerate(coord_lines):
@@ -452,10 +452,10 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                              weights=None, k_coordinates=None, unit_cell=None):
         """
         Creates Python dictionary with k-points data which can  be easily converted to AbinsData object.
-        :param data: Python dictionary to which found k points data should be added
+        :param data: Python dictionary to which found k-points data should be added
         :param freq: normal modes
         :param atomic_displacements: atomic displacements
-        :param atomic_coordinates: atomic coordinates
+        :param atomic_coordinates: equilibrium atomic coordinates
         :param weights: weights of k-points
         :param k_coordinates: coordinates of k-points
         :param unit_cell: list with unit cell vectors
@@ -543,6 +543,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :param column: number of atomic_displacements column to parse
         :param freq_num: number of mode (frequency)
         :param row_width: current width of row to parse
+        :return normalised atomic displacements
         """
         xdisp = atomic_displacements[0]
         ydisp = atomic_displacements[1]
