@@ -41,7 +41,6 @@ class MatrixWorkspace;
 namespace MantidQt {
 namespace MantidWidgets {
 class CollapsiblePanel;
-class OneCurvePlot;
 class Shape2D;
 
 /**

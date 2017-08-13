@@ -29,6 +29,7 @@ class OneCurvePlot;
 class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
+class MiniPlot;
 
 /**
 * Implements the Pick tab in InstrumentWidget.
@@ -123,6 +124,7 @@ private:
 
   /* Pick tab controls */
   OneCurvePlot *m_plot; ///< Miniplot to display data in the detectors
+  MiniPlot *m_mplPlot;  ///< Miniplot to display data in the detectors
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode

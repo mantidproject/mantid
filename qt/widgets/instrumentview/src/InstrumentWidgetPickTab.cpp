@@ -4,6 +4,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/OneCurvePlot.h"
+#include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
@@ -19,10 +20,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/V3D.h"
-
-#include "qwt_scale_widget.h"
-#include "qwt_scale_div.h"
-#include "qwt_scale_engine.h"
 
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -81,6 +78,9 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_plot->setXScale(0, 1);
   m_plot->setYScale(-1.2, 1.2);
   connect(m_plot, SIGNAL(showContextMenu()), this, SLOT(plotContextMenu()));
+  m_plot->hide();
+
+  m_mplPlot = new MiniPlot(this);
 
   // Plot context menu actions
   m_sumDetectors = new QAction("Sum", this);
@@ -146,7 +146,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 
   CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
-  m_plotPanel = panelStack->addPanel("Name", m_plot);
+  m_plotPanel = panelStack->addPanel("Name", m_mplPlot);
 
   m_selectionType = Single;
 

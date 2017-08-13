@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/InstrumentWidgetTreeTab.cpp
 	src/MantidGLWidget.cpp
 	src/MaskBinsData.cpp
+	src/MiniPlot.cpp
 	src/ObjCompAssemblyActor.cpp
 	src/ObjComponentActor.cpp
 	src/OneCurvePlot.cpp
@@ -59,6 +60,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h
   inc/MantidQtWidgets/InstrumentView/ColorMapWidget.h
   inc/MantidQtWidgets/InstrumentView/MantidGLWidget.h
+  inc/MantidQtWidgets/InstrumentView/MiniPlot.h
   inc/MantidQtWidgets/InstrumentView/OneCurvePlot.h
   inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
@@ -130,8 +132,7 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
-include_directories ( inc )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+include_directories (inc ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_LIST_DIR}/../mplcpp/inc)
 
 add_library ( MantidQtWidgetsInstrumentView ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
@@ -141,8 +142,9 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidQtWidgetsInstrumentView PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
 endif ()
 
-target_link_libraries ( MantidQtWidgetsInstrumentView LINK_PRIVATE 
+target_link_libraries ( MantidQtWidgetsInstrumentView LINK_PRIVATE
   MantidQtWidgetsCommon
+  MantidQtWidgetsMplCpp-Qt4
   ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS}
   ${QT_LIBRARIES}
