@@ -26,17 +26,20 @@ class LoadDmol3(AbinsModules.GeneralDFTProgram):
         """
         data = {}  # container to store read data
 
-        filename = self._clerk.get_input_filename()
-        with io.open(filename, "rb", ) as dmol3_file:
+        with io.open(self._clerk.get_input_filename(), "rb", ) as dmol3_file:
+
+            # Move read file pointer to the last calculation logged in the .outmol file. First calculation could be
+            # geometry optimization. The last calculation in the file is expected to  be calculation of vibrational
+            # data. There may be some intermediate resume calculations.
+            self._find_last(file_obj=dmol3_file, msg=b"$cell vectors")
 
             # read lattice vectors
-            self._find_last(file_obj=dmol3_file, msg=b"$cell vectors")
             self._read_lattice_vectors(obj_file=dmol3_file, data=data)
 
             # read info about atoms and construct atom data
             self._read_atomic_coordinates(file_obj=dmol3_file, data=data)
 
-            # read frequencies and normal modes and construct k-points data
+            # read frequencies, corresponding atomic displacements and construct k-points data
             self._find_first(file_obj=dmol3_file, msg="Frequencies (cm-1) and normal modes ")
             self._read_modes(file_obj=dmol3_file, data=data)
 
@@ -51,7 +54,6 @@ class LoadDmol3(AbinsModules.GeneralDFTProgram):
         Finds the first line with msg. Moves file current position to the next line.
         :param file_obj: file object from which we read
         :param msg: keyword to find
-        :return: line with the msg keyword
         """
         if six.PY3:
             msg = bytes(msg, "utf8")
@@ -65,7 +67,6 @@ class LoadDmol3(AbinsModules.GeneralDFTProgram):
         Moves file current position to the last occurrence of msg.
         :param file_obj: file object from which we read
         :param msg: keyword to find
-        :return: pos in file with the last occurrence
         """
         if six.PY3:
             msg = bytes(msg, "utf8")
@@ -102,10 +103,9 @@ class LoadDmol3(AbinsModules.GeneralDFTProgram):
 
     def _read_lattice_vectors(self, obj_file=None, data=None):
         """
-        Reads lattice vectors from .out CRYSTAL file.
-        :param obj_file:  file object from which we read
-        :param :param data: Python dictionary to which found lattice vectors should be added
-        :return: list with lattice vectors
+        Reads lattice vectors from .outmol DMOL3 file.
+        :param obj_file: file object from which we read
+        :param data: Python dictionary to which found lattice vectors should be added
         """
         self._find_first(file_obj=obj_file, msg=b"$cell vectors")
         dim = 3
@@ -122,10 +122,9 @@ class LoadDmol3(AbinsModules.GeneralDFTProgram):
 
     def _read_atomic_coordinates(self, file_obj=None, data=None):
         """
-        Reads atomic coordinates from .outmol file.
+        Reads atomic coordinates from .outmol DMOL3 file.
         :param file_obj:  file object from which we read
         :param data: Python dictionary to which atoms data should be added
-        :return: dictionary with data structure for atoms
         """
         atoms = {}
         atom_indx = 0
@@ -161,8 +160,6 @@ class LoadDmol3(AbinsModules.GeneralDFTProgram):
         Reads vibrational modes (frequencies and atomic displacements).
         :param file_obj: file object from which we read
         :param data: Python dictionary to which k-point data should be added
-        :return: Tuple with frequencies and corresponding atomic displacements, weights of k-points and coordinates of
-                k-points
         """
         end_msgs = ["STANDARD"]
         inside_block = True
@@ -273,7 +270,7 @@ class LoadDmol3(AbinsModules.GeneralDFTProgram):
 
     def _move_to(self, file_obj=None, msg=None):
         """
-        Finds the first line with msg and moves read file pointer to the line before.
+        Finds the first line with msg and moves read file pointer to that line.
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
@@ -287,6 +284,13 @@ class LoadDmol3(AbinsModules.GeneralDFTProgram):
                 break
 
     def _parse_item(self, item=None, container=None, part=None):
+        """
+        Creates atomic displacement from item.
+        :param item: string with atomic displacement for the given atom and frequency
+        :param container: list to which atomic displacement should be added
+        :param part: if real than real part of atomic displacement is created if imaginary then imaginary part is
+                     created
+        """
         if part == "real":
             container.append(complex(float(item), 0.0))
         elif part == "imaginary":
