@@ -226,8 +226,6 @@ def get_instrument_paths_for_sans_file(file_name):
     idf_path = ExperimentInfo.getInstrumentFilename(instrument_as_string, measurement_time_as_string)
     idf_path = os.path.normpath(idf_path)
 
-
-
     if not os.path.exists(idf_path):
         raise RuntimeError("SANSFileInformation: The instrument definition file {0} does not seem to "
                            "exist.".format(str(idf_path)))

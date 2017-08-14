@@ -182,7 +182,7 @@ def get_state_for_row_mock(row_index):
 
 
 def get_state_for_row_mock_with_real_state(row_index):
-    _ = row_index
+    _ = row_index  # noqa
     test_director = TestDirector()
     return test_director.construct()
 
