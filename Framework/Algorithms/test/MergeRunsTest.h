@@ -1534,79 +1534,6 @@ public:
     return outputWS;
   }
 
-  void assert_time_indexes_are_correct(const DetectorInfo &detInfo,
-                                       bool extraTimes = false) {
-    const auto TIME_1 = DateAndTime(0, 0);
-    const auto TIME_2 = DateAndTime(1, 0);
-    const auto TIME_3 = DateAndTime(3, 0);
-
-    const auto PAIR_1 = std::pair<DateAndTime, DateAndTime>(TIME_1, TIME_2);
-    const auto PAIR_2 = std::pair<DateAndTime, DateAndTime>(TIME_2, TIME_3);
-
-    TS_ASSERT_EQUALS(detInfo.scanInterval({0, 0}), PAIR_1)
-    TS_ASSERT_EQUALS(detInfo.scanInterval({1, 0}), PAIR_1)
-    TS_ASSERT_EQUALS(detInfo.scanInterval({0, 1}), PAIR_2)
-    TS_ASSERT_EQUALS(detInfo.scanInterval({1, 1}), PAIR_2)
-
-    if (extraTimes) {
-      const auto TIME_4 = DateAndTime(20, 0);
-      const auto TIME_5 = DateAndTime(21, 0);
-      const auto TIME_6 = DateAndTime(23, 0);
-
-      const auto PAIR_3 = std::pair<DateAndTime, DateAndTime>(TIME_4, TIME_5);
-      const auto PAIR_4 = std::pair<DateAndTime, DateAndTime>(TIME_5, TIME_6);
-
-      TS_ASSERT_EQUALS(detInfo.scanInterval({0, 2}), PAIR_3)
-      TS_ASSERT_EQUALS(detInfo.scanInterval({1, 2}), PAIR_3)
-      TS_ASSERT_EQUALS(detInfo.scanInterval({0, 3}), PAIR_4)
-      TS_ASSERT_EQUALS(detInfo.scanInterval({1, 3}), PAIR_4)
-    }
-  }
-
-  void assert_indexing_is_correct(const SpectrumInfo &specInfo,
-                                  bool extraSpectra = false) {
-
-    for (size_t i = 0; i < specInfo.size(); ++i) {
-      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(i).size(), 1)
-    }
-
-    const auto SPEC_DEF_1 = std::pair<size_t, size_t>(0, 0);
-    const auto SPEC_DEF_2 = std::pair<size_t, size_t>(0, 1);
-    const auto SPEC_DEF_3 = std::pair<size_t, size_t>(1, 0);
-    const auto SPEC_DEF_4 = std::pair<size_t, size_t>(1, 1);
-    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(0)[0], SPEC_DEF_1)
-    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(1)[0], SPEC_DEF_2)
-    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(2)[0], SPEC_DEF_3)
-    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(3)[0], SPEC_DEF_4)
-
-    if (extraSpectra) {
-      const auto SPEC_DEF_5 = std::pair<size_t, size_t>(0, 2);
-      const auto SPEC_DEF_6 = std::pair<size_t, size_t>(0, 3);
-      const auto SPEC_DEF_7 = std::pair<size_t, size_t>(1, 2);
-      const auto SPEC_DEF_8 = std::pair<size_t, size_t>(1, 3);
-      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(4)[0], SPEC_DEF_5)
-      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(5)[0], SPEC_DEF_6)
-      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(6)[0], SPEC_DEF_7)
-      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(7)[0], SPEC_DEF_8)
-    } else {
-      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(4)[0], SPEC_DEF_1)
-      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(5)[0], SPEC_DEF_2)
-      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(6)[0], SPEC_DEF_3)
-      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(7)[0], SPEC_DEF_4)
-    }
-  }
-
-  void assert_histograms_correctly_set(const MatrixWorkspace_sptr &ws) {
-    TS_ASSERT_EQUALS(ws->histogram(0).y()[0], 1)
-    TS_ASSERT_EQUALS(ws->histogram(1).y()[0], 1)
-    TS_ASSERT_EQUALS(ws->histogram(2).y()[0], 1)
-    TS_ASSERT_EQUALS(ws->histogram(3).y()[0], 1)
-    TS_ASSERT_EQUALS(ws->histogram(4).y()[0], 2)
-    TS_ASSERT_EQUALS(ws->histogram(5).y()[0], 2)
-    TS_ASSERT_EQUALS(ws->histogram(6).y()[0], 2)
-    TS_ASSERT_EQUALS(ws->histogram(7).y()[0], 2)
-  }
-
   void test_merging_detector_scan_workspaces_appends_workspaces() {
     auto outputWS = do_MergeRuns_with_scanning_workspaces();
 
@@ -1614,13 +1541,13 @@ public:
     TS_ASSERT_EQUALS(detInfo.size(), 2)
     TS_ASSERT_EQUALS(detInfo.scanCount(0), 2)
     TS_ASSERT_EQUALS(detInfo.scanCount(1), 2)
-    assert_time_indexes_are_correct(detInfo);
+    assert_scan_intervals_are_correct(detInfo);
 
     const auto &specInfo = outputWS->spectrumInfo();
     TS_ASSERT_EQUALS(specInfo.size(), 8)
 
-    assert_indexing_is_correct(specInfo);
-    assert_histograms_correctly_set(outputWS);
+    assert_scanning_indexing_is_correct(specInfo);
+    assert_scanning_histograms_correctly_set(outputWS);
   }
 
   void
@@ -1631,13 +1558,27 @@ public:
     TS_ASSERT_EQUALS(detInfo.size(), 2)
     TS_ASSERT_EQUALS(detInfo.scanCount(0), 4)
     TS_ASSERT_EQUALS(detInfo.scanCount(1), 4)
-    assert_time_indexes_are_correct(detInfo, true);
+    assert_scan_intervals_are_correct(detInfo, true);
 
     const auto &specInfo = outputWS->spectrumInfo();
     TS_ASSERT_EQUALS(specInfo.size(), 8)
 
-    assert_indexing_is_correct(specInfo, true);
-    assert_histograms_correctly_set(outputWS);
+    assert_scanning_indexing_is_correct(specInfo, true);
+    assert_scanning_histograms_correctly_set(outputWS);
+  }
+
+  void
+  test_merging_detector_scan_workspaces_with_overlapping_time_intervals_throws() {
+    auto ws = create_group_detector_scan_workspaces(2, 1);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals overlap but not identical")
   }
 
   void test_merging_detector_scan_workspaces_does_not_append_workspaces() {
@@ -1712,6 +1653,80 @@ public:
 
 private:
   MergeRuns merge;
+
+  void assert_scan_intervals_are_correct(const DetectorInfo &detInfo,
+                                         bool extraTimes = false) {
+    const auto TIME_1 = DateAndTime(0, 0);
+    const auto TIME_2 = DateAndTime(1, 0);
+    const auto TIME_3 = DateAndTime(3, 0);
+
+    const auto PAIR_1 = std::pair<DateAndTime, DateAndTime>(TIME_1, TIME_2);
+    const auto PAIR_2 = std::pair<DateAndTime, DateAndTime>(TIME_2, TIME_3);
+
+    TS_ASSERT_EQUALS(detInfo.scanInterval({0, 0}), PAIR_1)
+    TS_ASSERT_EQUALS(detInfo.scanInterval({1, 0}), PAIR_1)
+    TS_ASSERT_EQUALS(detInfo.scanInterval({0, 1}), PAIR_2)
+    TS_ASSERT_EQUALS(detInfo.scanInterval({1, 1}), PAIR_2)
+
+    if (extraTimes) {
+      const auto TIME_4 = DateAndTime(20, 0);
+      const auto TIME_5 = DateAndTime(21, 0);
+      const auto TIME_6 = DateAndTime(23, 0);
+
+      const auto PAIR_3 = std::pair<DateAndTime, DateAndTime>(TIME_4, TIME_5);
+      const auto PAIR_4 = std::pair<DateAndTime, DateAndTime>(TIME_5, TIME_6);
+
+      TS_ASSERT_EQUALS(detInfo.scanInterval({0, 2}), PAIR_3)
+      TS_ASSERT_EQUALS(detInfo.scanInterval({1, 2}), PAIR_3)
+      TS_ASSERT_EQUALS(detInfo.scanInterval({0, 3}), PAIR_4)
+      TS_ASSERT_EQUALS(detInfo.scanInterval({1, 3}), PAIR_4)
+    }
+  }
+
+  void assert_scanning_indexing_is_correct(const SpectrumInfo &specInfo,
+                                           bool extraSpectra = false) {
+
+    for (size_t i = 0; i < specInfo.size(); ++i) {
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(i).size(), 1)
+    }
+
+    const auto SPEC_DEF_1 = std::pair<size_t, size_t>(0, 0);
+    const auto SPEC_DEF_2 = std::pair<size_t, size_t>(0, 1);
+    const auto SPEC_DEF_3 = std::pair<size_t, size_t>(1, 0);
+    const auto SPEC_DEF_4 = std::pair<size_t, size_t>(1, 1);
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(0)[0], SPEC_DEF_1)
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(1)[0], SPEC_DEF_2)
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(2)[0], SPEC_DEF_3)
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(3)[0], SPEC_DEF_4)
+
+    if (extraSpectra) {
+      const auto SPEC_DEF_5 = std::pair<size_t, size_t>(0, 2);
+      const auto SPEC_DEF_6 = std::pair<size_t, size_t>(0, 3);
+      const auto SPEC_DEF_7 = std::pair<size_t, size_t>(1, 2);
+      const auto SPEC_DEF_8 = std::pair<size_t, size_t>(1, 3);
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(4)[0], SPEC_DEF_5)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(5)[0], SPEC_DEF_6)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(6)[0], SPEC_DEF_7)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(7)[0], SPEC_DEF_8)
+    } else {
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(4)[0], SPEC_DEF_1)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(5)[0], SPEC_DEF_2)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(6)[0], SPEC_DEF_3)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(7)[0], SPEC_DEF_4)
+    }
+  }
+
+  void
+  assert_scanning_histograms_correctly_set(const MatrixWorkspace_sptr &ws) {
+    TS_ASSERT_EQUALS(ws->histogram(0).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(1).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(2).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(3).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(4).y()[0], 2)
+    TS_ASSERT_EQUALS(ws->histogram(5).y()[0], 2)
+    TS_ASSERT_EQUALS(ws->histogram(6).y()[0], 2)
+    TS_ASSERT_EQUALS(ws->histogram(7).y()[0], 2)
+  }
 };
 
 #endif /*MERGERUNSTEST_H_*/

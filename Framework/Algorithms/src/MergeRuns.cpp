@@ -41,7 +41,7 @@ namespace {
  *time indexes are set here.
  */
 std::vector<SpectrumDefinition>
-buildCorrectTimeIndexes(const std::vector<SpectrumDefinition> &addeeSpecDefs,
+buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
                         const DetectorInfo &addeeDetInfo,
                         const DetectorInfo &outDetInfo,
                         const DetectorInfo &newOutDetInfo) {
@@ -264,7 +264,7 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
   const auto &addeeSpecDefs = *(addeeWS->indexInfo().spectrumDefinitions());
 
   const auto newAddeeSpecDefs =
-      buildCorrectTimeIndexes(addeeSpecDefs, addeeWS->detectorInfo(),
+      buildScanIntervals(addeeSpecDefs, addeeWS->detectorInfo(),
                               outWS->detectorInfo(), newOutWS->detectorInfo());
 
   outSpecDefs.insert(outSpecDefs.end(), newAddeeSpecDefs.begin(),

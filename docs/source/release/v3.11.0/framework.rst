@@ -33,6 +33,7 @@ Improved
 - :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` makes the culling of the top one percent of the background events optional.
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` has the culling of the top one percent of the background events now as an optional input.
 - :ref:`IntegrateEllipsoidsTwoStep <algm-IntegrateEllipsoidsTwoStep-v1>` has the culling of the top one percent of the background events now as an optional input.
+- :ref:`MergeRuns <algm-MergeRuns-v1>` will now merge workspaces with detector scans.
 
 
 Deprecated
