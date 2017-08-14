@@ -7,10 +7,8 @@
 
 namespace Mantid {
 namespace Geometry {
-class Instrument;
-}
-namespace API {
 class DetectorInfo;
+class Instrument;
 }
 
 namespace DataHandling {
@@ -112,8 +110,9 @@ private:
                             const std::vector<float> &theta,
                             const std::vector<float> &phi);
   /// Set the new detector position for a single det ID
-  void setDetectorPosition(API::DetectorInfo &detectorInfo, const size_t index,
-                           const float l2, const float theta, const float phi);
+  void setDetectorPosition(Geometry::DetectorInfo &detectorInfo,
+                           const size_t index, const float l2,
+                           const float theta, const float phi);
 
   /// The input workspace to modify
   API::MatrixWorkspace_sptr m_workspace;

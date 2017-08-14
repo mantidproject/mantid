@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -672,7 +673,10 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   }
   Quat rotation(twoTheta0Actual, V3D(0, 1, 0));
   g_log.debug() << "Setting 2theta0 to " << twoTheta0Actual;
-  m_outWorkspace->mutableDetectorInfo().setRotation(*component, rotation);
+  auto &componentInfo = m_outWorkspace->mutableComponentInfo();
+  const auto componentIndex =
+      componentInfo.indexOf(component->getComponentID());
+  componentInfo.setRotation(componentIndex, rotation);
 }
 
 /**
