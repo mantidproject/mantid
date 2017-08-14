@@ -553,7 +553,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 delete_set_property("Workspace", name + "_mon")
                 delete_exec()
         else:
-            RenameWorkspace(InputWorkspace=sam_ws_names_list[0], self._output_ws_name)
+            RenameWorkspace(InputWorkspace=sam_ws_names_list[0], OutputWorkspace=self._output_ws_name)
 
         result = mtd[self._output_ws_name]
 
