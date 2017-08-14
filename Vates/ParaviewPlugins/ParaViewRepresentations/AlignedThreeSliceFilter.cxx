@@ -276,6 +276,26 @@ void AlignedThreeSliceFilter::Process(
     }
   }
 
+  // Add composite index information if we have any
+  if (compositeIndex != VTK_UNSIGNED_INT_MAX) {
+    const char *vtkSliceCompositeIndex = "vtkSliceCompositeIndex";
+    if (input->GetCellData()->HasArray(vtkSliceCompositeIndex) == 1) {
+      vtkUnsignedIntArray *compositeIndexArray =
+          vtkUnsignedIntArray::FastDownCast(
+              input->GetCellData()->GetArray(vtkSliceCompositeIndex));
+      assert(compositeIndexArray != nullptr);
+      compositeIndexArray->SetNumberOfTuples(nbCells);
+      compositeIndexArray->FillComponent(0, compositeIndex);
+    } else {
+      vtkNew<vtkUnsignedIntArray> compositeIndexArray;
+      compositeIndexArray->SetName(vtkSliceCompositeIndex);
+      compositeIndexArray->SetNumberOfComponents(1);
+      compositeIndexArray->SetNumberOfTuples(nbCells);
+      compositeIndexArray->FillComponent(0, compositeIndex);
+      input->GetCellData()->AddArray(compositeIndexArray.GetPointer());
+    }
+  }
+
   // Setup internal pipeline
   this->Slices[0]->SetInputData(input);
   this->Slices[1]->SetInputData(input);

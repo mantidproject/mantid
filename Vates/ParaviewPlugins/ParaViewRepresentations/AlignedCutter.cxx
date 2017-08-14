@@ -260,44 +260,67 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
 
   vtkIdType outCellId = 0;
   vtkNew<vtkIdList> ids;
+  vtkNew<vtkPoints> outPts;
+  vtkPoints *inPts = input->GetPoints();
   ids->SetNumberOfIds(4);
   if (AxisNumber == 0) {
+    outPts->Allocate(4 * celldims[1] * celldims[2]);
     for (int j = 0; j < celldims[1]; ++j) {
       for (int k=0; k < celldims[2]; ++k) {
         auto index = min + j * celldims[0] + k * celldims[0] * celldims[1];
         if (input->IsCellVisible(index)) {
-          ids->SetId(0, min + j * dims[0] + k * dims[0] * dims[1]);
-          ids->SetId(3, min + (j + 1) * dims[0] + k * dims[0] * dims[1]);
-          ids->SetId(1, min + j * dims[0] + (k + 1) * dims[0] * dims[1]);
-          ids->SetId(2, min + (j + 1) * dims[0] + (k + 1) * dims[0] * dims[1]);
+          double x[3];
+          inPts->GetPoint(min + j * dims[0] + k * dims[0] * dims[1], x);
+          ids->SetId(0, outPts->InsertNextPoint(x));
+          inPts->GetPoint(min + j * dims[0] + (k + 1) * dims[0] * dims[1], x);
+          ids->SetId(1, outPts->InsertNextPoint(x));
+          inPts->GetPoint(min + (j + 1) * dims[0] + (k + 1) * dims[0] * dims[1],
+                          x);
+          ids->SetId(2, outPts->InsertNextPoint(x));
+          inPts->GetPoint(min + (j + 1) * dims[0] + k * dims[0] * dims[1], x);
+          ids->SetId(3, outPts->InsertNextPoint(x));
           output->InsertNextCell(VTK_QUAD, ids.Get());
           outCD->CopyData(inCD, index, outCellId++);
         }
       }
     }
   } else if (AxisNumber == 1) {
+    outPts->Allocate(4 * celldims[0] * celldims[2]);
     for (int i = 0; i < celldims[0]; ++i) {
       for (int k=0; k < celldims[2]; ++k) {
         auto index = i + min * celldims[0] + k * celldims[0] * celldims[1];
         if (input->IsCellVisible(index)) {
-          ids->SetId(0, i + min * dims[0] + k * dims[0] * dims[1]);
-          ids->SetId(1, i + 1 + min * dims[0] + k * dims[0] * dims[1]);
-          ids->SetId(3, i + min * dims[0] + (k + 1) * dims[0] * dims[1]);
-          ids->SetId(2, i + 1 + min * dims[0] + (k + 1) * dims[0] * dims[1]);
+          double x[3];
+          inPts->GetPoint(i + min * dims[0] + k * dims[0] * dims[1], x);
+          ids->SetId(0, outPts->InsertNextPoint(x));
+          inPts->GetPoint(i + 1 + min * dims[0] + k * dims[0] * dims[1], x);
+          ids->SetId(1, outPts->InsertNextPoint(x));
+          inPts->GetPoint(i + 1 + min * dims[0] + (k + 1) * dims[0] * dims[1],
+                          x);
+          ids->SetId(2, outPts->InsertNextPoint(x));
+          inPts->GetPoint(i + min * dims[0] + (k + 1) * dims[0] * dims[1], x);
+          ids->SetId(3, outPts->InsertNextPoint(x));
           output->InsertNextCell(VTK_QUAD, ids.Get());
           outCD->CopyData(inCD, index, outCellId++);
         }
       }
     }
   } else if (AxisNumber == 2) {
+    outPts->Allocate(4 * celldims[0] * celldims[1]);
     for (int i = 0; i < celldims[0]; ++i) {
       for (int j=0; j < celldims[1]; ++j) {
         auto index = i + j * celldims[0] + min * celldims[0] * celldims[1];
         if (input->IsCellVisible(index)) {
-          ids->SetId(0, i + j * dims[0] + min * dims[0] * dims[1]);
-          ids->SetId(3, i + 1 + j * dims[0] + min * dims[0] * dims[1]);
-          ids->SetId(2, i + 1 + (j + 1) * dims[0] + min * dims[0] * dims[1]);
-          ids->SetId(1, i + (j + 1) * dims[0] + min * dims[0] * dims[1]);
+          double x[3];
+          inPts->GetPoint(i + j * dims[0] + min * dims[0] * dims[1], x);
+          ids->SetId(0, outPts->InsertNextPoint(x));
+          inPts->GetPoint(i + (j + 1) * dims[0] + min * dims[0] * dims[1], x);
+          ids->SetId(1, outPts->InsertNextPoint(x));
+          inPts->GetPoint(i + 1 + (j + 1) * dims[0] + min * dims[0] * dims[1],
+                          x);
+          ids->SetId(2, outPts->InsertNextPoint(x));
+          inPts->GetPoint(i + 1 + j * dims[0] + min * dims[0] * dims[1], x);
+          ids->SetId(3, outPts->InsertNextPoint(x));
           output->InsertNextCell(VTK_QUAD, ids.Get());
           outCD->CopyData(inCD, index, outCellId++);
         }
@@ -305,7 +328,7 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     }
   }
 
-  output->SetPoints(input->GetPoints());
+  output->SetPoints(outPts.Get());
   thisOutput->ShallowCopy(output.Get());
 }
 
