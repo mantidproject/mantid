@@ -140,16 +140,12 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
 
             symbol = str(entries[0].decode("utf-8").capitalize())
             atom = Atom(symbol=symbol)
+            # We change unit of atomic displacements from atomic length units to Angstroms
             au2ang = AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
             float_type = AbinsModules.AbinsConstants.FLOAT_TYPE
-            mass = atom.mass
 
-            # We multiply by square root of atomic mass so that no modifications are needed in CalculatePowder module
-            # We change unit of atomic displacements from atomic length units to Angstroms
-            factor = sqrt(mass) * au2ang
-
-            atoms["atom_{}".format(atom_indx)] = {"symbol": symbol, "mass": mass, "sort": atom_indx,
-                                                  "coord": np.asarray(entries[1:]).astype(dtype=float_type) * factor}
+            atoms["atom_{}".format(atom_indx)] = {"symbol": symbol, "mass": atom.mass, "sort": atom_indx,
+                                                  "coord": np.asarray(entries[1:]).astype(dtype=float_type) * au2ang}
 
             atom_indx += 1
 
@@ -256,14 +252,20 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
             if line.strip():
                 line = line.strip(b"\n").split()
                 if b"x" in line:
+
+                    symbol = str(line[0].decode("utf-8").capitalize())
+                    atom_mass = Atom(symbol=symbol).mass
+
                     for item in line[2:]:
-                        self._parse_item(item=item, container=xdisp, part=part)
+                        self._parse_item(item=item, container=xdisp, part=part, mass=atom_mass)
                 elif b"y" in line:
                     for item in line[1:]:
-                        self._parse_item(item=item, container=ydisp, part=part)
+                        self._parse_item(item=item, container=ydisp, part=part, mass=atom_mass)
                 elif b"z" in line:
                     for item in line[1:]:
-                        self._parse_item(item=item, container=zdisp, part=part)
+                        self._parse_item(item=item, container=zdisp, part=part, mass=atom_mass)
+                    atom_mass = None
+
                 else:
                     file_obj.seek(pos)
                     break
@@ -283,17 +285,19 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
                 file_obj.seek(pos)
                 break
 
-    def _parse_item(self, item=None, container=None, part=None):
+    def _parse_item(self, item=None, container=None, part=None, mass=None):
         """
         Creates atomic displacement from item.
         :param item: string with atomic displacement for the given atom and frequency
         :param container: list to which atomic displacement should be added
         :param part: if real than real part of atomic displacement is created if imaginary then imaginary part is
                      created
+        :param mass: mass of atom
         """
+        # We multiply by square root of atomic mass so that no modifications are needed in CalculatePowder module
         if part == "real":
-            container.append(complex(float(item), 0.0))
+            container.append(complex(float(item), 0.0) * sqrt(mass))
         elif part == "imaginary":
-            container.append(complex(0.0, float(item)))
+            container.append(complex(0.0, float(item)) * sqrt(mass))
         else:
             raise ValueError("Real or imaginary part of complex number was expected.")
