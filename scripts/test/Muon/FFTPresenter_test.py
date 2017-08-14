@@ -1,4 +1,4 @@
-import mantid
+import mantid.simpleapi as mantid
 import mock
 #from . import Muon
 from  Muon import FFTPresenter 
@@ -10,12 +10,12 @@ class FFTPresenterTest(unittest.TestCase):
     def setUp(self):
         self.view=mock.create_autospec(FFTView.FFTView,spec_set=True) 
         #signals
-        self.view.tableClickSignal=mock.Mock(return_value=[1,3])
+        self.view.tableClickSignal=mock.Mock(return_value=[3,1])
         self.view.buttonSignal=mock.Mock()
         # functions  
         self.view.changed=mock.MagicMock()
         self.view.changedHideUnTick=mock.MagicMock()
-        self.view.initFFTInput=mock.Mock(return_value={"InputWorkspace":"test","OutputWorkspace":"muon"})
+        self.view.initFFTInput=mock.Mock(return_value={"InputWorkspace":"testWS","OutputWorkspace":"muon"})
         self.view.addFFTComplex=mock.Mock(return_value={"InputImWorkspace":"MuonFFT"})
         self.view.addFFTShift=mock.Mock()
         self.view.addRaw=mock.Mock()
@@ -36,85 +36,110 @@ class FFTPresenterTest(unittest.TestCase):
          
     def test_ImBox(self):
         self.sendSignal() 
-        self.view.changedHideUnTick.called_once()
-        self.view.changed.assert_not_called()
+        self.view.tableClickSignal=mock.Mock(return_value=[3,1])
+        assert(self.view.changedHideUnTick.call_count==1)
+        assert(self.view.changed.call_count == 0)
         
     def test_shiftBox(self):
-        self.view.tableClickSignal=mock.Mock(return_value=[1,5])
+        self.view.tableClickSignal=mock.Mock(return_value=[5,1])
         self.sendSignal() 
-        self.view.changed.called_once()
-        self.view.changedHideUnTick.assert_not_called()
+        assert(self.view.changed.call_count==1)
+        assert(self.view.changedHideUnTick.call_count==0)
 
              
     def test_buttonNotRawAndNoIm(self):
-       self.view.isRaw=mock.Mock(return_value=False)
+       self.view.isAutoShift=mock.Mock(return_value=True)
        self.view.isComplex=mock.Mock(return_value=False)
-       self.view.buttonSignal()
-       self.view.initFFTInput.called_once()       
-       self.view.addFFTComplex.not_called()       
-       self.view.addFFTShift.assert_not_called() 
-       self.view.addRaw.assert_not_called()      
+       self.view.isRaw=mock.Mock(return_value=False)
+       testWS=mantid.CreateWorkspace([0,1],[2,3])
+       self.presenter.handleButton()
+       assert(self.view.initFFTInput.call_count==1)
+       assert(self.view.addFFTComplex.call_count==0)
+       assert(self.view.addFFTShift.call_count==0)
+       assert(self.view.addRaw.call_count==0)
 
     def test_buttonNotRawAndIm(self):
+       self.view.isAutoShift=mock.Mock(return_value=True)
+       self.view.isComplex=mock.Mock(return_value=True)
        self.view.isRaw=mock.Mock(return_value=False)
-       self.view.buttonSignal()
-       self.view.initFFTInput.called_once()       
-       self.view.addFFTComplex.called_once()       
-       self.view.addFFTShift.assert_not_called() 
-       self.view.addRaw.assert_not_called()      
+       #self.view.buttonSignal()
+       testWS=mantid.CreateWorkspace([0,1],[2,3])
+       self.presenter.handleButton()
+       assert(self.view.initFFTInput.call_count==1)
+       assert(self.view.addFFTComplex.call_count==1)
+       assert(self.view.addFFTShift.call_count==0)
+       assert(self.view.addRaw.call_count==0)
 
     def test_buttonRawAndIm(self):
-       self.view.buttonSignal()
-       self.view.initFFTInput.called_once()       
-       self.view.addFFTComplex.called_once()       
-       self.view.addFFTShift.assert_not_called() 
-       self.view.addRaw.called_twice()      
+       self.view.isAutoShift=mock.Mock(return_value=True)
+       self.view.isComplex=mock.Mock(return_value=True)
+       self.view.isRaw=mock.Mock(return_value=True)
+       #self.view.buttonSignal()
+       testWS=mantid.CreateWorkspace([0,1],[2,3])
+       self.presenter.handleButton()
+       assert(self.view.initFFTInput.call_count==1)
+       assert(self.view.addFFTComplex.call_count==1)
+       assert(self.view.addFFTShift.call_count==0)
+       assert(self.view.addRaw.call_count==2)
 
     def test_buttonRawAndNoIm(self):
+       self.view.isAutoShift=mock.Mock(return_value=True)
        self.view.isComplex=mock.Mock(return_value=False)
-       self.view.buttonSignal()
-       self.view.initFFTInput.called_once()       
-       self.view.addFFTComplex.not_called()       
-       self.view.addFFTShift.assert_not_called() 
-       self.view.addRaw.called_twice()      
+       self.view.isRaw=mock.Mock(return_value=True)
+       testWS=mantid.CreateWorkspace([0,1],[2,3])
+       #self.view.buttonSignal()
+       self.presenter.handleButton()
+       assert(self.view.initFFTInput.call_count==1)
+       assert(self.view.addFFTComplex.call_count==0)
+       assert(self.view.addFFTShift.call_count==0)
+       assert(self.view.addRaw.call_count==1)
 
 
              
     def test_buttonNoShiftNotRawAndNoIm(self):
+       testWS=mantid.CreateWorkspace([0,1],[2,3])
        self.view.isAutoShift=mock.Mock(return_value=False)
        self.view.isComplex=mock.Mock(return_value=False)
-       self.view.isComplex=mock.Mock(return_value=False)
-       self.view.buttonSignal()
-       self.view.initFFTInput.called_once()       
-       self.view.addFFTComplex.not_called()       
-       self.view.addFFTShift.called_once() 
-       self.view.addRaw.assert_not_called()      
+       self.view.isRaw=mock.Mock(return_value=False)
+       #self.view.buttonSignal()
+       self.presenter.handleButton()
+       assert(self.view.initFFTInput.call_count==1)
+       assert(self.view.addFFTComplex.call_count==0)
+       assert(self.view.addFFTShift.call_count==1)
+       assert(self.view.addRaw.call_count==0)
 
     def test_buttonNoShiftNotRawAndIm(self):
+       testWS=mantid.CreateWorkspace([0,1],[2,3])
        self.view.isAutoShift=mock.Mock(return_value=False)
+       self.view.isComplex=mock.Mock(return_value=True)
        self.view.isRaw=mock.Mock(return_value=False)
-       self.view.buttonSignal()
-       self.view.initFFTInput.called_once()       
-       self.view.addFFTComplex.called_once()       
-       self.view.addFFTShift.called_once() 
-       self.view.addRaw.assert_not_called()      
+       self.presenter.handleButton()
+       assert(self.view.initFFTInput.call_count==1)
+       assert(self.view.addFFTComplex.call_count==1)
+       assert(self.view.addFFTShift.call_count==1)
+       assert(self.view.addRaw.call_count==0)
 
     def test_buttonNoShiftRawAndIm(self):
+       testWS=mantid.CreateWorkspace([0,1],[2,3])
        self.view.isAutoShift=mock.Mock(return_value=False)
-       self.view.buttonSignal()
-       self.view.initFFTInput.called_once()       
-       self.view.addFFTComplex.called_once()       
-       self.view.addFFTShift.called_once() 
-       self.view.addRaw.called_twice()      
+       self.view.isComplex=mock.Mock(return_value=True)
+       self.view.isRaw=mock.Mock(return_value=True)
+       self.presenter.handleButton()
+       assert(self.view.initFFTInput.call_count==1)
+       assert(self.view.addFFTComplex.call_count==1)
+       assert(self.view.addFFTShift.call_count==1)
+       assert(self.view.addRaw.call_count==2)
 
     def test_buttonNoShiftRawAndNoIm(self):
        self.view.isAutoShift=mock.Mock(return_value=False)
        self.view.isComplex=mock.Mock(return_value=False)
-       self.view.buttonSignal()
-       self.view.initFFTInput.called_once()       
-       self.view.addFFTComplex.not_called()       
-       self.view.addFFTShift.called_once() 
-       self.view.addRaw.called_twice()      
+       self.view.isRaw=mock.Mock(return_value=True)
+       testWS=mantid.CreateWorkspace([0,1],[2,3])
+       self.presenter.handleButton()
+       assert(self.view.initFFTInput.call_count==1)
+       assert(self.view.addFFTComplex.call_count==0)
+       assert(self.view.addFFTShift.call_count==1)
+       assert(self.view.addRaw.call_count==1)
 
 
 if __name__ == '__main__':
