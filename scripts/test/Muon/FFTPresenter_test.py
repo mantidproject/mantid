@@ -1,10 +1,12 @@
 import mantid.simpleapi as mantid
-import mock
-#from . import Muon
+import sys
 from  Muon import FFT_presenter 
 from  Muon import FFT_view 
-import unittest
-import sys
+if sys.version_info.major == 3:
+    from unittest import mock
+else:
+    import mock
+
 
 class FFTPresenterTest(unittest.TestCase):
     def setUp(self):
