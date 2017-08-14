@@ -216,7 +216,7 @@ void GenericDataProcessorPresenter::acceptViews(
   m_view = tableView;
   m_progressView = progressView;
 
-  addActionsToToolbar();
+  addActionsToReflectometryMenu();
 
   // Initialise options
   // Load saved values from disk
@@ -479,6 +479,7 @@ void GenericDataProcessorPresenter::endReduction() {
 
   pause();
   m_confirmReductionPaused = true;
+  m_view->confirmReductionPaused();
   m_mainPresenter->confirmReductionPaused();
 }
 
@@ -1541,7 +1542,7 @@ void GenericDataProcessorPresenter::initOptions() {
 
 /** Tells the view which of the actions should be added to the toolbar
 */
-void GenericDataProcessorPresenter::addActionsToToolbar() {
+void GenericDataProcessorPresenter::addActionsToReflectometryMenu() {
 
   auto commands = m_manager->publishCommands();
   std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;

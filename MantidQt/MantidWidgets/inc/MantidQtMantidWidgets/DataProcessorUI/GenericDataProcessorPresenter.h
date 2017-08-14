@@ -277,7 +277,7 @@ private:
   void initOptions();
   void setDefaultOptions();
 
-  void addActionsToToolbar();
+  void addActionsToReflectometryMenu();
 
   // decide between processing next row or group
   void doNextAction();

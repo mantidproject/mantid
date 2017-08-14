@@ -476,7 +476,6 @@ void ReflRunsTabPresenter::allowTableModification() {
  * confirmed to be resumed.
 */
 void ReflRunsTabPresenter::resume() {
-  std::cout << "Resume" << std::endl;
   disableRowAction(PROCESS);
   enableRowAction(PAUSE);
   preventTableModification();

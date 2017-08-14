@@ -141,16 +141,55 @@ public:
   // Forward a main presenter to this view's presenter
   void accept(DataProcessorMainPresenter *);
 
-  static const constexpr auto RESUME_ACTION_INDEX = 0;
-  static const constexpr auto PAUSE_ACTION_INDEX = 1;
+  enum class Action {
+    RESUME = 0,
+    PAUSE = 1,
+    /* Separator */
+    SELECT_GROUP = 3,
+    EXPAND_GROUP = 4,
+    COLAPSE_GROUP = 5,
+    /* Separator */
+    PLOT_RUNS = 7,
+    PLOT_GROUP = 8,
+    /* Separator */
+    INSERT_ROW_AFTER = 10,
+    INSERT_GROUP_AFTER = 11,
+    /* Separator */
+    GROUP_SELECTED = 13,
+    COPY_SELECTED = 14,
+    CUT_SELECTED = 15,
+    PASTE_SELECTED = 16,
+    CLEAR_SELECTED = 17,
+    /* Separator */
+    DELETE_ROW = 19,
+    DELETE_GROUP = 20,
+    WHATS_THIS = 21
+  };
 
+  constexpr int index_of(Action action) {
+      return static_cast<int>(action);
+  } 
 private:
   // initialise the interface
   void createTable();
+  void disableTableModification();
+  void enableTableModification();
   void disablePauseButtons();
   void enablePauseButtons();
   void disableResumeButtons();
   void enableResumeButtons();
+  void disableInsertButtons();
+  void enableInsertButtons();
+  void disableDeleteButtons();
+  void enableDeleteButtons();
+  void disableClipboardButtons();
+  void enableClipboardButtons();
+  void disableGroupingButtons();
+  void enableGroupingButtons();
+
+  void disableActionOnToolbar(Action toDisable);
+  void enableActionOnToolbar(Action toEnable);
+
   static void disableActionOnWidget(QWidget& widget, int index);
   static void enableActionOnWidget(QWidget& widget, int index);
   static void disable(QWidget& widget);
