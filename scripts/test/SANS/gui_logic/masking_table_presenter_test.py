@@ -2,9 +2,13 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid
 import unittest
-import mock
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter, masking_information)
 from sans.test_helper.mock_objects import (FakeParentPresenter, FakeState, create_mock_masking_table, create_run_tab_presenter_mock)
+import sys
+if sys.version_info.major == 3:
+    from unittest import mock
+else:
+    import mock
 
 
 class MaskingTablePresenterTest(unittest.TestCase):

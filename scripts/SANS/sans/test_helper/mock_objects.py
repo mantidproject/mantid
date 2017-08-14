@@ -1,4 +1,8 @@
-import mock
+import sys
+if sys.version_info.major == 3:
+    from unittest import mock
+else:
+    import mock
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from ui.sans_isis.masking_table import MaskingTable
