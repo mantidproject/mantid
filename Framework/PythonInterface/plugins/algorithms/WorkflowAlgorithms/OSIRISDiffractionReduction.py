@@ -182,11 +182,9 @@ def average_ws_list(ws_list):
     __temp_avg = sum(temperatures)
     __temp_avg /= num_workspaces
 
-    rename_get_property, rename_set_property, rename_exec =
-
     # Rename the average ws and return it.
     RenameWorkspace(InputWorkspace=__temp_avg, OutputWorkspace=av_name)
-    return avName.getName()
+    return av_name.getName()
 
 
 def find_intersection_of_ranges(rangeA, rangeB):
