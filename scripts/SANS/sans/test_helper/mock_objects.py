@@ -1,15 +1,15 @@
+from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
+from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
+from ui.sans_isis.masking_table import MaskingTable
+from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
+from sans.common.enums import (RangeStepType, OutputMode)
+from sans.test_helper.test_director import TestDirector
+
 import sys
 if sys.version_info.major == 3:
     from unittest import mock
 else:
     import mock
-from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
-from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
-from ui.sans_isis.masking_table import MaskingTable
-from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-
-from sans.common.enums import (RangeStepType, OutputMode)
-from sans.test_helper.test_director import TestDirector
 
 
 def create_mock_settings_diagnostic_tab():
