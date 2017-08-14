@@ -130,6 +130,24 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "conflict between options "
                              "specified via this column and global options "
                              "specified externally, the former prevail.");
+
+  // Column Hidden Options must be added to the whitelist
+  m_whitelist.addElement("HiddenOptions", "HiddenOptions",
+                         "<b>Override <samp>" +
+                             QString::fromStdString(processor.name()) +
+                             "</samp> properties</b><br /><i>optional</i><br "
+                             "/>This column allows you to "
+                             "override the properties used when executing "
+                             "the main reduction algorithm in the same way"
+                             "as the Options column, but this column is hidden"
+                             "from the user. "
+                             "Hidden Options are given as "
+                             "key=value pairs, separated by commas. Values "
+                             "containing commas must be quoted. In case of "
+                             "conflict between options "
+                             "specified via this column and global options "
+                             "specified externally, the former prevail.");
+
   m_columns = static_cast<int>(m_whitelist.size());
 
   if (m_postprocessor.name().empty()) {
@@ -237,7 +255,7 @@ void GenericDataProcessorPresenter::acceptViews(
   // ones we're handling that the user should'nt touch.
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
   m_view->setOptionsHintStrategy(
-      new AlgorithmHintStrategy(alg, m_processor.blacklist()), m_columns - 1);
+      new AlgorithmHintStrategy(alg, m_processor.blacklist()), m_columns - 2);
 
   // Start with a blank table
   newTable();
@@ -880,8 +898,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // Properties not to be used in processing
   std::set<std::string> restrictedProps;
 
-  // Loop over all columns in the whitelist except 'Options'
-  for (int i = 0; i < m_columns - 1; i++) {
+  // Loop over all columns in the whitelist except 'Options' and 'Hidden
+  // Options'
+  for (int i = 0; i < m_columns - 2; i++) {
 
     // The algorithm's property linked to this column
     auto propertyName = m_whitelist.algPropFromColIndex(i);
@@ -944,7 +963,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   }
 
   /* Now deal with 'Options' column */
-  const auto userOptions = data->back();
+  const auto userOptions = data->at(m_columns - 2);
 
   // Parse and set any user-specified options
   optionsMap = parseKeyValueString(userOptions);
@@ -953,6 +972,21 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
       alg->setProperty(kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
+                               kvp->first);
+    }
+  }
+
+  // Now deal with the 'Hidden Options' column
+  const auto hiddenOptions = data->back();
+
+  // Parse and set any user-specified options
+  auto hiddenOptionsMap = parseKeyValueString(hiddenOptions);
+  for (auto kvp = hiddenOptionsMap.begin(); kvp != hiddenOptionsMap.end();
+       ++kvp) {
+    try {
+      alg->setProperty(kvp->first, kvp->second);
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      throw std::runtime_error("Invalid property in hidden options column: " +
                                kvp->first);
     }
   }
@@ -970,7 +1004,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   if (alg->isExecuted()) {
 
     /* The reduction is complete, try to populate the columns */
-    for (int i = 0; i < m_columns - 1; i++) {
+    for (int i = 0; i < m_columns - 2; i++) {
 
       auto columnName = m_whitelist.colNameFromColIndex(i);
 

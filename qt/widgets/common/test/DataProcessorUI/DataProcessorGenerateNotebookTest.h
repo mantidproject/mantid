@@ -67,6 +67,7 @@ private:
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
     whitelist.addElement("Scale", "ScaleFactor", "");
     whitelist.addElement("Options", "Options", "");
+    whitelist.addElement("HiddenOptions", "HiddenOptions", "");
     return whitelist;
   }
 
@@ -76,13 +77,13 @@ private:
     TreeData treeData;
     RowData rowData;
 
-    rowData = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
+    rowData = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""};
     treeData[0][0] = rowData;
-    rowData = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    rowData = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
     treeData[0][1] = rowData;
-    rowData = {"24681", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
+    rowData = {"24681", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""};
     treeData[1][0] = rowData;
-    rowData = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    rowData = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
     treeData[1][1] = rowData;
 
     return treeData;
@@ -181,7 +182,8 @@ public:
   void testTableStringOneRow() {
 
     // Create some tree data
-    RowData rowData = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    RowData rowData = {"24682", "1.5", "", "1.4", "2.9",
+                       "0.04",  "1",   "", "" /*Hidden Option*/};
     TreeData treeData = {{1, {{0, rowData}}}};
 
     std::string output = tableString(treeData, reflWhitelist());
@@ -191,10 +193,10 @@ public:
 
     const std::string result[] = {
         "Group | Run(s) | Angle | Transmission Run(s) | Q min | Q max | dQ/Q | "
-        "Scale | Options",
+        "Scale | Options | HiddenOptions",
         "--- | --- | --- | --- | --- | --- | --- | "
-        "---",
-        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | ", ""};
+        "--- | ---",
+        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ", ""};
 
     int i = 0;
     for (auto it = notebookLines.begin(); it != notebookLines.end();
@@ -212,13 +214,13 @@ public:
 
     const std::string result[] = {
         "Group | Run(s) | Angle | Transmission Run(s) | Q min | Q max | dQ/Q | "
-        "Scale | Options",
+        "Scale | Options | HiddenOptions",
         "--- | --- | --- | --- | --- | --- | --- | "
-        "---",
-        "0 | 12345 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 | ",
-        "0 | 12346 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | ",
-        "1 | 24681 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 | ",
-        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | ", ""};
+        "--- | ---",
+        "0 | 12345 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 |  | ",
+        "0 | 12346 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ",
+        "1 | 24681 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 |  | ",
+        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ", ""};
 
     int i = 0;
     for (const auto &line : notebookLines) {
@@ -308,7 +310,8 @@ public:
     std::map<std::string, std::string> userPreProcessingOptions = {
         {"Run(s)", ""}, {"Transmission Run(s)", ""}};
 
-    const RowData data = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    const RowData data = {"12346", "1.5", "", "1.4", "2.9",
+                          "0.04",  "1",   "", ""};
 
     boost::tuple<std::string, std::string> output = reduceRowString(
         data, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
@@ -393,7 +396,8 @@ public:
         emptyPreProcessMap;
     std::map<std::string, std::string> emptyPreProcessingOptions;
 
-    const RowData data = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    const RowData data = {"12346", "1.5", "", "1.4", "2.9",
+                          "0.04",  "1",   "", ""};
 
     boost::tuple<std::string, std::string> output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
@@ -426,8 +430,8 @@ public:
     whitelist.addElement("Trans", "", "", false, "");
 
     // Create some data
-    const RowData data = {"1000,1001", "0.5",  "2000,2001", "1.4",
-                          "2.9",       "0.04", "1",         ""};
+    const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
+                          "0.04",      "1",   "",          ""};
 
     TS_ASSERT_THROWS_ANYTHING(
         getReducedWorkspaceName(data, whitelist, "IvsQ_"));
@@ -445,10 +449,11 @@ public:
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
     whitelist.addElement("Scale", "ScaleFactor", "");
     whitelist.addElement("Options", "Options", "");
+    whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
     // Create some data
-    const RowData data = {"1000,1001", "0.5",  "2000,2001", "1.4",
-                          "2.9",       "0.04", "1",         ""};
+    const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
+                          "0.04",      "1",   "",          ""};
 
     std::string name = getReducedWorkspaceName(data, whitelist, "IvsQ_");
     TS_ASSERT_EQUALS(name, "IvsQ_run_1000_1001")
@@ -466,10 +471,11 @@ public:
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
     whitelist.addElement("Scale", "ScaleFactor", "");
     whitelist.addElement("Options", "Options", "");
+    whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
     // Create some data
-    const RowData data = {"1000,1001", "0.5",  "2000,2001", "1.4",
-                          "2.9",       "0.04", "1",         ""};
+    const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
+                          "0.04",      "1",   "",          ""};
 
     std::string name = getReducedWorkspaceName(data, whitelist, "Prefix_");
     TS_ASSERT_EQUALS(name, "Prefix_run_1000_1001_trans_2000_2001")
@@ -487,9 +493,10 @@ public:
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
     whitelist.addElement("Scale", "ScaleFactor", "");
     whitelist.addElement("Options", "Options", "");
+    whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
-    const RowData data = {"1000,1001", "0.5",  "2000+2001", "1.4",
-                          "2.9",       "0.04", "1",         ""};
+    const RowData data = {"1000,1001", "0.5", "2000+2001", "1.4", "2.9",
+                          "0.04",      "1",   "",          ""};
 
     std::string name = getReducedWorkspaceName(data, whitelist, "Prefix_");
     TS_ASSERT_EQUALS(name, "Prefix_2000_2001")
@@ -499,8 +506,8 @@ public:
     std::string userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
                               "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
 
-    RowData rowData0 = {"12345", "", "", "", "", "", "", ""};
-    RowData rowData1 = {"12346", "", "", "", "", "", "", ""};
+    RowData rowData0 = {"12345", "", "", "", "", "", "", "", ""};
+    RowData rowData1 = {"12346", "", "", "", "", "", "", "", ""};
     GroupData groupData = {{0, rowData0}, {1, rowData1}};
 
     boost::tuple<std::string, std::string> output =
@@ -526,8 +533,8 @@ public:
 
     // All rows in second group
 
-    rowData0 = {"24681", "", "", "", "", "", "", ""};
-    rowData1 = {"24682", "", "", "", "", "", "", ""};
+    rowData0 = {"24681", "", "", "", "", "", "", "", ""};
+    rowData1 = {"24682", "", "", "", "", "", "", "", ""};
     groupData = {{0, rowData0}, {1, rowData1}};
     output = postprocessGroupString(groupData, reflWhitelist(), reflProcessor(),
                                     reflPostprocessor(), userOptions);
@@ -781,8 +788,8 @@ public:
         postProcessor, preprocessingOptions, processingOptions,
         postprocessingOptions);
 
-    RowData rowData0 = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
-    RowData rowData1 = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    RowData rowData0 = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""};
+    RowData rowData1 = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
     TreeData treeData = {{0, {{0, rowData0}}}, {1, {{0, rowData1}}}};
 
     std::string generatedNotebook = notebook->generateNotebook(treeData);
