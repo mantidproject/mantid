@@ -43,7 +43,8 @@ private:
 
   void fitPeaks();
 
-  void fitSpectraPeaks(size_t wi);
+  void fitSpectraPeaks(size_t wi, std::vector<double> &peak_pos, std::vector<std::vector<double>> &peak_params,
+                       std::vector<std::vector<double>> &fitted_functions);
 
   double fitSinglePeak(size_t peakindex, size_t wsindex,
                        std::vector<double> &init_peak_values,
@@ -66,6 +67,7 @@ private:
   void setOutputProperties();
 
   API::MatrixWorkspace_const_sptr m_inputWS;
+  API::MatrixWorkspace_const_sptr m_eventNumberWS;
 
   std::vector<double> m_peakCenters;
   std::vector<double> m_peakWindowLeft;

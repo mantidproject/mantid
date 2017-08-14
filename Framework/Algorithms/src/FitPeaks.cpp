@@ -77,6 +77,12 @@ void FitPeaks::init()
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace for peak fitting.");
 
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                    "EventNumberWorkspace", "", Direction::Input, PropertyMode::Optional),
+                  "Name of an optional workspace, whose each spectrum corresponds to each spectrum "
+                  "in input workspace. "
+                  "It has 1 value of each spectrum, standing for the number of events of the corresponding spectrum.");
+
   declareProperty("StartWorkspaceIndex", 0,
                   "Starting workspace index for fit");
   declareProperty("StopWorkspaceIndex", 0,
@@ -97,11 +103,24 @@ void FitPeaks::init()
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing peak centers for "
-                  "fitting offset.");
+                  "fitting offset."
+                  "The output workspace is point data."
+                  "Each workspace index corresponds to a spectrum. "
+                  "Each X value ranges from 0 to N-1, where N is the number of peaks to fit. "
+                  "Each Y value is the peak position obtained by peak fitting. "
+                  "Negative value is used for error signals. "
+                  "-1 for data is zero;  -2 for maximum value is smaller than specified minimum value."
+                  "and -3 for non-converged fitting.");
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputPeakParametersWorkspace", "", Direction::Output),
                   "Name of workspace containing all fitted peak parameters.  "
                   "X-values are spectra/workspace index.");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                     "FittedPeaksWorkspace", "", Direction::Output, PropertyMode::Optional),
+                   "Name of the output matrix workspace with fitted peak. "
+                   "This output workspace have the same dimesion as the input workspace."
+                   "The Y values belonged to peaks to fit are replaced by fitted value. "
+                   "Values of estimated background are used if peak fails to be fit.");
 
   return;
 }
@@ -120,6 +139,11 @@ void FitPeaks::exec()
 void FitPeaks::processInputs()
 {
     m_inputWS = getProperty("InputWorkspace");
+    std::string event_ws_name = getPropertyValue("EventNumberWorkspace");
+    if (event_ws_name.size() > 0)
+      m_eventNumberWS = getProperty("EventNumberWorkspace");
+    else
+      m_eventNumberWS = 0;
 
     int start_wi = getProperty("StartWorkspaceIndex");
     int stop_wi = getProperty("StopWorkspaceIndex");
@@ -171,7 +195,11 @@ void FitPeaks::fitPeaks()
 
       PARALLEL_START_INTERUPT_REGION
 
-      fitSpectraPeaks(wi);
+      std::vector<double> peak_positions;
+      std::vector<std::vector<double>> peak_parameters;
+      std::vector<std::vector<double>> fitted_peaks;
+
+      fitSpectraPeaks(wi, peak_positions, peak_parameters, fitted_peaks);
 
       PARALLEL_END_INTERUPT_REGION
   }
@@ -183,10 +211,13 @@ void FitPeaks::fitPeaks()
  * @brief FitPeaks::fitSpectraPeaks
  * @param wi
  */
-void FitPeaks::fitSpectraPeaks(size_t wi)
+void FitPeaks::fitSpectraPeaks(size_t wi, std::vector<double> &peak_pos, std::vector<std::vector<double>> &peak_params,
+                               std::vector<std::vector<double>> &fitted_functions)
 {
 
     g_log.notice() << "[DB] Fit peaks on workspace index :" << wi << "\n";
+
+   peak_pos.resize(m_numPeaksToFit);
 
   std::vector<double> lastPeakParameters = m_initParamValues;
 
@@ -203,10 +234,18 @@ void FitPeaks::fitSpectraPeaks(size_t wi)
     bkgd_params.push_back(bkgd_a);
     double max_value, peak_center;
     findMaxValue(wi, m_peakWindowLeft[ipeak], m_peakWindowRight[ipeak], bkgd_a, bkgd_b, peak_center, max_value);
-    if (max_value < m_minPeakMaxValue)
+
+
+    if (m_eventNumberWS && m_eventNumberWS->readX(wi)[0] < 1.0)
+    {
+      // no events
+      peak_pos[ipeak] = -1;
+      ipeak_fail = true;
+    }
+    else if (max_value < m_minPeakMaxValue)
     {
       ipeak_fail = true;
-      continue;
+      peak_pos[ipeak] = -2;
     }
     else
     {
@@ -215,7 +254,26 @@ void FitPeaks::fitSpectraPeaks(size_t wi)
     }
 
     // call Fit to fit peak and background
-    fitSinglePeak(ipeak, wi, lastPeakParameters, bkgd_params, m_peakWindows[ipeak], m_peakRangeVec[ipeak]);
+    if (!ipeak_fail)
+      fitSinglePeak(ipeak, wi, lastPeakParameters, bkgd_params, m_peakWindows[ipeak], m_peakRangeVec[ipeak]);
+
+    if (ipeak_fail)
+    {
+      // generate zero data for non-fit
+      std::vector<double> fit_param(5, 0.0);
+      peak_params.push_back(fit_param);
+
+      // generate
+      if (1)
+      {
+        std::vector<double> fitted_data(getRange(m_peakWindows)[ipeak], 0.0);
+        fitted_functions.push_back(fitted_data);
+      }
+      else
+      {
+        fitted_functions.push_back(NULL);
+      }
+    }
 
 
   } // END-FOR
