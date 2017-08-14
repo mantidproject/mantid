@@ -522,7 +522,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             crop_set_property("XMax", d_range[1])
             crop_exec()
 
-            mtd.addOrReplace(wrksp, crop_get_property("OutputWorkspace"))
+            mtd.addOrReplace(wrksp.getName(), crop_get_property("OutputWorkspace").value)
 
         # Divide all sample files by the corresponding vanadium files.
         self._divide_all_by(self._sam_ws_map.values(), self._van_ws_map.values())
