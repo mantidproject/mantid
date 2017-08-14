@@ -41,7 +41,12 @@ class FFTPresenter(object):
             alg.setProperty(name,value)
             mantid.logger.warning(name+"  "+str(value))
         alg.execute()
-
+        ws=alg.getPropertyValue("OutputWorkspace")
+        if mantid.AnalysisDataService.doesExist("FFTMuon"):
+            FFTMuon=mantid.AnalysisDataService.retrieve("FFTMuon")
+            FFTMuon.add(ws)
+        else:
+            FFTMuon=mantid.GroupWorkspaces(InputWorkspaces=ws)
     def get_FFT_input(self):
         inputs=self.view.initFFTInput()
         if self.view.isRaw():

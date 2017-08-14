@@ -80,7 +80,8 @@ class FFTView(QtGui.QWidget):
         inputs={}
         inputs['InputWorkspace']=str( self.ws.currentText()).replace(";","; ")
         inputs['Real']= 0 # always zero
-        inputs['OutputWorkspace']="MuonFFT"
+        out=str( self.ws.currentText()).replace(";","; ")
+        inputs['OutputWorkspace']=out+";FFT"
         inputs["AcceptXRoundingErrors"]=True
         return inputs
 
