@@ -203,7 +203,7 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
   size_t offset = 0;
   if (getProperty("NegativePadding")) {
           //non-zero offset is for padding before the data
-	      offset=int(std::floor(0.5*double(dataSize)));
+	      offset=dataSize/2;
           x = xData[0] - dx * (1.+double(offset));
   } 
   std::generate(newXData.begin(),newXData.end(),[&x,&dx]{return x+=dx;});
