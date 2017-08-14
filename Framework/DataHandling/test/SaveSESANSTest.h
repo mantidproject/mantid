@@ -54,7 +54,7 @@ public:
     ws->setTitle("Sample workspace");
 
     testAlg.setProperty("InputWorkspace", ws);
-	testAlg.setProperty("Sample", "Sample set in SaveSESANSTest");
+    testAlg.setProperty("Sample", "Sample set in SaveSESANSTest");
 
     // Make a temporary file
     Poco::TemporaryFile tempFile;
@@ -85,7 +85,7 @@ public:
         boost::dynamic_pointer_cast<API::MatrixWorkspace>(loadedWS);
     // Check titles were set
     TS_ASSERT_EQUALS(data->getTitle(), "Sample workspace");
-    TS_ASSERT_EQUALS(data->sample().getName(), "Sample set in workspace");
+    TS_ASSERT_EQUALS(data->sample().getName(), "Sample set in SaveSESANSTest");
 
     // Check (a small sample of) the values we wrote are correct
     TS_ASSERT_EQUALS(static_cast<int>(data->getNumberHistograms()), 1);
