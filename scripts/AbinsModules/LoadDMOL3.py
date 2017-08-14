@@ -7,7 +7,7 @@ from math import sqrt
 from mantid.kernel import Atom
 
 
-class LoadDmol3(AbinsModules.GeneralDFTProgram):
+class LoadDMOL3(AbinsModules.GeneralDFTProgram):
     """
     Class for loading DMOL3 DFT phonon data.
     """
@@ -15,7 +15,7 @@ class LoadDmol3(AbinsModules.GeneralDFTProgram):
         """
         @param input_dft_filename: name of file with phonon data (foo.outmol)
         """
-        super(LoadDmol3, self).__init__(input_dft_filename=input_dft_filename)
+        super(LoadDMOL3, self).__init__(input_dft_filename=input_dft_filename)
         self._dft_program = "DMOL3"
 
     def read_phonon_file(self):

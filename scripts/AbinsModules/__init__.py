@@ -22,7 +22,7 @@ from .FrequencyPowderGenerator import FrequencyPowderGenerator
 from .GeneralDFTProgram import GeneralDFTProgram
 from .LoadCASTEP import LoadCASTEP
 from .LoadCRYSTAL import LoadCRYSTAL
-from .LoadDmol3 import LoadDmol3
+from .LoadDMOL3 import LoadDMOL3
 
 # Calculating modules
 from .CalculatePowder import CalculatePowder
