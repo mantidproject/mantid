@@ -223,7 +223,10 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
   int dims[3], celldims[3];
   input->GetDimensions(dims);
   input->GetCellDims(celldims);
-  
+  auto inCD = input->GetCellData();
+  auto outCD = output->GetCellData();
+  outCD->CopyAllocate(inCD);
+
   double value = this->ContourValues->GetValue(0);
   if (AxisNumber == 0) {
     for(vtkIdType i = 0; i < dims[0]; ++i)
@@ -254,71 +257,55 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
   int min = static_cast<int>(std::distance(ptr, std::min_element(ptr, ptr + cutScalars->GetNumberOfTuples())));
   //should be using cell position instead of points;
   min = std::min(min, celldims[AxisNumber]);
-  vtkDataArray *inscalars = input->GetCellData()->GetScalars();//"scalars");
-    
-  vtkNew<vtkGenericCell> cell;
-  vtkNew<vtkPoints> pts;
-  vtkNew<vtkFloatArray> scalars;
-  scalars->SetName("signal");
+
+  vtkIdType outCellId = 0;
   vtkNew<vtkIdList> ids;
+  ids->SetNumberOfIds(4);
   if (AxisNumber == 0) {
-    pts->Allocate(4*celldims[1]*celldims[2]);
-    scalars->Allocate(celldims[1]*celldims[2]);
     for (int j = 0; j < celldims[1]; ++j) {
       for (int k=0; k < celldims[2]; ++k) {
-        input->GetCell(min, j, k, cell.Get());
-        if (cell.Get() && cell->GetCellType() != VTK_EMPTY_CELL) {
-          scalars->InsertNextTuple(inscalars->GetTuple(min + j * celldims[0] + k*celldims[0]*celldims[1]));
-          ids->Reset();
-          vtkCell *face = cell->GetFace(0);
-          vtkPoints *cellPts = face->GetPoints();
-          for (int l = 0; l < 4; ++l) {
-            ids->InsertNextId(pts->InsertNextPoint(cellPts->GetPoint(l)));
-          }
-          output->InsertNextCell(face->GetCellType(),ids.Get());
+        auto index = min + j * celldims[0] + k * celldims[0] * celldims[1];
+        if (input->IsCellVisible(index)) {
+          ids->SetId(0, min + j * dims[0] + k * dims[0] * dims[1]);
+          ids->SetId(3, min + (j + 1) * dims[0] + k * dims[0] * dims[1]);
+          ids->SetId(1, min + j * dims[0] + (k + 1) * dims[0] * dims[1]);
+          ids->SetId(2, min + (j + 1) * dims[0] + (k + 1) * dims[0] * dims[1]);
+          output->InsertNextCell(VTK_QUAD, ids.Get());
+          outCD->CopyData(inCD, index, outCellId++);
         }
       }
     }
   } else if (AxisNumber == 1) {
-    pts->Allocate(4*celldims[0]*celldims[2]);
-    scalars->Allocate(celldims[0]*celldims[2]);
     for (int i = 0; i < celldims[0]; ++i) {
       for (int k=0; k < celldims[2]; ++k) {
-        input->GetCell(i, min, k, cell.Get());
-        if (cell.Get() && cell->GetCellType() != VTK_EMPTY_CELL) {
-          scalars->InsertNextTuple(inscalars->GetTuple(i + min * celldims[0] + k*celldims[0]*celldims[1]));
-          ids->Reset();
-          vtkCell *face = cell->GetFace(2);
-          vtkPoints *cellPts = face->GetPoints();
-          for (int l = 0; l < 4; ++l) {
-            ids->InsertNextId(pts->InsertNextPoint(cellPts->GetPoint(l)));
-          }
-          output->InsertNextCell(face->GetCellType(),ids.Get());
+        auto index = i + min * celldims[0] + k * celldims[0] * celldims[1];
+        if (input->IsCellVisible(index)) {
+          ids->SetId(0, i + min * dims[0] + k * dims[0] * dims[1]);
+          ids->SetId(1, i + 1 + min * dims[0] + k * dims[0] * dims[1]);
+          ids->SetId(3, i + min * dims[0] + (k + 1) * dims[0] * dims[1]);
+          ids->SetId(2, i + 1 + min * dims[0] + (k + 1) * dims[0] * dims[1]);
+          output->InsertNextCell(VTK_QUAD, ids.Get());
+          outCD->CopyData(inCD, index, outCellId++);
         }
       }
     }
   } else if (AxisNumber == 2) {
-    pts->Allocate(4*celldims[0]*celldims[1]);
-    scalars->Allocate(celldims[0]*celldims[1]);
     for (int i = 0; i < celldims[0]; ++i) {
       for (int j=0; j < celldims[1]; ++j) {
-        input->GetCell(i, j, min, cell.Get());
-        if (cell.Get() && cell->GetCellType() != VTK_EMPTY_CELL) {
-          ids->Reset();
-          vtkCell *face = cell->GetFace(4);
-          vtkPoints *cellPts = face->GetPoints();
-          for (int l = 0; l < 4; ++l) {
-            ids->InsertNextId(pts->InsertNextPoint(cellPts->GetPoint(l)));
-          }
-          output->InsertNextCell(face->GetCellType(),ids.Get());
-          scalars->InsertNextTuple(inscalars->GetTuple(i + j * celldims[0] + min*celldims[0]*celldims[1]));
+        auto index = i + j * celldims[0] + min * celldims[0] * celldims[1];
+        if (input->IsCellVisible(index)) {
+          ids->SetId(0, i + j * dims[0] + min * dims[0] * dims[1]);
+          ids->SetId(3, i + 1 + j * dims[0] + min * dims[0] * dims[1]);
+          ids->SetId(2, i + 1 + (j + 1) * dims[0] + min * dims[0] * dims[1]);
+          ids->SetId(1, i + (j + 1) * dims[0] + min * dims[0] * dims[1]);
+          output->InsertNextCell(VTK_QUAD, ids.Get());
+          outCD->CopyData(inCD, index, outCellId++);
         }
       }
     }
   }
-  
-  output->SetPoints(pts.Get());
-  output->GetCellData()->SetScalars(scalars.Get());
+
+  output->SetPoints(input->GetPoints());
   thisOutput->ShallowCopy(output.Get());
 }
 
