@@ -733,8 +733,8 @@ void ConvolutionFitSequential::extractMembersFrom(
     auto extractAlg = createChildAlgorithm("ExtractSpectra", -1.0, -1.0, false);
     extractAlg->setProperty("InputWorkspace", resultWs);
     extractAlg->setProperty("OutputWorkspace", extractedWsName);
-    extractAlg->setProperty("StartWorkspaceIndex", i);
-    extractAlg->setProperty("EndWorkspaceIndex", i);
+    extractAlg->setProperty("StartWorkspaceIndex", boost::numeric_cast<int>(i));
+    extractAlg->setProperty("EndWorkspaceIndex", boost::numeric_cast<int>(i));
     extractAlg->executeAsChildAlg();
 
     MatrixWorkspace_sptr memberWs = extractAlg->getProperty("OutputWorkspace");
