@@ -21,11 +21,14 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class MiniPlot : public MantidQt::Widgets::MplCpp::MplFigureCanvas {
+class MiniPlot : public QWidget {
   Q_OBJECT
 
 public:
   MiniPlot(QWidget *parent = nullptr);
+
+private:
+  MantidQt::Widgets::MplCpp::MplFigureCanvas *m_canvas;
 };
 }
 }
