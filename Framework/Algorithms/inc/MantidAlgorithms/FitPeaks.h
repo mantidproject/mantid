@@ -1,12 +1,12 @@
 #ifndef MANTID_ALGORITHMS_FITPEAKS_H_
 #define MANTID_ALGORITHMS_FITPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -43,8 +43,10 @@ private:
 
   void fitPeaks();
 
-  void fitSpectraPeaks(size_t wi, std::vector<double> &peak_pos, std::vector<std::vector<double>> &peak_params,
-                       std::vector<std::vector<double>> &fitted_functions);
+  void fitSpectraPeaks(size_t wi, std::vector<double> &peak_pos,
+                       std::vector<std::vector<double>> &peak_params,
+                       std::vector<std::vector<double>> &fitted_functions,
+                       std::vector<std::vector<double>> &fitted_peak_windows);
 
   double fitSinglePeak(size_t wsindex, size_t peakindex,
                        const std::vector<double> &init_peak_values,
@@ -52,7 +54,7 @@ private:
                        const std::vector<double> &fit_window,
                        const std::vector<double> &peak_range,
                        std::vector<double> &fitted_params_values,
-                       std::vector<double> &fitted_params_erros,
+                       std::vector<double> &fitted_params_errors,
                        std::vector<double> &fitted_window,
                        std::vector<double> &fitted_data);
 
@@ -70,7 +72,8 @@ private:
   void generateOutputWorkspaces();
 
   double processFitResult(DataObjects::TableWorkspace_sptr param_table,
-                                  std::vector<double> &param_values, std::vector<double> &param_errors);
+                          std::vector<double> &param_values,
+                          std::vector<double> &param_errors);
 
   void setOutputProperties();
 
@@ -89,12 +92,13 @@ private:
   size_t m_numPeaksToFit;
   double m_minPeakMaxValue;
 
-  API::MatrixWorkspace_sptr m_peakPosWS;  // output workspace
-  API::MatrixWorkspace_sptr m_peakParamsWS;  // output workspace for all peak parameters
+  API::MatrixWorkspace_sptr m_peakPosWS; // output workspace
+  API::MatrixWorkspace_sptr
+      m_peakParamsWS; // output workspace for all peak parameters
+  API::MatrixWorkspace_sptr m_fittedPeakWS;
 
   size_t m_startWorkspaceIndex;
   size_t m_stopWorkspaceIndex;
-
 };
 
 } // namespace Algorithms
