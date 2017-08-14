@@ -557,7 +557,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             rename_alg.setProperty("InputWorkspace", sam_ws_names_list[0])
             rename_alg.setProperty("OutputWorkspace", self._output_ws_name)
             self._output_ws_name = rename_alg.getPropertyValue("OutputWorkspace")
-            mtd.addOrReplace(output_ws, rename_alg.getProperty("OutputWorkspace").value)
+            mtd.addOrReplace(self._output_ws_name, rename_alg.getProperty("OutputWorkspace").value)
 
         result = mtd[self._output_ws_name]
 
