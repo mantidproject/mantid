@@ -46,7 +46,7 @@ std::map<std::string, std::string> SaveSESANS::validateInputs() {
     }
   }
 
-  if (getPropertyValue("Sample").empty()){
+  if (getPropertyValue("Sample").empty()) {
     invalidInputs["Sample"] = "Sample must be set";
   }
   return invalidInputs;
@@ -75,7 +75,8 @@ void SaveSESANS::init() {
   declareProperty("EchoConstant", EMPTY_DBL(), "Echo_constant",
                   Kernel::Direction::Input);
 
-  declareProperty<std::string>("Sample", "", "Sample name", Kernel::Direction::Input);
+  declareProperty<std::string>("Sample", "", "Sample name",
+                               Kernel::Direction::Input);
 
   declareProperty<std::string>("Orientation", "Z", validOrientation,
                                "Orientation of the instrument");
@@ -96,13 +97,13 @@ void SaveSESANS::exec() {
 
   auto filename = getPropertyValue("Filename");
   std::ofstream outfile(filename, std::ofstream::trunc);
-  if (outfile.fail()){
+  if (outfile.fail()) {
     const std::string error = strerror(errno);
     g_log.error("Failed to open file. Error was: " + error);
     throw std::runtime_error("Could not open file at the following path: " +
-			     filename);
+                             filename);
   }
-  
+
   writeHeaders(outfile, ws);
   outfile << "\n"
           << "BEGIN_DATA"
