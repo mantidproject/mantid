@@ -116,13 +116,12 @@ MantidVec GetQsInQENSData::extractQValues(
       const DetectorInfo detInf = workspace->detectorInfo();
 
       for (size_t i = 0; i < numSpectra; i++) {
-        IDetector_const_sptr detector =
-            boost::make_shared<const IDetector>(detInf.detector(i));
+        IDetector_const_sptr detector = IDetector_const_sptr(&detInf.detector(i));
         double efixed = workspace->getEFixed(detector);
         double theta = 0.5 * workspace->detectorTwoTheta(*detector);
         qValues[i] = UnitConversion::convertToElasticQ(theta, efixed);
       }
-    } catch (std::exception &e) {
+    } catch (std::exception &) {
       throw std::exception("Detectors are missing from the input workspace");
     }
   }
