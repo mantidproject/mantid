@@ -522,7 +522,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             crop_set_property("XMax", d_range[1])
             crop_exec()
 
-            mtd.addOrReplace(wrksp, crop_get_property("OutputWorkspace").value)
+            mtd.addOrReplace(wrksp, crop_get_property("OutputWorkspace"))
 
         # Divide all sample files by the corresponding vanadium files.
         self._divide_all_by(self._sam_ws_map.values(), self._van_ws_map.values())
@@ -536,7 +536,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             merge_runs_alg.setProperty("InputWorkspaces", sam_ws_names_list)
             merge_runs_alg.setProperty("OutputWorkspace", self._output_ws_name)
             merge_runs_alg.execute()
-            mtd.addOrReplace(self._output_ws_name, merge_runs_alg.getProperty("OutputWorkspace").value)
+            mtd.addOrReplace(self._output_ws_name, merge_runs_alg.getProperty("OutputWorkspace"))
 
             for name in sam_ws_names_list:
                 delete_set_property("Workspace", name)
@@ -549,7 +549,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
             rename_alg.setProperty("InputWorkspace", sam_ws_names_list[0])
             rename_alg.setProperty("OutputWorkspace", self._output_ws_name)
-            mtd.addOrReplace(self._output_ws_name, rename_alg.getProperty("OutputWorkspace").value)
+            mtd.addOrReplace(self._output_ws_name, rename_alg.getProperty("OutputWorkspace"))
 
         result = mtd[self._output_ws_name]
 
@@ -561,6 +561,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         data_e = []
         for i in range(0, len(data_x) - 1):
             x_val = (data_x[i] + data_x[i + 1]) / 2.0
+
             if is_in_ranges(intersections, x_val):
                 data_y.append(2)
                 data_e.append(2)
@@ -660,10 +661,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         Initializes the algorithm with the specified name as a child algorithm.
         The getProperty, setProperty and execute methods for this child algorithm
         are returned.
-
-        This method can be used to improve performance of an algorithm called
-        within a loop - by removing the hash function step required to retrieve
-        the function pointer in each iteration of a loop.
 
         :param algorithm_name:   The name of the algorithm to initialize.
         :param enable_logging:   If True, enables algorithm logging.
