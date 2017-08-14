@@ -675,7 +675,7 @@ void ConvolutionFitSequential::extractMembers(
   // workspace - these are stored in the memberWorkspaces vector.
   size_t resultSize = resultGroupWs->size();
   std::vector<std::string> memberWorkspaces = {};
-  for (int i = 0; i < resultSize; i++) {
+  for (size_t i = 0; i < resultSize; i++) {
     extractMembersFrom(resultGroupWs->getItem(i), outputWsName, members, i == 0,
                        memberWorkspaces);
   }
@@ -683,7 +683,7 @@ void ConvolutionFitSequential::extractMembers(
   // Update the y-axis of each created member workspace - set to
   // the Q values from the QENS data.
   NumericAxis *qAxis = new NumericAxis(resultSize);
-  for (int j = 0; j < resultSize; j++) {
+  for (size_t j = 0; j < resultSize; j++) {
     qAxis->setValue(j, qValues[j]);
   }
 
@@ -725,7 +725,7 @@ void ConvolutionFitSequential::extractMembersFrom(
     const std::vector<std::string> &members, bool createMemberWs,
     std::vector<std::string> &memberWorkspaces) {
   // Iterate over all the members in the fit
-  for (int i = 0; i < members.size(); i++) {
+  for (size_t i = 0; i < members.size(); i++) {
     std::string memberWsName = outputWsName + "_" + members[i];
     std::string extractedWsName = "__temp";
 

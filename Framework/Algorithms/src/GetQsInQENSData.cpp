@@ -7,7 +7,7 @@
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/Unit.h"
 
-#include <exception>
+#include <stdexcept>
 
 namespace {
 Mantid::Kernel::Logger g_log("ConvolutionFitSequential");
@@ -88,7 +88,7 @@ MantidVec GetQsInQENSData::extractQValues(
   try {
     qAxis = workspace->getAxis(1);
   } catch (std::exception &) {
-    throw std::exception("Vertical axis is empty");
+    throw std::runtime_error("Vertical axis is empty");
   }
 
   MantidVec qValues(qAxis->length());
@@ -122,8 +122,8 @@ MantidVec GetQsInQENSData::extractQValues(
         double theta = 0.5 * workspace->detectorTwoTheta(*detector);
         qValues[i] = UnitConversion::convertToElasticQ(theta, efixed);
       }
-    } catch (std::exception &) {
-      throw std::exception("Detectors are missing from the input workspace");
+    } catch (std::runtime_error &) {
+      throw std::runtime_error("Detectors are missing from the input workspace");
     }
   }
 
