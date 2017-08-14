@@ -113,16 +113,14 @@ MantidVec GetQsInQENSData::extractQValues(
 
     // Iterate over all spectrum in the specified workspace.
     try {
-      const DetectorInfo detInf = workspace->detectorInfo();
 
       for (size_t i = 0; i < numSpectra; i++) {
-        IDetector_const_sptr detector =
-            IDetector_const_sptr(&detInf.detector(i));
+        IDetector_const_sptr detector = workspace->getDetector(i);
         double efixed = workspace->getEFixed(detector);
-        double theta = 0.5 * workspace->detectorTwoTheta(*detector);
+        double theta = 0.5 * workspace->detectorInfo()->twoTheta(i);
         qValues[i] = UnitConversion::convertToElasticQ(theta, efixed);
       }
-    } catch (std::runtime_error &) {
+    } catch (std::exception &) {
       throw std::runtime_error(
           "Detectors are missing from the input workspace");
     }
