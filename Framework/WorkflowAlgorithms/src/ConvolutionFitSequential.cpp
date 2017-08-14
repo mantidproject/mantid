@@ -637,7 +637,7 @@ void ConvolutionFitSequential::extractMembers(
   // the first workspace in the result GroupWorkspace.
   MatrixWorkspace_sptr firstSpectraWs =
       boost::dynamic_pointer_cast<MatrixWorkspace>(resultGroupWs->getItem(0));
-  TextAxis *axis = dynamic_cast<TextAxis *>(firstSpectraWs->getAxis(1));
+  Axis *axis = firstSpectraWs->getAxis(1);
   const Run run = firstSpectraWs->run();
   std::string delta = run.getProperty("delta_function")->value();
   std::string lorentziansStr = run.getProperty("lorentzians")->value();
