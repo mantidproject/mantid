@@ -74,12 +74,8 @@ void SaveSESANS::init() {
   declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
   declareProperty("EchoConstant", EMPTY_DBL(), "Echo_constant",
                   Kernel::Direction::Input);
-<<<<<<< HEAD
+
   declareProperty<std::string>("Sample", "", "Sample name", Kernel::Direction::Input);
-=======
-  API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
-  declareProperty("Sample", ws->sample().getName(), "The name of the sample", Kernel::Direction::Input);
->>>>>>> 9c8a3b6ae41bb7863f962d5e43d4a2bab2feb601
 
   declareProperty<std::string>("Orientation", "Z", validOrientation,
                                "Orientation of the instrument");
@@ -90,7 +86,6 @@ void SaveSESANS::init() {
  */
 void SaveSESANS::exec() {
   API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
-  setPropertyValue("Sample", ws->sample().getName());
 
   // Check workspace has only one spectrum
   if (ws->getNumberHistograms() != 1) {

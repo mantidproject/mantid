@@ -52,14 +52,13 @@ public:
 
     // Set workspace attributes
     ws->setTitle("Sample workspace");
-    API::Sample &sample = ws->mutableSample();
-    sample.setName("Sample set in workspace");
 
     testAlg.setProperty("InputWorkspace", ws);
+	testAlg.setProperty("Sample", "Sample set in SaveSESANSTest");
 
     // Make a temporary file
     Poco::TemporaryFile tempFile;
-    const auto &tempFileName = tempFile.path();
+    const std::string &tempFileName = tempFile.path();
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
 
     // Execute the algorithm
