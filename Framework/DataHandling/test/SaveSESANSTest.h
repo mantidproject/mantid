@@ -25,18 +25,18 @@ public:
   // This means the constructor isn't called when running other tests
   static SaveSESANSTest *createSuite() { return new SaveSESANSTest(); }
   static void destroySuite(SaveSESANSTest *suite) { delete suite; }
-
+  
   void test_init() {
     TS_ASSERT_THROWS_NOTHING(testAlg.initialize());
     TS_ASSERT(testAlg.isInitialized());
-    testAlg.setChild(true);
     testAlg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", "dummy.ses"));
-    testAlg.setProperty("ThetaZMax", 0.09);
-    testAlg.setProperty("ThetaYMax", 0.09);
-    testAlg.setProperty("EchoConstant", "1");
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("ThetaZMax", 0.09));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("ThetaYMax", 0.09));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("EchoConstant", "1"));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Sample", "Sample set in algorithm"));
   }
-
+  
   void test_rejectTooManySpectra() {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("InputWorkspace", ws));
@@ -44,7 +44,7 @@ public:
     // Should throw, as we can't save more than one histogram
     TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
   }
-
+  
   void test_exec() {
     // Set up workspace
     // X = [1 to 11], Y = [2] * 10, E = [sqrt(2)] * 10
@@ -53,12 +53,12 @@ public:
     // Set workspace attributes
     ws->setTitle("Sample workspace");
     API::Sample &sample = ws->mutableSample();
-    sample.setName("Sample sample");
+    sample.setName("Sample set in workspace");
 
     testAlg.setProperty("InputWorkspace", ws);
 
     // Make a temporary file
-    Poco::TemporaryFile tempFile(".");
+    Poco::TemporaryFile tempFile;
     const auto &tempFileName = tempFile.path();
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
 
@@ -86,7 +86,7 @@ public:
         boost::dynamic_pointer_cast<API::MatrixWorkspace>(loadedWS);
     // Check titles were set
     TS_ASSERT_EQUALS(data->getTitle(), "Sample workspace");
-    TS_ASSERT_EQUALS(data->sample().getName(), "Sample sample");
+    TS_ASSERT_EQUALS(data->sample().getName(), "Sample set in workspace");
 
     // Check (a small sample of) the values we wrote are correct
     TS_ASSERT_EQUALS(static_cast<int>(data->getNumberHistograms()), 1);

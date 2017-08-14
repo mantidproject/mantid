@@ -45,6 +45,9 @@ std::map<std::string, std::string> SaveSESANS::validateInputs() {
       invalidInputs[propertyName] = propertyName + " must be set";
     }
   }
+  if (getPropertyValue("Sample").empty()){
+    invalidInputs["Sample"] = "Sample must be set";
+  }
   return invalidInputs;
 }
 
@@ -70,6 +73,7 @@ void SaveSESANS::init() {
   declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
   declareProperty("EchoConstant", EMPTY_DBL(), "Echo_constant",
                   Kernel::Direction::Input);
+  declareProperty<std::string>("Sample", "", "Sample name", Kernel::Direction::Input);
 
   declareProperty<std::string>("Orientation", "Z", validOrientation,
                                "Orientation of the instrument");
@@ -80,6 +84,7 @@ void SaveSESANS::init() {
  */
 void SaveSESANS::exec() {
   API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+  setPropertyValue("Sample", ws->sample().getName());
 
   // Check workspace has only one spectrum
   if (ws->getNumberHistograms() != 1) {
@@ -88,8 +93,15 @@ void SaveSESANS::exec() {
                              "number of spectra, expected 1");
   }
 
-  std::ofstream outfile;
-  outfile.open(getPropertyValue("Filename"));
+  auto filename = getPropertyValue("Filename");
+  std::ofstream outfile(filename, std::ofstream::trunc);
+  if (outfile.fail()){
+    const std::string error = strerror(errno);
+    g_log.error("Failed to open file. Error was: " + error);
+    throw std::runtime_error("Could not open file at the following path: " +
+			     filename);
+  }
+  
   writeHeaders(outfile, ws);
   outfile << "\n"
           << "BEGIN_DATA"
@@ -126,7 +138,7 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile,
 
   writeHeader(outfile, "FileFormatVersion", "1.0");
   writeHeader(outfile, "DataFileTitle", ws->getTitle());
-  writeHeader(outfile, "Sample", sample.getName());
+  writeHeader(outfile, "Sample", getPropertyValue("Sample"));
   writeHeader(outfile, "Thickness", std::to_string(sample.getThickness()));
   writeHeader(outfile, "Thickness_unit", "mm");
   writeHeader(outfile, "Theta_zmax", getPropertyValue("ThetaZMax"));
