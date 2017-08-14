@@ -235,7 +235,6 @@ void FitPeaks::fitSpectraPeaks(size_t wi, std::vector<double> &peak_pos, std::ve
     double max_value, peak_center;
     findMaxValue(wi, m_peakWindowLeft[ipeak], m_peakWindowRight[ipeak], bkgd_a, bkgd_b, peak_center, max_value);
 
-
     if (m_eventNumberWS && m_eventNumberWS->readX(wi)[0] < 1.0)
     {
       // no events
@@ -255,7 +254,8 @@ void FitPeaks::fitSpectraPeaks(size_t wi, std::vector<double> &peak_pos, std::ve
 
     // call Fit to fit peak and background
     if (!ipeak_fail)
-      fitSinglePeak(ipeak, wi, lastPeakParameters, bkgd_params, m_peakWindows[ipeak], m_peakRangeVec[ipeak]);
+      fitSinglePeak(wi, ipeak, lastPeakParameters, bkgd_params,
+                    m_peakWindows[ipeak], m_peakRangeVec[ipeak]);
 
     if (ipeak_fail)
     {
@@ -266,17 +266,35 @@ void FitPeaks::fitSpectraPeaks(size_t wi, std::vector<double> &peak_pos, std::ve
       // generate
       if (1)
       {
-        std::vector<double> fitted_data(getRange(m_peakWindows)[ipeak], 0.0);
+        std::vector<size_t> i_window = getRange(wi, m_peakWindows[ipeak]);
+        std::vector<double> fitted_data(i_window[1] - i_window[0], 0.0);
         fitted_functions.push_back(fitted_data);
       }
       else
       {
-        fitted_functions.push_back(NULL);
+        std::vector<double> empty(0);
+        fitted_functions.push_back(empty);
       }
     }
 
 
   } // END-FOR
+}
+
+std::vector<size_t> FitPeaks::getRange(size_t wi,
+                                       const std::vector<double> &peak_window) {
+  if (peak_window.size() != 2)
+    throw std::runtime_error("Invalid peak window size");
+
+  auto vecX = m_inputWS->histogram(wi).x();
+  size_t istart = findXIndex(vecX, peak_window[0]);
+  size_t istop = findXIndex(vecX, peak_window[1]);
+
+  std::vector<size_t> range_index_window(2);
+  range_index_window[0] = istart;
+  range_index_window[1] = istop;
+
+  return range_index_window;
 }
 
 /**
@@ -299,11 +317,15 @@ void FitPeaks::fitSpectraPeaks(size_t wi, std::vector<double> &peak_pos, std::ve
    * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1, PeakPositionTolerance=0.02)
  *
  */
-double FitPeaks::fitSinglePeak(size_t peakindex, size_t wsindex,
-                               std::vector<double> &init_peak_values,
-                               std::vector<double> &init_bkgd_values,
-                               std::vector<double> &fit_window,
-                               std::vector<double> &peak_range) {
+double FitPeaks::fitSinglePeak(size_t wsindex, size_t peakindex,
+                               const std::vector<double> &init_peak_values,
+                               const std::vector<double> &init_bkgd_values,
+                               const std::vector<double> &fit_window,
+                               const std::vector<double> &peak_range,
+                               std::vector<double> &fitted_params_values,
+                               std::vector<double> &fitted_params_erros,
+                               std::vector<double> &fitted_window,
+                               std::vector<double> &fitted_data) {
   // Set up sub algorithm fit
   IAlgorithm_sptr fit_peak;
   try {
@@ -370,6 +392,13 @@ double FitPeaks::fitSinglePeak(size_t peakindex, size_t wsindex,
       std::vector<double> param_values(7);
       std::vector<double> param_errors(7);
     processFitResult(param_table, param_values, param_errors);
+
+    MatrixWorkspace_const_sptr out_ws_i =
+        fit_peak->getProperty("OutputWorkspace");
+    auto vecx = out_ws_i->histogram(1).x();
+    g_log.notice() << "[DB] Output workspace from " << vecx.front() << ", "
+                   << vecx.back() << ", number of points = " << vecx.size()
+                   << "\n";
   }
 
   return true;
@@ -408,14 +437,17 @@ void FitPeaks::estimateLinearBackground(size_t wi, double left_window_boundary,
   return;
 }
 
-void FitPeaks::findMaxValue(size_t wi, double left_window_boundary,
+double FitPeaks::findMaxValue(size_t wi, double left_window_boundary,
                               double right_window_boundary, double b1,
-                              double b0, double &peak_center, double &max_value) {
+                              double b0, double &peak_center,
+                              double &max_value) {
 
   auto vecX = m_inputWS->x(wi);
   size_t istart = findXIndex(vecX, left_window_boundary);
   size_t istop = findXIndex(vecX, right_window_boundary);
   auto vecY = m_inputWS->y(wi);
+
+  double abs_max = 0;
 
   max_value = 0;
   for (size_t i = istart; i < istop; ++i)
@@ -427,13 +459,15 @@ void FitPeaks::findMaxValue(size_t wi, double left_window_boundary,
       max_value = y;
       peak_center = x;
     }
+    if (vecY[i] > abs_max)
+      abs_max = y;
   }
 
   g_log.notice() << "[DB] wsindex " << wi << " between " << left_window_boundary
                  << " and " << right_window_boundary << ": max Y " << max_value
                  << " at x = " << peak_center << "\n";
 
-  return;
+  return abs_max;
 }
 
 void FitPeaks::generateOutputWorkspaces(){

@@ -46,18 +46,26 @@ private:
   void fitSpectraPeaks(size_t wi, std::vector<double> &peak_pos, std::vector<std::vector<double>> &peak_params,
                        std::vector<std::vector<double>> &fitted_functions);
 
-  double fitSinglePeak(size_t peakindex, size_t wsindex,
-                       std::vector<double> &init_peak_values,
-                       std::vector<double> &init_bkgd_values,
-                       std::vector<double> &fit_window,
-                       std::vector<double> &peak_range);
+  double fitSinglePeak(size_t wsindex, size_t peakindex,
+                       const std::vector<double> &init_peak_values,
+                       const std::vector<double> &init_bkgd_values,
+                       const std::vector<double> &fit_window,
+                       const std::vector<double> &peak_range,
+                       std::vector<double> &fitted_params_values,
+                       std::vector<double> &fitted_params_erros,
+                       std::vector<double> &fitted_window,
+                       std::vector<double> &fitted_data);
 
   void estimateLinearBackground(size_t wi, double left_window_boundary,
                                 double right_window_boundary, double &bkgd_a1,
                                 double &bkgd_a0);
 
-  void findMaxValue(size_t wi, double left_window_boundary,
-                      double right_window_boundary, double b1, double b0, double &peak_center, double &max_value);
+  double findMaxValue(size_t wi, double left_window_boundary,
+                      double right_window_boundary, double b1, double b0,
+                      double &peak_center, double &max_value);
+
+  std::vector<size_t> getRange(size_t wi,
+                               const std::vector<double> &peak_window);
 
   void generateOutputWorkspaces();
 
