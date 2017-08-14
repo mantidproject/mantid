@@ -155,7 +155,7 @@ fptr FFTPreProcessing::getApodizationFunction(const std::string method) {
 * Applies the appodization function to the data.
 * @param histogram :: [input] Input histogram.
 * @param function :: [input] the apodization function
-* @param decayConstantn :: [input] the decay constant for apodization function
+* @param decayConstant :: [input] the decay constant for apodization function
 * @returns :: Histogram of the apodized data
 */
 HistogramData::Histogram FFTPreProcessing::applyApodizationFunction(
