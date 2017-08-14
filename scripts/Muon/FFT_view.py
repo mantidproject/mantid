@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore, QtGui
-from Muon import widgetHelper
+from Muon import widget_helper
 
 
 class FFTView(QtGui.QWidget):
@@ -26,25 +26,25 @@ class FFTView(QtGui.QWidget):
         # populate table
         options=['test']
 
-        widgetHelper.setName(self.table,0,"Workspace")
-        self.ws= widgetHelper.createComboTable(self.table,0,options)
+        widget_helper.setName(self.table,0,"Workspace")
+        self.ws= widget_helper.createComboTable(self.table,0,options)
         self.Im_box_row=1
-        widgetHelper.setName(self.table,self.Im_box_row,"Imaginary Data")
-        self.Im_box= widgetHelper.createCheckTable(self.table,True,self.Im_box_row)
+        widget_helper.setName(self.table,self.Im_box_row,"Imaginary Data")
+        self.Im_box= widget_helper.createCheckTable(self.table,True,self.Im_box_row)
 
-        widgetHelper.setName(self.table,2,"Imaginary Workspace")
-        self.Im_ws= widgetHelper.createComboTable(self.table,2,options)
+        widget_helper.setName(self.table,2,"Imaginary Workspace")
+        self.Im_ws= widget_helper.createComboTable(self.table,2,options)
 
         self.shift_box_row=3
-        widgetHelper.setName(self.table,self.shift_box_row,"Auto shift")
-        self.shift_box= widgetHelper.createCheckTable(self.table,True,self.shift_box_row)
+        widget_helper.setName(self.table,self.shift_box_row,"Auto shift")
+        self.shift_box= widget_helper.createCheckTable(self.table,True,self.shift_box_row)
 
-        widgetHelper.setName(self.table,4,"Shift")
-        self.shift= widgetHelper.createDoubleTable(self.table,0.0,4)
+        widget_helper.setName(self.table,4,"Shift")
+        self.shift= widget_helper.createDoubleTable(self.table,0.0,4)
         self.table.hideRow(4)
 
-        widgetHelper.setName(self.table,5,"Use Raw data")
-        self.Raw_box= widgetHelper.createCheckTable(self.table,True,5)
+        widget_helper.setName(self.table,5,"Use Raw data")
+        self.Raw_box= widget_helper.createCheckTable(self.table,True,5)
         #make button
         self.button = QtGui.QPushButton('Calculate FFT', self)
         self.button.setStyleSheet("background-color:lightgrey")

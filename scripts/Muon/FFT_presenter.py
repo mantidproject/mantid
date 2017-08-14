@@ -46,6 +46,7 @@ class FFTPresenter(object):
             FFTMuon.add(ws)
         else:
             FFTMuon=mantid.GroupWorkspaces(InputWorkspaces=ws)
+ 
     def get_FFT_input(self):
         inputs=self.view.initFFTInput()
         if self.view.isRaw():

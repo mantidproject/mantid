@@ -1,14 +1,14 @@
 import mantid.simpleapi as mantid
 import mock
 #from . import Muon
-from  Muon import FFTPresenter 
-from  Muon import FFTView 
+from  Muon import FFT_presenter 
+from  Muon import FFT_view 
 import unittest
 import sys
 
 class FFTPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.view=mock.create_autospec(FFTView.FFTView,spec_set=True) 
+        self.view=mock.create_autospec(FFT_view.FFTView,spec_set=True) 
         #signals
         self.view.tableClickSignal=mock.Mock(return_value=[3,1])
         self.view.buttonSignal=mock.Mock()
@@ -29,7 +29,7 @@ class FFTPresenterTest(unittest.TestCase):
       
 
          #set presenter
-        self.presenter=FFTPresenter.FFTPresenter(self.view)
+        self.presenter=FFT_presenter.FFTPresenter(self.view)
     def sendSignal(self):
         row,col=self.view.tableClickSignal() 
         self.presenter.tableClicked(row,col)
