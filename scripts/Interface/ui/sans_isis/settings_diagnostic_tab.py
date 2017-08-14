@@ -1,3 +1,4 @@
+from __future__ import (absolute_import)
 import ui_settings_diagnostic_tab
 from PyQt4 import QtGui
 from abc import ABCMeta, abstractmethod

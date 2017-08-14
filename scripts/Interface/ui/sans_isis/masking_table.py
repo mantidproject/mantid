@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import ui_masking_table
 from PyQt4 import QtGui
 from abc import ABCMeta, abstractmethod

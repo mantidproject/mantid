@@ -1,11 +1,11 @@
+from __future__ import (absolute_import)
 try:
     from mantidplot import *
     canMantidPlot = True
 except ImportError:
     canMantidPlot = False
 
-import os
-import ui_sans_data_processor_window
+from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from PyQt4 import QtGui, QtCore
 from mantid.simpleapi import *
 from mantid.kernel import Logger

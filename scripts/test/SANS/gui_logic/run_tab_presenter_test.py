@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid
 import unittest
 import sys
+from mantid.kernel import config
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, OutputMode, ISISReductionMode,
                                RangeStepType, FitType)
@@ -17,6 +18,10 @@ else:
 
 
 class RunTabPresenterTest(unittest.TestCase):
+    def setUp(self):
+        config.setFacility("ISIS")
+        config.setString("default.instrument", "SANS2D")
+
     def test_that_will_load_user_file(self):
         # Setup presenter and mock view
         user_file_path = create_user_file(sample_user_file)
