@@ -1,7 +1,7 @@
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include <boost/python/class.hpp>
 
-using Mantid::API::DetectorInfo;
+using Mantid::Geometry::DetectorInfo;
 using namespace boost::python;
 
 void export_DetectorInfo() {

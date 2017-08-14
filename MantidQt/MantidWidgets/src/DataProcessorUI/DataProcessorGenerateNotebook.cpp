@@ -417,7 +417,7 @@ boost::tuple<QString, QString> reduceRowString(
   int ncols = static_cast<int>(whitelist.size());
 
   // Run through columns, excluding 'Options'
-  for (int col = 0; col < ncols - 1; col++) {
+  for (int col = 0; col < ncols - 2; col++) {
     // The column's name
     const QString colName = whitelist.colNameFromColIndex(col);
     // The algorithm property linked to this column
@@ -463,9 +463,28 @@ boost::tuple<QString, QString> reduceRowString(
     }
   }
 
+<<<<<<< HEAD
   // 'Options' specified either via 'Options' column or HintinLineEdit
   auto options = parseKeyValueString(processingOptions.toStdString());
   const QString optionsStr = data.back();
+=======
+  auto options = parseKeyValueString(processingOptions);
+
+  //-------------
+  // 'Hidden Options'
+  const std::string hiddenOptionsStr = data.back();
+  // Parse and set any user-specified options
+  auto hiddenOptionsMap = parseKeyValueString(hiddenOptionsStr);
+  // Options specified via 'Hidden Options' column will be preferred
+  for (auto kvp = hiddenOptionsMap.begin(); kvp != hiddenOptionsMap.end();
+       ++kvp) {
+    algProperties.push_back(kvp->first + " = " + kvp->second);
+  }
+
+  //-------------
+  // 'Options' specified either via 'Options' column or HintinLineEdit
+  const std::string optionsStr = data.at(ncols - 2);
+>>>>>>> master
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(optionsStr.toStdString());
   // Options specified via 'Options' column will be preferred

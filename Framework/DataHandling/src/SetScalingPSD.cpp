@@ -2,7 +2,7 @@
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "LoadRaw/isisraw.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"

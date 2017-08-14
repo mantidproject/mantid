@@ -408,9 +408,10 @@ public:
     // Check that the presenter updates the whitelist adding columns 'Group' and
     // 'Options'
     auto whitelist = presenter.getWhiteList();
-    TS_ASSERT_EQUALS(whitelist.size(), 8);
+    TS_ASSERT_EQUALS(whitelist.size(), 9);
     TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(0), "Run(s)");
     TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(7), "Options");
+    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(8), "HiddenOptions");
   }
 
   void testPresenterAcceptsViews() {
@@ -525,7 +526,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
             "Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 4);
-    TS_ASSERT_EQUALS(ws->columnCount(), 9);
+    TS_ASSERT_EQUALS(ws->columnCount(), 10);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("Workspace");
@@ -2444,8 +2445,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const auto expected = QString(
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'");
+    const auto expected =
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2495,11 +2496,11 @@ public:
     rowlist[1].insert(0);
     rowlist[1].insert(1);
 
-    const QString expected = QString(
-        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\n"
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
-        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t");
+    const auto expected = QString(
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t\n"
+        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2528,8 +2529,13 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
+<<<<<<< HEAD
     const auto expected = QString(
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'");
+=======
+    const std::string expected =
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t";
+>>>>>>> master
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2571,10 +2577,17 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
+<<<<<<< HEAD
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
         "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t");
+=======
+    const std::string expected =
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t";
+>>>>>>> master
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2612,7 +2625,12 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
+<<<<<<< HEAD
     auto const clipboard = QString("6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc");
+=======
+    const std::string clipboard =
+        "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef";
+>>>>>>> master
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2643,6 +2661,8 @@ public:
     TS_ASSERT_EQUALS(ws->String(1, DQQCol), "3.14");
     TS_ASSERT_EQUALS(ws->String(1, ScaleCol), "5");
     TS_ASSERT_EQUALS(ws->String(1, OptionsCol), "abc");
+    TS_ASSERT_EQUALS(ws->String(1, HiddenOptionsCol), "def");
+
     // Row is going to be pasted into the group where row in clipboard
     // belongs, i.e. group 0
     TS_ASSERT_EQUALS(ws->String(1, GroupCol), "0");
@@ -2664,7 +2684,12 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
+<<<<<<< HEAD
     auto const clipboard = QString("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc");
+=======
+    const std::string clipboard =
+        "1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef";
+>>>>>>> master
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2697,6 +2722,7 @@ public:
     TS_ASSERT_EQUALS(ws->String(4, ScaleCol), "5");
     TS_ASSERT_EQUALS(ws->String(4, GroupCol), "1");
     TS_ASSERT_EQUALS(ws->String(4, OptionsCol), "abc");
+    TS_ASSERT_EQUALS(ws->String(4, HiddenOptionsCol), "def");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -2719,8 +2745,14 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
+<<<<<<< HEAD
     auto const clipboard = QString("6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\n"
                                    "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef");
+=======
+    const std::string clipboard =
+        "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef\n"
+        "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tabc";
+>>>>>>> master
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2751,6 +2783,7 @@ public:
     TS_ASSERT_EQUALS(ws->String(1, ScaleCol), "5");
     TS_ASSERT_EQUALS(ws->String(1, GroupCol), "0");
     TS_ASSERT_EQUALS(ws->String(1, OptionsCol), "abc");
+    TS_ASSERT_EQUALS(ws->String(1, HiddenOptionsCol), "def");
 
     TS_ASSERT_EQUALS(ws->String(2, RunCol), "345");
     TS_ASSERT_EQUALS(ws->String(2, ThetaCol), "2.7");
@@ -2761,6 +2794,7 @@ public:
     TS_ASSERT_EQUALS(ws->String(2, ScaleCol), "3");
     TS_ASSERT_EQUALS(ws->String(2, GroupCol), "1");
     TS_ASSERT_EQUALS(ws->String(2, OptionsCol), "def");
+    TS_ASSERT_EQUALS(ws->String(2, HiddenOptionsCol), "abc");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -2779,8 +2813,14 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
+<<<<<<< HEAD
     auto const clipboard = QString("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\n"
                                    "1\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef");
+=======
+    const std::string clipboard =
+        "1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tzzz\n"
+        "1\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tyyy";
+>>>>>>> master
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2813,6 +2853,7 @@ public:
     TS_ASSERT_EQUALS(ws->String(4, ScaleCol), "5");
     TS_ASSERT_EQUALS(ws->String(4, GroupCol), "1");
     TS_ASSERT_EQUALS(ws->String(4, OptionsCol), "abc");
+    TS_ASSERT_EQUALS(ws->String(4, HiddenOptionsCol), "zzz");
 
     TS_ASSERT_EQUALS(ws->String(5, RunCol), "345");
     TS_ASSERT_EQUALS(ws->String(5, ThetaCol), "2.7");
@@ -2823,6 +2864,7 @@ public:
     TS_ASSERT_EQUALS(ws->String(5, ScaleCol), "3");
     TS_ASSERT_EQUALS(ws->String(5, GroupCol), "1");
     TS_ASSERT_EQUALS(ws->String(5, OptionsCol), "def");
+    TS_ASSERT_EQUALS(ws->String(5, HiddenOptionsCol), "yyy");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -2858,7 +2900,7 @@ public:
     // Empty clipboard
     EXPECT_CALL(mockDataProcessorView, getClipboard())
         .Times(1)
-        .WillRepeatedly(Return("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc"));
+        .WillRepeatedly(Return("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\t"));
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
         .WillOnce(Return(std::map<int, std::set<int>>()));
@@ -3055,9 +3097,17 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
+<<<<<<< HEAD
     QStringList row0 = {"12345", "0.5", "", "0.1", "0.3", "0.04", "1", ""};
     QStringList row1 = {"12346", "0.5", "", "0.1", "0.3", "0.04", "1", ""};
     std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+=======
+    std::vector<std::string> row0 = {"12345", "0.5", "", "0.1", "0.3",
+                                     "0.04",  "1",   "", ""};
+    std::vector<std::string> row1 = {"12346", "0.5", "", "0.1", "0.3",
+                                     "0.04",  "1",   "", ""};
+    std::map<int, std::vector<std::string>> group = {{0, row0}, {1, row1}};
+>>>>>>> master
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row0, "prefix_1_"),
@@ -3094,9 +3144,17 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
+<<<<<<< HEAD
     QStringList row0 = {"12345", "0.5", "11115", "0.1", "0.3", "0.04", "1", ""};
     QStringList row1 = {"12346", "0.5", "11116", "0.1", "0.3", "0.04", "1", ""};
     std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+=======
+    std::vector<std::string> row0 = {"12345", "0.5", "11115", "0.1", "0.3",
+                                     "0.04",  "1",   "",      ""};
+    std::vector<std::string> row1 = {"12346", "0.5", "11116", "0.1", "0.3",
+                                     "0.04",  "1",   "",      ""};
+    std::map<int, std::vector<std::string>> group = {{0, row0}, {1, row1}};
+>>>>>>> master
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row0, "prefix_1_"),
@@ -3169,7 +3227,7 @@ public:
     // Check that the presenter has updated the whitelist adding columns 'Group'
     // and 'Options'
     auto whitelist = presenter.getWhiteList();
-    TS_ASSERT_EQUALS(whitelist.size(), 8);
+    TS_ASSERT_EQUALS(whitelist.size(), 9);
     TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(0), "Run(s)");
     TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(7), "Options");
 

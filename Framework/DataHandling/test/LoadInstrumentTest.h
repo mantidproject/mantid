@@ -3,7 +3,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/SpectrumInfo.h"

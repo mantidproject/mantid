@@ -29,6 +29,8 @@ private slots:
   void saveClicked();
   /// Handles mantid plotting
   void plotClicked();
+  /// Handles plotting the preview.
+  void plotCurrentPreview();
 
 private:
   void setup() override;
@@ -37,12 +39,21 @@ private:
   void loadSettings(const QSettings &settings) override;
 
   void addRebinStep(QString toRebin, QString toMatch);
+  void plotInPreview(const QString &curveName,
+                     Mantid::API::MatrixWorkspace_sptr &ws,
+                     const QColor &curveColor);
 
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;
 
   std::string m_sampleWorkspaceName;
   std::string m_containerWorkspaceName;
+  /// Loaded workspaces
+  Mantid::API::MatrixWorkspace_sptr m_csSampleWS;
+  Mantid::API::MatrixWorkspace_sptr m_csContainerWS;
+  Mantid::API::MatrixWorkspace_sptr m_csSubtractedWS;
+
+  size_t m_spectra;
 };
 
 } // namespace CustomInterfaces
