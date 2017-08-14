@@ -144,8 +144,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 
   // Column Hidden Options must be added to the whitelist
   m_whitelist.addElement("HiddenOptions", "HiddenOptions",
-                         "<b>Override <samp>" +
-                             QString::fromStdString(processor.name()) +
+                         "<b>Override <samp>" + processor.name() +
                              "</samp> properties</b><br /><i>optional</i><br "
                              "/>This column allows you to "
                              "override the properties used when executing "
@@ -1005,7 +1004,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   const auto hiddenOptions = data->back();
 
   // Parse and set any user-specified options
-  auto hiddenOptionsMap = parseKeyValueString(hiddenOptions);
+  auto hiddenOptionsMap = parseKeyValueString(hiddenOptions.toStdString());
   for (auto kvp = hiddenOptionsMap.begin(); kvp != hiddenOptionsMap.end();
        ++kvp) {
     try {

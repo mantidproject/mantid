@@ -382,7 +382,7 @@ template <typename Map>
 void addProperties(QStringList &algProperties, const Map &optionsMap) {
   for (auto &&kvp : optionsMap) {
     algProperties.append(
-        QString::fromStdString(kvp->first + " = " + kvp->second));
+        QString::fromStdString(kvp.first + " = " + kvp.second));
   }
 }
 

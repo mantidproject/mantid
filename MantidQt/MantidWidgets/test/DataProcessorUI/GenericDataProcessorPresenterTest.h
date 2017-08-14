@@ -2445,8 +2445,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const auto expected =
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t";
+    const auto expected = QString(
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2529,13 +2529,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-<<<<<<< HEAD
     const auto expected = QString(
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'");
-=======
-    const std::string expected =
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t";
->>>>>>> master
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2577,17 +2572,10 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
-<<<<<<< HEAD
     const auto expected = QString(
-        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\n"
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t");
-=======
-    const std::string expected =
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t";
->>>>>>> master
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2625,12 +2613,7 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-<<<<<<< HEAD
-    auto const clipboard = QString("6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc");
-=======
-    const std::string clipboard =
-        "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef";
->>>>>>> master
+    const auto clipboard = QString("6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2684,12 +2667,8 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-<<<<<<< HEAD
-    auto const clipboard = QString("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc");
-=======
-    const std::string clipboard =
-        "1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef";
->>>>>>> master
+    const auto clipboard = QString(
+        "1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2745,14 +2724,9 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
-<<<<<<< HEAD
-    auto const clipboard = QString("6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\n"
-                                   "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef");
-=======
-    const std::string clipboard =
+    const auto clipboard = QString(
         "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef\n"
-        "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tabc";
->>>>>>> master
+        "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tabc");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2813,14 +2787,9 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-<<<<<<< HEAD
-    auto const clipboard = QString("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\n"
-                                   "1\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef");
-=======
-    const std::string clipboard =
+    const auto clipboard = QString(
         "1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tzzz\n"
-        "1\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tyyy";
->>>>>>> master
+        "1\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tyyy");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -3097,17 +3066,11 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-<<<<<<< HEAD
-    QStringList row0 = {"12345", "0.5", "", "0.1", "0.3", "0.04", "1", ""};
-    QStringList row1 = {"12346", "0.5", "", "0.1", "0.3", "0.04", "1", ""};
+    QStringList row0 = {"12345", "0.5", "", "0.1", "0.3",
+                                     "0.04",  "1",   "", ""};
+    QStringList row1 = {"12346", "0.5", "", "0.1", "0.3",
+                                     "0.04",  "1",   "", ""};
     std::map<int, QStringList> group = {{0, row0}, {1, row1}};
-=======
-    std::vector<std::string> row0 = {"12345", "0.5", "", "0.1", "0.3",
-                                     "0.04",  "1",   "", ""};
-    std::vector<std::string> row1 = {"12346", "0.5", "", "0.1", "0.3",
-                                     "0.04",  "1",   "", ""};
-    std::map<int, std::vector<std::string>> group = {{0, row0}, {1, row1}};
->>>>>>> master
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row0, "prefix_1_"),
@@ -3144,17 +3107,11 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-<<<<<<< HEAD
-    QStringList row0 = {"12345", "0.5", "11115", "0.1", "0.3", "0.04", "1", ""};
-    QStringList row1 = {"12346", "0.5", "11116", "0.1", "0.3", "0.04", "1", ""};
+    QStringList row0 = {"12345", "0.5", "11115", "0.1", "0.3",
+                                     "0.04",  "1",   "",      ""};
+    QStringList row1 = {"12346", "0.5", "11116", "0.1", "0.3",
+                                     "0.04",  "1",   "",      ""};
     std::map<int, QStringList> group = {{0, row0}, {1, row1}};
-=======
-    std::vector<std::string> row0 = {"12345", "0.5", "11115", "0.1", "0.3",
-                                     "0.04",  "1",   "",      ""};
-    std::vector<std::string> row1 = {"12346", "0.5", "11116", "0.1", "0.3",
-                                     "0.04",  "1",   "",      ""};
-    std::map<int, std::vector<std::string>> group = {{0, row0}, {1, row1}};
->>>>>>> master
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row0, "prefix_1_"),
