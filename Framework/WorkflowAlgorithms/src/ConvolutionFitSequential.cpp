@@ -691,7 +691,7 @@ void ConvolutionFitSequential::extractMembers(
     MatrixWorkspace_sptr memberWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             memberWsName);
-    memberWs->replaceAxis(1, new NumericAxis(*qAxis));
+    memberWs->replaceAxis(1, qAxis);
     memberWs->setYUnitLabel("MomentumTransfer");
   }
 
