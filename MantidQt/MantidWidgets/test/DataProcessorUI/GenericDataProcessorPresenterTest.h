@@ -2613,7 +2613,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const auto clipboard = QString("6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef");
+    const auto clipboard =
+        QString("6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2667,8 +2668,8 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    const auto clipboard = QString(
-        "1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef");
+    const auto clipboard =
+        QString("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2724,9 +2725,9 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
-    const auto clipboard = QString(
-        "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef\n"
-        "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tabc");
+    const auto clipboard =
+        QString("6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef\n"
+                "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tabc");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2787,9 +2788,9 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    const auto clipboard = QString(
-        "1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tzzz\n"
-        "1\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tyyy");
+    const auto clipboard =
+        QString("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tzzz\n"
+                "1\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tyyy");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -3066,10 +3067,8 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    QStringList row0 = {"12345", "0.5", "", "0.1", "0.3",
-                                     "0.04",  "1",   "", ""};
-    QStringList row1 = {"12346", "0.5", "", "0.1", "0.3",
-                                     "0.04",  "1",   "", ""};
+    QStringList row0 = {"12345", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
+    QStringList row1 = {"12346", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
     std::map<int, QStringList> group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
@@ -3108,9 +3107,9 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     QStringList row0 = {"12345", "0.5", "11115", "0.1", "0.3",
-                                     "0.04",  "1",   "",      ""};
+                        "0.04",  "1",   "",      ""};
     QStringList row1 = {"12346", "0.5", "11116", "0.1", "0.3",
-                                     "0.04",  "1",   "",      ""};
+                        "0.04",  "1",   "",      ""};
     std::map<int, QStringList> group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
