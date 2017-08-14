@@ -170,11 +170,8 @@ private:
   // void accept(WorkspaceReceiver *) {};
   void acceptViews(DataProcessorView *, ProgressableView *) override{};
 
-  void setCell(int, int, int, int,
-               const std::string &) override{};
-  std::string getCell(int, int, int, int) override {
-    return "";
-  };
+  void setCell(int, int, int, int, const std::string &) override{};
+  std::string getCell(int, int, int, int) override { return ""; };
   int getNumberOfRows() override { return 2; }
 
   void clearTable() override {}
