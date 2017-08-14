@@ -223,6 +223,8 @@ def get_instrument_paths_for_sans_file(file_name):
     #                 that we are performing XML parsing on the C++ side, which is costly. There is a
     #                 movement currently towards making the IDF redundant and storing instrument info
     #                 as native nexus information.
+    # TODO for optimization: Add the IDF path to a global cache layer which takes the
+    #                        instrument name and the from-to dates
     idf_path = ExperimentInfo.getInstrumentFilename(instrument_as_string, measurement_time_as_string)
     idf_path = os.path.normpath(idf_path)
 
