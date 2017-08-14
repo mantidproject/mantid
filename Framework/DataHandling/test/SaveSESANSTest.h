@@ -10,11 +10,11 @@
 #include "MantidDataHandling/SaveSESANS.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
-#include <fstream>
+#include <boost/algorithm/string/predicate.hpp>
 #include <cmath>
+#include <fstream>
 
 using Mantid::DataHandling::SaveSESANS;
 using namespace Mantid;
@@ -33,7 +33,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", "dummy.ses"));
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("ThetaZMax", 0.09));
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("ThetaYMax", 0.09));
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("EchoConstant", "1"));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("EchoConstant", echoConstant));
     TS_ASSERT_THROWS_NOTHING(
         testAlg.setProperty("Sample", "Sample set in algorithm"));
   }
@@ -102,11 +102,21 @@ public:
     double tolerance(1e-05);
     for (size_t i = 0; i < xValues.size(); i++) {
       // X values are 0.5 higher than they were when we set them, as we set the
-      // bin edges
-      // but are now dealing with bin middles
-      TS_ASSERT_DELTA(static_cast<double>(i) + 1.5, xValues[i], tolerance);
-      TS_ASSERT_DELTA(yValues[i], 2.0, tolerance);
-      TS_ASSERT_DELTA(eValues[i], SQRT_2, tolerance);
+      // bin edges but are now dealing with bin middles
+      // X value is now spinEchoLength = wavelength ^ 2 * echoConstant
+      // Wavelength is x in original workspace
+      double wavelengthSquared =
+          (static_cast<double>(i) + 1.5) * (static_cast<double>(i) + 1.5);
+      TS_ASSERT_DELTA(xValues[i], wavelengthSquared * echoConstant, tolerance);
+
+      // Y value is now depolarisation = log(Y) / wavelength ^ 2
+      // Where Y is Y value from original workspace (constantly 2 in this case)
+      TS_ASSERT_DELTA(yValues[i], ln2 / wavelengthSquared, tolerance);
+
+      // Error is now E / (Y * wavelength ^ 2)
+      // Where E and Y are from the original workspace (sqrt(2) and 2
+      // respectively)
+      TS_ASSERT_DELTA(eValues[i], root2 / (2.0 * wavelengthSquared), tolerance);
     }
 
     // Clean up the file
@@ -116,7 +126,9 @@ public:
 
 private:
   SaveSESANS testAlg;
-  const double SQRT_2 = std::sqrt(2.0);
+  const double root2 = std::sqrt(2.0);
+  const double ln2 = log(2.0);
+  const double echoConstant = 1.5;
 };
 
 #endif /* MANTID_DATAHANDLING_SAVESESANSTEST_H_ */

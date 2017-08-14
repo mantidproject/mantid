@@ -355,11 +355,9 @@ API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
       API::WorkspaceFactory::Instance().create(
           "Workspace2D", 1, histogramLength, histogramLength);
 
-  auto &xValues = columns[m_wavelength];
-  auto yValues =
-      calculateYValues(columns[m_depolarisation], columns[m_wavelength]);
-  auto eValues = calculateEValues(columns[m_depolarisationError], yValues,
-                                  columns[m_wavelength]);
+  const auto &xValues = columns[m_spinEchoLength];
+  const auto &yValues = columns[m_depolarisation];
+  const auto &eValues = columns[m_depolarisationError];
 
   auto &dataX = newWorkspace->mutableX(0);
   auto &dataY = newWorkspace->mutableY(0);
@@ -372,40 +370,6 @@ API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
   }
 
   return newWorkspace;
-}
-
-/**Calculate workspace Y values from depolarisation and wavelength.
- * y = e^(depolarisation * wavelength ^ 2)
- * @param depolarisation Depolarisation column from the input file
- * @param wavelength Wavelength column from the same
- * @return Calculated Y values
- */
-Column LoadSESANS::calculateYValues(const Column &depolarisation,
-                                    const Column &wavelength) const {
-  Column yValues;
-
-  transform(depolarisation.begin(), depolarisation.end(), wavelength.begin(),
-            back_inserter(yValues), [&](double depol, double wave) {
-              return exp(depol * wave * wave);
-            });
-  return yValues;
-}
-
-/**Calculate workspace E values from file columns
- * e = depolError * Y * wavelength ^ 2
- * @param error Depolarisation_error column from the input file
- * @param yValues calculated Y values for the new workspace
- * @param wavelength Wavelength column from the file
- * @return Calculated E values
- */
-Column LoadSESANS::calculateEValues(const Column &error, const Column &yValues,
-                                    const Column &wavelength) const {
-  Column eValues;
-
-  for (size_t i = 0; i < error.size(); i++) {
-    eValues.push_back(error[i] * yValues[i] * wavelength[i] * wavelength[i]);
-  }
-  return eValues;
 }
 
 } // namespace DataHandling

@@ -58,20 +58,16 @@ public:
     // Test the first two rows we read
     // These values are all hard-coded in the sample file in writeGoodFile(),
     // using:
-    // Y = e ^ (depol * wavelength ^2)
-    // E = depolError * Y * wavelength ^ 2
-    // X = wavelength
-    TS_ASSERT_DELTA(ws->x(0)[0], 1.612452, tolerance);
-    TS_ASSERT_DELTA(ws->y(0)[0], exp(-1.42e-3 * 1.612452 * 1.612452),
-                    tolerance);
-    TS_ASSERT_DELTA(ws->e(0)[0], 2.04e-3 * ws->y(0)[0] * 1.612452 * 1.612452,
-                    tolerance);
+    // Y = depol
+    // E = depolError
+    // X = spinEchoLength
+    TS_ASSERT_DELTA(ws->x(0)[0], 260.0, tolerance);
+    TS_ASSERT_DELTA(ws->y(0)[0], -0.00142, tolerance);
+    TS_ASSERT_DELTA(ws->e(0)[0], 0.00204, tolerance);
 
-    TS_ASSERT_DELTA(ws->x(0)[1], 1.675709, tolerance);
-    TS_ASSERT_DELTA(ws->y(0)[1], exp(-1.45e-3 * 1.675709 * 1.675709),
-                    tolerance);
-    TS_ASSERT_DELTA(ws->e(0)[1], 1.87e-3 * ws->y(0)[0] * 1.675709 * 1.675709,
-                    tolerance);
+    TS_ASSERT_DELTA(ws->x(0)[1], 280.8, tolerance);
+    TS_ASSERT_DELTA(ws->y(0)[1], -0.00145, tolerance);
+    TS_ASSERT_DELTA(ws->e(0)[1], 0.00187, tolerance);
   }
 
   void test_confidence() {

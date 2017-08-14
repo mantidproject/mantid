@@ -63,10 +63,11 @@ private:
   const std::string m_beginData = "BEGIN_DATA";
 
   const std::vector<std::string> m_mandatoryAttributes{
-      "FileFormatVersion", "DataFileTitle", "Sample", "Thickness",
-      "Thickness_unit", "Theta_zmax", "Theta_zmax_unit", "Theta_ymax",
-      "Theta_ymax_unit", "Orientation", "SpinEchoLength_unit",
-      "Depolarisation_unit", "Wavelength_unit"};
+      "FileFormatVersion", "DataFileTitle",       "Sample",
+      "Thickness",         "Thickness_unit",      "Theta_zmax",
+      "Theta_zmax_unit",   "Theta_ymax",          "Theta_ymax_unit",
+      "Orientation",       "SpinEchoLength_unit", "Depolarisation_unit",
+      "Wavelength_unit"};
   const std::vector<std::string> m_mandatoryColumnHeaders{
       m_spinEchoLength, m_wavelength, m_depolarisation, m_depolarisationError};
   const std::vector<std::string> m_fileExtensions{".ses", ".SES", ".sesans",
@@ -88,10 +89,6 @@ private:
                         const int &lineNum);
 
   API::MatrixWorkspace_sptr makeWorkspace(ColumnMap columns);
-  Column calculateYValues(const Column &depolarisation,
-                          const Column &wavelength) const;
-  Column calculateEValues(const Column &error, const Column &yValues,
-                          const Column &wavelength) const;
 };
 
 } // namespace DataHandling
