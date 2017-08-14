@@ -502,27 +502,28 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
         for d_range, wrksp in itertools.chain(self._sam_ws_map.items(), self._van_ws_map.items()):
+            output_ws = wrksp
             normalise_set_property("InputWorkspace", wrksp)
-            normalise_set_property("OutputWorkspace", wrksp)
+            normalise_set_property("OutputWorkspace", output_ws)
             normalise_exec()
 
             align_set_property("InputWorkspace", normalise_get_property("OutputWorkspace").value)
-            align_set_property("OutputWorkspace", wrksp)
+            align_set_property("OutputWorkspace", output_ws)
             align_set_property("CalibrationFile", self._cal)
             align_exec()
 
             diff_focus_set_property("InputWorkspace", align_get_property("OutputWorkspace").value)
-            diff_focus_set_property("OutputWorkspace", wrksp)
+            diff_focus_set_property("OutputWorkspace", output_ws)
             diff_focus_set_property("GroupingFileName", self._cal)
             diff_focus_exec()
 
             crop_set_property("InputWorkspace", diff_focus_get_property("OutputWorkspace").value)
-            crop_set_property("OutputWorkspace", wrksp)
+            crop_set_property("OutputWorkspace", output_ws)
             crop_set_property("XMin", d_range[0])
             crop_set_property("XMax", d_range[1])
             crop_exec()
 
-            mtd.addOrReplace(wrksp.getName(), crop_get_property("OutputWorkspace").value)
+            mtd.addOrReplace(wrksp, crop_get_property("OutputWorkspace").value)
 
         # Divide all sample files by the corresponding vanadium files.
         self._divide_all_by(self._sam_ws_map.values(), self._van_ws_map.values())
