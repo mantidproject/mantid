@@ -195,18 +195,20 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
   auto &eData = result.e();
   // assume approx evenly spaced
   double dx = xData[1] - xData[0];
-  std::vector<double> newXData(yData.size()*(1+padding),0.0);
-  std::vector<double> newYData(yData.size()*(1+padding),0.0);
-  std::vector<double> newEData(yData.size()*(1+padding),0.0);
-  double x = xData[xData.size()-1];
-  int offset = 0;
+  auto dataSize = yData.size();
+  std::vector<double> newXData(dataSize*(1+padding),0.0);
+  std::vector<double> newYData(dataSize*(1+padding),0.0);
+  std::vector<double> newEData(dataSize*(1+padding),0.0);
+  double x = xData.back();
+  size_t offset = 0;
   if (getProperty("NegativePadding")) {
-          offset=int(std::floor(0.5*double(yData.size())));
+          //non-zero offset is for padding before the data
+	      offset=int(std::floor(0.5*double(dataSize)));
           x = xData[0] - dx * (1.+double(offset));
   } 
   std::generate(newXData.begin(),newXData.end(),[&x,&dx]{return x+=dx;});
   std::copy(xData.begin(),xData.end(),newXData.begin()+offset);
-  std::copy_n(yData.begin(),yData.size(),newYData.begin()+offset);
+  std::copy(yData.begin(),yData.end(),newYData.begin()+offset);
   std::copy(eData.begin(),eData.end(),newEData.begin()+offset);
   
   result = HistogramData::Histogram(
