@@ -195,40 +195,20 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
   auto &eData = result.e();
   // assume approx evenly spaced
   double dx = xData[1] - xData[0];
-  std::vector<double> newXData;
-  std::vector<double> newYData;
-  std::vector<double> newEData;
-  size_t amountOfPadding = yData.size();
+  std::vector<double> newXData(yData.size()*(1+padding),0.0);
+  std::vector<double> newYData(yData.size()*(1+padding),0.0);
+  std::vector<double> newEData(yData.size()*(1+padding),0.0);
+  double x = xData[xData.size()-1];
+  int offset = 0;
   if (getProperty("NegativePadding")) {
-    amountOfPadding = size_t(std::floor(0.5 * double(yData.size())));
-    double xValue = xData[0] - dx * double(amountOfPadding * padding);
-    for (int j = 0; j < padding; j++) {
-
-      for (size_t i = 0; i < amountOfPadding; ++i) {
-        newXData.push_back(xValue);
-        newYData.push_back(0.0);
-        newEData.push_back(0.0);
-        xValue += dx;
-      }
-    }
-  }
-  // store original data
-  for (size_t i = 0; i < yData.size(); ++i) {
-    newXData.push_back(std::move(xData[i]));
-    newYData.push_back(std::move(yData[i]));
-    newEData.push_back(std::move(eData[i]));
-  }
-  double xValue = xData[xData.size() - 1] + dx;
-  for (int j = 0; j < padding; j++) {
-
-    for (size_t i = 0; i < amountOfPadding; ++i) {
-      newXData.push_back(xValue);
-      newYData.push_back(0.0);
-      newEData.push_back(0.0);
-      xValue += dx;
-    }
-  }
-
+          offset=int(std::floor(0.5*double(yData.size())));
+          x = xData[0] - dx * (1.+double(offset));
+  } 
+  std::generate(newXData.begin(),newXData.end(),[&x,&dx]{return x+=dx;});
+  std::copy(xData.begin(),xData.end(),newXData.begin()+offset);
+  std::copy_n(yData.begin(),yData.size(),newYData.begin()+offset);
+  std::copy(eData.begin(),eData.end(),newEData.begin()+offset);
+  
   result = HistogramData::Histogram(
       HistogramData::Points(newXData), HistogramData::Counts(newYData),
       HistogramData::CountStandardDeviations(newEData));
