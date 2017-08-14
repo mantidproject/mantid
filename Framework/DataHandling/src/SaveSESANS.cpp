@@ -4,8 +4,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/make_unique.h"
 
 #include <algorithm>
@@ -45,6 +45,7 @@ std::map<std::string, std::string> SaveSESANS::validateInputs() {
       invalidInputs[propertyName] = propertyName + " must be set";
     }
   }
+
   if (getPropertyValue("Sample").empty()){
     invalidInputs["Sample"] = "Sample must be set";
   }
@@ -73,7 +74,12 @@ void SaveSESANS::init() {
   declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
   declareProperty("EchoConstant", EMPTY_DBL(), "Echo_constant",
                   Kernel::Direction::Input);
+<<<<<<< HEAD
   declareProperty<std::string>("Sample", "", "Sample name", Kernel::Direction::Input);
+=======
+  API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+  declareProperty("Sample", ws->sample().getName(), "The name of the sample", Kernel::Direction::Input);
+>>>>>>> 9c8a3b6ae41bb7863f962d5e43d4a2bab2feb601
 
   declareProperty<std::string>("Orientation", "Z", validOrientation,
                                "Orientation of the instrument");
