@@ -543,7 +543,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             merge_runs_alg.setProperty("OutputWorkspace", self._output_ws_name)
             merge_runs_alg.execute()
             self._output_ws_name = merge_runs_alg.getPropertyValue("OutputWorkspace")
-            mtd.addOrReplace(output_ws, merge_runs_alg.getProperty("OutputWorkspace").value)
+            mtd.addOrReplace(self._output_ws_name, merge_runs_alg.getProperty("OutputWorkspace").value)
 
             for name in sam_ws_names_list:
                 delete_set_property("Workspace", name)
@@ -553,9 +553,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 delete_set_property("Workspace", name + "_mon")
                 delete_exec()
         else:
-            rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
-            rename_alg.setProperty("InputWorkspace", sam_ws_names_list[0])
-            rename_alg.setProperty("OutputWorkspace", self._output_ws_name)
+            RenameWorkspace(InputWorkspace=sam_ws_names_list[0], self._output_ws_name)
 
         result = mtd[self._output_ws_name]
 
