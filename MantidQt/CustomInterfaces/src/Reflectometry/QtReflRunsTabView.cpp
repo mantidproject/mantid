@@ -166,14 +166,54 @@ void QtReflRunsTabView::setAllSearchRowsSelected() {
 */
 void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
 
-/**
-* Sets a specific action in the "Edit" menu enabled or disabled
-* @param index : The index of the action in the "Edit" menu
-* @param enabled : Whether to enable or disable the action
-*/
-void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
+void QtReflRunsTabView::enable(QAction& toEnable) {
+  toEnable.setEnabled(true);
+}
 
-  ui.menuRows->actions()[index]->setEnabled(enabled);
+void QtReflRunsTabView::disable(QAction& toDisable) {
+  toDisable.setEnabled(false);
+}
+
+/**
+* Sets a specific action in the "Reflectometry" menu enabled
+* @param index : The index of the action in the "Reflectometry" menu
+*/
+void QtReflRunsTabView::disableMenuAction(int index) {
+  disable(*(ui.menuTable->actions()[index]));
+}
+
+/**
+* Enables a specific action in the "Reflectometry" menu.
+* @param index : The index of the action in the "Reflectometry" menu
+*/
+void QtReflRunsTabView::enableMenuAction(int index) {
+  enable(*(ui.menuTable->actions()[index]));
+}
+
+/**
+* Disables a specific action in the "Edit" menu.
+* @param index : The index of the action in the "Edit" menu
+*/
+void QtReflRunsTabView::disableRowAction(int index) {
+  disable(*(ui.menuRows->actions()[index]));
+}
+
+/**
+* Enables a specific action in the "Edit" menu.
+* @param index : The index of the action in the "Edit" menu
+*/
+void QtReflRunsTabView::enableRowAction(int index) {
+  disable(*(ui.menuRows->actions()[index]));
+}
+
+void QtReflRunsTabView::enableAction(int index) {
+  enableRowAction(index);
+  enableMenuAction(index);
+}
+
+void QtReflRunsTabView::disableAction(int index) {
+  disableRowAction(index);
+  disableMenuAction(index);
 }
 
 void QtReflRunsTabView::setTransferEnabled(bool enabled) {
@@ -185,7 +225,6 @@ void QtReflRunsTabView::setTransferEnabled(bool enabled) {
 * @param enabled : Whether to enable or disable the button
 */
 void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
-
   ui.buttonAutoreduce->setEnabled(enabled);
 }
 

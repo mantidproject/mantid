@@ -308,8 +308,7 @@ Handle interface when data reduction paused
 void QDataProcessorWidget::pause() { disablePauseButtons(); }
 
 void QDataProcessorWidget::disablePauseButtons() {
-  disableActionOnToolbar(Action::PAUSE);
-  disableActionOnWidget(*m_contextMenu, index_of(Action::PAUSE));
+  disableAction(Action::PAUSE);
 }
 
 void QDataProcessorWidget::disableActionOnToolbar(Action toDisable) {
@@ -329,8 +328,7 @@ void QDataProcessorWidget::disable(QWidget &toDisable) {
 }
 
 void QDataProcessorWidget::enablePauseButtons() {
-  enableActionOnToolbar(Action::PAUSE);
-  enableActionOnWidget(*m_contextMenu, index_of(Action::PAUSE));
+  enableAction(Action::PAUSE);
 }
 
 void QDataProcessorWidget::enableActionOnWidget(QWidget &widget, int index) {
@@ -366,57 +364,73 @@ void QDataProcessorWidget::disableTableModification() {
 }
 
 void QDataProcessorWidget::disableResumeButtons() {
-  disableActionOnToolbar(Action::RESUME);
-  disableActionOnWidget(*m_contextMenu, index_of(Action::RESUME));
+  disableAction(Action::RESUME);
   disable(*ui.buttonProcess);
 }
 
+void QDataProcessorWidget::enableAction(Action toEnable) {
+  enableActionOnToolbar(toEnable);
+  enableActionOnContextMenu(toEnable);
+}
+
+void QDataProcessorWidget::disableAction(Action toDisable) {
+  disableActionOnToolbar(toDisable);
+  disableActionOnContextMenu(toDisable);
+}
+
+void QDataProcessorWidget::disableActionOnContextMenu(Action toDisable) {
+  disableActionOnWidget(*m_contextMenu, index_of(toDisable));
+}
+
+void QDataProcessorWidget::enableActionOnContextMenu(Action toEnable) {
+  enableActionOnWidget(*m_contextMenu, index_of(toEnable));
+}
+
 void QDataProcessorWidget::enableResumeButtons() {
-  enableActionOnToolbar(Action::RESUME);
-  enableActionOnWidget(*m_contextMenu, index_of(Action::RESUME));
+  enableAction(Action::RESUME);
   enable(*ui.buttonProcess);
 }
 
 void QDataProcessorWidget::disableInsertButtons() {
-  disableActionOnToolbar(Action::INSERT_ROW_AFTER);
-  disableActionOnToolbar(Action::INSERT_GROUP_AFTER);
+  disableAction(Action::INSERT_ROW_AFTER);
+  disableAction(Action::INSERT_GROUP_AFTER);
 }
 
 void QDataProcessorWidget::enableInsertButtons() {
-  enableActionOnToolbar(Action::INSERT_ROW_AFTER);
-  enableActionOnToolbar(Action::INSERT_GROUP_AFTER);
+  enableAction(Action::INSERT_ROW_AFTER);
+  enableAction(Action::INSERT_GROUP_AFTER);
 }
 
 void QDataProcessorWidget::disableDeleteButtons() {
-  disableActionOnToolbar(Action::DELETE_ROW);
-  disableActionOnToolbar(Action::DELETE_GROUP);
+  disableAction(Action::DELETE_ROW);
+  disableAction(Action::DELETE_GROUP);
 }
 
 void QDataProcessorWidget::enableDeleteButtons() {
-  enableActionOnToolbar(Action::DELETE_ROW);
-  enableActionOnToolbar(Action::DELETE_GROUP);
+  enableAction(Action::DELETE_ROW);
+  enableAction(Action::DELETE_GROUP);
 }
 
 void QDataProcessorWidget::disableClipboardButtons() {
-  disableActionOnToolbar(Action::COPY_SELECTED);
-  disableActionOnToolbar(Action::PASTE_SELECTED);
-  disableActionOnToolbar(Action::CUT_SELECTED);
-  disableActionOnToolbar(Action::CLEAR_SELECTED);
+  disableAction(Action::COPY_SELECTED);
+  disableAction(Action::PASTE_SELECTED);
+  disableAction(Action::CUT_SELECTED);
+  disableAction(Action::CLEAR_SELECTED);
 }
 
 void QDataProcessorWidget::enableClipboardButtons() {
-  enableActionOnToolbar(Action::COPY_SELECTED);
-  enableActionOnToolbar(Action::PASTE_SELECTED);
-  enableActionOnToolbar(Action::CUT_SELECTED);
-  enableActionOnToolbar(Action::CLEAR_SELECTED);
+  enableAction(Action::COPY_SELECTED);
+  enableAction(Action::PASTE_SELECTED);
+  enableAction(Action::CUT_SELECTED);
+  enableAction(Action::CLEAR_SELECTED);
 }
 
 void QDataProcessorWidget::disableGroupingButtons() {
-  disableActionOnToolbar(Action::GROUP_SELECTED);
+  disableAction(Action::GROUP_SELECTED);
 }
 
 void QDataProcessorWidget::enableGroupingButtons() {
-  enableActionOnToolbar(Action::GROUP_SELECTED);
+  enableAction(Action::GROUP_SELECTED);
 }
 
 /**

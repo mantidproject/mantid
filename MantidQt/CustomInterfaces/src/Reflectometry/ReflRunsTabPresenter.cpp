@@ -447,23 +447,18 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 * when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() {
-  enableRowAction(PROCESS);
-  disableRowAction(PAUSE);
+  m_view->enableAction(PROCESS);
+  m_view->disableAction(PAUSE);
   m_view->enableTransferButton();
   m_view->enableAutoreduceButton();
 }
 
-void ReflRunsTabPresenter::enableRowAction(int index) const {
-  m_view->setRowActionEnabled(index, true);
-}
-
-void ReflRunsTabPresenter::disableRowAction(int index) const {
-  m_view->setRowActionEnabled(index, false);
-}
 
 void ReflRunsTabPresenter::preventTableModification() {
   m_view->disableAutoreduceButton();
   m_view->disableTransferButton();
+  //m_view->disableAction();
+  //m_view->disableAction();
 }
 
 void ReflRunsTabPresenter::allowTableModification() {
@@ -476,8 +471,8 @@ void ReflRunsTabPresenter::allowTableModification() {
  * confirmed to be resumed.
 */
 void ReflRunsTabPresenter::resume() {
-  disableRowAction(PROCESS);
-  enableRowAction(PAUSE);
+  m_view->disableAction(PROCESS);
+  m_view->enableAction(PAUSE);
   preventTableModification();
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
@@ -507,7 +502,7 @@ void ReflRunsTabPresenter::confirmReductionPaused() {
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
 void ReflRunsTabPresenter::confirmReductionResumed() {
-  m_view->setRowActionEnabled(PROCESS, true);
+  m_view->enableAction(PROCESS);
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }

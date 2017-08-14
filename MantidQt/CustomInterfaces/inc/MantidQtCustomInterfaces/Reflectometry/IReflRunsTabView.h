@@ -66,7 +66,8 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) = 0;
   virtual void setAllSearchRowsSelected() = 0;
   virtual void clearCommands() = 0;
-  virtual void setRowActionEnabled(int index, bool enabled) = 0;
+  virtual void enableAction(int index) = 0;
+  virtual void disableAction(int index) = 0;
   virtual void setTransferEnabled(bool transferEnabled) = 0;
   virtual void enableTransferButton() = 0;
   virtual void disableTransferButton() = 0;

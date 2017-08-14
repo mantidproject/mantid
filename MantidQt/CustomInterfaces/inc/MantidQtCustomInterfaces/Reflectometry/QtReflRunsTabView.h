@@ -78,13 +78,14 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
-  void setRowActionEnabled(int index, bool enabled) override;
-  void setTransferEnabled(bool enabled) override;
+  void enableAction(int index) override;
+  void disableAction(int index) override;
   void enableTransferButton() override;
   void disableTransferButton() override;
-  void setAutoreduceButtonEnabled(bool enabled) override;
+  void setTransferEnabled(bool enabled) override;
   void enableAutoreduceButton() override;
   void disableAutoreduceButton() override;
+  void setAutoreduceButtonEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -107,6 +108,13 @@ private:
   void initLayout();
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
+  
+  void enableRowAction(int index);
+  void disableRowAction(int index);
+  void enableMenuAction(int index);
+  void disableMenuAction(int index);
+  void enable(QAction& toEnable);
+  void disable(QAction& toDisable);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 

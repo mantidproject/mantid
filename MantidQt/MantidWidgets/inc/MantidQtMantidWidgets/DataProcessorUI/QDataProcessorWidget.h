@@ -187,8 +187,13 @@ private:
   void disableGroupingButtons();
   void enableGroupingButtons();
 
+  void enableAction(Action toEnable);
+  void disableAction(Action toDisable);
+
   void disableActionOnToolbar(Action toDisable);
+  void disableActionOnContextMenu(Action toDisable);
   void enableActionOnToolbar(Action toEnable);
+  void enableActionOnContextMenu(Action toEnable);
 
   static void disableActionOnWidget(QWidget& widget, int index);
   static void enableActionOnWidget(QWidget& widget, int index);
