@@ -378,6 +378,13 @@ QString getReducedWorkspaceName(const RowData &data,
   return prefix + names.join("_");
 }
 
+template <typename Map>
+void addProperties(QStringList& algProperties, const Map &optionsMap) {
+  for (auto&& kvp : optionsMap) {
+    algProperties.append(QString::fromStdString(kvp->first + " = " + kvp->second));
+  }
+}
+
 /**
  Create string of python code to run pre-processing and reduction algorithms on
  the specified row
@@ -463,36 +470,21 @@ boost::tuple<QString, QString> reduceRowString(
     }
   }
 
-<<<<<<< HEAD
-  // 'Options' specified either via 'Options' column or HintinLineEdit
   auto options = parseKeyValueString(processingOptions.toStdString());
-  const QString optionsStr = data.back();
-=======
-  auto options = parseKeyValueString(processingOptions);
 
-  //-------------
-  // 'Hidden Options'
-  const std::string hiddenOptionsStr = data.back();
+  const auto hiddenOptionsStr = data.back();
   // Parse and set any user-specified options
-  auto hiddenOptionsMap = parseKeyValueString(hiddenOptionsStr);
+  auto hiddenOptionsMap = parseKeyValueString(hiddenOptionsStr.toStdString());
   // Options specified via 'Hidden Options' column will be preferred
-  for (auto kvp = hiddenOptionsMap.begin(); kvp != hiddenOptionsMap.end();
-       ++kvp) {
-    algProperties.push_back(kvp->first + " = " + kvp->second);
-  }
+  addProperties(algProperties, hiddenOptionsMap);
 
-  //-------------
   // 'Options' specified either via 'Options' column or HintinLineEdit
-  const std::string optionsStr = data.at(ncols - 2);
->>>>>>> master
+  const auto optionsStr = data.at(ncols - 2);
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(optionsStr.toStdString());
   // Options specified via 'Options' column will be preferred
   optionsMap.insert(options.begin(), options.end());
-  for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
-    algProperties.append(
-        QString::fromStdString(kvp->first + " = " + kvp->second));
-  }
+  addProperties(algProperties, optionsMap);
 
   /* Now construct the names of the reduced workspaces*/
 
