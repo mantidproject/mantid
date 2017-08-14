@@ -108,6 +108,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         :param data: Python dictionary to which found lattice vectors should be added
         """
         self._find_first(file_obj=obj_file, msg=b"$cell vectors")
+        au2ang = AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
         dim = 3
         vectors = []
         for i in range(dim):
@@ -115,7 +116,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
             line = line.split()
             vector = []
             for item in line:
-                vector.append(float(item))
+                vector.append(float(item) * au2ang)
             vectors.append(vector)
 
         data["unit_cell"] = np.asarray(vectors).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
@@ -244,6 +245,9 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         :param zdisp: list with z coordinates which we update
         """
         self._move_to(file_obj=file_obj, msg=" x ")
+
+        atom_mass = None
+
         while not self._file_end(file_obj=file_obj):
 
             pos = file_obj.tell()
