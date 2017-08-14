@@ -160,7 +160,10 @@ class DRangeToWorkspaceMap(object):
 
 def average_ws_list(ws_list):
     """
-    Returns the average of a list of workspaces.
+    Calculates the average of a list of workspaces - stores the result in a new workspace.
+
+    :param ws_list: The list of workspaces to average.
+    :return:        The name of the workspace containing the average.
     """
     # Assert we have some ws in the list, and if there is only one then return it.
     if len(ws_list) == 0:
@@ -179,9 +182,11 @@ def average_ws_list(ws_list):
     __temp_avg = sum(temperatures)
     __temp_avg /= num_workspaces
 
+    rename_get_property, rename_set_property, rename_exec =
+
     # Rename the average ws and return it.
     RenameWorkspace(InputWorkspace=__temp_avg, OutputWorkspace=av_name)
-    return avName
+    return avName.getName()
 
 
 def find_intersection_of_ranges(rangeA, rangeB):
@@ -266,7 +271,7 @@ def rebin_to_smallest(workspaces):
         WorkspaceToRebin=ws,
         WorkspaceToMatch=smallest_ws,
         OutputWorkspace=ws
-    ) for ws in workspaces]
+    ).getName() for ws in workspaces]
 
 
 # pylint: disable=no-init,too-many-instance-attributes
