@@ -205,7 +205,18 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         # (num_freq, num_atom, dim) -> (num_atom, num_freq, dim)
         dim = 3
         displacements = np.asarray(a=[displacements], order="C")
+
+        # displacements[num_freq, num_atom, dim]
         displacements = np.reshape(a=displacements, newshape=(num_freq, num_atoms, dim))
+
+        # normalise atomic displacement so that the sum of all atomic
+        # displacements in any normal mode is normalised
+        # num_freq, num_atom, dim -> num_freq, num_atom, dim, dim -> num_freq, num_atom -> num_freq
+        norm = np.sum(np.trace(np.einsum('lki, lkj->lkij', displacements, displacements.conjugate()),
+                               axis1=2, axis2=3), axis=1)
+        displacements = np.einsum('ijk, i-> ijk', displacements, 1.0 / np.sqrt(norm))
+
+        # displacements[num_atoms, num_freq, dim]
         displacements = np.transpose(a=displacements, axes=(1, 0, 2))
         data["atomic_displacements"] = np.asarray([displacements])
 
@@ -256,10 +267,8 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
             if line.strip():
                 line = line.strip(b"\n").split()
                 if b"x" in line:
-
                     symbol = str(line[0].decode("utf-8").capitalize())
                     atom_mass = Atom(symbol=symbol).mass
-
                     for item in line[2:]:
                         self._parse_item(item=item, container=xdisp, part=part, mass=atom_mass)
                 elif b"y" in line:
