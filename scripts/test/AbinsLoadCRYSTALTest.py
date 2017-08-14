@@ -46,11 +46,19 @@ class AbinsLoadCRYSTALTest(unittest.TestCase):
 
         #  *************************** USE CASES ********************************************
     # ===================================================================================
-    # | Use case: Gamma point calculation for CRYSTAL                                    |
+    # | Use cases: Gamma point calculation for CRYSTAL                                    |
     # ===================================================================================
     _gamma_crystal = "crystalB3LYP_LoadCRYSTAL"
     _set_crystal = "crystal_set_key_LoadCRYSTAL"
+
+    # ===================================================================================
+    # | Use case: Molecular calculation for CRYSTAL                                     |
+    # ===================================================================================
     _molecule = "toluene_molecule_LoadCRYSTAL"
+
+    # ===================================================================================
+    # | Use cases: Phonon dispersion calculation for CRYSTAL                                     |
+    # ===================================================================================
     _phonon_dispersion_v1 = "mgo-GX_LoadCRYSTAL"
     _phonon_dispersion_v2 = "MgO-222-DISP_LoadCRYSTAL"
 
