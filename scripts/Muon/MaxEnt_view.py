@@ -56,12 +56,10 @@ class MaxEntView(QtGui.QWidget):
         self.grid.addWidget(self.table)
 #        self.grid.addWidget(self.button)
 
-#    # add data to view
-#    def addItems(self,options):
-#        self.ws.clear()
-#        self.ws.addItems(options)
-#        self.Im_ws.clear()
-#        self.Im_ws.addItems(options)
+    # add data to view
+    def addItems(self,options):
+        self.ws.clear()
+        self.ws.addItems(options)
 #
 #    # connect signals
 #    def tableClick(self,row,col):

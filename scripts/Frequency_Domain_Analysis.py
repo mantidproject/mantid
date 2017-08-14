@@ -12,10 +12,8 @@ import sys
 class FDAG(QMainWindow):
     def __init__(self,parent=None):
         super(FDAG,self).__init__(parent)
- #       view =FFT_view.FFTView(self)
- #       self.presenter =FFT_presenter.FFTPresenter(view) #the main ui class in this file is called MainWindow
         view =transform_view.transformView(self)
-        self.presenter =transform_presenter.transformPresenter(view) #the main ui class in this file is called MainWindow
+        self.presenter =transform_presenter.transformPresenter(view) 
         self.setCentralWidget(view)
         self.setWindowTitle("Frequency Domain Analysis")
 
