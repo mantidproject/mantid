@@ -278,7 +278,6 @@ void GenericDataProcessorPresenter::process() {
   m_gqueue = GroupQueue();
 
   // Progress: each group and each row within count as a progress step.
-  int progress = 0;
   int maxProgress = 0;
 
   for (const auto &item : m_selectedData) {
@@ -325,10 +324,11 @@ void GenericDataProcessorPresenter::process() {
   }
 
   // Create progress reporter bar
-  if (maxProgress > 0)
+  if (maxProgress > 0) {
+    int progress = 0;
     m_progressReporter = new ProgressPresenter(progress, maxProgress,
                                                maxProgress, m_progressView);
-
+  }
   // Start processing the first group
   m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
   resume();
@@ -744,7 +744,7 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     const GroupData &groupData, const std::string &prefix) {
 
   if (!m_postprocess)
-    throw std::runtime_error("Cannot retrieve post-processed workspace name");
+    return std::string();
 
   /* This method calculates, for a given set of rows, the name of the output
   * (post-processed) workspace */
@@ -1031,6 +1031,11 @@ Collapse all groups
 void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
 
 /**
+Select all rows / groups
+*/
+void GenericDataProcessorPresenter::selectAll() { m_view->selectAll(); }
+
+/**
 Used by the view to tell the presenter something has changed
 */
 void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
@@ -1104,6 +1109,9 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::CollapseAllGroupsFlag:
     collapseAll();
+    break;
+  case DataProcessorPresenter::SelectAllFlag:
+    selectAll();
     break;
   case DataProcessorPresenter::PauseFlag:
     pause();

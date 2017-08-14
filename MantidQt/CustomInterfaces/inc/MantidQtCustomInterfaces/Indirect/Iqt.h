@@ -29,11 +29,13 @@ private slots:
   void saveClicked();
   void plotClicked();
   void PlotTiled();
+  void plotCurrentPreview();
 
 private:
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
   bool m_iqtResFileType;
+  Mantid::API::MatrixWorkspace_sptr m_IqtInputWS;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
