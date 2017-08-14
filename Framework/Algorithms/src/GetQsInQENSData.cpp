@@ -123,7 +123,8 @@ MantidVec GetQsInQENSData::extractQValues(
         qValues[i] = UnitConversion::convertToElasticQ(theta, efixed);
       }
     } catch (std::runtime_error &) {
-      throw std::runtime_error("Detectors are missing from the input workspace");
+      throw std::runtime_error(
+          "Detectors are missing from the input workspace");
     }
   }
 
