@@ -2,6 +2,7 @@ import mantid.simpleapi as mantid
 import sys
 from  Muon import FFT_presenter 
 from  Muon import FFT_view 
+import unittest
 if sys.version_info.major == 3:
     from unittest import mock
 else:
@@ -13,6 +14,7 @@ class FFTPresenterTest(unittest.TestCase):
         self.view=mock.create_autospec(FFT_view.FFTView,spec_set=True) 
         #signals
         self.view.tableClickSignal=mock.Mock(return_value=[3,1])
+        #needed for connect in presenter
         self.view.buttonSignal=mock.Mock()
         # functions  
         self.view.changed=mock.MagicMock()
@@ -64,7 +66,6 @@ class FFTPresenterTest(unittest.TestCase):
        self.view.isAutoShift=mock.Mock(return_value=True)
        self.view.isComplex=mock.Mock(return_value=True)
        self.view.isRaw=mock.Mock(return_value=False)
-       #self.view.buttonSignal()
        testWS=mantid.CreateWorkspace([0,1],[2,3])
        self.presenter.handleButton()
        assert(self.view.initFFTInput.call_count==1)
@@ -76,7 +77,6 @@ class FFTPresenterTest(unittest.TestCase):
        self.view.isAutoShift=mock.Mock(return_value=True)
        self.view.isComplex=mock.Mock(return_value=True)
        self.view.isRaw=mock.Mock(return_value=True)
-       #self.view.buttonSignal()
        testWS=mantid.CreateWorkspace([0,1],[2,3])
        self.presenter.handleButton()
        assert(self.view.initFFTInput.call_count==1)
@@ -89,7 +89,6 @@ class FFTPresenterTest(unittest.TestCase):
        self.view.isComplex=mock.Mock(return_value=False)
        self.view.isRaw=mock.Mock(return_value=True)
        testWS=mantid.CreateWorkspace([0,1],[2,3])
-       #self.view.buttonSignal()
        self.presenter.handleButton()
        assert(self.view.initFFTInput.call_count==1)
        assert(self.view.addFFTComplex.call_count==0)
@@ -103,7 +102,6 @@ class FFTPresenterTest(unittest.TestCase):
        self.view.isAutoShift=mock.Mock(return_value=False)
        self.view.isComplex=mock.Mock(return_value=False)
        self.view.isRaw=mock.Mock(return_value=False)
-       #self.view.buttonSignal()
        self.presenter.handleButton()
        assert(self.view.initFFTInput.call_count==1)
        assert(self.view.addFFTComplex.call_count==0)
