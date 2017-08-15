@@ -137,7 +137,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         self._find_first(file_obj=file_obj, msg="$coordinates")
         end_msgs = ["$end", "----------------------------------------------------------------------"]
 
-        while not self._check_block_end(file_obj=file_obj, msg=end_msgs):
+        while not self._block_end(file_obj=file_obj, msg=end_msgs):
 
             line = file_obj.readline()
             entries = line.split()
@@ -169,13 +169,10 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         zdisp = []
 
         # parse block with frequencies and atomic displacements
-        while not self._file_end(file_obj=file_obj) and inside_block:
+        while not (self._block_end(file_obj=file_obj, msg=end_msgs) or self._file_end(file_obj=file_obj)):
 
             self._read_freq_block(file_obj=file_obj, freq=freq)
             self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
-
-            if self._check_block_end(file_obj=file_obj, msg=end_msgs):
-                inside_block = False
 
         freq = [freq]
         weights = [1.0]
@@ -222,7 +219,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         displacements = np.transpose(a=displacements, axes=(1, 0, 2))
         data["atomic_displacements"] = np.asarray([displacements])
 
-    def _check_block_end(self, file_obj=None, msg=None):
+    def _block_end(self, file_obj=None, msg=None):
         """
         Checks for msg which terminates block.
         :param file_obj: file object from which we read
