@@ -68,6 +68,9 @@ public:
   // Processing options
   MOCK_METHOD1(setForcedReProcessing, void(bool));
 
+  // Accessor
+  MOCK_CONST_METHOD0(getCurrentInstrument, QString());
+
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
   // copyable which means we have to mock addActions() via a proxy method
