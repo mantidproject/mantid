@@ -21,6 +21,9 @@ calculated for the centre-point of each element, and a numerical
 integration is carried out using these path lengths over the volume
 elements.
 
+The output workspace will contain the attenuation factors. To apply
+the correction you must divide your data set by the resulting factors.
+
 Note that the duration of this algorithm is strongly dependent on the
 element size chosen, and that too small an element size can cause the
 algorithm to fail because of insufficient memory.
