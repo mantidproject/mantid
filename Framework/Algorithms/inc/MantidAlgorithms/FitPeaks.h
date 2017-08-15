@@ -48,15 +48,15 @@ private:
                        std::vector<std::vector<double>> &fitted_functions,
                        std::vector<std::vector<double>> &fitted_peak_windows);
 
-  double fitSinglePeak(size_t wsindex, size_t peakindex,
-                       const std::vector<double> &init_peak_values,
-                       const std::vector<double> &init_bkgd_values,
-                       const std::vector<double> &fit_window,
-                       const std::vector<double> &peak_range,
-                       std::vector<double> &fitted_params_values,
-                       std::vector<double> &fitted_params_errors,
-                       std::vector<double> &fitted_window,
-                       std::vector<double> &fitted_data);
+  bool fitSinglePeak(size_t wsindex, size_t peakindex,
+                     const std::vector<double> &init_peak_values,
+                     const std::vector<double> &init_bkgd_values,
+                     const std::vector<double> &fit_window,
+                     const std::vector<double> &peak_range,
+                     std::vector<double> &fitted_params_values,
+                     std::vector<double> &fitted_params_errors,
+                     std::vector<double> &fitted_window,
+                     std::vector<double> &fitted_data);
 
   void estimateLinearBackground(size_t wi, double left_window_boundary,
                                 double right_window_boundary, double &bkgd_a1,

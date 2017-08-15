@@ -218,17 +218,20 @@ void FitPeaks::fitPeaks() {
             m_peakParamsWS->dataY(spec_index + ipar)[xindex] =
                 peak_parameters[ipeak][ipar];
 
-          // about the peak
-          auto vec_x = m_fittedPeakWS->histogram(wi).x();
-          double window_left = fitted_peaks_windows[ipeak][0];
-          double window_right = fitted_peaks_windows[ipeak][1];
-          size_t window_left_index = findXIndex(vec_x, window_left);
-          size_t window_right_index = findXIndex(vec_x, window_right);
-          g_log.notice() << "Set Y value from index " << window_left_index
-                         << " to " << window_right_index << "\n";
-          for (size_t ix = window_left_index; ix < window_right_index; ++ix)
-            m_fittedPeakWS->dataY(wi)[ix] =
-                fitted_peaks[ipeak][ix - window_left_index];
+          // about the peak: if fitting is bad, then the fitted peak window is
+          // empty
+          if (fitted_peaks_windows[ipeak].size() == 2) {
+            auto vec_x = m_fittedPeakWS->histogram(wi).x();
+            double window_left = fitted_peaks_windows[ipeak][0];
+            double window_right = fitted_peaks_windows[ipeak][1];
+            size_t window_left_index = findXIndex(vec_x, window_left);
+            size_t window_right_index = findXIndex(vec_x, window_right);
+            g_log.notice() << "Set Y value from index " << window_left_index
+                           << " to " << window_right_index << "\n";
+            for (size_t ix = window_left_index; ix < window_right_index; ++ix)
+              m_fittedPeakWS->dataY(wi)[ix] =
+                  fitted_peaks[ipeak][ix - window_left_index];
+          }
         }
       }
 
@@ -241,6 +244,10 @@ void FitPeaks::fitPeaks() {
 /**
  * @brief FitPeaks::fitSpectraPeaks
  * @param wi
+ * @param peak_pos
+ * @param peak_params
+ * @param fitted_functions
+ * @param fitted_peak_windows
  */
 void FitPeaks::fitSpectraPeaks(
     size_t wi, std::vector<double> &peak_pos,
@@ -248,8 +255,7 @@ void FitPeaks::fitSpectraPeaks(
     std::vector<std::vector<double>> &fitted_functions,
     std::vector<std::vector<double>> &fitted_peak_windows) {
 
-  g_log.notice() << "[DB] Fit peaks on workspace index :" << wi << "\n";
-
+  // init outputs
   peak_pos.resize(m_numPeaksToFit);
   fitted_peak_windows.clear();
 
@@ -258,7 +264,7 @@ void FitPeaks::fitSpectraPeaks(
   for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
     // definition
     double bkgd_a, bkgd_b;
-    bool ipeak_fail(false);
+    bool peak_i_no_fit(false);
 
     // estimate peak
     estimateLinearBackground(wi, m_peakWindowLeft[ipeak],
@@ -274,17 +280,21 @@ void FitPeaks::fitSpectraPeaks(
     if (m_eventNumberWS && m_eventNumberWS->readX(wi)[0] < 1.0) {
       // no events
       peak_pos[ipeak] = -1;
-      ipeak_fail = true;
+      peak_i_no_fit = true;
+    } else if (real_max < 1.0) {
+      // none-event, but no signal within region
+      peak_pos[ipeak] = -1;
+      peak_i_no_fit = true;
     } else if (max_value < m_minPeakMaxValue) {
-      ipeak_fail = true;
+      peak_i_no_fit = true;
       peak_pos[ipeak] = -2;
     } else {
       lastPeakParameters[X0] = peak_center;
       lastPeakParameters[HEIGHT] = max_value;
     }
 
-    g_log.warning() << "[DB-TRACE] ipeak_faile = " << ipeak_fail << ", "
-                    << "real max = " << real_max << "\n";
+    //    g_log.warning() << "[DB-TRACE] ipeak_faile = " << ipeak_fail << ", "
+    //                    << "real max = " << real_max << "\n";
 
     // call Fit to fit peak and background
     std::vector<double> fitted_params_values;
@@ -292,11 +302,23 @@ void FitPeaks::fitSpectraPeaks(
     std::vector<double> fitted_x_window;
     std::vector<double> fitted_y_vector;
 
-    if (!ipeak_fail) {
-      fitSinglePeak(wi, ipeak, lastPeakParameters, bkgd_params,
-                    m_peakWindows[ipeak], m_peakRangeVec[ipeak],
-                    fitted_params_values, fitted_params_errors, fitted_x_window,
-                    fitted_y_vector);
+    if (!peak_i_no_fit) {
+      bool good_fit = fitSinglePeak(wi, ipeak, lastPeakParameters, bkgd_params,
+                                    m_peakWindows[ipeak], m_peakRangeVec[ipeak],
+                                    fitted_params_values, fitted_params_errors,
+                                    fitted_x_window, fitted_y_vector);
+      if (good_fit) {
+        double peak_pos_i = fitted_params_values[X0];
+        double TOLERANCE = 0.01;
+        if (fabs(peak_pos_i - m_peakCenters[ipeak]) < TOLERANCE)
+          peak_pos[ipeak] = peak_pos_i;
+        else
+          // fitted peak position is too off
+          peak_pos[ipeak] = -4;
+      } else {
+        // failed to execute FitPeak
+        peak_pos[ipeak] = -3;
+      }
 
       //    double window_left = fitted_x_window[0];
       //    double window_right = fitted_x_window[1];
@@ -314,27 +336,28 @@ void FitPeaks::fitSpectraPeaks(
       //                        << " to " <<
       //                        m_fittedPeakWS->histogram(wi).x()[window_right_index]
       //                        << "\n";
-    }
+    } // END OF FITTING PEAK
 
-    if (ipeak_fail) {
-      // generate zero data for non-fit
-      std::vector<double> fit_param(5, 0.0);
-      peak_params.push_back(fit_param);
-    } else {
+    // set up the output value for fitted result
+    if (peak_pos[ipeak] > 0) {
+      // a valid fitting
+      // peak parameters that are fitted
       peak_params.push_back(fitted_params_values);
-    }
-
-    // generate
-    if (1) {
-      // std::vector<size_t> i_window = getRange(wi, m_peakWindows[ipeak]);
+      // peak values from fitted model
       fitted_peak_windows.push_back(fitted_x_window);
       fitted_functions.push_back(fitted_y_vector);
     } else {
+      // no fit or bad fit
+      // push back whatever all-zero
+      peak_params.push_back(fitted_params_values);
+      // non-data
       std::vector<double> empty(0);
+      fitted_peak_windows.push_back(empty);
       fitted_functions.push_back(empty);
-      }
-
+    }
   } // END-FOR
+
+  return;
 }
 
 std::vector<size_t> FitPeaks::getRange(size_t wi,
@@ -375,15 +398,15 @@ std::vector<size_t> FitPeaks::getRange(size_t wi,
  *PeakPositionTolerance=0.02)
  *
  */
-double FitPeaks::fitSinglePeak(size_t wsindex, size_t peakindex,
-                               const std::vector<double> &init_peak_values,
-                               const std::vector<double> &init_bkgd_values,
-                               const std::vector<double> &fit_window,
-                               const std::vector<double> &peak_range,
-                               std::vector<double> &fitted_params_values,
-                               std::vector<double> &fitted_params_errors,
-                               std::vector<double> &fitted_window,
-                               std::vector<double> &fitted_data) {
+bool FitPeaks::fitSinglePeak(size_t wsindex, size_t peakindex,
+                             const std::vector<double> &init_peak_values,
+                             const std::vector<double> &init_bkgd_values,
+                             const std::vector<double> &fit_window,
+                             const std::vector<double> &peak_range,
+                             std::vector<double> &fitted_params_values,
+                             std::vector<double> &fitted_params_errors,
+                             std::vector<double> &fitted_window,
+                             std::vector<double> &fitted_data) {
   // Set up sub algorithm fit
   IAlgorithm_sptr fit_peak;
   try {
