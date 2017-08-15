@@ -28,8 +28,8 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
 
         with io.open(self._clerk.get_input_filename(), "rb", ) as dmol3_file:
 
-            # Move read file pointer to the last calculation logged in the .outmol file. First calculation could be
-            # geometry optimization. The last calculation in the file is expected to  be calculation of vibrational
+            # Move read file pointer to the last calculation recorded in the .outmol file. First calculation could be
+            # geometry optimization. The last calculation in the file is expected to be calculation of vibrational
             # data. There may be some intermediate resume calculations.
             self._find_last(file_obj=dmol3_file, msg=b"$cell vectors")
 
@@ -88,7 +88,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
 
     def _file_end(self, file_obj=None):
         """
-        Checks end of text file.
+        Checks end of the text file.
         :param file_obj: file object which was open in "r" mode
         :return: True if end of file, otherwise False
         """
@@ -129,19 +129,17 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
     def _read_atomic_coordinates(self, file_obj=None, data=None):
         """
         Reads atomic coordinates from .outmol DMOL3 file.
-        :param file_obj:  file object from which we read
+        :param file_obj: file object from which we read
         :param data: Python dictionary to which atoms data should be added
         """
         atoms = {}
         atom_indx = 0
         self._find_first(file_obj=file_obj, msg="$coordinates")
+        end_msgs = ["$end", "----------------------------------------------------------------------"]
 
-        while not self._check_block_end(file_obj=file_obj, msg="$end"):
+        while not self._check_block_end(file_obj=file_obj, msg=end_msgs):
+
             line = file_obj.readline()
-            # At the end of this section there is always empty line.
-            if b"----------------------------------------------------------------------" in line:
-                break
-
             entries = line.split()
 
             symbol = str(entries[0].decode("utf-8").capitalize())
@@ -175,10 +173,9 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
 
             self._read_freq_block(file_obj=file_obj, freq=freq)
             self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
-            for msg in end_msgs:
-                if self._check_block_end(file_obj=file_obj, msg=msg):
-                    inside_block = False
-                    break
+
+            if self._check_block_end(file_obj=file_obj, msg=end_msgs):
+                inside_block = False
 
         freq = [freq]
         weights = [1.0]
@@ -229,16 +226,19 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         """
         Checks for msg which terminates block.
         :param file_obj: file object from which we read
-        :param msg: message which end kpoint block.
+        :param msg: list with messages which end kpoint block.
         :return: True if end of block otherwise False
         """
-        pos = file_obj.tell()
-        line = file_obj.readline()
-        file_obj.seek(pos)
-        if six.PY3:
-            msg = bytes(msg, "utf8")
+        for item in msg:
+            pos = file_obj.tell()
+            line = file_obj.readline()
+            file_obj.seek(pos)
+            if six.PY3:
+                item = bytes(item, "utf8")
 
-        return msg in line
+            if item in line:
+                return True
+        return False
 
     def _read_freq_block(self, file_obj=None, freq=None):
         """
