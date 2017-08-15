@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflectometryAction.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAction.h"
 #include <boost/shared_ptr.hpp>
@@ -105,6 +106,8 @@ private:
   static const std::string LegacyTransferMethod;
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
+  /// Reflectometry menu actions which should be disabled during processing
+  static const std::array<ReflectometryAction, 5> DisabledWhileProcessing;
   /// The current search string used for autoreduction
   std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
@@ -116,6 +119,8 @@ private:
   void autoreduce(bool startNew);
   void transfer();
   void pushCommands();
+  void enableAction(ReflectometryAction action);
+  void disableAction(ReflectometryAction action);
   void enableAction(DataProcessorAction action);
   void disableAction(DataProcessorAction action);
   /// transfer strategy

@@ -451,7 +451,6 @@ void ReflRunsTabPresenter::pause() {
   m_view->enableAutoreduceButton();
 }
 
-
 /** Disables the 'process' button and enables the 'pause' button when data
  * reduction is resumed. Also notifies main presenter that data reduction is
  * confirmed to be resumed.
@@ -463,6 +462,15 @@ void ReflRunsTabPresenter::resume() {
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
+
+void ReflRunsTabPresenter::enableAction(ReflectometryAction action) {
+  m_view->enableAction(action);
+}
+
+void ReflRunsTabPresenter::disableAction(ReflectometryAction action) {
+  m_view->disableAction(action);
+}
+
 void ReflRunsTabPresenter::enableAction(DataProcessorAction action) {
   m_view->enableAction(action);
 }
@@ -479,18 +487,30 @@ void ReflRunsTabPresenter::confirmReductionPaused() {
   allowTableModification();
 }
 
+const std::array<ReflectometryAction, 5>
+    ReflRunsTabPresenter::DisabledWhileProcessing = {
+        {ReflectometryAction::OPEN_TABLE, ReflectometryAction::NEW_TABLE,
+         ReflectometryAction::SAVE_TABLE, ReflectometryAction::SAVE_TABLE_AS,
+         ReflectometryAction::IMPORT_TBL}};
+
 void ReflRunsTabPresenter::preventTableModification() {
   m_view->disableAutoreduceButton();
   m_view->disableTransferButton();
 
-  disableTableModification([this](auto action) -> void { disableAction(action); });
+  disableTableModification(
+      [this](auto action) -> void { disableAction(action); });
+  for (auto reflectometryMenuAction : DisabledWhileProcessing)
+    disableAction(reflectometryMenuAction);
 }
 
 void ReflRunsTabPresenter::allowTableModification() {
   m_view->enableAutoreduceButton();
   m_view->enableTransferButton();
-  
-  enableTableModification([this](auto action) -> void { enableAction(action); });
+
+  enableTableModification(
+      [this](auto action) -> void { enableAction(action); });
+  for (auto reflectometryMenuAction : DisabledWhileProcessing)
+    enableAction(reflectometryMenuAction);
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
