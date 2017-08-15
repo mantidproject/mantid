@@ -303,16 +303,21 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 self._acc_ws = self._multiply('_acc_1', '_acc_2', self._acc_ws)
                 mtd['_acc_1'].delete()
                 mtd['_acc_2'].delete()
-                self._acc_ws = self._convert_from_wavelength(self._acc_ws, self._acc_ws)
 
             if self._shape == 'Cylinder':
                 container_kwargs['InnerRadius'] = self._container_inner_radius
                 container_kwargs['OuterRadius'] = self._container_outer_radius
                 container_kwargs['Shape'] = 'Annulus'
 
+                s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
+                                                      OutputWorkspace=self._acc_ws,
+                                                      **container_kwargs)
+
             if self._shape == 'Annulus':
                 container_kwargs['InnerRadius'] = self._container_inner_radius
                 container_kwargs['OuterRadius'] = self._sample_inner_radius
+
+            self._acc_ws = self._convert_from_wavelength(self._acc_ws, self._acc_ws)
 
             sample_wave_ws.delete()
 
