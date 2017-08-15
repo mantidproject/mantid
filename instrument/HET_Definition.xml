@@ -7,7 +7,8 @@
  name="HET" valid-from   ="1900-01-31 23:59:59"
                        valid-to     ="2100-01-31 23:59:59"
                last-modified="2017-06-08 00:00:00">
-
+<!-- this is trial IDF build to allow ISIS reduction to work. Pixel and tube sizes are almost certainly wrong as I do not have
+     full information about them. -->
 <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
@@ -46,6 +47,9 @@
   </component>
   
   <component type="Mid-angle tubes"  idlist="Mid-angle tubes">
+    <location/>
+  </component>
+  <component type="High-angle tubes"  idlist="High-angle tubes">
     <location/>
   </component>
   
@@ -99,17 +103,27 @@
         <location  z="4.02">  <facing x="0" y="0" z="0"/> </location>  
     </component>
  </type>
+
 <type name="Mid-angle tubes">
-    <component type="W1-W">
-        <location  r="2.5" p="0." rot="0."/>    
-    </component>
-    <component type="W1-SW">
-        <location  r="2.5" p="-45" rot="-45."  axis-x="1.0" axis-y="0.0" axis-z="0.0"/>
-    </component>
-    
+    <component type="W1-W"> <location />  </component>
+    <component type="W1-SW"> <location /> </component>
+    <component type="W1-S"> <location /> </component>
+    <component type="W1-SE"> <location /> </component>
+    <component type="W1-E"> <location /> </component>
+    <component type="W1-NE"> <location /> </component>
+    <component type="W1-N"> <location /> </component>
+    <component type="W1-NW"> <location /> </component>    
 </type>
- 
-  <type name="D1_West">
+
+<type name="High-angle tubes">
+    <component type="W6-R4L"> <location />  </component>
+    <component type="W6-R4R"> <location />  </component>    
+    <component type="W7-R2.5L"> <location /> </component>
+    <component type="W7-R2.5R"> <location /> </component>    
+</type>
+
+ <!-- ********************************************************************   -->
+<type name="D1_West">
     <component type="HET_long_PSDtube" outline="yes">
         <location  x=" 0.1750"   name="tube1" />    
         <location  x=" 0.2021"   name="tube2" />
@@ -125,8 +139,9 @@
         <location  x=" 0.4729"   name="tube12" />
         <location  x=" 0.5000"   name="tube13" />
     </component>
-  </type>
-  <type name="D1_East">
+</type>
+
+<type name="D1_East">
     <component type="HET_long_PSDtube" outline="yes">
         <location  x="-0.1750" name="tube1" />    
         <location  x="-0.2021" name="tube2" />
@@ -142,8 +157,9 @@
         <location  x="-0.4729" name="tube12" />
         <location  x="-0.5000" name="tube13" />
     </component>
-  </type>
-  <type name="D2_North">
+</type>
+
+<type name="D2_North">
     <component type="HET_short_PSDtube" outline="yes">
         <location  x="-0.1200" y="0.16" name="tube1" />    
         <location  x="-0.0933" y="0.16" name="tube2" />
@@ -156,8 +172,9 @@
         <location  x=" 0.0933" y="0.16" name="tube9" />
         <location  x=" 0.1200" y="0.16" name="tube10" />
     </component>
-  </type>
-  <type name="D2_South">
+</type>
+
+<type name="D2_South">
     <component type="HET_short_PSDtube" outline="yes">
         <location  x="-0.1200" y="-0.5" name="tube1" />    
         <location  x="-0.0933" y="-0.5" name="tube2" />
@@ -170,102 +187,421 @@
         <location  x=" 0.0933" y="-0.5" name="tube9" />
         <location  x=" 0.1200" y="-0.5" name="tube10" />
     </component>
-  </type>
-
+</type>
+<!-- ********************************************************************   -->
 <type name = "W1-W">
     <component type="HET_non_PSDtube" outline="yes">
-     <location  t="9.31" />  <!-- first two tubes in some way different from the following 30-->
-     <location  t="9.94" />
-     <location  t="10.56" />
-     <location  t="10.56" />
-     <location  t="11.19" />
-     <location  t="11.81" />
-     <location  t="12.44" />
-     <location  t="13.06" />
-     <location  t="13.69" />
-     <location  t="14.31" />
-     <location  t="14.94" />
-     <location  t="15.56" />
-     <location  t="16.19" />
-     <location  t="16.81" />
-     <location  t="17.44" />
-     <location  t="18.06" />
-     <location  t="18.69" />
-     <location  t="19.31" />
-     <location  t="19.94" />
-     <location  t="20.56" />
-     <location  t="21.19" />
-     <location  t="21.81" />
-     <location  t="22.44" />
-     <location  t="23.06" />
-     <location  t="23.69" />
-     <location  t="24.31" />
-     <location  t="24.94" />
-     <location  t="25.56" />
-     <location  t="26.19" />
-     <location  t="26.81" />
-     <location  t="27.44" />
-     <location  t="28.69" />
+        <location  r="2.512" t="9.31"  p="0." rot="0."/>  <!-- first two tubes in some way different from the following 30-->
+        <location  r="2.512" t="9.94"  p="0." rot="0."/>
+        <location  r="2.512" t="10.56" p="0." rot="0."/>
+        <location  r="2.512" t="10.56" p="0." rot="0."/>
+        <location  r="2.512" t="11.19" p="0." rot="0."/>
+        <location  r="2.512" t="11.81" p="0." rot="0."/>
+        <location  r="2.512" t="12.44" p="0." rot="0."/>
+        <location  r="2.512" t="13.06" p="0." rot="0."/>
+        <location  r="2.512" t="13.69" p="0." rot="0."/>
+        <location  r="2.512" t="14.31" p="0." rot="0."/>
+        <location  r="2.512" t="14.94" p="0." rot="0."/>
+        <location  r="2.512" t="15.56" p="0." rot="0."/>
+        <location  r="2.512" t="16.19" p="0." rot="0."/>
+        <location  r="2.512" t="16.81" p="0." rot="0."/>
+        <location  r="2.512" t="17.44" p="0." rot="0."/>
+        <location  r="2.512" t="18.06" p="0." rot="0."/>
+        <location  r="2.512" t="18.69" p="0." rot="0."/>
+        <location  r="2.512" t="19.31" p="0." rot="0."/>
+        <location  r="2.512" t="19.94" p="0." rot="0."/>
+        <location  r="2.512" t="20.56" p="0." rot="0."/>
+        <location  r="2.512" t="21.19" p="0." rot="0."/>
+        <location  r="2.512" t="21.81" p="0." rot="0."/>
+        <location  r="2.512" t="22.44" p="0." rot="0."/>
+        <location  r="2.512" t="23.06" p="0." rot="0."/>
+        <location  r="2.512" t="23.69" p="0." rot="0."/>
+        <location  r="2.512" t="24.31" p="0." rot="0."/>
+        <location  r="2.512" t="24.94" p="0." rot="0."/>
+        <location  r="2.512" t="25.56" p="0." rot="0."/>
+        <location  r="2.512" t="26.19" p="0." rot="0."/>
+        <location  r="2.512" t="26.81" p="0." rot="0."/>
+        <location  r="2.512" t="27.44" p="0." rot="0."/>
+        <location  r="2.512" t="28.69" p="0." rot="0."/>
      </component>
 </type>
+
 <type name = "W1-SW">
     <component type="HET_non_PSDtube" outline="yes">
-     <location  t="-9.31"   />  <!-- first two tubes in some way different from the following 30-->
-     <location  t="-9.94"  />
-     <location  t="-10.56" />
-     <location  t="-10.56" />
-     <location  t="-11.19" />
-     <location  t="-11.81" />
-     <location  t="-12.44" />
-     <location  t="-13.06" />
-     <location  t="-13.69" />
-     <location  t="-14.31" />
-     <location  t="-14.94" />
-     <location  t="-15.56" />
-     <location  t="-16.19" />
-     <location  t="-16.81" />
-     <location  t="-17.44" />
-     <location  t="-18.06" />
-     <location  t="-18.69" />
-     <location  t="-19.31" />
-     <location  t="-19.94" />
-     <location  t="-20.56" />
-     <location  t="-21.19" />
-     <location  t="-21.81" />
-     <location  t="-22.44" />
-     <location  t="-23.06" />
-     <location  t="-23.69" />
-     <location  t="-24.31" />
-     <location  t="-24.94" />
-     <location  t="-25.56" />
-     <location  t="-26.19" />
-     <location  t="-26.81" />
-     <location  t="-27.44" />
-     <location  t="-28.69" />
+        <location  r="2.512" t="9.31"  p="-45." rot="-45."/>  <!-- first two tubes in some way different from the following 30-->
+        <location  r="2.512" t="9.94"  p="-45." rot="-45."/>
+        <location  r="2.512" t="10.56" p="-45." rot="-45."/>
+        <location  r="2.512" t="10.56" p="-45." rot="-45."/>
+        <location  r="2.512" t="11.19" p="-45." rot="-45."/>
+        <location  r="2.512" t="11.81" p="-45." rot="-45."/>
+        <location  r="2.512" t="12.44" p="-45." rot="-45."/>
+        <location  r="2.512" t="13.06" p="-45." rot="-45."/>
+        <location  r="2.512" t="13.69" p="-45." rot="-45."/>
+        <location  r="2.512" t="14.31" p="-45." rot="-45."/>
+        <location  r="2.512" t="14.94" p="-45." rot="-45."/>
+        <location  r="2.512" t="15.56" p="-45." rot="-45."/>
+        <location  r="2.512" t="16.19" p="-45." rot="-45."/>
+        <location  r="2.512" t="16.81" p="-45." rot="-45."/>
+        <location  r="2.512" t="17.44" p="-45." rot="-45."/>
+        <location  r="2.512" t="18.06" p="-45." rot="-45."/>
+        <location  r="2.512" t="18.69" p="-45." rot="-45."/>
+        <location  r="2.512" t="19.31" p="-45." rot="-45."/>
+        <location  r="2.512" t="19.94" p="-45." rot="-45."/>
+        <location  r="2.512" t="20.56" p="-45." rot="-45."/>
+        <location  r="2.512" t="21.19" p="-45." rot="-45."/>
+        <location  r="2.512" t="21.81" p="-45." rot="-45."/>
+        <location  r="2.512" t="22.44" p="-45." rot="-45."/>
+        <location  r="2.512" t="23.06" p="-45." rot="-45."/>
+        <location  r="2.512" t="23.69" p="-45." rot="-45."/>
+        <location  r="2.512" t="24.31" p="-45." rot="-45."/>
+        <location  r="2.512" t="24.94" p="-45." rot="-45."/>
+        <location  r="2.512" t="25.56" p="-45." rot="-45."/>
+        <location  r="2.512" t="26.19" p="-45." rot="-45."/>
+        <location  r="2.512" t="26.81" p="-45." rot="-45."/>
+        <location  r="2.512" t="27.44" p="-45." rot="-45."/>
+        <location  r="2.512" t="28.69" p="-45." rot="-45."/>
      </component>
 </type>
 
-   <type name="HET_short_PSDtube" outline="yes">
- <component type="pixel">
-   <locations y="0" y-end="0.34" n-elements="256" />
- </component>
- </type>
- 
- <type name="HET_long_PSDtube" outline="yes">
- <component type="pixel">
-   <locations y="-0.45" y-end="0.45" n-elements="256" />
- </component>
- </type>
+<type name = "W1-S">
+<!-- Spectra 165-196 id start="193" end="224" -->
+    <component type="HET_non_PSDtube" outline="yes">
+        <location  r="2.512" t="9.31"  p="-90." rot="-90."/>  <!-- first two tubes in some way different from the following 30-->
+        <location  r="2.512" t="9.94"  p="-90." rot="-90."/>
+        <location  r="2.512" t="10.56" p="-90." rot="-90."/>
+        <location  r="2.512" t="10.56" p="-90." rot="-90."/>
+        <location  r="2.512" t="11.19" p="-90." rot="-90."/>
+        <location  r="2.512" t="11.81" p="-90." rot="-90."/>
+        <location  r="2.512" t="12.44" p="-90." rot="-90."/>
+        <location  r="2.512" t="13.06" p="-90." rot="-90."/>
+        <location  r="2.512" t="13.69" p="-90." rot="-90."/>
+        <location  r="2.512" t="14.31" p="-90." rot="-90."/>
+        <location  r="2.512" t="14.94" p="-90." rot="-90."/>
+        <location  r="2.512" t="15.56" p="-90." rot="-90."/>
+        <location  r="2.512" t="16.19" p="-90." rot="-90."/>
+        <location  r="2.512" t="16.81" p="-90." rot="-90."/>
+        <location  r="2.512" t="17.44" p="-90." rot="-90."/>
+        <location  r="2.512" t="18.06" p="-90." rot="-90."/>
+        <location  r="2.512" t="18.69" p="-90." rot="-90."/>
+        <location  r="2.512" t="19.31" p="-90." rot="-90."/>
+        <location  r="2.512" t="19.94" p="-90." rot="-90."/>
+        <location  r="2.512" t="20.56" p="-90." rot="-90."/>
+        <location  r="2.512" t="21.19" p="-90." rot="-90."/>
+        <location  r="2.512" t="21.81" p="-90." rot="-90."/>
+        <location  r="2.512" t="22.44" p="-90." rot="-90."/>
+        <location  r="2.512" t="23.06" p="-90." rot="-90."/>
+        <location  r="2.512" t="23.69" p="-90." rot="-90."/>
+        <location  r="2.512" t="24.31" p="-90." rot="-90."/>
+        <location  r="2.512" t="24.94" p="-90." rot="-90."/>
+        <location  r="2.512" t="25.56" p="-90." rot="-90."/>
+        <location  r="2.512" t="26.19" p="-90." rot="-90."/>
+        <location  r="2.512" t="26.81" p="-90." rot="-90."/>
+        <location  r="2.512" t="27.44" p="-90." rot="-90."/>
+        <location  r="2.512" t="28.69" p="-90." rot="-90."/>
+     </component>
+</type>
 
-<type name="HET_non_PSDtube" is="detector">     
-  <cylinder id="shape">
-      <centre-of-bottom-base x="0.0" y="-0.15" z="0.0" />
-      <axis x="0.0" y="1.0" z="0" /> 
-      <radius val="0.0125" />
-      <height val="0.3" />
-  </cylinder>
-</type>  
- 
+<type name = "W1-SE">
+<!-- Spectra 197-228 id start="225" end="256" -->
+    <component type="HET_non_PSDtube" outline="yes">
+        <location  r="2.512" t="9.31"  p="-135." rot="-135."/>  <!-- first two tubes in some way different from the following 30-->
+        <location  r="2.512" t="9.94"  p="-135." rot="-135."/>
+        <location  r="2.512" t="10.56" p="-135." rot="-135."/>
+        <location  r="2.512" t="10.56" p="-135." rot="-135."/>
+        <location  r="2.512" t="11.19" p="-135." rot="-135."/>
+        <location  r="2.512" t="11.81" p="-135." rot="-135."/>
+        <location  r="2.512" t="12.44" p="-135." rot="-135."/>
+        <location  r="2.512" t="13.06" p="-135." rot="-135."/>
+        <location  r="2.512" t="13.69" p="-135." rot="-135."/>
+        <location  r="2.512" t="14.31" p="-135." rot="-135."/>
+        <location  r="2.512" t="14.94" p="-135." rot="-135."/>
+        <location  r="2.512" t="15.56" p="-135." rot="-135."/>
+        <location  r="2.512" t="16.19" p="-135." rot="-135."/>
+        <location  r="2.512" t="16.81" p="-135." rot="-135."/>
+        <location  r="2.512" t="17.44" p="-135." rot="-135."/>
+        <location  r="2.512" t="18.06" p="-135." rot="-135."/>
+        <location  r="2.512" t="18.69" p="-135." rot="-135."/>
+        <location  r="2.512" t="19.31" p="-135." rot="-135."/>
+        <location  r="2.512" t="19.94" p="-135." rot="-135."/>
+        <location  r="2.512" t="20.56" p="-135." rot="-135."/>
+        <location  r="2.512" t="21.19" p="-135." rot="-135."/>
+        <location  r="2.512" t="21.81" p="-135." rot="-135."/>
+        <location  r="2.512" t="22.44" p="-135." rot="-135."/>
+        <location  r="2.512" t="23.06" p="-135." rot="-135."/>
+        <location  r="2.512" t="23.69" p="-135." rot="-135."/>
+        <location  r="2.512" t="24.31" p="-135." rot="-135."/>
+        <location  r="2.512" t="24.94" p="-135." rot="-135."/>
+        <location  r="2.512" t="25.56" p="-135." rot="-135."/>
+        <location  r="2.512" t="26.19" p="-135." rot="-135."/>
+        <location  r="2.512" t="26.81" p="-135." rot="-135."/>
+        <location  r="2.512" t="27.44" p="-135." rot="-135."/>
+        <location  r="2.512" t="28.69" p="-135." rot="-135."/>
+     </component>
+</type>
+
+<type name = "W1-E">
+<!-- Spectra 229-260 -->
+    <component type="HET_non_PSDtube" outline="yes">
+        <location  r="2.512" t="9.31"  p="180." rot="180."/>  <!-- first two tubes in some way different from the following 30-->
+        <location  r="2.512" t="9.94"  p="180." rot="180."/>
+        <location  r="2.512" t="10.56" p="180." rot="180."/>
+        <location  r="2.512" t="10.56" p="180." rot="180."/>
+        <location  r="2.512" t="11.19" p="180." rot="180."/>
+        <location  r="2.512" t="11.81" p="180." rot="180."/>
+        <location  r="2.512" t="12.44" p="180." rot="180."/>
+        <location  r="2.512" t="13.06" p="180." rot="180."/>
+        <location  r="2.512" t="13.69" p="180." rot="180."/>
+        <location  r="2.512" t="14.31" p="180." rot="180."/>
+        <location  r="2.512" t="14.94" p="180." rot="180."/>
+        <location  r="2.512" t="15.56" p="180." rot="180."/>
+        <location  r="2.512" t="16.19" p="180." rot="180."/>
+        <location  r="2.512" t="16.81" p="180." rot="180."/>
+        <location  r="2.512" t="17.44" p="180." rot="180."/>
+        <location  r="2.512" t="18.06" p="180." rot="180."/>
+        <location  r="2.512" t="18.69" p="180." rot="180."/>
+        <location  r="2.512" t="19.31" p="180." rot="180."/>
+        <location  r="2.512" t="19.94" p="180." rot="180."/>
+        <location  r="2.512" t="20.56" p="180." rot="180."/>
+        <location  r="2.512" t="21.19" p="180." rot="180."/>
+        <location  r="2.512" t="21.81" p="180." rot="180."/>
+        <location  r="2.512" t="22.44" p="180." rot="180."/>
+        <location  r="2.512" t="23.06" p="180." rot="180."/>
+        <location  r="2.512" t="23.69" p="180." rot="180."/>
+        <location  r="2.512" t="24.31" p="180." rot="180."/>
+        <location  r="2.512" t="24.94" p="180." rot="180."/>
+        <location  r="2.512" t="25.56" p="180." rot="180."/>
+        <location  r="2.512" t="26.19" p="180." rot="180."/>
+        <location  r="2.512" t="26.81" p="180." rot="180."/>
+        <location  r="2.512" t="27.44" p="180." rot="180."/>
+        <location  r="2.512" t="28.69" p="180." rot="180."/>
+     </component>
+</type>
+
+<type name = "W1-NE">
+    <!-- Spectra 261-292 -->
+    <component type="HET_non_PSDtube" outline="yes">
+        <location  r="2.512" t="9.31"  p="135." rot="135."/>  <!-- first two tubes in some way different from the following 30-->
+        <location  r="2.512" t="9.94"  p="135." rot="135."/>
+        <location  r="2.512" t="10.56" p="135." rot="135."/>
+        <location  r="2.512" t="10.56" p="135." rot="135."/>
+        <location  r="2.512" t="11.19" p="135." rot="135."/>
+        <location  r="2.512" t="11.81" p="135." rot="135."/>
+        <location  r="2.512" t="12.44" p="135." rot="135."/>
+        <location  r="2.512" t="13.06" p="135." rot="135."/>
+        <location  r="2.512" t="13.69" p="135." rot="135."/>
+        <location  r="2.512" t="14.31" p="135." rot="135."/>
+        <location  r="2.512" t="14.94" p="135." rot="135."/>
+        <location  r="2.512" t="15.56" p="135." rot="135."/>
+        <location  r="2.512" t="16.19" p="135." rot="135."/>
+        <location  r="2.512" t="16.81" p="135." rot="135."/>
+        <location  r="2.512" t="17.44" p="135." rot="135."/>
+        <location  r="2.512" t="18.06" p="135." rot="135."/>
+        <location  r="2.512" t="18.69" p="135." rot="135."/>
+        <location  r="2.512" t="19.31" p="135." rot="135."/>
+        <location  r="2.512" t="19.94" p="135." rot="135."/>
+        <location  r="2.512" t="20.56" p="135." rot="135."/>
+        <location  r="2.512" t="21.19" p="135." rot="135."/>
+        <location  r="2.512" t="21.81" p="135." rot="135."/>
+        <location  r="2.512" t="22.44" p="135." rot="135."/>
+        <location  r="2.512" t="23.06" p="135." rot="135."/>
+        <location  r="2.512" t="23.69" p="135." rot="135."/>
+        <location  r="2.512" t="24.31" p="135." rot="135."/>
+        <location  r="2.512" t="24.94" p="135." rot="135."/>
+        <location  r="2.512" t="25.56" p="135." rot="135."/>
+        <location  r="2.512" t="26.19" p="135." rot="135."/>
+        <location  r="2.512" t="26.81" p="135." rot="135."/>
+        <location  r="2.512" t="27.44" p="135." rot="135."/>
+        <location  r="2.512" t="28.69" p="135." rot="135."/>
+     </component>
+</type>
+
+<type name = "W1-N">
+    <!-- Spectra 293-324 -->
+    <component type="HET_non_PSDtube" outline="yes">
+        <location  r="2.512" t="9.31"  p="90." rot="90."/>  <!-- first two tubes in some way different from the following 30-->
+        <location  r="2.512" t="9.94"  p="90." rot="90."/>
+        <location  r="2.512" t="10.56" p="90." rot="90."/>
+        <location  r="2.512" t="10.56" p="90." rot="90."/>
+        <location  r="2.512" t="11.19" p="90." rot="90."/>
+        <location  r="2.512" t="11.81" p="90." rot="90."/>
+        <location  r="2.512" t="12.44" p="90." rot="90."/>
+        <location  r="2.512" t="13.06" p="90." rot="90."/>
+        <location  r="2.512" t="13.69" p="90." rot="90."/>
+        <location  r="2.512" t="14.31" p="90." rot="90."/>
+        <location  r="2.512" t="14.94" p="90." rot="90."/>
+        <location  r="2.512" t="15.56" p="90." rot="90."/>
+        <location  r="2.512" t="16.19" p="90." rot="90."/>
+        <location  r="2.512" t="16.81" p="90." rot="90."/>
+        <location  r="2.512" t="17.44" p="90." rot="90."/>
+        <location  r="2.512" t="18.06" p="90." rot="90."/>
+        <location  r="2.512" t="18.69" p="90." rot="90."/>
+        <location  r="2.512" t="19.31" p="90." rot="90."/>
+        <location  r="2.512" t="19.94" p="90." rot="90."/>
+        <location  r="2.512" t="20.56" p="90." rot="90."/>
+        <location  r="2.512" t="21.19" p="90." rot="90."/>
+        <location  r="2.512" t="21.81" p="90." rot="90."/>
+        <location  r="2.512" t="22.44" p="90." rot="90."/>
+        <location  r="2.512" t="23.06" p="90." rot="90."/>
+        <location  r="2.512" t="23.69" p="90." rot="90."/>
+        <location  r="2.512" t="24.31" p="90." rot="90."/>
+        <location  r="2.512" t="24.94" p="90." rot="90."/>
+        <location  r="2.512" t="25.56" p="90." rot="90."/>
+        <location  r="2.512" t="26.19" p="90." rot="90."/>
+        <location  r="2.512" t="26.81" p="90." rot="90."/>
+        <location  r="2.512" t="27.44" p="90." rot="90."/>
+        <location  r="2.512" t="28.69" p="90." rot="90."/>
+     </component>
+</type>
+
+<type name = "W1-NW">
+    <!-- Spectra 325-356 -->
+    <component type="HET_non_PSDtube" outline="yes">
+        <location  r="2.512" t="9.31"  p="45." rot="45."/>  <!-- first two tubes in some way different from the following 30-->
+        <location  r="2.512" t="9.94"  p="45." rot="45."/>
+        <location  r="2.512" t="10.56" p="45." rot="45."/>
+        <location  r="2.512" t="10.56" p="45." rot="45."/>
+        <location  r="2.512" t="11.19" p="45." rot="45."/>
+        <location  r="2.512" t="11.81" p="45." rot="45."/>
+        <location  r="2.512" t="12.44" p="45." rot="45."/>
+        <location  r="2.512" t="13.06" p="45." rot="45."/>
+        <location  r="2.512" t="13.69" p="45." rot="45."/>
+        <location  r="2.512" t="14.31" p="45." rot="45."/>
+        <location  r="2.512" t="14.94" p="45." rot="45."/>
+        <location  r="2.512" t="15.56" p="45." rot="45."/>
+        <location  r="2.512" t="16.19" p="45." rot="45."/>
+        <location  r="2.512" t="16.81" p="45." rot="45."/>
+        <location  r="2.512" t="17.44" p="45." rot="45."/>
+        <location  r="2.512" t="18.06" p="45." rot="45."/>
+        <location  r="2.512" t="18.69" p="45." rot="45."/>
+        <location  r="2.512" t="19.31" p="45." rot="45."/>
+        <location  r="2.512" t="19.94" p="45." rot="45."/>
+        <location  r="2.512" t="20.56" p="45." rot="45."/>
+        <location  r="2.512" t="21.19" p="45." rot="45."/>
+        <location  r="2.512" t="21.81" p="45." rot="45."/>
+        <location  r="2.512" t="22.44" p="45." rot="45."/>
+        <location  r="2.512" t="23.06" p="45." rot="45."/>
+        <location  r="2.512" t="23.69" p="45." rot="45."/>
+        <location  r="2.512" t="24.31" p="45." rot="45."/>
+        <location  r="2.512" t="24.94" p="45." rot="45."/>
+        <location  r="2.512" t="25.56" p="45." rot="45."/>
+        <location  r="2.512" t="26.19" p="45." rot="45."/>
+        <location  r="2.512" t="26.81" p="45." rot="45."/>
+        <location  r="2.512" t="27.44" p="45." rot="45."/>
+        <location  r="2.512" t="28.69" p="45." rot="45."/>
+     </component>
+</type>
+
+<!-- ********************************************************************   -->
+<type name = "W6-R4L">
+    <component type="HET_non_PSDtube" outline="yes">
+     <!-- Tube should be shifted along axis x or y instead of rotating p but I do not know the value of the shift -->
+        <location  r="4.038" t="110.39"  p="-93.05" rot="-90."/> 
+        <location  r="4.038" t="110.82"  p="-93.06" rot="-90."/> 
+        <location  r="4.038" t="111.25"  p="-93.07" rot="-90."/> 
+        <location  r="4.038" t="111.68"  p="-93.08" rot="-90."/> 
+        <location  r="4.038" t="112.11"  p="-93.09" rot="-90."/>
+        <location  r="4.038" t="112.54"  p="-93.1 " rot="-90."/>
+        <location  r="4.038" t="112.97"  p="-93.11" rot="-90."/>
+        <location  r="4.038" t="113.4 "  p="-93.12" rot="-90."/>
+        <location  r="4.038" t="113.82"  p="-93.13" rot="-90."/>
+        <location  r="4.038" t="114.25"  p="-93.14" rot="-90."/>
+        <location  r="4.038" t="114.68"  p="-93.15" rot="-90."/>
+        <location  r="4.038" t="115.11"  p="-93.16" rot="-90."/>
+        <location  r="4.038" t="115.54"  p="-93.17" rot="-90."/>
+        <location  r="4.038" t="115.97"  p="-93.18" rot="-90."/>
+        <location  r="4.038" t="116.4 "  p="-93.19" rot="-90."/>
+        <location  r="4.038" t="116.83"  p="-93.21" rot="-90."/>
+        <location  r="4.038" t="117.26"  p="-93.22" rot="-90."/>
+        <location  r="4.038" t="117.68"  p="-93.23" rot="-90."/>
+        <location  r="4.038" t="118.11"  p="-93.24" rot="-90."/>
+        <location  r="4.038" t="118.54"  p="-93.26" rot="-90."/>
+        <location  r="4.038" t="118.97"  p="-93.27" rot="-90."/>
+        <location  r="4.038" t="119.4 "  p="-93.28" rot="-90."/>
+     </component>
+</type>
+<type name = "W6-R4R">
+    <component type="HET_non_PSDtube" outline="yes">
+     <!-- Tube should be shifted along axis x or y instead of rotating phi but I do not know the value of the shift -->    
+        <location  r="4.038" t="110.39"  p="-86.95" rot="-90."/> 
+        <location  r="4.038" t="110.82"  p="-86.94" rot="-90."/> 
+        <location  r="4.038" t="111.25"  p="-86.93" rot="-90."/> 
+        <location  r="4.038" t="111.68"  p="-86.92" rot="-90."/> 
+        <location  r="4.038" t="112.11"  p="-86.91" rot="-90."/>
+        <location  r="4.038" t="112.54"  p="-86.9 " rot="-90."/>
+        <location  r="4.038" t="112.97"  p="-86.89" rot="-90."/>
+        <location  r="4.038" t="113.4 "  p="-86.88" rot="-90."/>
+        <location  r="4.038" t="113.82"  p="-86.87" rot="-90."/>
+        <location  r="4.038" t="114.25"  p="-86.86" rot="-90."/>
+        <location  r="4.038" t="114.68"  p="-86.85" rot="-90."/>
+        <location  r="4.038" t="115.11"  p="-86.84" rot="-90."/>
+        <location  r="4.038" t="115.54"  p="-86.83" rot="-90."/>
+        <location  r="4.038" t="115.97"  p="-86.82" rot="-90."/>
+        <location  r="4.038" t="116.4 "  p="-86.81" rot="-90."/>
+        <location  r="4.038" t="116.83"  p="-86.79" rot="-90."/>
+        <location  r="4.038" t="117.26"  p="-86.78" rot="-90."/>
+        <location  r="4.038" t="117.68"  p="-86.77" rot="-90."/>
+        <location  r="4.038" t="118.11"  p="-86.76" rot="-90."/>
+        <location  r="4.038" t="118.54"  p="-86.74" rot="-90."/>
+        <location  r="4.038" t="118.97"  p="-86.73" rot="-90."/>
+        <location  r="4.038" t="119.4 "  p="-86.72" rot="-90."/>
+     </component>
+</type>
+
+<type name = "W7-R2.5L">
+    <component type="HET_non_PSDtube" outline="yes">
+     <!-- Tube should be shifted along axis x or y instead of rotating p but I do not know the value of the shift -->
+        <location  r="2.496" t="125.31"  p="-95.6 " rot="-90."/> 
+        <location  r="2.496" t="125.94"  p="-95.65" rot="-90."/> 
+        <location  r="2.496" t="126.57"  p="-95.69" rot="-90."/> 
+        <location  r="2.496" t="127.2 "  p="-95.74" rot="-90."/> 
+        <location  r="2.496" t="127.83"  p="-95.79" rot="-90."/>
+        <location  r="2.496" t="128.46"  p="-95.84" rot="-90."/>
+        <location  r="2.496" t="129.09"  p="-95.89" rot="-90."/>
+        <location  r="2.496" t="129.71"  p="-95.95" rot="-90."/>
+        <location  r="2.496" t="130.34"  p="-96.  " rot="-90."/>
+        <location  r="2.496" t="130.97"  p="-96.06" rot="-90."/>
+        <location  r="2.496" t="131.6 "  p="-96.12" rot="-90."/>
+        <location  r="2.496" t="132.23"  p="-96.18" rot="-90."/>
+        <location  r="2.496" t="132.86"  p="-96.24" rot="-90."/>
+        <location  r="2.496" t="133.49"  p="-96.3 " rot="-90."/>
+        <location  r="2.496" t="134.12"  p="-96.37" rot="-90."/>
+        <location  r="2.496" t="134.74"  p="-96.44" rot="-90."/>
+        <location  r="2.496" t="135.37"  p="-96.51" rot="-90."/>
+        <location  r="2.496" t="136.  "  p="-96.59" rot="-90."/>
+        <location  r="2.496" t="136.63"  p="-96.66" rot="-90."/>
+        <location  r="2.496" t="137.26"  p="-96.74" rot="-90."/>
+        <location  r="2.496" t="137.89"  p="-96.82" rot="-90."/>
+        <location  r="2.496" t="138.51"  p="-96.91" rot="-90."/>
+     </component>
+</type>
+<type name = "W7-R2.5R">
+    <component type="HET_non_PSDtube" outline="yes">
+     <!-- Tube should be shifted along axis x or y instead of rotating p but I do not know the value of the shift -->
+        <location  r="2.496" t="125.31"  p="-84.4 " rot="-90."/> 
+        <location  r="2.496" t="125.94"  p="-84.35" rot="-90."/> 
+        <location  r="2.496" t="126.57"  p="-84.31" rot="-90."/> 
+        <location  r="2.496" t="127.2 "  p="-84.26" rot="-90."/> 
+        <location  r="2.496" t="127.83"  p="-84.21" rot="-90."/>
+        <location  r="2.496" t="128.46"  p="-84.16" rot="-90."/>
+        <location  r="2.496" t="129.09"  p="-84.11" rot="-90."/>
+        <location  r="2.496" t="129.71"  p="-84.05" rot="-90."/>
+        <location  r="2.496" t="130.34"  p="-84.  " rot="-90."/>
+        <location  r="2.496" t="130.97"  p="-83.94" rot="-90."/>
+        <location  r="2.496" t="131.6 "  p="-83.88" rot="-90."/>
+        <location  r="2.496" t="132.23"  p="-83.82" rot="-90."/>
+        <location  r="2.496" t="132.86"  p="-83.76" rot="-90."/>
+        <location  r="2.496" t="133.49"  p="-83.7 " rot="-90."/>
+        <location  r="2.496" t="134.12"  p="-83.63" rot="-90."/>
+        <location  r="2.496" t="134.74"  p="-83.56" rot="-90."/>
+        <location  r="2.496" t="135.37"  p="-83.49" rot="-90."/>
+        <location  r="2.496" t="136.  "  p="-83.41" rot="-90."/>
+        <location  r="2.496" t="136.63"  p="-83.34" rot="-90."/>
+        <location  r="2.496" t="137.26"  p="-83.26" rot="-90."/>
+        <location  r="2.496" t="137.89"  p="-83.18" rot="-90."/>
+        <location  r="2.496" t="138.51"  p="-83.09" rot="-90."/>
+     </component>
+</type>
+<!-- ********************************************************************   -->
 <type name="monitor" is="monitor">
   <properties/>
   <cylinder id="some-shape">
@@ -276,8 +612,30 @@
  </cylinder>
  <algebra val="some-shape" />
  </type>
+
+<type name="HET_short_PSDtube" outline="yes">
+    <component type="pixel">
+        <locations y="0" y-end="0.34" n-elements="256" />
+    </component>
+</type>
  
- <type name="pixel" is="detector">
+<type name="HET_long_PSDtube" outline="yes">
+    <component type="pixel">
+        <locations y="-0.45" y-end="0.45" n-elements="256" />
+    </component>
+</type>
+
+<type name="HET_non_PSDtube" is="detector">     
+    <cylinder id="shape">
+      <centre-of-bottom-base x="0.0" y="-0.15" z="0.0" />
+      <axis x="0.0" y="1.0" z="0" /> 
+      <radius val="0.0125" />
+      <height val="0.3" />
+    </cylinder>
+</type>  
+ 
+ 
+<type name="pixel" is="detector">
     <cylinder id="cyl-approx">
         <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
         <axis x="0.0" y="0.2" z="0.0" />
@@ -294,11 +652,35 @@
  
 <!-- DETECTOR ID LISTS -->
 <idlist idname="Mid-angle tubes">
-<!-- Spectra 101-132 -->  
+<!-- Spectra 101-132 -->
   <id start="129" end="160" />
-<!-- Spectra 133-164 -->    
-  <id start="161" end="192" />  
-</idlist>   
+<!-- Spectra 133-164 -->
+  <id start="161" end="192" />
+<!-- Spectra 165-196 -->
+  <id start="193" end="224" />
+<!-- Spectra 197-228 -->
+  <id start="225" end="256" />
+<!-- Spectra 229-260 -->
+  <id start="1" end="32" />
+<!-- Spectra 261-292 -->
+  <id start="33" end="64" />
+<!-- Spectra 293-324 -->
+  <id start="65" end="96" />
+<!-- Spectra 325-356 -->
+  <id start="97" end="128" />
+</idlist> 
+
+<idlist idname="High-angle tubes">
+<!-- Spectra 6-27 -->
+  <id start="4103" end="4124" />
+<!-- Spectra 28-49 -->
+  <id start="4203" end="4224" />
+<!-- Spectra 51-72 -->
+  <id start="5111" end="5132" />
+<!-- Spectra 75-96 -->
+  <id start="5211" end="5232" />
+</idlist>
+  
 <idlist idname="Low angle PSD">
 <!-- Spectra 401-1232 -->  
   <id start="213001" end="213256" />
@@ -353,18 +735,7 @@
 </idlist>
   
 
-      <!-- These detectors exist in the ISIS raw file but are not
-     believed to physical exist on the instrument
-    <id start="414001" end="414256" />
-    <id start="415001" end="415256" />    
-    <id start="601001" end="601040" />
-    <id start="701001" end="703048" />
-    <id start="704001" end="706048" />
-    <id start="707001" end="709048" />
-    <id start="710001" end="712048" />
-    <id start="713001" end="715048" />
-    <id start="716001" end="718048" />
-    -->
+
 
   
  <!--DETECTOR PARAMETERS-->
