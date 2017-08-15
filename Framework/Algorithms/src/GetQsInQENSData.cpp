@@ -117,7 +117,7 @@ MantidVec GetQsInQENSData::extractQValues(
       for (size_t i = 0; i < numSpectra; i++) {
         IDetector_const_sptr detector = workspace->getDetector(i);
         double efixed = workspace->getEFixed(detector);
-        double theta = 0.5 * workspace->detectorInfo().twoTheta(i);
+        double theta = 0.5 * workspace->detectorTwoTheta(*detector);
         qValues[i] = UnitConversion::convertToElasticQ(theta, efixed);
       }
     } catch (std::exception &) {
