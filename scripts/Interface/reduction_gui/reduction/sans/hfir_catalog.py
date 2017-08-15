@@ -94,7 +94,7 @@ class HFIRDataSet(DataSet):
 
 
 class DataCatalog(BaseCatalog):
-    extension = "xml"
+    extension = ["xml"]
     data_set_cls = HFIRDataSet
 
     def __init__(self, replace_db=False):
