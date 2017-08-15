@@ -421,7 +421,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 # Retrieve function pointers in advance to avoid expensive hash
                 # function on each loop iteration (improves performance)
                 scale_get_property, scale_set_property, scale_exec = self._init_child_algorithm("Scale")
-                scale_set_property("Operator", "Multiply")
+                scale_set_property("Operation", "Multiply")
 
                 # Scale every container workspace
                 for container_ws_name in container_ws_names:
