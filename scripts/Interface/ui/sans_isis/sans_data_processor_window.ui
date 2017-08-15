@@ -802,6 +802,9 @@ QGroupBox::title {
                <layout class="QVBoxLayout" name="mask_tab_right_layout">
                 <item>
                  <widget class="QGroupBox" name="phi_limit_group_box">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows for selecting pizza slice masks.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="title">
                    <string>Phi limit</string>
                   </property>
@@ -814,7 +817,11 @@ QGroupBox::title {
                     </widget>
                    </item>
                    <item row="0" column="4">
-                    <widget class="QLineEdit" name="phi_limit_max_line_edit"/>
+                    <widget class="QLineEdit" name="phi_limit_max_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stop angle in degree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
                    </item>
                    <item row="0" column="0">
                     <widget class="QLabel" name="phi_limit_from_label">
@@ -824,10 +831,17 @@ QGroupBox::title {
                     </widget>
                    </item>
                    <item row="0" column="1">
-                    <widget class="QLineEdit" name="phi_limit_min_line_edit"/>
+                    <widget class="QLineEdit" name="phi_limit_min_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Start angle in degree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
                    </item>
                    <item row="0" column="5">
                     <widget class="QCheckBox" name="phi_limit_use_mirror_check_box">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If the mirror sector should be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
                      <property name="text">
                       <string>use mirror sector</string>
                      </property>
@@ -838,12 +852,19 @@ QGroupBox::title {
                 </item>
                 <item>
                  <widget class="QGroupBox" name="radius_limit_group_box">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disk mask which is useful for the beam stop&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="title">
                    <string>Radius limit</string>
                   </property>
                   <layout class="QGridLayout" name="gridLayout_19">
                    <item row="1" column="1">
-                    <widget class="QLineEdit" name="radius_limit_min_line_edit"/>
+                    <widget class="QLineEdit" name="radius_limit_min_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower radius setting in mm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
                    </item>
                    <item row="1" column="0">
                     <widget class="QLabel" name="phi_limit">
@@ -853,7 +874,11 @@ QGroupBox::title {
                     </widget>
                    </item>
                    <item row="1" column="2">
-                    <widget class="QLineEdit" name="radius_limit_max_line_edit"/>
+                    <widget class="QLineEdit" name="radius_limit_max_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upper radius setting in mm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
                    </item>
                    <item row="0" column="1">
                     <widget class="QLabel" name="radius_limit_min_label">
@@ -866,22 +891,6 @@ QGroupBox::title {
                     <widget class="QLabel" name="radius_limit_max_label">
                      <property name="text">
                       <string>Max [mm]</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QGroupBox" name="groupBox_4">
-                  <property name="title">
-                   <string>Additional masking</string>
-                  </property>
-                  <layout class="QGridLayout" name="gridLayout_20">
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_9">
-                     <property name="text">
-                      <string>TODO</string>
                      </property>
                     </widget>
                    </item>

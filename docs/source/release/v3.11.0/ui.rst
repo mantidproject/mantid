@@ -45,7 +45,7 @@ Custom Interfaces
 #################
 
 - General > Multi dataset fitting interface and the general fitting dock now display the status string returned by the `Fit` algorithm. If an error occured during fitting it will be reported in this string.
-
+- SANS > ISIS SANS v2 experimental interface has become available. It has basic reduction functionalities and makes use of the new reduction backend.
 
 Bugs Resolved
 -------------

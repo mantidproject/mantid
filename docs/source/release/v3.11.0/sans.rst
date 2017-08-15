@@ -5,6 +5,12 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
+Interfaces
+----------
+
+- SANS > ISIS SANS v2 experimental interface has become available. It has basic reduction functionalities and makes use of the new reduction backend.
+
+
 Bug Fixes
 ---------
 
