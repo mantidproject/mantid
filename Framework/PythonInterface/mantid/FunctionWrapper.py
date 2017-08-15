@@ -482,7 +482,8 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
        # Set domain indices: 1 to 1       
        for i in range(0, len(self)):
           self.fun.setDomainIndex(i, i)
-           
+     
+    @property     
     def nDomains (self):
        """ Return number of domains 
            Used for testing

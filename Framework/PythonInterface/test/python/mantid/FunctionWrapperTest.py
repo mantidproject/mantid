@@ -518,7 +518,7 @@ class FunctionWrapperTest(unittest.TestCase):
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
         testhelpers.assertRaisesNothing(self, MultiDomainFunctionWrapper, g0, g1)
         m = MultiDomainFunctionWrapper( g0, g1, Global=["Height"])
-        self.assertEqual( m.nDomains(), 2)
+        self.assertEqual( m.nDomains, 2)
         m_str = str(m)
         self.assertEqual( m_str.count("ties"),1)
         self.assertEqual( m_str.count("Height"),4) # 2 in functions 2 in ties
