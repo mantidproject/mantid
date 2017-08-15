@@ -173,19 +173,18 @@ class FunctionWrapper(object):
           :param index: index of parameter
       """
       return self.fun.getParamName(index)
-       
-  def getFunction(self):
-      """ Return the underlying IFunction object
-      """
-      return self.fun
- 
+        
   @property
   def function(self):
+      """ Return the underlying IFunction object
+      """      
       return self.fun
  
   @property
   def name(self):
-      return self.name
+      """ Return the name of the function
+      """
+      return self.fun.name()
        
 class CompositeFunctionWrapper(FunctionWrapper):
     """ Wrapper class for Composite Fitting Function

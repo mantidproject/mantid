@@ -22,6 +22,10 @@ class FunctionWrapperTest(unittest.TestCase):
         
     def test_creation(self):
         testhelpers.assertRaisesNothing(self, FunctionWrapper, "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+    
+    def test_name(self):
+        g = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        self.assertEqual(g.name,"Gaussian")
         
     def test_read_array_elements(self):
         g = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
