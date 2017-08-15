@@ -7,8 +7,8 @@
  name="HET" valid-from   ="1900-01-31 23:59:59"
                        valid-to     ="2100-01-31 23:59:59"
                last-modified="2017-06-08 00:00:00">
-<!-- this is trial IDF build to allow ISIS reduction to work. Pixel and tube sizes are almost certainly wrong as I do not have
-     full information about them. -->
+<!-- this is trial IDF build to allow ISIS reduction to work. Pixel and tubes parameters and sizes are certainly wrong as I do not have
+     full information about them. (note valid on 15/08/2017) -->
 <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
