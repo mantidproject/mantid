@@ -22,6 +22,7 @@ const int QMaxCol = 5;
 const int DQQCol = 6;
 const int ScaleCol = 7;
 const int OptionsCol = 8;
+const int HiddenOptionsCol = 9;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -63,6 +64,9 @@ public:
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
+
+  // Processing options
+  MOCK_METHOD1(setForcedReProcessing, void(bool));
 
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
@@ -135,6 +139,7 @@ public:
   MOCK_CONST_METHOD2(giveUserWarning,
                      void(const std::string &prompt, const std::string &title));
   MOCK_METHOD0(publishCommandsMocked, void());
+  MOCK_METHOD1(setForcedReProcessing, void(bool));
 
 private:
   // Calls we don't care about
