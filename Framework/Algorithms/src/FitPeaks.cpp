@@ -33,7 +33,6 @@ using Mantid::HistogramData::HistogramY;
 
 using namespace std;
 
-const double MAGICNUMBER = 2.0;
 const size_t X0 = 3;
 const size_t HEIGHT = 0;
 
@@ -203,23 +202,28 @@ void FitPeaks::fitPeaks() {
       fitSpectraPeaks(wi, peak_positions, peak_parameters, fitted_peaks,
                       fitted_peaks_windows);
 
-      g_log.notice() << "[DB....Outer Most] " << peak_positions.size() << ", "
-                     << peak_parameters.size() << ", " << fitted_peaks.size()
-                     << "\n";
-
       PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
-        m_peakPosWS->dataY(wi)[0] = peak_positions[0];
-        g_log.notice() << peak_parameters[0].size() << "\n";
-        g_log.notice() << fitted_peaks[0].size() << "\n";
+        g_log.notice() << "[DB....Outer Most] " << peak_positions.size() << ", "
+                       << peak_parameters.size() << ", " << fitted_peaks.size()
+                       << "\n";
+
+        // set the fitted peaks' value to output workspace
         for (size_t ipeak = 0; ipeak < fitted_peaks.size(); ++ipeak) {
+          // set the peak positions
+          m_peakPosWS->dataY(wi)[ipeak] = peak_positions[ipeak];
+          // peak parameters
+          size_t xindex = wi - m_startWorkspaceIndex;
+          size_t spec_index = 5 * ipeak;
+          for (size_t ipar = 0; ipar < 5; ++ipar)
+            m_peakParamsWS->dataY(spec_index + ipar)[xindex] =
+                peak_parameters[ipeak][ipar];
+
+          // about the peak
           auto vec_x = m_fittedPeakWS->histogram(wi).x();
           double window_left = fitted_peaks_windows[ipeak][0];
           double window_right = fitted_peaks_windows[ipeak][1];
-          //    auto vec_x = m_inputWS->histogram(wi).x();
           size_t window_left_index = findXIndex(vec_x, window_left);
           size_t window_right_index = findXIndex(vec_x, window_right);
-
-          // findXIndex(, fitted_peaks_windows[ipeak]);
           g_log.notice() << "Set Y value from index " << window_left_index
                          << " to " << window_right_index << "\n";
           for (size_t ix = window_left_index; ix < window_right_index; ++ix)
@@ -398,21 +402,22 @@ double FitPeaks::fitSinglePeak(size_t wsindex, size_t peakindex,
   namess << "_param";
   std::string paramwsname = namess.str();
 
-  g_log.notice() << "[DB] wsindex " << wsindex << ", peak index " << peakindex
-                 << "\n";
-  g_log.notice() << "[DB] Init peak parameters values: ";
-  for (auto iter = init_peak_values.begin(); iter != init_peak_values.end();
-       ++iter)
-    g_log.notice() << *iter << ", ";
-  g_log.notice() << "\n[DB] Init background values: ";
-  for (auto iter = init_bkgd_values.begin(); iter != init_bkgd_values.end();
-       ++iter)
-    g_log.notice() << *iter << ", ";
-  g_log.notice() << "\n[DB] Fit window: " << fit_window[0] << ", "
-                 << fit_window[1] << "\n";
-  g_log.notice() << "[DB] Peak range: " << peak_range[0] << ", "
-                 << peak_range[1];
-  g_log.notice() << "... ... ||\n";
+  //  g_log.notice() << "[DB] wsindex " << wsindex << ", peak index " <<
+  //  peakindex
+  //                 << "\n";
+  //  g_log.notice() << "[DB] Init peak parameters values: ";
+  //  for (auto iter = init_peak_values.begin(); iter != init_peak_values.end();
+  //       ++iter)
+  //    g_log.notice() << *iter << ", ";
+  //  g_log.notice() << "\n[DB] Init background values: ";
+  //  for (auto iter = init_bkgd_values.begin(); iter != init_bkgd_values.end();
+  //       ++iter)
+  //    g_log.notice() << *iter << ", ";
+  //  g_log.notice() << "\n[DB] Fit window: " << fit_window[0] << ", "
+  //                 << fit_window[1] << "\n";
+  //  g_log.notice() << "[DB] Peak range: " << peak_range[0] << ", "
+  //                 << peak_range[1];
+  //  g_log.notice() << "... ... ||\n";
 
   fit_peak->setPropertyValue("InputWorkspace", m_inputWS->getName());
   fit_peak->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
@@ -541,19 +546,33 @@ double FitPeaks::findMaxValue(size_t wi, double left_window_boundary,
   return abs_max;
 }
 
+/**
+ * @brief FitPeaks::generateOutputWorkspaces
+ */
 void FitPeaks::generateOutputWorkspaces() {
-  // MatrixWorkspace_sptr outputWS
-  //  size_t NVectors, size_t XLength,
-  //  size_t YLength)
+  // create output workspace for peak positions
   size_t num_hist = m_inputWS->getNumberHistograms();
   m_peakPosWS = WorkspaceFactory::Instance().create(
       "Workspace2D", num_hist, m_numPeaksToFit, m_numPeaksToFit);
-  m_peakParamsWS = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_numPeaksToFit * 6,
-      (m_stopWorkspaceIndex - m_startWorkspaceIndex),
-      (m_stopWorkspaceIndex - m_startWorkspaceIndex));
+  for (size_t wi = 0; wi < num_hist; ++wi)
+    for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak)
+      m_peakPosWS->dataX(wi)[ipeak] = m_peakCenters[ipeak];
 
-  std::string fit_ws_name = getPropertyValue("FittedPeaksWorkspace");
+  // create output workspace of all fitted peak parameters
+  // it has number of peaks * 6 spectra
+  // following the order of input peak positions, they are
+  // I, A, B, X0, S
+  size_t num_spectra_to_fit = m_stopWorkspaceIndex - m_startWorkspaceIndex;
+  m_peakParamsWS = WorkspaceFactory::Instance().create(
+      "Workspace2D", m_numPeaksToFit * 5, num_spectra_to_fit,
+      num_spectra_to_fit);
+  for (size_t wi = 0; wi < m_peakParamsWS->getNumberHistograms(); ++wi) {
+    for (size_t xi = 0; xi < num_spectra_to_fit; ++xi)
+      m_peakParamsWS->dataY(wi)[xi] =
+          static_cast<double>(xi + m_startWorkspaceIndex);
+  }
+
+  // std::string fit_ws_name = getPropertyValue("FittedPeaksWorkspace");
   m_fittedPeakWS = API::WorkspaceFactory::Instance().create(m_inputWS);
   for (size_t iws = 0; iws < m_fittedPeakWS->getNumberHistograms(); ++iws) {
     auto out_vecx = m_fittedPeakWS->histogram(iws).x();
