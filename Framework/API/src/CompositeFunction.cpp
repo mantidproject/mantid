@@ -423,6 +423,7 @@ void CompositeFunction::removeFunction(size_t i) {
   // Reduction in parameters
   size_t dnp = fun->nParams();
 
+  // Remove ties involving parameters of the to-be-deleted function
   for (size_t j = 0; j < nParams();) {
     ParameterTie *tie = getTie(j);
     if (tie && tie->findParametersOf(fun.get())) {
@@ -432,9 +433,8 @@ void CompositeFunction::removeFunction(size_t i) {
     }
   }
 
-  // Shift down the function indeces for parameters
+  // Shift down the function indices for parameters
   for (auto it = m_IFunction.begin(); it != m_IFunction.end();) {
-
     if (*it == i) {
       it = m_IFunction.erase(it);
     } else {
@@ -454,6 +454,44 @@ void CompositeFunction::removeFunction(size_t i) {
   m_paramOffsets.erase(m_paramOffsets.begin() + i);
 
   m_functions.erase(m_functions.begin() + i);
+}
+
+/** Insert a function at a given index in the vector of component functions.
+ * @param i :: The index assigned to the new function.
+ * @param f :: A pointer to the new function
+ */
+void CompositeFunction::insertFunction(size_t i, IFunction_sptr f) {
+  auto old_nFunctions = nFunctions();  // number of functions before insertion
+  if (i >= old_nFunctions) {
+    throw std::out_of_range("Function index (" + std::to_string(i) +
+                            ") out of range (" + std::to_string(nFunctions()) +
+                            ").");
+  }
+  // Shift the function indices for parameters at and above the insertion index
+  for (auto it = m_IFunction.begin(); it != m_IFunction.end(); it++) {
+    if (*it >= i) {
+      *it += 1;
+    }
+  }
+  // Insert index for as many parameters owned by the new function
+  size_t np_new = f->nParams();
+  for (auto it = m_IFunction.begin(); it != m_IFunction.end(); it++) {
+    if (*it == i+1) {
+      m_IFunction.insert(it - 1, np_new, i);  // insert right before
+      break;
+    }
+  }
+  m_nParams += np_new;
+  // Insert the parameter offset associated to parameters of the new function
+  m_paramOffsets.insert(m_paramOffsets.begin() + i, m_paramOffsets[i]);
+  // Shift the parameter offsets for the remaining functions
+  // by the new number of newly included parameters
+  for (size_t j = i + 1; j < 1 + old_nFunctions; j++) {
+    m_paramOffsets[j] += np_new;
+  }
+  // Insert the new function
+  m_functions.insert(m_functions.begin() + i, f);
+  // From this point on, nFunction() returns 1 + old_nFunction
 }
 
 /** Replace a function with a new one. The old function is deleted.
@@ -488,7 +526,7 @@ void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
 
   size_t np_new = f->nParams();
 
-  // Modify function indeces: The new function may have different number of
+  // Modify function indices: The new function may have different number of
   // parameters
   {
     auto itFun = std::find(m_IFunction.begin(), m_IFunction.end(), i);

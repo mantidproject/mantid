@@ -4,7 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/AssociativeCompositeFunction.h"
 #include <boost/shared_array.hpp>
 #include <cmath>
 
@@ -39,10 +40,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ProductFunction : public API::CompositeFunction {
+class DLLExport ProductFunction : public API::AssociativeCompositeFunction {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "ProductFunction"; }
+  /// if f is of the same class then its component functions
+  /// are treated separately
+  bool isAssociative(API::IFunction_sptr f) const override;
   /// Function you want to fit to.
   /// @param domain :: The space on which the function acts
   /// @param values :: The buffer for writing the calculated values. Must be big

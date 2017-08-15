@@ -12,6 +12,18 @@ using namespace CurveFitting;
 
 DECLARE_FUNCTION(ProductFunction)
 
+/** Ascertain if a function is of the same class. If so, its
+ * component functions will be treated separately when combined
+ * with this object.
+ *  @param f :: pointer to the query function
+ */
+bool ProductFunction::isAssociative(API::IFunction_sptr f) const {
+  if (boost::dynamic_pointer_cast<ProductFunction>(f)) {
+    return true;
+  }
+  return false;
+}
+
 /** Function you want to fit to.
  *  @param domain :: The buffer for writing the calculated values. Must be big
  * enough to accept dataSize() values

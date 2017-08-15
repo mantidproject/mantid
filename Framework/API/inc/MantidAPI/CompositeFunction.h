@@ -163,6 +163,8 @@ public:
   std::size_t nFunctions() const { return m_functions.size(); }
   /// Remove a function
   void removeFunction(size_t i);
+  /// Insert a function at a given index in the vector of component functions
+  void insertFunction(size_t i, IFunction_sptr f);
   /// Replace a function
   void replaceFunction(size_t i, IFunction_sptr f);
   /// Replace a function
