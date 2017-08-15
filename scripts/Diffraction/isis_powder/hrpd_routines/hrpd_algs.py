@@ -15,11 +15,17 @@ def get_run_details(run_number_string, inst_settings, is_vanadium):
     mapping_dict_callable = cal_mapping_callable.add_to_func_chain(user_function=hrpd_get_inst_mode,
                                                                    inst_settings=inst_settings)
 
-    empty_run_callable = mapping_dict_callable.add_to_func_chain(
-        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="empty_run_numbers")
+    tof_dict_callable = mapping_dict_callable.add_to_func_chain(user_function=hrpd_get_tof_window,
+                                                                inst_settings=inst_settings)
 
-    vanadium_run_callable = mapping_dict_callable.add_to_func_chain(
-        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="vanadium_run_numbers")
+    err_message = "this must be under 'coupled' or 'decoupled' and the time of flight window eg 10-110."
+    empty_run_callable = tof_dict_callable.add_to_func_chain(
+        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="empty_run_numbers",
+        append_to_error_message=err_message)
+
+    vanadium_run_callable = tof_dict_callable.add_to_func_chain(
+        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="vanadium_run_numbers",
+        append_to_error_message=err_message)
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
                                      is_vanadium_run=is_vanadium, empty_run_call=empty_run_callable,
@@ -29,6 +35,11 @@ def get_run_details(run_number_string, inst_settings, is_vanadium):
 def hrpd_get_inst_mode(forwarded_value, inst_settings):
     cal_mapping = forwarded_value
     return common.cal_map_dictionary_key_helper(dictionary=cal_mapping, key=inst_settings.mode)
+
+
+def hrpd_get_tof_window(forwarded_value, inst_settings):
+    cal_mapping = forwarded_value
+    return common.cal_map_dictionary_key_helper(dictionary=cal_mapping, key=inst_settings.tof_window)
 
 
 def process_vanadium_for_focusing(bank_spectra, spline_number):

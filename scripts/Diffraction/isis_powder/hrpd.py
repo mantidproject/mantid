@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.routines import instrument_settings
+from isis_powder.routines import common, instrument_settings
 from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
 
 
@@ -28,12 +28,14 @@ class HRPD(AbstractInst):
         self._cached_run_details = {}
 
     def focus(self, **kwargs):
+        self._switch_decoupled_mode_inst_settings(kwargs.get("decoupled_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(
             run_number_string=self._inst_settings.run_number, do_van_normalisation=self._inst_settings.do_van_norm,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
+        self._switch_decoupled_mode_inst_settings(kwargs.get("decoupled_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
@@ -56,3 +58,14 @@ class HRPD(AbstractInst):
         output = hrpd_algs.process_vanadium_for_focusing(bank_spectra=focused_vanadium_banks,
                                                          spline_number=spline_coeff)
         return output
+
+    def _switch_decoupled_mode_inst_settings(self, decoupled_mode):
+        self._inst_settings.update_attributes(
+            advanced_config=hrpd_advanced_config.get_decoupled_mode_dict(decoupled_mode), suppress_warnings=True)
+
+    def _crop_banks_to_user_tof(self, focused_banks):
+        return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.tof_cropping_values)
+
+    def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
+        return common.crop_in_tof(ws_to_crop=van_ws_to_crop, x_min=self._inst_settings.van_tof_cropping[0],
+                                  x_max=self._inst_settings.van_tof_cropping[-1])
