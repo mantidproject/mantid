@@ -688,9 +688,8 @@ void ConvolutionFitSequential::extractMembers(
   }
 
   for (auto &memberWsName : memberWorkspaces) {
-    auto memberWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            memberWsName);
+    auto memberWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        memberWsName);
     memberWs->replaceAxis(1, qAxis.release());
     memberWs->setYUnitLabel("MomentumTransfer");
   }
