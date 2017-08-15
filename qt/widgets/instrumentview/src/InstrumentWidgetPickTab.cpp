@@ -44,6 +44,7 @@
 #include <boost/math/constants/constants.hpp>
 
 namespace MantidQt {
+using Widgets::MplCpp::Axes;
 namespace MantidWidgets {
 
 using namespace boost::math;
@@ -80,7 +81,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_plot, SIGNAL(showContextMenu()), this, SLOT(plotContextMenu()));
   m_plot->hide();
 
-  m_mplPlot = new MiniPlot(this);
+  m_miniplot = new MiniPlot(this);
 
   // Plot context menu actions
   m_sumDetectors = new QAction("Sum", this);
@@ -146,7 +147,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 
   CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
-  m_plotPanel = panelStack->addPanel("Name", m_mplPlot);
+  m_plotPanel = panelStack->addPanel("Name", m_miniplot);
 
   m_selectionType = Single;
 
@@ -577,7 +578,8 @@ void InstrumentWidgetPickTab::initSurface() {
   }
   m_infoController =
       new ComponentInfoController(this, m_instrWidget, m_selectionInfoDisplay);
-  m_plotController = new DetectorPlotController(this, m_instrWidget, m_plot);
+  m_plotController =
+      new DetectorPlotController(this, m_instrWidget, m_plot, m_miniplot);
   m_plotController->setTubeXUnits(
       static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache));
   m_plotController->setPlotType(
@@ -1120,10 +1122,11 @@ void ComponentInfoController::clear() { m_selectionInfoDisplay->clear(); }
 */
 DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
                                                InstrumentWidget *instrWidget,
-                                               OneCurvePlot *plot)
+                                               OneCurvePlot *plot,
+                                               MiniPlot *miniplot)
     : QObject(tab), m_tab(tab), m_instrWidget(instrWidget), m_plot(plot),
-      m_plotType(Single), m_enabled(true), m_tubeXUnits(DETECTOR_ID),
-      m_currentDetID(-1) {
+      m_miniplot(miniplot), m_plotType(Single), m_enabled(true),
+      m_tubeXUnits(DETECTOR_ID), m_currentDetID(-1) {
   connect(m_plot, SIGNAL(clickedAt(double, double)), this,
           SLOT(addPeak(double, double)));
 }
@@ -1158,11 +1161,12 @@ void DetectorPlotController::setPlotData(size_t pickID) {
     }
   } else {
     m_plot->clearCurve();
+    m_miniplot->clearLines();
   }
 }
 
 /**
-* Set curev data from multiple detectors: sum their spectra.
+* Set curve data from multiple detectors: sum their spectra.
 * @param detIDs :: A list of detector IDs.
 */
 void DetectorPlotController::setPlotData(QList<int> detIDs) {
@@ -1176,8 +1180,12 @@ void DetectorPlotController::setPlotData(QList<int> detIDs) {
   if (!x.empty()) {
     m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
                     actor.getWorkspace()->getAxis(0)->unit()->unitID());
+    m_miniplot->plotLine(x, y, "-");
+    m_miniplot->setLabel(Axes::Label::X,
+                         actor.getWorkspace()->getAxis(0)->unit()->unitID());
   }
   m_plot->setLabel("multiple");
+  m_miniplot->setCurveLabel("multiple");
 }
 
 /**
@@ -1194,6 +1202,7 @@ void DetectorPlotController::updatePlot() {
 void DetectorPlotController::clear() {
   m_plot->clearCurve();
   m_plot->clearPeakLabels();
+  m_miniplot->clearLines();
 }
 
 /**
@@ -1201,7 +1210,6 @@ void DetectorPlotController::clear() {
 * @param detid :: ID of the detector to be plotted.
 */
 void DetectorPlotController::plotSingle(int detid) {
-
   clear();
   std::vector<double> x, y;
   prepareDataForSinglePlot(detid, x, y);
@@ -1216,6 +1224,13 @@ void DetectorPlotController::plotSingle(int detid) {
                       ->unit()
                       ->unitID());
   m_plot->setLabel("Detector " + QString::number(detid));
+  m_miniplot->plotLine(x, y, "-");
+  m_miniplot->setLabel(Axes::Label::X, m_instrWidget->getInstrumentActor()
+                                           .getWorkspace()
+                                           ->getAxis(0)
+                                           ->unit()
+                                           ->unitID());
+  m_miniplot->setCurveLabel("Detector " + QString::number(detid));
 
   // find any markers
   auto surface = m_tab->getSurface();
@@ -1261,6 +1276,7 @@ void DetectorPlotController::plotTube(int detid) {
     }
   } else {
     m_plot->clearCurve();
+    m_miniplot->clearLines();
   }
 }
 
@@ -1285,6 +1301,14 @@ void DetectorPlotController::plotTubeSums(int detid) {
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
                   actor.getWorkspace()->getAxis(0)->unit()->unitID());
   m_plot->setLabel(label);
+  m_miniplot->removeLine(0);
+  m_miniplot->plotLine(x, y, "-");
+  m_miniplot->setLabel(Axes::Label::X, m_instrWidget->getInstrumentActor()
+                                           .getWorkspace()
+                                           ->getAxis(0)
+                                           ->unit()
+                                           ->unitID());
+  m_miniplot->setCurveLabel(label);
 }
 
 /**
@@ -1320,6 +1344,11 @@ void DetectorPlotController::plotTubeIntegrals(int detid) {
   QString label = QString::fromStdString(parent->getName()) + " (" +
                   QString::number(detid) + ") Integrals/" + getTubeXUnitsName();
   m_plot->setLabel(label);
+
+  m_miniplot->removeLine(0);
+  m_miniplot->plotLine(x, y, "-");
+  m_miniplot->setLabel(Axes::Label::X, xAxisUnits);
+  m_miniplot->setCurveLabel(label);
 }
 
 /**

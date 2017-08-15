@@ -18,17 +18,22 @@
 */
 #include "MantidQtWidgets/MplCpp/MplPlotWidget.h"
 
+#include <QStringList>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
-class MiniPlot : public QWidget {
+class MiniPlot : public Widgets::MplCpp::MplFigureCanvas {
   Q_OBJECT
 
 public:
   MiniPlot(QWidget *parent = nullptr);
 
+  void setCurveLabel(QString label);
+
 private:
-  MantidQt::Widgets::MplCpp::MplFigureCanvas *m_canvas;
+  QString m_activeCurveLabel;
+  QStringList m_storedCurveLabels;
 };
 }
 }

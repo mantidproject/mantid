@@ -1,8 +1,7 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 
-#include <QVBoxLayout>
-
 namespace MantidQt {
+using Widgets::MplCpp::Axes;
 using Widgets::MplCpp::MplFigureCanvas;
 namespace MantidWidgets {
 
@@ -11,9 +10,16 @@ namespace MantidWidgets {
  * @param parent A widget to be the parent
  */
 MiniPlot::MiniPlot(QWidget *parent)
-    : QWidget(parent), m_canvas(new MplFigureCanvas(111, this)) {
-  setLayout(new QVBoxLayout);
-  layout->addWidget(m_canvas);
+    : MplFigureCanvas(111, parent), m_activeCurveLabel(),
+      m_storedCurveLabels() {
+  setScale(Axes::Scale::X, 0, 1);
+  setScale(Axes::Scale::Y, -1.2, 1.2);
 }
+
+/**
+ * Set a label for the current curve
+ * @param label A string key to reference the curve
+ */
+void MiniPlot::setCurveLabel(QString label) { m_activeCurveLabel = label; }
 }
 }

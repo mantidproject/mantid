@@ -124,7 +124,7 @@ private:
 
   /* Pick tab controls */
   OneCurvePlot *m_plot; ///< Miniplot to display data in the detectors
-  MiniPlot *m_mplPlot;  ///< Miniplot to display data in the detectors
+  MiniPlot *m_miniplot;  ///< Miniplot to display data in the detectors
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode
@@ -237,7 +237,8 @@ public:
   };
 
   DetectorPlotController(InstrumentWidgetPickTab *tab,
-                         InstrumentWidget *instrWidget, OneCurvePlot *plot);
+                         InstrumentWidget *instrWidget, OneCurvePlot *plot,
+                         MiniPlot *miniplot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
   void setPlotData(QList<int> detIDs);
@@ -278,6 +279,7 @@ private:
   InstrumentWidgetPickTab *m_tab;
   InstrumentWidget *m_instrWidget;
   OneCurvePlot *m_plot;
+  MiniPlot *m_miniplot;
 
   PlotType m_plotType;
   bool m_enabled;
