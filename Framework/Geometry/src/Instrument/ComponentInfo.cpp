@@ -77,7 +77,7 @@ ComponentInfo::ComponentInfo(const ComponentInfo &other)
     : m_componentInfo(
           Kernel::make_unique<Beamline::ComponentInfo>(*other.m_componentInfo)),
       m_componentIds(other.m_componentIds),
-      m_compIDToIndex(other.m_compIDToIndex) {}
+      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ComponentInfo::~ComponentInfo() = default;
