@@ -446,7 +446,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             if container_ws_names:
                 rebin_set_property("WorkspaceToRebin", container_ws_names[idx])
                 rebin_set_property("WorkspaceToMatch", sample_ws)
-                rebin_set_property("OutputWorkspace".container_ws_names[idx])
+                rebin_set_property("OutputWorkspace", container_ws_names[idx])
                 rebin_exec()
 
                 minus_set_property("LHSWorkspace", sample_ws)
