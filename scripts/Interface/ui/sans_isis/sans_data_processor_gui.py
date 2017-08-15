@@ -1,4 +1,5 @@
 from __future__ import (absolute_import)
+import os
 try:
     from mantidplot import *
     canMantidPlot = True
@@ -22,6 +23,7 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
 # Globals
 # ----------------------------------------------------------------------------------------------------------------------
 gui_logger = Logger("SANS GUI LOGGER")
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Free Functions

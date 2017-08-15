@@ -330,12 +330,14 @@ class RunTabPresenter(object):
         """
         Disable all input fields and buttons during the execution of the reduction.
         """
+        # TODO: think about enabling and disable some controls during reduction
         pass
 
     def enable_controls(self):
         """
         Enable all input fields and buttons after the execution has completed.
         """
+        # TODO: think about enabling and disable some controls during reduction
         pass
 
     # ------------------------------------------------------------------------------------------------------------------
