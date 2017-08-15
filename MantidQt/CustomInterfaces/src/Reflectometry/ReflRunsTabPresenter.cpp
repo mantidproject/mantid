@@ -441,6 +441,28 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
+/** Tells view to enable all 'process' buttons and disable the 'pause' button
+* when data reduction is paused
+*/
+void ReflRunsTabPresenter::pause() {
+  enableAction(DataProcessorAction::PROCESS);
+  disableAction(DataProcessorAction::PAUSE);
+  m_view->enableTransferButton();
+  m_view->enableAutoreduceButton();
+}
+
+
+/** Disables the 'process' button and enables the 'pause' button when data
+ * reduction is resumed. Also notifies main presenter that data reduction is
+ * confirmed to be resumed.
+*/
+void ReflRunsTabPresenter::resume() {
+  disableAction(DataProcessorAction::PROCESS);
+  enableAction(DataProcessorAction::PAUSE);
+  preventTableModification();
+  m_mainPresenter->notify(
+      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
+}
 void ReflRunsTabPresenter::enableAction(DataProcessorAction action) {
   m_view->enableAction(action);
 }
@@ -449,14 +471,12 @@ void ReflRunsTabPresenter::disableAction(DataProcessorAction action) {
   m_view->disableAction(action);
 }
 
-/** Tells view to enable all 'process' buttons and disable the 'pause' button
-* when data reduction is paused
+/** Notifies main presenter that data reduction is confirmed to be paused
 */
-void ReflRunsTabPresenter::pause() {
-  m_view->enableAction(DataProcessorAction::PROCESS);
-  m_view->disableAction(DataProcessorAction::PAUSE);
-  m_view->enableTransferButton();
-  m_view->enableAutoreduceButton();
+void ReflRunsTabPresenter::confirmReductionPaused() {
+  m_mainPresenter->notify(
+      IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
+  allowTableModification();
 }
 
 void ReflRunsTabPresenter::preventTableModification() {
@@ -473,18 +493,6 @@ void ReflRunsTabPresenter::allowTableModification() {
   enableTableModification([this](auto action) -> void { enableAction(action); });
 }
 
-/** Disables the 'process' button and enables the 'pause' button when data
- * reduction is resumed. Also notifies main presenter that data reduction is
- * confirmed to be resumed.
-*/
-void ReflRunsTabPresenter::resume() {
-  m_view->disableAction(DataProcessorAction::PROCESS);
-  m_view->enableAction(DataProcessorAction::PAUSE);
-  preventTableModification();
-  m_mainPresenter->notify(
-      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
-}
-
 /** Determines whether to start a new autoreduction. Starts a new one if the
 * either the search number, transfer method or instrument has changed
 * @return : Boolean on whether to start a new autoreduction
@@ -497,19 +505,10 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
   return searchNumChanged || transferMethodChanged || m_instrumentChanged;
 }
 
-/** Notifies main presenter that data reduction is confirmed to be paused
-*/
-void ReflRunsTabPresenter::confirmReductionPaused() {
-
-  m_mainPresenter->notify(
-      IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
-  allowTableModification();
-}
-
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
 void ReflRunsTabPresenter::confirmReductionResumed() {
-  m_view->enableAction(DataProcessorAction::PROCESS);
+  enableAction(DataProcessorAction::PAUSE);
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }

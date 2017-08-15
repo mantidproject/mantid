@@ -262,7 +262,7 @@ void QtReflRunsTabView::disableAction(DataProcessorAction action) {
 * @param index : The index of the action in the "Edit" menu
 */
 void QtReflRunsTabView::enableAction(DataProcessorAction action) {
-  disable(*(ui.menuRows->actions()[toRowIndex(action)]));
+  enable(*(ui.menuRows->actions()[toRowIndex(action)]));
 }
 
 void QtReflRunsTabView::setTransferEnabled(bool enabled) {
