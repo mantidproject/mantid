@@ -522,7 +522,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         # dim: dimension for each atomic displacement (atoms vibrate in 3D space)
         #
         # The following conversion is necessary:
-        # (num_freq, num_atom, dim) -> (num_atom, num_freq, dim)
+        # (num_freq * num_atom * dim) -> (num_freq, num_atom, dim) -> (num_atom, num_freq, dim)
 
         num_freq = len(freq)
         dim = 3
