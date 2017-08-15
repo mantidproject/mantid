@@ -362,6 +362,18 @@ void QDataProcessorWidget::resume() {
 
 void QDataProcessorWidget::preventTableModification() {
   disableTableModification([this](auto action) -> void { disableAction(action); });
+  disableSelectionAndEditing();
+}
+
+void QDataProcessorWidget::disableSelectionAndEditing() {
+  ui.viewTable->clearSelection();
+  ui.viewTable->setSelectionMode(QAbstractItemView::SelectionMode::NoSelection);
+  ui.viewTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
+void QDataProcessorWidget::enableSelectionAndEditing() {
+  ui.viewTable->setSelectionMode(QAbstractItemView::SelectionMode::ContiguousSelection);
+  ui.viewTable->setEditTriggers(QAbstractItemView::AllEditTriggers);
 }
 
 void QDataProcessorWidget::enableResumeButtons() {
@@ -446,6 +458,7 @@ void QDataProcessorWidget::confirmReductionPaused() {
 }
 
 void QDataProcessorWidget::allowTableModification() {
+  enableSelectionAndEditing();
   enableTableModification([this](auto action) -> void { enableAction(action); });
 }
 
@@ -509,8 +522,8 @@ void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
   ui.viewTable->clearSelection();
   auto selectionModel = ui.viewTable->selectionModel();
 
-  for (auto group = groups.begin(); group != groups.end(); ++group) {
-    selectionModel->select(ui.viewTable->model()->index((*group), 0),
+  for (const auto& group : groups) {
+    selectionModel->select(ui.viewTable->model()->index(group, 0),
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
   }

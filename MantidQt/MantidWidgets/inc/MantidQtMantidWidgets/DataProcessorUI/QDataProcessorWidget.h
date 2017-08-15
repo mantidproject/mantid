@@ -169,6 +169,8 @@ private:
   void disableActionOnContextMenu(DataProcessorAction toDisable);
   void enableActionOnToolbar(DataProcessorAction toEnable);
   void enableActionOnContextMenu(DataProcessorAction toEnable);
+  void disableSelectionAndEditing();
+  void enableSelectionAndEditing();
 
   static void disableActionOnWidget(QWidget &widget, int index);
   static void enableActionOnWidget(QWidget &widget, int index);
