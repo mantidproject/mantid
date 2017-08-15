@@ -682,16 +682,16 @@ void ConvolutionFitSequential::extractMembers(
 
   // Update the y-axis of each created member workspace - set to
   // the Q values from the QENS data.
-  NumericAxis *qAxis = new NumericAxis(resultSize);
+  auto qAxis = Kernel::make_unique<NumericAxis>(resultSize);
   for (size_t j = 0; j < resultSize; j++) {
     qAxis->setValue(j, qValues[j]);
   }
 
   for (auto &memberWsName : memberWorkspaces) {
-    MatrixWorkspace_sptr memberWs =
+    auto memberWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             memberWsName);
-    memberWs->replaceAxis(1, qAxis);
+    memberWs->replaceAxis(1, qAxis.release());
     memberWs->setYUnitLabel("MomentumTransfer");
   }
 
