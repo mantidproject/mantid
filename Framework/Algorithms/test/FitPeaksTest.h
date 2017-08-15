@@ -26,6 +26,9 @@ using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 
 class FitPeaksTest : public CxxTest::TestSuite {
+private:
+  std::string m_inputWorkspaceName;
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -35,13 +38,23 @@ public:
   }
   static void destroySuite(FitPeaksTest *suite) { delete suite; }
 
+  void test_Init() {
+    // Generate input workspace
+    m_inputWorkspaceName = loadVulcanHighAngleData();
+
+    // Initialize FitPeak
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
-  void Xtest_Init() {
+  void test_singlePeakSpectrum() {
     // Generate input workspace
-    std::string input_ws_name = loadVulcanHighAngleData();
-
+    // std::string input_ws_name = loadVulcanHighAngleData();
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
@@ -54,9 +67,11 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 19999));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("StartWorkspaceIndex", 19014));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 19015));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
@@ -81,9 +96,9 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on single peak on multiple spectra
     */
-  void test_singlePeakMultiSpectra() {
+  void Ptest_singlePeakMultiSpectra() {
     // Generate input workspace
-    std::string input_ws_name = loadVulcanHighAngleData();
+    // std::string input_ws_name = loadVulcanHighAngleData();
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
@@ -97,7 +112,7 @@ public:
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", input_ws_name));
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("StartWorkspaceIndex", 19990));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
@@ -140,7 +155,7 @@ public:
     */
   void test_SingleSpectrum3Peaks() {
     // Generate input workspace
-    std::string input_ws_name = loadVulcanHighAngleData();
+    // std::string input_ws_name = loadVulcanHighAngleData();
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
@@ -154,10 +169,9 @@ public:
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", input_ws_name));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("StartWorkspaceIndex", 19999));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 6468));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 24900));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakCenters", "1.0758, 0.89198"));
     TS_ASSERT_THROWS_NOTHING(

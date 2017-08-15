@@ -65,7 +65,7 @@ size_t findXIndex(const HistogramX &vecx, double x) {
 /** constructor
  * @brief FitPeaks::FitPeaks
  */
-FitPeaks::FitPeaks() {}
+FitPeaks::FitPeaks() : m_minPeakMaxValue(20.) {}
 
 void FitPeaks::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -203,9 +203,14 @@ void FitPeaks::fitPeaks() {
                       fitted_peaks_windows);
 
       PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
-        g_log.notice() << "[DB....Outer Most] " << peak_positions.size() << ", "
-                       << peak_parameters.size() << ", " << fitted_peaks.size()
-                       << "\n";
+        //        g_log.notice() << "[DB....Outer Most] " <<
+        //        peak_positions.size() << ", "
+        //                       << peak_parameters.size() << ", " <<
+        //                       fitted_peaks.size()
+        //                       << "\n"
+        //                       << "Size of peak parameters vector = " <<
+        //                       peak_parameters.size()
+        //                       << "\n";
 
         // set the fitted peaks' value to output workspace
         for (size_t ipeak = 0; ipeak < fitted_peaks.size(); ++ipeak) {
@@ -214,9 +219,33 @@ void FitPeaks::fitPeaks() {
           // peak parameters
           size_t xindex = wi - m_startWorkspaceIndex;
           size_t spec_index = 5 * ipeak;
-          for (size_t ipar = 0; ipar < 5; ++ipar)
+          for (size_t ipar = 0; ipar < 5; ++ipar) {
+            //            g_log.notice() << "Data Y size = " <<
+            //            m_peakParamsWS->getNumberHistograms()
+            //                           << "; Working on spectrum " <<
+            //                           spec_index + ipar << " with size "
+            //                           << m_peakParamsWS->histogram(spec_index
+            //                           + ipar).y().size()
+            //                           << " and set value to index " << xindex
+            //                           << "\n"
+            //                           << "Peak parameters size = " <<
+            //                           peak_parameters[ipeak].size();
+            if (peak_parameters[ipeak].size() < 5) {
+              std::stringstream errss;
+              errss << "wsindex: " << wi << "  Data Y size = "
+                    << m_peakParamsWS->getNumberHistograms()
+                    << "; Working on spectrum " << spec_index + ipar
+                    << " with size "
+                    << m_peakParamsWS->histogram(spec_index + ipar).y().size()
+                    << " and set value to index " << xindex << "\n"
+                    << "Peak parameters size = "
+                    << peak_parameters[ipeak].size();
+              throw std::runtime_error(errss.str());
+            }
+
             m_peakParamsWS->dataY(spec_index + ipar)[xindex] =
                 peak_parameters[ipeak][ipar];
+          }
 
           // about the peak: if fitting is bad, then the fitted peak window is
           // empty
@@ -226,8 +255,10 @@ void FitPeaks::fitPeaks() {
             double window_right = fitted_peaks_windows[ipeak][1];
             size_t window_left_index = findXIndex(vec_x, window_left);
             size_t window_right_index = findXIndex(vec_x, window_right);
-            g_log.notice() << "Set Y value from index " << window_left_index
-                           << " to " << window_right_index << "\n";
+            //            g_log.notice() << "Set Y value from index " <<
+            //            window_left_index
+            //                           << " to " << window_right_index <<
+            //                           "\n";
             for (size_t ix = window_left_index; ix < window_right_index; ++ix)
               m_fittedPeakWS->dataY(wi)[ix] =
                   fitted_peaks[ipeak][ix - window_left_index];
@@ -297,8 +328,8 @@ void FitPeaks::fitSpectraPeaks(
     //                    << "real max = " << real_max << "\n";
 
     // call Fit to fit peak and background
-    std::vector<double> fitted_params_values;
-    std::vector<double> fitted_params_errors;
+    std::vector<double> fitted_params_values(7, 0.0);
+    std::vector<double> fitted_params_errors(7, 0.0);
     std::vector<double> fitted_x_window;
     std::vector<double> fitted_y_vector;
 
@@ -313,8 +344,14 @@ void FitPeaks::fitSpectraPeaks(
         if (fabs(peak_pos_i - m_peakCenters[ipeak]) < TOLERANCE)
           peak_pos[ipeak] = peak_pos_i;
         else
-          // fitted peak position is too off
+        // fitted peak position is too off
+        {
           peak_pos[ipeak] = -4;
+          g_log.warning() << "wsindex " << wi << " Fitted peak center "
+                          << peak_pos_i
+                          << " is far off with theoretical center "
+                          << m_peakCenters[ipeak] << "\n";
+        }
       } else {
         // failed to execute FitPeak
         peak_pos[ipeak] = -3;
@@ -471,27 +508,33 @@ bool FitPeaks::fitSinglePeak(size_t wsindex, size_t peakindex,
   }
 
   // get the information back
+  fitted_params_values.resize(7, 0.);
+  fitted_params_errors.resize(7, 0.);
+
   DataObjects::TableWorkspace_sptr param_table =
       fit_peak->getProperty("ParameterTableWorkspace");
   if (!param_table) {
-    g_log.notice() << "Unable to get fitted parameters\n";
+    g_log.information() << "Unable to get fitted parameters\n";
     return false;
   } else {
-    g_log.notice() << "Good to have fitted data\n";
+    g_log.information() << "Good to have fitted data\n";
 
-    fitted_params_values.resize(7, 0.);
-    fitted_params_errors.resize(7, 0.);
-
-    std::vector<double> param_values(7);
-    std::vector<double> param_errors(7);
-    processFitResult(param_table, param_values, param_errors);
+    double chi2 = processFitResult(param_table, fitted_params_values,
+                                   fitted_params_errors);
+    //    g_log.notice() << "Number of fitted parameters = " <<
+    //    fitted_params_values.size() << "\n";
+    //    for (size_t i = 0; i < fitted_params_values.size(); ++i)
+    //        g_log.notice() << "Fitted parameter " << i << " = " <<
+    //        fitted_params_values[i] << "\n";
 
     MatrixWorkspace_const_sptr out_ws_i =
         fit_peak->getProperty("OutputWorkspace");
     auto vecx = out_ws_i->histogram(1).x();
-    g_log.notice() << "[DB] Output workspace from " << vecx.front() << ", "
-                   << vecx.back() << ", number of points = " << vecx.size()
-                   << "\n";
+    //    g_log.notice() << "[DB] Output workspace from " << vecx.front() << ",
+    //    "
+    //                   << vecx.back() << ", number of points = " <<
+    //                   vecx.size()
+    //                   << "\n";
 
     fitted_window.resize(2);
     fitted_window[0] = vecx.front();
@@ -513,8 +556,9 @@ void FitPeaks::estimateLinearBackground(size_t wi, double left_window_boundary,
   bkgd_a0 = 0.;
   bkgd_a1 = 0.;
 
-  g_log.notice() << "[DB] Estimate background between " << left_window_boundary
-                 << " to " << right_window_boundary << "\n";
+  //  g_log.notice() << "[DB] Estimate background between " <<
+  //  left_window_boundary
+  //                 << " to " << right_window_boundary << "\n";
 
   auto &vecX = m_inputWS->x(wi);
   auto &vecY = m_inputWS->y(wi);
@@ -562,9 +606,11 @@ double FitPeaks::findMaxValue(size_t wi, double left_window_boundary,
       abs_max = y;
   }
 
-  g_log.notice() << "[DB] wsindex " << wi << " between " << left_window_boundary
-                 << " and " << right_window_boundary << ": max Y " << max_value
-                 << " at x = " << peak_center << "\n";
+  //  g_log.notice() << "[DB] wsindex " << wi << " between " <<
+  //  left_window_boundary
+  //                 << " and " << right_window_boundary << ": max Y " <<
+  //                 max_value
+  //                 << " at x = " << peak_center << "\n";
 
   return abs_max;
 }
@@ -622,7 +668,9 @@ double FitPeaks::processFitResult(DataObjects::TableWorkspace_sptr param_table,
 
   // clear
   param_values.clear();
+  param_values.resize(7, 0.0);
   param_errors.clear();
+  param_values.resize(7, 0.0);
 
   //    g_log.notice() << "Number of rows " << param_table->rowCount() << ",
   //    columns "
@@ -636,11 +684,12 @@ double FitPeaks::processFitResult(DataObjects::TableWorkspace_sptr param_table,
     if (irow == 7)
       continue;
 
-    const std::string &parname = param_table->cell<std::string>(irow, 0);
+    // const std::string &parname = param_table->cell<std::string>(irow, 0);
     double param_value = param_table->cell<double>(irow, 1);
     double param_error = param_table->cell<double>(irow, 2);
-    g_log.notice() << "Row " << irow << ": " << parname << " = " << param_value
-                   << " +/- " << param_error << "\n";
+    //    g_log.notice() << "Row " << irow << ": " << parname << " = " <<
+    //    param_value
+    //                   << " +/- " << param_error << "\n";
 
     param_values[iparam] = param_value;
     param_errors[iparam] = param_error;
