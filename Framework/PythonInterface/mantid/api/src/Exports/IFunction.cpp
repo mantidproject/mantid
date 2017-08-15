@@ -127,6 +127,9 @@ void export_IFunction() {
       .def("hasAttribute", &IFunction::hasAttribute, (arg("self"), arg("name")),
            "Return whether there is an attribute of the given name")
 
+      .def("hasParameter", &IFunction::hasParameter, (arg("self"), arg("name")),
+           "Return whether there is an parameter of the given name")
+
       .def("nParams", &IFunction::nParams, arg("self"),
            "Return the number of parameters")
 

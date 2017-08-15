@@ -35,6 +35,12 @@ class FunctionWrapperTest(unittest.TestCase):
         g[2] = 1.5
         self.assertAlmostEqual(g[2],1.5,10)
         
+    def test_dot_operator(self):
+        g = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10) 
+        self.assertAlmostEqual(g.Height,7.5,10)
+        g.Height = 8
+        self.assertAlmostEqual(g.Height,8,10)       
+        
     def test_compositefunction_creation(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
