@@ -271,7 +271,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             prog.report('Calculating container absorption factors')
 
             container_wave_1 = self._convert_to_wavelength(self._container_ws_name, '__container_wave_1')
-            container_wave_2 = self._clone_ws(container_wave_1, '__container_wave_2')
+            container_wave_2 = self._clone_ws(container_wave_1)
 
             container_kwargs = dict()
             container_kwargs.update(self._general_kwargs)
@@ -292,13 +292,18 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                                                       OutputWorkspace='_acc_1',
                                                       **container_kwargs)
 
-                offset_back = 0.5 * (self._can_back_thickness + self._sample_thickness)
+                offset_back = 0.5 * (self._container_back_thickness + self._sample_thickness)
                 container_kwargs['Thickness'] = self._container_back_thickness
                 container_kwargs['Center'] = offset_back
 
                 s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_2,
                                                       OutputWorkspace='_acc_2',
                                                       **container_kwargs)
+
+                self._acc_ws = self._multiply('_acc_1', '_acc_2', self._acc_ws)
+                mtd['_acc_1'].delete()
+                mtd['_acc_2'].delete()
+                self._acc_ws = self._convert_from_wavelength(self._acc_ws, self._acc_ws)
 
             if self._shape == 'Cylinder':
                 container_kwargs['InnerRadius'] = self._container_inner_radius
@@ -309,7 +314,14 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 container_kwargs['InnerRadius'] = self._container_inner_radius
                 container_kwargs['OuterRadius'] = self._sample_inner_radius
 
-        self.setProperty('CorrectionsWorkspace', self._ass_ws)
+            sample_wave_ws.delete()
+
+            # mtd.addOrReplace(self._output_ws + '_ass', self._ass_ws)
+            mtd.addOrReplace(self._output_ws + '_acc', self._acc_ws)
+
+            self._output_ws = self._group_ws([self._ass_ws, self._acc_ws], self._output_ws)
+
+        self.setProperty('CorrectionsWorkspace', self._output_ws)
 
     def _setup(self):
 
@@ -440,7 +452,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
 
-        if self._unit != 'Wavelength':
+        if self._sample_unit != 'Wavelength':
             convert_unit_alg.setProperty("InputWorkspace", input_ws)
             convert_unit_alg.setProperty("OutputWorkspace", output_ws)
             convert_unit_alg.setProperty("Target", self._unit)
@@ -455,12 +467,27 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
     # ------------------------------- Child algorithms -------------------------------
 
-    def _clone_ws(self, input_ws, output_ws):
+    def _clone_ws(self, input_ws, output_ws='_clone'):
         clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
         clone_alg.setProperty("InputWorkspace", input_ws)
         clone_alg.setProperty("OutputWorkspace", output_ws)
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
+
+    def _multiply(self, lhs_ws, rhs_ws, output_ws):
+        multiply_alg = self.createChildAlgorithm("Multiply", enableLogging=False)
+        multiply_alg.setProperty("LHSWorkspace", lhs_ws)
+        multiply_alg.setProperty("RHSWorkspace", rhs_ws)
+        multiply_alg.setProperty("OutputWorkspace", output_ws)
+        multiply_alg.execute()
+        return multiply_alg.getProperty('OutputWorkspace').value
+
+    def _group_ws(self, input_ws, output_ws):
+        group_alg = self.createChildAlgorithm("GroupWorkspaces", enableLogging=False)
+        group_alg.setProperty("InputWorkspaces", input_ws)
+        group_alg.setProperty("OutputWorkspace", output_ws)
+        group_alg.execute()
+        return group_alg.getProperty("OutputWorkspace").value
 
 
 # Register algorithm with Mantid
