@@ -17,6 +17,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         """
         super(LoadDMOL3, self).__init__(input_dft_filename=input_dft_filename)
         self._dft_program = "DMOL3"
+        self._norm = 0
 
     def read_phonon_file(self):
         """
@@ -209,6 +210,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         # Normalise atomic displacements so that the sum of all atomic
         # displacements in any normal mode is normalised (equal 1).
         # num_freq, num_atom, dim -> num_freq, num_atom, dim, dim -> num_freq, num_atom -> num_freq
+        displacements /= self._norm
         norm = np.sum(np.trace(np.einsum('lki, lkj->lkij', displacements, displacements.conjugate()),
                                axis1=2, axis2=3), axis=1)
         displacements = np.einsum('ijk, i-> ijk', displacements, 1.0 / np.sqrt(norm))
@@ -309,9 +311,11 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         :param mass: mass of atom
         """
         # We multiply by square root of atomic mass so that no modifications are needed in CalculatePowder module
+        floated_item = float(item)
+        self._norm += floated_item * floated_item
         if part == "real":
-            container.append(complex(float(item), 0.0) * sqrt(mass))
+            container.append(complex(float(floated_item), 0.0) * sqrt(mass))
         elif part == "imaginary":
-            container.append(complex(0.0, float(item)) * sqrt(mass))
+            container.append(complex(0.0, float(floated_item)) * sqrt(mass))
         else:
             raise ValueError("Real or imaginary part of complex number was expected.")
