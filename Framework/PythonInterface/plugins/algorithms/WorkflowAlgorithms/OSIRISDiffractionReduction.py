@@ -228,7 +228,7 @@ def get_intersection_of_ranges(range_list):
     intersections = filter(lambda intersection: intersection is not None, intersections)
 
     # Return the sorted intersections.
-    intersections.sort()
+    intersections = sorted(intersections)
     return intersections
 
 
