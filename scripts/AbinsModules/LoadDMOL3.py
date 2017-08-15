@@ -162,7 +162,6 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         :param data: Python dictionary to which k-point data should be added
         """
         end_msgs = ["STANDARD"]
-        inside_block = True
         freq = []
         xdisp = []
         ydisp = []
@@ -201,15 +200,14 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         # dim: dimension for each atomic displacement (atoms vibrate in 3D space)
         #
         # The following conversion is necessary:
-        # (num_freq, num_atom, dim) -> (num_atom, num_freq, dim)
+        # (num_freq * num_atom * dim) -> (num_freq, num_atom, dim) -> (num_atom, num_freq, dim)
         dim = 3
-        displacements = np.asarray(a=[displacements], order="C")
 
         # displacements[num_freq, num_atom, dim]
-        displacements = np.reshape(a=displacements, newshape=(num_freq, num_atoms, dim))
+        displacements = np.reshape(a=np.asarray(a=displacements, order="C"), newshape=(num_freq, num_atoms, dim))
 
-        # normalise atomic displacement so that the sum of all atomic
-        # displacements in any normal mode is normalised
+        # Normalise atomic displacements so that the sum of all atomic
+        # displacements in any normal mode is normalised (equal 1).
         # num_freq, num_atom, dim -> num_freq, num_atom, dim, dim -> num_freq, num_atom -> num_freq
         norm = np.sum(np.trace(np.einsum('lki, lkj->lkij', displacements, displacements.conjugate()),
                                axis1=2, axis2=3), axis=1)
@@ -217,6 +215,9 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
 
         # displacements[num_atoms, num_freq, dim]
         displacements = np.transpose(a=displacements, axes=(1, 0, 2))
+
+        # displacements[num_k, num_atoms, num_freq, dim]
+        # with num_k = 1
         data["atomic_displacements"] = np.asarray([displacements])
 
     def _block_end(self, file_obj=None, msg=None):
@@ -232,7 +233,6 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
             file_obj.seek(pos)
             if six.PY3:
                 item = bytes(item, "utf8")
-
             if item in line:
                 return True
         return False
@@ -280,7 +280,6 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
                     for item in line[1:]:
                         self._parse_item(item=item, container=zdisp, part=part, mass=atom_mass)
                     atom_mass = None
-
                 else:
                     file_obj.seek(pos)
                     break
