@@ -62,8 +62,10 @@ public:
   MOCK_METHOD0(clearCommands, void());
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
-  MOCK_METHOD1(enableAction, void(int));
-  MOCK_METHOD1(disableAction, void(int));
+  MOCK_METHOD1(enableAction, void(DataProcessorAction));
+  MOCK_METHOD1(enableAction, void(ReflectometryAction));
+  MOCK_METHOD1(disableAction, void(DataProcessorAction));
+  MOCK_METHOD1(disableAction, void(ReflectometryAction));
   MOCK_METHOD1(setTransferEnabled, void(bool));
   MOCK_METHOD0(enableTransferButton, void());
   MOCK_METHOD0(disableTransferButton, void());

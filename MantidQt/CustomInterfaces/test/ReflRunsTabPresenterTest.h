@@ -274,7 +274,7 @@ public:
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     // Expect view disables the 'process' button only
-    EXPECT_CALL(mockRunsTabView, disableAction(1))
+    EXPECT_CALL(mockRunsTabView, disableAction(DataProcessorAction::PROCESS))
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setAutoreduceButtonEnabled(true))
         .Times(Exactly(1));
@@ -303,9 +303,9 @@ public:
         mockMainPresenter,
         notify(IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag))
         .Times(Exactly(1));
-    EXPECT_CALL(mockRunsTabView, disableAction(0))
+    EXPECT_CALL(mockRunsTabView, disableAction(DataProcessorAction::PROCESS))
         .Times(Exactly(1));
-    EXPECT_CALL(mockRunsTabView, enableAction(1))
+    EXPECT_CALL(mockRunsTabView, enableAction(DataProcessorAction::PAUSE))
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setAutoreduceButtonEnabled(false))
         .Times(Exactly(1));
@@ -333,7 +333,7 @@ public:
         mockMainPresenter,
         notify(IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag))
         .Times(Exactly(1));
-    EXPECT_CALL(mockRunsTabView, enableAction(0))
+    EXPECT_CALL(mockRunsTabView, enableAction(DataProcessorAction::PROCESS))
         .Times(Exactly(1));
 
     presenter.confirmReductionPaused();

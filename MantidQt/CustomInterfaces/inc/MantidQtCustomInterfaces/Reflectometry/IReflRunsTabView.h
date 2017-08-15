@@ -4,6 +4,8 @@
 #include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAction.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflectometryAction.h"
 
 namespace MantidQt {
 
@@ -17,6 +19,7 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 using MantidWidgets::DataProcessorCommand;
+using MantidWidgets::DataProcessorAction;
 using API::AlgorithmRunner;
 class IReflRunsTabPresenter;
 class ReflSearchModel;
@@ -66,8 +69,10 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) = 0;
   virtual void setAllSearchRowsSelected() = 0;
   virtual void clearCommands() = 0;
-  virtual void enableAction(int index) = 0;
-  virtual void disableAction(int index) = 0;
+  virtual void enableAction(DataProcessorAction action) = 0;
+  virtual void enableAction(ReflectometryAction action) = 0;
+  virtual void disableAction(DataProcessorAction action) = 0;
+  virtual void disableAction(ReflectometryAction action) = 0;
   virtual void setTransferEnabled(bool transferEnabled) = 0;
   virtual void enableTransferButton() = 0;
   virtual void disableTransferButton() = 0;

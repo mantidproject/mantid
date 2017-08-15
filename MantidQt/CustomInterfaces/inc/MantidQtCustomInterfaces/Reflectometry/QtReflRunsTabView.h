@@ -5,6 +5,8 @@
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflectometryAction.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAction.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 
 #include "ui_ReflRunsTabWidget.h"
@@ -30,6 +32,7 @@ class ReflSearchModel;
 using MantidWidgets::DataProcessorCommand;
 using MantidWidgets::DataProcessorCommandAdapter;
 using MantidWidgets::SlitCalculator;
+using MantidWidgets::DataProcessorAction;
 
 /** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
@@ -78,8 +81,10 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
-  void enableAction(int index) override;
-  void disableAction(int index) override;
+  void enableAction(DataProcessorAction action) override;
+  void enableAction(ReflectometryAction action) override;
+  void disableAction(ReflectometryAction action) override;
+  void disableAction(DataProcessorAction action) override;
   void enableTransferButton() override;
   void disableTransferButton() override;
   void setTransferEnabled(bool enabled) override;
@@ -108,13 +113,11 @@ private:
   void initLayout();
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
-  
-  void enableRowAction(int index);
-  void disableRowAction(int index);
-  void enableMenuAction(int index);
-  void disableMenuAction(int index);
-  void enable(QAction& toEnable);
-  void disable(QAction& toDisable);
+
+  int toRowIndex(DataProcessorAction action);
+  int toMenuIndex(ReflectometryAction action);
+  void enable(QAction &toEnable);
+  void disable(QAction &toDisable);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 

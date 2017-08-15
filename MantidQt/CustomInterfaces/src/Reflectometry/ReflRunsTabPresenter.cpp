@@ -28,8 +28,6 @@
 #include <sstream>
 #include <vector>
 
-#include <iostream>
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
@@ -443,27 +441,36 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
+void ReflRunsTabPresenter::enableAction(DataProcessorAction action) {
+  m_view->enableAction(action);
+}
+
+void ReflRunsTabPresenter::disableAction(DataProcessorAction action) {
+  m_view->disableAction(action);
+}
+
 /** Tells view to enable all 'process' buttons and disable the 'pause' button
 * when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() {
-  m_view->enableAction(PROCESS);
-  m_view->disableAction(PAUSE);
+  m_view->enableAction(DataProcessorAction::PROCESS);
+  m_view->disableAction(DataProcessorAction::PAUSE);
   m_view->enableTransferButton();
   m_view->enableAutoreduceButton();
 }
 
-
 void ReflRunsTabPresenter::preventTableModification() {
   m_view->disableAutoreduceButton();
   m_view->disableTransferButton();
-  //m_view->disableAction();
-  //m_view->disableAction();
+
+  disableTableModification([this](auto action) -> void { disableAction(action); });
 }
 
 void ReflRunsTabPresenter::allowTableModification() {
   m_view->enableAutoreduceButton();
   m_view->enableTransferButton();
+  
+  enableTableModification([this](auto action) -> void { enableAction(action); });
 }
 
 /** Disables the 'process' button and enables the 'pause' button when data
@@ -471,8 +478,8 @@ void ReflRunsTabPresenter::allowTableModification() {
  * confirmed to be resumed.
 */
 void ReflRunsTabPresenter::resume() {
-  m_view->disableAction(PROCESS);
-  m_view->enableAction(PAUSE);
+  m_view->disableAction(DataProcessorAction::PROCESS);
+  m_view->enableAction(DataProcessorAction::PAUSE);
   preventTableModification();
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
@@ -502,7 +509,7 @@ void ReflRunsTabPresenter::confirmReductionPaused() {
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
 void ReflRunsTabPresenter::confirmReductionResumed() {
-  m_view->enableAction(PROCESS);
+  m_view->enableAction(DataProcessorAction::PROCESS);
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }

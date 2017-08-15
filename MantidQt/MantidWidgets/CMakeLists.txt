@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/CheckboxHeader.cpp
 	src/ColorBarWidget.cpp
 	src/DataProcessorUI/AbstractDataProcessorTreeModel.cpp
+    src/DataProcessorUI/DataProcessorAction.cpp
 	src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
 	src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
 	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp

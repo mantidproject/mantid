@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAction.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
@@ -141,39 +142,13 @@ public:
   // Forward a main presenter to this view's presenter
   void accept(DataProcessorMainPresenter *);
 
-  enum class Action {
-    RESUME = 0,
-    PAUSE = 1,
-    /* Separator */
-    SELECT_GROUP = 3,
-    EXPAND_GROUP = 4,
-    COLAPSE_GROUP = 5,
-    /* Separator */
-    PLOT_RUNS = 7,
-    PLOT_GROUP = 8,
-    /* Separator */
-    INSERT_ROW_AFTER = 10,
-    INSERT_GROUP_AFTER = 11,
-    /* Separator */
-    GROUP_SELECTED = 13,
-    COPY_SELECTED = 14,
-    CUT_SELECTED = 15,
-    PASTE_SELECTED = 16,
-    CLEAR_SELECTED = 17,
-    /* Separator */
-    DELETE_ROW = 19,
-    DELETE_GROUP = 20,
-    WHATS_THIS = 21
-  };
+      
 
-  constexpr int index_of(Action action) {
-      return static_cast<int>(action);
-  } 
 private:
   // initialise the interface
   void createTable();
-  void disableTableModification();
-  void enableTableModification();
+  void allowTableModification();
+  void preventTableModification();
   void disablePauseButtons();
   void enablePauseButtons();
   void disableResumeButtons();
@@ -187,20 +162,24 @@ private:
   void disableGroupingButtons();
   void enableGroupingButtons();
 
-  void enableAction(Action toEnable);
-  void disableAction(Action toDisable);
+  void enableAction(DataProcessorAction toEnable);
+  void disableAction(DataProcessorAction toDisable);
 
-  void disableActionOnToolbar(Action toDisable);
-  void disableActionOnContextMenu(Action toDisable);
-  void enableActionOnToolbar(Action toEnable);
-  void enableActionOnContextMenu(Action toEnable);
+  void disableActionOnToolbar(DataProcessorAction toDisable);
+  void disableActionOnContextMenu(DataProcessorAction toDisable);
+  void enableActionOnToolbar(DataProcessorAction toEnable);
+  void enableActionOnContextMenu(DataProcessorAction toEnable);
 
-  static void disableActionOnWidget(QWidget& widget, int index);
-  static void enableActionOnWidget(QWidget& widget, int index);
-  static void disable(QWidget& widget);
-  static void disable(QAction& widget);
-  static void enable(QWidget& widget);
-  static void enable(QAction& widget);
+  static void disableActionOnWidget(QWidget &widget, int index);
+  static void enableActionOnWidget(QWidget &widget, int index);
+  static void disable(QWidget &widget);
+  static void disable(QAction &widget);
+  static void enable(QWidget &widget);
+  static void enable(QAction &widget);
+  
+  static int toToolbarIndex(DataProcessorAction action);
+  static int toContextMenuIndex(DataProcessorAction);
+  static int toCommandIndex(DataProcessorAction action);
 
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;

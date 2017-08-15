@@ -71,7 +71,8 @@ void QtReflRunsTabView::initLayout() {
   // Create the presenter
   m_presenter = std::make_shared<ReflRunsTabPresenter>(
       this /* main view */,
-      this /* Currently this concrete view is also responsible for prog reporting */,
+      this /* Currently this concrete view is also responsible for prog reporting */
+      ,
       processingWidgets /* The data processor presenters */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
@@ -166,58 +167,106 @@ void QtReflRunsTabView::setAllSearchRowsSelected() {
 */
 void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
 
-void QtReflRunsTabView::enable(QAction& toEnable) {
-  toEnable.setEnabled(true);
-}
+void QtReflRunsTabView::enable(QAction &toEnable) { toEnable.setEnabled(true); }
 
-void QtReflRunsTabView::disable(QAction& toDisable) {
+void QtReflRunsTabView::disable(QAction &toDisable) {
   toDisable.setEnabled(false);
 }
 
-/**
-* Sets a specific action in the "Reflectometry" menu enabled
-* @param index : The index of the action in the "Reflectometry" menu
-*/
-void QtReflRunsTabView::disableMenuAction(int index) {
-  disable(*(ui.menuTable->actions()[index]));
+int QtReflRunsTabView::toRowIndex(DataProcessorAction action) {
+  switch (action) {
+  case DataProcessorAction::PROCESS:
+    return 0;
+  case DataProcessorAction::PAUSE:
+    return 1;
+  case DataProcessorAction::SELECT_GROUP:
+    return 3;
+  case DataProcessorAction::EXPAND_GROUP:
+    return 4;
+  case DataProcessorAction::COLAPSE_GROUP:
+    return 5;
+  case DataProcessorAction::PLOT_RUNS:
+    return 7;
+  case DataProcessorAction::PLOT_GROUP:
+    return 8;
+  case DataProcessorAction::INSERT_ROW_AFTER:
+    return 10;
+  case DataProcessorAction::INSERT_GROUP_AFTER:
+    return 11;
+  case DataProcessorAction::GROUP_SELECTED:
+    return 13;
+  case DataProcessorAction::COPY_SELECTED:
+    return 14;
+  case DataProcessorAction::CUT_SELECTED:
+    return 15;
+  case DataProcessorAction::PASTE_SELECTED:
+    return 16;
+  case DataProcessorAction::CLEAR_SELECTED:
+    return 17;
+  case DataProcessorAction::DELETE_ROW:
+    return 19;
+  case DataProcessorAction::DELETE_GROUP:
+    return 20;
+  case DataProcessorAction::WHATS_THIS:
+    return 21;
+  default:
+    throw std::logic_error("Unknown action specified.");
+  }
+}
+
+int QtReflRunsTabView::toMenuIndex(ReflectometryAction action) {
+  switch (action) {
+  case ReflectometryAction::OPEN_TABLE:
+    return 0;
+  case ReflectometryAction::NEW_TABLE:
+    return 1;
+  case ReflectometryAction::SAVE_TABLE:
+    return 2;
+  case ReflectometryAction::SAVE_TABLE_AS:
+    return 3;
+  case ReflectometryAction::IMPORT_TBL:
+    return 5;
+  case ReflectometryAction::EXPORT_TBL:
+    return 6;
+  default:
+    throw std::logic_error("Unknown action specified.");
+  }
 }
 
 /**
 * Enables a specific action in the "Reflectometry" menu.
 * @param index : The index of the action in the "Reflectometry" menu
 */
-void QtReflRunsTabView::enableMenuAction(int index) {
-  enable(*(ui.menuTable->actions()[index]));
+void QtReflRunsTabView::disableAction(ReflectometryAction action) {
+  disable(*(ui.menuTable->actions()[toMenuIndex(action)]));
+}
+
+/**
+* Enables a specific action in the "Reflectometry" menu.
+* @param index : The index of the action in the "Reflectometry" menu
+*/
+void QtReflRunsTabView::enableAction(ReflectometryAction action) {
+  enable(*(ui.menuTable->actions()[toMenuIndex(action)]));
 }
 
 /**
 * Disables a specific action in the "Edit" menu.
 * @param index : The index of the action in the "Edit" menu
 */
-void QtReflRunsTabView::disableRowAction(int index) {
-  disable(*(ui.menuRows->actions()[index]));
+void QtReflRunsTabView::disableAction(DataProcessorAction action) {
+  disable(*(ui.menuRows->actions()[toRowIndex(action)]));
 }
 
 /**
 * Enables a specific action in the "Edit" menu.
 * @param index : The index of the action in the "Edit" menu
 */
-void QtReflRunsTabView::enableRowAction(int index) {
-  disable(*(ui.menuRows->actions()[index]));
-}
-
-void QtReflRunsTabView::enableAction(int index) {
-  enableRowAction(index);
-  enableMenuAction(index);
-}
-
-void QtReflRunsTabView::disableAction(int index) {
-  disableRowAction(index);
-  disableMenuAction(index);
+void QtReflRunsTabView::enableAction(DataProcessorAction action) {
+  disable(*(ui.menuRows->actions()[toRowIndex(action)]));
 }
 
 void QtReflRunsTabView::setTransferEnabled(bool enabled) {
-    ui.buttonTransfer->setEnabled(enabled);
+  ui.buttonTransfer->setEnabled(enabled);
 }
 
 /**
@@ -229,20 +278,16 @@ void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
 }
 
 void QtReflRunsTabView::disableAutoreduceButton() {
-    setAutoreduceButtonEnabled(false);
+  setAutoreduceButtonEnabled(false);
 }
 
 void QtReflRunsTabView::enableAutoreduceButton() {
-    setAutoreduceButtonEnabled(true);
+  setAutoreduceButtonEnabled(true);
 }
 
-void QtReflRunsTabView::disableTransferButton() {
-    setTransferEnabled(false);
-}
+void QtReflRunsTabView::disableTransferButton() { setTransferEnabled(false); }
 
-void QtReflRunsTabView::enableTransferButton() {
-    setTransferEnabled(true);
-}
+void QtReflRunsTabView::enableTransferButton() { setTransferEnabled(true); }
 
 /**
 * Set all possible tranfer methods

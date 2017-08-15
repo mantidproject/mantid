@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAction.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
@@ -27,6 +28,7 @@ class ReflTransferStrategy;
 
 using MantidWidgets::DataProcessorPresenter;
 using MantidWidgets::ProgressableView;
+using MantidWidgets::DataProcessorAction;
 
 /** @class ReflRunsTabPresenter
 
@@ -85,8 +87,6 @@ public:
   void confirmReductionResumed() override;
 
 private:
-  static auto constexpr PROCESS = 0;
-  static auto constexpr PAUSE = 1;
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   /// The main view we're managing
@@ -116,8 +116,8 @@ private:
   void autoreduce(bool startNew);
   void transfer();
   void pushCommands();
-  void enableRowAction(int index) const;
-  void disableRowAction(int index) const;
+  void enableAction(DataProcessorAction action);
+  void disableAction(DataProcessorAction action);
   /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument

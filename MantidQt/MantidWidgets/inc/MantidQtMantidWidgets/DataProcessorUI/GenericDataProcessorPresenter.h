@@ -1,18 +1,18 @@
 #ifndef MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessMap.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/TreeData.h"
@@ -77,8 +77,8 @@ public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
@@ -92,8 +92,8 @@ public:
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(
@@ -109,7 +109,7 @@ public:
       const DataProcessorWhiteList &whitelist,
       const DataProcessorPreprocessMap &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
-       const DataProcessorPostprocessingAlgorithm &postprocessor);
+      const DataProcessorPostprocessingAlgorithm &postprocessor);
   ~GenericDataProcessorPresenter() override = default;
   void notify(DataProcessorPresenter::Flag flag) override;
   const Options &options() const override;
@@ -179,7 +179,7 @@ protected:
   virtual void plotRow();
   virtual void plotGroup();
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
-
+  
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);
