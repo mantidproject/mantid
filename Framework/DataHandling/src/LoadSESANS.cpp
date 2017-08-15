@@ -246,7 +246,7 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
                                  header + "\"",
                        lineNum);
 
-  std::string numberRegex = "(-?\\d+(\\.\\d+)?([Ee]-?\\d+)?)";
+  std::string numberRegex = "(-?\\d+(\\.\\d+)?([Ee][-\\+]?\\d+)?)";
   // static_cast is safe as realistically our file is never going to have enough
   // columns to overflow
   std::string rawRegex = "^\\s*" +
