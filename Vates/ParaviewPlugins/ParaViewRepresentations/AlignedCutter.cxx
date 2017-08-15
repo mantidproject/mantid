@@ -215,48 +215,54 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     return;
   }
 
-  vtkNew<vtkFloatArray> cutScalars;
+  vtkNew<vtkDoubleArray> cutScalars;
   cutScalars->SetName("cutScalars");
     
   vtkDataArray* dataArrayInput = input->GetPoints()->GetData();
   
   int dims[3], celldims[3];
   input->GetDimensions(dims);
+  vtkIdType d01 = vtkIdType{dims[0]} * dims[1];
   input->GetCellDims(celldims);
+  vtkIdType cd01 = vtkIdType{celldims[0]} * celldims[1];
   auto inCD = input->GetCellData();
   auto outCD = output->GetCellData();
   outCD->CopyAllocate(inCD);
 
   double value = this->ContourValues->GetValue(0);
   if (AxisNumber == 0) {
+    cutScalars->SetNumberOfTuples(dims[0]);
     for(vtkIdType i = 0; i < dims[0]; ++i)
     {
       double x[3];
-      dataArrayInput->GetTuple(i,x);
+      dataArrayInput->GetTuple(i, x);
       double FuncVal = this->CutFunction->EvaluateFunction(x);
-      cutScalars->InsertNextTuple1(std::abs(FuncVal - value));
+      cutScalars->SetTypedComponent(i, 0, std::abs(FuncVal - value));
     }
   } else if (AxisNumber == 1) {
-    for(vtkIdType i = 0; i < dims[0]*dims[1]; i=i + dims[0])
-    {
+    cutScalars->SetNumberOfTuples(dims[1]);
+    for (vtkIdType i = 0, j = 0; i < d01; i = i + dims[0], ++j) {
       double x[3];
-      dataArrayInput->GetTuple(i,x);
+      dataArrayInput->GetTuple(i, x);
       double FuncVal = this->CutFunction->EvaluateFunction(x);
-      cutScalars->InsertNextTuple1(std::abs(FuncVal - value));
+      cutScalars->SetTypedComponent(j, 0, std::abs(FuncVal - value));
     }
   } else if (AxisNumber == 2) {
-    for(vtkIdType i = 0; i < numPts; i=i + dims[0]*dims[1])
-    {
+    cutScalars->SetNumberOfTuples(dims[2]);
+    for (vtkIdType i = 0, j = 0; i < numPts; i = i + d01, ++j) {
       double x[3];
-      dataArrayInput->GetTuple(i,x);
+      dataArrayInput->GetTuple(i, x);
       double FuncVal = this->CutFunction->EvaluateFunction(x);
-      cutScalars->InsertNextTuple1(std::abs(FuncVal - value));
+      cutScalars->SetTypedComponent(j, 0, std::abs(FuncVal - value));
     }
   }
-  float * ptr = cutScalars->GetPointer(0);
-  int min = static_cast<int>(std::distance(ptr, std::min_element(ptr, ptr + cutScalars->GetNumberOfTuples())));
-  //should be using cell position instead of points;
-  min = std::min(min, celldims[AxisNumber]);
+  double *ptr = cutScalars->GetPointer(0);
+  vtkIdType min = std::distance(
+      ptr, std::min_element(ptr, ptr + cutScalars->GetNumberOfTuples()));
+  min = std::min(min, static_cast<vtkIdType>(celldims[AxisNumber] - 1));
+  // set out of bounds values;
+  if (min == 0 || min == dims[AxisNumber])
+    return;
 
   vtkIdType outCellId = 0;
   vtkNew<vtkIdList> ids;
@@ -267,17 +273,16 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     outPts->Allocate(4 * celldims[1] * celldims[2]);
     for (int j = 0; j < celldims[1]; ++j) {
       for (int k=0; k < celldims[2]; ++k) {
-        auto index = min + j * celldims[0] + k * celldims[0] * celldims[1];
+        vtkIdType index = min + j * celldims[0] + k * cd01;
         if (input->IsCellVisible(index)) {
           double x[3];
-          inPts->GetPoint(min + j * dims[0] + k * dims[0] * dims[1], x);
+          inPts->GetPoint(min + j * dims[0] + k * d01, x);
           ids->SetId(0, outPts->InsertNextPoint(x));
-          inPts->GetPoint(min + j * dims[0] + (k + 1) * dims[0] * dims[1], x);
+          inPts->GetPoint(min + j * dims[0] + (k + 1) * d01, x);
           ids->SetId(1, outPts->InsertNextPoint(x));
-          inPts->GetPoint(min + (j + 1) * dims[0] + (k + 1) * dims[0] * dims[1],
-                          x);
+          inPts->GetPoint(min + (j + 1) * dims[0] + (k + 1) * d01, x);
           ids->SetId(2, outPts->InsertNextPoint(x));
-          inPts->GetPoint(min + (j + 1) * dims[0] + k * dims[0] * dims[1], x);
+          inPts->GetPoint(min + (j + 1) * dims[0] + k * d01, x);
           ids->SetId(3, outPts->InsertNextPoint(x));
           output->InsertNextCell(VTK_QUAD, ids.Get());
           outCD->CopyData(inCD, index, outCellId++);
@@ -288,17 +293,16 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     outPts->Allocate(4 * celldims[0] * celldims[2]);
     for (int i = 0; i < celldims[0]; ++i) {
       for (int k=0; k < celldims[2]; ++k) {
-        auto index = i + min * celldims[0] + k * celldims[0] * celldims[1];
+        vtkIdType index = i + min * celldims[0] + k * cd01;
         if (input->IsCellVisible(index)) {
           double x[3];
-          inPts->GetPoint(i + min * dims[0] + k * dims[0] * dims[1], x);
+          inPts->GetPoint(i + min * dims[0] + k * d01, x);
           ids->SetId(0, outPts->InsertNextPoint(x));
-          inPts->GetPoint(i + 1 + min * dims[0] + k * dims[0] * dims[1], x);
+          inPts->GetPoint(i + 1 + min * dims[0] + k * d01, x);
           ids->SetId(1, outPts->InsertNextPoint(x));
-          inPts->GetPoint(i + 1 + min * dims[0] + (k + 1) * dims[0] * dims[1],
-                          x);
+          inPts->GetPoint(i + 1 + min * dims[0] + (k + 1) * d01, x);
           ids->SetId(2, outPts->InsertNextPoint(x));
-          inPts->GetPoint(i + min * dims[0] + (k + 1) * dims[0] * dims[1], x);
+          inPts->GetPoint(i + min * dims[0] + (k + 1) * d01, x);
           ids->SetId(3, outPts->InsertNextPoint(x));
           output->InsertNextCell(VTK_QUAD, ids.Get());
           outCD->CopyData(inCD, index, outCellId++);
@@ -309,17 +313,16 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     outPts->Allocate(4 * celldims[0] * celldims[1]);
     for (int i = 0; i < celldims[0]; ++i) {
       for (int j=0; j < celldims[1]; ++j) {
-        auto index = i + j * celldims[0] + min * celldims[0] * celldims[1];
+        auto index = i + j * celldims[0] + min * cd01;
         if (input->IsCellVisible(index)) {
           double x[3];
-          inPts->GetPoint(i + j * dims[0] + min * dims[0] * dims[1], x);
+          inPts->GetPoint(i + j * dims[0] + min * d01, x);
           ids->SetId(0, outPts->InsertNextPoint(x));
-          inPts->GetPoint(i + (j + 1) * dims[0] + min * dims[0] * dims[1], x);
+          inPts->GetPoint(i + (j + 1) * dims[0] + min * d01, x);
           ids->SetId(1, outPts->InsertNextPoint(x));
-          inPts->GetPoint(i + 1 + (j + 1) * dims[0] + min * dims[0] * dims[1],
-                          x);
+          inPts->GetPoint(i + 1 + (j + 1) * dims[0] + min * d01, x);
           ids->SetId(2, outPts->InsertNextPoint(x));
-          inPts->GetPoint(i + 1 + j * dims[0] + min * dims[0] * dims[1], x);
+          inPts->GetPoint(i + 1 + j * dims[0] + min * d01, x);
           ids->SetId(3, outPts->InsertNextPoint(x));
           output->InsertNextCell(VTK_QUAD, ids.Get());
           outCD->CopyData(inCD, index, outCellId++);
