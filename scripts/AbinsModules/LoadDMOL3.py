@@ -94,8 +94,8 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         """
         n = AbinsModules.AbinsConstants.ONE_CHARACTER
         pos = file_obj.tell()
-        end = file_obj.read(n)
-        if end == AbinsModules.AbinsConstants.EOF:
+        potential_end = file_obj.read(n)
+        if potential_end == AbinsModules.AbinsConstants.EOF:
             return True
         else:
             file_obj.seek(pos)
@@ -108,18 +108,23 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         :param data: Python dictionary to which found lattice vectors should be added
         """
         self._find_first(file_obj=obj_file, msg=b"$cell vectors")
-        au2ang = AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
+
         dim = 3
         vectors = []
         for i in range(dim):
-            line = obj_file.readline()
-            line = line.split()
-            vector = []
-            for item in line:
-                vector.append(float(item) * au2ang)
+            line = obj_file.readline().split()
+            vector = map(self._convert_to_angstroms, line)
             vectors.append(vector)
 
         data["unit_cell"] = np.asarray(vectors).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+
+    def _convert_to_angstroms(self, string=None):
+        """
+        :param string: string with number
+        :return: converted coordinate of lattice vector to Angstroms
+        """
+        au2ang = AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
+        return float(string) * au2ang
 
     def _read_atomic_coordinates(self, file_obj=None, data=None):
         """
