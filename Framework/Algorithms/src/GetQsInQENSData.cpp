@@ -67,7 +67,7 @@ void GetQsInQENSData::exec() {
     // exception which is thrown.
     bool inRaiseMode = getProperty("RaiseMode");
     if (inRaiseMode) {
-      throw e;
+      throw;
     }
 
     setProperty("Qvalues", std::vector<double>());
