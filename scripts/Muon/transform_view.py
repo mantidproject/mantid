@@ -3,25 +3,23 @@ from six import iteritems
 import mantid.simpleapi as mantid
 
 from PyQt4 import QtCore, QtGui
-from Muon import FFT_view
-from Muon import MaxEnt_view
-from Muon import transform_selection_view
+from Muon import constructor
 
 
 class transformView(QtGui.QWidget):
     #methodSignal = QtCore.pyqtSignal()
-    def __init__(self,parent=None):
+    def __init__(self,groupedViews,parent=None):
        super(transformView,self).__init__(parent)
-       self.methods={}
-       self.methods["FFT"]=FFT_view.FFTView(self)
-       self.selection=transform_selection_view.TransformSelectionView()
-       self.methods["MaxEnt"]=MaxEntView=MaxEnt_view.MaxEntView()
+       self.methods=groupedViews.getTransformMethods()
+       self.selection=groupedViews.getTransformSelection()
        self.Layout=QtGui.QGridLayout()
        self.Layout.addWidget(self.selection,1,0)
-       self.Layout.addWidget(self.methods["FFT"],2,0)
-       self.Layout.addWidget(self.methods["MaxEnt"],3,0)
+       for key in self.methods:
+           self.Layout.addWidget(self.methods[key])
        self.setLayout(self.Layout)
-       self.methods["MaxEnt"].hide()
+       self.hideAll()
+       methods=list(self.methods.keys())
+       self.show(methods[0])
     
     def getMethods(self):
        return [key for key in self.methods]
@@ -32,7 +30,5 @@ class transformView(QtGui.QWidget):
 
     def show(self,name):
         self.methods[name].show()
-     #  connect
-        # set data
         
  

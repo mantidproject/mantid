@@ -12,15 +12,15 @@ class MaxEntView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(MaxEntView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
-        self.table 	= QtGui.QTableWidget(self)
 
         #make table
-        self.table.resize(800, 800)
-        self.table.setRowCount(6)
+        self.table 	= QtGui.QTableWidget(self)
+        self.table.setRowCount(7)
         self.table.setColumnCount(2)
         self.table.setColumnWidth(0,300)
         self.table.setColumnWidth(1,300)
 
+        self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
 
         # populate table
@@ -28,33 +28,78 @@ class MaxEntView(QtGui.QWidget):
 
         widget_helper.setName(self.table,0,"Workspace")
         self.ws= widget_helper.createComboTable(self.table,0,options)
-#        self.Im_box_row=1
-#
-#        widget_helper.setName(self.table,self.Im_box_row,"Imaginary Data")
-#        self.Im_box= widget_helper.createCheckTable(self.table,True,self.Im_box_row)
-#
-#        widget_helper.setName(self.table,2,"Imaginary Workspace")
-#        self.Im_ws= widget_helper.createComboTable(self.table,2,options)
-#
-#        self.shift_box_row=3
-#        widget_helper.setName(self.table,self.shift_box_row,"Auto shift")
-#        self.shift_box= widget_helper.createCheckTable(self.table,True,self.shift_box_row)
-#
-#        widget_helper.setName(self.table,4,"Shift")
-#        self.shift= widget_helper.createDoubleTable(self.table,0.0,4)
-#        self.table.hideRow(4)
-#
-#        widget_helper.setName(self.table,5,"Use Raw data")
-#        self.Raw_box= widget_helper.createCheckTable(self.table,True,5)
-#        #make button
-#        self.button = QtGui.QPushButton('Calculate FFT', self)
-#        self.button.setStyleSheet("background-color:lightgrey")
+        
+        widget_helper.setName(self.table,1,"Complex Data")
+        self.complex_data_box= widget_helper.createCheckTable(self.table,False,1)
+
+        widget_helper.setName(self.table,2,"Complex Image")
+        self.complex_image_box= widget_helper.createCheckTable(self.table,True,2)
+ 
+        widget_helper.setName(self.table,3,"Positive Image")
+        self.positive_image_box= widget_helper.createCheckTable(self.table,False,3)
+
+ 
+        widget_helper.setName(self.table,4,"Resolution")
+        self.resolution_box= widget_helper.createSpinTable(self.table,1,4)
+
+        widget_helper.setName(self.table,5,"Maximum entropy constant (A)")
+        self.AConst= widget_helper.createDoubleTable(self.table,0.4,5)
+
+
+        widget_helper.setName(self.table, 6,"Auto shift")
+        self.shift_box= widget_helper.createCheckTable(self.table,False,6)
+
+        self.table.resizeRowsToContents()
+
+        # advanced options table
+        self.advancedLabel=QtGui.QLabel("\n  Advanced Options")
+        #make table
+        self.tableA 	= QtGui.QTableWidget(self)
+        self.tableA.setRowCount(6)
+        self.tableA.setColumnCount(2)
+        self.tableA.setColumnWidth(0,300)
+        self.tableA.setColumnWidth(1,300)
+        self.tableA.horizontalHeader().setStretchLastSection(True)
+
+        self.tableA.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
+
+
+        widget_helper.setName(self.tableA,0,"Chi target")
+        self.chiTarget= widget_helper.createDoubleTable(self.tableA,100,0)
+
+        widget_helper.setName(self.tableA,1,"Chi (precision)")
+        self.chiEps= widget_helper.createDoubleTable(self.tableA,0.001,1)
+
+        widget_helper.setName(self.tableA,2,"Distance Penalty")
+        self.dist= widget_helper.createDoubleTable(self.tableA,0.1,2)
+
+        widget_helper.setName(self.tableA,3,"Maximum Angle")
+        self.angle= widget_helper.createDoubleTable(self.tableA,0.05,3)
+
+        widget_helper.setName(self.tableA,4,"Max Iterations")
+        self.max_iterations= widget_helper.createSpinTable(self.tableA,20000,4)
+
+        widget_helper.setName(self.tableA,5,"Alpha Chop Iterations")
+        self.chop= widget_helper.createSpinTable(self.tableA,500,5)
+
+        #layout
+        self.table.setMinimumSize(40,202)
+        self.tableA.setMinimumSize(40,207)
+        self.horizontalSpacer1 = QtGui.QSpacerItem(20, 30, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.horizontalSpacer2 = QtGui.QSpacerItem(20, 70, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        #make button
+        self.button = QtGui.QPushButton('Calculate MaxEnt', self)
+        self.button.setStyleSheet("background-color:lightgrey")
 #        #connects
 #        self.table.cellClicked.connect(self.tableClick)
 #        self.button.clicked.connect(self.buttonClick)
-#        # add to layout
+        # add to layout
         self.grid.addWidget(self.table)
-#        self.grid.addWidget(self.button)
+        self.grid.addItem(self.horizontalSpacer1)
+        self.grid.addWidget(self.advancedLabel)
+        self.grid.addWidget(self.tableA)
+        self.grid.addItem(self.horizontalSpacer2)
+        self.grid.addWidget(self.button)
 
     # add data to view
     def addItems(self,options):
