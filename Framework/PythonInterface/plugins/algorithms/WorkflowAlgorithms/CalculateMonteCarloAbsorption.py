@@ -271,7 +271,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             sample_log_names.append("sample_" + log_name.lower())
             sample_log_values.append(log_value)
 
-
         self._ass_ws = self._convert_from_wavelength(self._ass_ws, self._ass_ws)
 
         if self._container_ws_name:
@@ -347,9 +346,11 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             # mtd.addOrReplace(self._output_ws + '_ass', self._ass_ws)
             mtd.addOrReplace(self._output_ws + '_acc', self._acc_ws)
 
-            self._output_ws = self._group_ws([self._ass_ws, self._acc_ws], self._output_ws)
-
             self._add_sample_log_multiple(self._acc_ws, sample_log_names, sample_log_values)
+
+            self._output_ws = self._group_ws([self._ass_ws, self._acc_ws], self._output_ws)
+        else:
+            self._output_ws = self._ass_ws
 
         self._add_sample_log_multiple(self._ass_ws, sample_log_names, sample_log_values)
 
