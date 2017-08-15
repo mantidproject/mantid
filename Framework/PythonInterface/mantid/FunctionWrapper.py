@@ -498,16 +498,15 @@ def _create_wrapper_function(name):
     """
     # ------------------------------------------------------------------------------------------------
     def wrapper_function(*args, **kwargs):
-        if name == "CompositeFunction":
-           return CompositeFunctionWrapper( *args, **kwargs )
-        elif name == "ProductFunction":
-           return ProductFunctionWrapper( *args, **kwargs )
-        elif name == "Convolution":
-           return ConvolutionWrapper( *args, **kwargs )
-        elif name == "MultiDomainFunction":
-           return MultiDomainFunctionWrapper( *args, **kwargs )
-        else:
-           return FunctionWrapper(name, *args, **kwargs)
+        name_to_constructor = {
+            'CompositeFunction': CompositeFunctionWrapper,
+            'ProductFunction': ProductFunctionWrapper,
+            'Convolution': ConvolutionWrapper,
+            'MultiDomainFunction': MultiDomainFunctionWrapper,
+            }
+        # constructor is FunctionWrapper if the name is not in the registry.
+        constructor = name_to_constructor.get(name, FunctionWrapper)  
+        return  constructor(name, *args, **kwargs)
  
     # ------------------------------------------------------------------------------------------------
     wrapper_function.__name__ = name
