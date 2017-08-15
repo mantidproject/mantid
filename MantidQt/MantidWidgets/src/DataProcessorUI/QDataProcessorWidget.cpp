@@ -187,6 +187,9 @@ void QDataProcessorWidget::showTable(
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
+
+  // Hide the Hidden Options column
+  ui.viewTable->hideColumn(m_model->columnCount() - 1);
 }
 
 /**
@@ -309,6 +312,11 @@ void QDataProcessorWidget::expandAll() { ui.viewTable->expandAll(); }
 Collapse all currently expanded groups
 */
 void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
+
+/**
+Select all rows/groups
+*/
+void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 
 /**
 Handle interface when data reduction paused
@@ -642,6 +650,10 @@ void QDataProcessorWidget::transfer(const QList<QString> &runs) {
   }
 
   m_presenter->transfer(runsMap);
+}
+
+void QDataProcessorWidget::setForcedReProcessing(bool forceReProcessing) {
+  m_presenter->setForcedReProcessing(forceReProcessing);
 }
 
 } // namespace MantidWidgets

@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/Load.h"
+#include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::API;
@@ -37,6 +37,7 @@ public:
 
   void test_D20_no_scan() {
     // Tests the no-scan case for D20
+    // Temperature ramp is not a motor scan so produces a file per T
 
     LoadILLDiffraction alg;
     // Don't put output in ADS by default
@@ -53,10 +54,51 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+
+    TS_ASSERT_EQUALS(outputWS->x(0)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], 2685529)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], 1638.76, 0.01)
+
+    TS_ASSERT_EQUALS(outputWS->x(1)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(1)[0], 548)
+    TS_ASSERT_DELTA(outputWS->e(1)[0], 23.40, 0.01)
+
+    TS_ASSERT_EQUALS(outputWS->x(2)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(2)[0], 991)
+    TS_ASSERT_DELTA(outputWS->e(2)[0], 31.48, 0.01)
+
+    TS_ASSERT_EQUALS(outputWS->x(1111)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(1111)[0], 7080)
+    TS_ASSERT_DELTA(outputWS->e(1111)[0], 84.14, 0.01)
+
+    TS_ASSERT_EQUALS(outputWS->x(3072)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(3072)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->e(3072)[0], 0.)
+
+    TS_ASSERT(outputWS->run().hasProperty("simulated_d20"))
+    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy"))
+    TS_ASSERT(outputWS->run().hasProperty("SampleSettings"))
+
+    const auto sim = outputWS->run().getLogData("simulated_d20");
+    const auto spy = outputWS->run().getLogData("AcquisitionSpy");
+    const auto sample = outputWS->run().getLogData("SampleSettings");
+
+    TS_ASSERT_EQUALS(sim->size(), 1)
+    TS_ASSERT_EQUALS(spy->size(), 1)
+    TS_ASSERT_EQUALS(sample->size(), 1)
+
+    TS_ASSERT_EQUALS(sim->value(), "2017-May-15 14:36:18  5.44174e+06\n")
+    TS_ASSERT_EQUALS(spy->value(), "2017-May-15 14:36:18  240\n")
+    TS_ASSERT_EQUALS(sample->value(), "2017-May-15 14:36:18  4.9681\n")
   }
 
   void test_D20_scan() {
-    // Tests the scanned case for D20
+    // Tests the omega scanned case for D20
+    // Omega scan is a motor scan, so it is recorded in a single file
+    // But it is not a detector scan within our context
 
     LoadILLDiffraction alg;
     // Don't put output in ADS by default
@@ -76,6 +118,46 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 21)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+
+    for (size_t row = 0; row < 10; ++row) {
+      for (size_t col = 0; col < 21; ++col) {
+        double val = static_cast<double>(col);
+        TS_ASSERT_EQUALS(outputWS->y(row)[col], 3. * (val + 1))
+        TS_ASSERT_EQUALS(outputWS->x(row)[col], 1. + 0.2 * val)
+        TS_ASSERT_EQUALS(outputWS->e(row)[col], sqrt(3. * (val + 1)))
+      }
+    }
+
+    TS_ASSERT(outputWS->run().hasProperty("Omega"))
+    TS_ASSERT(outputWS->run().hasProperty("Detector"))
+    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy"))
+    TS_ASSERT(outputWS->run().hasProperty("SampleSettings"))
+    TS_ASSERT(outputWS->run().hasProperty("MagneticField"))
+
+    const auto omega = outputWS->run().getLogData("Omega");
+
+    TS_ASSERT_EQUALS(omega->size(), 21)
+
+    const std::string omegaTimeSeriesValue =
+        "2017-Feb-15 08:58:52  1\n2017-Feb-15 08:58:52.521547000  "
+        "1.2\n2017-Feb-15 08:58:53.043086000  1.4\n2017-Feb-15 "
+        "08:58:53.564674000  1.6\n2017-Feb-15 08:58:54.086244000  "
+        "1.8\n2017-Feb-15 08:58:54.600926000  2\n2017-Feb-15 "
+        "08:58:55.122357000  2.2\n2017-Feb-15 08:58:55.643809000  "
+        "2.4\n2017-Feb-15 08:58:56.165310000  2.6\n2017-Feb-15 "
+        "08:58:56.686815000  2.8\n2017-Feb-15 08:58:57.208370000  "
+        "3\n2017-Feb-15 08:58:57.730012999  3.2\n2017-Feb-15 "
+        "08:58:58.251527998  3.4\n2017-Feb-15 08:58:58.773040998  "
+        "3.6\n2017-Feb-15 08:58:59.294480998  3.8\n2017-Feb-15 "
+        "08:58:59.815922997  4\n2017-Feb-15 08:59:00.337767997  "
+        "4.2\n2017-Feb-15 08:59:00.859268997  4.4\n2017-Feb-15 "
+        "08:59:01.380606996  4.6\n2017-Feb-15 08:59:01.902055996  "
+        "4.8\n2017-Feb-15 08:59:02.423509996  5\n";
+
+    TS_ASSERT_EQUALS(omega->value(), omegaTimeSeriesValue)
   }
 
   void test_D20_multifile() {
@@ -96,10 +178,14 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
   }
 
   void test_D2B_single_file() {
-    // Test a D2B file with 25 detector positions
+    // Test a D2B detector scan file with 25 detector positions
+    // TODO: assert on values!
 
     const int NUMBER_OF_TUBES = 128;
     const int NUMBER_OF_PIXELS = 128;

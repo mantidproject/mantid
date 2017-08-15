@@ -228,7 +228,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
       std::string ext = path.getExtension();
       // Chop off filename
       path.makeParent();
-      path.append(basename + number.str() + "." + ext);
+      path.append(basename.append(number.str()).append(".").append(ext));
       Poco::File fileobj(path);
       const bool exists = fileobj.exists();
       if (!exists || !append)

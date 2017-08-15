@@ -647,7 +647,7 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
     if (wsProp) {
       const std::string &wsPropValue = minimizerProp->value();
       if (wsPropValue != "") {
-        std::string wsPropName = minimizerProp->name();
+        const std::string &wsPropName = minimizerProp->name();
         m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);
       }
     }

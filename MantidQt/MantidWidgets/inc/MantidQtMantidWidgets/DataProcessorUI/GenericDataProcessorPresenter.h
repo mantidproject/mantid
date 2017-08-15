@@ -141,6 +141,7 @@ public:
   void giveUserWarning(const std::string &prompt,
                        const std::string &title) const override;
   bool isProcessing() const override;
+  void setForcedReProcessing(bool forceReProcessing) override;
 
 protected:
   // The table view we're managing
@@ -261,6 +262,8 @@ private:
   void expandAll();
   // close all groups
   void collapseAll();
+  // select all rows / groups
+  void selectAll();
   // table io methods
   void newTable();
   void openTable();
@@ -294,6 +297,11 @@ private:
   // pause/resume reduction
   void pause();
   void resume();
+
+  // Check if run has been processed
+  bool isProcessed(int position) const;
+  bool isProcessed(int position, int parent) const;
+  bool m_forceProcessing = false;
 
   // List of workspaces the user can open
   QSet<QString> m_workspaceList;

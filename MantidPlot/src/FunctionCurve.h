@@ -53,6 +53,8 @@ public:
   FunctionCurve(const FunctionCurve &c);
   ~FunctionCurve() override;
 
+  FunctionCurve &operator=(const FunctionCurve &rhs) = delete;
+
   PlotCurve *clone(const Graph *) const override {
     return new FunctionCurve(*this);
   }

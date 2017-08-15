@@ -106,6 +106,9 @@ public:
   void expandAll() override;
   void collapseAll() override;
 
+  // Select all rows/groups
+  void selectAll() override;
+
   // Handle pause/resume of data reduction
   void pause() override;
   void resume() override;
@@ -134,6 +137,9 @@ public:
 
   // Forward a main presenter to this view's presenter
   void accept(DataProcessorMainPresenter *);
+
+  // Force re-processing of rows
+  void setForcedReProcessing(bool forceReProcessing) override;
 
 private:
   // initialise the interface

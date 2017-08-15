@@ -130,6 +130,24 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "conflict between options "
                              "specified via this column and global options "
                              "specified externally, the former prevail.");
+
+  // Column Hidden Options must be added to the whitelist
+  m_whitelist.addElement("HiddenOptions", "HiddenOptions",
+                         "<b>Override <samp>" +
+                             QString::fromStdString(processor.name()) +
+                             "</samp> properties</b><br /><i>optional</i><br "
+                             "/>This column allows you to "
+                             "override the properties used when executing "
+                             "the main reduction algorithm in the same way"
+                             "as the Options column, but this column is hidden"
+                             "from the user. "
+                             "Hidden Options are given as "
+                             "key=value pairs, separated by commas. Values "
+                             "containing commas must be quoted. In case of "
+                             "conflict between options "
+                             "specified via this column and global options "
+                             "specified externally, the former prevail.");
+
   m_columns = static_cast<int>(m_whitelist.size());
 
   if (m_postprocessor.name().empty()) {
@@ -237,7 +255,7 @@ void GenericDataProcessorPresenter::acceptViews(
   // ones we're handling that the user should'nt touch.
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
   m_view->setOptionsHintStrategy(
-      new AlgorithmHintStrategy(alg, m_processor.blacklist()), m_columns - 1);
+      new AlgorithmHintStrategy(alg, m_processor.blacklist()), m_columns - 2);
 
   // Start with a blank table
   newTable();
@@ -278,7 +296,6 @@ void GenericDataProcessorPresenter::process() {
   m_gqueue = GroupQueue();
 
   // Progress: each group and each row within count as a progress step.
-  int progress = 0;
   int maxProgress = 0;
 
   for (const auto &item : m_selectedData) {
@@ -294,7 +311,7 @@ void GenericDataProcessorPresenter::process() {
 
     // Groups that are already processed or cannot be post-processed (only 1
     // child row selected) do not count in progress
-    if (!m_manager->isProcessed(item.first) && item.second.size() > 1)
+    if (!isProcessed(item.first) && item.second.size() > 1)
       maxProgress++;
 
     RowQueue rowQueue;
@@ -318,17 +335,18 @@ void GenericDataProcessorPresenter::process() {
         m_manager->setProcessed(false, data.first, item.first);
 
       // Rows that are already processed do not count in progress
-      if (!m_manager->isProcessed(data.first, item.first))
+      if (!isProcessed(data.first, item.first))
         maxProgress++;
     }
     m_gqueue.emplace(item.first, rowQueue);
   }
 
   // Create progress reporter bar
-  if (maxProgress > 0)
+  if (maxProgress > 0) {
+    int progress = 0;
     m_progressReporter = new ProgressPresenter(progress, maxProgress,
                                                maxProgress, m_progressView);
-
+  }
   // Start processing the first group
   m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
   resume();
@@ -379,7 +397,7 @@ void GenericDataProcessorPresenter::nextRow() {
     m_rowItem = rqueue.front();
     rqueue.pop();
     // Skip reducing rows that are already processed
-    if (!m_manager->isProcessed(m_rowItem.first, groupIndex)) {
+    if (!isProcessed(m_rowItem.first, groupIndex)) {
       startAsyncRowReduceThread(&m_rowItem, groupIndex);
       return;
     }
@@ -390,7 +408,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
     // Skip post-processing groups that are already processed or only contain a
     // single row
-    if (!m_manager->isProcessed(groupIndex) && m_groupData.size() > 1) {
+    if (!isProcessed(groupIndex) && m_groupData.size() > 1) {
       startAsyncGroupReduceThread(m_groupData, groupIndex);
       return;
     }
@@ -423,7 +441,7 @@ void GenericDataProcessorPresenter::nextGroup() {
     m_rowItem = rqueue.front();
     rqueue.pop();
     // Skip reducing rows that are already processed
-    if (!m_manager->isProcessed(m_rowItem.first, m_gqueue.front().first))
+    if (!isProcessed(m_rowItem.first, m_gqueue.front().first))
       startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
     else
       doNextAction();
@@ -744,7 +762,7 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     const GroupData &groupData, const std::string &prefix) {
 
   if (!m_postprocess)
-    throw std::runtime_error("Cannot retrieve post-processed workspace name");
+    return std::string();
 
   /* This method calculates, for a given set of rows, the name of the output
   * (post-processed) workspace */
@@ -880,8 +898,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // Properties not to be used in processing
   std::set<std::string> restrictedProps;
 
-  // Loop over all columns in the whitelist except 'Options'
-  for (int i = 0; i < m_columns - 1; i++) {
+  // Loop over all columns in the whitelist except 'Options' and 'Hidden
+  // Options'
+  for (int i = 0; i < m_columns - 2; i++) {
 
     // The algorithm's property linked to this column
     auto propertyName = m_whitelist.algPropFromColIndex(i);
@@ -944,7 +963,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   }
 
   /* Now deal with 'Options' column */
-  const auto userOptions = data->back();
+  const auto userOptions = data->at(m_columns - 2);
 
   // Parse and set any user-specified options
   optionsMap = parseKeyValueString(userOptions);
@@ -953,6 +972,21 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
       alg->setProperty(kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
+                               kvp->first);
+    }
+  }
+
+  // Now deal with the 'Hidden Options' column
+  const auto hiddenOptions = data->back();
+
+  // Parse and set any user-specified options
+  auto hiddenOptionsMap = parseKeyValueString(hiddenOptions);
+  for (auto kvp = hiddenOptionsMap.begin(); kvp != hiddenOptionsMap.end();
+       ++kvp) {
+    try {
+      alg->setProperty(kvp->first, kvp->second);
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      throw std::runtime_error("Invalid property in hidden options column: " +
                                kvp->first);
     }
   }
@@ -970,7 +1004,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   if (alg->isExecuted()) {
 
     /* The reduction is complete, try to populate the columns */
-    for (int i = 0; i < m_columns - 1; i++) {
+    for (int i = 0; i < m_columns - 2; i++) {
 
       auto columnName = m_whitelist.colNameFromColIndex(i);
 
@@ -1029,6 +1063,11 @@ void GenericDataProcessorPresenter::expandAll() { m_view->expandAll(); }
 Collapse all groups
 */
 void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
+
+/**
+Select all rows / groups
+*/
+void GenericDataProcessorPresenter::selectAll() { m_view->selectAll(); }
 
 /**
 Used by the view to tell the presenter something has changed
@@ -1104,6 +1143,9 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::CollapseAllGroupsFlag:
     collapseAll();
+    break;
+  case DataProcessorPresenter::SelectAllFlag:
+    selectAll();
     break;
   case DataProcessorPresenter::PauseFlag:
     pause();
@@ -1646,6 +1688,44 @@ void GenericDataProcessorPresenter::giveUserWarning(
 */
 bool GenericDataProcessorPresenter::isProcessing() const {
   return !m_reductionPaused;
+}
+
+/** Checks if a row in the table has been processed.
+ * @param position :: the row to check
+ * @return :: true if the row has already been processed else false.
+ */
+bool GenericDataProcessorPresenter::isProcessed(int position) const {
+  // processing truth table
+  // isProcessed      manager    force
+  //    0               1          1
+  //    0               0          1
+  //    1               1          0
+  //    0               0          0
+  return m_manager->isProcessed(position) && !m_forceProcessing;
+}
+
+/** Checks if a row in the table has been processed.
+ * @param position :: the row to check
+ * @param parent :: the parent
+ * @return :: true if the row has already been processed else false.
+ */
+bool GenericDataProcessorPresenter::isProcessed(int position,
+                                                int parent) const {
+  // processing truth table
+  // isProcessed      manager    force
+  //    0               1          1
+  //    0               0          1
+  //    1               1          0
+  //    0               0          0
+  return m_manager->isProcessed(position, parent) && !m_forceProcessing;
+}
+
+/** Set the forced reprocessing flag
+ * @param forceReProcessing :: the row to check
+ */
+void GenericDataProcessorPresenter::setForcedReProcessing(
+    bool forceReProcessing) {
+  m_forceProcessing = forceReProcessing;
 }
 }
 }
