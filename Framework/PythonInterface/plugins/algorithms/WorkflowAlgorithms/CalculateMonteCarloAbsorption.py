@@ -317,6 +317,18 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 container_kwargs['InnerRadius'] = self._container_inner_radius
                 container_kwargs['OuterRadius'] = self._sample_inner_radius
 
+                s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
+                                                      OutputWorkspace='_acc_1',
+                                                      **container_kwargs)
+
+                s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_2,
+                                                      OutputWorkspace='_acc_2',
+                                                      **container_kwargs)
+
+                self._acc_ws = self._multiply('_acc_1', '_acc_2', self._acc_ws)
+                mtd['_acc_1'].delete()
+                mtd['_acc_2'].delete()
+
             self._acc_ws = self._convert_from_wavelength(self._acc_ws, self._acc_ws)
 
             sample_wave_ws.delete()
