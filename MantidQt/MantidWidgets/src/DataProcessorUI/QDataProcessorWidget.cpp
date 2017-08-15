@@ -29,7 +29,6 @@ QDataProcessorWidget::QDataProcessorWidget(
       m_openMap(new QSignalMapper(this)) {
 
   createTable();
-
   m_presenter->acceptViews(this, this);
 }
 
@@ -231,6 +230,7 @@ void QDataProcessorWidget::setTableList(const QSet<QString> &tables) {
 void QDataProcessorWidget::on_comboProcessInstrument_currentIndexChanged(
     int index) {
   ui.comboProcessInstrument->setCurrentIndex(index);
+  emit instrumentHasChanged();
 }
 
 /**
@@ -445,6 +445,8 @@ void QDataProcessorWidget::setInstrumentList(const QString &instruments,
   int index =
       ui.comboProcessInstrument->findData(defaultInstrument, Qt::DisplayRole);
   ui.comboProcessInstrument->setCurrentIndex(index);
+
+  emit instrumentHasChanged();
 }
 
 /**
@@ -709,6 +711,10 @@ void QDataProcessorWidget::clearTable() {
 
 void QDataProcessorWidget::setForcedReProcessing(bool forceReProcessing) {
   m_presenter->setForcedReProcessing(forceReProcessing);
+}
+
+QString QDataProcessorWidget::getCurrentInstrument() const {
+  return ui.comboProcessInstrument->currentText();
 }
 
 } // namespace MantidWidgets

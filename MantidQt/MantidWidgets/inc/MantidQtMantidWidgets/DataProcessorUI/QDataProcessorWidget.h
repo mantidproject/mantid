@@ -120,6 +120,7 @@ public:
   void setTableList(const QSet<QString> &tables) override;
   void setInstrumentList(const QString &instruments,
                          const QString &defaultInstrument) override;
+
   void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
@@ -134,8 +135,8 @@ public:
   std::string getProcessInstrument() const override;
   std::string getWorkspaceToOpen() const override;
   std::string getClipboard() const override;
-
   DataProcessorPresenter *getPresenter() const override;
+  QString getCurrentInstrument() const override;
 
   // Forward a main presenter to this view's presenter
   void accept(DataProcessorMainPresenter *);
@@ -159,6 +160,7 @@ public:
 signals:
   void processButtonClicked();
   void processingFinished();
+  void instrumentHasChanged();
 
 private:
   // initialise the interface

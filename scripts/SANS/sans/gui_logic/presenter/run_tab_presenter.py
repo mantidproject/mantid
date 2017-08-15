@@ -213,6 +213,7 @@ class RunTabPresenter(object):
         2. Adds a dummy input workspace
         3. Adds row index information
         """
+        sans_logger.information("Starting processing of batch table.")
         # 0. Validate rows
         self._create_dummy_input_workspace()
         self._validate_rows()
@@ -340,9 +341,11 @@ class RunTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Table Model and state population
     # ------------------------------------------------------------------------------------------------------------------
-    def get_states(self):
+    def get_states(self, row_index=None):
         """
         Gathers the state information for all rows.
+        :param row_index: if a single row is selected, then only this row is returned, else all the state for all
+                             rows is returned
         :return: a list of states
         """
         start_time_state_generation = time.time()
@@ -355,12 +358,12 @@ class RunTabPresenter(object):
 
         # 3. Go through each row and construct a state object
         if table_model and state_model_with_view_update:
-            states = self._create_states(state_model_with_view_update, table_model)
+            states = self._create_states(state_model_with_view_update, table_model, row_index)
         else:
             states = None
         stop_time_state_generation = time.time()
         time_taken = stop_time_state_generation - start_time_state_generation
-        sans_logger.debug("The generation of all states took {}s".format(time_taken))
+        sans_logger.information("The generation of all states took {}s".format(time_taken))
         return states
 
     def get_row_indices(self):
@@ -381,8 +384,9 @@ class RunTabPresenter(object):
         :param row_index: the row index
         :return: a state if the index is valid and there is a state else None
         """
-        states = self.get_states()
+        states = self.get_states(row_index=row_index)
         if states is None:
+            sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
             return None
 
         if row_index in list(states.keys()):
@@ -741,14 +745,25 @@ class RunTabPresenter(object):
             table_model.add_table_entry(row, table_index_model)
         return table_model
 
-    def _create_states(self, state_model, table_model):
+    def _create_states(self, state_model, table_model, row_index=None):
         """
         Here we create the states based on the settings in the models
+        :param state_model: the state model object
+        :param table_model: the table model object
+        :param row_index: the selected row, if None then all rows are generated
         """
         number_of_rows = self._view.get_number_of_rows()
+        if row_index is not None:
+            # Check if the selected index is valid
+            if row_index >= number_of_rows:
+                return None
+            rows = [row_index]
+        else:
+            rows = range(number_of_rows)
         states = {}
         gui_state_director = GuiStateDirector(table_model, state_model, self._facility)
-        for row in range(number_of_rows):
+        for row in rows:
+            sans_logger.information("Generating state for row {}".format(row))
             if not self.is_empty_row(row):
                 try:
                     state = gui_state_director.create_state(row)
@@ -776,12 +791,17 @@ class RunTabPresenter(object):
         can_scatter = get_string_entry(BatchReductionEntry.CanScatter, row)
         can_transmission = get_string_entry(BatchReductionEntry.CanTransmission, row)
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
+        output_name = get_string_entry(BatchReductionEntry.Output, row)
 
         # 2. Create entry that can be understood by table
         row_entry = "SampleScatter:{0},SampleTransmission:{1},SampleDirect:{2}," \
-                    "CanScatter:{3},CanTransmission:{4},CanDirect:{5}".format(sample_scatter, sample_transmission,
-                                                                              sample_direct, can_scatter,
-                                                                              can_transmission, can_direct)
+                    "CanScatter:{3},CanTransmission:{4},CanDirect:{5},OutputName:{6}".format(sample_scatter,
+                                                                                             sample_transmission,
+                                                                                             sample_direct,
+                                                                                             can_scatter,
+                                                                                             can_transmission,
+                                                                                             can_direct,
+                                                                                             output_name)
         self._view.add_row(row_entry)
 
     # ------------------------------------------------------------------------------------------------------------------

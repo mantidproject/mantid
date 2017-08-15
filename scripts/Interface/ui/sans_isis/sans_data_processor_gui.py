@@ -8,7 +8,7 @@ except ImportError:
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from PyQt4 import QtGui, QtCore
 from mantid.simpleapi import *
-from mantid.kernel import Logger
+from mantid.kernel import (Logger, config)
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
 from inspect import isclass
@@ -22,7 +22,6 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
 # Globals
 # ----------------------------------------------------------------------------------------------------------------------
 gui_logger = Logger("SANS GUI LOGGER")
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Free Functions
@@ -44,6 +43,7 @@ def open_file_dialog(line_edit, filter_text, directory):
 class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_SansDataProcessorWindow):
     data_processor_table = None
     main_presenter = None
+    INSTRUMENTS = None
 
     class RunTabListener(with_metaclass(ABCMeta, object)):
         """
@@ -73,7 +73,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.setupUi(self)
 
         # Main presenter
-
         self._main_presenter = main_presenter
 
         # Algorithm configuration
@@ -95,9 +94,20 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.__transmission_roi_files_path_key = "transmission_roi_files_path"
         self.__transmission_mask_files_path_key = "transmission_roi_files_path"
         self.__q_resolution_moderator_path_key = "q_resolution_moderator_file_path"
+        self.__instrument_name = "sans_instrument"
 
         # Instrument
-        self._instrument = None
+        SANSDataProcessorGui.INSTRUMENTS = ",".join([SANSInstrument.to_string(item)
+                                                     for item in [SANSInstrument.SANS2D,
+                                                                  SANSInstrument.LOQ,
+                                                                  SANSInstrument.LARMOR]])
+        settings = QtCore.QSettings()
+        settings.beginGroup(self.__generic_settings)
+        instrument_name = settings.value(self.__instrument_name,
+                                         SANSInstrument.to_string(SANSInstrument.NoInstrument),
+                                         type=str)
+        settings.endGroup()
+        self._instrument = SANSInstrument.from_string(instrument_name)
 
         # Attach validators
         self._attach_validators()
@@ -218,14 +228,16 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.data_processor_table.accept(self._main_presenter)
 
         # Set the list of available instruments in the widget and the default instrument
-        no_instrument = SANSInstrument.to_string(SANSInstrument.NoInstrument)
-        self.data_processor_table.setInstrumentList(no_instrument, no_instrument)
+        instrument_name = SANSInstrument.to_string(self._instrument)
+        self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_name)
 
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
         self.data_processor_table.processButtonClicked.connect(self._processed_clicked)
         self.data_processor_table.processingFinished.connect(self._processing_finished)
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
+
+        self.data_processor_table.instrumentHasChanged.connect(self._handle_instrument_change)
 
     def _processed_clicked(self):
         """
@@ -257,6 +269,21 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self._load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_path_key,
                         self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
+
+    def _set_mantid_instrument(self, instrument_string):
+        # Add the instrument to the settings
+        settings = QtCore.QSettings()
+        settings.beginGroup(self.__generic_settings)
+        settings.setValue(self.__instrument_name, instrument_string)
+        settings.endGroup()
+
+        # Set the default instrument on Mantid
+        config.setFacility("ISIS")
+        config.setString("default.instrument", instrument_string)
+
+    def _handle_instrument_change(self):
+        instrument_string = str(self.data_processor_table.getCurrentInstrument())
+        self._set_mantid_instrument(instrument_string)
 
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())
@@ -422,11 +449,16 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
     # ------------------------------------------------------------------------------------------------------------------
+    def handle_instrument_change(self):
+        # TODO need to read it and set it as the default instrument
+        pass
+
     def set_instrument_settings(self, instrument):
         if instrument:
             self._instrument = instrument
             instrument_string = SANSInstrument.to_string(instrument)
-            self.data_processor_table.setInstrumentList(instrument_string, instrument_string)
+            self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_string)
+            self._set_mantid_instrument(instrument_string)
 
     def update_gui_combo_box(self, value, expected_type, combo_box):
         # There are two types of values that can be passed:
