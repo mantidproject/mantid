@@ -11,8 +11,8 @@ class HRPD(AbstractInst):
 
     def __init__(self, **kwargs):
         self._inst_settings = instrument_settings.InstrumentSettings(
-            param_map=hrpd_param_mapping.attr_mapping, adv_conf_dict=hrpd_advanced_config.get_all_adv_variables(),
-            kwargs=kwargs)
+            param_map=hrpd_param_mapping.attr_mapping, kwargs=kwargs,
+            adv_conf_dict=hrpd_advanced_config.get_all_adv_variables())
 
         super(HRPD, self).__init__(user_name=self._inst_settings.user_name,
                                    calibration_dir=self._inst_settings.calibration_dir,
@@ -69,3 +69,6 @@ class HRPD(AbstractInst):
     def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
         return common.crop_in_tof(ws_to_crop=van_ws_to_crop, x_min=self._inst_settings.van_tof_cropping[0],
                                   x_max=self._inst_settings.van_tof_cropping[-1])
+
+    def _get_instrument_bin_widths(self):
+        return self._inst_settings.focused_bin_widths

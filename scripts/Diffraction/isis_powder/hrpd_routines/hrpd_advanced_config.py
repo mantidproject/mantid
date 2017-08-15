@@ -5,7 +5,12 @@ file_names = {
 }
 
 general_params = {
-    "spline_coefficient": 70
+    "spline_coefficient": 70,
+    "focused_bin_widths": [
+        -0.0005,
+        -0.0005,
+        -0.001
+    ]
 }
 
 coupled_params = {
@@ -26,10 +31,7 @@ def get_all_adv_variables(is_decoupled_mode=False):
     advanced_config_dict = {}
     advanced_config_dict.update(file_names)
     advanced_config_dict.update(general_params)
-    if is_decoupled_mode:
-        advanced_config_dict.update(decoupled_params)
-    else:
-        advanced_config_dict.update(coupled_params)
+    advanced_config_dict.update(get_decoupled_mode_dict(decoupled_mode=is_decoupled_mode))
     return advanced_config_dict
 
 
