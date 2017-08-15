@@ -218,7 +218,7 @@ def get_intersection_of_ranges(range_list):
     the same point.  Also, all ranges should obey range[0] <= range[1].
     """
     # Find all combinations of ranges, and see where they intersect.
-    range_combos = list(itertools.combinations(range_list, 2))
+    range_combos = itertools.combinations(range_list, 2)
 
     # Retrieve all intersections
     intersections = map(lambda range_pair: find_intersection_of_ranges(range_pair[0], range_pair[1]),
