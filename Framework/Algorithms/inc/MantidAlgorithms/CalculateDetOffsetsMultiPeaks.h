@@ -93,18 +93,6 @@ private:
   /// Main function to calculate all detectors' offsets
   void calculateDetectorsOffsets();
 
-  void
-  importFitWindowTableWorkspace(DataObjects::TableWorkspace_sptr windowtablews);
-
-  /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW,
-                 const std::vector<double> &peakPositions,
-                 const std::vector<double> &fitWindows, size_t &nparams,
-                 double &minD, double &maxD, std::vector<double> &peakPosToFit,
-                 std::vector<double> &peakPosFitted, std::vector<double> &chisq,
-                 std::vector<double> &peakHeights, int &i_highestpeak,
-                 double &resolution, double &dev_resolution);
-
   /// Add peak fitting and offset calculation information to information table
   /// workspaces per spectrum
   void addInfoToReportWS(int wi, FitPeakOffsetResult offsetresult,
@@ -146,24 +134,14 @@ private:
   DataObjects::EventWorkspace_const_sptr m_eventW;
   bool m_isEvent;
 
-  /// Background type
-  std::string m_backType;
-  /// Peak profile type
-  std::string m_peakType;
   /// Criterias for fitting peak
   std::string m_minimizer;
   double m_maxChiSq;
-  double m_minPeakHeight;
-  double m_leastMaxObsY;
+
   double m_maxOffset;
 
   std::vector<double> m_peakPositions;
-  std::vector<double> m_fitWindows;
 
-  /// Input resolution
-  API::MatrixWorkspace_const_sptr m_inputResolutionWS;
-  /// Flag of use input resolution
-  bool m_hasInputResolution;
   /// Lower boundary of allowed peak width as resolution
   double m_minResFactor;
   /// Upper boundary of allowed peak width as resolution
