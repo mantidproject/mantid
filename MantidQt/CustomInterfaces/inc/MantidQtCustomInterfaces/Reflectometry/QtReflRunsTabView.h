@@ -85,10 +85,10 @@ public:
   void enableAction(ReflectometryAction action) override;
   void disableAction(ReflectometryAction action) override;
   void disableAction(DataProcessorAction action) override;
-  void enableTransferButton() override;
-  void disableTransferButton() override;
-  void enableAutoreduceButton() override;
-  void disableAutoreduceButton() override;
+  void enableTransfer() override;
+  void disableTransfer() override;
+  void enableAutoreduce() override;
+  void disableAutoreduce() override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;

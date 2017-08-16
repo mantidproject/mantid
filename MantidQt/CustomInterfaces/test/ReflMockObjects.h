@@ -66,10 +66,10 @@ public:
   MOCK_METHOD1(enableAction, void(ReflectometryAction));
   MOCK_METHOD1(disableAction, void(DataProcessorAction));
   MOCK_METHOD1(disableAction, void(ReflectometryAction));
-  MOCK_METHOD0(enableTransferButton, void());
-  MOCK_METHOD0(disableTransferButton, void());
-  MOCK_METHOD0(enableAutoreduceButton, void());
-  MOCK_METHOD0(disableAutoreduceButton, void());
+  MOCK_METHOD0(enableTransfer, void());
+  MOCK_METHOD0(disableTransfer, void());
+  MOCK_METHOD0(enableAutoreduce, void());
+  MOCK_METHOD0(disableAutoreduce, void());
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};

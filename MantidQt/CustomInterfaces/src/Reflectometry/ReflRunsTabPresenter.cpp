@@ -492,8 +492,8 @@ const std::array<ReflectometryAction, 5>
          ReflectometryAction::IMPORT_TBL}};
 
 void ReflRunsTabPresenter::preventTableModification() {
-  m_view->disableAutoreduceButton();
-  m_view->disableTransferButton();
+  m_view->disableAutoreduce();
+  m_view->disableTransfer();
 
   disableTableModification([this](auto action)
                                -> void { disableAction(action); });
@@ -502,8 +502,8 @@ void ReflRunsTabPresenter::preventTableModification() {
 }
 
 void ReflRunsTabPresenter::allowTableModification() {
-  m_view->enableAutoreduceButton();
-  m_view->enableTransferButton();
+  m_view->enableAutoreduce();
+  m_view->enableTransfer();
 
   enableTableModification([this](auto action)
                               -> void { enableAction(action); });

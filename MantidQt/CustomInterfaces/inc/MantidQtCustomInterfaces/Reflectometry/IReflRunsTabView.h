@@ -73,10 +73,10 @@ public:
   virtual void enableAction(ReflectometryAction action) = 0;
   virtual void disableAction(DataProcessorAction action) = 0;
   virtual void disableAction(ReflectometryAction action) = 0;
-  virtual void enableTransferButton() = 0;
-  virtual void disableTransferButton() = 0;
-  virtual void enableAutoreduceButton() = 0;
-  virtual void disableAutoreduceButton() = 0;
+  virtual void enableTransfer() = 0;
+  virtual void disableTransfer() = 0;
+  virtual void enableAutoreduce() = 0;
+  virtual void disableAutoreduce() = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;

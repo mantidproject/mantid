@@ -273,9 +273,9 @@ void QtReflRunsTabView::setTransferEnabled(bool enabled) {
   ui.buttonTransfer->setEnabled(enabled);
 }
 
-void QtReflRunsTabView::disableTransferButton() { setTransferEnabled(false); }
+void QtReflRunsTabView::disableTransfer() { setTransferEnabled(false); }
 
-void QtReflRunsTabView::enableTransferButton() { setTransferEnabled(true); }
+void QtReflRunsTabView::enableTransfer() { setTransferEnabled(true); }
 
 /**
 * Sets the "Autoreduce" button enabled or disabled

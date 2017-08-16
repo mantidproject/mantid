@@ -244,7 +244,7 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView, enableAction(DataProcessorAction::PAUSE))
         .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView, disableAutoreduceButton()).Times(Exactly(1));
+    EXPECT_CALL(m_mockRunsTabView, disableAutoreduce()).Times(Exactly(1));
 
     m_presenter.resume();
   }
@@ -322,7 +322,7 @@ public:
   void test_processing_re_enabled_on_pause_confirmation() {
     EXPECT_CALL(m_mockRunsTabView, enableAction(DataProcessorAction::PROCESS))
         .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView, enableAutoreduceButton()).Times(Exactly(1));
+    EXPECT_CALL(m_mockRunsTabView, enableAutoreduce()).Times(Exactly(1));
 
     m_presenter.confirmReductionPaused();
   }
