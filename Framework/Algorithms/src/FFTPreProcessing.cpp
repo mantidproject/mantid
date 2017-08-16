@@ -37,7 +37,7 @@ void FFTPreProcessing::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output 2D workspace.");
- declareProperty("ApodizationFunction", "None",
+  declareProperty("ApodizationFunction", "None",
                   boost::make_shared<Mantid::Kernel::StringListValidator>(
                       std::vector<std::string>{"None", "Lorentz", "Gaussian"}),
                   "The apodization function to apply to the data");
