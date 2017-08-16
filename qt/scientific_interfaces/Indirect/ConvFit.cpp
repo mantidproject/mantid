@@ -605,21 +605,19 @@ void ConvFit::extendResolutionWorkspace() {
     cloneAlg->initialize();
     cloneAlg->setProperty("InputWorkspace", resWsName.toStdString());
     cloneAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
-    m_batchAlgoRunner->addAlgorithm(cloneAlg);
-    // Append to cloned workspace if neccessary
-    if (resolutionNumHist == 1) {
-      for (size_t i = 1; i < numHist; i++) {
-        IAlgorithm_sptr appendAlg =
-            AlgorithmManager::Instance().create("AppendSpectra");
-        appendAlg->setLogging(false);
-        appendAlg->initialize();
-        appendAlg->setProperty("InputWorkspace1", "__ConvFit_Resolution");
-        appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
-        appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
-        m_batchAlgoRunner->addAlgorithm(appendAlg);
-      }
+    cloneAlg->execute();
+    // Append to cloned workspace if necessary
+    if (resolutionNumHist == 1 && numHist > 1) {
+      IAlgorithm_sptr appendAlg =
+              AlgorithmManager::Instance().create("AppendSpectra");
+      appendAlg->setLogging(false);
+      appendAlg->initialize();
+      appendAlg->setPropertyValue("InputWorkspace1", "__ConvFit_Resolution");
+      appendAlg->setPropertyValue("InputWorkspace2", resWsName.toStdString());
+      appendAlg->setProperty("Number", static_cast<int>(numHist-1));
+      appendAlg->setPropertyValue("OutputWorkspace", "__ConvFit_Resolution");
+      appendAlg->execute();
     }
-    m_batchAlgoRunner->executeBatchAsync();
   }
 }
 
