@@ -2,9 +2,18 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
-from isis_powder.routines import common
+from isis_powder.hrpd_routines import hrpd_advanced_config
+from isis_powder.routines import common, absorb_corrections
 from isis_powder.routines.run_details import create_run_details_object, \
                                              RunDetailsWrappedCommonFuncs, CustomFuncForRunDetails
+
+
+def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium):
+    absorb_dict = hrpd_advanced_config.absorption_correction_params
+    sample_details_obj = absorb_corrections.create_vanadium_sample_details_obj(config_dict=absorb_dict)
+    ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(
+        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, sample_details_obj=sample_details_obj)
+    return ws_to_correct
 
 
 def get_run_details(run_number_string, inst_settings, is_vanadium):

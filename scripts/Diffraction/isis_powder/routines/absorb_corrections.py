@@ -73,7 +73,6 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
     to ensure a none elemental formula has associated number density
     :return: The workspace with corrections applied
     """
-
     geometry_json = {'Shape': 'Cylinder',
                      'Height': sample_details_obj.height, 'Radius': sample_details_obj.radius,
                      'Center': sample_details_obj.center}

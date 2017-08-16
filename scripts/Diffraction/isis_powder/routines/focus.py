@@ -36,13 +36,13 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm, absorb):
     # Crop to largest acceptable TOF range
     input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
 
-    # Align
-    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
-                                       CalibrationFile=run_details.offset_file_path)
-
     # Correct for absorption / multiple scattering if required
     if absorb:
         input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
+
+    # Align
+    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
+                                       CalibrationFile=run_details.offset_file_path)
 
     # Focus the spectra into banks
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,

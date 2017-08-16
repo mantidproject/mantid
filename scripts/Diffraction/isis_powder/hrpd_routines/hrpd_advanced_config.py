@@ -1,16 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 
-file_names = {
-    "grouping_file_name" : "hrpd_new_072_01_corr.cal"
-}
-
-general_params = {
-    "spline_coefficient": 70,
-    "focused_bin_widths": [
-        -0.0005,
-        -0.0005,
-        -0.001
-    ]
+absorption_correction_params = {
+    "cylinder_sample_height": 2.0,
+    "cylinder_sample_radius": 0.3,
+    "cylinder_position": [0., 0., 0.],
+    "chemical_formula": "V"
 }
 
 coupled_params = {
@@ -24,6 +18,19 @@ coupled_params = {
 
 decoupled_params = {
     # TODO: Implement these
+}
+
+file_names = {
+    "grouping_file_name" : "hrpd_new_072_01_corr.cal"
+}
+
+general_params = {
+    "spline_coefficient": 70,
+    "focused_bin_widths": [
+        -0.0005,
+        -0.0005,
+        -0.001
+    ]
 }
 
 

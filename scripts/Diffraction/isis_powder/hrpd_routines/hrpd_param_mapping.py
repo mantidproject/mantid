@@ -16,6 +16,7 @@ attr_mapping = \
         ParamMapEntry(ext_name="spline_coefficient",        int_name="spline_coeff"),
         ParamMapEntry(ext_name="first_cycle_run_no",        int_name="run_in_range"),
         ParamMapEntry(ext_name="mode",                      int_name="mode", enum_class=HRPD_MODES),
+        ParamMapEntry(ext_name="multiple_scattering",       int_name="multiple_scattering"),
         ParamMapEntry(ext_name="run_number",                int_name="run_number"),
         ParamMapEntry(ext_name="sample_empty",              int_name="sample_empty", optional=True),
         ParamMapEntry(ext_name="sample_empty_scale",        int_name="sample_empty_scale"),
