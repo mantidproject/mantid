@@ -489,15 +489,12 @@ void PDCalibration::exec() {
       tof_vec_full[i + peaks.badPeakOffset] = centre;
     }
 
-    if (d_vec.empty()) {
+    if (d_vec.size() < 2) { // not enough peaks were found
       maskWS->setMaskedIndex(wkspIndex, true);
       continue;
     } else {
       double difc = 0., t0 = 0., difa = 0.;
       fitDIFCtZeroDIFA_LM(d_vec, tof_vec, height2, difc, t0, difa);
-      if (peaks.detid == 75967 || peaks.detid == 75968) // REMOVE
-        g_log.warning() << peaks.detid << " LM:   difc=" << difc << " t0=" << t0
-                        << " difa=" << difa << "\n"; // REMOVE
 
       const auto rowNum = m_detidToRow[peaks.detid];
       double chisq = 0.;
@@ -584,10 +581,6 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
                                    peakVec->begin() + (2 + 2 * numPeaks));
   const std::vector<double> height2(peakVec->begin() + (2 + 2 * numPeaks),
                                     peakVec->begin() + (2 + 3 * numPeaks));
-  // std::cout << "tofObs=";
-  // for (const auto &tof : tofObs)
-  //    std::cout << tof << " ";
-  // std::cout << std::endl;
 
   // create the function to convert tof to dspacing
   double difc = gsl_vector_get(v, 0);
@@ -595,7 +588,7 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
   double difa = 0.;
   if (numParams > 1) {
     tzero = gsl_vector_get(v, 1);
-    if (numParams > 1)
+    if (numParams > 2)
       difa = gsl_vector_get(v, 2);
   }
   auto converter =
@@ -609,8 +602,6 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
     errsum += errsum_i;
   }
 
-  // std::cout << "difc=" << difc << " tzero=" << tzero << " difa=" << difa
-  //          << " errsum=" << errsum << std::endl;
   return errsum;
 }
 
@@ -625,10 +616,17 @@ double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0,
   gsl_vector *fitParams = gsl_vector_alloc(numParams);
   gsl_vector_set_all(fitParams, 0.0); // set all parameters to zero
   gsl_vector_set(fitParams, 0, difc);
+  if (numParams > 1) {
+    gsl_vector_set(fitParams, 1, t0);
+    if (numParams > 2) {
+      gsl_vector_set(fitParams, 2, difa);
+    }
+  }
 
-  // Set initial step sizes to 0.001
+  // Set initial step sizes
   gsl_vector *stepSizes = gsl_vector_alloc(numParams);
-  gsl_vector_set_all(stepSizes, 0.001);
+  gsl_vector_set_all(stepSizes, 0.1);
+  gsl_vector_set(stepSizes, 0, 0.01);
 
   // Initialize method and iterate
   gsl_multimin_function minex_func;
@@ -644,7 +642,8 @@ double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0,
   gsl_multimin_fminimizer_set(minimizer, &minex_func, fitParams, stepSizes);
 
   // Finally do the fitting
-  size_t iter = 0;
+  size_t iter = 0; // number of iterations
+  const size_t MAX_ITER = 75 * numParams;
   int status = 0;
   double size;
   do {
@@ -656,7 +655,7 @@ double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0,
     size = gsl_multimin_fminimizer_size(minimizer);
     status = gsl_multimin_test_size(size, 1e-4);
 
-  } while (status == GSL_CONTINUE && iter < 50); // 50 iterations maximum
+  } while (status == GSL_CONTINUE && iter < MAX_ITER);
 
   // only update calibration values on successful fit
   double errsum = 0.; // return 0. if fit didn't work
@@ -665,7 +664,7 @@ double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0,
     difc = gsl_vector_get(minimizer->x, 0);
     if (numParams > 1) {
       t0 = gsl_vector_get(minimizer->x, 1);
-      if (numParams > 1) {
+      if (numParams > 2) {
         difa = gsl_vector_get(minimizer->x, 2);
       }
     }
