@@ -98,7 +98,7 @@ def has_hash(tag, hashed_value, workspace):
 
     try:
         check_if_valid_tag_and_workspace(tag, workspace)
-    except RuntimeException:
+    except RuntimeError:
         return False
 
     if not has_tag(tag, workspace):
