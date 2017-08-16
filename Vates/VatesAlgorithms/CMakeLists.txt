@@ -32,8 +32,6 @@ endif( UNITY_BUILD )
 
 # For Windows:
 add_definitions( -DIN_MANTID_VATESAPI )
-# Use a precompiled header where they are supported
-enable_precompiled_headers ( inc/MantidVatesAlgorithms/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library( VatesAlgorithms ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
