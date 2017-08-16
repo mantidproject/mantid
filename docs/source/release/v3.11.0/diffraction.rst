@@ -9,6 +9,7 @@ Crystal Improvements
 --------------------
 
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` now adjusts the sample offsets and has an option to optimize the initial time-of-flight for better calibration of single crystal data.
+- :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>` has not correctly aligned the detectors for SNAP since release 3.9. This bug that only impacted SNAP has been fixed.
 
 Engineering Diffraction
 -----------------------
@@ -27,4 +28,5 @@ and
 Single Crystal Diffraction
 --------------------------
 
-New algorithm :ref:`SingleCrystalDiffuseReduction <algm-SingleCrystalDiffuseReduction>` which performs the most common reductions done on Corelli (and elsewhere) for single crystal diffuse scattering.
+- New algorithm :ref:`SingleCrystalDiffuseReduction <algm-SingleCrystalDiffuseReduction>` which performs the most common reductions done on Corelli (and elsewhere) for single crystal diffuse scattering.
+- :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to only add peaks to runs that contributed to that peak. This is a lot faster when multiple runs are in the same MDworkspace.
