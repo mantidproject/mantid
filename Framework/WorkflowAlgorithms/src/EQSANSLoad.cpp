@@ -593,7 +593,8 @@ void EQSANSLoad::exec() {
       s2d = s2d - sampleflange_sample_offset + sampleflange_det_offset;
 
     // Modify SDD according to SampleDetectorDistanceOffset offset if given
-    const double sample_det_offset = getProperty("SampleDetectorDistanceOffset");
+    const double sample_det_offset =
+      getProperty("SampleDetectorDistanceOffset");
     if (!isEmpty(sample_det_offset))
       s2d += sample_det_offset;
   }
