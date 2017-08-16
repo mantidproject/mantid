@@ -3,7 +3,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -47,7 +47,7 @@ void AddPeak::exec() {
   const double height = getProperty("Height");
   const double count = getProperty("BinCount");
 
-  const DetectorInfo &detectorInfo = runWS->detectorInfo();
+  const auto &detectorInfo = runWS->detectorInfo();
   const size_t detectorIndex = detectorInfo.indexOf(detID);
 
   double theta2 = detectorInfo.twoTheta(detectorIndex);
