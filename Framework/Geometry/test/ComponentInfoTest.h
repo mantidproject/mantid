@@ -43,7 +43,9 @@ makeComponentIDMap(const boost::shared_ptr<
 
 // Make a Beamline ComponentInfo for a single component
 std::unique_ptr<Beamline::ComponentInfo> makeSingleComponentInfo(
-    Eigen::Vector3d position, Eigen::Quaterniond rotation,
+    Eigen::Vector3d position = Eigen::Vector3d{1, 1, 1},
+    Eigen::Quaterniond rotation =
+        Eigen::Quaterniond(Eigen::Affine3d::Identity().rotation()),
     Eigen::Vector3d scaleFactor = Eigen::Vector3d{1, 1, 1}) {
 
   auto detectorIndices =
@@ -212,6 +214,33 @@ public:
 
     double satol = 2e-2; // tolerance for solid angle
     TS_ASSERT_DELTA(info.solidAngle(0, V3D(10, 1.7, 0)), 1.840302, satol);
+  }
+
+  void test_copy_construction() {
+
+    auto internalInfo = std::move(makeSingleComponentInfo());
+    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
+
+    auto componentIds =
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1});
+
+    auto shapes = boost::make_shared<
+        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+    shapes->push_back(createCappedCylinder());
+
+    ComponentInfo a(std::move(internalInfo), componentIds,
+                    makeComponentIDMap(componentIds), shapes);
+
+    // Make the copy
+    ComponentInfo b = a;
+
+    // Compare sizes
+    TS_ASSERT_EQUALS(b.size(), a.size());
+    // Shapes are the same
+    TS_ASSERT_EQUALS(&b.shape(0), &a.shape(0));
+    // IDs are the same
+    TS_ASSERT_EQUALS(b.indexOf(&comp1), a.indexOf(&comp1));
   }
 };
 
