@@ -198,9 +198,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
-  std::transform(
-      std::begin(in), std::end(in), std::inserter(out, out.begin()),
-      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
+  std::transform(std::begin(in), std::end(in), std::inserter(out, out.begin()),
+                 [](QString const &inStr)
+                     -> std::string { return inStr.toStdString(); });
   return out;
 }
 }
@@ -1014,9 +1014,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                             ? propValue.right(propValue.indexOf("e"))
                             : "";
           propValue =
-              propValue.mid(0,
-                            propValue.indexOf(".") +
-                                m_options["RoundPrecision"].toInt() + 1) +
+              propValue.mid(0, propValue.indexOf(".") +
+                                   m_options["RoundPrecision"].toInt() + 1) +
               exp;
         }
 

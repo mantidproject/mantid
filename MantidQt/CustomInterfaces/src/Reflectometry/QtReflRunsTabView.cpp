@@ -265,13 +265,9 @@ void QtReflRunsTabView::enableAction(DataProcessorAction action) {
   enable(*(ui.menuRows->actions()[toRowIndex(action)]));
 }
 
-void QtReflRunsTabView::disableAutoreduce() {
-  setAutoreduceEnabled(false);
-}
+void QtReflRunsTabView::disableAutoreduce() { setAutoreduceEnabled(false); }
 
-void QtReflRunsTabView::enableAutoreduce() {
-  setAutoreduceEnabled(true);
-}
+void QtReflRunsTabView::enableAutoreduce() { setAutoreduceEnabled(true); }
 
 void QtReflRunsTabView::setTransferEnabled(bool enabled) {
   ui.buttonTransfer->setEnabled(enabled);
@@ -295,7 +291,7 @@ void QtReflRunsTabView::setAutoreduceEnabled(bool enabled) {
 */
 void QtReflRunsTabView::setTransferMethods(
     const std::set<std::string> &methods) {
-  for (const auto& method : methods) 
+  for (const auto &method : methods)
     ui.comboTransferMethod->addItem(method.c_str());
 }
 
@@ -310,7 +306,7 @@ void QtReflRunsTabView::setInstrumentList(
     const std::string &defaultInstrument) {
   ui.comboSearchInstrument->clear();
 
-  for (const auto& instrumentName : instruments) {
+  for (const auto &instrumentName : instruments) {
     QString instrument = QString::fromStdString(instrumentName);
     ui.comboSearchInstrument->addItem(instrument);
   }
