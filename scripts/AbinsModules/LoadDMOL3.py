@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import AbinsModules
 import io
-import six
 import numpy as np
 from math import sqrt
 from mantid.kernel import Atom
@@ -18,6 +17,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         super(LoadDMOL3, self).__init__(input_dft_filename=input_dft_filename)
         self._dft_program = "DMOL3"
         self._norm = 0
+        self._parser = AbinsModules.GeneralDFTParser()
 
     def read_phonon_file(self):
         """
@@ -32,7 +32,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
             # Move read file pointer to the last calculation recorded in the .outmol file. First calculation could be
             # geometry optimization. The last calculation in the file is expected to be calculation of vibrational
             # data. There may be some intermediate resume calculations.
-            self._find_last(file_obj=dmol3_file, msg=b"$cell vectors")
+            self._parser.find_last(file_obj=dmol3_file, msg=b"$cell vectors")
 
             # read lattice vectors
             self._read_lattice_vectors(obj_file=dmol3_file, data=data)
@@ -41,7 +41,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
             self._read_atomic_coordinates(file_obj=dmol3_file, data=data)
 
             # read frequencies, corresponding atomic displacements and construct k-points data
-            self._find_first(file_obj=dmol3_file, msg="Frequencies (cm-1) and normal modes ")
+            self._parser.find_first(file_obj=dmol3_file, msg="Frequencies (cm-1) and normal modes ")
             self._read_modes(file_obj=dmol3_file, data=data)
 
             # save data to hdf file
@@ -50,65 +50,13 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
             # return AbinsData object
             return self._rearrange_data(data=data)
 
-    def _find_first(self, file_obj=None, msg=None):
-        """
-        Finds the first line with msg. Moves file current position to the next line.
-        :param file_obj: file object from which we read
-        :param msg: keyword to find
-        """
-        if six.PY3:
-            msg = bytes(msg, "utf8")
-        while not self._file_end(file_obj=file_obj):
-            line = file_obj.readline()
-            if line.strip() and msg in line:
-                break
-
-    def _find_last(self, file_obj=None, msg=None):
-        """
-        Moves file current position to the last occurrence of msg.
-        :param file_obj: file object from which we read
-        :param msg: keyword to find
-        """
-        if six.PY3:
-            msg = bytes(msg, "utf8")
-
-        found = False
-        last_entry = None
-
-        while not self._file_end(file_obj=file_obj):
-            pos = file_obj.tell()
-            line = file_obj.readline()
-            if line.strip() and msg in line:
-                last_entry = pos
-                found = True
-
-        if not found:
-            raise ValueError("No entry " + msg + " has been found.")
-        else:
-            file_obj.seek(last_entry)
-
-    def _file_end(self, file_obj=None):
-        """
-        Checks end of the text file.
-        :param file_obj: file object which was open in "r" mode
-        :return: True if end of file, otherwise False
-        """
-        n = AbinsModules.AbinsConstants.ONE_CHARACTER
-        pos = file_obj.tell()
-        potential_end = file_obj.read(n)
-        if potential_end == AbinsModules.AbinsConstants.EOF:
-            return True
-        else:
-            file_obj.seek(pos)
-            return False
-
     def _read_lattice_vectors(self, obj_file=None, data=None):
         """
         Reads lattice vectors from .outmol DMOL3 file.
         :param obj_file: file object from which we read
         :param data: Python dictionary to which found lattice vectors should be added
         """
-        self._find_first(file_obj=obj_file, msg=b"$cell vectors")
+        self._parser.find_first(file_obj=obj_file, msg=b"$cell vectors")
 
         dim = 3
         vectors = []
@@ -135,10 +83,10 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         """
         atoms = {}
         atom_indx = 0
-        self._find_first(file_obj=file_obj, msg="$coordinates")
+        self._parser.find_first(file_obj=file_obj, msg="$coordinates")
         end_msgs = ["$end", "----------------------------------------------------------------------"]
 
-        while not self._block_end(file_obj=file_obj, msg=end_msgs):
+        while not self._parser.block_end(file_obj=file_obj, msg=end_msgs):
 
             line = file_obj.readline()
             entries = line.split()
@@ -169,7 +117,8 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         zdisp = []
 
         # parse block with frequencies and atomic displacements
-        while not (self._block_end(file_obj=file_obj, msg=end_msgs) or self._file_end(file_obj=file_obj)):
+        while not (self._parser.block_end(file_obj=file_obj, msg=end_msgs) or
+                   self._parser.file_end(file_obj=file_obj)):
 
             self._read_freq_block(file_obj=file_obj, freq=freq)
             self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
@@ -222,30 +171,13 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         # with num_k = 1
         data["atomic_displacements"] = np.asarray([displacements])
 
-    def _block_end(self, file_obj=None, msg=None):
-        """
-        Checks for msg which terminates block.
-        :param file_obj: file object from which we read
-        :param msg: list with messages which end kpoint block.
-        :return: True if end of block otherwise False
-        """
-        for item in msg:
-            pos = file_obj.tell()
-            line = file_obj.readline()
-            file_obj.seek(pos)
-            if six.PY3:
-                item = bytes(item, "utf8")
-            if item in line:
-                return True
-        return False
-
     def _read_freq_block(self, file_obj=None, freq=None):
         """
         Parses block with frequencies.
         :param file_obj: file object from which we read
         :param freq: list with frequencies which we update
         """
-        self._move_to(file_obj=file_obj, msg=":")
+        self._parser.move_to(file_obj=file_obj, msg=":")
         items = file_obj.readline().replace(b"\n", b" ").split()
         length = len(items)
         for i in range(1, length, 2):
@@ -259,11 +191,11 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         :param ydisp: list with y coordinates which we update
         :param zdisp: list with z coordinates which we update
         """
-        self._move_to(file_obj=file_obj, msg=" x ")
+        self._parser.move_to(file_obj=file_obj, msg=" x ")
 
         atom_mass = None
 
-        while not self._file_end(file_obj=file_obj):
+        while not self._parser.file_end(file_obj=file_obj):
 
             pos = file_obj.tell()
             line = file_obj.readline()
@@ -285,21 +217,6 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
                 else:
                     file_obj.seek(pos)
                     break
-
-    def _move_to(self, file_obj=None, msg=None):
-        """
-        Finds the first line with msg and moves read file pointer to that line.
-        :param file_obj: file object from which we read
-        :param msg: keyword to find
-        """
-        if six.PY3:
-            msg = bytes(msg, "utf8")
-        while not self._file_end(file_obj=file_obj):
-            pos = file_obj.tell()
-            line = file_obj.readline()
-            if line.strip() and msg in line:
-                file_obj.seek(pos)
-                break
 
     def _parse_item(self, item=None, container=None, part=None, mass=None):
         """

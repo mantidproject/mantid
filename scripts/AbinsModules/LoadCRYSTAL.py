@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import io
-import six
 from math import sqrt
 
 import numpy as np
@@ -28,6 +27,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         # More info in 'Creating a super cell' at
         # http://www.theochem.unito.it/crystal_tuto/mssc2008_cd/tutorials/geometry/geom_tut.html
         self._inv_expansion_matrix = np.eye(3, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        self._parser = AbinsModules.GeneralDFTParser()
 
         self._dft_program = "CRYSTAL"
 
@@ -109,7 +109,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
             # In case there is more than one k-point super-cell is constructed. In order to obtain metric tensor we
             # need to find expansion transformation.
             with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
-                self._find_first(file_obj=crystal_file, msg="EXPANSION MATRIX OF PRIMITIVE CELL")
+                self._parser.find_first(file_obj=crystal_file, msg="EXPANSION MATRIX OF PRIMITIVE CELL")
                 dim = 3
                 vectors = []
                 for i in range(dim):
@@ -129,7 +129,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :param file_obj:  file object from which we read
         :return: list with lattice vectors
         """
-        self._find_first(file_obj=file_obj, msg="DIRECT LATTICE VECTORS CARTESIAN COMPONENTS (ANGSTROM)")
+        self._parser.find_first(file_obj=file_obj, msg="DIRECT LATTICE VECTORS CARTESIAN COMPONENTS (ANGSTROM)")
         file_obj.readline()  # Line: X                    Y                    Z
         dim = 3
         vectors = []
@@ -149,10 +149,12 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :return: list with atomic coordinates
         """
         coord_lines = []
-        self._find_first(file_obj=file_obj, msg="ATOM          X(ANGSTROM)         Y(ANGSTROM)         Z(ANGSTROM)")
+        self._parser.find_first(file_obj=file_obj,
+                                msg="ATOM          X(ANGSTROM)         Y(ANGSTROM)         Z(ANGSTROM)")
+
         file_obj.readline()  # Line: *******************************************************************************
 
-        while not self._file_end(file_obj=file_obj):
+        while not self._parser.file_end(file_obj=file_obj):
             line = file_obj.readline().replace(b"T", b"")
             # At the end of this section there is always empty line.
             if not line.strip():
@@ -187,7 +189,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
             # parse all k-points
             for k in range(num_k):
 
-                line = self._find_first(file_obj=file_obj, msg="DISPERSION K POINT NUMBER")
+                line = self._parser.find_first(file_obj=file_obj, msg="DISPERSION K POINT NUMBER")
 
                 partial_freq = []
                 xdisp = []
@@ -203,12 +205,12 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 # parse k-points for which atomic displacements are real
                 if k_point_type == b"R":
 
-                    while not self._file_end(file_obj=file_obj):
+                    while not self._parser.file_end(file_obj=file_obj):
 
                         self._read_freq_block(file_obj=file_obj, freq=partial_freq)
                         self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
 
-                        if self._check_block_end(file_obj=file_obj, msg="DISPERSION K POINT NUMBER"):
+                        if self._parser.block_end(file_obj=file_obj, msg=["DISPERSION K POINT NUMBER"]):
                             break
                         if self._check_kpoints_end(file_obj=file_obj):
                             break
@@ -224,22 +226,22 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                     complex_partial_ydisp = []
                     complex_partial_zdisp = []
 
-                    while not self._file_end(file_obj=file_obj):
+                    while not self._parser.file_end(file_obj=file_obj):
 
                         self._read_freq_block(file_obj=file_obj, freq=partial_freq)
                         self._read_coord_block(file_obj=file_obj, xdisp=real_partial_xdisp,
                                                ydisp=real_partial_ydisp, zdisp=real_partial_zdisp, part="real")
-                        if self._check_block_end(file_obj=file_obj, msg="IMAGINARY"):
+                        if self._parser.block_end(file_obj=file_obj, msg=["IMAGINARY"]):
                             break
 
-                    while not self._file_end(file_obj=file_obj):
+                    while not self._parser.file_end(file_obj=file_obj):
 
                         self._read_freq_block(file_obj=file_obj, freq=partial_freq, append=False)
                         self._read_coord_block(file_obj=file_obj, xdisp=complex_partial_xdisp,
                                                ydisp=complex_partial_ydisp, zdisp=complex_partial_zdisp,
                                                part="imaginary")
 
-                        if self._check_block_end(file_obj=file_obj, msg="DISPERSION K POINT NUMBER"):
+                        if self._parser.block_end(file_obj=file_obj, msg=["DISPERSION K POINT NUMBER"]):
                             break
                         if self._check_kpoints_end(file_obj=file_obj):
                             break
@@ -267,14 +269,13 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
             zdisp = []
 
             # parse block with frequencies and atomic displacements
-            while not self._file_end(file_obj=file_obj) and inside_block:
+            while not self._parser.file_end(file_obj=file_obj) and inside_block:
 
                 self._read_freq_block(file_obj=file_obj, freq=freq)
                 self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
-                for msg in end_msgs:
-                    if self._check_block_end(file_obj=file_obj, msg=msg):
-                        inside_block = False
-                        break
+
+                if self._parser.block_end(file_obj=file_obj, msg=end_msgs):
+                    break
 
             freq = [freq]
             weights = [1.0]
@@ -298,7 +299,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :param file_obj: file object from which we read
         :param freq: list with frequencies which we update
         """
-        line = self._find_first(file_obj=file_obj, msg="FREQ(CM**-1)")
+        line = self._parser.find_first(file_obj=file_obj, msg="FREQ(CM**-1)")
 
         if append:
             for item in line.replace(b"\n", b" ").replace(b"FREQ(CM**-1)", b" ").split():
@@ -312,8 +313,8 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :param ydisp: list with y coordinates which we update
         :param zdisp: list with z coordinates which we update
         """
-        self._move_to(file_obj=file_obj, msg="AT.")
-        while not self._file_end(file_obj=file_obj):
+        self._parser.move_to(file_obj=file_obj, msg="AT.")
+        while not self._parser.file_end(file_obj=file_obj):
             pos = file_obj.tell()
             line = file_obj.readline()
 
@@ -339,35 +340,6 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         else:
             raise ValueError("Real or imaginary part of complex number was expected.")
 
-    def _move_to(self, file_obj=None, msg=None):
-        """
-        Finds the first line with msg and moves read file pointer to that line.
-        :param file_obj: file object from which we read
-        :param msg: keyword to find
-        """
-        if six.PY3:
-            msg = bytes(msg, "utf8")
-        while not self._file_end(file_obj=file_obj):
-            pos = file_obj.tell()
-            line = file_obj.readline()
-            if line.strip() and msg in line:
-                file_obj.seek(pos)
-                return
-
-    def _find_first(self, file_obj=None, msg=None):
-        """
-        Finds the first line with msg. Moves a file pointer current position to the next line.
-        :param file_obj: file object from which we read
-        :param msg: keyword to find
-        :return: line with the msg keyword
-        """
-        if six.PY3:
-            msg = bytes(msg, "utf8")
-        while not self._file_end(file_obj=file_obj):
-            line = file_obj.readline()
-            if line.strip() and msg in line:
-                return line
-
     def _check_kpoints_end(self, file_obj=None):
         """
         Checks if end of k-points block.
@@ -378,7 +350,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
         # remove empty lines:
         pos = None
-        while not self._file_end(file_obj=file_obj):
+        while not self._parser.file_end(file_obj=file_obj):
             pos = file_obj.tell()
             line = file_obj.readline()
             if line.strip():
@@ -394,40 +366,10 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 return False
         return True
 
-    def _file_end(self, file_obj=None):
-        """
-        Checks end of a file.
-        :param file_obj: file object which was open in "r" mode
-        :return: True if end of file, otherwise False
-        """
-        n = AbinsModules.AbinsConstants.ONE_CHARACTER
-        pos = file_obj.tell()
-        end = file_obj.read(n)
-        if end == AbinsModules.AbinsConstants.EOF:
-            return True
-        else:
-            file_obj.seek(pos)
-            return False
-
-    def _check_block_end(self, file_obj=None, msg=None):
-        """
-        Checks if end of k-point block.
-        :param file_obj: file object from which we read
-        :param msg: message which ends k-point block.
-        :return: True if end of block otherwise False
-        """
-        pos = file_obj.tell()
-        line = file_obj.readline()
-        file_obj.seek(pos)
-        if six.PY3:
-            msg = bytes(msg, "utf8")
-
-        return msg in line
-
     def _get_num_kpoints(self, file_obj=None):
-        self._find_first(file_obj=file_obj, msg="K       WEIGHT       COORD")
+        self._parser.find_first(file_obj=file_obj, msg="K       WEIGHT       COORD")
         num_k = 0
-        while not self._file_end(file_obj=file_obj):
+        while not self._parser.file_end(file_obj=file_obj):
             line = file_obj.readline()
             if b"WITH SHRINKING FACTORS:" in line:
                 return num_k
