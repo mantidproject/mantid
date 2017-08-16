@@ -1779,8 +1779,10 @@ std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
 
   // If we are not updating the instrument definitions
   // update the iterator, this means we will skip the folder in HOME and
-  // look in the instrument folder in mantid install directory or mantid source code directory
-  if (updateInstrStr != "1" || updateInstrStr != "on" || updateInstrStr != "On") {
+  // look in the instrument folder in mantid install directory or mantid source
+  // code directory
+  if (updateInstrStr != "1" || updateInstrStr != "on" ||
+      updateInstrStr != "On") {
     instrDir++;
   }
 
