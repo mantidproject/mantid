@@ -12,8 +12,8 @@ namespace MantidWidgets {
 MiniPlot::MiniPlot(QWidget *parent)
     : MplFigureCanvas(111, parent), m_activeCurveLabel(),
       m_storedCurveLabels() {
-  setScale(Axes::Scale::X, 0, 1);
-  setScale(Axes::Scale::Y, -1.2, 1.2);
+  setScale(Axes::Scale::X, 0, 1, Axes::ScaleMode::Auto);
+  setScale(Axes::Scale::Y, -1.2, 1.2, Axes::ScaleMode::Auto);
 }
 
 /**
