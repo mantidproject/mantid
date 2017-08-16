@@ -5,7 +5,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/SaveMDWorkspaceToVTK.h"
+#include "MantidVatesAlgorithms/SaveMDWorkspaceToVTK.h"
 
 #include <map>
 #include <vtkSmartPointer.h>
