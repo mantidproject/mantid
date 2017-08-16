@@ -31,7 +31,11 @@ class MaxEntView(QtGui.QWidget):
         
         widget_helper.setName(self.table,1,"Complex Data")
         self.complex_data_box= widget_helper.createCheckTable(self.table,False,1)
-
+        self.complex_data_box.setFlags(QtCore.Qt.ItemIsEnabled)
+        # needs an even number of ws to work
+        # so lets hide it for now
+        self.table.setRowHidden(1,True)       
+ 
         widget_helper.setName(self.table,2,"Complex Image")
         self.complex_image_box= widget_helper.createCheckTable(self.table,True,2)
  
@@ -84,7 +88,9 @@ class MaxEntView(QtGui.QWidget):
         self.chop= widget_helper.createSpinTable(self.tableA,500,5)
 
         #layout
-        self.table.setMinimumSize(40,228)
+        # this is if complex data is unhidden 
+        #self.table.setMinimumSize(40,228)
+        self.table.setMinimumSize(40,203)
         self.tableA.setMinimumSize(40,207)
         self.horizontalSpacer1 = QtGui.QSpacerItem(20, 30, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self.horizontalSpacer2 = QtGui.QSpacerItem(20, 70, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)

@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 import mantid.simpleapi as mantid
 
+from Muon import MaxEnt_model
 
 class MaxEntPresenter(object):
 
@@ -33,42 +34,9 @@ class MaxEntPresenter(object):
 #
     def handleMaxEntButton(self):
         inputs = self.get_MaxEnt_input()
-        alg=mantid.AlgorithmManager.create("MaxEnt")
-        alg.initialize()
-        alg.setChild(True)
-        for name,value in iteritems(inputs):
-            mantid.logger.warning(name+"  "+str(value))
-            alg.setProperty(name,value)
-        alg.execute() 
-        wsChi=  mantid.AnalysisDataService.addOrReplace( inputs["EvolChi"],alg.getProperty("EvolChi").value)
-        wsAngle=mantid.AnalysisDataService.addOrReplace( inputs["EvolAngle"],alg.getProperty("EvolAngle").value)
-        wsImage=mantid.AnalysisDataService.addOrReplace( inputs["ReconstructedImage"],alg.getProperty("ReconstructedImage").value)
-        wsData= mantid.AnalysisDataService.addOrReplace( inputs["ReconstructedData"],alg.getProperty("ReconstructedData").value)
-
-        if mantid.AnalysisDataService.doesExist("EvolChiMuon"):
-            EvolChiMuon=mantid.AnalysisDataService.retrieve("EvolChiMuon")
-            EvolChiMuon.add(inputs["EvolChi"])
-        else:
-            mantid.GroupWorkspaces(InputWorkspaces=inputs["EvolChi"],OutputWorkspace="EvolChiMuon")
-        
-        if mantid.AnalysisDataService.doesExist("EvolAngleMuon"):
-            EvolAngleMuon=mantid.AnalysisDataService.retrieve("EvolAngleMuon")
-            EvolAngleMuon.add(inputs["EvolAngle"])
-        else:
-            mantid.GroupWorkspaces(InputWorkspaces=inputs["EvolAngle"],OutputWorkspace="EvolAngleMuon")
- 
-        if mantid.AnalysisDataService.doesExist("ReconstructedImageMuon"):
-            ReconstructedImageMuon=mantid.AnalysisDataService.retrieve("ReconstructedImageMuon")
-            ReconstructedImageMuon.add(inputs["ReconstructedImage"])
-        else:
-            mantid.GroupWorkspaces(InputWorkspaces=inputs["ReconstructedImage"],OutputWorkspace="ReconstructedImageMuon")
- 
-        if mantid.AnalysisDataService.doesExist("ReconstructedDataMuon"):
-            ReconstructedMuon=mantid.AnalysisDataService.retrieve("ReconstructedDataMuon")
-            ReconstructedMuon.add(inputs["ReconstructedData"])
-        else:
-            mantid.GroupWorkspaces(InputWorkspaces=inputs["ReconstructedData"],OutputWorkspace="ReconstructedDataMuon")
-
+        alg=MaxEnt_model.MaxEntModel(inputs)
+        alg.execute()
+        alg.output()
 
     def get_MaxEnt_input(self):
         inputs=self.view.initMaxEntInput()
