@@ -11,7 +11,7 @@ class MaxEntPresenter(object):
         self.getWorkspaceNames()
         #connect
         #self.view.tableClickSignal.connect(self.tableClicked)
-        #self.view.buttonSignal.connect(self.handleButton)
+        self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
 
     # only get ws that are groups or pairs
     # ignore raw
@@ -31,32 +31,50 @@ class MaxEntPresenter(object):
 #        elif  row == self.view.getShiftBoxRow() and col ==1:
 #            self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 #
-#    def handleButton(self):
-#        inputs = self.get_FFT_input()
-#        alg=mantid.AlgorithmManager.create("FFT")
-#        alg.initialize()
-#        alg.setChild(False)
-#        for name,value in iteritems(inputs):
-#            alg.setProperty(name,value)
-#            mantid.logger.warning(name+"  "+str(value))
-#        alg.execute()
-#        ws=alg.getPropertyValue("OutputWorkspace")
-#        if mantid.AnalysisDataService.doesExist("FFTMuon"):
-#            FFTMuon=mantid.AnalysisDataService.retrieve("FFTMuon")
-#            FFTMuon.add(ws)
-#        else:
-#            FFTMuon=mantid.GroupWorkspaces(InputWorkspaces=ws)
-#
-#    def get_FFT_input(self):
-#        inputs=self.view.initFFTInput()
-#        if self.view.isRaw():
-#            self.view.addRaw(inputs,"InputWorkspace")
-#        if  self.view.isAutoShift():
-#            inputs["AutoShift"]=True
-#        else:
-#            self.view.addFFTShift(inputs)
-#        if self.view.isComplex():
-#            self.view.addFFTComplex(inputs)
-#            if self.view.isRaw():
-#                self.view.addRaw(inputs,"InputImagWorkspace")
-#        return inputs
+    def handleMaxEntButton(self):
+        inputs = self.get_MaxEnt_input()
+        alg=mantid.AlgorithmManager.create("MaxEnt")
+        alg.initialize()
+        alg.setChild(True)
+        for name,value in iteritems(inputs):
+            mantid.logger.warning(name+"  "+str(value))
+            alg.setProperty(name,value)
+        alg.execute() 
+        wsChi=  mantid.AnalysisDataService.addOrReplace( inputs["EvolChi"],alg.getProperty("EvolChi").value)
+        wsAngle=mantid.AnalysisDataService.addOrReplace( inputs["EvolAngle"],alg.getProperty("EvolAngle").value)
+        wsImage=mantid.AnalysisDataService.addOrReplace( inputs["ReconstructedImage"],alg.getProperty("ReconstructedImage").value)
+        wsData= mantid.AnalysisDataService.addOrReplace( inputs["ReconstructedData"],alg.getProperty("ReconstructedData").value)
+
+        if mantid.AnalysisDataService.doesExist("EvolChiMuon"):
+            EvolChiMuon=mantid.AnalysisDataService.retrieve("EvolChiMuon")
+            EvolChiMuon.add(inputs["EvolChi"])
+        else:
+            mantid.GroupWorkspaces(InputWorkspaces=inputs["EvolChi"],OutputWorkspace="EvolChiMuon")
+        
+        if mantid.AnalysisDataService.doesExist("EvolAngleMuon"):
+            EvolAngleMuon=mantid.AnalysisDataService.retrieve("EvolAngleMuon")
+            EvolAngleMuon.add(inputs["EvolAngle"])
+        else:
+            mantid.GroupWorkspaces(InputWorkspaces=inputs["EvolAngle"],OutputWorkspace="EvolAngleMuon")
+ 
+        if mantid.AnalysisDataService.doesExist("ReconstructedImageMuon"):
+            ReconstructedImageMuon=mantid.AnalysisDataService.retrieve("ReconstructedImageMuon")
+            ReconstructedImageMuon.add(inputs["ReconstructedImage"])
+        else:
+            mantid.GroupWorkspaces(InputWorkspaces=inputs["ReconstructedImage"],OutputWorkspace="ReconstructedImageMuon")
+ 
+        if mantid.AnalysisDataService.doesExist("ReconstructedDataMuon"):
+            ReconstructedMuon=mantid.AnalysisDataService.retrieve("ReconstructedDataMuon")
+            ReconstructedMuon.add(inputs["ReconstructedData"])
+        else:
+            mantid.GroupWorkspaces(InputWorkspaces=inputs["ReconstructedData"],OutputWorkspace="ReconstructedDataMuon")
+
+
+    def get_MaxEnt_input(self):
+        inputs=self.view.initMaxEntInput()
+        if self.view.isRaw():
+            self.view.addRaw(inputs,"InputWorkspace")
+            self.view.addRaw(inputs,"EvolChi")
+            self.view.addRaw(inputs,"ReconstructedImage")
+            self.view.addRaw(inputs,"ReconstructedData")
+        return inputs

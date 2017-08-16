@@ -38,3 +38,4 @@ def createSpinTable(table,default,row):
         box.setMaximum(default*10)
     box.setValue(default)
     table.setCellWidget(row,1,box)
+    return box
