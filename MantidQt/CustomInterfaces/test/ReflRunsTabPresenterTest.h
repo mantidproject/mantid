@@ -160,14 +160,12 @@ public:
     EXPECT_CALL(m_mockMainPresenter, runPythonAlgorithm(pythonSrc.str()))
         .Times(Exactly(1))
         .WillRepeatedly(ICATRuntimeException());
-    EXPECT_CALL(m_mockMainPresenter,
-                giveUserCritical("Error Logging in:\n", "login failed"))
-        .Times(1);
+    EXPECT_CALL(m_mockMainPresenter, giveUserCritical("Error Logging in:\n",
+                                                      "login failed")).Times(1);
     EXPECT_CALL(
         m_mockMainPresenter,
         giveUserInfo("Error Logging in: Please press 'Search' to try again.",
-                     "Login Failed"))
-        .Times(1);
+                     "Login Failed")).Times(1);
     m_presenter.notify(IReflRunsTabPresenter::SearchFlag);
   }
 

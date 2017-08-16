@@ -50,8 +50,8 @@ enum class DataProcessorAction {
   WHATS_THIS
 };
 
-std::array<DataProcessorAction, 9>
-    EXPORT_OPT_MANTIDQT_MANTIDWIDGETS tableModificationActions();
+std::array<DataProcessorAction, 9> EXPORT_OPT_MANTIDQT_MANTIDWIDGETS
+tableModificationActions();
 
 template <typename DisableAction>
 void disableTableModification(DisableAction disableAction) {

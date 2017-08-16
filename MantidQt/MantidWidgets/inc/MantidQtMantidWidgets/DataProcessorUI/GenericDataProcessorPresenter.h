@@ -77,8 +77,8 @@ public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm>
-          &preprocessMap,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
@@ -92,8 +92,8 @@ public:
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm>
-          &preprocessMap,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
       const DataProcessorProcessingAlgorithm &processor);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(
@@ -179,7 +179,7 @@ protected:
   virtual void plotRow();
   virtual void plotGroup();
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
-  
+
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);

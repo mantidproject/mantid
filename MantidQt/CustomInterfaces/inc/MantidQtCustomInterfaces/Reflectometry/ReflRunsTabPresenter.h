@@ -127,7 +127,8 @@ private:
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument
   void changeInstrument();
-  SearchResultMap querySelectedRunsToTransfer(std::set<int> const& selectedRows) const;
+  SearchResultMap
+  querySelectedRunsToTransfer(std::set<int> const &selectedRows) const;
   void preventTableModification();
   void allowTableModification();
 };

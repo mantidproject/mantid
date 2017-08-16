@@ -36,7 +36,6 @@ ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     postprocessor, postprocessMap, loader) {}
 
-
 /**
  Process selected data
 */

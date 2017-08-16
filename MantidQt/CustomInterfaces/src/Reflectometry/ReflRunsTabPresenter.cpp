@@ -495,8 +495,8 @@ void ReflRunsTabPresenter::preventTableModification() {
   m_view->disableAutoreduceButton();
   m_view->disableTransferButton();
 
-  disableTableModification(
-      [this](auto action) -> void { disableAction(action); });
+  disableTableModification([this](auto action)
+                               -> void { disableAction(action); });
   for (auto reflectometryMenuAction : DisabledWhileProcessing)
     disableAction(reflectometryMenuAction);
 }
@@ -505,8 +505,8 @@ void ReflRunsTabPresenter::allowTableModification() {
   m_view->enableAutoreduceButton();
   m_view->enableTransferButton();
 
-  enableTableModification(
-      [this](auto action) -> void { enableAction(action); });
+  enableTableModification([this](auto action)
+                              -> void { enableAction(action); });
   for (auto reflectometryMenuAction : DisabledWhileProcessing)
     enableAction(reflectometryMenuAction);
 }

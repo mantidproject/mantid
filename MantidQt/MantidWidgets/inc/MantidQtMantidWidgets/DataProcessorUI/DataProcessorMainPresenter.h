@@ -42,7 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DataProcessorMainPresenter {
 public:
-  virtual ~DataProcessorMainPresenter() = default; 
+  virtual ~DataProcessorMainPresenter() = default;
 
   /// Notify this receiver with the list of table workspaces in the ADS that can
   /// be loaded into the interface
@@ -64,11 +64,11 @@ public:
   virtual QString getTimeSlicingType() const { return QString(); }
 
   /// Handle data reduction paused/resumed
-  virtual void pause() {};
-  virtual void resume() {};
+  virtual void pause(){};
+  virtual void resume(){};
   /// Handle data reduction paused confirmation
-  virtual void confirmReductionPaused() {};
-  virtual void confirmReductionResumed() {};
+  virtual void confirmReductionPaused(){};
+  virtual void confirmReductionResumed(){};
 };
 }
 }

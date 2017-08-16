@@ -1,8 +1,8 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAction.h"
 namespace MantidQt {
 namespace MantidWidgets {
-std::array<DataProcessorAction, 9>
-    EXPORT_OPT_MANTIDQT_MANTIDWIDGETS tableModificationActions() {
+std::array<DataProcessorAction, 9> EXPORT_OPT_MANTIDQT_MANTIDWIDGETS
+tableModificationActions() {
   return {
       {DataProcessorAction::INSERT_ROW_AFTER,
        DataProcessorAction::INSERT_GROUP_AFTER,

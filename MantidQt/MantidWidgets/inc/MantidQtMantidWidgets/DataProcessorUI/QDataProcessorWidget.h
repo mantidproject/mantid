@@ -142,8 +142,6 @@ public:
   // Forward a main presenter to this view's presenter
   void accept(DataProcessorMainPresenter *);
 
-      
-
 private:
   // initialise the interface
   void createTable();
@@ -178,7 +176,7 @@ private:
   static void disable(QAction &widget);
   static void enable(QWidget &widget);
   static void enable(QAction &widget);
-  
+
   static int toToolbarIndex(DataProcessorAction action);
   static int toContextMenuIndex(DataProcessorAction);
   static int toCommandIndex(DataProcessorAction action);

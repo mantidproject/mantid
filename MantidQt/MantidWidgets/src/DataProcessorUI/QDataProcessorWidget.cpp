@@ -311,7 +311,8 @@ void QDataProcessorWidget::disablePauseButtons() {
   disableAction(DataProcessorAction::PAUSE);
 }
 
-void QDataProcessorWidget::disableActionOnToolbar(DataProcessorAction toDisable) {
+void QDataProcessorWidget::disableActionOnToolbar(
+    DataProcessorAction toDisable) {
   disableActionOnWidget(*ui.rowToolBar, toToolbarIndex(toDisable));
 }
 
@@ -361,7 +362,8 @@ void QDataProcessorWidget::resume() {
 }
 
 void QDataProcessorWidget::preventTableModification() {
-  disableTableModification([this](auto action) -> void { disableAction(action); });
+  disableTableModification([this](auto action)
+                               -> void { disableAction(action); });
   disableSelectionAndEditing();
 }
 
@@ -372,7 +374,8 @@ void QDataProcessorWidget::disableSelectionAndEditing() {
 }
 
 void QDataProcessorWidget::enableSelectionAndEditing() {
-  ui.viewTable->setSelectionMode(QAbstractItemView::SelectionMode::ContiguousSelection);
+  ui.viewTable->setSelectionMode(
+      QAbstractItemView::SelectionMode::ContiguousSelection);
   ui.viewTable->setEditTriggers(QAbstractItemView::AllEditTriggers);
 }
 
@@ -396,11 +399,13 @@ void QDataProcessorWidget::disableAction(DataProcessorAction toDisable) {
   disableActionOnContextMenu(toDisable);
 }
 
-void QDataProcessorWidget::disableActionOnContextMenu(DataProcessorAction toDisable) {
+void QDataProcessorWidget::disableActionOnContextMenu(
+    DataProcessorAction toDisable) {
   disableActionOnWidget(*m_contextMenu, toContextMenuIndex(toDisable));
 }
 
-void QDataProcessorWidget::enableActionOnContextMenu(DataProcessorAction toEnable) {
+void QDataProcessorWidget::enableActionOnContextMenu(
+    DataProcessorAction toEnable) {
   enableActionOnWidget(*m_contextMenu, toContextMenuIndex(toEnable));
 }
 
@@ -410,43 +415,43 @@ int QDataProcessorWidget::toContextMenuIndex(DataProcessorAction action) {
 
 int QDataProcessorWidget::toCommandIndex(DataProcessorAction action) {
   switch (action) {
-    case DataProcessorAction::PROCESS:
-      return 0;
-    case DataProcessorAction::PAUSE:
-      return 1;
-    case DataProcessorAction::SELECT_GROUP:
-      return 3;
-    case DataProcessorAction::EXPAND_GROUP:
-      return 4;
-    case DataProcessorAction::COLAPSE_GROUP:
-      return 5;
-    case DataProcessorAction::PLOT_RUNS:
-      return 7;
-    case DataProcessorAction::PLOT_GROUP:
-      return 8;
-    case DataProcessorAction::INSERT_ROW_AFTER:
-      return 10;
-    case DataProcessorAction::INSERT_GROUP_AFTER:
-      return 11;
-    case DataProcessorAction::GROUP_SELECTED:
-      return 13;
-    case DataProcessorAction::COPY_SELECTED:
-      return 14;
-    case DataProcessorAction::CUT_SELECTED:
-      return 15;
-    case DataProcessorAction::PASTE_SELECTED:
-      return 16;
-    case DataProcessorAction::CLEAR_SELECTED:
-      return 17;
-    case DataProcessorAction::DELETE_ROW:
-      return 19;
-    case DataProcessorAction::DELETE_GROUP:
-      return 20;
-    case DataProcessorAction::WHATS_THIS:
-      return 21;
-    default:
-      throw std::logic_error("Unknown action specified.");
-    }
+  case DataProcessorAction::PROCESS:
+    return 0;
+  case DataProcessorAction::PAUSE:
+    return 1;
+  case DataProcessorAction::SELECT_GROUP:
+    return 3;
+  case DataProcessorAction::EXPAND_GROUP:
+    return 4;
+  case DataProcessorAction::COLAPSE_GROUP:
+    return 5;
+  case DataProcessorAction::PLOT_RUNS:
+    return 7;
+  case DataProcessorAction::PLOT_GROUP:
+    return 8;
+  case DataProcessorAction::INSERT_ROW_AFTER:
+    return 10;
+  case DataProcessorAction::INSERT_GROUP_AFTER:
+    return 11;
+  case DataProcessorAction::GROUP_SELECTED:
+    return 13;
+  case DataProcessorAction::COPY_SELECTED:
+    return 14;
+  case DataProcessorAction::CUT_SELECTED:
+    return 15;
+  case DataProcessorAction::PASTE_SELECTED:
+    return 16;
+  case DataProcessorAction::CLEAR_SELECTED:
+    return 17;
+  case DataProcessorAction::DELETE_ROW:
+    return 19;
+  case DataProcessorAction::DELETE_GROUP:
+    return 20;
+  case DataProcessorAction::WHATS_THIS:
+    return 21;
+  default:
+    throw std::logic_error("Unknown action specified.");
+  }
 }
 
 /**
@@ -459,7 +464,8 @@ void QDataProcessorWidget::confirmReductionPaused() {
 
 void QDataProcessorWidget::allowTableModification() {
   enableSelectionAndEditing();
-  enableTableModification([this](auto action) -> void { enableAction(action); });
+  enableTableModification([this](auto action)
+                              -> void { enableAction(action); });
 }
 
 /**
@@ -522,7 +528,7 @@ void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
   ui.viewTable->clearSelection();
   auto selectionModel = ui.viewTable->selectionModel();
 
-  for (const auto& group : groups) {
+  for (const auto &group : groups) {
     selectionModel->select(ui.viewTable->model()->index(group, 0),
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
