@@ -171,4 +171,4 @@ SMALL_S = 1e-5
 MAX_THRESHOLD = 1.0
 
 ONE_CHARACTER = 1
-EOF = ""
+EOF = b""

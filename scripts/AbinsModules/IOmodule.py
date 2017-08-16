@@ -435,13 +435,10 @@ class IOmodule(object):
         :return: string representation of hash
         """
         hash_calculator = hashlib.sha512()
-        buf = 65536  # chop content of a file into 64kb chunks to minimize memory consumption for hash creation
+        buf = AbinsModules.AbinsConstants.BUF  # chop content of a file into 64kb chunks to minimize memory consumption for hash creation
         with io.open(file=filename, mode="rt", encoding=coding, buffering=buf, newline=None) as f:
-            while True:
-                data = f.read(buf)
-                if not data:
-                    break
-                hash_calculator.update(data.encode(coding))
+            for block in iter(lambda: f.read(buf), AbinsModules.AbinsConstants.EOF):
+                hash_calculator.update(block.encode(coding))
 
         return hash_calculator.hexdigest()
 
