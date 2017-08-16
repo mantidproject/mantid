@@ -116,7 +116,6 @@ public:
     IAlgorithm_sptr alg2 = setUpAlg();
     alg2->setProperty("InputWorkspace", workspaces[0]);
     alg2->setPropertyValue("OutputWorkspace", outputName);
-    alg2->setPropertyValue("WorkspaceIndices", "1");
     TS_ASSERT_THROWS_NOTHING(alg2->execute());
     TS_ASSERT(alg2->isExecuted());
     workspaces.push_back(alg2->getProperty("OutputWorkspace"));

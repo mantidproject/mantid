@@ -39,7 +39,7 @@ Usage
    y = [100, 150, 50, 10, 5]
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
-   output=FFTPreProcessing(InputWorkspace=input,WorkspaceIndices=0,ApodizationFunction="Gaussian",DecayConstant=2.44,Padding=0,)
+   output=FFTPreProcessing(InputWorkspace=input,ApodizationFunction="Gaussian",DecayConstant=2.44,Padding=0,)
    print  "output: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
    
 Output:
@@ -57,7 +57,7 @@ Output:
    y = [100, 150, 50, 10, 5]
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
-   output=FFTPreProcessing(InputWorkspace=input,WorkspaceIndices=0,Padding=2,)
+   output=FFTPreProcessing(InputWorkspace=input,Padding=2,)
    print  "output: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
    
 Output:
@@ -75,7 +75,7 @@ Output:
    y = [100, 150, 50, 10, 5]
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
-   output=FFTPreProcessing(InputWorkspace=input,WorkspaceIndices=0,ApodizationFunction="Gaussian",DecayConstant=2.44,Padding=2,)
+   output=FFTPreProcessing(InputWorkspace=input,ApodizationFunction="Gaussian",DecayConstant=2.44,Padding=2,)
    print  "output: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
    
 Output:

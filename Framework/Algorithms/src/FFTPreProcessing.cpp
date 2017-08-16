@@ -37,11 +37,7 @@ void FFTPreProcessing::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output 2D workspace.");
-  std::vector<int> empty;
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<int>>(
-                      "WorkspaceIndices", empty),
-                  "The workspace indices to process.");
-  declareProperty("ApodizationFunction", "None",
+ declareProperty("ApodizationFunction", "None",
                   boost::make_shared<Mantid::Kernel::StringListValidator>(
                       std::vector<std::string>{"None", "Lorentz", "Gaussian"}),
                   "The apodization function to apply to the data");
@@ -50,7 +46,7 @@ void FFTPreProcessing::init() {
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
-      "Padding", 0, mustBePositive->clone(),
+      "Padding", 0, mustBePositive,
       "The amount of padding to add to the data,"
       "it is the number of multiples of the data set."
       "i.e 0 means no padding and 1 will double the number of data points.");
@@ -64,7 +60,6 @@ void FFTPreProcessing::init() {
  *
  */
 void FFTPreProcessing::exec() {
-  std::vector<int> spectra = getProperty("WorkspaceIndices");
 
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -80,11 +75,9 @@ void FFTPreProcessing::exec() {
     outputWS->setSharedX(i, inputWS->sharedX(i));
   }
 
-  // No spectra specified = process all spectra
-  if (spectra.empty()) {
-    spectra = std::vector<int>(numSpectra);
-    std::iota(spectra.begin(), spectra.end(), 0);
-  }
+  std::vector<int> spectra;
+  spectra = std::vector<int>(numSpectra);
+  std::iota(spectra.begin(), spectra.end(), 0);
 
   Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
   if (inputWS != outputWS) {
