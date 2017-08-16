@@ -432,7 +432,8 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
   else
     det_name = temp[0];
 
-  // Checked 8/11/2017 here detector_z is sfdd which has been updated in eqsansload.cpp
+  // Checked 8/11/2017 here detector_z is sfdd which has been updated
+  // in eqsansload.cpp
   double source_z = inputWS->getInstrument()->getSource()->getPos().Z();
   double detector_z =
       inputWS->getInstrument()->getComponentByName(det_name)->getPos().Z();

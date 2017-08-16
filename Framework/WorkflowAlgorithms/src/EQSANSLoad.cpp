@@ -90,9 +90,10 @@ void EQSANSLoad::init() {
   declareProperty("SampleOffset", EMPTY_DBL(),
                   "Offset to be applied to the sample position (use only when "
                   "using the detector distance found in the meta data), in mm");
-  declareProperty("DetectorOffset", EMPTY_DBL(),
-                  "Offset to be applied to the detector position (use only when "
-                  "using the distance found in the meta data), in mm");
+  declareProperty(
+      "DetectorOffset", EMPTY_DBL(),
+      "Offset to be applied to the detector position (use only when "
+      "using the distance found in the meta data), in mm");
   declareProperty("LoadMonitors", true,
                   "If true, the monitor workspace will be loaded");
   declareProperty("OutputMessage", "", Direction::Output);
@@ -554,7 +555,7 @@ void EQSANSLoad::exec() {
   }
 
   // Get the sample flange-to-detector distance
-  // We have to call it "SampleDetectorDistance" in the workspace or break the Nexus files
+  // We have to call it "SampleDetectorDistance" in the workspace
   double sfdd = 0.0;
   double s2d = 0.0;
   const double sampleflange_det_dist = getProperty("SampleDetectorDistance");
@@ -581,26 +582,23 @@ void EQSANSLoad::exec() {
     s2d = sfdd;
 
     // Modify SDD according to the DetectorDistance offset if given
-    const double sampleflange_det_offset =
-      getProperty("DetectorOffset");
+    const double sampleflange_det_offset = getProperty("DetectorOffset");
     if (!isEmpty(sampleflange_det_offset))
       sfdd += sampleflange_det_offset;
 
     // Modify S2D according to the SampleDistance offset if given
     // This assumes that a positive offset moves the sample toward the detector
-    const double sampleflange_sample_offset =
-      getProperty("SampleOffset");
+    const double sampleflange_sample_offset = getProperty("SampleOffset");
     if (!isEmpty(sampleflange_sample_offset))
       s2d = s2d - sampleflange_sample_offset + sampleflange_det_offset;
 
     // Modify SDD according to SampleDetectorDistanceOffset offset if given
-    const double sample_det_offset =
-      getProperty("SampleDetectorDistanceOffset");
+    const double sample_det_offset = getProperty("SampleDetectorDistanceOffset");
     if (!isEmpty(sample_det_offset))
       s2d += sample_det_offset;
-
   }
-  dataWS->mutableRun().addProperty("sampleflange_detector_distance", sfdd, "mm", true);
+  dataWS->mutableRun().addProperty("sampleflange_detector_distance", sfdd, "mm",
+                                   true);
   dataWS->mutableRun().addProperty("sample_detector_distance", s2d, "mm", true);
 
   // Move the detector to its correct position
