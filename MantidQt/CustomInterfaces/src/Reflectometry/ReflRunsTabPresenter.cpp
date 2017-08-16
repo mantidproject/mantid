@@ -445,10 +445,7 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 * when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() {
-  enableAction(DataProcessorAction::PROCESS);
   disableAction(DataProcessorAction::PAUSE);
-  m_view->enableTransferButton();
-  m_view->enableAutoreduceButton();
 }
 
 /** Disables the 'process' button and enables the 'pause' button when data
@@ -484,6 +481,7 @@ void ReflRunsTabPresenter::disableAction(DataProcessorAction action) {
 void ReflRunsTabPresenter::confirmReductionPaused() {
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
+  enableAction(DataProcessorAction::PROCESS);
   allowTableModification();
 }
 
