@@ -44,14 +44,14 @@ Usage
 
 **Single file Q-sample**
 
-.. code-block:: python
+.. testcode::
 
-   ConvertMultipleRunsToSingleCrystalMD(Filename='CORELLI_29782',
-                                        FilterByTofMin=1000,
-                                        FilterByTofMax=16666,
+   ConvertMultipleRunsToSingleCrystalMD(Filename='CNCS_7860',
+                                        MinValues=[-2,-2,-2],
+                                        MaxValues=[2,2,2],
                                         OutputWorkspace='output',
                                         SetGoniometer=True,
-                                        Axis0="BL9:Mot:Sample:Axis1,0,1,0,1")
+                                        Axis0="huber,0,1,0,1")
    ws=mtd['output']
    print "The workspace is in", ws.getSpecialCoordinateSystem()
    print "There are", ws.getNumExperimentInfo(), "experiment runs in the workspace"
@@ -60,11 +60,11 @@ Usage
 
 Output:
 
-.. code-block:: none
+.. testoutput::
 
    The workspace is in QSample
    There are 1 experiment runs in the workspace
-   Number of Events = 12656647
+   Number of Events = 100210
    There are 3 dimensions with names: Q_sample_x Q_sample_y Q_sample_z
 
 **Multiple files Q-sample**
@@ -94,15 +94,26 @@ Output:
 
 **Single file HKL**
 
-.. code-block:: python
+.. testcode::
 
-   ConvertMultipleRunsToSingleCrystalMD(Filename='CORELLI_29782',
-                                        FilterByTofMin=1000,
-                                        FilterByTofMax=16666,
+   # Create a ISAW UB file for the test
+   import mantid
+   UBfilename=mantid.config.getString("defaultsave.directory")+"ConvertMultipleRunsToSingleCrystalMDTest.mat"
+   with open(UBfilename,'w') as f:
+       f.write("0.0  0.5  0.0  \n")
+       f.write("0.0  0.0  0.25  \n")
+       f.write("0.2  0.0  0.0  \n")
+       f.write("2.0  4.0  5.0  90  90  90  40  \n")
+       f.write("0.0  0.0  0.0   0   0   0   0  \n")
+       f.write("\n\nsome text about IPNS convention")
+
+   ConvertMultipleRunsToSingleCrystalMD(Filename='CNCS_7860',
+                                        MinValues=[-2,-2,-2],
+                                        MaxValues=[2,2,2],
                                         OutputWorkspace='output',
                                         SetGoniometer=True,
-                                        Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                        UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat")
+                                        Axis0="huber,0,1,0,1",
+                                        UBMatrix=UBfilename)
    ws=mtd['output']
    print "The workspace is in", ws.getSpecialCoordinateSystem()
    print "There are", ws.getNumExperimentInfo(), "experiment runs in the workspace"
@@ -111,11 +122,11 @@ Output:
 
 Output:
 
-.. code-block:: none
+.. testoutput::
 
    The workspace is in HKL
    There are 1 experiment runs in the workspace
-   Number of Events = 12656647
+   Number of Events = 112266
    There are 3 dimensions with names: [H,0,0] [0,K,0] [0,0,L]
 
 **Multiple files HKL**
