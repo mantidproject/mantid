@@ -1272,7 +1272,7 @@ void GenericDataProcessorPresenter::importTable() {
   QString pythonSrc;
   pythonSrc += "try:\n";
   pythonSrc += "  algm = LoadTBLDialog()\n";
-  pythonSrc += "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
+  pythonSrc += "  print(algm.getPropertyValue(\"OutputWorkspace\"))\n";
   pythonSrc += "except:\n";
   pythonSrc += "  pass\n";
 

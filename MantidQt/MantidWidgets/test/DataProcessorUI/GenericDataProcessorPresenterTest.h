@@ -2890,8 +2890,8 @@ public:
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     EXPECT_CALL(
         mockDataProcessorView,
-        runPythonAlgorithm(QString("try:\n  algm = LoadTBLDialog()\n  print "
-                                   "algm.getPropertyValue(\"OutputWorkspace\")"
+        runPythonAlgorithm(QString("try:\n  algm = LoadTBLDialog()\n  print("
+                                   "algm.getPropertyValue(\"OutputWorkspace\"))"
                                    "\nexcept:\n  pass\n")));
     presenter.notify(DataProcessorPresenter::ImportTableFlag);
 

@@ -290,7 +290,7 @@ void ReflRunsTabPresenter::transfer() {
     return;
   }
 
-  for (auto &&row : selectedRows) {
+  for (const auto &row : selectedRows) {
     const auto run = m_searchModel->data(m_searchModel->index(row, 0))
                          .toString()
                          .toStdString();
