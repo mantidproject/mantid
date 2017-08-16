@@ -3,12 +3,20 @@ from mantid.kernel import logger
 import AbinsModules
 
 
+class GeneralDFTProgramName(type):
+    def __str__(self):
+        return self.__name__
+
+
 # noinspection PyMethodMayBeStatic
 class GeneralDFTProgram(object):
     """
     A general class which groups all methods which should be inherited or implemented by a DFT program used
     in INS analysis.
     """
+
+    __metaclass__ = GeneralDFTProgramName
+
     def __init__(self, input_dft_filename=None):
 
         self._num_k = None
