@@ -1,18 +1,14 @@
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/Run.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidTypes/SpectrumDefinition.h"
 
-#include <unordered_map>
 #include <vector>
 
 using namespace Mantid::DataObjects;
