@@ -23,6 +23,7 @@ public:
     std::unique_ptr<DetectorInfo> detInfo;
     TS_ASSERT_THROWS_NOTHING(detInfo = Kernel::make_unique<DetectorInfo>());
     TS_ASSERT_EQUALS(detInfo->size(), 0);
+    TS_ASSERT_EQUALS(detInfo->scanSize(), 0);
     TS_ASSERT(!detInfo->isScanning());
     TS_ASSERT(!detInfo->hasComponentInfo());
 
@@ -39,6 +40,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         info = Kernel::make_unique<DetectorInfo>(PosVec(3), RotVec(3), mons));
     TS_ASSERT_EQUALS(info->size(), 3);
+    TS_ASSERT_EQUALS(info->scanSize(), 3);
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0, 1, 2}));
@@ -521,6 +523,7 @@ public:
     TS_ASSERT(a.isScanning());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT_EQUALS(a.size(), 2);
+    TS_ASSERT_EQUALS(a.scanSize(), 3);
     TS_ASSERT_EQUALS(a.scanCount(0), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
@@ -547,6 +550,7 @@ public:
     TS_ASSERT(a.isScanning());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT_EQUALS(a.size(), 2);
+    TS_ASSERT_EQUALS(a.scanSize(), 4);
     TS_ASSERT_EQUALS(a.scanCount(0), 2);
     TS_ASSERT_EQUALS(a.scanCount(1), 2);
     // Note that the order is not guaranteed, currently these are just in the
@@ -607,6 +611,7 @@ public:
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT(!a.isEquivalent(c));
     TS_ASSERT_EQUALS(a.size(), 2);
+    TS_ASSERT_EQUALS(a.scanSize(), 4);
     TS_ASSERT_EQUALS(a.scanCount(0), 3);
     TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
     TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
@@ -640,6 +645,7 @@ public:
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT(!a.isEquivalent(c));
     TS_ASSERT_EQUALS(a.size(), 2);
+    TS_ASSERT_EQUALS(a.scanSize(), 6);
     TS_ASSERT_EQUALS(a.scanCount(0), 3);
     TS_ASSERT_EQUALS(a.scanCount(1), 3);
     TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
