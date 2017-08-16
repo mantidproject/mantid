@@ -35,15 +35,6 @@ void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
   overWriteSpectraY(histo, workspace, peaksInY);
 }
 
-// Helper method to round a double value to ten decimal place
-double roundTo10Places(double toRound) {
-  double scaleFactor = 10e10;
-  double result = toRound * scaleFactor;
-  result = round(result);
-  result = result / scaleFactor;
-  return result;
-}
-
 //=====================================================================================
 // Functional tests
 //=====================================================================================
@@ -285,11 +276,7 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
 
-    // Round value to allow for minor error introduced by deg/rad conversion
     Mantid::Kernel::V3D qNoRot = result->getPeak(0).getQSampleFrame();
-    double qxNoRot = roundTo10Places(qNoRot.X());
-    double qyNoRot = roundTo10Places(qNoRot.Y());
-    double qzNoRot = roundTo10Places(qNoRot.Z());
 
     // Set Goniometer to 180 degrees
     Mantid::Geometry::Goniometer gonio;
@@ -309,16 +296,13 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
 
-    // Round value to allow for minor error introduced by deg/rad conversion
     Mantid::Kernel::V3D qRot = result->getPeak(0).getQSampleFrame();
-    double qxRot = roundTo10Places(qRot.X());
-    double qyRot = roundTo10Places(qRot.Y());
-    double qzRot = roundTo10Places(qRot.Z());
 
     // Peak should be rotated by 180 degrees around y in Q compared to baseline
-    TSM_ASSERT_EQUALS("Q_x should be unchanged!", qxNoRot, qxRot);
-    TSM_ASSERT_EQUALS("Q_y should be inverted!", qyNoRot * (-1), qyRot);
-    TSM_ASSERT_EQUALS("Q_z should be unchanged!", qzNoRot, qzRot);
+	// Use ASSERT_DELTA to account for minor error introduced by deg/rad conversion
+    TSM_ASSERT_DELTA("Q_x should be unchanged!", qNoRot.X(), qRot.X(), 10e-10);
+    TSM_ASSERT_DELTA("Q_y should be inverted!", qNoRot.Y(), qRot.Y()*(-1), 10e-10);
+    TSM_ASSERT_DELTA("Q_z should be unchanged!", qNoRot.Z(), qRot.Z(), 10e-10);
   }
 };
 
