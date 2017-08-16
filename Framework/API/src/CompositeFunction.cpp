@@ -477,7 +477,7 @@ void CompositeFunction::insertFunction(size_t i, IFunction_sptr f) {
   size_t np_new = f->nParams();
   for (auto it = m_IFunction.begin(); it != m_IFunction.end(); it++) {
     if (*it == i+1) {
-      m_IFunction.insert(it - 1, np_new, i);  // insert right before
+      m_IFunction.insert(it, np_new, i);  // insert right before
       break;
     }
   }

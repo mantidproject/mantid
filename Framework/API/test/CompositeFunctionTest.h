@@ -781,6 +781,80 @@ public:
     delete mfun;
   }
 
+  void testInsertFunction() {
+    CompositeFunction *mfun = new CompositeFunction;
+
+    IFunction_sptr bk1 = IFunction_sptr(new Linear());
+    bk1->setParameter("a", 0.1);
+    bk1->setParameter("b", 0.2);
+    mfun->addFunction(bk1);
+
+    IFunction_sptr g1 = IFunction_sptr(new Gauss());
+    g1->setParameter("c", 1.1);
+    g1->setParameter("h", 1.2);
+    g1->setParameter("s", 1.3);
+    mfun->addFunction(g1);
+
+    IFunction_sptr cub = IFunction_sptr(new Cubic());
+    cub->setParameter("c0", 2.1);
+    cub->setParameter("c1", 2.2);
+    cub->setParameter("c2", 2.3);
+    cub->setParameter("c3", 2.4);    IFunction_sptr g2 = IFunction_sptr(new Gauss());
+    mfun->addFunction(cub);
+
+    // fix the first parameter of each function
+    mfun->tie("f0.a", "10");
+    mfun->tie("f1.c", "11");
+    mfun->tie("f2.c0", "12");
+
+    IFunction_sptr bk2 = IFunction_sptr(new Linear());
+    bk2->setParameter("a", 4.1);
+    bk2->setParameter("b", 4.2);
+    mfun->insertFunction(2, bk2);  // insert right after function g1
+
+    mfun->applyTies();
+
+    TS_ASSERT_EQUALS(mfun->nFunctions(), 4);
+    TS_ASSERT_EQUALS(mfun->nParams(), 11);
+    // Check bk1
+    TS_ASSERT_EQUALS(mfun->parameterName(0), "f0.a");
+    TS_ASSERT_EQUALS(mfun->getParameter(0), 10);
+    TS_ASSERT(mfun->isFixed(0));
+    TS_ASSERT_EQUALS(mfun->parameterName(1), "f0.b")
+    TS_ASSERT_EQUALS(mfun->getParameter(1), 0.2);
+    TS_ASSERT(!mfun->isFixed(1));
+    // Check g1
+    TS_ASSERT_EQUALS(mfun->parameterName(2), "f1.c");
+    TS_ASSERT_EQUALS(mfun->getParameter(2), 11);
+    TS_ASSERT(mfun->isFixed(2));
+    TS_ASSERT_EQUALS(mfun->parameterName(3), "f1.h");
+    TS_ASSERT_EQUALS(mfun->getParameter(3), 1.2);
+    TS_ASSERT(!mfun->isFixed(3));
+    TS_ASSERT_EQUALS(mfun->parameterName(4), "f1.s");
+    TS_ASSERT_EQUALS(mfun->getParameter(4), 1.3);
+    TS_ASSERT(!mfun->isFixed(4));
+    // Check bk2
+    TS_ASSERT_EQUALS(mfun->parameterName(5), "f2.a");
+    TS_ASSERT_EQUALS(mfun->getParameter(5), 4.1);
+    TS_ASSERT(!mfun->isFixed(5));
+    TS_ASSERT_EQUALS(mfun->parameterName(6), "f2.b")
+    TS_ASSERT_EQUALS(mfun->getParameter(6), 4.2);
+    TS_ASSERT(!mfun->isFixed(6));
+    // Check cub
+    TS_ASSERT_EQUALS(mfun->parameterName(7), "f3.c0");
+    TS_ASSERT_EQUALS(mfun->getParameter(7), 12);
+    TS_ASSERT(mfun->isFixed(7));
+    TS_ASSERT_EQUALS(mfun->parameterName(8), "f3.c1")
+    TS_ASSERT_EQUALS(mfun->getParameter(8), 2.2);
+    TS_ASSERT(!mfun->isFixed(8));
+    TS_ASSERT_EQUALS(mfun->parameterName(9), "f3.c2");
+    TS_ASSERT_EQUALS(mfun->getParameter(9), 2.3);
+    TS_ASSERT(!mfun->isFixed(8));
+    TS_ASSERT_EQUALS(mfun->parameterName(10), "f3.c3")
+    TS_ASSERT_EQUALS(mfun->getParameter(10), 2.4);
+    TS_ASSERT(!mfun->isFixed(10));
+  }
+
   // replacing function has fewer parameters
   void testReplaceFunction() {
     IFunction_sptr g1 = IFunction_sptr(new Gauss());
