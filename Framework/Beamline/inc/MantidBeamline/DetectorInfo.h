@@ -69,6 +69,7 @@ public:
   bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
+  size_t scanSize() const;
   bool isScanning() const;
 
   bool isMonitor(const size_t index) const;
@@ -132,6 +133,17 @@ inline size_t DetectorInfo::size() const {
   if (!m_isMonitor)
     return 0;
   return m_isMonitor->size();
+}
+
+/** Returns the number of sum of the scan intervals for every detector in the
+ *instrument.
+ *
+ * If a detector is moving, i.e., has more than one associated position, every
+ *position is counted. */
+inline size_t DetectorInfo::scanSize() const {
+  if (!m_positions)
+    return 0;
+  return m_positions->size();
 }
 
 /// Returns true if the beamline has scanning detectors.

@@ -34,6 +34,8 @@ using namespace Mantid::Kernel;
 class MergeRunsTest : public CxxTest::TestSuite {
 
 private:
+  MergeRuns merge;
+
   /// Helper method to add an 'nperiods' log value to each workspace in a group.
   void add_periods_logs(WorkspaceGroup_sptr ws, bool calculateNPeriods = true,
                         int nperiods = -1) {
@@ -1515,15 +1517,13 @@ public:
   }
 
   MatrixWorkspace_sptr
-  do_MergeRuns_with_scanning_workspaces(bool appendDetectorScans = true,
-                                        size_t startTime = 0) {
+  do_MergeRuns_with_scanning_workspaces(size_t startTime = 0) {
     auto ws = create_group_detector_scan_workspaces(2, startTime);
     MatrixWorkspace_sptr outputWS;
 
     MergeRuns alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspaces", ws->getName());
-    alg.setProperty<bool>("AppendDetectorScans", appendDetectorScans);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
 
@@ -1533,126 +1533,6 @@ public:
 
     return outputWS;
   }
-
-  void test_merging_detector_scan_workspaces_appends_workspaces() {
-    auto outputWS = do_MergeRuns_with_scanning_workspaces();
-
-    const auto &detInfo = outputWS->detectorInfo();
-    TS_ASSERT_EQUALS(detInfo.size(), 2)
-    TS_ASSERT_EQUALS(detInfo.scanCount(0), 2)
-    TS_ASSERT_EQUALS(detInfo.scanCount(1), 2)
-    assert_scan_intervals_are_correct(detInfo);
-
-    const auto &specInfo = outputWS->spectrumInfo();
-    TS_ASSERT_EQUALS(specInfo.size(), 8)
-
-    assert_scanning_indexing_is_correct(specInfo);
-    assert_scanning_histograms_correctly_set(outputWS);
-  }
-
-  void
-  test_merging_detector_scan_workspaces_with_different_start_times_appends_workspaces() {
-    auto outputWS = do_MergeRuns_with_scanning_workspaces(true, 20);
-
-    const auto &detInfo = outputWS->detectorInfo();
-    TS_ASSERT_EQUALS(detInfo.size(), 2)
-    TS_ASSERT_EQUALS(detInfo.scanCount(0), 4)
-    TS_ASSERT_EQUALS(detInfo.scanCount(1), 4)
-    assert_scan_intervals_are_correct(detInfo, true);
-
-    const auto &specInfo = outputWS->spectrumInfo();
-    TS_ASSERT_EQUALS(specInfo.size(), 8)
-
-    assert_scanning_indexing_is_correct(specInfo, true);
-    assert_scanning_histograms_correctly_set(outputWS);
-  }
-
-  void
-  test_merging_detector_scan_workspaces_with_overlapping_time_intervals_throws() {
-    auto ws = create_group_detector_scan_workspaces(2, 1);
-
-    MergeRuns alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setPropertyValue("InputWorkspaces", ws->getName());
-    alg.setPropertyValue("OutputWorkspace", "outWS");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: scan intervals overlap but not identical")
-  }
-
-  void test_merging_detector_scan_workspaces_does_not_append_workspaces() {
-    auto outputWS = do_MergeRuns_with_scanning_workspaces(false);
-
-    TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
-    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
-
-    // Check bins are set correctly
-    TS_ASSERT_EQUALS(outputWS->histogram(0).y()[0], 3)
-    TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 3)
-    TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 3)
-    TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 3)
-  }
-
-  void test_merging_detector_scan_workspaces_with_different_positions_throws() {
-    auto ws = create_group_detector_scan_workspaces(2);
-
-    auto wsA =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("a1");
-
-    wsA->mutableDetectorInfo().setPosition(std::pair<size_t, size_t>(0, 0),
-                                           V3D(5, 6, 7));
-    MergeRuns alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setPropertyValue("InputWorkspaces", ws->getName());
-    alg.setPropertyValue("OutputWorkspace", "outWS");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
-                            std::string(e.what()), "Cannot merge DetectorInfo: "
-                                                   "matching scan interval but "
-                                                   "positions differ")
-  }
-
-  void test_merging_detector_scan_workspaces_failure_case() {
-    auto ws = create_group_detector_scan_workspaces(2);
-
-    auto wsA =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("a1");
-    Property *prop1 = new PropertyWithValue<int>("prop1", 1);
-    wsA->mutableRun().addLogData(prop1);
-
-    auto wsB =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("b1");
-    Property *prop2 = new PropertyWithValue<int>("prop1", 2);
-    wsB->mutableRun().addLogData(prop2);
-
-    MergeRuns alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", ws->getName());
-    alg.setPropertyValue("OutputWorkspace", "outWS");
-    alg.setPropertyValue("SampleLogsFail", "prop1");
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute();)
-
-    MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS"));
-
-    TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
-    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
-
-    // Check bins are set correctly
-    TS_ASSERT_EQUALS(outputWS->histogram(0).y()[0], 1)
-    TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 1)
-    TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 1)
-    TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 1)
-  }
-
-private:
-  MergeRuns merge;
 
   void assert_scan_intervals_are_correct(const DetectorInfo &detInfo,
                                          bool extraTimes = false) {
@@ -1726,6 +1606,107 @@ private:
     TS_ASSERT_EQUALS(ws->histogram(5).y()[0], 2)
     TS_ASSERT_EQUALS(ws->histogram(6).y()[0], 2)
     TS_ASSERT_EQUALS(ws->histogram(7).y()[0], 2)
+  }
+
+  void
+  test_merging_detector_scan_workspaces_with_different_start_times_appends_workspaces() {
+    auto outputWS = do_MergeRuns_with_scanning_workspaces(20);
+
+    const auto &detInfo = outputWS->detectorInfo();
+    TS_ASSERT_EQUALS(detInfo.size(), 2)
+    TS_ASSERT_EQUALS(detInfo.scanCount(0), 4)
+    TS_ASSERT_EQUALS(detInfo.scanCount(1), 4)
+    assert_scan_intervals_are_correct(detInfo, true);
+
+    const auto &specInfo = outputWS->spectrumInfo();
+    TS_ASSERT_EQUALS(specInfo.size(), 8)
+
+    assert_scanning_indexing_is_correct(specInfo, true);
+    assert_scanning_histograms_correctly_set(outputWS);
+  }
+
+  void
+  test_merging_detector_scan_workspaces_with_overlapping_time_intervals_throws() {
+    auto ws = create_group_detector_scan_workspaces(2, 1);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals overlap but not identical")
+  }
+
+  void test_merging_detector_scan_workspaces_does_not_append_workspaces() {
+    auto outputWS = do_MergeRuns_with_scanning_workspaces();
+
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
+
+    // Check bins are set correctly
+    TS_ASSERT_EQUALS(outputWS->histogram(0).y()[0], 3)
+    TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 3)
+    TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 3)
+    TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 3)
+  }
+
+  void test_merging_detector_scan_workspaces_with_different_positions_throws() {
+    auto ws = create_group_detector_scan_workspaces(2);
+
+    auto wsA =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("a1");
+
+    wsA->mutableDetectorInfo().setPosition(std::pair<size_t, size_t>(0, 0),
+                                           V3D(5, 6, 7));
+    MergeRuns alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "matching scan interval but "
+                                                   "positions differ")
+  }
+
+  void test_merging_detector_scan_workspaces_failure_case() {
+    auto ws = create_group_detector_scan_workspaces(2);
+
+    auto wsA =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("a1");
+    Property *prop1 = new PropertyWithValue<int>("prop1", 1);
+    wsA->mutableRun().addLogData(prop1);
+
+    auto wsB =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("b1");
+    Property *prop2 = new PropertyWithValue<int>("prop1", 2);
+    wsB->mutableRun().addLogData(prop2);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setPropertyValue("SampleLogsFail", "prop1");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute();)
+
+    MatrixWorkspace_sptr outputWS;
+    TS_ASSERT_THROWS_NOTHING(
+        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "outWS"));
+
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
+
+    // Check bins are set correctly
+    TS_ASSERT_EQUALS(outputWS->histogram(0).y()[0], 1)
+    TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 1)
+    TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 1)
+    TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 1)
   }
 };
 

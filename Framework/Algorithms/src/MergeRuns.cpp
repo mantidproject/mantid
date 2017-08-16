@@ -42,9 +42,9 @@ namespace {
  */
 std::vector<SpectrumDefinition>
 buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
-                        const DetectorInfo &addeeDetInfo,
-                        const DetectorInfo &outDetInfo,
-                        const DetectorInfo &newOutDetInfo) {
+                   const DetectorInfo &addeeDetInfo,
+                   const DetectorInfo &outDetInfo,
+                   const DetectorInfo &newOutDetInfo) {
   std::vector<SpectrumDefinition> newAddeeSpecDefs;
 
   for (auto &specDef : addeeSpecDefs) {
@@ -108,10 +108,6 @@ void MergeRuns::init() {
                   boost::make_shared<StringListValidator>(failBehaviourOptions),
                   "Choose whether to skip the file and continue, or stop and "
                   "throw and error, when encountering a failure.");
-
-  declareProperty(make_unique<PropertyWithValue<bool>>("AppendDetectorScans",
-                                                       true, Direction::Input),
-                  "TODO: Description goes here.");
 }
 
 // @return the name of the property used to supply in input workspace(s).
@@ -179,15 +175,6 @@ void MergeRuns::exec() {
         sampleLogsFailTolerances);
 
     auto isScanning = outWS->detectorInfo().isScanning();
-    bool appendDetectorScans = getProperty("AppendDetectorScans");
-
-    if (isScanning && !appendDetectorScans) {
-      // TODO: Should actually provide a check in here. For the cases in use
-      // at the moment it is not required though.
-      g_log.warning() << "Merging workspaces with detector scans. This is "
-                         "not recommended unless the detectors have the same "
-                         "positions, rotations etc. for each time index.\n";
-    }
 
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
@@ -224,7 +211,7 @@ void MergeRuns::exec() {
       try {
         sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
         sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
-        if (isScanning && appendDetectorScans)
+        if (isScanning)
           outWS = buildScanningOutputWorkspace(outWS, addee);
         else
           outWS = outWS + addee;
@@ -260,12 +247,29 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
 
   newOutWS->mutableDetectorInfo().merge(addeeWS->detectorInfo());
 
+  if (newOutWS->detectorInfo().scanSize() == outWS->detectorInfo().scanSize()) {
+    // In this case the detector info objects were identical. We just add the
+    // workspaces as we normally would for MergeRuns.
+    g_log.information()
+        << "Workspaces had identical detector scan information and were "
+           "merged.";
+    return outWS + addeeWS;
+  } else if (newOutWS->detectorInfo().scanSize() != numOutputSpectra) {
+    throw std::runtime_error("Unexpected DetectorInfo size. Merging workspaces "
+                             "with some, but not all overlapping scan "
+                             "intervals is not currently supported.");
+  }
+
+  g_log.information()
+      << "Workspaces had different, non-overlapping scan intervals "
+         "so spectra will be appended.";
+
   auto outSpecDefs = *(outWS->indexInfo().spectrumDefinitions());
   const auto &addeeSpecDefs = *(addeeWS->indexInfo().spectrumDefinitions());
 
   const auto newAddeeSpecDefs =
       buildScanIntervals(addeeSpecDefs, addeeWS->detectorInfo(),
-                              outWS->detectorInfo(), newOutWS->detectorInfo());
+                         outWS->detectorInfo(), newOutWS->detectorInfo());
 
   outSpecDefs.insert(outSpecDefs.end(), newAddeeSpecDefs.begin(),
                      newAddeeSpecDefs.end());
