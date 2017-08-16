@@ -10,7 +10,7 @@ Instrument Access via SpectrumInfo and DetectorInfo
 Introduction
 ------------
 
-There are three new layers to access instrument information, ``SpectrumInfo``, ``DetectorInfo``, and ``ComponentInfo`` that are introduced to Mantid as part of the work towards Instrument 2.0. Eventually these classes will store all commonly accessed information about spectra and detectors, namely masking, monitor flags, L1, L2, 2-theta and position. In addition, ``ComponentInfo`` will provide the updated API to tree and shape related operations currently peformed by the instrument. These changes are leading to improved performance and cleaner code.
+There are three new layers to access instrument information, ``SpectrumInfo``, ``DetectorInfo``, and ``ComponentInfo``, which are introduced to Mantid as part of the work towards Instrument 2.0. Eventually these classes will store all commonly accessed information about spectra and detectors, namely masking, monitor flags, L1, L2, 2-theta and position. In addition, ``ComponentInfo`` will provide the updated API to tree and shape related operations currently peformed by the instrument. These changes are leading to improved performance and cleaner code.
 
 A spectrum corresponds to (a group of) one or more detectors. Most algorithms work with spectra and thus ``SpectrumInfo`` would be used. Some algorithms work on a lower level (with individual detectors) and thus ``DetectorInfo`` would be used.
 
@@ -33,7 +33,7 @@ ____________
 
 ``DetectorInfo`` can be obtained from a call to ``ExperimentInfo::detectorInfo()`` (usually this method would be called on ``MatrixWorkspace``). The wrapper class holds a reference to the parametrised instrument for retrieving the relevant information.
 
-There is also a near-complete implementation of the "real" ``DetectorInfo`` class, in the ``Beamline`` namespace. The wrapper ``DetectorInfo`` class (which you get from ``ExperimentInfo::detectorInfo()`` holds a reference to the real class. This does not affect the rollout, where the wrapper class should still be used in all cases.
+There is also a near-complete implementation of the "real" ``DetectorInfo`` class, in the ``Beamline`` namespace. The wrapper ``DetectorInfo`` class (which you get from ``ExperimentInfo::detectorInfo()``) holds a reference to the real class. This does not affect the rollout, where the wrapper class should still be used in all cases.
 
 ``ExperimentInfo`` now also provides a method ``mutableDetectorInfo()`` so that non-const access to the DetectorInfo is possible for purposes of writing detector related information such as positions or rotations. These should be used wherever possible, but note, much like the existing instrument, writes are not guranteed to be thread safe.
 
@@ -59,7 +59,7 @@ ComponentInfo
 Basics
 ______
 
-The conversion is similar to that for ``DetectorInfo``, which is already largeely complete in the framework. For ``ComponentInfo`` all instances of ``Instrument::getComponentByID(const ComponentID id)`` should be replaced using calls to the ``ComponentInfo`` object obtained from ``MatrixWorkspace::componentInfo()``. The methods below can then be called on ``ComponentInfo`` instead of on the component.
+The conversion is similar to that for ``DetectorInfo``, which is already largely complete in the framework. For ``ComponentInfo`` all instances of ``Instrument::getComponentByID(const ComponentID id)`` should be replaced using calls to the ``ComponentInfo`` object obtained from ``MatrixWorkspace::componentInfo()``. The methods below can then be called on ``ComponentInfo`` instead of on the component.
 
 * ``isDetector(componentIndex)``
 * ``detectorsInSubtree(componentIndex)``
@@ -194,13 +194,7 @@ ___________
 Complete Examples
 _________________
 
-* `FindDetectorsInShape.cpp <https://github.com/mantidproject/mantid/commit/177ad14b25db7c40ee10be513512be9ae7dd0da1#diff-7f367da22c1a837b315b4bca5b2b3e24>`_
-
-* `SmoothNeighbours.cpp <https://github.com/mantidproject/mantid/pull/18295/files#diff-26a49ef923e1bdd77677b962528d1e01>`_
-
-* `ClaerMaskFlag.cpp <https://github.com/mantidproject/mantid/pull/18198/files#diff-7f0f739ba6db714eb6ef64b6125e4620>`_
-
-* `ApplyCalibration.cpp <https://github.com/mantidproject/mantid/commit/0c75f46e85c2dc39c2b76ea811f161fdfdef938e#diff-a4ccabae0099bfc22b3b87154cd6ee9e>`_ - for mutable ``DetectorInfo``
+TODO
 
 Rollout status
 --------------
