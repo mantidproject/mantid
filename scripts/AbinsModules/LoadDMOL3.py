@@ -32,7 +32,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
             # Move read file pointer to the last calculation recorded in the .outmol file. First calculation could be
             # geometry optimization. The last calculation in the file is expected to be calculation of vibrational
             # data. There may be some intermediate resume calculations.
-            self._parser.find_last(file_obj=dmol3_file, msg=b"$cell vectors")
+            self._parser.find_last(file_obj=dmol3_file, msg="$cell vectors")
 
             # read lattice vectors
             self._read_lattice_vectors(obj_file=dmol3_file, data=data)
@@ -56,13 +56,13 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         :param obj_file: file object from which we read
         :param data: Python dictionary to which found lattice vectors should be added
         """
-        self._parser.find_first(file_obj=obj_file, msg=b"$cell vectors")
+        self._parser.find_first(file_obj=obj_file, msg="$cell vectors")
 
         dim = 3
         vectors = []
         for i in range(dim):
             line = obj_file.readline().split()
-            vector = map(self._convert_to_angstroms, line)
+            vector = list(map(self._convert_to_angstroms, line))
             vectors.append(vector)
 
         data["unit_cell"] = np.asarray(vectors).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
