@@ -5,14 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidHistogramData/HistogramY.h"
 #include "MantidCrystal/FindSXPeaksHelper.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
-#include <unordered_map>
 #include <vector>
 
 namespace Mantid {

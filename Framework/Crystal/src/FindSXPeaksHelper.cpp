@@ -1,5 +1,4 @@
 #include "MantidCrystal/FindSXPeaksHelper.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/make_unique.h"
