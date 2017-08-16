@@ -609,12 +609,12 @@ void ConvFit::extendResolutionWorkspace() {
     // Append to cloned workspace if necessary
     if (resolutionNumHist == 1 && numHist > 1) {
       IAlgorithm_sptr appendAlg =
-              AlgorithmManager::Instance().create("AppendSpectra");
+          AlgorithmManager::Instance().create("AppendSpectra");
       appendAlg->setLogging(false);
       appendAlg->initialize();
       appendAlg->setPropertyValue("InputWorkspace1", "__ConvFit_Resolution");
       appendAlg->setPropertyValue("InputWorkspace2", resWsName.toStdString());
-      appendAlg->setProperty("Number", static_cast<int>(numHist-1));
+      appendAlg->setProperty("Number", static_cast<int>(numHist - 1));
       appendAlg->setPropertyValue("OutputWorkspace", "__ConvFit_Resolution");
       appendAlg->execute();
     }
