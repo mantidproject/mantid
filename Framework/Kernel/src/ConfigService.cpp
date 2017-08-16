@@ -1838,7 +1838,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
       pRootElem->getElementsByTagName("facility");
   size_t n = pNL_facility->length();
 
-  for (size_t i = 0; i < n; ++i) {
+  for (unsigned long i = 0; i < n; ++i) {
     Poco::XML::Element *elem =
         dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
     if (elem) {
