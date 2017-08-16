@@ -87,10 +87,8 @@ public:
   void disableAction(DataProcessorAction action) override;
   void enableTransferButton() override;
   void disableTransferButton() override;
-  void setTransferEnabled(bool enabled) override;
   void enableAutoreduceButton() override;
   void disableAutoreduceButton() override;
-  void setAutoreduceButtonEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -118,6 +116,8 @@ private:
   int toMenuIndex(ReflectometryAction action);
   void enable(QAction &toEnable);
   void disable(QAction &toDisable);
+  void setTransferEnabled(bool enabled);
+  void setAutoreduceEnabled(bool enabled);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 

@@ -219,10 +219,10 @@ private:
   Options m_options;
   // Thread to run reducer worker in
   std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
-  // A boolean that can be set to pause reduction of the current item
-  bool m_pauseReduction;
   // A boolean indicating whether data reduction is confirmed paused
   bool m_confirmReductionPaused;
+  // A boolean that can be set to pause reduction of the current item
+  bool m_pauseReduction;
   // Enumeration of the reduction actions that can be taken
   enum class ReductionFlag { ReduceRowFlag, ReduceGroupFlag, StopReduceFlag };
   // A flag of the next action due to be carried out

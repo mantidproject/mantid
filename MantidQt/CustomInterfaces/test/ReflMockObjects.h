@@ -66,10 +66,8 @@ public:
   MOCK_METHOD1(enableAction, void(ReflectometryAction));
   MOCK_METHOD1(disableAction, void(DataProcessorAction));
   MOCK_METHOD1(disableAction, void(ReflectometryAction));
-  MOCK_METHOD1(setTransferEnabled, void(bool));
   MOCK_METHOD0(enableTransferButton, void());
   MOCK_METHOD0(disableTransferButton, void());
-  MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
   MOCK_METHOD0(enableAutoreduceButton, void());
   MOCK_METHOD0(disableAutoreduceButton, void());
 

@@ -73,10 +73,8 @@ public:
   virtual void enableAction(ReflectometryAction action) = 0;
   virtual void disableAction(DataProcessorAction action) = 0;
   virtual void disableAction(ReflectometryAction action) = 0;
-  virtual void setTransferEnabled(bool transferEnabled) = 0;
   virtual void enableTransferButton() = 0;
   virtual void disableTransferButton() = 0;
-  virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
   virtual void enableAutoreduceButton() = 0;
   virtual void disableAutoreduceButton() = 0;
 

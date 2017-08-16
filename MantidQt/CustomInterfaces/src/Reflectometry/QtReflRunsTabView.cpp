@@ -265,24 +265,16 @@ void QtReflRunsTabView::enableAction(DataProcessorAction action) {
   enable(*(ui.menuRows->actions()[toRowIndex(action)]));
 }
 
+void QtReflRunsTabView::disableAutoreduce() {
+  setAutoreduceEnabled(false);
+}
+
+void QtReflRunsTabView::enableAutoreduce() {
+  setAutoreduceEnabled(true);
+}
+
 void QtReflRunsTabView::setTransferEnabled(bool enabled) {
   ui.buttonTransfer->setEnabled(enabled);
-}
-
-/**
-* Sets the "Autoreduce" button enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
-void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
-  ui.buttonAutoreduce->setEnabled(enabled);
-}
-
-void QtReflRunsTabView::disableAutoreduceButton() {
-  setAutoreduceButtonEnabled(false);
-}
-
-void QtReflRunsTabView::enableAutoreduceButton() {
-  setAutoreduceButtonEnabled(true);
 }
 
 void QtReflRunsTabView::disableTransferButton() { setTransferEnabled(false); }
@@ -290,14 +282,21 @@ void QtReflRunsTabView::disableTransferButton() { setTransferEnabled(false); }
 void QtReflRunsTabView::enableTransferButton() { setTransferEnabled(true); }
 
 /**
+* Sets the "Autoreduce" button enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setAutoreduceEnabled(bool enabled) {
+  ui.buttonAutoreduce->setEnabled(enabled);
+}
+
+/**
 * Set all possible tranfer methods
 * @param methods : All possible transfer methods.
 */
 void QtReflRunsTabView::setTransferMethods(
     const std::set<std::string> &methods) {
-  for (auto method = methods.begin(); method != methods.end(); ++method) {
-    ui.comboTransferMethod->addItem((*method).c_str());
-  }
+  for (const auto& method : methods) 
+    ui.comboTransferMethod->addItem(method.c_str());
 }
 
 /**
@@ -311,8 +310,8 @@ void QtReflRunsTabView::setInstrumentList(
     const std::string &defaultInstrument) {
   ui.comboSearchInstrument->clear();
 
-  for (auto it = instruments.begin(); it != instruments.end(); ++it) {
-    QString instrument = QString::fromStdString(*it);
+  for (const auto& instrumentName : instruments) {
+    QString instrument = QString::fromStdString(instrumentName);
     ui.comboSearchInstrument->addItem(instrument);
   }
 
