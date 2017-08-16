@@ -110,8 +110,8 @@ public:
     const auto &detectorInfo = output->detectorInfo();
     const auto &ptrDet103 = detectorInfo.detector(detectorInfo.indexOf(103));
     TS_ASSERT_EQUALS(ptrDet103.getID(), 103);
-    TS_ASSERT_EQUALS(ptrDet103.getName(), "pixel");
-    TS_ASSERT_DELTA(ptrDet103.getPos().X(), 0.4013, 0.01);
+    TS_ASSERT_EQUALS(ptrDet103.getName(), "HET_non_PSDtube");
+    TS_ASSERT_DELTA(ptrDet103.getPos().X(), 0.3826351418, 0.01);
     TS_ASSERT_DELTA(ptrDet103.getPos().Z(), 2.4470, 0.01);
     double d = ptrDet103.getPos().distance(samplepos->getPos());
     TS_ASSERT_DELTA(d, 2.512, 0.0001);

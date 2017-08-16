@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="HET" valid-from   ="1900-01-31 23:59:59"
+ name="HET" valid-from   ="1951-01-01 00:00:01"
                        valid-to     ="2100-01-31 23:59:59"
-               last-modified="2017-06-08 00:00:00">
+               last-modified="2017-06-16 00:00:00">
 <!-- this is trial IDF build to allow ISIS reduction to work. Pixel and tubes parameters and sizes are certainly wrong as I do not have
      full information about them. (note valid on 15/08/2017) -->
 <defaults>
