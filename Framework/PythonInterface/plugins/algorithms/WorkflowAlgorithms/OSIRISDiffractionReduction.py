@@ -160,7 +160,8 @@ class DRangeToWorkspaceMap(object):
 
 def average_ws_list(ws_list):
     """
-    Calculates the average of a list of workspaces - stores the result in a new workspace.
+    Calculates the average of a list of workspaces (not workspace names)
+    - stores the result in a new workspace.
 
     :param ws_list: The list of workspaces to average.
     :return:        The name of the workspace containing the average.
@@ -172,20 +173,7 @@ def average_ws_list(ws_list):
     if len(ws_list) == 1:
         return ws_list[0]
 
-    # Generate the final name of the averaged workspace.
-    av_name = "avg" + "_" + "_".join(ws_list)
-
-    num_workspaces = len(ws_list)
-
-    # Compute the average and put into "__temp_avg".
-    temperatures = map(lambda index: mtd[ws_list[index]], range(1, num_workspaces))
-    __temp_avg = sum(temperatures)
-    __temp_avg /= num_workspaces
-
-    # Rename the average ws and return it.
-    RenameWorkspace(InputWorkspace=__temp_avg, OutputWorkspace=av_name)
-    return av_name.getName()
-
+    return sum(ws_list) / len(ws_list)
 
 def find_intersection_of_ranges(rangeA, rangeB):
     if rangeA[0] >= rangeA[1] or rangeB[0] >= rangeB[1]:
@@ -264,12 +252,19 @@ def rebin_to_smallest(workspaces):
     :return:           The rebinned list of workspaces.
     """
     smallest_ws = min(workspaces, key=lambda ws: mtd[ws].blocksize())
+    rebin_alg = AlgorithmManager.create("RebinToWorkspace")
+    rebin_alg.setChild(True)
+    rebin_alg.initialize()
+    rebin_alg.setProperty("WorkspaceToMatch", smallest_ws)
 
-    return [RebinToWorkspace(
-        WorkspaceToRebin=ws,
-        WorkspaceToMatch=smallest_ws,
-        OutputWorkspace=ws
-    ).getName() for ws in workspaces]
+    rebinned_workspaces = []
+    for workspace in workspaces:
+        rebin_alg.setProperty("WorkspaceToRebin", workspace)
+        rebin_alg.setProperty("OutputWorkspace", workspace)
+        rebin_alg.execute()
+        rebinned_workspaces.append(rebin_alg.getProperty("OutputWorkspace").value)
+
+    return rebinned_workspaces
 
 
 # pylint: disable=no-init,too-many-instance-attributes
@@ -405,7 +400,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                           self._spec_min,
                                           self._spec_max,
                                           load_logs=self._load_logs)
-        container_ws_names = []
+        container_workspaces = []
 
         # Load the container run
         if self._container_files:
@@ -429,7 +424,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                     scale_set_property("OutputWorkspace", container_ws_name)
                     scale_set_property("Factor", self._container_scale_factor)
                     scale_exec()
-                    mtd.addOrReplace(container_ws_name, scale_get_property("OutputWorkspace").value)
+                    container_workspaces.append(scale_get_property("OutputWorkspace").value)
 
         # Initialize rebin algorithm and retrieve function pointers to improve performance
         rebin_get_property, rebin_set_property, rebin_exec \
@@ -444,23 +439,23 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             sample_ws = sample_ws_name
 
             if container_ws_names:
-                rebin_set_property("WorkspaceToRebin", container_ws_names[idx])
+                rebin_set_property("WorkspaceToRebin", container_workspaces[idx])
                 rebin_set_property("WorkspaceToMatch", sample_ws)
-                rebin_set_property("OutputWorkspace", container_ws_names[idx])
+                rebin_set_property("OutputWorkspace", container_workspaces[idx])
                 rebin_exec()
 
                 minus_set_property("LHSWorkspace", sample_ws)
                 minus_set_property("RHSWorkspace", rebin_get_property("OutputWorkspace").value)
                 minus_set_property("OutputWorkspace", sample_ws)
                 minus_exec()
-                mtd.addOrReplace(sample_ws_name, minus_get_property("OutputWorkspace").value)
 
             if self._man_d_range is not None and idx < len(self._man_d_range):
-                self._sam_ws_map.add_ws(sample_ws_name, self._man_d_range[idx])
+                self._sam_ws_map.add_ws(minus_get_property("OutputWorkspace").value,
+                                        self._man_d_range[idx])
             else:
-                self._sam_ws_map.add_ws(sample_ws_name)
+                self._sam_ws_map.add_ws(minus_get_property("OutputWorkspace").value)
 
-        # Add the vanadium workspaces to the dRange to vanadium map
+        # Add the vanadium workspace names to the dRange to vanadium map
         self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
 
         # Create delete workspace algorithm and retrieve function pointers to improve performance
@@ -468,11 +463,11 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             = self._init_child_algorithm("DeleteWorkspace")
 
         # Finished with container workspaces - delete them
-        for container in container_ws_names:
+        for container in container_workspaces:
             delete_set_property("Workspace", container)
             delete_exec()
             # Delete monitors
-            delete_set_property("Workspace", container + "_mon")
+            delete_set_property("Workspace", container.getName() + "_mon")
             delete_exec()
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
@@ -485,7 +480,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # of DRanges, each to a *single* workspace.
         self._sam_ws_map.average_across_dranges()
 
-        # Now do the same to the vanadium workspaces.
+        # Now do the same to the vanadium workspaces - NOTE: vanadium map now
+        # contains workspaces not workspace names.
         self._van_ws_map.average_across_dranges()
 
         # Create NormaliseByCurrent algorithm and retrieve function pointers to improve performance
@@ -506,54 +502,52 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
         for d_range, wrksp in itertools.chain(self._sam_ws_map.items(), self._van_ws_map.items()):
-            output_ws = wrksp
             normalise_set_property("InputWorkspace", wrksp)
-            normalise_set_property("OutputWorkspace", output_ws)
+            normalise_set_property("OutputWorkspace", wrksp)
             normalise_exec()
 
             align_set_property("InputWorkspace", normalise_get_property("OutputWorkspace").value)
-            align_set_property("OutputWorkspace", output_ws)
+            align_set_property("OutputWorkspace", wrksp)
             align_set_property("CalibrationFile", self._cal)
             align_exec()
 
             diff_focus_set_property("InputWorkspace", align_get_property("OutputWorkspace").value)
-            diff_focus_set_property("OutputWorkspace", output_ws)
+            diff_focus_set_property("OutputWorkspace", wrksp)
             diff_focus_set_property("GroupingFileName", self._cal)
             diff_focus_exec()
 
             crop_set_property("InputWorkspace", diff_focus_get_property("OutputWorkspace").value)
-            crop_set_property("OutputWorkspace", output_ws)
+            crop_set_property("OutputWorkspace", wrksp)
             crop_set_property("XMin", d_range[0])
             crop_set_property("XMax", d_range[1])
             crop_exec()
 
-            mtd.addOrReplace(wrksp, crop_get_property("OutputWorkspace").value)
-
         # Divide all sample files by the corresponding vanadium files.
         self._divide_all_by(self._sam_ws_map.values(), self._van_ws_map.values())
 
-        # Create a list of sample workspace NAMES, since we need this for MergeRuns.
-        sam_ws_names_list = list(self._sam_ws_map.values())
+        # Create a list of sample workspaces, since we need this for MergeRuns.
+        for sample_ws in self._sam_ws_map
+        sam_ws_list = self._sam_ws_map.values()
 
-        if len(sam_ws_names_list) > 1:
+        if len(sam_ws_list) > 1:
 
             # Merge the sample files into one.
             merge_runs_alg = self.createChildAlgorithm("MergeRuns", enableLogging=False)
-            merge_runs_alg.setProperty("InputWorkspaces", sam_ws_names_list)
+            merge_runs_alg.setProperty("InputWorkspaces", sam_ws_list)
             merge_runs_alg.setProperty("OutputWorkspace", self._output_ws_name)
             merge_runs_alg.execute()
             self._output_ws_name = merge_runs_alg.getPropertyValue("OutputWorkspace")
             mtd.addOrReplace(self._output_ws_name, merge_runs_alg.getProperty("OutputWorkspace").value)
 
-            for name in sam_ws_names_list:
-                delete_set_property("Workspace", name)
+            for workspace in sam_ws_list:
+                delete_set_property("Workspace", workspace)
                 delete_exec()
 
                 # Delete monitor workspaces
-                delete_set_property("Workspace", name + "_mon")
+                delete_set_property("Workspace", workspace.getName() + "_mon")
                 delete_exec()
         else:
-            RenameWorkspace(InputWorkspace=sam_ws_names_list[0], OutputWorkspace=self._output_ws_name)
+            mtd.addOrReplace(self._output_ws_name, sam_ws_list[0])
 
         result = mtd[self._output_ws_name]
 
@@ -692,11 +686,11 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Divide all dividend workspaces by the corresponding divisor workspaces.
         for dividend_ws_name, divisor_ws_name in zip(dividend_ws_names, divisor_ws_names):
             ws_list = rebin_to_smallest([dividend_ws_name, divisor_ws_name])
-            dividend_ws_name, divisor_ws_name = ws_list[0], ws_list[1]
+            dividend_ws, divisor_ws = ws_list[0], ws_list[1]
 
-            divide_set_property("LHSWorkspace", dividend_ws_name)
-            divide_set_property("RHSWorkspace", divisor_ws_name)
-            divide_set_property("OutputWorkspace", dividend_ws_name)
+            divide_set_property("LHSWorkspace", dividend_ws)
+            divide_set_property("RHSWorkspace", divisor_ws)
+            divide_set_property("OutputWorkspace", dividend_ws)
             divide_exec()
 
             replace_special_set_property("InputWorkspace", divide_get_property("OutputWorkspace").value)
