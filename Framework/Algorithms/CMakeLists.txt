@@ -145,6 +145,7 @@ set ( SRC_FILES
 	src/GeneratePeaks.cpp
 	src/GeneratePythonScript.cpp
 	src/GetAllEi.cpp
+	src/CalculateDetOffsetsMultiPeaks.cpp
 	src/GetDetOffsetsMultiPeaks.cpp
 	src/GetDetectorOffsets.cpp
 	src/GetEi.cpp
@@ -464,6 +465,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GeneratePeaks.h
 	inc/MantidAlgorithms/GeneratePythonScript.h
 	inc/MantidAlgorithms/GetAllEi.h
+	inc/MantidAlgorithms/CalculateDetOffsetsMultiPeaks.h
 	inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
 	inc/MantidAlgorithms/GetDetectorOffsets.h
 	inc/MantidAlgorithms/GetEi.h
