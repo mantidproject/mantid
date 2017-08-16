@@ -37,7 +37,7 @@ void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
 
 // Helper method to round a double value to ten decimal place
 double roundTo10Places(double toRound) {
-  int scaleFactor = 10e10;
+  double scaleFactor = 10e10;
   double result = toRound * scaleFactor;
   result = round(result);
   result = result / scaleFactor;
