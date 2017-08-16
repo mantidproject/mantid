@@ -554,13 +554,13 @@ void PDCalibration::exec() {
 }
 
 namespace { // anonymous namespace
-/**
- * Helper function for calculating costs in gsl.
- * @param v vector of parameters that are being modified by gsl (difc, tzero,
- * difa)
- * @param params The parameters being used for the fit
- * @return Sum of the errors
- */
+            /**
+             * Helper function for calculating costs in gsl.
+             * @param v vector of parameters that are being modified by gsl (difc, tzero,
+             * difa)
+             * @param params The parameters being used for the fit
+             * @return Sum of the errors
+             */
 double gsl_costFunction(const gsl_vector *v, void *peaks) {
   // this array is [numPeaks, numParams, vector<tof>, vector<dspace>,
   // vector<height^2>]

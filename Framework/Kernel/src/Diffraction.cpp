@@ -111,13 +111,9 @@ std::function<double(double)> getTofToDConversionFunc(const double difc,
 // convert from d-spacing to time-of-flight
 namespace { // anonymous namespace
 struct d_to_tof_difc_only {
-  d_to_tof_difc_only(const double difc) {
-    this->difc = difc;
-  }
+  d_to_tof_difc_only(const double difc) { this->difc = difc; }
 
-  double operator()(const double dspacing) const {
-    return difc * dspacing;
-  }
+  double operator()(const double dspacing) const { return difc * dspacing; }
 
   double difc;
 };
