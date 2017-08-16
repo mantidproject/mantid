@@ -31,7 +31,19 @@ public:
   }
   static void destroySuite(ReflRunsTabPresenterTest *suite) { delete suite; }
 
-  ReflRunsTabPresenterTest() : m_tablePresenterVec{{&m_mockTablePresenter}} {}
+  ReflRunsTabPresenterTest()
+      : m_tablePresenterVec({&m_mockTablePresenter}),
+        m_presenter(&m_mockRunsTabView, &m_mockProgress, m_tablePresenterVec) {}
+
+  void setUpPresenter(std::vector<DataProcessorPresenter *> &tablePresenters) {
+    m_presenter = ReflRunsTabPresenter(&m_mockRunsTabView, &m_mockProgress,
+                                       tablePresenters);
+    m_presenter.acceptMainPresenter(&m_mockMainPresenter);
+  }
+
+  void setUpPresenter() { setUpPresenter(m_tablePresenterVec); }
+
+  void setUp() override { setUpPresenter(); }
 
   void test_constructor_sets_possible_transfer_methods() {
     // Expect that the transfer methods get initialized on the view
@@ -39,23 +51,15 @@ public:
     // Expect that the list of instruments gets initialized on the view
     EXPECT_CALL(m_mockRunsTabView, setInstrumentList(_, _)).Times(Exactly(1));
 
-    // Constructor
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-
-    // Verify expectations
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockRunsTabView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockTablePresenter));
+    setUpPresenter();
   }
 
   void test_table_presenters_accept_this_presenter() {
     MockDataProcessorPresenter mockTablePresenter_1;
     MockDataProcessorPresenter mockTablePresenter_2;
     MockDataProcessorPresenter mockTablePresenter_3;
-    std::vector<DataProcessorPresenter *> tablePresenterVec;
-    tablePresenterVec.push_back(&mockTablePresenter_1);
-    tablePresenterVec.push_back(&mockTablePresenter_2);
-    tablePresenterVec.push_back(&mockTablePresenter_3);
+    std::vector<DataProcessorPresenter *> tablePresenterVec{
+        {&mockTablePresenter_1, &mockTablePresenter_2, &mockTablePresenter_3}};
 
     // Expect that the table presenters accept this presenter as a workspace
     // receiver
@@ -63,114 +67,71 @@ public:
     EXPECT_CALL(mockTablePresenter_2, accept(_)).Times(Exactly(1));
     EXPECT_CALL(mockTablePresenter_3, accept(_)).Times(Exactly(1));
 
-    // Constructor
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   tablePresenterVec);
-
-    // Verify expectations
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockRunsTabView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_1));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_2));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_3));
+    setUpPresenter(tablePresenterVec);
   }
 
   void test_presenter_sets_commands_when_ADS_changed() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-
-    // Expect that the view clears the list of commands
     EXPECT_CALL(m_mockRunsTabView, clearCommands()).Times(Exactly(1));
     // Expect that the view is populated with the list of table commands
     EXPECT_CALL(m_mockRunsTabView, setTableCommandsProxy()).Times(Exactly(1));
     // Expect that the view is populated with the list of row commands
     EXPECT_CALL(m_mockRunsTabView, setRowCommandsProxy()).Times(Exactly(1));
     // The presenter is notified that something changed in the ADS
-    presenter.notifyADSChanged(QSet<QString>());
-
-    // Verify expectations
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockRunsTabView));
+    m_presenter.notifyADSChanged(QSet<QString>());
   }
 
   void test_preprocessingOptions() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
-    int group = 199;
+    const auto group = 199;
     EXPECT_CALL(m_mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(group));
     EXPECT_CALL(m_mockMainPresenter, getTransmissionRuns(group)).Times(1);
-    presenter.getPreprocessingOptionsAsString();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockMainPresenter));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockRunsTabView));
+    m_presenter.getPreprocessingOptionsAsString();
   }
 
   void test_processingOptions() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
-    int group = 199;
+    const auto group = 199;
     EXPECT_CALL(m_mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(group));
     EXPECT_CALL(m_mockMainPresenter, getReductionOptions(group)).Times(1);
-    presenter.getProcessingOptions();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockMainPresenter));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockRunsTabView));
+    m_presenter.getProcessingOptions();
   }
 
   void test_postprocessingOptions() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
-    int group = 199;
+    const auto group = 199;
     EXPECT_CALL(m_mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(group));
     EXPECT_CALL(m_mockMainPresenter, getStitchOptions(group)).Times(1);
-    presenter.getPostprocessingOptions();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockMainPresenter));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockRunsTabView));
+    m_presenter.getPostprocessingOptions();
   }
 
   void test_when_group_changes_commands_are_updated() {
     NiceMock<MockDataProcessorPresenter> mockTablePresenter_0;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter_1;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter_2;
-    std::vector<DataProcessorPresenter *> tablePresenterVec;
-    tablePresenterVec.push_back(&mockTablePresenter_0);
-    tablePresenterVec.push_back(&mockTablePresenter_1);
-    tablePresenterVec.push_back(&mockTablePresenter_2);
+    std::vector<DataProcessorPresenter *> tablePresenterVec{
+        {&mockTablePresenter_0, &mockTablePresenter_1, &mockTablePresenter_2}};
 
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
+    setUpPresenter(tablePresenterVec);
 
     EXPECT_CALL(m_mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(1));
+
     // Commands should be updated with presenter of selected group
     EXPECT_CALL(mockTablePresenter_0, publishCommandsMocked()).Times(0);
     EXPECT_CALL(mockTablePresenter_1, publishCommandsMocked()).Times(1);
     EXPECT_CALL(mockTablePresenter_2, publishCommandsMocked()).Times(0);
-    presenter.notify(IReflRunsTabPresenter::GroupChangedFlag);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_0));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_1));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_2));
+    m_presenter.notify(IReflRunsTabPresenter::GroupChangedFlag);
   }
 
   void test_instrumentChanged() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
     std::vector<std::string> instruments = {"INTER", "POLREF", "OFFSPEC",
                                             "SURF", "CRISP"};
     for (const auto &instrument : instruments) {
@@ -179,7 +140,7 @@ public:
           .WillOnce(Return(instrument));
       EXPECT_CALL(m_mockMainPresenter, setInstrumentName(instrument))
           .Times(Exactly(1));
-      presenter.notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+      m_presenter.notify(IReflRunsTabPresenter::InstrumentChangedFlag);
       TS_ASSERT_EQUALS(Mantid::Kernel::ConfigService::Instance().getString(
                            "default.instrument"),
                        instrument);
@@ -187,10 +148,6 @@ public:
   }
 
   void test_invalid_ICAT_login_credentials_gives_user_critical() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
     std::stringstream pythonSrc;
     pythonSrc << "try:\n";
     pythonSrc << "  algm = CatalogLoginDialog()\n";
@@ -211,32 +168,24 @@ public:
         giveUserInfo("Error Logging in: Please press 'Search' to try again.",
                      "Login Failed"))
         .Times(1);
-    presenter.notify(IReflRunsTabPresenter::SearchFlag);
+    m_presenter.notify(IReflRunsTabPresenter::SearchFlag);
   }
 
   void test_pause_disables_pause_when_pause_requested() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
     // Expect view disables the 'pause' button only
     EXPECT_CALL(m_mockRunsTabView, disableAction(DataProcessorAction::PAUSE))
         .Times(Exactly(1));
 
-    presenter.pause();
+    m_presenter.pause();
   }
 
   void test_notifies_main_presenter_on_resume() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
     EXPECT_CALL(
         m_mockMainPresenter,
         notify(IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag))
         .Times(Exactly(1));
 
-    presenter.resume();
+    m_presenter.resume();
   }
 
   void expectPreventsTableModificationThroughReflectometryMenu() {
@@ -288,50 +237,34 @@ public:
   }
 
   void test_prevents_table_modification_on_resume() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
     expectPreventsTableModification();
-
-    presenter.resume();
+    m_presenter.resume();
   }
 
   void test_disables_processing_on_resume() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
     EXPECT_CALL(m_mockRunsTabView, disableAction(DataProcessorAction::PROCESS))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView, enableAction(DataProcessorAction::PAUSE))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView, disableAutoreduceButton()).Times(Exactly(1));
 
-    presenter.resume();
+    m_presenter.resume();
   }
 
   void test_re_enable_pause_on_resume() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
-    presenter.resume();
+    EXPECT_CALL(m_mockRunsTabView, enableAction(DataProcessorAction::PAUSE))
+        .Times(Exactly(1));
+    m_presenter.resume();
   }
 
   void test_notifies_main_presenter_on_pause_confirmation() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
     // Expect main presenter is notified that data reduction is paused
     // Expect view enables the 'process' button
     EXPECT_CALL(
         m_mockMainPresenter,
         notify(IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag))
         .Times(Exactly(1));
-
-    presenter.confirmReductionPaused();
+    m_presenter.confirmReductionPaused();
   }
 
   void expectAllowsTableModificationThroughReflectometryMenu() {
@@ -375,7 +308,6 @@ public:
     EXPECT_CALL(m_mockRunsTabView,
                 enableAction(DataProcessorAction::DELETE_GROUP))
         .Times(Exactly(1));
-
   }
 
   void expectAllowsTableModification() {
@@ -384,25 +316,17 @@ public:
   }
 
   void test_modification_re_enabled_on_pause_confirmation() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
     expectAllowsTableModification();
 
-    presenter.confirmReductionPaused();
+    m_presenter.confirmReductionPaused();
   }
 
   void test_processing_re_enabled_on_pause_confirmation() {
-    ReflRunsTabPresenter presenter(&m_mockRunsTabView, &m_mockProgress,
-                                   m_tablePresenterVec);
-    presenter.acceptMainPresenter(&m_mockMainPresenter);
-
-    // EXPECT_CALL(m_mockRunsTabView, enableAction(DataProcessorAction::PROCESS))
-       // .Times(Exactly(1));
+    EXPECT_CALL(m_mockRunsTabView, enableAction(DataProcessorAction::PROCESS))
+        .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView, enableAutoreduceButton()).Times(Exactly(1));
 
-    presenter.confirmReductionPaused();
+    m_presenter.confirmReductionPaused();
   }
 
   void tearDown() override {
@@ -418,6 +342,7 @@ protected:
   NiceMock<MockRunsTabView> m_mockRunsTabView;
   MockProgressableView m_mockProgress;
   std::vector<DataProcessorPresenter *> m_tablePresenterVec;
+  ReflRunsTabPresenter m_presenter;
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLRUNSTABPRESENTERTEST_H */
