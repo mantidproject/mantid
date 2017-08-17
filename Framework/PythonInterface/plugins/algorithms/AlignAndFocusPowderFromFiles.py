@@ -26,6 +26,15 @@ PROPS_FOR_PD_CHARACTER = ['FrequencyLogNames', 'WaveLengthLogNames']
 
 
 def determineChunking(filename, chunkSize):
+    # chunkSize=0 signifies that the user wants to read the whole file
+    if chunkSize == 0.:
+        return [{}]
+
+    # "small" files just get read in
+    sizeGiB = os.path.getsize(filename)/1024./1024./1024.
+    if 6.*sizeGiB < chunkSize:
+        return [{}]
+
     chunks = DetermineChunking(Filename=filename, MaxChunkSize=chunkSize, OutputWorkspace='chunks')
 
     strategy = []
