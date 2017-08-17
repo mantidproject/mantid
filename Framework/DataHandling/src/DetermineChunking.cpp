@@ -18,7 +18,7 @@
 namespace mpi = boost::mpi;
 #endif
 
-#include <boost/filesystem.hpp>
+#include <Poco/File.h>
 #include <exception>
 #include <fstream>
 #include <set>
@@ -131,9 +131,9 @@ void DetermineChunking::exec() {
   }
 #endif
 
+  Poco::File fileinfo(filename);
   const double fileSizeGiB =
-      static_cast<double>(boost::filesystem::file_size(filename)) *
-      BYTES_TO_GiB;
+      static_cast<double>(fileinfo.getSize()) * BYTES_TO_GiB;
 
 #ifndef MPI_BUILD
   // don't bother opening the file if its size is "small"
