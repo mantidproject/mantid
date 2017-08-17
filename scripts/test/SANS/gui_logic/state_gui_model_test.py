@@ -374,8 +374,6 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_q_limits_default_to_empty(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertTrue(state_gui_model.q_1d_min == "")
-        self.assertTrue(state_gui_model.q_1d_max == "")
         self.assertTrue(state_gui_model.q_1d_rebin_string == "")
 
         self.assertTrue(state_gui_model.q_xy_max == "")
@@ -384,15 +382,11 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_can_set_the_q_limits(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.q_1d_min = 11.2
-        state_gui_model.q_1d_max = 123.3
         state_gui_model.q_1d_rebin_string = "test"
         state_gui_model.q_xy_max = 1.
         state_gui_model.q_xy_step = 122.
         state_gui_model.q_xy_step_type = RangeStepType.Log
 
-        self.assertTrue(state_gui_model.q_1d_min == 11.2)
-        self.assertTrue(state_gui_model.q_1d_max == 123.3)
         self.assertTrue(state_gui_model.q_1d_rebin_string == "test")
         self.assertTrue(state_gui_model.q_xy_max == 1.)
         self.assertTrue(state_gui_model.q_xy_step == 122.)

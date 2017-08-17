@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Main view for the ISIS SANS reduction interface.
 """
 
@@ -45,6 +46,7 @@ def open_file_dialog(line_edit, filter_text, directory):
 class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_SansDataProcessorWindow):
     data_processor_table = None
     INSTRUMENTS = None
+    VARIABLE = "Variable"
 
     class RunTabListener(with_metaclass(ABCMeta, object)):
         """
@@ -190,6 +192,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Set the merge settings
         self.reduction_mode_combo_box.currentIndexChanged.connect(self._on_reduction_mode_selection_has_changed)
         self._on_reduction_mode_selection_has_changed()  # Disable the merge settings initially
+
+        # Set the q step type settings
+        self.q_1d_step_type_combo_box.currentIndexChanged.connect(self._on_q_1d_step_type_has_changed)
+        self._on_q_1d_step_type_has_changed()
 
         # Set the q resolution aperture shape settings
         self.q_resolution_shape_combo_box.currentIndexChanged.connect(self._on_q_resolution_shape_has_changed)
@@ -368,6 +374,17 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_resolution_sample_h_label.setEnabled(enable_rectangular)
         self.q_resolution_source_w_label.setEnabled(enable_rectangular)
         self.q_resolution_sample_w_label.setEnabled(enable_rectangular)
+
+    def _on_q_1d_step_type_has_changed(self):
+        selection = self.q_1d_step_type_combo_box.currentText()
+        is_variable = selection == self.VARIABLE
+        self.q_1d_max_line_edit.setEnabled(not is_variable)
+        self.q_1d_step_line_edit.setEnabled(not is_variable)
+        if is_variable:
+            self.q_min_label.setText("Rebin String")
+        else:
+            label = u"Min [\u00c5^-1]"
+            self.q_min_label.setText(label)
 
     def set_q_resolution_shape_to_rectangular(self, is_rectangular):
         index = 1 if is_rectangular else 0
@@ -1056,11 +1073,19 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     # Q limit
     # ------------------------------------------------------------------------------------------------------------------
     @property
-    def q_1d_min(self):
-        return self.get_simple_line_edit_field(line_edit="q_1d_min_line_edit", expected_type=float)
+    def q_1d_min_or_rebin_string(self):
+        gui_element = self.q_1d_min_line_edit
+        value_as_string = gui_element.text()
+        if not value_as_string:
+            return None
+        try:
+            value = float(value_as_string)
+        except ValueError:
+            value = value_as_string.encode('utf-8')
+        return value
 
-    @q_1d_min.setter
-    def q_1d_min(self, value):
+    @q_1d_min_or_rebin_string.setter
+    def q_1d_min_or_rebin_string(self, value):
         self.update_simple_line_edit_field(line_edit="q_1d_min_line_edit", value=value)
 
     @property
@@ -1082,7 +1107,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @property
     def q_1d_step_type(self):
         q_1d_step_type_as_string = self.q_1d_step_type_combo_box.currentText().encode('utf-8')
-        # Either the selection is something that can be converted to a SampleShape or we need to read from file
+        # Hedge for trying to read out
         try:
             return RangeStepType.from_string(q_1d_step_type_as_string)
         except RuntimeError:
@@ -1094,7 +1119,23 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             # Set to the default
             self.q_1d_step_type_combo_box.setCurrentIndex(0)
         else:
-            self.update_gui_combo_box(value=value, expected_type=RangeStepType, combo_box="q_1d_step_type_combo_box")
+            # Set the list
+            if isinstance(value, list):
+                gui_element = self.q_1d_step_type_combo_box
+                gui_element.clear()
+                value.append(self.VARIABLE)
+                for element in value:
+                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
+                                                        expected_type=RangeStepType)
+            else:
+                gui_element = getattr(self, "q_1d_step_type_combo_box")
+                if issubclass(value, RangeStepType):
+                    self._set_enum_as_element_in_combo_box(gui_element=gui_element, element=value,
+                                                           expected_type=RangeStepType)
+                else:
+                    index = gui_element.findText(value)
+                    if index != -1:
+                        gui_element.setCurrentIndex(index)
 
     @property
     def q_xy_max(self):
@@ -1339,7 +1380,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # --------------------------------
         # Q tab
         # --------------------------------
-        self.q_1d_min_line_edit.setValidator(double_validator)
         self.q_1d_max_line_edit.setValidator(double_validator)
         self.q_1d_step_line_edit.setValidator(positive_double_validator)
         self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
