@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 import sip
 import os
@@ -191,7 +192,7 @@ class ReflData(object):
             xmin, xmax = self._data[ReflData.OFF_OFF].get_skipped_range()
             self._data[ReflData.OFF_OFF].set_range(xmin, xmax)
         else:
-            print "No Off-Off data to process"
+            print("No Off-Off data to process")
             return xmin, xmax
 
         for polarization in [ReflData.ON_OFF,

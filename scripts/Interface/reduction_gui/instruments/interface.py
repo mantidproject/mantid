@@ -2,11 +2,16 @@
 """
     Base class for instrument-specific user interface
 """
+from __future__ import (absolute_import, division, print_function)
+import six
 from PyQt4 import QtGui
 import sys
 import os
 import traceback
 from reduction_gui.reduction.scripter import BaseReductionScripter
+
+if six.PY3:
+    unicode = str
 
 
 class InstrumentInterface(object):
@@ -80,7 +85,7 @@ class InstrumentInterface(object):
             else:
                 self.reset()
         except:
-            print "Could not load last reduction\n  %s" % str(traceback.format_exc())
+            print("Could not load last reduction\n  %s" % str(traceback.format_exc()))
             self.reset()
 
     def load_file(self, file_name):
@@ -114,7 +119,7 @@ class InstrumentInterface(object):
         self.scripter.update()
         try:
             return self.scripter.to_script(file_name)
-        except RuntimeError, e:
+        except RuntimeError as e:
             if self._settings.debug:
                 msg = "The following error was encountered:\n\n%s" % unicode(traceback.format_exc())
             else:
@@ -186,7 +191,7 @@ class InstrumentInterface(object):
         try:
             self.scripter.update()
         except:
-            print "Error in the user interface\n  %s" % str(traceback.format_exc())
+            print("Error in the user interface\n  %s" % str(traceback.format_exc()))
             self.scripter.push_state()
             return
 
@@ -195,7 +200,7 @@ class InstrumentInterface(object):
             red_path = os.path.join(self.ERROR_REPORT_DIR, self.LAST_REDUCTION_NAME)
             self.save_file(red_path)
         except:
-            print "Could not save last reduction\n  %s" % str(traceback.format_exc())
+            print("Could not save last reduction\n  %s" % str(traceback.format_exc()))
 
         try:
             self.set_running(True)

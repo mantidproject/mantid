@@ -1,6 +1,7 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import sys
-from scripter import BaseScriptElement
+from reduction_gui.reduction.scripter import BaseScriptElement
 
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False

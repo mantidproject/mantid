@@ -1,4 +1,5 @@
 #pylint: disable-all
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 import os
 from mantid.simpleapi import *
