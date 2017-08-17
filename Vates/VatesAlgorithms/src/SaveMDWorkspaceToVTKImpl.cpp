@@ -1,4 +1,4 @@
-#include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
+#include "MantidVatesAlgorithms/SaveMDWorkspaceToVTKImpl.h"
 #include "MantidVatesAPI/Normalization.h"
 
 #include "MantidVatesAPI/FactoryChains.h"

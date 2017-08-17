@@ -200,7 +200,7 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
     x = xData[0] - dx * (1. + double(offset));
   }
   std::generate(newXData.begin(), newXData.end(),
-                [&x, &dx] { return x += dx; });
+                [&x, &dx] { x += dx;return x; });
   std::copy(xData.begin(), xData.end(), newXData.begin() + offset);
   std::copy(yData.begin(), yData.end(), newYData.begin() + offset);
   std::copy(eData.begin(), eData.end(), newEData.begin() + offset);
