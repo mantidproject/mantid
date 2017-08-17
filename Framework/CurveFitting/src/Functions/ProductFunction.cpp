@@ -13,7 +13,7 @@ using namespace CurveFitting;
 DECLARE_FUNCTION(ProductFunction)
 
 /** Ascertain if a function is of the same class. If so, its
- * component functions will be treated separately when combined
+ * component functions will be incorporated separately when combined
  * with this object.
  *  @param f :: pointer to the query function
  */

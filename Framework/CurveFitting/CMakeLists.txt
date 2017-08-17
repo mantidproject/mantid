@@ -45,6 +45,7 @@ set ( SRC_FILES
 	src/FuncMinimizers/SteepestDescentMinimizer.cpp
 	src/FuncMinimizers/TrustRegionMinimizer.cpp
 	src/FunctionDomain1DSpectrumCreator.cpp
+	src/Functions/AdditionFunction.cpp
 	src/Functions/Abragam.cpp
 	src/Functions/BSpline.cpp
 	src/Functions/BackToBackExponential.cpp
@@ -203,6 +204,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
 	inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
 	inc/MantidCurveFitting/Functions/Abragam.h
+	inc/MantidCurveFitting/Functions/AdditionFunction.h
 	inc/MantidCurveFitting/Functions/BSpline.h
 	inc/MantidCurveFitting/Functions/BackToBackExponential.h
 	inc/MantidCurveFitting/Functions/BackgroundFunction.h

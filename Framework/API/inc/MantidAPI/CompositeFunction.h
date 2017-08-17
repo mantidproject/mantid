@@ -19,7 +19,7 @@ namespace API {
    the member functions.
     Functions are added to a composite functions with addFunction method and can
    be retrieved with
-    getFinction(i) method. Function indices are defined by the order they are
+    getFunction(i) method. Function indices are defined by the order they are
    added. Parameter names
     are formed from the member function's index and its parameter name:
    f[index].[name]. For example,

@@ -833,14 +833,14 @@ public:
     TS_ASSERT_EQUALS(mfun->parameterName(4), "f1.s");
     TS_ASSERT_EQUALS(mfun->getParameter(4), 1.3);
     TS_ASSERT(!mfun->isFixed(4));
-    // Check bk2
+    // Check bk2, the inserted function
     TS_ASSERT_EQUALS(mfun->parameterName(5), "f2.a");
     TS_ASSERT_EQUALS(mfun->getParameter(5), 4.1);
     TS_ASSERT(!mfun->isFixed(5));
     TS_ASSERT_EQUALS(mfun->parameterName(6), "f2.b")
     TS_ASSERT_EQUALS(mfun->getParameter(6), 4.2);
     TS_ASSERT(!mfun->isFixed(6));
-    // Check cub
+    // Check cub, the function "shifted upwards"
     TS_ASSERT_EQUALS(mfun->parameterName(7), "f3.c0");
     TS_ASSERT_EQUALS(mfun->getParameter(7), 12);
     TS_ASSERT(mfun->isFixed(7));

@@ -66,4 +66,4 @@ protected:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_PRODUCTFUNCTIONMW_H_*/
+#endif /*MANTID_CURVEFITTING_PRODUCTFUNCTION_H_*/

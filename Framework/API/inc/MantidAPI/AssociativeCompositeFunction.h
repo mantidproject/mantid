@@ -37,8 +37,8 @@ class DLLExport AssociativeCompositeFunction : public CompositeFunction {
 public:
     std::string name() const override { return "AssociativeCompositeFunction"; }
 
-    /// Mechanism to ascertain if the component function of
-    /// function f are to be separately treated
+    /// Mechanism to ascertain if the component functions of function f
+    /// are to be separately incorporated. Subclasses must override.
     bool virtual isAssociative(IFunction_sptr f) const = 0;
 
     /// Add a function at the back of the internal function list

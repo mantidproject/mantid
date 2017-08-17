@@ -11,20 +11,24 @@ namespace {
 Kernel::Logger g_log("AssociativeCompositeFunction");
 }
 
-DECLARE_FUNCTION(AssociativeCompositeFunction)
+/** We do not declare this function, since it is pure virtual
+ * DECLARE_FUNCTION(AssociativeCompositeFunction)
+*/
 
 /** Add a function to the end of the vector of component functions
  * @param f :: A pointer to the added function
- * @return The function index
+ * @return The index of the last added function
  */
 std::size_t AssociativeCompositeFunction::addFunction(IFunction_sptr f) {
     if (isAssociative(f)) {
-        for (auto g : f->m_functions){
-            CompositeFunction::addFunction(g);
+        auto fa = boost::dynamic_pointer_cast<AssociativeCompositeFunction>(f);
+        for(std::size_t i=0; i < fa->nFunctions(); i++) {
+            CompositeFunction::addFunction(fa->getFunction(i));
         }
     } else {
         CompositeFunction::addFunction(f);
     }
+    return nFunctions() - 1;
 }
 
 /** Insert a function at a given index in the vector of component functions
@@ -33,8 +37,9 @@ std::size_t AssociativeCompositeFunction::addFunction(IFunction_sptr f) {
  */
 void AssociativeCompositeFunction::insertFunction(size_t i, IFunction_sptr f) {
     if (isAssociative(f)) {
-        for (auto g : f->m_functions){
-            CompositeFunction::insertFunction(i, g);
+        auto fa = boost::dynamic_pointer_cast<AssociativeCompositeFunction>(f);
+        for(std::size_t i=0; i < fa->nFunctions(); i++) {
+            CompositeFunction::insertFunction(i, fa->getFunction(i));
         }
     } else {
         CompositeFunction::insertFunction(i, f);
@@ -48,7 +53,7 @@ void AssociativeCompositeFunction::insertFunction(size_t i, IFunction_sptr f) {
 void AssociativeCompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
     if (isAssociative(f)) {
         removeFunction(i);
-        insertFunction(i, g);
+        insertFunction(i, f);
     } else {
         CompositeFunction::replaceFunction(i, f);
     }
