@@ -137,7 +137,9 @@ void DetermineChunking::exec() {
 
 #ifndef MPI_BUILD
   // don't bother opening the file if its size is "small"
-  if (6. * fileSizeGiB < maxChunk)
+  // note that prenexus "_runinfo.xml" files don't represent what
+  // is actually loaded
+  if (fileType != PRENEXUS_FILE && 6. * fileSizeGiB < maxChunk)
     return;
 #endif
 
