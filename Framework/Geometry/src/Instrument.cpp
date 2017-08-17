@@ -1249,7 +1249,7 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
 }
 
 /// Returns a legacy ParameterMap, containing information that is now stored in
-/// DetectorInfo (masking, positions, rotations).
+/// DetectorInfo (masking, positions, rotations, scale factors).
 boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
   // Instrument is only needed for DetectorInfo access so it is not needed. This
@@ -1318,14 +1318,23 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       }
     }
 
+    const auto componentId = componentInfo.componentID(i);
+    const IComponent *baseComponent = componentId->getBaseComponent();
+    // Generic sca scale factors
+    const auto newScaleFactor =
+        Kernel::toVector3d(componentInfo.scaleFactor(i));
+    if ((newScaleFactor - toVector3d(baseComponent->getScaleFactor())).norm() >=
+        1e-9) {
+      pmap->addV3D(componentId, ParameterMap::scale(),
+                   componentInfo.scaleFactor(i));
+    }
+
     // Undo parent transformation to obtain relative position/rotation.
     Eigen::Vector3d relPos =
         transformation * toVector3d(componentInfo.position(i));
     Eigen::Quaterniond relRot =
         toQuaterniond(componentInfo.relativeRotation(i));
 
-    const IComponent *baseComponent =
-        componentInfo.componentID(i)->getBaseComponent();
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
       if (isRectangularDetectorPixel) {
@@ -1333,14 +1342,12 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
                                  "parameters for RectangularDetectorPixel are "
                                  "not supported");
       }
-      pmap->addV3D(componentInfo.componentID(i), ParameterMap::pos(),
-                   Kernel::toV3D(relPos));
+      pmap->addV3D(componentId, ParameterMap::pos(), Kernel::toV3D(relPos));
     }
     if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate())
             .vec()
             .norm() >= imag_norm_max) {
-      pmap->addQuat(componentInfo.componentID(i), ParameterMap::rot(),
-                    Kernel::toQuat(relRot));
+      pmap->addQuat(componentId, ParameterMap::rot(), Kernel::toQuat(relRot));
     }
   }
 

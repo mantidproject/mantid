@@ -22,7 +22,9 @@ class DetectorInfo;
 class ICompAssembly;
 class IComponent;
 class IDetector;
+class IObjComponent;
 class Instrument;
+class Object;
 class ParameterMap;
 /** InstrumentVisitor : Visitor for components with access to Info wrapping
   features.
@@ -122,6 +124,16 @@ private:
   /// Sample index to set
   int64_t m_sampleIndex = -1;
 
+  /// Null shared (empty shape)
+  boost::shared_ptr<const Mantid::Geometry::Object> m_nullShape;
+
+  /// Shapes stored in fly-weight fashion
+  boost::shared_ptr<
+      std::vector<boost::shared_ptr<const Mantid::Geometry::Object>>> m_shapes;
+
+  /// Scale factors
+  boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
+
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
                             const size_t componentIndex);
 
@@ -138,6 +150,10 @@ public:
 
   virtual size_t registerGenericComponent(
       const Mantid::Geometry::IComponent &component) override;
+
+  virtual size_t registerGenericObjComponent(
+      const Mantid::Geometry::IObjComponent &objComponent) override;
+
   virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
