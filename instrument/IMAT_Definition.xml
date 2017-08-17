@@ -155,7 +155,10 @@ see http://www.mantidproject.org/IDF -->
 <type name="detector-bank">
   <properties />
   <component type="detector-module">
-    <location  x="0" y="0" z="0" rot="0" axis-x="1" axis-y="0" axis-z="0"/>
+    <location  x="0" y="-0.00" z="0" rot="0" axis-x="1" axis-y="0" axis-z="0"/>
+  </component>
+  <component type="detector-module">
+    <location  x="0" y="0.00" z="0" rot="0" axis-x="1" axis-y="0" axis-z="0"/>
   </component>
 </type>
 
@@ -171,136 +174,22 @@ see http://www.mantidproject.org/IDF -->
 	   The blocks, and the pixels within each block, are specified in order from the lowest to the
 	   highest two-theta -->
   <component type="detector-block">
-    <!-- 
-        Currently (May 2017) the detectors that IMAT uses have 200 elements each,
-        structured in 2 rows, with 100 pixels each. We simulate that by defining 100 pixels 
-        below, and adding two of them in separate rows.
-
-        In 2018 new detectors are expected, if they are the full ones they will have more
-        rows per bank than these ones currently.
-    -->
     <location r="0" t="0" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
-    <location r="0" t="-0" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
   </component>
 </type>
-
-<!-- Pixels inside a single detector block -->
-<type name="detector-block">
-  <!--
-      Currently we have 100 pixels per row with a 0.004 gap between each detector pixel.
-      I am not sure if the number of pixels will change with the new detectors in 2018,
-      but I believe that it should be changed here
-  -->
-  <component type="detector-pixel">
-    <location x="0.196" y="0" z="0" name="pixel1" /> 
-    <location x="0.192" y="0" z="0" name="pixel2" /> 
-    <location x="0.188" y="0" z="0" name="pixel3" /> 
-    <location x="0.184" y="0" z="0" name="pixel4" /> 
-    <location x="0.18" y="0" z="0" name="pixel5" /> 
-    <location x="0.176" y="0" z="0" name="pixel6" /> 
-    <location x="0.172" y="0" z="0" name="pixel7" /> 
-    <location x="0.168" y="0" z="0" name="pixel8" /> 
-    <location x="0.164" y="0" z="0" name="pixel9" /> 
-    <location x="0.16" y="0" z="0" name="pixel10" /> 
-    <location x="0.156" y="0" z="0" name="pixel11" /> 
-    <location x="0.152" y="0" z="0" name="pixel12" /> 
-    <location x="0.148" y="0" z="0" name="pixel13" /> 
-    <location x="0.144" y="0" z="0" name="pixel14" /> 
-    <location x="0.14" y="0" z="0" name="pixel15" /> 
-    <location x="0.136" y="0" z="0" name="pixel16" /> 
-    <location x="0.132" y="0" z="0" name="pixel17" /> 
-    <location x="0.128" y="0" z="0" name="pixel18" /> 
-    <location x="0.124" y="0" z="0" name="pixel19" /> 
-    <location x="0.12" y="0" z="0" name="pixel20" /> 
-    <location x="0.116" y="0" z="0" name="pixel21" /> 
-    <location x="0.112" y="0" z="0" name="pixel22" /> 
-    <location x="0.108" y="0" z="0" name="pixel23" /> 
-    <location x="0.104" y="0" z="0" name="pixel24" /> 
-    <location x="0.1" y="0" z="0" name="pixel25" /> 
-    <location x="0.096" y="0" z="0" name="pixel26" /> 
-    <location x="0.092" y="0" z="0" name="pixel27" /> 
-    <location x="0.088" y="0" z="0" name="pixel28" /> 
-    <location x="0.084" y="0" z="0" name="pixel29" /> 
-    <location x="0.08" y="0" z="0" name="pixel30" /> 
-    <location x="0.076" y="0" z="0" name="pixel31" /> 
-    <location x="0.072" y="0" z="0" name="pixel32" /> 
-    <location x="0.068" y="0" z="0" name="pixel33" /> 
-    <location x="0.064" y="0" z="0" name="pixel34" /> 
-    <location x="0.06" y="0" z="0" name="pixel35" /> 
-    <location x="0.056" y="0" z="0" name="pixel36" /> 
-    <location x="0.052" y="0" z="0" name="pixel37" /> 
-    <location x="0.048" y="0" z="0" name="pixel38" /> 
-    <location x="0.044" y="0" z="0" name="pixel39" /> 
-    <location x="0.04" y="0" z="0" name="pixel40" /> 
-    <location x="0.036" y="0" z="0" name="pixel41" /> 
-    <location x="0.032" y="0" z="0" name="pixel42" /> 
-    <location x="0.028" y="0" z="0" name="pixel43" /> 
-    <location x="0.024" y="0" z="0" name="pixel44" /> 
-    <location x="0.02" y="0" z="0" name="pixel45" /> 
-    <location x="0.016" y="0" z="0" name="pixel46" /> 
-    <location x="0.012" y="0" z="0" name="pixel47" /> 
-    <location x="0.008" y="0" z="0" name="pixel48" /> 
-    <location x="0.004" y="0" z="0" name="pixel49" /> 
-    <location x="0.000" y="0" z="0" name="pixel50" /> 
-    <location x="-0.004" y="0" z="0" name="pixel51" /> 
-    <location x="-0.008" y="0" z="0" name="pixel52" /> 
-    <location x="-0.012" y="0" z="0" name="pixel53" /> 
-    <location x="-0.016" y="0" z="0" name="pixel54" /> 
-    <location x="-0.02" y="0" z="0" name="pixel55" /> 
-    <location x="-0.024" y="0" z="0" name="pixel56" /> 
-    <location x="-0.028" y="0" z="0" name="pixel57" /> 
-    <location x="-0.032" y="0" z="0" name="pixel58" /> 
-    <location x="-0.036" y="0" z="0" name="pixel59" /> 
-    <location x="-0.04" y="0" z="0" name="pixel60" /> 
-    <location x="-0.044" y="0" z="0" name="pixel61" /> 
-    <location x="-0.048" y="0" z="0" name="pixel62" /> 
-    <location x="-0.052" y="0" z="0" name="pixel63" /> 
-    <location x="-0.056" y="0" z="0" name="pixel64" /> 
-    <location x="-0.06" y="0" z="0" name="pixel65" /> 
-    <location x="-0.064" y="0" z="0" name="pixel66" /> 
-    <location x="-0.068" y="0" z="0" name="pixel67" /> 
-    <location x="-0.072" y="0" z="0" name="pixel68" /> 
-    <location x="-0.076" y="0" z="0" name="pixel69" /> 
-    <location x="-0.08" y="0" z="0" name="pixel70" /> 
-    <location x="-0.084" y="0" z="0" name="pixel71" /> 
-    <location x="-0.088" y="0" z="0" name="pixel72" /> 
-    <location x="-0.092" y="0" z="0" name="pixel73" /> 
-    <location x="-0.096" y="0" z="0" name="pixel74" /> 
-    <location x="-0.1" y="0" z="0" name="pixel75" /> 
-    <location x="-0.104" y="0" z="0" name="pixel76" /> 
-    <location x="-0.108" y="0" z="0" name="pixel77" /> 
-    <location x="-0.112" y="0" z="0" name="pixel78" /> 
-    <location x="-0.116" y="0" z="0" name="pixel79" /> 
-    <location x="-0.12" y="0" z="0" name="pixel80" /> 
-    <location x="-0.124" y="0" z="0" name="pixel81" /> 
-    <location x="-0.128" y="0" z="0" name="pixel82" /> 
-    <location x="-0.132" y="0" z="0" name="pixel83" /> 
-    <location x="-0.136" y="0" z="0" name="pixel84" /> 
-    <location x="-0.14" y="0" z="0" name="pixel85" /> 
-    <location x="-0.144" y="0" z="0" name="pixel86" /> 
-    <location x="-0.148" y="0" z="0" name="pixel87" /> 
-    <location x="-0.152" y="0" z="0" name="pixel88" /> 
-    <location x="-0.156" y="0" z="0" name="pixel89" /> 
-    <location x="-0.16" y="0" z="0" name="pixel90" /> 
-    <location x="-0.164" y="0" z="0" name="pixel91" /> 
-    <location x="-0.168" y="0" z="0" name="pixel92" /> 
-    <location x="-0.172" y="0" z="0" name="pixel93" /> 
-    <location x="-0.176" y="0" z="0" name="pixel94" /> 
-    <location x="-0.18" y="0" z="0" name="pixel95" /> 
-    <location x="-0.184" y="0" z="0" name="pixel96" /> 
-    <location x="-0.188" y="0" z="0" name="pixel97" /> 
-    <location x="-0.192" y="0" z="0" name="pixel98" /> 
-    <location x="-0.196" y="0" z="0" name="pixel99" /> 
-    <location x="-0.2" y="0" z="0" name="pixel100" /> 
-  </component>
+<!-- Pixels inside a single detector block, currently each bank has 2 rows with 100 pixels each  -->
+<type name="detector-block" is="RectangularDetector" type="detector-pixel"
+  xpixels="100" xstart="-0.2" xstep="+0.004"
+  ypixels="2" ystart="+0.05" ystep="-0.1">
 </type>
 
 <type name="detector-pixel" is="detector">
   <cuboid id="shape">
-    <left-front-bottom-point x="-0.0015" y="-0.092" z="0.0"  />
-    <left-front-top-point  x="-0.0015" y="0.092" z="0.0"  />
-    <left-back-bottom-point  x="-0.0015" y="-0.092" z="0.001"  />
-    <right-front-bottom-point  x="0.0015" y="-0.092" z="0.0"  />
+    <!-- Updated pixel shape, still using 4 points to define  -->
+    <left-front-bottom-point x="-0.002" y="-0.05" z="0.0"  />
+    <left-front-top-point  x="-0.002" y="0.05" z="0.0"  />
+    <left-back-bottom-point  x="-0.002" y="-0.05" z="0.001"  />
+    <right-front-bottom-point  x="0.002" y="-0.05" z="0.0"  />
   </cuboid>
   <algebra val="shape" />
 </type>
