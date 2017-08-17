@@ -34,13 +34,13 @@ void QtDataProcessorOptionsDialog::initBindings() {
   for (auto it = widgets.begin(); it != widgets.end(); ++it) {
     QVariant binding = (*it)->property("reflOptionName");
     if (binding.isValid())
-      m_bindings[binding.toString().toStdString()] = (*it)->objectName();
+      m_bindings[binding.toString()] = (*it)->objectName();
   }
 }
 
 /** This slot saves the currently configured options to the presenter */
 void QtDataProcessorOptionsDialog::saveOptions() {
-  std::map<std::string, QVariant> options = m_presenter->options();
+  std::map<QString, QVariant> options = m_presenter->options();
 
   // Iterate through all our bound widgets, pushing their value into the options
   // map
@@ -68,7 +68,7 @@ void QtDataProcessorOptionsDialog::saveOptions() {
 
 /** This slot sets the ui to match the presenter's options */
 void QtDataProcessorOptionsDialog::loadOptions() {
-  std::map<std::string, QVariant> options = m_presenter->options();
+  std::map<QString, QVariant> options = m_presenter->options();
 
   // Set the values from the options
   for (auto it = options.begin(); it != options.end(); ++it) {

@@ -42,14 +42,14 @@ public:
         preprocessingInstructions["Runs"];
     TS_ASSERT_EQUALS(algPlus.name(), "Plus");
     TS_ASSERT_EQUALS(algPlus.prefix(), "");
-    TS_ASSERT_EQUALS(algPlus.blacklist(), std::set<std::string>());
+    TS_ASSERT_EQUALS(algPlus.blacklist(), std::set<QString>());
 
     DataProcessorPreprocessingAlgorithm algTrans =
         preprocessingInstructions["Transmission Runs"];
     TS_ASSERT_EQUALS(algTrans.name(), "CreateTransmissionWorkspaceAuto");
     TS_ASSERT_EQUALS(algTrans.prefix(), "TRANS_");
-    std::set<std::string> blacklist = {"FirstTransmissionRun",
-                                       "SecondTransmissionRun"};
+    std::set<QString> blacklist = {"FirstTransmissionRun",
+                                   "SecondTransmissionRun"};
     TS_ASSERT_EQUALS(algTrans.blacklist(), blacklist);
   }
 };

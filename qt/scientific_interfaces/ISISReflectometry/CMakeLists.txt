@@ -11,6 +11,7 @@ set ( SRC_FILES
 	ReflDataProcessorPresenter.cpp
 	ReflEventPresenter.cpp
 	ReflEventTabPresenter.cpp
+    ReflFromStdStringMap.cpp
 	ReflGenericDataProcessorPresenterFactory.cpp
 	ReflLegacyTransferStrategy.cpp
 	ReflMainWindowPresenter.cpp
@@ -49,6 +50,7 @@ set ( INC_FILES
 	ReflDataProcessorPresenter.h
 	ReflEventPresenter.h
 	ReflEventTabPresenter.h
+    ReflFromStdStringMap.h
 	ReflGenericDataProcessorPresenterFactory.h
 	ReflLegacyTransferStrategy.h
 	ReflMainWindowPresenter.h

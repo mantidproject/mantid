@@ -39,7 +39,7 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace testing;
-using Runs = std::vector<std::map<std::string, std::string>>;
+using Runs = std::vector<std::map<QString, QString>>;
 
 //=====================================================================================
 // Functional tests
@@ -301,14 +301,10 @@ public:
     DataProcessorTwoLevelTreeManager manager(&presenter, whitelist);
     TS_ASSERT_THROWS_NOTHING(manager.newTable(table, whitelist));
 
-    std::vector<std::string> firstRow = {"12345", "0.5",  "",  "0.1",
-                                         "1.6",   "0.04", "1", ""};
-    std::vector<std::string> secondRow = {"12346", "1.5",  "",  "1.4",
-                                          "2.9",   "0.04", "1", ""};
-    std::vector<std::string> thirdRow = {"24681", "0.5",  "",  "0.1",
-                                         "1.6",   "0.04", "1", ""};
-    std::vector<std::string> fourthRow = {"24682", "1.5",  "",  "1.4",
-                                          "2.9",   "0.04", "1", ""};
+    QStringList firstRow = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
+    QStringList secondRow = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    QStringList thirdRow = {"24681", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
+    QStringList fourthRow = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
 
     // Check that runs have been transferred correctly
     EXPECT_CALL(presenter, selectedParents())
@@ -429,16 +425,17 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
     TS_ASSERT_EQUALS(data.size(), 2);
-    std::vector<std::string> firstRow = {
-        "12345", "0.5",  "20000", "0.1",
-        "0.2",   "0.04", "5",     "CorrectDetectorPositions=1"};
-    std::vector<std::string> secondRow = {
-        "12346", "0.6",  "20001", "0.1",
-        "0.2",   "0.04", "4",     "CorrectDetectorPositions=0"};
-    std::vector<std::string> thirdRow = {"12347", "0.7",  "20003", "0.3",
-                                         "0.4",   "0.01", "3",     ""};
-    std::vector<std::string> fourthRow = {"12348", "0.8",  "20004", "0.4",
-                                          "0.5",   "0.02", "2",     ""};
+    QStringList firstRow = {"12345", "0.5",                       "20000",
+                            "0.1",   "0.2",                       "0.04",
+                            "5",     "CorrectDetectorPositions=1"};
+    QStringList secondRow = {"12346", "0.6",                       "20001",
+                             "0.1",   "0.2",                       "0.04",
+                             "4",     "CorrectDetectorPositions=0"};
+    QStringList thirdRow = {"12347", "0.7",  "20003", "0.3",
+                            "0.4",   "0.01", "3",     ""};
+    QStringList fourthRow = {"12348", "0.8",  "20004", "0.4",
+                             "0.5",   "0.02", "2",     ""};
+
     TS_ASSERT_EQUALS(data[0][0], firstRow);
     TS_ASSERT_EQUALS(data[0][1], secondRow);
     TS_ASSERT_EQUALS(data[1][0], thirdRow);
@@ -449,7 +446,7 @@ public:
     NiceMock<MockDataProcessorPresenter> presenter;
     DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
 
-    std::vector<std::string> newRow = {"0", "1", "2", "3", "4", "5", "6", "7"};
+    QStringList newRow = {"0", "1", "2", "3", "4", "5", "6", "7"};
 
     TS_ASSERT_THROWS_NOTHING(manager.newTable(reflTable(), reflWhitelist()));
     TS_ASSERT_THROWS_NOTHING(manager.update(0, 0, newRow));

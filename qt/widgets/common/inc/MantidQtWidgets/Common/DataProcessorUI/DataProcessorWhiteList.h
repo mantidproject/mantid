@@ -43,22 +43,22 @@ public:
   void addElement(const QString &colName, const QString &algProperty,
                   const QString &description, bool showValue = false,
                   const QString &prefix = "");
-  int colIndexFromColName(const std::string &colName) const;
-  std::string colNameFromColIndex(int index) const;
-  std::string algPropFromColIndex(int index) const;
-  std::string description(int index) const;
-  std::string prefix(int index) const;
+  int colIndexFromColName(const QString &colName) const;
+  QString colNameFromColIndex(int index) const;
+  QString algPropFromColIndex(int index) const;
+  QString description(int index) const;
+  QString prefix(int index) const;
   bool showValue(int index) const;
   size_t size() const;
 
 private:
   int m_lastIndex;
-  std::map<std::string, int> m_colNameToColIndex;
-  std::vector<std::string> m_colIndexToColName;
-  std::vector<std::string> m_colIndexToAlgProp;
+  std::map<QString, int> m_colNameToColIndex;
+  std::vector<QString> m_colIndexToColName;
+  std::vector<QString> m_colIndexToAlgProp;
   std::vector<bool> m_showValue;
-  std::vector<std::string> m_prefix;
-  std::vector<std::string> m_description;
+  std::vector<QString> m_prefix;
+  std::vector<QString> m_description;
 };
 }
 }

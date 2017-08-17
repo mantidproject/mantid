@@ -4,6 +4,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 
+#include <QString>
+
 #include <set>
 #include <string>
 
@@ -44,48 +46,47 @@ public:
 
   // Constructor
   DataProcessorProcessingAlgorithmBase(
-      const std::string &name,
-      const std::set<std::string> &blacklist = std::set<std::string>());
+      const QString &name,
+      const std::set<QString> &blacklist = std::set<QString>());
 
   // Destructor
   ~DataProcessorProcessingAlgorithmBase();
 
   // Returns the input workspaces properties defined for this algorithm
-  virtual std::vector<std::string> getInputWsProperties() final;
+  virtual std::vector<QString> getInputWsProperties() final;
 
   // Returns the input str list properties defined for this algorithm
-  virtual std::vector<std::string> getInputStrListProperties() final;
+  virtual std::vector<QString> getInputStrListProperties() final;
 
   // Returns the output workspaces properties defined for this algorithm
-  virtual std::vector<std::string> getOutputWsProperties() final;
+  virtual std::vector<QString> getOutputWsProperties() final;
 
   // Returns the name of this algorithm
-  virtual std::string name() const final { return m_algName; };
+  virtual QString name() const final { return m_algName; };
 
   // Returns the blacklist
-  virtual std::set<std::string> blacklist() const final { return m_blacklist; };
+  virtual std::set<QString> blacklist() const final { return m_blacklist; };
 
 private:
   // Counts number of workspace properties
   void countWsProperties();
 
   // The name of this algorithm
-  std::string m_algName;
+  QString m_algName;
   // The blacklist
-  std::set<std::string> m_blacklist;
+  std::set<QString> m_blacklist;
   // Input ws properties
-  std::vector<std::string> m_inputWsProperties;
+  std::vector<QString> m_inputWsProperties;
   // Input str list properties
-  std::vector<std::string> m_inputStrListProperties;
+  std::vector<QString> m_inputStrListProperties;
   // Output ws properties
-  std::vector<std::string> m_OutputWsProperties;
+  std::vector<QString> m_OutputWsProperties;
 
 protected:
   // Converts a string to a vector of strings
-  static std::vector<std::string>
-  convertStringToVector(const std::string &text);
+  static std::vector<QString> convertStringToVector(const QString &text);
   // Converts a string to a set of strings
-  static std::set<std::string> convertStringToSet(const std::string &text);
+  static std::set<QString> convertStringToSet(const QString &text);
 };
 }
 }

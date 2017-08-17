@@ -27,6 +27,8 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -283,13 +285,13 @@ void DataProcessorTwoLevelTreeManager::clearSelected() {
 }
 
 /** Return the currently selected rows as a string */
-std::string DataProcessorTwoLevelTreeManager::copySelected() {
-  std::vector<std::string> lines;
+QString DataProcessorTwoLevelTreeManager::copySelected() {
+  QStringList lines;
 
   const auto selectedRows = m_presenter->selectedChildren();
 
   if (selectedRows.empty()) {
-    return std::string();
+    return QString();
   }
 
   for (const auto &item : selectedRows) {
@@ -297,34 +299,32 @@ std::string DataProcessorTwoLevelTreeManager::copySelected() {
     auto rows = item.second;
 
     for (const auto &row : rows) {
-      std::vector<std::string> line;
-      line.push_back(std::to_string(group));
+      QStringList line;
+      line.append(QString::number(group));
 
       for (int col = 0; col < m_model->columnCount(); ++col) {
-        line.push_back(
+        line.append(
             m_model->data(m_model->index(row, col, m_model->index(group, 0)))
-                .toString()
-                .toStdString());
+                .toString());
       }
-      lines.push_back(boost::algorithm::join(line, "\t"));
+      lines.append(line.join("\t"));
     }
   }
-  return boost::algorithm::join(lines, "\n");
+  return lines.join("\n");
 }
 
 /** Paste the contents of the clipboard into the currently selected rows, or
 * append new rows
 * @param text :: Selected rows to paste as a string
 */
-void DataProcessorTwoLevelTreeManager::pasteSelected(const std::string &text) {
+void DataProcessorTwoLevelTreeManager::pasteSelected(const QString &text) {
 
-  if (text.empty())
+  if (text.isEmpty())
     return;
 
   // Contains the data to paste plus the original group index in the first
   // element
-  std::vector<std::string> lines;
-  boost::split(lines, text, boost::is_any_of("\n"));
+  auto lines = text.split("\n");
 
   // If we have rows selected, we'll overwrite them. If not, we'll append new
   // rows.
@@ -333,17 +333,16 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const std::string &text) {
     // No rows were selected
     // Use group where rows in clipboard belong and paste new rows to it
     // Add as many new rows as required
-    for (size_t i = 0; i < lines.size(); ++i) {
-      std::vector<std::string> values;
-      boost::split(values, lines[i], boost::is_any_of("\t"));
+    for (auto i = 0; i < lines.size(); ++i) {
+      auto values = lines[i].split("\t");
 
-      int groupId = boost::lexical_cast<int>(values.front());
+      auto groupId = parseDenaryInteger(values.front());
       int rowId = numRowsInGroup(groupId);
       if (!m_model->insertRow(rowId, m_model->index(groupId, 0)))
         return;
       for (int col = 0; col < m_model->columnCount(); col++) {
         m_model->setData(m_model->index(rowId, col, m_model->index(groupId, 0)),
-                         QString::fromStdString(values[col + 1]));
+                         values[col + 1]);
       }
     }
   } else {
@@ -356,8 +355,7 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const std::string &text) {
       auto rows = it->second;
       auto rowIt = rows.begin();
       for (; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++) {
-        std::vector<std::string> values;
-        boost::split(values, *lineIt, boost::is_any_of("\t"));
+        auto values = (*lineIt).split("\t");
 
         // Paste as many columns as we can from this line
         for (int col = 0; col < m_model->columnCount() &&
@@ -365,7 +363,7 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const std::string &text) {
              ++col)
           m_model->setData(
               m_model->index(*rowIt, col, m_model->index(groupId, 0)),
-              QString::fromStdString(values[col + 1]));
+              values[col + 1]);
       }
     }
   }
@@ -492,7 +490,8 @@ TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
           std::stringstream err;
           err << "Some groups will not be fully processed.";
           err << " Are you sure you want to continue?";
-          if (!m_presenter->askUserYesNo(err.str(), "Continue Processing?"))
+          if (!m_presenter->askUserYesNo(QString::fromStdString(err.str()),
+                                         "Continue Processing?"))
             return selectedData;
           else
             break;
@@ -510,13 +509,11 @@ TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
     int group = item.first;
 
     for (const auto &row : item.second) {
-
-      std::vector<std::string> data;
+      QStringList data;
       for (int i = 0; i < m_model->columnCount(); i++)
-        data.push_back(
+        data.append(
             m_model->data(m_model->index(row, i, m_model->index(group, 0)))
-                .toString()
-                .toStdString());
+                .toString());
       selectedData[group][row] = data;
     }
   }
@@ -528,7 +525,7 @@ TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
 * @param whitelist :: [input] Whitelist containing number of columns
 */
 void DataProcessorTwoLevelTreeManager::transfer(
-    const std::vector<std::map<std::string, std::string>> &runs,
+    const std::vector<std::map<QString, QString>> &runs,
     const DataProcessorWhiteList &whitelist) {
 
   ITableWorkspace_sptr ws = m_model->getTableWorkspace();
@@ -537,9 +534,9 @@ void DataProcessorTwoLevelTreeManager::transfer(
     // If the table only has one row, check if it is empty and if so, remove it.
     // This is to make things nicer when transferring, as the default table has
     // one empty row
-    size_t cols = ws->columnCount();
+    auto cols = ws->columnCount();
     bool emptyTable = true;
-    for (size_t i = 0; i < cols; i++) {
+    for (auto i = 0u; i < cols; i++) {
       if (!ws->String(0, i).empty())
         emptyTable = false;
     }
@@ -552,7 +549,7 @@ void DataProcessorTwoLevelTreeManager::transfer(
 
     TableRow newRow = ws->appendRow();
     try {
-      newRow << row.at("Group");
+      newRow << (row.at("Group")).toStdString();
     } catch (std::out_of_range &) {
       throw std::invalid_argument("Data cannot be transferred to the "
                                   "processing table. Group information is "
@@ -561,7 +558,7 @@ void DataProcessorTwoLevelTreeManager::transfer(
 
     try {
       for (int i = 0; i < static_cast<int>(whitelist.size()); i++)
-        newRow << row.at(whitelist.colNameFromColIndex(i));
+        newRow << (row.at(whitelist.colNameFromColIndex(i))).toStdString();
     } catch (std::out_of_range &) {
       // OK, this column will not be populated
       continue;
@@ -576,15 +573,15 @@ void DataProcessorTwoLevelTreeManager::transfer(
 * @param child :: the row
 * @param data :: the data
 */
-void DataProcessorTwoLevelTreeManager::update(
-    int parent, int child, const std::vector<std::string> &data) {
+void DataProcessorTwoLevelTreeManager::update(int parent, int child,
+                                              const QStringList &data) {
 
   if (static_cast<int>(data.size()) != m_model->columnCount())
     throw std::invalid_argument("Can't update tree with given data");
 
   for (int col = 0; col < m_model->columnCount(); col++)
     m_model->setData(m_model->index(child, col, m_model->index(parent, 0)),
-                     QString::fromStdString(data[col]));
+                     data[col]);
 }
 
 /** Gets the number of groups in the table
@@ -671,7 +668,8 @@ ITableWorkspace_sptr DataProcessorTwoLevelTreeManager::createDefaultWorkspace(
 
   for (int col = 0; col < static_cast<int>(whitelist.size()); col++) {
     // The columns provided to this presenter
-    auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col));
+    auto column =
+        ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
     column->setPlotType(0);
   }
   ws->appendRow();
@@ -695,8 +693,8 @@ void DataProcessorTwoLevelTreeManager::validateModel(
                              "columns to be used as a data processor table.");
 
   try {
-    size_t ncols = ws->columnCount();
-    for (size_t i = 0; i < ncols; i++)
+    auto ncols = ws->columnCount();
+    for (auto i = 0u; i < ncols; i++)
       ws->String(0, i);
   } catch (const std::runtime_error &) {
     throw std::runtime_error("Selected table does not meet the specifications "

@@ -39,8 +39,8 @@ class EXPORT_OPT_MANTIDQT_COMMON DataProcessorPostprocessingAlgorithm
 public:
   // Constructor
   DataProcessorPostprocessingAlgorithm(
-      const std::string &name, const std::string &prefix = "",
-      const std::set<std::string> &blacklist = std::set<std::string>());
+      const QString &name, const QString &prefix = "",
+      const std::set<QString> &blacklist = std::set<QString>());
   // Delegating constructor
   DataProcessorPostprocessingAlgorithm(const QString &name,
                                        const QString &prefix,
@@ -50,21 +50,21 @@ public:
   // Destructor
   virtual ~DataProcessorPostprocessingAlgorithm();
   // The name of the input workspace property
-  std::string inputProperty() const;
+  QString inputProperty() const;
   // The name of the output workspace property
-  std::string outputProperty() const;
+  QString outputProperty() const;
   // The number of output workspace properties (currently only 1)
   size_t numberOfOutputProperties() const;
   // The prefix of the output property
-  std::string prefix() const;
+  QString prefix() const;
 
 private:
   // The prefix of the output workspace
-  std::string m_prefix;
+  QString m_prefix;
   // The name of the input property
-  std::string m_inputProp;
+  QString m_inputProp;
   // The name of the output property
-  std::string m_outputProp;
+  QString m_outputProp;
 };
 }
 }

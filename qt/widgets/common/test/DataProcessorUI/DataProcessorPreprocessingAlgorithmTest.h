@@ -71,8 +71,8 @@ public:
   void test_WeightedMean() {
 
     // WeightedMean
-    std::set<std::string> blacklist = {"InputWorkspace1", "InputWorkspace2",
-                                       "OutputWorkspace"};
+    std::set<QString> blacklist = {"InputWorkspace1", "InputWorkspace2",
+                                   "OutputWorkspace"};
     auto mean =
         DataProcessorPreprocessingAlgorithm("WeightedMean", "", blacklist);
     TS_ASSERT_EQUALS(mean.lhsProperty(), "InputWorkspace1");

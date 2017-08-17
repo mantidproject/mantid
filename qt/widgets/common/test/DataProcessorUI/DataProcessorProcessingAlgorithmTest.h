@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <QStringList>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
@@ -34,7 +35,7 @@ public:
     // property is valid
     // Currently ws must be either MatrixWorkspace or Workspace but this can be
     // changed
-    std::vector<std::string> prefix = {"run_"};
+    std::vector<QString> prefix = {"run_"};
     TS_ASSERT_THROWS_NOTHING(DataProcessorProcessingAlgorithm("Rebin", prefix));
     TS_ASSERT_THROWS_NOTHING(
         DataProcessorProcessingAlgorithm("ExtractSpectra", prefix));
@@ -44,7 +45,7 @@ public:
 
   void test_invalid_algorithms() {
 
-    std::vector<std::string> prefix = {"IvsQ_"};
+    std::vector<QString> prefix = {"IvsQ_"};
 
     // Algorithms with no input workspace properties
     TS_ASSERT_THROWS(DataProcessorProcessingAlgorithm("Stitch1DMany", prefix),
@@ -55,29 +56,29 @@ public:
   }
   void test_ReflectometryReductionOneAuto() {
 
-    std::string algName = "ReflectometryReductionOneAuto";
+    QString algName = "ReflectometryReductionOneAuto";
 
     // ReflectometryReductionOneAuto has three output ws properties
     // We should provide three prefixes, one for each ws
-    std::vector<std::string> prefixes;
-    prefixes.push_back("IvsQ_binned_");
+    std::vector<QString> prefixes;
+    prefixes.emplace_back("IvsQ_binned_");
     // This should throw
     TS_ASSERT_THROWS(DataProcessorProcessingAlgorithm(algName, prefixes,
-                                                      std::set<std::string>()),
+                                                      std::set<QString>()),
                      std::invalid_argument);
 
     prefixes.push_back("IvsQ_");
     // This should also throw
     TS_ASSERT_THROWS(DataProcessorProcessingAlgorithm(algName, prefixes,
-                                                      std::set<std::string>()),
+                                                      std::set<QString>()),
                      std::invalid_argument);
     // But this should be OK
     prefixes.push_back("IvsLam_");
     TS_ASSERT_THROWS_NOTHING(DataProcessorProcessingAlgorithm(
-        algName, prefixes, std::set<std::string>()));
+        algName, prefixes, std::set<QString>()));
 
     auto alg = DataProcessorProcessingAlgorithm(algName, prefixes,
-                                                std::set<std::string>());
+                                                std::set<QString>());
     TS_ASSERT_EQUALS(alg.name(), "ReflectometryReductionOneAuto");
     TS_ASSERT_EQUALS(alg.numberOfOutputProperties(), 3);
     TS_ASSERT_EQUALS(alg.prefix(0), "IvsQ_binned_");

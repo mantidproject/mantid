@@ -74,10 +74,12 @@
 	src/DataProcessorUI/DataProcessorWhiteList.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
 	src/DataProcessorUI/ParseKeyValueString.cpp
+	src/DataProcessorUI/ParseNumerics.cpp
 	src/DataProcessorUI/QDataProcessorOneLevelTreeModel.cpp
 	src/DataProcessorUI/QDataProcessorTwoLevelTreeModel.cpp
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
+	src/DataProcessorUI/DataProcessorVectorString.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DisplayCurveFit.cpp
@@ -338,6 +340,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/ParseNumerics.h
 	inc/MantidQtWidgets/Common/ErrorCurve.h
 	inc/MantidQtWidgets/Common/HintStrategy.h
 	inc/MantidQtWidgets/Common/IFunctionBrowser.h

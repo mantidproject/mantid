@@ -60,19 +60,18 @@ public:
   showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) = 0;
 
   // Dialog/Prompt methods
-  virtual std::string requestNotebookPath() = 0;
+  virtual QString requestNotebookPath() = 0;
   /// Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) = 0;
-  virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
-  virtual void giveUserWarning(std::string prompt, std::string title) = 0;
-  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
-  virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
+  virtual QString askUserString(const QString &prompt, const QString &title,
+                                const QString &defaultValue) = 0;
+  virtual bool askUserYesNo(QString prompt, QString title) = 0;
+  virtual void giveUserWarning(QString prompt, QString title) = 0;
+  virtual void giveUserCritical(QString prompt, QString title) = 0;
+  virtual QString runPythonAlgorithm(const QString &algorithm) = 0;
 
   // Settings
-  virtual void saveSettings(const std::map<std::string, QVariant> &options) = 0;
-  virtual void loadSettings(std::map<std::string, QVariant> &options) = 0;
+  virtual void saveSettings(const std::map<QString, QVariant> &options) = 0;
+  virtual void loadSettings(std::map<QString, QVariant> &options) = 0;
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
@@ -97,15 +96,15 @@ public:
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;
-  virtual void setClipboard(const std::string &text) = 0;
-  virtual void setModel(const std::string &name) = 0;
+  virtual void setClipboard(const QString &text) = 0;
+  virtual void setModel(QString const &name) = 0;
 
   // Accessor methods
   virtual std::map<int, std::set<int>> getSelectedChildren() const = 0;
   virtual std::set<int> getSelectedParents() const = 0;
-  virtual std::string getWorkspaceToOpen() const = 0;
-  virtual std::string getClipboard() const = 0;
-  virtual std::string getProcessInstrument() const = 0;
+  virtual QString getWorkspaceToOpen() const = 0;
+  virtual QString getClipboard() const = 0;
+  virtual QString getProcessInstrument() const = 0;
   virtual DataProcessorPresenter *getPresenter() const = 0;
 
   // Force re-processing of rows
