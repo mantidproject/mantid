@@ -235,7 +235,7 @@ int QtReflRunsTabView::toMenuIndex(ReflectometryAction action) {
 
 /**
 * Enables a specific action in the "Reflectometry" menu.
-* @param index : The index of the action in the "Reflectometry" menu
+* @param action : The action in the "Reflectometry" menu to enable
 */
 void QtReflRunsTabView::disableAction(ReflectometryAction action) {
   disable(*(ui.menuTable->actions()[toMenuIndex(action)]));
@@ -243,7 +243,7 @@ void QtReflRunsTabView::disableAction(ReflectometryAction action) {
 
 /**
 * Enables a specific action in the "Reflectometry" menu.
-* @param index : The index of the action in the "Reflectometry" menu
+* @param action : The action in the "Reflectometry" menu to disable
 */
 void QtReflRunsTabView::enableAction(ReflectometryAction action) {
   enable(*(ui.menuTable->actions()[toMenuIndex(action)]));
@@ -251,7 +251,7 @@ void QtReflRunsTabView::enableAction(ReflectometryAction action) {
 
 /**
 * Disables a specific action in the "Edit" menu.
-* @param index : The index of the action in the "Edit" menu
+* @param action : The action in the "Edit" menu to disable
 */
 void QtReflRunsTabView::disableAction(DataProcessorAction action) {
   disable(*(ui.menuRows->actions()[toRowIndex(action)]));
@@ -259,7 +259,7 @@ void QtReflRunsTabView::disableAction(DataProcessorAction action) {
 
 /**
 * Enables a specific action in the "Edit" menu.
-* @param index : The index of the action in the "Edit" menu
+* @param action : The action in the "Edit" menu to enable
 */
 void QtReflRunsTabView::enableAction(DataProcessorAction action) {
   enable(*(ui.menuRows->actions()[toRowIndex(action)]));
