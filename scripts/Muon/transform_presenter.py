@@ -11,8 +11,8 @@ class transformPresenter(object):
 
     def __init__(self,view):
         self.view=view
-        self.FFTPresenter=FFT_presenter.FFTPresenter(self.view.methods["FFT"])
-        self.MaxEntPresenter=MaxEnt_presenter.MaxEntPresenter(self.view.methods["MaxEnt"])
+        self.FFTPresenter=FFT_presenter.FFTPresenter(self.view.getView("FFT"))
+        self.MaxEntPresenter=MaxEnt_presenter.MaxEntPresenter(self.view.getView("MaxEnt"))
         self.selectionPresenter=transform_selection_presenter.transformSelectionPresenter(self.view.selection)
         self.methodsList=self.view.getMethods()
         self.selectionPresenter.setMethodsCombo(self.methodsList)

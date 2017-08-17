@@ -31,4 +31,5 @@ class transformView(QtGui.QWidget):
     def show(self,name):
         self.methods[name].show()
         
- 
+    def getView(self,name):
+         return self.methods[name]
