@@ -101,6 +101,7 @@ void PeakIntegration::exec() {
   int NumberPeaks = peaksW->getNumberPeaks();
   int MinPeaks = 0;
 
+  std::vector<int> badPeaks;
   for (int i = NumberPeaks - 1; i >= 0; i--) {
     Peak &peak = peaksW->getPeaks()[i];
     int pixelID = peak.getDetectorID();
@@ -111,12 +112,13 @@ void PeakIntegration::exec() {
       size_t wi = wiEntry->second;
       if ((matchRun && peak.getRunNumber() != inputW->getRunNumber()) ||
           wi >= Numberwi)
-        peaksW->removePeak(i);
+        badPeaks.push_back(i);
     } else // This is for appending peak workspaces when running
            // SNSSingleCrystalReduction one bank at at time
         if (i + 1 > MinPeaks)
       MinPeaks = i + 1;
   }
+  peaksW->removePeaks(std::move(badPeaks));
   NumberPeaks = peaksW->getNumberPeaks();
   if (NumberPeaks <= 0) {
     g_log.error(

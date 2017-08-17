@@ -620,7 +620,7 @@ void InstrumentDefinitionParser::saveDOM_Tree(std::string &outFilename) {
 double InstrumentDefinitionParser::attrToDouble(const Poco::XML::Element *pElem,
                                                 const std::string &name) {
   if (pElem->hasAttribute(name)) {
-    const std::string value = pElem->getAttribute(name);
+    const std::string &value = pElem->getAttribute(name);
     if (!value.empty()) {
       try {
         return std::stod(value);

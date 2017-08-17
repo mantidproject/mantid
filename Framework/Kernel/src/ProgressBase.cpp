@@ -2,6 +2,7 @@
 #include "MantidKernel/Timer.h"
 #include <sstream>
 #include <stdexcept>
+#include <algorithm>
 
 namespace Mantid {
 namespace Kernel {

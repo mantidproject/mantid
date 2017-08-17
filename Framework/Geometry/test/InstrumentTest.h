@@ -520,15 +520,18 @@ public:
     const V3D bankEpsilon{5e-10, 5e-10, 5e-10};
     const V3D bankAxis{0, 0, 1};
     const Quat bankRot(90.0, bankAxis);
+    const V3D bankScale{1, 2, 3};
     auto pmap = boost::make_shared<ParameterMap>();
     pmap->addV3D(bank1->getComponentID(), ParameterMap::pos(), bankOffset);
     pmap->addV3D(bank2->getComponentID(), ParameterMap::pos(), bankEpsilon);
     pmap->addQuat(bank3->getComponentID(), ParameterMap::rot(), bankRot);
+    pmap->addV3D(bank3->getComponentID(), ParameterMap::scale(), bankScale);
 
     // Set instrument in ParameterMap to create DetectorInfo
     pmap->setInstrument(baseInstrument.get());
     auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
     auto &detInfo = pmap->mutableDetectorInfo();
+    auto &compInfo = pmap->mutableComponentInfo();
 
     // bank 1
     TS_ASSERT(toVector3d(detInfo.position(0))
@@ -544,6 +547,9 @@ public:
     // bank 3
     TS_ASSERT(toVector3d(detInfo.position(18))
                   .isApprox(Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
+    TS_ASSERT_EQUALS(
+        compInfo.scaleFactor(compInfo.indexOf(bank3->getComponentID())),
+        bankScale);
 
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-10, 5e-10, 5e-10};
@@ -558,12 +564,17 @@ public:
     detInfo.setPosition(1, detInfo.position(1) + detEpsilon);
     detInfo.setPosition(9, detInfo.position(9) + detEpsilon);
     detInfo.setRotation(19, detRotEps * detInfo.rotation(19));
+    // Set a new scale factor
+    const V3D newScaleFactor{2, 2, 2};
+    compInfo.setScaleFactor(compInfo.indexOf(bank3->getComponentID()),
+                            newScaleFactor);
+
     // All position information should be purged
     TS_ASSERT_EQUALS(pmap->size(), 0);
 
     const auto legacyMap = instr->makeLegacyParameterMap();
-    // 3 bank parameters + 2 det parameters
-    TS_ASSERT_EQUALS(legacyMap->size(), 5);
+    // 3 bank parameters + 2 det parameters + 1 scale parameter
+    TS_ASSERT_EQUALS(legacyMap->size(), 6);
     TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
     Instrument legacyInstrument(baseInstrument, legacyMap);
 
@@ -580,6 +591,10 @@ public:
                      V3D(0.0002, -0.008, 15.0));
     TS_ASSERT(toQuaterniond(legacyInstrument.getDetector(19)->getRotation())
                   .isApprox(toQuaterniond(detRot * bankRot), 1e-10));
+    // Check the scale factor
+    TS_ASSERT(toVector3d(legacyInstrument.getComponentByName("bank3")
+                             ->getScaleFactor())
+                  .isApprox(toVector3d(newScaleFactor), 1e-10));
   }
 
   void test_makeLegacyParameterMap_scaled_RectangularDetector() {
