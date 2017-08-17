@@ -30,14 +30,11 @@ class FunctionWrapperTest(unittest.TestCase):
     def test_read_array_elements(self):
         g = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
         self.assertAlmostEqual(g["Height"],7.5,10)
-        self.assertAlmostEqual(g[2],1.2,10)
         
     def test_write_array_elements(self):
         g = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10) 
         g["Height"] = 8
         self.assertAlmostEqual(g["Height"],8,10)
-        g[2] = 1.5
-        self.assertAlmostEqual(g[2],1.5,10)
         
     def test_dot_operator(self):
         g = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10) 
