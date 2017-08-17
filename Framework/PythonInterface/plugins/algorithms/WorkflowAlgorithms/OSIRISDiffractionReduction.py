@@ -64,7 +64,7 @@ class DRangeToWorkspaceMap(object):
         """
 
         # Get the time regime of the workspace, and use it to find the DRange.
-        time_regime = wrksp.dataX(0)[0]
+        time_regime = workspace.dataX(0)[0]
         time_regimes = sorted(TIME_REGIME_TO_DRANGE.keys())
 
         for idx in range(len(time_regimes)):
@@ -86,20 +86,20 @@ class DRangeToWorkspaceMap(object):
 
         # Add the workspace to the map, alongside its DRange.
         if d_range not in self._map:
-            self._map[d_range] = [ws_name]
+            self._map[d_range] = [workspace]
         else:
 
             # Check if x ranges match an existing run
             for ws_name in self._map[d_range]:
                 map_lastx = mtd[ws_name].readX(0)[-1]
-                ws_lastx = wrksp.readX(0)[-1]
+                ws_lastx = workspace.readX(0)[-1]
 
                 # if it matches ignore it
                 if map_lastx == ws_lastx:
-                    DeleteWorkspace(wrksp)
+                    DeleteWorkspace(workspace)
                     return
 
-            self._map[d_range].append(ws_name)
+            self._map[d_range].append(workspace)
 
     def average_across_dranges(self):
         """
