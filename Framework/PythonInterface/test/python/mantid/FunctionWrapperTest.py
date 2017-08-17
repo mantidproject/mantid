@@ -496,17 +496,17 @@ class FunctionWrapperTest(unittest.TestCase):
         self.assertEqual(p_str.count("LinearBackground"),1)
         self.assertEqual(p_str.count("Gaussian"),2)
         
-        #lb_str = str(lb)
-        #p0_str = str(p[0])
-        #self.assertEqual(p0_str, lb_str)
+        lb_str = str(lb)
+        p0_str = str(p[0])
+        self.assertEqual(p0_str, lb_str)
            
-        #g0_str = str(g0)
-        #p1_str = str(p[1])
-        #self.assertEqual(p1_str, g0_str)
+        g0_str = str(g0)
+        p1_str = str(p[1])
+        self.assertEqual(p1_str, g0_str)
         
-        #g1_str = str(g1)
-        #p2_str = str(p[2])
-        #self.assertEqual(p2_str, g1_str)   
+        g1_str = str(g1)
+        p2_str = str(p[2])
+        self.assertEqual(p2_str, g1_str)   
 
     def test_convolution_creation(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
