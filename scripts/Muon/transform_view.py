@@ -3,7 +3,7 @@ from six import iteritems
 import mantid.simpleapi as mantid
 
 from PyQt4 import QtCore, QtGui
-from Muon import constructor
+#from Muon import constructor
 
 
 class transformView(QtGui.QWidget):

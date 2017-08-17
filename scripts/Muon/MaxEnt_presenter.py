@@ -31,7 +31,6 @@ class MaxEntPresenter(object):
         inputs = self.get_MaxEnt_input()
         self.alg.setInputs(inputs)
         self.alg.execute()
-        self.alg.output()
 
     def get_MaxEnt_input(self):
         inputs=self.view.initMaxEntInput()

@@ -12,9 +12,8 @@ else:
 
 class MaxEntPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.alg=mock.create_autospec(MaxEnt_model.MaxEntModel,spec_set=True) 
+        self.alg=mock.create_autospec(MaxEnt_model.MaxEntThread,spec_set=True) 
         self.alg.execute=mock.Mock()
-        self.alg.output=mock.Mock()
         self.alg.setInputs=mock.Mock()
 
         self.view=mock.create_autospec(MaxEnt_view.MaxEntView,spec_set=True)
@@ -38,7 +37,6 @@ class MaxEntPresenterTest(unittest.TestCase):
        assert(self.view.isRaw.call_count==1)
        assert(self.view.addRaw.call_count==5)
        assert(self.alg.execute.call_count==1)
-       assert(self.alg.output.call_count==1)
  
     def test_buttonWithoutRaw(self):
        self.view.isRaw=mock.Mock(return_value=False)
@@ -47,10 +45,6 @@ class MaxEntPresenterTest(unittest.TestCase):
        assert(self.view.isRaw.call_count==1)
        assert(self.view.addRaw.call_count==0)
        assert(self.alg.execute.call_count==1)
-       assert(self.alg.output.call_count==1)
-
-
-
 
 if __name__ == '__main__':
     unittest.main()

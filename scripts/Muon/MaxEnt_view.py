@@ -18,7 +18,7 @@ class MaxEntView(QtGui.QWidget):
         self.table.setColumnCount(2)
         self.table.setColumnWidth(0,300)
         self.table.setColumnWidth(1,300)
-
+        self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
 
@@ -64,6 +64,7 @@ class MaxEntView(QtGui.QWidget):
         self.tableA.setColumnWidth(0,300)
         self.tableA.setColumnWidth(1,300)
         self.tableA.horizontalHeader().setStretchLastSection(True)
+        self.tableA.verticalHeader().setVisible(False)
 
         self.tableA.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
 
