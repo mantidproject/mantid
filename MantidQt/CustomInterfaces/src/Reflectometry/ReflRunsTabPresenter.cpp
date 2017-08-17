@@ -14,15 +14,19 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
+#include <QStringList>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <algorithm>
+#include <iterator>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -33,6 +37,13 @@ namespace CustomInterfaces {
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
+
+QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
+  QStringList outVec;
+  std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec),
+                 &QString::fromStdString);
+  return outVec;
+}
 }
 
 /** Constructor
@@ -84,11 +95,12 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
       instruments.end()) {
     m_view->setInstrumentList(instruments, defaultInst);
     for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(instruments, defaultInst);
+      presenter->setInstrumentList(fromStdStringVector(instruments),
+                                   QString::fromStdString(defaultInst));
   } else {
     m_view->setInstrumentList(instruments, "INTER");
     for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(instruments, "INTER");
+      presenter->setInstrumentList(fromStdStringVector(instruments), "INTER");
   }
 }
 
@@ -150,7 +162,7 @@ void ReflRunsTabPresenter::pushCommands() {
     throw std::runtime_error("Invalid list of commands");
   }
   // The index at which "row" commands start
-  const size_t rowCommStart = 10;
+  const size_t rowCommStart = 10u;
   // We want to have two menus
   // Populate the "Reflectometry" menu
   std::vector<DataProcessorCommand_uptr> tableCommands;
@@ -166,7 +178,7 @@ void ReflRunsTabPresenter::pushCommands() {
 
 /** Searches for runs that can be used */
 void ReflRunsTabPresenter::search() {
-  const std::string searchString = m_view->getSearchString();
+  auto const searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return;
@@ -278,12 +290,10 @@ void ReflRunsTabPresenter::transfer() {
     return;
   }
 
-  for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
-       ++rowIt) {
-    const int row = *rowIt;
-    const std::string run = m_searchModel->data(m_searchModel->index(row, 0))
-                                .toString()
-                                .toStdString();
+  for (const auto &row : selectedRows) {
+    const auto run = m_searchModel->data(m_searchModel->index(row, 0))
+                         .toString()
+                         .toStdString();
     SearchResult searchResult;
 
     searchResult.description = m_searchModel->data(m_searchModel->index(row, 1))
@@ -337,7 +347,8 @@ void ReflRunsTabPresenter::transfer() {
   }
 
   m_tablePresenters.at(m_view->getSelectedGroup())
-      ->transfer(results.getTransferRuns());
+      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
+          results.getTransferRuns()));
 }
 
 /**
@@ -394,9 +405,9 @@ void ReflRunsTabPresenter::notifyADSChanged(
 */
 QString ReflRunsTabPresenter::getPreprocessingProperties() const {
 
-  std::string properties =
-      "Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun";
-  return QString::fromStdString(properties);
+  auto properties =
+      QString("Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun");
+  return properties;
 }
 
 /** Requests global pre-processing options as a string. Options are supplied by
@@ -405,11 +416,11 @@ QString ReflRunsTabPresenter::getPreprocessingProperties() const {
   */
 QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
-  std::string optionsStr =
-      "Transmission Run(s)," +
-      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
+  auto optionsStr = QString("Transmission Run(s),") +
+                    QString::fromStdString(m_mainPresenter->getTransmissionRuns(
+                        m_view->getSelectedGroup()));
 
-  return QString::fromStdString(optionsStr);
+  return optionsStr;
 }
 
 /** Requests global processing options. Options are supplied by the main
@@ -501,7 +512,7 @@ void ReflRunsTabPresenter::confirmReductionResumed() const {
 * information message
 */
 void ReflRunsTabPresenter::changeInstrument() {
-  const std::string instrument = m_view->getSearchInstrument();
+  auto const instrument = m_view->getSearchInstrument();
   m_mainPresenter->setInstrumentName(instrument);
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrument);

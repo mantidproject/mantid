@@ -54,7 +54,7 @@ LoadVTK(Filename='fly.vtk',SignalArrayName='volume_scalars',AdaptiveBinned=False
  plotSlice(source=demo)
 
 *WIKI_USAGE*/
-#include "MantidVatesAPI/LoadVTK.h"
+#include "MantidVatesAlgorithms/LoadVTK.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"

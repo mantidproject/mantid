@@ -2,7 +2,7 @@
 #define LOADVTK_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidVatesAPI/LoadVTK.h"
+#include "MantidVatesAlgorithms/LoadVTK.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
