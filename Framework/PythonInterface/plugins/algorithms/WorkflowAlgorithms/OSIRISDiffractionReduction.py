@@ -506,7 +506,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
         for d_range, wrksp in itertools.chain(self._sam_ws_map.items(), self._van_ws_map.items()):
             normalise_set_property("InputWorkspace", wrksp)
-            normalise_set_property("OutputWorkspace", wrksp)
+            normalise_set_property("OutputWorkspace", wrksp.getName())
             normalise_exec()
 
             align_set_property("InputWorkspace", normalise_get_property("OutputWorkspace").value)
