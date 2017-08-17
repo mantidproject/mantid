@@ -79,7 +79,8 @@ makeTreeExampleAndReturnGeometricArguments() {
       bankSortedComponentIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
-      parentIndices, isVisible, compPositions, compRotations, -1, -1);
+      parentIndices, isVisible, compPositions, compRotations, scaleFactors, -1,
+      -1);
   compInfo.setDetectorInfo(detectorInfo.get());
 
   return std::make_tuple(compInfo, detPositions, detRotations, *compPositions,
@@ -138,7 +139,7 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
       bankSortedComponentIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
-      parentIndices, isVisible, positions, rotations, -1, -1);
+      parentIndices, isVisible, positions, rotations, scaleFactors, -1, -1);
 
   componentInfo.setDetectorInfo(detectorInfo.get());
 
@@ -188,7 +189,7 @@ public:
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
                                 bankSortedComponentIndices, componentRanges,
                                 parentIndices, isVisible, positions, rotations,
-                                -1, -1);
+                                scaleFactors, -1, -1);
 
     DetectorInfo detectorInfo; // Detector info size 0
     TS_ASSERT_THROWS(componentInfo.setDetectorInfo(&detectorInfo),
@@ -225,7 +226,7 @@ public:
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
                                    parentIndices, isVisible, positions,
-                                   rotations, -1, -1),
+                                   rotations, scaleFactors, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -265,7 +266,7 @@ public:
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    componentsInSubtree, componentRanges,
                                    parentIndices, isVisible, positions,
-                                   rotations, -1, -1),
+                                   rotations, scaleFactors, -1, -1),
                      std::invalid_argument &);
   }
 

@@ -70,9 +70,9 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_isVisible(boost::make_shared<std::vector<bool>>()),
       m_componentIdToIndexMap(boost::make_shared<
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_isVisible(boost::make_shared<std::vector<bool>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
@@ -154,7 +154,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
   m_isVisible->emplace_back(componentIsVisible(componentID));
-  clearPositionAndRotationParameters(m_pmap, assembly);
+  clearLegacyParameters(m_pmap, assembly);
   // Now that we know what the index of the parent is we can apply it to the
   // children
   for (const auto &child : children) {
@@ -192,7 +192,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
   m_parentComponentIndices->push_back(componentIndex);
-  clearPositionAndRotationParameters(m_pmap, component);
+  clearLegacyParameters(m_pmap, component);
   markAsSourceOrSample(componentID, componentIndex);
   return componentIndex;
 }
@@ -261,7 +261,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
       m_monitorIndices->push_back(detectorIndex);
     }
     m_isVisible->emplace_back(componentIsVisible(componentID));
-    clearPositionAndRotationParameters(m_pmap, detector);
+    clearLegacyParameters(m_pmap, detector);
   }
   /* Note that positions and rotations for detectors are currently
   NOT stored! These go into DetectorInfo at present. push_back works for other
@@ -316,7 +316,7 @@ InstrumentVisitor::componentInfo() const {
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_isVisible, m_positions, m_rotations,
-      m_sourceIndex, m_sampleIndex);
+      m_scaleFactors, m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>

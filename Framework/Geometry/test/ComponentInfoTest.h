@@ -72,9 +72,10 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleComponentInfo(
       boost::make_shared<std::vector<Eigen::Quaterniond>>(1, rotation);
   auto scaleFactors =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
+  auto isVisible = boost::make_shared<std::vector<bool>>();
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
-      parentIndices, positions, rotations, scaleFactors, -1, -1);
+      parentIndices, isVisible, positions, rotations, scaleFactors, -1, -1);
 }
 
 boost::shared_ptr<Object> createCappedCylinder() {
@@ -143,7 +144,7 @@ public:
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, isVisible, positions, rotations, -1, -1);
+        parentIndices, isVisible, positions, rotations, scaleFactors, -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
