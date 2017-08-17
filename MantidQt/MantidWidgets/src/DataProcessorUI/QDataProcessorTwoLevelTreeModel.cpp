@@ -83,10 +83,10 @@ QVariant QDataProcessorTwoLevelTreeModel::headerData(
     int section, Qt::Orientation orientation, int role) const {
 
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-    return QString::fromStdString(m_whitelist.colNameFromColIndex(section));
+    return m_whitelist.colNameFromColIndex(section);
 
   if (orientation == Qt::Horizontal && role == Qt::WhatsThisRole)
-    return QString::fromStdString(m_whitelist.description(section));
+    return m_whitelist.description(section);
 
   return QVariant();
 }
