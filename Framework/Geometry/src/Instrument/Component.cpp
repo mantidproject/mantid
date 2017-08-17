@@ -294,9 +294,13 @@ void Component::rotate(double angle, const V3D &axis) {
 */
 V3D Component::getScaleFactor() const {
   if (m_map) {
-    Parameter_sptr par = m_map->get(m_base, "sca");
-    if (par) {
-      return par->value<V3D>();
+    if (hasComponentInfo()) {
+      return m_map->componentInfo().scaleFactor(index());
+    } else {
+      Parameter_sptr par = m_map->get(m_base, ParameterMap::scale());
+      if (par) {
+        return par->value<V3D>();
+      }
     }
   }
   return V3D(1, 1, 1);

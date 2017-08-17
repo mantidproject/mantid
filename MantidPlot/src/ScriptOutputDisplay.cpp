@@ -1,7 +1,7 @@
 #include "ScriptOutputDisplay.h"
 #include "TextFileIO.h"
 
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QDateTime>
 #include <QKeyEvent>
