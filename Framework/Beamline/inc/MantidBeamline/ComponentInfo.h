@@ -39,7 +39,6 @@ class DetectorInfo;
 */
 class MANTID_BEAMLINE_DLL ComponentInfo {
 private:
-
   boost::shared_ptr<const std::vector<size_t>> m_assemblySortedDetectorIndices;
   /// Contains only indices of non-detector components
   boost::shared_ptr<const std::vector<size_t>> m_assemblySortedComponentIndices;
