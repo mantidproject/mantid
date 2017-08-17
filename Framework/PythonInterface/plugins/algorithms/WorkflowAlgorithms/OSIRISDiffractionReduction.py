@@ -526,20 +526,23 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._divide_all_by(self._sam_ws_map.values(), self._van_ws_map.values())
 
         # Create a list of sample workspaces, since we need this for MergeRuns.
-        for sample_ws in self._sam_ws_map
-        sam_ws_list = self._sam_ws_map.values()
+        sample_ws_list = self._sam_ws_map.values()
 
-        if len(sam_ws_list) > 1:
+        for sample_ws_name, sample_ws in zip(sample_ws_names,
+                                             sample_ws_list):
+            mtd.addOrReplace(sample_ws_name, sample_ws)
+
+        if len(sample_ws_list) > 1:
 
             # Merge the sample files into one.
             merge_runs_alg = self.createChildAlgorithm("MergeRuns", enableLogging=False)
-            merge_runs_alg.setProperty("InputWorkspaces", sam_ws_list)
+            merge_runs_alg.setProperty("InputWorkspaces", sample_ws_list)
             merge_runs_alg.setProperty("OutputWorkspace", self._output_ws_name)
             merge_runs_alg.execute()
             self._output_ws_name = merge_runs_alg.getPropertyValue("OutputWorkspace")
             mtd.addOrReplace(self._output_ws_name, merge_runs_alg.getProperty("OutputWorkspace").value)
 
-            for workspace in sam_ws_list:
+            for workspace in sample_ws_list:
                 delete_set_property("Workspace", workspace)
                 delete_exec()
 
@@ -547,7 +550,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 delete_set_property("Workspace", workspace.getName() + "_mon")
                 delete_exec()
         else:
-            mtd.addOrReplace(self._output_ws_name, sam_ws_list[0])
+            mtd.addOrReplace(self._output_ws_name, sample_ws_list[0])
 
         result = mtd[self._output_ws_name]
 
