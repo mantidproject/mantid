@@ -82,6 +82,9 @@ private:
   boost::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
       m_componentIdToIndexMap;
 
+  /// Whether component is visible
+  boost::shared_ptr<std::vector<bool>> m_isVisible;
+
   /// Counter for dropped detectors
   size_t m_droppedDetectors = 0;
 
@@ -127,6 +130,8 @@ private:
 
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers() const;
+
+  bool componentIsVisible(Mantid::Geometry::IComponent *componentID);
 
 public:
   InstrumentVisitor(boost::shared_ptr<const Instrument> instrument);

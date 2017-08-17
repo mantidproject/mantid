@@ -44,6 +44,7 @@ void clearPositionAndRotationParameters(ParameterMap *pmap,
   pmap->clearParametersByName(ParameterMap::rotx(), &comp);
   pmap->clearParametersByName(ParameterMap::roty(), &comp);
   pmap->clearParametersByName(ParameterMap::rotz(), &comp);
+  pmap->clearParametersByName(ParameterMap::isHidden(), &comp);
 }
 }
 
@@ -68,6 +69,7 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
+	  m_isVisible(boost::make_shared<std::vector<bool>>()),
       m_componentIdToIndexMap(boost::make_shared<
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
@@ -102,6 +104,7 @@ InstrumentVisitor::InstrumentVisitor(
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors); // Exact
   m_componentIdToIndexMap->reserve(nDetectors);         // Approximation
+  m_isVisible->reserve(nDetectors);                     // Approximation
 }
 
 void InstrumentVisitor::walkInstrument() {
@@ -137,19 +140,21 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   m_componentRanges->emplace_back(
       std::make_pair(componentStart, componentStop));
 
+  const auto componentID = assembly.getComponentID();
   // Record the ID -> index mapping
-  (*m_componentIdToIndexMap)[assembly.getComponentID()] = componentIndex;
+  (*m_componentIdToIndexMap)[componentID] = componentIndex;
   // For any non-detector we extend the m_componentIds from the back
-  m_componentIds->emplace_back(assembly.getComponentID());
+  m_componentIds->emplace_back(componentID);
   m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
+  m_isVisible->emplace_back(componentIsVisible(componentID));
   clearPositionAndRotationParameters(m_pmap, assembly);
   // Now that we know what the index of the parent is we can apply it to the
   // children
   for (const auto &child : children) {
     (*m_parentComponentIndices)[child] = componentIndex;
   }
-  markAsSourceOrSample(assembly.getComponentID(), componentIndex);
+  markAsSourceOrSample(componentID, componentIndex);
   return componentIndex;
 }
 
@@ -168,10 +173,12 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
       std::make_pair(0, 0)); // Represents an empty range
   // Record the ID -> index mapping
   const size_t componentIndex = m_componentIds->size();
-  (*m_componentIdToIndexMap)[component.getComponentID()] = componentIndex;
-  m_componentIds->emplace_back(component.getComponentID());
+  const auto componentID = component.getComponentID();
+  (*m_componentIdToIndexMap)[componentID] = componentIndex;
+  m_componentIds->emplace_back(componentID);
   m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
+  m_isVisible->emplace_back(componentIsVisible(componentID));
   const size_t componentStart = m_assemblySortedComponentIndices->size();
   m_componentRanges->emplace_back(
       std::make_pair(componentStart, componentStart + 1));
@@ -180,7 +187,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   // updated later in the register call of the parent.
   m_parentComponentIndices->push_back(componentIndex);
   clearPositionAndRotationParameters(m_pmap, component);
-  markAsSourceOrSample(component.getComponentID(), componentIndex);
+  markAsSourceOrSample(componentID, componentIndex);
   return componentIndex;
 }
 
@@ -199,7 +206,7 @@ void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId,
  * @return Component index of this component
  */
 size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
-
+  const auto componentID = detector.getComponentID();
   size_t detectorIndex = 0;
   try {
     detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
@@ -222,8 +229,8 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
     * detectorIndex == componentIndex for all detectors.
     */
     // Record the ID -> component index mapping
-    (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
-    (*m_componentIds)[detectorIndex] = detector.getComponentID();
+    (*m_componentIdToIndexMap)[componentID] = detectorIndex;
+    (*m_componentIds)[detectorIndex] = componentID;
     m_assemblySortedDetectorIndices->push_back(detectorIndex);
     (*m_detectorPositions)[detectorIndex] =
         Kernel::toVector3d(detector.getPos());
@@ -232,6 +239,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
     if (m_instrument->isMonitorViaIndex(detectorIndex)) {
       m_monitorIndices->push_back(detectorIndex);
     }
+	m_isVisible->emplace_back(componentIsVisible(componentID));
     clearPositionAndRotationParameters(m_pmap, detector);
   }
   /* Note that positions and rotations for detectors are currently
@@ -240,7 +248,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
   component list
   forming a contiguous block.
   */
-  markAsSourceOrSample(detector.getComponentID(),
+  markAsSourceOrSample(componentID,
                        detectorIndex); // TODO. Optimisation. Cannot have a
                                        // detector that is either source or
                                        // sample. So delete this.
@@ -286,8 +294,8 @@ InstrumentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
-      m_parentComponentIndices, m_positions, m_rotations, m_sourceIndex,
-      m_sampleIndex);
+      m_parentComponentIndices, m_isVisible, m_positions, m_rotations, 
+	  m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
@@ -314,6 +322,12 @@ InstrumentVisitor::makeWrappers() const {
       std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
 
   return {std::move(compInfoWrapper), std::move(detInfoWrapper)};
+}
+
+bool InstrumentVisitor::componentIsVisible(
+	Mantid::Geometry::IComponent * componentID){
+	return m_pmap->contains(componentID, m_pmap->isHidden()) &&
+		   m_pmap->get(componentID, m_pmap->isHidden(), m_pmap->pBool());
 }
 
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>

@@ -82,6 +82,7 @@ public:
   /// Return the size of the map
   inline int size() const { return static_cast<int>(m_map.size()); }
   /// Return string to be used in the map
+  static const std::string &isHidden();
   static const std::string &pos();
   static const std::string &posx();
   static const std::string &posy();

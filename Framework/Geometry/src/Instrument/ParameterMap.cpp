@@ -25,6 +25,8 @@ using Kernel::Quat;
 
 namespace {
 // names of common parameter types
+const std::string HIDDEN_IN_INST_VIEW = "HiddenInInstrumentView";
+
 const std::string POS_PARAM_NAME = "pos";
 const std::string POSX_PARAM_NAME = "x";
 const std::string POSY_PARAM_NAME = "y";
@@ -85,6 +87,8 @@ ParameterMap::~ParameterMap() = default;
 /**
 * Return string to be inserted into the parameter map
 */
+const std::string &ParameterMap::isHidden() { return HIDDEN_IN_INST_VIEW; }
+
 // Position
 const std::string &ParameterMap::pos() { return POS_PARAM_NAME; }
 
