@@ -4,7 +4,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 
-#include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
 #include <QAction>
 #include <QApplication>

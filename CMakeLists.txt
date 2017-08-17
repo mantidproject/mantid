@@ -125,13 +125,6 @@ endif()
 find_package ( GSL REQUIRED )
 
 ###########################################################################
-# Add QtPropertyBrowser to build
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  add_subdirectory ( QtPropertyBrowser )
-endif(ENABLE_MANTIDPLOT)
-
-###########################################################################
 # Now add in all the components
 ###########################################################################
 # Flag that this is a full build, i.e not framework only
@@ -159,20 +152,15 @@ set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
 if (ENABLE_MANTIDPLOT)
   # Add a target for all GUI tests
   add_custom_target ( GUITests )
-  add_dependencies ( GUITests MantidWidgetsTest)
+  add_dependencies ( GUITests MantidQtCommonTest)
   add_dependencies ( check GUITests )
   # Collect all tests together
   add_custom_target ( AllTests )
   add_dependencies ( AllTests FrameworkTests GUITests )
 endif()
 
-if ( UNIX )
-  #Experimental feature. Unix only at this point.
-  set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
-endif ( UNIX )
+if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
-if (ENABLE_MANTIDPLOT AND MAKE_VATES )
-  add_subdirectory ( Vates )
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
           "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
@@ -190,12 +178,17 @@ if (ENABLE_MANTIDPLOT AND MAKE_VATES )
 
 endif ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
+if ( UNIX )
+  #Experimental feature. Unix only at this point.
+  set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
+endif ( UNIX )
+
 if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
 
 if (ENABLE_MANTIDPLOT)
-  add_subdirectory ( MantidQt )
+  add_subdirectory ( qt )
 
   add_subdirectory ( MantidPlot )
 endif()

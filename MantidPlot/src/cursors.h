@@ -7,4 +7,4 @@
 
  ***************************************************************************/
 
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
