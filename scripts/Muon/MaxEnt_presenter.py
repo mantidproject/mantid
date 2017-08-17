@@ -6,8 +6,9 @@ from Muon import MaxEnt_model
 
 class MaxEntPresenter(object):
 
-    def __init__(self,view):
+    def __init__(self,view,alg):
         self.view=view
+        self.alg=alg
         # set data
         self.getWorkspaceNames()
         #connect
@@ -25,24 +26,19 @@ class MaxEntPresenter(object):
                 final_options.append(pick)
         self.view.addItems(final_options)
 
-#    #functions
-#    def tableClicked(self,row,col):
-#        if row == self.view.getImBoxRow() and col ==1:
-#            self.view.changedHideUnTick(self.view.getImBox(),self.view.getImBoxRow()+1)
-#        elif  row == self.view.getShiftBoxRow() and col ==1:
-#            self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
-#
+    #functions
     def handleMaxEntButton(self):
         inputs = self.get_MaxEnt_input()
-        alg=MaxEnt_model.MaxEntModel(inputs)
-        alg.execute()
-        alg.output()
+        self.alg.setInputs(inputs)
+        self.alg.execute()
+        self.alg.output()
 
     def get_MaxEnt_input(self):
         inputs=self.view.initMaxEntInput()
         if self.view.isRaw():
             self.view.addRaw(inputs,"InputWorkspace")
             self.view.addRaw(inputs,"EvolChi")
+            self.view.addRaw(inputs,"EvolAngle")
             self.view.addRaw(inputs,"ReconstructedImage")
             self.view.addRaw(inputs,"ReconstructedData")
         return inputs

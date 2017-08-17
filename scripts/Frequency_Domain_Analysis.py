@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 #from Muon import FFT_presenter
 #from Muon import FFT_view
 
-from Muon import constructor
+from Muon import view_constructor
+from Muon import model_constructor
 from Muon import transform_view
 from Muon import transform_presenter
 from PyQt4.QtGui import *
@@ -13,9 +14,10 @@ import sys
 class FDAG(QMainWindow):
     def __init__(self,parent=None):
         super(FDAG,self).__init__(parent)
-        groupedViews = constructor.constructor(True,self)
+        groupedViews = view_constructor.viewConstructor(True,self)
+        groupedModels = model_constructor.modelConstructor(True)
         view =transform_view.transformView(groupedViews,self)
-        self.presenter =transform_presenter.transformPresenter(view) 
+        self.presenter =transform_presenter.transformPresenter(view,groupedModels) 
         self.setCentralWidget(view)
         self.setWindowTitle("Frequency Domain Analysis")
 

@@ -7,7 +7,6 @@ from Muon import constructor
 
 
 class transformView(QtGui.QWidget):
-    #methodSignal = QtCore.pyqtSignal()
     def __init__(self,groupedViews,parent=None):
        super(transformView,self).__init__(parent)
        self.methods=groupedViews.getTransformMethods()

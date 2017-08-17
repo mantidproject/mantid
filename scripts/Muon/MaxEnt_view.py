@@ -7,7 +7,6 @@ from Muon import widget_helper
 class MaxEntView(QtGui.QWidget):
     # signals
     maxEntButtonSignal = QtCore.pyqtSignal()
-    #tableClickSignal = QtCore.pyqtSignal(object,object)
 
     def __init__(self, parent=None):
         super(MaxEntView, self).__init__(parent)
@@ -68,7 +67,6 @@ class MaxEntView(QtGui.QWidget):
 
         self.tableA.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
 
-
         widget_helper.setName(self.tableA,0,"Chi target")
         self.chiTarget= widget_helper.createDoubleTable(self.tableA,100,0)
 
@@ -88,7 +86,7 @@ class MaxEntView(QtGui.QWidget):
         self.chop= widget_helper.createSpinTable(self.tableA,500,5)
 
         #layout
-        # this is if complex data is unhidden 
+        # this is if complex data is unhidden
         #self.table.setMinimumSize(40,228)
         self.table.setMinimumSize(40,203)
         self.tableA.setMinimumSize(40,207)
@@ -98,7 +96,6 @@ class MaxEntView(QtGui.QWidget):
         self.button = QtGui.QPushButton('Calculate MaxEnt', self)
         self.button.setStyleSheet("background-color:lightgrey")
 #        #connects
-#        self.table.cellClicked.connect(self.tableClick)
         self.button.clicked.connect(self.MaxEntButtonClick)
         # add to layout
         self.grid.addWidget(self.table)
@@ -112,21 +109,10 @@ class MaxEntView(QtGui.QWidget):
     def addItems(self,options):
         self.ws.clear()
         self.ws.addItems(options)
-#
-#    # connect signals
-#    def tableClick(self,row,col):
-#        self.tableClickSignal.emit(row,col)
-#
+
     def MaxEntButtonClick(self):
         self.maxEntButtonSignal.emit()
-#
-#    #functions
-#    def changed(self,box,row ):
-#        self.table.setRowHidden(row,box.checkState() == QtCore.Qt.Checked)
-#
-#    def changedHideUnTick(self,box,row ):
-#        self.table.setRowHidden(row, box.checkState() != QtCore.Qt.Checked)
-#
+
     def initMaxEntInput(self):
         inputs={}
         inputs['InputWorkspace']=str( self.ws.currentText()).replace(";","; ")
@@ -136,51 +122,24 @@ class MaxEntView(QtGui.QWidget):
         inputs["ResolutionFactor"]=int(self.resolution_box.text())
         inputs["A"] = float(self.AConst.text())
         inputs["AutoShift"]=self.shift_box.checkState()
-        
         inputs["ChiTarget"]=float(self.chiTarget.text())
         inputs["ChiEps"]=float(self.chiEps.text())
-        inputs["DistancePenalty"]=float(self.dist.text()) 
+        inputs["DistancePenalty"]=float(self.dist.text())
         inputs["MaxAngle"]=float(self.angle.text())
         inputs["MaxIterations"]=int(self.max_iterations.text())
-        inputs["AlphaChopIterations"]=int(self.chop.text()) 
+        inputs["AlphaChopIterations"]=int(self.chop.text())
 
         out=str( self.ws.currentText()).replace(";","; ")
         inputs['EvolChi']=out+";EvolChi;MaxEnt"
         inputs['EvolAngle']=out+";EvolAngle;MaxEnt"
         inputs['ReconstructedImage']=out+";ReconstructedImage;MaxEnt"
         inputs['ReconstructedData']=out+";ReconstructedData;MaxEnt"
-              
+
         return inputs
 
-#    def addFFTComplex(self,inputs):
-#        inputs["InputImagWorkspace"]=str( self.Im_ws.currentText()).replace(";","; ")
-#        inputs["Imaginary"] = 0 #always zero
-#
-#    def addFFTShift(self,inputs):
-#        inputs['AutoShift']=False
-#        inputs['Shift']= float(self.shift.text())
-#
     def addRaw(self,inputs,key):
         inputs[key]+="_Raw"
-#
-#    # get methods
-#    def isAutoShift(self):
-#        return self.shift_box.checkState() == QtCore.Qt.Checked
-#
-#    def isComplex(self):
-#        return self.Im_box.checkState() == QtCore.Qt.Checked
 
     def isRaw(self):
         return self.raw_box.checkState() == QtCore.Qt.Checked
-#
-#    def getImBoxRow(self):
-#        return self.Im_box_row
-#
-#    def getShiftBoxRow(self):
-#        return self.shift_box_row
-#
-#    def getImBox(self):
-#        return self.Im_box
-#
-#    def getShiftBox(self):
-#        return self.shift_box
+

@@ -5,11 +5,13 @@ import mantid.simpleapi as mantid
 
 class MaxEntModel(object):
 
-    def __init__(self,inputs):
-        self.inputs=inputs
+    def __init__(self):
         self.alg=mantid.AlgorithmManager.create("MaxEnt")
         self.alg.initialize()
         self.alg.setChild(True)
+
+    def setInputs(self,inputs):
+        self.inputs=inputs
         for name,value in iteritems(self.inputs):
             mantid.logger.warning(name+"  "+str(value))
             self.alg.setProperty(name,value)

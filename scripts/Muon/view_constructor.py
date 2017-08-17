@@ -8,7 +8,7 @@ from Muon import transform_selection_view
 # Only need to pass a single object to all
 # presenters 
 
-class constructor(object):
+class viewConstructor(object):
 
     def __init__(self,includeTransform,parent=None ):
         # construct transformation memebers
@@ -16,10 +16,10 @@ class constructor(object):
             self.transformMethods={}
             self.transformMethods["FFT"]=FFT_view.FFTView(parent)
             self.transformMethods["MaxEnt"]=MaxEnt_view.MaxEntView(parent)
+            
             self.transformSelector=transform_selection_view.TransformSelectionView(parent)
     def getTransformMethods(self):
         return self.transformMethods
  
     def getTransformSelection(self):
         return self.transformSelector
-        
