@@ -191,7 +191,10 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
   BoundingBox result;
   for (const auto &index :
        m_componentInfo->componentsInSubtree(componentIndex)) {
-
+    // Check that we have a valid shape here
+    if (!(*m_shapes)[index]) {
+      continue;
+    }
     const auto &s = this->shape(index);
     const BoundingBox &shapeBox = s.getBoundingBox();
     std::vector<Kernel::V3D> coordSystem;
