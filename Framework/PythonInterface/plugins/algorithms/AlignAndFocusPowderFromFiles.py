@@ -138,22 +138,28 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 self.kwargs[key] = instr + ext
 
     def __determineCharacterizations(self, filename, wkspname):
-        tempname = '__%s_temp' % wkspname
-        Load(Filename=filename, OutputWorkspace=tempname,
-             MetaDataOnly=True)
+        useCharac = bool(self.charac is not None)
+
+        # input workspace is only needed to find a row in the characterizations table
+        if useCharac:
+            tempname = '__%s_temp' % wkspname
+            Load(Filename=filename, OutputWorkspace=tempname,
+                 MetaDataOnly=True)
 
         # put together argument list
-        args = dict(InputWorkspace=tempname,
-                    ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
+        args = dict(ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
         for name in PROPS_FOR_PD_CHARACTER:
             prop = self.getProperty(name)
             if not prop.isDefault:
                 args[name] = prop.value
-        if self.charac is not None:
+        if useCharac:
+            args['InputWorkspace']=tempname
             args['Characterizations'] = self.charac
 
         PDDetermineCharacterizations(**args)
-        DeleteWorkspace(Workspace=tempname)
+
+        if useCharac:
+            DeleteWorkspace(Workspace=tempname)
 
     def __getCacheName(self, wkspname):
         cachedir = self.getProperty('CacheDir').value
