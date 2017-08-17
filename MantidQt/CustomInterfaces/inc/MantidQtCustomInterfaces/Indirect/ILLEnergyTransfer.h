@@ -53,11 +53,12 @@ private slots:
 private:
   Ui::ILLEnergyTransfer m_uiForm;
   double m_backScaling = 1.;
+  double m_backCalibScaling = 1.;
   double m_peakRange[2];
   int m_pixelRange[2];
+  std::string m_suffix;
   void save();
   void plot();
-  void convertTo2Theta();
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

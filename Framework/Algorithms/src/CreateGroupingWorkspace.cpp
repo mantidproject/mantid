@@ -1,17 +1,18 @@
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <queue>
 #include <fstream>
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
+#include <queue>
 
 namespace {
 Mantid::Kernel::Logger g_log("CreateGroupingWorkspace");
@@ -358,21 +359,18 @@ void CreateGroupingWorkspace::exec() {
   }
 
   // Validation for 2_4Grouping input used only for SNAP
-  if (inst->getName().compare("SNAP") != 0 &&
-      grouping.compare("2_4Grouping") == 0) {
+  if (inst->getName() != "SNAP" && grouping == "2_4Grouping") {
     const std::string message("2_4Grouping only works for SNAP.");
     g_log.error(message);
     throw std::invalid_argument(message);
   }
 
   if (GroupNames.empty() && OldCalFilename.empty()) {
-    if (grouping.compare("All") == 0) {
+    if (grouping == "All") {
       GroupNames = inst->getName();
-    } else if (inst->getName().compare("SNAP") == 0 &&
-               grouping.compare("Group") == 0) {
+    } else if (inst->getName() == "SNAP" && grouping == "Group") {
       GroupNames = "East,West";
-    } else if (inst->getName().compare("SNAP") == 0 &&
-               grouping.compare("2_4Grouping") == 0) {
+    } else if (inst->getName() == "SNAP" && grouping == "2_4Grouping") {
       GroupNames = "Column1,Column2,Column3,Column4,Column5,Column6,";
     } else {
       sortnames = true;
@@ -407,7 +405,7 @@ void CreateGroupingWorkspace::exec() {
   // Make the grouping one of three ways:
   if (!GroupNames.empty()) {
     detIDtoGroup = makeGroupingByNames(GroupNames, inst, prog, sortnames);
-    if (grouping.compare("2_4Grouping") == 0) {
+    if (grouping == "2_4Grouping") {
       std::map<detid_t, int>::const_iterator it_end = detIDtoGroup.end();
       std::map<detid_t, int>::const_iterator it;
       for (it = detIDtoGroup.begin(); it != it_end; ++it) {

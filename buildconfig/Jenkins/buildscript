@@ -96,6 +96,10 @@ if [[ "$CLEANBUILD" == true ]]; then
 fi
 if [ -d $BUILD_DIR ]; then
   rm -rf $BUILD_DIR/bin $BUILD_DIR/ExternalData
+  if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
+      rm -rf $BUILD_DIR/eigen-*
+      rm -rf $BUILD_DIR/googletest-*
+  fi
 else
   mkdir $BUILD_DIR
 fi
@@ -305,5 +309,9 @@ fi
 # Linux checks it install okay
 ###############################################################################
 if [[ ${SYSTEMTESTS} == true ]]; then
-  $SCRIPT_DIR/systemtests
+  if [[ ${PRBUILD} == true ]]; then
+    EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
+  else
+    $SCRIPT_DIR/systemtests
+  fi
 fi

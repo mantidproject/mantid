@@ -57,6 +57,8 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const override;
   /// maps each run number to why it was unusable in the process table
   std::vector<std::map<std::string, std::string>> m_errors;
+  /// clear the model
+  void clear();
 
 protected:
   // vector of the run numbers

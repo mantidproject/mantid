@@ -23,6 +23,12 @@ parameter is not specified it will be attached to the whole instrument.
 At present this algorithm only supports simple instrument parameters,
 NOT fitting parameters.
 
+Parameter Types
+---------------
+
+The algorithm supports three types of parameters; `Number` (integer or floating point), `String` and `Bool`.
+For `Bool` type, valid values are `1`, `0`, `true` or `false` (not case-sensitive).
+
 Usage
 -----
 

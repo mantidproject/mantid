@@ -149,9 +149,9 @@ void MaskBinsFromTable::processMaskBinWorkspace(
   for (int i = 0; i < static_cast<int>(colnames.size()); ++i) {
     string colname = colnames[i];
     transform(colname.begin(), colname.end(), colname.begin(), ::tolower);
-    if (colname.compare("xmin") == 0)
+    if (colname == "xmin")
       id_xmin = i;
-    else if (colname.compare("xmax") == 0)
+    else if (colname == "xmax")
       id_xmax = i;
     else if (boost::algorithm::starts_with(colname, "spec")) {
       id_spec = i;

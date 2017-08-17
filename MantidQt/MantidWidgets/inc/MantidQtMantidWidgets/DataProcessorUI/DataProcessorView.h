@@ -9,7 +9,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-class QAbstractItemModel;
+class AbstractDataProcessorTreeModel;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -56,37 +56,59 @@ public:
   addActions(std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
 
   // Connect the model
-  virtual void showTable(boost::shared_ptr<QAbstractItemModel> model) = 0;
+  virtual void
+  showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) = 0;
 
   // Dialog/Prompt methods
-  virtual std::string requestNotebookPath() = 0;
+  virtual QString requestNotebookPath() = 0;
+  /// Dialog/Prompt methods
+  virtual QString askUserString(const QString &prompt, const QString &title,
+                                const QString &defaultValue) = 0;
+  virtual bool askUserYesNo(QString prompt, QString title) = 0;
+  virtual void giveUserWarning(QString prompt, QString title) = 0;
+  virtual void giveUserCritical(QString prompt, QString title) = 0;
+  virtual QString runPythonAlgorithm(const QString &algorithm) = 0;
 
   // Settings
-  virtual void saveSettings(const std::map<std::string, QVariant> &options) = 0;
-  virtual void loadSettings(std::map<std::string, QVariant> &options) = 0;
+  virtual void saveSettings(const std::map<QString, QVariant> &options) = 0;
+  virtual void loadSettings(std::map<QString, QVariant> &options) = 0;
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
   virtual bool getEnableNotebook() = 0;
 
+  // Expand/Collapse all groups
+  virtual void expandAll() = 0;
+  virtual void collapseAll() = 0;
+
+  // Select all rows/groups
+  virtual void selectAll() = 0;
+
+  // Handle pause/resume of data reduction
+  virtual void pause() = 0;
+  virtual void resume() = 0;
+
   // Setter methods
-  virtual void setTableList(const std::set<std::string> &tables) = 0;
-  virtual void setInstrumentList(const std::vector<std::string> &instruments,
-                                 const std::string &defaultInstrument) = 0;
+  virtual void setTableList(const QSet<QString> &tables) = 0;
+  virtual void setInstrumentList(const QString &instruments,
+                                 const QString &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &groups) = 0;
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;
-  virtual void setClipboard(const std::string &text) = 0;
-  virtual void setModel(const std::string &name) = 0;
+  virtual void setClipboard(const QString &text) = 0;
+  virtual void setModel(QString const &name) = 0;
 
   // Accessor methods
   virtual std::map<int, std::set<int>> getSelectedChildren() const = 0;
   virtual std::set<int> getSelectedParents() const = 0;
-  virtual std::string getWorkspaceToOpen() const = 0;
-  virtual std::string getClipboard() const = 0;
-  virtual std::string getProcessInstrument() const = 0;
+  virtual QString getWorkspaceToOpen() const = 0;
+  virtual QString getClipboard() const = 0;
+  virtual QString getProcessInstrument() const = 0;
   virtual DataProcessorPresenter *getPresenter() const = 0;
+
+  // Force re-processing of rows
+  virtual void setForcedReProcessing(bool forceReProcessing) = 0;
 };
 }
 }

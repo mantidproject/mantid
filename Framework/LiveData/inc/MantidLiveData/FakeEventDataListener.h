@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include <Poco/Timer.h>
@@ -34,7 +34,7 @@ namespace LiveData {
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class FakeEventDataListener : public API::ILiveListener {
+class FakeEventDataListener : public API::LiveListener {
 public:
   FakeEventDataListener();
   ~FakeEventDataListener() override;

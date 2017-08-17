@@ -149,7 +149,7 @@ void CompositePeaksPresenterVsi::updateWorkspaces(
  * @returns If there are any peaks availbale.
  */
 bool CompositePeaksPresenterVsi::hasPeaks() {
-  return m_peaksPresenters.size() > 0;
+  return !m_peaksPresenters.empty();
 }
 
 /**

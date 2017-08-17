@@ -94,8 +94,8 @@ void ImportMDHistoWorkspace::exec() {
   size_t currentBox = 0;
   for (auto it = box_elements.begin(); it != box_elements.end(); it += 2) {
     auto temp = it;
-    double signal = atof((*(temp)).c_str());
-    double error = atof((*(++temp)).c_str());
+    double signal = std::stod(*(temp));
+    double error = std::stod(*(++temp));
     signals[currentBox] = signal;
     errors[currentBox] = error * error;
     ++currentBox;

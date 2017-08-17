@@ -53,10 +53,16 @@ void QtReflRunsTabView::initLayout() {
   QDataProcessorWidget *qDataProcessorWidget_1 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
   ui.toolbox->addItem(qDataProcessorWidget_1, "Group 1");
+  connect(qDataProcessorWidget_1,
+          SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   QDataProcessorWidget *qDataProcessorWidget_2 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
   ui.toolbox->addItem(qDataProcessorWidget_2, "Group 2");
+  connect(qDataProcessorWidget_2,
+          SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   std::vector<DataProcessorPresenter *> processingWidgets;
   processingWidgets.push_back(qDataProcessorWidget_1->getPresenter());
@@ -148,9 +154,36 @@ void QtReflRunsTabView::setRowCommands(
 }
 
 /**
+* Sets all rows in the table view to be selected
+*/
+void QtReflRunsTabView::setAllSearchRowsSelected() {
+
+  ui.tableSearchResults->selectAll();
+}
+
+/**
 * Clears all the actions (commands)
 */
 void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
+
+/**
+* Sets a specific action in the "Edit" menu enabled or disabled
+* @param index : The index of the action in the "Edit" menu
+* @param enabled : Whether to enable or disable the action
+*/
+void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
+
+  ui.menuRows->actions()[index]->setEnabled(enabled);
+}
+
+/**
+* Sets the "Autoreduce" button enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
+
+  ui.buttonAutoreduce->setEnabled(enabled);
+}
 
 /**
 * Set all possible tranfer methods
@@ -227,9 +260,26 @@ void QtReflRunsTabView::icatSearchComplete() {
 This slot notifies the presenter that the "search" button has been pressed
 */
 void QtReflRunsTabView::on_actionSearch_triggered() {
+  m_algoRunner.get()->disconnect(); // disconnect any other connections
   m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(icatSearchComplete()));
+          SLOT(icatSearchComplete()), Qt::UniqueConnection);
+}
+
+/**
+This slot conducts a search operation before notifying the presenter that the
+"autoreduce" button has been pressed
+*/
+void QtReflRunsTabView::on_actionAutoreduce_triggered() {
+  // No need to search first if not starting a new autoreduction
+  if (m_presenter->startNewAutoreduction()) {
+    m_algoRunner.get()->disconnect(); // disconnect any other connections
+    m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
+    connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+            SLOT(newAutoreduction()), Qt::UniqueConnection);
+  } else {
+    m_presenter->notify(IReflRunsTabPresenter::ResumeAutoreductionFlag);
+  }
 }
 
 /**
@@ -267,10 +317,20 @@ void QtReflRunsTabView::showSearchContextMenu(const QPoint &pos) {
  * @param index : The index of the combo box
  */
 void QtReflRunsTabView::instrumentChanged(int index) {
+  ui.textSearch->clear();
+  if (m_searchModel)
+    m_searchModel->clear();
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
   m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+}
+
+/**
+This notifies the presenter that a new autoreduction has been started
+*/
+void QtReflRunsTabView::newAutoreduction() {
+  m_presenter->notify(IReflRunsTabPresenter::NewAutoreductionFlag);
 }
 
 /**

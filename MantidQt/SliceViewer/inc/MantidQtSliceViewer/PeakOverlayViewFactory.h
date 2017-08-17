@@ -1,7 +1,6 @@
 #ifndef MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_FACTORY_H_
 #define MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_FACTORY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
@@ -47,7 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakOverlayViewFactory {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayViewFactory {
 public:
   /// Create a peak view from the index of a peak in the peaks workspace
   virtual boost::shared_ptr<PeakOverlayView>

@@ -685,7 +685,9 @@ void Shape2DCollection::loadFromTableWorkspace(
   for (size_t i = 0; i < ws->rowCount(); ++i) {
     const auto params = col[i];
     auto shape = Shape2D::loadFromProject(params);
-    m_shapes.append(shape);
+    if (shape != nullptr) {
+      m_shapes.append(shape);
+    }
   }
   emit shapeCreated();
 }

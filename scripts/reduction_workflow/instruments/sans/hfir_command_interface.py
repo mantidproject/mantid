@@ -8,13 +8,17 @@ List of common user commands for HFIR SANS
 import os.path
 import mantid
 
-from reduction_workflow.command_interface import ReductionSingleton, Clear, OutputPath, Reduce1D, Reduce, AppendDataFile, ClearDataFiles
+from reduction_workflow.command_interface import ReductionSingleton, Clear
 from reduction_workflow.find_data import find_data
 from reduction_workflow.instruments.sans import hfir_instrument
 
 from mantid.kernel import Logger
 from mantid.simpleapi import Load
 
+# The following imports allow users to import this file and have all functionality automatically imported
+# Do not remove these imports as it will break user scripts which rely on them
+from reduction_workflow.command_interface import OutputPath, Reduce1D, Reduce, \
+                                                 AppendDataFile, ClearDataFiles  # noqa: F401
 
 def BIOSANS():
     Clear()
@@ -497,9 +501,10 @@ def NoSaveIq():
         del ReductionSingleton().reduction_properties["ProcessInfo"]
 
 
-def IQxQy(nbins=100):
+def IQxQy(nbins=100, log_binning=False):
     ReductionSingleton().reduction_properties["Do2DReduction"] = True
     ReductionSingleton().reduction_properties["IQ2DNumberOfBins"] = nbins
+    ReductionSingleton().reduction_properties["IQxQyLogBinning"] = log_binning
 
 
 def NoIQxQy():

@@ -6,6 +6,15 @@
 # project settings should be included in the relevant CMakeLists.txt file
 # for that project.
 
+option ( USE_CCACHE "Use ccache to cache object artifacts if available" ON )
+if ( USE_CCACHE )
+  find_program(CCACHE_FOUND ccache)
+  if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+  endif()
+endif()
+
 # Set our own compiler version flag from the cmake one and export it globally
 if ( CMAKE_COMPILER_IS_GNUCXX )
   set( GCC_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION} CACHE INTERNAL "")
@@ -28,24 +37,21 @@ set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qua
 # -Wno-deprecated: Do not warn about use of deprecated headers.
 # -Wno-write-strings: Do not warn about deprecated conversions of char*->const char*
 # -Wno-unused-result: Do not warn about unused return values in some C functions
-set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
-
-# Check if we have a new enough version for this flag
-# some -pedantic warnings remain with gcc 4.4.7
-if ( CMAKE_COMPILER_IS_GNUCXX )
-  if (NOT (GCC_COMPILER_VERSION VERSION_LESS "4.5"))
-    set(GNUFLAGS "${GNUFLAGS} -Wno-unused-result -pedantic")
-  endif ()
-elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-    set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
-endif()
+set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings -Wno-unused-result")
 
 # Check if we have a new enough version for these flags
 if ( CMAKE_COMPILER_IS_GNUCXX )
+  set (GNUFLAGS "${GNUFLAGS} -Wpedantic")
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wsuggest-final-types -Wsuggest-final-methods")
+    set(GNUFLAGS "${GNUFLAGS} -Wsuggest-override")
   endif()
+  if (NOT (GCC_COMPILER_VERSION VERSION_LESS "7.1"))
+    # Consider enabling once [[fallthrough]] is available on all platforms.
+    # https://developers.redhat.com/blog/2017/03/10/wimplicit-fallthrough-in-gcc-7/
+    set(GNUFLAGS "${GNUFLAGS} -Wimplicit-fallthrough=0")
+  endif()
+elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
+  set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
 endif()
 
 # Add some options for debug build to help the Zoom profiler

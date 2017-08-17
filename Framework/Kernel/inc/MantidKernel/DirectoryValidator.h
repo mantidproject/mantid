@@ -5,7 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "IValidator.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/FileValidator.h"
+#include <string>
 #include <vector>
 
 namespace Mantid {

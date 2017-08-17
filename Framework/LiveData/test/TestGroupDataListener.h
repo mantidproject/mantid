@@ -26,8 +26,13 @@ public:
   boost::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
+  bool dataReset() override;
   ILiveListener::RunStatus runStatus() override;
   int runNumber() const override;
+
+  void setSpectra(const std::vector<specnum_t> &) override;
+  void
+  setAlgorithm(const class Mantid::API::IAlgorithm &callingAlgorithm) override;
 
 private:
   API::WorkspaceGroup_sptr m_buffer;

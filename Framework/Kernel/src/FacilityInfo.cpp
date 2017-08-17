@@ -33,7 +33,7 @@ Logger g_log("FacilityInfo");
 FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
     : m_catalogs(elem), m_name(elem->getAttribute("name")), m_zeroPadding(0),
       m_delimiter(), m_extensions(), m_archiveSearch(), m_instruments(),
-      m_noFilePrefix(), m_computeResources() {
+      m_noFilePrefix(), m_multiFileLimit(100), m_computeResources() {
   if (m_name.empty()) {
     g_log.error("Facility name is not defined");
     throw std::runtime_error("Facility name is not defined");
@@ -46,6 +46,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
   fillArchiveNames(elem);
   fillComputeResources(elem);
   fillNoFilePrefix(elem);
+  fillMultiFileLimit(elem);
   fillInstruments(elem); // Make sure this is last as it picks up some defaults
                          // that are set above
 }
@@ -63,6 +64,17 @@ void FacilityInfo::fillZeroPadding(const Poco::XML::Element *elem) {
 void FacilityInfo::fillNoFilePrefix(const Poco::XML::Element *elem) {
   std::string noFilePrefixStr = elem->getAttribute("nofileprefix");
   m_noFilePrefix = (noFilePrefixStr == "True");
+}
+
+/// Called from constructor to fill the multifile limit
+void FacilityInfo::fillMultiFileLimit(const Poco::XML::Element *elem) {
+  const std::string multiFileLimitStr = elem->getAttribute("multifilelimit");
+  if (!multiFileLimitStr.empty()) {
+    size_t limit;
+    if (Mantid::Kernel::Strings::convert(multiFileLimitStr, limit)) {
+      m_multiFileLimit = limit;
+    }
+  }
 }
 
 /// Called from constructor to fill default delimiter

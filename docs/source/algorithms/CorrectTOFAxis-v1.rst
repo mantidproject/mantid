@@ -37,7 +37,7 @@ Usage
 
 **Example - CorrectTOFAxis by specifying the elastic bin and L2**
 
-.. textCode:: ExElasticBinWithL2
+.. testcode:: ExElasticBinWithL2
 
     from mantid.kernel import DeltaEModeType, UnitConversion
     

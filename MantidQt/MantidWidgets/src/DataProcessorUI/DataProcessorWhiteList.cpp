@@ -1,5 +1,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 
+#include <QString>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -11,11 +13,10 @@ namespace MantidWidgets {
 * @param prefix : the prefix to be added to the value of this column
 * @param description : a description of this column
 */
-void DataProcessorWhiteList::addElement(const std::string &colName,
-                                        const std::string &algProperty,
-                                        const std::string &description,
-                                        bool showValue,
-                                        const std::string &prefix) {
+void DataProcessorWhiteList::addElement(const QString &colName,
+                                        const QString &algProperty,
+                                        const QString &description,
+                                        bool showValue, const QString &prefix) {
 
   m_colIndexToColName.push_back(colName);
   m_colIndexToAlgProp.push_back(algProperty);
@@ -28,29 +29,28 @@ void DataProcessorWhiteList::addElement(const std::string &colName,
 /** Returns the column index for a column specified via its name
     @param colName : The column name
 */
-int DataProcessorWhiteList::colIndexFromColName(
-    const std::string &colName) const {
+int DataProcessorWhiteList::colIndexFromColName(const QString &colName) const {
   return m_colNameToColIndex.at(colName);
 }
 
 /** Returns the column name for a column specified via its index
     @param index : The column index
 */
-std::string DataProcessorWhiteList::colNameFromColIndex(int index) const {
+QString DataProcessorWhiteList::colNameFromColIndex(int index) const {
   return m_colIndexToColName.at(index);
 }
 
 /** Returns the algorithm property linked to a column specified via its index
     @param index : The column index
 */
-std::string DataProcessorWhiteList::algPropFromColIndex(int index) const {
+QString DataProcessorWhiteList::algPropFromColIndex(int index) const {
   return m_colIndexToAlgProp.at(index);
 }
 
 /** Returns the column description for a column specified via its index
     @param index : The column index
 */
-std::string DataProcessorWhiteList::description(int index) const {
+QString DataProcessorWhiteList::description(int index) const {
   return m_description.at(index);
 }
 
@@ -72,7 +72,7 @@ bool DataProcessorWhiteList::showValue(int index) const {
 * only be used if showValue is true for this column
 * @param index : The column index
 */
-std::string DataProcessorWhiteList::prefix(int index) const {
+QString DataProcessorWhiteList::prefix(int index) const {
   return m_prefix.at(index);
 }
 }

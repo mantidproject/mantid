@@ -121,7 +121,7 @@ void ConvertSpectrumAxis::exec() {
     // Set up binding to memeber funtion. Avoids condition as part of loop over
     // nHistograms.
     boost::function<double(const IDetector &)> thetaFunction;
-    if (unitTarget.compare("signed_theta") == 0) {
+    if (unitTarget == "signed_theta") {
       thetaFunction =
           boost::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
     } else {

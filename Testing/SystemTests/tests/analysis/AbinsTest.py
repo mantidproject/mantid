@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import stresstesting
-from mantid.simpleapi import Abins, mtd, DeleteWorkspace, Scale
+from mantid.simpleapi import Abins, mtd, DeleteWorkspace
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 
 
@@ -56,14 +56,19 @@ class HelperTestingClass(object):
         if order in orders:
             self._quantum_order_event = order
         else:
-            raise RuntimeError("Unsupported number of quantum order event %s" % order)
+            raise RuntimeError(
+                "Unsupported number of quantum order event %s" % order)
 
     def set_name(self, name):
         if isinstance(name, str):
             self._system_name = name
             self._output_name = name
         else:
-            raise RuntimeError("Invalid name. Name should be a string but it is %s " % type(name))
+            raise RuntimeError(
+                "Invalid name. Name should be a string but it is %s " % type(name))
+
+    def set_cross_section(self, cross_section=None):
+        self._cross_section_factor = cross_section
 
     def case_from_scratch(self):
         """
@@ -127,59 +132,66 @@ class HelperTestingClass(object):
         Destructor removes output files after tests and workspaces.
         :return:
         """
-        AbinsTestHelpers.remove_output_files(list_of_names=[self._system_name])
+
+        try:
+            AbinsTestHelpers.remove_output_files(list_of_names=[self._system_name])
+        except TypeError:
+            # nothing to remove but it is OK
+            pass
+
         mtd.clear()
+
 
 # ----------------------------------------------------------------------------------------------------------------
 # Tests for 1D S
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass):
     """
-    In this benchmark it is tested if calculation from scratch with input data from CASTEP and for 1-4 quantum
+    In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for 1-4 quantum
     order events is correct.
     """
-    _ref_result = None
     tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
 
     def runTest(self):
-
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneScratchAbins"
+        name = "TolueneScratchAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_dft_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
         self.case_from_scratch()
 
+    def excludeInPullRequests(self):
+        return True
+
     def validate(self):
-
         self.tolerance = 1e-2
-
         return self._output_name, self.ref_result
+
 
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestBiggerSystem(stresstesting.MantidStressTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for only 1 quantum
     order event is correct.
     """
-    _ref_result = None
     tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
 
     def runTest(self):
-
         HelperTestingClass.__init__(self)
 
         name = "Crystalb3lypScratchAbins"
@@ -191,216 +203,187 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
         self.case_from_scratch()
 
     def validate(self):
-
         self.tolerance = 1e-1
-
         return self._output_name, self.ref_result
+
 
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestT(stresstesting.MantidStressTest, HelperTestingClass):
     """
     In this benchmark scenario of restart is considered in which data for other temperature already exists in an hdf
-    file. In this benchmark input data from CASTEP DFT program is used.
+    file. In this benchmark input data from CRYSTAL DFT program is used.
     """
-    _ref_result = None
+    tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
 
     def runTest(self):
-
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneTAbins"
+        name = "TolueneTAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_dft_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_t()
 
+    def excludeInPullRequests(self):
+        return True
+
     def validate(self):
+        self.tolerance = 1e-1
         return self._output_name, self.ref_result
+
 
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestLargerOrder(stresstesting.MantidStressTest, HelperTestingClass):
     """
-    In this benchmark it is tested if calculation from restart with input data from CASTEP is correct. Requested order
+    In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested order
     of quantum event is larger than the one which is saved to an hdf file so S has to be calculated.
     """
-    _ref_result = None
+    tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
 
     def runTest(self):
-
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneLargerOrderAbins"
+        name = "TolueneLargerOrderAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_dft_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_THREE)
 
+    def excludeInPullRequests(self):
+        return True
+
     def validate(self):
+        self.tolerance = 1e-1
         return self._output_name, self.ref_result
+
 
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingClass):
     """
-    In this benchmark it is tested if calculation from restart with input data from CASTEP is correct. Requested
+    In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested
     order of quantum event is smaller than the one which is saved to an hdf file so S is loaded from an hdf file.
     """
-    _ref_result = None
+    tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
 
     def runTest(self):
-
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneSmallerOrderAbins"
+        name = "TolueneSmallerOrderAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_dft_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_ONE)
 
     def validate(self):
+        self.tolerance = 1e-1
         return self._output_name, self.ref_result
 
 
-class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
-        """
-        In this benchmark it is tested if scaling is correct.
-        """
-        _wrk_1 = None
-        _wrk_2 = None
+class AbinsCRYSTALTestScale(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if scaling is correct.
+    """
+    _wrk_1 = None
+    _ref_result = None
+    tolerance = None
 
-        def skipTests(self):
-            return skip_tests()
+    def skipTests(self):
+        return skip_tests()
 
-        def runTest(self):
-            HelperTestingClass.__init__(self)
+    def runTest(self):
+        HelperTestingClass.__init__(self)
 
-            scaling_factor = 2.0
+        scaling_factor = 2.0
 
-            name = "BenzeneNoScale"
-            self.set_dft_program("CASTEP")
-            self.set_name(name)
-            self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-            self.case_from_scratch()
-            self._wrk_1 = self._output_name
+        name = "TolueneScale"
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("CRYSTAL")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
 
-            Scale(InputWorkspace=self._wrk_1,
-                  OutputWorkspace=self._wrk_1,
-                  Operation='Multiply',
-                  Factor=scaling_factor)
+        self.set_scale(scale=scaling_factor)
+        self.case_from_scratch()
 
-            self._output_name = ""
-            name = "BenzeneScale"
-            self.set_dft_program("CASTEP")
-            self.set_name(name)
-            self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-            self.set_scale(scaling_factor)
-            self.case_from_scratch()
-
-            self._wrk_2 = self._output_name
-
-        def validateMethod(self):
-            return "validateWorkspaceToWorkspace"
-
-        def validate(self):
-            return self._wrk_1, self._wrk_2
-
-# ----------------------------------------------------------------------------------------------------------------
-# Tests for 2D S
-# ----------------------------------------------------------------------------------------------------------------
+    def validate(self):
+        self.tolerance = 1e-1
+        return self._output_name, self.ref_result
 
 
-# class AbinsCASTEPTestScratchTwoDMap(stresstesting.MantidStressTest, HelperTestingClass):
-#     """
-#     In this benchmark it is tested if calculation from scratch with input data from CASTEP, for 1-2 order quantum
-#     events and for TwoDMap is correct.
-#     """
-#     _ref_result = None
-#     tolerance = None
-#
-#     def runTest(self):
-#
-#         HelperTestingClass.__init__(self)
-#
-#         name = "BenzeneScratchTwoDMapAbins"
-#         AbinsParameters.q_start = 0.0  # beginning of q interval
-#         AbinsParameters.q_end = 30  # end of q interval
-#         AbinsParameters.q_step = 5.0  # sampling of q
-#
-#         self._ref_result = name + ".nxs"
-#         self.set_dft_program("CASTEP")
-#         self.set_name(name)
-#         self.set_instrument_name("TwoDMap")
-#         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-#         self.case_from_scratch()
-#
-#     def validate(self):
-#
-#         self.tolerance = 1e-2
-#
-#         return self._output_name, self._ref_result
-#
-#
-# class AbinsCASTEPTestScaleTwoDMap(stresstesting.MantidStressTest, HelperTestingClass):
-#     """
-#     In this benchmark it is tested if scaling is correct.
-#     """
-#     _wrk_1 = None
-#     _wrk_2 = None
-#
-#     def runTest(self):
-#         HelperTestingClass.__init__(self)
-#
-#         AbinsParameters.q_start = 0.0  # beginning of q interval
-#         AbinsParameters.q_end = 30  # end of q interval
-#         AbinsParameters.q_step = 5.0  # sampling of q
-#
-#         scaling_factor = 2.0
-#
-#         name = "BenzeneNoScaleTwoDMap"
-#         self.set_dft_program("CASTEP")
-#         self.set_name(name)
-#         self.set_instrument_name("TwoDMap")
-#         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-#         self.case_from_scratch()
-#         self._wrk_1 = self._output_name
-#
-#         Scale(InputWorkspace=self._wrk_1,
-#               OutputWorkspace=self._wrk_1,
-#               Operation='Multiply',
-#               Factor=scaling_factor)
-#
-#         self._output_name = ""
-#         name = "BenzeneScaleTwoDMap"
-#         self.set_dft_program("CASTEP")
-#         self.set_name(name)
-#         self.set_instrument_name("TwoDMap")
-#         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-#         self.set_scale(scaling_factor)
-#         self.case_from_scratch()
-#         self._wrk_2 = self._output_name
-#
-#     def validateMethod(self):
-#         return "validateWorkspaceToWorkspace"
-#
-#     def validate(self):
-#         return self._wrk_1, self._wrk_2
+# noinspection PyAttributeOutsideInit,PyPep8Naming
+class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation for systems without H is correct.
+    """
+    tolerance = None
+    ref_result = None
+
+    def skipTests(self):
+        return skip_tests()
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "Na2SiF6"
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("CASTEP")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_cross_section(cross_section="Total")
+        self.case_from_scratch()
+        self._wrk_1 = self._output_name
+
+    def validate(self):
+        self.tolerance = 1e-1
+        return self._output_name, self.ref_result
+
+
+# noinspection PyAttributeOutsideInit,PyPep8Naming
+class AbinsCASTEP1DDispersion(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation of S from phonon dispersion is correct (1D case).
+    """
+    tolerance = None
+    ref_result = None
+
+    def skipTests(self):
+        return skip_tests()
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "Mapi"
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("CASTEP")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
+        self.case_from_scratch()
+        self._wrk_1 = self._output_name
+
+    def validate(self):
+
+        self.tolerance = 1e-1
+        return self._output_name, self.ref_result

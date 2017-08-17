@@ -1,0 +1,618 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="EXED"
+valid-from="2017-03-05 23:59:59"
+valid-to="2100-01-31 23:59:59"
+last-modified="2017-04-21 14:58:37">
+<defaults>
+<length unit="meter"/>
+<angle unit="degree"/>
+<location x="0" y="0" z="0" rot="0" axis-x="0" axis-y="0" axis-z="1"/>
+<reference-frame>
+<!-- The z-axis is set parallel to and in the direction of the beam. the
+     y-axis points up and the coordinate system is right handed. -->
+<along-beam axis="z"/>
+<pointing-up axis="y"/>
+<handedness val="right"/>
+<origin val="beam" />
+</reference-frame>
+<offsets spherical="delta" />
+</defaults>
+
+<!-- Detector components -->
+<!--<component type="monitors" idlist="monitors"><location/></component>-->
+<component type="panel02" idlist="panel02"><location y="-0.447"/></component>
+<component type="panel04" idlist="panel04"><location y="-0.4466"/></component>
+<component type="Tank">
+    <location>
+        <parameter name="r-position">
+            <value val="0"/>
+        </parameter>
+        <parameter name="t-position">
+            <value val="0"/>
+        </parameter>
+        <parameter name="p-position">
+            <value val="0"/>
+        </parameter>
+        <parameter name="rotx">
+            <value val="0"/>
+        </parameter>
+        <parameter name="roty">
+            <value val="0"/>
+        </parameter>
+        <parameter name="rotz">
+            <value val="0"/>
+        </parameter>
+    </location>
+</component>
+<type name="Tank">
+    <component type="panel05" idlist="panel05">
+        <location y="-0.98"/>
+    </component>
+    <component type="panel06" idlist="panel06">
+        <location y="-1.147"/>
+    </component>
+    <component type="panel07" idlist="panel07">
+        <location y="-1.192"/>
+    </component>
+    <component type="panel08" idlist="panel08">
+        <location y="-0.98"/>
+    </component>
+</type>
+<!-- source and sample-position components -->
+<component type="double_disk">
+<location z="-53.063"></location>
+</component>
+
+<!-- Source types -->
+<type name="double_disk" is="Source">
+<properties />
+<cylinder id="some-shape">
+<centre-of-bottom-base r="0" t="0" p="0" />
+<axis x="0" y="0" z="1" />
+<radius val="0.01" />
+<height val="0.03" />
+</cylinder>
+</type>
+
+<component type="sample-holder"><location></location>
+</component>
+
+<!-- Sample-position types -->
+<type name="sample-holder" is="SamplePos">
+<properties />
+<sphere id="some-shape">
+<centre x="0" y="0" z="0" />
+<radius val="0.03" />
+</sphere>
+<algebra val="some-shape" />
+</type>
+
+<!-- Monitors -->
+<component type="monitors" idlist="monitors">
+  <location/>
+</component>
+<type name="monitors" >
+   <component type="monitor">
+     <location x="0" z="-1.973" name="monitor1"/>
+     <location x="0" z="-0.1" name="monitor2"/>
+   </component>
+</type>
+<!-- Detector Panel -->
+<type name="panel02">
+<properties />
+  <component type="tube0_913">
+    <location x="-0.44" z="-3.359" name="tube1"/>
+    <location x="-0.4536" z="-3.356" name="tube2"/>
+    <location x="-0.4673" z="-3.353" name="tube3"/>
+    <location x="-0.4809" z="-3.35" name="tube4"/>
+    <location x="-0.4945" z="-3.347" name="tube5"/>
+    <location x="-0.5082" z="-3.344" name="tube6"/>
+    <location x="-0.5218" z="-3.341" name="tube7"/>
+    <location x="-0.5355" z="-3.338" name="tube8"/>
+    <location x="-0.5491" z="-3.335" name="tube9"/>
+    <location x="-0.5627" z="-3.332" name="tube10"/>
+    <location x="-0.5764" z="-3.329" name="tube11"/>
+    <location x="-0.59" z="-3.326" name="tube12"/>
+    <location x="-0.6037" z="-3.323" name="tube13"/>
+    <location x="-0.6173" z="-3.32" name="tube14"/>
+    <location x="-0.631" z="-3.318" name="tube15"/>
+    <location x="-0.6446" z="-3.315" name="tube16"/>
+    <location x="-0.6582" z="-3.312" name="tube17"/>
+    <location x="-0.6719" z="-3.309" name="tube18"/>
+    <location x="-0.6855" z="-3.306" name="tube19"/>
+    <location x="-0.6992" z="-3.303" name="tube20"/>
+    <location x="-0.7128" z="-3.3" name="tube21"/>
+    <location x="-0.7264" z="-3.297" name="tube22"/>
+    <location x="-0.7401" z="-3.294" name="tube23"/>
+    <location x="-0.7537" z="-3.291" name="tube24"/>
+    <location x="-0.7674" z="-3.288" name="tube25"/>
+    <location x="-0.781" z="-3.285" name="tube26"/>
+    <location x="-0.7946" z="-3.282" name="tube27"/>
+    <location x="-0.8083" z="-3.279" name="tube28"/>
+    <location x="-0.8219" z="-3.276" name="tube29"/>
+    <location x="-0.8356" z="-3.273" name="tube30"/>
+    <location x="-0.8492" z="-3.27" name="tube31"/>
+    <location x="-0.8628" z="-3.267" name="tube32"/>
+    <location x="-0.8765" z="-3.264" name="tube33"/>
+    <location x="-0.8901" z="-3.261" name="tube34"/>
+    <location x="-0.9038" z="-3.258" name="tube35"/>
+    <location x="-0.9174" z="-3.255" name="tube36"/>
+    <location x="-0.931" z="-3.252" name="tube37"/>
+    <location x="-0.9447" z="-3.249" name="tube38"/>
+    <location x="-0.9583" z="-3.246" name="tube39"/>
+    <location x="-0.972" z="-3.243" name="tube40"/>
+    <location x="-0.9856" z="-3.24" name="tube41"/>
+    <location x="-0.9993" z="-3.237" name="tube42"/>
+    <location x="-1.013" z="-3.234" name="tube43"/>
+    <location x="-1.027" z="-3.231" name="tube44"/>
+    <location x="-1.04" z="-3.228" name="tube45"/>
+    <location x="-1.054" z="-3.226" name="tube46"/>
+    <location x="-1.067" z="-3.223" name="tube47"/>
+    <location x="-1.081" z="-3.22" name="tube48"/>
+  </component>
+</type>
+<type name="panel04">
+<properties />
+  <component type="tube0_913">
+    <location x="1.013" z="-3.267" name="tube49"/>
+    <location x="0.9989" z="-3.27" name="tube50"/>
+    <location x="0.9851" z="-3.272" name="tube51"/>
+    <location x="0.9713" z="-3.274" name="tube52"/>
+    <location x="0.9575" z="-3.276" name="tube53"/>
+    <location x="0.9438" z="-3.279" name="tube54"/>
+    <location x="0.93" z="-3.281" name="tube55"/>
+    <location x="0.9162" z="-3.283" name="tube56"/>
+    <location x="0.9024" z="-3.285" name="tube57"/>
+    <location x="0.8887" z="-3.288" name="tube58"/>
+    <location x="0.8749" z="-3.29" name="tube59"/>
+    <location x="0.8611" z="-3.292" name="tube60"/>
+    <location x="0.8473" z="-3.294" name="tube61"/>
+    <location x="0.8335" z="-3.297" name="tube62"/>
+    <location x="0.8198" z="-3.299" name="tube63"/>
+    <location x="0.806" z="-3.301" name="tube64"/>
+    <location x="0.7922" z="-3.303" name="tube65"/>
+    <location x="0.7784" z="-3.305" name="tube66"/>
+    <location x="0.7647" z="-3.308" name="tube67"/>
+    <location x="0.7509" z="-3.31" name="tube68"/>
+    <location x="0.7371" z="-3.312" name="tube69"/>
+    <location x="0.7233" z="-3.314" name="tube70"/>
+    <location x="0.7095" z="-3.317" name="tube71"/>
+    <location x="0.6958" z="-3.319" name="tube72"/>
+    <location x="0.682" z="-3.321" name="tube73"/>
+    <location x="0.6682" z="-3.323" name="tube74"/>
+    <location x="0.6544" z="-3.326" name="tube75"/>
+    <location x="0.6406" z="-3.328" name="tube76"/>
+    <location x="0.6269" z="-3.33" name="tube77"/>
+    <location x="0.6131" z="-3.332" name="tube78"/>
+    <location x="0.5993" z="-3.335" name="tube79"/>
+    <location x="0.5855" z="-3.337" name="tube80"/>
+    <location x="0.5718" z="-3.339" name="tube81"/>
+    <location x="0.558" z="-3.341" name="tube82"/>
+    <location x="0.5442" z="-3.343" name="tube83"/>
+    <location x="0.5304" z="-3.346" name="tube84"/>
+    <location x="0.5166" z="-3.348" name="tube85"/>
+    <location x="0.5029" z="-3.35" name="tube86"/>
+    <location x="0.4891" z="-3.352" name="tube87"/>
+    <location x="0.4753" z="-3.355" name="tube88"/>
+    <location x="0.4615" z="-3.357" name="tube89"/>
+    <location x="0.4478" z="-3.359" name="tube90"/>
+    <location x="0.434" z="-3.361" name="tube91"/>
+    <location x="0.4202" z="-3.364" name="tube92"/>
+    <location x="0.4064" z="-3.366" name="tube93"/>
+    <location x="0.3926" z="-3.368" name="tube94"/>
+    <location x="0.3789" z="-3.37" name="tube95"/>
+    <location x="0.3651" z="-3.373" name="tube96"/>
+  </component>
+</type>
+<type name="panel05" >
+<properties />
+  <component type="tube2">
+    <location x="-1.039" z="4.378" name="tube97"/>
+    <location x="-1.019" z="4.383" name="tube98"/>
+    <location x="-0.9983" z="4.388" name="tube99"/>
+    <location x="-0.978" z="4.392" name="tube100"/>
+    <location x="-0.9577" z="4.397" name="tube101"/>
+    <location x="-0.9374" z="4.401" name="tube102"/>
+    <location x="-0.917" z="4.406" name="tube103"/>
+    <location x="-0.8967" z="4.41" name="tube104"/>
+    <location x="-0.8763" z="4.414" name="tube105"/>
+    <location x="-0.8559" z="4.418" name="tube106"/>
+    <location x="-0.8354" z="4.422" name="tube107"/>
+    <location x="-0.815" z="4.426" name="tube108"/>
+    <location x="-0.7945" z="4.429" name="tube109"/>
+    <location x="-0.774" z="4.433" name="tube110"/>
+    <location x="-0.7535" z="4.436" name="tube111"/>
+    <location x="-0.733" z="4.44" name="tube112"/>
+    <location x="-0.7125" z="4.443" name="tube113"/>
+    <location x="-0.6919" z="4.446" name="tube114"/>
+    <location x="-0.6714" z="4.45" name="tube115"/>
+    <location x="-0.6508" z="4.453" name="tube116"/>
+    <location x="-0.6302" z="4.456" name="tube117"/>
+    <location x="-0.6096" z="4.459" name="tube118"/>
+    <location x="-0.589" z="4.461" name="tube119"/>
+  </component>
+</type>
+<type name="panel06" >
+<properties />
+  <component type="tube2_4">
+    <location x="-0.5344" z="4.468" name="tube120"/>
+    <location x="-0.5138" z="4.471" name="tube121"/>
+    <location x="-0.4931" z="4.473" name="tube122"/>
+    <location x="-0.4724" z="4.475" name="tube123"/>
+    <location x="-0.4517" z="4.477" name="tube124"/>
+    <location x="-0.431" z="4.479" name="tube125"/>
+    <location x="-0.4103" z="4.481" name="tube126"/>
+    <location x="-0.3896" z="4.483" name="tube127"/>
+    <location x="-0.3689" z="4.485" name="tube128"/>
+    <location x="-0.3481" z="4.487" name="tube129"/>
+    <location x="-0.3274" z="4.488" name="tube130"/>
+    <location x="-0.3067" z="4.49" name="tube131"/>
+    <location x="-0.2859" z="4.491" name="tube132"/>
+    <location x="-0.2651" z="4.492" name="tube133"/>
+    <location x="-0.2444" z="4.493" name="tube134"/>
+    <location x="-0.2236" z="4.494" name="tube135"/>
+    <location x="-0.2028" z="4.495" name="tube136"/>
+    <location x="-0.182" z="4.496" name="tube137"/>
+    <location x="-0.1613" z="4.497" name="tube138"/>
+    <location x="-0.1405" z="4.498" name="tube139"/>
+    <location x="-0.1197" z="4.498" name="tube140"/>
+    <location x="-0.09888" z="4.499" name="tube141"/>
+    <location x="-0.07808" z="4.499" name="tube142"/>
+    <location x="-0.05729" z="4.5" name="tube143"/>
+    <location x="-0.03649" z="4.5" name="tube144"/>
+    <location x="-0.01569" z="4.5" name="tube145"/>
+    <location x="0.005111" z="4.5" name="tube146"/>
+    <location x="0.02591" z="4.5" name="tube147"/>
+    <location x="0.04671" z="4.5" name="tube148"/>
+    <location x="0.06751" z="4.499" name="tube149"/>
+    <location x="0.08831" z="4.499" name="tube150"/>
+  </component>
+</type>
+<type name="panel07" >
+<properties />
+  <component type="tube2_4">
+    <location x="0.1401" z="4.498" name="tube151"/>
+    <location x="0.1609" z="4.497" name="tube152"/>
+    <location x="0.1817" z="4.496" name="tube153"/>
+    <location x="0.2025" z="4.495" name="tube154"/>
+    <location x="0.2232" z="4.494" name="tube155"/>
+    <location x="0.244" z="4.493" name="tube156"/>
+    <location x="0.2648" z="4.492" name="tube157"/>
+    <location x="0.2855" z="4.491" name="tube158"/>
+    <location x="0.3063" z="4.49" name="tube159"/>
+    <location x="0.327" z="4.488" name="tube160"/>
+    <location x="0.3478" z="4.487" name="tube161"/>
+    <location x="0.3685" z="4.485" name="tube162"/>
+    <location x="0.3892" z="4.483" name="tube163"/>
+    <location x="0.41" z="4.481" name="tube164"/>
+    <location x="0.4307" z="4.479" name="tube165"/>
+    <location x="0.4514" z="4.477" name="tube166"/>
+    <location x="0.4721" z="4.475" name="tube167"/>
+    <location x="0.4927" z="4.473" name="tube168"/>
+    <location x="0.5134" z="4.471" name="tube169"/>
+    <location x="0.5341" z="4.468" name="tube170"/>
+    <location x="0.5547" z="4.466" name="tube171"/>
+    <location x="0.5754" z="4.463" name="tube172"/>
+    <location x="0.596" z="4.46" name="tube173"/>
+    <location x="0.6166" z="4.458" name="tube174"/>
+    <location x="0.6372" z="4.455" name="tube175"/>
+    <location x="0.6578" z="4.452" name="tube176"/>
+    <location x="0.6783" z="4.449" name="tube177"/>
+    <location x="0.6989" z="4.445" name="tube178"/>
+    <location x="0.7194" z="4.442" name="tube179"/>
+    <location x="0.74" z="4.439" name="tube180"/>
+    <location x="0.7605" z="4.435" name="tube181"/>
+  </component>
+</type>
+<type name="panel08">
+<properties />
+  <component type="tube2">
+    <location x="0.8132" z="4.426" name="tube182"/>
+    <location x="0.8336" z="4.422" name="tube183"/>
+    <location x="0.8541" z="4.418" name="tube184"/>
+    <location x="0.8745" z="4.414" name="tube185"/>
+    <location x="0.8949" z="4.41" name="tube186"/>
+    <location x="0.9152" z="4.406" name="tube187"/>
+    <location x="0.9356" z="4.402" name="tube188"/>
+    <location x="0.9559" z="4.397" name="tube189"/>
+    <location x="0.9762" z="4.393" name="tube190"/>
+    <location x="0.9965" z="4.388" name="tube191"/>
+    <location x="1.017" z="4.384" name="tube192"/>
+    <location x="1.037" z="4.379" name="tube193"/>
+    <location x="1.057" z="4.374" name="tube194"/>
+    <location x="1.077" z="4.369" name="tube195"/>
+    <location x="1.098" z="4.364" name="tube196"/>
+    <location x="1.118" z="4.359" name="tube197"/>
+    <location x="1.138" z="4.354" name="tube198"/>
+    <location x="1.158" z="4.348" name="tube199"/>
+    <location x="1.178" z="4.343" name="tube200"/>
+    <location x="1.198" z="4.338" name="tube201"/>
+    <location x="1.218" z="4.332" name="tube202"/>
+    <location x="1.238" z="4.326" name="tube203"/>
+    <location x="1.258" z="4.321" name="tube204"/>
+  </component>
+</type>
+<type name="tube0_913">
+  <component type="pixel_s">
+    <locations y="0.004565" y-end="0.9084" n-elements="100" name="det"/>
+  </component>
+</type>
+<type name="tube2">
+  <component type="pixel_l1">
+    <locations y="0.01" y-end="1.99" n-elements="100" name="det"/>
+  </component>
+</type>
+<type name="tube2_4">
+  <component type="pixel_l2">
+    <locations y="0.012" y-end="2.388" n-elements="100" name="det"/>
+  </component>
+</type>
+<type name="monitor" is="monitor">
+<properties/>
+<cylinder id="some-shape">
+<centre-of-bottom-base r="0" t="0" p="0" />
+<axis x="0" y="0" z="1" />
+<radius val="0.05" />
+<height val="0.02" />
+</cylinder>
+<algebra val="some-shape" />
+</type>
+<!--Pixel for short tube -->
+<type name="pixel_s" is="detector">
+  <cylinder id="cyl-approx">
+    <centre-of-bottom-base x="0" y="0" z="0" />
+    <axis x="0" y="0.2" z="0" />
+    <radius val="0.004" />
+    <height val="0.01" />
+  </cylinder>
+  <algebra val="cyl-approx" />
+</type>
+<!--Pixel for first long tube -->
+<type name="pixel_l1" is="detector">
+  <cylinder id="cyl-approx">
+    <centre-of-bottom-base x="0" y="0" z="0" />
+    <axis x="0" y="0.2" z="0" />
+    <radius val="0.0095" />
+    <height val="0.02" />
+  </cylinder>
+  <algebra val="cyl-approx" />
+</type>
+
+<!--Pixel for second long tube -->
+<type name="pixel_l2" is="detector">
+  <cylinder id="cyl-approx">
+    <centre-of-bottom-base x="0" y="0" z="0" />
+    <axis x="0" y="0.2" z="0" />
+    <radius val="0.0095" />
+    <height val="0.024" />
+  </cylinder>
+  <algebra val="cyl-approx" />
+</type>
+
+
+
+<!-- detector id lists -->
+<idlist idname="panel02">
+<id start="401001" end="401100" />
+<id start="402001" end="402100" />
+<id start="403001" end="403100" />
+<id start="404001" end="404100" />
+<id start="405001" end="405100" />
+<id start="406001" end="406100" />
+<id start="407001" end="407100" />
+<id start="408001" end="408100" />
+<id start="409001" end="409100" />
+<id start="410001" end="410100" />
+<id start="411001" end="411100" />
+<id start="412001" end="412100" />
+<id start="413001" end="413100" />
+<id start="414001" end="414100" />
+<id start="415001" end="415100" />
+<id start="416001" end="416100" />
+<id start="417001" end="417100" />
+<id start="418001" end="418100" />
+<id start="419001" end="419100" />
+<id start="420001" end="420100" />
+<id start="421001" end="421100" />
+<id start="422001" end="422100" />
+<id start="423001" end="423100" />
+<id start="424001" end="424100" />
+<id start="425001" end="425100" />
+<id start="426001" end="426100" />
+<id start="427001" end="427100" />
+<id start="428001" end="428100" />
+<id start="429001" end="429100" />
+<id start="430001" end="430100" />
+<id start="431001" end="431100" />
+<id start="432001" end="432100" />
+<id start="433001" end="433100" />
+<id start="434001" end="434100" />
+<id start="435001" end="435100" />
+<id start="436001" end="436100" />
+<id start="437001" end="437100" />
+<id start="438001" end="438100" />
+<id start="439001" end="439100" />
+<id start="440001" end="440100" />
+<id start="441001" end="441100" />
+<id start="442001" end="442100" />
+<id start="443001" end="443100" />
+<id start="444001" end="444100" />
+<id start="445001" end="445100" />
+<id start="446001" end="446100" />
+<id start="447001" end="447100" />
+<id start="448001" end="448100" />
+</idlist>
+<idlist idname="panel04">
+<id start="601001" end="601100" />
+<id start="602001" end="602100" />
+<id start="603001" end="603100" />
+<id start="604001" end="604100" />
+<id start="605001" end="605100" />
+<id start="606001" end="606100" />
+<id start="607001" end="607100" />
+<id start="608001" end="608100" />
+<id start="609001" end="609100" />
+<id start="610001" end="610100" />
+<id start="611001" end="611100" />
+<id start="612001" end="612100" />
+<id start="613001" end="613100" />
+<id start="614001" end="614100" />
+<id start="615001" end="615100" />
+<id start="616001" end="616100" />
+<id start="617001" end="617100" />
+<id start="618001" end="618100" />
+<id start="619001" end="619100" />
+<id start="620001" end="620100" />
+<id start="621001" end="621100" />
+<id start="622001" end="622100" />
+<id start="623001" end="623100" />
+<id start="624001" end="624100" />
+<id start="625001" end="625100" />
+<id start="626001" end="626100" />
+<id start="627001" end="627100" />
+<id start="628001" end="628100" />
+<id start="629001" end="629100" />
+<id start="630001" end="630100" />
+<id start="631001" end="631100" />
+<id start="632001" end="632100" />
+<id start="633001" end="633100" />
+<id start="634001" end="634100" />
+<id start="635001" end="635100" />
+<id start="636001" end="636100" />
+<id start="637001" end="637100" />
+<id start="638001" end="638100" />
+<id start="639001" end="639100" />
+<id start="640001" end="640100" />
+<id start="641001" end="641100" />
+<id start="642001" end="642100" />
+<id start="643001" end="643100" />
+<id start="644001" end="644100" />
+<id start="645001" end="645100" />
+<id start="646001" end="646100" />
+<id start="647001" end="647100" />
+<id start="648001" end="648100" />
+</idlist>
+<idlist idname="panel05">
+<id start="1001001" end="1001100" />
+<id start="1002001" end="1002100" />
+<id start="1003001" end="1003100" />
+<id start="1004001" end="1004100" />
+<id start="1005001" end="1005100" />
+<id start="1006001" end="1006100" />
+<id start="1007001" end="1007100" />
+<id start="1008001" end="1008100" />
+<id start="1009001" end="1009100" />
+<id start="1010001" end="1010100" />
+<id start="1011001" end="1011100" />
+<id start="1012001" end="1012100" />
+<id start="1013001" end="1013100" />
+<id start="1014001" end="1014100" />
+<id start="1015001" end="1015100" />
+<id start="1016001" end="1016100" />
+<id start="1017001" end="1017100" />
+<id start="1018001" end="1018100" />
+<id start="1019001" end="1019100" />
+<id start="1020001" end="1020100" />
+<id start="1021001" end="1021100" />
+<id start="1022001" end="1022100" />
+<id start="1023001" end="1023100" />
+</idlist>
+<idlist idname="panel06">
+<id start="1101001" end="1101100" />
+<id start="1102001" end="1102100" />
+<id start="1103001" end="1103100" />
+<id start="1104001" end="1104100" />
+<id start="1105001" end="1105100" />
+<id start="1106001" end="1106100" />
+<id start="1107001" end="1107100" />
+<id start="1108001" end="1108100" />
+<id start="1109001" end="1109100" />
+<id start="1110001" end="1110100" />
+<id start="1111001" end="1111100" />
+<id start="1112001" end="1112100" />
+<id start="1113001" end="1113100" />
+<id start="1114001" end="1114100" />
+<id start="1115001" end="1115100" />
+<id start="1116001" end="1116100" />
+<id start="1117001" end="1117100" />
+<id start="1118001" end="1118100" />
+<id start="1119001" end="1119100" />
+<id start="1120001" end="1120100" />
+<id start="1121001" end="1121100" />
+<id start="1122001" end="1122100" />
+<id start="1123001" end="1123100" />
+<id start="1124001" end="1124100" />
+<id start="1125001" end="1125100" />
+<id start="1126001" end="1126100" />
+<id start="1127001" end="1127100" />
+<id start="1128001" end="1128100" />
+<id start="1129001" end="1129100" />
+<id start="1130001" end="1130100" />
+<id start="1131001" end="1131100" />
+</idlist>
+<idlist idname="panel07">
+<id start="1201001" end="1201100" />
+<id start="1202001" end="1202100" />
+<id start="1203001" end="1203100" />
+<id start="1204001" end="1204100" />
+<id start="1205001" end="1205100" />
+<id start="1206001" end="1206100" />
+<id start="1207001" end="1207100" />
+<id start="1208001" end="1208100" />
+<id start="1209001" end="1209100" />
+<id start="1210001" end="1210100" />
+<id start="1211001" end="1211100" />
+<id start="1212001" end="1212100" />
+<id start="1213001" end="1213100" />
+<id start="1214001" end="1214100" />
+<id start="1215001" end="1215100" />
+<id start="1216001" end="1216100" />
+<id start="1217001" end="1217100" />
+<id start="1218001" end="1218100" />
+<id start="1219001" end="1219100" />
+<id start="1220001" end="1220100" />
+<id start="1221001" end="1221100" />
+<id start="1222001" end="1222100" />
+<id start="1223001" end="1223100" />
+<id start="1224001" end="1224100" />
+<id start="1225001" end="1225100" />
+<id start="1226001" end="1226100" />
+<id start="1227001" end="1227100" />
+<id start="1228001" end="1228100" />
+<id start="1229001" end="1229100" />
+<id start="1230001" end="1230100" />
+<id start="1231001" end="1231100" />
+</idlist>
+<idlist idname="panel08">
+<id start="1301001" end="1301100" />
+<id start="1302001" end="1302100" />
+<id start="1303001" end="1303100" />
+<id start="1304001" end="1304100" />
+<id start="1305001" end="1305100" />
+<id start="1306001" end="1306100" />
+<id start="1307001" end="1307100" />
+<id start="1308001" end="1308100" />
+<id start="1309001" end="1309100" />
+<id start="1310001" end="1310100" />
+<id start="1311001" end="1311100" />
+<id start="1312001" end="1312100" />
+<id start="1313001" end="1313100" />
+<id start="1314001" end="1314100" />
+<id start="1315001" end="1315100" />
+<id start="1316001" end="1316100" />
+<id start="1317001" end="1317100" />
+<id start="1318001" end="1318100" />
+<id start="1319001" end="1319100" />
+<id start="1320001" end="1320100" />
+<id start="1321001" end="1321100" />
+<id start="1322001" end="1322100" />
+<id start="1323001" end="1323100" />
+</idlist>
+<!-- MONITOR ID LISTS -->
+<idlist idname="monitors">
+<id start="1801001" end="1801002" />
+</idlist>
+</instrument>

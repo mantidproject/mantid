@@ -17,8 +17,8 @@
 #include <pqServerManagerModel.h>
 #include <pqSMAdaptor.h>
 
-#include <vtkCallbackCommand.h>
 #include "vtk_jsoncpp.h"
+#include <vtkCallbackCommand.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMIntVectorProperty.h>
 #include <vtkSMProxy.h>

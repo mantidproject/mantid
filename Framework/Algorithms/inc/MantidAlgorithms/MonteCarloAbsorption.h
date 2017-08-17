@@ -17,6 +17,7 @@ class Instrument;
 }
 
 namespace Algorithms {
+class DetectorGridDefinition;
 /**
   Calculates attenuation due to absorption and scattering in a sample +
   its environment using a Monte Carlo algorithm.
@@ -62,14 +63,20 @@ private:
   void init() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr
-  doSimulation(const API::MatrixWorkspace &inputWS, size_t nevents, int nlambda,
-               int seed, const InterpolationOption &interpolateOpt);
-  API::MatrixWorkspace_sptr
+  API::MatrixWorkspace_uptr
+  doSimulation(const API::MatrixWorkspace &inputWS, const size_t nevents,
+               int nlambda, const int seed,
+               const InterpolationOption &interpolateOpt,
+               const bool useSparseInstrument);
+  API::MatrixWorkspace_uptr
   createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::unique_ptr<IBeamProfile>
   createBeamProfile(const Geometry::Instrument &instrument,
                     const API::Sample &sample) const;
+  void interpolateFromSparse(
+      API::MatrixWorkspace &targetWS, const API::MatrixWorkspace &sparseWS,
+      const Mantid::Algorithms::InterpolationOption &interpOpt,
+      const DetectorGridDefinition &detGrid);
 };
 }
 }

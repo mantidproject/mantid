@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include <map>
 
 #include "MantidKernel/IPropertyManager.h"
 

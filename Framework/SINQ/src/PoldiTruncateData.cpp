@@ -1,5 +1,5 @@
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidSINQ/PoldiTruncateData.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
 namespace Mantid {
@@ -68,7 +68,7 @@ void PoldiTruncateData::setTimeBinWidthFromWorkspace(
         "Workspace does not contain any data. Aborting.");
   }
 
-  const MantidVec &xData = workspace->readX(0);
+  const auto &xData = workspace->x(0);
 
   if (xData.size() < 2) {
     throw std::invalid_argument(

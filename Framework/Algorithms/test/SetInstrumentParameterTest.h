@@ -5,7 +5,7 @@
 
 #include <string>
 #include "MantidAlgorithms/SetInstrumentParameter.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -148,6 +148,28 @@ public:
 
     cmpt = ws->getInstrument()->getComponentByName(cmptName);
     TS_ASSERT_EQUALS(paramValue2, cmpt->getStringParameter(paramName)[0]);
+  }
+
+  void test_bool() {
+    const std::string paramName = "TestParam";
+    const std::string paramType = "Bool";
+    const std::map<std::string, bool> paramValues = {{"true", true},
+                                                     {"TRUE", true},
+                                                     {"True", true},
+                                                     {"1", true},
+                                                     {"false", false},
+                                                     {"FALSE", false},
+                                                     {"False", false},
+                                                     {"0", false}};
+
+    MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+
+    for (const auto &value : paramValues) {
+      ExecuteAlgorithm(ws, "", "", paramName, value.first, paramType);
+      TS_ASSERT(ws->getInstrument()->getBoolParameter(paramName)[0] ==
+                value.second);
+    }
   }
 
   MatrixWorkspace_sptr

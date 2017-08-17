@@ -375,14 +375,14 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if wksp is None:
             return None
         MaskDetectors(Workspace=wksp, MaskedWorkspace=str(wksp)+"mask")
-        wksp = AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+        wksp = AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp,
                               CalibrationWorkspace=str(wksp)+"cal")
         # Diffraction focusing using new calibration file with offsets
         if self._diffractionfocus:
-            wksp = DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+            wksp = DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                                         GroupingWorkspace=str(wksp)+"group")
 
-        wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(), Params=self._binning)
+        wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning)
         return wksp
 
     def _initCCpars(self):

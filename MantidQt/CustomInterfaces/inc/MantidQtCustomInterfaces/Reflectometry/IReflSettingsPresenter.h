@@ -38,6 +38,7 @@ class IReflSettingsPresenter {
 public:
   virtual ~IReflSettingsPresenter(){};
   /// Pre-processing
+  virtual std::string getTransmissionRuns(bool loadRuns) const = 0;
   virtual std::string getTransmissionOptions() const = 0;
   /// Processing
   virtual std::string getReductionOptions() const = 0;

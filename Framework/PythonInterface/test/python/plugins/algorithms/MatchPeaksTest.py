@@ -7,6 +7,7 @@ from mantid.simpleapi import *
 from mantid.api import *
 from testhelpers import run_algorithm
 
+
 class MatchPeaksTest(unittest.TestCase):
 
     _args = {}
@@ -100,7 +101,7 @@ class MatchPeaksTest(unittest.TestCase):
         if AnalysisDataService.doesExist('to_be_shifted'):
             DeleteWorkspace(self._ws_shift)
         if AnalysisDataService.doesExist('in_2'):
-            DeleteWorkspace(self._ws_in_2 )
+            DeleteWorkspace(self._ws_in_2)
         if AnalysisDataService.doesExist('output'):
             DeleteWorkspace(mtd['output'])
         if AnalysisDataService.doesExist('wrong_number_of_histograms'):
@@ -108,60 +109,41 @@ class MatchPeaksTest(unittest.TestCase):
         if AnalysisDataService.doesExist('wrong_number_of_bins'):
             DeleteWorkspace(self._in2)
 
-    def testValidatorInput(self):
+    def testValidateInputWorkspace(self):
         self._args['OutputWorkspace'] = 'output'
-        # Test if incompatible workspaces will fail
-        if sys.version_info >= (2, 7):
-            with self.assertRaises(RuntimeError):
-                self._args['InputWorkspace'] = self._in1
-                run_algorithm('MatchPeaks', **self._args)
+        self.assertTrue(sys.version_info >= (2, 7))
+        with self.assertRaises(RuntimeError) as contextManager:
+            self._args['InputWorkspace'] = self._in1
+            run1 = run_algorithm('MatchPeaks', **self._args)
+            self.assertTrue(run1.isExecuted())
+        self.assertEqual('Some invalid Properties found', str(contextManager.exception))
+        with self.assertRaises(RuntimeError) as contextManager:
+            self._args['InputWorkspace'] = self._in2
+            run2 = run_algorithm('MatchPeaks', **self._args)
+            self.assertTrue(run2.isExecuted())
+        self.assertEqual('Some invalid Properties found', str(contextManager.exception))
 
-                self._args['InputWorkspace'] = self._in2
-                run_algorithm('MatchPeaks', **self._args)
-        else:
-            incompatible = False
-            try:
-                self._args['InputWorkspace'] = self._in1
-                run_algorithm('MatchPeaks', **self._args)
-
-                self._args['InputWorkspace'] = self._in2
-                run_algorithm('MatchPeaks', **self._args)
-            except RuntimeError:
-                incompatible = True
-            self.assertTrue(incompatible, "Workspaces are incompatible")
-
-        # Test if compatible workspaces will be accepted (size, X-values, E-values)
-        self._args['InputWorkspace'] = self._ws_shift
-        alg_test = run_algorithm('MatchPeaks', **self._args)
-        self.assertTrue(alg_test.isExecuted())
-
-    def testValidatorInput2(self):
+    def testValidateInputWorkspace2(self):
         self._args['InputWorkspace'] = self._ws_shift
         self._args['OutputWorkspace'] = 'output'
-        # Test if incompatible workspaces will fail
-        if sys.version_info >= (2, 7):
-            with self.assertRaises(RuntimeError):
-                self._args['InputWorkspace2'] = self._in1
-                run_algorithm('MatchPeaks', **self._args)
+        self.assertTrue(sys.version_info >= (2, 7))
+        with self.assertRaises(RuntimeError) as contextManager:
+            self._args['InputWorkspace2'] = self._in1
+            run_algorithm('MatchPeaks', **self._args)
+        self.assertEqual('Some invalid Properties found', str(contextManager.exception))
+        with self.assertRaises(RuntimeError) as contextManager:
+            self._args['InputWorkspace2'] = self._in2
+            run_algorithm('MatchPeaks', **self._args)
+        self.assertEqual('Some invalid Properties found', str(contextManager.exception))
 
-                self._args['InputWorkspace2'] = self._in2
-                run_algorithm('MatchPeaks', **self._args)
-        else:
-            incompatible = False
-            try:
-                self._args['InputWorkspace2'] = self._in1
-                run_algorithm('MatchPeaks', **self._args)
-
-                self._args['InputWorkspace2'] = self._in2
-                run_algorithm('MatchPeaks', **self._args)
-            except RuntimeError:
-                incompatible = True
-            self.assertTrue(incompatible, "Workspaces are incompatible")
-
-        # Test if compatible workspaces will be accepted (size, X-values, E-values)
-        self._args['InputWorkspace2'] = self._ws_in_2
-        alg_test = run_algorithm('MatchPeaks', **self._args)
-        self.assertTrue(alg_test.isExecuted())
+    def testValidateInputWorkspace3(self):
+        self._args['InputWorkspace'] = self._ws_shift
+        self._args['InputWorkspace3'] = self._ws_in_3
+        self._args['OutputWorkspace'] = 'output'
+        self.assertTrue(sys.version_info >= (2, 7))
+        with self.assertRaises(RuntimeError) as contextManager:
+            run_algorithm('MatchPeaks', **self._args)
+        self.assertEqual('Some invalid Properties found', str(contextManager.exception))
 
     def testMatchCenter(self):
         # Input workspace should match its center

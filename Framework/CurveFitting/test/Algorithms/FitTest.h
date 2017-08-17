@@ -17,6 +17,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidTestHelpers/FunctionCreationHelper.h"
 #include "MantidTestHelpers/MultiDomainFunctionHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -319,9 +320,9 @@ public:
       e[i] = 1.0;
     }
     const double sqrh = 0.70710678; // cos( 45 degrees )
-    y = {0.01 * sqrh,  0.00,  -1.2 * sqrh,  -5.6, -18.2 * sqrh,  0.0,
-         80.08 * sqrh, 114.4, 128.7 * sqrh, 0.0,  -80.08 * sqrh, -43.68,
-         -18.2 * sqrh, 0.0,   1.2 * sqrh,   0.16, 0.01 * sqrh,   0.00};
+    y = {1.e-4 * sqrh, 0.00, -1.2e-2 * sqrh, -5.6e-2, -18.2e-2 * sqrh, 0.0,
+         0.8008 * sqrh, 1.144, 1.287 * sqrh, 0.0, -0.8008 * sqrh, -0.4368,
+         -0.182 * sqrh, 0.0, 1.2e-2 * sqrh, 0.16e-2, 1.e-4 * sqrh, 0.00};
 
     Fit fit;
     fit.initialize();
@@ -335,7 +336,7 @@ public:
 
     // Test the fitting parameters
     IFunction_sptr func = fit.getProperty("Function");
-    TS_ASSERT_DELTA(func->getParameter("A"), 129.300, 0.001);
+    TS_ASSERT_DELTA(func->getParameter("A"), 1.29300, 0.00001);
     TS_ASSERT_DELTA(func->getParameter("Sigma"), 0.348, 0.001);
     TS_ASSERT_DELTA(func->getParameter("Frequency"), 1 / 8.0,
                     0.01);                                    // Period of 8
@@ -1562,25 +1563,31 @@ public:
     fit.setProperty(
         "Function",
         "name=IkedaCarpenterPV, I=1000, SigmaSquared=25.0, Gamma=0.1, X0=50.0");
-    fit.setProperty("Ties", "Alpha0=1.6, Alpha1=1.5, Beta0=31.9, Kappa=46.0");
     fit.setProperty("InputWorkspace", ws);
-    fit.setPropertyValue("StartX", "0");
-    fit.setPropertyValue("EndX", "150");
+    fit.setPropertyValue("StartX", "30");
+    fit.setPropertyValue("EndX", "100");
+    // from the fitfunctions documentation:
+    // In general when fitting a single peak it is not recommended to refine
+    // both Alpha0 and Alpha1 at the same time since these two parameters will
+    // effectively be 100% correlated because the wavelength over a single peak
+    // is likely effectively constant. All parameters are constrained to be
+    // non-negative.
+    fit.setProperty("Ties", "Alpha0=1.6666");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
     TS_ASSERT(fit.isExecuted());
 
     // test the output from fit is what you expect
     double chi2 = fit.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(chi2, 0.0, 0.1);
+    TS_ASSERT_DELTA(chi2, 0.0, 0.01);
 
     IFunction_sptr out = fit.getProperty("Function");
-    TS_ASSERT_DELTA(out->getParameter("I"), 3101.672, 0.1);
-    TS_ASSERT_DELTA(out->getParameter("Alpha0"), 1.6, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.5, 0.001);
-    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0, 0.0001);
+    // test that all parameters are non-negative
+    TS_ASSERT_DELTA(out->getParameter("I"), 3101.7067, 1.0);
+    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.4276, 0.005);
+    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9007, 0.02);
+    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0238, 0.005);
     TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 99.935, 0.1);
-    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.0, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.05, 0.05);
     TS_ASSERT_DELTA(out->getParameter("X0"), 49.984, 0.1);
   }
 
@@ -2024,6 +2031,101 @@ public:
       }
       TS_ASSERT_DIFFERS(y[26], 0.0);
       TS_ASSERT_DIFFERS(y[26], 0.0);
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_size_change() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double x, int) { return 2 * exp(-(5 * x + x * x - 3 * x * x * x)); },
+        1, 0, 1, 0.1);
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 1.9936, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(1), -9.4991, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(2), 19.1074, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(3), -17.8434, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(4), 6.3465, 0.1);
+    }
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 1.9936, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(1), -9.4991, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(2), 19.1074, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(3), -17.8434, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(4), 6.3465, 0.1);
+      std::string status = fit.getProperty("OutputStatus");
+      TS_ASSERT_EQUALS(status, "success");
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_size_change_1() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double x, int) { return 2 + x - 0.1 * x * x; }, 1, 0, 1, 0.1);
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 2.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(1), 1.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(2), -0.1, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(3), 0.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(4), 0.0, 0.0001);
+      std::string status = fit.getProperty("OutputStatus");
+      TS_ASSERT_EQUALS(status, "success");
+    }
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 2.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(1), 1.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(2), -0.1, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(3), 0.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(4), 0.0, 0.0001);
+      std::string status = fit.getProperty("OutputStatus");
+      TS_ASSERT_EQUALS(status, "success");
     }
 
     AnalysisDataService::Instance().clear();

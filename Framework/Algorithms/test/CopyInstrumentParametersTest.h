@@ -8,7 +8,7 @@
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -20,7 +20,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include <cmath>
 #include <stdexcept>
 
@@ -30,7 +29,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::IDetector_const_sptr;
 using Mantid::Geometry::IComponent_const_sptr;
-using namespace Geometry::ComponentHelper;
 
 class CopyInstrumentParametersTest : public CxxTest::TestSuite {
 public:

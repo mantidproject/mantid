@@ -118,20 +118,20 @@ class VisionReduction(PythonAlgorithm):
             CalTab[j][0]=tab[i][2]
             CalTab[j][1]=tab[i][3]
 
-        logger.information('Loading inelastic banks from', NexusFile)
+        logger.information('Loading inelastic banks from {}'.format(NexusFile))
         bank_list = ["bank%d" % i for i in range(1, 15)]
         bank_property = ",".join(bank_list)
         LoadEventNexus(Filename=NexusFile, BankName=bank_property, OutputWorkspace='__IED_T', LoadMonitors='0')
         LoadInstrument(Workspace='__IED_T',Filename='/SNS/VIS/shared/autoreduce/VISION_Definition_no_efixed.xml',RewriteSpectraMap=True)
         MaskDetectors(Workspace='__IED_T', DetectorList=MaskPX)
 
-        logger.information("Title:", mtd['__IED_T'].getTitle())
-        logger.information("Proton charge:", mtd['__IED_T'].getRun().getProtonCharge())
+        logger.information('Title: {}'.format(mtd['__IED_T'].getTitle()))
+        logger.information('Proton charge: {}'.format(mtd['__IED_T'].getRun().getProtonCharge()))
         if "Temperature" in mtd['__IED_T'].getTitle():
-            logger.error("Error: Non-equilibrium runs will not be reduced")
+            logger.error('Error: Non-equilibrium runs will not be reduced')
             # sys.exit()
         if mtd['__IED_T'].getRun().getProtonCharge() < 5.0:
-            logger.error("Error: Proton charge is too low")
+            logger.error('Error: Proton charge is too low')
             # sys.exit()
 
         NormaliseByCurrent(InputWorkspace='__IED_T',OutputWorkspace='__IED_T')
@@ -153,7 +153,7 @@ class VisionReduction(PythonAlgorithm):
             Ef=CalTab[Pixel][0]
             mtd['__IED_L'].setEFixed(Pixel, Ef)
         ConvertUnits(InputWorkspace='__IED_L',OutputWorkspace='__IED_E',EMode='Indirect',Target='DeltaE')
-        Rebin(InputWorkspace='__IED_E',OutputWorkspace='__IED_E',Params=self.binE,PreserveEvents='0')
+        Rebin(InputWorkspace='__IED_E',OutputWorkspace='__IED_E',Params=self.binE,PreserveEvents='0',IgnoreBinErrors=True)
         CorrectKiKf(InputWorkspace='__IED_E',OutputWorkspace='__IED_E',EMode='Indirect')
 
         GroupDetectors(InputWorkspace='__IED_E',OutputWorkspace='__IED_E_Forward',DetectorList=self.ListPXF)

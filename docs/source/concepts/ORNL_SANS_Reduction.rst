@@ -380,8 +380,8 @@ I(Q) calculation
 
     The resolution in Q is computed using Mildner-Carpenter.
 
-``IQxQy(nbins=100)``
-    Option to produce the reduced I(Qx, Qy).
+``IQxQy(nbins=100, log_binning=False)``
+    Option to produce the reduced `I(Qx, Qy)`. If `log_binning` is `True` the output `QxQy` will be logarithmic of base 10. By default the output `QxQy` is linear.
 
 ``NoIQxQy()``
     Turns off the option to produce the reduced I(Qx, Qy).

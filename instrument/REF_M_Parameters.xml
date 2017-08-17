@@ -10,7 +10,11 @@
     <parameter name="number-of-y-pixels">
       <value val="256"/>
     </parameter>
-      
+
+    <parameter name="pixel-width">
+      <value val="0.7"/>
+    </parameter>
+
    <parameter name="MultiDetectorStart">
        <value val="1"/>
    </parameter>

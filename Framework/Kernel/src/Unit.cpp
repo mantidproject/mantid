@@ -1,9 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
@@ -583,6 +582,61 @@ double dSpacing::conversionTOFMax() const { return DBL_MAX / factorTo; }
 
 Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
+// ==================================================================================================
+/* D-SPACING Perpendicular
+ * ==================================================================================================
+ *
+ * Conversion uses equation: dp^2 = lambda^2 - 2[Angstrom^2]*ln(cos(theta))
+ */
+DECLARE_UNIT(dSpacingPerpendicular)
+
+const UnitLabel dSpacingPerpendicular::label() const {
+  return Symbol::Angstrom;
+}
+
+dSpacingPerpendicular::dSpacingPerpendicular()
+    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
+
+void dSpacingPerpendicular::init() {
+  factorTo =
+      (PhysicalConstants::NeutronMass * (l1 + l2)) / PhysicalConstants::h;
+
+  // Now adjustments for the scale of units used
+  const double TOFisinMicroseconds = 1e6;
+  const double toAngstroms = 1e10;
+  factorTo *= TOFisinMicroseconds / toAngstroms;
+  factorFrom = factorTo;
+  if (factorFrom == 0.0)
+    factorFrom = DBL_MIN; // Protect against divide by zero
+  double cos_theta = cos(twoTheta / 2.0);
+  sfpTo = 0.0;
+  if (cos_theta > 0)
+    sfpTo = 2.0 * log(cos_theta);
+  sfpFrom = sfpTo;
+}
+
+double dSpacingPerpendicular::singleToTOF(const double x) const {
+  double sqrtarg = x * x + sfpTo;
+  // consider very small values to be a rounding error
+  if (sqrtarg < 1.0e-17)
+    return 0.0;
+  return sqrt(sqrtarg) * factorTo;
+}
+double dSpacingPerpendicular::singleFromTOF(const double tof) const {
+  double temp = tof / factorFrom;
+  return sqrt(temp * temp - sfpFrom);
+}
+double dSpacingPerpendicular::conversionTOFMin() const {
+  return sqrt(-1.0 * sfpFrom);
+}
+double dSpacingPerpendicular::conversionTOFMax() const {
+  return sqrt(std::numeric_limits<double>::max()) / factorFrom;
+}
+
+Unit *dSpacingPerpendicular::clone() const {
+  return new dSpacingPerpendicular(*this);
+}
+
 // ================================================================================
 /* MOMENTUM TRANSFER
  * ================================================================================
@@ -714,6 +768,7 @@ DeltaE::DeltaE()
     : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN), t_other(DBL_MIN),
       t_otherFrom(DBL_MIN), unitScaling(DBL_MIN) {
   addConversion("DeltaE_inWavenumber", PhysicalConstants::meVtoWavenumber, 1.);
+  addConversion("DeltaE_inFrequency", PhysicalConstants::meVtoFrequency, 1.);
 }
 
 void DeltaE::init() {
@@ -854,6 +909,40 @@ double DeltaE_inWavenumber::conversionTOFMin() const {
 }
 
 double DeltaE_inWavenumber::conversionTOFMax() const {
+  return DeltaE::conversionTOFMax();
+}
+
+// =====================================================================================================
+/* Energy Transfer in units of frequency
+ * =====================================================================================================
+ *
+ * This is identical to Energy Transfer in meV, with one division by Plank's
+ *constant, or multiplication
+ * by factor PhysicalConstants::meVtoFrequency
+ */
+DECLARE_UNIT(DeltaE_inFrequency)
+
+const UnitLabel DeltaE_inFrequency::label() const { return Symbol::GHz; }
+
+void DeltaE_inFrequency::init() {
+  DeltaE::init();
+  // Change the unit scaling factor
+  unitScaling = PhysicalConstants::meVtoFrequency;
+}
+
+Unit *DeltaE_inFrequency::clone() const {
+  return new DeltaE_inFrequency(*this);
+}
+
+DeltaE_inFrequency::DeltaE_inFrequency() : DeltaE() {
+  addConversion("DeltaE", 1.0 / PhysicalConstants::meVtoFrequency, 1.);
+}
+
+double DeltaE_inFrequency::conversionTOFMin() const {
+  return DeltaE::conversionTOFMin();
+}
+
+double DeltaE_inFrequency::conversionTOFMax() const {
   return DeltaE::conversionTOFMax();
 }
 

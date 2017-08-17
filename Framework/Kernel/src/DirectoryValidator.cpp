@@ -1,4 +1,5 @@
 #include "MantidKernel/DirectoryValidator.h"
+#include "MantidKernel/IValidator.h"
 #include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>

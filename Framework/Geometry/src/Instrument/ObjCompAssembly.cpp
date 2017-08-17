@@ -1,10 +1,12 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
 #include <algorithm>
 #include <iostream>
 #include <ostream>
@@ -299,7 +301,7 @@ void ObjCompAssembly::printTree(std::ostream &os) const {
  * @returns A vector of the absolute position
  */
 V3D ObjCompAssembly::getPos() const {
-  if (m_map) {
+  if (m_map && !hasComponentInfo()) {
     V3D pos;
     if (!m_map->getCachedLocation(m_base, pos)) {
       pos = Component::getPos();
@@ -315,8 +317,8 @@ V3D ObjCompAssembly::getPos() const {
  * creates it if it is not available.
  * @returns A vector of the absolute position
  */
-const Quat ObjCompAssembly::getRotation() const {
-  if (m_map) {
+Quat ObjCompAssembly::getRotation() const {
+  if (m_map && !hasComponentInfo()) {
     Quat rot;
     if (!m_map->getCachedRotation(m_base, rot)) {
       rot = Component::getRotation();
@@ -351,6 +353,11 @@ void ObjCompAssembly::testIntersectionWithChildren(
     } else {
     }
   }
+}
+
+size_t ObjCompAssembly::registerContents(
+    Mantid::Geometry::ComponentVisitor &visitor) const {
+  return visitor.registerComponentAssembly(*this);
 }
 
 /** Set the outline of the assembly. Creates an Object and sets m_shape point to

@@ -10,7 +10,7 @@ import AbinsModules
 import os
 
 
-from mantid.kernel import logger
+from mantid.kernel import logger, ConfigService
 
 
 # noinspection PyMethodMayBeStatic
@@ -25,7 +25,9 @@ class IOmodule(object):
             self._input_filename = input_filename
             try:
                 self._hash_input_filename = self.calculate_dft_file_hash()
-            except (IOError, ValueError) as err:
+            except IOError as err:
+                logger.error(str(err))
+            except ValueError as err:
                 logger.error(str(err))
 
             # extract name of file from the full path in the platform independent way
@@ -42,12 +44,15 @@ class IOmodule(object):
         else:
             raise ValueError("Invalid name of the group. String was expected.")
 
-        core_name = filename[0:filename.find(".")]
-        self._hdf_filename = core_name + ".hdf5"  # name of hdf file
+        core_name = filename[0:filename.rfind(".")]
+        save_dir_path = ConfigService.getString("defaultsave.directory")
+        self._hdf_filename = os.path.join(save_dir_path, core_name + ".hdf5")  # name of hdf file
 
         try:
             self._advanced_parameters = self._get_advanced_parameters()
-        except (IOError, ValueError) as err:
+        except IOError as err:
+            logger.error(str(err))
+        except ValueError as err:
             logger.error(str(err))
 
         self._attributes = {}  # attributes for group
@@ -219,8 +224,12 @@ class IOmodule(object):
                                    " -o " + os.path.join(path, temp_file)])
 
             shutil.move(os.path.join(path, temp_file), os.path.join(path, self._hdf_filename))
-        except (OSError, IOError, RuntimeError):
+        except OSError:
             pass  # repacking failed: no h5repack installed in the system... but we proceed
+        except IOError:
+            pass
+        except RuntimeError:
+            pass
 
     # noinspection PyMethodMayBeStatic
     def _list_of_str(self, list_str=None):
@@ -298,7 +307,7 @@ class IOmodule(object):
         @param item: converts unicode to item
         @return: converted element
         """
-        assert isinstance(item, unicode)
+        assert isinstance(item, six.text_type)
         return item.encode('utf-8')
 
     def _convert_unicode_to_str(self, object_to_check=None):
@@ -315,7 +324,7 @@ class IOmodule(object):
 
             elif isinstance(object_to_check, dict):
                 for item in object_to_check:
-                    if isinstance(item, unicode):
+                    if isinstance(item, six.text_type):
 
                         decoded_item = self._convert_unicode_to_string_core(item)
                         item_dict = object_to_check[item]
@@ -326,7 +335,7 @@ class IOmodule(object):
                     object_to_check[item] = self._convert_unicode_to_str(object_to_check[item])
 
             # unicode element
-            elif isinstance(object_to_check, unicode):
+            elif isinstance(object_to_check, six.text_type):
                 object_to_check = self._convert_unicode_to_string_core(object_to_check)
 
         return object_to_check
@@ -423,7 +432,6 @@ class IOmodule(object):
         """
         Helper function for calculating hash.
         :param filename: name of a file to calculate hash
-        :param fun_obj: object function to open file
         :return: string representation of hash
         """
         hash_calculator = hashlib.sha512()

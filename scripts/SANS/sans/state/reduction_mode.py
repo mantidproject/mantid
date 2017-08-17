@@ -11,7 +11,6 @@ from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter
                                    FloatWithNoneParameter, rename_descriptor_names)
 from sans.common.enums import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSInstrument, DetectorType)
-from sans.common.file_information import (get_instrument_paths_for_sans_file)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.automatic_setters import (automatic_setters)
 
@@ -88,8 +87,7 @@ class StateReductionMode(StateReductionBase, StateBase):
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
 def setup_detectors_from_ipf(reduction_info, data_info):
-    file_name = data_info.sample_scatter
-    _, ipf_path = get_instrument_paths_for_sans_file(file_name)
+    ipf_file_path = data_info.ipf_file_path
 
     detector_names = {DetectorType.to_string(DetectorType.LAB): "low-angle-detector-name",
                       DetectorType.to_string(DetectorType.HAB): "high-angle-detector-name"}
@@ -97,7 +95,7 @@ def setup_detectors_from_ipf(reduction_info, data_info):
     names_to_search = []
     names_to_search.extend(list(detector_names.values()))
 
-    found_detector_names = get_named_elements_from_ipf_file(ipf_path, names_to_search, str)
+    found_detector_names = get_named_elements_from_ipf_file(ipf_file_path, names_to_search, str)
 
     for detector_type in list(reduction_info.detector_names.keys()):
         try:

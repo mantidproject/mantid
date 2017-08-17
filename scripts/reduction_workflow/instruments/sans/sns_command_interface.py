@@ -5,37 +5,36 @@
 # Import the specific commands that we need - some of these are used in systemtests
 from reduction_workflow.command_interface import *
 
-from hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization
-from hfir_command_interface import SolidAngle, NoSolidAngle
-from hfir_command_interface import DirectBeamCenter, ScatteringBeamCenter
+from hfir_command_interface import SolidAngle
 from hfir_command_interface import SetBeamCenter as BaseSetBeamCenter
 
-from hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter
-from hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter
-from hfir_command_interface import NoSensitivityCorrection, DivideByThickness
+# The following imports allow users to import this file and have all functionality automatically imported
+# Do not remove these imports as it will break user scripts which rely on them
 
-from hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii
+from hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization, NoSolidAngle  # noqa: F401
+from hfir_command_interface import DirectBeamCenter, ScatteringBeamCenter  # noqa: F401
+from hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter  # noqa: F401
+from hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter  # noqa: F401
+from hfir_command_interface import NoSensitivityCorrection, DivideByThickness  # noqa: F401
 
-from hfir_command_interface import DirectBeamTransmission, TransmissionDarkCurrent
-from hfir_command_interface import ThetaDependentTransmission
-from hfir_command_interface import SetTransmissionBeamCenter, TransmissionDirectBeamCenter
-from hfir_command_interface import SetTransmission, NoTransmission
+from hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii  # noqa: F401
 
-from hfir_command_interface import Background, NoBackground, NoBckTransmission
-from hfir_command_interface import SetBckTransmission, BckDirectBeamTransmission
-from hfir_command_interface import SetBckTransmissionBeamCenter, BckThetaDependentTransmission
-from hfir_command_interface import BckTransmissionDirectBeamCenter, BckTransmissionDarkCurrent
+from hfir_command_interface import DirectBeamTransmission, TransmissionDarkCurrent  # noqa: F401
+from hfir_command_interface import ThetaDependentTransmission  # noqa: F401
+from hfir_command_interface import SetTransmissionBeamCenter, TransmissionDirectBeamCenter  # noqa: F401
+from hfir_command_interface import SetTransmission, NoTransmission  # noqa: F401
 
-from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance
-from hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide
-from hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale
+from hfir_command_interface import Background, NoBackground, NoBckTransmission  # noqa: F401
+from hfir_command_interface import SetBckTransmission, BckDirectBeamTransmission  # noqa: F401
+from hfir_command_interface import SetBckTransmissionBeamCenter, BckThetaDependentTransmission  # noqa: F401
+from hfir_command_interface import BckTransmissionDirectBeamCenter, BckTransmissionDarkCurrent  # noqa: F401
+
+from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance  # noqa: F401
+from hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide  # noqa: F401
+from hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale  # noqa: F401
 from hfir_command_interface import Stitch
 
-#from mantid.api import AlgorithmManager
-#from mantid.kernel import Logger
-#import mantid.simpleapi as simpleapi
 from reduction_workflow.find_data import find_data
-
 
 def EQSANS(keep_events=False, property_manager=None):
     Clear()

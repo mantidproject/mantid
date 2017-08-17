@@ -4,6 +4,8 @@
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
 
+#include <QString>
+
 namespace MantidQt {
 namespace MantidWidgets {
 /** @class DataProcessorProcessingAlgorithm
@@ -39,26 +41,29 @@ public:
   DataProcessorProcessingAlgorithm() = delete;
   // Constructor
   DataProcessorProcessingAlgorithm(
-      const std::string &name, const std::vector<std::string> &prefix,
-      const std::set<std::string> &blacklist = std::set<std::string>());
+      const QString &name, const std::vector<QString> &prefix,
+      const std::set<QString> &blacklist = std::set<QString>());
+  // Delegating constructor
+  DataProcessorProcessingAlgorithm(const QString &name, const QString &prefix,
+                                   const QString &blacklist = "");
   // Destructor
   virtual ~DataProcessorProcessingAlgorithm();
   // The number of output properties
   size_t numberOfOutputProperties() const;
   // The prefix for this output property
-  std::string prefix(size_t index) const;
+  QString prefix(size_t index) const;
   // The name of this input property
-  std::string inputPropertyName(size_t index) const;
+  QString inputPropertyName(size_t index) const;
   // The name of this output property
-  std::string outputPropertyName(size_t index) const;
+  QString outputPropertyName(size_t index) const;
 
 private:
   // The prefix of the output workspace(s)
-  std::vector<std::string> m_prefix;
+  std::vector<QString> m_prefix;
   // The names of the input workspace properties
-  std::vector<std::string> m_inputProperties;
+  std::vector<QString> m_inputProperties;
   // The names of the output workspace properties
-  std::vector<std::string> m_outputProperties;
+  std::vector<QString> m_outputProperties;
 };
 }
 }

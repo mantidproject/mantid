@@ -16,6 +16,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
@@ -589,6 +590,41 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), 2275);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Indirect, output->getEMode());
+
+    ConvertUnits conv3;
+    conv3.initialize();
+    conv3.setProperty("InputWorkspace", ws);
+    conv3.setPropertyValue("OutputWorkspace", outputSpace);
+    conv3.setPropertyValue("Target", "DeltaE_inFrequency");
+    conv3.setPropertyValue("Emode", "Direct");
+    conv3.setPropertyValue("Efixed", "12.95");
+    conv3.execute();
+
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputSpace));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
+                     "DeltaE_inFrequency");
+    TS_ASSERT_EQUALS(output->blocksize(), 1669);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
+
+    ConvertUnits conv4;
+    conv4.initialize();
+    conv4.setProperty("InputWorkspace", ws);
+    conv4.setPropertyValue("OutputWorkspace", outputSpace);
+    conv4.setPropertyValue("Target", "dSpacingPerpendicular");
+    conv4.setPropertyValue("Emode", "Direct");
+    conv4.execute();
+
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputSpace));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
+                     "dSpacingPerpendicular");
+    TS_ASSERT_EQUALS(output->blocksize(), 2663);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
 
     AnalysisDataService::Instance().remove(outputSpace);
   }

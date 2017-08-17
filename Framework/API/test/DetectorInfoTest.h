@@ -1,15 +1,18 @@
-#ifndef MANTID_API_DETECTORINFOTEST_H_
-#define MANTID_API_DETECTORINFOTEST_H_
+#ifndef MANTID_GEOMETRY_DETECTORINFOTEST_H_
+#define MANTID_GEOMETRY_DETECTORINFOTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
 #include <algorithm>
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -41,6 +44,11 @@ public:
 
     m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1,
                                        numberOfBins);
+  }
+
+  void test_comparison() {
+    TS_ASSERT(
+        m_workspace.detectorInfo().isEquivalent(m_workspace.detectorInfo()));
   }
 
   void test_size() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().size(), 5); }
@@ -127,6 +135,9 @@ public:
     TS_ASSERT_DELTA(detectorInfo.twoTheta(0), 0.0199973, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.twoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.twoTheta(2), 0.0199973, 1e-6);
+    // Monitors
+    TS_ASSERT_THROWS(detectorInfo.twoTheta(3), std::logic_error);
+    TS_ASSERT_THROWS(detectorInfo.twoTheta(4), std::logic_error);
   }
 
   // Legacy test via the workspace method detectorTwoTheta(), which might be
@@ -143,6 +154,9 @@ public:
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(0), -0.0199973, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(2), 0.0199973, 1e-6);
+    // Monitors
+    TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(3), std::logic_error);
+    TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(4), std::logic_error);
   }
 
   void test_position() {
@@ -211,18 +225,6 @@ public:
     detectorInfo.setRotation(0, oldRot);
   }
 
-  void test_setPosition_component_works_without_cached_positions() {
-    auto &detectorInfo = m_workspace.mutableDetectorInfo();
-    const auto &instrument = m_workspace.getInstrument();
-    const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
-    const auto oldPos = root->getPos();
-    const V3D offset(1.0, 0.0, 0.0);
-    // No detector, source, or sample data has been accessed, make sure that
-    // uninitialized caches done break the position update.
-    TS_ASSERT_THROWS_NOTHING(detectorInfo.setPosition(*root, oldPos + offset));
-    TS_ASSERT_THROWS_NOTHING(detectorInfo.setPosition(*root, oldPos));
-  }
-
   void test_setPosition_component() {
     auto &detInfo = m_workspace.mutableDetectorInfo();
     const auto &instrument = m_workspace.getInstrument();
@@ -234,7 +236,9 @@ public:
     TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, 5.0));
 
-    detInfo.setPosition(*root, oldPos + offset);
+    auto &compInfo = m_workspace.mutableComponentInfo();
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()),
+                         oldPos + offset);
 
     TS_ASSERT_EQUALS(detInfo.sourcePosition(), V3D(1.0, 0.0, -20.0));
     TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(1.0, 0.0, 0.0));
@@ -248,7 +252,8 @@ public:
     TS_ASSERT_EQUALS(info.samplePosition(), V3D(1.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(info.position(0), V3D(1.0, -0.1, 5.0));
 
-    detInfo.setPosition(*root, oldPos);
+    // Reset
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), oldPos);
   }
 
   void test_setRotation_component() {
@@ -259,7 +264,8 @@ public:
     V3D e2{0, 1, 0};
     Quat rot(180.0, e2);
 
-    detInfo.setRotation(*root, rot);
+    auto &compInfo = m_workspace.mutableComponentInfo();
+    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), rot);
 
     // Rotations *and* positions have changed since *parent* was rotated
     TS_ASSERT_EQUALS(detInfo.rotation(0), rot);
@@ -279,7 +285,106 @@ public:
     TS_ASSERT_EQUALS(info.samplePosition(), V3D(0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(info.position(0), V3D(0.0, -0.1, -5.0));
 
-    detInfo.setRotation(*root, oldRot);
+    // Reset
+    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), oldRot);
+  }
+
+  void test_setRotation_component_moved_root() {
+    auto &detInfo = m_workspace.mutableDetectorInfo();
+    const auto &instrument = m_workspace.getInstrument();
+    const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
+    const auto oldPos = root->getPos();
+    const auto oldRot = root->getRotation();
+    V3D e2{0, 1, 0};
+    Quat rot(180.0, e2);
+
+    auto &compInfo = m_workspace.mutableComponentInfo();
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()),
+                         V3D{0.0, 0.0, 1.0});
+    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), rot);
+
+    // Rotations *and* positions have changed since *parent* was rotated
+    TS_ASSERT_EQUALS(detInfo.rotation(0), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(1), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(2), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(3), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(4), rot);
+    TS_ASSERT_EQUALS(detInfo.sourcePosition(), V3D(0.0, 0.0, 21.0));
+    TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(0.0, 0.0, 1.0));
+    TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, -4.0));
+
+    // For additional verification we do *not* use detInfo, but make sure that
+    // the changes actually affected the workspace.
+    const auto &clone = m_workspace.clone();
+    const auto &info = clone->detectorInfo();
+    TS_ASSERT_EQUALS(info.sourcePosition(), V3D(0.0, 0.0, 21.0));
+    TS_ASSERT_EQUALS(info.samplePosition(), V3D(0.0, 0.0, 1.0));
+    TS_ASSERT_EQUALS(info.position(0), V3D(0.0, -0.1, -4.0));
+
+    // Reset
+    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), oldRot);
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), oldPos);
+  }
+
+  void test_setRotation_setPosition_commute() {
+    auto &detInfo = m_workspace.mutableDetectorInfo();
+    const auto &instrument = m_workspace.getInstrument();
+    const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
+    const auto oldRot = root->getRotation();
+    const auto oldPos = root->getPos();
+    V3D axis{0.1, 0.2, 0.7};
+    Quat rot(42.0, axis);
+    V3D pos{-11.0, 7.0, 42.0};
+
+    // Note the order: We are going in a (figurative) square...
+    auto &compInfo = m_workspace.mutableComponentInfo();
+    const size_t rootIndex = compInfo.indexOf(root->getComponentID());
+    compInfo.setRotation(rootIndex, rot);
+    compInfo.setPosition(rootIndex, pos);
+    compInfo.setRotation(rootIndex, oldRot);
+    compInfo.setPosition(rootIndex, oldPos);
+
+    // ... and check that we come back to where we started.
+    TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, 5.0));
+    TS_ASSERT_EQUALS(detInfo.position(1), V3D(0.0, 0.0, 5.0));
+    TS_ASSERT_EQUALS(detInfo.position(2), V3D(0.0, 0.1, 5.0));
+    TS_ASSERT_EQUALS(detInfo.position(3), V3D(0.0, 0.0, -9.0));
+    TS_ASSERT_EQUALS(detInfo.position(4), V3D(0.0, 0.0, -2.0));
+    TS_ASSERT_EQUALS(detInfo.rotation(0), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.rotation(1), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.rotation(2), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.rotation(3), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
+  }
+
+  void test_positions_rotations_multi_level() {
+    WorkspaceTester ws;
+    ws.initialize(9, 1, 1);
+    ws.setInstrument(
+        ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    auto &detInfo = ws.mutableDetectorInfo();
+    const auto root = ws.getInstrument();
+    const auto bank = root->getComponentByName("bank1");
+    TS_ASSERT_EQUALS(detInfo.position(0), (V3D{-0.008, -0.0002, 5.0}));
+    const auto rootRot = root->getRotation();
+    const auto rootPos = root->getPos();
+    const auto bankPos = bank->getPos();
+    V3D axis{0.1, 0.2, 0.7};
+    Quat rot(42.0, axis);
+    V3D delta1{-11.0, 7.0, 42.0};
+    V3D delta2{1.0, 3.0, 2.0};
+
+    auto &compInfo = ws.mutableComponentInfo();
+    const size_t rootIndex = compInfo.indexOf(root->getComponentID());
+    const size_t bankIndex = compInfo.indexOf(bank->getComponentID());
+    compInfo.setRotation(rootIndex, rot);
+    compInfo.setPosition(rootIndex, delta1);
+    compInfo.setPosition(bankIndex, delta1 + delta2);
+    // Undo, but *not* in reverse order.
+    compInfo.setRotation(rootIndex, rootRot);
+    compInfo.setPosition(rootIndex, rootPos);
+    compInfo.setPosition(bankIndex, bankPos);
+    TS_ASSERT_EQUALS(detInfo.position(0), (V3D{-0.008, -0.0002, 5.0}));
   }
 
   void test_detectorIDs() {
@@ -432,10 +537,12 @@ public:
   }
 
   void test_position_after_parent_move() {
-    auto &detectorInfo = m_workspace.mutableDetectorInfo();
     const auto &instrument = m_workspace.getInstrument();
     const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
-    detectorInfo.setPosition(*root, Kernel::V3D(0.1, 0.0, 0.0));
+
+    auto &compInfo = m_workspace.mutableComponentInfo();
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()),
+                         Kernel::V3D(0.1, 0.0, 0.0));
     for (int repeat = 0; repeat < 32; ++repeat) {
       Kernel::V3D result;
       const auto &detectorInfo = m_workspace.detectorInfo();
@@ -451,4 +558,4 @@ private:
   WorkspaceTester m_workspace;
 };
 
-#endif /* MANTID_API_DETECTORINFOTEST_H_ */
+#endif /* MANTID_GEOMETRY_DETECTORINFOTEST_H_ */

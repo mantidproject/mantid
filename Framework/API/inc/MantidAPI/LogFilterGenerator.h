@@ -59,7 +59,8 @@ private:
   /// Filter log by period
   void filterByPeriod(Mantid::Kernel::LogFilter *filter) const;
   /// Get log data from workspace
-  Mantid::Kernel::Property *getLogData(const std::string &logName) const;
+  Mantid::Kernel::Property *getLogData(const std::string &logName,
+                                       bool warnIfNotFound = true) const;
   /// Type of filter
   const FilterType m_filterType;
   /// Run object containing logs

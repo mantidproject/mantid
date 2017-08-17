@@ -3,16 +3,16 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import mantid.simpleapi as mantid
 import isis_powder.routines.common as common
-from isis_powder.routines.common_enums import InputBatchingEnum
+from isis_powder.routines.common_enums import INPUT_BATCHING
 
 # TODO this entire file needs cleaning and refactoring
 
 
 def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
     input_ws_list = common.load_current_normalised_ws_list(run_number_string=calibration_runs, instrument=self,
-                                                           input_batching=InputBatchingEnum.Summed)
+                                                           input_batching=INPUT_BATCHING.Summed)
     input_ws = input_ws_list[0]
-    run_details = self.get_run_details(calibration_runs)
+    run_details = self._get_run_details(calibration_runs)
 
     if run_details.instrument_version == "new" or run_details.instrument_version == "new2":
         input_ws = mantid.Rebin(InputWorkspace=input_ws, Params="100,-0.0006,19950")

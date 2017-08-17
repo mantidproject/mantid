@@ -117,6 +117,7 @@
   </instrument>
 
   <instrument name="LOQ">
+    <zeropadding size="8" startRunNumber="99738" prefix="LOQ"/>
     <technique>Small Angle Scattering</technique>
     <livedata>
       <connection name="histo" address="NDXLOQ:6789" listener="ISISHistoDataListener" />
@@ -512,6 +513,9 @@
 	<technique>Neutron Diffraction</technique>
 	<technique>Single Crystal Diffraction</technique>
 	<technique>Protein Crystallography</technique>
+    <livedata>
+      <connection name="event" address="bl11b-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+    </livedata>
    </instrument>
 
    <instrument name="TOPAZ" beamline="12">
@@ -579,7 +583,7 @@
 
 </facility>
 
-<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc" nofileprefix="True">
+<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc" nofileprefix="True" multifilelimit="1000">
 
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique>
@@ -627,6 +631,17 @@
     <technique>Powder diffraction</technique>
   </instrument>
 
+  <instrument name="D20">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
+  <instrument name="D1B">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
+  <instrument name="D4C">
+    <technique>Liquid diffraction</technique>
+  </instrument>
 
   <instrument name="D17">
     <technique>Reflectometry</technique>
@@ -741,6 +756,7 @@
   </instrument>
 
   <instrument name="TOFTOF">
+    <zeropadding size="8" startRunNumber="69750"/>
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
@@ -751,6 +767,14 @@
 <facility name="ANSTO" FileExtensions=".nxs,.tar">
   <instrument name="Bilby">
     <technique>Small Angle Scattering</technique>
+  </instrument>
+</facility>
+
+<!-- HZB -->
+<facility name="HZB" FileExtensions=".nxs">
+  <instrument name="EXED">
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Single Crystal Diffraction</technique>
   </instrument>
 </facility>
 
@@ -781,6 +805,13 @@
     <technique>Test Listener</technique>
     <livedata>
       <connection name="fake" address="127.0.0.1:0" listener="FakeEventDataListener" />
+    </livedata>
+  </instrument>
+  
+  <instrument name="ISIS_Kafka_Event">
+    <technique>Test Listener</technique>
+    <livedata>
+      <connection name="kafka_event" address="sakura:9092" listener="KafkaEventListener" />
     </livedata>
   </instrument>
 

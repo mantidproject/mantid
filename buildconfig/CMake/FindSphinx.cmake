@@ -5,42 +5,27 @@
 # If the module is found the following variables are
 # set:
 #  SPHINX_FOUND
-#  SPHINX_EXECUTABLE
+#  SPHINX_PACKAGE_DIR
 #
 #=============================================================
 # main()
 #=============================================================
 
-find_program( SPHINX_EXECUTABLE NAME sphinx-build.cmd sphinx-build
-  PATHS ${CMAKE_LIBRARY_PATH}/python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}/Scripts
-  PATH_SUFFIXES bin
-  DOC "Sphinx documentation generator"
-)
 
-if (SPHINX_EXECUTABLE)
-    # run sphinx-build to attempt to get the version
-    execute_process (COMMAND ${SPHINX_EXECUTABLE} --version
-                     OUTPUT_STRIP_TRAILING_WHITESPACE
-                     OUTPUT_VARIABLE version_string
-                     ERROR_VARIABLE version_error_string
-                     ERROR_STRIP_TRAILING_WHITESPACE)
+FIND_FILE(_find_sphinx_py FindSphinx.py PATHS ${CMAKE_MODULE_PATH})
 
-    # if it wasn't successful it is hiding in stderr
-    if (NOT version_string)
-        if ( version_error_string )
-            string (REGEX REPLACE "\n" ";" version_string ${version_error_string})
-            list (GET version_string 0 version_string)
-        else ( version_error_string )
-            set ( version_string "1.1.0" )
-        endif ( version_error_string )
-    endif (NOT version_string)
+# import sphinx-build to attempt to get the version
+execute_process (COMMAND ${PYTHON_EXECUTABLE} ${_find_sphinx_py} OUTPUT_VARIABLE sphinx_output
+                                                                 RESULT_VARIABLE sphinx_result)
+list(GET sphinx_output 0 version_string)
+list(GET sphinx_output 1 SPHINX_PACKAGE_DIR)
 
-    # chop out the version number
-    string (REGEX REPLACE ".*([0-9]+\\.[0-9]+\\.[0-9]+).*" "\\1" SPHINX_VERSION ${version_string})
-endif (SPHINX_EXECUTABLE)
+if (${sphinx_result} STREQUAL "0" AND version_string)
+  # chop out the version number
+  string (REGEX REPLACE ".*([0-9]+\\.[0-9]+\\.[0-9]+).*" "\\1" SPHINX_VERSION ${version_string})
+endif ()
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(Sphinx DEFAULT_MSG SPHINX_EXECUTABLE )
+find_package_handle_standard_args(Sphinx DEFAULT_MSG SPHINX_PACKAGE_DIR)
 
-mark_as_advanced ( SPHINX_EXECUTABLE )

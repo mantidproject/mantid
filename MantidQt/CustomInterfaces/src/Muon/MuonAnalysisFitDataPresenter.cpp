@@ -13,6 +13,8 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include <boost/lexical_cast.hpp>
 
+#include "MantidAPI/ITableWorkspace.h"
+
 using MantidQt::MantidWidgets::IMuonFitDataModel;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
@@ -176,6 +178,7 @@ void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
  */
 void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
   const auto names = generateWorkspaceNames(overwrite);
+
   if (!names.empty()) {
     createWorkspacesToFit(names);
     updateWorkspaceNames(names);
@@ -356,9 +359,59 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
       }
     }
   }
+
   return workspaceNames;
 }
+/**
+* Stores the normalization into the table WS
+* If the workspace is already in the table
+* do nothing.
+* @param name :: the name of the workspace to add.
+*/
+void MuonAnalysisFitDataPresenter::storeNormalization(std::string name) const {
+  if (m_isItTFAsymm) {
+    if (!Mantid::API::AnalysisDataService::Instance().doesExist(
+            "MuonAnalysisTFNormalizations")) {
+      Mantid::API::ITableWorkspace_sptr table =
+          Mantid::API::WorkspaceFactory::Instance().createTable();
+      AnalysisDataService::Instance().addOrReplace(
+          "MuonAnalysisTFNormalizations", table);
+      table->addColumn("double", "norm");
+      table->addColumn("str", "name");
+      table->addColumn("str", "method");
+    }
+    Mantid::API::ITableWorkspace_sptr table =
+        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                "MuonAnalysisTFNormalizations"));
+    auto colName = table->getColumn("name");
+    if (table->rowCount() > 1) {
+      std::string tmp = name;
+      // stored with ; instead of spaces
+      std::replace(tmp.begin(), tmp.end(), ' ', ';');
+      for (size_t j = 0; j < table->rowCount(); j++) {
+        if (colName->cell<std::string>(j) == tmp) { // already exists
+          return;
+        }
+      }
+    }
 
+    Mantid::API::TableRow row = table->appendRow();
+    std::string tmp = name;
+    // spaces stop the string being written
+    std::replace(tmp.begin(), tmp.end(), ' ', ';');
+    // get data
+    if (Mantid::API::AnalysisDataService::Instance().doesExist("__norm__")) {
+      Mantid::API::ITableWorkspace_sptr tmpNorm =
+          boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+              Mantid::API::AnalysisDataService::Instance().retrieve(
+                  "__norm__"));
+      auto colNorm = tmpNorm->getColumn("norm");
+      // saves data
+      row << (*colNorm)[0] << tmp << "Estimate";
+    }
+  }
+}
 /**
  * Create an analysis workspace given the required name.
  * @param name :: [input] Name of workspace to create (in format INST0001234;
@@ -390,7 +443,6 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     // This will sum multiple runs together
     const auto loadedData = m_dataLoader.loadFiles(filenames);
     groupLabel = loadedData.label;
-
     // correct and group the data
     const auto correctedData =
         m_dataLoader.correctAndGroup(loadedData, m_grouping);
@@ -401,7 +453,8 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     if (params.periods.empty()) {
       analysisOptions.summedPeriods = "1";
     } else {
-      std::replace(params.periods.begin(), params.periods.end(), ',', '+');
+      // need a comma seperated list
+      std::replace(params.periods.begin(), params.periods.end(), '+', ',');
       const size_t minus = params.periods.find('-');
       analysisOptions.summedPeriods = params.periods.substr(0, minus);
       if (minus != std::string::npos && minus != params.periods.size()) {
@@ -409,7 +462,6 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
             params.periods.substr(minus + 1, std::string::npos);
       }
     }
-
     // Rebin params: use the same as MuonAnalysis uses, UNLESS this is raw data
     analysisOptions.rebinArgs =
         isRawData(name) ? "" : getRebinParams(correctedData);
@@ -421,11 +473,13 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     analysisOptions.plotType = params.plotType;
     outputWS =
         m_dataLoader.createAnalysisWorkspace(correctedData, analysisOptions);
+
   } catch (const std::exception &ex) {
     std::ostringstream err;
     err << "Failed to create analysis workspace " << name << ": " << ex.what();
     g_log.error(err.str());
   }
+  storeNormalization(name);
 
   return outputWS;
 }
@@ -454,7 +508,7 @@ std::string MuonAnalysisFitDataPresenter::getRebinParams(
       const double step = std::stod(m_rebinArgs.second);
       const auto &mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
       if (mws) {
-        const double binSize = mws->dataX(0)[1] - mws->dataX(0)[0];
+        const double binSize = mws->x(0)[1] - mws->x(0)[0];
         params = boost::lexical_cast<std::string>(step * binSize);
       }
     } catch (const std::exception &err) {
@@ -785,20 +839,6 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(
   const QString numberString = instRun.right(instRun.size() - firstZero);
   m_dataSelector->setWorkspaceDetails(
       numberString, QString::fromStdString(wsParams.instrument), filePath);
-
-  // Set selected groups/pairs and periods here too
-  // (unless extra groups/periods are already selected, in which case don't
-  // unselect them)
-  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
-  const QString &periodToSet = QString::fromStdString(wsParams.periods);
-  const auto &groups = m_dataSelector->getChosenGroups();
-  const auto &periods = m_dataSelector->getPeriodSelections();
-  if (!groups.contains(groupToSet)) {
-    m_dataSelector->setChosenGroup(groupToSet);
-  }
-  if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
-    m_dataSelector->setChosenPeriod(periodToSet);
-  }
 
   // If given an optional file path to "current run", cache it for later use
   if (filePath && !wsParams.runs.empty()) {

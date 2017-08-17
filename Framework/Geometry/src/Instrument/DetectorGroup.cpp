@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -454,10 +455,10 @@ size_t DetectorGroup::index() const {
   throw std::runtime_error("A DetectorGroup cannot have an index");
 }
 
-/// Helper for legacy access mode. Always throws for DetectorGroup.
-void DetectorGroup::setIndex(const size_t index) {
-  UNUSED_ARG(index);
-  throw std::runtime_error("A DetectorGroup cannot have an index");
+size_t DetectorGroup::registerContents(class ComponentVisitor &) const {
+  throw std::runtime_error("DetectorGroup::registerContents. This should not "
+                           "be called. DetectorGroups are not part of the "
+                           "instrument. On-the-fly only.");
 }
 
 } // namespace Geometry

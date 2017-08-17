@@ -42,6 +42,8 @@ private slots:
   void saveClicked();
   // Handles plotting
   void plotClicked();
+  // Handles plotting current preview
+  void plotCurrentPreview();
 
 private:
   /// Current preview spectrum

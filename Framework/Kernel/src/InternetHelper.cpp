@@ -12,28 +12,32 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/PrivateKeyPassphraseHandler.h>
-#include <Poco/Net/SecureStreamSocket.h>
 #include <Poco/Net/SSLManager.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/URI.h>
-// Visual Studio complains with the inclusion of Poco/FileStream
-// disabling this warning.
-#if defined(_WIN32) || defined(_WIN64)
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#include <Poco/FileStream.h>
-#include <Poco/NullStream.h>
-#include <Winhttp.h>
-#pragma warning(pop)
-#else
-#include <Poco/FileStream.h>
-#include <Poco/NullStream.h>
 
+#include <Poco/Exception.h>
+#include <Poco/File.h>
+#include <Poco/FileStream.h>
+#include <Poco/Net/Context.h>
+#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPMessage.h>
+#include <Poco/Net/InvalidCertificateHandler.h>
+#include <Poco/SharedPtr.h>
+#include <Poco/Timespan.h>
+#include <Poco/Types.h>
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <Winhttp.h>
 #endif
 
+#include <boost/lexical_cast.hpp>
+
 // std
+#include <mutex>
 #include <fstream>
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {

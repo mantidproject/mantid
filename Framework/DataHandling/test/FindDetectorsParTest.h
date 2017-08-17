@@ -1,16 +1,17 @@
 #ifndef FIND_DETECTORSPAR_H_
 #define FIND_DETECTORSPAR_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <array>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -446,9 +447,10 @@ private:
       AnalysisDataService::Instance().remove(inputWS->getName());
     }
 
-    boost::shared_ptr<Geometry::DetectorGroup> pDet(
-        ComponentCreationHelper::createRingOfCylindricalDetectors(4, 5, 4));
-    const size_t NDET = pDet->nDets();
+    auto detectors =
+        ComponentCreationHelper::createVectorOfCylindricalDetectors(4, 5, 4);
+
+    const size_t NDET = detectors.size();
 
     inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
 
@@ -456,22 +458,25 @@ private:
         new Geometry::Instrument("basic_ring"));
     Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
     source->setPos(0.0, 0.0, -10.0);
+    spInst->add(source);
     spInst->markAsSource(source);
 
     Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
     sample->setPos(0.0, 0.0, -2);
+    spInst->add(sample);
     spInst->markAsSamplePos(sample);
 
-    // get pointers to the detectors, contributed into group;
-    partDetectors = pDet->getDetectors();
-
+    std::vector<detid_t> detectorIDs;
+    for (size_t i = 0; i < NDET; i++) {
+      auto *tempUnmanagedDet = detectors[i].release();
+      spInst->add(tempUnmanagedDet);
+      spInst->markAsDetector(tempUnmanagedDet);
+      detectorIDs.push_back(tempUnmanagedDet->getID());
+    }
     inputWS->getSpectrum(0).setSpectrumNo(1);
     inputWS->getSpectrum(0).clearDetectorIDs();
-    inputWS->getSpectrum(0).addDetectorIDs(pDet->getDetectorIDs());
+    inputWS->getSpectrum(0).addDetectorIDs(detectorIDs);
 
-    for (size_t i = 0; i < NDET; i++) {
-      spInst->markAsDetector(partDetectors[i].get());
-    }
     inputWS->setInstrument(spInst);
 
     AnalysisDataService::Instance().add(WS_Name, inputWS);

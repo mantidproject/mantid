@@ -76,29 +76,42 @@ void CubicSpline::function1D(double *out, const double *xValues,
 void CubicSpline::setupInput(boost::scoped_array<double> &x,
                              boost::scoped_array<double> &y, int n) const {
   // Populate data points from the input attributes and parameters
-  bool xSortFlag = false;
+  bool isSorted = true;
 
   for (int i = 0; i < n; ++i) {
-    std::string num = std::to_string(i);
 
-    std::string xName = "x" + num;
-    std::string yName = "y" + num;
+    x[i] = getAttribute("x" + std::to_string(i)).asDouble();
+    y[i] = getParameter(i);
 
-    x[i] = getAttribute(xName).asDouble();
-
-    // if x[i] is out of order with its neighbours
-    if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
-      xSortFlag = true;
+    if (isSorted) {
+      // if x[i] is out of order with its neighbours
+      if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
+        isSorted = false;
+      }
     }
-
-    y[i] = getParameter(yName);
   }
 
   // sort the data points if necessary
-  if (xSortFlag) {
+  if (!isSorted) {
     g_log.warning() << "Spline x parameters are not in ascending order. Values "
                        "will be sorted.\n";
-    std::sort(x.get(), x.get() + n);
+
+    using point = std::pair<double, double>;
+    std::vector<point> pairs;
+    pairs.reserve(n);
+    for (int i = 0; i < n; ++i) {
+      pairs.push_back(std::make_pair(x[i], y[i]));
+    }
+
+    std::sort(pairs.begin(), pairs.end(),
+              [](const point &xy1, const point &xy2) {
+                return xy1.first < xy2.first;
+              });
+
+    for (int i = 0; i < n; ++i) {
+      x[i] = pairs[i].first;
+      y[i] = pairs[i].second;
+    }
   }
 
   // pass values to GSL objects

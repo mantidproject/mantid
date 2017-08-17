@@ -69,7 +69,7 @@ public:
   }
 
   void do_test(bool deleteWS, int MaxPeaks, int expectedPeaks,
-               bool AppendPeaks = false, bool histo = false) {
+               bool AppendPeaks = false, bool histo = false, int edge = 0) {
     // Name of the output workspace.
     std::string outWSName("peaksFound");
 
@@ -102,6 +102,7 @@ public:
         alg.setPropertyValue("PeakDistanceThreshold", "0.7"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxPeaks", int64_t(MaxPeaks)));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AppendPeaks", AppendPeaks));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EdgePixels", edge));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -114,7 +115,10 @@ public:
     TS_ASSERT(ws);
     if (!ws)
       return;
-
+    if (edge > 0) {
+      TS_ASSERT_EQUALS(ws->getNumberPeaks(), 0);
+      return;
+    }
     // Should find 3 peaks.
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), 1);
     if (ws->getNumberPeaks() != expectedPeaks)
@@ -200,6 +204,43 @@ public:
   /** Run on MDHistoWorkspace, but limit to 1 peak */
   void test_exec_histo_withMaxPeaks() {
     do_test(true, 1, 1, false, true /*histo conversion*/);
+  }
+
+  /** Test edge */
+  void test_exec_edge() {
+    do_test(true, 100, 3, false, false, 100 /*edge pixels*/);
+  }
+
+  /**Test number of event normalization selection fails for MDHistoWorkspace */
+  void
+  test_that_number_of_event_normalization_selection_throws_when_MDHistoWorkspace_is_selected() {
+    // Create an MDHistoWorkspace
+    createMDEW();
+    addPeak(100, 1, 2, 3, 0.1);
+    FrameworkManager::Instance().exec(
+        "BinMD", 14, "AxisAligned", "1", "AlignedDim0", "Q_lab_x,-10,10,100",
+        "AlignedDim1", "Q_lab_y,-10,10,100", "AlignedDim2",
+        "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDEWS",
+        "OutputWorkspace", "MDEWS");
+
+    FindPeaksMD alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "place_holder"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("DensityThresholdFactor", "2.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PeakDistanceThreshold", "0.7"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxPeaks", int64_t(10)));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("PeakFindingStrategy", "NumberOfEventsNormalization"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SignalThresholdFactor", 1.3));
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+
+    AnalysisDataService::Instance().remove("MDEWS");
   }
 };
 

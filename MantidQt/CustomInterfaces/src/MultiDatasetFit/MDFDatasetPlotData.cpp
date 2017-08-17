@@ -93,39 +93,36 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws,
                               int wsIndex,
                               const Mantid::API::MatrixWorkspace *outputWS) {
   bool haveFitCurves = outputWS && outputWS->getNumberHistograms() >= 3;
-  std::vector<double> xValues = ws->readX(wsIndex);
-  if (ws->isHistogramData()) {
-    auto xend = xValues.end() - 1;
-    for (auto x = xValues.begin(); x != xend; ++x) {
-      *x = (*x + *(x + 1)) / 2;
-    }
-    xValues.pop_back();
-  }
-  m_dataCurve->setData(xValues.data(), ws->readY(wsIndex).data(),
+  auto xValues = ws->points(wsIndex);
+
+  m_dataCurve->setData(xValues.rawData().data(),
+                       ws->y(wsIndex).rawData().data(),
                        static_cast<int>(xValues.size()));
 
   if (m_dataErrorCurve) {
     m_dataErrorCurve->detach();
     delete m_dataErrorCurve;
   }
-  m_dataErrorCurve =
-      new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, ws->readE(wsIndex));
+  m_dataErrorCurve = new MantidQt::MantidWidgets::ErrorCurve(
+      m_dataCurve, ws->e(wsIndex).rawData());
 
   if (haveFitCurves) {
     auto xBegin = std::lower_bound(xValues.begin(), xValues.end(),
-                                   outputWS->readX(1).front());
+                                   outputWS->x(1).front());
     if (xBegin == xValues.end())
       return;
     int i0 = static_cast<int>(std::distance(xValues.begin(), xBegin));
-    int n = static_cast<int>(outputWS->readY(1).size());
+    int n = static_cast<int>(outputWS->y(1).size());
     if (i0 + n > static_cast<int>(xValues.size()))
       return;
     m_calcCurve = new QwtPlotCurve("calc");
-    m_calcCurve->setData(xValues.data() + i0, outputWS->readY(1).data(), n);
+    m_calcCurve->setData(xValues.rawData().data() + i0,
+                         outputWS->y(1).rawData().data(), n);
     QPen penCalc("red");
     m_calcCurve->setPen(penCalc);
     m_diffCurve = new QwtPlotCurve("diff");
-    m_diffCurve->setData(xValues.data() + i0, outputWS->readY(2).data(), n);
+    m_diffCurve->setData(xValues.rawData().data() + i0,
+                         outputWS->y(2).rawData().data(), n);
     QPen penDiff("green");
     m_diffCurve->setPen(penDiff);
   }

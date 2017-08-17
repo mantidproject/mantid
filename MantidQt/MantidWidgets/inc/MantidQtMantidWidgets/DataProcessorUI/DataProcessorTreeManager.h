@@ -3,20 +3,19 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/TreeData.h"
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
-
-class QAbstractItemModel;
+#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 class DataProcessorCommand;
 class DataProcessorWhiteList;
-
-typedef std::map<int, std::map<int, std::vector<std::string>>> TreeData;
 
 /** @class DataProcessorTreeManager
 
@@ -71,9 +70,9 @@ public:
   /// Clear selected
   virtual void clearSelected() = 0;
   /// Copy selected
-  virtual std::string copySelected() = 0;
+  virtual QString copySelected() = 0;
   /// Paste selected
-  virtual void pasteSelected(const std::string &text) = 0;
+  virtual void pasteSelected(const QString &text) = 0;
   /// Blank table
   virtual void newTable(const DataProcessorWhiteList &whitelist) = 0;
   /// Blank table
@@ -85,12 +84,19 @@ public:
   /// Return selected data
   virtual TreeData selectedData(bool prompt = false) = 0;
   /// Transfer new data to model
-  virtual void
-  transfer(const std::vector<std::map<std::string, std::string>> &runs,
-           const DataProcessorWhiteList &whitelist) = 0;
+  virtual void transfer(const std::vector<std::map<QString, QString>> &runs,
+                        const DataProcessorWhiteList &whitelist) = 0;
   /// Update row with new data
-  virtual void update(int parent, int child,
-                      const std::vector<std::string> &data) = 0;
+  virtual void update(int parent, int child, const QStringList &data) = 0;
+  /// Get the number of rows of a given parent
+  virtual int rowCount() const = 0;
+  virtual int rowCount(int parent) const = 0;
+  /// Get the 'processed' status of a data item
+  virtual bool isProcessed(int position) const = 0;
+  virtual bool isProcessed(int position, int parent) const = 0;
+  /// Set the 'processed' status of a data item
+  virtual void setProcessed(bool processed, int position) = 0;
+  virtual void setProcessed(bool processed, int position, int parent) = 0;
 
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,
@@ -99,7 +105,7 @@ public:
   /// Return member variables
 
   /// Return the model
-  virtual boost::shared_ptr<QAbstractItemModel> getModel() = 0;
+  virtual boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() = 0;
   /// Return the table ws
   virtual Mantid::API::ITableWorkspace_sptr getTableWorkspace() = 0;
 

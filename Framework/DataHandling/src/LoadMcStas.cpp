@@ -510,8 +510,9 @@ void LoadMcStas::readHistogramData(
 
     // ensure that specified name is given to workspace (eventWS) when added to
     // outputGroup
-    std::string nameOfGroupWS = getProperty("OutputWorkspace");
-    std::string nameUserSee = nameAttrValueTITLE + "_" + nameOfGroupWS;
+    std::string nameUserSee = std::string(nameAttrValueTITLE)
+                                  .append("_")
+                                  .append(getProperty("OutputWorkspace"));
     std::string extraProperty =
         "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
     declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(

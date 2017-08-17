@@ -16,16 +16,16 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#include <boost/function.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
-#include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <functional>
 
@@ -297,6 +297,14 @@ public:
         // (from the IDF)
         // ID. Setting this will abort the loading of the bank.
         m_loadError = true;
+      }
+      // fixup the minimum pixel id in the case that it's lower than the lowest
+      // 'known' id. We test this by checking that when we add the offset we
+      // would not get a negative index into the vector. Note that m_min_id is
+      // a uint so we have to be cautious about adding it to an int which may be
+      // negative.
+      if (static_cast<int32_t>(m_min_id) + alg->pixelID_to_wi_offset < 0) {
+        m_min_id = static_cast<uint32_t>(abs(alg->pixelID_to_wi_offset));
       }
       // fixup the maximum pixel id in the case that it's higher than the
       // highest 'known' id
@@ -1575,7 +1583,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   size_t numProg = bankNames.size() * (1 + 3); // 1 = disktask, 3 = proc task
   if (splitProcessing)
     numProg += bankNames.size() * 3; // 3 = second proc task
-  auto prog2 = new Progress(this, 0.3, 1.0, numProg);
+  auto prog2 = make_unique<Progress>(this, 0.3, 1.0, numProg);
 
   const std::vector<int> periodLogVec = periodLog->valuesAsVector();
 
@@ -1584,12 +1592,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     if (bankNumEvents[i] > 0)
       pool.schedule(new LoadBankFromDiskTask(
           this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
-          prog2, diskIOMutex, scheduler, periodLogVec));
+          prog2.get(), diskIOMutex, scheduler, periodLogVec));
   }
   // Start and end all threads
   pool.joinAll();
   diskIOMutex.reset();
-  delete prog2;
 
   // Info reporting
   const std::size_t eventsLoaded = m_ws->getNumberEvents();
@@ -1770,7 +1777,7 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
     std::string det_name = det->getName();
     for (auto &bankName : bankNames) {
       size_t pos = bankName.find("_events");
-      if (det_name.compare(bankName.substr(0, pos)) == 0)
+      if (det_name == bankName.substr(0, pos))
         keep = true;
       if (keep)
         break;

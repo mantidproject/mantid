@@ -4,12 +4,9 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-
 #include "MantidDataHandling/LoadVulcanCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
@@ -167,4 +164,55 @@ public:
   }
 };
 
+class LoadVulcanCalFileTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    for (int i = 0; i < numberOfIterations; ++i) {
+      loadAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testLoadVulcanCalFilePerformance() {
+    for (auto alg : loadAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete loadAlgPtrs[i];
+      loadAlgPtrs[i] = nullptr;
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(outWSName);
+  }
+
+private:
+  std::vector<LoadVulcanCalFile *> loadAlgPtrs;
+
+  const int numberOfIterations = 1;
+
+  const std::string offsetfilename = "pid_offset_vulcan_new.dat";
+  const std::string outWSName = "vulcan_cal_file_ws";
+  const std::string effectiveDFCs = "16372.601900,16376.951300,16372.096300,"
+                                    "16336.622200, 16340.822400,16338.777300";
+  const std::string effective2Thetas =
+      "90.091000,90.122000,90.089000,89.837000,89.867000,89.852000";
+
+  LoadVulcanCalFile *setupAlg() {
+    LoadVulcanCalFile *loader = new LoadVulcanCalFile;
+    loader->initialize();
+    loader->isInitialized();
+    loader->setPropertyValue("OffsetFilename", offsetfilename);
+    loader->setPropertyValue("WorkspaceName", outWSName);
+    loader->setPropertyValue("OffsetFilename", offsetfilename);
+    loader->setPropertyValue("Grouping", "6Modules");
+    loader->setPropertyValue("WorkspaceName", outWSName);
+    loader->setPropertyValue("BankIDs", "21,22,23,26,27,28");
+    loader->setPropertyValue("EffectiveDIFCs", effectiveDFCs);
+    loader->setPropertyValue("Effective2Thetas", effective2Thetas);
+    loader->setRethrows(true);
+
+    return loader;
+  }
+};
 #endif /* MANTID_DATAHANDLING_LOCALVULCANCALFILETEST_H_ */

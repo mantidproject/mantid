@@ -3,16 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
+using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -53,7 +54,9 @@ public:
 
   void test_constructor() {
     Beamline::SpectrumInfo specInfo(3);
-    TS_ASSERT_THROWS_NOTHING(SpectrumInfo(specInfo, *makeWorkspace(3)));
+    auto ws = makeWorkspace(3);
+    TS_ASSERT_THROWS_NOTHING(
+        SpectrumInfo(specInfo, *ws, ws->mutableDetectorInfo()));
   }
 
   void test_sourcePosition() {

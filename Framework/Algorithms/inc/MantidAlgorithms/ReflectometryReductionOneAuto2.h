@@ -70,8 +70,8 @@ private:
                 std::vector<double> &params);
   /// Populate direct beam properties
   void populateDirectBeamProperties(Mantid::API::IAlgorithm_sptr alg);
-  /// Populate transmission properties
-  void populateTransmissionProperties(
+  /// Populate algorithmic correction properties
+  void populateAlgorithmicCorrectionProperties(
       Mantid::API::IAlgorithm_sptr alg,
       Mantid::Geometry::Instrument_const_sptr instrument);
 };

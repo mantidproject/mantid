@@ -188,7 +188,8 @@ class ComponentInfoController : public QObject {
 public:
   /// Constructor.
   ComponentInfoController(InstrumentWidgetPickTab *tab,
-                          InstrumentActor *instrActor, QTextEdit *infoDisplay);
+                          const InstrumentWidget *instrWidget,
+                          QTextEdit *infoDisplay);
 public slots:
   void displayInfo(size_t pickID);
   void displayComparePeaksInfo(
@@ -204,11 +205,11 @@ private:
   QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
   QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *,
                                             Mantid::Geometry::IPeak *> &peaks);
-  QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
+  QString getParameterInfo(const Mantid::Geometry::IComponent &comp);
   QString getPeakOverlayInfo();
 
   InstrumentWidgetPickTab *m_tab;
-  InstrumentActor *m_instrActor;
+  const InstrumentWidget *m_instrWidget;
   QTextEdit *m_selectionInfoDisplay;
 
   bool m_freezePlot;
@@ -234,7 +235,7 @@ public:
   };
 
   DetectorPlotController(InstrumentWidgetPickTab *tab,
-                         InstrumentActor *instrActor, OneCurvePlot *plot);
+                         InstrumentWidget *instrWidget, OneCurvePlot *plot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
   void setPlotData(QList<int> detIDs);
@@ -273,7 +274,7 @@ private:
                                    const Mantid::Kernel::V3D &normal);
 
   InstrumentWidgetPickTab *m_tab;
-  InstrumentActor *m_instrActor;
+  InstrumentWidget *m_instrWidget;
   OneCurvePlot *m_plot;
 
   PlotType m_plotType;

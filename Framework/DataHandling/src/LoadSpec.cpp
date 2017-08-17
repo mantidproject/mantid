@@ -53,7 +53,7 @@ void LoadSpec::exec() {
   std::ifstream file(filename.c_str());
 
   file.seekg(0, std::ios::end);
-  Progress progress(this, 0, 1, static_cast<int>(file.tellg()));
+  Progress progress(this, 0.0, 1.0, static_cast<int>(file.tellg()));
   file.seekg(0, std::ios::beg);
 
   std::string str;

@@ -15,7 +15,7 @@ class IReflEventPresenter;
 /** @class ReflEventTabPresenter
 
 ReflEventTabPresenter is a presenter class for the tab 'Event' in the
-Reflectometry (Polref) Interface.
+ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -46,8 +46,10 @@ public:
   /// Destructor
   ~ReflEventTabPresenter() override;
 
-  /// Returns global options for time-slicing
-  std::string getTimeSlicingOptions(int group) const override;
+  /// Returns time-slicing values
+  std::string getTimeSlicingValues(int group) const override;
+  /// Return time-slicing type
+  std::string getTimeSlicingType(int group) const override;
 
 private:
   /// The presenters for each group as a vector

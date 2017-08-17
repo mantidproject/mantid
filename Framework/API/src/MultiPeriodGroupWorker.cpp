@@ -280,7 +280,7 @@ void MultiPeriodGroupWorker::validateMultiPeriodGroupInputs(
                 currentGroup->getItem(j));
         Property *nPeriodsProperty =
             currentNestedWS->run().getLogData("nperiods");
-        size_t nPeriods = atoi(nPeriodsProperty->value().c_str());
+        size_t nPeriods = std::stoul(nPeriodsProperty->value());
         if (nPeriods != benchMarkGroupSize) {
           throw std::runtime_error("Missmatch between nperiods log and the "
                                    "number of workspaces in the input group: " +
@@ -288,7 +288,7 @@ void MultiPeriodGroupWorker::validateMultiPeriodGroupInputs(
         }
         Property *currentPeriodProperty =
             currentNestedWS->run().getLogData("current_period");
-        size_t currentPeriod = atoi(currentPeriodProperty->value().c_str());
+        size_t currentPeriod = std::stoul(currentPeriodProperty->value());
         if (currentPeriod != (j + 1)) {
           throw std::runtime_error("Multiperiod group workspaces must be "
                                    "ordered by current_period. Correct: " +

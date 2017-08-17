@@ -8,7 +8,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidIndexing/MakeRange.h"
 
 using namespace Mantid::Indexing;
 using namespace Mantid::Kernel;
@@ -138,7 +137,7 @@ void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1,
 
   auto indexInfo = output.indexInfo();
   indexInfo.setSpectrumNumbers(
-      makeRange(0, static_cast<specnum_t>(output.getNumberHistograms() - 1)));
+      0, static_cast<int32_t>(output.getNumberHistograms() - 1));
   output.setIndexInfo(indexInfo);
 
   const int yAxisNum = 1;

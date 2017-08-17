@@ -5,8 +5,8 @@
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
 
@@ -14,8 +14,6 @@
 #include "MantidKernel/PropertyWithValue.tcc"
 
 #include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/scoped_array.hpp>
 
 #include <memory>
 

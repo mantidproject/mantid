@@ -135,17 +135,19 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
     if (updateXMins || updateXMaxs) {
       const auto &xvalues = inputWS->x(i);
       if (updateXMins) {
-        if (std::isnan(xvalues.front())) {
+        const auto minimum = xvalues.front();
+        if (std::isnan(minimum) || minimum >= xmax_wksp) {
           xmins.push_back(xmin_wksp);
         } else {
-          xmins.push_back(xvalues.front());
+          xmins.push_back(minimum);
         }
       }
       if (updateXMaxs) {
-        if (std::isnan(xvalues.back())) {
+        const auto maximum = xvalues.back();
+        if (std::isnan(maximum) || maximum <= xmin_wksp) {
           xmaxs.push_back(xmax_wksp);
         } else {
-          xmaxs.push_back(xvalues.back());
+          xmaxs.push_back(maximum);
         }
       }
     }

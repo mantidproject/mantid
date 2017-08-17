@@ -29,6 +29,7 @@ namespace {
  * @param Pointer to byte src
  */
 template <typename InterpretType> double toDouble(uint8_t *src) {
+  // cppcheck-suppress invalidPointerCast
   return static_cast<double>(*reinterpret_cast<InterpretType *>(src));
 }
 }
@@ -47,12 +48,8 @@ struct FITSInfo {
   int offset;
   int headerSizeMultiplier;
   std::vector<size_t> axisPixelLengths;
-  double tof;
-  double timeBin;
   double scale;
   std::string imageKey;
-  long int countsInImage;
-  long int numberOfTriggers;
   std::string extension;
   std::string filePath;
   bool isFloat;
@@ -492,7 +489,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   size_t totalWS = headers.size();
   // Create a progress reporting object
-  API::Progress progress(this, 0, 1, totalWS + 1);
+  API::Progress progress(this, 0.0, 1.0, totalWS + 1);
   progress.report(0, "Loading file(s) into workspace(s)");
 
   // Create first workspace (with instrument definition). This is also used as

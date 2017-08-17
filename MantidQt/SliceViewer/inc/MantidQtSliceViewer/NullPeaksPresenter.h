@@ -12,7 +12,8 @@ NullPeaksPresenter
 This implementation prevents the client code having to run Null checks on the
 PeaksPresenter pointer before using it.
 ----------------------------------------------------------*/
-class DLLExport NullPeaksPresenter : public PeaksPresenter {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER NullPeaksPresenter
+    : public PeaksPresenter {
 public:
   void update() override {}
   void updateWithSlicePoint(const PeakBoundingBox &) override {}

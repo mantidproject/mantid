@@ -137,7 +137,7 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy,
     std::vector<GoniometerAxis>::iterator it;
     // check if such axis is already defined
     for (it = motors.begin(); it < motors.end(); ++it) {
-      if (name.compare((*it).name) == 0)
+      if (name == it->name)
         throw std::invalid_argument("Motor name already defined");
     }
     GoniometerAxis a(name, V3D(axisx, axisy, axisz), angle, sense, angUnit);
@@ -154,8 +154,8 @@ void Goniometer::setRotationAngle(std::string name, double value) {
   bool changed = false;
   std::vector<GoniometerAxis>::iterator it;
   for (it = motors.begin(); it < motors.end(); ++it) {
-    if (name.compare((*it).name) == 0) {
-      (*it).angle = value;
+    if (name == it->name) {
+      it->angle = value;
       changed = true;
     }
   }
@@ -189,7 +189,7 @@ const GoniometerAxis &Goniometer::getAxis(size_t axisnumber) const {
 /// @param axisname :: axis name
 const GoniometerAxis &Goniometer::getAxis(std::string axisname) const {
   for (auto it = motors.begin(); it < motors.end(); ++it) {
-    if (axisname.compare((*it).name) == 0) {
+    if (axisname == it->name) {
       return (*it);
     }
   }

@@ -2,7 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
-from sans.state.move import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMove, get_move_builder)
+from sans.state.move import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMove, StateMoveDetector,
+                             get_move_builder)
 from sans.state.data import get_data_builder
 from sans.common.enums import (CanonicalCoordinates, SANSFacility, DetectorType)
 from state_test_helper import assert_validate_error, assert_raises_nothing
@@ -14,6 +15,8 @@ from state_test_helper import assert_validate_error, assert_raises_nothing
 class StateMoveWorkspaceTest(unittest.TestCase):
     def test_that_raises_if_the_detector_name_is_not_set_up(self):
         state = StateMove()
+        state.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
+                           DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
         state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name = "test"
         state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short = "test"
         state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short = "test"
@@ -23,6 +26,8 @@ class StateMoveWorkspaceTest(unittest.TestCase):
 
     def test_that_raises_if_the_short_detector_name_is_not_set_up(self):
         state = StateMove()
+        state.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
+                           DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
         state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name = "test"
         state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name = "test"
         state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short = "test"
@@ -32,6 +37,8 @@ class StateMoveWorkspaceTest(unittest.TestCase):
 
     def test_that_general_isis_default_values_are_set_up(self):
         state = StateMove()
+        state.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
+                           DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
         self.assertTrue(state.sample_offset == 0.0)
         self.assertTrue(state.sample_offset_direction is CanonicalCoordinates.Z)
         self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction == 0.0)
@@ -138,8 +145,8 @@ class StateMoveBuilderTest(unittest.TestCase):
         self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction == value)
         self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short == "front")
         self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name == "rear-detector")
-        self.assertTrue(state.monitor_names[str(7)] == "monitor7")
-        self.assertTrue(len(state.monitor_names) == 8)
+        self.assertTrue(state.monitor_names[str(4)] == "monitor4")
+        self.assertTrue(len(state.monitor_names) == 4)
 
     def test_that_state_for_larmor_can_be_built(self):
         # Arrange
@@ -152,15 +159,15 @@ class StateMoveBuilderTest(unittest.TestCase):
         builder = get_move_builder(data_info)
         self.assertTrue(builder)
         value = 324.2
-        builder.set_HAB_x_translation_correction(value)
+        builder.set_LAB_x_translation_correction(value)
 
         # Assert
         state = builder.build()
-        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction == value)
-        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short == "front")
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.LAB)].x_translation_correction == value)
         self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name == "DetectorBench")
+        self.assertTrue(DetectorType.to_string(DetectorType.HAB) not in state.detectors)
         self.assertTrue(state.monitor_names[str(5)] == "monitor5")
-        self.assertTrue(len(state.monitor_names) == 10)
+        self.assertTrue(len(state.monitor_names) == 5)
 
 
 if __name__ == '__main__':

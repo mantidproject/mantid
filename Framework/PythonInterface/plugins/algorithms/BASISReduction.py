@@ -2,12 +2,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as sapi
-from mantid.api import PythonAlgorithm, AlgorithmFactory, FileProperty, FileAction
+from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory, FileProperty, FileAction
 from mantid.kernel import IntArrayProperty, StringListValidator, FloatArrayProperty, EnabledWhenProperty,\
     FloatArrayLengthValidator, Direction, PropertyCriterion
 from mantid import config
 from os.path import join as pjoin
 
+TEMPERATURE_SENSOR = "SensorA"
 DEFAULT_RANGE = [6.24, 6.30]
 DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce/new_masks_08_12_2015"
 DEFAULT_CONFIG_DIR = config["instrumentDefinition.directory"]
@@ -118,9 +119,7 @@ class BASISReduction(PythonAlgorithm):
                                                 direction=Direction.Input),
                              "Momentum transfer binning scheme")
         self.setPropertyGroup("MomentumTransferBins", titleReflection)
-        self.declareProperty(FileProperty(name="MaskFile",
-                                          defaultValue=pjoin(DEFAULT_MASK_GROUP_DIR,
-                                                             default_reflection["mask_file"]),
+        self.declareProperty(FileProperty(name="MaskFile", defaultValue='',
                                           action=FileAction.OptionalLoad, extensions=['.xml']),
                              "See documentation for latest mask files.")
         self.setPropertyGroup("MaskFile", titleReflection)
@@ -150,6 +149,12 @@ class BASISReduction(PythonAlgorithm):
         self.setPropertySettings("NormWavelengthRange", ifDivideByVanadium)
         self.setPropertyGroup("NormWavelengthRange", titleDivideByVanadium)
 
+        # Aditional output properties
+        titleAddionalOutput = "Additional Output"
+        self.declareProperty("OutputSusceptibility", False, direction=Direction.Input,
+                             doc="Output dynamic susceptibility (Xqw)")
+        self.setPropertyGroup("OutputSusceptibility", titleAddionalOutput)
+
     #pylint: disable=too-many-branches
     def PyExec(self):
         config['default.facility'] = "SNS"
@@ -162,6 +167,9 @@ class BASISReduction(PythonAlgorithm):
         self._qBins[2] += self._qBins[1]/2.0  # self._qBins[2] is rightmost bin boundary
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
         self._maskFile = self.getProperty("MaskFile").value
+        maskfile = self.getProperty("MaskFile").value
+        self._maskFile = maskfile if maskfile else pjoin(DEFAULT_MASK_GROUP_DIR,
+                                                         self._reflection["mask_file"])
         self._groupDetOpt = self.getProperty("GroupDetectors").value
         self._normalizeToFirst = self.getProperty("NormalizeToFirst").value
         self._doNorm = self.getProperty("DivideByVanadium").value
@@ -255,6 +263,17 @@ class BASISReduction(PythonAlgorithm):
             extension = "_divided_sqw.nxs" if self._doNorm else "_sqw.nxs"
             processed_filename = self._makeRunName(self._samWsRun, False) + extension
             sapi.SaveNexus(Filename=processed_filename, InputWorkspace=self._samSqwWs)
+
+            # additional output
+            if self.getProperty("OutputSusceptibility").value:
+                temperature = mtd[self._samSqwWs].getRun().getProperty(TEMPERATURE_SENSOR).getStatistics().mean
+                samXqsWs = self._samSqwWs.replace("sqw", "Xqw")
+                sapi.ApplyDetailedBalance(InputWorkspace=self._samSqwWs,
+                                          OutputWorkspace=samXqsWs, Temperature=str(temperature))
+                sapi.ConvertUnits(InputWorkspace=samXqsWs, OutputWorkspace=samXqsWs,
+                                  Target="DeltaE_inFrequency", Emode="Indirect")
+                susceptibility_filename = processed_filename.replace("sqw", "Xqw")
+                sapi.SaveNexus(Filename=susceptibility_filename, InputWorkspace=samXqsWs)
 
         if not self._debugMode:
             sapi.DeleteWorkspace("BASIS_MASK")  # delete the mask
@@ -360,7 +379,8 @@ class BASISReduction(PythonAlgorithm):
         self._sumRuns(run_set, wsName, wsName_mon, extra_extension)
         self._calibData(wsName, wsName_mon)
         if not self._debugMode:
-            sapi.DeleteWorkspace(wsName_mon)  # delete monitors
+            if not self._noMonNorm:
+                sapi.DeleteWorkspace(wsName_mon)  # delete monitors
         return wsName
 
     def _group_and_SofQW(self, wsName, etRebins, isSample=True):
@@ -368,7 +388,7 @@ class BASISReduction(PythonAlgorithm):
         @param wsName: workspace as a function of wavelength and detector id
         @param etRebins: final energy domain and bin width
         @param isSample: discriminates between sample and vanadium
-        @return: S(Q,E)
+        @return: string name of S(Q,E)
         """
         sapi.ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target='DeltaE', EMode='Indirect')
         sapi.CorrectKiKf(InputWorkspace=wsName, OutputWorkspace=wsName, EMode='Indirect')

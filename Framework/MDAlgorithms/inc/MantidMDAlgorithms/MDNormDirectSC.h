@@ -60,8 +60,8 @@ private:
   void calculateNormalization(const std::vector<coord_t> &otherValues,
                               const Kernel::Matrix<coord_t> &affineTrans);
 
-  std::vector<Kernel::VMD> calculateIntersections(const double theta,
-                                                  const double phi);
+  void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
+                              const double theta, const double phi);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
@@ -85,6 +85,7 @@ private:
   Kernel::V3D m_beamDir;
   /// ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string convention;
+  bool m_accumulate{false};
 };
 
 } // namespace MDAlgorithms

@@ -4,13 +4,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/DllConfig.h"
+
+#include <boost/shared_ptr.hpp>
+
+#include <iosfwd>
 #include <string>
 #include <vector>
-#ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
-#endif
+
 namespace Mantid {
 namespace Kernel {
 //----------------------------------------------------------------------
@@ -69,7 +70,8 @@ public:
   /// get direction flag of algorithm parameter const
   unsigned int direction() const { return m_direction; };
   /// print contents of object
-  void printSelf(std::ostream &, const int indent = 0) const;
+  void printSelf(std::ostream &, const int indent = 0,
+                 const size_t maxPropertyLength = 0) const;
   /// get whether algorithm parameter was left as default EMPTY_INT,LONG,DBL
   /// const
   bool isEmptyDefault() const;

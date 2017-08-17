@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include "MantidTypes/SpectrumDefinition.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
@@ -76,7 +76,7 @@ void ConvertSpectrumAxis2::exec() {
   // The unit to convert to.
   const std::string unitTarget = getProperty("Target");
 
-  Progress progress(this, 0, 1, inputWS->getNumberHistograms());
+  Progress progress(this, 0.0, 1.0, inputWS->getNumberHistograms());
 
   // Call the functions to convert to the different forms of theta or Q.
   if (unitTarget == "theta" || unitTarget == "Theta" ||
@@ -102,8 +102,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           API::MatrixWorkspace_sptr &inputWS) {
   // Not sure about default, previously there was a call to a null function?
   bool signedTheta = false;
-  if (targetUnit.compare("signed_theta") == 0 ||
-      targetUnit.compare("SignedTheta") == 0) {
+  if (targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
     signedTheta = true;
   } else if (targetUnit == "theta" || targetUnit == "Theta") {
     signedTheta = false;
@@ -240,7 +239,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
 }
 
 double ConvertSpectrumAxis2::getEfixed(
-    const size_t detectorIndex, const API::DetectorInfo &detectorInfo,
+    const size_t detectorIndex, const Geometry::DetectorInfo &detectorInfo,
     const Mantid::API::MatrixWorkspace &inputWS, const int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");

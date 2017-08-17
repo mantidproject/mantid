@@ -5,17 +5,18 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidDataHandling/RawFileInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadLog.h"
-#include "MantidDataHandling/RawFileInfo.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -1257,7 +1258,6 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
 
   std::string str;
   std::string path;
-  std::string logFile;
   std::set<std::string> logfilesList;
   Poco::Path logpath(pathToRawFile);
   size_t pos = pathToRawFile.find_last_of('/');
@@ -1276,10 +1276,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
     pos = fileName.find("txt");
     if (pos == std::string::npos)
       continue;
-    logFile = path + "/" + fileName;
-    if (logFile.empty())
-      continue;
-    logfilesList.insert(logFile);
+    logfilesList.insert(std::string(path).append("/").append(fileName));
   }
   return (logfilesList);
 }

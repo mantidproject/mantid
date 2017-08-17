@@ -421,9 +421,9 @@ void SANSDiagnostics::getSpectraList(
     return;
   }
 
-  size_t min_spec_index = ULONG_MAX;
-  size_t max_spec_index = 0;
-  size_t aux;
+  specnum_t min_spec_index = INT_MAX;
+  specnum_t max_spec_index = 0;
+  specnum_t aux;
   // this is a costly opperation and should be done just once for each file
   for (size_t i = 0; i < mws_sptr->getNumberHistograms(); ++i) {
     const auto &spec = mws_sptr->getSpectrum(i);
@@ -443,7 +443,7 @@ void SANSDiagnostics::getSpectraList(
       }
     }
   }
-  if (min_spec_index == ULONG_MAX || max_spec_index == 0) {
+  if (min_spec_index == INT_MAX || max_spec_index == 0) {
     g_log.error() << "Error : The instrument does not have data associated to "
                      "the RectangularDetector "
                   << rectDet->getDetectorName().toStdString() << '\n';
@@ -452,8 +452,8 @@ void SANSDiagnostics::getSpectraList(
   specList.clear();
   // it is not really required, it could stay with the workspace id, just for
   // compatibility
-  specList.push_back(mws_sptr->getSpectrum(min_spec_index).getSpectrumNo());
-  specList.push_back(mws_sptr->getSpectrum(max_spec_index).getSpectrumNo());
+  specList.push_back(min_spec_index);
+  specList.push_back(max_spec_index);
 }
 /** This method returns the minimum and maximum spectrum Nos
   * @param specList - list of spectra.

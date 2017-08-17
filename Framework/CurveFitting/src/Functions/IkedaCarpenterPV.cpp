@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/IkedaCarpenterPV.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -104,14 +105,30 @@ void IkedaCarpenterPV::init() {
   declareParameter("I", 0.0, "The integrated intensity of the peak. I.e. "
                              "approximately equal to HWHM times height of "
                              "peak");
+  this->lowerConstraint0("I");
   declareParameter("Alpha0", 1.6, "Used to model fast decay constant");
+  this->lowerConstraint0("Alpha0");
   declareParameter("Alpha1", 1.5, "Used to model fast decay constant");
+  this->lowerConstraint0("Alpha1");
   declareParameter("Beta0", 31.9, "Inverse of slow decay constant");
+  this->lowerConstraint0("Beta0");
   declareParameter("Kappa", 46.0, "Controls contribution of slow decay term");
+  this->lowerConstraint0("Kappa");
   declareParameter("SigmaSquared", 1.0,
                    "standard deviation squared (Voigt Guassian broadening)");
+  this->lowerConstraint0("SigmaSquared");
   declareParameter("Gamma", 1.0, "Voigt Lorentzian broadening");
+  this->lowerConstraint0("Gamma");
   declareParameter("X0", 0.0, "Peak position");
+  this->lowerConstraint0("X0");
+}
+
+void IkedaCarpenterPV::lowerConstraint0(std::string paramName) {
+  auto mixingConstraint =
+      Kernel::make_unique<BoundaryConstraint>(this, paramName, 0.0, true);
+  mixingConstraint->setPenaltyFactor(1e9);
+
+  addConstraint(std::move(mixingConstraint));
 }
 
 /** Method for updating m_waveLength.

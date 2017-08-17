@@ -531,14 +531,20 @@ public:
   }
 
   void testPlotSpectrum() {
-    EXPECT_CALL(*mockView.get(), plotSpectrum(false)).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), plotSpectrum("Simple")).Times(Exactly(1));
     presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrum);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void testPlotSpectrumWithErrors() {
-    EXPECT_CALL(*mockView.get(), plotSpectrum(true)).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), plotSpectrum("Errors")).Times(Exactly(1));
     presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testPlotSpectrumAdvanced() {
+    EXPECT_CALL(*mockView.get(), plotSpectrum("Advanced")).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumAdvanced);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
@@ -646,18 +652,6 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     AnalysisDataService::Instance().remove("ws1");
-  }
-
-  void testShowSurfacePlot() {
-    EXPECT_CALL(*mockView.get(), showSurfacePlot()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
-  void testShowContourPlot() {
-    EXPECT_CALL(*mockView.get(), showContourPlot()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowContourPlot);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
 private:

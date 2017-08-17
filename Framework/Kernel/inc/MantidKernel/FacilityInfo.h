@@ -96,6 +96,9 @@ public:
   /// Returns a bool indicating whether prefix is required in file names
   bool noFilePrefix() const { return m_noFilePrefix; }
 
+  /// Returns the multiple file limit
+  size_t multiFileLimit() const { return m_multiFileLimit; }
+
 private:
   void fillZeroPadding(const Poco::XML::Element *elem);
   void fillDelimiter(const Poco::XML::Element *elem);
@@ -105,6 +108,7 @@ private:
   void fillHTTPProxy(const Poco::XML::Element *elem);
   void fillComputeResources(const Poco::XML::Element *elem);
   void fillNoFilePrefix(const Poco::XML::Element *elem);
+  void fillMultiFileLimit(const Poco::XML::Element *elem);
 
   /// Add new extension
   void addExtension(const std::string &ext);
@@ -121,6 +125,7 @@ private:
   std::vector<InstrumentInfo>
       m_instruments;   ///< list of instruments of this facility
   bool m_noFilePrefix; ///< flag indicating if prefix is required in file names
+  size_t m_multiFileLimit; ///< the multiple file limit
   std::vector<ComputeResourceInfo> m_computeResInfos; ///< (remote) compute
   /// resources available in
   /// this facility

@@ -35,6 +35,8 @@ namespace Algorithms {
 class DLLExport ReflectometryWorkflowBase2
     : public API::DataProcessorAlgorithm {
 protected:
+  /// Initialize reduction-type properties
+  void initReductionProperties();
   /// Initialize monitor properties
   void initMonitorProperties();
   /// Initialize direct beam properties
@@ -47,6 +49,10 @@ protected:
   void initAlgorithmicProperties(bool autodetect = false);
   /// Initialize momentum transfer properties
   void initMomentumTransferProperties();
+  /// Initialize properties for diagnostics
+  void initDebugProperties();
+  /// Validate reduction-type properties
+  std::map<std::string, std::string> validateReductionProperties() const;
   /// Validate direct beam properties
   std::map<std::string, std::string> validateDirectBeamProperties() const;
   /// Validate transmission properties
@@ -58,10 +64,13 @@ protected:
   convertToWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
   /// Crop a workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
-  cropWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
+  cropWavelength(Mantid::API::MatrixWorkspace_sptr inputWS,
+                 const bool useArgs = false, const double argMin = 0.0,
+                 const double argMax = 0.0);
   // Create a detector workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
-  makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS);
+  makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
+                 const bool convert = true);
   // Create a monitor workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeMonitorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
@@ -79,6 +88,8 @@ protected:
       Mantid::API::IAlgorithm_sptr alg,
       Mantid::Geometry::Instrument_const_sptr instrument,
       Mantid::API::MatrixWorkspace_sptr inputWS) const;
+  /// Populate transmission properties
+  bool populateTransmissionProperties(Mantid::API::IAlgorithm_sptr alg) const;
 };
 } // namespace Algorithms
 } // namespace Mantid

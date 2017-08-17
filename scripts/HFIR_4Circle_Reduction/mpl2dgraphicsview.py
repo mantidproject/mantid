@@ -37,6 +37,14 @@ class Mpl2dGraphicsView(QtGui.QWidget):
 
         return
 
+    @property
+    def array2d(self):
+        """
+        return the matrix (2d-array) plot on the canvas
+        :return:
+        """
+        return self._myCanvas.array2d
+
     def add_plot_2d(self, array2d, x_min, x_max, y_min, y_max, hold_prev_image=True, y_tick_label=None):
         """
         Add a 2D image to canvas
@@ -148,6 +156,9 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         # polygon
         self._myPolygon = None
 
+        # Buffer of data
+        self._currentArray2D = None
+
         # image management data structure
         self._currIndex = 0
         self._imagePlotDict = dict()
@@ -157,6 +168,14 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         self._yLimit = [0., 1.]
 
         return
+
+    @property
+    def array2d(self):
+        """
+        get the matrix plot now
+        :return:
+        """
+        return self._currentArray2D
 
     def add_2d_plot(self, array2d, x_min, x_max, y_min, y_max, hold_prev, yticklabels=None):
         """ Add a 2D plot
@@ -187,6 +206,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         img_plot = self.axes.imshow(array2d,
                                     extent=[x_min, x_max, y_min, y_max],
                                     interpolation='none')
+        self._currentArray2D = array2d
 
         # set y ticks as an option:
         if yticklabels is not None:

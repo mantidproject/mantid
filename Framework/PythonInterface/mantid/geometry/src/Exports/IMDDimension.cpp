@@ -70,6 +70,8 @@ void export_IMDDimension() {
            "A axis directed along dimension would have getNBins+1 axis points.")
       .def("getX", &IMDDimension::getX, (arg("self"), arg("ind")),
            "Return coordinate of the axis at the given index")
+      .def("getBinWidth", &IMDDimension::getBinWidth, arg("self"),
+           "Return the width of each bin.")
       .def("getDimensionId", &IMDDimension::getDimensionId, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Return a short name which identify the dimension among other "

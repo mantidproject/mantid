@@ -19,9 +19,9 @@ namespace MantidWidgets {
 /**
 * Constructor for tree model to display instrument tree
 */
-InstrumentTreeModel::InstrumentTreeModel(const InstrumentActor *actor,
+InstrumentTreeModel::InstrumentTreeModel(const InstrumentWidget *instrWidget,
                                          QObject *parent)
-    : QAbstractItemModel(parent), m_instrumentActor(actor) {}
+    : QAbstractItemModel(parent), m_instrWidget(instrWidget) {}
 
 /**
 * Destructor for instrument display tree
@@ -37,7 +37,7 @@ InstrumentTreeModel::~InstrumentTreeModel() {}
 int InstrumentTreeModel::columnCount(const QModelIndex &parent) const {
   try {
     if (parent.isValid()) {
-      auto instr = m_instrumentActor->getInstrument();
+      auto instr = m_instrWidget->getInstrumentActor().getInstrument();
       boost::shared_ptr<const IComponent> comp = instr->getComponentByID(
           static_cast<Mantid::Geometry::ComponentID>(parent.internalPointer()));
       boost::shared_ptr<const ICompAssembly> objcomp =
@@ -62,7 +62,7 @@ QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const {
     if (role != Qt::DisplayRole)
       return QVariant();
 
-    auto instr = m_instrumentActor->getInstrument();
+    auto instr = m_instrWidget->getInstrumentActor().getInstrument();
 
     if (!index.isValid()) // not valid has to return the root node
       return QString(instr->getName().c_str());
@@ -109,7 +109,7 @@ QModelIndex InstrumentTreeModel::index(int row, int column,
   //"<<parent.isValid()<<'\n';
   try {
     boost::shared_ptr<const ICompAssembly> parentItem;
-    auto instr = m_instrumentActor->getInstrument();
+    auto instr = m_instrWidget->getInstrumentActor().getInstrument();
     if (!parent.isValid()) // invalid parent, has to be the root node i.e
                            // instrument
       return createIndex(row, column, instr->getComponentID());
@@ -152,7 +152,7 @@ QModelIndex InstrumentTreeModel::parent(const QModelIndex &index) const {
                           // for root return empty.
       return QModelIndex();
 
-    auto instr = m_instrumentActor->getInstrument();
+    auto instr = m_instrWidget->getInstrumentActor().getInstrument();
 
     if (instr->getComponentID() ==
         static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()))
@@ -193,7 +193,7 @@ int InstrumentTreeModel::rowCount(const QModelIndex &parent) const {
     {
       return 1; // boost::dynamic_pointer_cast<ICompAssembly>(m_instrument)->nelements();
     } else {
-      auto instr = m_instrumentActor->getInstrument();
+      auto instr = m_instrWidget->getInstrumentActor().getInstrument();
       if (instr->getComponentID() == static_cast<Mantid::Geometry::ComponentID>(
                                          parent.internalPointer())) {
         return instr->nelements();

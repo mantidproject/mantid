@@ -238,7 +238,7 @@ private:
       *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap,
       *lblVsiLastSession, *lblVsiInitialView;
   ColorButton *vsiDefaultBackground;
-  QGroupBox *mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom;
+  QGroupBox *mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom, *vsiAxesColor;
   QCheckBox *vsiLastSession;
   MantidQt::API::MdSettings m_mdSettings;
 

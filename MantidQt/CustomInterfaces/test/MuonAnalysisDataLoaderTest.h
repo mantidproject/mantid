@@ -1,9 +1,9 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -196,7 +196,7 @@ public:
       // Check that each period has number of spectra = number of groups
       TS_ASSERT_EQUALS(matrixWS->getNumberHistograms(), grouping.groups.size());
       // Check that each period has been corrected for dead time
-      TS_ASSERT_DELTA(matrixWS->getSpectrum(0).dataY().at(0),
+      TS_ASSERT_DELTA(matrixWS->getSpectrum(0).y()[0],
                       i == 0 ? 84.1692 : 16.0749, 0.0001);
     }
   }
@@ -263,7 +263,7 @@ public:
     const auto outputWS =
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(analysed);
     TS_ASSERT(outputWS);
-    const auto &data = outputWS->dataY(0);
+    const auto &data = outputWS->y(0);
     TS_ASSERT_EQUALS(data.size(), 617);
     for (size_t i = 0; i < expectedOutput.size(); i++) {
       TS_ASSERT_DELTA(data[i], expectedOutput[i], 1e-6);
@@ -362,5 +362,4 @@ private:
     }
   }
 };
-
 #endif /* MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_ */

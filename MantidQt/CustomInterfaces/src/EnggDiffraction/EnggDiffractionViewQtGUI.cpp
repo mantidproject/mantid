@@ -3,8 +3,8 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtAPI/MWRunFiles.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
@@ -1114,6 +1114,11 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
 void EnggDiffractionViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
       nullptr, QString("Engineering_Diffraction"));
+}
+
+void EnggDiffractionViewQtGUI::updateTabsInstrument(
+    const std::string &newInstrument) {
+  m_fittingWidget->setCurrentInstrument(newInstrument);
 }
 
 } // namespace CustomInterfaces

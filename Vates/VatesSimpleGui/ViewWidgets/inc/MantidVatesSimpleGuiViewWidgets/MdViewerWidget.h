@@ -1,25 +1,29 @@
 #ifndef MDVIEWERWIDGET_H_
 #define MDVIEWERWIDGET_H_
 
+#ifdef ERROR
+#undef ERROR
+#endif
 #include "ui_MdViewerWidget.h"
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
 
-#include "boost/shared_ptr.hpp"
+#include "vtkSmartPointer.h"
 
-#include <vtkSmartPointer.h>
+#include "boost/optional.hpp"
+#include "boost/shared_ptr.hpp"
 
 // forward declaration of ParaQ classes
 class pqApplicationSettingsReaction;
 class pqLoadDataReaction;
 class pqPipelineSource;
+class pqSaveScreenshotReaction;
 
 // forward declaration of Qt classes
 class QAction;
@@ -35,7 +39,6 @@ namespace Vates {
 namespace SimpleGui {
 
 class RotationPointDialog;
-class SaveScreenshotReaction;
 class ViewBase;
 class RebinDialog;
 class ColorMapEditorPanel;
@@ -103,7 +106,7 @@ public:
   std::string getWindowType() override;
 
 public slots:
-  /// Seet MantidQt::API::VatesViewerInterface
+  /// See MantidQt::API::VatesViewerInterface
   void shutdown() override;
 
 protected slots:
@@ -132,6 +135,7 @@ protected slots:
                        std::string sourceType);
   /// reset state of all the views
   void onResetViewsStateToAllData();
+  void showOutputWidget();
 
 protected:
   /// Handle workspace preDeletion tasks.
@@ -149,6 +153,7 @@ protected:
 
 private:
   Q_DISABLE_COPY(MdViewerWidget)
+  boost::optional<unsigned long> m_axesTag;
   QString m_widgetName;
 
   ViewBase *currentView; ///< Holder for the current (shown) view
@@ -160,9 +165,9 @@ private:
   QAction *lodAction;  ///< Holder for the LOD threshold menu item
   bool pluginMode;     ///< Flag to say widget is in plugin mode
   RotationPointDialog *rotPointDialog; ///< Holder for the rotation point dialog
-  SaveScreenshotReaction *screenShot;  ///< Holder for the screen shot reaction
-  Ui::MdViewerWidgetClass ui;          ///< The MD viewer's UI form
-  QHBoxLayout *viewLayout;             ///< Layout manager for the view widget
+  pqSaveScreenshotReaction *screenShot; ///< Holder for the screen shot reaction
+  Ui::MdViewerWidgetClass ui;           ///< The MD viewer's UI form
+  QHBoxLayout *viewLayout;              ///< Layout manager for the view widget
   pqApplicationSettingsReaction *
       viewSettings; ///< Holder for the view settings reaction
   bool useCurrentColorSettings;
@@ -256,6 +261,8 @@ private:
                                         QStringList &wsNames);
   /// Set up the default color for the background of the view.
   void setColorForBackground();
+  /// Sets axes colors that are visible against the background.
+  void setVisibleAxesColors();
   /// Set the color map
   void setColorMap();
   /// Render the original workspace

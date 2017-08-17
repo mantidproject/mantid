@@ -6,13 +6,17 @@ from isis_powder.routines import common as common
 from isis_powder.routines import yaml_sanity
 
 
-def get_run_dictionary(run_number, file_path):
+def get_run_dictionary(run_number_string, file_path):
+    if isinstance(run_number_string, str):
+        run_number_string = common.get_first_run_number(run_number_string=run_number_string)
+
     config_file = open_yaml_file_as_dictionary(file_path)
-    yaml_sanity.calibration_file_sanity_check(config_file)
-    run_key = _find_dictionary_key(dict_to_search=config_file, run_number=run_number)
+    yaml_sanity.calibration_file_sanity_check(config_file, file_path)
+    run_key = _find_dictionary_key(dict_to_search=config_file, run_number=run_number_string)
 
     if not run_key:
-        raise ValueError("Run number " + str(run_number) + " not recognised in calibration mapping")
+        raise ValueError("Run number " + str(run_number_string) +
+                         " not recognised in cycle mapping file at " + str(file_path))
 
     return config_file[run_key]
 
@@ -45,10 +49,16 @@ def _find_dictionary_key(dict_to_search, run_number):
         if is_run_range_key_unbounded(key):  # Have an unbounded run don't generate numbers
             split_key = str(key).split('-')
             lower_key_bound = int(split_key[-2])
-            if run_number > lower_key_bound:
+            if run_number >= lower_key_bound:
                 return key
         else:
-            generated_runs = common.generate_run_numbers(run_number_string=key)
+            try:
+                generated_runs = common.generate_run_numbers(run_number_string=key)
+            except RuntimeError:
+                raise ValueError("Could not parse '" + str(key) + "'\n"
+                                 "This should be a range of runs in the mapping file."
+                                 " Please check your indentation and YAML syntax is correct.")
+
             if run_number in generated_runs:
                 return key
 

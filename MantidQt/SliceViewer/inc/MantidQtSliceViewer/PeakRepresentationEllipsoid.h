@@ -31,7 +31,8 @@ namespace SliceViewer {
   <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakRepresentationEllipsoid : public PeakRepresentation {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationEllipsoid
+    : public PeakRepresentation {
 public:
   PeakRepresentationEllipsoid(
       const Mantid::Kernel::V3D &origin, const std::vector<double> peakRadii,
@@ -60,6 +61,8 @@ public:
   void showBackgroundRadius(const bool show) override;
 
   static const double zeroRadius;
+  /// Get the zoom out factor
+  double getZoomOutFactor() const;
 
 protected:
   std::shared_ptr<PeakPrimitives> getDrawingInformation(

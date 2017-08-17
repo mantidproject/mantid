@@ -62,8 +62,8 @@ public:
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
-    const Mantid::MantidVec &vecX = outws->readX(0);
-    const Mantid::MantidVec &vecY = outws->readY(0);
+    const auto &vecX = outws->x(0);
+    const auto &vecY = outws->y(0);
     TS_ASSERT_EQUALS(vecX.size(), 44);
     TS_ASSERT_EQUALS(vecY.size(), 44);
     double twotheta1 = 8.9;
@@ -100,8 +100,8 @@ public:
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
-    const Mantid::MantidVec &vecX = outws->readX(0);
-    const Mantid::MantidVec &vecY = outws->readY(0);
+    const auto &vecX = outws->x(0);
+    const auto &vecY = outws->y(0);
     TS_ASSERT_EQUALS(vecX.size(), 61);
     TS_ASSERT_EQUALS(vecY.size(), 61);
     double twotheta1 = 6.000; // integer as Pt. number
@@ -139,8 +139,8 @@ public:
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
-    const Mantid::MantidVec &vecX = outws->readX(0);
-    const Mantid::MantidVec &vecY = outws->readY(0);
+    const auto &vecX = outws->x(0);
+    const auto &vecY = outws->y(0);
     TS_ASSERT_EQUALS(vecX.size(), 61);
     TS_ASSERT_EQUALS(vecY.size(), 61);
     double pt1 = 1.000; // integer as Pt. number
@@ -178,8 +178,8 @@ public:
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
-    const Mantid::MantidVec &vecX = outws->readX(0);
-    const Mantid::MantidVec &vecY = outws->readY(0);
+    const auto &vecX = outws->x(0);
+    const auto &vecY = outws->y(0);
     TS_ASSERT_EQUALS(vecX.size(), 61);
     TS_ASSERT_EQUALS(vecY.size(), 61);
     double pt1 = 1.000; // integer as Pt. number

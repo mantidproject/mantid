@@ -172,10 +172,11 @@ public:
   void calculateCentroid(coord_t *centroid, const int runindex) const override;
   coord_t *getCentroid() const override;
   void calculateDimensionStats(MDDimensionStats *stats) const;
-  void integrateSphere(Mantid::API::CoordTransform &radiusTransform,
-                       const coord_t radiusSquared, signal_t &signal,
-                       signal_t &errorSquared,
-                       const coord_t innerRadiusSquared = 0.0) const override;
+  void integrateSphere(
+      Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
+      signal_t &signal, signal_t &errorSquared,
+      const coord_t innerRadiusSquared = 0.0,
+      const bool useOnePercentBackgroundCorrection = true) const override;
   void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
                       const coord_t radiusSquared, coord_t *centroid,
                       signal_t &signal) const override;
@@ -223,15 +224,6 @@ private:
   MDBox(const MDBox &);
   /// common part of mdBox constructor
   void initMDBox(const size_t nBoxEvents);
-  struct MyComparator {
-    const std::vector<double> &value_vector;
-
-    MyComparator(const std::vector<double> &val_vec) : value_vector(val_vec) {}
-
-    bool operator()(size_t i1, size_t i2) {
-      return value_vector[i1] < value_vector[i2];
-    }
-  };
 
 public:
   /// Typedef for a shared pointer to a MDBox

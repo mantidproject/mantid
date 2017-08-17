@@ -12,7 +12,6 @@ src/ConcretePeaksPresenterVsi.cpp
 src/EventNexusLoadingPresenter.cpp
 src/FieldDataToMetadata.cpp
 src/IMDDimensionComparitor.cpp
-src/LoadVTK.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
 src/MDEWLoadingPresenter.cpp
 src/MDEWInMemoryLoadingPresenter.cpp
@@ -29,8 +28,6 @@ src/Normalization.cpp
 src/ProgressAction.cpp
 src/PresenterFactories.cpp
 src/PresenterUtilities.cpp
-src/SaveMDWorkspaceToVTK.cpp
-src/SaveMDWorkspaceToVTKImpl.cpp
 src/SingleWorkspaceProvider.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
@@ -75,7 +72,6 @@ inc/MantidVatesAPI/FactoryChains.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
 inc/MantidVatesAPI/GeometryView.h
-inc/MantidVatesAPI/LoadVTK.h
 inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDEWLoadingPresenter.h
 inc/MantidVatesAPI/MDEWInMemoryLoadingPresenter.h
@@ -95,8 +91,6 @@ inc/MantidVatesAPI/NullPeaksPresenterVsi.h
 inc/MantidVatesAPI/PeaksPresenterVsi.h
 inc/MantidVatesAPI/PresenterFactories.h
 inc/MantidVatesAPI/ProgressAction.h
-inc/MantidVatesAPI/SaveMDWorkspaceToVTK.h
-inc/MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h
 inc/MantidVatesAPI/SingleWorkspaceProvider.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
@@ -127,7 +121,6 @@ inc/MantidVatesAPI/vtkMDHistoQuadFactory.h
 inc/MantidVatesAPI/vtkMDHistoHex4DFactory.h
 inc/MantidVatesAPI/vtkSinglePeakMarker.h
 inc/MantidVatesAPI/WorkspaceProvider.h
-inc/MantidVatesAPI/vtkMDHWSignalArray.h
 )
 
 set( TEST_FILES
@@ -151,7 +144,6 @@ test/vtkMDHistoQuadFactoryTest.h
 test/vtkMD0DFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
-test/LoadVTKTest.h
 test/MDLoadingViewAdapterTest.h
 test/MDEWEventNexusLoadingPresenterTest.h
 test/MDEWInMemoryLoadingPresenterTest.h
@@ -166,8 +158,6 @@ test/MetadataJsonManagerTest.h
 test/MetadataToFieldDataTest.h
 test/NormalizationTest.h
 test/PresenterUtilitiesTest.h
-test/SaveMDWorkspaceToVTKTest.h
-test/SaveMDWorkspaceToVTKImplTest.h
 test/SingleWorkspaceProviderTest.h
 test/SQWLoadingPresenterTest.h
 test/TimeStepToTimeStepTest.h

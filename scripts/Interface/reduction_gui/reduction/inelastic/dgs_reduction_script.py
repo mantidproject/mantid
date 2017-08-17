@@ -36,7 +36,7 @@ class DgsReductionScripter(BaseReductionScripter):
                 except:
                     pass
 
-        out_dir_line=""
+        out_dir_line = ""
         script = "# DGS reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
 
@@ -45,36 +45,36 @@ class DgsReductionScripter(BaseReductionScripter):
         script += "from mantid.simpleapi import *\n"
         script += "config['default.facility']=\"%s\"\n" % self.facility_name
         script += "\n"
-        script += 'DGS_input_data=Load("'+data_list+'")\n'
-        script +=  "DGS_output_data=%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
+        script += 'DGS_input_data=Load("' + data_list + '")\n'
+        script += "DGS_output_data=%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
         script += DgsReductionScripter.WIDTH + 'SampleInputWorkspace=DGS_input_data,\n'
         for item in self._observers:
             if item.state() is not None:
                 for subitem in str(item.state()).split('\n'):
-                    if len(subitem) and subitem.find("SampleInputFile")==-1 and subitem.find("OutputDirectory")==-1:
+                    if len(subitem) and subitem.find("SampleInputFile") == -1 and subitem.find("OutputDirectory") == -1:
                         script += DgsReductionScripter.WIDTH + subitem + "\n"
-                    elif len(subitem) and subitem.find("OutputDirectory")!=-1:
-                        out_dir_line=subitem.strip(',')+"\n"
+                    elif len(subitem) and subitem.find("OutputDirectory") != -1:
+                        out_dir_line = subitem.strip(',') + "\n"
         script += DgsReductionScripter.WIDTH_END + ")\n"
         script += "\n"
 
-        if len(out_dir_line)==0:
-            output_dir=mantid.config['defaultsave.directory']
-            out_dir_line='OutputDirectory="%s"\n'%output_dir
+        if len(out_dir_line) == 0:
+            output_dir = mantid.config['defaultsave.directory']
+            out_dir_line = 'OutputDirectory="%s"\n' % output_dir
 
         script += out_dir_line
 
-        filenames=self.filenameParser(data_list)
-        if len(filenames)==1:
+        filenames = self.filenameParser(data_list)
+        if len(filenames) == 1:
             script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrument().getName()"
             script += "+str(DGS_output_data[0].getRunNumber())+'.nxs')\n"
             script += 'SaveNexus(DGS_output_data[0],OutputFilename)\n'
         else:
-            script += "for i in range("+str(len(filenames))+"):\n"
+            script += "for i in range(" + str(len(filenames)) + "):\n"
             script += DgsReductionScripter.WIDTH
-            script +="OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0][i].getInstrument().getName()"
-            script +="+str(DGS_output_data[0][i].getRunNumber())+'.nxs')\n"
-            script += DgsReductionScripter.WIDTH+'SaveNexus(DGS_output_data[0][i],OutputFilename)\n'
+            script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0][i].getInstrument().getName()"
+            script += "+str(DGS_output_data[0][i].getRunNumber())+'.nxs')\n"
+            script += DgsReductionScripter.WIDTH + 'SaveNexus(DGS_output_data[0][i],OutputFilename)\n'
 
         if file_name is not None:
             f = open(file_name, 'w')
@@ -100,15 +100,12 @@ class DgsReductionScripter(BaseReductionScripter):
                             options += subitem
 
         if '_spe' in output_workspace:
-            output_workspace_name = 'live_spe'
             output_workspace = 'OutputWorkspace="live_spe"'
-        else:
-            output_workspace_name = output_workspace.split('"')[1]
 
         script = """StartLiveData(UpdateEvery='10',Instrument='"""
         script += self.instrument_name
         script += """',ProcessingScript='"""
-        script +=  DgsReductionScripter.TOPLEVEL_WORKFLOWALG + '('
+        script += DgsReductionScripter.TOPLEVEL_WORKFLOWALG + '('
         script += options
         script += ")"
 
@@ -133,7 +130,7 @@ class DgsReductionScripter(BaseReductionScripter):
         data_files = self.filenameParser(data_list)
         scripts = []
 
-        out_dir_line=""
+        out_dir_line = ""
         for data_file in data_files:
             script = "# DGS reduction script\n"
             script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
@@ -145,29 +142,29 @@ class DgsReductionScripter(BaseReductionScripter):
 
             script += "\n"
 
-            if isinstance(data_file,list):
-                data_file='+'.join(data_file)
-            script += 'DGS_input_data=Load("'+data_file+'")\n'
-            script +=  "DGS_output_data=%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
+            if isinstance(data_file, list):
+                data_file = '+'.join(data_file)
+            script += 'DGS_input_data=Load("' + data_file + '")\n'
+            script += "DGS_output_data=%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
             script += DgsReductionScripter.WIDTH + 'SampleInputWorkspace=DGS_input_data,\n'
             for item in self._observers:
                 if item.state() is not None:
                     for subitem in str(item.state()).split('\n'):
-                        if len(subitem) and subitem.find("SampleInputFile")==-1 and subitem.find("OutputDirectory")==-1:
+                        if len(subitem) and subitem.find("SampleInputFile") == -1 and subitem.find("OutputDirectory") == -1:
                             script += DgsReductionScripter.WIDTH + subitem + "\n"
-                        elif len(subitem) and subitem.find("OutputDirectory")!=-1:
-                            out_dir_line=subitem.strip(',')+"\n"
+                        elif len(subitem) and subitem.find("OutputDirectory") != -1:
+                            out_dir_line = subitem.strip(',') + "\n"
             script += DgsReductionScripter.WIDTH_END + ")\n"
 
-            script +="\n"
-            if len(out_dir_line)==0:
-                output_dir=mantid.config['defaultsave.directory']
-                out_dir_line='OutputDirectory="%s"\n'%output_dir
+            script += "\n"
+            if len(out_dir_line) == 0:
+                output_dir = mantid.config['defaultsave.directory']
+                out_dir_line = 'OutputDirectory="%s"\n' % output_dir
             script += out_dir_line
 
-            script +="OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrument().getName()"
-            script +="+str(DGS_output_data[0].getRunNumber())+'.nxs')\n"
-            script +="SaveNexus(DGS_output_data[0],OutputFilename)\n"
+            script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrument().getName()"
+            script += "+str(DGS_output_data[0].getRunNumber())+'.nxs')\n"
+            script += "SaveNexus(DGS_output_data[0],OutputFilename)\n"
 
             scripts.append(script)
 
@@ -176,5 +173,5 @@ class DgsReductionScripter(BaseReductionScripter):
     def filenameParser(self, filename):
         alg = mantid.api.AlgorithmManager.createUnmanaged("Load")
         alg.initialize()
-        alg.setPropertyValue('Filename',str(filename))
+        alg.setPropertyValue('Filename', str(filename))
         return alg.getProperty('Filename').value

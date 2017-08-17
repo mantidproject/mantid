@@ -22,12 +22,10 @@
 #include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
-#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
-#include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
@@ -38,11 +36,6 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/scoped_ptr.hpp"
 
-// Have to deal with ParaView warnings and Intel compiler the hard way.
-#if defined(__INTEL_COMPILER)
-#pragma warning disable 1170
-#endif
-#include <pqApplicationCore.h>
 #include <pqActiveObjects.h>
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
@@ -52,31 +45,33 @@
 #include <pqDeleteReaction.h>
 #include <pqLoadDataReaction.h>
 #include <pqObjectBuilder.h>
-#include <pqParaViewBehaviors.h>
-#include <pqPipelineSource.h>
-#include <pqPipelineFilter.h>
 #include <pqPVApplicationCore.h>
+#include <pqParaViewBehaviors.h>
+#include <pqPipelineFilter.h>
+#include <pqPipelineRepresentation.h>
+#include <pqPipelineSource.h>
 #include <pqRenderView.h>
-#include <pqSettings.h>
+#include <pqSaveScreenshotReaction.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
+#include <pqSettings.h>
 #include <pqStatusBar.h>
 #include <vtkCamera.h>
+#include <vtkCommand.h>
 #include <vtkMathTextUtilities.h>
 #include <vtkPVOrthographicSliceView.h>
 #include <vtkPVXMLElement.h>
 #include <vtkPVXMLParser.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
-#include <vtkSMProxyManager.h>
 #include <vtkSMProxy.h>
+#include <vtkSMProxyManager.h>
 #include <vtkSMReaderFactory.h>
 #include <vtkSMRenderViewProxy.h>
 #include <vtkSMSessionProxyManager.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMViewProxy.h>
 #include <vtksys/SystemTools.hxx>
-#include <pqPipelineRepresentation.h>
 
 // Used for plugin mode
 #include <pqAlwaysConnectedBehavior.h>
@@ -87,17 +82,12 @@
 #include <pqDataTimeStepBehavior.h>
 #include <pqDataRepresentation.h>
 #include <pqDefaultViewBehavior.h>
-#include <pqFixPathsInStateFilesBehavior.h>
 #include <pqInterfaceTracker.h>
 #include <pqObjectPickingBehavior.h>
-//#include <pqPersistentMainWindowStateBehavior.h>
 #include <pqPipelineContextMenuBehavior.h>
 #include <pqPipelineSource.h>
-//#include <pqPluginActionGroupBehavior.h>
-//#include <pqPluginDockWidgetsBehavior.h>
 #include <pqPluginManager.h>
 #include <pqPluginSettingsBehavior.h>
-#include <pqQtMessageHandlerBehavior.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqSpreadSheetVisibilityBehavior.h>
@@ -105,13 +95,9 @@
 #include <pqStandardViewFrameActionsImplementation.h>
 #include <pqUndoRedoBehavior.h>
 #include <pqView.h>
-//#include <pqViewFrameActionsBehavior.h>
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 #include <pqSaveDataReaction.h>
-#if defined(__INTEL_COMPILER)
-#pragma warning enable 1170
-#endif
 
 #include <QAction>
 #include <QDragEnterEvent>
@@ -237,6 +223,14 @@ void MdViewerWidget::setupUiAndConnections() {
   // Setup rotation point button
   QObject::connect(this->ui.resetCenterToPointButton, SIGNAL(clicked()), this,
                    SLOT(onRotationPoint()));
+
+  QObject::connect(this->ui.outputWidget,
+                   SIGNAL(messageDisplayed(const QString &, int)),
+                   SLOT(showOutputWidget()));
+
+  this->ui.outputWidget->setWindowFlags(Qt::Window);
+  this->ui.outputWidget->setWindowTitle("Output Messages");
+  this->ui.outputWidget->hide();
 
   /// Provide access to the color-editor panel for the application.
   if (!m_colorMapEditorPanel) {
@@ -694,6 +688,7 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
   //             after the window is started again.
   if (this->currentView->getNumSources() == 0) {
     this->setColorForBackground();
+    this->setVisibleAxesColors();
     this->setColorMap();
 
     if (VatesViewerInterface::PEAKS != workspaceType) {
@@ -714,7 +709,7 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
     this->useCurrentColorSettings = true;
   }
 
-  QString sourcePlugin = "";
+  QString sourcePlugin;
   if (VatesViewerInterface::PEAKS == workspaceType) {
     sourcePlugin = "Peaks Source";
   } else if (VatesViewerInterface::MDHW == workspaceType) {
@@ -1140,6 +1135,7 @@ std::string MdViewerWidget::getWindowType() { return "VSIWindow"; }
 void MdViewerWidget::renderAndFinalSetup() {
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   this->setColorForBackground();
+  this->setVisibleAxesColors();
   this->currentView->render();
   this->setColorMap();
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
@@ -1155,6 +1151,20 @@ void MdViewerWidget::renderAndFinalSetup() {
  */
 void MdViewerWidget::setColorForBackground() {
   this->currentView->setColorForBackground(this->useCurrentColorSettings);
+}
+
+void MdViewerWidget::setVisibleAxesColors() {
+  if (mdSettings.getUserSettingAutoColorAxes()) {
+    // Only add the observer once.
+    if (!m_axesTag) {
+      m_axesTag = this->currentView->setVisibleAxesColors();
+    }
+  } else if (m_axesTag) {
+    this->currentView->getView()
+        ->getViewProxy()
+        ->GetProperty("Background")
+        ->RemoveObserver(*m_axesTag);
+  }
 }
 
 /**
@@ -1234,6 +1244,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v) {
   restoreViewState(this->currentView, v);
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->setColorForBackground();
+  this->setVisibleAxesColors();
 
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
@@ -1359,7 +1370,7 @@ void MdViewerWidget::createMenus() {
   screenShotAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+R"));
   screenShotAction->setStatusTip(
       QApplication::tr("Save a screenshot of the current view."));
-  this->screenShot = new SaveScreenshotReaction(screenShotAction);
+  this->screenShot = new pqSaveScreenshotReaction(screenShotAction);
   viewMenu->addAction(screenShotAction);
 
   QAction *settingsAction = new QAction(QApplication::tr("Settings..."), this);
@@ -1789,6 +1800,12 @@ bool MdViewerWidget::areGridAxesOn() {
   } else {
     return true;
   }
+}
+
+//-----------------------------------------------------------------------------
+void MdViewerWidget::showOutputWidget() {
+  this->ui.outputWidget->raise();
+  this->ui.outputWidget->show();
 }
 
 } // namespace SimpleGui

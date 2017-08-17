@@ -75,28 +75,28 @@ void LoadHKL::exec() {
     getline(in, line);
     if (line.length() > 125)
       cosines = true;
-    double h = atof(line.substr(0, 4).c_str());
-    double k = atof(line.substr(4, 4).c_str());
-    double l = atof(line.substr(8, 4).c_str());
+    double h = std::stod(line.substr(0, 4));
+    double k = std::stod(line.substr(4, 4));
+    double l = std::stod(line.substr(8, 4));
     if (h == 0.0 && k == 0 && l == 0)
       break;
-    double Inti = atof(line.substr(12, 8).c_str());
-    double SigI = atof(line.substr(20, 8).c_str());
-    double wl = atof(line.substr(32, 8).c_str());
+    double Inti = std::stod(line.substr(12, 8));
+    double SigI = std::stod(line.substr(20, 8));
+    double wl = std::stod(line.substr(32, 8));
     double tbar, trans, scattering;
     int run, bank;
     if (cosines) {
-      tbar = atof(line.substr(40, 8).c_str()); // tbar
-      run = atoi(line.substr(102, 6).c_str());
-      trans = atof(line.substr(114, 7).c_str()); // transmission
-      bank = atoi(line.substr(121, 4).c_str());
-      scattering = atof(line.substr(125, 9).c_str());
+      tbar = std::stod(line.substr(40, 8)); // tbar
+      run = std::stoi(line.substr(102, 6));
+      trans = std::stod(line.substr(114, 7)); // transmission
+      bank = std::stoi(line.substr(121, 4));
+      scattering = std::stod(line.substr(125, 9));
     } else {
-      tbar = atof(line.substr(40, 7).c_str()); // tbar
-      run = atoi(line.substr(47, 7).c_str());
-      trans = atof(line.substr(61, 7).c_str()); // transmission
-      bank = atoi(line.substr(68, 4).c_str());
-      scattering = atof(line.substr(72, 9).c_str());
+      tbar = std::stod(line.substr(40, 7)); // tbar
+      run = std::stoi(line.substr(47, 7));
+      trans = std::stod(line.substr(61, 7)); // transmission
+      bank = std::stoi(line.substr(68, 4));
+      scattering = std::stod(line.substr(72, 9));
     }
 
     if (first) {
@@ -121,8 +121,8 @@ void LoadHKL::exec() {
 
     peak.setBankName(bankName);
     if (cosines) {
-      int col = atoi(line.substr(142, 7).c_str());
-      int row = atoi(line.substr(149, 7).c_str());
+      int col = std::stoi(line.substr(142, 7));
+      int row = std::stoi(line.substr(149, 7));
       peak.setCol(col);
       peak.setRow(row);
     }

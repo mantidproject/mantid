@@ -44,12 +44,13 @@ class SData(AbinsModules.GeneralData):
 
             elif "frequencies" == item:
 
+                step = AbinsModules.AbinsParameters.bin_width
                 bins = np.arange(start=AbinsModules.AbinsParameters.min_wavenumber,
-                                 stop=AbinsModules.AbinsParameters.max_wavenumber,
-                                 step=AbinsModules.AbinsParameters.bin_width,
+                                 stop=AbinsModules.AbinsParameters.max_wavenumber + step,
+                                 step=step,
                                  dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
-                if not np.array_equal(items[item], bins[1:]):
+                if not np.array_equal(items[item], bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:-1]):
                     raise ValueError("Invalid frequencies.")
 
             else:

@@ -2,9 +2,12 @@
 #define INSTRUMENTTEST_H_
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
@@ -497,6 +500,172 @@ public:
 
     TS_ASSERT_EQUALS(instrRect->containsRectDetectors(),
                      Instrument::ContainsState::Partial);
+  }
+
+  void test_detectorIndex() {
+    auto i = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
+    TS_ASSERT_EQUALS(i->detectorIndex(4), 0);
+    TS_ASSERT_EQUALS(i->detectorIndex(5), 1);
+    TS_ASSERT_EQUALS(i->detectorIndex(6), 2);
+    TS_ASSERT_EQUALS(i->detectorIndex(7), 3);
+  }
+
+  void test_makeLegacyParameterMap() {
+    const auto &baseInstrument =
+        ComponentCreationHelper::createTestInstrumentCylindrical(3);
+    const auto bank1 = baseInstrument->getComponentByName("bank1");
+    const auto bank2 = baseInstrument->getComponentByName("bank2");
+    const auto bank3 = baseInstrument->getComponentByName("bank3");
+    const V3D bankOffset{0.1, 0.2, 0.3};
+    const V3D bankEpsilon{5e-10, 5e-10, 5e-10};
+    const V3D bankAxis{0, 0, 1};
+    const Quat bankRot(90.0, bankAxis);
+    const V3D bankScale{1, 2, 3};
+    auto pmap = boost::make_shared<ParameterMap>();
+    pmap->addV3D(bank1->getComponentID(), ParameterMap::pos(), bankOffset);
+    pmap->addV3D(bank2->getComponentID(), ParameterMap::pos(), bankEpsilon);
+    pmap->addQuat(bank3->getComponentID(), ParameterMap::rot(), bankRot);
+    pmap->addV3D(bank3->getComponentID(), ParameterMap::scale(), bankScale);
+
+    // Set instrument in ParameterMap to create DetectorInfo
+    pmap->setInstrument(baseInstrument.get());
+    auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
+    auto &detInfo = pmap->mutableDetectorInfo();
+    auto &compInfo = pmap->mutableComponentInfo();
+
+    // bank 1
+    TS_ASSERT(toVector3d(detInfo.position(0))
+                  .isApprox(toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}),
+                            1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(2))
+                  .isApprox(toVector3d(bankOffset + V3D{0.008, -0.0002, 0.0}),
+                            1e-12));
+    // bank 2
+    TS_ASSERT(toVector3d(detInfo.position(9))
+                  .isApprox(toVector3d(bankEpsilon + V3D{-0.008, -0.0002, 0.0}),
+                            1e-12));
+    // bank 3
+    TS_ASSERT(toVector3d(detInfo.position(18))
+                  .isApprox(Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
+    TS_ASSERT_EQUALS(
+        compInfo.scaleFactor(compInfo.indexOf(bank3->getComponentID())),
+        bankScale);
+
+    const V3D detOffset{0.2, 0.3, 0.4};
+    const V3D detEpsilon{5e-10, 5e-10, 5e-10};
+    const V3D detAxis{0.2, 0.4, 13.3};
+    const Quat detRot(42.0, detAxis);
+    const Quat detRotEps(1e-11, detAxis);
+
+    detInfo.setPosition(0, detInfo.position(0) + detOffset);
+    detInfo.setRotation(18, detRot * detInfo.rotation(18));
+    // Shifts/rotations by epsilon below tolerance, should not generate
+    // parameter from this:
+    detInfo.setPosition(1, detInfo.position(1) + detEpsilon);
+    detInfo.setPosition(9, detInfo.position(9) + detEpsilon);
+    detInfo.setRotation(19, detRotEps * detInfo.rotation(19));
+    // Set a new scale factor
+    const V3D newScaleFactor{2, 2, 2};
+    compInfo.setScaleFactor(compInfo.indexOf(bank3->getComponentID()),
+                            newScaleFactor);
+
+    // All position information should be purged
+    TS_ASSERT_EQUALS(pmap->size(), 0);
+
+    const auto legacyMap = instr->makeLegacyParameterMap();
+    // 3 bank parameters + 2 det parameters + 1 scale parameter
+    TS_ASSERT_EQUALS(legacyMap->size(), 6);
+    TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
+    Instrument legacyInstrument(baseInstrument, legacyMap);
+
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(),
+                     bankOffset + V3D(-0.008, -0.0002, 0.0) + detOffset);
+    // Was shifted by something less than epsilon so this is the default
+    // position.
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(3)->getPos(),
+                     bankOffset + V3D(0.008, -0.0002, 0.0));
+    // Epsilon in parent is preserved, but not epsilon relative to parent.
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(10)->getPos(),
+                     bankEpsilon + V3D(-0.008, -0.0002, 0.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(19)->getPos(),
+                     V3D(0.0002, -0.008, 15.0));
+    TS_ASSERT(toQuaterniond(legacyInstrument.getDetector(19)->getRotation())
+                  .isApprox(toQuaterniond(detRot * bankRot), 1e-10));
+    // Check the scale factor
+    TS_ASSERT(toVector3d(legacyInstrument.getComponentByName("bank3")
+                             ->getScaleFactor())
+                  .isApprox(toVector3d(newScaleFactor), 1e-10));
+  }
+
+  void test_makeLegacyParameterMap_scaled_RectangularDetector() {
+    const auto &baseInstrument =
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
+    const auto bank1 = baseInstrument->getComponentByName("bank1");
+    auto pmap = boost::make_shared<ParameterMap>();
+    double scalex = 1.7;
+    double scaley = 1.3;
+    pmap->addDouble(bank1->getComponentID(), "scalex", scalex);
+    pmap->addDouble(bank1->getComponentID(), "scaley", scaley);
+
+    // Set instrument in ParameterMap to create DetectorInfo
+    pmap->setInstrument(baseInstrument.get());
+    auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
+    auto &detInfo = pmap->mutableDetectorInfo();
+
+    // bank 1
+    double pitch = 0.008;
+    TS_ASSERT(toVector3d(detInfo.position(0))
+                  .isApprox(toVector3d(V3D{0.0, 0.0, 5.0}), 1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(1))
+                  .isApprox(toVector3d(V3D{0.0, scaley * pitch, 5.0}), 1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(2))
+                  .isApprox(toVector3d(V3D{scalex * pitch, 0.0, 5.0}), 1e-12));
+    TS_ASSERT(
+        toVector3d(detInfo.position(3))
+            .isApprox(toVector3d(V3D{scalex * pitch, scaley * pitch, 5.0}),
+                      1e-12));
+
+    const V3D detOffset{0.2, 0.3, 0.4};
+    const V3D detEpsilon{5e-10, 5e-10, 5e-10};
+
+    detInfo.setPosition(2, detInfo.position(2) + detEpsilon);
+    // 2 bank parameters, det pos/rot is in DetectorInfo
+    TS_ASSERT_EQUALS(pmap->size(), 2);
+
+    const auto legacyMap = instr->makeLegacyParameterMap();
+
+    // Legacy instrument does not support positions in ParameterMap for
+    // RectangularDetectorPixel (parameters ignored by
+    // RectangularDetectorPixel::getRelativePos), so we cannot support this.
+    detInfo.setPosition(3, detInfo.position(3) + detOffset);
+    TS_ASSERT_THROWS(instr->makeLegacyParameterMap(), std::runtime_error);
+
+    // 2 bank parameters + 0 det parameters
+    TS_ASSERT_EQUALS(legacyMap->size(), 2);
+    TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
+    Instrument legacyInstrument(baseInstrument, legacyMap);
+
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(),
+                     V3D(0.0, 0.0, 5.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(5)->getPos(),
+                     V3D(0.0, scaley * pitch, 5.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(6)->getPos(),
+                     V3D(scalex * pitch, 0.0, 5.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(7)->getPos(),
+                     V3D(scalex * pitch, scaley * pitch, 5.0));
+  }
+
+  void test_empty_Instrument() {
+    Instrument emptyInstrument{};
+    TS_ASSERT(emptyInstrument.isEmptyInstrument());
+  }
+
+  void test_not_empty_Instrument() {
+
+    Instrument instrument{};
+    TS_ASSERT(instrument.isEmptyInstrument());
+    instrument.add(new CompAssembly{});
+    TS_ASSERT(!instrument.isEmptyInstrument());
   }
 
 private:

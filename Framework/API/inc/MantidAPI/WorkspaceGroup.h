@@ -124,6 +124,9 @@ private:
   WorkspaceGroup *doClone() const override {
     throw std::runtime_error("Cloning of WorkspaceGroup is not implemented.");
   }
+  WorkspaceGroup *doCloneEmpty() const override {
+    throw std::runtime_error("Cloning of WorkspaceGroup is not implemented.");
+  }
   /// ADS removes a member of this group using this method. It doesn't send
   /// notifications in contrast to remove(name).
   void removeByADS(const std::string &wsName);

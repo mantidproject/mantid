@@ -131,7 +131,7 @@ void DiffractionFocussing::exec() {
   API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(
       tmpW, resultIndeces.size(), newSize + 1, newSize);
 
-  std::vector<specnum_t> specNums;
+  std::vector<Indexing::SpectrumNumber> specNums;
   const auto &tmpIndices = tmpW->indexInfo();
   for (int64_t hist = 0; hist < static_cast<int64_t>(resultIndeces.size());
        hist++) {

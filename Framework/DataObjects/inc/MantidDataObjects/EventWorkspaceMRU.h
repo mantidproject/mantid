@@ -7,9 +7,11 @@
 #include "MantidKernel/MRUList.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/HistogramE.h"
+
+#include "Poco/RWLock.h"
+
 #include <cstdint>
 #include <vector>
-#include <mutex>
 
 namespace Mantid {
 namespace DataObjects {
@@ -99,7 +101,7 @@ public:
   /** Return how many entries in the Y MRU list are used.
    * Only used in tests. It only returns the 0-th MRU list size.
    * @return :: number of entries in the MRU list. */
-  size_t MRUSize() const { return this->m_bufferedDataY[0]->size(); }
+  size_t MRUSize() const;
 
 protected:
   /// The most-recently-used list of dataY histograms
@@ -109,8 +111,8 @@ protected:
   mutable std::vector<mru_listE *> m_bufferedDataE;
 
   /// Mutex when adding entries in the MRU list
-  mutable std::mutex m_changeMruListsMutexE;
-  mutable std::mutex m_changeMruListsMutexY;
+  mutable Poco::RWLock m_changeMruListsMutexE;
+  mutable Poco::RWLock m_changeMruListsMutexY;
 };
 
 } // namespace DataObjects

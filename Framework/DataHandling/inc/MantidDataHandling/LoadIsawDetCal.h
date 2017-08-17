@@ -1,13 +1,18 @@
 #ifndef MANTID_DATAHANDLING_LOADISAWDETCAL_H_
 #define MANTID_DATAHANDLING_LOADISAWDETCAL_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
+namespace API {
+class DetectorInfo;
+}
 namespace DataHandling {
 /**
  Find the offsets for each detector
@@ -60,16 +65,33 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 private:
+  const double CM_TO_M = 0.01;
+
+  struct ComponentScaling {
+    std::string componentName;
+    double scaleX;
+    double scaleY;
+  };
+
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
 
   /// Set the center of the supplied detector name
   void center(const double x, const double y, const double z,
-              const std::string &detname, API::Workspace_sptr ws);
+              const std::string &detname, API::Workspace_sptr ws,
+              Geometry::ComponentInfo &componentInfo);
 
   Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
   std::vector<std::string> getFilenames();
+
+  void doRotation(Kernel::V3D rX, Kernel::V3D rY,
+                  Geometry::ComponentInfo &componentInfo,
+                  boost::shared_ptr<const Geometry::IComponent> comp,
+                  bool doWishCorrection = false);
+  void applyScalings(
+      API::Workspace_sptr &ws,
+      const std::vector<ComponentScaling> &rectangularDetectorScalings);
 };
 
 } // namespace DataHandling

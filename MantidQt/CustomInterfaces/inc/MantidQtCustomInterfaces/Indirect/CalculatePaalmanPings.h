@@ -24,9 +24,12 @@ private slots:
   void absCorComplete(bool error);
   void postProcessComplete(bool error);
   void getBeamWidthFromWorkspace(const QString &wsName);
+  void fillCorrectionDetails(const QString &wsName);
   void validateChemical();
   void saveClicked();
   void plotClicked();
+  void changeSampleDensityUnit(int);
+  void changeCanDensityUnit(int);
 
 private:
   void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg,

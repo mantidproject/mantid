@@ -15,24 +15,21 @@ columns, their indices and descriptions
 QDataProcessorTwoLevelTreeModel::QDataProcessorTwoLevelTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
-    : m_tWS(tableWorkspace), m_whitelist(whitelist) {
+    : AbstractDataProcessorTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size() + 1)
     throw std::invalid_argument("Invalid table workspace. Table workspace must "
                                 "have one extra column accounting for groups");
 
+  // Sort the table workspace by group, i.e. first column
+  std::vector<std::pair<std::string, bool>> criteria = {
+      std::make_pair(tableWorkspace->getColumnNames().at(0), true)};
+  m_tWS->sort(criteria);
+
   setupModelData(tableWorkspace);
 }
 
 QDataProcessorTwoLevelTreeModel::~QDataProcessorTwoLevelTreeModel() {}
-
-/** Returns the number of columns, i.e. elements in the whitelist
-* @return : The number of columns
-*/
-int QDataProcessorTwoLevelTreeModel::columnCount(
-    const QModelIndex & /* parent */) const {
-  return static_cast<int>(m_whitelist.size());
-}
 
 /** Returns data for specified index
 * @param index : The index
@@ -41,37 +38,39 @@ int QDataProcessorTwoLevelTreeModel::columnCount(
 */
 QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
                                                int role) const {
-  if (!index.isValid())
-    return QVariant();
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole)
+  if (!index.isValid())
     return QVariant();
 
   if (!parent(index).isValid()) {
     // Index corresponds to a group
+    auto group = m_groupName.at(index.row());
 
-    if (index.column() == 0) {
+    if ((role == Qt::DisplayRole || role == Qt::EditRole) &&
+        index.column() == 0) {
       // Return the group name only in the first column
-      return QString::fromStdString(m_groupName.at(index.row()));
-    } else {
-      return QVariant();
+      return QString::fromStdString(group.first);
+    }
+    if (role == Qt::BackgroundRole && group.second) {
+      // Highlight if this group is processed
+      return QColor("#00b300");
     }
   } else {
     // Index corresponds to a row
+    auto pIndex = parent(index);
+    auto row = m_rowsOfGroup[pIndex.row()][index.row()];
 
-    // Absolute position of this row in the table
-    int absolutePosition = m_rowsOfGroup[parent(index).row()][index.row()];
-    return QString::fromStdString(
-        m_tWS->String(absolutePosition, index.column() + 1));
+    if (role == Qt::DisplayRole || role == Qt::EditRole) {
+      return QString::fromStdString(
+          m_tWS->String(row.first, index.column() + 1));
+    }
+    if (role == Qt::BackgroundRole && row.second) {
+      // Highlight if this row is processed
+      return QColor("#00b300");
+    }
   }
-}
 
-Qt::ItemFlags
-QDataProcessorTwoLevelTreeModel::flags(const QModelIndex &index) const {
-  if (!index.isValid())
-    return 0;
-
-  return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+  return QVariant();
 }
 
 /** Returns the column name (header data for given section)
@@ -84,7 +83,10 @@ QVariant QDataProcessorTwoLevelTreeModel::headerData(
     int section, Qt::Orientation orientation, int role) const {
 
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-    return QString::fromStdString(m_whitelist.colNameFromColIndex(section));
+    return m_whitelist.colNameFromColIndex(section);
+
+  if (orientation == Qt::Horizontal && role == Qt::WhatsThisRole)
+    return m_whitelist.description(section);
 
   return QVariant();
 }
@@ -101,6 +103,37 @@ QDataProcessorTwoLevelTreeModel::index(int row, int column,
 
   return parent.isValid() ? createIndex(row, column, parent.row())
                           : createIndex(row, column, -1);
+}
+
+/** Gets the 'processed' status of a data item
+* @param position : The position of the item
+* @param parent : The parent of this item
+* @return : The 'processed' status
+*/
+bool QDataProcessorTwoLevelTreeModel::isProcessed(
+    int position, const QModelIndex &parent) const {
+
+  if (!parent.isValid()) {
+    // We have a group item (no parent)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount())
+      throw std::invalid_argument("Invalid position. Position index must be "
+                                  "within the range of the number of groups in "
+                                  "this model");
+
+    return m_groupName[position].second;
+  } else {
+    // We have a row item (parent exists)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount(parent))
+      throw std::invalid_argument("Invalid position. Position index must be "
+                                  "within the range of the number of rows in "
+                                  "the given group for this model");
+
+    return m_rowsOfGroup[parent.row()][position].second;
+  }
 }
 
 /** Returns the parent of a given index
@@ -168,29 +201,29 @@ bool QDataProcessorTwoLevelTreeModel::insertRows(int position, int count,
   int absolutePosition =
       (m_rowsOfGroup[parent].size() > 0)
           ? ((position == static_cast<int>(m_rowsOfGroup[parent].size()))
-                 ? m_rowsOfGroup[parent][position - 1] + 1
-                 : m_rowsOfGroup[parent][position])
-          : (parent > 0) ? m_rowsOfGroup[parent - 1].back() + 1 : 0;
+                 ? m_rowsOfGroup[parent][position - 1].first + 1
+                 : m_rowsOfGroup[parent][position].first)
+          : (parent > 0) ? m_rowsOfGroup[parent - 1].back().first + 1 : 0;
 
   for (int pos = position; pos < position + count; pos++) {
     m_tWS->insertRow(absolutePosition);
-    m_tWS->String(absolutePosition, 0) = m_groupName[parent];
+    m_tWS->String(absolutePosition, 0) = m_groupName[parent].first;
   }
 
   int lastRowIndex = absolutePosition;
 
   // Insert new elements
   m_rowsOfGroup[parent].insert(m_rowsOfGroup[parent].begin() + position, count,
-                               0);
+                               std::make_pair(0, false));
 
   // Update row indices in the group where we are adding the new rows
   for (int pos = position; pos < rowCount(index(parent, 0)); pos++)
-    m_rowsOfGroup[parent][pos] = lastRowIndex++;
+    m_rowsOfGroup[parent][pos].first = lastRowIndex++;
 
   // Update row indices in subsequent groups
   for (int group = parent + 1; group < rowCount(); group++) {
     for (int row = 0; row < rowCount(index(group, 0)); row++)
-      m_rowsOfGroup[group][row] = lastRowIndex++;
+      m_rowsOfGroup[group][row].first = lastRowIndex++;
   }
 
   endInsertRows();
@@ -217,8 +250,9 @@ bool QDataProcessorTwoLevelTreeModel::insertGroups(int position, int count) {
 
   // Update m_rowsOfGroup
   m_rowsOfGroup.insert(m_rowsOfGroup.begin() + position, count,
-                       std::vector<int>());
-  m_groupName.insert(m_groupName.begin() + position, count, "");
+                       std::vector<std::pair<int, bool>>());
+  m_groupName.insert(m_groupName.begin() + position, count,
+                     std::make_pair("", false));
 
   for (int pos = position; pos < position + count; pos++) {
 
@@ -281,8 +315,8 @@ bool QDataProcessorTwoLevelTreeModel::removeGroups(int position, int count) {
 
   int absolutePosition =
       (m_rowsOfGroup[position].size() > 0)
-          ? m_rowsOfGroup[position][0]
-          : (position > 0) ? m_rowsOfGroup[position - 1].back() + 1 : 0;
+          ? m_rowsOfGroup[position][0].first
+          : (position > 0) ? m_rowsOfGroup[position - 1].back().first + 1 : 0;
 
   for (int group = position; group < position + count; group++) {
     for (int row = 0; row < rowCount(index(group, 0)); row++)
@@ -296,7 +330,7 @@ bool QDataProcessorTwoLevelTreeModel::removeGroups(int position, int count) {
     // Update row positions
     for (int group = position; group < rowCount(); group++) {
       for (int row = 0; row < rowCount(index(group, 0)); row++)
-        m_rowsOfGroup[group][row] = absolutePosition++;
+        m_rowsOfGroup[group][row].first = absolutePosition++;
     }
   } else
     m_rowsOfGroup.clear();
@@ -334,7 +368,7 @@ bool QDataProcessorTwoLevelTreeModel::removeRows(int position, int count,
   beginRemoveRows(index(parent, 0), position, position + count - 1);
 
   // Update the table workspace
-  int absolutePosition = m_rowsOfGroup[parent][position];
+  int absolutePosition = m_rowsOfGroup[parent][position].first;
   for (int pos = position; pos < position + count; pos++) {
     m_tWS->removeRow(absolutePosition);
   }
@@ -344,13 +378,13 @@ bool QDataProcessorTwoLevelTreeModel::removeRows(int position, int count,
 
   // Update row indices in this group
   for (int row = position; row < rowCount(index(parent, 0)); row++) {
-    m_rowsOfGroup[parent][row] = absolutePosition++;
+    m_rowsOfGroup[parent][row].first = absolutePosition++;
   }
 
   // Update row indices in subsequent groups
   for (int group = parent + 1; group < rowCount(); group++)
     for (int row = 0; row < rowCount(index(group, 0)); row++)
-      m_rowsOfGroup[group][row] = absolutePosition++;
+      m_rowsOfGroup[group][row].first = absolutePosition++;
 
   if (m_rowsOfGroup[parent].size() == 0) {
     removeGroups(parent, 1);
@@ -366,11 +400,21 @@ bool QDataProcessorTwoLevelTreeModel::removeRows(int position, int count,
 * @return : The number of rows
 */
 int QDataProcessorTwoLevelTreeModel::rowCount(const QModelIndex &parent) const {
-  return !parent.isValid()
-             ? static_cast<int>(m_rowsOfGroup.size())
-             : !parent.parent().isValid()
-                   ? static_cast<int>(m_rowsOfGroup[parent.row()].size())
-                   : 0;
+
+  // We are counting the number of groups
+  if (!parent.isValid())
+    return static_cast<int>(m_rowsOfGroup.size());
+
+  // This shouldn't happen
+  if (parent.parent().isValid())
+    return 0;
+
+  // This group does not exist anymore
+  if (parent.row() >= static_cast<int>(m_rowsOfGroup.size()))
+    return 0;
+
+  // Group exists, return number of children
+  return static_cast<int>(m_rowsOfGroup[parent.row()].size());
 }
 
 /** Updates an index with given data
@@ -384,36 +428,40 @@ bool QDataProcessorTwoLevelTreeModel::setData(const QModelIndex &index,
   if (role != Qt::EditRole)
     return false;
 
+  const std::string newName = value.toString().toStdString();
+
   if (!parent(index).isValid()) {
     // Index corresponds to a group
 
-    if (index.column() == 0) {
-
-      const std::string newName = value.toString().toStdString();
-
-      // Update the group name, which means updating:
-
-      // 1. Axiliary member variables
-
-      m_groupName[index.row()] = newName;
-
-      // 2. Table workspace
-
-      size_t nrows = m_rowsOfGroup[index.row()].size();
-      for (size_t row = 0; row < nrows; row++) {
-        m_tWS->String(m_rowsOfGroup[index.row()][row], 0) = newName;
-      }
-
-    } else {
+    if (index.column() != 0)
       return false;
+
+    if (m_groupName[index.row()].first == newName)
+      return false;
+
+    // Update the group name, which means updating:
+
+    // 1. Auxiliary member variables
+
+    m_groupName[index.row()].first = newName;
+
+    // 2. Table workspace
+
+    size_t nrows = m_rowsOfGroup[index.row()].size();
+    for (size_t row = 0; row < nrows; row++) {
+      m_tWS->String(m_rowsOfGroup[index.row()][row].first, 0) = newName;
     }
   } else {
     // Index corresponds to a row
 
     // First we need to find the absolute position of this row in the table
-    int absolutePosition = m_rowsOfGroup[parent(index).row()][index.row()];
-    m_tWS->String(absolutePosition, index.column() + 1) =
-        value.toString().toStdString();
+    int absolutePosition =
+        m_rowsOfGroup[parent(index).row()][index.row()].first;
+
+    if (m_tWS->String(absolutePosition, index.column() + 1) == newName)
+      return false;
+
+    m_tWS->String(absolutePosition, index.column() + 1) = newName;
   }
 
   emit dataChanged(index, index);
@@ -440,12 +488,51 @@ void QDataProcessorTwoLevelTreeModel::setupModelData(
     if (groupIndex.count(groupName) == 0) {
       groupIndex[groupName] = lastIndex++;
 
-      m_groupName.push_back(groupName);
-      m_rowsOfGroup.push_back(std::vector<int>());
+      m_groupName.push_back(std::make_pair(groupName, false));
+      m_rowsOfGroup.push_back(std::vector<std::pair<int, bool>>());
     }
 
-    m_rowsOfGroup[groupIndex[groupName]].push_back(r);
+    m_rowsOfGroup[groupIndex[groupName]].push_back(std::make_pair(r, false));
   }
+}
+
+/** Return the underlying data structure, i.e. the table workspace this model is
+* representing
+* @return :: the underlying table workspace
+*/
+ITableWorkspace_sptr
+QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
+  return m_tWS;
+}
+
+/** Sets the 'processed' status of a data item
+* @param processed : True to set processed, false to set unprocessed
+* @param position : The position of the item
+* @param parent : The parent of this item
+* @return : Boolean indicating whether process status was set successfully
+*/
+bool QDataProcessorTwoLevelTreeModel::setProcessed(bool processed, int position,
+                                                   const QModelIndex &parent) {
+
+  if (!parent.isValid()) {
+    // We have a group item (no parent)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount())
+      return false;
+
+    m_groupName[position].second = processed;
+  } else {
+    // We have a row item (parent exists)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount(parent))
+      return false;
+
+    m_rowsOfGroup[parent.row()][position].second = processed;
+  }
+
+  return true;
 }
 
 } // namespace MantidWidgets

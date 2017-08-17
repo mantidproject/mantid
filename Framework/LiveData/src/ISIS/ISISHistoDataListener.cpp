@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -48,7 +49,7 @@ Kernel::Logger g_log("ISISHistoDataListener");
 
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
-    : ILiveListener(), isInitilized(false), m_daeHandle(nullptr),
+    : LiveListener(), isInitilized(false), m_daeHandle(nullptr),
       m_numberOfPeriods(0), m_totalNumberOfSpectra(0), m_timeRegime(-1) {
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList"),
@@ -85,6 +86,8 @@ void ISISHistoDataListener::IDCReporter(int status, int code,
 
 /** Connect to the specified address and checks that is valid
   *  @param address   The IP address and port to contact (port is ignored).
+  * @param args A ConnectionArgs object used to supply additional arguments
+  * required for the connection
   *  @return True if the connection was successfully established
   */
 bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {

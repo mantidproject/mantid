@@ -14,6 +14,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -200,15 +201,10 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
   return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
-//----------------------------------------------------------------------------------------------
-/**
- * Create a group of detectors arranged in a ring;
- */
-boost::shared_ptr<DetectorGroup>
-createRingOfCylindricalDetectors(const double R_min, const double R_max,
-                                 const double z0) {
-
-  std::vector<boost::shared_ptr<const IDetector>> groupMembers;
+std::vector<std::unique_ptr<IDetector>>
+createVectorOfCylindricalDetectors(const double R_min, const double R_max,
+                                   const double z0) {
+  std::vector<std::unique_ptr<IDetector>> allDetectors;
   // One object
   double R0 = 0.5;
   double h = 1.5;
@@ -231,15 +227,33 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
       if (Rsq >= Rmin2 && Rsq < Rmax2) {
         std::ostringstream os;
         os << "d" << ic;
-        auto det =
-            boost::make_shared<Detector>(os.str(), ic + 1, detShape, nullptr);
+        auto det = Mantid::Kernel::make_unique<Detector>(os.str(), ic + 1,
+                                                         detShape, nullptr);
         det->setPos(x, y, z0);
-        groupMembers.push_back(det);
+        allDetectors.emplace_back(std::move(det));
       }
 
       ic++;
     }
   }
+  return allDetectors;
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * Create a group of detectors arranged in a ring;
+ */
+boost::shared_ptr<DetectorGroup>
+createRingOfCylindricalDetectors(const double R_min, const double R_max,
+                                 const double z0) {
+
+  auto vecOfDetectors = createVectorOfCylindricalDetectors(R_min, R_max, z0);
+  std::vector<boost::shared_ptr<const IDetector>> groupMembers;
+  groupMembers.reserve(vecOfDetectors.size());
+  for (auto &det : vecOfDetectors) {
+    groupMembers.push_back(boost::shared_ptr<const IDetector>(std::move(det)));
+  }
+
   return boost::make_shared<DetectorGroup>(groupMembers);
 }
 

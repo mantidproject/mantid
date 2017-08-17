@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>803</width>
-    <height>547</height>
+    <width>949</width>
+    <height>733</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,6 +39,9 @@
          </stringlist>
         </property>
         <property name="showLoad" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="ShowGroups" stdset="0">
          <bool>false</bool>
         </property>
        </widget>
@@ -93,6 +96,13 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbPlotPreview">
+           <property name="text">
+            <string>Plot Current Preview</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

@@ -1,3 +1,4 @@
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
@@ -458,7 +459,7 @@ void CompAssembly::printTree(std::ostream &os) const {
  * @returns A vector of the absolute position
  */
 V3D CompAssembly::getPos() const {
-  if (!m_map)
+  if (!m_map || hasComponentInfo())
     return Component::getPos();
   else {
     V3D pos;
@@ -475,8 +476,8 @@ V3D CompAssembly::getPos() const {
  * creates it if it is not available.
  * @returns A vector of the absolute position
  */
-const Quat CompAssembly::getRotation() const {
-  if (!m_map)
+Quat CompAssembly::getRotation() const {
+  if (!m_map || hasComponentInfo())
     return Component::getRotation();
   else {
     Quat rot;
@@ -486,6 +487,10 @@ const Quat CompAssembly::getRotation() const {
     }
     return rot;
   }
+}
+
+size_t CompAssembly::registerContents(ComponentVisitor &visitor) const {
+  return visitor.registerComponentAssembly(*this);
 }
 
 /** Print information about elements in the assembly to a stream

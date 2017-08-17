@@ -1,20 +1,20 @@
 #include <iostream>
 #include <sstream>
 
-#include "MantidQtCustomInterfaces/MantidEVWorker.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtCustomInterfaces/MantidEVWorker.h"
 #include <exception>
 
 namespace MantidQt {
@@ -296,7 +296,7 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
         int_alg->execute();
         Mantid::API::MatrixWorkspace_sptr int_ws =
             ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
-        monitor_count = int_ws->readY(0)[0];
+        monitor_count = int_ws->y(0)[0];
         std::cout << "Beam monitor counts used for scaling = " << monitor_count
                   << "\n";
       } else {

@@ -20,7 +20,7 @@ ProjectSavePresenter::ProjectSavePresenter(IProjectSaveView *view)
     : m_view(view), m_model(m_view->getWindows()) {
   auto workspaceNames = m_model.getWorkspaceNames();
   auto info = m_model.getWorkspaceInformation();
-  auto winInfo = m_model.getWindowInformation(workspaceNames);
+  auto winInfo = m_model.getWindowInformation(workspaceNames, true);
   m_view->updateIncludedWindowsList(winInfo);
   m_view->updateWorkspacesList(info);
 }
@@ -49,7 +49,8 @@ void ProjectSavePresenter::notify(Notification notification) {
 void ProjectSavePresenter::includeWindowsForCheckedWorkspace() {
   auto wsNames = m_view->getCheckedWorkspaceNames();
   auto names = m_model.getWindowNames(wsNames);
-  auto info = m_model.getWindowInformation(wsNames);
+  // true flag gets windows unattached to workspaces as well
+  auto info = m_model.getWindowInformation(wsNames, true);
   m_view->updateIncludedWindowsList(info);
   m_view->removeFromExcludedWindowsList(names);
 }
