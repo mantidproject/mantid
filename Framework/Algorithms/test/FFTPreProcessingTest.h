@@ -253,6 +253,26 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[0], 0.0, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[300], ws->y(0)[0], Delta);
     TS_ASSERT_DELTA(outWS->y(0)[350], 0.0, Delta);
+  } 
+  void test_PaddingTwo() {
+
+    auto ws = createWorkspace(1, 50);
+    IAlgorithm_sptr alg = setUpAlg();
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", outputName);
+    alg->setProperty("Padding", 2);
+    alg->setProperty("NegativePAdding", true);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+
+    double Delta = 0.0001;
+    // Test padding is applied
+    TS_ASSERT_EQUALS(outWS->x(0).size(), 150);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.0, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[51], ws->y(0)[1], Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[101], 0.0, Delta);
   }
 };
 
