@@ -138,7 +138,6 @@ see http://www.mantidproject.org/IDF -->
 <type name="detector-bank">
   <properties />
   <component type="detector-module">
-  <!--TODO do we want -0.05 -> 0.05 or 0.00?  -->
     <location  x="0" y="-0.00" z="0" rot="0" axis-x="1" axis-y="0" axis-z="0"/>
   </component>
   <component type="detector-module">
@@ -161,12 +160,10 @@ see http://www.mantidproject.org/IDF -->
     <location r="0" t="0" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
   </component>
 </type>
-<!-- Pixels inside a single detector block -->
+<!-- Pixels inside a single detector block, currently each bank has 2 rows with 100 pixels each  -->
 <type name="detector-block" is="RectangularDetector" type="detector-pixel"
   xpixels="100" xstart="-0.2" xstep="+0.004"
   ypixels="2" ystart="+0.05" ystep="-0.1">
-  <!--# we need 100 pixels per row-->
-
 </type>
 
 <type name="detector-pixel" is="detector">
