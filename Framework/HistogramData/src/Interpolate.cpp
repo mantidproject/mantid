@@ -66,9 +66,12 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
  * @param output A histogram where interpolated values are store
  * @throw runtime_error Signals that the sanity check failed.
  */
-void sanityCheck(const Histogram &input, const Histogram &output) {
+void sanityCheck(const Histogram &input, const Histogram &output, const size_t minInputSize) {
   const auto inPoints = input.points();
   const auto outPoints = output.points();
+  if (inPoints.size() < minInputSize) {
+    throw std::runtime_error("interpolate - input histogram has too few points");
+  }
   if (outPoints.front() < inPoints.front() ||
       outPoints.back() > inPoints.back()) {
     throw std::runtime_error("interpolate - input does not cover all points in "
@@ -229,7 +232,7 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
  * @param output A histogram containing the interpolated values
  */
 void interpolateLinearInplace(const Histogram &input, Histogram &output) {
-  sanityCheck(input, output);
+  sanityCheck(input, output, 2);
   const auto &points = input.points().rawData();
   const auto &y = input.y().rawData();
   const auto &interpPoints = output.points();
@@ -280,7 +283,7 @@ void interpolateCSplineInplace(Histogram &inOut, const size_t stepSize) {
  * @param output A histogram where to store the interpolated values
  */
 void interpolateCSplineInplace(const Histogram &input, Histogram &output) {
-  sanityCheck(input, output);
+  sanityCheck(input, output, 3);
   const auto &points = input.points().rawData();
   const auto &y = input.y().rawData();
   const auto &interpPoints = output.points();
