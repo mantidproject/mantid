@@ -1,30 +1,62 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include <exception>
 #include <string>
+#include <Eigen/Geometry>
 
 namespace Mantid {
 namespace Geometry {
+
+namespace {
+/**
+ * Rotate point by inverse of rotation held at componentIndex
+ */
+const Eigen::Vector3d undoRotation(const Eigen::Vector3d &point,
+                                   const Beamline::ComponentInfo &compInfo,
+                                   const size_t componentIndex) {
+  auto unRotateTransform =
+      Eigen::Affine3d(compInfo.rotation(componentIndex).inverse());
+  return unRotateTransform * point;
+}
+/**
+ * Put the point into the frame of the shape.
+ * 1. Subtract component position (puts component pos at origin, same as shape
+ * coordinate system).
+ * 2. Apply inverse rotation of component to point. Unrotates the component into
+ * shape coordinate frame, with observer reorientated.
+ */
+const Kernel::V3D toShapeFrame(const Kernel::V3D &point,
+                               const Beamline::ComponentInfo &compInfo,
+                               const size_t componentIndex) {
+  return Kernel::toV3D(undoRotation(Kernel::toVector3d(point) -
+                                        compInfo.position(componentIndex),
+                                    compInfo, componentIndex));
+}
+}
 
 /**
  * Constructor.
  * @param componentInfo : Internal Beamline ComponentInfo
  * @param componentIds : ComponentIDs ordered by component
  * @param componentIdToIndexMap : ID -> index translation map
- * index
- */
+ * @param shapes : Shapes for each component
+ * */
 ComponentInfo::ComponentInfo(
     std::unique_ptr<Beamline::ComponentInfo> componentInfo,
     boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
         componentIds,
     boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
-        componentIdToIndexMap)
+        componentIdToIndexMap,
+    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+        shapes)
     : m_componentInfo(std::move(componentInfo)),
       m_componentIds(std::move(componentIds)),
-      m_compIDToIndex(std::move(componentIdToIndexMap)) {
+      m_compIDToIndex(std::move(componentIdToIndexMap)),
+      m_shapes(std::move(shapes)) {
 
   if (m_componentIds->size() != m_compIDToIndex->size()) {
     throw std::invalid_argument("Inconsistent ID and Mapping input containers "
@@ -45,7 +77,7 @@ ComponentInfo::ComponentInfo(const ComponentInfo &other)
     : m_componentInfo(
           Kernel::make_unique<Beamline::ComponentInfo>(*other.m_componentInfo)),
       m_componentIds(other.m_componentIds),
-      m_compIDToIndex(other.m_compIDToIndex) {}
+      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ComponentInfo::~ComponentInfo() = default;
@@ -120,6 +152,36 @@ void ComponentInfo::setRotation(const size_t componentIndex,
                                 const Kernel::Quat &newRotation) {
   m_componentInfo->setRotation(componentIndex,
                                Kernel::toQuaterniond(newRotation));
+}
+
+const Object &ComponentInfo::shape(const size_t componentIndex) const {
+  return *(*m_shapes)[componentIndex];
+}
+
+Kernel::V3D ComponentInfo::scaleFactor(const size_t componentIndex) const {
+  return Kernel::toV3D(m_componentInfo->scaleFactor(componentIndex));
+}
+
+void ComponentInfo::setScaleFactor(const size_t componentIndex,
+                                   const Kernel::V3D &scaleFactor) {
+  m_componentInfo->setScaleFactor(componentIndex,
+                                  Kernel::toVector3d(scaleFactor));
+}
+
+double ComponentInfo::solidAngle(const size_t componentIndex,
+                                 const Kernel::V3D &observer) const {
+
+  // This is the observer position in the shape's coordinate system.
+  const Kernel::V3D relativeObserver =
+      toShapeFrame(observer, *m_componentInfo, componentIndex);
+  const Kernel::V3D scaleFactor = this->scaleFactor(componentIndex);
+  if ((scaleFactor - Kernel::V3D(1.0, 1.0, 1.0)).norm() < 1e-12)
+    return shape(componentIndex).solidAngle(relativeObserver);
+  else {
+    // This function will scale the object shape when calculating the solid
+    // angle.
+    return shape(componentIndex).solidAngle(relativeObserver, scaleFactor);
+  }
 }
 } // namespace Geometry
 } // namespace Mantid
