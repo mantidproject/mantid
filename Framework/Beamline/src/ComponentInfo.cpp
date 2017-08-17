@@ -260,8 +260,7 @@ size_t ComponentInfo::parent(const size_t componentIndex) const {
   return (*m_parentIndices)[componentIndex];
 }
 
-bool ComponentInfo::isVisible(const size_t componentIndex) const
-{
+bool ComponentInfo::isVisible(const size_t componentIndex) const {
 	return (*m_isVisible)[componentIndex];
 }
 

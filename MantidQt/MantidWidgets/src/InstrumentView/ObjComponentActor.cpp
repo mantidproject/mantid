@@ -8,6 +8,8 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 
@@ -51,8 +53,8 @@ ObjComponentActor::ObjComponentActor(const InstrumentActor &instrActor,
   // set the displayed colour
   setColors();
 
-  if (compID->hasParameter("HiddenInInstrumentView") &&
-      compID->getBoolParameter("HiddenInInstrumentView")[0]) {
+  if (compID->hasParameter(ParameterMap::isHidden()) &&
+      compID->getBoolParameter(ParameterMap::isHidden())[0]) {
     // If the user has explicitly stated that this component should be hidden,
     // then hide itn();
   } else if (!isComponentFinite(compID)) {
