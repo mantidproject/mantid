@@ -64,7 +64,7 @@ public:
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -76,7 +76,7 @@ public:
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -107,7 +107,7 @@ public:
     IAlgorithm_sptr alg1 = setUpAlg();
     alg1->setProperty("InputWorkspace", workspaces[0]);
     alg1->setPropertyValue("OutputWorkspace", outputName);
-    TS_ASSERT_THROWS_NOTHING(alg1->execute());
+    alg1->execute();
     TS_ASSERT(alg1->isExecuted());
 
     workspaces.push_back(alg1->getProperty("OutputWorkspace"));
@@ -116,7 +116,7 @@ public:
     IAlgorithm_sptr alg2 = setUpAlg();
     alg2->setProperty("InputWorkspace", workspaces[0]);
     alg2->setPropertyValue("OutputWorkspace", outputName);
-    TS_ASSERT_THROWS_NOTHING(alg2->execute());
+    alg2->execute();
     TS_ASSERT(alg2->isExecuted());
     workspaces.push_back(alg2->getProperty("OutputWorkspace"));
 
@@ -142,7 +142,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("ApodizationFunction", "Lorentz");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -164,7 +164,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("ApodizationFunction", "Gaussian");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -186,7 +186,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 1);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -203,7 +203,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 12);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -223,7 +223,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 1);
     alg->setProperty("NegativePAdding", true);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -242,7 +242,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 12);
     alg->setProperty("NegativePAdding", true);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -262,7 +262,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 2);
     alg->setProperty("NegativePAdding", true);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
