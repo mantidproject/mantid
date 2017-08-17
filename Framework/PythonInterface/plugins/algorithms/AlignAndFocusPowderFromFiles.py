@@ -242,7 +242,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         self.absorption = self.getProperty('AbsorptionWorkspace').value
         self.charac = self.getProperty('Characterizations').value
         finalname = self.getProperty('OutputWorkspace').valueAsStr
-        useCaching = len(self.getProperty('CacheDir').value) <= 0
+        useCaching = len(self.getProperty('CacheDir').value) > 0
 
         if not useCaching:
             self.log().warning('CacheDir is not specified - functionality disabled')
@@ -261,6 +261,8 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 self.__determineCharacterizations(filename,
                                                   wkspname, True) # updates instance variable
                 cachefile = self.__getCacheName(wkspname)
+            else:
+                cachefile = None
 
             wkspname += '_f%d' % i # add file number to be unique
 
