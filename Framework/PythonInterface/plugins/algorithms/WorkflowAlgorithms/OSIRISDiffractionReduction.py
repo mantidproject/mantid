@@ -52,17 +52,16 @@ class DRangeToWorkspaceMap(object):
     def __init__(self):
         self._map = {}
 
-    def add_ws(self, ws_name, d_range=None):
+    def add_ws(self, workspace, d_range=None):
         """
         Takes in the given workspace and lists it alongside its time regime
         value.  If the time regime has yet to be created, it will create it,
         and if there is already a workspace listed beside the time regime, then
         the new ws will be appended to that list.
 
-        @param ws_name Name of workspace to add
+        @param workspace The workspace to add
         @param d_range Optionally override the dRange
         """
-        wrksp = mtd[ws_name]
 
         # Get the time regime of the workspace, and use it to find the DRange.
         time_regime = wrksp.dataX(0)[0]
@@ -451,14 +450,16 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 minus_set_property("RHSWorkspace", rebin_get_property("OutputWorkspace").value)
                 minus_set_property("OutputWorkspace", sample_ws)
                 minus_exec()
+            else:
+                sample_ws = mtd[sample_ws_name]
 
             if self._man_d_range is not None and idx < len(self._man_d_range):
-                self._sam_ws_map.add_ws(minus_get_property("OutputWorkspace").value,
+                self._sam_ws_map.add_ws(sample_ws,
                                         self._man_d_range[idx])
             else:
-                self._sam_ws_map.add_ws(minus_get_property("OutputWorkspace").value)
+                self._sam_ws_map.add_ws(sample_ws)
 
-        # Add the vanadium workspace names to the dRange to vanadium map
+        # Add the vanadium workspaces to the vanadium drange map
         self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
 
         # Create delete workspace algorithm and retrieve function pointers to improve performance
@@ -483,8 +484,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # of DRanges, each to a *single* workspace.
         self._sam_ws_map.average_across_dranges()
 
-        # Now do the same to the vanadium workspaces - NOTE: vanadium map now
-        # contains workspaces not workspace names.
+        # Now do the same to the vanadium workspaces
         self._van_ws_map.average_across_dranges()
 
         # Create NormaliseByCurrent algorithm and retrieve function pointers to improve performance
@@ -534,8 +534,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for sample_ws_name, sample_ws in zip(sample_ws_names,
                                              sample_ws_list):
             mtd.addOrReplace(sample_ws_name, sample_ws)
-
-        output_ws = None
 
         if len(sample_ws_list) > 1:
 
@@ -602,24 +600,24 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", result)
 
-    def _add_to_drange_map(self, workspaces, drange_map):
+    def _add_to_drange_map(self, workspace_names, drange_map):
         """
         Adds the specified workspaces to the specified drange map.
         Attempts to add using the manually entered dranges where
         possible - if not, automatically finds the drange.
 
-        :param workspaces:      The workspaces to add to the drange map.
+        :param workspaces:      The names of the workspaces to add to the drange map.
         :param drange_map:      The drange map to add the workspaces to.
         :param do_log_found:    If True print the found workspaces to log.
                                 Else don't print to log.
         """
 
-        for idx, ws in enumerate(workspaces):
+        for idx, ws_name in enumerate(workspace_names):
             if self._man_d_range is not None and \
                             idx < len(self._man_d_range):
-                drange_map.add_ws(ws, self._man_d_range[idx])
+                drange_map.add_ws(mtd[ws_name], self._man_d_range[idx])
             else:
-                drange_map.add_ws(ws)
+                drange_map.add_ws(mtd[ws_name])
 
     def _parse_string_array(self, string):
         """
