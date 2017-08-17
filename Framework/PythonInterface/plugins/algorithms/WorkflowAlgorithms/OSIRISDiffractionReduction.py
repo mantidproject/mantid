@@ -209,8 +209,8 @@ def get_intersection_of_ranges(range_list):
     range_combos = itertools.combinations(range_list, 2)
 
     # Retrieve all intersections
-    intersections = map(lambda range_pair: find_intersection_of_ranges(range_pair[0], range_pair[1]),
-                        range_combos)
+    intersections = (find_intersection_of_ranges(range_pair[0], range_pair[1])
+                     for range_pair in range_combos)
 
     # Filter out None type intersections
     intersections = filter(lambda intersection: intersection is not None, intersections)
@@ -251,7 +251,7 @@ def rebin_to_smallest(workspaces):
     :param workspaces: The list of workspaces to rebin to the smallest.
     :return:           The rebinned list of workspaces.
     """
-    smallest_ws = min(workspaces, key=lambda ws: mtd[ws].blocksize())
+    smallest_ws = min(workspaces, key=lambda ws: ws.blocksize())
     rebin_alg = AlgorithmManager.create("RebinToWorkspace")
     rebin_alg.setChild(True)
     rebin_alg.initialize()
@@ -696,7 +696,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Divide all dividend workspaces by the corresponding divisor workspaces.
         for dividend_ws_name, divisor_ws_name in zip(dividend_ws_names, divisor_ws_names):
-            ws_list = rebin_to_smallest([dividend_ws_name, divisor_ws_name])
+            ws_list = rebin_to_smallest(mtd[dividend_ws_name], mtd[divisor_ws_name])
             dividend_ws, divisor_ws = ws_list[0], ws_list[1]
 
             divide_set_property("LHSWorkspace", dividend_ws)
