@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRYOLD_REFLSEARCHMODEL_H_
-#define MANTID_ISISREFLECTOMETRYOLD_REFLSEARCHMODEL_H_
+#ifndef MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
+#define MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include <QAbstractTableModel>
@@ -77,4 +77,4 @@ typedef boost::shared_ptr<ReflSearchModel> ReflSearchModel_sptr;
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif /* MANTID_ISISREFLECTOMETRYOLD_REFLSEARCHMODEL_H_ */
+#endif /* MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_ */

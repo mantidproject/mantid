@@ -32,10 +32,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace MantidQt {
 namespace CustomInterfaces {
-std::map<QString, QString> MANTIDQT_ISISREFLECTOMETRYOLD_DLL
+std::map<QString, QString> MANTIDQT_ISISREFLECTOMETRY_DLL
 fromStdStringMap(std::map<std::string, std::string> const &inMap);
 
-std::vector<std::map<QString, QString>> MANTIDQT_ISISREFLECTOMETRYOLD_DLL
+std::vector<std::map<QString, QString>> MANTIDQT_ISISREFLECTOMETRY_DLL
 fromStdStringVectorMap(
     std::vector<std::map<std::string, std::string>> const &inVectorMap);
 }

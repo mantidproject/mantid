@@ -97,22 +97,22 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers( PrecompiledHeader.h  ALL_SRC )
-add_library ( MantidScientificInterfacesISISReflectometryOld ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( MantidScientificInterfacesISISReflectometry ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # Set the name of the generated library
-set_target_properties ( MantidScientificInterfacesISISReflectometryOld PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_ISISREFLECTOMETRYOLD )
+set_target_properties ( MantidScientificInterfacesISISReflectometry PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_ISISREFLECTOMETRY )
 if ( MSVC_IDE )
 #  # Add to the 'ScientificInterfaces' group in VS
-  set_property ( TARGET MantidScientificInterfacesISISReflectometryOld PROPERTY FOLDER "ScientificInterfaces" )
+  set_property ( TARGET MantidScientificInterfacesISISReflectometry PROPERTY FOLDER "ScientificInterfaces" )
 endif()
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidScientificInterfacesISISReflectometryOld PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
+  set_target_properties ( MantidScientificInterfacesISISReflectometry PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
 endif ()
 
 find_Package(Threads)
 
-target_link_libraries ( MantidScientificInterfacesISISReflectometryOld LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+target_link_libraries ( MantidScientificInterfacesISISReflectometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtWidgetsCommon
             ${CORE_MANTIDLIBS}
             ${QT_LIBRARIES}
@@ -126,4 +126,4 @@ target_link_libraries ( MantidScientificInterfacesISISReflectometryOld LINK_PRIV
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidScientificInterfacesISISReflectometryOld ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )
+install ( TARGETS MantidScientificInterfacesISISReflectometry ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )

@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRYOLD_QTREFLRUNSTABVIEW_H_
-#define MANTID_ISISREFLECTOMETRYOLD_QTREFLRUNSTABVIEW_H_
+#ifndef MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
+#define MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
@@ -55,7 +55,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL QtReflRunsTabView
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflRunsTabView
     : public MantidQt::API::MantidWidget,
       public IReflRunsTabView,
       public MantidQt::MantidWidgets::ProgressableView {
@@ -131,4 +131,4 @@ private slots:
 } // namespace Mantid
 } // namespace CustomInterfaces
 
-#endif /* MANTID_ISISREFLECTOMETRYOLD_QTREFLRUNSTABVIEW_H_ */
+#endif /* MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_ */

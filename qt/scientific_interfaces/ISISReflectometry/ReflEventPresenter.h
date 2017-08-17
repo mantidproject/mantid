@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRYOLD_REFLEVENTPRESENTER_H
-#define MANTID_ISISREFLECTOMETRYOLD_REFLEVENTPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
 
 #include "DllConfig.h"
 #include "IReflEventPresenter.h"
@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL ReflEventPresenter
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReflEventPresenter
     : public IReflEventPresenter {
 public:
   /// Constructor
@@ -55,4 +55,4 @@ private:
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRYOLD_REFLEVENTPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H */

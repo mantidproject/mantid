@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRYOLD_REFLMAINWINDOWPRESENTER_H
-#define MANTID_ISISREFLECTOMETRYOLD_REFLMAINWINDOWPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_REFLMAINWINDOWPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_REFLMAINWINDOWPRESENTER_H
 
 #include "DllConfig.h"
 #include "IReflMainWindowPresenter.h"
@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL ReflMainWindowPresenter
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReflMainWindowPresenter
     : public IReflMainWindowPresenter {
 public:
   /// Constructor
@@ -105,4 +105,4 @@ private:
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRYOLD_REFLMAINWINDOWPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_REFLMAINWINDOWPRESENTER_H */

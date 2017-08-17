@@ -35,7 +35,7 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL ReflNexusMeasurementItemSource
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReflNexusMeasurementItemSource
     : public ReflMeasurementItemSource {
 public:
   ReflNexusMeasurementItemSource();

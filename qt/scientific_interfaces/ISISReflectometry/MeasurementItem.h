@@ -30,7 +30,7 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL MeasurementItem {
+class MANTIDQT_ISISREFLECTOMETRY_DLL MeasurementItem {
 
 public:
   typedef std::string IDType;

@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRYOLD_REFLDATAPROCESSORPRESENTER_H
-#define MANTID_ISISREFLECTOMETRYOLD_REFLDATAPROCESSORPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_REFLDATAPROCESSORPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_REFLDATAPROCESSORPRESENTER_H
 
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL ReflDataProcessorPresenter
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReflDataProcessorPresenter
     : public GenericDataProcessorPresenter {
 public:
   // Constructor
@@ -118,4 +118,4 @@ private:
 };
 }
 }
-#endif /*MANTID_ISISREFLECTOMETRYOLD_REFLDATAPROCESSORPRESENTER_H*/
+#endif /*MANTID_ISISREFLECTOMETRY_REFLDATAPROCESSORPRESENTER_H*/

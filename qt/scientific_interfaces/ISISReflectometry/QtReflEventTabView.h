@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL QtReflEventTabView : public QWidget {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflEventTabView : public QWidget {
   Q_OBJECT
 public:
   /// Constructor

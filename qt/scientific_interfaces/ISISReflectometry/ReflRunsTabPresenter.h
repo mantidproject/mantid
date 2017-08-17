@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRYOLD_REFLRUNSTABPRESENTER_H
-#define MANTID_ISISREFLECTOMETRYOLD_REFLRUNSTABPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 
 #include "MantidAPI/IAlgorithm.h"
 #include "DllConfig.h"
@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL ReflRunsTabPresenter
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReflRunsTabPresenter
     : public IReflRunsTabPresenter,
       public MantidQt::MantidWidgets::DataProcessorMainPresenter {
 public:
@@ -120,4 +120,4 @@ private:
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRYOLD_REFLRUNSTABPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H */

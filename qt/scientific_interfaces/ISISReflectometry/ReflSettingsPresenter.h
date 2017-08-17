@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRYOLD_REFLSETTINGSPRESENTER_H
-#define MANTID_ISISREFLECTOMETRYOLD_REFLSETTINGSPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H
 
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
@@ -38,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL ReflSettingsPresenter
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSettingsPresenter
     : public IReflSettingsPresenter {
 public:
   /// Constructor
@@ -73,4 +73,4 @@ private:
 };
 }
 }
-#endif /* MANTID_ISISREFLECTOMETRYOLD_REFLSETTINGSPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H */

@@ -33,7 +33,7 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL ReflMeasurementItemSource {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReflMeasurementItemSource {
 public:
   /// Get the measurement somehow using location, or fuzzy path
   virtual MeasurementItem obtain(const std::string &definedPath,

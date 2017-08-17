@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRYOLD_REFLMEASURETRANSFERSTRATEGY_H_
-#define MANTID_ISISREFLECTOMETRYOLD_REFLMEASURETRANSFERSTRATEGY_H_
+#ifndef MANTID_ISISREFLECTOMETRY_REFLMEASURETRANSFERSTRATEGY_H_
+#define MANTID_ISISREFLECTOMETRY_REFLMEASURETRANSFERSTRATEGY_H_
 
 #include "DllConfig.h"
 #include "ReflTransferStrategy.h"
@@ -47,7 +47,7 @@ class ReflMeasurementItemSource;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRYOLD_DLL ReflMeasureTransferStrategy
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReflMeasureTransferStrategy
     : public ReflTransferStrategy {
 public:
   ReflMeasureTransferStrategy(
@@ -78,4 +78,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_ISISREFLECTOMETRYOLD_REFLMEASURETRANSFERSTRATEGY_H_ */
+#endif /* MANTID_ISISREFLECTOMETRY_REFLMEASURETRANSFERSTRATEGY_H_ */
