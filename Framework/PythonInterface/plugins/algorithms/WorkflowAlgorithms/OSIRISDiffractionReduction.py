@@ -175,6 +175,7 @@ def average_ws_list(ws_list):
 
     return sum(ws_list) / len(ws_list)
 
+
 def find_intersection_of_ranges(rangeA, rangeB):
     if rangeA[0] >= rangeA[1] or rangeB[0] >= rangeB[1]:
         raise RuntimeError("Malformed range")
@@ -330,7 +331,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Note that dRange numbers are offset to match the numbering in the OSIRIS manual
         # http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf
-        self.declareProperty('DRange', defaultValue="", doc='Dranges to use when DetectDRange is disabled')
+        self.declareProperty('DRange', defaultValue="", doc='Dranges to use when DetectDRange is disabled; a comma'
+                                                            ' separated list should be provided. a-b can be used to'
+                                                            ' create a list of values in the range a-b, inclusively.')
 
         self._cal = None
         self._output_ws_name = None
@@ -438,7 +441,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for idx, sample_ws_name in enumerate(sample_ws_names):
             sample_ws = sample_ws_name
 
-            if container_ws_names:
+            if container_workspaces:
                 rebin_set_property("WorkspaceToRebin", container_workspaces[idx])
                 rebin_set_property("WorkspaceToMatch", sample_ws)
                 rebin_set_property("OutputWorkspace", container_workspaces[idx])
@@ -629,7 +632,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Convert string ranges to integer ranges.
         try:
-            int_ranges = map(lambda str_range: [int(x) for x in str_range], str_ranges)
+            int_ranges = [[int(x) for x in str_range] for str_range in str_ranges]
         except RuntimeError:
             raise ValueError("Provided d-range was incorrectly formatted.")
 
