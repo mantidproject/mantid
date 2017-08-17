@@ -7,7 +7,7 @@ Muon Analysis
 
 Interfaces
 ----------
--  Added the Frequency Domain Analysis GUI. At present it is only able to transform data from real space to frequency space. 
+-  Added the Frequency Domain Analysis GUI. At present it is only able to transform data from real space to frequency space. Includes FFT and Maximum entropy methods.
 
 - Updated the TF asymmetry fit. It now works with multiple fitting. 
 
