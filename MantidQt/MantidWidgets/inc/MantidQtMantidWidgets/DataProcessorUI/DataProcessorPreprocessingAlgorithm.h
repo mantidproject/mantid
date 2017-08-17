@@ -3,6 +3,7 @@
 
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include <QString>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -38,35 +39,35 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorPreprocessingAlgorithm
 public:
   // Constructor
   DataProcessorPreprocessingAlgorithm(
-      const std::string &name, const std::string &prefix = "",
-      const std::set<std::string> &blacklist = std::set<std::string>());
+      const QString &name, const QString &prefix = "",
+      const std::set<QString> &blacklist = std::set<QString>());
   // Delegating constructor
-  DataProcessorPreprocessingAlgorithm(const std::string &name,
-                                      const std::string &prefix,
-                                      const std::string &blacklist);
+  DataProcessorPreprocessingAlgorithm(const QString &name,
+                                      const QString &prefix,
+                                      const QString &blacklist);
   // Default constructor
   DataProcessorPreprocessingAlgorithm();
   // Destructor
   virtual ~DataProcessorPreprocessingAlgorithm();
 
   // The name of the lhs input property
-  std::string lhsProperty() const;
+  QString lhsProperty() const;
   // The name of the rhs input property
-  std::string rhsProperty() const;
+  QString rhsProperty() const;
   // The name of the output property
-  std::string outputProperty() const;
+  QString outputProperty() const;
   // The prefix to add to the output property
-  std::string prefix() const;
+  QString prefix() const;
 
 private:
   // A prefix to the name of the pre-processed output ws
-  std::string m_prefix;
+  QString m_prefix;
   // The name of the LHS input property
-  std::string m_lhs;
+  QString m_lhs;
   // The name of the RHS input property
-  std::string m_rhs;
+  QString m_rhs;
   // The name of the output proerty
-  std::string m_outProperty;
+  QString m_outProperty;
 };
 }
 }

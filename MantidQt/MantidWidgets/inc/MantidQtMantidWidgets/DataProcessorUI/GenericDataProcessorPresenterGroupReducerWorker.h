@@ -55,14 +55,14 @@ private slots:
         m_presenter->m_manager->setProcessed(true, m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
-      emit reductionErrorSignal(ex);
+      emit reductionErrorSignal(QString(ex.what()));
       emit finished(1);
     }
   }
 
 signals:
   void finished(const int exitCode);
-  void reductionErrorSignal(std::exception ex);
+  void reductionErrorSignal(QString ex);
 
 private:
   GenericDataProcessorPresenter *m_presenter;

@@ -68,6 +68,10 @@ makeTreeExampleAndReturnGeometricArguments() {
   compRotations->emplace_back(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()));
   compRotations->emplace_back(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()));
 
+  // Component scale factors
+  auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(
+      std::vector<Eigen::Vector3d>(5, Eigen::Vector3d{1, 1, 1}));
+
   ComponentInfo compInfo(
       bankSortedDetectorIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
@@ -76,7 +80,6 @@ makeTreeExampleAndReturnGeometricArguments() {
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
       parentIndices, isVisible, compPositions, compRotations, -1, -1);
-
   compInfo.setDetectorInfo(detectorInfo.get());
 
   return std::make_tuple(compInfo, detPositions, detRotations, *compPositions,
@@ -122,6 +125,9 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
       2,
       Eigen::Quaterniond::Identity()); // 2 rotations provided. 2 non-detectors
 
+  // Component scale factors
+  auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(
+      std::vector<Eigen::Vector3d>(5, Eigen::Vector3d{1, 1, 1}));
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
 
@@ -178,7 +184,7 @@ public:
     auto isVisible = boost::make_shared<std::vector<bool>>();
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
-
+    auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(3);
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
                                 bankSortedComponentIndices, componentRanges,
                                 parentIndices, isVisible, positions, rotations,
@@ -215,6 +221,7 @@ public:
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
         0); // 0 rotations provided
 
+    auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>();
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
                                    parentIndices, isVisible, positions,
@@ -249,6 +256,7 @@ public:
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
         1); // 1 rotation provided
 
+    auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>();
     // Only one component. So single empty component range.
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
@@ -610,6 +618,23 @@ public:
     TSM_ASSERT("Sub component should have a parent", compInfo.hasParent(3));
     TSM_ASSERT("Root component should not have a parent",
                !compInfo.hasParent(compInfo.size() - 1 /*root index*/));
+  }
+
+  void test_scale_factors() {
+
+    using namespace Eigen;
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+
+    // No scale factors by default
+    for (size_t i = 0; i < compInfo.size(); ++i) {
+      TS_ASSERT_EQUALS(Eigen::Vector3d(1.0, 1.0, 1.0), compInfo.scaleFactor(i));
+    }
+    Eigen::Vector3d newFactor(1, 2, 3);
+    // Overwrite
+    compInfo.setScaleFactor(0, newFactor);
+    // Read-back
+    TS_ASSERT_EQUALS(compInfo.scaleFactor(0), newFactor);
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

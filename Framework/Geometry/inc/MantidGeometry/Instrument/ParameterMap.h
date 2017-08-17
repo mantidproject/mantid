@@ -97,6 +97,7 @@ public:
   static const std::string &pString();
   static const std::string &pV3D();
   static const std::string &pQuat();
+  static const std::string &scale();
 
   const std::string diff(const ParameterMap &rhs,
                          const bool &firstDiffOnly = false) const;

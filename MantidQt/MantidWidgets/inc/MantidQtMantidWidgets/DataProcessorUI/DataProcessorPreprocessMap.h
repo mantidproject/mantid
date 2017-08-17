@@ -46,11 +46,11 @@ public:
   void addElement(const QString &column, const QString &algorithm,
                   const QString &prefix = "", const QString &blacklist = "");
   // Returns a map where keys are columns and values pre-processing algorithms
-  std::map<std::string, DataProcessorPreprocessingAlgorithm> asMap() const;
+  std::map<QString, DataProcessorPreprocessingAlgorithm> asMap() const;
 
 private:
   // A map where keys are columns and values pre-processing algorithms
-  std::map<std::string, DataProcessorPreprocessingAlgorithm> m_map;
+  std::map<QString, DataProcessorPreprocessingAlgorithm> m_map;
 };
 }
 }

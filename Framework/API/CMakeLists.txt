@@ -27,7 +27,7 @@ set ( SRC_FILES
 	src/CostFunctionFactory.cpp
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
-        src/DetectorSearcher.cpp
+	src/DetectorSearcher.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/EqualBinSizesValidator.cpp
@@ -82,6 +82,8 @@ set ( SRC_FILES
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
 	src/IncreasingAxisValidator.cpp
+	src/IndexProperty.cpp
+	src/IndexTypeProperty.cpp
 	src/InstrumentDataService.cpp
 	src/InstrumentValidator.cpp
 	src/JointDomain.cpp
@@ -102,8 +104,6 @@ set ( SRC_FILES
 	src/MultiPeriodGroupWorker.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
-        src/WorkspaceNearestNeighbourInfo.cpp
-        src/WorkspaceNearestNeighbours.cpp
 	src/NotebookBuilder.cpp
 	src/NotebookWriter.cpp
 	src/NullCoordTransform.cpp
@@ -139,6 +139,8 @@ set ( SRC_FILES
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
 	src/WorkspaceHistory.cpp
+	src/WorkspaceNearestNeighbourInfo.cpp
+	src/WorkspaceNearestNeighbours.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
 	src/WorkspaceUnitValidator.cpp
@@ -157,6 +159,7 @@ set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
 	inc/MantidAPI/ADSValidator.h
 	inc/MantidAPI/Algorithm.h
+	inc/MantidAPI/Algorithm.tcc
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
 	inc/MantidAPI/AlgorithmHistory.h
@@ -186,7 +189,7 @@ set ( INC_FILES
 	inc/MantidAPI/DataProcessorAlgorithm.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
-        inc/MantidAPI/DetectorSearcher.h
+	inc/MantidAPI/DetectorSearcher.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
@@ -270,6 +273,8 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParser.h
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
 	inc/MantidAPI/IncreasingAxisValidator.h
+	inc/MantidAPI/IndexProperty.h
+	inc/MantidAPI/IndexTypeProperty.h
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/InstrumentValidator.h
 	inc/MantidAPI/Jacobian.h
@@ -293,8 +298,6 @@ set ( INC_FILES
 	inc/MantidAPI/MultiPeriodGroupWorker.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
-  inc/MantidAPI/WorkspaceNearestNeighbourInfo.h
-  inc/MantidAPI/WorkspaceNearestNeighbours.h
 	inc/MantidAPI/NotebookBuilder.h
 	inc/MantidAPI/NotebookWriter.h
 	inc/MantidAPI/NullCoordTransform.h
@@ -334,6 +337,8 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceGroup_fwd.h
 	inc/MantidAPI/WorkspaceHistory.h
+	inc/MantidAPI/WorkspaceNearestNeighbourInfo.h
+	inc/MantidAPI/WorkspaceNearestNeighbours.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
 	inc/MantidAPI/WorkspaceProperty.tcc
@@ -362,7 +367,7 @@ set ( TEST_FILES
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
 	DetectorInfoTest.h
-        DetectorSearcherTest.h
+	DetectorSearcherTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
 	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
@@ -396,6 +401,8 @@ set ( TEST_FILES
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
+	IndexPropertyTest.h
+	IndexTypePropertyTest.h
 	InstrumentDataServiceTest.h
 	InstrumentValidatorTest.h
 	LatticeDomainTest.h
@@ -412,8 +419,6 @@ set ( TEST_FILES
 	MultiPeriodGroupWorkerTest.h
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
-        WorkspaceNearestNeighbourInfoTest.h
-        WorkspaceNearestNeighboursTest.h
 	NotebookBuilderTest.h
 	NotebookWriterTest.h
 	NumericAxisTest.h
@@ -422,7 +427,7 @@ set ( TEST_FILES
 	ParameterReferenceTest.h
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
-        ProgressTest.h
+	ProgressTest.h
 	ProjectionTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
@@ -444,6 +449,8 @@ set ( TEST_FILES
 	WorkspaceGroupTest.h
 	WorkspaceHistoryIOTest.h
 	WorkspaceHistoryTest.h
+	WorkspaceNearestNeighbourInfoTest.h
+	WorkspaceNearestNeighboursTest.h
 	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h
 	WorkspaceUnitValidatorTest.h

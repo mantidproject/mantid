@@ -17,11 +17,16 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
+std::ostream &operator<<(std::ostream &os, QString const &str) {
+  os << str.toStdString();
+  return os;
+}
+
 class ReflDataProcessorPresenterTest : public CxxTest::TestSuite {
 
 private:
   ITableWorkspace_sptr
-  createWorkspace(const std::string &wsName,
+  createWorkspace(const QString &wsName,
                   const DataProcessorWhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
@@ -31,18 +36,19 @@ private:
     colGroup->setPlotType(0);
 
     for (int col = 0; col < ncols; col++) {
-      auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col));
+      auto column = ws->addColumn(
+          "str", whitelist.colNameFromColIndex(col).toStdString());
       column->setPlotType(0);
     }
 
     if (wsName.length() > 0)
-      AnalysisDataService::Instance().addOrReplace(wsName, ws);
+      AnalysisDataService::Instance().addOrReplace(wsName.toStdString(), ws);
 
     return ws;
   }
 
   ITableWorkspace_sptr
-  createPrefilledWorkspace(const std::string &wsName,
+  createPrefilledWorkspace(const QString &wsName,
                            const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::vector<std::string> group{"0", "0", "1", "1"};
@@ -63,7 +69,7 @@ private:
   }
 
   ITableWorkspace_sptr
-  createPrefilledMixedWorkspace(const std::string &wsName,
+  createPrefilledMixedWorkspace(const QString &wsName,
                                 const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::string group = "0";
@@ -84,7 +90,7 @@ private:
   }
 
   ITableWorkspace_sptr
-  createPrefilledMinimalWorkspace(const std::string &wsName,
+  createPrefilledMinimalWorkspace(const QString &wsName,
                                   const DataProcessorWhiteList &whitelist) {
 
     auto ws = createWorkspace(wsName, whitelist);
@@ -103,9 +109,9 @@ private:
     return ws;
   }
 
-  void createSampleEventWS(const std::string &wsName) {
+  void createSampleEventWS(const QString &wsName) {
     auto tinyWS = WorkspaceCreationHelper::createEventWorkspace2();
-    AnalysisDataService::Instance().addOrReplace(wsName, tinyWS);
+    AnalysisDataService::Instance().addOrReplace(wsName.toStdString(), tinyWS);
   }
 
   ReflGenericDataProcessorPresenterFactory presenterFactory;
@@ -121,6 +127,14 @@ public:
   }
 
   ReflDataProcessorPresenterTest() { FrameworkManager::Instance(); }
+
+  static bool workspaceExists(std::string const &name) {
+    return AnalysisDataService::Instance().doesExist(name);
+  }
+
+  void setUp() override { DefaultValue<QString>::Set(QString()); }
+
+  void tearDown() override { DefaultValue<QString>::Clear(); }
 
   void testProcessEventWorkspacesUniformEvenSlicing() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
@@ -183,32 +197,24 @@ public:
     for (size_t i = 0; i < 3; i++) {
       std::string sliceIndex = std::to_string(i);
 
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13460_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_13460_slice_" + sliceIndex + "_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13460_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
-                                                          sliceIndex));
+      TS_ASSERT(workspaceExists("IvsLam_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
+                                "_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("TOF_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
     }
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_monitors"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_monitors"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13464"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
+    TS_ASSERT(workspaceExists("TOF_13460"));
+    TS_ASSERT(workspaceExists("TOF_13462"));
+    TS_ASSERT(workspaceExists("TOF_13460_monitors"));
+    TS_ASSERT(workspaceExists("TOF_13462_monitors"));
+    TS_ASSERT(workspaceExists("TRANS_13463"));
+    TS_ASSERT(workspaceExists("TRANS_13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -278,48 +284,35 @@ public:
     for (size_t i = 0; i < 3; i++) {
       std::string sliceIndex = std::to_string(i);
 
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13460_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_13460_slice_" + sliceIndex + "_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13460_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
-                                                          sliceIndex));
+      TS_ASSERT(workspaceExists("IvsLam_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
+                                "_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("TOF_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
     }
     // Uniform slicing allows for different runs to have different numbers
     // of output slices
     for (size_t i = 3; i < 4; i++) {
       std::string sliceIndex = std::to_string(i);
 
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
-                                                          sliceIndex));
+      TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
     }
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_monitors"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_monitors"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13464"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
+    TS_ASSERT(workspaceExists("TOF_13460"));
+    TS_ASSERT(workspaceExists("TOF_13462"));
+    TS_ASSERT(workspaceExists("TOF_13460_monitors"));
+    TS_ASSERT(workspaceExists("TOF_13462_monitors"));
+    TS_ASSERT(workspaceExists("TRANS_13463"));
+    TS_ASSERT(workspaceExists("TRANS_13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -389,32 +382,24 @@ public:
     for (size_t i = 0; i < 3; i++) {
       std::string sliceIndex = std::to_string(i);
 
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13460_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_13460_slice_" + sliceIndex + "_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13460_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
-                                                          sliceIndex));
+      TS_ASSERT(workspaceExists("IvsLam_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
+                                "_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("TOF_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
     }
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_monitors"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_monitors"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13464"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
+    TS_ASSERT(workspaceExists("TOF_13460"));
+    TS_ASSERT(workspaceExists("TOF_13462"));
+    TS_ASSERT(workspaceExists("TOF_13460_monitors"));
+    TS_ASSERT(workspaceExists("TOF_13462_monitors"));
+    TS_ASSERT(workspaceExists("TRANS_13463"));
+    TS_ASSERT(workspaceExists("TRANS_13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -484,32 +469,24 @@ public:
     for (size_t i = 0; i < 3; i++) {
       std::string sliceIndex = std::to_string(i);
 
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13460_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_13460_slice_" + sliceIndex + "_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13460_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13462_slice_" + sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_slice_" +
-                                                          sliceIndex));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
-                                                          sliceIndex));
+      TS_ASSERT(workspaceExists("IvsLam_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
+                                "_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("TOF_13460_slice_" + sliceIndex));
+      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
     }
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_monitors"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_monitors"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13464"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
+    TS_ASSERT(workspaceExists("TOF_13460"));
+    TS_ASSERT(workspaceExists("TOF_13462"));
+    TS_ASSERT(workspaceExists("TOF_13460_monitors"));
+    TS_ASSERT(workspaceExists("TOF_13462_monitors"));
+    TS_ASSERT(workspaceExists("TRANS_13463"));
+    TS_ASSERT(workspaceExists("TRANS_13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -693,7 +670,7 @@ public:
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
 
-    std::string pythonCode =
+    auto const pythonCode = QString(
         "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_slice_0\", "
         "0, True, window = base_graph)\n"
         "base_graph = plotSpectrum(\"IvsQ_13460_slice_1\", 0, True, window = "
@@ -705,7 +682,7 @@ public:
         "base_graph = plotSpectrum(\"IvsQ_13462_slice_1\", 0, True, window = "
         "base_graph)\n"
         "base_graph = plotSpectrum(\"IvsQ_13462_slice_2\", 0, True, window = "
-        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n");
 
     EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     TS_ASSERT_THROWS_NOTHING(
@@ -768,7 +745,7 @@ public:
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
 
-    std::string pythonCode =
+    auto const pythonCode = QString(
         "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_slice_0\", "
         "0, True, window = base_graph)\n"
         "base_graph = plotSpectrum(\"IvsQ_13460_slice_1\", 0, True, window = "
@@ -780,7 +757,7 @@ public:
         "base_graph = plotSpectrum(\"IvsQ_13462_slice_1\", 0, True, window = "
         "base_graph)\n"
         "base_graph = plotSpectrum(\"IvsQ_13462_slice_2\", 0, True, window = "
-        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n");
 
     EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     TS_ASSERT_THROWS_NOTHING(
