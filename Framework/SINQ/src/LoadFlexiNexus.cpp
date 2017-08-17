@@ -334,9 +334,17 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
       sample = it->second;
     } else {
       if (safeOpenpath(fin, it->second)) {
-        sample = fin->getStrData();
+        Info inf = fin->getInfo();
+        if (inf.dims.size() == 1) {
+          sample = fin->getStrData();
+        } else { // something special for 2-d array
+          std::vector<char> val_array;
+          fin->getData(val_array);
+          fin->closeData();
+          sample = std::string(val_array.begin(), val_array.end());
+        }
       } else {
-        sample = "Sampe plath not found";
+        sample = "Sample path not found";
       }
     }
   }
