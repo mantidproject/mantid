@@ -16,7 +16,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 #include <Poco/NObserver.h>
 
