@@ -451,7 +451,6 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
 
         sv.setRebinThickness(2, 1.0)
         sv.setRebinNumBins(50, 200)
-        sv.refreshRebin()
         sv.setRebinMode(True)
 
         time.sleep(1)
@@ -471,7 +470,6 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
 
         sv.setRebinThickness(2, 1.0)
         sv.setRebinNumBins(10, 10)
-        sv.refreshRebin()
         sv.setRebinMode(True)
 
         time.sleep(1)
@@ -493,7 +491,6 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         # rebin the workspace
         sv.setRebinThickness(2, 1.0)
         sv.setRebinNumBins(50, 200)
-        sv.refreshRebin()
         sv.setRebinMode(True)
 
         # check that the first rebin was successful
@@ -515,7 +512,6 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         # rebin the second (MDHisto) workspace
         sv.setRebinThickness(2, 1.0)
         sv.setRebinNumBins(30, 100)
-        sv.refreshRebin()
         sv.setRebinMode(True)
 
         # check rebinning was successful

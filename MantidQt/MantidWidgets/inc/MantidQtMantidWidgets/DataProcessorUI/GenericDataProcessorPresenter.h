@@ -141,6 +141,7 @@ public:
   void giveUserWarning(const QString &prompt,
                        const QString &title) const override;
   bool isProcessing() const override;
+  void setForcedReProcessing(bool forceReProcessing) override;
 
 protected:
   template <typename T> using QOrderedSet = QMap<T, std::nullptr_t>;
@@ -299,6 +300,11 @@ private:
   // pause/resume reduction
   void pause();
   void resume();
+
+  // Check if run has been processed
+  bool isProcessed(int position) const;
+  bool isProcessed(int position, int parent) const;
+  bool m_forceProcessing = false;
 
   // List of workspaces the user can open
   QSet<QString> m_workspaceList;

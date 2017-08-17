@@ -142,6 +142,9 @@ public:
   // Forward a main presenter to this view's presenter
   void accept(DataProcessorMainPresenter *);
 
+  // Force re-processing of rows
+  void setForcedReProcessing(bool forceReProcessing) override;
+
 private:
   // initialise the interface
   void createTable();

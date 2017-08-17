@@ -378,6 +378,14 @@ QString getReducedWorkspaceName(const RowData &data,
   return prefix + names.join("_");
 }
 
+template <typename Map>
+void addProperties(QStringList &algProperties, const Map &optionsMap) {
+  for (auto &&kvp : optionsMap) {
+    algProperties.append(
+        QString::fromStdString(kvp.first + " = " + kvp.second));
+  }
+}
+
 /**
  Create string of python code to run pre-processing and reduction algorithms on
  the specified row
@@ -417,7 +425,7 @@ boost::tuple<QString, QString> reduceRowString(
   int ncols = static_cast<int>(whitelist.size());
 
   // Run through columns, excluding 'Options'
-  for (int col = 0; col < ncols - 1; col++) {
+  for (int col = 0; col < ncols - 2; col++) {
     // The column's name
     const QString colName = whitelist.colNameFromColIndex(col);
     // The algorithm property linked to this column
@@ -463,17 +471,21 @@ boost::tuple<QString, QString> reduceRowString(
     }
   }
 
-  // 'Options' specified either via 'Options' column or HintinLineEdit
   auto options = parseKeyValueString(processingOptions.toStdString());
-  const QString optionsStr = data.back();
+
+  const auto hiddenOptionsStr = data.back();
+  // Parse and set any user-specified options
+  auto hiddenOptionsMap = parseKeyValueString(hiddenOptionsStr.toStdString());
+  // Options specified via 'Hidden Options' column will be preferred
+  addProperties(algProperties, hiddenOptionsMap);
+
+  // 'Options' specified either via 'Options' column or HintinLineEdit
+  const auto optionsStr = data.at(ncols - 2);
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(optionsStr.toStdString());
   // Options specified via 'Options' column will be preferred
   optionsMap.insert(options.begin(), options.end());
-  for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
-    algProperties.append(
-        QString::fromStdString(kvp->first + " = " + kvp->second));
-  }
+  addProperties(algProperties, optionsMap);
 
   /* Now construct the names of the reduced workspaces*/
 

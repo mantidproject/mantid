@@ -4,10 +4,10 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidVatesAPI/SaveMDWorkspaceToVTK.h"
+#include "MantidVatesAlgorithms/SaveMDWorkspaceToVTK.h"
 
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
+#include "MantidVatesAlgorithms/SaveMDWorkspaceToVTKImpl.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/make_unique.h"
