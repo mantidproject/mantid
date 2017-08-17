@@ -444,7 +444,8 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 * when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() {
-  disableAction(DataProcessorAction::PAUSE);
+  m_view->disableEditMenuAction(DataProcessorAction::PAUSE);
+  m_view->autoreduceCannotBePressed();
 }
 
 /** Disables the 'process' button and enables the 'pause' button when data
@@ -452,27 +453,11 @@ void ReflRunsTabPresenter::pause() {
  * confirmed to be resumed.
 */
 void ReflRunsTabPresenter::resume() {
-  disableAction(DataProcessorAction::PROCESS);
-  enableAction(DataProcessorAction::PAUSE);
+  m_view->disableEditMenuAction(DataProcessorAction::PROCESS);
+  m_view->autoreduceCannotBePressed();
   preventTableModification();
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
-}
-
-void ReflRunsTabPresenter::enableAction(ReflectometryAction action) {
-  m_view->enableAction(action);
-}
-
-void ReflRunsTabPresenter::disableAction(ReflectometryAction action) {
-  m_view->disableAction(action);
-}
-
-void ReflRunsTabPresenter::enableAction(DataProcessorAction action) {
-  m_view->enableAction(action);
-}
-
-void ReflRunsTabPresenter::disableAction(DataProcessorAction action) {
-  m_view->disableAction(action);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
@@ -480,7 +465,8 @@ void ReflRunsTabPresenter::disableAction(DataProcessorAction action) {
 void ReflRunsTabPresenter::confirmReductionPaused() {
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
-  enableAction(DataProcessorAction::PROCESS);
+  m_view->enableEditMenuAction(DataProcessorAction::PROCESS);
+  m_view->autoreduceWillReduce();
   allowTableModification();
 }
 
@@ -491,23 +477,22 @@ const std::array<ReflectometryAction, 5>
          ReflectometryAction::IMPORT_TBL}};
 
 void ReflRunsTabPresenter::preventTableModification() {
-  m_view->disableAutoreduce();
   m_view->disableTransfer();
 
-  disableTableModification([this](DataProcessorAction action)
-                               -> void { this->disableAction(action); });
+  forEachTableModificationAction([this](DataProcessorAction action)
+                               -> void { this->m_view->disableEditMenuAction(action); });
   for (auto reflectometryMenuAction : disabledWhileProcessing)
-    disableAction(reflectometryMenuAction);
+    m_view->disableReflectometryMenuAction(reflectometryMenuAction);
 }
 
 void ReflRunsTabPresenter::allowTableModification() {
-  m_view->enableAutoreduce();
   m_view->enableTransfer();
 
-  enableTableModification([this](DataProcessorAction action)
-                              -> void { this->enableAction(action); });
+  forEachTableModificationAction([this](DataProcessorAction action)
+                              -> void { this->m_view->enableEditMenuAction(action); });
+
   for (auto reflectometryMenuAction : disabledWhileProcessing)
-    enableAction(reflectometryMenuAction);
+    m_view->enableReflectometryMenuAction(reflectometryMenuAction);
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
@@ -525,7 +510,8 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
 void ReflRunsTabPresenter::confirmReductionResumed() {
-  enableAction(DataProcessorAction::PAUSE);
+  m_view->enableEditMenuAction(DataProcessorAction::PAUSE);
+  m_view->autoreduceWillPause();
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }

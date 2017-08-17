@@ -69,14 +69,12 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) = 0;
   virtual void setAllSearchRowsSelected() = 0;
   virtual void clearCommands() = 0;
-  virtual void enableAction(DataProcessorAction action) = 0;
-  virtual void enableAction(ReflectometryAction action) = 0;
-  virtual void disableAction(DataProcessorAction action) = 0;
-  virtual void disableAction(ReflectometryAction action) = 0;
+  virtual void enableEditMenuAction(DataProcessorAction action) = 0;
+  virtual void enableReflectometryMenuAction(ReflectometryAction action) = 0;
+  virtual void disableEditMenuAction(DataProcessorAction action) = 0;
+  virtual void disableReflectometryMenuAction(ReflectometryAction action) = 0;
   virtual void enableTransfer() = 0;
   virtual void disableTransfer() = 0;
-  virtual void enableAutoreduce() = 0;
-  virtual void disableAutoreduce() = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;
@@ -86,6 +84,9 @@ public:
   virtual int getSelectedGroup() const = 0;
 
   virtual IReflRunsTabPresenter *getPresenter() const = 0;
+  virtual void autoreduceCannotBePressed() = 0;
+  virtual void autoreduceWillReduce() = 0;
+  virtual void autoreduceWillPause() = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
 };

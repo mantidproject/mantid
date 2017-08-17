@@ -119,10 +119,6 @@ private:
   void autoreduce(bool startNew);
   void transfer();
   void pushCommands();
-  void enableAction(ReflectometryAction action);
-  void disableAction(ReflectometryAction action);
-  void enableAction(DataProcessorAction action);
-  void disableAction(DataProcessorAction action);
   /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument

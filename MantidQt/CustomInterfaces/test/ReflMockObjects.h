@@ -62,14 +62,15 @@ public:
   MOCK_METHOD0(clearCommands, void());
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
-  MOCK_METHOD1(enableAction, void(DataProcessorAction));
-  MOCK_METHOD1(enableAction, void(ReflectometryAction));
-  MOCK_METHOD1(disableAction, void(DataProcessorAction));
-  MOCK_METHOD1(disableAction, void(ReflectometryAction));
+  MOCK_METHOD1(enableEditMenuAction, void(DataProcessorAction));
+  MOCK_METHOD1(enableReflectometryMenuAction, void(ReflectometryAction));
+  MOCK_METHOD1(disableEditMenuAction, void(DataProcessorAction));
+  MOCK_METHOD1(disableReflectometryMenuAction, void(ReflectometryAction));
   MOCK_METHOD0(enableTransfer, void());
   MOCK_METHOD0(disableTransfer, void());
-  MOCK_METHOD0(enableAutoreduce, void());
-  MOCK_METHOD0(disableAutoreduce, void());
+  MOCK_METHOD0(autoreduceCannotBePressed, void());
+  MOCK_METHOD0(autoreduceWillPause, void());
+  MOCK_METHOD0(autoreduceWillReduce, void());
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};

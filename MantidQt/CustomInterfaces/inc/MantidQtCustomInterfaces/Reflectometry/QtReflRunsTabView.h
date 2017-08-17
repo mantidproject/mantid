@@ -81,14 +81,12 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
-  void enableAction(DataProcessorAction action) override;
-  void enableAction(ReflectometryAction action) override;
-  void disableAction(ReflectometryAction action) override;
-  void disableAction(DataProcessorAction action) override;
+  void enableEditMenuAction(DataProcessorAction action) override;
+  void enableReflectometryMenuAction(ReflectometryAction action) override;
+  void disableReflectometryMenuAction(ReflectometryAction action) override;
+  void disableEditMenuAction(DataProcessorAction action) override;
   void enableTransfer() override;
   void disableTransfer() override;
-  void enableAutoreduce() override;
-  void disableAutoreduce() override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -107,17 +105,22 @@ public:
   getAlgorithmRunner() const override;
 
 private:
+  void autoreduceCannotBePressed() override;
+  void autoreduceWillReduce() override;
+  void autoreduceWillPause() override;
   /// initialise the interface
   void initLayout();
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
-
+  QPushButton& autoreduceButton();
   int toRowIndex(DataProcessorAction action);
   int toMenuIndex(ReflectometryAction action);
+  void enable(QWidget &toEnable);
+  void disable(QWidget &toDisable);
   void enable(QAction &toEnable);
   void disable(QAction &toDisable);
   void setTransferEnabled(bool enabled);
-  void setAutoreduceEnabled(bool enabled);
+  void setAutoreduceIcon(QIcon &icon);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -131,6 +134,9 @@ private:
   SlitCalculator *m_calculator;
   // Command adapters
   std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
+
+  QIcon m_pauseIcon;
+  QIcon m_playIcon;
 
 private slots:
   void on_actionSearch_triggered();

@@ -24,7 +24,8 @@ using namespace MantidQt::MantidWidgets;
 * @param parent :: The parent of this view
 */
 QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
-    : m_presenter(), m_calculator(new SlitCalculator(this)) {
+    : m_presenter(), m_calculator(new SlitCalculator(this)),
+      m_pauseIcon(":/pause.png"), m_playIcon(":/play2.png") {
 
   UNUSED_ARG(parent);
   initLayout();
@@ -167,6 +168,14 @@ void QtReflRunsTabView::setAllSearchRowsSelected() {
 */
 void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
 
+void QtReflRunsTabView::enable(QWidget &toEnable) {
+  toEnable.setEnabled(true);
+}
+
+void QtReflRunsTabView::disable(QWidget &toDisable) {
+  toDisable.setEnabled(false);
+}
+
 void QtReflRunsTabView::enable(QAction &toEnable) { toEnable.setEnabled(true); }
 
 void QtReflRunsTabView::disable(QAction &toDisable) {
@@ -237,7 +246,7 @@ int QtReflRunsTabView::toMenuIndex(ReflectometryAction action) {
 * Enables a specific action in the "Reflectometry" menu.
 * @param action : The action in the "Reflectometry" menu to enable
 */
-void QtReflRunsTabView::disableAction(ReflectometryAction action) {
+void QtReflRunsTabView::disableReflectometryMenuAction(ReflectometryAction action) {
   disable(*(ui.menuTable->actions()[toMenuIndex(action)]));
 }
 
@@ -245,7 +254,7 @@ void QtReflRunsTabView::disableAction(ReflectometryAction action) {
 * Enables a specific action in the "Reflectometry" menu.
 * @param action : The action in the "Reflectometry" menu to disable
 */
-void QtReflRunsTabView::enableAction(ReflectometryAction action) {
+void QtReflRunsTabView::enableReflectometryMenuAction(ReflectometryAction action) {
   enable(*(ui.menuTable->actions()[toMenuIndex(action)]));
 }
 
@@ -253,7 +262,7 @@ void QtReflRunsTabView::enableAction(ReflectometryAction action) {
 * Disables a specific action in the "Edit" menu.
 * @param action : The action in the "Edit" menu to disable
 */
-void QtReflRunsTabView::disableAction(DataProcessorAction action) {
+void QtReflRunsTabView::disableEditMenuAction(DataProcessorAction action) {
   disable(*(ui.menuRows->actions()[toRowIndex(action)]));
 }
 
@@ -261,13 +270,9 @@ void QtReflRunsTabView::disableAction(DataProcessorAction action) {
 * Enables a specific action in the "Edit" menu.
 * @param action : The action in the "Edit" menu to enable
 */
-void QtReflRunsTabView::enableAction(DataProcessorAction action) {
+void QtReflRunsTabView::enableEditMenuAction(DataProcessorAction action) {
   enable(*(ui.menuRows->actions()[toRowIndex(action)]));
 }
-
-void QtReflRunsTabView::disableAutoreduce() { setAutoreduceEnabled(false); }
-
-void QtReflRunsTabView::enableAutoreduce() { setAutoreduceEnabled(true); }
 
 void QtReflRunsTabView::setTransferEnabled(bool enabled) {
   ui.buttonTransfer->setEnabled(enabled);
@@ -277,12 +282,26 @@ void QtReflRunsTabView::disableTransfer() { setTransferEnabled(false); }
 
 void QtReflRunsTabView::enableTransfer() { setTransferEnabled(true); }
 
-/**
-* Sets the "Autoreduce" button enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
-void QtReflRunsTabView::setAutoreduceEnabled(bool enabled) {
-  ui.buttonAutoreduce->setEnabled(enabled);
+void QtReflRunsTabView::autoreduceCannotBePressed() {
+  disable(autoreduceButton());
+}
+
+void QtReflRunsTabView::autoreduceWillReduce() {
+  setAutoreduceIcon(m_playIcon);
+  enable(autoreduceButton());
+}
+
+void QtReflRunsTabView::autoreduceWillPause() {
+  setAutoreduceIcon(m_pauseIcon);
+  enable(autoreduceButton());
+}
+
+void QtReflRunsTabView::setAutoreduceIcon(QIcon &icon) {
+  autoreduceButton().setIcon(icon);
+}
+
+QPushButton& QtReflRunsTabView::autoreduceButton() {
+  return *ui.buttonAutoreduce;
 }
 
 /**

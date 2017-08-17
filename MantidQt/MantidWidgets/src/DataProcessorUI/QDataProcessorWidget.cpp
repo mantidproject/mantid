@@ -365,7 +365,7 @@ void QDataProcessorWidget::resume() {
 }
 
 void QDataProcessorWidget::preventTableModification() {
-  disableTableModification([this](DataProcessorAction action)
+  forEachTableModificationAction([this](DataProcessorAction action)
                                -> void { this->disableAction(action); });
   disableSelectionAndEditing();
 }
@@ -467,7 +467,7 @@ void QDataProcessorWidget::confirmReductionPaused() {
 
 void QDataProcessorWidget::allowTableModification() {
   enableSelectionAndEditing();
-  enableTableModification([this](DataProcessorAction action)
+  forEachTableModificationAction([this](DataProcessorAction action)
                               -> void { this->enableAction(action); });
 }
 

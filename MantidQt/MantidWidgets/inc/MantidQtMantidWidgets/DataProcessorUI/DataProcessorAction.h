@@ -53,18 +53,11 @@ enum class DataProcessorAction {
 std::array<DataProcessorAction, 9> EXPORT_OPT_MANTIDQT_MANTIDWIDGETS
 tableModificationActions();
 
-template <typename DisableAction>
-void disableTableModification(DisableAction disableAction) {
-  auto actionsToDisable = tableModificationActions();
-  for (auto action : actionsToDisable)
-    disableAction(action);
-}
-
-template <typename EnableAction>
-void enableTableModification(EnableAction enableAction) {
-  auto actionsToEnable = tableModificationActions();
-  for (auto action : actionsToEnable)
-    enableAction(action);
+template <typename DoIt>
+void forEachTableModificationAction(DoIt doIt) {
+  auto actions = tableModificationActions();
+  for (auto action : actions)
+    doIt(action);
 }
 }
 }
