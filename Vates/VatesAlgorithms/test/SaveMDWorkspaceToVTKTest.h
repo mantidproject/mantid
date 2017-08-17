@@ -2,7 +2,7 @@
 #define VATES_API_SAVE_MD_WORKSPACE_TO_VTK_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidVatesAPI/SaveMDWorkspaceToVTK.h"
+#include "MantidVatesAlgorithms/SaveMDWorkspaceToVTK.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <Poco/File.h>
