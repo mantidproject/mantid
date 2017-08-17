@@ -645,15 +645,13 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string &beam,
     centre[1] = static_cast<double>(maxIndex);
     g_log.debug() << "Peak maximum position of " << beam << ": " << centre[1] << '\n';
     // determine sigma
-    using iterType = HistogramData::HistogramY::const_iterator;
-    auto minFwhmIt = std::find_if(std::reverse_iterator<iterType>(maxValueIt), spectrum->y(0).crend(), [height](const double x) {
-      return x < 0.5 * height;
-    });
-    auto maxFwhmIt = std::find_if(maxValueIt, spectrum->y(0).cend(), [height](const double x) {
-      return x < 0.5 * height;
-    });
-    double fwhm =
-        0.5 * static_cast<double>(std::distance(std::reverse_iterator<iterType>(maxFwhmIt), minFwhmIt) + 1);
+    auto lessThanHalfMax = [height](const double x) { return x < 0.5 * height; };
+    using IterType = HistogramData::HistogramY::const_iterator;
+    std::reverse_iterator<IterType> revMaxValueIt{maxValueIt};
+    auto revMinFwhmIt = std::find_if(revMaxValueIt, spectrum->y(0).crend(), lessThanHalfMax);
+    auto maxFwhmIt = std::find_if(maxValueIt, spectrum->y(0).cend(), lessThanHalfMax);
+    std::reverse_iterator<IterType> revMaxFwhmIt{maxFwhmIt};
+    const double fwhm = static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
     g_log.debug() << "Initial fwhm (fixed window at half maximum) " << beam << ": " << fwhm << '\n';
     // generate Gaussian
     auto func = API::FunctionFactory::Instance().createFunction("Gaussian");
