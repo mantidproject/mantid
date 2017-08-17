@@ -535,6 +535,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                              sample_ws_list):
             mtd.addOrReplace(sample_ws_name, sample_ws)
 
+        output_ws = None
+
         if len(sample_ws_list) > 1:
 
             # Merge the sample files into one.
@@ -542,8 +544,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             merge_runs_alg.setProperty("InputWorkspaces", sample_ws_list)
             merge_runs_alg.setProperty("OutputWorkspace", self._output_ws_name)
             merge_runs_alg.execute()
+            output_ws = merge_runs_alg.getProperty("OutputWorkspace").value
             self._output_ws_name = merge_runs_alg.getPropertyValue("OutputWorkspace")
-            mtd.addOrReplace(self._output_ws_name, merge_runs_alg.getProperty("OutputWorkspace").value)
 
             for workspace in sample_ws_list:
                 delete_set_property("Workspace", workspace)
@@ -553,12 +555,17 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 delete_set_property("Workspace", workspace.getName() + "_mon")
                 delete_exec()
         else:
-            mtd.addOrReplace(self._output_ws_name, sample_ws_list[0])
+            output_ws = sample_ws_list[0]
+
+        add_log_alg = self.createChildAlgorithm("AddSampleLog", enableLogging=False)
+        add_log_alg.setProperty("Workspace", output_ws)
+        add_log_alg.setProperty("LogName", "D-Ranges")
+        add_log_alg.setProperty("LogText", "D-Ranges used for reduction: " + self.getPropertyValue("Drange"))
 
         result = mtd[self._output_ws_name]
 
         # Create scalar data to cope with where merge has combined overlapping data.
-        intersections = get_intersection_of_ranges(list(self._sam_ws_map.keys()))
+        intersections = get_intersection_of_ranges(self._sam_ws_map.keys())
 
         data_x = result.dataX(0)
         data_y = []
