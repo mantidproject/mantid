@@ -485,7 +485,7 @@ void ReflRunsTabPresenter::confirmReductionPaused() {
 }
 
 const std::array<ReflectometryAction, 5>
-    ReflRunsTabPresenter::DisabledWhileProcessing = {
+    ReflRunsTabPresenter::disabledWhileProcessing = {
         {ReflectometryAction::OPEN_TABLE, ReflectometryAction::NEW_TABLE,
          ReflectometryAction::SAVE_TABLE, ReflectometryAction::SAVE_TABLE_AS,
          ReflectometryAction::IMPORT_TBL}};
@@ -496,7 +496,7 @@ void ReflRunsTabPresenter::preventTableModification() {
 
   disableTableModification([this](auto action)
                                -> void { disableAction(action); });
-  for (auto reflectometryMenuAction : DisabledWhileProcessing)
+  for (auto reflectometryMenuAction : disabledWhileProcessing)
     disableAction(reflectometryMenuAction);
 }
 
@@ -506,7 +506,7 @@ void ReflRunsTabPresenter::allowTableModification() {
 
   enableTableModification([this](auto action)
                               -> void { enableAction(action); });
-  for (auto reflectometryMenuAction : DisabledWhileProcessing)
+  for (auto reflectometryMenuAction : disabledWhileProcessing)
     enableAction(reflectometryMenuAction);
 }
 

@@ -107,7 +107,7 @@ private:
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
   /// Reflectometry menu actions which should be disabled during processing
-  static const std::array<ReflectometryAction, 5> DisabledWhileProcessing;
+  static const std::array<ReflectometryAction, 5> disabledWhileProcessing;
   /// The current search string used for autoreduction
   std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
