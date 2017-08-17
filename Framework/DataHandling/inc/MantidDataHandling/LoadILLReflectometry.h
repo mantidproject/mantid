@@ -61,6 +61,7 @@ private:
   void initWorkspace(const std::vector<std::vector<int>> &monitorsData);
   void initNames(NeXus::NXEntry &entry);
   void loadDataDetails(NeXus::NXEntry &entry);
+  double doubleFromRun(const std::string& entryName);
   std::vector<double> getXValues();
   void convertTofToWavelength();
   void loadData(NeXus::NXEntry &entry,

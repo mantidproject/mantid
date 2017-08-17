@@ -23,75 +23,36 @@ using Mantid::HistogramData::LinearGenerator;
 using Mantid::DataObjects::create;
 using Mantid::DataObjects::Workspace2D;
 
-// unit
-/// Convert an angle from degree to radiant
-#define inRad *M_PI / 180.
-/// Convert and angle from radiant to degree
-#define inDeg *180. / M_PI
-/// Convert a value from millimeter to meter
-#define inMeter *1.0e-3
-// formula
-/// Computes the antan of an angle in rad used for the coherence equation, where
-/// \a is a peak position. This equation requires the sample-detector distance
-/// of the direct beam.
-#define atanUsingDirectBeam(a)                                                 \
-  atan((a - m_pixelCentre) * m_pixelWidth / m_detectorDistanceDirectBeam)
-/// Computes the antan of an angle in rad used for the coherence equation, where
-/// \a is a peak position. This equation requires the sample-detector distance
-/// of the reflected beam.
-#define atanUsingReflectedBeam(a)                                              \
-  atan((a - m_pixelCentre) * m_pixelWidth / m_detectorDistanceValue)
-/** Computes the coherence and incoherence equation for an angle \a, and peak
-  * positions of the reflected beam \b and \c. The signed factor \sign depends
-  * on Figaro's reflection down option.
-  */
-#define eq1(a, b, c, sign)                                                     \
-  (a -                                                                         \
-   (sign)*0.5 * (atanUsingDirectBeam(b) + (sign)*atanUsingReflectedBeam(c)))   \
-      inDeg
-/** Computes the coherence and incoherence equation for an angle \a, and peak
-  * positions of the direct and reflected beam \b and \c, respectively. The
-  *  signed factor \sign depends on Figaro's reflection
-  * down option.
-  */
-#define eq2(a, b, c, sign)                                                     \
-  (a -                                                                         \
-   (sign)*0.5 *                                                                \
-       (atanUsingReflectedBeam(b) + (sign)*atanUsingReflectedBeam(c))) inDeg
-/// Returns an iterator for an iterator \a and \b and a double value \c
-#define iterator(a, b, c)                                                      \
-  std::find_if(a, b, [c](double value) { return value < 0.5 * c; })
-// string concatenation
-/// Concatenates \string1 and \string2, where the \string1 string will not be
-/// modified but copied
-#define StringConcat(string1, string2) std::string(string1).append(string2)
-// logging
-/// Logs a debug message \myString for \myValue
-#define debugLog(myString, myValue)                                            \
-  g_log.debug(StringConcat(myString, std::to_string(myValue)).append("\n"))
-/// Logs a debug message for \myValue explained by two strings \myString and
-/// \aString
-#define debugLog2(myString, aString, myValue)                                  \
-  g_log.debug(StringConcat(myString, aString)                                  \
-                  .append(StringConcat(": ", std::to_string(myValue)))         \
-                  .append("\n"))
-/// Logs a debug message \myString for a \myValue in degrees
-#define debugLogWithUnitDegrees(myString, myValue)                             \
-  g_log.debug(                                                                 \
-      StringConcat(myString, std::to_string(myValue).append(" degrees\n")))
-/// Logs a debug message \myString for \myValue in meters
-#define debugLogWithUnitMeter(myString, myValue)                               \
-  g_log.debug(StringConcat(myString, std::to_string(myValue)).append(" m\n"))
-/// Logs an information message \myString using the generated error message
-/// what()
-#define infoLog(myString)                                                      \
-  g_log.information(StringConcat(myString, e.what()).append("\n"))
-// get a double value from sample logs of the (output) workspace
-/// Get a double value from the workspace to be loaded (SampleLogs) for
-/// \myString. Throws error message "Unknown property search object". Possible
-/// check via ws->run().hasProperty(myString).
-#define getDouble(myString)                                                    \
-  m_localWorkspace->run().getPropertyValueAsType<double>(myString)
+namespace {
+constexpr double inRad(const double x) {
+  return x * M_PI / 180;
+}
+
+constexpr double inDeg(const double x) {
+  return x * 180 / M_PI;
+}
+
+constexpr double inMeter(const double x) {
+  return x * 1e-3;
+}
+
+/** Computes the coherence and incoherence equation.
+ *  @param angle the angle to compute the equation for.
+ *  @param peakPos1 first peak position.
+ *  @param peakPos2 second peak position.
+ *  @param pixelCentre centre of the detector, in pixels.
+ *  @param pixelWidth physical pixel width.
+ *  @param detDist1 sample to detector distance corresponding to first peak.
+ *  @param detDist2 sample to detector distance corresponding to second peak.
+ *  @param sign a sign option depending on Figaro's reflection down option.
+ *  @return the Bragg angle in degrees.
+ */
+double coherenceIncoherenceEq(const double angle, const double peakPos1, const double peakPos2, const double pixelCentre, const double pixelWidth, const double detDist1, const double detDist2, const double sign) {
+  const double angle1 = std::atan2((peakPos1 - pixelCentre) * pixelWidth, detDist1);
+  const double angle2 = std::atan2((peakPos2 - pixelCentre) * pixelWidth, detDist2);
+  return inDeg(inRad(angle) - sign * 0.5 * (angle1 + sign * angle2));
+}
+}
 
 namespace Mantid {
 namespace DataHandling {
@@ -245,7 +206,7 @@ void LoadILLReflectometry::loadInstrument() {
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     loadInst->executeAsChildAlg();
   } catch (std::runtime_error &e) {
-    infoLog("Unable to successfully run LoadInstrument Child Algorithm : ");
+    g_log.information() << "Unable to succesfully run LoadInstrument child algorithm: " << e.what() << '\n';
   }
 }
 
@@ -266,8 +227,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   // loader follows its convention.
   boost::to_lower(m_instrumentName);
   m_instrumentName[0] = char((std::toupper(m_instrumentName[0])));
-  g_log.debug(
-      StringConcat("Instrument name : ", m_instrumentName).append("\n"));
+  g_log.debug() << "Instrument name: " << m_instrumentName << '\n';
   if (m_instrumentName == "D17") {
     m_detectorDistance = "det";
     m_detectorAngleName = "dan.value";
@@ -292,8 +252,8 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     NXFloat secondChopper =
         entry.openNXFloat("instrument/ChopperSetting/secondChopper");
     secondChopper.load();
-    m_chopper1Name = StringConcat("CH", std::to_string(int(firstChopper[0])));
-    m_chopper2Name = StringConcat("CH", std::to_string(int(secondChopper[0])));
+    m_chopper1Name = "CH" + std::to_string(int(firstChopper[0]));
+    m_chopper2Name = "CH" + std::to_string(int(secondChopper[0]));
   }
   // get acquisition mode
   NXInt acqMode = entry.openNXInt("acquisition_mode");
@@ -326,11 +286,10 @@ void LoadILLReflectometry::convertTofToWavelength() {
 void LoadILLReflectometry::initWorkspace(
     const std::vector<std::vector<int>> &monitorsData) {
 
-  debugLog("Number of monitors: ", monitorsData.size());
+  g_log.debug() << "Number of monitors: " << monitorsData.size() << '\n';
   for (size_t i = 0; i < monitorsData.size(); ++i) {
     if (monitorsData[i].size() != m_numberOfChannels)
-      debugLog2("Data size of monitor", std::to_string(i),
-                monitorsData[i].size());
+      g_log.debug() << "Data size of monitor ID " << i << " is " << monitorsData[i].size() << '\n';
   }
   // create the workspace
   try {
@@ -339,14 +298,12 @@ void LoadILLReflectometry::initWorkspace(
         m_numberOfChannels + 1, m_numberOfChannels);
   } catch (std::out_of_range &) {
     throw std::runtime_error(
-        StringConcat("Workspace2D cannot be created, check number of "
-                     "histograms (",
-                     std::to_string(m_numberOfHistograms))
-            .append(StringConcat("), monitors (",
-                                 std::to_string(monitorsData.size())))
-            .append(StringConcat("), and channels (",
-                                 std::to_string(m_numberOfChannels)))
-            .append(")\n"));
+        "Workspace2D cannot be created, check number of histograms (" +
+            std::to_string(m_numberOfHistograms) +
+            "), monitors (" +
+            std::to_string(monitorsData.size()) +
+            "), and channels (" +
+            std::to_string(m_numberOfChannels) + '\n');
   }
   if (m_acqMode)
     m_localWorkspace->getAxis(0)->unit() =
@@ -394,20 +351,24 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
     widthName = "mppy";
 
   NXFloat pixelWidth =
-      entry.openNXFloat(StringConcat("instrument/PSD/", widthName));
+      entry.openNXFloat("instrument/PSD/" + widthName);
   pixelWidth.load();
-  m_pixelWidth = static_cast<double>(pixelWidth[0]) inMeter;
+  m_pixelWidth = inMeter(static_cast<double>(pixelWidth[0]));
 
-  g_log.debug("Please note that ILL reflectometry instruments have "
+  g_log.debug() << "Please note that ILL reflectometry instruments have "
               "several tubes, after integration one "
-              "tube remains in the Nexus file.\n Number of tubes (banks): 1\n");
-  debugLog("Number of pixels per tube (number of detectors and number "
-           "of histograms): ",
-           m_numberOfHistograms);
-  debugLog("Number of time channels: ", m_numberOfChannels);
-  g_log.debug() << "Channel width: " << m_channelWidth << " 10e-6 sec\n";
-  debugLog("TOF delay: ", m_tofDelay);
-  debugLogWithUnitMeter("Pixel width ", m_pixelWidth);
+              "tube remains in the Nexus file.\n Number of tubes (banks): 1\n";
+  g_log.debug() << "Number of pixels per tube (number of detectors and number "
+           "of histograms): "
+           << m_numberOfHistograms << '\n';
+  g_log.debug() << "Number of time channels: " << m_numberOfChannels << '\n';
+  g_log.debug() << "Channel width: " << m_channelWidth << " 1e-6 sec\n";
+  g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
+  g_log.debug() << "Pixel width: " << m_pixelWidth << '\n';
+}
+
+double LoadILLReflectometry::doubleFromRun(const std::string &entryName) {
+  return m_localWorkspace->run().getPropertyValueAsType<double>(entryName);
 }
 
 /**
@@ -458,35 +419,34 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       std::string chopper{"Chopper"};
       double chop1Speed{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
       if (m_instrumentName == "D17") {
-        chop1Speed = getDouble("VirtualChopper.chopper1_speed_average");
-        chop2Speed = getDouble("VirtualChopper.chopper2_speed_average");
-        chop2Phase = getDouble("VirtualChopper.chopper2_phase_average");
+        chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
+        chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
+        chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
       }
       // use phase of first chopper
-      double chop1Phase = getDouble(StringConcat(m_chopper1Name, ".phase"));
+      double chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
       if (m_instrumentName == "Figaro" && chop1Phase > 360.0) {
         // Chopper 1 phase on Figaro is set to an arbitrary value (999.9)
         chop1Phase = 0.0;
       }
-      double POFF = getDouble(StringConcat(m_offsetFrom, ".poff"));
-      double openOffset =
-          getDouble(StringConcat(m_offsetFrom, ".").append(m_offsetName));
+      double POFF = doubleFromRun(m_offsetFrom + ".poff");
+      double openOffset = doubleFromRun(m_offsetFrom + "." + m_offsetName);
       if (m_instrumentName == "D17" && chop1Speed != 0.0 && chop2Speed != 0.0 && chop2Phase != 0.0) {
         // virtual chopper entries are valid
         chopper = "Virtual chopper";
       } else {
         // use chopper values
-        chop1Speed = getDouble(StringConcat(m_chopper1Name, ".rotation_speed"));
-        chop2Speed = getDouble(StringConcat(m_chopper2Name, ".rotation_speed"));
-        chop2Phase = getDouble(StringConcat(m_chopper2Name, ".phase"));
+        chop1Speed = doubleFromRun(m_chopper1Name + ".rotation_speed");
+        chop2Speed = doubleFromRun(m_chopper2Name +  ".rotation_speed");
+        chop2Phase = doubleFromRun(m_chopper2Name + ".phase");
       }
       // logging
-      debugLog("Poff: ", POFF);
-      debugLog("Open offset: ", openOffset);
-      debugLog("Chopper 1 phase : ", chop1Phase);
-      debugLog(StringConcat(chopper, " 1 speed : "), chop1Speed);
-      debugLog(StringConcat(chopper, " 2 phase : "), chop2Phase);
-      debugLog(StringConcat(chopper, " 2 speed : "), chop2Speed);
+      g_log.debug() << "Poff: " << POFF << '\n';
+      g_log.debug() << "Open offset: " << openOffset << '\n';
+      g_log.debug() << "Chopper 1 phase: " << chop1Phase << '\n';
+      g_log.debug() << chopper << " 1 speed: " << chop1Speed << '\n';
+      g_log.debug() << chopper << " 2 phase: " << chop2Phase << '\n';
+      g_log.debug() << chopper << " 2 speed: " << chop2Speed << '\n';
 
       if (chop1Speed <= 0.0) {
         g_log.error() << "First chopper velocity " << chop1Speed << ". Check you NeXus file.\n";
@@ -494,7 +454,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       const double t_TOF2 = -1.e+6 * 60.0 *
                  (POFF - 45.0 + chop2Phase - chop1Phase + openOffset) /
                  (2.0 * 360 * chop1Speed);
-      debugLog("t_TOF2 : ", t_TOF2);
+      g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
       // compute tof values
       for (int channelIndex = 0; channelIndex <= int(m_numberOfChannels);
            ++channelIndex) {
@@ -507,7 +467,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         xVals.push_back(double(t));
     }
   } catch (std::runtime_error &e) {
-    infoLog("Unable to access Nexus file entry : ");
+    g_log.information() << "Unable to access NeXus file entry: " << e.what() << '\n';
   }
   return xVals;
 }
@@ -593,28 +553,22 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
     if (beam == "DirectBeam") {
       if (data.dim0() * data.dim1() * data.dim2() !=
           int(m_numberOfChannels * m_numberOfHistograms))
-        g_log.error(
-            StringConcat(beam, " has incompatible size with Filename beam\n"));
+        g_log.error(beam + " has incompatible size with Filename beam\n");
       // get sample detector distance
       if (m_instrumentName == "D17")
-        m_detectorDistanceDirectBeam = entry.getFloat(
-            StringConcat("instrument/", m_detectorDistance).append("/value"))
-                                           inMeter;
+        m_detectorDistanceDirectBeam = inMeter(entry.getFloat(
+            "instrument/" + m_detectorDistance + "/value"));
       else if (m_instrumentName == "Figaro")
         m_detectorDistanceDirectBeam =
-            entry.getFloat(StringConcat("instrument/", m_detectorDistance)
-                               .append("/value")) inMeter +
-            entry.getFloat(StringConcat("instrument/", m_detectorDistance)
-                               .append("/offset_value")) inMeter;
-      debugLog2("Sample-detector distance (m) ", beam,
-                m_detectorDistanceDirectBeam);
+            inMeter(entry.getFloat("instrument/" +  m_detectorDistance + "/value")) +
+            inMeter(entry.getFloat("instrument/" + m_detectorDistance + "/offset_value"));
+      g_log.debug() << "Sample-detector distance " << beam << " : " << m_detectorDistanceDirectBeam << '\n';
       // set Bragg angle of the direct beam for later use
       if (!angleDirectBeam.empty()) {
         std::replace(angleDirectBeam.begin(), angleDirectBeam.end(), '.', '/');
         m_angleDirectBeam =
-            entry.getFloat(StringConcat("instrument/", angleDirectBeam));
-        debugLogWithUnitDegrees("Bragg angle of the direct beam: ",
-                                m_angleDirectBeam); //?
+            entry.getFloat("instrument/" + angleDirectBeam);
+        g_log.debug() << "Bragg angle of the direct beam: " << m_angleDirectBeam << '\n';
       }
     }
     /* uncommented since validation needed. This cannot be found in cosmos
@@ -670,10 +624,6 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string &beam,
   if ((beam == "DirectBeam") || (beam == "Filename")) {
     MatrixWorkspace_sptr beamWS;
     loadBeam(beamWS, beam, angleDirectBeam);
-    // create new MatrixWorkspace containing (single spectrum only)
-    // MatrixWorkspace_sptr singleSpectrum =
-    // WorkspaceFactory::Instance().create(
-    //  "Workspace2D", 1, m_numberOfHistograms, m_numberOfHistograms);
     Points x(m_numberOfHistograms, LinearGenerator(0, 1));
     auto singleSpectrum = create<Workspace2D>(1, Histogram(x));
     MatrixWorkspace_sptr spectrum{std::move(singleSpectrum)};
@@ -683,7 +633,7 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string &beam,
     }
     // check sum of detector counts
     if ((beam == "Filename") &&
-        getDouble("PSD.detsum") !=
+        doubleFromRun("PSD.detsum") !=
             std::accumulate(spectrum->y(0).begin(), spectrum->y(0).end(), 0))
       g_log.error("Error after integrating and transposing beam\n");
     // determine initial height: maximum value
@@ -693,13 +643,18 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string &beam,
     // determine initial centre: index of the maximum value
     size_t maxIndex = std::distance(spectrum->y(0).begin(), maxValueIt);
     centre[1] = static_cast<double>(maxIndex);
-    debugLog2("Peak maximum position of ", beam, centre[1]);
+    g_log.debug() << "Peak maximum position of " << beam << ": " << centre[1] << '\n';
     // determine sigma
-    auto minFwhmIt = iterator(maxValueIt, spectrum->y(0).begin(), height);
-    auto maxFwhmIt = iterator(maxValueIt, spectrum->y(0).end(), height);
+    using iterType = HistogramData::HistogramY::const_iterator;
+    auto minFwhmIt = std::find_if(std::reverse_iterator<iterType>(maxValueIt), spectrum->y(0).crend(), [height](const double x) {
+      return x < 0.5 * height;
+    });
+    auto maxFwhmIt = std::find_if(maxValueIt, spectrum->y(0).cend(), [height](const double x) {
+      return x < 0.5 * height;
+    });
     double fwhm =
-        0.5 * static_cast<double>(std::distance(minFwhmIt, maxFwhmIt) + 1);
-    debugLog2("Initial fwhm (fixed window at half maximum) ", beam, fwhm);
+        0.5 * static_cast<double>(std::distance(std::reverse_iterator<iterType>(maxFwhmIt), minFwhmIt) + 1);
+    g_log.debug() << "Initial fwhm (fixed window at half maximum) " << beam << ": " << fwhm << '\n';
     // generate Gaussian
     auto func = API::FunctionFactory::Instance().createFunction("Gaussian");
     auto initialGaussian =
@@ -722,12 +677,12 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string &beam,
       // get fitted values back
       centre[0] = initialGaussian->centre();
       double sigma = initialGaussian->fwhm();
-      debugLog("Sigma: ", sigma);
+      g_log.debug() << "Sigma: " << sigma << '\n';
     }
-    debugLog2("Estimated peak position of ", beam, centre[0]);
+    g_log.debug() << "Estimated peak position of " << beam << ": " << centre[0] << '\n';
   } else
     throw std::runtime_error(
-        StringConcat("The input ", beam).append(" does not exist"));
+        "The input " + beam + " does not exist");
   return centre;
 }
 
@@ -746,11 +701,11 @@ double LoadILLReflectometry::computeBraggAngle() {
   if (angle == EMPTY_DBL()) {
     // modify error message "Unknown property search object"
     if (m_localWorkspace->run().hasProperty(incidentAngle)) {
-      angle = getDouble(incidentAngle);
-      debugLog2("Use angle (degrees), ", incidentAngle, angle);
+      angle = doubleFromRun(incidentAngle);
+      g_log.debug() << "Use angle " << incidentAngle << ": " << angle << " degrees.\n";
     } else
       throw std::runtime_error(
-          std::string(incidentAngle).append(" is not defined in Nexus file"));
+          incidentAngle + " is not defined in Nexus file");
   }
   // user angle and sample angle behave equivalently for D17
   const std::string scatteringType = getProperty("ScatteringType");
@@ -760,7 +715,7 @@ double LoadILLReflectometry::computeBraggAngle() {
   // Figaro theta sign informs about reflection down (-1.0) or up (1.0)
   double down{1.0}; // default value for D17
   if (m_instrumentName == "Figaro") {
-    down = getDouble("theta");
+    down = doubleFromRun("theta");
     down > 0. ? down = 1. : down = -1.;
     if (inputAngle == "detectorAngle")
       down = down;
@@ -768,38 +723,39 @@ double LoadILLReflectometry::computeBraggAngle() {
   double sign{-down};
   if (((inputAngle == ("sample angle")) || (m_instrumentName == "Figaro")) &&
       (scatteringType == "coherent")) {
-    angleBragg = eq2(angle inRad, peakPosRB[1], peakPosRB[0], sign);
+    angleBragg = coherenceIncoherenceEq(angle, peakPosRB[1], peakPosRB[0], m_pixelCentre, m_pixelWidth, m_detectorDistanceValue, m_detectorDistanceValue, sign);
   } else if (inputAngle == "detector angle") {
     // DirectBeam is abvailable and we can read from its Nexus file
     std::vector<double> peakPosDB =
         fitReflectometryPeak("DirectBeam", incidentAngle);
-    double angleCentre = down * ((angle - m_angleDirectBeam) / 2.)inRad;
-    debugLogWithUnitDegrees("Centre angle ", angleCentre inDeg);
-    if (scatteringType == "incoherent")
-      angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[0], sign);
-    else if (scatteringType == "coherent")
-      angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[1] + 0.5, sign);
+    const double angleCentre = down * (angle - m_angleDirectBeam) / 2.;
+    g_log.debug() << "Centre angle " << angleCentre << " degrees.\n";
+    if (scatteringType == "incoherent") {
+      angleBragg = coherenceIncoherenceEq(angleCentre, peakPosDB[0], peakPosRB[0], m_pixelCentre, m_pixelWidth, m_detectorDistanceDirectBeam, m_detectorDistanceValue, sign);
+    } else if (scatteringType == "coherent") {
+      angleBragg = coherenceIncoherenceEq(angleCentre, peakPosDB[0], peakPosRB[1] + 0.5, m_pixelCentre, m_pixelWidth, m_detectorDistanceDirectBeam, m_detectorDistanceValue, sign);
+    }
   }
-  debugLogWithUnitDegrees("Bragg angle ", angleBragg);
+  g_log.debug() << "Bragg angle " << angleBragg << " degrees.\n";
   return angleBragg;
 }
 
 /// Update detector position according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
-  double dist = getDouble(StringConcat(m_detectorDistance, ".value"));
-  m_detectorDistanceValue = dist inMeter;
+  double dist = doubleFromRun(m_detectorDistance + ".value");
+  m_detectorDistanceValue = inMeter(dist);
   if (m_instrumentName == "Figaro")
-    dist += getDouble(StringConcat(m_detectorDistance, ".offset_value"));
-  debugLogWithUnitMeter("Sample-detector distance ", m_detectorDistanceValue);
-  double rho = computeBraggAngle() + m_offsetAngle / 2.;
-  double theta_rad = (2. * rho)inRad;
+    dist += doubleFromRun(m_detectorDistance + ".offset_value");
+  g_log.debug() << "Sample-detector distance: " << m_detectorDistanceValue << "m.\n";
+  const double rho = computeBraggAngle() + m_offsetAngle / 2.;
+  const double theta = (2. * rho);
   // incident angle for using the algorithm ConvertToReflectometryQ
-  m_localWorkspace->mutableRun().addProperty("stheta", double(rho inRad));
-  const std::string componentName = "bank";
+  m_localWorkspace->mutableRun().addProperty("stheta", inRad(rho));
+  const std::string componentName = "detector";
   V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
-  V3D newpos(m_detectorDistanceValue * sin(theta_rad), pos.Y(),
-             m_detectorDistanceValue * cos(theta_rad));
+  V3D newpos(m_detectorDistanceValue * sin(inRad(theta)), pos.Y(),
+             m_detectorDistanceValue * cos(inRad(theta)));
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
   const V3D axis(0.0, 1.0, 0.0);
@@ -812,10 +768,10 @@ void LoadILLReflectometry::placeSource() {
   if (m_instrumentName != "Figaro") {
     return;
   }
-  const double dist = getDouble("ChopperSetting.chopperpair_sample_distance");
-  debugLogWithUnitMeter("Source-sample distance ", dist inMeter);
+  const double dist = inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+  g_log.debug() << "Source-sample distance " << dist << "m.\n";
   const std::string source = "chopper1";
-  const V3D newPos{0.0, 0.0, -dist inMeter};
+  const V3D newPos{0.0, 0.0, -dist};
   m_loader.moveComponent(m_localWorkspace, source, newPos);
 }
 } // namespace DataHandling

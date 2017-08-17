@@ -118,34 +118,34 @@ public:
 
   void testIncoherentScatteringSampleAngleD17() {
     // this must be the san.value in rad or stheta
-    testScatteringAngle(0.013958706061406229, "sample angle", "incoherent",
+    testScatteringAngle(0.013958706061406229, 1e-16, "sample angle", "incoherent",
                         m_d17File);
   }
 
   void testCoherentScatteringSampleAngleD17() {
-    testScatteringAngle(0.013869106563677843, "sample angle", "coherent",
+    testScatteringAngle(0.013869106563677843, 1e-8, "sample angle", "coherent",
                         m_d17File);
   }
 
   // small values due to centre angle is zero
   void testIncoherentScatteringDetectorAngleD17() {
-    testScatteringAngle(0.0, "detector angle", "incoherent", m_d17File);
+    testScatteringAngle(0.0, 1e-16, "detector angle", "incoherent", m_d17File);
   }
 
   void testCoherentScatteringDetectorAngleD17() {
-    testScatteringAngle(-7.116574826901076e-06, "detector angle", "coherent",
+    testScatteringAngle(-7.116574826901076e-06, 1e-10, "detector angle", "coherent",
                         m_d17File);
   }
 
   // user defined input angle of 30.0 degree only needs to be converted to
   // radiant
   void testIncoherentScatteringUserAngleD17() {
-    testScatteringAngle(30.0 * M_PI / 180., "user defined", "incoherent",
+    testScatteringAngle(30.0 * M_PI / 180., 1e-16, "user defined", "incoherent",
                         m_d17File);
   }
 
   void testCoherentScatteringUserAngleD17() {
-    testScatteringAngle(30.0 * M_PI / 180., "user defined", "coherent",
+    testScatteringAngle(30.0 * M_PI / 180., 1e-16, "user defined", "coherent",
                         m_d17File);
   }
 
@@ -167,34 +167,34 @@ public:
   }
 
   void testIncoherentScatteringSampleAngleFigaro() {
-    testScatteringAngle(0.01085594758122008, "sample angle", "incoherent",
+    testScatteringAngle(0.01085594758122008, 1e-16, "sample angle", "incoherent",
                         m_figaroFile);
   }
 
   void testCoherentScatteringSampleAngleFigaro() {
-    testScatteringAngle(0.017701593089980518, "sample angle", "coherent",
+    testScatteringAngle(0.017701593089980518, 1e-7, "sample angle", "coherent",
                         m_figaroFile);
   }
 
   void testIncoherentScatteringDetectorAngleFigaro() {
-    testScatteringAngle(-0.009931402389595764, "detector angle", "incoherent",
+    testScatteringAngle(-0.009931402389595764, 1e-8, "detector angle", "incoherent",
                         m_figaroFile);
   }
 
   void testCoherentScatteringDetectorAngleFigaro() {
-    testScatteringAngle(0.01770084511622124, "detector angle", "coherent",
+    testScatteringAngle(0.01770084511622124, 1e-7, "detector angle", "coherent",
                         m_figaroFile);
   }
 
   void testCoherentScatteringUserAngleFigaro() {
-    testScatteringAngle(0.5304444211070592, "user defined", "coherent",
+    testScatteringAngle(0.5304444211070592, 1e-7, "user defined", "coherent",
                         m_figaroFile);
   }
 
   // user defined input angle of 30.0 degree only needs to be converted to
   // radiant
   void testIncoherentScatteringUserAngleFigaro() {
-    testScatteringAngle(30.0 * M_PI / 180., "user defined", "incoherent",
+    testScatteringAngle(30.0 * M_PI / 180., 1e-16, "user defined", "incoherent",
                         m_figaroFile);
   }
 
@@ -279,7 +279,8 @@ public:
     return counts;
   }
 
-  void testScatteringAngle(double comparisonValue, const std::string &angle,
+  void testScatteringAngle(const double comparisonValue, const double delta,
+                           const std::string &angle,
                            const std::string &scatteringType,
                            const std::string &file) {
     LoadILLReflectometry loader;
@@ -306,8 +307,8 @@ public:
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
               outWSName);
       TS_ASSERT(output);
-      TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
-                       comparisonValue);
+      TS_ASSERT_DELTA(output->run().getPropertyValueAsType<double>("stheta"),
+                       comparisonValue, delta);
     }
     AnalysisDataService::Instance().clear();
   }
