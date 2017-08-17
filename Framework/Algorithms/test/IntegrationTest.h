@@ -8,13 +8,9 @@
 #include "MantidAlgorithms/Integration.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
-<<<<<<< HEAD
-#include "MantidDataObjects/Workspace2D.h"
-=======
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
->>>>>>> master
 #include "MantidGeometry/IDTypes.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <MantidHistogramData/LinearGenerator.h>
@@ -36,25 +32,6 @@ public:
   void setUp() override {
     using namespace Mantid::HistogramData;
     // Set up a small workspace for testing
-<<<<<<< HEAD
-    Workspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", 5, 6, 5);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    double *a = new double[25];
-    double *e = new double[25];
-    for (int i = 0; i < 25; ++i) {
-      a[i] = i;
-      e[i] = sqrt(double(i));
-    }
-    for (int j = 0; j < 5; ++j) {
-      auto &X = space2D->mutableX(j);
-
-      for (int k = 0; k < 6; ++k) {
-        X[k] = k;
-      }
-      space2D->mutableY(j).assign(a + (5 * j), a + (5 * j) + 5);
-      space2D->mutableE(j).assign(e + (5 * j), e + (5 * j) + 5);
-=======
     const size_t nhist(5), nbins(5);
     const bool isHist = true;
     auto space2D =
@@ -66,7 +43,6 @@ public:
       Counts counts(nbins,
                     LinearGenerator(nbins * static_cast<double>(i), 1.0));
       space2D->setHistogram(i, Histogram(BinEdges(xValues), counts));
->>>>>>> master
     }
 
     // Register the workspace in the data service
@@ -174,7 +150,6 @@ public:
   void testRangeWithPartialBins() {
     Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-<<<<<<< HEAD
         output = AnalysisDataService::Instance().retrieve("out3"));
 
     Workspace2D_sptr output2D =
@@ -197,17 +172,14 @@ public:
       TS_ASSERT_EQUALS(y[0], yy[i]);
       TS_ASSERT_DELTA(e[0], ee[i], 0.001);
     }
-=======
         input = boost::dynamic_pointer_cast<Workspace2D>(
             AnalysisDataService::Instance().retrieve("testSpace")))
     assertRangeWithPartialBins(input);
   }
->>>>>>> master
 
   void testRangeWithPartialBinsAndDistributionData() {
     Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-<<<<<<< HEAD
         output = AnalysisDataService::Instance().retrieve("out3"));
 
     output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
@@ -226,12 +198,10 @@ public:
       TS_ASSERT_EQUALS(y[0], yy[i]);
       TS_ASSERT_DELTA(e[0], ee[i], 0.001);
     }
-=======
         input = boost::dynamic_pointer_cast<Workspace2D>(
             AnalysisDataService::Instance().retrieve("testSpace")))
     input->setDistribution(true);
-    assertRangeWithPartialBins(input);
->>>>>>> master
+        assertRangeWithPartialBins(input);
   }
 
   void doTestEvent(std::string inName, std::string outName,
@@ -424,15 +394,9 @@ public:
     TS_ASSERT_EQUALS(inWs->getNumberHistograms(), outWs->getNumberHistograms());
 
     if (checkRanges) {
-<<<<<<< HEAD
-      TS_ASSERT_LESS_THAN_EQUALS(atof(rangeLower.c_str()), outWs->x(0).front());
-      TS_ASSERT_LESS_THAN_EQUALS(outWs->x(0).back(), atof(rangeUpper.c_str()));
-=======
-      TS_ASSERT_LESS_THAN_EQUALS(std::stod(rangeLower),
-                                 outWs->dataX(0).front());
+      TS_ASSERT_LESS_THAN_EQUALS(std::stod(rangeLower), outWs->x(0).front());
 
-      TS_ASSERT_LESS_THAN_EQUALS(outWs->dataX(0).back(), std::stod(rangeUpper));
->>>>>>> master
+      TS_ASSERT_LESS_THAN_EQUALS(outWs->x(0).back(), std::stod(rangeUpper));
     }
     // At last, check numerical results
     TS_ASSERT_DELTA(outWs->mutableY(0)[0], expectedVal, 1e-8);
@@ -885,9 +849,9 @@ private:
     const double yy[3] = {52., 74., 96.};
     const double ee[3] = {6.899, 8.240, 9.391};
     for (size_t i = 0; i < max; ++i) {
-      Mantid::MantidVec &x = output2D->dataX(i);
-      Mantid::MantidVec &y = output2D->dataY(i);
-      Mantid::MantidVec &e = output2D->dataE(i);
+      Mantid::MantidVec &x = output2D->x(i);
+      Mantid::MantidVec &y = output2D->y(i);
+      Mantid::MantidVec &e = output2D->e(i);
 
       TS_ASSERT_EQUALS(x.size(), 2);
       TS_ASSERT_EQUALS(y.size(), 1);
