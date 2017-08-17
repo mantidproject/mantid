@@ -260,7 +260,7 @@ def rebin_to_smallest(workspaces):
     rebinned_workspaces = []
     for workspace in workspaces:
         rebin_alg.setProperty("WorkspaceToRebin", workspace)
-        rebin_alg.setProperty("OutputWorkspace", workspace)
+        rebin_alg.setProperty("OutputWorkspace", workspace.getName())
         rebin_alg.execute()
         rebinned_workspaces.append(rebin_alg.getProperty("OutputWorkspace").value)
 
