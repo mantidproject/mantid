@@ -110,7 +110,7 @@ public:
       const DataProcessorPreprocessMap &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor);
-  ~GenericDataProcessorPresenter() override = default;
+  ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const Options &options() const override;
   void setOptions(const Options &options) override;

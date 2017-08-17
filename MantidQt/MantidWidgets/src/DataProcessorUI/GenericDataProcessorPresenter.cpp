@@ -363,6 +363,11 @@ void GenericDataProcessorPresenter::process() {
 }
 
 /**
+ * Destructor
+ */
+GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
+
+/**
 Decide which processing action to take next
 */
 void GenericDataProcessorPresenter::doNextAction() {
