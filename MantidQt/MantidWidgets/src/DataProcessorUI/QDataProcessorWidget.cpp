@@ -365,8 +365,8 @@ void QDataProcessorWidget::resume() {
 }
 
 void QDataProcessorWidget::preventTableModification() {
-  disableTableModification([this](auto action)
-                               -> void { disableAction(action); });
+  disableTableModification([this](DataProcessorAction action)
+                               -> void { this->disableAction(action); });
   disableSelectionAndEditing();
 }
 
@@ -467,8 +467,8 @@ void QDataProcessorWidget::confirmReductionPaused() {
 
 void QDataProcessorWidget::allowTableModification() {
   enableSelectionAndEditing();
-  enableTableModification([this](auto action)
-                              -> void { enableAction(action); });
+  enableTableModification([this](DataProcessorAction action)
+                              -> void { this->enableAction(action); });
 }
 
 /**
@@ -479,7 +479,7 @@ void QDataProcessorWidget::saveSettings(
     const std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
-  for (auto &&option : options)
+  for (const auto &option : options)
     settings.setValue(option.first, option.second);
   settings.endGroup();
 }
@@ -492,7 +492,7 @@ void QDataProcessorWidget::loadSettings(std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
   QStringList keys = settings.childKeys();
-  for (auto &&key : keys)
+  for (const auto &key : keys)
     options[key] = settings.value(key);
   settings.endGroup();
 }
