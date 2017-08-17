@@ -91,7 +91,8 @@ class Instrument(object):
         :return: numpy array with calculated Gaussian values
         """
         sigma_factor = 2.0 * sigma * sigma
-        return 1.0 / np.sqrt(sigma_factor * np.pi) * np.exp(-(points - center) ** 2 / sigma_factor)
+        norm = points.size / (6 * sigma)
+        return 1.0 / np.sqrt(sigma_factor * np.pi) * np.exp(-(points - center) ** 2 / sigma_factor) / norm
 
     def __str__(self):
         return self._name
