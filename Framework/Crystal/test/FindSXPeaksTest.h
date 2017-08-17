@@ -299,9 +299,11 @@ public:
     Mantid::Kernel::V3D qRot = result->getPeak(0).getQSampleFrame();
 
     // Peak should be rotated by 180 degrees around y in Q compared to baseline
-	// Use ASSERT_DELTA to account for minor error introduced by deg/rad conversion
+    // Use ASSERT_DELTA to account for minor error introduced by deg/rad
+    // conversion
     TSM_ASSERT_DELTA("Q_x should be unchanged!", qNoRot.X(), qRot.X(), 10e-10);
-    TSM_ASSERT_DELTA("Q_y should be inverted!", qNoRot.Y(), qRot.Y()*(-1), 10e-10);
+    TSM_ASSERT_DELTA("Q_y should be inverted!", qNoRot.Y(), qRot.Y() * (-1),
+                     10e-10);
     TSM_ASSERT_DELTA("Q_z should be unchanged!", qNoRot.Z(), qRot.Z(), 10e-10);
   }
 };
