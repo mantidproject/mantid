@@ -59,7 +59,7 @@ protected:
   // the presenter
   DataProcessorPresenter *m_presenter;
   // maps option names to widget names
-  std::map<std::string, QString> m_bindings;
+  std::map<QString, QString> m_bindings;
 };
 
 } // MantidWidgets

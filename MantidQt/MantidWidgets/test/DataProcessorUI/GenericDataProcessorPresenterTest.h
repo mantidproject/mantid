@@ -33,13 +33,13 @@ public:
   // Standard constructor
   GenericDataProcessorPresenterNoThread(
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
-      const std::map<std::string, std::string> &postprocessMap =
-          std::map<std::string, std::string>(),
-      const std::string &loader = "Load")
+      const std::map<QString, QString> &postprocessMap =
+          std::map<QString, QString>(),
+      const QString &loader = "Load")
       : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                       postprocessor, postprocessMap, loader) {}
 
@@ -49,8 +49,7 @@ public:
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor)
       : GenericDataProcessorPresenter(
-            whitelist,
-            std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
+            whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
             processor, postprocessor) {}
 
   // Destructor
@@ -64,7 +63,7 @@ private:
       m_manager->update(groupIndex, rowItem->first, rowItem->second);
       m_manager->setProcessed(true, rowItem->first, groupIndex);
     } catch (std::exception &ex) {
-      reductionError(ex);
+      reductionError(QString(ex.what()));
       threadFinished(1);
     }
     threadFinished(0);
@@ -78,7 +77,7 @@ private:
       if (m_manager->rowCount(groupIndex) == static_cast<int>(groupData.size()))
         m_manager->setProcessed(true, groupIndex);
     } catch (std::exception &ex) {
-      reductionError(ex);
+      reductionError(QString(ex.what()));
       threadFinished(1);
     }
     threadFinished(0);
@@ -107,41 +106,40 @@ private:
     return whitelist;
   }
 
-  std::map<std::string, DataProcessorPreprocessingAlgorithm>
+  std::map<QString, DataProcessorPreprocessingAlgorithm>
   createReflectometryPreprocessMap() {
 
-    return std::map<std::string, DataProcessorPreprocessingAlgorithm>{
-        {"Run(s)", DataProcessorPreprocessingAlgorithm(
-                       "Plus", "TOF_",
-                       std::set<std::string>{"LHSWorkspace", "RHSWorkspace",
-                                             "OutputWorkspace"})},
+    return std::map<QString, DataProcessorPreprocessingAlgorithm>{
+        {"Run(s)",
+         DataProcessorPreprocessingAlgorithm(
+             "Plus", "TOF_", std::set<QString>{"LHSWorkspace", "RHSWorkspace",
+                                               "OutputWorkspace"})},
         {"Transmission Run(s)",
          DataProcessorPreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
-             std::set<std::string>{"FirstTransmissionRun",
-                                   "SecondTransmissionRun",
-                                   "OutputWorkspace"})}};
+             std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
+                               "OutputWorkspace"})}};
   }
 
   DataProcessorProcessingAlgorithm createReflectometryProcessor() {
 
     return DataProcessorProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
-        std::vector<std::string>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
-        std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
-                              "OutputWorkspace", "OutputWorkspaceWavelength",
-                              "FirstTransmissionRun", "SecondTransmissionRun"});
+        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
+        std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
+                          "OutputWorkspace", "OutputWorkspaceWavelength",
+                          "FirstTransmissionRun", "SecondTransmissionRun"});
   }
 
   DataProcessorPostprocessingAlgorithm createReflectometryPostprocessor() {
 
     return DataProcessorPostprocessingAlgorithm(
         "Stitch1DMany", "IvsQ_",
-        std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
+        std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
   }
 
   ITableWorkspace_sptr
-  createWorkspace(const std::string &wsName,
+  createWorkspace(const QString &wsName,
                   const DataProcessorWhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
@@ -151,18 +149,19 @@ private:
     colGroup->setPlotType(0);
 
     for (int col = 0; col < ncols; col++) {
-      auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col));
+      auto column = ws->addColumn(
+          "str", whitelist.colNameFromColIndex(col).toStdString());
       column->setPlotType(0);
     }
 
     if (wsName.length() > 0)
-      AnalysisDataService::Instance().addOrReplace(wsName, ws);
+      AnalysisDataService::Instance().addOrReplace(wsName.toStdString(), ws);
 
     return ws;
   }
 
-  void createTOFWorkspace(const std::string &wsName,
-                          const std::string &runNumber = "") {
+  void createTOFWorkspace(const QString &wsName,
+                          const QString &runNumber = "") {
     auto tinyWS =
         WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
     auto inst = tinyWS->getInstrument();
@@ -180,30 +179,32 @@ private:
 
     tinyWS->mutableRun().addLogData(
         new PropertyWithValue<double>("Theta", 0.12345));
-    if (!runNumber.empty())
-      tinyWS->mutableRun().addLogData(
-          new PropertyWithValue<std::string>("run_number", runNumber));
+    if (!runNumber.isEmpty())
+      tinyWS->mutableRun().addLogData(new PropertyWithValue<std::string>(
+          "run_number", runNumber.toStdString()));
 
-    AnalysisDataService::Instance().addOrReplace(wsName, tinyWS);
+    AnalysisDataService::Instance().addOrReplace(wsName.toStdString(), tinyWS);
   }
 
-  void createMultiPeriodTOFWorkspace(const std::string &wsName,
-                                     const std::string &runNumber = "") {
+  void createMultiPeriodTOFWorkspace(const QString &wsName,
+                                     const QString &runNumber = "") {
 
     createTOFWorkspace(wsName + "_1", runNumber);
     createTOFWorkspace(wsName + "_2", runNumber);
 
+    auto stdWorkspaceName = wsName.toStdString();
+
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
     group->addWorkspace(
-        AnalysisDataService::Instance().retrieve(wsName + "_1"));
+        AnalysisDataService::Instance().retrieve(stdWorkspaceName + "_1"));
     group->addWorkspace(
-        AnalysisDataService::Instance().retrieve(wsName + "_2"));
+        AnalysisDataService::Instance().retrieve(stdWorkspaceName + "_2"));
 
-    AnalysisDataService::Instance().addOrReplace(wsName, group);
+    AnalysisDataService::Instance().addOrReplace(stdWorkspaceName, group);
   }
 
   ITableWorkspace_sptr
-  createPrefilledWorkspace(const std::string &wsName,
+  createPrefilledWorkspace(const QString &wsName,
                            const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
@@ -252,7 +253,7 @@ private:
   }
 
   ITableWorkspace_sptr
-  createPrefilledWorkspaceThreeGroups(const std::string &wsName,
+  createPrefilledWorkspaceThreeGroups(const QString &wsName,
                                       const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
@@ -319,7 +320,7 @@ private:
   }
 
   ITableWorkspace_sptr
-  createPrefilledWorkspaceWithTrans(const std::string &wsName,
+  createPrefilledWorkspaceWithTrans(const QString &wsName,
                                     const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
@@ -380,6 +381,10 @@ public:
     delete suite;
   }
 
+  void setUp() override { DefaultValue<QString>::Set(QString()); }
+
+  void tearDown() override { DefaultValue<QString>::Clear(); }
+
   GenericDataProcessorPresenterTest() { FrameworkManager::Instance(); }
 
   void testConstructor() {
@@ -426,9 +431,9 @@ public:
     EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(Exactly(1));
     // Expect that the layout containing pre-processing, processing and
     // post-processing options is created
-    std::vector<std::string> stages = {"Pre-process", "Pre-process", "Process",
-                                       "Post-process"};
-    std::vector<std::string> algorithms = {
+    std::vector<QString> stages = {"Pre-process", "Pre-process", "Process",
+                                   "Post-process"};
+    std::vector<QString> algorithms = {
         "Plus", "CreateTransmissionWorkspaceAuto",
         "ReflectometryReductionOneAuto", "Stitch1DMany"};
 
@@ -453,7 +458,8 @@ public:
 
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
-    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView,
+                askUserString(_, _, QString("Workspace")))
         .Times(1)
         .WillOnce(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -478,8 +484,8 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
-        .Times(0);
+    EXPECT_CALL(mockDataProcessorView,
+                askUserString(_, _, QString("Workspace"))).Times(0);
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -502,13 +508,15 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // The user hits "save as" but cancels when choosing a name
-    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView,
+                askUserString(_, _, QString("Workspace")))
         .Times(1)
         .WillOnce(Return(""));
     presenter.notify(DataProcessorPresenter::SaveAsFlag);
 
     // The user hits "save as" and and enters "Workspace" for a name
-    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView,
+                askUserString(_, _, QString("Workspace")))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveAsFlag);
@@ -1077,10 +1085,10 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
-        .WillOnce(Return("Params = \"0.1\""));
+        .WillOnce(Return(QString("Params = \"0.1\"")));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
     EXPECT_CALL(mockMainPresenter, resume()).Times(1);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -1753,7 +1761,8 @@ public:
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     // The user saves
-    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView,
+                askUserString(_, _, QString("Workspace")))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -1791,7 +1800,8 @@ public:
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     // The user saves
-    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView,
+                askUserString(_, _, QString("Workspace")))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -1825,7 +1835,8 @@ public:
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
     // The user saves
-    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView,
+                askUserString(_, _, QString("Workspace")))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -1877,7 +1888,8 @@ public:
     presenter.notify(DataProcessorPresenter::AppendGroupFlag);
 
     // The user saves
-    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView,
+                askUserString(_, _, QString("Workspace")))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -2433,8 +2445,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const std::string expected =
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t";
+    const auto expected = QString(
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2455,7 +2467,7 @@ public:
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 
     // The user hits "copy selected" with the second and third rows selected
-    EXPECT_CALL(mockDataProcessorView, setClipboard(std::string())).Times(1);
+    EXPECT_CALL(mockDataProcessorView, setClipboard(QString())).Times(1);
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
@@ -2484,11 +2496,11 @@ public:
     rowlist[1].insert(0);
     rowlist[1].insert(1);
 
-    const std::string expected =
+    const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
         "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t\n"
-        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t\t";
+        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2517,8 +2529,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const std::string expected =
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t";
+    const auto expected = QString(
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2560,10 +2572,10 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
-    const std::string expected =
+    const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t";
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2601,8 +2613,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const std::string clipboard =
-        "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef";
+    const auto clipboard =
+        QString("6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2656,8 +2668,8 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    const std::string clipboard =
-        "1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef";
+    const auto clipboard =
+        QString("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2713,9 +2725,9 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
-    const std::string clipboard =
-        "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef\n"
-        "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tabc";
+    const auto clipboard =
+        QString("6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tdef\n"
+                "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tabc");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2776,9 +2788,9 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    const std::string clipboard =
-        "1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tzzz\n"
-        "1\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tyyy";
+    const auto clipboard =
+        QString("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\tzzz\n"
+                "1\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef\tyyy");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2838,7 +2850,7 @@ public:
     // Empty clipboard
     EXPECT_CALL(mockDataProcessorView, getClipboard())
         .Times(1)
-        .WillRepeatedly(Return(std::string()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
     presenter.notify(DataProcessorPresenter::PasteSelectedFlag);
 
@@ -2876,10 +2888,11 @@ public:
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    EXPECT_CALL(mockDataProcessorView,
-                runPythonAlgorithm("try:\n  algm = LoadTBLDialog()\n  print "
-                                   "algm.getPropertyValue(\"OutputWorkspace\")"
-                                   "\nexcept:\n  pass\n"));
+    EXPECT_CALL(
+        mockDataProcessorView,
+        runPythonAlgorithm(QString("try:\n  algm = LoadTBLDialog()\n  print("
+                                   "algm.getPropertyValue(\"OutputWorkspace\"))"
+                                   "\nexcept:\n  pass\n")));
     presenter.notify(DataProcessorPresenter::ImportTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
@@ -2893,8 +2906,8 @@ public:
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     EXPECT_CALL(mockDataProcessorView,
-                runPythonAlgorithm(
-                    "try:\n  algm = SaveTBLDialog()\nexcept:\n  pass\n"));
+                runPythonAlgorithm(QString(
+                    "try:\n  algm = SaveTBLDialog()\nexcept:\n  pass\n")));
     presenter.notify(DataProcessorPresenter::ExportTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
@@ -3054,11 +3067,9 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    std::vector<std::string> row0 = {"12345", "0.5", "", "0.1", "0.3",
-                                     "0.04",  "1",   "", ""};
-    std::vector<std::string> row1 = {"12346", "0.5", "", "0.1", "0.3",
-                                     "0.04",  "1",   "", ""};
-    std::map<int, std::vector<std::string>> group = {{0, row0}, {1, row1}};
+    QStringList row0 = {"12345", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
+    QStringList row1 = {"12346", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
+    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row0, "prefix_1_"),
@@ -3085,7 +3096,7 @@ public:
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 
-    createPrefilledWorkspaceWithTrans("TestWorkspace",
+    createPrefilledWorkspaceWithTrans(QString("TestWorkspace"),
                                       presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
@@ -3095,11 +3106,11 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    std::vector<std::string> row0 = {"12345", "0.5", "11115", "0.1", "0.3",
-                                     "0.04",  "1",   "",      ""};
-    std::vector<std::string> row1 = {"12346", "0.5", "11116", "0.1", "0.3",
-                                     "0.04",  "1",   "",      ""};
-    std::map<int, std::vector<std::string>> group = {{0, row0}, {1, row1}};
+    QStringList row0 = {"12345", "0.5", "11115", "0.1", "0.3",
+                        "0.04",  "1",   "",      ""};
+    QStringList row1 = {"12346", "0.5", "11116", "0.1", "0.3",
+                        "0.04",  "1",   "",      ""};
+    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row0, "prefix_1_"),
@@ -3129,7 +3140,7 @@ public:
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 
-    createPrefilledWorkspaceWithTrans("TestWorkspace",
+    createPrefilledWorkspaceWithTrans(QString("TestWorkspace"),
                                       presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
@@ -3139,9 +3150,9 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
-    std::vector<std::string> row0 = {"12345", "0.5"};
-    std::vector<std::string> row1 = {"12346", "0.5"};
-    std::map<int, std::vector<std::string>> group = {{0, row0}, {1, row1}};
+    QStringList row0 = {"12345", "0.5"};
+    QStringList row1 = {"12346", "0.5"};
+    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_THROWS_ANYTHING(presenter.getReducedWorkspaceName(row0));
@@ -3288,11 +3299,11 @@ public:
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
 
-    std::string pythonCode =
+    auto pythonCode = QString(
         "base_graph = None\nbase_graph = "
         "plotSpectrum(\"IvsQ_binned_TOF_12345\", 0, True, window = "
         "base_graph)\nbase_graph = plotSpectrum(\"IvsQ_binned_TOF_12346\", 0, "
-        "True, window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+        "True, window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n");
 
     EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     presenter.notify(DataProcessorPresenter::PlotRowFlag);
@@ -3332,10 +3343,10 @@ public:
         .Times(1)
         .WillRepeatedly(Return(group));
 
-    std::string pythonCode =
-        "base_graph = None\nbase_graph = "
-        "plotSpectrum(\"IvsQ_TOF_12345_TOF_12346\", 0, True, window = "
-        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+    auto pythonCode =
+        QString("base_graph = None\nbase_graph = "
+                "plotSpectrum(\"IvsQ_TOF_12345_TOF_12346\", 0, True, window = "
+                "base_graph)\nbase_graph.activeLayer().logLogAxes()\n");
 
     EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     presenter.notify(DataProcessorPresenter::PlotGroupFlag);
@@ -3369,7 +3380,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(
         presenter.notify(DataProcessorPresenter::PlotGroupFlag));
     TS_ASSERT(presenter.getPostprocessedWorkspaceName(
-                  std::map<int, std::vector<std::string>>()) == "");
+                  std::map<int, QStringList>()) == "");
   }
 
   void testPostprocessMap() {
@@ -3377,7 +3388,7 @@ public:
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
 
-    std::map<std::string, std::string> postprocesssMap = {{"dQ/Q", "Params"}};
+    std::map<QString, QString> postprocesssMap = {{"dQ/Q", "Params"}};
     GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
@@ -3416,7 +3427,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(Return(QString("")));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return("Params='-0.10'"));
@@ -3500,8 +3511,7 @@ public:
                     QString::fromStdString("INTER,SURF,POLREF,OFFSPEC,CRISP"),
                     QString::fromStdString("INTER"))).Times(1);
     presenter.setInstrumentList(
-        std::vector<std::string>{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"},
-        "INTER");
+        QStringList{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"}, "INTER");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }

@@ -42,7 +42,7 @@ public:
 
   void execute() override {
     // Tell the presenter which of the available workspaces was selected
-    m_presenter->setModel(m_name.toStdString());
+    m_presenter->setModel(m_name);
   };
   QString name() override { return m_name; }
   QString icon() override { return QString("://worksheet.png"); }
