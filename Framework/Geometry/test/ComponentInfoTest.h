@@ -4,8 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
@@ -60,7 +62,7 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleComponentInfo(
   auto componentRanges =
       boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
   componentRanges->push_back(
-      std::make_pair(0, 0)); // One component with no sub-components
+      std::make_pair(0, 1)); // One component with no sub-components
 
   auto parentIndices = boost::make_shared<const std::vector<size_t>>(
       std::vector<size_t>()); // These indices are invalid, but that's
@@ -165,15 +167,16 @@ public:
   void test_simple_solidAngle() {
     auto position = Eigen::Vector3d{0, 0, 0};
     // No rotation
+    const double radius = 1.0;
     auto rotation = Eigen::Quaterniond(Eigen::Affine3d::Identity().rotation());
     auto internalInfo = std::move(makeSingleComponentInfo(position, rotation));
-    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
+    Mantid::Geometry::ObjComponent comp1(
+        "component1", ComponentCreationHelper::createSphere(radius));
 
     auto componentIds =
         boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
-    const double radius = 1.0;
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::Object>>>();
     shapes->push_back(ComponentCreationHelper::createSphere(radius));
@@ -241,6 +244,69 @@ public:
     TS_ASSERT_EQUALS(&b.shape(0), &a.shape(0));
     // IDs are the same
     TS_ASSERT_EQUALS(b.indexOf(&comp1), a.indexOf(&comp1));
+  }
+
+  void test_boundingBox_single_component() {
+
+    const double radius = 2;
+    Eigen::Vector3d position{1, 1, 1};
+    auto internalInfo = std::move(makeSingleComponentInfo(position));
+    Mantid::Geometry::ObjComponent comp1(
+        "component1", ComponentCreationHelper::createSphere(radius));
+
+    auto componentIds =
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1});
+
+    auto shapes = boost::make_shared<
+        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+    shapes->push_back(ComponentCreationHelper::createSphere(radius));
+
+    ComponentInfo componentInfo(std::move(internalInfo), componentIds,
+                                makeComponentIDMap(componentIds), shapes);
+
+    BoundingBox boundingBox;
+    componentInfo.getBoundingBox(0 /*componentIndex*/, boundingBox);
+
+    TS_ASSERT((boundingBox.minPoint() -
+               (Kernel::V3D{position[0] - radius, position[1] - radius,
+                            position[2] - radius})).norm() < 1e-9);
+    TS_ASSERT((boundingBox.maxPoint() -
+               (Kernel::V3D{position[0] + radius, position[1] + radius,
+                            position[2] + radius})).norm() < 1e-9);
+  }
+
+  void test_boundingBox_complex() {
+    const V3D sourcePos(0, 0, 0);
+    const V3D samplePos(10, 0, 0);
+    const V3D detectorPos(11, 0, 0);
+    const double radius = 0.01; // See helper creation method for definition
+    // Create a very basic real instrument to visit
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        sourcePos, samplePos, detectorPos);
+
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    BoundingBox boundingBox;
+    // Check bounding box of detector
+    componentInfo->getBoundingBox(0 /*detector index*/, boundingBox);
+    TS_ASSERT((boundingBox.minPoint() -
+               (Kernel::V3D{detectorPos[0] - radius, detectorPos[1] - radius,
+                            detectorPos[2] - radius})).norm() < 1e-9);
+    TS_ASSERT((boundingBox.maxPoint() -
+               (Kernel::V3D{detectorPos[0] + radius, detectorPos[1] + radius,
+                            detectorPos[2] + radius})).norm() < 1e-9);
+
+    // Check bounding box of root (instrument)
+    componentInfo->getBoundingBox(componentInfo->root() /*Root*/, boundingBox);
+    // min in the source
+    TS_ASSERT((boundingBox.minPoint() -
+               (Kernel::V3D{sourcePos[0] - radius, sourcePos[1] - radius,
+                            sourcePos[2] - radius})).norm() < 1e-9);
+    // max is the detector
+    TS_ASSERT((boundingBox.maxPoint() -
+               (Kernel::V3D{detectorPos[0] + radius, detectorPos[1] + radius,
+                            detectorPos[2] + radius})).norm() < 1e-9);
   }
 };
 

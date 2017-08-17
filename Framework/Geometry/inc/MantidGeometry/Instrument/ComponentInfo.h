@@ -14,6 +14,7 @@ class V3D;
 }
 
 namespace Geometry {
+class BoundingBox;
 class IComponent;
 class Object;
 }
@@ -104,6 +105,8 @@ public:
   const Geometry::Object &shape(const size_t componentIndex) const;
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;
+  void getBoundingBox(const size_t componentIndex,
+                      BoundingBox &absoluteBB) const;
   friend class Instrument;
 };
 

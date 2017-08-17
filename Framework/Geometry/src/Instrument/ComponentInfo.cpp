@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
@@ -182,6 +183,53 @@ double ComponentInfo::solidAngle(const size_t componentIndex,
     // angle.
     return shape(componentIndex).solidAngle(relativeObserver, scaleFactor);
   }
+}
+
+void ComponentInfo::getBoundingBox(const size_t componentIndex,
+                                   BoundingBox &absoluteBB) const {
+
+  BoundingBox result;
+  for (const auto &index :
+       m_componentInfo->componentsInSubtree(componentIndex)) {
+
+    const auto &s = this->shape(index);
+    const BoundingBox &shapeBox = s.getBoundingBox();
+    std::vector<Kernel::V3D> coordSystem;
+    if (!absoluteBB.isAxisAligned()) { // copy coordinate system (it is better
+
+      coordSystem.assign(absoluteBB.getCoordSystem().begin(),
+                         absoluteBB.getCoordSystem().end());
+    }
+    auto currentBB = BoundingBox(shapeBox);
+    // modify in place for speed
+    const Eigen::Vector3d scaleFactor = m_componentInfo->scaleFactor(index);
+    // Scale
+    currentBB.xMin() *= scaleFactor[0];
+    currentBB.xMax() *= scaleFactor[0];
+    currentBB.yMin() *= scaleFactor[1];
+    currentBB.yMax() *= scaleFactor[1];
+    currentBB.zMin() *= scaleFactor[2];
+    currentBB.zMax() *= scaleFactor[2];
+    // Rotate
+    (this->rotation(index))
+        .rotateBB(currentBB.xMin(), currentBB.yMin(), currentBB.zMin(),
+                  currentBB.xMax(), currentBB.yMax(), currentBB.zMax());
+
+    // Shift
+    const Eigen::Vector3d localPos = m_componentInfo->position(index);
+    currentBB.xMin() += localPos[0];
+    currentBB.xMax() += localPos[0];
+    currentBB.yMin() += localPos[1];
+    currentBB.yMax() += localPos[1];
+    currentBB.zMin() += localPos[2];
+    currentBB.zMax() += localPos[2];
+
+    if (!coordSystem.empty()) {
+      currentBB.realign(&coordSystem);
+    }
+    result.grow(currentBB);
+  }
+  absoluteBB = result;
 }
 } // namespace Geometry
 } // namespace Mantid
