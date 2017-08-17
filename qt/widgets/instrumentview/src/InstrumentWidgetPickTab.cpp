@@ -43,6 +43,11 @@
 
 #include <boost/math/constants/constants.hpp>
 
+namespace {
+// Format for miniplot
+const char *MINI_PLOT_LINE_FORMAT = "k-";
+}
+
 namespace MantidQt {
 using Widgets::MplCpp::Axes;
 namespace MantidWidgets {
@@ -148,6 +153,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name", m_miniplot);
+  //panelStack->addPanel("Old Plot", m_plot);
 
   m_selectionType = Single;
 
@@ -1180,7 +1186,7 @@ void DetectorPlotController::setPlotData(QList<int> detIDs) {
   if (!x.empty()) {
     m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
                     actor.getWorkspace()->getAxis(0)->unit()->unitID());
-    m_miniplot->plotLine(x, y, "-");
+    m_miniplot->plotLine(x, y, MINI_PLOT_LINE_FORMAT);
     m_miniplot->setLabel(Axes::Label::X,
                          actor.getWorkspace()->getAxis(0)->unit()->unitID());
   }
@@ -1224,7 +1230,7 @@ void DetectorPlotController::plotSingle(int detid) {
                       ->unit()
                       ->unitID());
   m_plot->setLabel("Detector " + QString::number(detid));
-  m_miniplot->plotLine(x, y, "-");
+  m_miniplot->plotLine(x, y, MINI_PLOT_LINE_FORMAT);
   m_miniplot->setLabel(Axes::Label::X, m_instrWidget->getInstrumentActor()
                                            .getWorkspace()
                                            ->getAxis(0)
@@ -1302,7 +1308,7 @@ void DetectorPlotController::plotTubeSums(int detid) {
                   actor.getWorkspace()->getAxis(0)->unit()->unitID());
   m_plot->setLabel(label);
   m_miniplot->removeLine(0);
-  m_miniplot->plotLine(x, y, "-");
+  m_miniplot->plotLine(x, y, MINI_PLOT_LINE_FORMAT);
   m_miniplot->setLabel(Axes::Label::X, m_instrWidget->getInstrumentActor()
                                            .getWorkspace()
                                            ->getAxis(0)
@@ -1346,7 +1352,7 @@ void DetectorPlotController::plotTubeIntegrals(int detid) {
   m_plot->setLabel(label);
 
   m_miniplot->removeLine(0);
-  m_miniplot->plotLine(x, y, "-");
+  m_miniplot->plotLine(x, y, MINI_PLOT_LINE_FORMAT);
   m_miniplot->setLabel(Axes::Label::X, xAxisUnits);
   m_miniplot->setCurveLabel(label);
 }
