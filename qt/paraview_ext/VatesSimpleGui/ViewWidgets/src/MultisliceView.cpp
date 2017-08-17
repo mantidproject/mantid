@@ -69,7 +69,7 @@ MultiSliceView::MultiSliceView(QWidget *parent,
   if (createRenderProxy) {
     pqRenderView *tmp =
         this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
-    this-setupData();
+    this->setupData();
     this->m_mainView = qobject_cast<pqMultiSliceView *>(tmp);
     QObject::connect(this->m_mainView,
                      SIGNAL(sliceClicked(int, double, int, int)), this,
