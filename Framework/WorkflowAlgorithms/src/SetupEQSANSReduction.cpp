@@ -57,7 +57,7 @@ void SetupEQSANSReduction::init() {
 
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
                   "Offset to the sample to detector distance (use only when "
-                  "using the detector distance found in the meta data), in mm");                  
+                  "using the detector distance found in the meta data), in mm");
   declareProperty("SampleOffset", EMPTY_DBL(),
                   "Offset applies to the sample position (use only when "
                   "using the detector distance found in the meta data), in mm");
