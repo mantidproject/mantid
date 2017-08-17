@@ -9,7 +9,7 @@ namespace DataHandling {
 
 /*! LoadILLReflectometry : Loads an ILL reflectometry Nexus data file.
 
- Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ Copyright &copy; 2014-2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
 
  This file is part of Mantid.
@@ -61,7 +61,7 @@ private:
   void initWorkspace(const std::vector<std::vector<int>> &monitorsData);
   void initNames(NeXus::NXEntry &entry);
   void loadDataDetails(NeXus::NXEntry &entry);
-  double doubleFromRun(const std::string& entryName);
+  double doubleFromRun(const std::string& entryName) const;
   std::vector<double> getXValues();
   void convertTofToWavelength();
   void loadData(NeXus::NXEntry &entry,
@@ -86,25 +86,24 @@ private:
   size_t m_acqMode{1}; ///< Acquisition mode (1 TOF (default), 0 monochromatic)
   size_t m_numberOfChannels{0};
   double m_tofDelay{0.0};
-  size_t m_numberOfHistograms{
-      0}; // number of tubes (always 1) times number of pixels per tube
+  // number of tubes (always 1) times number of pixels per tube
+  size_t m_numberOfHistograms{0};
   double m_wavelength{0.0};
   double m_channelWidth{0.0};
   double m_angleDirectBeam{0.0}; /// detector angle of the direct beam
   double m_offsetAngle{0.0};
-  std::string m_detectorDistance{std::string()};
-  std::string m_detectorAngleName{std::string()};
-  std::string m_sampleAngleName{std::string()};
-  std::string m_offsetName{std::string()};
-  std::string m_offsetFrom{std::string()};
-  std::string m_chopper1Name{std::string()};
-  std::string m_chopper2Name{std::string()};
+  std::string m_detectorDistance;
+  std::string m_detectorAngleName;
+  std::string m_sampleAngleName;
+  std::string m_offsetName;
+  std::string m_offsetFrom;
+  std::string m_chopper1Name;
+  std::string m_chopper2Name;
   double m_detectorDistanceDirectBeam{0.0}; ///< Sample detector distance
   double m_detectorDistanceValue{0.0};
   double m_pixelCentre{0.0};
   double m_pixelWidth{0.0};
-  std::unordered_set<std::string> m_supportedInstruments{"D17", "d17", "Figaro",
-                                                         "figaro"};
+  const static std::unordered_set<std::string> m_supportedInstruments;
   Mantid::DataHandling::LoadHelper m_loader;
 };
 

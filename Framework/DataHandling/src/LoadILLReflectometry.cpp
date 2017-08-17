@@ -64,6 +64,8 @@ using namespace NeXus;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
+const std::unordered_set<std::string> LoadILLReflectometry::m_supportedInstruments{"D17", "d17", "Figaro", "figaro"};
+
 /**
  * Return the confidence with this algorithm can load the file
  * @param descriptor A descriptor for the file
@@ -239,7 +241,11 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_chopper2Name = "Chopper2";
     // m_wavelength = getFloat("wavelength");
   } else if (m_instrumentName == "Figaro") {
+    // TODO Figaro's detector position should be calculated from
+    // some motor positions, not from DTR and some offset value.
     m_detectorDistance = "DTR";
+    // TODO Figaro's detector angle may need to be calculated
+    // from some motor positions instead.
     m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
@@ -306,8 +312,7 @@ void LoadILLReflectometry::initWorkspace(
             std::to_string(m_numberOfChannels) + '\n');
   }
   if (m_acqMode)
-    m_localWorkspace->getAxis(0)->unit() =
-        UnitFactory::Instance().create("TOF");
+    m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
   m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
   if (m_wavelength > 0.0) {
@@ -344,7 +349,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   nChannels.load();
   m_numberOfHistograms = nChannels[0];
 
-  std::string widthName{};
+  std::string widthName;
   if (m_instrumentName == "D17")
     widthName = "mppx";
   else if (m_instrumentName == "Figaro")
@@ -367,7 +372,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   g_log.debug() << "Pixel width: " << m_pixelWidth << '\n';
 }
 
-double LoadILLReflectometry::doubleFromRun(const std::string &entryName) {
+double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
   return m_localWorkspace->run().getPropertyValueAsType<double>(entryName);
 }
 
@@ -386,8 +391,7 @@ LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry,
   NXInt data = dataGroup.openIntData();
   // load counts
   data.load();
-  std::vector<int> monitor(data(), data() + data.size());
-  return monitor;
+  return std::vector<int>(data(), data() + data.size());
 }
 
 /**
@@ -400,7 +404,7 @@ std::vector<std::vector<int>>
 LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
   g_log.debug("Read monitor data...");
   // vector of monitors with one entry
-  std::vector<std::vector<int>> monitors{
+  const std::vector<std::vector<int>> monitors{
       loadSingleMonitor(entry, "monitor1/data"),
       loadSingleMonitor(entry, "monitor2/data")};
   return monitors;
@@ -429,8 +433,8 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         // Chopper 1 phase on Figaro is set to an arbitrary value (999.9)
         chop1Phase = 0.0;
       }
-      double POFF = doubleFromRun(m_offsetFrom + ".poff");
-      double openOffset = doubleFromRun(m_offsetFrom + "." + m_offsetName);
+      const double POFF = doubleFromRun(m_offsetFrom + ".poff");
+      const double openOffset = doubleFromRun(m_offsetFrom + "." + m_offsetName);
       if (m_instrumentName == "D17" && chop1Speed != 0.0 && chop2Speed != 0.0 && chop2Phase != 0.0) {
         // virtual chopper entries are valid
         chopper = "Virtual chopper";
@@ -456,9 +460,9 @@ std::vector<double> LoadILLReflectometry::getXValues() {
                  (2.0 * 360 * chop1Speed);
       g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
       // compute tof values
-      for (int channelIndex = 0; channelIndex <= int(m_numberOfChannels);
+      for (int channelIndex = 0; channelIndex <= static_cast<int>(m_numberOfChannels);
            ++channelIndex) {
-        double t_TOF1 = (channelIndex + 0.5) * m_channelWidth + m_tofDelay;
+        const double t_TOF1 = (channelIndex + 0.5) * m_channelWidth + m_tofDelay;
         xVals.push_back(t_TOF1 + t_TOF2);
       }
     } else {
@@ -487,7 +491,7 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
   NXInt data = dataGroup.openIntData();
   // load the counts from the file into memory
   data.load();
-  size_t nb_monitors = monitorsData.size();
+  const size_t nb_monitors = monitorsData.size();
   Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
 
   // write monitors
@@ -552,7 +556,7 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
     // check whether beam workspace is compatible
     if (beam == "DirectBeam") {
       if (data.dim0() * data.dim1() * data.dim2() !=
-          int(m_numberOfChannels * m_numberOfHistograms))
+          static_cast<int>(m_numberOfChannels * m_numberOfHistograms))
         g_log.error(beam + " has incompatible size with Filename beam\n");
       // get sample detector distance
       if (m_instrumentName == "D17")
@@ -591,7 +595,7 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
     dataRoot.close();
     // set x values
     std::vector<double> xVals;
-    xVals.reserve(int(m_numberOfChannels) + 1);
+    xVals.reserve(m_numberOfChannels + 1);
     for (size_t t = 0; t < m_numberOfChannels + 1; ++t)
       xVals.push_back(double(t));
     // write data
@@ -688,7 +692,7 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string &beam,
 double LoadILLReflectometry::computeBraggAngle() {
   // compute bragg angle called angleBragg in the following
   const std::string inputAngle = getPropertyValue("InputAngle");
-  std::string incidentAngle{std::string()};
+  std::string incidentAngle;
   if (inputAngle == "sample angle" || inputAngle == "detector angle") {
     inputAngle == "sample angle" ? incidentAngle = m_sampleAngleName
                                  : incidentAngle = m_detectorAngleName;
@@ -709,7 +713,7 @@ double LoadILLReflectometry::computeBraggAngle() {
   const std::string scatteringType = getProperty("ScatteringType");
   double angleBragg{angle};
   // the reflected beam
-  std::vector<double> peakPosRB = fitReflectometryPeak("Filename");
+  const std::vector<double> peakPosRB = fitReflectometryPeak("Filename");
   // Figaro theta sign informs about reflection down (-1.0) or up (1.0)
   double down{1.0}; // default value for D17
   if (m_instrumentName == "Figaro") {
@@ -743,6 +747,7 @@ void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
   double dist = doubleFromRun(m_detectorDistance + ".value");
   m_detectorDistanceValue = inMeter(dist);
+  // TODO offset_value cannot be used like this for Figaro.
   if (m_instrumentName == "Figaro")
     dist += doubleFromRun(m_detectorDistance + ".offset_value");
   g_log.debug() << "Sample-detector distance: " << m_detectorDistanceValue << "m.\n";
@@ -751,8 +756,8 @@ void LoadILLReflectometry::placeDetector() {
   // incident angle for using the algorithm ConvertToReflectometryQ
   m_localWorkspace->mutableRun().addProperty("stheta", inRad(rho));
   const std::string componentName = "detector";
-  V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
-  V3D newpos(m_detectorDistanceValue * sin(inRad(theta)), pos.Y(),
+  const V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
+  const V3D newpos(m_detectorDistanceValue * sin(inRad(theta)), pos.Y(),
              m_detectorDistanceValue * cos(inRad(theta)));
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
