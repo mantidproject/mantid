@@ -1,9 +1,9 @@
-#include "MantidQtCustomInterfaces/Reflectometry/ReflFromStdStringMap.h"
+#include "ReflFromStdStringMap.h"
 #include <algorithm>
 #include <iterator>
 namespace MantidQt {
 namespace CustomInterfaces {
-std::map<QString, QString> MANTIDQT_CUSTOMINTERFACES_DLL
+std::map<QString, QString> MANTIDQT_ISISREFLECTOMETRYOLD_DLL
 fromStdStringMap(std::map<std::string, std::string> const &inMap) {
   std::map<QString, QString> out;
   std::transform(inMap.begin(), inMap.end(), std::inserter(out, out.begin()),
@@ -16,7 +16,7 @@ fromStdStringMap(std::map<std::string, std::string> const &inMap) {
   return out;
 }
 
-std::vector<std::map<QString, QString>> MANTIDQT_CUSTOMINTERFACES_DLL
+std::vector<std::map<QString, QString>> MANTIDQT_ISISREFLECTOMETRYOLD_DLL
 fromStdStringVectorMap(
     std::vector<std::map<std::string, std::string>> const &inVectorMap) {
   std::vector<std::map<QString, QString>> out;

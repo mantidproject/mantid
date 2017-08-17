@@ -192,6 +192,8 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/TreeData.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h
   inc/MantidQtWidgets/Common/DataSelector.h
   inc/MantidQtWidgets/Common/DiagResults.h
   inc/MantidQtWidgets/Common/DisplayCurveFit.h
@@ -340,7 +342,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/ParseNumerics.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h
 	inc/MantidQtWidgets/Common/ErrorCurve.h
 	inc/MantidQtWidgets/Common/HintStrategy.h
 	inc/MantidQtWidgets/Common/IFunctionBrowser.h

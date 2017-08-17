@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h"
 namespace MantidQt {
 namespace MantidWidgets {
 /** Create a comma separated list of items from a QStringList.

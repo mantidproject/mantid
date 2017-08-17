@@ -1,8 +1,8 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/ParseNumerics.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h"
 #include <stdexcept>
 namespace MantidQt {
 namespace MantidWidgets {
-double EXPORT_OPT_MANTIDQT_MANTIDWIDGETS parseDouble(QString const &in) {
+double parseDouble(QString const &in) {
   static auto ok = false;
   auto out = in.toDouble(&ok);
   if (ok)
@@ -12,7 +12,7 @@ double EXPORT_OPT_MANTIDQT_MANTIDWIDGETS parseDouble(QString const &in) {
                              "' as a double numerical value.");
 }
 
-int EXPORT_OPT_MANTIDQT_MANTIDWIDGETS parseDenaryInteger(QString const &in) {
+int parseDenaryInteger(QString const &in) {
   static auto ok = false;
   auto constexpr BASE = 10;
   auto out = in.toInt(&ok, BASE);

@@ -79,12 +79,12 @@ endif ()
 # Create test file projects
 include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc ../../Framework/MDAlgorithms/inc)
-set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-                      ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-                      ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-                      ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
-                      ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
+include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc ../../../Framework/MDAlgorithms/inc)
+set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+                      ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+                      ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                      ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
+                      ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
 cxxtest_add_test( VatesAlgorithmsTest ${TEST_FILES} )
 target_link_libraries( VatesAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${MANTID_SUBPROJECT_LIBS}

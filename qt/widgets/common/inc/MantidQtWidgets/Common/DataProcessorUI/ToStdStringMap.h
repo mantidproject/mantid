@@ -1,13 +1,13 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLFROMSTDSTRINGMAP_H
-#define MANTID_CUSTOMINTERFACES_REFLFROMSTDSTRINGMAP_H
-#include "DllConfig.h"
+#ifndef MANTID_MANTIDWIDGETS_DATAPROCESSORTOSTDSTRINGMAP_H
+#define MANTID_MANTIDWIDGETS_DATAPROCESSORTOSTDSTRINGMAP_H
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QString>
 #include <map>
-#include <vector>
+#include <string>
 /**
-This file contains some functions used to convert map data structures using
-std::string
-to those using QString.
+
+This file defines functions for converting a QString -> QString map to a
+std::string -> std::string map.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace MantidQt {
-namespace CustomInterfaces {
-std::map<QString, QString> MANTIDQT_ISISREFLECTOMETRYOLD_DLL
-fromStdStringMap(std::map<std::string, std::string> const &inMap);
-
-std::vector<std::map<QString, QString>> MANTIDQT_ISISREFLECTOMETRYOLD_DLL
-fromStdStringVectorMap(
-    std::vector<std::map<std::string, std::string>> const &inVectorMap);
+namespace MantidWidgets {
+std::map<std::string, std::string> EXPORT_OPT_MANTIDQT_COMMON
+toStdStringMap(std::map<QString, QString> const &inMap);
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLFROMSTDSTRINGMAP_H*/
+#endif // MANTID_MANTIDWIDGETS_DATAPROCESSORTOSTDSTRINGMAP_H
