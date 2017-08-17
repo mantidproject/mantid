@@ -219,8 +219,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist)
     : GenericDataProcessorPresenter(
-          whitelist,
-          std::map<QString, DataProcessorPreprocessingAlgorithm>(),
+          whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
           DataProcessorProcessingAlgorithm(),
           DataProcessorPostprocessingAlgorithm()) {}
 
