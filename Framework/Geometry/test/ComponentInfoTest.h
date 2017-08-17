@@ -53,7 +53,7 @@ public:
         std::make_pair(0, 0)); // One component with no detectors
     detectorRanges->push_back(
         std::make_pair(0, 0)); // Another component with no detectors
-	auto isVisible = boost::make_shared<std::vector<bool>>();
+    auto isVisible = boost::make_shared<std::vector<bool>>();
     auto componentIndices = boost::make_shared<std::vector<size_t>>(
         std::vector<size_t>{0, 1}); // No detectors in this example
     auto componentRanges =

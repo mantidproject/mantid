@@ -175,14 +175,14 @@ public:
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{});
-	auto isVisible = boost::make_shared<std::vector<bool>>();
+    auto isVisible = boost::make_shared<std::vector<bool>>();
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
 
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
                                 bankSortedComponentIndices, componentRanges,
-                                parentIndices, isVisible, positions, rotations, 
-								-1, -1);
+                                parentIndices, isVisible, positions, rotations,
+                                -1, -1);
 
     DetectorInfo detectorInfo; // Detector info size 0
     TS_ASSERT_THROWS(componentInfo.setDetectorInfo(&detectorInfo),
@@ -209,7 +209,7 @@ public:
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::move(innerComponentRanges));
-	auto isVisible = boost::make_shared<std::vector<bool>>();
+    auto isVisible = boost::make_shared<std::vector<bool>>();
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
         1); // 1 position provided
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
@@ -217,8 +217,8 @@ public:
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
-                                   parentIndices, isVisible, positions, 
-		                           rotations, -1, -1),
+                                   parentIndices, isVisible, positions,
+                                   rotations, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -243,7 +243,7 @@ public:
         std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
                                        // ok as not being tested here
 
-	auto isVisible = boost::make_shared<std::vector<bool>>();
+    auto isVisible = boost::make_shared<std::vector<bool>>();
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
         1); // 1 position provided
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
@@ -256,8 +256,8 @@ public:
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    componentsInSubtree, componentRanges,
-                                   parentIndices, isVisible, positions, 
-		                           rotations, -1, -1),
+                                   parentIndices, isVisible, positions,
+                                   rotations, -1, -1),
                      std::invalid_argument &);
   }
 

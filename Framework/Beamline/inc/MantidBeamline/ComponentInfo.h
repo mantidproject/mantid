@@ -87,7 +87,7 @@ public:
                 boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
                     componentRanges,
                 boost::shared_ptr<const std::vector<size_t>> parentIndices,
-				boost::shared_ptr<const std::vector<bool>> isVisible,
+                boost::shared_ptr<const std::vector<bool>> isVisible,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
                 int64_t sourceIndex, int64_t sampleIndex);

@@ -69,7 +69,7 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-	  m_isVisible(boost::make_shared<std::vector<bool>>()),
+      m_isVisible(boost::make_shared<std::vector<bool>>()),
       m_componentIdToIndexMap(boost::make_shared<
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
@@ -239,7 +239,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
     if (m_instrument->isMonitorViaIndex(detectorIndex)) {
       m_monitorIndices->push_back(detectorIndex);
     }
-	m_isVisible->emplace_back(componentIsVisible(componentID));
+    m_isVisible->emplace_back(componentIsVisible(componentID));
     clearPositionAndRotationParameters(m_pmap, detector);
   }
   /* Note that positions and rotations for detectors are currently
@@ -294,8 +294,8 @@ InstrumentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
-      m_parentComponentIndices, m_isVisible, m_positions, m_rotations, 
-	  m_sourceIndex, m_sampleIndex);
+      m_parentComponentIndices, m_isVisible, m_positions, m_rotations,
+      m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
@@ -325,9 +325,9 @@ InstrumentVisitor::makeWrappers() const {
 }
 
 bool InstrumentVisitor::componentIsVisible(
-	Mantid::Geometry::IComponent * componentID){
-	return m_pmap->contains(componentID, m_pmap->isHidden()) &&
-		   m_pmap->get(componentID, m_pmap->isHidden(), m_pmap->pBool());
+    Mantid::Geometry::IComponent *componentID) {
+  return m_pmap->contains(componentID, m_pmap->isHidden()) &&
+         m_pmap->get(componentID, m_pmap->isHidden(), m_pmap->pBool());
 }
 
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
