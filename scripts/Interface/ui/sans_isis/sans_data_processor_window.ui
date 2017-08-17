@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>933</width>
+    <width>962</width>
     <height>699</height>
    </rect>
   </property>
@@ -138,8 +138,37 @@ QGroupBox::title {
              <layout class="QVBoxLayout" name="data_processor_widget_layout"/>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="save_layout_2">
-              <item>
+             <layout class="QGridLayout" name="gridLayout_7">
+              <item row="0" column="2">
+               <widget class="QGroupBox" name="reduction_dimensionality_group_box">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="title">
+                 <string>Dimensionality</string>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                 <item>
+                  <widget class="QRadioButton" name="reduction_dimensionality_1D">
+                   <property name="text">
+                    <string>1D</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="reduction_dimensionality_2D">
+                   <property name="text">
+                    <string>2D</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="1">
                <spacer name="horizontalSpacer_2">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -152,7 +181,7 @@ QGroupBox::title {
                 </property>
                </spacer>
               </item>
-              <item>
+              <item row="0" column="3" rowspan="2">
                <widget class="QGroupBox" name="save_group_box">
                 <property name="styleSheet">
                  <string notr="true"/>
@@ -331,47 +360,7 @@ QGroupBox::title {
                       <layout class="QVBoxLayout" name="general_vertical_layout">
                        <item>
                         <layout class="QGridLayout" name="general_grid">
-                         <item row="0" column="1">
-                          <layout class="QHBoxLayout" name="reduction_dimensioality_horizontal_layout">
-                           <item>
-                            <widget class="QRadioButton" name="reduction_dimensionality_1D">
-                             <property name="toolTip">
-                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction dimensionality.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                             </property>
-                             <property name="text">
-                              <string>&amp;1D</string>
-                             </property>
-                             <property name="checked">
-                              <bool>true</bool>
-                             </property>
-                            </widget>
-                           </item>
-                           <item>
-                            <widget class="QRadioButton" name="reduction_dimensionality_2D">
-                             <property name="toolTip">
-                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction dimensionality.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                             </property>
-                             <property name="text">
-                              <string>&amp;2D</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item>
-                            <spacer name="reduction_mode_spacer">
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                             <property name="sizeHint" stdset="0">
-                              <size>
-                               <width>40</width>
-                               <height>20</height>
-                              </size>
-                             </property>
-                            </spacer>
-                           </item>
-                          </layout>
-                         </item>
-                         <item row="1" column="0">
+                         <item row="0" column="0">
                           <widget class="QLabel" name="reduction_mode_label">
                            <property name="toolTip">
                             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specifed data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -381,17 +370,7 @@ QGroupBox::title {
                            </property>
                           </widget>
                          </item>
-                         <item row="0" column="0">
-                          <widget class="QLabel" name="reduction_dimensionality_label">
-                           <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction dimensionality.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                           </property>
-                           <property name="text">
-                            <string>Reduction Dimensionality</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="1" column="1">
+                         <item row="0" column="1">
                           <widget class="QComboBox" name="reduction_mode_combo_box">
                            <property name="toolTip">
                             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specifed data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1889,7 +1868,7 @@ QGroupBox::title {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>933</width>
+     <width>962</width>
      <height>19</height>
     </rect>
    </property>
