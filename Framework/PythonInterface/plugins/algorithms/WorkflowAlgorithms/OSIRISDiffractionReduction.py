@@ -90,8 +90,8 @@ class DRangeToWorkspaceMap(object):
         else:
 
             # Check if x ranges match an existing run
-            for ws_name in self._map[d_range]:
-                map_lastx = mtd[ws_name].readX(0)[-1]
+            for ws in self._map[d_range]:
+                map_lastx = ws.readX(0)[-1]
                 ws_lastx = workspace.readX(0)[-1]
 
                 # if it matches ignore it
