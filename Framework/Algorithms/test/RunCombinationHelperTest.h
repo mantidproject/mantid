@@ -160,7 +160,7 @@ private:
   MatrixWorkspace_sptr createSampleScanningWorkspace(int nTimeIndexes,
                                                      int nhist = 2) {
     return create2DDetectorScanWorkspaceWithFullInstrument(
-        nhist, 3, nTimeIndexes, true, false, true, "test");
+        nhist, 3, nTimeIndexes, 0, 1, true, false, true, "test");
   }
 
   RunCombinationHelper m_testee;
