@@ -50,7 +50,6 @@ DECLARE_ALGORITHM(PDCalibration)
 
 namespace { // anonymous
 const auto isNonZero = [](const double value) { return value != 0.; };
-const double CHISQ_BAD = 1.e9; // hopefully much worse than possible
 }
 
 /// private inner class
@@ -367,11 +366,11 @@ void PDCalibration::exec() {
   double maxChiSquared = getProperty("MaxChiSq");
 
   const std::string calParams = getPropertyValue("CalibrationParameters");
-  if (calParams == "DIFC")
+  if (calParams == std::string("DIFC"))
     m_numberMaxParams = 1;
-  else if ("DIFC+TZERO")
+  else if (calParams == std::string("DIFC+TZERO"))
     m_numberMaxParams = 2;
-  else if ("DIFC+TZERO+DIFA")
+  else if (calParams == std::string("DIFC+TZERO+DIFA"))
     m_numberMaxParams = 3;
   else
     throw std::runtime_error(
