@@ -253,7 +253,7 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[0], 0.0, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[300], ws->y(0)[0], Delta);
     TS_ASSERT_DELTA(outWS->y(0)[350], 0.0, Delta);
-  } 
+  }
   void test_PaddingTwo() {
 
     auto ws = createWorkspace(1, 50);
