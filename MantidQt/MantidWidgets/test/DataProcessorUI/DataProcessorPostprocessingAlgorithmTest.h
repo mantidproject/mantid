@@ -51,13 +51,13 @@ public:
 
     auto stitch = DataProcessorPostprocessingAlgorithm(
         "Stitch1DMany", "IvsQ_",
-        std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
+        std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
     TS_ASSERT_EQUALS(stitch.name(), "Stitch1DMany");
     TS_ASSERT_EQUALS(stitch.inputProperty(), "InputWorkspaces");
     TS_ASSERT_EQUALS(stitch.outputProperty(), "OutputWorkspace");
     TS_ASSERT_EQUALS(stitch.numberOfOutputProperties(), 1);
     TS_ASSERT_EQUALS(stitch.prefix(), "IvsQ_");
-    std::set<std::string> blacklist = {"InputWorkspaces", "OutputWorkspace"};
+    std::set<QString> blacklist = {"InputWorkspaces", "OutputWorkspace"};
     TS_ASSERT_EQUALS(stitch.blacklist(), blacklist);
   }
 

@@ -182,44 +182,37 @@ void DataProcessorOneLevelTreeManager::clearSelected() {
 }
 
 /** Return the currently selected rows as a string */
-std::string DataProcessorOneLevelTreeManager::copySelected() {
-
+QString DataProcessorOneLevelTreeManager::copySelected() {
   const auto selectedRows = m_presenter->selectedParents();
 
-  if (selectedRows.empty())
-    return std::string();
-
-  std::vector<std::string> lines;
-
+  QStringList lines;
   for (const auto &row : selectedRows) {
-    std::vector<std::string> line;
+    QStringList line;
     for (int col = 0; col < m_model->columnCount(); col++) {
-      line.push_back(
-          m_model->data(m_model->index(row, col)).toString().toStdString());
+      line.append(m_model->data(m_model->index(row, col)).toString());
     }
-    lines.push_back(boost::algorithm::join(line, "\t"));
+    lines.append(line.join("\t"));
   }
-  return boost::algorithm::join(lines, "\n");
+  return lines.join("\n");
 }
 
 /** Paste the contents of the clipboard into the currently selected rows, or
 * append new rows
 * @param text :: Selected rows to paste as a string
 */
-void DataProcessorOneLevelTreeManager::pasteSelected(const std::string &text) {
+void DataProcessorOneLevelTreeManager::pasteSelected(const QString &text) {
 
-  if (text.empty())
+  if (text.isEmpty())
     return;
 
-  std::vector<std::string> lines;
-  boost::split(lines, text, boost::is_any_of("\n"));
+  auto lines = text.split("\n");
 
   // If we have rows selected, we'll overwrite them.
   // If not, we'll append new rows to write to.
   std::set<int> rows = m_presenter->selectedParents();
   if (rows.empty()) {
     // Add as many new rows as required
-    for (size_t i = 0; i < lines.size(); ++i) {
+    for (auto i = 0; i < lines.size(); ++i) {
       int index = m_model->rowCount();
       insertRow(index);
       rows.insert(index);
@@ -231,15 +224,13 @@ void DataProcessorOneLevelTreeManager::pasteSelected(const std::string &text) {
   auto rowIt = rows.begin();
   auto lineIt = lines.begin();
   for (; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++) {
-    std::vector<std::string> values;
-    boost::split(values, *lineIt, boost::is_any_of("\t"));
+    auto values = (*lineIt).split("\t");
 
     // Paste as many columns as we can from this line
     for (int col = 0;
          col < m_model->columnCount() && col < static_cast<int>(values.size());
          ++col)
-      m_model->setData(m_model->index(*rowIt, col),
-                       QString::fromStdString(values[col]));
+      m_model->setData(m_model->index(*rowIt, col), values[col]);
   }
 }
 
@@ -319,10 +310,9 @@ TreeData DataProcessorOneLevelTreeManager::selectedData(bool prompt) {
   // and each element in the vector is a column
   for (const auto &row : rows) {
 
-    std::vector<std::string> data;
+    QStringList data;
     for (int i = 0; i < m_model->columnCount(); i++)
-      data.push_back(
-          m_model->data(m_model->index(row, i)).toString().toStdString());
+      data.append(m_model->data(m_model->index(row, i)).toString());
     selectedData[row][row] = data;
   }
   return selectedData;
@@ -333,7 +323,7 @@ TreeData DataProcessorOneLevelTreeManager::selectedData(bool prompt) {
 * @param whitelist :: [input] Whitelist containing number of columns
 */
 void DataProcessorOneLevelTreeManager::transfer(
-    const std::vector<std::map<std::string, std::string>> &runs,
+    const std::vector<std::map<QString, QString>> &runs,
     const DataProcessorWhiteList &whitelist) {
 
   ITableWorkspace_sptr ws = m_model->getTableWorkspace();
@@ -342,9 +332,9 @@ void DataProcessorOneLevelTreeManager::transfer(
     // If the table only has one row, check if it is empty and if so, remove it.
     // This is to make things nicer when transferring, as the default table has
     // one empty row
-    size_t cols = ws->columnCount();
+    auto cols = ws->columnCount();
     bool emptyTable = true;
-    for (size_t i = 0; i < cols; i++) {
+    for (auto i = 0u; i < cols; i++) {
       if (!ws->String(0, i).empty())
         emptyTable = false;
     }
@@ -357,12 +347,12 @@ void DataProcessorOneLevelTreeManager::transfer(
 
     TableRow newRow = ws->appendRow();
 
-    for (int i = 0; i < static_cast<int>(whitelist.size()); i++) {
-      const std::string columnName = whitelist.colNameFromColIndex(i);
+    for (auto i = 0; i < static_cast<int>(whitelist.size()); i++) {
+      const QString columnName = whitelist.colNameFromColIndex(i);
       if (row.count(columnName)) {
-        newRow << row.at(columnName);
+        newRow << (row.at(columnName)).toStdString();
       } else {
-        newRow << "";
+        newRow << std::string();
       }
     }
   }
@@ -375,8 +365,8 @@ void DataProcessorOneLevelTreeManager::transfer(
 * @param child :: the row
 * @param data :: the data
 */
-void DataProcessorOneLevelTreeManager::update(
-    int parent, int child, const std::vector<std::string> &data) {
+void DataProcessorOneLevelTreeManager::update(int parent, int child,
+                                              const QStringList &data) {
 
   UNUSED_ARG(child);
 
@@ -384,8 +374,7 @@ void DataProcessorOneLevelTreeManager::update(
     throw std::invalid_argument("Can't update tree with given data");
 
   for (int col = 0; col < m_model->columnCount(); col++)
-    m_model->setData(m_model->index(parent, col),
-                     QString::fromStdString(data[col]));
+    m_model->setData(m_model->index(parent, col), data[col]);
 }
 
 /** Gets the number of rows in the table
@@ -471,7 +460,8 @@ ITableWorkspace_sptr DataProcessorOneLevelTreeManager::createDefaultWorkspace(
 
   for (int col = 0; col < static_cast<int>(whitelist.size()); col++) {
     // The columns provided to this presenter
-    auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col));
+    auto column =
+        ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
     column->setPlotType(0);
   }
   ws->appendRow();
@@ -495,8 +485,8 @@ void DataProcessorOneLevelTreeManager::validateModel(
                              "columns to be used as a data processor table.");
 
   try {
-    size_t ncols = ws->columnCount();
-    for (size_t i = 0; i < ncols; i++)
+    auto ncols = ws->columnCount();
+    for (auto i = 0u; i < ncols; i++)
       ws->String(0, i);
   } catch (const std::runtime_error &) {
     throw std::runtime_error("Selected table does not meet the specifications "

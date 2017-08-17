@@ -82,18 +82,18 @@ public:
   showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) override;
 
   // Dialog/Prompt methods
-  std::string requestNotebookPath() override;
+  QString requestNotebookPath() override;
   /// Dialog/Prompt methods
-  std::string askUserString(const std::string &prompt, const std::string &title,
-                            const std::string &defaultValue) override;
-  bool askUserYesNo(std::string prompt, std::string title) override;
-  void giveUserWarning(std::string prompt, std::string title) override;
-  void giveUserCritical(std::string prompt, std::string title) override;
-  std::string runPythonAlgorithm(const std::string &pythonCode) override;
+  QString askUserString(const QString &prompt, const QString &title,
+                        const QString &defaultValue) override;
+  bool askUserYesNo(QString prompt, QString title) override;
+  void giveUserWarning(QString prompt, QString title) override;
+  void giveUserCritical(QString prompt, QString title) override;
+  QString runPythonAlgorithm(const QString &pythonCode) override;
 
   // Settings
-  void saveSettings(const std::map<std::string, QVariant> &options) override;
-  void loadSettings(std::map<std::string, QVariant> &options) override;
+  void saveSettings(const std::map<QString, QVariant> &options) override;
+  void loadSettings(std::map<QString, QVariant> &options) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -124,7 +124,7 @@ public:
   void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
-  void setClipboard(const std::string &text) override;
+  void setClipboard(const QString &text) override;
 
   // Transfer runs
   void transfer(const QList<QString> &runs);
@@ -132,9 +132,9 @@ public:
   // Accessor methods
   std::map<int, std::set<int>> getSelectedChildren() const override;
   std::set<int> getSelectedParents() const override;
-  std::string getProcessInstrument() const override;
-  std::string getWorkspaceToOpen() const override;
-  std::string getClipboard() const override;
+  QString getProcessInstrument() const override;
+  QString getWorkspaceToOpen() const override;
+  QString getClipboard() const override;
   DataProcessorPresenter *getPresenter() const override;
   QString getCurrentInstrument() const override;
 
@@ -165,8 +165,6 @@ signals:
 private:
   // initialise the interface
   void createTable();
-  // Set a selected model (table workspace)
-  void setModel(const std::string &name) override;
 
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;
@@ -175,7 +173,7 @@ private:
   // the interface
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open
-  std::string m_toOpen;
+  QString m_toOpen;
   // the context menu
   QMenu *m_contextMenu;
   QSignalMapper *m_openMap;
@@ -184,18 +182,19 @@ private:
 
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);
-  void runPythonAlgorithm(const QString &pythonCode);
+  void ranPythonAlgorithm(const QString &pythonCode);
 
 public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);
+  void setModel(QString const &name) override;
 
 private slots:
-  void setModel(QString name);
   void rowsUpdated(const QModelIndex &parent, int first, int last);
   void rowDataUpdated(const QModelIndex &topLeft,
                       const QModelIndex &bottomRight);
   void showContextMenu(const QPoint &pos);
   void processClicked();
+  void ensureHasExtension(QString &filename) const;
 };
 
 } // namespace Mantid

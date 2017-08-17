@@ -21,19 +21,18 @@ class DataProcessorGenerateNotebookTest : public CxxTest::TestSuite {
 
 private:
   // Creates a map with pre-processing instruction for reflectometry
-  std::map<std::string, DataProcessorPreprocessingAlgorithm>
-  reflPreprocessMap(const std::string &plusPrefix = "") {
+  std::map<QString, DataProcessorPreprocessingAlgorithm>
+  reflPreprocessMap(const QString &plusPrefix = "") {
 
     // Reflectometry pre-process map
-    return std::map<std::string, DataProcessorPreprocessingAlgorithm>{
-        {"Run(s)", DataProcessorPreprocessingAlgorithm(
-                       "Plus", plusPrefix, std::set<std::string>())},
+    return std::map<QString, DataProcessorPreprocessingAlgorithm>{
+        {"Run(s)", DataProcessorPreprocessingAlgorithm("Plus", plusPrefix,
+                                                       std::set<QString>())},
         {"Transmission Run(s)",
          DataProcessorPreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
-             std::set<std::string>{"FirstTransmissionRun",
-                                   "SecondTransmissionRun",
-                                   "OutputWorkspace"})}};
+             std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
+                               "OutputWorkspace"})}};
   }
 
   // Creates a reflectometry processing algorithm
@@ -41,16 +40,16 @@ private:
 
     return DataProcessorProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
-        std::vector<std::string>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
-        std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
-                              "OutputWorkspace", "OutputWorkspaceWavelength",
-                              "FirstTransmissionRun", "SecondTransmissionRun"});
+        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
+        std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
+                          "OutputWorkspace", "OutputWorkspaceWavelength",
+                          "FirstTransmissionRun", "SecondTransmissionRun"});
   }
 
   DataProcessorPostprocessingAlgorithm reflPostprocessor() {
     return DataProcessorPostprocessingAlgorithm(
         "Stitch1DMany", "IvsQ_",
-        std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
+        std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
   }
 
   // Creates a reflectometry whitelist
@@ -89,8 +88,8 @@ private:
     return treeData;
   }
 
-  std::string m_wsName;
-  std::string m_instrument;
+  QString m_wsName;
+  QString m_instrument;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -100,6 +99,31 @@ public:
   }
   static void destroySuite(DataProcessorGenerateNotebookTest *suite) {
     delete suite;
+  }
+
+  static QStringList splitIntoLines(QString const &notebook) {
+    return notebook.split("\n");
+  }
+
+  static void assertContainsMatchingLines(QString const *expectedLines,
+                                          QString const &book) {
+    auto lines = splitIntoLines(book);
+    auto i = 0u;
+    for (auto const &line : lines) {
+      TS_ASSERT_EQUALS(expectedLines[i], line);
+      i++;
+    }
+  }
+
+  static void
+  assertContainsMatchingLines(std::vector<QString> const &expectedLines,
+                              QString const &book) {
+    auto lines = splitIntoLines(book);
+    auto i = 0u;
+    for (auto const &line : lines) {
+      TS_ASSERT_EQUALS(expectedLines[i], line);
+      i++;
+    }
   }
 
   DataProcessorGenerateNotebookTest() { FrameworkManager::Instance(); }
@@ -114,15 +138,14 @@ public:
 
     auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
-        std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
-        reflProcessor(), reflPostprocessor(),
-        std::map<std::string, std::string>(), "", "");
+        std::map<QString, DataProcessorPreprocessingAlgorithm>(),
+        reflProcessor(), reflPostprocessor(), std::map<QString, QString>(), "",
+        "");
 
-    std::string generatedNotebook = notebook->generateNotebook(TreeData());
+    auto generatedNotebook = notebook->generateNotebook(TreeData());
 
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
-    const std::string result[] = {
+    auto notebookLines = splitIntoLines(generatedNotebook);
+    const QString result[] = {
         "{", "   \"metadata\" : {", "      \"name\" : \"Mantid Notebook\"",
         "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
         "   \"worksheets\" : [", "      {", "         \"cells\" : [",
@@ -130,41 +153,22 @@ public:
     };
 
     // Check that the first 10 lines are output as expected
-    for (int i = 0; i < 11; ++i) {
+    for (auto i = 0u; i < 11u; ++i) {
       TS_ASSERT_EQUALS(notebookLines[i], result[i])
     }
   }
 
   void testTitleString() {
-    // Test with workspace name
-    std::string output = titleString("TEST_WORKSPACE");
+    // With workspace name
+    auto output = titleString("TEST_WORKSPACE");
+    const QString result[] = {"Processed data from workspace: TEST_WORKSPACE",
+                              "---------------", ""};
+    assertContainsMatchingLines(result, output);
 
-    const std::string result[] = {
-        "Processed data from workspace: TEST_WORKSPACE", "---------------", ""};
-
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, output, boost::is_any_of("\n"));
-
-    int i = 0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end();
-         ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
-
-    // Test without workspace name
-    std::string outputEmptyStr = titleString("");
-
-    const std::string resultEmptyStr[] = {"Processed data", "---------------",
-                                          ""};
-
-    std::vector<std::string> notebookLinesEmptyStr;
-    boost::split(notebookLinesEmptyStr, outputEmptyStr, boost::is_any_of("\n"));
-
-    i = 0;
-    for (auto it = notebookLinesEmptyStr.begin();
-         it != notebookLinesEmptyStr.end(); ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, resultEmptyStr[i])
-    }
+    // Without workspace name
+    auto outputEmptyStr = titleString("");
+    const QString resultEmptyStr[] = {"Processed data", "---------------", ""};
+    assertContainsMatchingLines(resultEmptyStr, outputEmptyStr);
   }
 
   void testTableStringWrongData() {
@@ -186,33 +190,21 @@ public:
                        "0.04",  "1",   "", "" /*Hidden Option*/};
     TreeData treeData = {{1, {{0, rowData}}}};
 
-    std::string output = tableString(treeData, reflWhitelist());
+    auto output = tableString(treeData, reflWhitelist());
 
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, output, boost::is_any_of("\n"));
-
-    const std::string result[] = {
+    const QString result[] = {
         "Group | Run(s) | Angle | Transmission Run(s) | Q min | Q max | dQ/Q | "
         "Scale | Options | HiddenOptions",
         "--- | --- | --- | --- | --- | --- | --- | "
         "--- | ---",
         "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ", ""};
 
-    int i = 0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end();
-         ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    assertContainsMatchingLines(result, output);
   }
 
   void testTableStringAllRows() {
-
-    std::string output = tableString(reflData(), reflWhitelist());
-
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, output, boost::is_any_of("\n"));
-
-    const std::string result[] = {
+    auto output = tableString(reflData(), reflWhitelist());
+    const QString result[] = {
         "Group | Run(s) | Angle | Transmission Run(s) | Q min | Q max | dQ/Q | "
         "Scale | Options | HiddenOptions",
         "--- | --- | --- | --- | --- | --- | --- | "
@@ -222,28 +214,23 @@ public:
         "1 | 24681 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 |  | ",
         "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ", ""};
 
-    int i = 0;
-    for (const auto &line : notebookLines) {
-      TS_ASSERT_EQUALS(line, result[i++])
-    }
+    assertContainsMatchingLines(result, output);
   }
 
   void testLoadRunString() {
-    boost::tuple<std::string, std::string> output =
-        loadRunString("12345", m_instrument, "TOF_");
-    const std::string result =
-        "TOF_12345 = Load(Filename = 'INSTRUMENT12345')\n";
+    auto output = loadRunString("12345", m_instrument, "TOF_");
+    auto const result =
+        QString("TOF_12345 = Load(Filename = 'INSTRUMENT12345')\n");
     TS_ASSERT_EQUALS(boost::get<0>(output), result)
   }
 
   void testPlusString() {
 
     auto reflectometryPreprocessMap = reflPreprocessMap();
-
-    std::string output = plusString("INPUT_WS", "OUTPUT_WS",
-                                    reflectometryPreprocessMap["Run(s)"], "");
-    const std::string result = "OUTPUT_WS = Plus(LHSWorkspace = 'OUTPUT_WS', "
-                               "RHSWorkspace = 'INPUT_WS')\n";
+    auto output = plusString("INPUT_WS", "OUTPUT_WS",
+                             reflectometryPreprocessMap["Run(s)"], "");
+    auto const result = QString("OUTPUT_WS = Plus(LHSWorkspace = 'OUTPUT_WS', "
+                                "RHSWorkspace = 'INPUT_WS')\n");
     TS_ASSERT_EQUALS(output, result)
   }
 
@@ -251,12 +238,12 @@ public:
 
     auto preprocessMap = reflPreprocessMap();
     auto transProcessor = preprocessMap["Transmission Run(s)"];
-    std::string output = plusString("INPUT_WS", "OUTPUT_WS", transProcessor,
-                                    "WavelengthMin = 0.5, WavelengthMax = 5.0");
-    std::string result =
+    auto output = plusString("INPUT_WS", "OUTPUT_WS", transProcessor,
+                             "WavelengthMin = 0.5, WavelengthMax = 5.0");
+    auto result = QString(
         "OUTPUT_WS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun "
         "= 'OUTPUT_WS', SecondTransmissionRun = 'INPUT_WS', WavelengthMin = "
-        "0.5, WavelengthMax = 5.0)\n";
+        "0.5, WavelengthMax = 5.0)\n");
     TS_ASSERT_EQUALS(output, result)
   }
 
@@ -270,15 +257,13 @@ public:
   }
 
   void testLoadWorkspaceStringThreeRunsWithOptions() {
-
     DataProcessorPreprocessingAlgorithm preprocessor("WeightedMean");
     auto output = loadWorkspaceString("RUN1+RUN2,RUN3", "INST_", preprocessor,
                                       "Property1 = 1, Property2 = 2");
-    std::vector<std::string> outputLines;
-    boost::split(outputLines, boost::get<0>(output), boost::is_any_of("\n"));
+    auto outputLines = splitIntoLines(boost::get<0>(output));
 
     // The python code that does the loading
-    const std::string result[] = {
+    const QString result[] = {
         "RUN1 = Load(Filename = 'INST_RUN1')", "RUN1_RUN2_RUN3 = RUN1",
         "RUN2 = Load(Filename = 'INST_RUN2')",
         "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
@@ -286,8 +271,9 @@ public:
         "RUN3 = Load(Filename = 'INST_RUN3')",
         "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
         "InputWorkspace2 = 'RUN3', Property1 = 1, Property2 = 2)"};
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
       TS_ASSERT_EQUALS(outputLines[i], result[i]);
+    }
 
     // The loaded workspace
     TS_ASSERT_EQUALS(boost::get<1>(output), "RUN1_RUN2_RUN3");
@@ -300,24 +286,24 @@ public:
 
     TS_ASSERT_THROWS_ANYTHING(reduceRowString(
         rowData, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
-        reflProcessor(), std::map<std::string, std::string>(), ""));
+        reflProcessor(), std::map<QString, QString>(), ""));
   }
 
   void testReduceRowString() {
     // Reduce a single row, no pre-processing is needed because there's
     // only one run in the 'Run(s)' column and no transmission runs
 
-    std::map<std::string, std::string> userPreProcessingOptions = {
+    std::map<QString, QString> userPreProcessingOptions = {
         {"Run(s)", ""}, {"Transmission Run(s)", ""}};
 
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",
                           "0.04",  "1",   "", ""};
 
-    boost::tuple<std::string, std::string> output = reduceRowString(
-        data, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
-        reflProcessor(), userPreProcessingOptions, "");
+    auto output = reduceRowString(data, m_instrument, reflWhitelist(),
+                                  reflPreprocessMap("TOF_"), reflProcessor(),
+                                  userPreProcessingOptions, "");
 
-    const std::string result[] = {
+    const QString result[] = {
         "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
         "IvsQ_binned_TOF_12346, IvsQ_TOF_12346, IvsLam_TOF_12346 = "
         "ReflectometryReductionOneAuto(InputWorkspace = 'TOF_12346', ThetaIn = "
@@ -325,13 +311,7 @@ public:
         "MomentumTransferStep = 0.04, ScaleFactor = 1)",
         ""};
 
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
-
-    int i = 0;
-    for (const auto &line : notebookLines) {
-      TS_ASSERT_EQUALS(line, result[i++]);
-    }
+    assertContainsMatchingLines(result, boost::get<0>(output));
   }
 
   void testReduceRowStringWithPreprocessing() {
@@ -349,21 +329,21 @@ public:
     whitelist.addElement("Options", "Options", "");
 
     // Create a pre-process map
-    std::map<std::string, DataProcessorPreprocessingAlgorithm> preprocessMap = {
+    std::map<QString, DataProcessorPreprocessingAlgorithm> preprocessMap = {
         {"Run", DataProcessorPreprocessingAlgorithm("Plus", "RUN_",
-                                                    std::set<std::string>())}};
+                                                    std::set<QString>())}};
     // Specify some pre-processing options
-    std::map<std::string, std::string> userPreProcessingOptions = {
+    std::map<QString, QString> userPreProcessingOptions = {
         {"Run", "Property=prop"}};
 
     // Create some data
     const RowData data = {"1000+1001", "0.5", "", "", "", "", "", ""};
 
-    boost::tuple<std::string, std::string> output =
+    auto output =
         reduceRowString(data, "INST", whitelist, preprocessMap, reflProcessor(),
                         userPreProcessingOptions, "");
 
-    const std::string result[] = {
+    const QString result[] = {
         "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000_1001 = RUN_1000",
         "RUN_1001 = Load(Filename = 'INST1001')",
         "RUN_1000_1001 = Plus(LHSWorkspace = 'RUN_1000_1001', RHSWorkspace = "
@@ -374,50 +354,39 @@ public:
         "ThetaIn = 0.5)",
         ""};
 
+    std::cout << boost::get<1>(output).toStdString() << std::endl;
+
     // Check the names of the reduced workspaces
     TS_ASSERT_EQUALS(boost::get<1>(output), "IvsQ_binned_1000_1001_angle_0.5, "
                                             "IvsQ_1000_1001_angle_0.5, "
                                             "IvsLam_1000_1001_angle_0.5");
 
     // Check the python code
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
-    int i = 0;
-    for (const auto &line : notebookLines) {
-      TS_ASSERT_EQUALS(line, result[i++])
-    }
+    assertContainsMatchingLines(result, boost::get<0>(output));
   }
 
   void testReduceRowStringNoPreProcessing() {
     // Reduce a run without pre-processing algorithm specified (i.e. empty
     // pre-process map)
 
-    std::map<std::string, DataProcessorPreprocessingAlgorithm>
-        emptyPreProcessMap;
-    std::map<std::string, std::string> emptyPreProcessingOptions;
+    std::map<QString, DataProcessorPreprocessingAlgorithm> emptyPreProcessMap;
+    std::map<QString, QString> emptyPreProcessingOptions;
 
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",
                           "0.04",  "1",   "", ""};
 
-    boost::tuple<std::string, std::string> output =
+    auto output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
                         reflProcessor(), emptyPreProcessingOptions, "");
 
-    const std::string result[] = {
+    const QString result[] = {
         "IvsQ_binned_TOF_12346, IvsQ_TOF_12346, IvsLam_TOF_12346 = "
         "ReflectometryReductionOneAuto(InputWorkspace = 12346, ThetaIn = 1.5, "
         "MomentumTransferMin = 1.4, MomentumTransferMax = 2.9, "
         "MomentumTransferStep = 0.04, ScaleFactor = 1)",
         ""};
 
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
-
-    int i = 0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end();
-         ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    assertContainsMatchingLines(result, boost::get<0>(output));
   }
 
   void testReducedWorkspaceNameWrong() {
@@ -455,7 +424,7 @@ public:
     const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
                           "0.04",      "1",   "",          ""};
 
-    std::string name = getReducedWorkspaceName(data, whitelist, "IvsQ_");
+    auto name = getReducedWorkspaceName(data, whitelist, "IvsQ_");
     TS_ASSERT_EQUALS(name, "IvsQ_run_1000_1001")
   }
 
@@ -477,7 +446,7 @@ public:
     const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
                           "0.04",      "1",   "",          ""};
 
-    std::string name = getReducedWorkspaceName(data, whitelist, "Prefix_");
+    auto name = getReducedWorkspaceName(data, whitelist, "Prefix_");
     TS_ASSERT_EQUALS(name, "Prefix_run_1000_1001_trans_2000_2001")
   }
 
@@ -498,23 +467,23 @@ public:
     const RowData data = {"1000,1001", "0.5", "2000+2001", "1.4", "2.9",
                           "0.04",      "1",   "",          ""};
 
-    std::string name = getReducedWorkspaceName(data, whitelist, "Prefix_");
+    auto name = getReducedWorkspaceName(data, whitelist, "Prefix_");
     TS_ASSERT_EQUALS(name, "Prefix_2000_2001")
   }
 
   void testPostprocessGroupString() {
-    std::string userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
-                              "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
+    auto userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
+                       "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
 
     RowData rowData0 = {"12345", "", "", "", "", "", "", "", ""};
     RowData rowData1 = {"12346", "", "", "", "", "", "", "", ""};
     GroupData groupData = {{0, rowData0}, {1, rowData1}};
 
-    boost::tuple<std::string, std::string> output =
+    auto output =
         postprocessGroupString(groupData, reflWhitelist(), reflProcessor(),
                                reflPostprocessor(), userOptions);
 
-    std::vector<std::string> result = {
+    std::vector<QString> result = {
         "#Post-process workspaces",
         "IvsQ_TOF_12345_TOF_12346, _ = "
         "Stitch1DMany(InputWorkspaces = "
@@ -523,14 +492,7 @@ public:
         "'1.6, 2.9, 1.6')",
         ""};
 
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
-
-    int i = 0;
-    for (const auto &line : notebookLines) {
-      TS_ASSERT_EQUALS(line, result[i++])
-    }
-
+    assertContainsMatchingLines(result, boost::get<0>(output));
     // All rows in second group
 
     rowData0 = {"24681", "", "", "", "", "", "", "", ""};
@@ -547,43 +509,35 @@ public:
               "'1.6, 2.9, 1.6')",
               ""};
 
-    boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
-
-    i = 0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end();
-         ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    assertContainsMatchingLines(result, boost::get<0>(output));
   }
 
   void testPlot1DString() {
-    std::vector<std::string> ws_names;
-    ws_names.emplace_back("workspace1");
-    ws_names.emplace_back("workspace2");
+    QStringList ws_names;
+    ws_names.append("workspace1");
+    ws_names.append("workspace2");
 
-    std::string output = plot1DString(ws_names);
-
-    const std::string result =
+    auto output = plot1DString(ws_names);
+    auto const result = QString(
         "fig = plots([workspace1, workspace2], "
-        "title=['workspace1', 'workspace2'], legendLocation=[1, 1, 4])\n";
+        "title=['workspace1', 'workspace2'], legendLocation=[1, 1, 4])\n");
 
-    TS_ASSERT_EQUALS(output, result)
+    TS_ASSERT_EQUALS(result, output);
   }
 
   void testPlotsString() {
-    std::vector<std::string> unprocessed_ws;
-    unprocessed_ws.emplace_back("IvsQ_binned_1, IvsQ_1, IvsLam_1");
-    unprocessed_ws.emplace_back("IvsQ_binned_2, IvsQ_2, IvsLam_2");
+    QStringList unprocessed_ws;
+    unprocessed_ws.append("IvsQ_binned_1, IvsQ_1, IvsLam_1");
+    unprocessed_ws.append("IvsQ_binned_2, IvsQ_2, IvsLam_2");
 
-    std::vector<std::string> postprocessed_ws;
-    postprocessed_ws.emplace_back("TEST_WS3");
-    postprocessed_ws.emplace_back("TEST_WS4");
+    QStringList postprocessed_ws;
+    postprocessed_ws.append("TEST_WS3");
+    postprocessed_ws.append("TEST_WS4");
 
-    std::string output = plotsString(
-        unprocessed_ws, boost::algorithm::join(postprocessed_ws, "_"),
-        reflProcessor());
+    auto output = plotsString(unprocessed_ws, postprocessed_ws.join("_"),
+                              reflProcessor());
 
-    const std::string result[] = {
+    const QString result[] = {
         "#Group workspaces to be plotted on same axes",
         "IvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
         "'IvsQ_binned_1, IvsQ_binned_2')",
@@ -596,27 +550,21 @@ public:
         "'IvsLam_groupWS', 'TEST_WS3_TEST_WS4'], legendLocation=[1, 1, 4])",
         ""};
 
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, output, boost::is_any_of("\n"));
-    std::cout << "\n";
-    int i = 0;
-    for (const auto &line : notebookLines) {
-      TS_ASSERT_EQUALS(line, result[i++])
-    }
+    assertContainsMatchingLines(result, output);
   }
 
   void testPlotsStringNoPostprocessing() {
     // Reduced workspaces
-    std::vector<std::string> unprocessed_ws;
-    unprocessed_ws.emplace_back("IvsQ_binned_1, IvsQ_1, IvsLam_1");
-    unprocessed_ws.emplace_back("IvsQ_binned_2, IvsQ_2, IvsLam_2");
+    QStringList unprocessed_ws;
+    unprocessed_ws.append("IvsQ_binned_1, IvsQ_1, IvsLam_1");
+    unprocessed_ws.append("IvsQ_binned_2, IvsQ_2, IvsLam_2");
     // Post-processed ws (empty)
-    std::string postprocessed_ws;
+    auto postprocessed_ws = "";
 
-    std::string output =
+    auto output =
         plotsString(unprocessed_ws, postprocessed_ws, reflProcessor());
 
-    const std::string result[] = {
+    const QString result[] = {
         "#Group workspaces to be plotted on same axes",
         "IvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
         "'IvsQ_binned_1, IvsQ_binned_2')",
@@ -629,41 +577,32 @@ public:
         "legendLocation=[1, 1, 4])",
         ""};
 
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, output, boost::is_any_of("\n"));
-
-    int i = 0;
-    for (const auto &line : notebookLines) {
-      TS_ASSERT_EQUALS(line, result[i++])
-    }
+    assertContainsMatchingLines(result, output);
   }
 
   void testVectorParamString() {
-    std::vector<std::string> stringVector;
+    std::vector<QString> stringVector;
     stringVector.emplace_back("A");
     stringVector.emplace_back("B");
     stringVector.emplace_back("C");
 
-    const std::string stringOutput =
-        vectorParamString("PARAM_NAME", stringVector);
+    auto const stringOutput = vectorParamString("PARAM_NAME", stringVector);
 
     TS_ASSERT_EQUALS(stringOutput, "PARAM_NAME = 'A, B, C'")
   }
 
   void testVectorString() {
-    std::vector<std::string> stringVector;
+    std::vector<QString> stringVector;
     stringVector.emplace_back("A");
     stringVector.emplace_back("B");
     stringVector.emplace_back("C");
-
-    const std::string stringOutput = vectorString(stringVector);
+    auto const stringOutput = vectorString(stringVector);
 
     std::vector<int> intVector;
-    intVector.push_back(1);
-    intVector.push_back(2);
-    intVector.push_back(3);
-
-    const std::string intOutput = vectorString(intVector);
+    intVector.emplace_back(1);
+    intVector.emplace_back(2);
+    intVector.emplace_back(3);
+    auto const intOutput = vectorString(intVector);
 
     // Test string list output is correct for vector of strings and vector of
     // ints
@@ -678,9 +617,9 @@ public:
     auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
     auto postProcessor = reflPostprocessor();
-    auto preprocessingOptions = std::map<std::string, std::string>{
-        {"Run(s)", "PlusProperty=PlusValue"},
-        {"Transmission Run(s)", "Property=Value"}};
+    auto preprocessingOptions =
+        std::map<QString, QString>{{"Run(s)", "PlusProperty=PlusValue"},
+                                   {"Transmission Run(s)", "Property=Value"}};
     auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
     auto postprocessingOptions = "Params=0.04";
 
@@ -689,12 +628,10 @@ public:
         postProcessor, preprocessingOptions, processingOptions,
         postprocessingOptions);
 
-    std::string generatedNotebook = notebook->generateNotebook(reflData());
+    auto generatedNotebook = notebook->generateNotebook(reflData());
 
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
-
-    const std::string loadAndReduceStringFirstGroup =
+    auto notebookLines = splitIntoLines(generatedNotebook);
+    auto const loadAndReduceStringFirstGroup = QString(
         "               \"input\" : \"#Load and reduce\\n12345 = Load(Filename "
         "= \'INTER12345\')\\nIvsQ_binned_TOF_12345, IvsQ_TOF_12345, "
         "IvsLam_TOF_12345 = ReflectometryReductionOneAuto(InputWorkspace = "
@@ -706,18 +643,18 @@ public:
         "ReflectometryReductionOneAuto(InputWorkspace = \'12346\', ThetaIn = "
         "1.5, MomentumTransferMin = 1.4, MomentumTransferMax = 2.9, "
         "MomentumTransferStep = 0.04, ScaleFactor = 1, AnalysisMode = "
-        "MultiDetectorAnalysis)\\n\",";
+        "MultiDetectorAnalysis)\\n\",");
     TS_ASSERT_EQUALS(notebookLines[48], loadAndReduceStringFirstGroup);
 
-    const std::string postProcessStringFirstGroup =
-        "               \"input\" : \"#Post-process "
-        "workspaces\\nIvsQ_TOF_12345_TOF_12346, _ = "
-        "Stitch1DMany(InputWorkspaces = \'IvsQ_binned_TOF_12345, "
-        "IvsQ_binned_TOF_12346\', "
-        "Params=0.04)\",";
+    auto const postProcessStringFirstGroup =
+        QString("               \"input\" : \"#Post-process "
+                "workspaces\\nIvsQ_TOF_12345_TOF_12346, _ = "
+                "Stitch1DMany(InputWorkspaces = \'IvsQ_binned_TOF_12345, "
+                "IvsQ_binned_TOF_12346\', "
+                "Params=0.04)\",");
     TS_ASSERT_EQUALS(notebookLines[56], postProcessStringFirstGroup);
 
-    const std::string groupWorkspacesStringFirstGroup =
+    auto const groupWorkspacesStringFirstGroup = QString(
         "               \"input\" : \"#Group workspaces to be plotted on same "
         "axes\\nIvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
         "\'IvsQ_binned_TOF_12345, IvsQ_binned_TOF_12346\')\\nIvsQ_groupWS = "
@@ -727,11 +664,11 @@ public:
         "plots([IvsQ_binned_groupWS, IvsQ_groupWS, IvsLam_groupWS, "
         "IvsQ_TOF_12345_TOF_12346], title=[\'IvsQ_binned_groupWS\', "
         "\'IvsQ_groupWS\', \'IvsLam_groupWS\', \'IvsQ_TOF_12345_TOF_12346\'], "
-        "legendLocation=[1, 1, 4])\\n\",";
+        "legendLocation=[1, 1, 4])\\n\",");
     ;
     TS_ASSERT_EQUALS(notebookLines[64], groupWorkspacesStringFirstGroup);
 
-    const std::string loadAndReduceStringSecondGroup =
+    auto const loadAndReduceStringSecondGroup = QString(
         "               \"input\" : \"#Load and reduce\\n24681 = Load(Filename "
         "= \'INTER24681\')\\nIvsQ_binned_TOF_24681, IvsQ_TOF_24681, "
         "IvsLam_TOF_24681 = ReflectometryReductionOneAuto(InputWorkspace = "
@@ -743,17 +680,17 @@ public:
         "ReflectometryReductionOneAuto(InputWorkspace = \'24682\', ThetaIn = "
         "1.5, MomentumTransferMin = 1.4, MomentumTransferMax = 2.9, "
         "MomentumTransferStep = 0.04, ScaleFactor = 1, AnalysisMode = "
-        "MultiDetectorAnalysis)\\n\",";
+        "MultiDetectorAnalysis)\\n\",");
     TS_ASSERT_EQUALS(notebookLines[77], loadAndReduceStringSecondGroup);
 
-    const std::string postProcessStringSecondGroup =
-        "               \"input\" : \"#Post-process "
-        "workspaces\\nIvsQ_TOF_24681_TOF_24682, _ = "
-        "Stitch1DMany(InputWorkspaces = \'IvsQ_binned_TOF_24681, "
-        "IvsQ_binned_TOF_24682\', Params=0.04)\",";
+    auto const postProcessStringSecondGroup =
+        QString("               \"input\" : \"#Post-process "
+                "workspaces\\nIvsQ_TOF_24681_TOF_24682, _ = "
+                "Stitch1DMany(InputWorkspaces = \'IvsQ_binned_TOF_24681, "
+                "IvsQ_binned_TOF_24682\', Params=0.04)\",");
     TS_ASSERT_EQUALS(notebookLines[85], postProcessStringSecondGroup);
 
-    const std::string groupWorkspacesStringSecondGroup =
+    auto const groupWorkspacesStringSecondGroup = QString(
         "               \"input\" : \"#Group workspaces to be plotted on same "
         "axes\\nIvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
         "\'IvsQ_binned_TOF_24681, IvsQ_binned_TOF_24682\')\\nIvsQ_groupWS = "
@@ -763,8 +700,8 @@ public:
         "plots([IvsQ_binned_groupWS, IvsQ_groupWS, IvsLam_groupWS, "
         "IvsQ_TOF_24681_TOF_24682], title=[\'IvsQ_binned_groupWS\', "
         "\'IvsQ_groupWS\', \'IvsLam_groupWS\', \'IvsQ_TOF_24681_TOF_24682\'], "
-        "legendLocation=[1, 1, 4])\\n\",";
-    ;
+        "legendLocation=[1, 1, 4])\\n\",");
+
     TS_ASSERT_EQUALS(notebookLines[93], groupWorkspacesStringSecondGroup);
 
     // Total number of lines
@@ -777,9 +714,9 @@ public:
     auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
     auto postProcessor = reflPostprocessor();
-    auto preprocessingOptions = std::map<std::string, std::string>{
-        {"Run(s)", "PlusProperty=PlusValue"},
-        {"Transmission Run(s)", "Property=Value"}};
+    auto preprocessingOptions =
+        std::map<QString, QString>{{"Run(s)", "PlusProperty=PlusValue"},
+                                   {"Transmission Run(s)", "Property=Value"}};
     auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
     auto postprocessingOptions = "Params=0.04";
 
@@ -792,29 +729,28 @@ public:
     RowData rowData1 = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
     TreeData treeData = {{0, {{0, rowData0}}}, {1, {{0, rowData1}}}};
 
-    std::string generatedNotebook = notebook->generateNotebook(treeData);
+    auto generatedNotebook = notebook->generateNotebook(treeData);
 
-    std::vector<std::string> notebookLines;
-    boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
+    auto notebookLines = splitIntoLines(generatedNotebook);
 
     // Only 75 lines because we only analyzed the first two runs
     TS_ASSERT_EQUALS(notebookLines.size(), 104);
 
     // First group
 
-    std::string loadAndReduceString =
+    auto loadAndReduceString = QString(
         "               \"input\" : \"#Load and reduce\\n12345 = Load(Filename "
         "= \'INTER12345\')\\nIvsQ_binned_TOF_12345, IvsQ_TOF_12345, "
         "IvsLam_TOF_12345 = ReflectometryReductionOneAuto(InputWorkspace = "
         "\'12345\', ThetaIn = 0.5, MomentumTransferMin = 0.1, "
         "MomentumTransferMax = 1.6, MomentumTransferStep = 0.04, ScaleFactor = "
-        "1, AnalysisMode = MultiDetectorAnalysis)\\n\",";
+        "1, AnalysisMode = MultiDetectorAnalysis)\\n\",");
     TS_ASSERT_EQUALS(notebookLines[48], loadAndReduceString);
 
-    std::string postProcessString = "               \"input\" : \"\",";
+    auto postProcessString = QString("               \"input\" : \"\",");
     TS_ASSERT_EQUALS(notebookLines[56], postProcessString);
 
-    std::string groupWorkspacesString =
+    auto groupWorkspacesString = QString(
         "               \"input\" : \"#Group workspaces to be plotted on same "
         "axes\\nIvsQ_binned_groupWS = GroupWorkspaces(InputWorkspaces = "
         "\'IvsQ_binned_TOF_12345\')\\nIvsQ_groupWS = "
@@ -823,7 +759,7 @@ public:
         "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12345\')\\n#Plot "
         "workspaces\\nfig = plots([IvsQ_binned_groupWS, IvsQ_groupWS, "
         "IvsLam_groupWS, ], title=[\'IvsQ_binned_groupWS\', \'IvsQ_groupWS\', "
-        "\'IvsLam_groupWS\', \'\'], legendLocation=[1, 1, 4])\\n\",";
+        "\'IvsLam_groupWS\', \'\'], legendLocation=[1, 1, 4])\\n\",");
     TS_ASSERT_EQUALS(notebookLines[64], groupWorkspacesString);
 
     // Second group

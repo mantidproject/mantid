@@ -32,21 +32,20 @@ public:
   ~MockDataProcessorView() override {}
 
   // Prompt
-  MOCK_METHOD0(requestNotebookPath, std::string());
+  MOCK_METHOD0(requestNotebookPath, QString());
   MOCK_METHOD3(askUserString,
-               std::string(const std::string &, const std::string &,
-                           const std::string &));
-  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+               QString(const QString &, const QString &, const QString &));
+  MOCK_METHOD2(askUserYesNo, bool(QString, QString));
+  MOCK_METHOD2(giveUserWarning, void(QString, QString));
+  MOCK_METHOD2(giveUserCritical, void(QString, QString));
+  MOCK_METHOD1(runPythonAlgorithm, QString(const QString &));
 
   // IO
-  MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
+  MOCK_CONST_METHOD0(getWorkspaceToOpen, QString());
   MOCK_CONST_METHOD0(getSelectedChildren, std::map<int, std::set<int>>());
   MOCK_CONST_METHOD0(getSelectedParents, std::set<int>());
-  MOCK_CONST_METHOD0(getClipboard, std::string());
-  MOCK_CONST_METHOD0(getProcessInstrument, std::string());
+  MOCK_CONST_METHOD0(getClipboard, QString());
+  MOCK_CONST_METHOD0(getProcessInstrument, QString());
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
@@ -54,16 +53,16 @@ public:
   MOCK_METHOD0(pause, void());
   MOCK_METHOD0(resume, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
-  MOCK_METHOD1(setClipboard, void(const std::string &text));
+  MOCK_METHOD1(setClipboard, void(const QString &text));
 
-  MOCK_METHOD1(setModel, void(const std::string &));
+  MOCK_METHOD1(setModel, void(const QString &));
   MOCK_METHOD1(setTableList, void(const QSet<QString> &));
   MOCK_METHOD2(setInstrumentList, void(const QString &, const QString &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
 
   // Settings
-  MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
+  MOCK_METHOD1(loadSettings, void(std::map<QString, QVariant> &));
 
   // Processing options
   MOCK_METHOD1(setForcedReProcessing, void(bool));
@@ -82,7 +81,7 @@ public:
   // Calls we don't care about
   void showTable(boost::shared_ptr<
       MantidQt::MantidWidgets::AbstractDataProcessorTreeModel>) override{};
-  void saveSettings(const std::map<std::string, QVariant> &) override{};
+  void saveSettings(const std::map<QString, QVariant> &) override{};
 
   void emitProcessClicked() override{};
   void emitProcessingFinished() override{};
@@ -101,12 +100,11 @@ public:
 
   // Prompt methods
   MOCK_METHOD3(askUserString,
-               std::string(const std::string &, const std::string &,
-                           const std::string &));
-  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+               QString(const QString &, const QString &, const QString &));
+  MOCK_METHOD2(askUserYesNo, bool(QString, QString));
+  MOCK_METHOD2(giveUserWarning, void(QString, QString));
+  MOCK_METHOD2(giveUserCritical, void(QString, QString));
+  MOCK_METHOD1(runPythonAlgorithm, QString(const QString &));
   MOCK_CONST_METHOD0(getPreprocessingProperties, QString());
 
   // Global options
@@ -135,21 +133,21 @@ public:
   ~MockDataProcessorPresenter() override {}
 
   MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
-  MOCK_METHOD1(setModel, void(std::string name));
+  MOCK_METHOD1(setModel, void(QString const &name));
   MOCK_METHOD1(accept, void(DataProcessorMainPresenter *));
   MOCK_CONST_METHOD0(selectedParents, std::set<int>());
   MOCK_CONST_METHOD0(selectedChildren, std::map<int, std::set<int>>());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD2(askUserYesNo,
-                     bool(const std::string &prompt, const std::string &title));
+                     bool(const QString &prompt, const QString &title));
   MOCK_CONST_METHOD2(giveUserWarning,
-                     void(const std::string &prompt, const std::string &title));
+                     void(const QString &prompt, const QString &title));
   MOCK_METHOD0(publishCommandsMocked, void());
   MOCK_METHOD1(setForcedReProcessing, void(bool));
 
 private:
   // Calls we don't care about
-  const std::map<std::string, QVariant> &options() const override {
+  const std::map<QString, QVariant> &options() const override {
     return m_options;
   };
 
@@ -161,15 +159,11 @@ private:
     publishCommandsMocked();
     return commands;
   };
-  std::set<std::string> getTableList() const {
-    return std::set<std::string>();
-  };
+  std::set<QString> getTableList() const { return std::set<QString>(); };
   // Calls we don't care about
-  void setOptions(const std::map<std::string, QVariant> &) override {}
-  void
-  transfer(const std::vector<std::map<std::string, std::string>> &) override {}
-  void setInstrumentList(const std::vector<std::string> &,
-                         const std::string &) override {}
+  void setOptions(const std::map<QString, QVariant> &) override {}
+  void transfer(const std::vector<std::map<QString, QString>> &) override {}
+  void setInstrumentList(const QStringList &, const QString &) override {}
   // void accept(WorkspaceReceiver *) {};
   void acceptViews(DataProcessorView *, ProgressableView *) override{};
 
@@ -179,7 +173,7 @@ private:
 
   void clearTable() override {}
 
-  std::map<std::string, QVariant> m_options;
+  std::map<QString, QVariant> m_options;
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
