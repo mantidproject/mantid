@@ -10,7 +10,7 @@ from mantid.api import AlgorithmManager
 
 from sans.state.data import get_data_builder
 from sans.common.enums import (DetectorType, DataType, SANSFacility)
-from sans.user_file.user_file_state_director import UserFileStateDirectorISIS
+from sans.user_file.state_director import StateDirectorISIS
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 
@@ -139,7 +139,7 @@ class SANSReductionCoreTest(unittest.TestCase):
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = UserFileStateDirectorISIS(data_state)
+        user_file_director = StateDirectorISIS(data_state)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

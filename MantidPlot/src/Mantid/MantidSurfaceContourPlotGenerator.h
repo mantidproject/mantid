@@ -5,8 +5,8 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidMatrix.h"
-#include <MantidQtMantidWidgets/MantidWSIndexDialog.h>
-#include <MantidQtMantidWidgets/MantidDisplayBase.h>
+#include <MantidQtWidgets/Common/MantidWSIndexDialog.h>
+#include <MantidQtWidgets/Common/MantidDisplayBase.h>
 
 /**
 * This utility class generates a surface or contour plot from a group of

@@ -4,9 +4,11 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidBeamline/ComponentInfo.h"
@@ -32,8 +34,7 @@ makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
   return std::move(detIdToIndex);
 }
 
-void clearPositionAndRotationParameters(ParameterMap *pmap,
-                                        const IComponent &comp) {
+void clearLegacyParameters(ParameterMap *pmap, const IComponent &comp) {
   if (!pmap)
     return;
   pmap->clearParametersByName(ParameterMap::pos(), &comp);
@@ -44,6 +45,7 @@ void clearPositionAndRotationParameters(ParameterMap *pmap,
   pmap->clearParametersByName(ParameterMap::rotx(), &comp);
   pmap->clearParametersByName(ParameterMap::roty(), &comp);
   pmap->clearParametersByName(ParameterMap::rotz(), &comp);
+  pmap->clearParametersByName(ParameterMap::scale(), &comp);
 }
 }
 
@@ -78,7 +80,12 @@ InstrumentVisitor::InstrumentVisitor(
       m_detectorRotations(boost::make_shared<std::vector<Eigen::Quaterniond>>(
           m_orderedDetectorIds->size())),
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
-      m_instrument(std::move(instrument)), m_pmap(nullptr) {
+      m_instrument(std::move(instrument)), m_pmap(nullptr),
+      m_nullShape(boost::make_shared<const Object>()),
+      m_shapes(boost::make_shared<std::vector<boost::shared_ptr<const Object>>>(
+          m_orderedDetectorIds->size(), m_nullShape)),
+      m_scaleFactors(boost::make_shared<std::vector<Eigen::Vector3d>>(
+          m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})) {
 
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
@@ -102,6 +109,7 @@ InstrumentVisitor::InstrumentVisitor(
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors); // Exact
   m_componentIdToIndexMap->reserve(nDetectors);         // Approximation
+  m_shapes->reserve(nDetectors);                        // Approximation
 }
 
 void InstrumentVisitor::walkInstrument() {
@@ -143,13 +151,15 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   m_componentIds->emplace_back(assembly.getComponentID());
   m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
-  clearPositionAndRotationParameters(m_pmap, assembly);
   // Now that we know what the index of the parent is we can apply it to the
   // children
   for (const auto &child : children) {
     (*m_parentComponentIndices)[child] = componentIndex;
   }
   markAsSourceOrSample(assembly.getComponentID(), componentIndex);
+  m_shapes->emplace_back(m_nullShape);
+  m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
+  clearLegacyParameters(m_pmap, assembly);
   return componentIndex;
 }
 
@@ -179,8 +189,10 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
   m_parentComponentIndices->push_back(componentIndex);
-  clearPositionAndRotationParameters(m_pmap, component);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
+  m_shapes->emplace_back(m_nullShape);
+  m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
+  clearLegacyParameters(m_pmap, component);
   return componentIndex;
 }
 
@@ -191,6 +203,18 @@ void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId,
   } else if (componentId == m_sourceId) {
     m_sourceIndex = componentIndex;
   }
+}
+
+/**
+ * @brief InstrumentVisitor::registerGenericObjComponent
+ * @param objComponent : IObjComponent being visited
+ * @return Component index of this component
+ */
+size_t InstrumentVisitor::registerGenericObjComponent(
+    const Mantid::Geometry::IObjComponent &objComponent) {
+  auto index = registerGenericComponent(objComponent);
+  (*m_shapes)[index] = objComponent.shape();
+  return index;
 }
 
 /**
@@ -229,10 +253,13 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
         Kernel::toVector3d(detector.getPos());
     (*m_detectorRotations)[detectorIndex] =
         Kernel::toQuaterniond(detector.getRotation());
+    (*m_shapes)[detectorIndex] = std::move(detector.shape());
+    (*m_scaleFactors)[detectorIndex] =
+        Kernel::toVector3d(detector.getScaleFactor());
     if (m_instrument->isMonitorViaIndex(detectorIndex)) {
       m_monitorIndices->push_back(detectorIndex);
     }
-    clearPositionAndRotationParameters(m_pmap, detector);
+    clearLegacyParameters(m_pmap, detector);
   }
   /* Note that positions and rotations for detectors are currently
   NOT stored! These go into DetectorInfo at present. push_back works for other
@@ -286,8 +313,8 @@ InstrumentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
-      m_parentComponentIndices, m_positions, m_rotations, m_sourceIndex,
-      m_sampleIndex);
+      m_parentComponentIndices, m_positions, m_rotations, m_scaleFactors,
+      m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
@@ -309,7 +336,7 @@ InstrumentVisitor::makeWrappers() const {
   detInfo->setComponentInfo(compInfo.get());
 
   auto compInfoWrapper = Kernel::make_unique<ComponentInfo>(
-      std::move(compInfo), componentIds(), componentIdToIndexMap());
+      std::move(compInfo), componentIds(), componentIdToIndexMap(), m_shapes);
   auto detInfoWrapper = Kernel::make_unique<DetectorInfo>(
       std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
 
