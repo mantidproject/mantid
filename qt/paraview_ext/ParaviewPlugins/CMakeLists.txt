@@ -41,5 +41,6 @@ endif()
 
 add_subdirectory( ParaViewFilters )
 add_subdirectory( ParaViewReaders )
+add_subdirectory( ParaViewRepresentations )
 add_subdirectory( ParaViewSources )
 add_subdirectory( ParaViewWidgets )

@@ -1,0 +1,56 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="representations">
+    <RepresentationProxy name="MySpecialRepresentation"
+                base_proxygroup="internal_representations"
+                base_proxyname="SurfaceRepresentationBase"
+                class="vtkMySpecialRepresentation"
+                processes="client|renderserver|dataserver">
+      <Documentation>
+        MySpecialRepresentation add support to show multiple slices in the view.
+        This is used by CompositeMySpecialRepresentation.
+      </Documentation>
+      <InputProperty command="SetInputConnection"
+                     name="Input">
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkDataSet" />
+        </DataTypeDomain>
+        <Documentation>Set the input to the representation.</Documentation>
+      </InputProperty>
+
+      <IntVectorProperty name="ShowOutline"
+        command="SetShowOutline"
+        number_of_elements="1"
+        default_values="0">
+        <Documentation>
+          Check to show data outline when showing "Slices".
+        </Documentation>
+        <BooleanDomain name="bool" />
+      </IntVectorProperty>
+    </RepresentationProxy>
+    <PVRepresentationProxy name="CompositeMySpecialRepresentation"
+                           base_proxygroup="representations"
+                           base_proxyname="GeometryRepresentation"
+                           class="vtkPVCompositeRepresentation"
+                           processes="client|renderserver|dataserver" >
+       <RepresentationType  subproxy="MySpecialRepresentation"
+         text="Slices" subtype="Surface"/>
+       <SubProxy>
+         <Proxy name="MySpecialRepresentation"
+           proxygroup="representations"
+           proxyname="MySpecialRepresentation">
+         </Proxy>
+         <ShareProperties subproxy="SurfaceRepresentation">
+           <Exception name="Input" />
+           <Exception name="Visibility" />
+         </ShareProperties>
+         <ExposedProperties>
+           <PropertyGroup label="Slices Parameters">
+             <Property name="ShowOutline"
+                       panel_visibility="advanced"
+                       panel_visibility_default_for_representation="slices" />
+           </PropertyGroup>
+         </ExposedProperties>
+       </SubProxy>
+    </PVRepresentationProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>
