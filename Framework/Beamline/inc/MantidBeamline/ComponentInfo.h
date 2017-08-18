@@ -68,6 +68,7 @@ private:
   boost::shared_ptr<const std::vector<size_t>> m_parentIndices;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
+  Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
   const size_t m_size = 0;
   const int64_t m_sourceIndex = -1;
   const int64_t m_sampleIndex = -1;
@@ -88,6 +89,7 @@ public:
                 boost::shared_ptr<const std::vector<size_t>> parentIndices,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
+                boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
                 int64_t sourceIndex, int64_t sampleIndex);
 
   std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
@@ -121,6 +123,9 @@ public:
   size_t sample() const;
   size_t root() const;
   double l1() const;
+  Eigen::Vector3d scaleFactor(const size_t componentIndex) const;
+  void setScaleFactor(const size_t componentIndex,
+                      const Eigen::Vector3d &scaleFactor);
 };
 } // namespace Beamline
 } // namespace Mantid

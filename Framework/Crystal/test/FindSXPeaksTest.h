@@ -40,46 +40,6 @@ void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
 class FindSXPeaksTest : public CxxTest::TestSuite {
 
 public:
-  // Test out of bounds constuction arguments
-  void testSXPeakConstructorThrowsIfNegativeIntensity() {
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    const auto &spectrumInfo = workspace->spectrumInfo();
-    double intensity = -1; // Negative intensity.
-    std::vector<int> spectra(1, 1);
-    TSM_ASSERT_THROWS("SXPeak: Should not construct with a negative intensity",
-                      SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
-                      std::invalid_argument);
-  }
-
-  // Test out of bounds construction arguments.
-  void testSXPeakConstructorThrowsIfSpectraSizeZero() {
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    const auto &spectrumInfo = workspace->spectrumInfo();
-    double intensity = 1;
-    std::vector<int> spectra; // Zero size spectra list
-    TSM_ASSERT_THROWS(
-        "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
-        std::invalid_argument);
-  }
-
-  void testSXPeakGetters() {
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    const auto &spectrumInfo = workspace->spectrumInfo();
-    double intensity = 1;
-    std::vector<int> spectra(1, 1);
-    SXPeak peak(0.001, 0.02, intensity, spectra, 1, spectrumInfo);
-
-    TSM_ASSERT_EQUALS("Intensity getter is not wired-up correctly", 1,
-                      peak.getIntensity());
-    TSM_ASSERT_EQUALS("Detector Id getter is not wired-up correctly", 2,
-                      peak.getDetectorId());
-    // QSpace is also a getter, but is tested more thouroughly below.
-  }
-
   void testInvalidIndexRanges() {
     Workspace2D_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
@@ -218,7 +178,7 @@ public:
                       results[2]);
   }
 
-  void testSpectrumWithoutUniqueDetectorsThrows() {
+  void testSpectrumWithoutUniqueDetectorsDoesNotThrow() {
     const int nHist = 10;
     Workspace2D_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nHist, 10);
@@ -237,8 +197,8 @@ public:
     alg.setProperty("InputWorkspace", grouped);
     alg.setProperty("OutputWorkspace", "found_peaks");
     alg.setRethrows(true);
-    TSM_ASSERT_THROWS_ANYTHING("FindSXPeak should have thrown.", alg.execute());
-    TSM_ASSERT("FindSXPeak should not have been executed.", !alg.isExecuted());
+    TSM_ASSERT_THROWS_NOTHING("FindSXPeak should have thrown.", alg.execute());
+    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
   }
 
   void testUseWorkspaceRangeCropping() {

@@ -6,9 +6,9 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtMantidWidgets/MantidDisplayBase.h"
-#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/MantidDisplayBase.h"
+#include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -20,9 +20,9 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 
-#include "MantidQtAPI/AlgorithmDialog.h"
-#include "MantidQtAPI/MantidAlgorithmMetatype.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/MantidAlgorithmMetatype.h"
+#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
 
 #include "MantidPlotUtilities.h"
 
