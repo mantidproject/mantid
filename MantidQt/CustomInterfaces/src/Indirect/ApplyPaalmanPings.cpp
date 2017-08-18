@@ -16,8 +16,8 @@ Mantid::Kernel::Logger g_log("ApplyPaalmanPings");
 namespace MantidQt {
 namespace CustomInterfaces {
 ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
+  m_spectra = 0;
   m_uiForm.setupUi(parent);
-
   connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
           SLOT(handleGeometryChange(int)));
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
@@ -40,6 +40,8 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
           SLOT(updateContainer()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -58,19 +60,18 @@ void ApplyPaalmanPings::newSample(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Corrected");
 
   // Get workspace
-  const MatrixWorkspace_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          dataName.toStdString());
+  m_ppSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
 
   // Plot the curve
-  m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
+  plotInPreview("Sample", m_ppSampleWS, Qt::black);
   m_uiForm.spPreviewSpec->setMaximum(
-      static_cast<int>(sampleWs->getNumberHistograms()) - 1);
+      static_cast<int>(m_ppSampleWS->getNumberHistograms()) - 1);
   m_sampleWorkspaceName = dataName.toStdString();
 
   // Set maximum / minimum can shift
-  m_uiForm.spCanShift->setMinimum(sampleWs->getXMin());
-  m_uiForm.spCanShift->setMaximum(sampleWs->getXMax());
+  m_uiForm.spCanShift->setMinimum(m_ppSampleWS->getXMin());
+  m_uiForm.spCanShift->setMaximum(m_ppSampleWS->getXMax());
 }
 
 void ApplyPaalmanPings::newContainer(const QString &dataName) {
@@ -79,17 +80,18 @@ void ApplyPaalmanPings::newContainer(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Corrected");
 
   // get Workspace
-  const MatrixWorkspace_sptr containerWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          dataName.toStdString());
+  m_ppContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
   // Clone for use in plotting and alg
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->initialize();
-  clone->setProperty("InputWorkspace", containerWs);
+  clone->setProperty("InputWorkspace", m_ppContainerWS);
   clone->setProperty("Outputworkspace", "__processed_can");
   clone->execute();
-  m_uiForm.ppPreview->addSpectrum("Container", containerWs, 0, Qt::red);
   m_containerWorkspaceName = "__processed_can";
+
+  // Plot the container
+  plotInPreview("Container", m_ppContainerWS, Qt::red);
 }
 
 void ApplyPaalmanPings::updateContainer() {
@@ -546,6 +548,8 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
         "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
         Qt::red);
   }
+
+  m_spectra = boost::numeric_cast<size_t>(wsIndex);
 }
 /**
  * Handles saving of the workspace
@@ -571,6 +575,67 @@ void ApplyPaalmanPings::plotClicked() {
 
     if (plotType == "Contour" || plotType == "Both")
       plot2D(QString::fromStdString(m_pythonExportWsName));
+  }
+}
+
+/**
+* Plots the current spectrum displayed in the preview plot
+*/
+void ApplyPaalmanPings::plotCurrentPreview() {
+  QStringList workspaces = QStringList();
+
+  // Check whether a sample workspace has been specified
+  if (m_ppSampleWS) {
+    workspaces.append(QString::fromStdString(m_ppSampleWS->getName()));
+  }
+
+  // Check whether a container workspace has been specified
+  if (m_ppContainerWS) {
+    workspaces.append(QString::fromStdString(m_ppContainerWS->getName()));
+  }
+
+  // Check whether a subtracted workspace has been generated
+  if (!m_pythonExportWsName.empty()) {
+    workspaces.append(QString::fromStdString(m_pythonExportWsName));
+  }
+
+  IndirectTab::plotSpectrum(workspaces, boost::numeric_cast<int>(m_spectra));
+}
+
+/*
+ * Plots the selected spectra (selected by the Spectrum spinner) of the
+ * specified workspace. The resultant curve will be given the specified
+ * name and the specified colour.
+ *
+ * @param curveName   The name of the curve to plot in the preview.
+ * @param ws          The workspace whose spectra to plot in the preview.
+ * @param curveColor  The color of the curve to plot in the preview.
+ */
+void ApplyPaalmanPings::plotInPreview(const QString &curveName,
+                                      MatrixWorkspace_sptr &ws,
+                                      const QColor &curveColor) {
+
+  // Check whether the selected spectra is now out of bounds with
+  // respect to the specified workspace.
+  if (ws->getNumberHistograms() > m_spectra) {
+    m_uiForm.ppPreview->addSpectrum(curveName, ws, m_spectra, curveColor);
+  } else {
+    size_t specNo = 0;
+
+    if (m_ppSampleWS) {
+      specNo = std::min(ws->getNumberHistograms(),
+                        m_ppSampleWS->getNumberHistograms()) -
+               1;
+    } else if (m_ppContainerWS) {
+      specNo = std::min(ws->getNumberHistograms(),
+                        m_ppContainerWS->getNumberHistograms()) -
+               1;
+    }
+
+    m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
+    m_uiForm.spPreviewSpec->setValue(boost::numeric_cast<int>(specNo));
+    m_spectra = specNo;
+    m_uiForm.spPreviewSpec->setMaximum(boost::numeric_cast<int>(m_spectra));
   }
 }
 } // namespace CustomInterfaces

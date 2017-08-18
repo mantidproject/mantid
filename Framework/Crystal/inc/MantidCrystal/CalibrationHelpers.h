@@ -1,10 +1,12 @@
 #ifndef MANTID_CRYSTAL_CALIBRATIONHELPERS_H_
 #define MANTID_CRYSTAL_CALIBRATIONHELPERS_H_
 
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
 namespace Crystal {
 
 /** CalibrationHelpers : This contains helper methods to move source, sample and
@@ -35,16 +37,15 @@ namespace Crystal {
 namespace CalibrationHelpers {
 
 DLLExport void
-adjustUpSampleAndSourcePositions(const Geometry::Instrument &newInstrument,
-                                 double const L0, const Kernel::V3D &newSampPos,
-                                 API::DetectorInfo &detectorInfo);
+adjustUpSampleAndSourcePositions(double const L0, const Kernel::V3D &newSampPos,
+                                 Geometry::ComponentInfo &componentInfo);
 
 DLLExport void
 adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
                             const Geometry::Instrument &newInstrument,
                             const Kernel::V3D &pos, const Kernel::Quat &rot,
                             const double detWScale, const double detHtScale,
-                            API::DetectorInfo &detectorInfo);
+                            Geometry::ComponentInfo &componentInfo);
 
 } // namespace CalibrationHelpers
 } // namespace Crystal

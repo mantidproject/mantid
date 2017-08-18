@@ -107,14 +107,6 @@ class AbstractInst(object):
         raise NotImplementedError("spline_vanadium_ws must be implemented per instrument")
 
     # Optional overrides
-    def _attenuate_workspace(self, input_workspace):
-        """
-        Applies an attenuation correction to the workspace
-        :param input_workspace: The workspace to correct
-        :return: The corrected workspace
-        """
-        return input_workspace
-
     @staticmethod
     def _can_auto_gen_vanadium_cal():
         """
