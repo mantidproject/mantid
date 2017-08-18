@@ -43,13 +43,7 @@
 
 #include <boost/math/constants/constants.hpp>
 
-namespace {
-// Format for miniplot
-const char *MINI_PLOT_LINE_FORMAT = "k-";
-}
-
 namespace MantidQt {
-using Widgets::MplCpp::Axes;
 namespace MantidWidgets {
 
 using namespace boost::math;
@@ -145,7 +139,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 
   // Instrument display context menu actions
   m_storeCurve = new QAction("Store curve", this);
-  connect(m_storeCurve, SIGNAL(triggered()), this, SLOT(storeCurve()));
+  connect(m_storeCurve, SIGNAL(triggered()), m_miniplot, SLOT(storeCurve()));
   m_savePlotToWorkspace = new QAction("Save plot to workspace", this);
   connect(m_savePlotToWorkspace, SIGNAL(triggered()), this,
           SLOT(savePlotToWorkspace()));
@@ -153,7 +147,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name", m_miniplot);
-  //panelStack->addPanel("Old Plot", m_plot);
+  panelStack->addPanel("Old Plot", m_plot);
 
   m_selectionType = Single;
 
@@ -631,11 +625,11 @@ void InstrumentWidgetPickTab::loadSettings(const QSettings &settings) {
 bool InstrumentWidgetPickTab::addToDisplayContextMenu(QMenu &context) const {
   m_freezePlot = true;
   bool res = false;
-  if (m_plot->hasCurve()) {
+  if (m_miniplot->hasActiveCurve()) {
     context.addAction(m_storeCurve);
     res = true;
   }
-  if (m_plot->hasStored() || m_plot->hasCurve()) {
+  if (m_miniplot->hasActiveCurve() || m_miniplot->hasStoredCurves()) {
     context.addAction(m_savePlotToWorkspace);
     res = true;
   }
@@ -1143,6 +1137,11 @@ DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
 * @param pickID :: A pick ID of an instrument component.
 */
 void DetectorPlotController::setPlotData(size_t pickID) {
+  if (!m_enabled) {
+    m_plot->clearCurve();
+    m_miniplot->removeActiveCurve();
+    return;
+  }
   m_currentDetID = -1;
 
   if (m_plotType == DetectorSum) {
@@ -1150,11 +1149,6 @@ void DetectorPlotController::setPlotData(size_t pickID) {
   }
 
   const int detid = m_instrWidget->getInstrumentActor().getDetID(pickID);
-
-  if (!m_enabled) {
-    m_plot->clearCurve();
-    return;
-  }
 
   if (detid >= 0) {
     if (m_plotType == Single) {
@@ -1167,7 +1161,7 @@ void DetectorPlotController::setPlotData(size_t pickID) {
     }
   } else {
     m_plot->clearCurve();
-    m_miniplot->clearLines();
+    m_miniplot->removeActiveCurve();
   }
 }
 
@@ -1186,12 +1180,11 @@ void DetectorPlotController::setPlotData(QList<int> detIDs) {
   if (!x.empty()) {
     m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
                     actor.getWorkspace()->getAxis(0)->unit()->unitID());
-    m_miniplot->plotLine(x, y, MINI_PLOT_LINE_FORMAT);
-    m_miniplot->setLabel(Axes::Label::X,
-                         actor.getWorkspace()->getAxis(0)->unit()->unitID());
+    m_miniplot->setActiveCurve(
+        std::move(x), std::move(y),
+        actor.getWorkspace()->getAxis(0)->unit()->unitID().data(), "multiple");
   }
   m_plot->setLabel("multiple");
-  m_miniplot->setCurveLabel("multiple");
 }
 
 /**
@@ -1200,6 +1193,7 @@ void DetectorPlotController::setPlotData(QList<int> detIDs) {
 void DetectorPlotController::updatePlot() {
   m_plot->recalcAxisDivs();
   m_plot->replot();
+  m_miniplot->update();
 }
 
 /**
@@ -1208,7 +1202,7 @@ void DetectorPlotController::updatePlot() {
 void DetectorPlotController::clear() {
   m_plot->clearCurve();
   m_plot->clearPeakLabels();
-  m_miniplot->clearLines();
+  m_miniplot->removeActiveCurve();
 }
 
 /**
@@ -1216,27 +1210,11 @@ void DetectorPlotController::clear() {
 * @param detid :: ID of the detector to be plotted.
 */
 void DetectorPlotController::plotSingle(int detid) {
-  clear();
-  std::vector<double> x, y;
-  prepareDataForSinglePlot(detid, x, y);
-  if (x.empty() || y.empty())
+  auto plotData = prepareDataForSinglePlot(detid);
+  if (plotData.x.empty() || plotData.y.empty())
     return;
 
-  // set the data
-  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  m_instrWidget->getInstrumentActor()
-                      .getWorkspace()
-                      ->getAxis(0)
-                      ->unit()
-                      ->unitID());
-  m_plot->setLabel("Detector " + QString::number(detid));
-  m_miniplot->plotLine(x, y, MINI_PLOT_LINE_FORMAT);
-  m_miniplot->setLabel(Axes::Label::X, m_instrWidget->getInstrumentActor()
-                                           .getWorkspace()
-                                           ->getAxis(0)
-                                           ->unit()
-                                           ->unitID());
-  m_miniplot->setCurveLabel("Detector " + QString::number(detid));
+  m_miniplot->setActiveCurve(std::move(plotData));
 
   // find any markers
   auto surface = m_tab->getSurface();
@@ -1282,7 +1260,7 @@ void DetectorPlotController::plotTube(int detid) {
     }
   } else {
     m_plot->clearCurve();
-    m_miniplot->clearLines();
+    m_miniplot->removeActiveCurve();
   }
 }
 
@@ -1293,28 +1271,23 @@ void DetectorPlotController::plotTube(int detid) {
 *   with this id.
 */
 void DetectorPlotController::plotTubeSums(int detid) {
-  std::vector<double> x, y;
-  prepareDataForSumsPlot(detid, x, y);
-  if (x.empty() || y.empty()) {
-    clear();
-    return;
-  }
-  const auto &actor = m_instrWidget->getInstrumentActor();
-  auto &det = actor.getDetectorByDetID(detid);
-  auto parent = det.getParent();
-  QString label = QString::fromStdString(parent->getName()) + " (" +
-                  QString::number(detid) + ") Sum";
-  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  actor.getWorkspace()->getAxis(0)->unit()->unitID());
-  m_plot->setLabel(label);
-  m_miniplot->removeLine(0);
-  m_miniplot->plotLine(x, y, MINI_PLOT_LINE_FORMAT);
-  m_miniplot->setLabel(Axes::Label::X, m_instrWidget->getInstrumentActor()
-                                           .getWorkspace()
-                                           ->getAxis(0)
-                                           ->unit()
-                                           ->unitID());
-  m_miniplot->setCurveLabel(label);
+  //  std::vector<double> x, y;
+  //  prepareDataForSumsPlot(detid, x, y);
+  //  if (x.empty() || y.empty()) {
+  //    clear();
+  //    return;
+  //  }
+  //  const auto &actor = m_instrWidget->getInstrumentActor();
+  //  auto &det = actor.getDetectorByDetID(detid);
+  //  auto parent = det.getParent();
+  //  const std::string label =
+  //      parent->getName() + " (" + std::to_string(detid) + ") Sum";
+  //  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
+  //                  actor.getWorkspace()->getAxis(0)->unit()->unitID());
+  //  m_plot->setLabel(QString::fromStdString(label));
+  //  m_miniplot->setActiveCurve(std::move(x), std::move(y),
+  //                             actor.getWorkspace()->getAxis(0)->unit()->unitID().data(),
+  //                             label);
 }
 
 /**
@@ -1330,50 +1303,55 @@ void DetectorPlotController::plotTubeSums(int detid) {
 *   with this id.
 */
 void DetectorPlotController::plotTubeIntegrals(int detid) {
-  auto &det = m_instrWidget->getInstrumentActor().getDetectorByDetID(detid);
-  std::vector<double> x, y;
-  prepareDataForIntegralsPlot(detid, x, y);
-  if (x.empty() || y.empty()) {
-    clear();
-    return;
-  }
-  auto xAxisCaption = getTubeXUnitsName();
-  auto xAxisUnits = getTubeXUnitsUnits();
-  if (!xAxisUnits.isEmpty()) {
-    xAxisCaption += " (" + xAxisUnits + ")";
-  }
-  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  xAxisCaption.toStdString());
-  auto parent = det.getParent();
-  // curve label: "tube_name (detid) Integrals"
-  // detid is included to distiguish tubes with the same name
-  QString label = QString::fromStdString(parent->getName()) + " (" +
-                  QString::number(detid) + ") Integrals/" + getTubeXUnitsName();
-  m_plot->setLabel(label);
+  //  auto &det = m_instrWidget->getInstrumentActor().getDetectorByDetID(detid);
+  //  std::vector<double> x, y;
+  //  prepareDataForIntegralsPlot(detid, x, y);
+  //  if (x.empty() || y.empty()) {
+  //    clear();
+  //    return;
+  //  }
+  //  auto xAxisCaption = getTubeXUnitsName();
+  //  auto xAxisUnits = getTubeXUnitsUnits();
+  //  if (!xAxisUnits.isEmpty()) {
+  //    xAxisCaption += " (" + xAxisUnits + ")";
+  //  }
+  //  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
+  //                  xAxisCaption.toStdString());
+  //  auto parent = det.getParent();
+  //  // curve label: "tube_name (detid) Integrals"
+  //  // detid is included to distiguish tubes with the same name
+  //  QString label = parent->getName() + " (" + std::to_string(detid) +
+  //                  ") Integrals/" + getTubeXUnitsName();
+  //  m_plot->setLabel(label);
 
-  m_miniplot->removeLine(0);
-  m_miniplot->plotLine(x, y, MINI_PLOT_LINE_FORMAT);
-  m_miniplot->setLabel(Axes::Label::X, xAxisUnits);
-  m_miniplot->setCurveLabel(label);
+  //  m_miniplot->setActiveCurve(std::move(x), std::move(y),
+  //                             actor.getWorkspace()->getAxis(0)->unit()->unitID().data(),
+  //                             label);
+
+  //  m_miniplot->removeLine(0);
+  //  m_miniplot->plotLine(x, y, MINI_PLOT_LINE_FORMAT);
+  //  m_miniplot->setLabel(Axes::Label::X, xAxisUnits);
+  //  m_miniplot->setCurveLabel(label);
 }
 
 /**
 * Prepare data for plotting a spectrum of a single detector.
 * @param detid :: ID of the detector to be plotted.
-* @param x :: Vector of x coordinates (output)
-* @param y :: Vector of y coordinates (output)
-* @param err :: Optional pointer to a vector of errors (output)
+* @param includeErrors If true then provide the error data as well
+* @return A new MiniPlotCurveData object containing the data to plot
 */
-void DetectorPlotController::prepareDataForSinglePlot(
-    int detid, std::vector<double> &x, std::vector<double> &y,
-    std::vector<double> *err) {
+MiniPlotCurveData
+DetectorPlotController::prepareDataForSinglePlot(int detid,
+                                                 bool includeErrors) {
+  MiniPlotCurveData data;
   const auto &actor = m_instrWidget->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
   size_t wi;
   try {
     wi = actor.getWorkspaceIndex(detid);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    return; // Detector doesn't have a workspace index relating to it
+    // Detector doesn't have a workspace index relating to it
+    return data;
   }
   // get the data
   const auto &XPoints = ws->points(wi);
@@ -1384,11 +1362,21 @@ void DetectorPlotController::prepareDataForSinglePlot(
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
 
-  x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
-  y.assign(Y.begin() + imin, Y.begin() + imax);
-  if (err) {
-    err->assign(E.begin() + imin, E.begin() + imax);
+  // set the data
+  auto resizeAndAssign =
+      [](auto &dest, const auto srcItrBegin, const auto srcItrEnd) {
+        dest.resize(std::distance(srcItrBegin, srcItrEnd));
+        dest.assign(srcItrBegin, srcItrEnd);
+      };
+  resizeAndAssign(data.x, XPoints.begin() + imin, XPoints.begin() + imax);
+  resizeAndAssign(data.y, Y.begin() + imin, Y.begin() + imax);
+  if (includeErrors) {
+    resizeAndAssign(data.e, E.begin() + imin, E.begin() + imax);
   }
+  // metadata
+  data.xunit = QString::fromStdString(ws->getAxis(0)->unit()->unitID());
+  data.label = "Detector " + QString::number(detid);
+  return data;
 }
 
 /**
@@ -1599,110 +1587,116 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
 * Save data plotted on the miniplot into a MatrixWorkspace.
 */
 void DetectorPlotController::savePlotToWorkspace() {
-  if (!m_plot->hasCurve() && !m_plot->hasStored()) {
-    // nothing to save
-    return;
-  }
-  const auto &actor = m_instrWidget->getInstrumentActor();
-  Mantid::API::MatrixWorkspace_const_sptr parentWorkspace =
-      actor.getWorkspace();
-  // interpret curve labels and reconstruct the data to be saved
-  QStringList labels = m_plot->getLabels();
-  if (m_plot->hasCurve()) {
-    labels << m_plot->label();
-  }
-  std::vector<double> X, Y, E;
-  size_t nbins = 0;
-  // to keep det ids for spectrum-detector mapping in the output workspace
-  std::vector<Mantid::detid_t> detids;
-  // unit id for x vector in the created workspace
-  std::string unitX;
-  foreach (QString label, labels) {
-    std::vector<double> x, y, e;
-    // split the label to get the detector id and selection type
-    QStringList parts = label.split(QRegExp("[()]"));
-    if (label == "multiple") {
-      if (X.empty()) {
-        // label doesn't have any info on how to reproduce the curve:
-        // only the current curve can be saved
-        QList<int> dets;
-        m_tab->getSurface()->getMaskedDetectors(dets);
-        actor.sumDetectors(dets, x, y);
-        unitX = parentWorkspace->getAxis(0)->unit()->unitID();
-      } else {
-        QMessageBox::warning(NULL, "MantidPlot - Warning",
-                             "Cannot save the stored curves.\nOnly the current "
-                             "curve will be saved.");
-      }
-    } else if (parts.size() == 3) {
-      int detid = parts[1].toInt();
-      QString SumOrIntegral = parts[2].trimmed();
-      if (SumOrIntegral == "Sum") {
-        prepareDataForSumsPlot(detid, x, y, &e);
-        unitX = parentWorkspace->getAxis(0)->unit()->unitID();
-      } else {
-        prepareDataForIntegralsPlot(detid, x, y, &e);
-        unitX = SumOrIntegral.split('/')[1].toStdString();
-      }
-    } else if (parts.size() == 1) {
-      // second word is detector id
-      int detid = parts[0].split(QRegExp("\\s+"))[1].toInt();
-      prepareDataForSinglePlot(detid, x, y, &e);
-      unitX = parentWorkspace->getAxis(0)->unit()->unitID();
-      // save det ids for the output workspace
-      detids.push_back(static_cast<Mantid::detid_t>(detid));
-    } else {
-      continue;
-    }
-    if (!x.empty()) {
-      if (nbins > 0 && x.size() != nbins) {
-        QMessageBox::critical(NULL, "MantidPlot - Error",
-                              "Curves have different sizes.");
-        return;
-      } else {
-        nbins = x.size();
-      }
-      X.insert(X.end(), x.begin(), x.end());
-      Y.insert(Y.end(), y.begin(), y.end());
-      E.insert(E.end(), e.begin(), e.end());
-    }
-  }
-  // call CreateWorkspace algorithm. Created worksapce will have name "Curves"
-  if (!X.empty()) {
-    if (nbins == 0)
-      nbins = 1;
-    E.resize(Y.size(), 1.0);
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace", -1);
-    alg->initialize();
-    alg->setPropertyValue("OutputWorkspace", "Curves");
-    alg->setProperty("DataX", X);
-    alg->setProperty("DataY", Y);
-    alg->setProperty("DataE", E);
-    alg->setProperty("NSpec", static_cast<int>(X.size() / nbins));
-    alg->setProperty("UnitX", unitX);
-    alg->setPropertyValue("ParentWorkspace", parentWorkspace->getName());
-    alg->execute();
+  QMessageBox::warning(m_tab, "Instrument Widget",
+                       "savePlotToWorkspace needs to be implemented");
+  //  if (!m_miniplot->hasActiveCurve() && !m_miniplot->hasStoredCurves()) {
+  //    // nothing to save
+  //    return;
+  //  }
+  //  const auto &actor = m_instrWidget->getInstrumentActor();
+  //  Mantid::API::MatrixWorkspace_const_sptr parentWorkspace =
+  //      actor.getWorkspace();
+  //  // interpret curve labels and reconstruct the data to be saved
+  //  QStringList labels = m_plot->getLabels();
+  //  if (m_plot->hasCurve()) {
+  //    labels << m_plot->label();
+  //  }
+  //  std::vector<double> X, Y, E;
+  //  size_t nbins = 0;
+  //  // to keep det ids for spectrum-detector mapping in the output workspace
+  //  std::vector<Mantid::detid_t> detids;
+  //  // unit id for x vector in the created workspace
+  //  std::string unitX;
+  //  foreach (QString label, labels) {
+  //    std::vector<double> x, y, e;
+  //    // split the label to get the detector id and selection type
+  //    QStringList parts = label.split(QRegExp("[()]"));
+  //    if (label == "multiple") {
+  //      if (X.empty()) {
+  //        // label doesn't have any info on how to reproduce the curve:
+  //        // only the current curve can be saved
+  //        QList<int> dets;
+  //        m_tab->getSurface()->getMaskedDetectors(dets);
+  //        actor.sumDetectors(dets, x, y);
+  //        unitX = parentWorkspace->getAxis(0)->unit()->unitID();
+  //      } else {
+  //        QMessageBox::warning(NULL, "MantidPlot - Warning",
+  //                             "Cannot save the stored curves.\nOnly the
+  //                             current "
+  //                             "curve will be saved.");
+  //      }
+  //    } else if (parts.size() == 3) {
+  //      int detid = parts[1].toInt();
+  //      QString SumOrIntegral = parts[2].trimmed();
+  //      if (SumOrIntegral == "Sum") {
+  //        prepareDataForSumsPlot(detid, x, y, &e);
+  //        unitX = parentWorkspace->getAxis(0)->unit()->unitID();
+  //      } else {
+  //        prepareDataForIntegralsPlot(detid, x, y, &e);
+  //        unitX = SumOrIntegral.split('/')[1].toStdString();
+  //      }
+  //    } else if (parts.size() == 1) {
+  //      // second word is detector id
+  //      int detid = parts[0].split(QRegExp("\\s+"))[1].toInt();
+  //      prepareDataForSinglePlot(detid, x, y, &e);
+  //      unitX = parentWorkspace->getAxis(0)->unit()->unitID();
+  //      // save det ids for the output workspace
+  //      detids.push_back(static_cast<Mantid::detid_t>(detid));
+  //    } else {
+  //      continue;
+  //    }
+  //    if (!x.empty()) {
+  //      if (nbins > 0 && x.size() != nbins) {
+  //        QMessageBox::critical(NULL, "MantidPlot - Error",
+  //                              "Curves have different sizes.");
+  //        return;
+  //      } else {
+  //        nbins = x.size();
+  //      }
+  //      X.insert(X.end(), x.begin(), x.end());
+  //      Y.insert(Y.end(), y.begin(), y.end());
+  //      E.insert(E.end(), e.begin(), e.end());
+  //    }
+  //  }
+  //  // call CreateWorkspace algorithm. Created worksapce will have name
+  //  "Curves"
+  //  if (!X.empty()) {
+  //    if (nbins == 0)
+  //      nbins = 1;
+  //    E.resize(Y.size(), 1.0);
+  //    Mantid::API::IAlgorithm_sptr alg =
+  //        Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace",
+  //        -1);
+  //    alg->initialize();
+  //    alg->setPropertyValue("OutputWorkspace", "Curves");
+  //    alg->setProperty("DataX", X);
+  //    alg->setProperty("DataY", Y);
+  //    alg->setProperty("DataE", E);
+  //    alg->setProperty("NSpec", static_cast<int>(X.size() / nbins));
+  //    alg->setProperty("UnitX", unitX);
+  //    alg->setPropertyValue("ParentWorkspace", parentWorkspace->getName());
+  //    alg->execute();
 
-    if (!detids.empty()) {
-      // set up spectra - detector mapping
-      Mantid::API::MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-              Mantid::API::AnalysisDataService::Instance().retrieve("Curves"));
-      if (!ws) {
-        throw std::runtime_error("Failed to create Curves workspace");
-      }
+  //    if (!detids.empty()) {
+  //      // set up spectra - detector mapping
+  //      Mantid::API::MatrixWorkspace_sptr ws =
+  //          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+  //              Mantid::API::AnalysisDataService::Instance().retrieve("Curves"));
+  //      if (!ws) {
+  //        throw std::runtime_error("Failed to create Curves workspace");
+  //      }
 
-      if (detids.size() == ws->getNumberHistograms()) {
-        size_t i = 0;
-        for (std::vector<Mantid::detid_t>::const_iterator id = detids.begin();
-             id != detids.end(); ++id, ++i) {
-          ws->getSpectrum(i).setDetectorID(*id);
-        }
-      }
+  //      if (detids.size() == ws->getNumberHistograms()) {
+  //        size_t i = 0;
+  //        for (std::vector<Mantid::detid_t>::const_iterator id =
+  //        detids.begin();
+  //             id != detids.end(); ++id, ++i) {
+  //          ws->getSpectrum(i).setDetectorID(*id);
+  //        }
+  //      }
 
-    } // !detids.empty()
-  }
+  //    } // !detids.empty()
+  //  }
 }
 
 /**

@@ -30,6 +30,7 @@ class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
 class MiniPlot;
+class MiniPlotCurveData;
 
 /**
 * Implements the Pick tab in InstrumentWidget.
@@ -124,7 +125,7 @@ private:
 
   /* Pick tab controls */
   OneCurvePlot *m_plot; ///< Miniplot to display data in the detectors
-  MiniPlot *m_miniplot;  ///< Miniplot to display data in the detectors
+  MiniPlot *m_miniplot; ///< Miniplot to display data in the detectors
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode
@@ -263,9 +264,9 @@ private:
   void plotTube(int detid);
   void plotTubeSums(int detid);
   void plotTubeIntegrals(int detid);
-  void prepareDataForSinglePlot(int detid, std::vector<double> &x,
-                                std::vector<double> &y,
-                                std::vector<double> *err = NULL);
+
+  MiniPlotCurveData prepareDataForSinglePlot(int detid,
+                                             bool includeErrors = false);
   void prepareDataForSumsPlot(int detid, std::vector<double> &x,
                               std::vector<double> &y,
                               std::vector<double> *err = NULL);
