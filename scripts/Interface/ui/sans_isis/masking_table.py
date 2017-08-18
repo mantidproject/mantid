@@ -53,6 +53,7 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
 
     def connect_signals(self):
         self.select_row_combo_box.currentIndexChanged.connect(self.on_row_changed)
+        self.display_mask_push_button.clicked.connect(self.on_display)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
@@ -92,3 +93,12 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
             self.masking_table.setItem(row, 0, entry_type)
             self.masking_table.setItem(row, 1, entry_detector)
             self.masking_table.setItem(row, 2, entry_detail)
+
+    def set_display_mask_button_to_processing(self):
+        self.display_mask_push_button.setText("Processing ...")
+        self.display_mask_push_button.setEnabled(False)
+
+    def set_display_mask_button_to_normal(self):
+        self.display_mask_push_button.setText("Display Mask")
+        self.display_mask_push_button.setEnabled(True)
+

@@ -1,7 +1,10 @@
 from ui.sans_isis.masking_table import MaskingTable
+from ui.sans_isis.work_handler import WorkHandler
+
 from collections import namedtuple
 import copy
 from mantid.api import (AnalysisDataService)
+
 try:
     import mantidplot
 except ImportError:
@@ -12,6 +15,68 @@ from sans.common.general_functions import create_unmanaged_algorithm
 
 
 masking_information = namedtuple("masking_information", "first, second, third")
+
+
+def load_and_mask_workspace(state, workspace_name):
+    # -------------------------------------------
+    # 1. Load the data
+    # -------------------------------------------
+    # We only want to load the data for the scatter sample. Hence we set everything else to an empty string.
+    # This is ok since we are changing a copy of the state which is not being used for the actual data reduction.
+    state.data.sample_transmission = ""
+    state.data.sample_direct = ""
+    state.data.can_scatter = ""
+    state.data.can_transmission = ""
+    state.data.can_direct = ""
+
+    # If the data is multi-period data, then we select only the first period.
+    if state.data.sample_scatter_is_multi_period and state.data.sample_scatter_period == 0:
+        state.data.sample_scatter_period = 1
+
+    # Load the workspace
+    serialized_state = state.property_manager
+    load_name = "SANSLoad"
+    load_options = {"SANSState": serialized_state,
+                    "PublishToCache": True,
+                    "UseCached": True,
+                    "SampleScatterWorkspace": EMPTY_NAME,
+                    "SampleScatterMonitorWorkspace": EMPTY_NAME,
+                    "SampleTransmissionWorkspace": EMPTY_NAME,
+                    "SampleDirectWorkspace": EMPTY_NAME,
+                    "CanScatterWorkspace": EMPTY_NAME,
+                    "CanScatterMonitorWorkspace": EMPTY_NAME,
+                    "CanTransmissionWorkspace": EMPTY_NAME,
+                    "CanDirectWorkspace": EMPTY_NAME}
+    load_alg = create_unmanaged_algorithm(load_name, **load_options)
+    load_alg.execute()
+    workspace_to_mask = load_alg.getProperty("SampleScatterWorkspace").value
+
+    # Perform an initial move on the workspace
+    move_name = "SANSMove"
+    move_options = {"SANSState": serialized_state,
+                    "Workspace": workspace_to_mask,
+                    "MoveType": "InitialMove"}
+    move_alg = create_unmanaged_algorithm(move_name, **move_options)
+    move_alg.execute()
+
+    # Put the workspace onto the ADS as a hidden workspace
+    AnalysisDataService.addOrReplace(workspace_name, workspace_to_mask)
+
+    # -------------------------------------------
+    # 2. Mask the data
+    # -------------------------------------------
+    serialized_state = state.property_manager
+    mask_name = "SANSMaskWorkspace"
+    mask_options = {"SANSState": serialized_state,
+                    "Workspace": workspace_to_mask}
+    mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
+
+    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)]
+    for detector in detectors:
+        mask_alg.setProperty("Component", detector)
+        mask_alg.execute()
+
+    return mask_alg.getProperty("Workspace").value
 
 
 class MaskingTablePresenter(object):
@@ -31,10 +96,22 @@ class MaskingTablePresenter(object):
         def on_display(self):
             self._presenter.on_display()
 
+    class DisplayMaskListener(WorkHandler.WorkListener):
+        def __init__(self, presenter):
+            super(MaskingTablePresenter.DisplayMaskListener, self).__init__()
+            self._presenter = presenter
+
+        def on_processing_finished(self, result):
+            self._presenter.on_processing_finished_masking_display(result)
+
+        def on_processing_error(self, error):
+            self._presenter.on_processing_error_masking_display(error)
+
     def __init__(self, parent_presenter):
         super(MaskingTablePresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
+        self._work_handler = WorkHandler()
 
     def on_row_changed(self):
         row_index = self._view.get_current_row()
@@ -43,20 +120,30 @@ class MaskingTablePresenter(object):
             self.display_masking_information(state)
 
     def on_display(self):
-        # TODO: This will run synchronously and block the GUI, therefore it is not enabled at the moment. Once,
-        # we agree on a async framework which we can use in combination with Mantid in Python, we will have to
-        # disable this feature. Once it is solved, it is easy to hook up.
-
-        # Load the sample workspace
+        # Get the state information for the selected row.
         row_index = self._view.get_current_row()
         state = self.get_state(row_index)
-        workspace_to_mask = self._load_the_workspace_to_mask(state)
 
-        # Apply the mask
-        self._mask_workspace(state, workspace_to_mask)
+        if not state:
+            return
 
-        # Display
-        self._display(workspace_to_mask)
+        # Disable the button
+        self._view.set_display_mask_button_to_processing()
+
+        # Run the task
+        listener = MaskingTablePresenter.DisplayMaskListener(self)
+        state_copy = copy.copy(state)
+        self._work_handler.process(listener, load_and_mask_workspace, state_copy, self.DISPLAY_WORKSPACE_NAME)
+
+    def on_processing_finished_masking_display(self, result):
+        # Enable button
+        self._view.set_display_mask_button_to_normal()
+
+        # Display masked workspace
+        self._display(result)
+
+    def on_processing_error(self, error):
+        pass
 
     def on_update_rows(self):
         """
@@ -319,65 +406,6 @@ class MaskingTablePresenter(object):
     def display_masking_information(self, state):
         table_entries = self.get_masking_information(state)
         self._view.set_table(table_entries)
-
-    def _load_the_workspace_to_mask(self, state):
-        # Make a deepcopy of the state
-        state_copy = copy.deepcopy(state)
-
-        # We only want to load the data for the scatter sample. Hence we set everything else to an empty string.
-        # This is ok since we are changing a copy of the state which is not being used for the actual data reduction.
-        state_copy.data.sample_transmission = ""
-        state_copy.data.sample_direct = ""
-        state_copy.data.can_scatter = ""
-        state_copy.data.can_transmission = ""
-        state_copy.data.can_direct = ""
-
-        # If the data is multi-period data, then we select only the first period.
-        if state_copy.data.sample_scatter_is_multi_period and state_copy.data.sample_scatter_period == 0:
-            state_copy.data.sample_scatter_period = 1
-
-        # Load the workspace
-        serialized_state = state_copy.property_manager
-        load_name = "SANSLoad"
-        load_options = {"SANSState": serialized_state,
-                        "PublishToCache": False,
-                        "UseCached": True,
-                        "SampleScatterWorkspace": EMPTY_NAME,
-                        "SampleScatterMonitorWorkspace": EMPTY_NAME,
-                        "SampleTransmissionWorkspace": EMPTY_NAME,
-                        "SampleDirectWorkspace": EMPTY_NAME,
-                        "CanScatterWorkspace": EMPTY_NAME,
-                        "CanScatterMonitorWorkspace": EMPTY_NAME,
-                        "CanTransmissionWorkspace": EMPTY_NAME,
-                        "CanDirectWorkspace": EMPTY_NAME}
-        load_alg = create_unmanaged_algorithm(load_name, **load_options)
-        load_alg.execute()
-        workspace_to_mask = load_alg.getProperty("SampleScatterWorkspace").value
-
-        # Perform an initial move on the workspace
-        move_name = "SANSMove"
-        move_options = {"SANSState": serialized_state,
-                        "Workspace": workspace_to_mask,
-                        "MoveType": "InitialMove"}
-        move_alg = create_unmanaged_algorithm(move_name, **move_options)
-        move_alg.execute()
-
-        # Put the workspace onto the ADS as a hidden workspace
-        AnalysisDataService.addOrReplace(self.DISPLAY_WORKSPACE_NAME, workspace_to_mask)
-        return workspace_to_mask
-
-    @staticmethod
-    def _mask_workspace(state, workspace):
-        serialized_state = state.property_manager
-        mask_name = "SANSMaskWorkspace"
-        mask_options = {"SANSState": serialized_state,
-                        "Workspace": workspace}
-        mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-
-        detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)]
-        for detector in detectors:
-            mask_alg.setProperty("Component", detector)
-            mask_alg.execute()
 
     @staticmethod
     def _display(masked_workspace):
