@@ -193,14 +193,15 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
                                 "enought data points to add padding"
                                 "dx = 0");
   }
-  double dx = *(xData.begin() + 1) - xData.front();
+  double dx = xData[1] - xData[0];
   auto dataSize = yData.size();
   std::vector<double> newXData(dataSize * (1 + padding), 0.0);
   std::vector<double> newYData(dataSize * (1 + padding), 0.0);
   std::vector<double> newEData(dataSize * (1 + padding), 0.0);
   double x = xData.back();
   size_t offset = 0;
-  if (getProperty("NegativePadding")) {
+  bool negativePadding= getProperty("NegativePadding");
+  if ( negativePadding) {
     // non-zero offset is for padding before the data
     offset = padding * dataSize / 2;
     x = xData.front() - dx * (1. + double(offset));
