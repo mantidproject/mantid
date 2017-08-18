@@ -158,7 +158,7 @@ class DetectorWidget(BaseWidget):
                 mantidplot.runPythonScript(script, True)
             except:
                 print("Could not compute sensitivity")
-                print(sys.exc_value)
+                print(sys.exc_info()[1])
 
     def _sensitivity_plot_clicked(self):
         self.show_instrument(file_name=self._content.sensitivity_file_edit.text)

@@ -38,4 +38,4 @@ class Output(BaseScriptElement):
                     if len(iq_plots)>0:
                         mantidplot.plotSpectrum(iq_plots, 0, True)
             except:
-                raise RuntimeError("Could not plot resulting output\n  %s" % sys.exc_value)
+                raise RuntimeError("Could not plot resulting output\n  %s" % sys.exc_info()[1])

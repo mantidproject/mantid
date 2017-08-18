@@ -535,7 +535,7 @@ class BaseReductionScripter(object):
                             item.state().update()
                         except (StopIteration, ImportError, NameError, TypeError, ValueError, Warning):
                             pass
-                raise RuntimeError(str(sys.exc_value))
+                raise RuntimeError(str(sys.exc_info()[1]))
         else:
             raise RuntimeError("Reduction could not be executed: Mantid could not be imported")
 

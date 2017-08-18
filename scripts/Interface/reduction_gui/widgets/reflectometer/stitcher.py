@@ -322,7 +322,7 @@ class StitcherWidget(BaseWidget):
         try:
             self._scale_data_sets()
         except:
-            message = "Could not scale data\n  %s" % sys.exc_value
+            message = "Could not scale data\n  %s" % sys.exc_info()[1]
             if self._content.scale_to_one_chk.isChecked():
                 message += "\n\nCheck your Q range near the critical edge"
             QtGui.QMessageBox.warning(self,

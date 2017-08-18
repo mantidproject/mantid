@@ -487,7 +487,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                   + file_path+"\n\n" \
                   + "Please make sure it has been produced by this application."
             QtGui.QMessageBox.warning(self, "Error loading reduction parameter file", msg)
-            print(sys.exc_value)
+            print(sys.exc_info()[1])
             return
 
         if not found_instrument == self._instrument:
@@ -551,7 +551,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self._set_window_title()
             except:
                 #TODO: put this in a log window, and in a file
-                print(sys.exc_value)
+                print(sys.exc_info()[1])
                 self.statusBar().showMessage("Failed to save %s" % self._filename)
 
     def _save_as(self):

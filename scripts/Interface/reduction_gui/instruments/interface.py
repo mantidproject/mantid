@@ -174,7 +174,7 @@ class InstrumentInterface(object):
 
                 self.scripter.cluster_submit(job_data_dir, user, pwd, resource, nodes, cores_per_node, job_name)
             except:
-                msg = "The following error was encountered:\n\n%s" % sys.exc_value
+                msg = "The following error was encountered:\n\n%s" % sys.exc_info()[1]
                 msg += "\n\nPlease check your reduction parameters\n"
                 log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
                 msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
@@ -215,7 +215,7 @@ class InstrumentInterface(object):
             if self._settings.debug:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
             else:
-                msg = "Reduction could not be executed:\n\n%s" % sys.exc_value
+                msg = "Reduction could not be executed:\n\n%s" % sys.exc_info()[1]
                 log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
                 msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
             self._warning("Reduction failed", msg)
