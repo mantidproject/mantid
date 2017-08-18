@@ -181,6 +181,9 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
                              const int padding) {
 
   HistogramData::Histogram result(histogram);
+  if(padding==0){
+      return histogram;
+  }
   // make sure point data
   result.points();
   auto &xData = result.x();
@@ -222,6 +225,7 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
     result = HistogramData::Histogram(HistogramData::Points(newXData),
                                       HistogramData::Counts(newYData));
   }
+  result.binEdges();
   return result;
 }
 
