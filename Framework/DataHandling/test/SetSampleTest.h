@@ -299,6 +299,10 @@ public:
     run_Geometry_As_Sphere_Test("sphere");
   }
 
+  void test_Setting_Mixedcase_Geometry_As_Sphere() {
+    run_Geometry_As_Sphere_Test("sPhErE");
+  }
+
   void run_Geometry_As_Sphere_Test(const std::string &sphereTag) {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);

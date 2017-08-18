@@ -512,7 +512,7 @@ SetSample::createSphereXML(const Kernel::PropertyManager &args,
 
   // We have to do a cast to double to help the compiler select the correct
   // overload for the return type.
-  // Convert to meters when getting the radius
+  // Convert to meters when getting the radius as we expect units of cm
   const double radius =
       static_cast<double>(args.getProperty(ShapeArgs::RADIUS)) * 0.01;
   std::vector<double> centre = args.getProperty(ShapeArgs::CENTER);
