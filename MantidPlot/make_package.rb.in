@@ -135,7 +135,7 @@ if( "@MAKE_VATES@" == "ON" )
                 "Contents/MacOS/libMantidQtWidgetsCommon.dylib",
                 "Contents/MacOS/libMantidParaViewQtWidgets.dylib",
                 "Contents/MacOS/libMantidVatesAPI.dylib",
-                "Contents/plugins/libMantidVatesAlgorithms.dylib",
+                "plugins/libMantidVatesAlgorithms.dylib",
                 "pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]
   vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["pvplugins/pvplugins/*.dylib"]
   vatesfiles.each do |file|
