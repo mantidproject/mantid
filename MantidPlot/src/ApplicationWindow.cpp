@@ -30,7 +30,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "ApplicationWindow.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 #include "CurvesDialog.h"
 #include "PlotDialog.h"
 #include "AxesDialog.h"
@@ -79,7 +79,7 @@
 #include "Folder.h"
 #include "FindDialog.h"
 #include "ScaleDraw.h"
-#include "MantidQtAPI/ScaleEngine.h"
+#include "MantidQtWidgets/Common/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
 #include "ScriptFileInterpreter.h"
@@ -112,7 +112,7 @@
 #include "DataPickerTool.h"
 #include "TiledWindow.h"
 #include "DockedWindow.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "ProjectSerialiser.h"
 
 // TODO: move tool-specific code to an extension manager
@@ -189,19 +189,19 @@
 #include "Mantid/ManageInterfaceCategories.h"
 #include "Mantid/FirstTimeSetup.h"
 
-#include "MantidQtAPI/InterfaceManager.h"
-#include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
-#include "MantidQtAPI/Message.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/Message.h"
 
-#include "MantidQtMantidWidgets/CatalogHelper.h"
-#include "MantidQtMantidWidgets/CatalogSearch.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MessageDisplay.h"
-#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/TrackedAction.h"
+#include "MantidQtWidgets/Common/CatalogHelper.h"
+#include "MantidQtWidgets/Common/CatalogSearch.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/MessageDisplay.h"
+#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/TrackedAction.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -218,7 +218,7 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "MantidQtAPI/ScriptRepositoryView.h"
+#include "MantidQtWidgets/Common/ScriptRepositoryView.h"
 
 #ifdef MAKE_VATES
 #include "vtkPVDisplayInformation.h"

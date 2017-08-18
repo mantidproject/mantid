@@ -14,6 +14,7 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include <set>
 #include <algorithm>
 #include <boost/make_shared.hpp>
@@ -49,7 +50,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
     // Create the visitor.
-    InstrumentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(visitee);
     // Visit everything
     visitee->registerContents(visitor);
 
@@ -153,7 +154,7 @@ public:
 
     const size_t instrumentIndex = 3; // Instrument is always hightest index.
 
-    InstrumentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(visitee);
     // Visit everything
     visitor.walkInstrument();
 
@@ -176,7 +177,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    InstrumentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(visitee);
 
     // Visit everything
     visitor.walkInstrument();
@@ -228,7 +229,7 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     // Create the visitor.
-    InstrumentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(visitee);
 
     // Visit everything
     visitor.walkInstrument();
@@ -278,7 +279,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    InstrumentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(visitee);
     // Visit everything
     visitor.walkInstrument();
 
@@ -310,7 +311,7 @@ public:
     visitee->add(det);
     visitee->markAsDetector(det);
 
-    InstrumentVisitor visitor(makeParameterized(visitee));
+    InstrumentVisitor visitor(visitee);
 
     // Visit everything
     visitor.walkInstrument();
@@ -330,7 +331,7 @@ public:
     const int nPixelsWide = 10; // Gives 10*10 detectors in total
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
         1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
-    InstrumentVisitor visitor(makeParameterized(instrument));
+    InstrumentVisitor visitor(instrument);
     visitor.walkInstrument();
 
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
@@ -343,7 +344,7 @@ public:
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
         1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
 
-    InstrumentVisitor visitor(makeParameterized(instrument));
+    InstrumentVisitor visitor(instrument);
 
     // Visit everything
     visitor.walkInstrument();
@@ -356,6 +357,66 @@ public:
     TS_ASSERT_EQUALS(compInfo->parent(compInfo->source()), compInfo->root());
     TS_ASSERT_EQUALS(compInfo->parent(compInfo->sample()), compInfo->root());
     TS_ASSERT_EQUALS(compInfo->parent(compInfo->root()), compInfo->root());
+  }
+
+  void test_shapes() {
+
+    const int nPixelsWide = 10; // Gives 10*10 detectors in total
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
+
+    // Visit everything
+    auto wrappers =
+        InstrumentVisitor::makeWrappers(*instrument, nullptr /*parameter map*/);
+    auto componentInfo = std::move(std::get<0>(wrappers));
+
+    // Instrument
+    const auto &instrumentShape = componentInfo->shape(componentInfo->root());
+    TSM_ASSERT("CompAssemblies should have no shape",
+               !instrumentShape.hasValidShape());
+    // Bank 1
+    const auto &subAssemblyShape =
+        componentInfo->shape(componentInfo->root() - 3);
+    TSM_ASSERT("CompAssemblies should have no shape",
+               !subAssemblyShape.hasValidShape());
+    const auto &detectorShape =
+        componentInfo->shape(0 /*Is a detector index!*/);
+    TSM_ASSERT("Detectors should have a shape", detectorShape.hasValidShape());
+
+    // Check shapes are re-used as expected
+    TSM_ASSERT_EQUALS("Shape object should be reused", &instrumentShape,
+                      &subAssemblyShape);
+    TSM_ASSERT_EQUALS("Shape object should be reused", &detectorShape,
+                      &componentInfo->shape(1 /*another detector*/));
+  }
+
+  void test_purge_scale_factors() {
+
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/,
+                                           V3D(11, 0, 0) /*detector position*/);
+    auto pmap = boost::make_shared<ParameterMap>();
+    auto detector = visitee->getDetector(visitee->getDetectorIDs()[0]);
+    // Add a scale factor for the detector
+
+    Mantid::Kernel::V3D detScaling{2, 2, 2};
+    pmap->addV3D(detector->getComponentID(), ParameterMap::scale(), detScaling);
+    // Add as scale factor for the instrument
+    Mantid::Kernel::V3D instrScaling{3, 3, 3};
+    pmap->addV3D(visitee->getComponentID(), ParameterMap::scale(),
+                 instrScaling);
+    // Sanity check inputs
+    TS_ASSERT_EQUALS(pmap->size(), 2);
+
+    auto wrappers = InstrumentVisitor::makeWrappers(*visitee, pmap.get());
+
+    TSM_ASSERT_EQUALS("Detectors positions are purged by visitor at present",
+                      pmap->size(), 0);
+
+    auto compInfo = std::move(std::get<0>(wrappers));
+    TS_ASSERT_EQUALS(detScaling, compInfo->scaleFactor(0));
+    TS_ASSERT_EQUALS(instrScaling, compInfo->scaleFactor(compInfo->root()));
   }
 };
 
