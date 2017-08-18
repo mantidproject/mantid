@@ -454,8 +454,9 @@ void ReflRunsTabPresenter::pause() {
 */
 void ReflRunsTabPresenter::resume() {
   m_view->disableEditMenuAction(DataProcessorAction::PROCESS);
-  m_view->autoreduceCannotBePressed();
+  m_view->autoreduceWillPause();
   preventTableModification();
+
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
@@ -505,15 +506,6 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
       m_currentTransferMethod != m_view->getTransferMethod();
 
   return searchNumChanged || transferMethodChanged || m_instrumentChanged;
-}
-
-/** Notifies main presenter that data reduction is confirmed to be resumed
-*/
-void ReflRunsTabPresenter::confirmReductionResumed() {
-  m_view->enableEditMenuAction(DataProcessorAction::PAUSE);
-  m_view->autoreduceWillPause();
-  m_mainPresenter->notify(
-      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
 
 /** Changes the current instrument in the data processor widget. Also clears the

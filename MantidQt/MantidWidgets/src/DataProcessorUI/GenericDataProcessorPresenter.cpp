@@ -271,9 +271,6 @@ void GenericDataProcessorPresenter::acceptViews(
 
   // Start with a blank table
   newTable();
-
-  // The view should currently be in the paused state
-  m_view->pause();
 }
 
 /**
@@ -1654,8 +1651,6 @@ void GenericDataProcessorPresenter::accept(
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
   m_mainPresenter->notifyADSChanged(m_workspaceList);
-  // Presenter should initially be in the paused state
-  m_mainPresenter->pause();
 }
 
 /** Returs the list of valid workspaces currently in the ADS

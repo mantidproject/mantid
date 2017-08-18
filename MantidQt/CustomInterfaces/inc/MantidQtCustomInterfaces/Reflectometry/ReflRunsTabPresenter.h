@@ -85,7 +85,6 @@ public:
   bool startNewAutoreduction() const override;
   /// Reduction paused/resumed confirmation handler
   void confirmReductionPaused() override;
-  void confirmReductionResumed() override;
 
 private:
   /// The search model

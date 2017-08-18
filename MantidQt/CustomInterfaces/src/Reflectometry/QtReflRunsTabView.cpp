@@ -14,6 +14,9 @@
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
 
+
+#include <iostream>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
@@ -283,15 +286,18 @@ void QtReflRunsTabView::disableTransfer() { setTransferEnabled(false); }
 void QtReflRunsTabView::enableTransfer() { setTransferEnabled(true); }
 
 void QtReflRunsTabView::autoreduceCannotBePressed() {
+  std::cout << "Can't press" << std::endl;
   disable(autoreduceButton());
 }
 
 void QtReflRunsTabView::autoreduceWillReduce() {
+  std::cout << "Reducepress" << std::endl;
   setAutoreduceIcon(m_playIcon);
   enable(autoreduceButton());
 }
 
 void QtReflRunsTabView::autoreduceWillPause() {
+  std::cout << "PausePress" << std::endl;
   setAutoreduceIcon(m_pauseIcon);
   enable(autoreduceButton());
 }
