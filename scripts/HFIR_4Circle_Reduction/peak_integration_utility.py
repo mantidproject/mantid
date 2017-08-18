@@ -1,5 +1,6 @@
 # Utility methods to do peak integration
 from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import numpy
 import math
 from scipy.optimize import curve_fit

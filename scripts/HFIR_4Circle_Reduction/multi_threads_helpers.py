@@ -4,7 +4,7 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import QThread
 
 import HFIR_4Circle_Reduction.reduce4circleControl as r4c
-import HFIR_4Circle_Reduction.peak_integration_utility
+from HFIR_4Circle_Reduction import peak_integration_utility
 
 
 class AddPeaksThread(QThread):

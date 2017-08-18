@@ -1,5 +1,6 @@
 #pylint: disable=R0913,W0403,R0903,C0103
 from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import numpy
 import numpy.linalg
 import math

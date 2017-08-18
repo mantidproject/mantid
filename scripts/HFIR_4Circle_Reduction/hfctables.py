@@ -1,9 +1,10 @@
 #pylint: disable=W0403,C0103,R0901,R0904,R0913,C0302
 from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import numpy
 import sys
-import HFIR_4Circle_Reduction.fourcircle_utility
-import HFIR_4Circle_Reduction.guiutility
+from HFIR_4Circle_Reduction import fourcircle_utility
+from HFIR_4Circle_Reduction import guiutility
 
 import HFIR_4Circle_Reduction.NTableWidget as tableBase
 

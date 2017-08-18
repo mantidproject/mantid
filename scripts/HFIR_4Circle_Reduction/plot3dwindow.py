@@ -1,11 +1,12 @@
 #pylint: disable=C0103,W0403
 from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import sys
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
 from . import ui_View3DWidget
-import HFIR_4Circle_Reduction.guiutility
+from HFIR_4Circle_Reduction import guiutility
 
 __author__ = 'wzz'
 

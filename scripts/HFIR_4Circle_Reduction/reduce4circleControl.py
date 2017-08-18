@@ -9,16 +9,17 @@
 #
 ################################################################################
 from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import csv
 import random
 import os
 
 from HFIR_4Circle_Reduction.fourcircle_utility import *
 from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
-import HFIR_4Circle_Reduction.fputility
-import HFIR_4Circle_Reduction.project_manager
-import HFIR_4Circle_Reduction.peak_integration_utility
-import HFIR_4Circle_Reduction.absorption
+from HFIR_4Circle_Reduction import fputility
+from HFIR_4Circle_Reduction import project_manager
+from HFIR_4Circle_Reduction import peak_integration_utility
+from HFIR_4Circle_Reduction import absorption
 
 import mantid
 import mantid.simpleapi as mantidsimple
@@ -681,8 +682,8 @@ class CWSCDReductionControl(object):
 
                 if intensity < std_dev:
                     # error is huge, very likely bad gaussian fit
-                    print('[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} Excluded from exporting.' \
-                          ''.format(algorithm_type, scan_number, intensity, std_dev))
+                    print('[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} '
+                          'Excluded from exporting.'.format(algorithm_type, scan_number, intensity, std_dev))
                     continue
                 # END-IF
 
@@ -2346,12 +2347,12 @@ class CWSCDReductionControl(object):
         # check whether there is a redundant creation of PeakProcessRecord for the same (exp, scan) combination
         if (exp_number, scan_number) in self._myPeakInfoDict:
             peak_info = self._myPeakInfoDict[(exp_number, scan_number)]
-            print('[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not be created twice!' \
-                  ''.format(exp_number, scan_number))
-            print('[CONTINUE] New PeaksWorkspace = {0} vs Existing PeaksWorkspace = {1}.' \
-                  ''.format(peak_ws_name, peak_info.peaks_workspace))
-            print('[CONTINUE] New MDEventWorkspace = {0} vs Existing MDEventWorkspace = {1}.' \
-                  ''.format(md_ws_name, peak_info.md_workspace))
+            print('[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not '
+                  'be created twice!'.format(exp_number, scan_number))
+            print('[CONTINUE] New PeaksWorkspace = {0} vs Existing '
+                  'PeaksWorkspace = {1}.'.format(peak_ws_name, peak_info.peaks_workspace))
+            print('[CONTINUE] New MDEventWorkspace = {0} vs Existing '
+                  'MDEventWorkspace = {1}.'.format(md_ws_name, peak_info.md_workspace))
             return False, peak_info
         # END-IF
 

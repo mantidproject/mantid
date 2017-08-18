@@ -1,7 +1,10 @@
 #pylint: disable=W0633,R0913,too-many-branches
 from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import os
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 import socket
 import numpy
 import math

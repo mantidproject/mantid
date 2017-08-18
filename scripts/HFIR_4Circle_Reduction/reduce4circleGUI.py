@@ -5,6 +5,7 @@
 #
 ################################################################################
 from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import six
 import os
 import sys
@@ -13,11 +14,25 @@ import time
 import datetime
 import random
 import numpy
+import HFIR_4Circle_Reduction.guiutility as gutil
+import HFIR_4Circle_Reduction.peakprocesshelper as peak_util
+import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
+from HFIR_4Circle_Reduction import plot3dwindow
+from HFIR_4Circle_Reduction.multi_threads_helpers import *
+import HFIR_4Circle_Reduction.optimizelatticewindow as ol_window
+from HFIR_4Circle_Reduction import viewspicedialog
+from HFIR_4Circle_Reduction import peak_integration_utility
+from HFIR_4Circle_Reduction import FindUBUtility
+from HFIR_4Circle_Reduction import message_dialog
+
+# import line for the UI python class
+from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
+
+from PyQt4 import QtCore, QtGui
 
 if six.PY3:
     unicode = str
 
-from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -30,20 +45,6 @@ except ImportError as e:
     NO_SCROLL = True
 else:
     NO_SCROLL = False
-
-import HFIR_4Circle_Reduction.guiutility as gutil
-import HFIR_4Circle_Reduction.peakprocesshelper as peak_util
-import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
-import HFIR_4Circle_Reduction.plot3dwindow
-from HFIR_4Circle_Reduction.multi_threads_helpers import *
-import HFIR_4Circle_Reduction.optimizelatticewindow as ol_window
-import HFIR_4Circle_Reduction.viewspicedialog
-import HFIR_4Circle_Reduction.peak_integration_utility
-import HFIR_4Circle_Reduction.FindUBUtility
-import HFIR_4Circle_Reduction.message_dialog
-
-# import line for the UI python class
-from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
 
 
 # define constants
@@ -2642,8 +2643,8 @@ class MainWindow(QtGui.QMainWindow):
                 self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, is_spice, round_error)
             except RuntimeError as run_err:
                 scan_number, pt_number = self.ui.tableWidget_peaksCalUB.get_scan_pt(row_index)
-                print('[ERROR] Unable to convert HKL to integer for scan {0} due to {1}.' \
-                      ''.format(scan_number, run_err))
+                print('[ERROR] Unable to convert HKL to integer for scan '
+                      '{0} due to {1}.'.format(scan_number, run_err))
         # END-FOR
 
         # disable the set to integer button and enable the revert/undo button
@@ -2675,8 +2676,8 @@ class MainWindow(QtGui.QMainWindow):
                 intensity2, error2 = peak_info_obj.get_intensity(integrate_type, True)
                 self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity1, intensity2, error2, integrate_type)
             except RuntimeError as run_err:
-                print('[ERROR] Unable to get peak intensity of scan {0} due to {1}.' \
-                      ''.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err))
+                print('[ERROR] Unable to get peak intensity of scan'
+                      ' {0} due to {1}.'.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err))
         # END-FOR
 
         return

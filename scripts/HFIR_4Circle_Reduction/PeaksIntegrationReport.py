@@ -74,8 +74,8 @@ class PeaksIntegrationReportDialog(QtGui.QDialog):
 
         scan_number_list = sorted(peak_integration_summary.keys())
         for scan_number in scan_number_list:
-            print('[DB...BAT] Scan {0} Peak integration report keys: {1}' \
-                  ''.format(scan_number, peak_integration_summary[scan_number].keys()))
+            print('[DB...BAT] Scan {0} Peak integration report '
+                  'keys: {1}'.format(scan_number, peak_integration_summary[scan_number].keys()))
 
             spice_hkl = peak_integration_summary[scan_number]['SPICE HKL']
             calculated_hkl = peak_integration_summary[scan_number]['Mantid HKL']
