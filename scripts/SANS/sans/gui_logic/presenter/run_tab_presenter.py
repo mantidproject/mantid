@@ -14,7 +14,14 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiag
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, OPTIONS_SEPARATOR, OPTIONS_INDEX,
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui,
+                                       SAMPLE_SCATTER_INDEX, SAMPLE_SCATTER_PERIOD_INDEX,
+                                       SAMPLE_TRANSMISSION_INDEX, SAMPLE_TRANSMISSION_PERIOD_INDEX,
+                                       SAMPLE_DIRECT_INDEX, SAMPLE_DIRECT_PERIOD_INDEX,
+                                       CAN_SCATTER_INDEX, CAN_SCATTER_PERIOD_INDEX,
+                                       CAN_TRANSMISSION_INDEX, CAN_TRANSMISSION_PERIOD_INDEX,
+                                       CAN_DIRECT_INDEX, CAN_DIRECT_PERIOD_INDEX, OUTPUT_NAME_INDEX,
+                                       OPTIONS_SEPARATOR, OPTIONS_INDEX,
                                        OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX)
 from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RangeStepType, SampleShape, FitType)
 from sans.common.file_information import (SANSFileInformationFactory)
@@ -728,21 +735,39 @@ class RunTabPresenter(object):
         # 2. Iterate over each row, create a table row model and insert it
         number_of_rows = self._view.get_number_of_rows()
         for row in range(number_of_rows):
-            sample_scatter = self._view.get_cell(row=row, column=0, convert_to=str)
-            sample_transmission = self._view.get_cell(row=row, column=1, convert_to=str)
-            sample_direct = self._view.get_cell(row=row, column=2, convert_to=str)
-            can_scatter = self._view.get_cell(row=row, column=3, convert_to=str)
-            can_transmission = self._view.get_cell(row=row, column=4, convert_to=str)
-            can_direct = self._view.get_cell(row=row, column=5, convert_to=str)
-            output_name = self._view.get_cell(row=row, column=6, convert_to=str)
+            sample_scatter = self._view.get_cell(row=row, column=SAMPLE_SCATTER_INDEX, convert_to=str)
+            sample_scatter_period = self._view.get_cell(row=row, column=SAMPLE_SCATTER_PERIOD_INDEX, convert_to=str)
+            sample_transmission = self._view.get_cell(row=row, column=SAMPLE_TRANSMISSION_INDEX, convert_to=str)
+            sample_transmission_period = self._view.get_cell(row=row, column=SAMPLE_TRANSMISSION_PERIOD_INDEX, convert_to=str)  # noqa
+            sample_direct = self._view.get_cell(row=row, column=SAMPLE_DIRECT_INDEX, convert_to=str)
+            sample_direct_period = self._view.get_cell(row=row, column=SAMPLE_DIRECT_PERIOD_INDEX, convert_to=str)
+            can_scatter = self._view.get_cell(row=row, column=CAN_SCATTER_INDEX, convert_to=str)
+            can_scatter_period = self._view.get_cell(row=row, column=CAN_SCATTER_PERIOD_INDEX, convert_to=str)
+            can_transmission = self._view.get_cell(row=row, column=CAN_TRANSMISSION_INDEX, convert_to=str)
+            can_transmission_period = self._view.get_cell(row=row, column=CAN_TRANSMISSION_PERIOD_INDEX, convert_to=str)
+            can_direct = self._view.get_cell(row=row, column=CAN_DIRECT_INDEX, convert_to=str)
+            can_direct_period = self._view.get_cell(row=row, column=CAN_DIRECT_PERIOD_INDEX, convert_to=str)
+            output_name = self._view.get_cell(row=row, column=OUTPUT_NAME_INDEX, convert_to=str)
 
             # Get the options string
             # We don't have to add the hidden column here, since it only contains information for the SANS
             # workflow to operate properly. It however does not contain information for the
             options_string = self._get_options(row)
 
-            table_index_model = TableIndexModel(row, sample_scatter, sample_transmission, sample_direct,
-                                                can_scatter, can_transmission, can_direct, output_name=output_name,
+            table_index_model = TableIndexModel(index=row,
+                                                sample_scatter=sample_scatter,
+                                                sample_scatter_period=sample_scatter_period,
+                                                sample_transmission=sample_transmission,
+                                                sample_transmission_period=sample_transmission_period,
+                                                sample_direct=sample_direct,
+                                                sample_direct_period=sample_direct_period,
+                                                can_scatter=can_scatter,
+                                                can_scatter_period=can_scatter_period,
+                                                can_transmission=can_transmission,
+                                                can_transmission_period=can_transmission_period,
+                                                can_direct=can_direct,
+                                                can_direct_period=can_direct_period,
+                                                output_name=output_name,
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model
@@ -788,22 +813,35 @@ class RunTabPresenter(object):
 
         # 1. Pull out the entries
         sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
+        sample_scatter_period = get_string_entry(BatchReductionEntry.SampleScatterPeriod, row)
         sample_transmission = get_string_entry(BatchReductionEntry.SampleTransmission, row)
+        sample_transmission_period = get_string_entry(BatchReductionEntry.SampleTransmissionPeriod, row)
         sample_direct = get_string_entry(BatchReductionEntry.SampleDirect, row)
+        sample_direct_period = get_string_entry(BatchReductionEntry.SampleDirectPeriod, row)
         can_scatter = get_string_entry(BatchReductionEntry.CanScatter, row)
+        can_scatter_period = get_string_entry(BatchReductionEntry.CanScatterPeriod, row)
         can_transmission = get_string_entry(BatchReductionEntry.CanTransmission, row)
+        can_transmission_period = get_string_entry(BatchReductionEntry.CanScatterPeriod, row)
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
+        can_direct_period = get_string_entry(BatchReductionEntry.CanDirectPeriod, row)
         output_name = get_string_entry(BatchReductionEntry.Output, row)
 
         # 2. Create entry that can be understood by table
-        row_entry = "SampleScatter:{0},SampleTransmission:{1},SampleDirect:{2}," \
-                    "CanScatter:{3},CanTransmission:{4},CanDirect:{5},OutputName:{6}".format(sample_scatter,
-                                                                                             sample_transmission,
-                                                                                             sample_direct,
-                                                                                             can_scatter,
-                                                                                             can_transmission,
-                                                                                             can_direct,
-                                                                                             output_name)
+        row_entry = "SampleScatter:{},scp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
+                    "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
+                    "CanDirect:{},cdp:{},OutputName:{}".format(sample_scatter,
+                                                               sample_scatter_period,
+                                                               sample_transmission,
+                                                               sample_transmission_period,
+                                                               sample_direct,
+                                                               sample_direct_period,
+                                                               can_scatter,
+                                                               can_scatter_period,
+                                                               can_transmission,
+                                                               can_transmission_period,
+                                                               can_direct,
+                                                               can_direct_period,
+                                                               output_name)
         self._view.add_row(row_entry)
 
     # ------------------------------------------------------------------------------------------------------------------

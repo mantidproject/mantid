@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>933</width>
-    <height>699</height>
+    <width>1211</width>
+    <height>775</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -81,7 +81,7 @@ QGroupBox::title {
                  <enum>QFrame::NoFrame</enum>
                 </property>
                 <property name="text">
-                 <string>User File:</string>
+                 <string>User F&amp;ile:</string>
                 </property>
                 <property name="buddy">
                  <cstring>masking_table</cstring>
@@ -1889,8 +1889,8 @@ QGroupBox::title {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>933</width>
-     <height>19</height>
+     <width>1211</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuEdit">
