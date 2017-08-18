@@ -3,9 +3,9 @@ Containing a set of classes used for finding (calculating and refining) UB matri
 """
 import os
 
-import ui_AddUBPeaksDialog
-import ui_UBSelectPeaksDialog
-import guiutility
+from . import ui_AddUBPeaksDialog
+from . import ui_UBSelectPeaksDialog
+from . import guiutility
 
 from PyQt4 import QtGui, QtCore
 

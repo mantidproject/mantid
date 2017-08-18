@@ -1,7 +1,7 @@
 # Dialog for message
 from PyQt4 import QtGui, QtCore
 
-import ui_messagebox
+from . import ui_messagebox
 
 
 class MessageDialog(QtGui.QDialog):
