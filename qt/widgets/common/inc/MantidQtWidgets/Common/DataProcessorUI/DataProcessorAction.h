@@ -1,6 +1,6 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORACTION_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORACTION_H
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <array>
 namespace MantidQt {
 namespace MantidWidgets {
@@ -50,7 +50,7 @@ enum class DataProcessorAction {
   WHATS_THIS
 };
 
-std::array<DataProcessorAction, 9> EXPORT_OPT_MANTIDQT_MANTIDWIDGETS
+std::array<DataProcessorAction, 9> EXPORT_OPT_MANTIDQT_COMMON
 tableModificationActions();
 
 template <typename DoIt>
