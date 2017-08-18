@@ -13,8 +13,6 @@ using namespace Mantid::API;
 using Mantid::MantidVec;
 using Mantid::Algorithms::FFTPreProcessing;
 
-const std::string outputName = "FFTPReProcessing_Output";
-
 namespace {
 struct yData {
   double operator()(const double x, size_t) { return x; }
@@ -37,7 +35,7 @@ IAlgorithm_sptr setUpAlg() {
   FFTPreProcess->initialize();
   FFTPreProcess->setChild(true);
   FFTPreProcess->setProperty("DecayConstant", 2.0);
-  FFTPreProcess->setProperty("OutputWorkspace", outputName);
+  FFTPreProcess->setProperty("OutputWorkspace", "FFTPreProcessing_output");
   return FFTPreProcess;
 }
 }
