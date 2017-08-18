@@ -1,8 +1,10 @@
 #include "MuonAnalysisFitFunctionPresenter.h"
-#include "../MultiDatasetFit/MDFEditLocalParameterDialog.h"
 #include "MantidAPI/IFunction.h"
 
+#include "MDFEditLocalParameterDialog.h"
+
 using MantidQt::CustomInterfaces::MDF::EditLocalParameterDialog;
+
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 

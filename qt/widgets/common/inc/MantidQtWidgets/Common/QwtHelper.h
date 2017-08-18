@@ -1,43 +1,44 @@
-#ifndef MANTID_CUSTOMINTERFACES_ALCHELPER_H_
-#define MANTID_CUSTOMINTERFACES_ALCHELPER_H_
+#ifndef MANTID_API_QWTHELPER_H_
+#define MANTID_API_QWTHELPER_H_
 
 #include "MantidKernel/System.h"
-#include "DllConfig.h"
+#include "DllOption.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
 
-#include "qwt_data.h"
+#include <qwt_data.h>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace ALCHelper {
+namespace API {
+namespace QwtHelper {
 /// Create Qwt curve data from a workspace
-boost::shared_ptr<QwtData>
+EXPORT_OPT_MANTIDQT_COMMON boost::shared_ptr<QwtData>
 curveDataFromWs(Mantid::API::MatrixWorkspace_const_sptr ws, size_t wsIndex);
 
 /// Create vector of Qwt curve data from a workspace, used for EnggDiffraction
 /// GUI
-MANTIDQT_MUONINTERFACE_DLL std::vector<boost::shared_ptr<QwtData>>
+EXPORT_OPT_MANTIDQT_COMMON std::vector<boost::shared_ptr<QwtData>>
 curveDataFromWs(Mantid::API::MatrixWorkspace_const_sptr ws);
 
 /// Create error vector from a workspace
-std::vector<double>
+EXPORT_OPT_MANTIDQT_COMMON std::vector<double>
 curveErrorsFromWs(Mantid::API::MatrixWorkspace_const_sptr ws, size_t wsIndex);
 
 /// Create Qwt curve data from a function
-boost::shared_ptr<QwtData>
+EXPORT_OPT_MANTIDQT_COMMON boost::shared_ptr<QwtData>
 curveDataFromFunction(Mantid::API::IFunction_const_sptr func,
                       const std::vector<double> &xValues);
 
 /// Create workspace filled with function values
-Mantid::API::MatrixWorkspace_sptr
+EXPORT_OPT_MANTIDQT_COMMON Mantid::API::MatrixWorkspace_sptr
 createWsFromFunction(Mantid::API::IFunction_const_sptr func,
                      const std::vector<double> &xValues);
 
 /// Creates empty Qwt curve data
-boost::shared_ptr<QwtData> emptyCurveData();
-}
-} // namespace CustomInterfaces
+EXPORT_OPT_MANTIDQT_COMMON boost::shared_ptr<QwtData> emptyCurveData();
+
+} // namespace QwtHelper
+} // namespace API
 } // namespace MantidQt
 
-#endif /* MANTID_CUSTOMINTERFACES_ALCHELPER_H_ */
+#endif /* MANTID_API_QWTHELPER_H_ */
