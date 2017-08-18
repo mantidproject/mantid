@@ -262,14 +262,15 @@ private slots:
 private:
   void plotSingle(int detid);
   void plotTube(int detid);
-  void plotTubeSums(int detid);
+  void plotTubeSums(int detid, const InstrumentActor &instrumentActor,
+                    const Mantid::Geometry::ICompAssembly &assembly);
   void plotTubeIntegrals(int detid);
 
   MiniPlotCurveData prepareDataForSinglePlot(int detid,
                                              bool includeErrors = false);
-  void prepareDataForSumsPlot(int detid, std::vector<double> &x,
-                              std::vector<double> &y,
-                              std::vector<double> *err = NULL);
+  MiniPlotCurveData
+  prepareDataForSumsPlot(int detid, const InstrumentActor &instrumentActor,
+                         const Mantid::Geometry::ICompAssembly &assembly);
   void prepareDataForIntegralsPlot(int detid, std::vector<double> &x,
                                    std::vector<double> &y,
                                    std::vector<double> *err = NULL);
@@ -284,8 +285,8 @@ private:
 
   PlotType m_plotType;
   bool m_enabled;
-  TubeXUnits
-      m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
+  /// quantity the time bin integrals to be plotted against
+  TubeXUnits m_tubeXUnits;
   int m_currentDetID;
 };
 

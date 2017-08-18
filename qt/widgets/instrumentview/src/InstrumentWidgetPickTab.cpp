@@ -48,11 +48,6 @@ namespace MantidWidgets {
 
 using namespace boost::math;
 
-/// to be used in std::transform
-struct Sqrt {
-  double operator()(double x) { return sqrt(x); }
-};
-
 /**
 * Constructor.
 * @param instrWidget :: Parent InstrumentWidget.
@@ -1243,23 +1238,21 @@ void DetectorPlotController::plotSingle(int detid) {
 void DetectorPlotController::plotTube(int detid) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   auto &det = actor.getDetectorByDetID(detid);
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent =
-      det.getParent();
-  Mantid::Geometry::ICompAssembly_const_sptr ass =
+  auto parent = det.getParent();
+  auto assembly =
       boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
           parent);
-  if (parent && ass) {
-    if (m_plotType == TubeSum) // plot sums over detectors vs time bins
-    {
-      plotTubeSums(detid);
-    } else // plot detector integrals vs detID or a function of detector
-           // position in the tube
-    {
+  if (parent && assembly) {
+    if (m_plotType == TubeSum) {
+      // plot sums over detectors vs time bins
+      plotTubeSums(detid, actor, *assembly);
+    } else {
+      // plot detector integrals vs detID or a function of detector
+      // position in the tube
       assert(m_plotType == TubeIntegral);
       plotTubeIntegrals(detid);
     }
   } else {
-    m_plot->clearCurve();
     m_miniplot->removeActiveCurve();
   }
 }
@@ -1269,25 +1262,16 @@ void DetectorPlotController::plotTube(int detid) {
 * @param detid :: A detector id. The miniplot will display data for a component
 * containing the detector
 *   with this id.
+* @param instrumentActor The actor giving access to the workspace
+* @param A CompAssembly object to be summed
 */
-void DetectorPlotController::plotTubeSums(int detid) {
-  //  std::vector<double> x, y;
-  //  prepareDataForSumsPlot(detid, x, y);
-  //  if (x.empty() || y.empty()) {
-  //    clear();
-  //    return;
-  //  }
-  //  const auto &actor = m_instrWidget->getInstrumentActor();
-  //  auto &det = actor.getDetectorByDetID(detid);
-  //  auto parent = det.getParent();
-  //  const std::string label =
-  //      parent->getName() + " (" + std::to_string(detid) + ") Sum";
-  //  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-  //                  actor.getWorkspace()->getAxis(0)->unit()->unitID());
-  //  m_plot->setLabel(QString::fromStdString(label));
-  //  m_miniplot->setActiveCurve(std::move(x), std::move(y),
-  //                             actor.getWorkspace()->getAxis(0)->unit()->unitID().data(),
-  //                             label);
+void DetectorPlotController::plotTubeSums(
+    int detid, const InstrumentActor &instrumentActor,
+    const Mantid::Geometry::ICompAssembly &assembly) {
+  auto plotData = prepareDataForSumsPlot(detid, instrumentActor, assembly);
+  if (plotData.x.empty() || plotData.y.empty())
+    return;
+  m_miniplot->setActiveCurve(std::move(plotData));
 }
 
 /**
@@ -1343,35 +1327,28 @@ void DetectorPlotController::plotTubeIntegrals(int detid) {
 MiniPlotCurveData
 DetectorPlotController::prepareDataForSinglePlot(int detid,
                                                  bool includeErrors) {
-  MiniPlotCurveData data;
   const auto &actor = m_instrWidget->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
   size_t wi;
+  MiniPlotCurveData data;
   try {
     wi = actor.getWorkspaceIndex(detid);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     // Detector doesn't have a workspace index relating to it
     return data;
   }
-  // get the data
-  const auto &XPoints = ws->points(wi);
-  const auto &Y = ws->y(wi);
-  const auto &E = ws->e(wi);
-
   // find min and max for x
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
 
-  // set the data
-  auto resizeAndAssign =
-      [](auto &dest, const auto srcItrBegin, const auto srcItrEnd) {
-        dest.resize(std::distance(srcItrBegin, srcItrEnd));
-        dest.assign(srcItrBegin, srcItrEnd);
-      };
-  resizeAndAssign(data.x, XPoints.begin() + imin, XPoints.begin() + imax);
-  resizeAndAssign(data.y, Y.begin() + imin, Y.begin() + imax);
+  // get the data
+  const auto &xdet = ws->points(wi);
+  const auto &ydet = ws->y(wi);
+  data.x.assign(xdet.begin() + imin, xdet.begin() + imax);
+  data.y.assign(ydet.begin() + imin, ydet.begin() + imax);
   if (includeErrors) {
-    resizeAndAssign(data.e, E.begin() + imin, E.begin() + imax);
+    const auto &edet = ws->e(wi);
+    data.e.assign(edet.begin() + imin, edet.begin() + imax);
   }
   // metadata
   data.xunit = QString::fromStdString(ws->getAxis(0)->unit()->unitID());
@@ -1380,66 +1357,50 @@ DetectorPlotController::prepareDataForSinglePlot(int detid,
 }
 
 /**
-* Prepare data for plotting accumulated data in a tube against time of flight.
+* Prepare data for plotting accumulated data in a tube against X.
 * @param detid :: A detector id. The miniplot will display data for a component
 * containing the detector
 *   with this id.
-* @param x :: Vector of x coordinates (output)
-* @param y :: Vector of y coordinates (output)
-* @param err :: Optional pointer to a vector of errors (output)
+* @param instrumentActor The actor giving access to the workspace
+* @param A CompAssembly object to be summed
+* @param includeErrors If true then provide the error data as well
+* @return A new MiniPlotCurveData object containing the data to plot
 */
-void DetectorPlotController::prepareDataForSumsPlot(int detid,
-                                                    std::vector<double> &x,
-                                                    std::vector<double> &y,
-                                                    std::vector<double> *err) {
-  const auto &actor = m_instrWidget->getInstrumentActor();
-  auto ws = actor.getWorkspace();
-  auto &det = actor.getDetectorByDetID(detid);
-  auto parent = det.getParent();
-  auto ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-      parent);
+MiniPlotCurveData DetectorPlotController::prepareDataForSumsPlot(
+    int detid, const InstrumentActor &instrumentActor,
+    const Mantid::Geometry::ICompAssembly &assembly) {
+  auto ws = instrumentActor.getWorkspace();
+  MiniPlotCurveData data;
   size_t wi;
   try {
-    wi = actor.getWorkspaceIndex(detid);
+    wi = instrumentActor.getWorkspaceIndex(detid);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    return; // Detector doesn't have a workspace index relating to it
+    // Detector doesn't have a workspace index relating to it
+    return data;
   }
   size_t imin, imax;
-  actor.getBinMinMaxIndex(wi, imin, imax);
+  instrumentActor.getBinMinMaxIndex(wi, imin, imax);
 
-  const auto &XPoints = ws->points(wi);
-  x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
-  y.resize(x.size(), 0);
-  if (err)
-    err->resize(x.size(), 0);
+  const auto &xdet = ws->points(wi);
+  data.x.assign(xdet.begin() + imin, xdet.begin() + imax);
+  data.y.resize(xdet.size(), 0);
 
-  const int n = ass->nelements();
+  const int n = assembly.nelements();
   for (int i = 0; i < n; ++i) {
-    Mantid::Geometry::IDetector_sptr idet =
-        boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
+    auto idet =
+        boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(assembly[i]);
     if (idet) {
       try {
-        size_t index = actor.getWorkspaceIndex(idet->getID());
-        const auto &Y = ws->y(index);
-        std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
-                       std::plus<double>());
-        if (err) {
-          const auto &E = ws->e(index);
-          std::vector<double> tmp;
-          tmp.assign(E.begin() + imin, E.begin() + imax);
-          std::transform(tmp.begin(), tmp.end(), tmp.begin(), tmp.begin(),
-                         std::multiplies<double>());
-          std::transform(err->begin(), err->end(), tmp.begin(), err->begin(),
-                         std::plus<double>());
-        }
+        size_t index = instrumentActor.getWorkspaceIndex(idet->getID());
+        const auto &ydet = ws->y(index);
+        std::transform(data.y.begin(), data.y.end(), ydet.begin() + imin,
+                       data.y.begin(), std::plus<double>());
       } catch (Mantid::Kernel::Exception::NotFoundError &) {
         continue; // Detector doesn't have a workspace index relating to it
       }
     }
   }
-
-  if (err)
-    std::transform(err->begin(), err->end(), err->begin(), Sqrt());
+  return data;
 }
 
 /**
