@@ -62,7 +62,7 @@ class TableIndexModel(object):
         self.sample_transmission = sample_transmission
         self.sample_transmission_period = sample_transmission_period
         self.sample_direct = sample_direct
-        self.sample_direct = sample_direct_period
+        self.sample_direct_period = sample_direct_period
 
         self.can_scatter = can_scatter
         self.can_scatter_period = can_scatter_period
