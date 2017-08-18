@@ -3,6 +3,7 @@ from ui.sans_isis.work_handler import WorkHandler
 
 from collections import namedtuple
 import copy
+from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService)
 
 try:
@@ -112,6 +113,7 @@ class MaskingTablePresenter(object):
         self._view = None
         self._parent_presenter = parent_presenter
         self._work_handler = WorkHandler()
+        self._logger = Logger("SANS")
 
     def on_row_changed(self):
         row_index = self._view.get_current_row()
@@ -125,6 +127,8 @@ class MaskingTablePresenter(object):
         state = self.get_state(row_index)
 
         if not state:
+            self._logger.information("You can only show a masked workspace if a user file has been loaded and there"
+                                     "valid sample scatter entry has been provided in the selected row.")
             return
 
         # Disable the button
@@ -141,6 +145,9 @@ class MaskingTablePresenter(object):
 
         # Display masked workspace
         self._display(result)
+
+    def on_processing_error_masking_display(self, error):
+        self._logger.warning("There has been an error. See more: {}".format(error))
 
     def on_processing_error(self, error):
         pass

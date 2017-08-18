@@ -30,8 +30,13 @@ class WorkHandler(object):
     @pyqtSlot()
     def on_finished(self):
         result = self._worker.result
-        self._listener.on_processing_finished(result)
         self._worker = None
+        self._listener.on_processing_finished(result)
+
+    @pyqtSlot()
+    def on_error(self, error):
+        self._worker = None
+        self._listener.on_processing_error(error)
 
     def process(self, caller, func, *args, **kwargs):
         # Add the caller
@@ -40,6 +45,7 @@ class WorkHandler(object):
         # Generate worker
         self._worker = Worker(func, *args, **kwargs)
         self._worker.signals.finished.connect(self.on_finished)
+        self._worker.signals.error.connect(self.on_error)
 
         if not self.thread_pool:
             self.thread_pool = QThreadPool()

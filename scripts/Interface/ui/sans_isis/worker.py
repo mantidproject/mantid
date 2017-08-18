@@ -6,7 +6,6 @@ import traceback, sys
 class WorkerSignals(QObject):
     finished = pyqtSignal()
     error = pyqtSignal(tuple)
-    result = pyqtSignal(object)
 
 
 class Worker(QRunnable):
