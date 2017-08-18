@@ -153,6 +153,19 @@ void MonteCarloAbsorption::exec() {
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
+std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
+  std::map<std::string, std::string> issues;
+  const int nlambda = getProperty("NumberOfWavelengthPoints");
+  InterpolationOption interpOpt;
+  const std::string interpValue = getPropertyValue("Interpolation");
+  interpOpt.set(interpValue);
+  const auto nlambdaIssue = interpOpt.validateInputSize(nlambda);
+  if (!nlambdaIssue.empty()) {
+    issues["NumberOfWavelengthPoints"] = nlambdaIssue;
+  }
+  return issues;
+}
+
 /**
  * Run the simulation over the whole input workspace
  * @param inputWS A reference to the input workspace
