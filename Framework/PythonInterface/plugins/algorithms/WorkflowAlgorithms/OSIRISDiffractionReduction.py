@@ -110,16 +110,10 @@ class DRangeToWorkspaceMap(object):
         temp_map = {}
 
         for d_range, ws_list in self._map.items():
-            ws_list = rebin_to_smallest(ws_list)
+            ws_list = rebin_to_smallest(*ws_list)
             temp_map[d_range] = average_ws_list(ws_list)
 
         self._map = temp_map
-
-    def set_item(self, d_range, ws_name):
-        """
-        Set a dRange and corresponding *single* ws.
-        """
-        self._map[d_range] = ws_name
 
     def items(self):
         """
@@ -138,6 +132,12 @@ class DRangeToWorkspaceMap(object):
         :return: An iterator over values in this d-range map.
         """
         return self._map.values()
+
+    def __setitem__(self, d_range, ws_name):
+        """
+        Set a dRange and corresponding *single* ws.
+        """
+        self._map[d_range] = ws_name
 
     def __iter__(self):
         """
@@ -243,7 +243,7 @@ def list_to_range(array_to_convert):
         return range(array_to_convert[0], array_to_convert[1] + 1)
 
 
-def rebin_to_smallest(workspaces):
+def rebin_to_smallest(*workspaces):
     """
     Rebins the specified list to the workspace with the smallest
     x-range in the list.
@@ -260,7 +260,7 @@ def rebin_to_smallest(workspaces):
     rebinned_workspaces = []
     for workspace in workspaces:
         rebin_alg.setProperty("WorkspaceToRebin", workspace)
-        rebin_alg.setProperty("OutputWorkspace", workspace.getName())
+        rebin_alg.setProperty("OutputWorkspace", "temp")
         rebin_alg.execute()
         rebinned_workspaces.append(rebin_alg.getProperty("OutputWorkspace").value)
 
@@ -392,16 +392,23 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Load all sample, vanadium files
         ipf_file_name = 'OSIRIS_diffraction_diffonly_Parameters.xml'
+        load_opts = {"DeleteMonitors": True}
+
         sample_ws_names, _ = load_files(self._sample_runs,
                                         ipf_file_name,
                                         self._spec_min,
                                         self._spec_max,
-                                        load_logs=self._load_logs)
+                                        load_logs=self._load_logs,
+                                        load_opts=load_opts)
+
         vanadium_ws_names, _ = load_files(self._vanadium_runs,
                                           ipf_file_name,
                                           self._spec_min,
                                           self._spec_max,
-                                          load_logs=self._load_logs)
+                                          load_logs=self._load_logs,
+                                          load_opts=load_opts)
+
+        container_ws_names = []
         container_workspaces = []
 
         # Load the container run
@@ -410,7 +417,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                                ipf_file_name,
                                                self._spec_min,
                                                self._spec_max,
-                                               load_logs=self._load_logs)
+                                               load_logs=self._load_logs,
+                                               load_opts=load_opts)
 
             # Scale the container run if required
             if self._container_scale_factor != 1.0:
@@ -423,33 +431,32 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 # Scale every container workspace
                 for container_ws_name in container_ws_names:
                     scale_set_property("InputWorkspace", container_ws_name)
-                    scale_set_property("OutputWorkspace", container_ws_name)
                     scale_set_property("Factor", self._container_scale_factor)
                     scale_exec()
                     container_workspaces.append(scale_get_property("OutputWorkspace").value)
+            else:
+                container_workspaces = container_ws_names
 
         # Initialize rebin algorithm and retrieve function pointers to improve performance
         rebin_get_property, rebin_set_property, rebin_exec \
             = self._init_child_algorithm("RebinToWorkspace")
 
-        # Intialize minus algorithm and retrieve function pointers to improve performance
+        # Initialize minus algorithm and retrieve function pointers to improve performance
         minus_get_property, minus_set_property, minus_exec \
             = self._init_child_algorithm("Minus")
 
         # Add the sample workspaces to the dRange to sample map
         for idx, sample_ws_name in enumerate(sample_ws_names):
-            sample_ws = sample_ws_name
 
             if container_workspaces:
                 rebin_set_property("WorkspaceToRebin", container_workspaces[idx])
-                rebin_set_property("WorkspaceToMatch", sample_ws)
-                rebin_set_property("OutputWorkspace", container_workspaces[idx])
+                rebin_set_property("WorkspaceToMatch", sample_ws_name)
                 rebin_exec()
 
-                minus_set_property("LHSWorkspace", sample_ws)
+                minus_set_property("LHSWorkspace", sample_ws_name)
                 minus_set_property("RHSWorkspace", rebin_get_property("OutputWorkspace").value)
-                minus_set_property("OutputWorkspace", sample_ws)
                 minus_exec()
+                sample_ws = minus_get_property("OutputWorkspace").value
             else:
                 sample_ws = mtd[sample_ws_name]
 
@@ -459,20 +466,18 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             else:
                 self._sam_ws_map.add_ws(sample_ws)
 
-        # Add the vanadium workspaces to the vanadium drange map
-        self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
-
-        # Create delete workspace algorithm and retrieve function pointers to improve performance
+        # Initialize delete workspace algorithm and retrieve function pointers
+        # to improve performance
         _, delete_set_property, delete_exec \
             = self._init_child_algorithm("DeleteWorkspace")
 
-        # Finished with container workspaces - delete them
-        for container in container_workspaces:
-            delete_set_property("Workspace", container)
+        # Finished with container workspaces, so delete them
+        for container_ws_name in container_ws_names:
+            delete_set_property("Workspace", container_ws_name)
             delete_exec()
-            # Delete monitors
-            delete_set_property("Workspace", container.getName() + "_mon")
-            delete_exec()
+
+        # Add the vanadium workspaces to the vanadium drange map
+        self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
         for d_range in self._sam_ws_map:
@@ -503,8 +508,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         crop_get_property, crop_set_property, crop_exec \
             = self._init_child_algorithm("CropWorkspace")
 
-        # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
-        for d_range, wrksp in itertools.chain(self._sam_ws_map.items(), self._van_ws_map.items()):
+        # Run necessary algorithms on the Sample workspaces.
+        for d_range, wrksp in self._sam_ws_map.items():
             normalise_set_property("InputWorkspace", wrksp)
             normalise_exec()
 
@@ -521,35 +526,60 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             crop_set_property("XMax", d_range[1])
             crop_exec()
 
+            self._sam_ws_map[d_range] = crop_get_property("OutputWorkspace").value
+
+        # Run necessary algorithms on the Vanadium workspaces.
+        for d_range, wrksp in self._van_ws_map.items():
+            normalise_set_property("InputWorkspace", wrksp)
+            normalise_exec()
+
+            align_set_property("InputWorkspace", normalise_get_property("OutputWorkspace").value)
+            align_set_property("CalibrationFile", self._cal)
+            align_exec()
+
+            diff_focus_set_property("InputWorkspace", align_get_property("OutputWorkspace").value)
+            diff_focus_set_property("GroupingFileName", self._cal)
+            diff_focus_exec()
+
+            crop_set_property("InputWorkspace", diff_focus_get_property("OutputWorkspace").value)
+            crop_set_property("XMin", d_range[0])
+            crop_set_property("XMax", d_range[1])
+            crop_exec()
+
+            self._van_ws_map[d_range] = crop_get_property("OutputWorkspace").value
+
+        # Workspaces in vanadium map are no longer in the ADS - can safely delete
+        # vanadium workspaces in ADS.
+        for vanadium_ws_name in vanadium_ws_names:
+            delete_set_property("Workspace", vanadium_ws_name)
+            delete_exec()
+
         # Divide all sample files by the corresponding vanadium files.
-        self._divide_all_by(self._sam_ws_map.values(), self._van_ws_map.values())
+        divided = self._divide_all_by(self._sam_ws_map.values(), self._van_ws_map.values())
 
-        # Create a list of sample workspaces, since we need this for MergeRuns.
-        sample_ws_list = self._sam_ws_map.values()
-
+        # Workspaces must be added to the ADS, as there does not yet exist
+        # a workspace list property (must be passed to merge runs by name).
         for sample_ws_name, sample_ws in zip(sample_ws_names,
-                                             sample_ws_list):
+                                             divided):
             mtd.addOrReplace(sample_ws_name, sample_ws)
 
-        if len(sample_ws_list) > 1:
+        if len(divided) > 1:
 
             # Merge the sample files into one.
             merge_runs_alg = self.createChildAlgorithm("MergeRuns", enableLogging=False)
-            merge_runs_alg.setProperty("InputWorkspaces", sample_ws_list)
-            merge_runs_alg.setProperty("OutputWorkspace", self._output_ws_name)
+            merge_runs_alg.setProperty("InputWorkspaces", sample_ws_names)
             merge_runs_alg.execute()
             output_ws = merge_runs_alg.getProperty("OutputWorkspace").value
-            self._output_ws_name = merge_runs_alg.getPropertyValue("OutputWorkspace")
-
-            for workspace in sample_ws_list:
-                delete_set_property("Workspace", workspace)
-                delete_exec()
-
-                # Delete monitor workspaces
-                delete_set_property("Workspace", workspace.getName() + "_mon")
-                delete_exec()
         else:
-            output_ws = sample_ws_list[0]
+            output_ws = divided[0]
+
+        # Sample workspaces are now finished with and can be deleted
+        # safely from the ADS.
+        for sample_ws_name in sample_ws_names:
+            delete_set_property("Workspace", sample_ws_name)
+            delete_exec()
+
+        mtd.addOrReplace(self._output_ws_name, output_ws)
 
         add_log_alg = self.createChildAlgorithm("AddSampleLog", enableLogging=False)
         add_log_alg.setProperty("Workspace", output_ws)
@@ -584,15 +614,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
             result.setY(i, result_y)
             result.setE(i, result_e)
-
-        # Delete all workspaces we've created, except the result.
-        for wrksp in self._van_ws_map.values():
-            delete_set_property("Workspace", wrksp)
-            delete_exec()
-
-            # Delete monitor workspaces
-            delete_set_property("Workspace", wrksp + "_mon")
-            delete_exec()
 
         self.setProperty("OutputWorkspace", result)
 
@@ -675,13 +696,14 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         algorithm = self.createChildAlgorithm(algorithm_name, enable_logging)
         return algorithm.getProperty, algorithm.setProperty, algorithm.execute
 
-    def _divide_all_by(self, dividend_ws_names, divisor_ws_names):
+    def _divide_all_by(self, dividend_workspaces, divisor_workspaces):
         """
         Divides the workspaces with the specified divided workspace names by
         the workspaces with the specified divisor workspace names.
 
-        :param dividend_ws_names:   The names of the workspaces to be divided.
-        :param divisor_ws_names:    The names of the workspaces to divide by.
+        :param dividend_workspaces:   The workspaces to be divided.
+        :param divisor_workspaces:    The workspaces to divide by.
+        :return:                      A list of the resultant divided workspaces.
         """
 
         divide_get_property, divide_set_property, divide_exec \
@@ -690,22 +712,24 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         replace_special_get_property, replace_special_set_property, replace_special_exec \
             = self._init_child_algorithm("ReplaceSpecialValues")
 
+        divided = []
+
         # Divide all dividend workspaces by the corresponding divisor workspaces.
-        for dividend_ws_name, divisor_ws_name in zip(dividend_ws_names, divisor_ws_names):
-            ws_list = rebin_to_smallest(mtd[dividend_ws_name], mtd[divisor_ws_name])
+        for dividend_ws, divisor_ws in zip(dividend_workspaces, divisor_workspaces):
+            ws_list = rebin_to_smallest(dividend_ws, divisor_ws)
             dividend_ws, divisor_ws = ws_list[0], ws_list[1]
 
             divide_set_property("LHSWorkspace", dividend_ws)
             divide_set_property("RHSWorkspace", divisor_ws)
-            divide_set_property("OutputWorkspace", dividend_ws)
             divide_exec()
 
             replace_special_set_property("InputWorkspace", divide_get_property("OutputWorkspace").value)
-            replace_special_set_property("OutputWorkspace", dividend_ws_name)
             replace_special_set_property("NaNValue", 0.0)
             replace_special_set_property("InfinityValue", 0.0)
             replace_special_exec()
-            mtd.addOrReplace(dividend_ws_name, replace_special_get_property("OutputWorkspace").value)
+            divided.append(replace_special_get_property("OutputWorkspace").value)
+
+        return divided
 
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
