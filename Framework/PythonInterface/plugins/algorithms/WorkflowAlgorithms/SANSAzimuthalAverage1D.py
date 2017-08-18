@@ -56,8 +56,8 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         #                                             PropertyMode.Optional),
         #                     "I(q) wedge workspaces")
         self.declareProperty(WorkspaceGroupProperty("IQLambdaWorkspace", "",
-                                                     Direction.Output,
-                                                     PropertyMode.Optional),
+                                                    Direction.Output,
+                                                    PropertyMode.Optional),
                              "I(q, wavelength) workspaces")
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
@@ -146,12 +146,12 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
         wedge_ws = alg.getProperty("WedgeWorkspace").value
-        
+
         output_tof_ws_name = self.getPropertyValue("IQLambdaWorkspace")
         if output_tof_ws_name == '':
             output_tof_ws_name = output_ws_name+'_wl'
             self.setPropertyValue("IQLambdaWorkspace", output_tof_ws_name)
-        
+
         tof_ws = alg.getProperty("IQLambdaWorkspace").value
         self.setProperty("IQLambdaWorkspace", tof_ws)
 

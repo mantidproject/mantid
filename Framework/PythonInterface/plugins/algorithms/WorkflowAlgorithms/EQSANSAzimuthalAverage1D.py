@@ -48,8 +48,8 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         self.declareProperty('OutputMessage', '', direction = Direction.Output,
                              doc = 'Output message')
         self.declareProperty(WorkspaceGroupProperty("IQLambdaWorkspace", "",
-                                                     Direction.Output,
-                                                     PropertyMode.Optional),
+                                                    Direction.Output,
+                                                    PropertyMode.Optional),
                              "I(q, wavelength) workspaces")
 
     def PyExec(self):
@@ -192,14 +192,14 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
 
         # Average second frame
         output_frame2, output_tof_frame2 = self._process_frame(workspace, wl_min_f2, wl_max_f2,
-                                            source_aperture_radius, '2', binning)
+                                                               source_aperture_radius, '2', binning)
 
         # Average first frame
         if independent_binning:
             binning = None
 
         output_frame1, output_tof_frame1 = self._process_frame(workspace, wl_min_f1, wl_max_f1,
-                                            source_aperture_radius, '1', binning)
+                                                               source_aperture_radius, '1', binning)
 
         if scale_results:
             output_frame1 = self._scale(output_frame1, output_frame2)
