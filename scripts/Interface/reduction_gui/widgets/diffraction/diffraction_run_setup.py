@@ -321,9 +321,9 @@ class RunSetupWidget(BaseWidget):
     def _charfile_browse(self):
         """ Event handing for browsing calibrtion file
         """
-        fname = self.data_browse_dialog("*.txt;;*")
+        fname = self.data_browse_dialog("*.txt;;*", multi=True)
         if fname:
-            self._content.charfile_edit.setText(fname)
+            self._content.charfile_edit.setText(','.join(fname))
 
         return
 
