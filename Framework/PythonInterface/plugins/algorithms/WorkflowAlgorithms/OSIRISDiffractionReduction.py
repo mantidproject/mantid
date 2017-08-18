@@ -80,7 +80,11 @@ class DRangeToWorkspaceMap(object):
         if d_range is None:
             d_range = TIME_REGIME_TO_DRANGE[time_regime]
         else:
-            d_range = TIME_REGIME_TO_DRANGE[time_regimes[d_range]]
+
+            try:
+                d_range = TIME_REGIME_TO_DRANGE[time_regimes[d_range]]
+            except RuntimeError:
+                raise RuntimeError("Supplied d-range, " + str(d_range) + ", is out of bounds.")
 
         logger.information('dRange for workspace %s is %s' % (workspace.getName(), str(d_range)))
 
@@ -359,17 +363,19 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self._man_d_range = None
 
-        # Check whether to manually override d-ranges.
-        try:
-            if not self.getProperty("DetectDRange").value:
-                self._man_d_range = self._parse_string_array(self.getProperty("DRange").value)
-                self._man_d_range = [x - 1 for x in self._man_d_range]
-        except BaseException as exc:
-            self.log().error(str(exc))
+        if not self.getProperty("DetectDRange").value:
+            self._man_d_range = self.getProperty("DRange").value
 
     def validateInputs(self):
         self._get_properties()
         issues = dict()
+
+        if self._man_d_range is not None:
+            try:
+                self._man_d_range = self._parse_string_array(self._man_d_range)
+                self._man_d_range = [x - 1 for x in self._man_d_range]
+            except BaseException as exc:
+                issues['DRange'] = str(exc)
 
         num_samples = len(self._sample_runs)
         num_vanadium = len(self._vanadium_runs)
@@ -655,8 +661,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Convert string ranges to integer ranges.
         try:
             int_ranges = [[int(x) for x in str_range] for str_range in str_ranges]
-        except RuntimeError:
-            raise ValueError("Provided d-range was incorrectly formatted.")
+        except BaseException:
+            raise ValueError('Provided string, "' + string +  '", was incorrectly formatted\n'
+                             '')
 
         # Expand integer ranges formed from a string 'a-b', to a range from a to b
         # Single provided integers remain the same
