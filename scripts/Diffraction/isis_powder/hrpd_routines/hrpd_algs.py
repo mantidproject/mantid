@@ -72,7 +72,7 @@ def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
 def _read_masking_file(masking_file_path):
     all_banks_masking_list = []
     bank_masking_list = []
-    ignore_line_prefixes = (' ', '\n', '\t', '#') # Matches whitespace or # symbol
+    ignore_line_prefixes = (' ', '\n', '\t', '#')  # Matches whitespace or # symbol
     with open(masking_file_path) as mask_file:
         for line in mask_file:
             if line.startswith(ignore_line_prefixes):

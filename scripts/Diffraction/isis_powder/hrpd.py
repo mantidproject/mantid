@@ -27,21 +27,20 @@ class HRPD(AbstractInst):
         self._sample_details = None
 
     def focus(self, **kwargs):
-        self._switch_decoupled_mode_inst_settings(kwargs.get("decoupled_mode"))
+        self._switch_tof_window_inst_settings(kwargs.get("window"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(
             run_number_string=self._inst_settings.run_number, do_van_normalisation=self._inst_settings.do_van_norm,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
-        self._switch_decoupled_mode_inst_settings(kwargs.get("decoupled_mode"))
+        self._switch_tof_window_inst_settings(kwargs.get("window"))
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def set_sample_details(self, **kwargs):
-        self._switch_decoupled_mode_inst_settings(kwargs.get("decoupled_mode"))
         kwarg_name = "sample"
         sample_details_obj = common.dictionary_key_helper(
             dictionary=kwargs, key=kwarg_name,
@@ -87,6 +86,6 @@ class HRPD(AbstractInst):
                                                          spline_number=spline_coeff)
         return output
 
-    def _switch_decoupled_mode_inst_settings(self, decoupled_mode):
+    def _switch_tof_window_inst_settings(self, tof_window):
         self._inst_settings.update_attributes(
-            advanced_config=hrpd_advanced_config.get_decoupled_mode_dict(decoupled_mode), suppress_warnings=True)
+            advanced_config=hrpd_advanced_config.get_tof_window_dict(tof_window=tof_window))
