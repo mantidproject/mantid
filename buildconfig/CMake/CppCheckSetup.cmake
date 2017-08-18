@@ -27,10 +27,9 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/TestHelpers/inc
         Framework/Crystal/inc
         Framework/Kernel/inc
-        Vates/VatesAPI/inc
-        Vates/VatesSimpleGui/ViewWidgets/inc
-        Vates/VatesSimpleGui/StandAloneExec/inc
-        Vates/VatesSimpleGui/QtWidgets/inc
+        qt/paraview_ext/VatesAPI/inc
+        qt/paraview_ext/VatesSimpleGui/ViewWidgets/inc
+        qt/paraview_ext/VatesSimpleGui/QtWidgets/inc
         qt/widgets/common/inc
         qt/widgets/factory/inc
         qt/widgets/instrumentview/inc
