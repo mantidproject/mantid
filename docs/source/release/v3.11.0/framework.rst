@@ -25,7 +25,7 @@ Improved
 - :ref:`GroupDetectors <algm-GroupDetectors-v2>` now supports workspaces with detector scans.
 - :ref:`Load <algm-Load-v1>` now supports use of tilde in file paths in Python, for example Load(Filename="~/data/test.nxs", ...)
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces-v1>` provides option to change Y axis unit and label.
-- :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays.
+- :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays. Also, the NumberOfWavelengthPoints input property is now validated more rigorously.
 - :ref:`FindPeaksMD <algm-FindPeaksMD-v1>` allows now to normalize by the number of events. This can improve results for data that was originally based on histogram data which has been converted to event-mode.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` has refactored on splitting sample logs.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
