@@ -118,7 +118,7 @@ public:
                  "name=Linear,a=0,b=0;" \
                  "name=Linear,a=0,b=0;" \
                  "name=Cubic,c0=0,c1=0,c2=0,c3=0");
-        //TS_ASSERT_EQUALS(f->asString(), s);
+        TS_ASSERT_EQUALS(f->asString(), s);
         f->insertFunction(3, m_f["moc3"]);  // insert moc3 (Gauss * Cubic) before Cubic
         s.assign("composite=AssociativeMoc,NumDeriv=false;" \
                  "name=Gauss,c=0,h=1,s=1;" \
@@ -127,20 +127,29 @@ public:
                  "name=Gauss,c=0,h=1,s=1;" \
                  "name=Cubic,c0=0,c1=0,c2=0,c3=0;" \
                  "name=Cubic,c0=0,c1=0,c2=0,c3=0");
-        //TS_ASSERT_EQUALS(f->asString(), s);
+        TS_ASSERT_EQUALS(f->asString(), s);
     }
 
     void testReplaceFunction() {
         std::string s("(composite=AssociativeMoc;name=Gauss;name=Cubic)");
         auto f = functionAssociativeInitialized(s);
-        f->replaceFunction(1, m_f["line"]);
-        //TS_ASSERT_EQUALS(f->asString(), s);
-        f->addFunction(m_f["comp"]);
-        //TS_ASSERT_EQUALS(f->asString(), s);
-        f->replaceFunction(0, m_f["moc2"]);
-        //TS_ASSERT_EQUALS(f->asString(), s);
-        f->insertFunction(1, m_f["moc3"]);
-        //TS_ASSERT_EQUALS(f->asString(), s);
+        f->replaceFunction(1, m_f["line"]);  // Replace Cubic with Linear
+        s.assign("composite=AssociativeMoc,NumDeriv=false;" \
+                 "name=Gauss,c=0,h=1,s=1;" \
+                 "name=Linear,a=0,b=0");
+        TS_ASSERT_EQUALS(f->asString(), s);
+        f->replaceFunction(0, m_f["moc2"]);  // Replace Gauss with moc2 (Linear)
+        s.assign("composite=AssociativeMoc,NumDeriv=false;" \
+                  "name=Linear,a=0,b=0;" \
+                  "name=Linear,a=0,b=0");
+        TS_ASSERT_EQUALS(f->asString(), s);
+        f->insertFunction(1, m_f["moc3"]);  // Replace second Linear with moc3 (Gauss * Cubic)
+        s.assign("composite=AssociativeMoc,NumDeriv=false;" \
+                 "name=Linear,a=0,b=0;" \
+                 "name=Gauss,c=0,h=1,s=1;" \
+                 "name=Cubic,c0=0,c1=0,c2=0,c3=0;" \
+                 "name=Linear,a=0,b=0");
+        TS_ASSERT_EQUALS(f->asString(), s);
     }
 
 private:

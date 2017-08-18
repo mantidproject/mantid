@@ -45,10 +45,10 @@ public:
     virtual size_t addFunction(IFunction_sptr f) override;
 
     /// Insert a function at a given index in the vector of component functions
-    void insertFunction(size_t i, IFunction_sptr f);
+    void insertFunction(size_t idx, IFunction_sptr f);
 
-    /// Replace a function
-    void replaceFunction(size_t i, IFunction_sptr f);
+    /// Replace a function at a given index in the vector of component functions
+    void replaceFunction(size_t idx, IFunction_sptr f);
 };
 
 } // namespace API

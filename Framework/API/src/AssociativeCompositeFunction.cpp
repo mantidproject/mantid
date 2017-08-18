@@ -32,30 +32,30 @@ std::size_t AssociativeCompositeFunction::addFunction(IFunction_sptr f) {
 }
 
 /** Insert a function at a given index in the vector of component functions
- *  @param i :: The index assigned to the new function.
+ *  @param idx :: The index assigned to the new function.
  *  @param f :: A pointer to the new function
  */
-void AssociativeCompositeFunction::insertFunction(size_t i, IFunction_sptr f) {
+void AssociativeCompositeFunction::insertFunction(size_t idx, IFunction_sptr f) {
     if (isAssociative(f)) {
         auto fa = boost::dynamic_pointer_cast<AssociativeCompositeFunction>(f);
         for(std::size_t i=0; i < fa->nFunctions(); i++) {
-            CompositeFunction::insertFunction(i, fa->getFunction(i));
+            CompositeFunction::insertFunction(idx+i, fa->getFunction(i));
         }
     } else {
-        CompositeFunction::insertFunction(i, f);
+        CompositeFunction::insertFunction(idx, f);
     }
 }
 
 /** Replace a function with a new one. The old function is deleted.
- * @param i :: The index of the function to replace
+ * @param idx :: The index of the function to replace
  * @param f :: A pointer to the new function
  */
-void AssociativeCompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
+void AssociativeCompositeFunction::replaceFunction(size_t idx, IFunction_sptr f) {
     if (isAssociative(f)) {
-        removeFunction(i);
-        insertFunction(i, f);
+        removeFunction(idx);
+        insertFunction(idx, f);
     } else {
-        CompositeFunction::replaceFunction(i, f);
+        CompositeFunction::replaceFunction(idx, f);
     }
 }
 
