@@ -268,7 +268,8 @@ public:
   void test_interpolatelinearinplace_throws_if_input_has_less_than_2_points() {
     Histogram input(Points(1, LinearGenerator(0.1, 0.1)));
     Histogram output(Points(1, LinearGenerator(0.1, 0.1)));
-    TS_ASSERT_THROWS(interpolateLinearInplace(input, output), std::runtime_error)
+    TS_ASSERT_THROWS(interpolateLinearInplace(input, output),
+                     std::runtime_error)
   }
 
   void
@@ -302,7 +303,8 @@ public:
   void test_interpolatecsplineinplace_throws_if_input_has_less_than_3_points() {
     Histogram input(Points(2, LinearGenerator(0, 1.0)));
     Histogram output(Points(5, LinearGenerator(0.1, 0.1)));
-    TS_ASSERT_THROWS(interpolateCSplineInplace(input, output), std::runtime_error)
+    TS_ASSERT_THROWS(interpolateCSplineInplace(input, output),
+                     std::runtime_error)
   }
 
   void

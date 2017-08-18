@@ -69,11 +69,13 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
  * @param output A histogram where interpolated values are store
  * @throw runtime_error Signals that the sanity check failed.
  */
-void sanityCheck(const Histogram &input, const Histogram &output, const size_t minInputSize) {
+void sanityCheck(const Histogram &input, const Histogram &output,
+                 const size_t minInputSize) {
   const auto inPoints = input.points();
   const auto outPoints = output.points();
   if (inPoints.size() < minInputSize) {
-    throw std::runtime_error("interpolate - input histogram has too few points");
+    throw std::runtime_error(
+        "interpolate - input histogram has too few points");
   }
   if (outPoints.front() < inPoints.front() ||
       outPoints.back() > inPoints.back()) {

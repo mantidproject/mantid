@@ -153,6 +153,10 @@ void MonteCarloAbsorption::exec() {
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
+/**
+ * Validate the input properties.
+ * @return a map where keys are property names and values the found issues
+ */
 std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
   std::map<std::string, std::string> issues;
   const int nlambda = getProperty("NumberOfWavelengthPoints");

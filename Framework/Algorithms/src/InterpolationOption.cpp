@@ -68,19 +68,26 @@ std::string InterpolationOption::propertyDoc() const {
   return "Method of interpolation used to compute unsimulated values.";
 }
 
+/**
+ * Validate the size of input histogram
+ * @param size number of points in the input histogram
+ * @return an error message if there was one, otherwise an empty string
+ */
 std::string InterpolationOption::validateInputSize(const size_t size) const {
   size_t nMin;
   switch (m_value) {
   case Value::Linear:
     nMin = minSizeForLinearInterpolation();
     if (size < nMin) {
-      return "Linear interpolation requires at least " + std::to_string(nMin) + " points.";
+      return "Linear interpolation requires at least " + std::to_string(nMin) +
+             " points.";
     }
     break;
   case Value::CSpline:
     nMin = minSizeForCSplineInterpolation();
     if (size < nMin) {
-      return "CSpline interpolation requires at least " + std::to_string(nMin) + " points.";
+      return "CSpline interpolation requires at least " + std::to_string(nMin) +
+             " points.";
     }
     break;
   }
