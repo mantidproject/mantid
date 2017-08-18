@@ -132,7 +132,7 @@ if( "@MAKE_VATES@" == "ON" )
   `mkdir Contents/Libraries`
   `cp #{ParaView_dir}/lib/*Python.so Contents/Libraries`
   vatesfiles = ["Contents/MacOS/MantidPlot",
-                "Contents/MacOS/libMantidQtAPI.dylib",
+                "Contents/MacOS/libMantidQtWidgetsCommon.dylib",
                 "Contents/MacOS/libMantidParaViewQtWidgets.dylib",
                 "Contents/MacOS/libMantidVatesAPI.dylib",
                 "pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]
