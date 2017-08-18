@@ -1250,7 +1250,7 @@ void DetectorPlotController::plotTube(int detid) {
       // plot detector integrals vs detID or a function of detector
       // position in the tube
       assert(m_plotType == TubeIntegral);
-      plotTubeIntegrals(detid);
+      plotTubeIntegrals(detid, actor, *assembly);
     }
   } else {
     m_miniplot->removeActiveCurve();
@@ -1286,7 +1286,15 @@ void DetectorPlotController::plotTubeSums(
 * containing the detector
 *   with this id.
 */
-void DetectorPlotController::plotTubeIntegrals(int detid) {
+void DetectorPlotController::plotTubeIntegrals(
+    int detid, const InstrumentActor &instrumentActor,
+    const Mantid::Geometry::ICompAssembly &assembly) {
+  MiniPlotCurveData data =
+      prepareDataForIntegralsPlot(detid, instrumentActor, assembly);
+  if (data.x.empty() || data.y.empty()) {
+    clear();
+    return;
+  }
   //  auto &det = m_instrWidget->getInstrumentActor().getDetectorByDetID(detid);
   //  std::vector<double> x, y;
   //  prepareDataForIntegralsPlot(detid, x, y);
@@ -1301,7 +1309,7 @@ void DetectorPlotController::plotTubeIntegrals(int detid) {
   //  }
   //  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
   //                  xAxisCaption.toStdString());
-  //  auto parent = det.getParent();
+  //  auto parent = assembly.getParent();
   //  // curve label: "tube_name (detid) Integrals"
   //  // detid is included to distiguish tubes with the same name
   //  QString label = parent->getName() + " (" + std::to_string(detid) +
@@ -1420,128 +1428,127 @@ MiniPlotCurveData DetectorPlotController::prepareDataForSumsPlot(
 * @param y :: Vector of y coordinates (output)
 * @param err :: Optional pointer to a vector of errors (output)
 */
-void DetectorPlotController::prepareDataForIntegralsPlot(
-    int detid, std::vector<double> &x, std::vector<double> &y,
-    std::vector<double> *err) {
-
+MiniPlotCurveData DetectorPlotController::prepareDataForIntegralsPlot(
+    int detid, const InstrumentActor &actor,
+    const Mantid::Geometry::ICompAssembly &assembly) {
+  MiniPlotCurveData data;
 #define PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED                              \
-  x.clear();                                                                   \
-  y.clear();                                                                   \
-  if (err)                                                                     \
-    err->clear();                                                              \
-  return;
+  data.x.clear();                                                              \
+  data.y.clear();                                                              \
+  return data;
 
-  const auto &actor = m_instrWidget->getInstrumentActor();
-  Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
+  //  const auto &actor = m_instrWidget->getInstrumentActor();
+  //  Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
 
-  // Does the instrument definition specify that psi should be offset.
-  std::vector<std::string> parameters =
-      ws->getInstrument()->getStringParameter("offset-phi");
-  const bool bOffsetPsi = (!parameters.empty()) &&
-                          std::find(parameters.begin(), parameters.end(),
-                                    "Always") != parameters.end();
+  //  // Does the instrument definition specify that psi should be offset.
+  //  std::vector<std::string> parameters =
+  //      ws->getInstrument()->getStringParameter("offset-phi");
+  //  const bool bOffsetPsi = (!parameters.empty()) &&
+  //                          std::find(parameters.begin(), parameters.end(),
+  //                                    "Always") != parameters.end();
 
-  auto &det = actor.getDetectorByDetID(detid);
-  auto parent = det.getParent();
-  auto ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-      parent);
-  size_t wi;
-  try {
-    wi = actor.getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    return; // Detector doesn't have a workspace index relating to it
-  }
-  // imin and imax give the bin integration range
-  size_t imin, imax;
-  actor.getBinMinMaxIndex(wi, imin, imax);
+  //  auto &det = actor.getDetectorByDetID(detid);
+  //  size_t wi;
+  //  try {
+  //    wi = actor.getWorkspaceIndex(detid);
+  //  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+  //    return; // Detector doesn't have a workspace index relating to it
+  //  }
+  //  // imin and imax give the bin integration range
+  //  size_t imin, imax;
+  //  actor.getBinMinMaxIndex(wi, imin, imax);
 
-  Mantid::Kernel::V3D samplePos = actor.getInstrument()->getSample()->getPos();
+  //  Mantid::Kernel::V3D samplePos =
+  //  actor.getInstrument()->getSample()->getPos();
 
-  const int n = ass->nelements();
-  if (n == 0) {
-    // don't think it's ever possible but...
-    throw std::runtime_error("PickTab miniplot: empty instrument assembly");
-  }
-  if (n == 1) {
-    // if assembly has just one element there is nothing to plot
-    PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
-  }
-  // collect and sort xy pairs in xymap
-  std::map<double, double> xymap, errmap;
-  // get the first detector in the tube for lenth calculation
-  Mantid::Geometry::IDetector_sptr idet0 =
-      boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[0]);
-  if (!idet0) {
-    // it's not an assembly of detectors,
-    // could be a mixture of monitors and other components
-    PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
-  }
-  Mantid::Kernel::V3D normal = (*ass)[1]->getPos() - idet0->getPos();
-  normal.normalize();
-  for (int i = 0; i < n; ++i) {
-    Mantid::Geometry::IDetector_sptr idet =
-        boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-    if (idet) {
-      try {
-        const int id = idet->getID();
-        // get the x-value for detector idet
-        double xvalue = 0;
-        switch (m_tubeXUnits) {
-        case LENGTH:
-          xvalue = idet->getDistance(*idet0);
-          break;
-        case PHI:
-          xvalue = bOffsetPsi ? idet->getPhiOffset(M_PI) : idet->getPhi();
-          break;
-        case OUT_OF_PLANE_ANGLE: {
-          Mantid::Kernel::V3D pos = idet->getPos();
-          xvalue = getOutOfPlaneAngle(pos, samplePos, normal);
-          break;
-        }
-        default:
-          xvalue = static_cast<double>(id);
-        }
-        size_t index = actor.getWorkspaceIndex(id);
-        // get the y-value for detector idet
-        const auto &Y = ws->y(index);
-        double sum = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
-        xymap[xvalue] = sum;
-        if (err) {
-          const auto &E = ws->e(index);
-          std::vector<double> tmp(imax - imin);
-          // take squares of the errors
-          std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin,
-                         tmp.begin(), std::multiplies<double>());
-          // sum them
-          double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
-          // take sqrt
-          errmap[xvalue] = sqrt(sum);
-        }
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        continue; // Detector doesn't have a workspace index relating to it
-      }
-    }
-  }
-  if (!xymap.empty()) {
-    // set the plot curve data
-    x.resize(xymap.size());
-    y.resize(xymap.size());
-    std::map<double, double>::const_iterator xy = xymap.begin();
-    for (size_t i = 0; xy != xymap.end(); ++xy, ++i) {
-      x[i] = xy->first;
-      y[i] = xy->second;
-    }
-    if (err) {
-      err->resize(errmap.size());
-      std::map<double, double>::const_iterator e = errmap.begin();
-      for (size_t i = 0; e != errmap.end(); ++e, ++i) {
-        (*err)[i] = e->second;
-      }
-    }
-  } else {
-    PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
-  }
-#undef PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
+  //  const int n = assembly->nelements();
+  //  if (n == 0) {
+  //    // don't think it's ever possible but...
+  //    throw std::runtime_error("PickTab miniplot: empty instrument assembly");
+  //  }
+  //  if (n == 1) {
+  //    // if assembly has just one element there is nothing to plot
+  //    PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
+  //  }
+  //  // collect and sort xy pairs in xymap
+  //  std::map<double, double> xymap, errmap;
+  //  // get the first detector in the tube for lenth calculation
+  //  Mantid::Geometry::IDetector_sptr idet0 =
+  //      boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[0]);
+  //  if (!idet0) {
+  //    // it's not an assembly of detectors,
+  //    // could be a mixture of monitors and other components
+  //    PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
+  //  }
+  //  Mantid::Kernel::V3D normal = (*ass)[1]->getPos() - idet0->getPos();
+  //  normal.normalize();
+  //  for (int i = 0; i < n; ++i) {
+  //    Mantid::Geometry::IDetector_sptr idet =
+  //        boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
+  //    if (idet) {
+  //      try {
+  //        const int id = idet->getID();
+  //        // get the x-value for detector idet
+  //        double xvalue = 0;
+  //        switch (m_tubeXUnits) {
+  //        case LENGTH:
+  //          xvalue = idet->getDistance(*idet0);
+  //          break;
+  //        case PHI:
+  //          xvalue = bOffsetPsi ? idet->getPhiOffset(M_PI) : idet->getPhi();
+  //          break;
+  //        case OUT_OF_PLANE_ANGLE: {
+  //          Mantid::Kernel::V3D pos = idet->getPos();
+  //          xvalue = getOutOfPlaneAngle(pos, samplePos, normal);
+  //          break;
+  //        }
+  //        default:
+  //          xvalue = static_cast<double>(id);
+  //        }
+  //        size_t index = actor.getWorkspaceIndex(id);
+  //        // get the y-value for detector idet
+  //        const auto &Y = ws->y(index);
+  //        double sum = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
+  //        xymap[xvalue] = sum;
+  //        if (err) {
+  //          const auto &E = ws->e(index);
+  //          std::vector<double> tmp(imax - imin);
+  //          // take squares of the errors
+  //          std::transform(E.begin() + imin, E.begin() + imax, E.begin() +
+  //          imin,
+  //                         tmp.begin(), std::multiplies<double>());
+  //          // sum them
+  //          double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
+  //          // take sqrt
+  //          errmap[xvalue] = sqrt(sum);
+  //        }
+  //      } catch (Mantid::Kernel::Exception::NotFoundError &) {
+  //        continue; // Detector doesn't have a workspace index relating to it
+  //      }
+  //    }
+  //  }
+  //  if (!xymap.empty()) {
+  //    // set the plot curve data
+  //    x.resize(xymap.size());
+  //    y.resize(xymap.size());
+  //    std::map<double, double>::const_iterator xy = xymap.begin();
+  //    for (size_t i = 0; xy != xymap.end(); ++xy, ++i) {
+  //      x[i] = xy->first;
+  //      y[i] = xy->second;
+  //    }
+  //    if (err) {
+  //      err->resize(errmap.size());
+  //      std::map<double, double>::const_iterator e = errmap.begin();
+  //      for (size_t i = 0; e != errmap.end(); ++e, ++i) {
+  //        (*err)[i] = e->second;
+  //      }
+  //    }
+  //  } else {
+  //    PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
+  //  }
+  //#undef PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
+
+  return data;
 }
 
 /**

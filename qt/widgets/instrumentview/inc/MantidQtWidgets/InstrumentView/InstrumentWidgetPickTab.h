@@ -264,16 +264,16 @@ private:
   void plotTube(int detid);
   void plotTubeSums(int detid, const InstrumentActor &instrumentActor,
                     const Mantid::Geometry::ICompAssembly &assembly);
-  void plotTubeIntegrals(int detid);
-
+  void plotTubeIntegrals(int detid, const InstrumentActor &instrumentActor,
+                         const Mantid::Geometry::ICompAssembly &assembly);
   MiniPlotCurveData prepareDataForSinglePlot(int detid,
                                              bool includeErrors = false);
   MiniPlotCurveData
   prepareDataForSumsPlot(int detid, const InstrumentActor &instrumentActor,
                          const Mantid::Geometry::ICompAssembly &assembly);
-  void prepareDataForIntegralsPlot(int detid, std::vector<double> &x,
-                                   std::vector<double> &y,
-                                   std::vector<double> *err = NULL);
+  MiniPlotCurveData
+  prepareDataForIntegralsPlot(int detid, const InstrumentActor &instrumentActor,
+                              const Mantid::Geometry::ICompAssembly &assembly);
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
                                    const Mantid::Kernel::V3D &origin,
                                    const Mantid::Kernel::V3D &normal);
