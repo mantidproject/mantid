@@ -214,14 +214,14 @@ class SPowderSemiEmpiricalCalculator(object):
         intend = AbinsModules.AbinsConstants.S_THRESHOLD_CHANGE_INDENTATION
         if atom is None:
 
-            self._s_current_threshold = self._s_threshold_ref * 2.0 ** self._total_s_correction_num_attempt
+            self._s_current_threshold += self._s_threshold_ref
             self._report_progress(
                 intend + "Threshold for S has been changed to {} for all atoms."
                 .format(self._s_current_threshold[0]) + " S for all atoms will be calculated from scratch.")
 
         else:
 
-            self._s_current_threshold[atom] *= 2
+            self._s_current_threshold[atom] += self._s_threshold_ref[atom]
             atom_symbol = self._atoms["atom_{}".format(atom)]["symbol"]
             self._report_progress(
                 intend + "Threshold for S has been changed to {} for atom {}  ({})."
@@ -496,8 +496,9 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             rebined_broad_spectrum = self._fix_empty_array()
 
-        # multiply by k-point weight
-        rebined_broad_spectrum = rebined_broad_spectrum * self._weight / AbinsModules.AbinsParameters.bin_width
+        # multiply by k-point weight and scaling constant
+        factor = self._weight / AbinsModules.AbinsParameters.bin_width * AbinsModules.AbinsConstants.SCALING_CONSTANT
+        rebined_broad_spectrum = rebined_broad_spectrum * factor
         return local_freq, local_coeff, rebined_broad_spectrum
 
     # noinspection PyUnusedLocal
@@ -574,7 +575,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
                        np.einsum('kli, kil->k',
                        np.take(b_tensor, indices=indices[:, 1], axis=0),
-                       np.take(b_tensor, indices=indices[:, 0], axis=0))) / (15.0 * factor)
+                       np.take(b_tensor, indices=indices[:, 0], axis=0))) * 16.0 / (15.0 * factor)
 
         return s
 
@@ -594,7 +595,7 @@ class SPowderSemiEmpiricalCalculator(object):
         """
         coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
                              (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
-        s = 9.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
+        s = 36.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
         return s

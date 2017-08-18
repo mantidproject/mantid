@@ -167,8 +167,10 @@ MAX_WAVENUMBER = 5000.0  # in cm^-1
 MAX_POINTS_PER_PEAK = 1000
 MIN_POINTS_PER_PEAK = 1
 
-SMALL_S = 1e-5
-MAX_THRESHOLD = 1.0
+SMALL_S = 1e-6
+MAX_THRESHOLD = 0.20
 
 ONE_CHARACTER = 1
 EOF = b""
+
+SCALING_CONSTANT = 100.0  # scaling constant so it is easier to compare with aCLIMAX
