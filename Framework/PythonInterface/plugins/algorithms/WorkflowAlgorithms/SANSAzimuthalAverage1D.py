@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 import math
+#import time
 
 from mantid.kernel import logger
 
@@ -55,6 +56,10 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         #                                             Direction.Output,
         #                                             PropertyMode.Optional),
         #                     "I(q) wedge workspaces")
+        self.declareProperty(WorkspaceGroupProperty("TOFWorkspace", "",
+                                                     Direction.Output,
+                                                     PropertyMode.Optional),
+                             "I(q, wavelength) wedge workspaces")
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
 
@@ -142,6 +147,10 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
         wedge_ws = alg.getProperty("WedgeWorkspace").value
+        tof_ws = alg.getProperty("IQLambdaWorkspace").value
+        self.setProperty("TOFWorkspace", tof_ws)
+
+        #AnalysisDataService.addOrReplace("IQ_tof_%s" % time.time(), tof_ws)
 
         alg = AlgorithmManager.create("ReplaceSpecialValues")
         alg.initialize()

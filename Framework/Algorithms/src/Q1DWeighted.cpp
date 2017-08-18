@@ -77,6 +77,11 @@ void Q1DWeighted::init() {
       "ErrorWeighting", false,
       "Choose whether each pixel contribution will be weighted by 1/error^2.");
   // Add option for I(q, lambda)
+  declareProperty(
+      make_unique<WorkspaceProperty<WorkspaceGroup>>(
+          "IQLambdaWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Name for the WorkspaceGroup containing the I(q,lambda) distributions.");
+
 }
 
 void Q1DWeighted::exec() {
@@ -163,6 +168,19 @@ void Q1DWeighted::exec() {
       nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
+
+  // Create workspace group that holds output workspaces
+  std::vector<MatrixWorkspace_sptr> tofWorkspaces;
+  for (int iTOF = 0; iTOF < xLength - 1; iTOF++) {
+    MatrixWorkspace_sptr tof_ws =
+        WorkspaceFactory::Instance().create(inputWS, 1, sizeOut, sizeOut - 1);
+    tof_ws->getAxis(0)->unit() =
+        UnitFactory::Instance().create("MomentumTransfer");
+    tof_ws->setYUnitLabel("1/cm");
+    tof_ws->setDistribution(true);
+    tof_ws->setBinEdges(0, XOut);
+    tofWorkspaces.push_back(tof_ws);
+  }
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   // Loop over all xLength-1 detector channels
@@ -287,6 +305,11 @@ void Q1DWeighted::exec() {
       }
       progress.report("Computing I(Q)");
     }
+
+    // Store I(q) for this wavelength bin
+    auto &tofYOut = tofWorkspaces[j]->mutableY(0);
+    auto &tofEOut = tofWorkspaces[j]->mutableE(0);
+
     // Normalize according to the chosen weighting scheme
     PARALLEL_CRITICAL(iq) /* Write to shared memory - must protect */
     {
@@ -295,6 +318,9 @@ void Q1DWeighted::exec() {
           YOut[k] += lambda_iq[k] / XNorm[k];
           EOut[k] += lambda_iq_err[k] / XNorm[k] / XNorm[k];
           XNormLambda[k] += 1.0;
+
+          tofYOut[k] += lambda_iq[k] / XNorm[k];
+          tofEOut[k] += lambda_iq_err[k] / XNorm[k] / XNorm[k];
         }
 
         // Normalize wedges
@@ -342,6 +368,21 @@ void Q1DWeighted::exec() {
     setPropertyValue("WedgeWorkspace", outputWSGroupName);
   }
   setProperty("WedgeWorkspace", wsgroup);
+
+  // Set I(q, lambda) output property
+  auto wsLambdaGroup = boost::make_shared<WorkspaceGroup>();
+
+  for (auto &tofWorkspace : tofWorkspaces) {
+    wsLambdaGroup->addWorkspace(tofWorkspace);
+  }
+  outputWSGroupName = getPropertyValue("IQLambdaWorkspace");
+  if (outputWSGroupName.empty()) {
+    std::string outputWSName = getPropertyValue("OutputWorkspace");
+    outputWSGroupName = outputWSName + "_tof";
+    setPropertyValue("IQLambdaWorkspace", outputWSGroupName);
+  }
+  setProperty("IQLambdaWorkspace", wsLambdaGroup);
+
 }
 
 } // namespace Algorithms
