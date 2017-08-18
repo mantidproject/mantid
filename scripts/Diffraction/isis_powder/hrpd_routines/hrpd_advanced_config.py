@@ -9,15 +9,6 @@ absorption_correction_params = {
     "chemical_formula": "V"
 }
 
-coupled_params = {
-    "vanadium_tof_cropping": (1e4, 1.2e5),
-    "focused_cropping_values" : [
-        (10000, 110000),  # Bank 1
-        (10000, 115000),  # Bank 2
-        (11000, 110000)   # Bank 3
-    ]
-}
-
 window_10_110_params = {
     "vanadium_tof_cropping": (1e4, 1.2e5),
     "focused_cropping_values" : [
@@ -32,7 +23,7 @@ window_30_130_params = {
     "focused_cropping_values": [
         (3e4, 1.3e5),      # Bank 1
         (2.84e4, 1.42e5),  # Bank 2
-        (3e4, 1.37e5)
+        (3e4, 1.37e5)      # Bank 3
     ]
 }
 

@@ -1,4 +1,4 @@
-.. _isis-powder-diffraction-pearl-ref:
+.. _isis-powder-diffraction-hrpd-ref:
 
 ==================================================
 ISIS Powder Diffraction Scripts - HRPD Reference
@@ -10,7 +10,7 @@ ISIS Powder Diffraction Scripts - HRPD Reference
 .. _creating_hrpd_object-isis-powder-diffraction-ref:
 
 Creating an HRPD Object
---------------------
+-----------------------
 
 This method assumes you are familiar with the concept of objects in Python.
 If not more details can be read here: :ref:`intro_to_objects-isis-powder-diffraction-ref`
@@ -280,23 +280,6 @@ Example Input:
   # In this example assume we mean a cycle with run numbers 100-200
   hrpd_example.create_vanadium(first_cycle_run_no=100, ...)
 
-.. _grouping_file_name_hrpd_isis-powder-diffraction-ref:
-  
-grouping_file_name
-^^^^^^^^^^^^^^^^^^
-Determines the name of the grouping calibration file which is located
-within the top level of the
-:ref:`calibration_directory_hrpd_isis-powder-diffraction-ref`.
-
-The grouping file determines the mapping from detector ID to bank, and
-is used when focusing the spectra into banks.
-
-On HRPD this is set to the following:
-
-..  code-block:: python
-		 
-  grouping_file_name : "hrpd_new_072_01_corr.cal"
-
 .. _mode_hrpd_isis-powder-diffraction-ref:
 
 mode
@@ -481,3 +464,165 @@ Example Input:
   hrpd_example.create_vanadium(window="100-200", ...)
   # Or
   hrpd_example.focus(window="10-110", ...)
+
+Advanced Parameters
+-------------------
+.. warning:: These values are not intended to be changed and should
+             reflect optimal defaults for the instrument. For more
+             details please read:
+             :ref:`instrument_advanced_properties_isis-powder-diffraction-ref`
+
+             This section is mainly intended to act as reference for
+             the current settings distributed with Mantid
+
+Changing any values in the advanced configuration file will require
+the user to restart Mantid in order for the new values to take effect.
+Please read
+:ref:`instrument_advanced_properties_isis-powder-diffraction-ref`
+before changing values in the advanced configuration file.
+
+focused_bin_widths
+^^^^^^^^^^^^^^^^^^
+The dt-upon-t binning for the focused data.
+
+On HRPD this is set to the following:
+
+.. code-block:: python
+
+  focused_bin_widths = [
+        -0.0005,  # Bank 1
+        -0.0005,  # Bank 2
+        -0.001    # Bank 3
+  ]
+  
+focused_cropping_values
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Cropping windows for the three banks once data has been focused.
+
+On HRPD this is set to the following:
+
+.. code-block:: python
+
+  # window = "10-110"
+  focused_cropping_values = [
+        (1e4, 1.1e5),    # Bank 1
+        (1e4, 1.2e5),    # Bank 2
+        (1.1e4, 1.15e5)  # Bank 3
+  ]
+  
+  # window = "30-130"
+  focused_cropping_values = [
+        (3e4, 1.3e5),      # Bank 1
+        (2.84e4, 1.42e5),  # Bank 2
+        (3e4, 1.37e5)      # Bank 3
+  ]
+  
+  # window = "100-200"
+  focused_cropping_values = [
+        (1e5, 2.02e5),    # Bank 1
+        (9.6e4, 2.18e5),  # Bank 2
+        (1e5, 2.11e5)     # Bank 3
+  ]
+  
+.. _grouping_file_name_hrpd_isis-powder-diffraction-ref:
+  
+grouping_file_name
+^^^^^^^^^^^^^^^^^^
+The name of the grouping calibration file which is located within the
+top level of the
+:ref:`calibration_directory_hrpd_isis-powder-diffraction-ref`.
+
+The grouping file determines the mapping from detector ID to bank, and
+is used when focusing the spectra into banks.
+
+On HRPD this is set to the following:
+
+..  code-block:: python
+		 
+  grouping_file_name = "hrpd_new_072_01_corr.cal"
+
+spline_coefficient
+^^^^^^^^^^^^^^^^^^
+The spline coefficient to use after processing the vanadium in
+:ref:`create_vanadium_hrpd_isis-powder-diffraction-ref` method. For
+more details see: :ref:`SplineBackground <algm-SplineBackground>`
+
+*Note that if this value is changed 'create_vanadium' will need to be
+called again.*
+
+On HRPD this is set to the following:
+
+..  code-block:: python
+
+  spline_coefficient = 70
+
+  
+vanadium_tof_cropping
+^^^^^^^^^^^^^^^^^^^^^
+
+The cropping window for the Vanadium sample.
+
+On HRPD this is set to the following:
+
+.. code-block:: python
+
+  # window = "10-110"
+  vanadium_tof_cropping = (1e4, 1.2e5)
+
+  # window = "30-130"
+  vanadium_tof_cropping = (3e4, 1.4e5)
+
+  # window = "100-200"
+  vanadium_tof_cropping = (1e5, 2.15e5)
+
+Vanadium Sample details
+^^^^^^^^^^^^^^^^^^^^^^^
+
+chemical_formula
+================
+
+The chemical formula for the Vanadium rod.
+
+On HRPD this is, predictably, set to the following:
+
+.. code-block:: python
+
+  chemical_formula = "V"
+
+cylinder_position
+=================
+
+The position of the Vanadium rod in [x, y, z]
+
+On HRPD this is set to the following:
+
+.. code-block:: python
+
+  cylinder_position = [0.0, 0.0, 0.0]
+
+
+cylinder_sample_height
+======================
+
+The height of the Vanadium rod.
+
+On HRPD this is set to the following:
+
+.. code-block:: python
+
+  cylinder_sample_height = 2.0
+
+
+cylinder_sample_radius
+======================
+
+The radius of the Vanadium rod.
+
+On HRPD this is set to the following:
+
+.. code-block:: python
+
+  cylinder_sample_radius = 2.0
+
+.. categories:: Techniques
