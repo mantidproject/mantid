@@ -47,6 +47,10 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
                              doc = 'I(q) workspace')
         self.declareProperty('OutputMessage', '', direction = Direction.Output,
                              doc = 'Output message')
+        self.declareProperty(WorkspaceGroupProperty("IQLambdaWorkspace", "",
+                                                     Direction.Output,
+                                                     PropertyMode.Optional),
+                             "I(q, wavelength) workspaces")
 
     def PyExec(self):
         input_ws_name = self.getPropertyValue('InputWorkspace')
@@ -81,7 +85,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         property_manager_name = self.getProperty('ReductionProperties').value
         pixel_size_x = workspace.getInstrument().getNumberParameter('x-pixel-size')[0]
         pixel_size_y = workspace.getInstrument().getNumberParameter('y-pixel-size')[0]
-        (output_msg, output_ws, output_binning) = \
+        (output_msg, output_ws, output_binning, output_tof_ws) = \
             self._call_sans_averaging(workspace, None,
                                       nbins, log_binning,
                                       property_manager_name,
@@ -105,6 +109,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
             self.setProperty('OutputMessage', output_msg)
 
         self.setProperty('OutputWorkspace', output_ws)
+        self.setProperty('IQLambdaWorkspace', output_tof_ws)
 
     #pylint: disable=too-many-arguments
     def _call_sans_averaging(self, workspace, binning, nbins, log_binning,
@@ -130,16 +135,18 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         alg.setProperty('ComputeResolution', False)
         alg.setProperty('ReductionProperties', property_manager_name)
         alg.setProperty('OutputWorkspace', output_workspace)
+        alg.setProperty('IQLambdaWorkspace', output_workspace+'_tof')
         alg.execute()
         if alg.existsProperty('OutputMessage'):
             output_msg = alg.getProperty('OutputMessage').value
         else:
             output_msg = None
         output_ws = alg.getProperty('OutputWorkspace').value
+        output_tof_ws = alg.getProperty('IQLambdaWorkspace').value
 
         # Get output binning
         output_binning = alg.getPropertyValue("Binning")
-        return (output_msg, output_ws, output_binning)
+        return (output_msg, output_ws, output_binning, output_tof_ws)
 
     def _with_frame_skipping(self, source_aperture_radius):
         """
@@ -184,14 +191,14 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
             binning = '%g, %g, %g' % (qmin, qstep, qmax)
 
         # Average second frame
-        output_frame2 = self._process_frame(workspace, wl_min_f2, wl_max_f2,
+        output_frame2, output_tof_frame2 = self._process_frame(workspace, wl_min_f2, wl_max_f2,
                                             source_aperture_radius, '2', binning)
 
         # Average first frame
         if independent_binning:
             binning = None
 
-        output_frame1 = self._process_frame(workspace, wl_min_f1, wl_max_f1,
+        output_frame1, output_tof_frame1 = self._process_frame(workspace, wl_min_f1, wl_max_f1,
                                             source_aperture_radius, '1', binning)
 
         if scale_results:
@@ -200,9 +207,14 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         self.setPropertyValue('OutputWorkspace', ws_frame1)
         self.setProperty('OutputWorkspace', output_frame1)
 
+        self.setProperty('IQLambdaWorkspace', output_tof_frame1)
+
         self.declareProperty(MatrixWorkspaceProperty('OutputFrame2', ws_frame2,
                                                      direction = Direction.Output))
+        self.declareProperty(MatrixWorkspaceProperty('OutputTOFFrame2', ws_frame2,
+                                                     direction = Direction.Output))
         self.setProperty('OutputFrame2', output_frame2)
+        self.setProperty('OutputTOFFrame2', output_tof_frame2)
 
         self.setProperty('OutputMessage', 'Performed radial averaging for two frames')
 
@@ -252,7 +264,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
 
-        (dummy_output_msg, output_iq, output_binning) = \
+        (dummy_output_msg, output_iq, output_binning, output_tof_ws) = \
             self._call_sans_averaging(output_ws, binning,
                                       nbins, log_binning,
                                       property_manager_name,
@@ -273,7 +285,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
             alg.setProperty("SampleApertureRadius", sample_aperture_radius)
             alg.execute()
 
-        return output_iq
+        return output_iq, output_tof_ws
 
     #pylint: disable=too-many-branches
     def _scale(self, ws_frame1, ws_frame2):

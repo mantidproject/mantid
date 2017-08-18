@@ -81,7 +81,6 @@ void Q1DWeighted::init() {
       make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "IQLambdaWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Name for the WorkspaceGroup containing the I(q,lambda) distributions.");
-
 }
 
 void Q1DWeighted::exec() {
@@ -382,7 +381,6 @@ void Q1DWeighted::exec() {
     setPropertyValue("IQLambdaWorkspace", outputWSGroupName);
   }
   setProperty("IQLambdaWorkspace", wsLambdaGroup);
-
 }
 
 } // namespace Algorithms
