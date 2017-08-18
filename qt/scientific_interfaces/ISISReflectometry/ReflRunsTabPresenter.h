@@ -4,7 +4,10 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
+#include "ReflTransferStrategy.h"
+#include "ReflectometryAction.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {

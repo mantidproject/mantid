@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAction.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
 namespace MantidQt {
 namespace MantidWidgets {
 std::array<DataProcessorAction, 9> EXPORT_OPT_MANTIDQT_COMMON

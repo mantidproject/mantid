@@ -4,8 +4,8 @@
 #include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAction.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflectometryAction.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
+#include "ReflectometryAction.h"
 
 namespace MantidQt {
 
