@@ -4,6 +4,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
 #include <exception>
 #include <string>
@@ -128,6 +129,10 @@ bool ComponentInfo::hasParent(const size_t componentIndex) const {
   return m_componentInfo->hasParent(componentIndex);
 }
 
+bool ComponentInfo::hasShape(const size_t componentIndex) const {
+  return (*m_shapes)[componentIndex].get() != nullptr;
+}
+
 Kernel::V3D ComponentInfo::sourcePosition() const {
   return Kernel::toV3D(m_componentInfo->sourcePosition());
 }
@@ -171,7 +176,9 @@ void ComponentInfo::setScaleFactor(const size_t componentIndex,
 
 double ComponentInfo::solidAngle(const size_t componentIndex,
                                  const Kernel::V3D &observer) const {
-
+  if (!hasShape(componentIndex))
+    throw Kernel::Exception::NullPointerException("ComponentInfo::solidAngle",
+                                                  "shape");
   // This is the observer position in the shape's coordinate system.
   const Kernel::V3D relativeObserver =
       toShapeFrame(observer, *m_componentInfo, componentIndex);
@@ -192,8 +199,8 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
   for (const auto &index :
        m_componentInfo->componentsInSubtree(componentIndex)) {
     // Check that we have a valid shape here
-    if (!(*m_shapes)[index]) {
-      continue;
+    if (!hasShape(index)) {
+      continue; // This index will not contribute to bounding box
     }
     const auto &s = this->shape(index);
     const BoundingBox &shapeBox = s.getBoundingBox();

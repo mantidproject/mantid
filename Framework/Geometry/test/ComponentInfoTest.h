@@ -14,6 +14,7 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -43,8 +44,37 @@ makeComponentIDMap(const boost::shared_ptr<
   return idMap;
 }
 
+boost::shared_ptr<Object> createCappedCylinder() {
+  std::string C31 = "cx 0.5"; // cylinder x-axis radius 0.5
+  std::string C32 = "px 1.2";
+  std::string C33 = "px -3.2";
+
+  // First create some surfaces
+  std::map<int, boost::shared_ptr<Surface>> CylSurMap;
+  CylSurMap[31] = boost::make_shared<Cylinder>();
+  CylSurMap[32] = boost::make_shared<Plane>();
+  CylSurMap[33] = boost::make_shared<Plane>();
+
+  CylSurMap[31]->setSurface(C31);
+  CylSurMap[32]->setSurface(C32);
+  CylSurMap[33]->setSurface(C33);
+  CylSurMap[31]->setName(31);
+  CylSurMap[32]->setName(32);
+  CylSurMap[33]->setName(33);
+
+  // Capped cylinder (id 21)
+  // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
+  std::string ObjCapCylinder = "-31 -32 33";
+
+  auto retVal = boost::make_shared<Object>();
+  retVal->setObject(21, ObjCapCylinder);
+  retVal->populate(CylSurMap);
+
+  return retVal;
+}
+
 // Make a Beamline ComponentInfo for a single component
-std::unique_ptr<Beamline::ComponentInfo> makeSingleComponentInfo(
+std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
     Eigen::Vector3d position = Eigen::Vector3d{1, 1, 1},
     Eigen::Quaterniond rotation =
         Eigen::Quaterniond(Eigen::Affine3d::Identity().rotation()),
@@ -77,35 +107,6 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleComponentInfo(
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
       parentIndices, positions, rotations, scaleFactors, -1, -1);
-}
-
-boost::shared_ptr<Object> createCappedCylinder() {
-  std::string C31 = "cx 0.5"; // cylinder x-axis radius 0.5
-  std::string C32 = "px 1.2";
-  std::string C33 = "px -3.2";
-
-  // First create some surfaces
-  std::map<int, boost::shared_ptr<Surface>> CylSurMap;
-  CylSurMap[31] = boost::make_shared<Cylinder>();
-  CylSurMap[32] = boost::make_shared<Plane>();
-  CylSurMap[33] = boost::make_shared<Plane>();
-
-  CylSurMap[31]->setSurface(C31);
-  CylSurMap[32]->setSurface(C32);
-  CylSurMap[33]->setSurface(C33);
-  CylSurMap[31]->setName(31);
-  CylSurMap[32]->setName(32);
-  CylSurMap[33]->setName(33);
-
-  // Capped cylinder (id 21)
-  // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
-  std::string ObjCapCylinder = "-31 -32 33";
-
-  auto retVal = boost::make_shared<Object>();
-  retVal->setObject(21, ObjCapCylinder);
-  retVal->populate(CylSurMap);
-
-  return retVal;
 }
 }
 
@@ -164,64 +165,8 @@ public:
     TS_ASSERT_EQUALS(info.indexOf(comp2.getComponentID()), 1);
   }
 
-  void test_simple_solidAngle() {
-    auto position = Eigen::Vector3d{0, 0, 0};
-    // No rotation
-    const double radius = 1.0;
-    auto rotation = Eigen::Quaterniond(Eigen::Affine3d::Identity().rotation());
-    auto internalInfo = std::move(makeSingleComponentInfo(position, rotation));
-    Mantid::Geometry::ObjComponent comp1(
-        "component1", ComponentCreationHelper::createSphere(radius));
-
-    auto componentIds =
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-            std::vector<Mantid::Geometry::ComponentID>{&comp1});
-
-    auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
-    shapes->push_back(ComponentCreationHelper::createSphere(radius));
-
-    ComponentInfo info(std::move(internalInfo), componentIds,
-                       makeComponentIDMap(componentIds), shapes);
-
-    double satol = 1e-9; // tolerance for solid angle
-
-    // Put observer on surface of sphere and solid angle is 2PI
-    V3D observer{radius, 0, 0};
-    TS_ASSERT_DELTA(info.solidAngle(0, observer), 2 * M_PI, satol);
-    // Put observer at center of sphere and solid angle is full 4PI square
-    // radians
-    observer = V3D{0, 0, 0};
-    TS_ASSERT_DELTA(info.solidAngle(0, observer), 4 * M_PI, satol);
-  }
-
-  // Test adapted from ObjComponentTest
-  void test_solidAngle() {
-
-    auto position = Eigen::Vector3d{10, 0, 0};
-    auto rotation = Eigen::Quaterniond(
-        Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
-    auto internalInfo = std::move(makeSingleComponentInfo(position, rotation));
-    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
-
-    auto componentIds =
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-            std::vector<Mantid::Geometry::ComponentID>{&comp1});
-
-    auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
-    shapes->push_back(createCappedCylinder());
-
-    ComponentInfo info(std::move(internalInfo), componentIds,
-                       makeComponentIDMap(componentIds), shapes);
-
-    double satol = 2e-2; // tolerance for solid angle
-    TS_ASSERT_DELTA(info.solidAngle(0, V3D(10, 1.7, 0)), 1.840302, satol);
-  }
-
   void test_copy_construction() {
-
-    auto internalInfo = std::move(makeSingleComponentInfo());
+    auto internalInfo = std::move(makeSingleBeamlineComponentInfo());
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
@@ -246,11 +191,95 @@ public:
     TS_ASSERT_EQUALS(b.indexOf(&comp1), a.indexOf(&comp1));
   }
 
+  void test_has_shape() {
+    auto internalInfo = std::move(makeSingleBeamlineComponentInfo());
+    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
+
+    auto componentIds =
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1});
+
+    auto shapes = boost::make_shared<
+        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+    shapes->push_back(createCappedCylinder());
+
+    ComponentInfo compInfo(std::move(internalInfo), componentIds,
+                           makeComponentIDMap(componentIds), shapes);
+
+    TS_ASSERT(compInfo.hasShape(0));
+    // Nullify the shape of the component
+    shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
+    TS_ASSERT(!compInfo.hasShape(0));
+    TS_ASSERT_THROWS(compInfo.solidAngle(0, V3D{1, 1, 1}),
+                     Mantid::Kernel::Exception::NullPointerException &);
+  }
+
+  void test_simple_solidAngle() {
+    auto position = Eigen::Vector3d{0, 0, 0};
+    // No rotation
+    const double radius = 1.0;
+    auto rotation = Eigen::Quaterniond(Eigen::Affine3d::Identity().rotation());
+    auto internalInfo =
+        std::move(makeSingleBeamlineComponentInfo(position, rotation));
+    Mantid::Geometry::ObjComponent comp1(
+        "component1", ComponentCreationHelper::createSphere(radius));
+
+    auto componentIds =
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1});
+
+    auto shapes = boost::make_shared<
+        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+    shapes->push_back(ComponentCreationHelper::createSphere(radius));
+
+    ComponentInfo info(std::move(internalInfo), componentIds,
+                       makeComponentIDMap(componentIds), shapes);
+
+    double satol = 1e-9; // tolerance for solid angle
+
+    // Put observer on surface of sphere and solid angle is 2PI
+    V3D observer{radius, 0, 0};
+    TS_ASSERT_DELTA(info.solidAngle(0, observer), 2 * M_PI, satol);
+    // Put observer at center of sphere and solid angle is full 4PI square
+    // radians
+    observer = V3D{0, 0, 0};
+    TS_ASSERT_DELTA(info.solidAngle(0, observer), 4 * M_PI, satol);
+    // Nullify  the shape and retest solid angle
+    shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
+    TS_ASSERT_THROWS(info.solidAngle(0, observer),
+                     Mantid::Kernel::Exception::NullPointerException &);
+  }
+
+  // Test adapted from ObjComponentTest
+  void test_solidAngle() {
+
+    auto position = Eigen::Vector3d{10, 0, 0};
+    auto rotation = Eigen::Quaterniond(
+        Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
+    auto internalInfo =
+        std::move(makeSingleBeamlineComponentInfo(position, rotation));
+    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
+
+    auto componentIds =
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1});
+
+    auto shapes = boost::make_shared<
+        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+    shapes->push_back(createCappedCylinder());
+
+    ComponentInfo info(std::move(internalInfo), componentIds,
+                       makeComponentIDMap(componentIds), shapes);
+
+    double satol = 2e-2; // tolerance for solid angle
+    TS_ASSERT_DELTA(info.solidAngle(0, V3D(10, 1.7, 0)), 1.840302, satol);
+  }
+
   void test_boundingBox_single_component() {
 
     const double radius = 2;
     Eigen::Vector3d position{1, 1, 1};
-    auto internalInfo = std::move(makeSingleComponentInfo(position));
+    auto internalInfo = std::move(makeSingleBeamlineComponentInfo(position));
     Mantid::Geometry::ObjComponent comp1(
         "component1", ComponentCreationHelper::createSphere(radius));
 
@@ -274,6 +303,10 @@ public:
     TS_ASSERT((boundingBox.maxPoint() -
                (Kernel::V3D{position[0] + radius, position[1] + radius,
                             position[2] + radius})).norm() < 1e-9);
+    // Nullify shape and retest BoundingBox
+    shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
+    componentInfo.getBoundingBox(0, boundingBox);
+    TS_ASSERT(boundingBox.isNull());
   }
 
   void test_boundingBox_complex() {
