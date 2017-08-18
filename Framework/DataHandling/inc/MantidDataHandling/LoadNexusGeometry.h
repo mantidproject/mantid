@@ -3,16 +3,22 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument_fwd.h"
+
+#include "Eigen/Core"
+
 
 namespace Mantid{
 namespace DataHandling{
 
+
 class DLLExport LoadNexusGeometry
         : public API::IFileLoader<Kernel::NexusDescriptor> {
+
 public:
     /// Default constructor
-    LoadNexusGeometry();
+    LoadNexusGeometry() = default;
     /// Algorithm's name for identification overriding a virtual method
     const std::string name() const override { return "LoadNexusGeometry"; }
     /// Algorithm's version for identification overriding a virtual method
@@ -22,19 +28,27 @@ public:
     /// Summary of algorithms purpose
     const std::string summary() const override {
         return "Loads Instrument Geometry from a NeXus file.";
-
     }
 
     /// Returns a confidence value that this algorithm can load a file
     int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
+    /// Add component to instrument
+    Geometry::IComponent* addComponent(std::string &name, Eigen::Vector3d &position, Geometry::Instrument_sptr instrument);
+    /// Add source to instrument
+    void addSource(std::string &name, Eigen::Vector3d &position, Geometry::Instrument_sptr instrument);
+    /// Add sample to instrument
+    void addSample(std::string &name, Eigen::Vector3d &position, Geometry::Instrument_sptr instrument);
+    /// Add detector to instrument
+    void addDetector(std::string &name, Eigen::Vector3d &position, int detId, Geometry::ICompAssembly *parent, Geometry::Instrument_sptr instrument);
 private:
     /// Overwrites Algorithm method.
     void init() override;
     /// Overwrites Algorithm method
     void exec() override;
-    //Add source to instrument
-    void addSource(Mantid::Geometry::Instrument_sptr &instrument);
+    //Instrument pointer
+    std::string defaultName = "defaultInstrumentName";
+    Geometry::Instrument_sptr inst = nullptr;
 
 };
 

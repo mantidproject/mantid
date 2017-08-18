@@ -1,11 +1,15 @@
 ﻿#ifndef LOAD_NEXUS_GEOMETRY_TEST_H_
 #define LOAD_NEXUS_GEOMETRY_TEST_H_
 
+#include <cxxtest/TestSuite.h>
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidDataHandling/LoadNexusGeometry.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 
-#include <cxxtest/TestSuite.h>
+#include "Eigen/Core"
 
 using namespace Mantid;
 using namespace DataHandling;
@@ -15,36 +19,27 @@ class LoadNexusGeometryTest : public CxxTest::TestSuite
 public:
     void testInit()
     {
+        LoadNexusGeometry loader;
         TS_ASSERT(!loader.isInitialized ());
         loader.initialize ();
         TS_ASSERT(loader.isInitialized ());
+
+        TS_ASSERT_THROWS_NOTHING(loader.setProperty("InstrumentName", "testInstrument"));
     }
 
     void testExec()
     {
-        if(!loader.isInitialized ())
-            loader.initialize ();
-        //Initialize instrument name
-        loader.setProperty("InstrumentName", testInstrumentName);
+        LoadNexusGeometry loader;
+        loader.initialize();
+        loader.setProperty("InstrumentName", "testInstrument");
 
-        // Test Execution
-        TS_ASSERT(!loader.isExecuted ());
-
-        TS_ASSERT_THROWS_NOTHING(loader.execute ());
-        TS_ASSERT(loader.isExecuted ());
-        //Test if instrument exists with correct name
-        boost::shared_ptr<Geometry::Instrument> testInstrument;
-        testInstrument = API::InstrumentDataService::Instance ().retrieve (testInstrumentName); 
-        TS_ASSERT(testInstrument->getName () == testInstrumentName);
-        //Test if instrument has source
-        TS_ASSERT(testInstrument->isEmptyInstrument ());
-        TS_ASSERT(testInstrument->getSource ()->getName () == "Source");
-
+        TS_ASSERT(!loader.isExecuted());
+        TS_ASSERT(loader.execute());
+        TS_ASSERT(loader.isExecuted());
     }
 
-private:
-    LoadNexusGeometry loader;
-    std::string testInstrumentName = "LoadNexusGeometryTestInstrument";
 };
+
+
 
 #endif // LOAD_NEXUS_GEOMETRY_TEST_H_
