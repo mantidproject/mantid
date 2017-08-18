@@ -461,7 +461,7 @@ void CompositeFunction::removeFunction(size_t i) {
  * @param f :: A pointer to the new function
  */
 void CompositeFunction::insertFunction(size_t i, IFunction_sptr f) {
-  auto old_nFunctions = nFunctions();  // number of functions before insertion
+  auto old_nFunctions = nFunctions(); // number of functions before insertion
   if (i >= old_nFunctions) {
     throw std::out_of_range("Function index (" + std::to_string(i) +
                             ") out of range (" + std::to_string(nFunctions()) +
@@ -476,8 +476,8 @@ void CompositeFunction::insertFunction(size_t i, IFunction_sptr f) {
   // Insert index for as many parameters owned by the new function
   size_t np_new = f->nParams();
   for (auto it = m_IFunction.begin(); it != m_IFunction.end(); it++) {
-    if (*it == i+1) {
-      m_IFunction.insert(it, np_new, i);  // insert right before
+    if (*it == i + 1) {
+      m_IFunction.insert(it, np_new, i); // insert right before
       break;
     }
   }

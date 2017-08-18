@@ -18,10 +18,10 @@ DECLARE_FUNCTION(AdditionFunction)
  *  @param f :: pointer to the query function
  */
 bool AdditionFunction::isAssociative(API::IFunction_sptr f) const {
-    if (boost::dynamic_pointer_cast<AdditionFunction>(f)) {
-        return true;
-    }
-    return false;
+  if (boost::dynamic_pointer_cast<AdditionFunction>(f)) {
+    return true;
+  }
+  return false;
 }
 
 } // namespace Functions

@@ -83,7 +83,6 @@ private:
   size_t m_blocksize;
 };
 
-
 class CompositeFunctionTest : public CxxTest::TestSuite {
 public:
   static CompositeFunctionTest *createSuite() {
@@ -691,7 +690,8 @@ public:
     cub->setParameter("c0", 2.1);
     cub->setParameter("c1", 2.2);
     cub->setParameter("c2", 2.3);
-    cub->setParameter("c3", 2.4);    IFunction_sptr g2 = IFunction_sptr(new Gauss());
+    cub->setParameter("c3", 2.4);
+    IFunction_sptr g2 = IFunction_sptr(new Gauss());
     mfun->addFunction(cub);
 
     // fix the first parameter of each function
@@ -702,7 +702,7 @@ public:
     IFunction_sptr bk2 = IFunction_sptr(new Linear());
     bk2->setParameter("a", 4.1);
     bk2->setParameter("b", 4.2);
-    mfun->insertFunction(2, bk2);  // insert right after function g1
+    mfun->insertFunction(2, bk2); // insert right after function g1
 
     mfun->applyTies();
 

@@ -40,15 +40,15 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 class DLLExport AdditionFunction : public API::AssociativeCompositeFunction {
 public:
-    /// overwrite IFunction base class methods
-    std::string name() const override { return "AdditionFunction"; }
-    /// if f is of the same class then its component functions
-    /// are treated separately
-    bool isAssociative(API::IFunction_sptr f) const override;
+  /// overwrite IFunction base class methods
+  std::string name() const override { return "AdditionFunction"; }
+  /// if f is of the same class then its component functions
+  /// are treated separately
+  bool isAssociative(API::IFunction_sptr f) const override;
 
 protected:
-    /// overwrite IFunction base class method, which declare function parameters
-    void init() override {};
+  /// overwrite IFunction base class method, which declare function parameters
+  void init() override{};
 };
 
 } // namespace Functions
