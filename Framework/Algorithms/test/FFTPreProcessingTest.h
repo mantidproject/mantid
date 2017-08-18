@@ -37,6 +37,7 @@ IAlgorithm_sptr setUpAlg() {
   FFTPreProcess->initialize();
   FFTPreProcess->setChild(true);
   FFTPreProcess->setProperty("DecayConstant", 2.0);
+  FFTPreProcess->setProperty("OutputWorkspace", outputName);
   return FFTPreProcess;
 }
 }
@@ -63,7 +64,6 @@ public:
 
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
@@ -75,10 +75,8 @@ public:
 
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
-
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
 
     double Delta = 0.0001;
@@ -106,7 +104,6 @@ public:
 
     IAlgorithm_sptr alg1 = setUpAlg();
     alg1->setProperty("InputWorkspace", workspaces[0]);
-    alg1->setPropertyValue("OutputWorkspace", outputName);
     alg1->execute();
     TS_ASSERT(alg1->isExecuted());
 
@@ -115,7 +112,6 @@ public:
     // Then run the algorithm on the second spectrum only
     IAlgorithm_sptr alg2 = setUpAlg();
     alg2->setProperty("InputWorkspace", workspaces[0]);
-    alg2->setPropertyValue("OutputWorkspace", outputName);
     alg2->execute();
     TS_ASSERT(alg2->isExecuted());
     workspaces.push_back(alg2->getProperty("OutputWorkspace"));
@@ -140,7 +136,6 @@ public:
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("ApodizationFunction", "Lorentz");
     alg->execute();
     TS_ASSERT(alg->isExecuted());
@@ -162,7 +157,6 @@ public:
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("ApodizationFunction", "Gaussian");
     alg->execute();
     TS_ASSERT(alg->isExecuted());
@@ -184,7 +178,6 @@ public:
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 1);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
@@ -201,7 +194,6 @@ public:
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 12);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
@@ -220,7 +212,6 @@ public:
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 1);
     alg->setProperty("NegativePAdding", true);
     alg->execute();
@@ -239,7 +230,6 @@ public:
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 12);
     alg->setProperty("NegativePAdding", true);
     alg->execute();
@@ -259,7 +249,6 @@ public:
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("Padding", 2);
     alg->setProperty("NegativePAdding", true);
     alg->execute();
