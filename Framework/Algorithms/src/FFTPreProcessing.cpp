@@ -186,7 +186,7 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
   auto &xData = result.x();
   auto &yData = result.y();
   auto &eData = result.e();
-  auto incEData = eData.size() >0 ? true:false;
+  auto incEData = eData.size() > 0 ? true : false;
   // assume approx evenly spaced
   if (xData.size() < 2) {
     throw std::invalid_argument("The xData does not contain "
@@ -211,16 +211,16 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
   });
   std::copy(xData.begin(), xData.end(), newXData.begin() + offset);
   std::copy(yData.begin(), yData.end(), newYData.begin() + offset);
-  if(incEData){
-       std::copy(eData.begin(), eData.end(), newEData.begin() + offset);
-       result = HistogramData::Histogram(
-          HistogramData::Points(newXData), HistogramData::Counts(newYData),
-          HistogramData::CountStandardDeviations(newEData));
-  
-  }else{
-       result = HistogramData::Histogram(
-           HistogramData::Points(newXData), HistogramData::Counts(newYData));
-   }
+  if (incEData) {
+    std::copy(eData.begin(), eData.end(), newEData.begin() + offset);
+    result = HistogramData::Histogram(
+        HistogramData::Points(newXData), HistogramData::Counts(newYData),
+        HistogramData::CountStandardDeviations(newEData));
+
+  } else {
+    result = HistogramData::Histogram(HistogramData::Points(newXData),
+                                      HistogramData::Counts(newYData));
+  }
   return result;
 }
 
