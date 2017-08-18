@@ -42,6 +42,8 @@ const std::string STRING_PARAM_NAME = "string";
 const std::string V3D_PARAM_NAME = "V3D";
 const std::string QUAT_PARAM_NAME = "Quat";
 
+const std::string SCALE_PARAM_NAME = "sca";
+
 // static logger reference
 Kernel::Logger g_log("ParameterMap");
 
@@ -115,6 +117,9 @@ const std::string &ParameterMap::pString() { return STRING_PARAM_NAME; }
 const std::string &ParameterMap::pV3D() { return V3D_PARAM_NAME; }
 
 const std::string &ParameterMap::pQuat() { return QUAT_PARAM_NAME; }
+
+// Scale
+const std::string &ParameterMap::scale() { return SCALE_PARAM_NAME; }
 
 /**
  * Compares the values in this object with that given for inequality

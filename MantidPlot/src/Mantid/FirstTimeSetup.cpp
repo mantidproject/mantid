@@ -1,9 +1,9 @@
 #include "FirstTimeSetup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 
 #include <QMessageBox>
 #include <QPainter>
