@@ -50,15 +50,15 @@ const std::string SCDCalibratePanels::category() const {
 void SCDCalibratePanels::exec() {
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
   // We must sort the peaks
-  std::vector<std::pair<std::string, bool> > criteria{ { "BankName", true } };
+  std::vector<std::pair<std::string, bool>> criteria{{"BankName", true}};
   peaksWs->sort(criteria);
   // Remove peaks on edge
   int edge = this->getProperty("EdgePixels");
   Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
   if (edge > 0) {
     std::vector<Peak> &peaks = peaksWs->getPeaks();
-    auto it = std::remove_if(peaks.begin(), peaks.end(),
-                             [&peaksWs, edge, inst](const Peak &pk) {
+    auto it = std::remove_if(peaks.begin(), peaks.end(), [&peaksWs, edge, inst](
+                                                             const Peak &pk) {
       return edgePixel(inst, pk.getBankName(), pk.getCol(), pk.getRow(), edge);
     });
     peaks.erase(it, peaks.end());
@@ -184,8 +184,7 @@ void SCDCalibratePanels::exec() {
       peak.setInstrument(inst2);
       peak.setQSampleFrame(Q2);
       peak.setHKL(hkl);
-    }
-    catch (const std::exception &exc) {
+    } catch (const std::exception &exc) {
       g_log.notice() << "Problem in applying calibration to peak " << i << " : "
                      << exc.what() << "\n";
     }
@@ -255,8 +254,7 @@ void SCDCalibratePanels::exec() {
           RowY[icount] = theoretical.getRow();
           TofX[icount] = peak.getTOF();
           TofY[icount] = theoretical.getTOF();
-        }
-        catch (...) {
+        } catch (...) {
           // g_log.debug() << "Problem only in printing peaks\n";
         }
         icount++;
@@ -291,8 +289,7 @@ void SCDCalibratePanels::findL1(int nPeaks,
   IAlgorithm_sptr fitL1_alg;
   try {
     fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
-  }
-  catch (Exception::NotFoundError &) {
+  } catch (Exception::NotFoundError &) {
     g_log.error("Can't locate Fit algorithm");
     throw;
   }
@@ -332,8 +329,7 @@ void SCDCalibratePanels::findT0(int nPeaks,
   IAlgorithm_sptr fitT0_alg;
   try {
     fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
-  }
-  catch (Exception::NotFoundError &) {
+  } catch (Exception::NotFoundError &) {
     g_log.error("Can't locate Fit algorithm");
     throw;
   }
@@ -384,8 +380,7 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   IAlgorithm_sptr ub_alg;
   try {
     ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
-  }
-  catch (Exception::NotFoundError &) {
+  } catch (Exception::NotFoundError &) {
     g_log.error("Can't locate CalculateUMatrix algorithm");
     throw;
   }
@@ -469,11 +464,11 @@ void SCDCalibratePanels::saveIsawDetCal(
 }
 
 void SCDCalibratePanels::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeakWorkspace", "", Kernel::Direction::InOut),
                   "Workspace of Indexed Peaks");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty("a", EMPTY_DBL(), mustBePositive,
@@ -508,7 +503,7 @@ void SCDCalibratePanels::init() {
                   "sides of SNAP.");
 
   // ---------- outputs
-  const std::vector<std::string> detcalExts{ ".DetCal", ".Det_Cal" };
+  const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
   declareProperty(
       Kernel::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
                                         FileProperty::Save, detcalExts),
@@ -643,22 +638,23 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
     PeaksWorkspace_sptr local = peaksWs->clone();
     AnalysisDataService::Instance().addOrReplace(bankName, local);
     std::vector<Peak> &localPeaks = local->getPeaks();
-    auto lit = std::remove_if(localPeaks.begin(), localPeaks.end(),
-                              [&iBank](const Peak &pk) {
-      std::string name = pk.getBankName();
-      IComponent_const_sptr det = pk.getInstrument()->getComponentByName(name);
-      if (det && iBank.substr(0, 4) != "bank") {
-        IComponent_const_sptr parent = det->getParent();
-        if (parent) {
-          IComponent_const_sptr grandparent = parent->getParent();
-          if (grandparent) {
-            name = grandparent->getName();
+    auto lit = std::remove_if(
+        localPeaks.begin(), localPeaks.end(), [&iBank](const Peak &pk) {
+          std::string name = pk.getBankName();
+          IComponent_const_sptr det =
+              pk.getInstrument()->getComponentByName(name);
+          if (det && iBank.substr(0, 4) != "bank") {
+            IComponent_const_sptr parent = det->getParent();
+            if (parent) {
+              IComponent_const_sptr grandparent = parent->getParent();
+              if (grandparent) {
+                name = grandparent->getName();
+              }
+            }
           }
-        }
-      }
 
-      return name != iBank;
-    });
+          return name != iBank;
+        });
     localPeaks.erase(lit, localPeaks.end());
 
     int nBankPeaks = local->getNumberPeaks();
@@ -697,8 +693,7 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
     IAlgorithm_sptr fit_alg;
     try {
       fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-    }
-    catch (Exception::NotFoundError &) {
+    } catch (Exception::NotFoundError &) {
       g_log.error("Can't locate Fit algorithm");
       throw;
     }
@@ -737,8 +732,7 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
       IAlgorithm_sptr fit2_alg;
       try {
         fit2_alg = createChildAlgorithm("Fit", -1, -1, false);
-      }
-      catch (Exception::NotFoundError &) {
+      } catch (Exception::NotFoundError &) {
         g_log.error("Can't locate Fit algorithm");
         throw;
       }

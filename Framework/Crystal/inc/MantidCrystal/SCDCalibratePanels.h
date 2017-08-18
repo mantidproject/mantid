@@ -71,7 +71,7 @@ private:
   void findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
   /// Function to optimize L2
   void findL2(boost::container::flat_set<std::string> MyBankNames,
-                                DataObjects::PeaksWorkspace_sptr peaksWs);
+              DataObjects::PeaksWorkspace_sptr peaksWs);
   /// Function to optimize T0
   void findT0(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
 
