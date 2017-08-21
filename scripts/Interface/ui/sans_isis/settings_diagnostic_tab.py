@@ -3,6 +3,7 @@ import ui_settings_diagnostic_tab
 from PyQt4 import QtGui
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
+from sans.gui_logic.gui_common import (GENERIC_SETTINGS, load_file)
 
 
 class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_SettingsDiagnosticTab):
@@ -26,6 +27,10 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         def on_expand(self):
             pass
 
+        @abstractmethod
+        def on_save_state_to_file(self):
+            pass
+
     def __init__(self):
         super(SettingsDiagnosticTab, self).__init__()
         self.setupUi(self)
@@ -37,6 +42,10 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         # Excluded settings entries
         self.excluded = ["state_module", "state_name"]
         self.class_type_id = "ClassTypeParameter"
+
+        # Q Settings
+        self.__generic_settings = GENERIC_SETTINGS
+        self.__save_location_path_key = "save_state_location"
 
     def add_listener(self, listener):
         if not isinstance(listener, SettingsDiagnosticTab.SettingsDiagnosticTabListener):
@@ -62,11 +71,20 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
     def on_update_rows(self):
         self._call_settings_diagnostic_listeners(lambda listener: listener.on_update_rows())
 
+    def on_save_state(self):
+        self._call_settings_diagnostic_listeners(lambda listener: listener.on_save_state_to_file())
+
+    def on_browse_save_location(self):
+        load_file(self.save_state_line_edit, "*.*", self.__generic_settings, self.__save_location_path_key,
+                  self.get_save_location)
+
     def connect_signals(self):
         self.select_row_combo_box.currentIndexChanged.connect(self.on_row_changed)
         self.select_row_push_button.clicked.connect(self.on_update_rows)
         self.collapse_button.clicked.connect(self.on_collapse)
         self.expand_button.clicked.connect(self.on_expand)
+        self.save_state_save_push_button.clicked.connect(self.on_save_state)
+        self.save_state_browse_push_button.clicked.connect(self.on_browse_save_location)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
@@ -132,3 +150,6 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         for index in range(self.tree_widget.topLevelItemCount()):
             top_level_item = self.tree_widget.topLevelItem(index)
             self.tree_widget.expandItem(top_level_item)
+
+    def get_save_location(self):
+        return str(self.save_state_line_edit.text())

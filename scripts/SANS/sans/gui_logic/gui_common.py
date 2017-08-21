@@ -1,5 +1,6 @@
 from sans.common.enums import SANSInstrument, ISISReductionMode
-
+from PyQt4 import QtGui, QtCore
+import os
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Option column globals
@@ -24,6 +25,8 @@ DEFAULT_LAB = ISISReductionMode.to_string(ISISReductionMode.LAB)
 DEFAULT_HAB = ISISReductionMode.to_string(ISISReductionMode.HAB)
 MERGED = "Merged"
 ALL = "All"
+
+GENERIC_SETTINGS = "Mantid/ISISSANS"
 
 
 def get_reduction_mode_strings_for_gui(instrument=None):
@@ -73,3 +76,38 @@ def get_reduction_mode_from_gui_selection(gui_selection):
         return ISISReductionMode.HAB
     else:
         raise RuntimeError("Reduction mode selection is not valid.")
+
+
+def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func,
+              search_for_directory=False):
+    # Get the last location of the user file
+    settings = QtCore.QSettings()
+    settings.beginGroup(q_settings_group_key)
+    last_path = settings.value(q_settings_key, "", type=str)
+    settings.endGroup()
+
+    # Open the dialog
+    if search_for_directory:
+        open_file_dialog(line_edit_field, filter_for_dialog, last_path, QtGui.QFileDialog.Directory)
+    else:
+        open_file_dialog(line_edit_field, filter_for_dialog, last_path, QtGui.QFileDialog.AnyFile)
+
+    # Save the new location
+    new_path, _ = os.path.split(func())
+    if new_path:
+        settings = QtCore.QSettings()
+        settings.beginGroup(q_settings_group_key)
+        settings.setValue(q_settings_key, new_path)
+        settings.endGroup()
+
+
+def open_file_dialog(line_edit, filter_text, directory, dialog_type):
+    dlg = QtGui.QFileDialog()
+    dlg.setFileMode(dialog_type)
+    dlg.setFilter(filter_text)
+    dlg.setDirectory(directory)
+    if dlg.exec_():
+        file_names = dlg.selectedFiles()
+        if file_names:
+            line_edit.setText(file_names[0])
+
