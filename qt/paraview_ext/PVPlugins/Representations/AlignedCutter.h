@@ -47,7 +47,7 @@
 
 #include "vtkCutter.h"
 
-class VTKFILTERSCORE_EXPORT AlignedCutter : public vtkCutter {
+class VTK_EXPORT AlignedCutter : public vtkCutter {
 public:
   vtkTypeMacro(AlignedCutter, vtkCutter);
   vtkSetMacro(AxisNumber, int);

@@ -32,8 +32,7 @@
 #include "vtkPVClientServerCoreRenderingModule.h" //needed for exports
 #include "vtkThreeSliceFilter.h"
 
-class VTKPVCLIENTSERVERCORERENDERING_EXPORT AlignedThreeSliceFilter
-    : public vtkThreeSliceFilter {
+class VTK_EXPORT AlignedThreeSliceFilter : public vtkThreeSliceFilter {
 public:
   vtkTypeMacro(AlignedThreeSliceFilter, vtkThreeSliceFilter);
   /**

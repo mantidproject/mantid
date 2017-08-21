@@ -27,8 +27,8 @@
 
 #include "vtkGeometryRepresentation.h"
 
-class VTKPVCLIENTSERVERCORERENDERING_EXPORT
-    vtkAlignedGeometrySliceRepresentation : public vtkGeometryRepresentation {
+class VTK_EXPORT vtkAlignedGeometrySliceRepresentation
+    : public vtkGeometryRepresentation {
 public:
   static vtkAlignedGeometrySliceRepresentation *New();
   vtkTypeMacro(vtkAlignedGeometrySliceRepresentation,
