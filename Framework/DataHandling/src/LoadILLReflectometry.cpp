@@ -52,6 +52,47 @@ double coherenceIncoherenceEq(const double angle, const double peakPos1, const d
   const double angle2 = std::atan2((peakPos2 - pixelCentre) * pixelWidth, detDist2);
   return inDeg(inRad(angle) - sign * 0.5 * (angle1 + sign * angle2));
 }
+
+enum class RotationPlane {
+  horizontal,
+  vertical
+};
+
+Mantid::Kernel::V3D detectorPosition(const RotationPlane plane, const double distance, const double angle) {
+  const double a = inRad(angle);
+  double x, y, z;
+  switch (plane) {
+  case RotationPlane::horizontal:
+    x = distance * std::sin(a);
+    y = 0;
+    z = distance * std::cos(a);
+    break;
+  case RotationPlane::vertical:
+    x = 0;
+    y = distance * std::sin(a);
+    z = distance * std::cos(a);
+    break;
+  }
+  return Mantid::Kernel::V3D(x, y, z);
+}
+
+Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane, const double angle) {
+  const Mantid::Kernel::V3D axis = [plane]() {
+    double x, y;
+    switch(plane) {
+    case RotationPlane::horizontal:
+      x = 0;
+      y = 1;
+      break;
+    case RotationPlane::vertical:
+      x = -1;
+      y = 0;
+      break;
+    }
+    return Mantid::Kernel::V3D(x, y, 0);
+  }();
+  return Mantid::Kernel::Quat(angle, axis);
+}
 }
 
 namespace Mantid {
@@ -151,7 +192,7 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   const std::string angleOption{getPropertyValue("InputAngle")};
   if ((angleOption == "user defined") && (angleUserDefined == EMPTY_DBL()))
     result["BraggAngle"] =
-        "User defined BraggAngle option requires an input value";
+        "User defined Bragdocs/source/release/v3.11.0/framework.rst.origgAngle option requires an input value";
   // check direct beam file
   const std::string directBeam{getPropertyValue("DirectBeam")};
   if (!directBeam.empty() &&
@@ -756,13 +797,15 @@ void LoadILLReflectometry::placeDetector() {
   // incident angle for using the algorithm ConvertToReflectometryQ
   m_localWorkspace->mutableRun().addProperty("stheta", inRad(rho));
   const std::string componentName = "detector";
-  const V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
-  const V3D newpos(m_detectorDistanceValue * sin(inRad(theta)), pos.Y(),
-             m_detectorDistanceValue * cos(inRad(theta)));
+  const RotationPlane rotPlane = [this]() {
+    if (m_instrumentName == "D17") return RotationPlane::horizontal;
+    else if (m_instrumentName == "Figaro") return RotationPlane::vertical;
+    else return RotationPlane::horizontal;
+  }();
+  const auto newpos = detectorPosition(rotPlane, m_detectorDistanceValue, theta);
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
-  const V3D axis(0.0, 1.0, 0.0);
-  const Quat rotation(2. * rho, axis);
+  const auto rotation = detectorFaceRotation(rotPlane, theta);
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
 }
 
