@@ -1,11 +1,19 @@
+""" The run tab presenter.
+
+This presenter is essentially the brain of the reduction gui. It controlls other presenters and is mainly responsible
+for presenting and generating the reduction settings.
+"""
+
 from __future__ import (absolute_import, division, print_function)
 
 import os
 import copy
-from mantid.kernel import Logger
 import time
-from mantid.api import (AlgorithmManager, AnalysisDataService, FileFinder)
+
+from mantid.kernel import Logger
+from mantid.api import (AlgorithmManager, AnalysisDataService, FileFinder, WorkspaceFactory)
 from mantid.kernel import (Property)
+
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
@@ -20,9 +28,6 @@ from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, 
 from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
-
-
-sans_logger = Logger("SANS")
 
 
 class RunTabPresenter(object):
@@ -47,12 +52,14 @@ class RunTabPresenter(object):
         super(RunTabPresenter, self).__init__()
         self._facility = facility
 
+        # Logger
+        self.sans_logger = Logger("SANS")
+
         # Presenter needs to have a handle on the view since it delegates it
         self._view = None
         self.set_view(view)
 
         # Models that are being used by the presenter
-        self._state_model = None
         self._state_model = None
         self._table_model = None
 
@@ -166,7 +173,7 @@ class RunTabPresenter(object):
             self._settings_diagnostic_tab_presenter.on_update_rows()
 
         except Exception as e:
-            sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
+            self.sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
 
     def on_batch_file_load(self):
         """
@@ -202,7 +209,7 @@ class RunTabPresenter(object):
             self._settings_diagnostic_tab_presenter.on_update_rows()
 
         except RuntimeError as e:
-            sans_logger.error("Loading of the batch file failed. See here for more details: {}".format(str(e)))
+            self.sans_logger.error("Loading of the batch file failed. See here for more details: {}".format(str(e)))
 
     def on_processed_clicked(self):
         """
@@ -213,7 +220,7 @@ class RunTabPresenter(object):
         2. Adds a dummy input workspace
         3. Adds row index information
         """
-        sans_logger.information("Starting processing of batch table.")
+        self.sans_logger.information("Starting processing of batch table.")
         # 0. Validate rows
         self._create_dummy_input_workspace()
         self._validate_rows()
@@ -365,7 +372,7 @@ class RunTabPresenter(object):
             states = None
         stop_time_state_generation = time.time()
         time_taken = stop_time_state_generation - start_time_state_generation
-        sans_logger.information("The generation of all states took {}s".format(time_taken))
+        self.sans_logger.information("The generation of all states took {}s".format(time_taken))
         return states
 
     def get_row_indices(self):
@@ -388,7 +395,7 @@ class RunTabPresenter(object):
         """
         states = self.get_states(row_index=row_index)
         if states is None:
-            sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
+            self.sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
             return None
 
         if row_index in list(states.keys()):
@@ -765,13 +772,13 @@ class RunTabPresenter(object):
         states = {}
         gui_state_director = GuiStateDirector(table_model, state_model, self._facility)
         for row in rows:
-            sans_logger.information("Generating state for row {}".format(row))
+            self.sans_logger.information("Generating state for row {}".format(row))
             if not self.is_empty_row(row):
                 try:
                     state = gui_state_director.create_state(row)
                     states.update({row: state})
                 except ValueError as e:
-                    sans_logger.error("There was a bad entry for row {}. See here for more details: {}".format(row, str(e)))  # noqa
+                    self.sans_logger.error("There was a bad entry for row {}. See here for more details: {}".format(row, str(e)))  # noqa
                     raise RuntimeError("There was a bad entry for row {}. "
                                        "See here for more details: {}".format(row, str(e)))
         return states
@@ -822,7 +829,7 @@ class RunTabPresenter(object):
         try:
             self._file_information = file_information_factory.create_sans_file_information(sample_scatter)
         except NotImplementedError:
-            sans_logger.warning("Could not get file information from {}.".format(sample_scatter))
+            self.sans_logger.warning("Could not get file information from {}.".format(sample_scatter))
             self._file_information = None
 
         # Provide the instrument specific settings
@@ -862,17 +869,8 @@ class RunTabPresenter(object):
     @staticmethod
     def _create_dummy_input_workspace():
         if not AnalysisDataService.doesExist(SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME):
-            create_alg = AlgorithmManager.create("CreateSampleWorkspace")
-            create_alg.initialize()
-            create_alg.setProperty("OutputWorkspace",  SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME)
-            create_alg.setProperty("WorkspaceType",  "Histogram")
-            create_alg.setProperty("NumBanks",  1)
-            create_alg.setProperty("NumMonitors",  1)
-            create_alg.setProperty("BankPixelWidth",  1)
-            create_alg.setProperty("XMin",  0)
-            create_alg.setProperty("XMax",  1)
-            create_alg.setProperty("BinWidth",  1)
-            create_alg.execute()
+            workspace = WorkspaceFactory.create("Workspace2D", 1, 1, 1)
+            AnalysisDataService.addOrReplace(SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME, workspace)
 
     @staticmethod
     def _delete_dummy_input_workspace():

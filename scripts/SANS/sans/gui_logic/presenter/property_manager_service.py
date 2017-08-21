@@ -1,5 +1,14 @@
+""" The property manager service.
+
+The property manager service serializes a SANS state object into a PropertyManager object and places it on the
+ PropertyManagerDataService. It is also used to retrieve the state from this service.
+"""
+
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import Algorithm
 from mantid.kernel import (PropertyManagerProperty, PropertyManagerDataService)
+
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 

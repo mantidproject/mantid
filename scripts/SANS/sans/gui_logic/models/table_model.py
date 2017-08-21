@@ -1,6 +1,15 @@
+""" The table  model contains all the reduction information which is provided via the data table
+
+The main information in the table model are the run numbers and the selected periods. However it also contains
+information regarding the custom output name and the information in the options tab.
+"""
+
+from __future__ import (absolute_import, division, print_function)
+
 import os
+
 from sans.gui_logic.sans_data_processor_gui_algorithm import create_option_column_properties
-from sans.gui_logic.gui_common import (OPTIONS_SEPARATOR, OPTIONS_EQUAL)
+from sans.gui_logic.gui_common import OPTIONS_SEPARATOR, OPTIONS_EQUAL
 
 
 class TableModel(object):

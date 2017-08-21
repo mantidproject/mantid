@@ -1,5 +1,17 @@
-from __future__ import (absolute_import)
+""" Main view for the ISIS SANS reduction interface.
+"""
+
+from __future__ import (absolute_import, division, print_function)
+
 import os
+from abc import ABCMeta, abstractmethod
+from inspect import isclass
+
+from six import with_metaclass
+from PyQt4 import QtGui, QtCore
+
+from mantid.kernel import (Logger, config)
+from mantidqtpython import MantidQt
 try:
     from mantidplot import *
     canMantidPlot = True
@@ -7,22 +19,10 @@ except ImportError:
     canMantidPlot = False
 
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
-from PyQt4 import QtGui, QtCore
-from mantid.simpleapi import *
-from mantid.kernel import (Logger, config)
-from abc import ABCMeta, abstractmethod
-from six import with_metaclass
-from inspect import isclass
-from mantidqtpython import MantidQt
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, SampleShape, ReductionMode, FitType)
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_string_for_gui_from_reduction_mode)
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Globals
-# ----------------------------------------------------------------------------------------------------------------------
-gui_logger = Logger("SANS GUI LOGGER")
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -44,7 +44,6 @@ def open_file_dialog(line_edit, filter_text, directory):
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_SansDataProcessorWindow):
     data_processor_table = None
-    main_presenter = None
     INSTRUMENTS = None
 
     class RunTabListener(with_metaclass(ABCMeta, object)):
@@ -97,6 +96,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.__transmission_mask_files_path_key = "transmission_roi_files_path"
         self.__q_resolution_moderator_path_key = "q_resolution_moderator_file_path"
         self.__instrument_name = "sans_instrument"
+
+        # Logger
+        self.gui_logger = Logger("SANS GUI LOGGER")
 
         # Instrument
         SANSDataProcessorGui.INSTRUMENTS = ",".join([SANSInstrument.to_string(item)
@@ -573,7 +575,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         elif self.output_mode_both_radio_button.isChecked():
             return OutputMode.Both
         else:
-            gui_logger.warning("The output format was not specified. Defaulting to saving to memory only.")
+            self.gui_logger.warning("The output format was not specified. Defaulting to saving to memory only.")
             return OutputMode.PublishToADS
 
     @output_mode.setter
