@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid
+import tempfile
 import unittest
 import mock
 from mantid.kernel import config
@@ -39,7 +40,8 @@ class SettingsDiagnosticPresenterTest(unittest.TestCase):
         # Arrange
         parent_presenter = create_run_tab_presenter_mock()
         view = create_mock_settings_diagnostic_tab()
-        dummy_file_path = os.path.join(config["defaultsave.directory"], "sans_settings_presenter_test_dummy_file.json")
+        dummy_file_path = os.path.join(tempfile.gettempdir(), "sans_settings_diag_test.json")
+        print(dummy_file_path)
         view.get_save_location = mock.MagicMock(return_value=dummy_file_path)
         presenter = SettingsDiagnosticPresenter(parent_presenter)
         presenter.set_view(view)
