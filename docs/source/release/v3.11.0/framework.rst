@@ -49,6 +49,15 @@ Performance
 -----------
 - Performance of UB indexing routines addressed. `:ref:`FindUBUsingLatticeParameters` running 2x faster than before.
 
+Core Framework Changes
+----------------------
+
+Several changes to the core of how instrument geometry is stored and accessed. These changes have resulted in a few noteworthy performance improvements.
+
+- Partial loading of event nexus files has improved by 22%.
+- The LoadNexusMonitors algorithm has improved by 30%.
+- The ConvertSpectrumAxis algorithm has improved by 8%.
+
 CurveFitting
 ------------
 
