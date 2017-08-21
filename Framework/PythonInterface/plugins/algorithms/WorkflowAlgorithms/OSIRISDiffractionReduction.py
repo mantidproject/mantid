@@ -258,9 +258,8 @@ def rebin_to_smallest(*workspaces):
     if len(workspaces) == 1:
         return workspaces
 
-
     smallest_idx, smallest_ws = \
-        min(enumerate(workspaces), key=lambda x : x[1].blocksize())
+        min(enumerate(workspaces), key=lambda x: x[1].blocksize())
 
     rebin_alg = AlgorithmManager.create("RebinToWorkspace")
     rebin_alg.setChild(True)
@@ -684,8 +683,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         try:
             int_ranges = [[int(x) for x in str_range] for str_range in str_ranges]
         except BaseException:
-            raise ValueError('Provided list, "' + string +  '", was incorrectly formatted\n'
-                             '')
+            raise ValueError('Provided list, "' + string + '", was incorrectly formatted\n'
+                                                           '')
 
         # Expand integer ranges formed from a string 'a-b', to a range from a to b
         # Single provided integers remain the same
