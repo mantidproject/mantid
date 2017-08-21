@@ -570,13 +570,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Workspaces in vanadium map are no longer in the ADS - can safely delete
         # vanadium workspaces in ADS.
-        for vanadium_ws_name in vanadium_ws_names:
-
-            # This check is necessary, as the smallest vanadium workspace
-            # would have been removed from the ADS by rebin_to_smallest.
-            if mtd.doesExist(vanadium_ws_name):
-                delete_set_property("Workspace", vanadium_ws_name)
-                delete_exec()
+        self._delete_workspaces(vanadium_ws_names, delete_set_property, delete_exec)
 
         # Divide all sample files by the corresponding vanadium files.
         divided = self._divide_all_by(self._sam_ws_map.values(), self._van_ws_map.values())
@@ -599,14 +593,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Sample workspaces are now finished with and can be deleted
         # safely from the ADS.
-        for sample_ws_name in sample_ws_names:
-
-            # This check is necessary, as if no container workspaces
-            # are provided, the smallest sample workspace would have
-            # been removed from the ADS by rebin_to_smallest.
-            if mtd.doesExist(sample_ws_name):
-                delete_set_property("Workspace", sample_ws_name)
-                delete_exec()
+        self._delete_workspaces(sample_ws_names, delete_set_property, delete_exec)
 
         mtd.addOrReplace(self._output_ws_name, output_ws)
 
@@ -645,6 +632,21 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             result.setE(i, result_e)
 
         self.setProperty("OutputWorkspace", result)
+
+    def _delete_workspaces(self, workspace_names, delete_set_property, delete_exec):
+        """
+        Deletes the workspaces with the specified names, using the specified
+        delete_set_property and delete_exec methods of a deleting algorithm.
+
+        :param workspace_names:     The names of the workspaces to delete.
+        :param delete_set_property: The setProperty method of the delete algorithm.
+        :param delete_exec:         The execute method of the delete algorithm.
+        """
+        for workspace_name in workspace_names:
+
+            if mtd.doesExist(workspace_name):
+                delete_set_property("Workspace", workspace_name)
+                delete_exec()
 
     def _add_to_drange_map(self, workspace_names, drange_map):
         """
