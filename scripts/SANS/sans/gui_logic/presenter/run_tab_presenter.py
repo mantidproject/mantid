@@ -11,7 +11,7 @@ import copy
 import time
 
 from mantid.kernel import Logger
-from mantid.api import (AlgorithmManager, AnalysisDataService, FileFinder, WorkspaceFactory)
+from mantid.api import (AnalysisDataService, FileFinder, WorkspaceFactory)
 from mantid.kernel import (Property)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
