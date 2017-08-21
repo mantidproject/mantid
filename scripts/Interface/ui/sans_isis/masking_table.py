@@ -101,4 +101,3 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
     def set_display_mask_button_to_normal(self):
         self.display_mask_push_button.setText("Display Mask")
         self.display_mask_push_button.setEnabled(True)
-

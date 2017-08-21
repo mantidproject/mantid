@@ -1,5 +1,6 @@
 from PyQt4.QtCore import QRunnable, pyqtSlot, pyqtSignal, QObject
-import traceback, sys
+import traceback
+import sys
 # Following https://martinfitzpatrick.name/article/multithreading-pyqt-applications-with-qthreadpool/
 
 
