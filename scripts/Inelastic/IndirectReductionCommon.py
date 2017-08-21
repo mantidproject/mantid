@@ -33,6 +33,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
     if "DeleteMonitors" in load_opts:
         delete_monitors = load_opts["DeleteMonitors"]
+        load_opts.pop("DeleteMonitors")
 
     workspace_names = []
 
@@ -110,6 +111,9 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
             workspace_names = sum_chopped_runs(workspace_names)
         else:
             workspace_names = sum_regular_runs(workspace_names)
+
+    if delete_monitors:
+        load_opts['DeleteMonitors'] = True
 
     logger.information('Summed workspace names: %s' % (str(workspace_names)))
 

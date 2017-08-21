@@ -255,16 +255,29 @@ def rebin_to_smallest(*workspaces):
     :param workspaces: The list of workspaces to rebin to the smallest.
     :return:           The rebinned list of workspaces.
     """
-    smallest_ws = min(workspaces, key=lambda ws: ws.blocksize())
+    workspace_set = set()
+    smallest_ws = workspaces[0]
+    smallest_size = workspaces[0].blocksize()
+
+    # Iterate over all workspaces and find the minimum.
+    # Add all the workspaces to a set during iteration.
+    for workspace in workspaces:
+        workspace_set.add(workspace)
+        current_size = workspace.blocksize()
+
+        if workspace.blocksize() < smallest_size:
+            smallest_ws = workspace
+            smallest_size = current_size
+    workspace_set.remove(smallest_ws)
+
     rebin_alg = AlgorithmManager.create("RebinToWorkspace")
     rebin_alg.setChild(True)
     rebin_alg.initialize()
     rebin_alg.setProperty("WorkspaceToMatch", smallest_ws)
 
     rebinned_workspaces = []
-    for workspace in workspaces:
+    for workspace in workspace_set:
         rebin_alg.setProperty("WorkspaceToRebin", workspace)
-        rebin_alg.setProperty("OutputWorkspace", "temp")
         rebin_alg.execute()
         rebinned_workspaces.append(rebin_alg.getProperty("OutputWorkspace").value)
 
@@ -634,10 +647,11 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         :param do_log_found:    If True print the found workspaces to log.
                                 Else don't print to log.
         """
+        drange_len = len(self._man_d_range)
 
         for idx, ws_name in enumerate(workspace_names):
             if self._man_d_range is not None and \
-                            idx < len(self._man_d_range):
+                            idx < drange_len:
                 drange_map.add_ws(mtd[ws_name], self._man_d_range[idx])
             else:
                 drange_map.add_ws(mtd[ws_name])
