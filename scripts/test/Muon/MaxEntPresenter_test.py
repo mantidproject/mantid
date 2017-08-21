@@ -1,0 +1,56 @@
+import sys
+from  Muon import MaxEnt_presenter
+from  Muon import MaxEnt_view
+from  Muon import MaxEnt_model
+import unittest
+if sys.version_info.major == 3:
+    from unittest import mock
+else:
+    import mock
+
+
+class MaxEntPresenterTest(unittest.TestCase):
+    def setUp(self):
+        self.alg=mock.create_autospec(MaxEnt_model.MaxEntThread,spec_set=True)
+        self.alg.execute=mock.Mock()
+        self.alg.setInputs=mock.Mock()
+
+        self.view=mock.create_autospec(MaxEnt_view.MaxEntView,spec_set=True)
+        #signals
+        #needed for connect in presenter
+        self.view.maxEntButtonSignal=mock.Mock()
+        # functions
+        self.view.addItems=mock.MagicMock()
+        self.view.initMaxEntInput=mock.Mock(return_value={"InputWorkspace":"testWS","EvolChi":"out",
+                                            "ReconstructedData":"out2","ReconstructedImage":"out3","EvolAngle":"out4"})
+        self.view.addRaw=mock.Mock()
+        self.view.isRaw=mock.Mock(return_value=False)
+        self.view.deactivateButton=mock.Mock()
+        self.view.activateButton=mock.Mock()
+         #set presenter
+        self.presenter=MaxEnt_presenter.MaxEntPresenter(self.view,self.alg)
+
+    def test_buttonWithRaw(self):
+        self.view.isRaw=mock.Mock(return_value=True)
+        self.presenter.handleMaxEntButton()
+        assert(self.view.initMaxEntInput.call_count==1)
+        assert(self.view.isRaw.call_count==1)
+        assert(self.view.addRaw.call_count==5)
+        assert(self.view.deactivateButton.call_count==1)
+        assert(self.alg.execute.call_count==1)
+
+    def test_buttonWithoutRaw(self):
+        self.view.isRaw=mock.Mock(return_value=False)
+        self.presenter.handleMaxEntButton()
+        assert(self.view.initMaxEntInput.call_count==1)
+        assert(self.view.isRaw.call_count==1)
+        assert(self.view.addRaw.call_count==0)
+        assert(self.alg.execute.call_count==1)
+        assert(self.view.deactivateButton.call_count==1)
+
+    def test_ActivateButton(self):
+        self.presenter.activateButton()
+        assert(self.view.activateButton.call_count==1)
+
+if __name__ == '__main__':
+    unittest.main()

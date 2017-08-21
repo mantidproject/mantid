@@ -4,6 +4,8 @@
 
 set ( TEST_PY_FILES
    FFTPresenter_test.py
+   MaxEntPresenter_test.py
+   transformPresenter_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
