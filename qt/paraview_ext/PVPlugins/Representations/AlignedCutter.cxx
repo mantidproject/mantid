@@ -28,13 +28,10 @@
 
 vtkStandardNewMacro(AlignedCutter);
 
-//----------------------------------------------------------------------------
-// Construct with user-specified implicit function; initial value of 0.0; and
-// generating cut scalars turned off.
 AlignedCutter::AlignedCutter(vtkImplicitFunction *cf) : vtkCutter(cf) {}
 
 //----------------------------------------------------------------------------
-AlignedCutter::~AlignedCutter() {}
+AlignedCutter::~AlignedCutter() = default;
 
 //----------------------------------------------------------------------------
 void AlignedCutter::AlignedStructuredGridCutter(vtkDataSet *dataSetInput,
@@ -279,30 +276,4 @@ int AlignedCutter::RequestData(
   cout << "Sliced "<<output->GetNumberOfCells()<<" cells in "<< timer->GetElapsedTime() <<" secs "<<endl;
 #endif
   return 1;
-}
-
-//----------------------------------------------------------------------------
-void AlignedCutter::PrintSelf(ostream& os, vtkIndent indent)
-{
-  this->Superclass::PrintSelf(os,indent);
-
-  os << indent << "Cut Function: " << this->CutFunction << "\n";
-  os << indent << "Sort By: " << this->GetSortByAsString() << "\n";
-
-  if ( this->Locator )
-  {
-    os << indent << "Locator: " << this->Locator << "\n";
-  }
-  else
-  {
-    os << indent << "Locator: (none)\n";
-  }
-
-  this->ContourValues->PrintSelf(os,indent.GetNextIndent());
-
-  os << indent << "Generate Cut Scalars: "
-     << (this->GenerateCutScalars ? "On\n" : "Off\n");
-
-  os << indent << "Precision of the output points: "
-     << this->OutputPointsPrecision << "\n";
 }

@@ -50,7 +50,6 @@
 class VTKFILTERSCORE_EXPORT AlignedCutter : public vtkCutter {
 public:
   vtkTypeMacro(AlignedCutter, vtkCutter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   vtkSetMacro(AxisNumber, int);
   vtkGetMacro(AxisNumber, int);
   /**
@@ -60,8 +59,9 @@ public:
   static AlignedCutter *New();
 protected:
   AlignedCutter(vtkImplicitFunction *cf=NULL);
-  ~AlignedCutter() VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  ~AlignedCutter() override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
   void AlignedStructuredGridCutter(vtkDataSet *, vtkPolyData *);
   int AxisNumber;
 private:
