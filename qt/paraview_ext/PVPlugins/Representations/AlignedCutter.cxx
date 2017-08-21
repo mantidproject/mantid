@@ -275,9 +275,13 @@ void AlignedCutter::StructuredGridCutter(vtkDataSet *dataSetInput,
     double *ptr = cutScalars->GetPointer(0);
     vtkIdType min = std::distance(
         ptr, std::min_element(ptr, ptr + cutScalars->GetNumberOfTuples()));
+
+    // check for out-of-bounds values
+    if (min == 0 || min == celldims[AxisNumber])
+      break;
+
     min = std::min(min, static_cast<vtkIdType>(celldims[AxisNumber] - 1));
-    // set out of bounds values;
-      
+
     if (AxisNumber == 0) {
       for (int j = 0; j < celldims[1]; ++j) {
         for (int k=0; k < celldims[2]; ++k) {
