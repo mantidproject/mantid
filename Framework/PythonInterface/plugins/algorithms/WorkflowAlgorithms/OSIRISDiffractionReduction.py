@@ -258,6 +258,7 @@ def rebin_to_smallest(*workspaces):
     if len(workspaces) == 1:
         return workspaces
 
+
     smallest_idx, smallest_ws = \
         min(enumerate(workspaces), key=lambda x : x[1].blocksize())
 
@@ -269,6 +270,11 @@ def rebin_to_smallest(*workspaces):
     rebinned_workspaces = []
     for idx, workspace in enumerate(workspaces):
 
+        # Check whether this is the workspace with the smallest x-range.
+        # No reason to rebin workspace to match itself.
+        # NOTE: In the future this may append workspace.clone() - this will
+        # occur in the circumstance that the input files do not want to be
+        # removed from the ADS.
         if idx == smallest_idx:
             rebinned_workspaces.append(workspace)
         else:
@@ -566,8 +572,12 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Workspaces in vanadium map are no longer in the ADS - can safely delete
         # vanadium workspaces in ADS.
         for vanadium_ws_name in vanadium_ws_names:
-            delete_set_property("Workspace", vanadium_ws_name)
-            delete_exec()
+
+            # This check is necessary, as the smallest vanadium workspace
+            # would have been removed from the ADS by rebin_to_smallest.
+            if mtd.doesExist(vanadium_ws_name):
+                delete_set_property("Workspace", vanadium_ws_name)
+                delete_exec()
 
         # Divide all sample files by the corresponding vanadium files.
         divided = self._divide_all_by(self._sam_ws_map.values(), self._van_ws_map.values())
