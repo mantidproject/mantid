@@ -53,7 +53,7 @@
 
 #include <qwt3d_color.h>
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtWidgets/Common/MantidColorMap.h"
 
 using Mantid::Kernel::ConfigService;
 

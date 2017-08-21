@@ -1,4 +1,6 @@
 # pylint: disable=invalid-name,protected-access
+from __future__ import (absolute_import, division, print_function)
+import six
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import os
@@ -13,6 +15,9 @@ try:
     IS_IN_MANTIDPLOT = True
 except ImportError:
     pass
+
+if six.PY3:
+    unicode = str
 
 
 class SANSInstrumentWidget(BaseWidget):
