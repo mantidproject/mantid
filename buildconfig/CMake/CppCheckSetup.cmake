@@ -61,6 +61,8 @@ if ( CPPCHECK_EXECUTABLE )
         MantidPlot/src/origin/OPJFile.cpp
         MantidPlot/src/zlib123/minigzip.c
         Framework/SINQ/src/PoldiPeakFit.cpp
+        qt/widgets/common/src/QtPropertyBrowser/
+        qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/
       )
 
   # Header files to be ignored require different handling

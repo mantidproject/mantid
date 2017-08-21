@@ -131,7 +131,7 @@ void IndirectCorrections::run() {
  * Opens a directory dialog.
  */
 void IndirectCorrections::openDirectoryDialog() {
-  MantidQt::API::ManageUserDirectories *ad =
+  auto ad =
       new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();

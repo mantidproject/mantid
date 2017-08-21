@@ -490,8 +490,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
  *diffonly)
  */
 MatrixWorkspace_sptr
-IndirectDiffractionReduction::loadInstrument(std::string instrumentName,
-                                             std::string reflection) {
+IndirectDiffractionReduction::loadInstrument(const std::string &instrumentName,
+                                             const std::string &reflection) {
   std::string idfPath = Mantid::Kernel::ConfigService::Instance().getString(
       "instrumentDefinition.directory");
 
@@ -615,7 +615,7 @@ void IndirectDiffractionReduction::instrumentSelected(
  * Handles opening the directory manager window.
  */
 void IndirectDiffractionReduction::openDirectoryDialog() {
-  MantidQt::API::ManageUserDirectories *ad =
+  auto ad =
       new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();

@@ -50,17 +50,17 @@ RunFindPeaks::RunFindPeaks(MantidEVWorker *worker,
                            const std::string &md_ws_name,
                            const std::string &peaks_ws_name, double max_abc,
                            size_t num_to_find, double min_intensity,
-                           double minQPeaks, double maxQPeaks) {
-  this->worker = worker;
-  this->ev_ws_name = ev_ws_name;
-  this->md_ws_name = md_ws_name;
-  this->peaks_ws_name = peaks_ws_name;
-  this->max_abc = max_abc;
-  this->num_to_find = num_to_find;
-  this->min_intensity = min_intensity;
-  this->minQPeaks = minQPeaks;
-  this->maxQPeaks = maxQPeaks;
-}
+                           double minQPeaks, double maxQPeaks) :
+  worker(worker),
+  ev_ws_name(ev_ws_name),
+  md_ws_name(md_ws_name),
+  peaks_ws_name(peaks_ws_name),
+  max_abc(max_abc),
+  num_to_find(num_to_find),
+  min_intensity(min_intensity),
+  minQPeaks(minQPeaks),
+  maxQPeaks(maxQPeaks)
+  {}
 
 /**
  *  Class to call findPeaks in a separate thread.
@@ -77,14 +77,14 @@ RunPredictPeaks::RunPredictPeaks(MantidEVWorker *worker,
                                  const std::string &peaks_ws_name,
                                  double min_pred_wl, double max_pred_wl,
                                  double min_pred_dspacing,
-                                 double max_pred_dspacing) {
-  this->worker = worker;
-  this->peaks_ws_name = peaks_ws_name;
-  this->min_pred_wl = min_pred_wl;
-  this->max_pred_wl = max_pred_wl;
-  this->min_pred_dspacing = min_pred_dspacing;
-  this->max_pred_dspacing = max_pred_dspacing;
-}
+                                 double max_pred_dspacing) :
+  worker(worker),
+  peaks_ws_name(peaks_ws_name),
+  min_pred_wl(min_pred_wl),
+  max_pred_wl(max_pred_wl),
+  min_pred_dspacing(min_pred_dspacing),
+  max_pred_dspacing(max_pred_dspacing)
+  {}
 
 /**
  *  Class to call predictPeaks in a separate thread.
@@ -103,21 +103,21 @@ RunSphereIntegrate::RunSphereIntegrate(
     double outer_radius, bool integrate_edge, bool use_cylinder_integration,
     double cylinder_length, double cylinder_percent_bkg,
     const std::string &cylinder_profile_fit, bool adaptiveQBkg,
-    double adaptiveQMult) {
-  this->worker = worker;
-  this->peaks_ws_name = peaks_ws_name;
-  this->event_ws_name = event_ws_name;
-  this->peak_radius = peak_radius;
-  this->inner_radius = inner_radius;
-  this->outer_radius = outer_radius;
-  this->integrate_edge = integrate_edge;
-  this->use_cylinder_integration = use_cylinder_integration;
-  this->cylinder_length = cylinder_length;
-  this->cylinder_percent_bkg = cylinder_percent_bkg;
-  this->cylinder_profile_fit = cylinder_profile_fit;
-  this->adaptiveQBkg = adaptiveQBkg;
-  this->adaptiveQMult = adaptiveQMult;
-}
+    double adaptiveQMult) :
+  worker(worker),
+  peaks_ws_name(peaks_ws_name),
+  event_ws_name(event_ws_name),
+  peak_radius(peak_radius),
+  inner_radius(inner_radius),
+  outer_radius(outer_radius),
+  integrate_edge(integrate_edge),
+  use_cylinder_integration(use_cylinder_integration),
+  cylinder_length(cylinder_length),
+  cylinder_percent_bkg(cylinder_percent_bkg),
+  cylinder_profile_fit(cylinder_profile_fit),
+  adaptiveQBkg(adaptiveQBkg),
+  adaptiveQMult(adaptiveQMult)
+  {}
 
 /**
  *  Class to call sphereIntegrate in a separate thread.
@@ -137,14 +137,14 @@ RunFitIntegrate::RunFitIntegrate(MantidEVWorker *worker,
                                  const std::string &event_ws_name,
                                  const std::string &rebin_params,
                                  size_t n_bad_edge_pix,
-                                 bool use_ikeda_carpenter) {
-  this->worker = worker;
-  this->peaks_ws_name = peaks_ws_name;
-  this->event_ws_name = event_ws_name;
-  this->rebin_params = rebin_params;
-  this->n_bad_edge_pix = n_bad_edge_pix;
-  this->use_ikeda_carpenter = use_ikeda_carpenter;
-}
+                                 bool use_ikeda_carpenter) :
+  worker(worker),
+  peaks_ws_name(peaks_ws_name),
+  event_ws_name(event_ws_name),
+  rebin_params(rebin_params),
+  n_bad_edge_pix(n_bad_edge_pix),
+  use_ikeda_carpenter(use_ikeda_carpenter)
+  {}
 
 /**
  *  Class to call fitIntegrate in a separate thread.
@@ -160,16 +160,16 @@ void RunFitIntegrate::run() {
 RunEllipsoidIntegrate::RunEllipsoidIntegrate(
     MantidEVWorker *worker, const std::string &peaks_ws_name,
     const std::string &event_ws_name, double region_radius, bool specify_size,
-    double peak_size, double inner_size, double outer_size) {
-  this->worker = worker;
-  this->peaks_ws_name = peaks_ws_name;
-  this->event_ws_name = event_ws_name;
-  this->region_radius = region_radius;
-  this->specify_size = specify_size;
-  this->peak_size = peak_size;
-  this->inner_size = inner_size;
-  this->outer_size = outer_size;
-}
+    double peak_size, double inner_size, double outer_size) :
+  worker(worker),
+  peaks_ws_name(peaks_ws_name),
+  event_ws_name(event_ws_name),
+  region_radius(region_radius),
+  specify_size(specify_size),
+  peak_size(peak_size),
+  inner_size(inner_size),
+  outer_size(outer_size)
+  {}
 
 /**
  *  Class to call ellipsoidIntegrate in a separate thread.
@@ -187,12 +187,13 @@ void RunEllipsoidIntegrate::run() {
  *  Constructor for MantidEV.  Makes the thread pool and instance of
  *  MantidEVWorker.
  */
-MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent) {
-  last_Q = V3D(0, 0, 0);
-  worker = new MantidEVWorker();
-  m_thread_pool = new QThreadPool(this);
-  m_thread_pool->setMaxThreadCount(1);
+MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent),
+  worker(new MantidEVWorker()),
+  last_Q(V3D(0, 0, 0)),
+  m_thread_pool(new QThreadPool(this))
+{
 
+  m_thread_pool->setMaxThreadCount(1);
   QObject::connect(&(MantidQt::API::SelectionNotificationService::Instance()),
                    SIGNAL(QPointSelection_signal(bool, double, double, double)),
                    this,

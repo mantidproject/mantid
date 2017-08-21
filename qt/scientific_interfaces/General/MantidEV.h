@@ -31,7 +31,7 @@ namespace CustomInterfaces {
 class RunLoadAndConvertToMD : public QRunnable {
 public:
   /// Constructor just saves the info needed by the run() method
-  RunLoadAndConvertToMD(MantidEVWorker *worker, const std::string &file_name,
+  explicit RunLoadAndConvertToMD(MantidEVWorker *worker, const std::string &file_name,
                         const std::string &ev_ws_name,
                         const std::string &md_ws_name, const double modQ,
                         const double minQ, const double maxQ,
@@ -194,7 +194,7 @@ class MantidEV : public API::UserSubWindow {
 
 public:
   /// Constructor
-  MantidEV(QWidget *parent = 0);
+  explicit MantidEV(QWidget *parent = 0);
 
   /// Destructor
   ~MantidEV() override;

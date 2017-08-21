@@ -522,7 +522,7 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
  * Handles showing the manage directory dialog box.
  */
 void IndirectDataReduction::openDirectoryDialog() {
-  MantidQt::API::ManageUserDirectories *ad =
+  auto ad =
       new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();

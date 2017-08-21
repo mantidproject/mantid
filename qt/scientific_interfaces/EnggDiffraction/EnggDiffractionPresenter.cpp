@@ -181,13 +181,10 @@ void EnggDiffractionPresenter::notify(
 }
 
 void EnggDiffractionPresenter::processStart() {
-  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
   m_view->showStatus("Ready");
 }
 
 void EnggDiffractionPresenter::processLoadExistingCalib() {
-  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
-
   const std::string fname = m_view->askExistingCalibFilename();
   if (fname.empty()) {
     return;
@@ -1247,7 +1244,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   * @param outVanName The fixed filename for the vanadium run
   */
 void EnggDiffractionPresenter::appendCalibInstPrefix(
-    const std::string vanNo, std::string &outVanName) const {
+    const std::string &vanNo, std::string &outVanName) const {
   // Use a single non numeric digit so we are guaranteed to skip
   // generating cerium file names
   const std::string cer = "-";
@@ -1266,7 +1263,7 @@ void EnggDiffractionPresenter::appendCalibInstPrefix(
   * @param outCerName The fixed filename for the cerium run
   */
 void EnggDiffractionPresenter::appendCalibInstPrefix(
-    const std::string vanNo, const std::string cerNo, std::string &outVanName,
+    const std::string &vanNo, const std::string &cerNo, std::string &outVanName,
     std::string &outCerName) const {
 
   // Load uses the default instrument if we don't give it the name of the
@@ -1925,7 +1922,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
     const std::string &vanNo, const std::string &inputDirCalib,
     ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
-    bool forceRecalc, const std::string specNos) {
+    bool forceRecalc, const std::string &specNos) {
   bool foundPrecalc = false;
 
   std::string preIntegFilename, preCurvesFilename;
@@ -2057,7 +2054,7 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
     const std::string &preIntegFilename, const std::string &preCurvesFilename,
     ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
-    const std::string &vanNo, const std::string specNos) {
+    const std::string &vanNo, const std::string &specNos) {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
 
   auto alg =
@@ -2160,7 +2157,7 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
 * @param runNo run number to search for the file with 'Load'.
 */
 Workspace_sptr
-EnggDiffractionPresenter::loadToPreproc(const std::string runNo) {
+EnggDiffractionPresenter::loadToPreproc(const std::string &runNo) {
   const std::string instStr = m_view->currentInstrument();
   Workspace_sptr inWS;
 
@@ -2805,7 +2802,7 @@ std::string EnggDiffractionPresenter::plotDifcZeroWorkspace(
 * @param bank_i current loop of the bank during calibration
 */
 std::string EnggDiffractionPresenter::outFitParamsTblNameGenerator(
-    const std::string specNos, const size_t bank_i) const {
+    const std::string &specNos, const size_t bank_i) const {
   std::string outFitParamsTblName;
   bool specNumUsed = specNos != "";
 
