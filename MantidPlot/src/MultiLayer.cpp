@@ -68,15 +68,15 @@
 #include "Mantid/MantidMDCurve.h"
 #include "Mantid/MantidMatrixCurve.h"
 #include "MantidKernel/Strings.h"
-#include <MantidQtMantidWidgets/MantidTreeWidget.h>
+#include <MantidQtWidgets/Common/MantidTreeWidget.h>
 
 #include "Mantid/MantidMDCurveDialog.h"
-#include "MantidQtSliceViewer/LinePlotOptions.h"
-#include <MantidQtMantidWidgets/MantidTreeWidget.h>
-#include <MantidQtMantidWidgets/MantidWSIndexDialog.h>
+#include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
+#include <MantidQtWidgets/Common/MantidTreeWidget.h>
+#include <MantidQtWidgets/Common/MantidWSIndexDialog.h>
 #include <gsl/gsl_vector.h>
 
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(MultiLayer)

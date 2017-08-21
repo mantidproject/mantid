@@ -461,20 +461,6 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
   // Then find the corresponding relative position
   const auto componentIndex = componentInfo.indexOf(comp->getComponentID());
 
-  if (componentInfo.hasParent(componentIndex)) {
-    const auto parentIndex = componentInfo.parent(componentIndex);
-    auto rot0 = componentInfo.relativeRotation(parentIndex);
-    rot0.inverse();
-    Rot *= rot0;
-
-    if (componentInfo.hasParent(parentIndex)) {
-      const auto grandParentIndex = componentInfo.parent(parentIndex);
-      auto rot0 = componentInfo.relativeRotation(grandParentIndex);
-      rot0.inverse();
-      Rot *= rot0;
-    }
-  }
-
   componentInfo.setRotation(componentIndex, Rot);
 }
 

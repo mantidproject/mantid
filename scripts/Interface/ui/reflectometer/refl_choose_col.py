@@ -2,6 +2,7 @@
 #This is an extension of refl_columns.py as that is a auto-generated script form pyqt and shouldn't be edited
 #so this file provides any extra GUI tweaks not easily doable in the designer
 #for the time being this also includes non-GUI behaviour
+from __future__ import (absolute_import, division, print_function)
 import ui_refl_columns
 from PyQt4 import QtCore, QtGui
 

@@ -23,6 +23,13 @@ using namespace Mantid::Kernel;
 
 class FindUBUsingLatticeParametersTest : public CxxTest::TestSuite {
 public:
+  static FindUBUsingLatticeParametersTest *createSuite() {
+    return new FindUBUsingLatticeParametersTest();
+  }
+  static void destroySuite(FindUBUsingLatticeParametersTest *suite) {
+    delete suite;
+  }
+
   FindUBUsingLatticeParametersTest() { m_ws = loadPeaksWorkspace(); }
 
   ~FindUBUsingLatticeParametersTest() {

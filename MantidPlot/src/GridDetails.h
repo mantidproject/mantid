@@ -33,7 +33,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 #include <QWidget>
 #include <QList>
-#include <MantidQtMantidWidgets/DoubleSpinBox.h>
+#include <MantidQtWidgets/Common/DoubleSpinBox.h>
 class ApplicationWindow;
 class Graph;
 class QCheckBox;
