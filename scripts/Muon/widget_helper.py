@@ -32,6 +32,7 @@ def createCheckTable(table,state,row):
     table.setItem(row,1, box)
     return box
 
+
 def createSpinTable(table,default,row):
     box= QtGui.QSpinBox()
     if default > 99:

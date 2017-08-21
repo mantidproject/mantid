@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore, QtGui
-from Muon import widget_helper
 
 
 class TransformSelectionView(QtGui.QWidget):
@@ -16,8 +15,10 @@ class TransformSelectionView(QtGui.QWidget):
         self.methods.addItems(options)
         self.grid.addWidget(self.methods)
         self.methods.currentIndexChanged.connect(self.sendSignal)
+
     def setMethodsCombo(self,options):
         self.methods.clear()
-        self.methods.addItems(options)       
+        self.methods.addItems(options)
+
     def sendSignal(self,index):
         self.changeMethodSignal.emit(index)

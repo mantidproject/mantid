@@ -27,20 +27,18 @@ class MaxEntView(QtGui.QWidget):
 
         widget_helper.setName(self.table,0,"Workspace")
         self.ws= widget_helper.createComboTable(self.table,0,options)
-        
+
         widget_helper.setName(self.table,1,"Complex Data")
         self.complex_data_box= widget_helper.createCheckTable(self.table,False,1)
         self.complex_data_box.setFlags(QtCore.Qt.ItemIsEnabled)
         # needs an even number of ws to work
         # so lets hide it for now
-        self.table.setRowHidden(1,True)       
- 
+        self.table.setRowHidden(1,True)
+
         widget_helper.setName(self.table,2,"Complex Image")
         self.complex_image_box= widget_helper.createCheckTable(self.table,True,2)
- 
         widget_helper.setName(self.table,3,"Positive Image")
         self.positive_image_box= widget_helper.createCheckTable(self.table,False,3)
- 
         widget_helper.setName(self.table,4,"Resolution")
         self.resolution_box= widget_helper.createSpinTable(self.table,1,4)
 
@@ -143,7 +141,9 @@ class MaxEntView(QtGui.QWidget):
 
     def isRaw(self):
         return self.raw_box.checkState() == QtCore.Qt.Checked
+
     def activateButton(self):
         self.button.setEnabled(True)
+
     def deactivateButton(self):
         self.button.setEnabled(False)

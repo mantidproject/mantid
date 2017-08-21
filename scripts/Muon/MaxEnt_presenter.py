@@ -1,8 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
-from six import iteritems
 import mantid.simpleapi as mantid
 
-from Muon import MaxEnt_model
 
 class MaxEntPresenter(object):
 
@@ -32,10 +30,10 @@ class MaxEntPresenter(object):
         inputs = self.get_MaxEnt_input()
         self.alg.setInputs(inputs)
         self.alg.execute(self.activateButton)
- 
+
     def activateButton(self):
         self.view.activateButton()
- 
+
     def get_MaxEnt_input(self):
         inputs=self.view.initMaxEntInput()
         if self.view.isRaw():

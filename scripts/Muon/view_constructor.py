@@ -4,9 +4,10 @@ from Muon import MaxEnt_view
 from Muon import transform_selection_view
 
 # simple class to create a single object
-# containing all of the views. 
+# containing all of the views.
 # Only need to pass a single object to all
-# presenters 
+# presenters
+
 
 class viewConstructor(object):
 
@@ -16,10 +17,10 @@ class viewConstructor(object):
             self.transformMethods={}
             self.transformMethods["FFT"]=FFT_view.FFTView(parent)
             self.transformMethods["MaxEnt"]=MaxEnt_view.MaxEntView(parent)
-            
             self.transformSelector=transform_selection_view.TransformSelectionView(parent)
+
     def getTransformMethods(self):
         return self.transformMethods
- 
+
     def getTransformSelection(self):
         return self.transformSelector

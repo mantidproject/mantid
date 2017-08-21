@@ -1,6 +1,4 @@
 from __future__ import (absolute_import, division, print_function)
-from six import iteritems
-import mantid.simpleapi as mantid
 
 
 class transformSelectionPresenter(object):
