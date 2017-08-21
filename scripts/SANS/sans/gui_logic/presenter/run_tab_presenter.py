@@ -27,6 +27,7 @@ from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, 
 from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
+from sans.common.constants import ALL_PERIODS
 
 
 sans_logger = Logger("SANS")
@@ -811,6 +812,9 @@ class RunTabPresenter(object):
                 _element = _row[_tag]
             return _element
 
+        def get_string_period(_tag):
+            return "" if _tag == ALL_PERIODS else str(_tag)
+
         # 1. Pull out the entries
         sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
         sample_scatter_period = get_string_entry(BatchReductionEntry.SampleScatterPeriod, row)
@@ -827,21 +831,22 @@ class RunTabPresenter(object):
         output_name = get_string_entry(BatchReductionEntry.Output, row)
 
         # 2. Create entry that can be understood by table
-        row_entry = "SampleScatter:{},scp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
+        row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
                     "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
                     "CanDirect:{},cdp:{},OutputName:{}".format(sample_scatter,
-                                                               sample_scatter_period,
+                                                               get_string_period(sample_scatter_period),
                                                                sample_transmission,
-                                                               sample_transmission_period,
+                                                               get_string_period(sample_transmission_period),
                                                                sample_direct,
-                                                               sample_direct_period,
+                                                               get_string_period(sample_direct_period),
                                                                can_scatter,
-                                                               can_scatter_period,
+                                                               get_string_period(can_scatter_period),
                                                                can_transmission,
-                                                               can_transmission_period,
+                                                               get_string_period(can_transmission_period),
                                                                can_direct,
-                                                               can_direct_period,
+                                                               get_string_period(can_direct_period),
                                                                output_name)
+
         self._view.add_row(row_entry)
 
     # ------------------------------------------------------------------------------------------------------------------
