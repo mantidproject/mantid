@@ -678,7 +678,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         try:
             int_ranges = [[int(x) for x in str_range] for str_range in str_ranges]
         except BaseException:
-            raise ValueError('Provided string, "' + string +  '", was incorrectly formatted\n'
+            raise ValueError('Provided list, "' + string +  '", was incorrectly formatted\n'
                              '')
 
         # Expand integer ranges formed from a string 'a-b', to a range from a to b
