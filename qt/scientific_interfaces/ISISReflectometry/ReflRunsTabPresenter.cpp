@@ -56,7 +56,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     std::vector<DataProcessorPresenter *> tablePresenters,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
-      m_tablePresenters(tablePresenters), m_mainPresenter(),
+      m_tablePresenters(tablePresenters), m_mainPresenter(nullptr),
       m_searcher(searcher), m_instrumentChanged(false) {
 
   // Register this presenter as the workspace receiver

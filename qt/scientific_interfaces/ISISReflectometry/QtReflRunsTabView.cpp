@@ -34,17 +34,23 @@ QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
   initLayout();
 }
 
+
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
 QtReflRunsTabView::~QtReflRunsTabView() {}
+
+
+void QtReflRunsTabView::initState() {
+  autoreduceWillReduce();
+  disableEditMenuAction(DataProcessorAction::PAUSE);
+}
 
 /**
 Initialise the Interface
 */
 void QtReflRunsTabView::initLayout() {
   ui.setupUi(this);
-
   ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
 
   // Expand the process runs column at the expense of the search column
@@ -111,6 +117,8 @@ void QtReflRunsTabView::initLayout() {
   connect(qDataProcessorWidget_2,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
+
+  initState();
 }
 
 /**
@@ -286,12 +294,10 @@ void QtReflRunsTabView::disableTransfer() { setTransferEnabled(false); }
 void QtReflRunsTabView::enableTransfer() { setTransferEnabled(true); }
 
 void QtReflRunsTabView::autoreduceCannotBePressed() {
-  std::cout << "Can't press" << std::endl;
   disable(autoreduceButton());
 }
 
 void QtReflRunsTabView::autoreduceWillReduce() {
-  std::cout << "Reducepress" << std::endl;
   setAutoreduceIcon(m_playIcon);
   setAutoreduceText(playText);
   m_autoreduceShouldPause = false;
@@ -303,7 +309,6 @@ QString const QtReflRunsTabView::pauseText = "Pause Autoreduction";
 QString const QtReflRunsTabView::playText = "Autoreduce";
 
 void QtReflRunsTabView::autoreduceWillPause() {
-  std::cout << "PausePress" << std::endl;
   setAutoreduceIcon(m_pauseIcon);
   setAutoreduceText(pauseText);
   m_autoreduceShouldPause = true;

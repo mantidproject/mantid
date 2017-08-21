@@ -112,6 +112,7 @@ private:
   bool autoreduceShouldPause() const;
   void onAutoreduceWhenShouldPause();
   void onAutoreduceWhenShouldNotPause();
+  void initState();
 
   /// initialise the interface
   void initLayout();

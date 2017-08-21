@@ -1653,8 +1653,6 @@ void GenericDataProcessorPresenter::accept(
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
   m_mainPresenter->notifyADSChanged(m_workspaceList);
-
-  m_mainPresenter->pause();
 }
 
 /** Returs the list of valid workspaces currently in the ADS
