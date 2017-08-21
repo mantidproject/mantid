@@ -122,6 +122,10 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   case IReflRunsTabPresenter::ResumeAutoreductionFlag:
     autoreduce(false);
     break;
+  case IReflRunsTabPresenter::PauseAutoreductionFlag:
+    for (const auto &presenter : m_tablePresenters)
+      presenter->notify(DataProcessorPresenter::PauseFlag);
+    break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     auto algRunner = m_view->getAlgorithmRunner();
     IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
@@ -439,7 +443,7 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
-/** Tells view to enable all 'process' buttons and disable the 'pause' button
+/** Tells view to disable the 'pause' buttons
 * when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() {
@@ -453,6 +457,7 @@ void ReflRunsTabPresenter::pause() {
 */
 void ReflRunsTabPresenter::resume() {
   m_view->disableEditMenuAction(DataProcessorAction::PROCESS);
+  m_view->enableEditMenuAction(DataProcessorAction::PAUSE);
   m_view->autoreduceWillPause();
   preventTableModification();
 
@@ -499,7 +504,7 @@ void ReflRunsTabPresenter::allowTableModification() {
 * either the search number, transfer method or instrument has changed
 * @return : Boolean on whether to start a new autoreduction
 */
-bool ReflRunsTabPresenter::startNewAutoreduction() const {
+bool ReflRunsTabPresenter::shouldStartNewAutoreduction() const {
   bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
   bool transferMethodChanged =
       m_currentTransferMethod != m_view->getTransferMethod();

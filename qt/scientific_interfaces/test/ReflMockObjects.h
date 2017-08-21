@@ -172,7 +172,7 @@ public:
 
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
-  MOCK_CONST_METHOD0(startNewAutoreduction, bool());
+  MOCK_CONST_METHOD0(shouldStartNewAutoreduction, bool());
   void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);

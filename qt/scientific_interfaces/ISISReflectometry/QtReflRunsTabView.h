@@ -102,11 +102,17 @@ public:
   IReflRunsTabPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
-
-private:
+  
   void autoreduceCannotBePressed() override;
   void autoreduceWillReduce() override;
   void autoreduceWillPause() override;
+private:
+  static QString const playText; 
+  static QString const pauseText;
+  bool autoreduceShouldPause() const;
+  void onAutoreduceWhenShouldPause();
+  void onAutoreduceWhenShouldNotPause();
+
   /// initialise the interface
   void initLayout();
   // Adds an action (command) to a menu
@@ -120,6 +126,7 @@ private:
   void disable(QAction &toDisable);
   void setTransferEnabled(bool enabled);
   void setAutoreduceIcon(QIcon &icon);
+  void setAutoreduceText(const QString &icon);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -134,6 +141,7 @@ private:
   // Command adapters
   std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
 
+  bool m_autoreduceShouldPause;
   QIcon m_pauseIcon;
   QIcon m_playIcon;
 

@@ -82,7 +82,7 @@ public:
   void pause() override;
   void resume() override;
   /// Determine whether to start a new autoreduction
-  bool startNewAutoreduction() const override;
+  bool shouldStartNewAutoreduction() const override;
   /// Reduction paused/resumed confirmation handler
   void confirmReductionPaused() override;
 

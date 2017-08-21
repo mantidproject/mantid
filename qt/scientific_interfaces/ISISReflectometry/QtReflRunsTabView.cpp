@@ -293,17 +293,29 @@ void QtReflRunsTabView::autoreduceCannotBePressed() {
 void QtReflRunsTabView::autoreduceWillReduce() {
   std::cout << "Reducepress" << std::endl;
   setAutoreduceIcon(m_playIcon);
+  setAutoreduceText(playText);
+  m_autoreduceShouldPause = false;
   enable(autoreduceButton());
 }
+
+
+QString const QtReflRunsTabView::pauseText = "Pause Autoreduction";
+QString const QtReflRunsTabView::playText = "Autoreduce";
 
 void QtReflRunsTabView::autoreduceWillPause() {
   std::cout << "PausePress" << std::endl;
   setAutoreduceIcon(m_pauseIcon);
+  setAutoreduceText(pauseText);
+  m_autoreduceShouldPause = true;
   enable(autoreduceButton());
 }
 
 void QtReflRunsTabView::setAutoreduceIcon(QIcon &icon) {
   autoreduceButton().setIcon(icon);
+}
+
+void QtReflRunsTabView::setAutoreduceText(QString const& text) {
+  autoreduceButton().setText(text);
 }
 
 QPushButton& QtReflRunsTabView::autoreduceButton() {
@@ -390,13 +402,17 @@ void QtReflRunsTabView::on_actionSearch_triggered() {
           SLOT(icatSearchComplete()), Qt::UniqueConnection);
 }
 
-/**
-This slot conducts a search operation before notifying the presenter that the
-"autoreduce" button has been pressed
-*/
-void QtReflRunsTabView::on_actionAutoreduce_triggered() {
+bool QtReflRunsTabView::autoreduceShouldPause() const {
+  return m_autoreduceShouldPause;
+}
+
+void QtReflRunsTabView::onAutoreduceWhenShouldPause() {
+  m_presenter->notify(IReflRunsTabPresenter::PauseAutoreductionFlag);
+}
+
+void QtReflRunsTabView::onAutoreduceWhenShouldNotPause() {
   // No need to search first if not starting a new autoreduction
-  if (m_presenter->startNewAutoreduction()) {
+  if (m_presenter->shouldStartNewAutoreduction()) {
     m_algoRunner.get()->disconnect(); // disconnect any other connections
     m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
     connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
@@ -404,6 +420,17 @@ void QtReflRunsTabView::on_actionAutoreduce_triggered() {
   } else {
     m_presenter->notify(IReflRunsTabPresenter::ResumeAutoreductionFlag);
   }
+}
+
+/**
+This slot conducts a search operation before notifying the presenter that the
+"autoreduce" button has been pressed
+*/
+void QtReflRunsTabView::on_actionAutoreduce_triggered() {
+  if(autoreduceShouldPause())
+    onAutoreduceWhenShouldPause();
+  else
+    onAutoreduceWhenShouldNotPause();
 }
 
 /**

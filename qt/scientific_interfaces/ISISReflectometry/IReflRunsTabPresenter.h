@@ -42,6 +42,7 @@ public:
     SearchFlag,
     NewAutoreductionFlag,
     ResumeAutoreductionFlag,
+    PauseAutoreductionFlag,
     ICATSearchCompleteFlag,
     TransferFlag,
     InstrumentChangedFlag,
@@ -51,7 +52,7 @@ public:
   // Tell the presenter something happened
   virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
   // Determine whether to start a new autoreduction
-  virtual bool startNewAutoreduction() const = 0;
+  virtual bool shouldStartNewAutoreduction() const = 0;
 };
 }
 }
