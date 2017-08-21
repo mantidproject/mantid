@@ -40,7 +40,7 @@ public:
     /// Add sample to instrument
     void addSample(std::string &name, Eigen::Vector3d &position, Geometry::Instrument_sptr instrument);
     /// Add detector to instrument
-    void addDetector(std::string &name, Eigen::Vector3d &position, int detId, Geometry::ICompAssembly *parent, Geometry::Instrument_sptr instrument);
+    void addDetector(std::string &name, Eigen::Vector3d &position, int detId, Geometry::Instrument_sptr instrument);
 private:
     /// Overwrites Algorithm method.
     void init() override;
@@ -48,7 +48,6 @@ private:
     void exec() override;
     //Instrument pointer
     std::string defaultName = "defaultInstrumentName";
-    Geometry::Instrument_sptr inst = nullptr;
 
 };
 

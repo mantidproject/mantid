@@ -27,9 +27,8 @@ void LoadNexusGeometry::exec()
     //Add instrument to data service
     std::string instName = getPropertyValue("InstrumentName");
     Geometry::Instrument_sptr instrument(new Geometry::Instrument(instName));
-    this->inst = instrument;
 
-    API::InstrumentDataService::Instance().add(instName, inst);
+    API::InstrumentDataService::Instance().add(instName, instrument);
 
 }
 //Set confidence level for successful loading
@@ -61,12 +60,14 @@ void LoadNexusGeometry::addSample(std::string &name, Eigen::Vector3d &position, 
 }
 
 //Add detector to instrument
-void LoadNexusGeometry::addDetector(std::string &name, Eigen::Vector3d &position, int detId, Geometry::ICompAssembly *parent, Geometry::Instrument_sptr instrument)
+void LoadNexusGeometry::addDetector(std::string &name, Eigen::Vector3d &position, int detId, Geometry::Instrument_sptr instrument)
 {
-    Geometry::Detector detector(name, detId, parent);
-    detector.setPos(position(0), position(1), position(2));
-    instrument->add(&detector);
-    instrument->markAsDetectorIncomplete(&detector);
+    Geometry::Detector *detector(new Geometry::Detector(name, detId, const_cast<Geometry::IComponent *>(instrument->getBaseComponent())));
+    detector->setPos(position(0), position(1), position(2));
+    instrument->add(detector);
+    instrument->markAsDetectorIncomplete(detector);
+    //Will be moved to exec, when more than one detector created
+    instrument->markAsDetectorFinalize();
 }
 
 }
