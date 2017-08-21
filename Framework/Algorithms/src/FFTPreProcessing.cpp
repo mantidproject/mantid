@@ -164,7 +164,9 @@ HistogramData::Histogram FFTPreProcessing::applyApodizationFunction(
     yData[i] *= function(xData[i], decayConstant);
     eData[i] *= function(xData[i], decayConstant);
   }
-  result.binEdges();
+  if(histogram.x().size() != histogram.y().size()){
+  result.binEdges();}
+
   return result;
 }
 /**
@@ -225,7 +227,9 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
     result = HistogramData::Histogram(HistogramData::Points(newXData),
                                       HistogramData::Counts(newYData));
   }
-  result.binEdges();
+   if(histogram.x().size() != histogram.y().size()){
+  result.binEdges();}
+
   return result;
 }
 
