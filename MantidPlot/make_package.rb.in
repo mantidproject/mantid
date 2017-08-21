@@ -44,6 +44,7 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libboost_python-mt.dylib",
                      "libboost_serialization-mt.dylib",
                      "libboost_filesystem-mt.dylib",
+                     "libboost_system-mt.dylib"
                      "libgsl.dylib",
                      "libgslcblas.dylib",
                      "libjsoncpp.dylib",
