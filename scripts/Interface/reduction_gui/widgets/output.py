@@ -1,6 +1,7 @@
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui
 from reduction_gui.reduction.output_script import Output
-from base_widget import BaseWidget
+from reduction_gui.widgets.base_widget import BaseWidget
 import ui.ui_hfir_output
 
 
