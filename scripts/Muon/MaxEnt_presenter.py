@@ -28,10 +28,14 @@ class MaxEntPresenter(object):
 
     #functions
     def handleMaxEntButton(self):
+        self.view.deactivateButton()
         inputs = self.get_MaxEnt_input()
         self.alg.setInputs(inputs)
-        self.alg.execute()
-
+        self.alg.execute(self.activateButton)
+ 
+    def activateButton(self):
+        self.view.activateButton()
+ 
     def get_MaxEnt_input(self):
         inputs=self.view.initMaxEntInput()
         if self.view.isRaw():

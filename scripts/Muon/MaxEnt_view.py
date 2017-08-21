@@ -143,4 +143,7 @@ class MaxEntView(QtGui.QWidget):
 
     def isRaw(self):
         return self.raw_box.checkState() == QtCore.Qt.Checked
-
+    def activateButton(self):
+        self.button.setEnabled(True)
+    def deactivateButton(self):
+        self.button.setEnabled(False)

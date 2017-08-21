@@ -13,11 +13,10 @@ class MaxEntThread(object):
     def __init__(self,alg):
         self.alg=alg
 
-    def execute(self):
+    def execute(self, activateButton):
         print ("MaxEnt calculation started (this may take a while)")
-        thread = MaxEntThreadWrapper(self.alg)   
+        thread = MaxEntThreadWrapper(self.alg,activateButton)   
         thread.start()  
-
     def setInputs(self,inputs):
         self.alg.setInputs(inputs)   
 
@@ -25,13 +24,14 @@ class MaxEntThread(object):
 # a wrapper to allow threading with
 # the MaxEnt algorithm. 
 class MaxEntThreadWrapper(threading.Thread):
-    def __init__(self,alg):
+    def __init__(self,alg,activateButton):
         threading.Thread.__init__(self)
         self.alg=alg
-
+        self.activate=activateButton
     def run(self):
         self.alg.execute()
         self.alg.output()
+        self.activate()
         return
  
 # A simple class to hold the MaxEnt algorithm

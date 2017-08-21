@@ -26,6 +26,8 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.view.addRaw=mock.Mock()
         self.view.isRaw=mock.Mock(return_value=False)
  
+        self.view.deactivateButton=mock.Mock()
+        self.view.activateButton=mock.Mock()
          #set presenter
         self.presenter=MaxEnt_presenter.MaxEntPresenter(self.view,self.alg)
          
@@ -36,6 +38,7 @@ class MaxEntPresenterTest(unittest.TestCase):
        assert(self.view.initMaxEntInput.call_count==1)
        assert(self.view.isRaw.call_count==1)
        assert(self.view.addRaw.call_count==5)
+       assert(self.view.deactivateButton.call_count==1)
        assert(self.alg.execute.call_count==1)
  
     def test_buttonWithoutRaw(self):
@@ -45,6 +48,11 @@ class MaxEntPresenterTest(unittest.TestCase):
        assert(self.view.isRaw.call_count==1)
        assert(self.view.addRaw.call_count==0)
        assert(self.alg.execute.call_count==1)
-
+       assert(self.view.deactivateButton.call_count==1)
+       
+    def test_ActivateButton(self):
+       self.presenter.activateButton()
+       assert(self.view.activateButton.call_count==1)
+ 
 if __name__ == '__main__':
     unittest.main()
