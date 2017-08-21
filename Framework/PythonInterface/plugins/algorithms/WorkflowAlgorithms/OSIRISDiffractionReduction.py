@@ -647,11 +647,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         :param do_log_found:    If True print the found workspaces to log.
                                 Else don't print to log.
         """
-        drange_len = len(self._man_d_range)
+        if self._man_d_range is not None:
+            drange_len = len(self._man_d_range)
+        else:
+            drange_len = None
 
         for idx, ws_name in enumerate(workspace_names):
-            if self._man_d_range is not None and \
-                            idx < drange_len:
+            if drange_len is not None and idx < drange_len:
                 drange_map.add_ws(mtd[ws_name], self._man_d_range[idx])
             else:
                 drange_map.add_ws(mtd[ws_name])
