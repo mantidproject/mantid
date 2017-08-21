@@ -1,5 +1,6 @@
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -721,6 +722,11 @@ const boost::shared_ptr<const Object> RectangularDetector::shape() const {
 
 const Kernel::Material RectangularDetector::material() const {
   return Kernel::Material();
+}
+
+size_t RectangularDetector::registerContents(
+    ComponentVisitor &componentVisitor) const {
+  return componentVisitor.registerRectangularBank(*this);
 }
 
 //-------------------------------------------------------------------------------------------------

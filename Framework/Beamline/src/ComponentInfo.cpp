@@ -24,7 +24,8 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-    int64_t sourceIndex, int64_t sampleIndex)
+    boost::shared_ptr<std::vector<bool>> isRectangularBank, int64_t sourceIndex,
+    int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(
           std::move(assemblySortedComponentIndices)),
@@ -33,6 +34,7 @@ ComponentInfo::ComponentInfo(
       m_parentIndices(std::move(parentIndices)),
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
       m_scaleFactors(std::move(scaleFactors)),
+      m_isRectangularBank(std::move(isRectangularBank)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
       m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex) {
@@ -62,6 +64,11 @@ ComponentInfo::ComponentInfo(
     throw std::invalid_argument(
         "ComponentInfo should have been provided same "
         "number of scale factors as number of components");
+  }
+  if (m_isRectangularBank->size() != m_componentRanges->size()) {
+    throw std::invalid_argument("ComponentInfo should be provided same number "
+                                "of rectangular bank flags as number of "
+                                "non-detector components");
   }
 }
 
@@ -346,6 +353,10 @@ Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
 void ComponentInfo::setScaleFactor(const size_t componentIndex,
                                    const Eigen::Vector3d &scaleFactor) {
   m_scaleFactors.access()[componentIndex] = scaleFactor;
+}
+
+bool ComponentInfo::isRectangularBank(const size_t componentIndex) const {
+  return !isDetector(componentIndex) && (*m_isRectangularBank)[componentIndex];
 }
 
 } // namespace Beamline

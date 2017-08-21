@@ -111,6 +111,7 @@ public:
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
   double l1() const;
+  bool isRectangularDetectorPixel(const size_t index) const;
 
   const std::vector<detid_t> &detectorIDs() const;
   /// Returns the index of the detector with the given detector ID.

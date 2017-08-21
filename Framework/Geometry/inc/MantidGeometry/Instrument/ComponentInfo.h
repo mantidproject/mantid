@@ -108,6 +108,7 @@ public:
                     const Kernel::V3D &observer) const;
   void getBoundingBox(const size_t componentIndex,
                       BoundingBox &absoluteBB) const;
+  bool isRectangularBank(const size_t componentIndex) const;
   friend class Instrument;
 };
 

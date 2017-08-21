@@ -307,6 +307,11 @@ Kernel::V3D DetectorInfo::samplePosition() const {
 /// Returns L1 (distance from source to sample).
 double DetectorInfo::l1() const { return m_detectorInfo->l1(); }
 
+/// Returns true if this is a detector as part of a Rectangular Detector Bank
+bool DetectorInfo::isRectangularDetectorPixel(const size_t index) const {
+  return m_detectorInfo->isRectangularDetectorPixel(index);
+}
+
 /// Returns a sorted vector of all detector IDs.
 const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
   return *m_detectorIDs;

@@ -101,6 +101,7 @@ public:
   double l1() const;
   Eigen::Vector3d sourcePosition() const;
   Eigen::Vector3d samplePosition() const;
+  bool isRectangularDetectorPixel(const size_t index) const;
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;

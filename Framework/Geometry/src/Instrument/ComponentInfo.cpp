@@ -241,5 +241,9 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
   }
   absoluteBB = result;
 }
+
+bool ComponentInfo::isRectangularBank(const size_t componentIndex) const {
+  return m_componentInfo->isRectangularBank(componentIndex);
+}
 } // namespace Geometry
 } // namespace Mantid
