@@ -16,22 +16,7 @@
 
 #include "AlignedCutter.h"
 #include "vtkAppendPolyData.h"
-#include "vtkCellData.h"
-#include "vtkContourValues.h"
-#include "vtkDataObject.h"
-#include "vtkDataSet.h"
-#include "vtkFloatArray.h"
-#include "vtkIdTypeArray.h"
-#include "vtkInformation.h"
-#include "vtkInformationVector.h"
-#include "vtkNew.h"
-#include "vtkObjectFactory.h"
-#include "vtkPProbeFilter.h"
 #include "vtkPlane.h"
-#include "vtkPointData.h"
-#include "vtkPointSource.h"
-#include "vtkSMPTools.h"
-#include "vtkUnsignedIntArray.h"
 
 #include <math.h>
 
