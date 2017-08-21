@@ -110,4 +110,3 @@ def open_file_dialog(line_edit, filter_text, directory, dialog_type):
         file_names = dlg.selectedFiles()
         if file_names:
             line_edit.setText(file_names[0])
-
