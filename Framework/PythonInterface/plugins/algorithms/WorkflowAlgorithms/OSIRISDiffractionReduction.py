@@ -100,7 +100,6 @@ class DRangeToWorkspaceMap(object):
 
                 # if it matches ignore it
                 if map_lastx == ws_lastx:
-                    DeleteWorkspace(workspace)
                     return
 
             self._map[d_range].append(workspace)
