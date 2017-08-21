@@ -94,7 +94,8 @@ void MultiSliceView::setupData() {
   // Make sure that origsrc exists
   if (this->origSrc) {
     pqDataRepresentation *drep = builder->createDataRepresentation(
-        this->origSrc->getOutputPort(0), this->m_mainView,"CompositeMySpecialRepresentation");
+        this->origSrc->getOutputPort(0), this->m_mainView,
+        "CompositeAlignedGeometrySliceRepresentation");
     vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
     if (!this->isPeaksWorkspace(this->origSrc)) {
       vtkSMPVRepresentationProxy::SetScalarColoring(

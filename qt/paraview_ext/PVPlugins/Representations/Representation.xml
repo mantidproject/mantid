@@ -1,13 +1,13 @@
 <ServerManagerConfiguration>
   <ProxyGroup name="representations">
-    <RepresentationProxy name="MySpecialRepresentation"
+    <RepresentationProxy name="AlignedGeometrySliceRepresentation"
                 base_proxygroup="internal_representations"
                 base_proxyname="SurfaceRepresentationBase"
-                class="vtkMySpecialRepresentation"
+                class="vtkAlignedGeometrySliceRepresentation"
                 processes="client|renderserver|dataserver">
       <Documentation>
-        MySpecialRepresentation add support to show multiple slices in the view.
-        This is used by CompositeMySpecialRepresentation.
+        AlignedGeometrySliceRepresentation add support to show multiple slices in the view.
+        This is used by CompositeAlignedGeometrySliceRepresentation.
       </Documentation>
       <InputProperty command="SetInputConnection"
                      name="Input">
@@ -27,17 +27,17 @@
         <BooleanDomain name="bool" />
       </IntVectorProperty>
     </RepresentationProxy>
-    <PVRepresentationProxy name="CompositeMySpecialRepresentation"
+    <PVRepresentationProxy name="CompositeAlignedGeometrySliceRepresentation"
                            base_proxygroup="representations"
                            base_proxyname="GeometryRepresentation"
                            class="vtkPVCompositeRepresentation"
                            processes="client|renderserver|dataserver" >
-       <RepresentationType  subproxy="MySpecialRepresentation"
+       <RepresentationType  subproxy="AlignedGeometrySliceRepresentation"
          text="Slices" subtype="Surface"/>
        <SubProxy>
-         <Proxy name="MySpecialRepresentation"
+         <Proxy name="AlignedGeometrySliceRepresentation"
            proxygroup="representations"
-           proxyname="MySpecialRepresentation">
+           proxyname="AlignedGeometrySliceRepresentation">
          </Proxy>
          <ShareProperties subproxy="SurfaceRepresentation">
            <Exception name="Input" />
