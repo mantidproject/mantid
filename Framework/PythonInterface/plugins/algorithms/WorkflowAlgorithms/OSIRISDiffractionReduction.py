@@ -255,6 +255,9 @@ def rebin_to_smallest(*workspaces):
     :param workspaces: The list of workspaces to rebin to the smallest.
     :return:           The rebinned list of workspaces.
     """
+    if len(workspaces) == 1:
+        return workspaces
+
     workspace_set = set()
     smallest_ws = workspaces[0]
     smallest_size = workspaces[0].blocksize()
