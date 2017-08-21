@@ -600,8 +600,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Sample workspaces are now finished with and can be deleted
         # safely from the ADS.
         for sample_ws_name in sample_ws_names:
-            delete_set_property("Workspace", sample_ws_name)
-            delete_exec()
+
+            # This check is necessary, as if no container workspaces
+            # are provided, the smallest sample workspace would have
+            # been removed from the ADS by rebin_to_smallest.
+            if mtd.doesExist(sample_ws_name):
+                delete_set_property("Workspace", sample_ws_name)
+                delete_exec()
 
         mtd.addOrReplace(self._output_ws_name, output_ws)
 
