@@ -58,6 +58,7 @@ SliceViewer Improvements
 VSI Improvments
 ---------------
 - ParaView has been updated to to `v5.4.0 <https://blog.kitware.com/paraview-5-4-0-release-notes/>`_.
+- Multislice view use a custom representation that speeds up slicing by taking advantage of the consistent bin sizes in a MDHistoWorkspace.
 
 |
 
