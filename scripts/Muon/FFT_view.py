@@ -15,12 +15,13 @@ class FFTView(QtGui.QWidget):
         self.table 	= QtGui.QTableWidget(self)
 
         #make table
-        self.table.resize(800, 800)
+        #self.table.resize(800, 800)
         self.table.setRowCount(6)
         self.table.setColumnCount(2)
         self.table.setColumnWidth(0,300)
         self.table.setColumnWidth(1,300)
-
+        self.table.verticalHeader().setVisible(False)
+        self.table.horizontalHeader().setStretchLastSection(True)    
         self.table.setHorizontalHeaderLabels(("FFT Property;Value").split(";"))
 
         # populate table
@@ -45,6 +46,31 @@ class FFTView(QtGui.QWidget):
 
         widget_helper.setName(self.table,5,"Use Raw data")
         self.Raw_box= widget_helper.createCheckTable(self.table,True,5)
+
+        #make advanced table options
+        self.advancedLabel=QtGui.QLabel("\n Advanced Options")
+        self.tableA     = QtGui.QTableWidget(self)
+        self.tableA.setRowCount(6)
+        self.tableA.setColumnCount(2)
+        self.tableA.setColumnWidth(0,300)
+        self.tableA.setColumnWidth(1,300)
+        self.tableA.horizontalHeader().setStretchLastSection(True)
+        self.tableA.verticalHeader().setVisible(False)
+
+
+        widget_helper.setName(self.tableA,0,"Apodization Function")
+        options=["None","Lorentz","Gaussian"]
+        self.apodization = widget_helper.createComboTable(self.tableA,0,options)
+ 
+        widget_helper.setName(self.tableA,1,"Decay Constant")
+        self.decay = widget_helper.createDoubleTable(self.tableA,1.4,1)
+
+        widget_helper.setName(self.table,2,"Negative Padding")
+        self.shift= widget_helper.create(self.table,0.0,4)
+        self.table.hideRow(4)
+
+
+
         #make button
         self.button = QtGui.QPushButton('Calculate FFT', self)
         self.button.setStyleSheet("background-color:lightgrey")
@@ -53,6 +79,8 @@ class FFTView(QtGui.QWidget):
         self.button.clicked.connect(self.buttonClick)
         # add to layout
         self.grid.addWidget(self.table)
+        self.grid.addWidget(self.advancedLabel)
+        self.grid.addWidget(self.tableA)
         self.grid.addWidget(self.button)
 
     # add data to view
