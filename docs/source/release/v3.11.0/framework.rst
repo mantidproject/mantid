@@ -9,6 +9,11 @@ Concepts
 --------
 - The reference frame in :ref:`IDF <InstrumentDefinitionFile>` can now be customized in terms of setting the axis defining the 2theta sign.
 
+Properties
+----------
+
+- The :ref:`IndexProperty` has been added to the list of property types.
+
 Algorithms
 ----------
 
