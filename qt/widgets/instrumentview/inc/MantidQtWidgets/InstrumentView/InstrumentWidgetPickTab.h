@@ -152,9 +152,6 @@ private:
   QAction *m_integrateTimeBins; ///< Sets integration over time bins (m_plotSum
                                 ///= false)
   QActionGroup *m_summationType;
-  QAction *m_logY;
-  QAction *m_linearY;
-  QActionGroup *m_yScale;
   QActionGroup *m_unitsGroup;
   QAction *m_detidUnits, *m_lengthUnits, *m_phiUnits, *m_outOfPlaneAngleUnits;
   QSignalMapper *m_unitsMapper;

@@ -72,7 +72,6 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_plot->setYAxisLabelRotation(-90);
   m_plot->setXScale(0, 1);
   m_plot->setYScale(-1.2, 1.2);
-  connect(m_plot, SIGNAL(showContextMenu()), this, SLOT(plotContextMenu()));
   m_plot->hide();
 
   m_miniplot = new MiniPlot(this);
@@ -86,19 +85,10 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_summationType = new QActionGroup(this);
   m_summationType->addAction(m_sumDetectors);
   m_summationType->addAction(m_integrateTimeBins);
-  m_logY = new QAction("Y log scale", this);
-  m_linearY = new QAction("Y linear scale", this);
-  m_yScale = new QActionGroup(this);
-  m_yScale->addAction(m_linearY);
-  m_yScale->addAction(m_logY);
-  m_logY->setCheckable(true);
-  m_linearY->setCheckable(true);
-  m_linearY->setChecked(true);
+
   connect(m_sumDetectors, SIGNAL(triggered()), this, SLOT(sumDetectors()));
   connect(m_integrateTimeBins, SIGNAL(triggered()), this,
           SLOT(integrateTimeBins()));
-  connect(m_logY, SIGNAL(triggered()), m_plot, SLOT(setYLogScale()));
-  connect(m_linearY, SIGNAL(triggered()), m_plot, SLOT(setYLinearScale()));
 
   m_unitsMapper = new QSignalMapper(this);
 
@@ -312,14 +302,14 @@ void InstrumentWidgetPickTab::plotContextMenu() {
     context.addMenu(removeCurves);
   }
 
-  // the axes menu
+//  // the axes menu
   QMenu *axes = new QMenu("Axes", this);
-  axes->addActions(m_yScale->actions());
-  if (m_plot->isYLogScale()) {
-    m_logY->setChecked(true);
-  } else {
-    m_linearY->setChecked(true);
-  }
+//  axes->addActions(m_yScale->actions());
+//  if (m_plot->isYLogScale()) {
+//    m_logY->setChecked(true);
+//  } else {
+//    m_linearY->setChecked(true);
+//  }
 
   // Tube x units menu options
   if (plotType == DetectorPlotController::TubeIntegral) {
