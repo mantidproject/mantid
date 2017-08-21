@@ -258,20 +258,8 @@ def rebin_to_smallest(*workspaces):
     if len(workspaces) == 1:
         return workspaces
 
-    workspace_set = set()
-    smallest_ws = workspaces[0]
-    smallest_size = workspaces[0].blocksize()
-
-    # Iterate over all workspaces and find the minimum.
-    # Add all the workspaces to a set during iteration.
-    for workspace in workspaces:
-        workspace_set.add(workspace)
-        current_size = workspace.blocksize()
-
-        if workspace.blocksize() < smallest_size:
-            smallest_ws = workspace
-            smallest_size = current_size
-    workspace_set.remove(smallest_ws)
+    smallest_idx, smallest_ws = \
+        min(enumerate(workspaces), key=lambda x : x[1].blocksize())
 
     rebin_alg = AlgorithmManager.create("RebinToWorkspace")
     rebin_alg.setChild(True)
@@ -279,11 +267,15 @@ def rebin_to_smallest(*workspaces):
     rebin_alg.setProperty("WorkspaceToMatch", smallest_ws)
 
     rebinned_workspaces = []
-    for workspace in workspace_set:
-        rebin_alg.setProperty("WorkspaceToRebin", workspace)
-        rebin_alg.setProperty("OutputWorkspace", "temp")
-        rebin_alg.execute()
-        rebinned_workspaces.append(rebin_alg.getProperty("OutputWorkspace").value)
+    for idx, workspace in enumerate(workspaces):
+
+        if idx == smallest_idx:
+            rebinned_workspaces.append(workspace)
+        else:
+            rebin_alg.setProperty("WorkspaceToRebin", workspace)
+            rebin_alg.setProperty("OutputWorkspace", "temp")
+            rebin_alg.execute()
+            rebinned_workspaces.append(rebin_alg.getProperty("OutputWorkspace").value)
 
     return rebinned_workspaces
 
