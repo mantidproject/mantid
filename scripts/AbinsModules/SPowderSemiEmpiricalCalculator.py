@@ -156,9 +156,9 @@ class SPowderSemiEmpiricalCalculator(object):
             max_threshold = AbinsModules.AbinsConstants.MAX_THRESHOLD
 
             is_not_smaller = s_max - self._max_s_previous_order[atom] > small_s
-            max_attempts = self._s_current_threshold[atom] < max_threshold
+            allow_attempts = self._s_current_threshold[atom] < max_threshold
 
-            if is_not_smaller and max_attempts:
+            if is_not_smaller and allow_attempts:
 
                 msg = ("Numerical instability detected. Threshold for S has to be increased." +
                        " Current max S is {} and the previous is {} for order {}."
@@ -198,8 +198,11 @@ class SPowderSemiEmpiricalCalculator(object):
             if order == AbinsModules.AbinsConstants.FUNDAMENTALS:
                 previous_s_max = np.max(s_temp)
             else:
+
                 current_s_max = np.max(s_temp)
-                if previous_s_max <= current_s_max:
+                allow_attempts = np.median(self._s_current_threshold) < AbinsModules.AbinsConstants.MAX_THRESHOLD
+
+                if previous_s_max <= current_s_max and allow_attempts:
                     raise StabilityErrorAllAtoms(
                         "Numerical instability detected for all atoms for order {}".format(order))
                 else:
@@ -214,7 +217,7 @@ class SPowderSemiEmpiricalCalculator(object):
         intend = AbinsModules.AbinsConstants.S_THRESHOLD_CHANGE_INDENTATION
         if atom is None:
 
-            self._s_current_threshold += self._s_threshold_ref
+            self._s_current_threshold = self._s_threshold_ref * 2**self._total_s_correction_num_attempt
             self._report_progress(
                 intend + "Threshold for S has been changed to {} for all atoms."
                 .format(self._s_current_threshold[0]) + " S for all atoms will be calculated from scratch.")
@@ -367,6 +370,7 @@ class SPowderSemiEmpiricalCalculator(object):
                 s = self._calculate_s_powder_one_atom_core(atom=atom)
                 return s
             except StabilityError as e:
+
                 self._report_progress("{}".format(e))
                 self._s_threshold_up(atom=atom)
 

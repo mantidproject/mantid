@@ -347,7 +347,7 @@ class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
 
-        name = "Na2SiF6"
+        name = "Na2SiF6_CASTEP"
         self.ref_result = name + ".nxs"
         self.set_dft_program("CASTEP")
         self.set_name(name)
