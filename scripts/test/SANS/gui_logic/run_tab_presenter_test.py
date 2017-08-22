@@ -168,11 +168,11 @@ class RunTabPresenterTest(unittest.TestCase):
 
         presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
-
         presenter.on_user_file_load()
         presenter.on_batch_file_load()
 
         # Act
+
         states = presenter.get_states()
 
         # Assert
