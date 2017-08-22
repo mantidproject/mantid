@@ -5,7 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendGroupCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
@@ -253,7 +253,7 @@ public:
 
   void test_append_group_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorAppendGroupCommand command(&mockPresenter);
+    AppendGroupCommand command(&mockPresenter);
 
     // The presenter should be notified with the AppendRowFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::AppendGroupFlag))

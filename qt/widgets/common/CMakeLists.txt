@@ -302,7 +302,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/WorkspaceIcons.h
 	inc/MantidQtWidgets/Common/AlgorithmHintStrategy.h
 	inc/MantidQtWidgets/Common/CatalogHelper.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendGroupCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h
