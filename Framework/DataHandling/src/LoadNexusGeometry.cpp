@@ -29,8 +29,8 @@ void LoadNexusGeometry::exec()
     Geometry::Instrument_sptr instrument(new Geometry::Instrument(instName));
 
     API::InstrumentDataService::Instance().add(instName, instrument);
-
 }
+
 //Set confidence level for successful loading
 int LoadNexusGeometry::confidence(Kernel::NexusDescriptor &descriptor) const
 { return 0; }
@@ -62,7 +62,7 @@ void LoadNexusGeometry::addSample(std::string &name, Eigen::Vector3d &position, 
 //Add detector to instrument
 void LoadNexusGeometry::addDetector(std::string &name, Eigen::Vector3d &position, int detId, Geometry::Instrument_sptr instrument)
 {
-    Geometry::Detector *detector(new Geometry::Detector(name, detId, const_cast<Geometry::IComponent *>(instrument->getBaseComponent())));
+    auto *detector(new Geometry::Detector(name, detId, const_cast<Geometry::IComponent *>(instrument->getBaseComponent())));
     detector->setPos(position(0), position(1), position(2));
     instrument->add(detector);
     instrument->markAsDetectorIncomplete(detector);

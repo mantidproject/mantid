@@ -8,10 +8,8 @@
 
 #include "Eigen/Core"
 
-
 namespace Mantid{
 namespace DataHandling{
-
 
 class DLLExport LoadNexusGeometry
         : public API::IFileLoader<Kernel::NexusDescriptor> {
@@ -51,10 +49,8 @@ private:
 
 };
 
-
 }
 }
-
 
 #endif // LOAD_NEXUS_GEOMETRY_H_
 

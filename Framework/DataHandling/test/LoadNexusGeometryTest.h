@@ -11,13 +11,10 @@
 
 #include "Eigen/Core"
 
-#include <iostream>
-
 using namespace Mantid;
 using namespace DataHandling;
 
 typedef boost::shared_ptr<Beamline::ComponentInfo> ComponentInfo_sptr;
-typedef boost::shared_ptr<Beamline::DetectorInfo> DetectorInfo_sptr;
 
 class LoadNexusGeometryTest : public CxxTest::TestSuite
 {
@@ -58,8 +55,6 @@ public:
         setUpAddDetectorWithParent(loader, instrument);
         setUpAddSource(loader, instrument);
         setUpAddSample(loader, instrument);
-
-
 
         //Convert to instrument_2 interface for testing
         Geometry::InstrumentVisitor inst2 = Geometry::InstrumentVisitor(instrument);
@@ -108,8 +103,6 @@ private:
 
         TS_ASSERT(compInfo->isDetector(detIndex));
         TS_ASSERT(inst.detectorInfo()->position(detIndex) == Eigen::Vector3d(1.0,1.0,0.5));
-
-
     }
     void checkSource(ComponentInfo_sptr compInfo)
     {
@@ -122,7 +115,5 @@ private:
         TS_ASSERT(compInfo->samplePosition() == Eigen::Vector3d(1.0,0.0,2.0));
     }
 };
-
-
 
 #endif // LOAD_NEXUS_GEOMETRY_TEST_H_
