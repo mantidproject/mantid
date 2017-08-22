@@ -3,7 +3,7 @@
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>

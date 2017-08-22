@@ -2,7 +2,6 @@
 #include <stdexcept>
 namespace MantidQt {
 namespace MantidWidgets {
-namespace DataProcessor {
 double parseDouble(QString const &in) {
   static auto ok = false;
   auto out = in.toDouble(&ok);
@@ -22,7 +21,6 @@ int parseDenaryInteger(QString const &in) {
   else
     throw std::runtime_error("Failed to parse '" + in.toStdString() +
                              "' as a denary integer.");
-}
 }
 }
 }

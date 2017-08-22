@@ -9,8 +9,6 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
-using MantidQt::MantidWidgets::DataProcessorProcessingAlgorithmBase;
-
 class DataProcessorProcessingAlgorithmBaseTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
