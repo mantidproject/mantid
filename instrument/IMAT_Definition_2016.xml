@@ -4,8 +4,8 @@ see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
-            name="IMAT" valid-from ="2016-07-15 00:00:00"
-            valid-to ="2017-02-24 23:59:59"
+            name="IMAT" valid-from="2016-07-15 00:00:00"
+            valid-to="2017-02-24 23:59:59"
             last-modified="2016-08-03 18:46:01">
   <defaults>
     <length unit="meter"/>
@@ -56,22 +56,10 @@ see http://www.mantidproject.org/IDF -->
 	<location x="+1.77" rot="90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-200-elements"/>
   </component>
 
-  <!-- gap of 202 spectra between workspace indices [214..415] -->
-  <!-- use this if we need gaps between the detector blocks: -->
-  <component type="dummy-gap" idstart="214" idfillbyfirst="y" idstep="1" idstepbyrow="1">
-    <location z="-100000"/>
-  </component>
-
   <!-- Place the 16PMT prototype diffraction detector. 1.895m to the right of the sample (seen in the direction of the beam) -->
   <component type="16PMT" idstart="416" idfillbyfirst="n" idstep="1" idstepbyrow="16">
    <!-- <location r="1.895" theta="90" phi="0" rot="90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-16PMT"/> -->
    <location x="-1.895" rot="-90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-16PMT"/>
-  </component>
-
-
-  <!-- "Camera" -->
-  <component type="old-mcp-definition" idstart="1000000" idfillbyfirst="y" idstep="1" idstepbyrow="1">
-    <location z="10" x="0.0" name="detector-old-mcp"/>
   </component>
 
   <!-- A cuboid sample holder -->
@@ -93,32 +81,10 @@ see http://www.mantidproject.org/IDF -->
   ypixels="2" ystart="+0.01" ystep="-0.01" >
   </type>
 
-  <type name="dummy-gap" is="RectangularDetector" type="pixel"
-  xpixels="202" xstart="0.0" xstep="0.1"
-  ypixels="1" ystart="0.0" ystep="0.1" >
-  </type>
-
   <!-- Matrix structure of the "16PMT" detector -->
   <type name="16PMT" is="RectangularDetector" type="pixel-16PMT"
   xpixels="16" xstart="-0.032" xstep="+0.004"
   ypixels="2" ystart="+0.002" ystep="-0.004" >
-  </type>
-
-
-  <!-- Old/now fixed definition of the MCP detector. Here for reference in the future -->
-  <type name="old-mcp-definition" is="RectangularDetector" type="pixel"
-  xpixels="512" xstart="-0.048705" xstep="+0.00051"
-  ypixels="512" ystart="-0.048705" ystep="+0.00051" >
-  </type>
-
-  <type name="pixel" is="detector-old-mcp-definition">
-    <cuboid id="shape">
-      <left-front-bottom-point x="0.0005104167" y="-0.0005104167" z="0.0" />
-      <left-front-top-point x="0.0005104167" y="-0.0005104167" z="0.000005" />
-      <left-back-bottom-point x="-0.0005104167" y="-0.0005104167" z="0.0" />
-      <right-front-bottom-point x="0.0005104167" y="0.0005104167" z="0.0" />
-    </cuboid>
-    <algebra val="shape" />
   </type>
 
 
@@ -193,5 +159,4 @@ see http://www.mantidproject.org/IDF -->
   </idlist>
 
   <!-- do not use idlist for the rectangular detectors, they're ignored! -->
-
 </instrument>
