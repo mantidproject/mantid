@@ -44,6 +44,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 QStringList DLLExport splitByCommas(const QString &namesString);
 
@@ -137,5 +138,5 @@ private:
 };
 }
 }
-
+}
 #endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORGENERATENOTEBOOK_H

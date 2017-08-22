@@ -7,6 +7,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorPreprocessingAlgorithm
 
 DataProcessorPreprocessingAlgorithm defines a pre-processor algorithm that will
@@ -69,6 +70,7 @@ private:
   // The name of the output proerty
   QString m_outProperty;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSINGALGORITHM_H*/

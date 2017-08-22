@@ -435,7 +435,7 @@ void DataProcessorOneLevelTreeManager::setProcessed(bool processed,
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model
 */
-boost::shared_ptr<AbstractDataProcessorTreeModel>
+boost::shared_ptr<AbstractTreeModel>
 DataProcessorOneLevelTreeManager::getModel() {
   return m_model;
 }

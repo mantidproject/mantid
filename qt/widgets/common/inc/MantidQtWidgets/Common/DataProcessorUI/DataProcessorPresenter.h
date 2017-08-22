@@ -12,6 +12,7 @@ using ChildItems = std::map<int, std::set<int>>;
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 // Forward decs
 class DataProcessorCommand;
 class DataProcessorMainPresenter;
@@ -99,6 +100,7 @@ public:
   virtual bool isProcessing() const = 0;
   virtual void setForcedReProcessing(bool forceReProcessing) = 0;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPRESENTER_H*/

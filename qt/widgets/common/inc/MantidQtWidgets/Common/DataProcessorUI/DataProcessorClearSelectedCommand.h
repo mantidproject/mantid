@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorClearSelectedCommand
 
 DataProcessorClearSelectedCommand defines the action "Clear Selected"
@@ -49,6 +50,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCLEARSELECTEDCOMMAND_H*/

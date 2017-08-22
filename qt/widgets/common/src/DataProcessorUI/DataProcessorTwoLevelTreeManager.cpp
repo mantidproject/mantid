@@ -639,7 +639,7 @@ void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model
 */
-boost::shared_ptr<AbstractDataProcessorTreeModel>
+boost::shared_ptr<AbstractTreeModel>
 DataProcessorTwoLevelTreeManager::getModel() {
   return m_model;
 }

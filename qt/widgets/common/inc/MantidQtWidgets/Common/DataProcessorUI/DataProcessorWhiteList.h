@@ -10,6 +10,8 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
+
 /** @class DataProcessorWhiteList
 
 DataProcessorWhiteList is an class defining a whitelist
@@ -60,6 +62,7 @@ private:
   std::vector<QString> m_prefix;
   std::vector<QString> m_description;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORWHITELIST_H*/

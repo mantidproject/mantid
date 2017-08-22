@@ -10,6 +10,7 @@
 #include <gmock/gmock.h>
 
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 // Clean column ids for use within tests (they refer to the table workspace
 // only)
@@ -77,7 +78,7 @@ public:
 
   // Calls we don't care about
   void showTable(boost::shared_ptr<
-      MantidQt::MantidWidgets::AbstractDataProcessorTreeModel>) override{};
+      MantidQt::MantidWidgets::AbstractTreeModel>) override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }

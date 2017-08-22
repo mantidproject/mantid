@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorOpenTableCommand
 
 DataProcessorOpenTableCommand defines the action "Open Table"
@@ -51,6 +52,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPENTABLECOMMAND_H*/

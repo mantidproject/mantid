@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorPauseCommand
 
 DataProcessorProcessCommand defines the action "Pause"
@@ -48,6 +49,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPAUSECOMMAND_H*/

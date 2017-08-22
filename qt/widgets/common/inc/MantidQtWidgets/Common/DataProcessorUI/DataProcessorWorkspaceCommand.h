@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorWorkspaceCommand
 
 DataProcessorWorkspaceCommand defines a workspace action
@@ -53,6 +54,7 @@ public:
 private:
   QString m_name;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORWORKSPACECOMMAND_H*/

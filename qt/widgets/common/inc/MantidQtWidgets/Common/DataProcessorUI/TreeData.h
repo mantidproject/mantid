@@ -34,9 +34,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 using RowData = QStringList;
 using GroupData = std::map<int, RowData>;
 using TreeData = std::map<int, GroupData>;
+}
 }
 }
 #endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEDATA_H

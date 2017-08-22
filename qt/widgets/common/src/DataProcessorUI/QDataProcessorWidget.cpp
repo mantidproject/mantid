@@ -165,7 +165,7 @@ Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
 void QDataProcessorWidget::showTable(
-    boost::shared_ptr<AbstractDataProcessorTreeModel> model) {
+    boost::shared_ptr<AbstractTreeModel> model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),

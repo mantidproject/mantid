@@ -26,6 +26,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 // Forward decs
 class ProgressableView;
 class DataProcessorView;
@@ -315,6 +316,7 @@ private:
   void saveNotebook(const TreeData &data);
   std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H*/

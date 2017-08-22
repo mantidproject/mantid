@@ -6,6 +6,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 class DataProcessorPresenter;
 class DataProcessorWhiteList;
@@ -99,7 +100,7 @@ public:
                     size_t whitelistColumns) const override;
 
   /// Return the model
-  boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() override;
+  boost::shared_ptr<AbstractTreeModel> getModel() override;
   /// Return the table workspace
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
@@ -122,6 +123,7 @@ private:
   void validateModel(Mantid::API::ITableWorkspace_sptr ws,
                      size_t whitelistColumns) const;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H*/

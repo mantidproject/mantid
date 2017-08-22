@@ -2,7 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 #include <boost/shared_ptr.hpp>
 #include <map>
@@ -10,6 +10,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /** QDataProcessorOneLevelTreeModel : Provides a QAbstractItemModel for a
 DataProcessorUI with no post-processing defined. The first argument to the
@@ -41,7 +42,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorOneLevelTreeModel
-    : public AbstractDataProcessorTreeModel {
+    : public AbstractTreeModel {
   Q_OBJECT
 public:
   QDataProcessorOneLevelTreeModel(
@@ -92,9 +93,10 @@ private:
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorOneLevelTreeModel
-typedef boost::shared_ptr<QDataProcessorOneLevelTreeModel>
-    QDataProcessorOneLevelTreeModel_sptr;
+using QDataProcessorOneLevelTreeModel_sptr =
+    boost::shared_ptr<QDataProcessorOneLevelTreeModel>;
 
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid
 

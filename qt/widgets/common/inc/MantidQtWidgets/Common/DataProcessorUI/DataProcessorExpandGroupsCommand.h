@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorExpandGroupsCommand
 
 DataProcessorExpandGroupsCommand defines the action "Expand All Groups"
@@ -49,6 +50,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDGROUPSCOMMAND_H*/

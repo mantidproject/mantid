@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorCopySelectedCommand
 
 DataProcessorCopySelectedCommand defines the action "Copy Selected"
@@ -51,6 +52,7 @@ public:
   }
   QString shortcut() override { return QString("Ctrl+C"); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOPYSELECTEDCOMMAND_H*/

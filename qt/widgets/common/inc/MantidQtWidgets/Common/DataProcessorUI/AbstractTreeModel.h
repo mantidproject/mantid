@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /** AbstractTreeModel is a base class for several tree model
 implementations for processing table data. Full function implementation is
@@ -65,6 +66,7 @@ protected:
   /// Map of column indexes to names and viceversa
   DataProcessorWhiteList m_whitelist;
 };
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid
 

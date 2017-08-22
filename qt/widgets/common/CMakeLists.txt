@@ -63,7 +63,7 @@
 	src/CatalogSelector.cpp
 	src/CheckboxHeader.cpp
 	src/ColorBarWidget.cpp
-	src/DataProcessorUI/AbstractDataProcessorTreeModel.cpp
+	src/DataProcessorUI/AbstractTreeModel.cpp
 	src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
 	src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
 	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
@@ -183,7 +183,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
   inc/MantidQtWidgets/Common/CheckboxHeader.h
   inc/MantidQtWidgets/Common/ColorBarWidget.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h

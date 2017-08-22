@@ -9,10 +9,11 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-class AbstractDataProcessorTreeModel;
+class AbstractTreeModel;
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 // Forward dec
 class HintStrategy;
 class DataProcessorCommand;
@@ -57,7 +58,7 @@ public:
 
   // Connect the model
   virtual void
-  showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) = 0;
+  showTable(boost::shared_ptr<AbstractTreeModel> model) = 0;
 
   // Dialog/Prompt methods
   virtual QString requestNotebookPath() = 0;
@@ -110,6 +111,7 @@ public:
   // Force re-processing of rows
   virtual void setForcedReProcessing(bool forceReProcessing) = 0;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORVIEW_H*/

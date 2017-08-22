@@ -5,6 +5,8 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
+
 /** @class DataProcessorProcessCommand
 
 DataProcessorProcessCommand defines the action "Process"
@@ -52,6 +54,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSCOMMAND_H*/

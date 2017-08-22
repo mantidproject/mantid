@@ -14,7 +14,7 @@ using namespace Mantid::API;
 QDataProcessorOneLevelTreeModel::QDataProcessorOneLevelTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
-    : AbstractDataProcessorTreeModel(tableWorkspace, whitelist) {
+    : AbstractTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size())
     throw std::invalid_argument(

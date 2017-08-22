@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorCutSelectedCommand
 
 DataProcessorCutSelectedCommand defines the action "Cut Selected"
@@ -51,6 +52,7 @@ public:
   }
   QString shortcut() override { return QString("Ctrl+X"); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCUTSELECTEDCOMMAND_H*/

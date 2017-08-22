@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /** @class DataProcessorDeleteRowCommand
 
@@ -48,6 +49,7 @@ public:
   QString whatsthis() override { return QString("Deletes the selected row"); }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORDELETEROWCOMMAND_H*/

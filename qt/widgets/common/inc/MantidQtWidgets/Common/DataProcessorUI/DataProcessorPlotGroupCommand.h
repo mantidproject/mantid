@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorPlotGroupCommand
 
 DataProcessorPlotGroupCommand defines the action "Plot Selected Groups"
@@ -50,6 +51,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPLOTGROUPCOMMAND_H*/
