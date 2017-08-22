@@ -6,7 +6,7 @@
 #include <gmock/gmock.h>
 
 using namespace MantidQt::MantidWidgets;
-using namespace MantidQt::MantidWidgets::DataProceesor;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 class MockProgressableView : public ProgressableView {
 public:

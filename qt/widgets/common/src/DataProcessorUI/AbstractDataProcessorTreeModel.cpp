@@ -4,6 +4,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
@@ -39,5 +40,6 @@ AbstractTreeModel::flags(const QModelIndex &index) const {
   return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }
 
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

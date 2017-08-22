@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /**
     Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'`
    into a map of key/value pairs
@@ -52,6 +53,7 @@ std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
     }
   }
   return kvp;
+}
 }
 }
 }

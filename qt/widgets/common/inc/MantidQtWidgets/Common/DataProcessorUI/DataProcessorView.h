@@ -3,19 +3,19 @@
 
 #include "MantidKernel/System.h"
 
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 class AbstractTreeModel;
 
 namespace MantidQt {
 namespace MantidWidgets {
+class HintStrategy;
 namespace DataProcessor {
 // Forward dec
-class HintStrategy;
 class DataProcessorCommand;
 class DataProcessorPresenter;
 
@@ -57,8 +57,7 @@ public:
   addActions(std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
 
   // Connect the model
-  virtual void
-  showTable(boost::shared_ptr<AbstractTreeModel> model) = 0;
+  virtual void showTable(boost::shared_ptr<AbstractTreeModel> model) = 0;
 
   // Dialog/Prompt methods
   virtual QString requestNotebookPath() = 0;

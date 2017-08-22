@@ -2,6 +2,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /** Constructor
 * @param name : The name of this algorithm
@@ -76,6 +77,7 @@ DataProcessorProcessingAlgorithm::inputPropertyName(size_t index) const {
 QString
 DataProcessorProcessingAlgorithm::outputPropertyName(size_t index) const {
   return m_outputProperties[index];
+}
 }
 }
 }

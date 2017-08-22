@@ -4,6 +4,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
@@ -247,5 +248,6 @@ QDataProcessorOneLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

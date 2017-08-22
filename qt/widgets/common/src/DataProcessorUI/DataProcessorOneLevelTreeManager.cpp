@@ -31,6 +31,7 @@ using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /**
 * Constructor
@@ -510,6 +511,7 @@ bool DataProcessorOneLevelTreeManager::isValidModel(
     return false;
   }
   return true;
+}
 }
 }
 }

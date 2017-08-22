@@ -2,6 +2,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /** Constructor
  * @param name : The name of the pre-processing algorithm
@@ -71,5 +72,6 @@ QString DataProcessorPreprocessingAlgorithm::outputProperty() const {
 
 // Returns the prefix to add to the output property
 QString DataProcessorPreprocessingAlgorithm::prefix() const { return m_prefix; }
+}
 }
 }

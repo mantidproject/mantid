@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorSeparatorCommand
 
 DataProcessorSeparatorCommand defines a separator. It has no name, no icon and
@@ -47,6 +48,7 @@ public:
   QString whatsthis() override { return QString(); }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H*/
