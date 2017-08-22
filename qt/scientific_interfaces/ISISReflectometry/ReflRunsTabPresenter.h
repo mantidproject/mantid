@@ -12,7 +12,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 // Forward decs
 class ProgressableView;
+namespace DataProcessor {
 class DataProcessorPresenter;
+}
 }
 
 namespace CustomInterfaces {
@@ -24,8 +26,8 @@ class IReflSearcher;
 class ReflSearchModel;
 class ReflTransferStrategy;
 
-using MantidWidgets::DataProcessorPresenter;
 using MantidWidgets::ProgressableView;
+using MantidWidgets::DataProcessor::DataProcessorPresenter;
 
 /** @class ReflRunsTabPresenter
 
@@ -55,7 +57,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflRunsTabPresenter
     : public IReflRunsTabPresenter,
-      public MantidQt::MantidWidgets::DataProcessorMainPresenter {
+      public MantidWidgets::DataProcessor::DataProcessorMainPresenter {
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,

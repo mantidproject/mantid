@@ -5,7 +5,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ParseNumerics.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflFromStdStringMap.h"

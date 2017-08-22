@@ -37,13 +37,13 @@ public:
   // I will mock a proxy method, setTableCommandsProxy, I just want to test that
   // this method is invoked by the presenter's constructor
   virtual void setTableCommands(
-      std::vector<MantidQt::MantidWidgets::DataProcessorCommand_uptr>)
+      std::vector<MantidQt::MantidWidgets::DataProcessor::DataProcessorCommand_uptr>)
       override {
     setTableCommandsProxy();
   }
   // The same happens for setRowCommands
   virtual void setRowCommands(
-      std::vector<MantidQt::MantidWidgets::DataProcessorCommand_uptr>)
+      std::vector<MantidQt::MantidWidgets::DataProcessor::DataProcessorCommand_uptr>)
       override {
     setRowCommandsProxy();
   }
