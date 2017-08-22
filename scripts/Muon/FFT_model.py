@@ -11,21 +11,21 @@ class FFTModel(object):
     def preAlg(self,preInputs):
         preAlg=mantid.AlgorithmManager.create("FFTPreProcessing")
         preAlg.initialize()
-        preAlg.setChild(False)
+        preAlg.setChild(True)
         for name,value in iteritems(preInputs):
-            print(name,value)
             preAlg.setProperty(name,value)
-            mantid.logger.warning(name+"  "+str(value))
         preAlg.execute()
+        mantid.AnalysisDataService.addOrReplace(preInputs["OutputWorkspace"],preAlg.getProperty("OutputWorkspace").value)
 
     def FFTAlg(self,FFTInputs):
         alg=mantid.AlgorithmManager.create("FFT")
         alg.initialize()
-        alg.setChild(False)
+        alg.setChild(True)
         for name,value in iteritems(FFTInputs):
             alg.setProperty(name,value)
-            mantid.logger.warning(name+"  "+str(value))
         alg.execute()
+        mantid.AnalysisDataService.addOrReplace(FFTInputs["OutputWorkspace"],alg.getProperty("OutputWorkspace").value)
+ 
         ws=alg.getPropertyValue("OutputWorkspace")
         if mantid.AnalysisDataService.doesExist("FFTMuon"):
             FFTMuon=mantid.AnalysisDataService.retrieve("FFTMuon")
