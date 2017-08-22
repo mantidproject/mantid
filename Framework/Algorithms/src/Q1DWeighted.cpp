@@ -159,7 +159,7 @@ void Q1DWeighted::exec() {
     wedge_ws->setBinEdges(0, XOut);
     wedge_ws->mutableRun().addProperty("wedge_angle", center_angle, "degrees",
                                        true);
-    wedgeWorkspaces.push_back(wedge_ws);
+    wedgeWorkspaces.push_back(std::move(wedge_ws));
   }
 
   // Count histogram for wedge normalization
@@ -178,7 +178,7 @@ void Q1DWeighted::exec() {
     tof_ws->setYUnitLabel("1/cm");
     tof_ws->setDistribution(true);
     tof_ws->setBinEdges(0, XOut);
-    tofWorkspaces.push_back(tof_ws);
+    tofWorkspaces.push_back(std::move(tof_ws));
   }
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))

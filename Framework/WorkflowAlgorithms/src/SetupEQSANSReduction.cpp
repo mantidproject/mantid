@@ -574,6 +574,14 @@ void SetupEQSANSReduction::init() {
   declareProperty("SampleApertureDiameter", 10.0,
                   "Sample aperture diameter [mm]");
 
+  // Wedge options
+  declareProperty("NumberOfWedges", 2, positiveInt,
+                  "Number of wedges to calculate.");
+  declareProperty("WedgeAngle", 30.0,
+                  "Opening angle of each wedge, in degrees.");
+  declareProperty("WedgeOffset", 0.0,
+                  "Angular offset for the wedges, in degrees.");
+
   declareProperty("Do2DReduction", true);
   declareProperty("IQ2DNumberOfBins", 100, positiveInt,
                   "Number of I(qx,qy) bins.");
@@ -843,6 +851,9 @@ void SetupEQSANSReduction::exec() {
     const bool computeResolution = getProperty("ComputeResolution");
     const bool indepBinning = getProperty("IQIndependentBinning");
     const bool scaleResults = getProperty("IQScaleResults");
+    const std::string n_wedges = getPropertyValue("NumberOfWedges");
+    const double wedge_angle = getProperty("WedgeAngle");
+    const double wedge_offset = getProperty("WedgeOffset");
 
     IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSAzimuthalAverage1D");
     iqAlg->setPropertyValue("NumberOfBins", nBins);
@@ -852,6 +863,9 @@ void SetupEQSANSReduction::exec() {
     iqAlg->setProperty("IndependentBinning", indepBinning);
     iqAlg->setProperty("SampleApertureDiameter", sampleApert);
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    iqAlg->setProperty("NumberOfWedges", n_wedges);
+    iqAlg->setProperty("WedgeAngle", wedge_angle);
+    iqAlg->setProperty("WedgeOffset", wedge_offset);
 
     auto iqalgProp = make_unique<AlgorithmProperty>("IQAlgorithm");
     iqalgProp->setValue(iqAlg->toString());

@@ -47,6 +47,9 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
                              doc = 'I(q) workspace')
         self.declareProperty('OutputMessage', '', direction = Direction.Output,
                              doc = 'Output message')
+        self.declareProperty("NumberOfWedges", 2, "Number of wedges to calculate")
+        self.declareProperty("WedgeAngle", 30.0, "Angular opening of each wedge, in degrees")
+        self.declareProperty("WedgeOffset", 0.0, "Angular offset for the wedges, in degrees")
         self.declareProperty(WorkspaceGroupProperty("IQLambdaWorkspace", "",
                                                     Direction.Output,
                                                     PropertyMode.Optional),
@@ -135,7 +138,15 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         alg.setProperty('ComputeResolution', False)
         alg.setProperty('ReductionProperties', property_manager_name)
         alg.setProperty('OutputWorkspace', output_workspace)
-        alg.setProperty('IQLambdaWorkspace', output_workspace+'_tof')
+        # Wedges
+        n_wedges = self.getProperty("NumberOfWedges").value
+        wedge_angle = self.getProperty("WedgeAngle").value
+        wedge_offset = self.getProperty("WedgeOffset").value
+        alg.setProperty("NumberOfWedges", n_wedges)
+        alg.setProperty("WedgeAngle", wedge_angle)
+        alg.setProperty("WedgeOffset", wedge_offset)
+        # I(Q, wl)
+        alg.setPropertyValue('IQLambdaWorkspace', output_workspace+'_wl')
         alg.execute()
         if alg.existsProperty('OutputMessage'):
             output_msg = alg.getProperty('OutputMessage').value
@@ -144,6 +155,15 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         output_ws = alg.getProperty('OutputWorkspace').value
         output_tof_ws = alg.getProperty('IQLambdaWorkspace').value
 
+        # Process wedge workspaces
+        for i in range(n_wedges):
+            wedge_ws = alg.getProperty("WedgeWorkspace_%d" % i).value
+            property_name = "WedgeWorkspace_%s_%s" % (output_workspace, i)
+            self.declareProperty(MatrixWorkspaceProperty(property_name, "",
+                                                         direction = Direction.Output))
+            self.setPropertyValue(property_name,
+                                  "%s_wedge_%s" % (output_workspace, i))
+            self.setProperty(property_name, wedge_ws)
         # Get output binning
         output_binning = alg.getPropertyValue("Binning")
         return (output_msg, output_ws, output_binning, output_tof_ws)
@@ -204,14 +224,15 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         if scale_results:
             output_frame1 = self._scale(output_frame1, output_frame2)
 
-        self.setPropertyValue('OutputWorkspace', ws_frame1)
+        
+        self.setProperty('OutputWorkspace', ws_frame1)
         self.setProperty('OutputWorkspace', output_frame1)
-
+        self.setProperty('IQLambdaWorkspace', ws_frame1+'_wl')
         self.setProperty('IQLambdaWorkspace', output_tof_frame1)
 
         self.declareProperty(MatrixWorkspaceProperty('OutputFrame2', ws_frame2,
                                                      direction = Direction.Output))
-        self.declareProperty(MatrixWorkspaceProperty('OutputTOFFrame2', ws_frame2,
+        self.declareProperty(WorkspaceGroupProperty('OutputTOFFrame2', ws_frame2+'_wl',
                                                      direction = Direction.Output))
         self.setProperty('OutputFrame2', output_frame2)
         self.setProperty('OutputTOFFrame2', output_tof_frame2)
