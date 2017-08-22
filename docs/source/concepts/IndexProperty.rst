@@ -9,22 +9,21 @@ Index Property
 Why IndexProperty?
 ------------------
 
-Presently, indices are captured from the user with the ``ArrayProperty<int>` property type. However, this lacks a few key behaviours which
-a property of this type should have. Firstly, there is no automatic validation of the indices with respect to
+In many cases, indices are captured from the user with the ``ArrayProperty<int>`` property type. However, this lacks a few key behaviours which
+a property collecting workspace index information should have. Firstly, there is no automatic validation of the indices with respect to
 the workspace itself. Therefore users could enter invalid input e.g negative numbers, or numbers outside of
 the range of spectra held by the workspace, unless bounded validators or used. Additionally, the ``ArrayProperty<int>`` 
-does not lend itself to an distributed method for accessing workspace data, this would require manual conversion 
-of global indices to local indices on an mpi rank. Finally, any conversion between "index types" i.e. conversion from
-spectrum numbers to workspace indices (also known as spectrum indices) must be taken care of manually. This style
+does not lend itself to a distributed method for accessing workspace data, this would require manual conversion 
+of global indices to local indices on each mpi rank. Finally, any conversion between "index types" i.e. conversion from
+spectrum numbers to workspace indices (also known as spectrum indices) must be managed by the algorithm developer. This style
 of development is very error prone, particularly in the MPI case, and could lead to inconsitencies across algorithms as
 each developer may have a different approach to addressing the aforementioned issues.
 
 The ``IndexProperty`` in Mantid provides a consistent interface for algorithms 
-which need to access a subset of the workspace spectra for processing.The ``IndexProperty`` property facilitates 
+which need to access a subset of the workspace spectra for processing.The ``IndexProperty`` facilitates 
 the retrieval of a set of workspace indices, called a ``SpectrumIndexSet``, once provided with a set of workspace indices or 
-spectrum numbers [#]_. Therefore algorithm developers do not need to 
-perform any conversions manually, unlike the case of just using ``ArrayProperty<int>``.  In situations where data is distributed 
-across several clusters (distributed processing) [#]_, the underlying ``IndexInfo`` object, which is used to 
+spectrum numbers [#]_. Therefore algorithm developers do not need to perform any conversions manually.  In situations where data is 
+distributed across several clusters (distributed processing) [#]_, the underlying ``IndexInfo`` object, which is used to 
 obtain a ``SpectrumIndexSet``, hides these mpi-specific details by automatically selecting the correct indices for
 a specific mpi rank. Therefore access to the workspace data remains unchanged for developers.
 
