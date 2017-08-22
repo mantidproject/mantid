@@ -5,8 +5,9 @@ import mantid.simpleapi as mantid
 
 class FFTPresenter(object):
 
-    def __init__(self,view):
+    def __init__(self,view,alg):
         self.view=view
+        self.alg=alg  
         # set data
         self.getWorkspaceNames()
         #connect
@@ -32,31 +33,25 @@ class FFTPresenter(object):
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
     def handleButton(self):
-        inputs = self.get_FFT_input()
-        alg=mantid.AlgorithmManager.create("FFT")
-        alg.initialize()
-        alg.setChild(False)
-        for name,value in iteritems(inputs):
-            alg.setProperty(name,value)
-            mantid.logger.warning(name+"  "+str(value))
-        alg.execute()
-        ws=alg.getPropertyValue("OutputWorkspace")
-        if mantid.AnalysisDataService.doesExist("FFTMuon"):
-            FFTMuon=mantid.AnalysisDataService.retrieve("FFTMuon")
-            FFTMuon.add(ws)
-        else:
-            FFTMuon=mantid.GroupWorkspaces(InputWorkspaces=ws)
-
-    def get_FFT_input(self):
-        inputs=self.view.initFFTInput()
-        if self.view.isRaw():
-            self.view.addRaw(inputs,"InputWorkspace")
-        if  self.view.isAutoShift():
-            inputs["AutoShift"]=True
-        else:
-            self.view.addFFTShift(inputs)
+        preInputs=self.view.initAdvanced()
+        self.view.ReAdvanced(preInputs)
+        self.alg.preAlg(preInputs)
         if self.view.isComplex():
-            self.view.addFFTComplex(inputs)
-            if self.view.isRaw():
-                self.view.addRaw(inputs,"InputImagWorkspace")
-        return inputs
+            self.view.ImAdvanced(preInputs)
+            self.alg.preAlg(preInputs)
+
+        FFTInputs = self.get_FFT_input()
+        self.alg.FFTAlg(FFTInputs) 
+    def get_FFT_input(self):
+        FFTInputs=self.view.initFFTInput()
+        #if self.view.isRaw():
+        #    self.view.addRaw(FFTInputs,"InputWorkspace")
+        if  self.view.isAutoShift():
+            FFTInputs["AutoShift"]=True
+        else:
+            self.view.addFFTShift(FFTInputs)
+        if self.view.isComplex():
+            self.view.addFFTComplex(FFTInputs)
+            #if self.view.isRaw():
+            #    self.view.addRaw(FFTInputs,"InputImagWorkspace")
+        return FFTInputs

@@ -12,78 +12,90 @@ class FFTView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(FFTView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
-        self.table 	= QtGui.QTableWidget(self)
+        self.FFTTable 	= QtGui.QTableWidget(self)
 
         #make table
-        #self.table.resize(800, 800)
-        self.table.setRowCount(6)
-        self.table.setColumnCount(2)
-        self.table.setColumnWidth(0,300)
-        self.table.setColumnWidth(1,300)
-        self.table.verticalHeader().setVisible(False)
-        self.table.horizontalHeader().setStretchLastSection(True)    
-        self.table.setHorizontalHeaderLabels(("FFT Property;Value").split(";"))
+        self.FFTTable.resize(800, 800)
+        self.FFTTable.setRowCount(6)
+        self.FFTTable.setColumnCount(2)
+        self.FFTTable.setColumnWidth(0,300)
+        self.FFTTable.setColumnWidth(1,300)
+        self.FFTTable.verticalHeader().setVisible(False)
+        self.FFTTable.horizontalHeader().setStretchLastSection(True)    
+        self.FFTTable.setHorizontalHeaderLabels(("FFT Property;Value").split(";"))
 
         # populate table
         options=['test']
 
-        widget_helper.setName(self.table,0,"Workspace")
-        self.ws= widget_helper.createComboTable(self.table,0,options)
+        widget_helper.setName(self.FFTTable,0,"Workspace")
+        self.ws= widget_helper.createComboTable(self.FFTTable,0,options)
         self.Im_box_row=1
-        widget_helper.setName(self.table,self.Im_box_row,"Imaginary Data")
-        self.Im_box= widget_helper.createCheckTable(self.table,True,self.Im_box_row)
+        widget_helper.setName(self.FFTTable,self.Im_box_row,"Imaginary Data")
+        self.Im_box= widget_helper.createCheckTable(self.FFTTable,True,self.Im_box_row)
 
-        widget_helper.setName(self.table,2,"Imaginary Workspace")
-        self.Im_ws= widget_helper.createComboTable(self.table,2,options)
+        widget_helper.setName(self.FFTTable,2,"Imaginary Workspace")
+        self.Im_ws= widget_helper.createComboTable(self.FFTTable,2,options)
 
         self.shift_box_row=3
-        widget_helper.setName(self.table,self.shift_box_row,"Auto shift")
-        self.shift_box= widget_helper.createCheckTable(self.table,True,self.shift_box_row)
+        widget_helper.setName(self.FFTTable,self.shift_box_row,"Auto shift")
+        self.shift_box= widget_helper.createCheckTable(self.FFTTable,True,self.shift_box_row)
 
-        widget_helper.setName(self.table,4,"Shift")
-        self.shift= widget_helper.createDoubleTable(self.table,0.0,4)
-        self.table.hideRow(4)
+        widget_helper.setName(self.FFTTable,4,"Shift")
+        self.shift= widget_helper.createDoubleTable(self.FFTTable,0.0,4)
+        self.FFTTable.hideRow(4)
 
-        widget_helper.setName(self.table,5,"Use Raw data")
-        self.Raw_box= widget_helper.createCheckTable(self.table,True,5)
+        widget_helper.setName(self.FFTTable,5,"Use Raw data")
+        self.Raw_box= widget_helper.createCheckTable(self.FFTTable,True,5)
 
+        self.FFTTable.resizeRowsToContents()
         #make advanced table options
         self.advancedLabel=QtGui.QLabel("\n Advanced Options")
-        self.tableA     = QtGui.QTableWidget(self)
-        self.tableA.setRowCount(6)
-        self.tableA.setColumnCount(2)
-        self.tableA.setColumnWidth(0,300)
-        self.tableA.setColumnWidth(1,300)
-        self.tableA.horizontalHeader().setStretchLastSection(True)
-        self.tableA.verticalHeader().setVisible(False)
+        self.FFTTableA     = QtGui.QTableWidget(self)
+        self.FFTTableA.setRowCount(4)
+        self.FFTTableA.setColumnCount(2)
+        self.FFTTableA.setColumnWidth(0,300)
+        self.FFTTableA.setColumnWidth(1,300)
+        self.FFTTableA.horizontalHeader().setStretchLastSection(True)
+        self.FFTTableA.verticalHeader().setVisible(False)
+        self.FFTTableA.setHorizontalHeaderLabels(("PreProcessing Property;Value").split(";"))
 
 
-        widget_helper.setName(self.tableA,0,"Apodization Function")
+        widget_helper.setName(self.FFTTableA,0,"Apodization Function")
         options=["None","Lorentz","Gaussian"]
-        self.apodization = widget_helper.createComboTable(self.tableA,0,options)
+        self.apodization = widget_helper.createComboTable(self.FFTTableA,0,options)
  
-        widget_helper.setName(self.tableA,1,"Decay Constant")
-        self.decay = widget_helper.createDoubleTable(self.tableA,1.4,1)
+        widget_helper.setName(self.FFTTableA,1,"Decay Constant")
+        self.decay = widget_helper.createDoubleTable(self.FFTTableA,1.4,1)
 
-        widget_helper.setName(self.table,2,"Negative Padding")
-        self.shift= widget_helper.create(self.table,0.0,4)
-        self.table.hideRow(4)
+        widget_helper.setName(self.FFTTableA,2,"Negative Padding")
+        self.negativePadding= widget_helper.createCheckTable(self.FFTTableA,True,2)
 
-
+        widget_helper.setName(self.FFTTableA,3,"Padding")
+        self.padding= widget_helper.createSpinTable(self.FFTTableA,1,3)
+        self.FFTTableA.resizeRowsToContents()
 
         #make button
         self.button = QtGui.QPushButton('Calculate FFT', self)
         self.button.setStyleSheet("background-color:lightgrey")
         #connects
-        self.table.cellClicked.connect(self.tableClick)
+        self.FFTTable.cellClicked.connect(self.tableClick)
         self.button.clicked.connect(self.buttonClick)
         # add to layout
-        self.grid.addWidget(self.table)
+        self.FFTTable.setMinimumSize(40,158)
+        self.FFTTableA.setMinimumSize(40,127)
+        self.horizontalSpacer1 = QtGui.QSpacerItem(20, 94, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.horizontalSpacer2 = QtGui.QSpacerItem(20, 280, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        # add to layout
+        self.grid.addWidget(self.FFTTable)
+        self.grid.addItem(self.horizontalSpacer1)
         self.grid.addWidget(self.advancedLabel)
-        self.grid.addWidget(self.tableA)
+        self.grid.addWidget(self.FFTTableA)
+        self.grid.addItem(self.horizontalSpacer2)
         self.grid.addWidget(self.button)
 
-    # add data to view
+
+
+   # add data to view
     def addItems(self,options):
         self.ws.clear()
         self.ws.addItems(options)
@@ -99,14 +111,14 @@ class FFTView(QtGui.QWidget):
 
     #functions
     def changed(self,box,row ):
-        self.table.setRowHidden(row,box.checkState() == QtCore.Qt.Checked)
+        self.FFTTable.setRowHidden(row,box.checkState() == QtCore.Qt.Checked)
 
     def changedHideUnTick(self,box,row ):
-        self.table.setRowHidden(row, box.checkState() != QtCore.Qt.Checked)
+        self.FFTTable.setRowHidden(row, box.checkState() != QtCore.Qt.Checked)
 
     def initFFTInput(self):
         inputs={}
-        inputs['InputWorkspace']=str( self.ws.currentText()).replace(";","; ")
+        inputs['InputWorkspace']="__ReTmp__"#str( self.ws.currentText()).replace(";","; ")
         inputs['Real']= 0 # always zero
         out=str( self.ws.currentText()).replace(";","; ")
         inputs['OutputWorkspace']=out+";FFT"
@@ -114,7 +126,7 @@ class FFTView(QtGui.QWidget):
         return inputs
 
     def addFFTComplex(self,inputs):
-        inputs["InputImagWorkspace"]=str( self.Im_ws.currentText()).replace(";","; ")
+        inputs["InputImagWorkspace"]="__ImTmp__"#str( self.Im_ws.currentText()).replace(";","; ")
         inputs["Imaginary"] = 0 #always zero
 
     def addFFTShift(self,inputs):
@@ -123,6 +135,24 @@ class FFTView(QtGui.QWidget):
 
     def addRaw(self,inputs,key):
         inputs[key]+="_Raw"
+
+    def initAdvanced(self):
+        inputs={}
+        inputs["ApodizationFunction"]=str(self.apodization.currentText())
+        inputs["DecayConstant"]=float(self.decay.text())
+        inputs["NegativePadding"] = self.negativePadding.checkState()
+        inputs["Padding"]=int(self.padding.text())
+        return inputs
+
+    def ReAdvanced(self,inputs):
+        inputs['InputWorkspace']=str( self.ws.currentText()).replace(";","; ")
+        inputs['OutputWorkspace']="__ReTmp__"
+ 
+    def ImAdvanced(self,inputs):
+        inputs['InputWorkspace']=str( self.Im_ws.currentText()).replace(";","; ")
+        inputs['OutputWorkspace']="__ImTmp__"
+
+
 
     # get methods
     def isAutoShift(self):
