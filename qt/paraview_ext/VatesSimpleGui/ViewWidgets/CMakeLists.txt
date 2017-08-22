@@ -145,7 +145,7 @@ VatesSimpleGuiQtWidgets
 MantidQtWidgetsCommon
 VatesAPI
 MantidQtWidgetsSliceViewer
-MantidQtWidgetsFactory
+MantidQtWidgetsFactoryQt4
 ${PYTHON_LIBRARIES}
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}

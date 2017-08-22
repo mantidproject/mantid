@@ -6,6 +6,9 @@ find_package ( QScintilla REQUIRED )
 include ( UseQt4 )
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
+# Utilities for defining targets
+include (QtTargetFunctions)
+
 # Any MantidQt package can depend on widgets/common, so add the includes to the path here
 include_directories ( widgets/common/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/widgets/common )
@@ -27,7 +30,7 @@ if ( MSVC_IDE )
   set_property ( TARGET MantidQtWidgetsSliceViewer PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsSpectrumViewer PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsRefDetectorView PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET MantidQtWidgetsFactory PROPERTY FOLDER "MantidQt" )
+  set_property ( TARGET MantidQtWidgetsFactoryQt4 PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsPluginsDesigner PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsPluginsAlgorithmDialogs PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET mantidqtpython PROPERTY FOLDER "MantidQt" )
