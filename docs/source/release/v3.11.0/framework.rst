@@ -70,6 +70,7 @@ Python Fit Functions
 ####################
 
 - A bug that makes it difficult to define and use attributes in python fit functions has been fixed.
+- The usability of the fit functions has been improved.
 
 |
 
