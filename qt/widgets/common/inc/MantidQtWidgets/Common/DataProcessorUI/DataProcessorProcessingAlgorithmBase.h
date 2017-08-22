@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorProcessingAlgorithmBase
 
 DataProcessorProcessingAlgorithmBase defines shared code to be used by derived
@@ -88,6 +89,7 @@ protected:
   // Converts a string to a set of strings
   static std::set<QString> convertStringToSet(const QString &text);
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORALGORITHMBASE_H*/

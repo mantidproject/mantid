@@ -12,12 +12,12 @@ using ChildItems = std::map<int, std::set<int>>;
 
 namespace MantidQt {
 namespace MantidWidgets {
+class ProgressableView;
 namespace DataProcessor {
 // Forward decs
 class DataProcessorCommand;
 class DataProcessorMainPresenter;
 class DataProcessorView;
-class ProgressableView;
 
 /** @class DataProcessorPresenter
 

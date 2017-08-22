@@ -4,6 +4,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /** Adds an element to the whitelist
 * @param colName : the name of the column to be added
@@ -74,6 +75,7 @@ bool DataProcessorWhiteList::showValue(int index) const {
 */
 QString DataProcessorWhiteList::prefix(int index) const {
   return m_prefix.at(index);
+}
 }
 }
 }

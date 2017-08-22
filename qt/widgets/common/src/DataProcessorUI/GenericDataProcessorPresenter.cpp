@@ -102,6 +102,7 @@ void removeWorkspace(QString const &workspaceName) {
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /**
 * Constructor
@@ -1744,6 +1745,7 @@ bool GenericDataProcessorPresenter::isProcessed(int position,
 void GenericDataProcessorPresenter::setForcedReProcessing(
     bool forceReProcessing) {
   m_forceProcessing = forceReProcessing;
+}
 }
 }
 }

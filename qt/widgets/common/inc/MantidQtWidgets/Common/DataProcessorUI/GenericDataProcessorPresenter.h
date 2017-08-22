@@ -26,9 +26,9 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+class ProgressableView;
 namespace DataProcessor {
 // Forward decs
-class ProgressableView;
 class DataProcessorView;
 class DataProcessorTreeManager;
 class GenericDataProcessorPresenterThread;

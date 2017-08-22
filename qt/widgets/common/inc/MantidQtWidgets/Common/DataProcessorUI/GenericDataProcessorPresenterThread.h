@@ -8,7 +8,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-namespace DataProceesor {
+namespace DataProcessor {
 
 /**
 GenericDataProcessorPresenterThread class to handle a single worker

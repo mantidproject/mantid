@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorSaveTableCommand
 
 DataProcessorSaveTableCommand defines the action "Save Table"
@@ -49,6 +50,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORSAVETABLECOMMAND_H*/

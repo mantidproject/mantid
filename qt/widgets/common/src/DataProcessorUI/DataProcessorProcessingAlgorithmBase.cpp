@@ -4,6 +4,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /** Constructor */
 DataProcessorProcessingAlgorithmBase::DataProcessorProcessingAlgorithmBase(
@@ -96,5 +97,6 @@ DataProcessorProcessingAlgorithmBase::convertStringToSet(const QString &text) {
   std::set<QString> out(items.begin(), items.end());
   return out;
 }
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

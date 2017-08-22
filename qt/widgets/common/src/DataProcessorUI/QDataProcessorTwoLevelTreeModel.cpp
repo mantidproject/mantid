@@ -4,6 +4,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
@@ -535,5 +536,6 @@ bool QDataProcessorTwoLevelTreeModel::setProcessed(bool processed, int position,
   return true;
 }
 
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

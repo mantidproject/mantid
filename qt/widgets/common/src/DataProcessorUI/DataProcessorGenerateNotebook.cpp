@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /*
  * Split the input string on commas and trim leading and trailing whitespace
@@ -648,6 +649,7 @@ QString completeOutputProperties(const QString &algName,
     outString += ", _";
 
   return outString;
+}
 }
 }
 }

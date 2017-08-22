@@ -2,6 +2,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /** Constructor
 */
@@ -34,6 +35,7 @@ void DataProcessorPreprocessMap::addElement(const QString &column,
 std::map<QString, DataProcessorPreprocessingAlgorithm>
 DataProcessorPreprocessMap::asMap() const {
   return m_map;
+}
 }
 }
 }

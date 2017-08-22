@@ -16,6 +16,7 @@ const QString DataProcessorSettingsGroup =
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 using namespace Mantid::API;
 
 /** Constructor
@@ -618,5 +619,6 @@ void QDataProcessorWidget::setForcedReProcessing(bool forceReProcessing) {
   m_presenter->setForcedReProcessing(forceReProcessing);
 }
 
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid
