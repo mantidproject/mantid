@@ -687,7 +687,7 @@ private:
 namespace MantidQt
 {
 %TypeHeaderCode
-#include "MantidQtAPI/DistributionOptions.h"
+#include "MantidQtWidgets/Common/DistributionOptions.h"
 %End
 
 	enum DistributionFlag {DistributionDefault, DistributionTrue, DistributionFalse};

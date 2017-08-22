@@ -13,7 +13,7 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
 
         # Using water sample
         formula = "H2-O"
-        density = 0.033424
+        density = 0.100272
         thickness = 0.1
 
         ws = CalculateSampleTransmission(WavelengthRange='5.0,0.2,7.0', ChemicalFormula=formula,
@@ -21,8 +21,8 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
 
         self.assertEqual(ws.getNumberHistograms(), 2)
 
-        expected_trans = [0.825901, 0.825778, 0.825656, 0.825533, 0.825411, 0.825288, 0.825166, 0.825044, 0.824921, 0.824799]
-        expected_scatt = [0.170971, 0.170971, 0.170971, 0.170971, 0.170971, 0.170971, 0.170971, 0.170971, 0.170971, 0.170971]
+        expected_trans = [0.56619985, 0.56605978, 0.56591975, 0.56577975, 0.56563978, 0.56549985, 0.56535996, 0.56522009, 0.56508027, 0.56494047]
+        expected_scatt = [0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862]
         trans = ws.readY(0)
         scatt = ws.readY(1)
 
@@ -42,8 +42,8 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
 
         self.assertEqual(ws.getNumberHistograms(), 2)
 
-        expected_trans = [0.825901, 0.825778, 0.825656, 0.825533, 0.825411, 0.825288, 0.825166, 0.825044, 0.824921, 0.824799]
-        expected_scatt = [0.170971, 0.170971, 0.170971, 0.170971, 0.170971, 0.170971, 0.170971, 0.170971, 0.170971, 0.170971]
+        expected_trans = [0.56619985, 0.56605978, 0.56591975, 0.56577975, 0.56563978, 0.56549985, 0.56535996, 0.56522009, 0.56508027, 0.56494047]
+        expected_scatt = [0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665]
 
         trans = ws.readY(0)
         scatt = ws.readY(1)

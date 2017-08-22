@@ -676,6 +676,20 @@ On PEARL this is set to the following:
   # Long mode ON:
   monitor_integration_range: (6, 10)
 
+.. _monitor_mask_regions_pearl_isis-powder-diffraction-ref:
+
+monitor_mask_regions
+^^^^^^^^^^^^^^^^^^^^
+
+The masks applied to monitor spectra when normalising a workspace.
+
+On PEARL this is set to the following:
+
+.. code-block:: python
+
+  monitor_mask_regions: [[3.45, 2.96, 2.1,  1.73],
+                         [3.7,  3.2,  2.26, 1.98]]
+					
 .. _monitor_spectrum_number_pearl_isis-powder-diffraction-ref:
 
 monitor_spectrum_number

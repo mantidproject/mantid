@@ -1,37 +1,33 @@
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidGeometry/IComponent.h"
 
 namespace Mantid {
+
 namespace API {
 
-/** Update pixel positions in DetectorInfo after scale parameters have been set
- * for a RectangularDetector.
- *
- * This does *not* set the scale parameters for detector in the ParameterMap. */
-void applyRectangularDetectorScaleToDetectorInfo(
-    DetectorInfo &detectorInfo, const Geometry::RectangularDetector &detector,
+void applyRectangularDetectorScaleToComponentInfo(
+    Geometry::ComponentInfo &componentInfo, Geometry::ComponentID componentId,
     const double scaleX, const double scaleY) {
 
+  const size_t componentIndex = componentInfo.indexOf(componentId);
   // Precompute transformation: Undo translation, undo rotation, scale, rotate
   // back, translate back:
   Eigen::Affine3d transformation(
       Eigen::Scaling(Eigen::Vector3d(scaleX, scaleY, 1)));
-  const auto rotation = toQuaterniond(detector.getRotation());
+  const auto rotation = toQuaterniond(componentInfo.rotation(componentIndex));
   transformation.rotate(rotation.conjugate());
   transformation.prerotate(rotation);
-  const auto origin = Kernel::toVector3d(detector.getPos());
+  const auto origin =
+      Kernel::toVector3d(componentInfo.position(componentIndex));
   transformation.translate(-origin);
   transformation.pretranslate(origin);
 
-  const auto idstart = detector.idstart();
-  const auto idstep = detector.idstep();
-  const auto count = detector.xpixels() * detector.ypixels();
-  for (detid_t id = idstart; id < idstart + idstep * count; ++id) {
-    const auto index = detectorInfo.indexOf(id);
-    const auto pos = Kernel::toVector3d(detectorInfo.position(index));
-    detectorInfo.setPosition(index, Kernel::toV3D(transformation * pos));
+  for (auto index : componentInfo.detectorsInSubtree(componentIndex)) {
+    auto newPos = Kernel::toV3D(
+        transformation * Kernel::toVector3d(componentInfo.position(index)));
+    componentInfo.setPosition(index, newPos);
   }
 }
 

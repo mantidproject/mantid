@@ -1,15 +1,14 @@
 #ifndef MANTID_ALGORITHMS_CONVERTSPECTRUMAXIS_H_
 #define MANTID_ALGORITHMS_CONVERTSPECTRUMAXIS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 class DetectorInfo;
+}
+namespace API {
 class MatrixWorkspace;
 }
 namespace Algorithms {
@@ -88,7 +87,7 @@ private:
 
   /// Getting Efixed
   double getEfixed(const size_t detectorIndex,
-                   const Mantid::API::DetectorInfo &detectorInfo,
+                   const Mantid::Geometry::DetectorInfo &detectorInfo,
                    const API::MatrixWorkspace &inputWS, const int emode) const;
 };
 

@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name, too-many-instance-attributes, too-many-arguments
 # used to parse files more easily
-from __future__ import with_statement
+from __future__ import (with_statement, absolute_import, division, print_function)
 # Qt4 bindings for core Qt functionalities (non-GUI)
 from PyQt4 import QtCore
 # python Qt4 bindings for GUI objects
