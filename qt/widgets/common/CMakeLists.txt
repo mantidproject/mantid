@@ -253,6 +253,8 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -480,10 +482,7 @@ qt4_generate_moc (
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
 )
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp
-)
+
 qt4_generate_moc (
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
@@ -514,7 +513,6 @@ set (
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
@@ -529,19 +527,19 @@ set_source_files_properties (
     HEADER_FILE_ONLY true
 )
 
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
-)
+# qt4_generate_moc (
+  # inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
+  # ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
+# )
 
-set (
-  QTPROPERTYBROWSER_HEADERS_MOC
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
-)
+# set (
+  # QTPROPERTYBROWSER_HEADERS_MOC
+  # ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
+# )
 
 set (
   QTPROPERTYBROWSER_MOC
-  ${QTPROPERTYBROWSER_HEADERS_MOC}
+#  ${QTPROPERTYBROWSER_HEADERS_MOC}
   ${QTPROPERTYBROWSER_HEADERS_ONLY_MOC}
   ${EXTRA_MOCS}
 )
