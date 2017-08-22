@@ -57,16 +57,18 @@ public:
    * generating cut scalars turned off.
    */
   static AlignedCutter *New();
+
 protected:
-  AlignedCutter(vtkImplicitFunction *cf=NULL);
+  AlignedCutter(vtkImplicitFunction *cf = NULL);
   ~AlignedCutter() override;
   int RequestData(vtkInformation *, vtkInformationVector **,
                   vtkInformationVector *) override;
   void AlignedStructuredGridCutter(vtkDataSet *, vtkPolyData *);
   int AxisNumber;
+
 private:
-  AlignedCutter(const AlignedCutter&) VTK_DELETE_FUNCTION;
-  void operator=(const AlignedCutter&) VTK_DELETE_FUNCTION;
+  AlignedCutter(const AlignedCutter &) VTK_DELETE_FUNCTION;
+  void operator=(const AlignedCutter &) VTK_DELETE_FUNCTION;
 };
 //@}
 
