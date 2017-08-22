@@ -63,7 +63,8 @@ VSI Improvements
    :class: screenshot
    :align: right
 
-- Multislice view uses a custom `representation <https://www.paraview.org/ParaView/index.php/Views_And_Representations>`_ to speed up slicing by taking advantage of the consistent bin sizes in a MDHistoWorkspace.
+- Multislice view uses a custom `representation <https://www.paraview.org/ParaView/index.php/Views_And_Representations>`_ to speed up slicing by taking advantage of the consistent bin 
+  sizes in a MDHistoWorkspace. Smooth interaction with typical data sizes (< 10 million cells) is now possible.
 
 |
 
