@@ -165,11 +165,14 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         if container_data is not None:
             corrections_args["ContainerWorkspace"] = container_data
 
+        gamma_correct = flags.get('gamma_correct', False) \
+                        and flags['spectra'] != 'backward'
+
         ms.VesuvioCorrections(InputWorkspace=sample_data,
                               OutputWorkspace=corrected_data_name,
                               LinearFitResult=linear_correction_fit_params_name,
                               WorkspaceIndex=index,
-                              GammaBackground=flags.get('gamma_correct', False),
+                              GammaBackground=gamma_correct,
                               Masses=mass_values,
                               MassProfiles=profiles,
                               IntensityConstraints=intensity_constraints,
