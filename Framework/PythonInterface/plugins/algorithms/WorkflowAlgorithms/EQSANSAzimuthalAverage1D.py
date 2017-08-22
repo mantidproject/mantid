@@ -224,7 +224,6 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         if scale_results:
             output_frame1 = self._scale(output_frame1, output_frame2)
 
-        
         self.setProperty('OutputWorkspace', ws_frame1)
         self.setProperty('OutputWorkspace', output_frame1)
         self.setProperty('IQLambdaWorkspace', ws_frame1+'_wl')
