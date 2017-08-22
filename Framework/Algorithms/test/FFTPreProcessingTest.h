@@ -184,7 +184,8 @@ public:
 
     double Delta = 0.0001;
     // Test padding is applied
-    TS_ASSERT_EQUALS(outWS->x(0).size(), 100);
+    TS_ASSERT_EQUALS(outWS->x(0).size(), 101);
+    TS_ASSERT_EQUALS(outWS->y(0).size(), 100);
     TS_ASSERT_DELTA(outWS->y(0)[ws->x(0).size()], 0.0, Delta);
   }
   void test_PaddingTwelve() {
@@ -200,7 +201,8 @@ public:
 
     double Delta = 0.0001;
     // Test padding is applied
-    TS_ASSERT_EQUALS(outWS->x(0).size(), 650);
+    TS_ASSERT_EQUALS(outWS->x(0).size(), 651);
+    TS_ASSERT_EQUALS(outWS->y(0).size(), 650);
     TS_ASSERT_DELTA(outWS->y(0)[ws->x(0).size()], 0.0, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[ws->x(0).size() * 4], 0.0, Delta);
   }
@@ -219,7 +221,8 @@ public:
 
     double Delta = 0.0001;
     // Test padding is applied
-    TS_ASSERT_EQUALS(outWS->x(0).size(), 100);
+    TS_ASSERT_EQUALS(outWS->x(0).size(), 101);
+    TS_ASSERT_EQUALS(outWS->y(0).size(), 100);
     TS_ASSERT_DELTA(outWS->y(0)[1], 0.0, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[75], 0.0, Delta);
   }
@@ -237,7 +240,8 @@ public:
 
     double Delta = 0.0001;
     // Test padding is applied
-    TS_ASSERT_EQUALS(outWS->x(0).size(), 650);
+    TS_ASSERT_EQUALS(outWS->x(0).size(), 651);
+    TS_ASSERT_EQUALS(outWS->y(0).size(), 650);
     TS_ASSERT_DELTA(outWS->y(0)[0], 0.0, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[300], ws->y(0)[0], Delta);
     TS_ASSERT_DELTA(outWS->y(0)[350], 0.0, Delta);
@@ -256,7 +260,8 @@ public:
 
     double Delta = 0.0001;
     // Test padding is applied
-    TS_ASSERT_EQUALS(outWS->x(0).size(), 150);
+    TS_ASSERT_EQUALS(outWS->x(0).size(), 151);
+    TS_ASSERT_EQUALS(outWS->y(0).size(), 150);
     TS_ASSERT_DELTA(outWS->y(0)[0], 0.0, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[51], ws->y(0)[1], Delta);
     TS_ASSERT_DELTA(outWS->y(0)[101], 0.0, Delta);
