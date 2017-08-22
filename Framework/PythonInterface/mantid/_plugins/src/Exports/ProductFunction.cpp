@@ -20,6 +20,5 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
 void export_ProductFunction() {
 
   class_<ProductFunction, bases<CompositeFunction>, boost::noncopyable>(
-      "ProductFunction", "Composite Fit functions")
-    ;
+      "ProductFunction", "Composite Fit functions");
 }
