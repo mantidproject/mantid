@@ -1600,13 +1600,13 @@ DataProcessorAppendRowCommand();
 DataProcessorAppendRowCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorAppendRowCommand &);
 };
 
-class DataProcessorAppendGroupCommand
+class AppendGroupCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendGroupCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h"
 %End
 public:
-DataProcessorAppendGroupCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+AppendGroupCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1615,8 +1615,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorAppendGroupCommand();
-DataProcessorAppendGroupCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorAppendGroupCommand &);
+AppendGroupCommand();
+AppendGroupCommand(const MantidQt::MantidWidgets::DataProcessor::AppendGroupCommand &);
 };
 
 class DataProcessorClearSelectedCommand

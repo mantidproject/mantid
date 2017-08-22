@@ -9,7 +9,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendGroupCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
@@ -161,7 +161,7 @@ public:
     TS_ASSERT(dynamic_cast<DataProcessorPlotGroupCommand *>(comm[18].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[19].get()));
     TS_ASSERT(dynamic_cast<DataProcessorAppendRowCommand *>(comm[20].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorAppendGroupCommand *>(comm[21].get()));
+    TS_ASSERT(dynamic_cast<AppendGroupCommand *>(comm[21].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[22].get()));
     TS_ASSERT(dynamic_cast<DataProcessorGroupRowsCommand *>(comm[23].get()));
     TS_ASSERT(dynamic_cast<DataProcessorCopySelectedCommand *>(comm[24].get()));
