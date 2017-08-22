@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include <memory>
+#include <string>
 
 // Forward declare
 namespace NeXus {

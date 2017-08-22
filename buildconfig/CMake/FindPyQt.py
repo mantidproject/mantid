@@ -33,6 +33,9 @@ class PyQtConfig(object):
       # configuration process.
       if sys.platform == 'win32':
           self.sip_dir = os.path.join(sys.prefix, 'sip', name)
+      elif sys.platform == 'darwin':
+          # hardcoded for homebrew
+          self.sip_dir = '/usr/local/share/sip'
       else:
           self.sip_dir = os.path.join(sys.prefix, 'share', 'sip', name)
       # Assume uic script is in uic submodule
