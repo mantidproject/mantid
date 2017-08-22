@@ -2,6 +2,7 @@
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
 from mantid.kernel import Logger

@@ -1,4 +1,5 @@
 #pylint: disable-all
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 import os
 from mantid.simpleapi import *
@@ -28,7 +29,7 @@ class Ui_SaveWindow(object):
             usersettings = Settings() # This will throw a missing config exception if no config file is available.
             self.__mountpoint = usersettings.get_named_setting("DataMountPoint")
         except KeyError:
-            print "DataMountPoint is missing from the config.xml file."
+            print("DataMountPoint is missing from the config.xml file.")
             self.__has_mount_point = False
 
     def setupUi(self, SaveWindow):
@@ -57,7 +58,7 @@ class Ui_SaveWindow(object):
         self.lineEdit.setFont(font)
         self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
         self.gridLayout.addWidget(self.lineEdit, 0, 3, 1, 3)
-        #print QtGui.QMainWindow.findChild(QtGui.QMainWindow.QLabel,'RBEdit')
+        #print(QtGui.QMainWindow.findChild(QtGui.QMainWindow.QLabel,'RBEdit'))
 
 # Prefix label and edit field
         self.PrefixLabel = QtGui.QLabel("Prefix: ",self.centralWidget)
@@ -268,7 +269,7 @@ class Ui_SaveWindow(object):
     def workspaceSelected(self):
         self.listWidget2.clear()
         #self.listWidget.setCurrentRow(0)
-        print str(self.listWidget.currentItem().text())
+        print(str(self.listWidget.currentItem().text()))
         logs = mtd[str(self.listWidget.currentItem().text())].getRun().getLogData()
         for i in range(0,len(logs)):
             self.listWidget2.addItem(logs[i].name)
@@ -288,9 +289,9 @@ class Ui_SaveWindow(object):
             else:
                 if self.__has_mount_point:
                     try:
-                        print "mountpoint = ", self.__mountpoint
+                        print("mountpoint = ", self.__mountpoint)
                         base_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument','logs','journal')
-                        print "Loading journal from", base_path
+                        print("Loading journal from", base_path)
                         main_journal_path = os.path.join(base_path, 'journal_main.xml')
                         tree1=xml.parse(main_journal_path)
                         root1=tree1.getroot()
@@ -309,9 +310,9 @@ class Ui_SaveWindow(object):
                             SavePath = os.path.join('U:/', user)
                             self.lineEdit.setText(SavePath)
                         except LookupError:
-                            print "Couldn't find user name in archives!"
+                            print("Couldn't find user name in archives!")
                     except:
-                        print "Journal does not exist or is unreachable, please check your network connection."
+                        print("Journal does not exist or is unreachable, please check your network connection.")
 
 #--------- If "Save" button pressed, selcted workspaces are saved -------------
     def buttonClickHandler1(self):
@@ -324,7 +325,7 @@ class Ui_SaveWindow(object):
         for idx in self.listWidget.selectedItems():
             fname=os.path.join(self.lineEdit.text(),prefix + idx.text())
             if self.comboBox.currentIndex() == 0:
-                print "Custom Ascii format"
+                print("Custom Ascii format")
                 if self.radio1.isChecked():
                     sep=','
                 elif self.radio2.isChecked():
@@ -335,16 +336,16 @@ class Ui_SaveWindow(object):
                     sep=' '
                 saveCustom(idx,fname,sep,self.listWidget2.selectedItems(),self.titleCheckBox.isChecked(),self.xErrorCheckBox.isChecked())
             elif self.comboBox.currentIndex() == 1:
-                print "Not yet implemented!"
+                print("Not yet implemented!")
             elif self.comboBox.currentIndex() == 2:
-                print "ANSTO format"
+                print("ANSTO format")
                 saveANSTO(idx,fname)
             elif self.comboBox.currentIndex() == 3:
-                print "ILL MFT format"
+                print("ILL MFT format")
                 saveMFT(idx,fname,self.listWidget2.selectedItems())
         # for idx in self.listWidget.selectedItems():
             # fname=str(path+prefix+idx.text()+'.dat')
-            # print "FILENAME: ", fname
+            # print("FILENAME: ", fname)
             # wksp=str(idx.text())
             # SaveAscii(InputWorkspace=wksp,Filename=fname)
 
@@ -372,10 +373,10 @@ def calcRes(run):
     else:
         th = theta
 
-    print "s1vg=", s1vg, "s2vg=", s2vg, "theta=", theta
+    print("s1vg=", s1vg, "s2vg=", s2vg, "theta=", theta)
     #1500.0 is the S1-S2 distance in mm for SURF!!!
     resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
-    print "dq/q=", resolution
+    print("dq/q=", resolution)
     DeleteWorkspace(runno)
     return resolution
 
@@ -400,7 +401,7 @@ def groupGet(wksp, whattoget, field=''):
                     res = log[len(log) - 1]
             except RuntimeError:
                 res = 0
-                print "Block " + field + " not found."
+                print("Block " + field + " not found.")
         else:
             try:
                 log = mtd[wksp].getRun().getLogData(field).value
@@ -410,7 +411,7 @@ def groupGet(wksp, whattoget, field=''):
                     res = log[len(log) - 1]
             except RuntimeError:
                 res = 0
-                print "Block " + field + " not found."
+                print("Block " + field + " not found.")
         return res
     elif whattoget == 'wksp':
         if isinstance(mtd[wksp], WorkspaceGroup):
