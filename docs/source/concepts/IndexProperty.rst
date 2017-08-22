@@ -58,7 +58,7 @@ managing the workspace and the type of user-defined input index list respectivel
 automatically generated based on the property name in the declaration. 
 A toy example algorithm dialog in the GUI would have the following inputs defined:
 
-.. image:: ../images/IndexPropertyDialogExample.PNG
+.. image:: ../images/IndexPropertyDialogExample.png
    :height: 300px
    :alt: Toy Example of an Algorithm Dialog using IndexProperty
 
