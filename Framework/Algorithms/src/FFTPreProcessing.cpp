@@ -155,7 +155,7 @@ HistogramData::Histogram FFTPreProcessing::applyApodizationFunction(
     const HistogramData::Histogram &histogram, const double decayConstant,
     fptr function) {
   HistogramData::Histogram result(histogram);
-  result.points();
+
   auto &xData = result.mutableX();
   auto &yData = result.mutableY();
   auto &eData = result.mutableE();
@@ -164,8 +164,6 @@ HistogramData::Histogram FFTPreProcessing::applyApodizationFunction(
     yData[i] *= function(xData[i], decayConstant);
     eData[i] *= function(xData[i], decayConstant);
   }
-  if(histogram.x().size() != histogram.y().size()){
-  result.binEdges();}
 
   return result;
 }
@@ -181,16 +179,13 @@ HistogramData::Histogram FFTPreProcessing::applyApodizationFunction(
 HistogramData::Histogram
 FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
                              const int padding) {
-
-  HistogramData::Histogram result(histogram);
   if (padding == 0) {
     return histogram;
   }
-  // make sure point data
-  result.points();
-  auto &xData = result.x();
-  auto &yData = result.y();
-  auto &eData = result.e();
+
+  auto &xData = histogram.x();
+  auto &yData = histogram.y();
+  auto &eData = histogram.e();
   auto incEData = eData.size() > 0 ? true : false;
   // assume approx evenly spaced
   if (xData.size() < 2) {
@@ -198,37 +193,45 @@ FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
                                 "enought data points to add padding"
                                 "dx = 0");
   }
-  double dx = xData[1] - xData[0];
-  auto dataSize = yData.size();
-  std::vector<double> newXData(dataSize * (1 + padding), 0.0);
-  std::vector<double> newYData(dataSize * (1 + padding), 0.0);
-  std::vector<double> newEData(dataSize * (1 + padding), 0.0);
-  double x = xData.back();
+  const double dx = xData[1] - xData[0];
+  const auto dataSize = yData.size() * (1 + padding);
+
+  // Create histogram with the same structure as histogram
+  HistogramData::Histogram result(histogram);
+  // Resize result to new size.
+  result.resize(dataSize);
+  auto &newXData = result.mutableX();
+  auto &newYData = result.mutableY();
+  auto &newEData = result.mutableE();
+
+  // Start x counter at 1 dx below the first value to make
+  // the std::generate algorithm work correctly.
+  double x = xData.front() - dx;
   size_t offset = 0;
   bool negativePadding = getProperty("NegativePadding");
   if (negativePadding) {
     // non-zero offset is for padding before the data
-    offset = padding * dataSize / 2;
-    x = xData.front() - dx * (1. + double(offset));
+    offset = padding * yData.size() / 2;
+    x -= dx * double(offset);
   }
+
+  // This covers all x values, no need to copy from xData
   std::generate(newXData.begin(), newXData.end(), [&x, &dx] {
     x += dx;
     return x;
   });
-  std::copy(xData.begin(), xData.end(), newXData.begin() + offset);
-  std::copy(yData.begin(), yData.end(), newYData.begin() + offset);
-  if (incEData) {
-    std::copy(eData.begin(), eData.end(), newEData.begin() + offset);
-    result = HistogramData::Histogram(
-        HistogramData::Points(newXData), HistogramData::Counts(newYData),
-        HistogramData::CountStandardDeviations(newEData));
 
-  } else {
-    result = HistogramData::Histogram(HistogramData::Points(newXData),
-                                      HistogramData::Counts(newYData));
+  // Do not rely on Histogram::resize to fill the extra elements with 0s
+  // Fill in all ys with 0s first
+  std::fill(newYData.begin(), newYData.end(), 0.0);
+  // Then copy the old yData to the appropriate positions
+  std::copy(yData.begin(), yData.end(), newYData.begin() + offset);
+
+  if (incEData) {
+    // The same reasoning as for ys
+    std::fill(newEData.begin(), newEData.end(), 0.0);
+    std::copy(eData.begin(), eData.end(), newEData.begin() + offset);
   }
-   if(histogram.x().size() != histogram.y().size()){
-  result.binEdges();}
 
   return result;
 }
