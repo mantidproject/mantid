@@ -610,19 +610,15 @@ void ConvolutionFitSequential::calculateEISF(
 }
 
 /*
- * Extracts the convolution fit members from the specified result group
- *workspace,
+ * Extracts the convolution fit members from the specified result group workspace,
  * given the specified input workspace used for the fit, each into a workspace,
- *stored
- * inside a group workspace of the specified name.
+ * stored inside a group workspace of the specified name.
  *
  * @param inputWs       The input workspace used in the convolution fit.
  * @param resultGroupWs The result group workspace produced by the convolution
- *fit;
- *                      from which to extract the members.
+ *                      fit; from which to extract the members.
  * @param outputWsName  The name of the output group workspace to store the
- *member
- *                      workspaces.
+ *                      member workspaces.
  */
 void ConvolutionFitSequential::extractMembers(
     MatrixWorkspace_sptr inputWs, WorkspaceGroup_const_sptr resultGroupWs,
@@ -682,15 +678,15 @@ void ConvolutionFitSequential::extractMembers(
 
   // Update the y-axis of each created member workspace - set to
   // the Q values from the QENS data.
-  auto qAxis = Kernel::make_unique<NumericAxis>(resultSize);
+  auto qAxis = NumericAxis(resultSize);
   for (size_t j = 0; j < resultSize; j++) {
-    qAxis->setValue(j, qValues[j]);
+    qAxis.setValue(j, qValues[j]);
   }
 
   for (auto &memberWsName : memberWorkspaces) {
     auto memberWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         memberWsName);
-    memberWs->replaceAxis(1, qAxis.release());
+    memberWs->replaceAxis(1, new NumericAxis(qAxis));
     memberWs->setYUnitLabel("MomentumTransfer");
   }
 
@@ -707,17 +703,15 @@ void ConvolutionFitSequential::extractMembers(
  * of the member workspaces are appended to the specified vector.
  *
  * @param resultWs          Workspace containing result of the fit, from which
- *to extract
- *                          members.
+ *                          to extract members.
  * @param outputWsName      The prefix of the output member workspaces.
  *                          Format: outputWsName + NameOfMember
  * @param members           The list (vector) of members to extract from the
- *result workspace.
+ *                          result workspace.
  * @param createMemberWs    If True, create a new workspace for each member.
  *                          Else, append to existing workspace.
  * @param memberWorkspaces  The list (vector) of member workspaces to append
- *output workspace
- *                          names to.
+ *                          output workspace names to.
  */
 void ConvolutionFitSequential::extractMembersFrom(
     Mantid::API::Workspace_sptr resultWs, const std::string &outputWsName,
