@@ -17,7 +17,7 @@ class FDAG(QMainWindow):
         groupedViews = view_constructor.viewConstructor(True,self)
         groupedModels = model_constructor.modelConstructor(True)
         view =transform_view.transformView(groupedViews,self)
-        self.presenter =transform_presenter.transformPresenter(view,groupedModels) 
+        self.presenter =transform_presenter.transformPresenter(view,groupedModels)
         self.setCentralWidget(view)
         self.setWindowTitle("Frequency Domain Analysis")
 
