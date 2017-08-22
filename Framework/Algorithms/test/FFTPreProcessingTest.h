@@ -270,20 +270,21 @@ public:
   }
   void test_Points() {
 
-    std::vector<double> xData,yData;
-    for(int j=0;j<50;j++){
-         xData.push_back(double(j));
-         yData.push_back(double(j));
+    std::vector<double> xData, yData;
+    for (int j = 0; j < 50; j++) {
+      xData.push_back(double(j));
+      yData.push_back(double(j));
     }
 
-    IAlgorithm_sptr makeWS = AlgorithmManager::Instance().create("CreateWorkspace");
-    makeWS->setProperty("OutputWorkspace","pointDataFFT");
-    makeWS->setProperty("DataX",xData);
-    makeWS->setProperty("DataY",yData);
+    IAlgorithm_sptr makeWS =
+        AlgorithmManager::Instance().create("CreateWorkspace");
+    makeWS->setProperty("OutputWorkspace", "pointDataFFT");
+    makeWS->setProperty("DataX", xData);
+    makeWS->setProperty("DataY", yData);
     makeWS->execute();
 
     IAlgorithm_sptr alg = setUpAlg();
-    alg->setProperty("InputWorkspace","pointDataFFT");
+    alg->setProperty("InputWorkspace", "pointDataFFT");
     alg->setProperty("Padding", 1);
     alg->setProperty("NegativePAdding", true);
     alg->execute();
@@ -298,7 +299,6 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[1], 0.0, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[75], 0.0, Delta);
   }
-
 };
 
 #endif /*FFTPREPROCESSINGTSTEST_H_*/
