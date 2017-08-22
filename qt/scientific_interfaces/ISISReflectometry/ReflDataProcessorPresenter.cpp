@@ -6,10 +6,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h"
+#include "MantidQtWidgets/Common/ParseNumerics.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflFromStdStringMap.h"
 
+using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 

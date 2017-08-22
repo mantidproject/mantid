@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h"
+#include "MantidQtWidgets/Common/ParseNumerics.h"
 #include <stdexcept>
 namespace MantidQt {
 namespace MantidWidgets {

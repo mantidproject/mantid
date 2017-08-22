@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 using MantidQt::MantidWidgets::DataProcessorProcessingAlgorithmBase;
 

@@ -38,6 +38,7 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace testing;
 using Runs = std::vector<std::map<QString, QString>>;
 

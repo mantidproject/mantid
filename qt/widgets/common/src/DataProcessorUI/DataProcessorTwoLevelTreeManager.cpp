@@ -27,7 +27,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h"
+#include "MantidQtWidgets/Common/ParseNumerics.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string/classification.hpp>
