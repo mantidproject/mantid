@@ -3,6 +3,7 @@ import sys
 from  Muon import transform_presenter
 from  Muon import transform_view
 from  Muon import transform_selection_view
+from  Muon import model_constructor
 import unittest
 if sys.version_info.major == 3:
     from unittest import mock
@@ -19,8 +20,11 @@ class FFTTransformTest(unittest.TestCase):
         self.view.show=mock.Mock()
         self.view.selection=mock.create_autospec(transform_selection_view.TransformSelectionView,spec_set=True)
         self.view.selection.changeMethodSignal=mock.Mock()
+
+        self.model=mock.create_autospec(model_constructor.modelConstructor)
+        self.model.getModel=mock.Mock()
         #set presenter
-        self.presenter=transform_presenter.transformPresenter(self.view)
+        self.presenter=transform_presenter.transformPresenter(self.view,self.model)
 
     def test_changeDisplay(self):
         self.presenter.updateDisplay(1)
