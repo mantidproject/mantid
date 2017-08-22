@@ -32,6 +32,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 namespace {
 template <typename A>
 std::vector<std::string>
@@ -83,5 +84,5 @@ QString vectorParamString(const QString &param_name,
 }
 }
 }
-
+}
 #endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORVECTORSTRING_H

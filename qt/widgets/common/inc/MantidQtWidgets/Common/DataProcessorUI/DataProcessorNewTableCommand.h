@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorNewTableCommand
 
 DataProcessorNewTableCommand defines the action "New Table"
@@ -49,6 +50,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORNEWTABLECOMMAND_H*/

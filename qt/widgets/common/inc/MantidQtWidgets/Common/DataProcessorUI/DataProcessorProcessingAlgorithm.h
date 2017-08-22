@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorProcessingAlgorithm
 
 DataProcessorProcessingAlgorithm defines a processing algorithm that will
@@ -65,6 +66,7 @@ private:
   // The names of the output workspace properties
   std::vector<QString> m_outputProperties;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHM_H*/

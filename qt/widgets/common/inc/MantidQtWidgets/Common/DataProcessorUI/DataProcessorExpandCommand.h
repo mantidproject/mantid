@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorExpandCommand
 
 DataProcessorExpandCommand defines the action "Expand Selection"
@@ -52,6 +53,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDCOMMAND_H*/

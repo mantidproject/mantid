@@ -15,7 +15,7 @@ columns, their indices and descriptions
 QDataProcessorTwoLevelTreeModel::QDataProcessorTwoLevelTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
-    : AbstractDataProcessorTreeModel(tableWorkspace, whitelist) {
+    : AbstractTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size() + 1)
     throw std::invalid_argument("Invalid table workspace. Table workspace must "

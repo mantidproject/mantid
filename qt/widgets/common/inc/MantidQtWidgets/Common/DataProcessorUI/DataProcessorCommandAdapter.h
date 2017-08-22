@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 using DataProcessorCommand_uptr = std::unique_ptr<DataProcessorCommand>;
 
@@ -42,8 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorCommandAdapter
-    : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON DataProcessorCommandAdapter : public QObject {
   Q_OBJECT
 public:
   /** Constructor: Adds actions to a menu
@@ -115,8 +115,9 @@ private:
   std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_adapter;
 };
 
-typedef std::unique_ptr<DataProcessorCommandAdapter>
-    DataProcessorCommandAdapter_uptr;
+using DataProcessorCommandAdapter_uptr =
+    std::unique_ptr<DataProcessorCommandAdapter>;
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDADAPTER_H*/

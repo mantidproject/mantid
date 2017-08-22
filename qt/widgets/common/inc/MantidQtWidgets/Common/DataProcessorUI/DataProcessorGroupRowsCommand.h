@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorGroupRowsCommand
 
 DataProcessorGroupRowsCommand defines the action "Group Selected"
@@ -49,6 +50,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORGROUPROWSCOMMAND_H*/

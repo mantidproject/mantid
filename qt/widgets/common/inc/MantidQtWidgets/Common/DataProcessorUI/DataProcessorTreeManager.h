@@ -3,7 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <map>
 #include <memory>
@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 class DataProcessorCommand;
 class DataProcessorWhiteList;
@@ -105,7 +106,7 @@ public:
   /// Return member variables
 
   /// Return the model
-  virtual boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() = 0;
+  virtual boost::shared_ptr<AbstractTreeModel> getModel() = 0;
   /// Return the table ws
   virtual Mantid::API::ITableWorkspace_sptr getTableWorkspace() = 0;
 
@@ -116,6 +117,7 @@ protected:
     commands.push_back(std::move(command));
   }
 };
+}
 }
 }
 #endif /* MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H */

@@ -7,6 +7,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /** @class ReflCommandBase
 
@@ -48,6 +49,7 @@ public:
 protected:
   DataProcessorPresenter *const m_presenter;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H*/

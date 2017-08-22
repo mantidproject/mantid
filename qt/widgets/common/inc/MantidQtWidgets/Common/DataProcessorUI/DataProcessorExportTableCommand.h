@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorExportTableCommand
 
 DataProcessorExportTableCommand defines the action "Export .TBL"
@@ -51,6 +52,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPORTTABLECOMMAND_H*/

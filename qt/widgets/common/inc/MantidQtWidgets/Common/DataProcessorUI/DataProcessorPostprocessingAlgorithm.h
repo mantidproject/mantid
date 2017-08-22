@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataPostprocessorAlgorithm
 
 DataPostprocessorAlgorithm defines a post-processor algorithm responsible for
@@ -66,6 +67,7 @@ private:
   // The name of the output property
   QString m_outputProp;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPOSTPROCESSINGALGORITHM_H*/

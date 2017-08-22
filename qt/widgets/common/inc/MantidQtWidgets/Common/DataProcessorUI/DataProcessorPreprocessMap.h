@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorPreprocessMap
 
 DataProcessorPreprocessMap defines a pre-processor algorithm that will
@@ -52,6 +53,7 @@ private:
   // A map where keys are columns and values pre-processing algorithms
   std::map<QString, DataProcessorPreprocessingAlgorithm> m_map;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSMAP_H*/

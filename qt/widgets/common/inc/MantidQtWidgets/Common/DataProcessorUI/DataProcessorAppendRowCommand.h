@@ -6,6 +6,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorAppendRowCommand
 
 DataProcessorAppendRowCommand defines the action "Insert Row After"
@@ -53,6 +54,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORAPPENDROWCOMMAND_H*/

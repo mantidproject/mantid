@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorCommand
 
 DataProcessorCommand is an interface which defines the functions any data
@@ -62,7 +63,8 @@ protected:
 };
 
 /// Typedef for a shared pointer to \c ReflSearchModel
-typedef std::unique_ptr<DataProcessorCommand> DataProcessorCommand_uptr;
+using DataProcessorCommand_uptr = std::unique_ptr<DataProcessorCommand>;
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMAND_H*/

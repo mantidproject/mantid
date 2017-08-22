@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorPlotRowCommand
 
 DataProcessorPlotRowCommand defines the action "Plot Selected Rows"
@@ -50,6 +51,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPLOTROWCOMMAND_H*/

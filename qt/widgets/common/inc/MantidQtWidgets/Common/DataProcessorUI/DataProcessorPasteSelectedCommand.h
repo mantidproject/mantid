@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** @class DataProcessorPasteSelectedCommand
 
 DataProcessorPasteSelectedCommand defines the action "Paste Selected"
@@ -51,6 +52,7 @@ public:
   }
   QString shortcut() override { return QString("Ctrl+V"); }
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPASTESELECTEDCOMMAND_H*/
