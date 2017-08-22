@@ -64,7 +64,7 @@ class FFTView(QtGui.QWidget):
         options=["None","Lorentz","Gaussian"]
         self.apodization = widget_helper.createComboTable(self.FFTTableA,0,options)
  
-        widget_helper.setName(self.FFTTableA,1,"Decay Constant")
+        widget_helper.setName(self.FFTTableA,1,"Decay Constant (micro seconds)")
         self.decay = widget_helper.createDoubleTable(self.FFTTableA,1.4,1)
 
         widget_helper.setName(self.FFTTableA,2,"Negative Padding")

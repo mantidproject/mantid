@@ -1,11 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
-
 from six import iteritems
+
+
 class FFTModel(object):
 
     def __init__(self):
-        tmp=1       
+        self.name="FFT"
 
     def preAlg(self,preInputs):
         preAlg=mantid.AlgorithmManager.create("FFTPreProcessing")
@@ -32,5 +33,5 @@ class FFTModel(object):
         else:
             FFTMuon=mantid.GroupWorkspaces(InputWorkspaces=ws)
 
-
-
+    def getName(self):
+        return self.name

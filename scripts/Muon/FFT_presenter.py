@@ -1,5 +1,4 @@
 from __future__ import (absolute_import, division, print_function)
-from six import iteritems
 import mantid.simpleapi as mantid
 
 
@@ -7,7 +6,7 @@ class FFTPresenter(object):
 
     def __init__(self,view,alg):
         self.view=view
-        self.alg=alg  
+        self.alg=alg
         # set data
         self.getWorkspaceNames()
         #connect
@@ -33,15 +32,24 @@ class FFTPresenter(object):
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
     def handleButton(self):
+        #do apodization and padding to real data
         preInputs=self.view.initAdvanced()
         self.view.ReAdvanced(preInputs)
         self.alg.preAlg(preInputs)
+        if self.view.isRaw():
+            self.view.addRaw(preInputs,"InputWorkspace")
+        #do apodization and padding to complex data
         if self.view.isComplex():
             self.view.ImAdvanced(preInputs)
             self.alg.preAlg(preInputs)
-
+            if self.view.isRaw():
+                self.view.addRaw(preInputs,"InputWorkspace")
+        #do FFT to transformed data
         FFTInputs = self.get_FFT_input()
-        self.alg.FFTAlg(FFTInputs) 
+        if self.view.isRaw():
+            self.view.addRaw(FFTInputs,"OutputWorkspace")
+        self.alg.FFTAlg(FFTInputs)
+
     def get_FFT_input(self):
         FFTInputs=self.view.initFFTInput()
         #if self.view.isRaw():
