@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid
 import tempfile
 import unittest
+import sys
 import os
 import json
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
