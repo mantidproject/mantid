@@ -21,7 +21,7 @@ class FFTView(QtGui.QWidget):
         self.FFTTable.setColumnWidth(0,300)
         self.FFTTable.setColumnWidth(1,300)
         self.FFTTable.verticalHeader().setVisible(False)
-        self.FFTTable.horizontalHeader().setStretchLastSection(True)    
+        self.FFTTable.horizontalHeader().setStretchLastSection(True)
         self.FFTTable.setHorizontalHeaderLabels(("FFT Property;Value").split(";"))
 
         # populate table
@@ -59,11 +59,10 @@ class FFTView(QtGui.QWidget):
         self.FFTTableA.verticalHeader().setVisible(False)
         self.FFTTableA.setHorizontalHeaderLabels(("PreProcessing Property;Value").split(";"))
 
-
         widget_helper.setName(self.FFTTableA,0,"Apodization Function")
         options=["None","Lorentz","Gaussian"]
         self.apodization = widget_helper.createComboTable(self.FFTTableA,0,options)
- 
+
         widget_helper.setName(self.FFTTableA,1,"Decay Constant (micro seconds)")
         self.decay = widget_helper.createDoubleTable(self.FFTTableA,1.4,1)
 
@@ -92,8 +91,6 @@ class FFTView(QtGui.QWidget):
         self.grid.addWidget(self.FFTTableA)
         self.grid.addItem(self.horizontalSpacer2)
         self.grid.addWidget(self.button)
-
-
 
    # add data to view
     def addItems(self,options):
@@ -147,12 +144,10 @@ class FFTView(QtGui.QWidget):
     def ReAdvanced(self,inputs):
         inputs['InputWorkspace']=str( self.ws.currentText()).replace(";","; ")
         inputs['OutputWorkspace']="__ReTmp__"
- 
+
     def ImAdvanced(self,inputs):
         inputs['InputWorkspace']=str( self.Im_ws.currentText()).replace(";","; ")
         inputs['OutputWorkspace']="__ImTmp__"
-
-
 
     # get methods
     def isAutoShift(self):

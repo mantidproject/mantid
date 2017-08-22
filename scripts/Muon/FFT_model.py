@@ -25,7 +25,7 @@ class FFTModel(object):
             alg.setProperty(name,value)
         alg.execute()
         mantid.AnalysisDataService.addOrReplace(FFTInputs["OutputWorkspace"],alg.getProperty("OutputWorkspace").value)
- 
+
         ws=alg.getPropertyValue("OutputWorkspace")
         if mantid.AnalysisDataService.doesExist("FFTMuon"):
             FFTMuon=mantid.AnalysisDataService.retrieve("FFTMuon")
