@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 using namespace testing;
 

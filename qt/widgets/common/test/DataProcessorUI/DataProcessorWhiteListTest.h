@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace testing;
 
 //=====================================================================================

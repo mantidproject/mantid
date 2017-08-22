@@ -8,6 +8,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 
 class QDataProcessorTwoLevelTreeModelTest : public CxxTest::TestSuite {

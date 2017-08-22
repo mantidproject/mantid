@@ -11,7 +11,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 /** @class ReflDataProcessorPresenter
 
@@ -110,7 +110,7 @@ private:
   retrieveWorkspace(QString const &name) const;
 
   // Asks user if they wish to proceed if a type of workspace exists in the ADS
-  bool proceedIfWSTypeInADS(const MantidQt::MantidWidgets::TreeData &data,
+  bool proceedIfWSTypeInADS(const MantidQt::MantidWidgets::DataProcessor::TreeData &data,
                             const bool findEventWS);
 
   std::map<int, std::map<int, size_t>> m_numSlicesMap;
