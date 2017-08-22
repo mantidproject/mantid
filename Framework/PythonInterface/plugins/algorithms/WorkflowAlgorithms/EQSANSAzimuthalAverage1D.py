@@ -232,7 +232,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputFrame2', ws_frame2,
                                                      direction = Direction.Output))
         self.declareProperty(WorkspaceGroupProperty('OutputTOFFrame2', ws_frame2+'_wl',
-                                                     direction = Direction.Output))
+                                                    direction = Direction.Output))
         self.setProperty('OutputFrame2', output_frame2)
         self.setProperty('OutputTOFFrame2', output_tof_frame2)
 
