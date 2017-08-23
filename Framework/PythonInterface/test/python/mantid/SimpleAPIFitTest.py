@@ -91,7 +91,6 @@ class SimpleAPIFitTest(unittest.TestCase):
         self.assertTrue(isinstance(retvals.OutputWorkspace, MatrixWorkspace))
         self.assertTrue(isinstance(retvals.FunctionString, str))
 
-
     def test_that_dialog_call_raises_runtime_error(self):
         try:
             FitDialog()

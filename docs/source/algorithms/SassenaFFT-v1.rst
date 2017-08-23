@@ -66,6 +66,7 @@ Usage
 
 .. testcode:: Ex
 
+    from __future__ import print_function
     ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
     SassenaFFT(ws, FFTonlyRealPart=1, Temp=1000, DetailedBalance=1)
 
@@ -82,15 +83,17 @@ Usage
     myFunc = 'name=Gaussian,Height={0},PeakCentre={1},Sigma={2}'.format(intensity,center,sigma)
 
     # Call the Fit algorithm and perform the fit
-    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
-    Fit(Function=myFunc, InputWorkspace=sqt, WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit')
+    fit_output = Fit(Function=myFunc, InputWorkspace=sqt, WorkspaceIndex=0,
+                     StartX = startX, EndX=endX, Output='fit')
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+    fitWorkspace = fit_output.OutputWorkspace
 
-    print "The fit was: " + fitStatus
+    print("The fit was: " + fit_output.OutputStatus)
     print("Fitted Height value is: %.1f" % paramTable.column(1)[0])
     print("Fitted centre value is: %.1f" % abs(paramTable.column(1)[1]))
     print("Fitted sigma value is: %.4f" % paramTable.column(1)[2])
     # fitWorkspace contains the data, the calculated and the difference patterns
-    print "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms())
+    print("Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms()))
 
 Output:
 
