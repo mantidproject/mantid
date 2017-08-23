@@ -1714,13 +1714,13 @@ DeleteRowCommand();
 DeleteRowCommand(const MantidQt::MantidWidgets::DataProcessor::DeleteRowCommand &);
 };
 
-class DataProcessorExpandCommand
+class ExpandCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h"
 %End
 public:
-DataProcessorExpandCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+ExpandCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1729,8 +1729,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorExpandCommand();
-DataProcessorExpandCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorExpandCommand &);
+ExpandCommand();
+ExpandCommand(const MantidQt::MantidWidgets::DataProcessor::ExpandCommand &);
 };
 
 class DataProcessorExportTableCommand

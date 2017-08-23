@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorExpandCommand
+/** @class ExpandCommand
 
-DataProcessorExpandCommand defines the action "Expand Selection"
+ExpandCommand defines the action "Expand Selection"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorExpandCommand : public CommandBase {
+class ExpandCommand : public CommandBase {
 public:
-  DataProcessorExpandCommand(DataProcessorPresenter *tablePresenter)
+  ExpandCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorExpandCommand(const QDataProcessorWidget &widget)
+  ExpandCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorExpandCommand(){};
+  virtual ~ExpandCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ExpandSelectionFlag);

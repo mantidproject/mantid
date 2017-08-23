@@ -161,7 +161,7 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
 
         # Actions that go in the 'Edit' menu
         self._create_action(MantidQt.MantidWidgets.DataProcessorProcessCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorExpandCommand(self.data_processor_table), self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.ExpandCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorPlotRowCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorPlotGroupCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.AppendRowCommand(self.data_processor_table), self.menuEdit)
