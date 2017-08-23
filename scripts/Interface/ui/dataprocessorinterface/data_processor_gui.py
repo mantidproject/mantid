@@ -4,10 +4,11 @@ try:
 except ImportError:
     canMantidPlot = False
 
-import ui_data_processor_window
 from PyQt4 import QtGui
-from mantid.simpleapi import *
 from mantidqtpython import MantidQt
+
+from . import ui_data_processor_window
+
 
 canMantidPlot = True
 
