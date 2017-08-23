@@ -671,6 +671,10 @@ void ConvolutionFitSequential::extractMembers(
   // Extract the members from each workspace into their respective
   // workspace - these are stored in the memberWorkspaces vector.
   size_t resultSize = resultGroupWs->size();
+  if (qValues.size() < resultSize) {
+    throw std::runtime_error("Couldn't extract Q-Values from InputWorkspace.");
+  }
+
   std::vector<std::string> memberWorkspaces = {};
   for (size_t i = 0; i < resultSize; i++) {
     extractMembersFrom(resultGroupWs->getItem(i), outputWsName, members, i == 0,

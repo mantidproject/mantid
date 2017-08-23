@@ -8,6 +8,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include "MantidDataHandling/Load.h"
+
 #include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
 
 #include "MantidDataObjects/Workspace2D.h"
@@ -248,12 +250,14 @@ public:
   }
 
   void test_exec_with_extract_members() {
-    const int totalBins = 6;
-    auto resWs = create2DWorkspace(5, 1);
-    auto redWs = create2DWorkspace(totalBins, 5);
-    createConvFitResWorkspace(5, totalBins);
+    std::string runName = "irs26173_graphite002";
+
+    auto resWs = loadWorkspace(runName + "_res.nxs");
+    auto redWs = loadWorkspace(runName + "_red.nxs");
+    createConvFitResWorkspace(redWs->getNumberHistograms(), redWs->blocksize());
     AnalysisDataService::Instance().add("ResolutionWs_", resWs);
     AnalysisDataService::Instance().add("ReductionWs_", redWs);
+
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", redWs);
@@ -282,7 +286,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         membersGroupWs =
             AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                "ReductionWs_conv_1LFixF_s0_to_5_Members"));
+                runName + "_conv_1LFixF_s0_to_5_Members"));
 
     // Check all members have been extracted into their own workspace and
     // grouped
@@ -302,6 +306,17 @@ public:
   }
 
   //------------------------ Private Functions---------------------------
+
+  MatrixWorkspace_sptr loadWorkspace(const std::string &fileName) {
+    Mantid::DataHandling::Load loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setProperty("Filename", fileName);
+    loadAlg.setProperty("OutputWorkspace", "__temp");
+    loadAlg.executeAsChildAlg();
+    Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  }
 
   MatrixWorkspace_sptr createGenericWorkspace(const std::string &wsName,
                                               const bool numericAxis) {
@@ -362,7 +377,7 @@ public:
     return ws;
   }
 
-  void createConvFitResWorkspace(int totalHist, int totalBins) {
+  void createConvFitResWorkspace(size_t totalHist, size_t totalBins) {
     auto convFitRes =
         createWorkspace<Workspace2D>(totalHist + 1, totalBins + 1, totalBins);
     BinEdges x1(totalBins + 1, 0.0);
@@ -372,7 +387,7 @@ public:
     int j = 0;
     std::generate(begin(x1), end(x1), [&j] { return 0.5 + 0.75 * j++; });
 
-    for (int i = 0; i < totalBins; i++) {
+    for (size_t i = 0; i < totalHist; i++) {
       convFitRes->setBinEdges(i, x1);
       convFitRes->setCounts(i, y1);
       convFitRes->setCountStandardDeviations(i, e1);
