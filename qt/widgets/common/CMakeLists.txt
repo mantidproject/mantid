@@ -308,7 +308,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h
   inc/MantidQtWidgets/Common/DataProcessorUI/CollapseGroupsCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h

@@ -4,7 +4,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
@@ -90,7 +90,7 @@ DataProcessorOneLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<AppendRowCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands,
-             make_unique<DataProcessorCopySelectedCommand>(m_presenter));
+             make_unique<CopySelectedCommand>(m_presenter));
   addCommand(commands,
              make_unique<DataProcessorCutSelectedCommand>(m_presenter));
   addCommand(commands,

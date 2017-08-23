@@ -9,7 +9,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CollapseGroupsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
@@ -279,7 +279,7 @@ public:
 
   void test_copy_selected_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorCopySelectedCommand command(&mockPresenter);
+    CopySelectedCommand command(&mockPresenter);
 
     // The presenter should be notified with the CopySelectedFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::CopySelectedFlag))
