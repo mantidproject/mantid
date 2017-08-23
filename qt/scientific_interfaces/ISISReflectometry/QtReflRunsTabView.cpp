@@ -8,7 +8,7 @@
 #include "ReflGenericDataProcessorPresenterFactory.h"
 #include "ReflRunsTabPresenter.h"
 #include "ReflSearchModel.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/CommandAdapter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
@@ -116,7 +116,7 @@ void QtReflRunsTabView::initLayout() {
 void QtReflRunsTabView::addToMenu(QMenu *menu,
                                   DataProcessor::Command_uptr command) {
 
-  m_commands.push_back(Mantid::Kernel::make_unique<CommandAdapter>(
+  m_commands.push_back(Mantid::Kernel::make_unique<QtCommandAdapter>(
       menu, std::move(command)));
 }
 

@@ -15,7 +15,7 @@ namespace MantidWidgets {
 namespace DataProcessor {
 // Forward decs
 class Command;
-class CommandAdapter;
+class QtCommandAdapter;
 }
 class SlitCalculator;
 }
@@ -115,7 +115,7 @@ private:
   // the slit calculator
   SlitCalculator *m_calculator;
   // Command adapters
-  std::vector<std::unique_ptr<DataProcessor::CommandAdapter>> m_commands;
+  std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
 
 private slots:
   void on_actionSearch_triggered();

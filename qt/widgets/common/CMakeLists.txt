@@ -184,7 +184,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/CheckboxHeader.h
   inc/MantidQtWidgets/Common/ColorBarWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/CommandAdapter.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h
