@@ -1574,7 +1574,7 @@ void GenericDataProcessorPresenter::initOptions() {
 void GenericDataProcessorPresenter::addCommands() {
 
   auto commands = m_manager->publishCommands();
-  std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;
+  std::vector<std::unique_ptr<Command>> commandsToShow;
   for (auto comm = 10u; comm < commands.size(); comm++)
     commandsToShow.push_back(std::move(commands.at(comm)));
   m_view->addActions(std::move(commandsToShow));
@@ -1626,7 +1626,7 @@ void GenericDataProcessorPresenter::setPromptUser(bool allowPrompt) {
 * Publishes a list of available commands
 * @return : The list of available commands
 */
-std::vector<std::unique_ptr<DataProcessorCommand>>
+std::vector<std::unique_ptr<Command>>
 GenericDataProcessorPresenter::publishCommands() {
 
   auto commands = m_manager->publishCommands();
@@ -1654,10 +1654,10 @@ void GenericDataProcessorPresenter::accept(
 /** Returs the list of valid workspaces currently in the ADS
 * @return : The vector of workspaces (as commands)
 */
-std::vector<DataProcessorCommand_uptr>
+std::vector<Command_uptr>
 GenericDataProcessorPresenter::getTableList() {
 
-  std::vector<DataProcessorCommand_uptr> workspaces;
+  std::vector<Command_uptr> workspaces;
   workspaces.reserve(m_workspaceList.size());
   // Create a command for each of the workspaces in the ADS
   for (const auto &name : m_workspaceList) {

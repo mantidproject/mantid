@@ -14,8 +14,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 // Forward decs
-class DataProcessorCommand;
-class DataProcessorCommandAdapter;
+class Command;
+class CommandAdapter;
 }
 class SlitCalculator;
 }
@@ -73,10 +73,10 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void setTableCommands(std::vector<std::unique_ptr<DataProcessor::DataProcessorCommand>>
+  void setTableCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
                             tableCommands) override;
   void setRowCommands(
-      std::vector<std::unique_ptr<DataProcessor::DataProcessorCommand>> rowCommands) override;
+      std::vector<std::unique_ptr<DataProcessor::Command>> rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
   void setRowActionEnabled(int index, bool enabled) override;
@@ -102,7 +102,7 @@ private:
   /// initialise the interface
   void initLayout();
   // Adds an action (command) to a menu
-  void addToMenu(QMenu *menu, std::unique_ptr<DataProcessor::DataProcessorCommand> command);
+  void addToMenu(QMenu *menu, std::unique_ptr<DataProcessor::Command> command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -115,7 +115,7 @@ private:
   // the slit calculator
   SlitCalculator *m_calculator;
   // Command adapters
-  std::vector<std::unique_ptr<DataProcessor::DataProcessorCommandAdapter>> m_commands;
+  std::vector<std::unique_ptr<DataProcessor::CommandAdapter>> m_commands;
 
 private slots:
   void on_actionSearch_triggered();

@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORDELETEROWCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORDELETEROWCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -32,12 +32,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorDeleteRowCommand : public DataProcessorCommandBase {
+class DataProcessorDeleteRowCommand : public CommandBase {
 public:
   DataProcessorDeleteRowCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
+      : CommandBase(tablePresenter){};
   DataProcessorDeleteRowCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+      : CommandBase(widget){};
   virtual ~DataProcessorDeleteRowCommand(){};
 
   void execute() override {

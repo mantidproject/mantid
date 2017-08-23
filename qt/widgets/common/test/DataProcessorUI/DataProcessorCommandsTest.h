@@ -41,16 +41,16 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class DataProcessorCommandsTest : public CxxTest::TestSuite {
+class CommandsTest : public CxxTest::TestSuite {
 
 private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DataProcessorCommandsTest *createSuite() {
-    return new DataProcessorCommandsTest();
+  static CommandsTest *createSuite() {
+    return new CommandsTest();
   }
-  static void destroySuite(DataProcessorCommandsTest *suite) { delete suite; }
+  static void destroySuite(CommandsTest *suite) { delete suite; }
 
   void test_open_table_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;

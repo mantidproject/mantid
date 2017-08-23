@@ -71,7 +71,7 @@ public:
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
   // copyable which means we have to mock addActions() via a proxy method
-  void addActions(std::vector<DataProcessorCommand_uptr>) override {
+  void addActions(std::vector<Command_uptr>) override {
     addActionsProxy();
   }
   MOCK_METHOD0(addActionsProxy, void());
@@ -146,8 +146,8 @@ private:
     return m_options;
   };
 
-  std::vector<DataProcessorCommand_uptr> publishCommands() override {
-    std::vector<DataProcessorCommand_uptr> commands;
+  std::vector<Command_uptr> publishCommands() override {
+    std::vector<Command_uptr> commands;
     for (size_t i = 0; i < 31; i++)
       commands.push_back(
           Mantid::Kernel::make_unique<AppendRowCommand>(this));

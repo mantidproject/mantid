@@ -9,9 +9,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorCommand
+/** @class Command
 
-DataProcessorCommand is an interface which defines the functions any data
+Command is an interface which defines the functions any data
 processor action needs to support.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -35,10 +35,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCommand {
+class Command {
 public:
-  DataProcessorCommand() : m_child(){};
-  virtual ~DataProcessorCommand(){};
+  Command() : m_child(){};
+  virtual ~Command(){};
 
   virtual void execute() = 0;
   virtual QString name() = 0;
@@ -48,10 +48,10 @@ public:
   virtual QString shortcut() = 0;
   virtual bool hasChild() final { return !m_child.empty(); };
   virtual void
-  setChild(std::vector<std::unique_ptr<DataProcessorCommand>> child) final {
+  setChild(std::vector<std::unique_ptr<Command>> child) final {
     m_child = std::move(child);
   }
-  virtual std::vector<std::unique_ptr<DataProcessorCommand>> &getChild() final {
+  virtual std::vector<std::unique_ptr<Command>> &getChild() final {
     return m_child;
   }
   virtual bool isSeparator() final {
@@ -59,11 +59,11 @@ public:
   }
 
 protected:
-  std::vector<std::unique_ptr<DataProcessorCommand>> m_child;
+  std::vector<std::unique_ptr<Command>> m_child;
 };
 
 /// Typedef for a shared pointer to \c ReflSearchModel
-using DataProcessorCommand_uptr = std::unique_ptr<DataProcessorCommand>;
+using Command_uptr = std::unique_ptr<Command>;
 }
 }
 }
