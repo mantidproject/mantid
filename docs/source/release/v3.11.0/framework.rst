@@ -87,6 +87,8 @@ Bug fixes
 Improved
 ########
 
+- `:ref:`Fit` Outputs a string represention of the the fit function containing the optimized parameter values.
+
 Python
 ------
 
