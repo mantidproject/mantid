@@ -16,9 +16,9 @@ namespace DataProcessor {
 
 using Command_uptr = std::unique_ptr<Command>;
 
-/** @class CommandAdapter
+/** @class QtCommandAdapter
 
-CommandAdapter is an adapter that allows Commands to
+QtCommandAdapter is an adapter that allows Commands to
 be treated as
 QObjects for signals.
 
@@ -43,14 +43,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON CommandAdapter : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON QtCommandAdapter : public QObject {
   Q_OBJECT
 public:
   /** Constructor: Adds actions to a menu
   * @param menu :: The menu where the actions will be added
   * @param adaptee :: The action to add
   */
-  CommandAdapter(QMenu *menu, Command_uptr adaptee)
+  QtCommandAdapter(QMenu *menu, Command_uptr adaptee)
       : m_adaptee(std::move(adaptee)) {
 
     if (m_adaptee->hasChild()) {
@@ -62,7 +62,7 @@ public:
       auto &child = m_adaptee->getChild();
       for (auto &ch : child) {
         m_adapter.push_back(
-            Mantid::Kernel::make_unique<CommandAdapter>(
+            Mantid::Kernel::make_unique<QtCommandAdapter>(
                 submenu, std::move(ch)));
       }
     } else {
@@ -76,7 +76,7 @@ public:
   * @param toolbar :: The toolbar where actions will be added
   * @param adaptee :: The action to add
   */
-  CommandAdapter(QToolBar *toolbar,
+  QtCommandAdapter(QToolBar *toolbar,
                               Command_uptr adaptee)
       : m_adaptee(std::move(adaptee)) {
 
@@ -112,11 +112,11 @@ public slots:
 private:
   // The adaptee
   Command_uptr m_adaptee;
-  std::vector<std::unique_ptr<CommandAdapter>> m_adapter;
+  std::vector<std::unique_ptr<QtCommandAdapter>> m_adapter;
 };
 
-using CommandAdapter_uptr =
-    std::unique_ptr<CommandAdapter>;
+using QtCommandAdapter_uptr =
+    std::unique_ptr<QtCommandAdapter>;
 }
 }
 }
