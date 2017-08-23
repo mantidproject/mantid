@@ -3,7 +3,7 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 
@@ -150,7 +150,7 @@ private:
     std::vector<DataProcessorCommand_uptr> commands;
     for (size_t i = 0; i < 31; i++)
       commands.push_back(
-          Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
+          Mantid::Kernel::make_unique<AppendRowCommand>(this));
     publishCommandsMocked();
     return commands;
   };

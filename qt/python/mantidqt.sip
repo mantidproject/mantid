@@ -1581,13 +1581,13 @@ virtual QString getPostprocessingOptions() const;
 virtual void notifyADSChanged(const QSet<QString> &);
 };
 
-class DataProcessorAppendRowCommand
+class AppendRowCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 %End
 public:
-DataProcessorAppendRowCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+AppendRowCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1596,8 +1596,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorAppendRowCommand();
-DataProcessorAppendRowCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorAppendRowCommand &);
+AppendRowCommand();
+AppendRowCommand(const MantidQt::MantidWidgets::DataProcessor::AppendRowCommand &);
 };
 
 class AppendGroupCommand
