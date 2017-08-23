@@ -18,7 +18,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ExpandGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
@@ -153,7 +153,7 @@ public:
     TS_ASSERT(dynamic_cast<DataProcessorPauseCommand *>(comm[11].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[12].get()));
     TS_ASSERT(dynamic_cast<ExpandCommand *>(comm[13].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorExpandGroupsCommand *>(comm[14].get()));
+    TS_ASSERT(dynamic_cast<ExpandGroupsCommand *>(comm[14].get()));
     TS_ASSERT(
         dynamic_cast<CollapseGroupsCommand *>(comm[15].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[16].get()));
