@@ -1657,13 +1657,13 @@ CopySelectedCommand();
 CopySelectedCommand(const MantidQt::MantidWidgets::DataProcessor::CopySelectedCommand &);
 };
 
-class DataProcessorCutSelectedCommand
+class CutSelectedCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h"
 %End
 public:
-DataProcessorCutSelectedCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+CutSelectedCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1672,8 +1672,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorCutSelectedCommand();
-DataProcessorCutSelectedCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorCutSelectedCommand &);
+CutSelectedCommand();
+CutSelectedCommand(const MantidQt::MantidWidgets::DataProcessor::CutSelectedCommand &);
 };
 
 class DataProcessorDeleteGroupCommand

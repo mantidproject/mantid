@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorCutSelectedCommand
+/** @class CutSelectedCommand
 
-DataProcessorCutSelectedCommand defines the action "Cut Selected"
+CutSelectedCommand defines the action "Cut Selected"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCutSelectedCommand : public CommandBase {
+class CutSelectedCommand : public CommandBase {
 public:
-  DataProcessorCutSelectedCommand(DataProcessorPresenter *tablePresenter)
+  CutSelectedCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorCutSelectedCommand(const QDataProcessorWidget &widget)
+  CutSelectedCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorCutSelectedCommand(){};
+  virtual ~CutSelectedCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::CutSelectedFlag);
