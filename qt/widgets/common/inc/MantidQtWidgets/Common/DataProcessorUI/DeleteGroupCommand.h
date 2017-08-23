@@ -7,9 +7,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-/** @class DataProcessorDeleteGroupCommand
+/** @class DeleteGroupCommand
 
-DataProcessorDeleteGroupCommand defines the action "Delete Group"
+DeleteGroupCommand defines the action "Delete Group"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,13 +32,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorDeleteGroupCommand : public CommandBase {
+class DeleteGroupCommand : public CommandBase {
 public:
-  DataProcessorDeleteGroupCommand(DataProcessorPresenter *tablePresenter)
+  DeleteGroupCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorDeleteGroupCommand(const QDataProcessorWidget &widget)
+  DeleteGroupCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorDeleteGroupCommand(){};
+  virtual ~DeleteGroupCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);

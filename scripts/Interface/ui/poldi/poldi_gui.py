@@ -161,7 +161,7 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
         self._create_action(MantidQt.MantidWidgets.DataProcessorPasteSelectedCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.ClearSelectedCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorDeleteRowCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorDeleteGroupCommand(self.data_processor_table), self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DeleteGroupCommand(self.data_processor_table), self.menuEdit)
 
         # Actions that go in the 'File' menu
         self._create_action(MantidQt.MantidWidgets.DataProcessorOpenTableCommand(self.data_processor_table), self.menuFile, workspace_list)

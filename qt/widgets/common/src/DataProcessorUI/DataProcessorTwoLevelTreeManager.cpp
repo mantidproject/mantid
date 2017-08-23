@@ -8,7 +8,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/CollapseGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DeleteGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
@@ -119,7 +119,7 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorDeleteRowCommand>(m_presenter));
   addCommand(commands,
-             make_unique<DataProcessorDeleteGroupCommand>(m_presenter));
+             make_unique<DeleteGroupCommand>(m_presenter));
   return commands;
 }
 

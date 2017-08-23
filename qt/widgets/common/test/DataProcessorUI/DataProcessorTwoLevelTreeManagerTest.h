@@ -15,7 +15,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/CollapseGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DeleteGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
@@ -172,7 +172,7 @@ public:
         dynamic_cast<ClearSelectedCommand *>(comm[27].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[28].get()));
     TS_ASSERT(dynamic_cast<DataProcessorDeleteRowCommand *>(comm[29].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorDeleteGroupCommand *>(comm[30].get()));
+    TS_ASSERT(dynamic_cast<DeleteGroupCommand *>(comm[30].get()));
   }
 
   void test_append_row() {
