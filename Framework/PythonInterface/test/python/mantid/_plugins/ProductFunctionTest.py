@@ -5,10 +5,15 @@ import unittest
 
 from mantid.kernel import DateAndTime
 from mantid.api import EventType
-from mantid.api import FunctionFactory
-# from mantid._plugins import ProductFunction
+from mantid.api import CompositeFunction, FunctionFactory
+from mantid._plugins._curvefitting import ProductFunction
 
 class ProductFunctionTest(unittest.TestCase):
+
+    def test_type(self):
+        p = FunctionFactory.createFunction("ProductFunction")
+        self.assertTrue( isinstance(p,ProductFunction) )
+        self.assertTrue( isinstance(p,CompositeFunction) )
 
     def test_length(self):
         p = FunctionFactory.createFunction("ProductFunction")
