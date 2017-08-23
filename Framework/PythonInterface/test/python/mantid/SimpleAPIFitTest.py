@@ -83,12 +83,13 @@ class SimpleAPIFitTest(unittest.TestCase):
         self.assertTrue(output_name + '_Workspace' in mtd)
 
     def _check_returns_are_correct_type_with_workspaces(self, retvals):
-        self.assertEquals(len(retvals), 5)
-        self.assertTrue(isinstance(retvals[0], str))
-        self.assertTrue(isinstance(retvals[1], float))
-        self.assertTrue(isinstance(retvals[2], ITableWorkspace))
-        self.assertTrue(isinstance(retvals[3], ITableWorkspace))
-        self.assertTrue(isinstance(retvals[4], MatrixWorkspace))
+        self.assertEquals(len(retvals), 6)
+        self.assertTrue(isinstance(retvals.OutputStatus, str))
+        self.assertTrue(isinstance(retvals.OutputChi2overDoF, float))
+        self.assertTrue(isinstance(retvals.OutputNormalisedCovarianceMatrix, ITableWorkspace))
+        self.assertTrue(isinstance(retvals.OutputParameters, ITableWorkspace))
+        self.assertTrue(isinstance(retvals.OutputWorkspace, MatrixWorkspace))
+        self.assertTrue(isinstance(retvals.FunctionString, str))
 
 
     def test_that_dialog_call_raises_runtime_error(self):
