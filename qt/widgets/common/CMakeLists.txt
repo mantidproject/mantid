@@ -314,7 +314,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/ExpandGroupsCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h

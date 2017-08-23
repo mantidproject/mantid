@@ -14,7 +14,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ExpandGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
@@ -119,7 +119,7 @@ public:
 
   void test_export_table_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorExportTableCommand command(&mockPresenter);
+    ExportTableCommand command(&mockPresenter);
 
     // The presenter should be notified with the ExportTableFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ExportTableFlag))

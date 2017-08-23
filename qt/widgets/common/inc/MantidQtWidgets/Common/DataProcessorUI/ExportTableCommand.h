@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorExportTableCommand
+/** @class ExportTableCommand
 
-DataProcessorExportTableCommand defines the action "Export .TBL"
+ExportTableCommand defines the action "Export .TBL"
 
 processor interface presenter needs to support.
 
@@ -33,13 +33,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorExportTableCommand : public CommandBase {
+class ExportTableCommand : public CommandBase {
 public:
-  DataProcessorExportTableCommand(DataProcessorPresenter *tablePresenter)
+  ExportTableCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorExportTableCommand(const QDataProcessorWidget &widget)
+  ExportTableCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorExportTableCommand(){};
+  virtual ~ExportTableCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ExportTableFlag);
