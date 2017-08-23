@@ -9,8 +9,8 @@ namespace DataHandling {
 
 /*! LoadILLReflectometry : Loads an ILL reflectometry Nexus data file.
 
- Copyright &copy; 2014-2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
+ Copyright &copy; 2014-2017 ISIS Rutherford Appleton Laboratory, NScD Oak
+ Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -49,10 +49,6 @@ public:
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
-  /// Return the detector position of the peak
-  std::vector<double>
-  fitReflectometryPeak(const std::string &beam = "ReflectedBeam",
-                       const std::string &angleDirectBeam = "");
 
 private:
   void init() override;
@@ -64,6 +60,7 @@ private:
   double doubleFromRun(const std::string& entryName) const;
   std::vector<double> getXValues();
   void convertTofToWavelength();
+  std::pair<double, double> fitReflectometryPeak();
   void loadData(NeXus::NXEntry &entry,
                 const std::vector<std::vector<int> > &monitorsData,
                 const std::vector<double> &xVals);
@@ -72,13 +69,12 @@ private:
                                      const std::string &monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void loadInstrument();
-  void loadBeam(API::MatrixWorkspace_sptr &beamWS,
-                const std::string &beam,
-                std::string angleDirectBeam);
   double computeBraggAngle();
   void placeDetector();
   void placeSource();
 
+  double detectorAngle(const double peakPosition, const double detectorDistance) const ;
+  double sampleDetectorDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   /* Values parsed from the nexus file */
@@ -90,7 +86,6 @@ private:
   size_t m_numberOfHistograms{0};
   double m_wavelength{0.0};
   double m_channelWidth{0.0};
-  double m_angleDirectBeam{0.0}; /// detector angle of the direct beam
   double m_offsetAngle{0.0};
   std::string m_detectorDistance;
   std::string m_detectorAngleName;
