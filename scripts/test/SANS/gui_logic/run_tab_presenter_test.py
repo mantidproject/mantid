@@ -61,7 +61,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(view.transmission_mask_files == "test4.xml")
         self.assertTrue(view.transmission_radius == 7.)
         self.assertTrue(view.transmission_monitor == 4)
-        self.assertTrue(view.transmission_m4_shift == -70)
+        self.assertTrue(view.transmission_mn_shift == -70)
         self.assertTrue(view.transmission_sample_use_fit)
         self.assertTrue(view.transmission_sample_fit_type is FitType.Logarithmic)
         self.assertTrue(view.transmission_sample_polynomial_order == 2)
@@ -301,6 +301,37 @@ class RunTabPresenterTest(unittest.TestCase):
         remove_file(user_file_path)
 
         self._clear_property_manager_data_service()
+
+    def test_that_can_add_new_masks(self):
+        # Arrange
+        self._clear_property_manager_data_service()
+        content = "# MANTID_BATCH_FILE add more text here\n" \
+                  "sample_sans,SANS2D00022024,sample_trans,SANS2D00022048," \
+                  "sample_direct_beam,SANS2D00022048,output_as,test_file\n" \
+                  "sample_sans,SANS2D00022024,output_as,test_file2\n"
+        batch_file_path = save_to_csv(content)
+        user_file_path = create_user_file(sample_user_file)
+        view, _, _ = create_mock_view(user_file_path, batch_file_path)
+        # We just use the sample_user_file since it exists.
+        view.get_mask_file = mock.MagicMock(return_value=user_file_path)
+
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(view)
+        presenter.on_user_file_load()
+        presenter.on_batch_file_load()
+
+        # Act
+        presenter.on_mask_file_add()
+
+        # Assert
+        state = presenter.get_state_for_row(0)
+        mask_info = state.mask
+        mask_files = mask_info.mask_files
+        self.assertTrue(mask_files == [user_file_path])
+
+        # clean up
+        remove_file(sample_user_file)
+        remove_file(user_file_path)
 
     @staticmethod
     def _clear_property_manager_data_service():
