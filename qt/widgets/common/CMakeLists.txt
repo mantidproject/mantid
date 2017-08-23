@@ -304,7 +304,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/CatalogHelper.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h
   inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h
