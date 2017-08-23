@@ -615,8 +615,7 @@ void IndirectDiffractionReduction::instrumentSelected(
  * Handles opening the directory manager window.
  */
 void IndirectDiffractionReduction::openDirectoryDialog() {
-  auto ad =
-      new MantidQt::API::ManageUserDirectories(this);
+  auto ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
 }

@@ -51,8 +51,9 @@ private:
   bool validateVanCal();
   bool validateCalOnly();
 
-  Mantid::API::MatrixWorkspace_sptr loadInstrument(const std::string &instrumentName,
-                                                   const std::string &reflection = "");
+  Mantid::API::MatrixWorkspace_sptr
+  loadInstrument(const std::string &instrumentName,
+                 const std::string &reflection = "");
 
   void runGenericReduction(QString instName, QString mode);
   void runOSIRISdiffonlyReduction();

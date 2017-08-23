@@ -31,14 +31,12 @@ namespace CustomInterfaces {
 class RunLoadAndConvertToMD : public QRunnable {
 public:
   /// Constructor just saves the info needed by the run() method
-  explicit RunLoadAndConvertToMD(MantidEVWorker *worker, const std::string &file_name,
-                        const std::string &ev_ws_name,
-                        const std::string &md_ws_name, const double modQ,
-                        const double minQ, const double maxQ,
-                        const bool do_lorentz_corr, const bool load_data,
-                        const bool load_det_cal,
-                        const std::string &det_cal_file,
-                        const std::string &det_cal_file2);
+  explicit RunLoadAndConvertToMD(
+      MantidEVWorker *worker, const std::string &file_name,
+      const std::string &ev_ws_name, const std::string &md_ws_name,
+      const double modQ, const double minQ, const double maxQ,
+      const bool do_lorentz_corr, const bool load_data, const bool load_det_cal,
+      const std::string &det_cal_file, const std::string &det_cal_file2);
 
   /// Calls worker->loadAndConvertToMD from a separate thread
   void run() override;

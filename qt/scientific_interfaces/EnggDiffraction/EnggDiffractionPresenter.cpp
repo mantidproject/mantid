@@ -180,9 +180,7 @@ void EnggDiffractionPresenter::notify(
   }
 }
 
-void EnggDiffractionPresenter::processStart() {
-  m_view->showStatus("Ready");
-}
+void EnggDiffractionPresenter::processStart() { m_view->showStatus("Ready"); }
 
 void EnggDiffractionPresenter::processLoadExistingCalib() {
   const std::string fname = m_view->askExistingCalibFilename();
