@@ -12,7 +12,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteGroupCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
@@ -333,7 +333,7 @@ public:
 
   void test_delete_row_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorDeleteRowCommand command(&mockPresenter);
+    DeleteRowCommand command(&mockPresenter);
 
     // The presenter should be notified with the DeleteRowFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::DeleteRowFlag))

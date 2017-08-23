@@ -1695,13 +1695,13 @@ DeleteGroupCommand();
 DeleteGroupCommand(const MantidQt::MantidWidgets::DataProcessor::DeleteGroupCommand &);
 };
 
-class DataProcessorDeleteRowCommand
+class DeleteRowCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h"
 %End
 public:
-DataProcessorDeleteRowCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+DeleteRowCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1710,8 +1710,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorDeleteRowCommand();
-DataProcessorDeleteRowCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorDeleteRowCommand &);
+DeleteRowCommand();
+DeleteRowCommand(const MantidQt::MantidWidgets::DataProcessor::DeleteRowCommand &);
 };
 
 class DataProcessorExpandCommand
