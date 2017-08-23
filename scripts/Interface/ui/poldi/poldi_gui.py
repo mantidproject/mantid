@@ -153,7 +153,7 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
         self._create_action(MantidQt.MantidWidgets.DataProcessorExpandCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorPlotRowCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorPlotGroupCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorAppendRowCommand(self.data_processor_table), self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.AppendRowCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.AppendGroupCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorGroupRowsCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorCopySelectedCommand(self.data_processor_table), self.menuEdit)

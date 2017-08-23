@@ -3,7 +3,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
@@ -103,7 +103,7 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<DataProcessorPlotRowCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorPlotGroupCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorAppendRowCommand>(m_presenter));
+  addCommand(commands, make_unique<AppendRowCommand>(m_presenter));
   addCommand(commands,
              make_unique<AppendGroupCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));

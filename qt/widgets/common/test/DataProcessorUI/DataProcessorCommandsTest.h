@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
@@ -240,7 +240,7 @@ public:
 
   void test_append_row_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorAppendRowCommand command(&mockPresenter);
+    AppendRowCommand command(&mockPresenter);
 
     // The presenter should be notified with the AppendRowFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::AppendRowFlag))
