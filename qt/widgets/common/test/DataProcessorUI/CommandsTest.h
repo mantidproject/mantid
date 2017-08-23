@@ -15,7 +15,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ExpandGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
@@ -186,7 +186,7 @@ public:
 
   void test_expand_groups_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorExpandGroupsCommand command(&mockPresenter);
+    ExpandGroupsCommand command(&mockPresenter);
 
     // The presenter should be notified with the ExpandAllGroupsFlag
     EXPECT_CALL(mockPresenter,
