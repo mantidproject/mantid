@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CollapseGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
@@ -111,7 +111,7 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
   addCommand(commands,
              make_unique<CopySelectedCommand>(m_presenter));
   addCommand(commands,
-             make_unique<DataProcessorCutSelectedCommand>(m_presenter));
+             make_unique<CutSelectedCommand>(m_presenter));
   addCommand(commands,
              make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
   addCommand(commands,

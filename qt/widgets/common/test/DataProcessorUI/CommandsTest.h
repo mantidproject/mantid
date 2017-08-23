@@ -10,7 +10,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CollapseGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
@@ -292,7 +292,7 @@ public:
 
   void test_cut_selected_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorCutSelectedCommand command(&mockPresenter);
+    CutSelectedCommand command(&mockPresenter);
 
     // The presenter should be notified with the CutSelectedFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::CutSelectedFlag))
