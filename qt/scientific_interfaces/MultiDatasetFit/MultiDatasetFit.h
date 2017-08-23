@@ -38,8 +38,7 @@ class PlotController;
  * multi-dataset fit
  * and displaying the results.
  */
-class MANTIDQT_MULTIDATASETFIT_DLL MultiDatasetFit
-    : public API::UserSubWindow {
+class MANTIDQT_MULTIDATASETFIT_DLL MultiDatasetFit : public API::UserSubWindow {
   Q_OBJECT
 public:
   /// The name of the interface as registered into the factory

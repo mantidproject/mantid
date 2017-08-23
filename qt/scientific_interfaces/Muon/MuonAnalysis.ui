@@ -1594,7 +1594,7 @@ p, li { white-space: pre-wrap; }
                <string>Include</string>
               </property>
               <property name="textAlignment">
-               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+               <set>AlignCenter</set>
               </property>
              </column>
             </widget>
@@ -2490,16 +2490,6 @@ p, li { white-space: pre-wrap; }
             <layout class="QGridLayout" name="gridLayout_20">
              <item row="3" column="0">
               <layout class="QGridLayout" name="gridLayout_21">
-               <item row="3" column="0">
-                <widget class="QLabel" name="lblEnableMultiFit">
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables the new UI for the &amp;quot;Data Analysis&amp;quot; tab introduced in Mantid 3.8.&lt;/p&gt;&lt;p&gt;In this mode, simultaneous fits of multiple datasets are possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>Enable multiple fitting:</string>
-                 </property>
-                </widget>
-               </item>
                <item row="0" column="2">
                 <widget class="QComboBox" name="plotCreation">
                  <property name="sizePolicy">
@@ -2530,36 +2520,6 @@ p, li { white-space: pre-wrap; }
                  </item>
                 </widget>
                </item>
-               <item row="0" column="3">
-                <spacer name="horizontalSpacer_23">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Fixed</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>200</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_7">
-                 <property name="toolTip">
-                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The method by which plots should be created.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>Plot Creation:</string>
-                 </property>
-                </widget>
-               </item>
                <item row="1" column="2">
                 <widget class="QComboBox" name="newPlotPolicy">
                  <item>
@@ -2581,6 +2541,46 @@ p, li { white-space: pre-wrap; }
                  </property>
                  <property name="text">
                   <string>New plot policy:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3">
+                <spacer name="horizontalSpacer_23">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>200</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="lblEnableMultiFit">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables the new UI for the &amp;quot;Data Analysis&amp;quot; tab introduced in Mantid 3.8.&lt;/p&gt;&lt;p&gt;In this mode, simultaneous fits of multiple datasets are possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Enable multiple fitting:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_7">
+                 <property name="toolTip">
+                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The method by which plots should be created.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Plot Creation:</string>
                  </property>
                 </widget>
                </item>
@@ -2625,7 +2625,7 @@ p, li { white-space: pre-wrap; }
                      <x>0</x>
                      <y>0</y>
                      <width>131</width>
-                     <height>22</height>
+                     <height>23</height>
                     </rect>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_KeepNPlots">
@@ -2679,20 +2679,6 @@ p, li { white-space: pre-wrap; }
                  </property>
                  <property name="text">
                   <string/>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="2">
-                <widget class="QCheckBox" name="chkTFAsymm">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="lblTFAsymmetry">
-                 <property name="text">
-                  <string>TF Asymmetry</string>
                  </property>
                 </widget>
                </item>
