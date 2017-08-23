@@ -339,6 +339,21 @@ Monitor normalization
 |       |                              | of a normal rebin.                                     |
 +-------+------------------------------+--------------------------------------------------------+
 
+Tranmission calculation
+"""""""""""""""""""""""
+.. _Transmission_Calculation:
+
+.. image::  ../images/sans_isis_v2_adjustment_tab_monitor_normalization.png
+   :align: right
+
++-------+------------------------------+--------------------------------------------------------+
+| **1** | **Incident monitor**         | The incident monitor spectrum number.                  |
++-------+------------------------------+--------------------------------------------------------+
+| **2** | **Use interpolating rebin**  | Check if an interpolating rebin should be used instead |
+|       |                              | of a normal rebin.                                     |
++-------+------------------------------+--------------------------------------------------------+
+
+
 
 .. image::  ../images/MuonAnalysisGroupingGroupTable.png
    :align: center
