@@ -70,7 +70,7 @@ void ALCPeakFittingPresenter::onPeakPickerChanged() {
   // If PeakPicker is changed, it should be enabled, which means a peak function
   // should be selected
   // (See onCurrentFunctionChanged)
-  assert(index);
+  assert(bool(index));
 
   auto peakFunc = m_view->peakPicker();
 
