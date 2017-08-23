@@ -116,15 +116,6 @@ double Material::temperature() const { return m_temperature; }
 double Material::pressure() const { return m_pressure; }
 
 /**
- * Get the mass
- * @returns The mass of the material
- */
-double Material::mass() const {
-  return std::accumulate(m_chemicalFormula.begin(), m_chemicalFormula.end(), 
-    0.0, [&](double acc, FormulaUnit mass) { return acc + mass.atom->mass; });
-}
-
-/**
  * Get the coherent scattering cross section for a given wavelength.
  * CURRENTLY this simply returns the value for the underlying element
  * @param lambda :: The wavelength to evaluate the cross section

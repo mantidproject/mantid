@@ -97,8 +97,6 @@ public:
   double temperature() const;
   /// Get the pressure
   double pressure() const;
-  /// Get the mass of this material
-  double mass() const;
   /// Get the coherent scattering cross section for a given wavelength
   double
   cohScatterXSection(const double lambda =
