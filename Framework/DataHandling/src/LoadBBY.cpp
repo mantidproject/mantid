@@ -343,7 +343,6 @@ void LoadBBY::exec() {
   logManager.addProperty("end_time", end_time.toISO8601String());
   logManager.addProperty("is_tof", instrumentInfo.is_tof);
 
-
   std::string time_str = start_time.toISO8601String();
 
   AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_name",
