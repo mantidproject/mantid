@@ -9,6 +9,11 @@ Concepts
 --------
 - The reference frame in :ref:`IDF <InstrumentDefinitionFile>` can now be customized in terms of setting the axis defining the 2theta sign.
 
+Properties
+----------
+
+- The :ref:`IndexProperty` has been added to the list of property types.
+
 Algorithms
 ----------
 
@@ -48,6 +53,15 @@ MD Algorithms (VATES CLI)
 Performance
 -----------
 - Performance of UB indexing routines addressed. `:ref:`FindUBUsingLatticeParameters` running 2x faster than before.
+
+Core Framework Changes
+----------------------
+
+Several changes to the core of how instrument geometry is stored and accessed. These changes have resulted in a few noteworthy performance improvements.
+
+- Partial loading of event nexus files has improved by 22%.
+- The LoadNexusMonitors algorithm has improved by 30%.
+- The ConvertSpectrumAxis algorithm has improved by 8%.
 
 CurveFitting
 ------------

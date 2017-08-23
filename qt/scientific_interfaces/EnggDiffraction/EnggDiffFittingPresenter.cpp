@@ -6,8 +6,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidQtWidgets/Common/QwtHelper.h"
 #include "EnggDiffFittingPresWorker.h"
-#include "../Muon/ALCHelper.h"
 
 #include <boost/lexical_cast.hpp>
 #include <cctype>
@@ -20,6 +20,7 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt {
+namespace QwtHelper = API::QwtHelper;
 namespace CustomInterfaces {
 
 namespace {
@@ -1729,7 +1730,7 @@ void EnggDiffFittingPresenter::plotFocusedFile(bool plotSinglePeaks) {
   try {
     auto focusedPeaksWS =
         ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
-    auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
+    auto focusedData = QwtHelper::curveDataFromWs(focusedPeaksWS);
 
     // Check that the number of curves to plot isn't excessive
     // lets cap it at 20 to begin with - this number could need
@@ -1781,7 +1782,7 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     if (m_fittingFinishedOK) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
       auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
-      auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
+      auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
       m_view->setDataVector(singlePeaksData, false, true);
       m_view->showStatus("Peaks fitted successfully");
 

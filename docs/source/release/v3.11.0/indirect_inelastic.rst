@@ -25,9 +25,9 @@ Jump Fit
 
 Improvements
 ------------
+- Added a flag 'ms_enabled' (default: True) for enabling/disabling multiple scattering in vesuvio user scripts.
 - The *S(Q, W)* interface now automatically replaces NaN values with 0.
 - EISF is now generated when performing a Single Fit, with a delta function, in the ConvFit interface.
-
 - :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` now supports `Direct` and `Indirect` modes.
 
 Bugfixes
