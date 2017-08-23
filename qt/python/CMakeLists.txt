@@ -39,7 +39,7 @@ set ( SIP_HDRS
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h
-  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h

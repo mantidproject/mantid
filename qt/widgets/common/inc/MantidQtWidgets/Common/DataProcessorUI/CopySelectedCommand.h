@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorCopySelectedCommand
+/** @class CopySelectedCommand
 
-DataProcessorCopySelectedCommand defines the action "Copy Selected"
+CopySelectedCommand defines the action "Copy Selected"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCopySelectedCommand : public DataProcessorCommandBase {
+class CopySelectedCommand : public DataProcessorCommandBase {
 public:
-  DataProcessorCopySelectedCommand(DataProcessorPresenter *tablePresenter)
+  CopySelectedCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorCopySelectedCommand(const QDataProcessorWidget &widget)
+  CopySelectedCommand(const QDataProcessorWidget &widget)
       : DataProcessorCommandBase(widget){};
-  virtual ~DataProcessorCopySelectedCommand(){};
+  virtual ~CopySelectedCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::CopySelectedFlag);
