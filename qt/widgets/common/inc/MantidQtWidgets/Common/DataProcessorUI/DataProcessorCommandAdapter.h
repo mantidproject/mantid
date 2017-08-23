@@ -2,7 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDADAPTER_H
 
 #include "MantidKernel/make_unique.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QObject>
 #include <memory>
@@ -14,11 +14,11 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-using DataProcessorCommand_uptr = std::unique_ptr<DataProcessorCommand>;
+using Command_uptr = std::unique_ptr<Command>;
 
-/** @class DataProcessorCommandAdapter
+/** @class CommandAdapter
 
-DataProcessorCommandAdapter is an adapter that allows DataProcessorCommands to
+CommandAdapter is an adapter that allows Commands to
 be treated as
 QObjects for signals.
 
@@ -43,14 +43,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorCommandAdapter : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON CommandAdapter : public QObject {
   Q_OBJECT
 public:
   /** Constructor: Adds actions to a menu
   * @param menu :: The menu where the actions will be added
   * @param adaptee :: The action to add
   */
-  DataProcessorCommandAdapter(QMenu *menu, DataProcessorCommand_uptr adaptee)
+  CommandAdapter(QMenu *menu, Command_uptr adaptee)
       : m_adaptee(std::move(adaptee)) {
 
     if (m_adaptee->hasChild()) {
@@ -62,7 +62,7 @@ public:
       auto &child = m_adaptee->getChild();
       for (auto &ch : child) {
         m_adapter.push_back(
-            Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
+            Mantid::Kernel::make_unique<CommandAdapter>(
                 submenu, std::move(ch)));
       }
     } else {
@@ -76,8 +76,8 @@ public:
   * @param toolbar :: The toolbar where actions will be added
   * @param adaptee :: The action to add
   */
-  DataProcessorCommandAdapter(QToolBar *toolbar,
-                              DataProcessorCommand_uptr adaptee)
+  CommandAdapter(QToolBar *toolbar,
+                              Command_uptr adaptee)
       : m_adaptee(std::move(adaptee)) {
 
     if (!m_adaptee->hasChild()) {
@@ -111,12 +111,12 @@ public slots:
 
 private:
   // The adaptee
-  DataProcessorCommand_uptr m_adaptee;
-  std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_adapter;
+  Command_uptr m_adaptee;
+  std::vector<std::unique_ptr<CommandAdapter>> m_adapter;
 };
 
-using DataProcessorCommandAdapter_uptr =
-    std::unique_ptr<DataProcessorCommandAdapter>;
+using CommandAdapter_uptr =
+    std::unique_ptr<CommandAdapter>;
 }
 }
 }

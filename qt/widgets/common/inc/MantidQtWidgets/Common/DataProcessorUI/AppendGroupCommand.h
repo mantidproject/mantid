@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORAPPENDGROUPCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORAPPENDGROUPCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CommandBase.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 
 namespace MantidQt {
@@ -32,12 +32,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class AppendGroupCommand : public DataProcessorCommandBase {
+class AppendGroupCommand : public CommandBase {
 public:
   AppendGroupCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
+      : CommandBase(tablePresenter){};
   AppendGroupCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+      : CommandBase(widget){};
   virtual ~AppendGroupCommand(){};
 
   void execute() override {

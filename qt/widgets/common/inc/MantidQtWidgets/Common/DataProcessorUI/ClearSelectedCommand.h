@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCLEARSELECTEDCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCLEARSELECTEDCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -31,12 +31,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ClearSelectedCommand : public DataProcessorCommandBase {
+class ClearSelectedCommand : public CommandBase {
 public:
   ClearSelectedCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
+      : CommandBase(tablePresenter){};
   ClearSelectedCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+      : CommandBase(widget){};
   virtual ~ClearSelectedCommand(){};
 
   void execute() override {

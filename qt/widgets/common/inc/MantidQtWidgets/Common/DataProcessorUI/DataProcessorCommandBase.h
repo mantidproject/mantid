@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 
@@ -35,16 +35,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCommandBase : public DataProcessorCommand {
+class CommandBase : public Command {
 public:
-  DataProcessorCommandBase(DataProcessorPresenter *tablePresenter)
+  CommandBase(DataProcessorPresenter *tablePresenter)
       : m_presenter(tablePresenter) {
     if (!tablePresenter) {
       throw std::invalid_argument("Invalid abstract presenter");
     }
   };
-  DataProcessorCommandBase(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget.getPresenter()) {}
+  CommandBase(const QDataProcessorWidget &widget)
+      : CommandBase(widget.getPresenter()) {}
 
 protected:
   DataProcessorPresenter *const m_presenter;

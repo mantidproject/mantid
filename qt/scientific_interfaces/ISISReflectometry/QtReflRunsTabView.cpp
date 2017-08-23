@@ -8,7 +8,7 @@
 #include "ReflGenericDataProcessorPresenterFactory.h"
 #include "ReflRunsTabPresenter.h"
 #include "ReflSearchModel.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
@@ -114,9 +114,9 @@ void QtReflRunsTabView::initLayout() {
 * @param command : [input] The command (action) to add
 */
 void QtReflRunsTabView::addToMenu(QMenu *menu,
-                                  DataProcessor::DataProcessorCommand_uptr command) {
+                                  DataProcessor::Command_uptr command) {
 
-  m_commands.push_back(Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
+  m_commands.push_back(Mantid::Kernel::make_unique<CommandAdapter>(
       menu, std::move(command)));
 }
 
@@ -126,7 +126,7 @@ void QtReflRunsTabView::addToMenu(QMenu *menu,
 * "Reflectometry" menu
 */
 void QtReflRunsTabView::setTableCommands(
-    std::vector<DataProcessor::DataProcessorCommand_uptr> tableCommands) {
+    std::vector<DataProcessor::Command_uptr> tableCommands) {
 
   ui.menuTable->clear();
   for (auto &command : tableCommands) {
@@ -145,7 +145,7 @@ void QtReflRunsTabView::setTableCommands(
 * @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
 void QtReflRunsTabView::setRowCommands(
-    std::vector<DataProcessor::DataProcessorCommand_uptr> rowCommands) {
+    std::vector<DataProcessor::Command_uptr> rowCommands) {
 
   ui.menuRows->clear();
   for (auto &command : rowCommands) {

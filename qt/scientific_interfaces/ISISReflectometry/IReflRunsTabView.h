@@ -9,7 +9,7 @@ namespace MantidQt {
 
 namespace MantidWidgets {
 namespace DataProcessor {
-class DataProcessorCommand;
+class Command;
 }
 }
 namespace API {
@@ -62,9 +62,9 @@ public:
                                  const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
   virtual void setTableCommands(
-      std::vector<std::unique_ptr<DataProcessor::DataProcessorCommand>> tableCommands) = 0;
+      std::vector<std::unique_ptr<DataProcessor::Command>> tableCommands) = 0;
   virtual void setRowCommands(
-      std::vector<std::unique_ptr<DataProcessor::DataProcessorCommand>> rowCommands) = 0;
+      std::vector<std::unique_ptr<DataProcessor::Command>> rowCommands) = 0;
   virtual void setAllSearchRowsSelected() = 0;
   virtual void clearCommands() = 0;
   virtual void setRowActionEnabled(int index, bool enabled) = 0;

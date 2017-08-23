@@ -73,10 +73,10 @@ DataProcessorTwoLevelTreeManager::~DataProcessorTwoLevelTreeManager() {}
 * Publishes a list of available commands
 * @return : The list of available commands
 */
-std::vector<DataProcessorCommand_uptr>
+std::vector<Command_uptr>
 DataProcessorTwoLevelTreeManager::publishCommands() {
 
-  std::vector<DataProcessorCommand_uptr> commands;
+  std::vector<Command_uptr> commands;
 
   addCommand(commands, make_unique<DataProcessorOpenTableCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorNewTableCommand>(m_presenter));

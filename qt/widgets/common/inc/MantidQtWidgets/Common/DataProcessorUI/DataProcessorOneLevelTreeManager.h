@@ -53,7 +53,7 @@ public:
   ~DataProcessorOneLevelTreeManager() override;
 
   /// Publish commands
-  std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
+  std::vector<std::unique_ptr<Command>> publishCommands() override;
   /// Append a row
   void appendRow() override;
   /// Append a group to the model

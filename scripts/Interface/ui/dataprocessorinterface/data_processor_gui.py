@@ -185,7 +185,7 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
 
     def _create_action(self, command, menu, workspace_list = None):
         """
-        Create an action from a given DataProcessorCommand and add it to a given menu
+        Create an action from a given Command and add it to a given menu
         A 'workspace_list' can be provided but it is only intended to be used with DataProcessorOpenTableCommand.
         It refers to the list of table workspaces in the ADS that could be loaded into the widget. Note that only
         table workspaces with an appropriate number of columns and column types can be loaded.

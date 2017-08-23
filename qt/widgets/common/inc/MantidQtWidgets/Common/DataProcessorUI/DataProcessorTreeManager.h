@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-class DataProcessorCommand;
+class Command;
 class DataProcessorWhiteList;
 
 /** @class DataProcessorTreeManager
@@ -54,7 +54,7 @@ public:
   /// Actions/commands
 
   /// Publish actions/commands
-  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
+  virtual std::vector<std::unique_ptr<Command>>
   publishCommands() = 0;
   /// Append a row
   virtual void appendRow() = 0;
@@ -112,8 +112,8 @@ public:
 
 protected:
   /// Add a command to the list of available commands
-  void addCommand(std::vector<std::unique_ptr<DataProcessorCommand>> &commands,
-                  std::unique_ptr<DataProcessorCommand> command) {
+  void addCommand(std::vector<std::unique_ptr<Command>> &commands,
+                  std::unique_ptr<Command> command) {
     commands.push_back(std::move(command));
   }
 };

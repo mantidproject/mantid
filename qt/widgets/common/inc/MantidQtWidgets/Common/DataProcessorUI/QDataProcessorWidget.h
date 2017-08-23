@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-class DataProcessorCommandAdapter;
+class CommandAdapter;
 class DataProcessorMainPresenter;
 class DataProcessorPreprocessMap;
 class DataProcessorProcessingAlgorithm;
@@ -74,7 +74,7 @@ public:
 
   // Add actions to the toolbar
   void addActions(
-      std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
+      std::vector<std::unique_ptr<Command>> commands) override;
 
   // Connect the model
   void
@@ -158,7 +158,7 @@ private:
   QMenu *m_contextMenu;
   QSignalMapper *m_openMap;
   // Command adapters
-  std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
+  std::vector<std::unique_ptr<CommandAdapter>> m_commands;
 
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);

@@ -16,7 +16,7 @@ namespace MantidWidgets {
 class HintStrategy;
 namespace DataProcessor {
 // Forward dec
-class DataProcessorCommand;
+class Command;
 class DataProcessorPresenter;
 
 /** @class DataProcessorView
@@ -54,7 +54,7 @@ public:
 
   // Add actions to the toolbar
   virtual void
-  addActions(std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
+  addActions(std::vector<std::unique_ptr<Command>> commands) = 0;
 
   // Connect the model
   virtual void showTable(boost::shared_ptr<AbstractTreeModel> model) = 0;

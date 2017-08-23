@@ -1,6 +1,6 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
@@ -124,12 +124,12 @@ void QDataProcessorWidget::createTable() {
 * @param commands :: A vector of actions (commands)
 */
 void QDataProcessorWidget::addActions(
-    std::vector<std::unique_ptr<DataProcessorCommand>> commands) {
+    std::vector<std::unique_ptr<Command>> commands) {
 
   // Put the commands in the toolbar
   for (auto &command : commands) {
     m_commands.push_back(
-        Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
+        Mantid::Kernel::make_unique<CommandAdapter>(
             ui.rowToolBar, std::move(command)));
   }
 

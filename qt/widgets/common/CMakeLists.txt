@@ -184,7 +184,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/CheckboxHeader.h
   inc/MantidQtWidgets/Common/ColorBarWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/CommandAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h
@@ -305,8 +305,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/Command.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/CommandBase.h
   inc/MantidQtWidgets/Common/DataProcessorUI/CollapseGroupsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h
@@ -440,7 +440,7 @@ set( TEST_FILES
    SignalBlockerTest.h
    AlgorithmHintStrategyTest.h
    TrackedActionTest.h
-   DataProcessorUI/DataProcessorCommandsTest.h
+   DataProcessorUI/CommandsTest.h
    DataProcessorUI/DataProcessorGenerateNotebookTest.h
    DataProcessorUI/DataProcessorOneLevelTreeManagerTest.h
    DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
