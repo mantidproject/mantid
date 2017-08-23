@@ -1,4 +1,4 @@
-#include "ALCHelper.h"
+#include "MantidQtWidgets/Common/QwtHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -10,8 +10,8 @@
 using namespace Mantid::API;
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace ALCHelper {
+namespace API {
+namespace QwtHelper {
 /**
  * Creates QwtData using X and Y values from the workspace spectra.
  * @param ws :: Workspace with X and Y values to use

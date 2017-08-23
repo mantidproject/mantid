@@ -2,9 +2,9 @@
 """
     Data catalog for HFIR SANS
 """
-from data_cat import DataCatalog as BaseCatalog
-from data_cat import DataSet
-from data_cat import DataType
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
+from reduction_gui.reduction.sans.data_cat import DataSet, DataType
 import os
 import time
 

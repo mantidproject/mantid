@@ -30,7 +30,6 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/Kernel/inc
         Vates/VatesAPI/inc
         Vates/VatesSimpleGui/ViewWidgets/inc
-        Vates/VatesSimpleGui/StandAloneExec/inc
         Vates/VatesSimpleGui/QtWidgets/inc
         MantidQt/MantidWidgets/inc
         MantidQt/CustomDialogs/inc
