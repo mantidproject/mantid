@@ -3,9 +3,10 @@
     This class holds all the necessary information to create a reduction script.
     This is a fake version of the Reducer for testing purposes.
 """
+from __future__ import (absolute_import, division, print_function)
 import time
 import os
-from scripter import BaseReductionScripter
+from reduction_gui.reduction.scripter import BaseReductionScripter
 
 HAS_MANTID = False
 try:

@@ -37,6 +37,7 @@
 	src/PythonThreading.cpp
 	src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
+        src/QwtHelper.cpp
 	src/QwtRasterDataMD.cpp
 	src/QwtRasterDataMDNonOrthogonal.cpp
 	src/QwtWorkspaceBinData.cpp
@@ -244,7 +245,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/LogValueSelector.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h 
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h
@@ -285,6 +286,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/PythonSystemHeader.h
 	inc/MantidQtWidgets/Common/PythonThreading.h
 	inc/MantidQtWidgets/Common/QScienceSpinBox.h
+	inc/MantidQtWidgets/Common/QwtHelper.h
 	inc/MantidQtWidgets/Common/QwtRasterDataMD.h
 	inc/MantidQtWidgets/Common/QwtRasterDataMDNonOrthogonal.h
 	inc/MantidQtWidgets/Common/QwtWorkspaceBinData.h
@@ -474,7 +476,7 @@ qt4_generate_moc (
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
 )
 qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h 
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
 )
 qt4_generate_moc (

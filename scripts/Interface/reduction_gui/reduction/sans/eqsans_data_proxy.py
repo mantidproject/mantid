@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import sys
 # Check whether Mantid is available
 try:
@@ -29,9 +30,9 @@ class DataProxy(object):
                 try:
                     api.LoadEventNexus(Filename=data_file, OutputWorkspace=workspace_name)
                 except:
-                    self.errors.append("Error loading data file as Nexus event file:\n%s" % sys.exc_value)
+                    self.errors.append("Error loading data file as Nexus event file:\n%s" % sys.exc_info()[1])
                     api.Load(Filename=data_file, OutputWorkspace=workspace_name)
                     self.errors = []
             except:
                 self.data_ws = None
-                self.errors.append("Error loading data file:\n%s" % sys.exc_value)
+                self.errors.append("Error loading data file:\n%s" % sys.exc_info()[1])

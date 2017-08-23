@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 import sys
 from functools import partial
@@ -257,7 +258,7 @@ class RemoteJobsWidget(BaseWidget):
                 alg.setProperty("JobID", job_id)
                 alg.execute()
             except:
-                Logger("cluster_status").error("Problem aborting job: %s" % sys.exc_value)
+                Logger("cluster_status").error("Problem aborting job: %s" % sys.exc_info()[1])
         try:
             alg = AlgorithmManager.create("StopRemoteTransaction", 1)
             alg.initialize()
@@ -265,7 +266,7 @@ class RemoteJobsWidget(BaseWidget):
             alg.setProperty("TransactionID", trans_id)
             alg.execute()
         except:
-            Logger("cluster_status").error("Project stopping remote transaction: %s" % sys.exc_value)
+            Logger("cluster_status").error("Project stopping remote transaction: %s" % sys.exc_info()[1])
         self._update_content()
 
     def get_state(self):
