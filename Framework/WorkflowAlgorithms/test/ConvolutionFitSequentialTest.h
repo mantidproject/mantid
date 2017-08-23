@@ -260,6 +260,9 @@ public:
     AnalysisDataService::Instance().add("ResolutionWs_", resWs);
     AnalysisDataService::Instance().add(fileName, redWs);
 
+    int specMin = 0;
+    int specMax = 5;
+
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", redWs);
@@ -273,8 +276,8 @@ public:
     alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
-    alg.setProperty("SpecMin", 0);
-    alg.setProperty("SpecMax", 5);
+    alg.setProperty("SpecMin", specMin);
+    alg.setProperty("SpecMax", specMax);
     alg.setProperty("Convolve", true);
     alg.setProperty("ExtractMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
@@ -283,14 +286,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    auto names = AnalysisDataService::Instance().getObjectNames();
-
     // Check members group workspace was created
     WorkspaceGroup_const_sptr membersGroupWs;
     TS_ASSERT_THROWS_NOTHING(
         membersGroupWs =
             AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                runName + "_conv_1LFixF_s0_to_5_Members"));
+                runName + "_conv_1LFixF_s" + std::to_string(specMin) + "_to_" + 
+              std::to_string(specMax) + "_Members"));
 
     // Check all members have been extracted into their own workspace and
     // grouped
@@ -301,8 +303,11 @@ public:
       MatrixWorkspace_const_sptr ws =
           boost::dynamic_pointer_cast<const MatrixWorkspace>(
               membersGroupWs->getItem(i));
-      TS_ASSERT(ws->getNumberHistograms() == redWs->getNumberHistograms());
-      members.erase(ws->getName());
+      size_t wsSize = ws->getNumberHistograms();
+      size_t redSize = redWs->getNumberHistograms();
+      TS_ASSERT(ws->getNumberHistograms() == specMax - specMin + 1);
+      std::string name = ws->getName();
+      members.erase(name.substr(name.find_last_of('_') + 1));
     }
     TS_ASSERT(members.empty());
 
