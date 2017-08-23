@@ -13,7 +13,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h"
@@ -172,7 +172,7 @@ public:
 
   void test_expand_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorExpandCommand command(&mockPresenter);
+    ExpandCommand command(&mockPresenter);
 
     // The presenter should be notified with the ExpandSelectionFlag
     EXPECT_CALL(mockPresenter,

@@ -10,7 +10,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
@@ -94,7 +94,7 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<DataProcessorProcessCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorPauseCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorExpandCommand>(m_presenter));
+  addCommand(commands, make_unique<ExpandCommand>(m_presenter));
   addCommand(commands,
              make_unique<DataProcessorExpandGroupsCommand>(m_presenter));
   addCommand(commands,
