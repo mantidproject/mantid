@@ -250,13 +250,15 @@ public:
   }
 
   void test_exec_with_extract_members() {
-    std::string runName = "irs26173_graphite002";
+    std::string runName = "irs26173";
+    std::string runSample = "graphite002";
+    std::string fileName = runName + "_" + runSample;
 
-    auto resWs = loadWorkspace(runName + "_res.nxs");
-    auto redWs = loadWorkspace(runName + "_red.nxs");
+    auto resWs = loadWorkspace(fileName + "_res.nxs");
+    auto redWs = loadWorkspace(fileName + "_red.nxs");
     createConvFitResWorkspace(redWs->getNumberHistograms(), redWs->blocksize());
     AnalysisDataService::Instance().add("ResolutionWs_", resWs);
-    AnalysisDataService::Instance().add("ReductionWs_", redWs);
+    AnalysisDataService::Instance().add(fileName, redWs);
 
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -280,6 +282,8 @@ public:
     alg.setProperty("OutputWorkspace", "Result");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+
+    auto names = AnalysisDataService::Instance().getObjectNames();
 
     // Check members group workspace was created
     WorkspaceGroup_const_sptr membersGroupWs;
