@@ -291,8 +291,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         membersGroupWs =
             AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                runName + "_conv_1LFixF_s" + std::to_string(specMin) + "_to_" + 
-              std::to_string(specMax) + "_Members"));
+                runName + "_conv_1LFixF_s" + std::to_string(specMin) + "_to_" +
+                std::to_string(specMax) + "_Members"));
 
     // Check all members have been extracted into their own workspace and
     // grouped
