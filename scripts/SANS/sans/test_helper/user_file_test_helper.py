@@ -1,9 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-import os
 import tempfile
-
-import mantid
 
 sample_user_file = ("PRINT for changer\n"
                     "MASK/CLEAR \n"
