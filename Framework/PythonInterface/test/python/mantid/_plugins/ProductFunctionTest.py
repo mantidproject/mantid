@@ -3,8 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantid.kernel import DateAndTime
-from mantid.api import EventType
+# from mantid.kernel import DateAndTime
+# from mantid.api import EventType
 from mantid.api import CompositeFunction, FunctionFactory
 from mantid._plugins._curvefitting import ProductFunction
 
