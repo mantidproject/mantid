@@ -56,7 +56,7 @@ SliceViewer Improvements
 - SliceViewer input of number of bins, thickness, and slice point now waits until the editing is finished to rebin or changing slice point instead of changing with each digit entered.
 
 VSI Improvements
----------------
+----------------
 - ParaView has been updated to to `v5.4.0 <https://blog.kitware.com/paraview-5-4-0-release-notes/>`_.
 
 .. figure:: ../../images/LaNaF4_3D_Slices.png

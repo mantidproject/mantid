@@ -154,7 +154,7 @@ void AlignedCutter::AlignedStructuredGridCutter(vtkDataSet *dataSetInput,
     } else if (AxisNumber == 2) {
       for (int i = 0; i < celldims[0]; ++i) {
         for (int j=0; j < celldims[1]; ++j) {
-          auto index = i + j * celldims[0] + min * cd01;
+          vtkIdType index = i + j * celldims[0] + min * cd01;
           if (input->IsCellVisible(index)) {
             double x[3];
             inPts->GetPoint(i + j * dims[0] + min * d01, x);
