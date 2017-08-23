@@ -65,6 +65,9 @@ public:
   // Get the index for a given column, row and parent
   QModelIndex index(int row, int column,
                     const QModelIndex &parent = QModelIndex()) const override;
+  // Get the 'processed' status of a row
+  bool isProcessed(int position,
+                   const QModelIndex &parent = QModelIndex()) const override;
   // Get the underlying data structure
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
@@ -82,14 +85,9 @@ public:
   // Remove rows from the model
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
-
-  // Miscellaneous model functions
-
-  // Add a row / group to the list of items to be highlighted
-  bool addHighlighted(int position,
-                      const QModelIndex &parent = QModelIndex()) override;
-  // Clear the list of highlighted items
-  virtual void clearHighlighted() override;
+  // Set the 'processed' status of a row / group
+  bool setProcessed(bool processed, int position,
+                    const QModelIndex &parent = QModelIndex()) override;
 
 private:
   void setupModelData(Mantid::API::ITableWorkspace_sptr table);
@@ -98,14 +96,11 @@ private:
   bool removeGroups(int position, int count);
   bool removeRows(int position, int count, int parent);
 
-  /// Vector containing group names
-  std::vector<std::string> m_groupName;
-  /// Vector containing the (absolute) row indices for a given group
-  std::vector<std::vector<int>> m_rowsOfGroup;
-  /// Map of row indexes for each group index that should be highlighted
-  std::map<int, std::vector<int>> m_highlightRows;
-  /// List of group indexes that should be highlighted
-  std::vector<int> m_highlightGroups;
+  /// Vector containing group names and process status
+  std::vector<std::pair<std::string, bool>> m_groupName;
+  /// Vector containing the (absolute) row indices for a given group and process
+  /// status
+  std::vector<std::vector<std::pair<int, bool>>> m_rowsOfGroup;
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorTwoLevelTreeModel

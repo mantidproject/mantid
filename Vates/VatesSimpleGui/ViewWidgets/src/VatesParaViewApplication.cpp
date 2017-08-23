@@ -5,7 +5,6 @@
 #include "pqInterfaceTracker.h"
 #include "pqStandardPropertyWidgetInterface.h"
 #include "pqStandardViewFrameActionsImplementation.h"
-#include "pqQtMessageHandlerBehavior.h"
 #include "pqDataTimeStepBehavior.h"
 #include "pqSpreadSheetVisibilityBehavior.h"
 #include "pqPipelineContextMenuBehavior.h"
@@ -16,7 +15,6 @@
 #include "pqCrashRecoveryBehavior.h"
 #include "pqAutoLoadPluginXMLBehavior.h"
 #include "pqVerifyRequiredPluginBehavior.h"
-#include "pqFixPathsInStateFilesBehavior.h"
 #include "pqCommandLineOptionsBehavior.h"
 #include "pqCollaborationBehavior.h"
 #include "pqViewStreamingBehavior.h"
@@ -88,7 +86,6 @@ void VatesParaViewApplication::setupParaViewBehaviors() {
   pqApplicationCore::instance()->loadDistributedPlugins();
 
   // Define application behaviors.
-  new pqQtMessageHandlerBehavior(this);
   new pqDataTimeStepBehavior(this);
   new pqSpreadSheetVisibilityBehavior(this);
   new pqPipelineContextMenuBehavior(this);
@@ -98,12 +95,8 @@ void VatesParaViewApplication::setupParaViewBehaviors() {
   new pqAlwaysConnectedBehavior(this);
   new pqCrashRecoveryBehavior(this);
   new pqAutoLoadPluginXMLBehavior(this);
-  // new pqPluginDockWidgetsBehavior(mainWindow);
   new pqVerifyRequiredPluginBehavior(this);
-  // new pqPluginActionGroupBehavior(mainWindow);
-  new pqFixPathsInStateFilesBehavior(this);
   new pqCommandLineOptionsBehavior(this);
-  // new pqPersistentMainWindowStateBehavior(mainWindow);
   new pqCollaborationBehavior(this);
   new pqViewStreamingBehavior(this);
   new pqPluginSettingsBehavior(this);

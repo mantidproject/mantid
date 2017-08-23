@@ -9,10 +9,62 @@ set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/sip_mantidqt.cpp.in )
 set ( SIP_SRC ${CMAKE_CURRENT_BINARY_DIR}/sip_mantidqt.cpp )
 set ( SIP_SRC_AUTO sipmantidqtpythonpart0.cpp )
 
-# We need to manually add all the headers that are in the sip file
-# so that the dependencies are known to CMake
-set ( SIP_HDRS 
-	../SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h
+# Sip needs to have a dependency on all headers within it
+set ( SIP_HDRS
+  ../API/inc/MantidQtAPI/PythonSystemHeader.h
+  ../API/inc/MantidQtAPI/WorkspaceObserver.h
+  ../API/inc/MantidQtAPI/GraphOptions.h
+  ../API/inc/MantidQtAPI/AlgorithmDialog.h
+  ../API/inc/MantidQtAPI/UserSubWindow.h
+  ../API/inc/MantidQtAPI/InterfaceManager.h
+  ../API/inc/MantidQtAPI/MantidDesktopServices.h
+  ../API/inc/MantidQtAPI/MWRunFiles.h
+  ../API/inc/MantidQtAPI/WidgetScrollbarDecorator.h
+  ../SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h
+  ../SliceViewer/inc/MantidQtSliceViewer/LineViewer.h
+  ../SliceViewer/inc/MantidQtSliceViewer/PeaksPresenter.h
+  ../SliceViewer/inc/MantidQtSliceViewer/ProxyCompositePeaksPresenter.h
+  ../SliceViewer/inc/MantidQtSliceViewer/PeaksPresenter.h
+  ../SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h
+  ../Factory/inc/MantidQtFactory/WidgetFactory.h
+  ../RefDetectorViewer/inc/MantidQtRefDetectorViewer/RefIVConnections.h
+  ../RefDetectorViewer/inc/MantidQtRefDetectorViewer/RefMatrixWSImageView.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/FitPropertyBrowser.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessMap.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/SlitCalculator.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetRenderTab.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetPickTab.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h
+  ../MantidWidgets/inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h
 )
 
 set( SRC_UNITY_IGNORE_FILES )

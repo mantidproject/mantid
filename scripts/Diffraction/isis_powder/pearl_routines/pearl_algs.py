@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-import numpy as numpy
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
@@ -91,16 +90,10 @@ def _pearl_get_tt_grouping_file_name(inst_settings):
     return grouping_file_name
 
 
-def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values, integration_range):
+def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values, integration_range, ex_regions):
     processed_monitor_ws = mantid.ConvertUnits(InputWorkspace=monitor_ws, Target="Wavelength")
     processed_monitor_ws = mantid.CropWorkspace(InputWorkspace=processed_monitor_ws,
                                                 XMin=lambda_values[0], XMax=lambda_values[-1])
-    # TODO move these masks to the adv. config file
-    ex_regions = numpy.zeros((2, 4))
-    ex_regions[:, 0] = [3.45, 3.7]
-    ex_regions[:, 1] = [2.96, 3.2]
-    ex_regions[:, 2] = [2.1, 2.26]
-    ex_regions[:, 3] = [1.73, 1.98]
 
     for reg in range(0, 4):
         processed_monitor_ws = mantid.MaskBins(InputWorkspace=processed_monitor_ws, XMin=ex_regions[0, reg],

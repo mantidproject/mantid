@@ -202,9 +202,9 @@ class SPowderSemiEmpiricalCalculator(object):
             max_threshold = AbinsModules.AbinsConstants.MAX_THRESHOLD
 
             is_not_smaller = s_max - self._max_s_previous_order[atom] > small_s
-            max_attempts = self._s_current_threshold[atom] < max_threshold
+            allow_attempts = self._s_current_threshold[atom] < max_threshold
 
-            if is_not_smaller and max_attempts:
+            if is_not_smaller and allow_attempts:
 
                 msg = ("Numerical instability detected. Threshold for S has to be increased." +
                        " Current max S is {} and the previous is {} for order {}."
@@ -244,8 +244,11 @@ class SPowderSemiEmpiricalCalculator(object):
             if order == AbinsModules.AbinsConstants.FUNDAMENTALS:
                 previous_s_max = np.max(s_temp)
             else:
+
                 current_s_max = np.max(s_temp)
-                if previous_s_max <= current_s_max:
+                allow_attempts = np.median(self._s_current_threshold) < AbinsModules.AbinsConstants.MAX_THRESHOLD
+
+                if previous_s_max <= current_s_max and allow_attempts:
                     raise StabilityErrorAllAtoms(
                         "Numerical instability detected for all atoms for order {}".format(order))
                 else:
@@ -260,14 +263,14 @@ class SPowderSemiEmpiricalCalculator(object):
         intend = AbinsModules.AbinsConstants.S_THRESHOLD_CHANGE_INDENTATION
         if atom is None:
 
-            self._s_current_threshold = self._s_threshold_ref * 2.0 ** self._total_s_correction_num_attempt
+            self._s_current_threshold = self._s_threshold_ref * 2**self._total_s_correction_num_attempt
             self._report_progress(
                 intend + "Threshold for S has been changed to {} for all atoms."
                 .format(self._s_current_threshold[0]) + " S for all atoms will be calculated from scratch.")
 
         else:
 
-            self._s_current_threshold[atom] *= 2
+            self._s_current_threshold[atom] += self._s_threshold_ref[atom]
             atom_symbol = self._atoms["atom_{}".format(atom)]["symbol"]
             self._report_progress(
                 intend + "Threshold for S has been changed to {} for atom {}  ({})."
@@ -413,6 +416,7 @@ class SPowderSemiEmpiricalCalculator(object):
                 s = self._calculate_s_powder_one_atom_core(atom=atom)
                 return s
             except StabilityError as e:
+
                 self._report_progress("{}".format(e))
                 self._s_threshold_up(atom=atom)
 
@@ -551,8 +555,9 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             rebined_broad_spectrum = self._fix_empty_array()
 
-        # multiply by k-point weight
-        rebined_broad_spectrum = rebined_broad_spectrum * self._weight / AbinsModules.AbinsParameters.bin_width
+        # multiply by k-point weight and scaling constant
+        factor = self._weight / AbinsModules.AbinsParameters.bin_width * AbinsModules.AbinsConstants.SCALING_CONSTANT
+        rebined_broad_spectrum = rebined_broad_spectrum * factor
         return local_freq, local_coeff, rebined_broad_spectrum
 
     def _helper_atom_angle(self, atom=None, local_freq=None, local_coeff=None, order=None, return_freq=True, q2=None):
@@ -685,7 +690,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
                        np.einsum('kli, kil->k',
                        np.take(b_tensor, indices=indices[:, 1], axis=0),
-                       np.take(b_tensor, indices=indices[:, 0], axis=0))) / (15.0 * factor)
+                       np.take(b_tensor, indices=indices[:, 0], axis=0))) * 16.0 / (15.0 * factor)
 
         return s
 
@@ -705,7 +710,7 @@ class SPowderSemiEmpiricalCalculator(object):
         """
         coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
                              (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
-        s = 9.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
+        s = 36.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
         return s

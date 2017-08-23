@@ -52,7 +52,7 @@ ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
 ALL_KEYWORDS_K_DATA = ["weights", "k_vectors", "frequencies", "atomic_displacements", "unit_cell"]
 
 # keywords which define data structure of AtomsData
-ALL_KEYWORDS_ATOMS_DATA = ["symbol", "fract_coord", "sort", "mass"]
+ALL_KEYWORDS_ATOMS_DATA = ["symbol", "coord", "sort", "mass"]
 # keywords which define data structure for PowderData
 ALL_KEYWORDS_POWDER_DATA = ["b_tensors", "a_tensors"]
 
@@ -130,7 +130,7 @@ MAX_ORDER = 4  # max quantum order event
 
 NUMPY_VERSION_REQUIRED = "1.6.0"  # Abins requires numpy 1.6.0 or higher
 
-ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP"]
+ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
 TWO_DIMENSIONAL_INSTRUMENTS = ["TwoDMap"]
@@ -169,11 +169,10 @@ MAX_WAVENUMBER = 5000.0  # in cm^-1
 MAX_POINTS_PER_PEAK = 1000
 MIN_POINTS_PER_PEAK = 1
 
-SMALL_S = 1e-5
+SMALL_S = 1e-6
 MAX_THRESHOLD = 1.0
 
 ONE_CHARACTER = 1
-EOF = ""
 
 DIGITS_NUM = 5
 S_PLOT_SPACING = 4.0
@@ -203,3 +202,7 @@ ALL_FIG_FORMATS = ["png", "pdf", "ps", "eps", "svg"]
 DPI = 600
 BBOX = "tight"
 BACKGROUND = "white"
+
+EOF = b""
+
+SCALING_CONSTANT = 100.0  # scaling constant so it is easier to compare with aCLIMAX

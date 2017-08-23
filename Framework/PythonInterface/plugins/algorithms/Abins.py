@@ -52,13 +52,13 @@ class Abins(PythonAlgorithm):
         self.declareProperty(name="DFTprogram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
-                             validator=StringListValidator(["CASTEP", "CRYSTAL"]),
+                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3"]),
                              doc="DFT program which was used for a phonon calculation.")
 
         self.declareProperty(FileProperty("PhononFile", "",
                              action=FileAction.Load,
                              direction=Direction.Input,
-                             extensions=["phonon", "out"]),
+                             extensions=["phonon", "out", "outmol"]),
                              doc="File with the data from a phonon calculation.")
 
         self.declareProperty(FileProperty("ExperimentalFile", "",
@@ -115,7 +115,8 @@ class Abins(PythonAlgorithm):
         """
 
         input_file_validators = {"CASTEP": self._validate_castep_input_file,
-                                 "CRYSTAL": self._validate_crystal_input_file}
+                                 "CRYSTAL": self._validate_crystal_input_file,
+                                 "DMOL3": self._validate_dmol3_input_file}
 
         issues = dict()
 
@@ -164,7 +165,8 @@ class Abins(PythonAlgorithm):
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read DFT data
-        dft_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL}
+        dft_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
+                       "DMOL3": AbinsModules.LoadDMOL3}
         dft_reader = dft_loaders[self._dft_program](input_dft_filename=self._phonon_file)
         dft_data = dft_reader.get_formatted_data()
         prog_reporter.report("Phonon data has been read.")
@@ -787,6 +789,27 @@ class Abins(PythonAlgorithm):
             threads = AbinsModules.AbinsParameters.threads
             if not (isinstance(threads, six.integer_types) and 1 <= threads <= mp.cpu_count()):
                 raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
+
+    def _validate_dmol3_input_file(self, filename_full_path=None):
+        """
+        Method to validate input file for DMOL3 DFT program.
+        @param filename_full_path: full path of a file to check.
+        @return: True if file is valid otherwise false.
+        """
+        logger.information("Validate DMOL3 phonon file: ")
+
+        output = {"Invalid": False, "Comment": ""}
+        msg_err = "Invalid %s file. " % filename_full_path
+        msg_rename = "Please rename your file and try again."
+
+        # check  extension of a file
+        filename_ext = os.path.splitext(filename_full_path)[1]
+        if filename_ext != ".outmol":
+            return dict(Invalid=True,
+                        Comment=msg_err + "Output from DFT program " + self._dft_program + " is expected." +
+                        " The expected extension of file is .outmol . (found: " + filename_ext + ") " +
+                        msg_rename)
+        return output
 
     def _validate_crystal_input_file(self, filename_full_path=None):
         """

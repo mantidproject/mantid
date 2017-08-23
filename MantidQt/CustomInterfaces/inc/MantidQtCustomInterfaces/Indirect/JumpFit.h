@@ -42,6 +42,7 @@ private slots:
   /// Handles plotting and saving
   void saveClicked();
   void plotClicked();
+  void plotCurrentPreview();
 
 private:
   /// Gets a list of parameter names for a given fit function
@@ -65,6 +66,9 @@ private:
   QtTreePropertyBrowser *m_jfTree;
 
   Mantid::API::IAlgorithm_sptr m_fitAlg;
+
+  Mantid::API::MatrixWorkspace_sptr m_jfInputWS;
+  int m_specNo;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
