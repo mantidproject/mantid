@@ -10,7 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
@@ -149,7 +149,7 @@ public:
     TS_ASSERT(
         dynamic_cast<DataProcessorPasteSelectedCommand *>(comm[19].get()));
     TS_ASSERT(
-        dynamic_cast<DataProcessorClearSelectedCommand *>(comm[20].get()));
+        dynamic_cast<ClearSelectedCommand *>(comm[20].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[21].get()));
     TS_ASSERT(dynamic_cast<DataProcessorDeleteRowCommand *>(comm[22].get()));
   }

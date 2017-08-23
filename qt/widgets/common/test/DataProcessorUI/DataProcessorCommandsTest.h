@@ -7,7 +7,7 @@
 
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
@@ -319,7 +319,7 @@ public:
 
   void test_clear_selected_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorClearSelectedCommand command(&mockPresenter);
+    ClearSelectedCommand command(&mockPresenter);
 
     // The presenter should be notified with the ClearSelectedFlag
     EXPECT_CALL(mockPresenter,

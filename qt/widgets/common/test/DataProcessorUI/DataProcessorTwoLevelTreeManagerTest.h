@@ -11,7 +11,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
@@ -169,7 +169,7 @@ public:
     TS_ASSERT(
         dynamic_cast<DataProcessorPasteSelectedCommand *>(comm[26].get()));
     TS_ASSERT(
-        dynamic_cast<DataProcessorClearSelectedCommand *>(comm[27].get()));
+        dynamic_cast<ClearSelectedCommand *>(comm[27].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[28].get()));
     TS_ASSERT(dynamic_cast<DataProcessorDeleteRowCommand *>(comm[29].get()));
     TS_ASSERT(dynamic_cast<DataProcessorDeleteGroupCommand *>(comm[30].get()));

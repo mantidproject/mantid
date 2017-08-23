@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorClearSelectedCommand
+/** @class ClearSelectedCommand
 
-DataProcessorClearSelectedCommand defines the action "Clear Selected"
+ClearSelectedCommand defines the action "Clear Selected"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorClearSelectedCommand : public DataProcessorCommandBase {
+class ClearSelectedCommand : public DataProcessorCommandBase {
 public:
-  DataProcessorClearSelectedCommand(DataProcessorPresenter *tablePresenter)
+  ClearSelectedCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorClearSelectedCommand(const QDataProcessorWidget &widget)
+  ClearSelectedCommand(const QDataProcessorWidget &widget)
       : DataProcessorCommandBase(widget){};
-  virtual ~DataProcessorClearSelectedCommand(){};
+  virtual ~ClearSelectedCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ClearSelectedFlag);
