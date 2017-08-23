@@ -7,9 +7,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-/** @class DataProcessorDeleteRowCommand
+/** @class DeleteRowCommand
 
-DataProcessorDeleteRowCommand defines the action "Delete Row"
+DeleteRowCommand defines the action "Delete Row"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,13 +32,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorDeleteRowCommand : public CommandBase {
+class DeleteRowCommand : public CommandBase {
 public:
-  DataProcessorDeleteRowCommand(DataProcessorPresenter *tablePresenter)
+  DeleteRowCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorDeleteRowCommand(const QDataProcessorWidget &widget)
+  DeleteRowCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorDeleteRowCommand(){};
+  virtual ~DeleteRowCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::DeleteRowFlag);
