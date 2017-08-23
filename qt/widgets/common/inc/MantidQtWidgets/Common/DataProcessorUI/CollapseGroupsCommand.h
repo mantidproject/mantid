@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorCollapseGroupsCommand
+/** @class CollapseGroupsCommand
 
-DataProcessorCollapseGroupsCommand defines the action "Collapse All Groups"
+CollapseGroupsCommand defines the action "Collapse All Groups"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,11 +31,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCollapseGroupsCommand : public DataProcessorCommandBase {
+class CollapseGroupsCommand : public DataProcessorCommandBase {
 public:
-  DataProcessorCollapseGroupsCommand(DataProcessorPresenter *tablePresenter)
+  CollapseGroupsCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter) {}
-  virtual ~DataProcessorCollapseGroupsCommand() {}
+  virtual ~CollapseGroupsCommand() {}
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::CollapseAllGroupsFlag);

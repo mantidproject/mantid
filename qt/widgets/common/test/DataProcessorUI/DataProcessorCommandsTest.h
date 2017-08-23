@@ -8,7 +8,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CollapseGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
@@ -200,7 +200,7 @@ public:
 
   void test_collapse_groups_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorCollapseGroupsCommand command(&mockPresenter);
+    CollapseGroupsCommand command(&mockPresenter);
 
     // The presenter should be notified with the CollapseAllGroupsFlag
     EXPECT_CALL(mockPresenter,
