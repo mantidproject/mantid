@@ -259,6 +259,8 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -470,84 +472,6 @@ set( TEST_FILES
 # moc'd files will end up in build directory, so add to include path
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
-# Need to use a string of calls to the qt4_generate_moc macro
-# instead of qt4_wrap_cpp because the latter produces files with
-# a cxx suffix when QtPropertyBrowser requires cpp
-
-# qt4_generate_moc (
-  # inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h
-  # ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
-# )
-# qt4_generate_moc (
-  # inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
-  # ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
-# )
-# qt4_generate_moc (
-  # inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
-  # ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
-# )
-
-# qt4_generate_moc (
-  # inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
-  # ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
-# )
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
-)
-# qt4_generate_moc (
-  # src/QtPropertyBrowser/qtpropertymanager.cpp
-  # ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
-# )
-# qt4_generate_moc (
-  # src/QtPropertyBrowser/qteditorfactory.cpp
-  # ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
-# )
-# qt4_generate_moc (
-  # src/QtPropertyBrowser/qttreepropertybrowser.cpp
-  # ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
-# )
-
-set (
-  QTPROPERTYBROWSER_HEADERS_ONLY_MOC
-  #${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
-  #${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
-  #${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
-  #${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
-  #${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
-  #${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
-  #${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
-)
-
-set_source_files_properties (
-  ${QTPROPERTYBROWSER_HEADERS_ONLY_MOC}
-  PROPERTIES
-    HEADER_FILE_ONLY true
-)
-
-# qt4_generate_moc (
-  # inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
-  # ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
-# )
-
-# set (
-  # QTPROPERTYBROWSER_HEADERS_MOC
-  # ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
-# )
-
-set (
-  QTPROPERTYBROWSER_MOC
-#  ${QTPROPERTYBROWSER_HEADERS_MOC}
-  ${QTPROPERTYBROWSER_HEADERS_ONLY_MOC}
-  ${EXTRA_MOCS}
-)
-
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
 include(${QT_USE_FILE})
 
@@ -556,9 +480,7 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 set ( ALL_SRC
   ${SRC_FILES}
   ${MOCCED_FILES}
-  ${QTPROPERTYBROWSER_MOC}
-  ${QTPROPERTYBROWSER_SRCS}
-  ${QTPROPERTYBROWSER_RESOURCES})
+)
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
 if(MAKE_VATES AND ParaView_FOUND)
