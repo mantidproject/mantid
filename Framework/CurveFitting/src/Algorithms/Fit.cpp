@@ -267,15 +267,15 @@ void Fit::createOutput() {
     baseName += "_";
 
     declareProperty(
-            Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                    "OutputNormalisedCovarianceMatrix", "", Kernel::Direction::Output),
-            "The name of the TableWorkspace in which to store the final covariance "
-                    "matrix");
+        Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+            "OutputNormalisedCovarianceMatrix", "", Kernel::Direction::Output),
+        "The name of the TableWorkspace in which to store the final covariance "
+        "matrix");
     setPropertyValue("OutputNormalisedCovarianceMatrix",
                      baseName + "NormalisedCovarianceMatrix");
 
     Mantid::API::ITableWorkspace_sptr covariance =
-            Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
     covariance->addColumn("str", "Name");
     // set plot type to Label = 6
     covariance->getColumn(covariance->columnCount() - 1)->setPlotType(6);
@@ -301,12 +301,12 @@ void Fit::createOutput() {
         else {
           if (!covar.gsl()) {
             throw std::runtime_error(
-                    "There was an error while allocating the (GSL) covariance "
-                            "matrix "
-                            "which is needed to produce fitting error results.");
+                "There was an error while allocating the (GSL) covariance "
+                "matrix "
+                "which is needed to produce fitting error results.");
           }
           row << 100.0 * covar.get(ia, ja) /
-                 sqrt(covar.get(ia, ia) * covar.get(ja, ja));
+                     sqrt(covar.get(ia, ia) * covar.get(ja, ja));
         }
         ++ja;
       }
@@ -319,15 +319,15 @@ void Fit::createOutput() {
     // including error estimates if derivative of fitting function defined
 
     declareProperty(
-            Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                    "OutputParameters", "", Kernel::Direction::Output),
-            "The name of the TableWorkspace in which to store the "
-                    "final fit parameters");
+        Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+            "OutputParameters", "", Kernel::Direction::Output),
+        "The name of the TableWorkspace in which to store the "
+        "final fit parameters");
 
     setPropertyValue("OutputParameters", baseName + "Parameters");
 
     Mantid::API::ITableWorkspace_sptr result =
-            Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
     result->addColumn("str", "Name");
     // set plot type to Label = 6
     result->getColumn(result->columnCount() - 1)->setPlotType(6);
@@ -370,8 +370,8 @@ void Fit::createOutput() {
     // optimal parameter values
     declareProperty("FunctionString", "", Kernel::Direction::Output);
     getPointerToProperty("FunctionString")
-            ->setDocumentation("String representation of the function "
-                               "with optimal parameters.");
+        ->setDocumentation("String representation of the function "
+                           "with optimal parameters.");
     setPropertyValue("FunctionString", m_function->asString());
   }
 }
