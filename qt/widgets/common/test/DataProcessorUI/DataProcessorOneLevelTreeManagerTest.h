@@ -14,7 +14,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
@@ -133,7 +133,7 @@ public:
     TS_ASSERT(dynamic_cast<DataProcessorSaveTableAsCommand *>(comm[3].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[4].get()));
     TS_ASSERT(dynamic_cast<DataProcessorImportTableCommand *>(comm[5].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorExportTableCommand *>(comm[6].get()));
+    TS_ASSERT(dynamic_cast<ExportTableCommand *>(comm[6].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[7].get()));
     TS_ASSERT(dynamic_cast<DataProcessorOptionsCommand *>(comm[8].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[9].get()));

@@ -169,7 +169,7 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableAsCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorImportTableCommand(self.data_processor_table), self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorExportTableCommand(self.data_processor_table), self.menuFile)
+        self._create_action(MantidQt.MantidWidgets.ExportTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorOptionsCommand(self.data_processor_table), self.menuFile)
 
     def _demo_clicked(self):

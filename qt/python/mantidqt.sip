@@ -1733,13 +1733,13 @@ ExpandCommand();
 ExpandCommand(const MantidQt::MantidWidgets::DataProcessor::ExpandCommand &);
 };
 
-class DataProcessorExportTableCommand
+class ExportTableCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h"
 %End
 public:
-DataProcessorExportTableCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+ExportTableCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1748,8 +1748,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorExportTableCommand();
-DataProcessorExportTableCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorExportTableCommand &);
+ExportTableCommand();
+ExportTableCommand(const MantidQt::MantidWidgets::DataProcessor::ExportTableCommand &);
 };
 
 class DataProcessorGroupRowsCommand
