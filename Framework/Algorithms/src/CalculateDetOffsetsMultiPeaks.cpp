@@ -193,7 +193,6 @@ void CalculateDetOffsetsMultiPeaks::exec() {
 
   // Make summary
   progress(0.92, "Making summary");
-  makeFitSummary();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -216,15 +215,11 @@ void CalculateDetOffsetsMultiPeaks::processProperties() {
     m_isEvent = true;
 
   // Cache the peak and background function names
-  m_peakType = this->getPropertyValue("PeakFunction");
-  m_backType = this->getPropertyValue("BackgroundType");
 
   // The maximum allowable chisq value for an individual peak fit
   m_maxChiSq = this->getProperty("MaxChiSq");
-  m_minPeakHeight = this->getProperty("MinimumPeakHeight");
   m_minimizer = getPropertyValue("Minimizer");
   m_maxOffset = getProperty("MaxOffset");
-  m_leastMaxObsY = getProperty("MinimumPeakHeightObs");
 
   // Create output workspaces
   m_outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
@@ -232,28 +227,6 @@ void CalculateDetOffsetsMultiPeaks::processProperties() {
   MatrixWorkspace_sptr tempmaskws =
       boost::make_shared<MaskWorkspace>(m_inputWS->getInstrument());
   m_maskWS = tempmaskws;
-
-  // Input resolution
-  std::string reswsname = getPropertyValue("InputResolutionWorkspace");
-  if (reswsname.empty())
-    m_hasInputResolution = false;
-  else {
-    m_inputResolutionWS = getProperty("InputResolutionWorkspace");
-    m_hasInputResolution = true;
-
-    m_minResFactor = getProperty("MinimumResolutionFactor");
-    m_maxResFactor = getProperty("MaximumResolutionFactor");
-
-    if (m_minResFactor >= m_maxResFactor)
-      throw std::runtime_error(
-          "Input peak resolution boundary is 0 or negative.");
-
-    // Check
-    if (m_inputResolutionWS->getNumberHistograms() !=
-        m_inputWS->getNumberHistograms())
-      throw std::runtime_error(
-          "Input workspace does not match resolution workspace. ");
-  }
 }
 
 //-----------------------------------------------------------------------------------------
@@ -311,19 +284,6 @@ void CalculateDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
             // Using the detector
             m_maskWS->mutableY(workspaceIndex)[0] = offsetresult.mask;
 
-            // check the average value of delta(d)/d.  if it is far off the
-            // theorical value, output
-            // FIXME - This warning should not appear by filtering out peaks
-            // that are too wide or narrow.
-            // TODO - Delete the if statement below if it is never triggered.
-            if (m_hasInputResolution) {
-              double pixelresolution = m_inputResolutionWS->y(wi)[0];
-              if (offsetresult.resolution > 10 * pixelresolution ||
-                  offsetresult.resolution < 0.1 * pixelresolution)
-                g_log.warning() << "Spectrum " << wi
-                                << " delta(d)/d = " << offsetresult.resolution
-                                << "\n";
-            }
           }
         } // ENDFOR (detectors)
 
@@ -404,10 +364,12 @@ FitPeakOffsetResult CalculateDetOffsetsMultiPeaks::calculatePeakOffset(
     double minD, maxD;
     int i_highestpeak;
     double resolution, devresolution;
-    fr.numpeaksindrange =
-        fitSpectra(wi, m_inputWS, m_peakPositions, m_fitWindows, nparams, minD,
-                   maxD, vec_peakPosRef, vec_peakPosFitted, vec_fitChi2,
-                   vec_peakHeights, i_highestpeak, resolution, devresolution);
+    //    fr.numpeaksindrange =
+    //        fitSpectra(wi, m_inputWS, m_peakPositions, m_fitWindows, nparams,
+    //        minD,
+    //                   maxD, vec_peakPosRef, vec_peakPosFitted, vec_fitChi2,
+    //                   vec_peakHeights, i_highestpeak, resolution,
+    //                   devresolution);
     fr.numpeakstofit = static_cast<int>(m_peakPositions.size());
     fr.numpeaksfitted = static_cast<int>(vec_peakPosFitted.size());
     fr.resolution = resolution;
@@ -673,29 +635,8 @@ void CalculateDetOffsetsMultiPeaks::generatePeaksList(
       continue;
     }
 
-    // - check peak height
-    if (height < m_minPeakHeight) {
-      g_log.debug() << " wi = " << wi << " c = " << centre << " h = " << height
-                    << ": Too low "
-                    << "\n";
-      continue;
-    }
-
     // - check peak's resolution
     double widthdevpos = width / centre;
-    if (m_hasInputResolution) {
-      double recres = m_inputResolutionWS->y(wi)[0];
-      double resmax = recres * m_maxResFactor;
-      double resmin = recres * m_minResFactor;
-      if (widthdevpos < resmin || widthdevpos > resmax) {
-        std::stringstream dbss;
-        dbss << " wi = " << wi << " c = " << centre
-             << " Delta(d)/d = " << widthdevpos
-             << " too far away from suggested value " << recres;
-        g_log.debug(dbss.str());
-        continue;
-      }
-    }
 
     // background value
     double back_intercept = peakslist->getRef<double>("backgroundintercept", i);

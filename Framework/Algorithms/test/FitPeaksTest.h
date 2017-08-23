@@ -52,7 +52,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
-  void test_singlePeakSpectrum() {
+  void OKtest_singlePeakSpectrum() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
@@ -153,7 +153,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
-  void test_SingleSpectrum3Peaks() {
+  void OKtest_SingleSpectrum3Peaks() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
@@ -205,6 +205,63 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test on init and setup
+    */
+  void test_highAngle4Peaks() {
+    // Generate input workspace
+    // std::string input_ws_name = loadVulcanHighAngleData();
+
+    // Generate peak and background parameters
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    gen_PeakParameters(peakparnames, peakparvalues);
+
+    // Initialize FitPeak
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 6468));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 24900));
+    // 0.728299, 0.89198, 1.07577, 1.26145
+    // 0.6307, 0.6867, 0.728299, 0.89198, 1.07577, 1.26145
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
+        "PeakCenters", "1.0758, 0.89198, 0.728299, 0.6867"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowLeftBoundary",
+                                                  "1.05, 0.87, 0.71, 0.67"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowRightBoundary",
+                                                  "1.15, 0.92, 0.76, 0.709"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakRanges", "0.02, 0.015, 0.01, 0.01"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS2");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS2");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS2");
+
+    fitpeaks.execute();
+    TS_ASSERT(fitpeaks.isExecuted());
+
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS2"));
+
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS2"));
+    API::MatrixWorkspace_sptr fitted_data_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            API::AnalysisDataService::Instance().retrieve("FittedPeaksWS2"));
+    TS_ASSERT(fitted_data_ws);
+
+    // API::MatrixWorkspace_const_sptr fitted_data_ws =
+    // fitpeaks.getProperty("FittedPeaksWS2");
+    TS_ASSERT_EQUALS(fitted_data_ws->getNumberHistograms(), 24900);
+
+    return;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains PG3_4866 5-th peak
@@ -261,6 +318,28 @@ public:
     return "Diamond2Peaks";
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Generate a workspace contains PG3_4866 5-th peak
+    */
+  std::string loadVulcanHighAngleDataFull() {
+
+    DataHandling::LoadNexusProcessed loader;
+    loader.initialize();
+
+    loader.setProperty("Filename", "/home/wzz/Mantid/VULCAN_150178_2Peaks.nxs");
+    loader.setProperty("OutputWorkspace", "Diamond2Peaks");
+
+    loader.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("Diamond2Peaks"));
+
+    API::MatrixWorkspace_sptr ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("Diamond2Peaks"));
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 24900);
+
+    return "Diamond2Peaks";
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_FITPEAKSTEST_H_ */
