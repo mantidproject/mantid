@@ -257,6 +257,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -480,10 +481,10 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
   # inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
   # ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
 # )
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
-)
+# qt4_generate_moc (
+  # inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
+  # ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
+# )
 
 qt4_generate_moc (
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
@@ -501,10 +502,10 @@ qt4_generate_moc (
   # src/QtPropertyBrowser/qtpropertymanager.cpp
   # ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
 # )
-qt4_generate_moc (
-  src/QtPropertyBrowser/qteditorfactory.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
-)
+# qt4_generate_moc (
+  # src/QtPropertyBrowser/qteditorfactory.cpp
+  # ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
+# )
 qt4_generate_moc (
   src/QtPropertyBrowser/qttreepropertybrowser.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
@@ -514,12 +515,12 @@ set (
   QTPROPERTYBROWSER_HEADERS_ONLY_MOC
   #${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
   #${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
+  #${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
   #${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
-  ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
+  #${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
   ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
 )
 
