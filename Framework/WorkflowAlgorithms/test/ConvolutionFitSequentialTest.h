@@ -260,8 +260,8 @@ public:
     AnalysisDataService::Instance().add("ResolutionWs_", resWs);
     AnalysisDataService::Instance().add(fileName, redWs);
 
-    int specMin = 0;
-    int specMax = 5;
+    size_t specMin = 0;
+    size_t specMax = 5;
 
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -276,8 +276,8 @@ public:
     alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
-    alg.setProperty("SpecMin", specMin);
-    alg.setProperty("SpecMax", specMax);
+    alg.setProperty("SpecMin", boost::numeric_cast<int>(specMin));
+    alg.setProperty("SpecMax", boost::numeric_cast<int>(specMax));
     alg.setProperty("Convolve", true);
     alg.setProperty("ExtractMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
