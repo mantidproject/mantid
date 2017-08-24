@@ -23,9 +23,9 @@ set ( SRC_FILES
 	src/MantidGLWidget.cpp
 	src/MaskBinsData.cpp
 	src/MiniPlot.cpp
+	src/MiniPlotController.cpp
 	src/ObjCompAssemblyActor.cpp
 	src/ObjComponentActor.cpp
-	src/OneCurvePlot.cpp
 	src/OpenGLError.cpp
 	src/PanelsSurface.cpp
 	src/PeakMarker2D.cpp
@@ -61,7 +61,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/InstrumentView/ColorMapWidget.h
   inc/MantidQtWidgets/InstrumentView/MantidGLWidget.h
   inc/MantidQtWidgets/InstrumentView/MiniPlot.h
-  inc/MantidQtWidgets/InstrumentView/OneCurvePlot.h
+  inc/MantidQtWidgets/InstrumentView/MiniPlotController.h
   inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
   inc/MantidQtWidgets/InstrumentView/PeakOverlay.h
@@ -101,7 +101,6 @@ set ( INC_FILES
 	inc/MantidQtWidgets/InstrumentView/MaskBinsData.h
 	inc/MantidQtWidgets/InstrumentView/ObjCompAssemblyActor.h
 	inc/MantidQtWidgets/InstrumentView/ObjComponentActor.h
-	inc/MantidQtWidgets/InstrumentView/OneCurvePlot.h
 	inc/MantidQtWidgets/InstrumentView/OpenGLError.h
 	inc/MantidQtWidgets/InstrumentView/PanelsSurface.h
 	inc/MantidQtWidgets/InstrumentView/PeakMarker2D.h

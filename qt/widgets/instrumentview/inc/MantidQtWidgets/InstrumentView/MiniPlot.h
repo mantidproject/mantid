@@ -50,8 +50,9 @@ public:
   MiniPlot(QWidget *parent = nullptr);
 
   // Query
-  bool hasStoredCurves() const;
   bool hasActiveCurve() const;
+  bool hasStoredCurves() const;
+  QStringList storedCurveLabels() const { return m_storedCurveLabels; }
 
   // Modify
   /// Redraw the canvas
@@ -60,27 +61,23 @@ public:
                       QString xunit, QString curveLabel);
   void setActiveCurve(MiniPlotCurveData data);
   void removeActiveCurve();
+  void removeCurve(QString label);
 
 public slots:
   void storeCurve();
   void setYScaleLinear();
   void setYScaleLog();
 
+signals:
+  void contextMenuRequested(QContextMenuEvent *evt);
+
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
-  void contextMenuEvent(QContextMenuEvent *evt) override;
 
 private:
-  void initActions();
-
   Widgets::MplCpp::MplFigureCanvas *m_canvas;
   QString m_activeCurveLabel;
   QStringList m_storedCurveLabels;
-
-  // actions
-  QActionGroup *m_yScaleActions;
-  QAction *m_linearY;
-  QAction *m_logY;
 };
 }
 }
