@@ -51,9 +51,8 @@ public:
   DataProcessorView(){};
   virtual ~DataProcessorView(){};
 
-  // Add actions to the toolbar
   virtual void
-  addActions(std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
+  addEditActions(std::vector<std::unique_ptr<DataProcessorCommand>> actions) = 0;
 
   // Connect the model
   virtual void
@@ -85,11 +84,9 @@ public:
   virtual void selectAll() = 0;
 
   // Handle pause/resume of data reduction
-  virtual void pause() = 0;
-  virtual void resume() = 0;
-
-  // Reduction paused confirmation handler
-  virtual void confirmReductionPaused() = 0;
+  virtual void pauseRequested() = 0;
+  virtual void resumed() = 0;
+  virtual void reductionPaused() = 0;
 
   // Setter methods
   virtual void setTableList(const QSet<QString> &tables) = 0;

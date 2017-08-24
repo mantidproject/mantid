@@ -1,9 +1,9 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QWidget>
 #include <iterator>
@@ -124,7 +124,7 @@ void QDataProcessorWidget::createTable() {
 /** Add actions to the toolbar
 * @param commands :: A vector of actions (commands)
 */
-void QDataProcessorWidget::addActions(
+void QDataProcessorWidget::addEditActions(
     std::vector<std::unique_ptr<DataProcessorCommand>> commands) {
 
   // Put the commands in the toolbar
@@ -308,15 +308,10 @@ void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 /**
 Handle interface when data reduction paused
 */
-void QDataProcessorWidget::pause() { disablePauseButtons(); }
+void QDataProcessorWidget::pauseRequested() {}
 
-void QDataProcessorWidget::disablePauseButtons() {
-  disableAction(DataProcessorAction::PAUSE);
-}
-
-void QDataProcessorWidget::disableActionOnToolbar(
-    DataProcessorAction toDisable) {
-  disableActionOnWidget(*ui.rowToolBar, toToolbarIndex(toDisable));
+void QDataProcessorWidget::disableActionOnToolbar(int indexToDisable) {
+  disableActionOnWidget(*ui.rowToolBar, indexToDisable);
 }
 
 void QDataProcessorWidget::disableActionOnWidget(QWidget &widget, int index) {
@@ -331,20 +326,13 @@ void QDataProcessorWidget::disable(QWidget &toDisable) {
   toDisable.setEnabled(false);
 }
 
-void QDataProcessorWidget::enablePauseButtons() {
-  enableAction(DataProcessorAction::PAUSE);
+void QDataProcessorWidget::enableActionOnToolbar(int indexToEnable) {
+  enableActionOnWidget(*ui.rowToolBar, indexToEnable);
 }
 
-void QDataProcessorWidget::enableActionOnWidget(QWidget &widget, int index) {
-  enable(*(widget.actions()[index]));
-}
-
-void QDataProcessorWidget::enableActionOnToolbar(DataProcessorAction toEnable) {
-  enableActionOnWidget(*ui.rowToolBar, toToolbarIndex(toEnable));
-}
-
-int QDataProcessorWidget::toToolbarIndex(DataProcessorAction action) {
-  return toCommandIndex(action);
+void QDataProcessorWidget::enableActionOnWidget(QWidget &widget,
+                                                int indexToEnable) {
+  enable(*(widget.actions()[indexToEnable]));
 }
 
 void QDataProcessorWidget::enable(QAction &toEnable) {
@@ -358,15 +346,8 @@ void QDataProcessorWidget::enable(QWidget &toEnable) {
 /**
 Handle interface when data reduction resumed
 */
-void QDataProcessorWidget::resume() {
-  disableResumeButtons();
-  preventTableModification();
-  enablePauseButtons();
-}
-
-void QDataProcessorWidget::preventTableModification() {
-  disableTableModification([this](DataProcessorAction action)
-                               -> void { this->disableAction(action); });
+void QDataProcessorWidget::resumed() {
+  disableProcessButton();
   disableSelectionAndEditing();
 }
 
@@ -382,93 +363,36 @@ void QDataProcessorWidget::enableSelectionAndEditing() {
   ui.viewTable->setEditTriggers(QAbstractItemView::AllEditTriggers);
 }
 
-void QDataProcessorWidget::enableResumeButtons() {
-  enableAction(DataProcessorAction::PROCESS);
-  enable(*ui.buttonProcess);
-}
+void QDataProcessorWidget::enableProcessButton() { enable(*ui.buttonProcess); }
 
-void QDataProcessorWidget::disableResumeButtons() {
-  disableAction(DataProcessorAction::PROCESS);
+void QDataProcessorWidget::disableProcessButton() {
   disable(*ui.buttonProcess);
 }
 
-void QDataProcessorWidget::enableAction(DataProcessorAction toEnable) {
-  enableActionOnToolbar(toEnable);
-  enableActionOnContextMenu(toEnable);
+void QDataProcessorWidget::enableAction(int indexToEnable) {
+  enableActionOnToolbar(indexToEnable);
+  enableActionOnContextMenu(indexToEnable);
 }
 
-void QDataProcessorWidget::disableAction(DataProcessorAction toDisable) {
-  disableActionOnToolbar(toDisable);
-  disableActionOnContextMenu(toDisable);
+void QDataProcessorWidget::disableAction(int indexToDisable) {
+  disableActionOnToolbar(indexToDisable);
+  disableActionOnContextMenu(indexToDisable);
 }
 
-void QDataProcessorWidget::disableActionOnContextMenu(
-    DataProcessorAction toDisable) {
-  disableActionOnWidget(*m_contextMenu, toContextMenuIndex(toDisable));
+void QDataProcessorWidget::disableActionOnContextMenu(int indexToDisable) {
+  disableActionOnWidget(*m_contextMenu, indexToDisable);
 }
 
-void QDataProcessorWidget::enableActionOnContextMenu(
-    DataProcessorAction toEnable) {
-  enableActionOnWidget(*m_contextMenu, toContextMenuIndex(toEnable));
-}
-
-int QDataProcessorWidget::toContextMenuIndex(DataProcessorAction action) {
-  return toCommandIndex(action);
-}
-
-int QDataProcessorWidget::toCommandIndex(DataProcessorAction action) {
-  switch (action) {
-  case DataProcessorAction::PROCESS:
-    return 0;
-  case DataProcessorAction::PAUSE:
-    return 1;
-  case DataProcessorAction::SELECT_GROUP:
-    return 3;
-  case DataProcessorAction::EXPAND_GROUP:
-    return 4;
-  case DataProcessorAction::COLAPSE_GROUP:
-    return 5;
-  case DataProcessorAction::PLOT_RUNS:
-    return 7;
-  case DataProcessorAction::PLOT_GROUP:
-    return 8;
-  case DataProcessorAction::INSERT_ROW_AFTER:
-    return 10;
-  case DataProcessorAction::INSERT_GROUP_AFTER:
-    return 11;
-  case DataProcessorAction::GROUP_SELECTED:
-    return 13;
-  case DataProcessorAction::COPY_SELECTED:
-    return 14;
-  case DataProcessorAction::CUT_SELECTED:
-    return 15;
-  case DataProcessorAction::PASTE_SELECTED:
-    return 16;
-  case DataProcessorAction::CLEAR_SELECTED:
-    return 17;
-  case DataProcessorAction::DELETE_ROW:
-    return 19;
-  case DataProcessorAction::DELETE_GROUP:
-    return 20;
-  case DataProcessorAction::WHATS_THIS:
-    return 21;
-  default:
-    throw std::logic_error("Unknown action specified.");
-  }
+void QDataProcessorWidget::enableActionOnContextMenu(int indexToEnable) {
+  enableActionOnWidget(*m_contextMenu, indexToEnable);
 }
 
 /**
 Handle interface when data reduction confirmed to be paused
 */
-void QDataProcessorWidget::confirmReductionPaused() {
-  enableResumeButtons();
-  allowTableModification();
-}
-
-void QDataProcessorWidget::allowTableModification() {
+void QDataProcessorWidget::reductionPaused() {
+  enableProcessButton();
   enableSelectionAndEditing();
-  enableTableModification([this](DataProcessorAction action)
-                              -> void { this->enableAction(action); });
 }
 
 /**

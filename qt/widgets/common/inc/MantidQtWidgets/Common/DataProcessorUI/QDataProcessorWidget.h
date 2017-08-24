@@ -73,7 +73,7 @@ public:
   ~QDataProcessorWidget() override;
 
   // Add actions to the toolbar
-  void addActions(
+  void addEditActions(
       std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
 
   // Connect the model
@@ -111,11 +111,11 @@ public:
   void selectAll() override;
 
   // Handle pause/resume of data reduction
-  void pause() override;
-  void resume() override;
+  void pauseRequested() override;
+  void resumed() override;
 
   // Reduction paused confirmation handler
-  void confirmReductionPaused() override;
+  void reductionPaused() override;
 
   // Setter methods
   void setSelection(const std::set<int> &groups) override;
@@ -145,31 +145,16 @@ public:
   // Force re-processing of rows
   void setForcedReProcessing(bool forceReProcessing) override;
 
+  void disableProcessButton();
+  void enableProcessButton();
+  void enableAction(int indexToEnable);
+  void disableAction(int indexToDisable);
 private:
-  // initialise the interface
   void createTable();
-  void allowTableModification();
-  void preventTableModification();
-  void disablePauseButtons();
-  void enablePauseButtons();
-  void disableResumeButtons();
-  void enableResumeButtons();
-  void disableInsertButtons();
-  void enableInsertButtons();
-  void disableDeleteButtons();
-  void enableDeleteButtons();
-  void disableClipboardButtons();
-  void enableClipboardButtons();
-  void disableGroupingButtons();
-  void enableGroupingButtons();
-
-  void enableAction(DataProcessorAction toEnable);
-  void disableAction(DataProcessorAction toDisable);
-
-  void disableActionOnToolbar(DataProcessorAction toDisable);
-  void disableActionOnContextMenu(DataProcessorAction toDisable);
-  void enableActionOnToolbar(DataProcessorAction toEnable);
-  void enableActionOnContextMenu(DataProcessorAction toEnable);
+  void disableActionOnToolbar(int indexToDisable);
+  void disableActionOnContextMenu(int indexToDisable);
+  void enableActionOnToolbar(int indexToEnable);
+  void enableActionOnContextMenu(int indexToEnable);
   void disableSelectionAndEditing();
   void enableSelectionAndEditing();
 
@@ -179,10 +164,6 @@ private:
   static void disable(QAction &widget);
   static void enable(QWidget &widget);
   static void enable(QAction &widget);
-
-  static int toToolbarIndex(DataProcessorAction action);
-  static int toContextMenuIndex(DataProcessorAction);
-  static int toCommandIndex(DataProcessorAction action);
 
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;

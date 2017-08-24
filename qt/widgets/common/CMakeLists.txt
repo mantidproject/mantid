@@ -65,7 +65,7 @@
 	src/ColorBarWidget.cpp
 	src/DataProcessorUI/AbstractDataProcessorTreeModel.cpp
 	src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
-    src/DataProcessorUI/DataProcessorAction.cpp
+    src/DataProcessorUI/EditAction.cpp
 	src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
 	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp

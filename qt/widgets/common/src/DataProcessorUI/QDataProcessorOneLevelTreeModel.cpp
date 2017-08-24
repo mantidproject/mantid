@@ -247,5 +247,45 @@ QDataProcessorOneLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 
+int toEditMenuIndex(EditAction action) {
+  switch (action) {
+  case EditAction::PROCESS:
+    return 0;
+  case EditAction::PAUSE:
+    return 1;
+  case EditAction::SELECT_GROUP:
+    return 3;
+  case EditAction::EXPAND_GROUP:
+    return 4;
+  case EditAction::COLAPSE_GROUP:
+    return 5;
+  case EditAction::PLOT_RUNS:
+    return 7;
+  case EditAction::PLOT_GROUP:
+    return 8;
+  case EditAction::INSERT_ROW_AFTER:
+    return 10;
+  case EditAction::INSERT_GROUP_AFTER:
+    return 11;
+  case EditAction::GROUP_SELECTED:
+    return 13;
+  case EditAction::COPY_SELECTED:
+    return 14;
+  case EditAction::CUT_SELECTED:
+    return 15;
+  case EditAction::PASTE_SELECTED:
+    return 16;
+  case EditAction::CLEAR_SELECTED:
+    return 17;
+  case EditAction::DELETE_ROW:
+    return 19;
+  case EditAction::DELETE_GROUP:
+    return 20;
+  case EditAction::WHATS_THIS:
+    return 21;
+  default:
+    throw std::logic_error("Unknown action for two level manager specified.");
+  }
+}
 } // namespace MantidWidgets
 } // namespace Mantid

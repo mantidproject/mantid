@@ -233,7 +233,7 @@ void GenericDataProcessorPresenter::acceptViews(
   m_view = tableView;
   m_progressView = progressView;
 
-  addActionsToReflectometryMenu();
+  addActionsToEditMenu();
 
   // Initialise options
   // Load saved values from disk
@@ -273,7 +273,7 @@ void GenericDataProcessorPresenter::acceptViews(
   newTable();
 
   // The view should currently be in the paused state
-  m_view->pause();
+  m_view->pauseRequested();
 }
 
 /**
@@ -394,8 +394,8 @@ void GenericDataProcessorPresenter::nextRow() {
 
   if (m_pauseReduction) {
     // Notify presenter and view that reduction is paused
+    m_view->reductionPaused();
     m_mainPresenter->confirmReductionPaused();
-    m_view->confirmReductionPaused();
     m_confirmReductionPaused = true;
     return;
   }
@@ -441,8 +441,8 @@ void GenericDataProcessorPresenter::nextGroup() {
 
   if (m_pauseReduction) {
     // Notify presenter and view that reduction is paused
+    m_view->reductionPaused();
     m_mainPresenter->confirmReductionPaused();
-    m_view->confirmReductionPaused();
     m_confirmReductionPaused = true;
     return;
   }
@@ -501,7 +501,7 @@ void GenericDataProcessorPresenter::endReduction() {
 
   pause();
   m_confirmReductionPaused = true;
-  m_view->confirmReductionPaused();
+  m_view->reductionPaused();
   m_mainPresenter->confirmReductionPaused();
 }
 
@@ -1580,13 +1580,13 @@ void GenericDataProcessorPresenter::initOptions() {
 
 /** Tells the view which of the actions should be added to the toolbar
 */
-void GenericDataProcessorPresenter::addActionsToReflectometryMenu() {
+void GenericDataProcessorPresenter::addActionsToEditMenu() {
 
   auto commands = m_manager->publishCommands();
   std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;
   for (auto comm = 10u; comm < commands.size(); comm++)
     commandsToShow.push_back(std::move(commands.at(comm)));
-  m_view->addActions(std::move(commandsToShow));
+  m_view->addEditActions(std::move(commandsToShow));
 }
 
 /**
@@ -1595,7 +1595,7 @@ the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::pause() {
 
-  m_view->pause();
+  m_view->pauseRequested();
   m_mainPresenter->pause();
 
   m_pauseReduction = true;
@@ -1605,7 +1605,7 @@ void GenericDataProcessorPresenter::pause() {
 */
 void GenericDataProcessorPresenter::resume() {
 
-  m_view->resume();
+  m_view->resumed();
   m_mainPresenter->resume();
 
   m_pauseReduction = false;
