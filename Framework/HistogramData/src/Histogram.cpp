@@ -254,7 +254,8 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
     target++;
   if (target != binEdges.size()) {
     std::stringstream msg;
-    msg << "Histogram: size mismatch of BinEdges: (" << target << " != " << binEdges.size() << ")";
+    msg << "Histogram: size mismatch of BinEdges: (" << target
+        << " != " << binEdges.size() << ")";
     throw std::logic_error(msg.str());
   }
 }
