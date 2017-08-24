@@ -352,7 +352,7 @@ public:
                             detectorPos[2] + radius})).norm() < 1e-9);
   }
 
-  void test_boundingBox_complex_around_rectangular_bank() {
+  void test_boundingBox_around_rectangular_bank() {
 
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
         1 /*1 bank*/, 10 /*10 by 10*/);
@@ -380,6 +380,88 @@ public:
     componentInfo->getBoundingBox(bankIndex, boundingBoxBank);
     TS_ASSERT((boundingBoxRoot.maxPoint() - boundingBoxBank.maxPoint()).norm() <
               1e-9);
+  }
+
+  void test_boundingBox_complex_rectangular_bank_setup() {
+
+    /* y
+     * |
+     * |---z                        bank1
+     *            source    sample              det
+     *                                   bank2
+     */
+
+    Mantid::Geometry::Instrument instrument;
+
+    int pixels = 10; // 10*10 total
+    double pixelSpacing = 0;
+    Mantid::Kernel::Quat bankRot{}; // No rotation
+
+    // Add a rectangular bank
+    int idStart = 0;
+    std::string bankName = "bank1";
+    Mantid::Kernel::V3D bankPos{0, 1, 1};
+    ComponentCreationHelper::addRectangularBank(
+        instrument, idStart, pixels, pixelSpacing, bankName, bankPos, bankRot);
+
+    // A source
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(V3D{0, 0, -10});
+    instrument.add(source);
+    instrument.markAsSource(source);
+
+    // A sample
+    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    sample->setPos(V3D{0, 0, 0});
+    sample->setShape(
+        ComponentCreationHelper::createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+    instrument.add(sample);
+    instrument.markAsSamplePos(sample);
+
+    // A detector
+    Detector *det = new Detector(
+        "point-detector", (2 * pixels * pixels) + 1 /*detector id*/, nullptr);
+    det->setPos(V3D{0, 0, 3});
+    det->setShape(
+        ComponentCreationHelper::createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+    instrument.add(det);
+    instrument.markAsDetector(det);
+
+    // Add another rectangular bank
+    idStart = pixels * pixels;
+    bankName = "bank2";
+    bankPos = Mantid::Kernel::V3D{0, -1, 2};
+    ComponentCreationHelper::addRectangularBank(
+        instrument, idStart, pixels, pixelSpacing, bankName, bankPos, bankRot);
+
+    auto wrappers = InstrumentVisitor::makeWrappers(instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    BoundingBox boundingBoxRoot;
+    // Check bounding box of root (instrument)
+    componentInfo->getBoundingBox(componentInfo->root() /*Root*/,
+                                  boundingBoxRoot);
+
+    // Check free detector not ignored because it's sandwidged between banks.
+    // Should not be skipped over.
+    const double detRadius = 0.01; // See test helper for value
+    TS_ASSERT_DELTA(boundingBoxRoot.maxPoint().Z(),
+                    det->getPos().Z() + detRadius, 1e-9);
+
+    // Check bank1 represents max point in y
+    BoundingBox boundingBoxBank1;
+    const size_t bank1Index = componentInfo->root() - 4 - 10;
+    componentInfo->getBoundingBox(bank1Index, boundingBoxBank1);
+    TS_ASSERT(componentInfo->isRectangularBank(bank1Index));
+    TS_ASSERT_DELTA(boundingBoxRoot.maxPoint().Y(),
+                    boundingBoxBank1.maxPoint().Y(), 1e-9);
+
+    // Check bank2 represents min point in y
+    BoundingBox boundingBoxBank2;
+    const size_t bank2Index = componentInfo->root() - 1;
+    componentInfo->getBoundingBox(bank2Index, boundingBoxBank2);
+    TS_ASSERT(componentInfo->isRectangularBank(bank2Index));
+    TS_ASSERT_DELTA(boundingBoxRoot.minPoint().Y(),
+                    boundingBoxBank2.minPoint().Y(), 1e-9);
   }
 };
 

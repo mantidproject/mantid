@@ -24,6 +24,7 @@ class ObjComponent;
 class DetectorGroup;
 class DetectorsRing;
 class IDetector;
+class Instrument;
 }
 }
 
@@ -163,6 +164,12 @@ Mantid::Geometry::Instrument_sptr createTestInstrumentCylindrical(
     const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0.0, 0.0, -10.),
     const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(),
     const double cylRadius = 0.004, const double cylHeight = 0.0002);
+
+void addRectangularBank(Mantid::Geometry::Instrument &testInstrument,
+                        int idStart, int pixels, double pixelSpacing,
+                        std::string bankName,
+                        const Mantid::Kernel::V3D &bankPos,
+                        const Mantid::Kernel::Quat &bankRot);
 
 /// Create a test instrument with n panels of rectangular detectors,
 /// pixels*pixels in size, a source and spherical sample shape.

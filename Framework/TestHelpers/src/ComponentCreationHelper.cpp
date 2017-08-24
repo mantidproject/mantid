@@ -409,6 +409,52 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
 }
 
 //----------------------------------------------------------------------------------------------
+
+/**
+ * Add a rectangular bank onto an instrument
+ * Rectangular detectors, pixels*pixels in size,
+ * Banks' lower-left corner is at position (0,0,5*banknum) and they go up to
+ (pixels*0.008, pixels*0.008, Z) Pixels are 4 mm wide.
+
+ * @param testInstrument :: instrument to add the bank to
+ * @param idStart :: start id for first detector id
+ * @param pixels :: number of pixels in x (same again in y to give pixels *
+ pixels total)
+ * @param pixelSpacing :: spacing between pixels
+ * @param bankName :: name of the bank
+ * @param bankPos :: position of the bank
+ * @param bankRot :: rotation of the bank
+ */
+void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
+                        double pixelSpacing, std::string bankName,
+                        const V3D &bankPos, const Quat &bankRot) {
+
+  const double cylRadius(pixelSpacing / 2);
+  const double cylHeight(0.0002);
+  // One object
+  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
+      "pixel-shape");
+
+  RectangularDetector *bank = new RectangularDetector(bankName);
+  bank->initialize(pixelShape, pixels, 0.0, pixelSpacing, pixels, 0.0,
+                   pixelSpacing, idStart, true, pixels);
+
+    // Mark them all as detectors
+    for (int x = 0; x < pixels; x++)
+      for (int y = 0; y < pixels; y++) {
+        boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
+        if (detector)
+          // Mark it as a detector (add to the instrument cache)
+          testInstrument.markAsDetector(detector.get());
+      }
+
+    testInstrument.add(bank);
+    bank->setPos(bankPos);
+    bank->setRot(bankRot);
+}
+
+//----------------------------------------------------------------------------------------------
 /**
  * Create an test instrument with n panels of rectangular detectors,
  *pixels*pixels in size,
@@ -428,33 +474,14 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
                                                 double bankDistanceFromSample) {
   auto testInst = boost::make_shared<Instrument>("basic_rect");
 
-  const double cylRadius(pixelSpacing / 2);
-  const double cylHeight(0.0002);
-  // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
-      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
-      "pixel-shape");
-
   for (int banknum = 1; banknum <= num_banks; banknum++) {
     // Make a new bank
-    std::ostringstream bankname;
-    bankname << "bank" << banknum;
-
-    RectangularDetector *bank = new RectangularDetector(bankname.str());
-    bank->initialize(pixelShape, pixels, 0.0, pixelSpacing, pixels, 0.0,
-                     pixelSpacing, banknum * pixels * pixels, true, pixels);
-
-    // Mark them all as detectors
-    for (int x = 0; x < pixels; x++)
-      for (int y = 0; y < pixels; y++) {
-        boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
-        if (detector)
-          // Mark it as a detector (add to the instrument cache)
-          testInst->markAsDetector(detector.get());
-      }
-
-    testInst->add(bank);
-    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * banknum));
+    std::ostringstream bankName;
+    bankName << "bank" << banknum;
+    V3D bankPos(0.0, 0.0, bankDistanceFromSample * banknum);
+    Quat bankRot{}; // Identity
+    addRectangularBank(*testInst, banknum * pixels * pixels, pixels,
+                       pixelSpacing, bankName.str(), bankPos, bankRot);
   }
 
   // Define a source component

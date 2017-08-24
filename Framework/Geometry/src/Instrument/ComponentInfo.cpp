@@ -249,10 +249,12 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
   }
   auto rangeComp = m_componentInfo->componentRangeInSubtree(componentIndex);
   std::vector<std::pair<size_t, size_t>> detExclusions{};
-  for (auto it = rangeComp.begin(); it != rangeComp.end(); ++it) {
+  auto it = rangeComp.rbegin();
+  while (it != rangeComp.rend()) {
 
     const size_t index = *it;
     if (hasSource() && index == source()) {
+      ++it;
       continue;
     }
     if (isRectangularBank(index)) {
@@ -276,24 +278,26 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
       // Get bounding box for rectangular detector
       // Skip all sub components.
       detExclusions.emplace_back(std::make_pair(corner1, corner2));
-      // it = innerRangeComp.end();
+      it = innerRangeComp.rend();
     } else {
       doGetBoundingBox(index, absoluteBB);
+      ++it;
     }
   }
 
   // Now deal with bounding boxes for detectors
   auto rangeDet = m_componentInfo->detectorRangeInSubtree(componentIndex);
-  auto it = rangeDet.begin();
-  while (it != rangeDet.end()) {
-    for (auto exc = detExclusions.begin(); exc != detExclusions.end(); ++exc) {
-      if ((*it) >= exc->first && (*it) <= exc->second) {
-        it += (exc->second - exc->first + 1); // Jump the iterator forward
+  auto it2 = rangeDet.begin();
+  while (it2 != rangeDet.end()) {
+    for (auto exc = detExclusions.rbegin(); exc != detExclusions.rend();
+         ++exc) {
+      if ((*it2) >= exc->first && (*it2) <= exc->second) {
+        it2 += (exc->second - exc->first + 1); // Jump the iterator forward
       }
     }
-    if (it != rangeDet.end()) {
-      doGetBoundingBox(*it, absoluteBB);
-      ++it;
+    if (it2 != rangeDet.end()) {
+      doGetBoundingBox(*it2, absoluteBB);
+      ++it2;
     }
   }
 }
