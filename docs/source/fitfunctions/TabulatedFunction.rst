@@ -43,9 +43,6 @@ Usage
     # Call the Fit algorithm and perform the fit
     myFunc='name=TabulatedFunction,Workspace=ws1,WorkspaceIndex=0,Scaling=1.0,Shift=0.0'
     fit_output = Fit(Function=myFunc, InputWorkspace=ws2, Output='fit')
-
-    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
-    Fit(Function=myFunc, InputWorkspace=ws2, Output='fit')
     paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
     fitWorkspace = fit_output.OutputWorkspace
 

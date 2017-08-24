@@ -56,7 +56,7 @@ Usage
 
     from __future__ import print_function
     ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
-    print 'workspaces instantiated: ', ', '.join(ws.getNames())
+    print('workspaces instantiated: ', ', '.join(ws.getNames()))
     fqtReal = ws[1] # Real part of F(Q,t)
     # Let's fit it to a Gaussian. We start with an initial guess
     intensity = 0.5
