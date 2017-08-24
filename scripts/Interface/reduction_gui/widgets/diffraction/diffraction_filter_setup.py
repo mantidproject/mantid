@@ -2,6 +2,7 @@
 ################################################################################
 # Event Filtering (and advanced) Setup Widget
 ################################################################################
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
 
@@ -165,7 +166,7 @@ class FilterSetupWidget(BaseWidget):
                 self._content.timeunit_combo.setCurrentIndex(index)
             else:
                 self._content.timeunit_combo.setCurrentIndex(0)
-                print "Input value of unit of time '%s' is not allowed. " % (state.unitoftime)
+                print("Input value of unit of time '%s' is not allowed. " % (state.unitoftime))
         else:
             # Default
             self._content.timeunit_combo.setCurrentIndex(0)
@@ -193,8 +194,8 @@ class FilterSetupWidget(BaseWidget):
                 self._content.valuechange_combo.setCurrentIndex(index)
             else:
                 self._content.valuechange_combo.setCurrentIndex(0)
-                print "Input value of filter log value by changing direction '%s' is not allowed." % \
-                    (state.filterlogvaluebychangingdirection)
+                print("Input value of filter log value by changing direction '%s' is not allowed." %
+                      (state.filterlogvaluebychangingdirection))
         else:
             # Default
             self._content.valuechange_combo.setCurrentIndex(0)
@@ -205,7 +206,7 @@ class FilterSetupWidget(BaseWidget):
                 self._content.logbound_combo.setCurrentIndex(index)
             else:
                 self._content.logbound_combo.setCurrentIndex(0)
-                print "Input value for log boundary '%s' is not allowed." % (state.logboundary)
+                print("Input value for log boundary '%s' is not allowed." % (state.logboundary))
         else:
             # Default
             self._content.logbound_combo.setCurrentIndex(0)
@@ -295,7 +296,7 @@ class FilterSetupWidget(BaseWidget):
                 if p.__class__.__name__ == "FloatTimeSeriesProperty":
                     if p.size() > 1:
                         properties.append(p.name)
-                        print p.name, p.size()
+                        print(p.name, p.size())
             # ENDFOR p
             properties = sorted(properties)
 
@@ -306,7 +307,7 @@ class FilterSetupWidget(BaseWidget):
 
         """
         now = datetime.now()
-        print "New Run Number = %s.  @ %s" % (newrunnumberstr, str(now))
+        print("New Run Number = %s.  @ %s" % (newrunnumberstr, str(now)))
         if newrunnumberstr == "":
             self._content.log_name_combo.clear()
         else:

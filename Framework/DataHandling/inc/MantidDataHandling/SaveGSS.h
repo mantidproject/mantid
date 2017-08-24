@@ -5,8 +5,14 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
+
+#include <iosfwd>
+#include <memory>
+#include <vector>
 
 // Forward declare
 namespace Mantid {
@@ -89,34 +95,77 @@ private:
   /// Execution code
   void exec() override;
 
-  /// Write GSAS file
-  void writeGSASFile(const std::string &outfilename, bool append,
-                     int basebanknumber, bool multiplybybinwidth, bool split,
-                     const std::string &outputFormat);
+  /// Determines if all spectra have detectors
+  bool areAllDetectorsValid() const;
 
-  /// Write the header information
-  void writeHeaders(const std::string &format, std::stringstream &os,
-                    double primaryflightpath) const;
+  /// Turns the data associated with this spectra into a string stream
+  void generateBankData(std::stringstream &outBuf, size_t specIndex) const;
 
-  /// Write out the data in RALF format
-  void writeRALFdata(const int bank, const bool MultiplyByBinWidth,
-                     std::stringstream &out,
-                     const HistogramData::Histogram &histo) const;
+  /// Generates the bank header and returns this as a string stream
+  void generateBankHeader(std::stringstream &out,
+                          const API::SpectrumInfo &spectrumInfo,
+                          size_t specIndex) const;
 
-  /// Write out the data in SLOG format
-  void writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
-                     std::stringstream &out,
-                     const HistogramData::Histogram &histo) const;
+  /// Generates the output which will be written to the GSAS file
+  void generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra);
+
+  /// Generates the instrument header and returns this as a string stream
+  void generateInstrumentHeader(std::stringstream &out, double l1) const;
+
+  /// Generates the filename(s) and paths to write to and stores in member var
+  void generateOutFileNames(size_t numberOfOutFiles);
+
+  /// Returns the log value in a GSAS format as a string stream
+  void getLogValue(std::stringstream &out, const API::Run &runInfo,
+                   const std::string &name,
+                   const std::string &failsafeValue = "UNKNOWN") const;
+
+  /// Returns if the input workspace instrument is valid
+  bool isInstrumentValid() const;
+
+  /// Opens a new file stream at the path specified.
+  void openFileStream(const std::string &outFilePath, std::ofstream &outStream);
 
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,
                           int periodNum) override;
 
-  bool m_useSpecAsBank;
+  /// Validates the user input and warns / throws on bad conditions
+  void validateUserInput() const;
+
+  /// Writes the current buffer to the user specified file path
+  void writeBufferToFile(size_t numOutFiles, size_t numSpectra);
+
+  // Writes the header for RALF data format to the buffer
+  void writeRALFHeader(std::stringstream &out, int bank,
+                       const HistogramData::Histogram &histo) const;
+
+  /// Write out the data in RALF - ALT format
+  void writeRALF_ALTdata(std::stringstream &out, const int bank,
+                         const HistogramData::Histogram &histo) const;
+
+  /// Write out the data in RALF - FXYE format
+  void writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
+                         std::stringstream &out,
+                         const HistogramData::Histogram &histo) const;
+
+  /// Write out the data in SLOG format
+  void writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
+                     std::stringstream &out,
+                     const HistogramData::Histogram &histo) const;
 
   /// Workspace
-  API::MatrixWorkspace_const_sptr inputWS;
+  API::MatrixWorkspace_const_sptr m_inputWS;
+  /// The output buffer. This is either n spectra in one file,
+  /// or n files with 1 spectra
+  std::vector<std::unique_ptr<std::stringstream>> m_outputBuffer{};
+  /// The output filename(s)
+  std::vector<std::string> m_outFileNames{};
+  /// Indicates whether all spectra have valid detectors
+  bool m_allDetectorsValid{false};
+  /// Holds pointer to progress bar
+  std::unique_ptr<API::Progress> m_progress{nullptr};
 };
 }
 }

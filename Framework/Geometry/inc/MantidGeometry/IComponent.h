@@ -1,12 +1,10 @@
 #ifndef MANTID_GEOMETRY_ICOMPONENT_H_
 #define MANTID_GEOMETRY_ICOMPONENT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
+#include <map>
 #include <string>
 #include <vector>
 #include <set>
@@ -22,9 +20,6 @@ class Quat;
 }
 
 namespace Geometry {
-//---------------------------------------------------------
-// Forward declarations
-//---------------------------------------------------------
 class IComponent;
 class BoundingBox;
 class ParameterMap;
@@ -187,7 +182,7 @@ public:
   virtual void printSelf(std::ostream &) const = 0;
   //! Returns true if the Component is parametrized (has a parameter map)
   virtual bool isParametrized() const = 0;
-  virtual void registerContents(class ComponentVisitor &component) const = 0;
+  virtual size_t registerContents(class ComponentVisitor &component) const = 0;
 };
 
 /// Typedef of a shared pointer to a IComponent

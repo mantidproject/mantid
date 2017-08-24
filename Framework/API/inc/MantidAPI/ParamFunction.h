@@ -66,6 +66,8 @@ public:
                                const std::string &description) override;
   /// Get parameter by name.
   double getParameter(const std::string &name) const override;
+  /// Check if function has a parameter with this name.
+  bool hasParameter(const std::string &name) const override;
   /// Total number of parameters
   size_t nParams() const override { return m_parameters.size(); }
   /// Returns the index of parameter name

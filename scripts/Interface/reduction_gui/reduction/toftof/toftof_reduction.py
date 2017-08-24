@@ -5,11 +5,12 @@
 """
 TOFTOF reduction workflow gui.
 """
+from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 
 class TOFTOFScriptElement(BaseScriptElement):
@@ -129,7 +130,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         if els:
             dom = els[0]
 
-            def get_str(tag, default = ''):
+            def get_str(tag, default=''):
                 return BaseScriptElement.getStringElement(dom, tag, default=default)
 
             def get_int(tag, default):
@@ -215,7 +216,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         script = ['']
 
         # helper: add a line to the script
-        def l(line = ''):
+        def l(line=''):
             script[0] += line + '\n'
 
         # helpers
@@ -290,7 +291,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             if i == 0:
                 wsData0 = wsData
 
-        def group_list(listVal, postfix = ''):
+        def group_list(listVal, postfix=''):
             return ('[' + ', '.join(listVal) + ']' + postfix) if listVal else ''
 
         gPrefix = 'g' + self.prefix
@@ -365,7 +366,7 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             l()
 
-        else: # none, simply use the not normalised workspaces
+        else:  # none, simply use the not normalised workspaces
             gDataNorm = gDataRuns
 
             if self.vanRuns:
@@ -386,7 +387,7 @@ class TOFTOFScriptElement(BaseScriptElement):
                 l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledEC))
             l()
 
-        l("# group data for processing") # without empty can
+        l("# group data for processing")  # without empty can
         gDataSource = gDataSubEC if self.ecRuns else gDataNorm
         gData = gPrefix + 'Data'
         if self.vanRuns:
@@ -482,7 +483,7 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         return script[0]
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 
 class TOFTOFReductionScripter(BaseReductionScripter):
@@ -490,5 +491,5 @@ class TOFTOFReductionScripter(BaseReductionScripter):
     def __init__(self, name, facility):
         BaseReductionScripter.__init__(self, name, facility)
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # eof

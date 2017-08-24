@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name,R0912
 """
     Classes for each reduction step. Those are kept separately
@@ -77,7 +78,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
             f.write(script)
             f.close()
         except IOError as e:
-            print "Unable to save script to file. Reason: %s." % (str(e))
+            print ("Unable to save script to file. Reason: %s." % (str(e)))
 
         # Export XML file
         autosavexmlfname = os.path.join(self.configDir, "snspowderreduction.xml")
@@ -88,7 +89,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
             file_name, autosavexmlfname)
         wbuf += script
         wbuf += "\n========== End of Script ==========="
-        print wbuf
+        print (wbuf)
 
         return script
 
@@ -222,7 +223,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # ENDIF : do filter
 
-        print "Script and Save XML to default."
+        print ("Script and Save XML to default.")
 
         return script
 
@@ -362,7 +363,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         # Facility instrument
         for observer in self._observers:
             observertype = observer._subject.__class__.__name__
-            print "[ToScript] Observer Type = ", observertype
+            print ("[ToScript] Observer Type = ", observertype)
             if observertype.count("AdvancedWidget") == 1:
                 self.instrument_name = observer._subject._instrument_name
 

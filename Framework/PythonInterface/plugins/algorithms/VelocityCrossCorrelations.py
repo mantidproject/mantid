@@ -125,14 +125,11 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         # Initialise velocity arrray. Note that the first dimension is 2 elements shorter than the coordinate array.
         # Use finite difference methods to evaluate the time-derivative to 1st order
         # Shape: (# of particles) x (timesteps-2) x (# of spatial dimensions)
-        velocities=np.zeros((n_particles,n_timesteps-1,n_dimensions))
 
-        for i in range(n_particles):
-            for j in range(n_timesteps-2):
-                # Unwrapping coordinates
-                v_temp1=scaled_coords[i,j+1]-scaled_coords[i,j]-np.round(scaled_coords[i,j+1]-scaled_coords[i,j])
-                v_temp2=scaled_coords[i,j+2]-scaled_coords[i,j+1]-np.round(scaled_coords[i,j+2]-scaled_coords[i,j+1])
-                velocities[i,j]=(v_temp1+v_temp2)/(2.0)
+        velocities=np.zeros((n_particles,n_timesteps-1,n_dimensions))
+        v1=scaled_coords[:,1:-1,:]-scaled_coords[:,:-2,:]-np.round(scaled_coords[:,1:-1,:]-scaled_coords[:,:-2,:])
+        v2=scaled_coords[:,2:,:]-scaled_coords[:,1:-1,:]-np.round(scaled_coords[:,2:,:]-scaled_coords[:,1:-1,:])
+        velocities[:,:-1,:]=(v1+v2)/2.
 
         # Transform velocities (configuration array) back to Cartesian coordinates at each time step
         velocities=np.array([[np.dot(box_size_tensors[j+1],np.transpose(velocities[i,j]))
@@ -141,7 +138,6 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
         logger.information("Calculating velocity cross-correlations (resource intensive calculation)...")
         start_time=time.time()
-
         correlation_length=n_timesteps-1
         correlations=np.zeros((n_species,n_species,correlation_length))
         # Array for counting particle pairings

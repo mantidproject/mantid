@@ -200,6 +200,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             qmin = workspace.getRun().getProperty("qmin").value
             qmax = workspace.getRun().getProperty("qmax").value
         else:
+            #  Checked 8/10/2017 -  this is using the right distance for calculating q
             sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
             nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
             ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])

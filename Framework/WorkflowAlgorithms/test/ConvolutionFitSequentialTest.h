@@ -234,15 +234,15 @@ public:
     // Assert that output is in ADS
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "SqwWs_conv_1LFixF_s0_to_0_Parameters"));
+            "SqwWs_conv_1LFixF_s0_Parameters"));
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "SqwWs_conv_1LFixF_s0_to_0_Result"));
+            "SqwWs_conv_1LFixF_s0_Result"));
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            "SqwWs_conv_1LFixF_s0_to_0_Workspaces"));
+            "SqwWs_conv_1LFixF_s0_Workspaces"));
 
     AnalysisDataService::Instance().clear();
   }
