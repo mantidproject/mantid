@@ -155,7 +155,7 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             max_threshold = AbinsModules.AbinsConstants.MAX_THRESHOLD
 
-            is_not_smaller = s_max - self._max_s_previous_order[atom] > small_s
+            is_not_smaller = s_max - self._max_s_previous_order[atom] > 1.3 * self._max_s_previous_order[atom]
             allow_attempts = self._s_current_threshold[atom] < max_threshold
 
             if is_not_smaller and allow_attempts:
@@ -225,6 +225,12 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
 
             self._s_current_threshold[atom] += self._s_threshold_ref[atom]
+
+            if self._s_current_threshold[atom] > AbinsModules.AbinsConstants.MAX_THRESHOLD:
+                raise StabilityErrorAllAtoms(
+                    "Numerical instability detected. To large threshold for the individual atom. Threshold for all "
+                    "atoms should be raised.")
+
             atom_symbol = self._atoms["atom_{}".format(atom)]["symbol"]
             self._report_progress(
                 intend + "Threshold for S has been changed to {} for atom {}  ({})."
@@ -501,7 +507,7 @@ class SPowderSemiEmpiricalCalculator(object):
             rebined_broad_spectrum = self._fix_empty_array()
 
         # multiply by k-point weight and scaling constant
-        factor = self._weight / AbinsModules.AbinsParameters.bin_width * AbinsModules.AbinsConstants.SCALING_CONSTANT
+        factor = self._weight * AbinsModules.AbinsConstants.SCALING_CONSTANT
         rebined_broad_spectrum = rebined_broad_spectrum * factor
         return local_freq, local_coeff, rebined_broad_spectrum
 
@@ -654,7 +660,7 @@ class SPowderSemiEmpiricalCalculator(object):
             output_array_x = self._frequencies
             output_array_y = np.asarray(
                 a=[array_y[inds == i].sum() for i in range(self._freq_size)],
-                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE) / AbinsModules.AbinsParameters.bin_width
 
         return output_array_x, output_array_y
 
