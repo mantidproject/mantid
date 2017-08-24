@@ -299,12 +299,10 @@ public:
     // inside the members group workspace.
     std::unordered_set<std::string> members = {
         "Data", "Calc", "Diff", "LinearBackground", "Lorentzian1"};
-    for (int i = 0; i < membersGroupWs->size(); i++) {
+    for (size_t i = 0; i < membersGroupWs->size(); i++) {
       MatrixWorkspace_const_sptr ws =
           boost::dynamic_pointer_cast<const MatrixWorkspace>(
               membersGroupWs->getItem(i));
-      size_t wsSize = ws->getNumberHistograms();
-      size_t redSize = redWs->getNumberHistograms();
       TS_ASSERT(ws->getNumberHistograms() == specMax - specMin + 1);
       std::string name = ws->getName();
       members.erase(name.substr(name.find_last_of('_') + 1));
