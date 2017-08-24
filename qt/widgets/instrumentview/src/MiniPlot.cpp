@@ -42,8 +42,10 @@ namespace MantidWidgets {
 MiniPlot::MiniPlot(QWidget *parent)
     : QWidget(parent), m_canvas(new MplFigureCanvas(111, this)),
       m_activeCurveLabel(), m_storedCurveLabels() {
+  m_canvas->setCanvasFaceColor("white");
   setLayout(new QVBoxLayout);
   layout()->addWidget(m_canvas);
+  layout()->setContentsMargins(0, 0, 0, 0);
 
   // install event filter on "real" canvas to monitor mouse events
   m_canvas->canvasWidget()->installEventFilter(this);
@@ -64,9 +66,7 @@ bool MiniPlot::hasActiveCurve() const { return !m_activeCurveLabel.isEmpty(); }
 /**
  * Redraw the canvas based on the current data
  */
-void MiniPlot::update() {
-  m_canvas->rescaleToData(Axes::Scale::Both, true);
-}
+void MiniPlot::update() { m_canvas->rescaleToData(Axes::Scale::Both, true); }
 
 /**
  * Set the given data as the active curve on the plot
