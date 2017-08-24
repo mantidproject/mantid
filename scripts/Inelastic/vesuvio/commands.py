@@ -52,6 +52,16 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                             flags['diff_mode'], fit_mode,
                                             flags.get('bin_parameters', None))
 
+    if 'ms_flags' in flags:
+        ms_flags = flags['ms_flags']
+
+        if 'hydrogen_constraints' in ms_flags and \
+            isinstance(ms_flags['hydrogen_constraints'], list):
+
+            flags['ms_flags']['hydrogen_constraints'] = \
+                _parse_ms_hydrogen_constraints(ms_flags['hydrogen_constraints'])
+
+
     last_results = None
 
     exit_iteration = 0
@@ -328,6 +338,35 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
 # --------------------------------------------------------------------------------
 # Private Functions
 # --------------------------------------------------------------------------------
+
+
+def _parse_ms_hydrogen_constraints(constraints):
+    """
+    Parses the specified hydrogen constraints from a list of constraints,
+    to a dictionary of the chemical symbols of each constraint mapped to
+    their corresponding constraint properties (factor and weight).
+
+    :param constraints: The hydrogen constraints to parse.
+    :return:            A dictionary mapping chemical symbol to constraint
+                        properties.
+    :raise:             A RuntimeError if a constraint doesn't hasn't been
+                        given an associated chemical symbol.
+    """
+    import json
+
+    parsed = dict()
+
+    for constraint in constraints:
+        symbol = constraint.pop("symbol", None)
+
+        if symbol is None:
+            raise RuntimeError("Invalid hydrogen constraint: " +
+                               str(json.dumps(constraint)) +
+                               " - No symbol provided")
+
+        parsed[symbol] = constraint
+
+    return parsed
 
 
 def _update_masses_from_params(old_masses, param_ws):
