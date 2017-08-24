@@ -305,52 +305,6 @@ Select all rows/groups
 */
 void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 
-/**
-Handle interface when data reduction paused
-*/
-void QDataProcessorWidget::pauseRequested() {}
-
-void QDataProcessorWidget::disableActionOnToolbar(int indexToDisable) {
-  disableActionOnWidget(*ui.rowToolBar, indexToDisable);
-}
-
-void QDataProcessorWidget::disableActionOnWidget(QWidget &widget, int index) {
-  disable(*(widget.actions()[index]));
-}
-
-void QDataProcessorWidget::disable(QAction &toDisable) {
-  toDisable.setEnabled(false);
-}
-
-void QDataProcessorWidget::disable(QWidget &toDisable) {
-  toDisable.setEnabled(false);
-}
-
-void QDataProcessorWidget::enableActionOnToolbar(int indexToEnable) {
-  enableActionOnWidget(*ui.rowToolBar, indexToEnable);
-}
-
-void QDataProcessorWidget::enableActionOnWidget(QWidget &widget,
-                                                int indexToEnable) {
-  enable(*(widget.actions()[indexToEnable]));
-}
-
-void QDataProcessorWidget::enable(QAction &toEnable) {
-  toEnable.setEnabled(true);
-}
-
-void QDataProcessorWidget::enable(QWidget &toEnable) {
-  toEnable.setEnabled(true);
-}
-
-/**
-Handle interface when data reduction resumed
-*/
-void QDataProcessorWidget::resumed() {
-  disableProcessButton();
-  disableSelectionAndEditing();
-}
-
 void QDataProcessorWidget::disableSelectionAndEditing() {
   ui.viewTable->clearSelection();
   ui.viewTable->setSelectionMode(QAbstractItemView::SelectionMode::NoSelection);
@@ -385,14 +339,6 @@ void QDataProcessorWidget::disableActionOnContextMenu(int indexToDisable) {
 
 void QDataProcessorWidget::enableActionOnContextMenu(int indexToEnable) {
   enableActionOnWidget(*m_contextMenu, indexToEnable);
-}
-
-/**
-Handle interface when data reduction confirmed to be paused
-*/
-void QDataProcessorWidget::reductionPaused() {
-  enableProcessButton();
-  enableSelectionAndEditing();
 }
 
 /**

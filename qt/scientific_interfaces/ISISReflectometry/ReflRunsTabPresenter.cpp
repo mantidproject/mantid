@@ -447,7 +447,10 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 /** Tells view to enable all 'process' buttons and disable the 'pause' button
 * when data reduction is paused
 */
-void ReflRunsTabPresenter::pause() { disableAction(EditAction::PAUSE); }
+void ReflRunsTabPresenter::pause() {
+  //tablePresenter().pause();
+  disableAction(EditAction::PAUSE); 
+}
 
 /** Disables the 'process' button and enables the 'pause' button when data
  * reduction is resumed. Also notifies main presenter that data reduction is
@@ -457,6 +460,7 @@ void ReflRunsTabPresenter::resume() {
   disableAction(EditAction::PROCESS);
   enableAction(EditAction::PAUSE);
   preventTableModification();
+  // tablePresenter().resume();
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }

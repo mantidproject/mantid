@@ -359,7 +359,7 @@ void GenericDataProcessorPresenter::process() {
   }
   // Start processing the first group
   m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
-  resume();
+  resumeReduction();
 }
 
 /**
@@ -387,6 +387,11 @@ void GenericDataProcessorPresenter::doNextAction() {
   // a flag we aren't handling.
 }
 
+void GenericDataProcessorPresenter::reductionPaused() {
+  m_view->reductionPaused();
+  m_mainPresenter->confirmReductionPaused();
+  m_confirmReductionPaused = true;
+}
 /**
 Process a new row
 */
@@ -394,9 +399,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
   if (m_pauseReduction) {
     // Notify presenter and view that reduction is paused
-    m_view->reductionPaused();
-    m_mainPresenter->confirmReductionPaused();
-    m_confirmReductionPaused = true;
+    reductionPaused();
     return;
   }
 
@@ -499,7 +502,7 @@ End reduction
 */
 void GenericDataProcessorPresenter::endReduction() {
 
-  pause();
+  requestReductionPause();
   m_confirmReductionPaused = true;
   m_view->reductionPaused();
   m_mainPresenter->confirmReductionPaused();
@@ -1183,7 +1186,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     selectAll();
     break;
   case DataProcessorPresenter::PauseFlag:
-    pause();
+    reductionPauseRequested();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -1585,23 +1588,54 @@ void GenericDataProcessorPresenter::addActionsToEditMenu() {
   m_view->addEditActions(m_manager->getEditCommands());
 }
 
+void GenericDataProcessorPresenter::enableProcessActions() {
+  auto pauseActions = m_manager->getProcessActionCommandIndices();
+  for(const auto& action : pauseActions) {
+    m_view->enableAction(action);
+  }
+
+  m_view->disableProcessButton();
+}
+
+void GenericDataProcessorPresenter::disableProcessActions() {
+  auto pauseActions = m_manager->getProcessActionCommandIndices();
+  for(const auto& action : pauseActions) {
+    m_view->disableAction(action);
+  }
+
+  m_view->disableProcessButton();
+}
+
+void GenericDataProcessorPresenter::enablePauseActions() {
+  auto pauseActions = m_manager->getPauseActionCommandIndices();
+  for(const auto& action : pauseActions) {
+    m_view->enableAction(action);
+  }
+}
+
+void GenericDataProcessorPresenter::disablePauseActions() {
+  auto pauseActions = m_manager->getPauseActionCommandIndices();
+  for(const auto& action : pauseActions) {
+    m_view->disableAction(action);
+  }
+}
+
 /**
 Pauses reduction. If currently reducing runs, this does not take effect until
 the current thread for reducing a row or group has finished
 */
-void GenericDataProcessorPresenter::pause() {
-
-  m_view->pauseRequested();
+void GenericDataProcessorPresenter::requestReductionPause() {
+  disablePauseActions(); 
   m_mainPresenter->pause();
-
   m_pauseReduction = true;
 }
 
 /** Resumes reduction if currently paused
 */
-void GenericDataProcessorPresenter::resume() {
+void GenericDataProcessorPresenter::resumeReduction() {
+  m_view->disableSelectionAndEditing();
+  m_view->disableProcessButton();
 
-  m_view->resumed();
   m_mainPresenter->resume();
 
   m_pauseReduction = false;

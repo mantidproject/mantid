@@ -110,13 +110,6 @@ public:
   // Select all rows/groups
   void selectAll() override;
 
-  // Handle pause/resume of data reduction
-  void pauseRequested() override;
-  void resumed() override;
-
-  // Reduction paused confirmation handler
-  void reductionPaused() override;
-
   // Setter methods
   void setSelection(const std::set<int> &groups) override;
   void setTableList(const QSet<QString> &tables) override;
@@ -147,17 +140,19 @@ public:
 
   void disableProcessButton();
   void enableProcessButton();
+
   void enableAction(int indexToEnable);
   void disableAction(int indexToDisable);
-private:
+
+  void disableSelectionAndEditing();
+  void enableSelectionAndEditing();
+rivate:
   void createTable();
   void disableActionOnToolbar(int indexToDisable);
   void disableActionOnContextMenu(int indexToDisable);
   void enableActionOnToolbar(int indexToEnable);
   void enableActionOnContextMenu(int indexToEnable);
-  void disableSelectionAndEditing();
-  void enableSelectionAndEditing();
-
+  
   static void disableActionOnWidget(QWidget &widget, int index);
   static void enableActionOnWidget(QWidget &widget, int index);
   static void disable(QWidget &widget);

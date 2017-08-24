@@ -301,8 +301,9 @@ private:
   void handleReductionErrorOnThreadCompletion();
 
   // pause/resume reduction
-  void pause();
-  void resume();
+  void requestReductionPause();
+  void resumeReduction();
+  void reductionPaused()
 
   // Check if run has been processed
   bool isProcessed(int position) const;

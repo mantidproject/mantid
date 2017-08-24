@@ -31,20 +31,12 @@ public:
   }
 
   static void destroySuite(ReflRunsTabPresenterTest *suite) { delete suite; }
-
-  ReflRunsTabPresenterTest()
-      : m_tablePresenterVec({&m_mockTablePresenter}),
-        m_presenter(&m_mockRunsTabView, &m_mockProgress, m_tablePresenterVec) {}
-
-  void setUpPresenter(std::vector<DataProcessorPresenter *> &tablePresenters) {
-    m_presenter = ReflRunsTabPresenter(&m_mockRunsTabView, &m_mockProgress,
-                                       tablePresenters);
-    m_presenter.acceptMainPresenter(&m_mockMainPresenter);
-  }
-
-  void setUpPresenter() { setUpPresenter(m_tablePresenterVec); }
-
-  void setUp() override { setUpPresenter(); }
+  
+  static auto constexpr OPEN_TABLE = 0;
+  static auto constexpr NEW_TABLE = 1;
+  static auto constexpr SAVE_TABLE = 2;
+  static auto constexpr SAVE_TABLE_AS = 3;
+  static auto constexpr IMPORT_TBL_FILE = 5;
   
   static auto constexpr PROCESS = 0;
   static auto constexpr PAUSE = 1;
@@ -58,6 +50,55 @@ public:
   static auto constexpr DELETE_ROW = 19;
   static auto constexpr DELETE_GROUP = 20;
 
+  ReflRunsTabPresenterTest()
+      : m_tablePresenterVec({&m_mockTablePresenter}),
+        m_presenter(&m_mockRunsTabView, &m_mockProgress, m_tablePresenterVec) {
+    ON_CALL(m_mockTablePresenter, indexOfCommand(TableAction::OPEN_TABLE))
+        .WillByDefault(Return(OPEN_TABLE));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(TableAction::NEW_TABLE))
+        .WillByDefault(Return(NEW_TABLE));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(TableAction::SAVE_TABLE))
+        .WillByDefault(Return(SAVE_TABLE));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(TableAction::SAVE_TABLE_AS))
+        .WillByDefault(Return(SAVE_TABLE_AS));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(TableAction::IMPORT_TBL_FILE))
+        .WillByDefault(Return(IMPORT_TBL_FILE));
+    
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::PROCESS))
+        .WillByDefault(Return(PROCESS));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::PAUSE))
+        .WillByDefault(Return(PAUSE));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::INSERT_ROW_AFTER))
+        .WillByDefault(Return(INSERT_ROW_AFTER));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::INSERT_GROUP_AFTER))
+        .WillByDefault(Return(INSERT_GROUP_AFTER));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::GROUP_SELECTED))
+        .WillByDefault(Return(GROUP_SELECTED));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::COPY_SELECTED))
+        .WillByDefault(Return(COPY_SELECTED));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::CUT_SELECTED))
+        .WillByDefault(Return(CUT_SELECTED));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::PASTE_SELECTED))
+        .WillByDefault(Return(PASTE_SELECTED));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::CLEAR_SELECTED))
+        .WillByDefault(Return(CLEAR_SELECTED));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::DELETE_ROW))
+        .WillByDefault(Return(DELETE_ROW));
+    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::DELETE_GROUP))
+        .WillByDefault(Return(DELETE_GROUP));
+  }
+
+  void setUpPresenter(std::vector<DataProcessorPresenter *> &tablePresenters) {
+    m_presenter = ReflRunsTabPresenter(&m_mockRunsTabView, &m_mockProgress,
+                                       tablePresenters);
+    m_presenter.acceptMainPresenter(&m_mockMainPresenter);
+  }
+
+  void setUpPresenter() { setUpPresenter(m_tablePresenterVec); }
+
+  void setUp() override { setUpPresenter(); }
+
+  
   void test_constructor_sets_possible_transfer_methods() {
     // Expect that the transfer methods get initialized on the view
     EXPECT_CALL(m_mockRunsTabView, setTransferMethods(_)).Times(Exactly(1));
@@ -148,6 +189,10 @@ public:
     EXPECT_CALL(mockTablePresenter_2, getEditCommandsMocked()).Times(0);
 
     m_presenter.notify(IReflRunsTabPresenter::GroupChangedFlag);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_2));
   }
 
   void test_instrumentChanged() {
@@ -192,8 +237,7 @@ public:
 
   void test_pause_disables_pause_when_pause_requested() {
     // Expect view disables the 'pause' button only
-    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(PAUSE))
-        .Times(Exactly(1));
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(PAUSE));
 
     m_presenter.pause();
   }
@@ -206,50 +250,27 @@ public:
 
     m_presenter.resume();
   }
-  static auto constexpr OPEN_TABLE = 0;
-  static auto constexpr NEW_TABLE = 1;
-  static auto constexpr SAVE_TABLE = 2;
-  static auto constexpr SAVE_TABLE_AS = 3;
-  static auto constexpr IMPORT_TBL_FILE = 5;
-
+  
   void expectPreventsTableModificationThroughReflectometryMenu() {
     EXPECT_CALL(m_mockRunsTabView, disableReflectometryMenuAction(OPEN_TABLE));
     EXPECT_CALL(m_mockRunsTabView, disableReflectometryMenuAction(NEW_TABLE));
     EXPECT_CALL(m_mockRunsTabView,
                 disableReflectometryMenuAction(SAVE_TABLE_AS));
     EXPECT_CALL(m_mockRunsTabView, disableReflectometryMenuAction(SAVE_TABLE));
-    EXPECT_CALL(m_mockRunsTabView, disableReflectometryMenuAction(IMPORT_TBL_FILE));
+    EXPECT_CALL(m_mockRunsTabView,
+                disableReflectometryMenuAction(IMPORT_TBL_FILE));
   }
 
-  
   void expectPreventsTableModificationThroughDataProcessor() {
-    EXPECT_CALL(m_mockRunsTabView,
-                disableEditMenuAction(INSERT_ROW_AFTER))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableEditMenuAction(INSERT_GROUP_AFTER))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableEditMenuAction(GROUP_SELECTED))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableEditMenuAction(COPY_SELECTED))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableEditMenuAction(CUT_SELECTED))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableEditMenuAction(PASTE_SELECTED))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableEditMenuAction(CLEAR_SELECTED))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableEditMenuAction(DELETE_ROW))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableEditMenuAction(DELETE_GROUP))
-        .Times(Exactly(1));
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(INSERT_ROW_AFTER));
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(INSERT_GROUP_AFTER));
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(GROUP_SELECTED));
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(COPY_SELECTED));
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(CUT_SELECTED));
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(PASTE_SELECTED));
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(CLEAR_SELECTED));
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(DELETE_ROW));
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(DELETE_GROUP));
   }
 
   void expectPreventsTableModification() {
@@ -263,8 +284,7 @@ public:
   }
 
   void test_disables_processing_on_resume() {
-    EXPECT_CALL(m_mockRunsTabView,
-                disableEditMenuAction(PROCESS))
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(PROCESS))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(PAUSE))
         .Times(Exactly(1));
@@ -292,39 +312,23 @@ public:
   void expectAllowsTableModificationThroughReflectometryMenu() {
     EXPECT_CALL(m_mockRunsTabView, enableReflectometryMenuAction(OPEN_TABLE));
     EXPECT_CALL(m_mockRunsTabView, enableReflectometryMenuAction(NEW_TABLE));
-    EXPECT_CALL(m_mockRunsTabView, enableReflectometryMenuAction(SAVE_TABLE_AS));
+    EXPECT_CALL(m_mockRunsTabView,
+                enableReflectometryMenuAction(SAVE_TABLE_AS));
     EXPECT_CALL(m_mockRunsTabView, enableReflectometryMenuAction(SAVE_TABLE));
-    EXPECT_CALL(m_mockRunsTabView, enableReflectometryMenuAction(IMPORT_TBL_FILE));
+    EXPECT_CALL(m_mockRunsTabView,
+                enableReflectometryMenuAction(IMPORT_TBL_FILE));
   }
 
   void expectAllowsTableModificationThroughDataProcessor() {
-    EXPECT_CALL(m_mockRunsTabView,
-                enableEditMenuAction(INSERT_ROW_AFTER))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableEditMenuAction(INSERT_GROUP_AFTER))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableEditMenuAction(GROUP_SELECTED))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableEditMenuAction(COPY_SELECTED))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableEditMenuAction(CUT_SELECTED))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableEditMenuAction(PASTE_SELECTED))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableEditMenuAction(CLEAR_SELECTED))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableEditMenuAction(DELETE_ROW))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableEditMenuAction(DELETE_GROUP))
-        .Times(Exactly(1));
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(INSERT_ROW_AFTER));
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(INSERT_GROUP_AFTER));
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(GROUP_SELECTED));
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(COPY_SELECTED));
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(CUT_SELECTED));
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(PASTE_SELECTED));
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(CLEAR_SELECTED));
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(DELETE_ROW));
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(DELETE_GROUP));
   }
 
   void expectAllowsTableModification() {
