@@ -5,8 +5,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidKernel/ConfigService.h"
 #include "../ISISReflectometry/ReflRunsTabPresenter.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "ReflMockObjects.h"
@@ -29,6 +29,7 @@ public:
   static ReflRunsTabPresenterTest *createSuite() {
     return new ReflRunsTabPresenterTest();
   }
+
   static void destroySuite(ReflRunsTabPresenterTest *suite) { delete suite; }
 
   ReflRunsTabPresenterTest()
@@ -44,6 +45,18 @@ public:
   void setUpPresenter() { setUpPresenter(m_tablePresenterVec); }
 
   void setUp() override { setUpPresenter(); }
+  
+  static auto constexpr PROCESS = 0;
+  static auto constexpr PAUSE = 1;
+  static auto constexpr INSERT_ROW_AFTER = 10;
+  static auto constexpr INSERT_GROUP_AFTER = 11;
+  static auto constexpr GROUP_SELECTED = 13;
+  static auto constexpr COPY_SELECTED = 14;
+  static auto constexpr CUT_SELECTED = 15;
+  static auto constexpr PASTE_SELECTED = 16;
+  static auto constexpr CLEAR_SELECTED = 17;
+  static auto constexpr DELETE_ROW = 19;
+  static auto constexpr DELETE_GROUP = 20;
 
   void test_constructor_sets_possible_transfer_methods() {
     // Expect that the transfer methods get initialized on the view
@@ -73,9 +86,11 @@ public:
   void test_presenter_sets_commands_when_ADS_changed() {
     EXPECT_CALL(m_mockRunsTabView, clearCommands()).Times(Exactly(1));
     // Expect that the view is populated with the list of table commands
-    EXPECT_CALL(m_mockRunsTabView, setTableCommandsProxy()).Times(Exactly(1));
+    EXPECT_CALL(m_mockRunsTabView, setEditMenuCommandsProxy())
+        .Times(Exactly(1));
     // Expect that the view is populated with the list of row commands
-    EXPECT_CALL(m_mockRunsTabView, setRowCommandsProxy()).Times(Exactly(1));
+    EXPECT_CALL(m_mockRunsTabView, setReflectometryMenuCommandsProxy())
+        .Times(Exactly(1));
     // The presenter is notified that something changed in the ADS
     m_presenter.notifyADSChanged(QSet<QString>());
   }
@@ -124,9 +139,13 @@ public:
         .WillOnce(Return(1));
 
     // Commands should be updated with presenter of selected group
-    EXPECT_CALL(mockTablePresenter_0, publishCommandsMocked()).Times(0);
-    EXPECT_CALL(mockTablePresenter_1, publishCommandsMocked()).Times(1);
-    EXPECT_CALL(mockTablePresenter_2, publishCommandsMocked()).Times(0);
+    EXPECT_CALL(mockTablePresenter_0, getTableCommandsMocked()).Times(0);
+    EXPECT_CALL(mockTablePresenter_1, getTableCommandsMocked()).Times(1);
+    EXPECT_CALL(mockTablePresenter_2, getTableCommandsMocked()).Times(0);
+
+    EXPECT_CALL(mockTablePresenter_0, getEditCommandsMocked()).Times(0);
+    EXPECT_CALL(mockTablePresenter_1, getEditCommandsMocked()).Times(1);
+    EXPECT_CALL(mockTablePresenter_2, getEditCommandsMocked()).Times(0);
 
     m_presenter.notify(IReflRunsTabPresenter::GroupChangedFlag);
   }
@@ -160,18 +179,20 @@ public:
     EXPECT_CALL(m_mockMainPresenter, runPythonAlgorithm(pythonSrc.str()))
         .Times(Exactly(1))
         .WillRepeatedly(ICATRuntimeException());
-    EXPECT_CALL(m_mockMainPresenter, giveUserCritical("Error Logging in:\n",
-                                                      "login failed")).Times(1);
+    EXPECT_CALL(m_mockMainPresenter,
+                giveUserCritical("Error Logging in:\n", "login failed"))
+        .Times(1);
     EXPECT_CALL(
         m_mockMainPresenter,
         giveUserInfo("Error Logging in: Please press 'Search' to try again.",
-                     "Login Failed")).Times(1);
+                     "Login Failed"))
+        .Times(1);
     m_presenter.notify(IReflRunsTabPresenter::SearchFlag);
   }
 
   void test_pause_disables_pause_when_pause_requested() {
     // Expect view disables the 'pause' button only
-    EXPECT_CALL(m_mockRunsTabView, disableAction(DataProcessorAction::PAUSE))
+    EXPECT_CALL(m_mockRunsTabView, disableEditMenuAction(PAUSE))
         .Times(Exactly(1));
 
     m_presenter.pause();
@@ -185,47 +206,49 @@ public:
 
     m_presenter.resume();
   }
+  static auto constexpr OPEN_TABLE = 0;
+  static auto constexpr NEW_TABLE = 1;
+  static auto constexpr SAVE_TABLE = 2;
+  static auto constexpr SAVE_TABLE_AS = 3;
+  static auto constexpr IMPORT_TBL_FILE = 5;
 
   void expectPreventsTableModificationThroughReflectometryMenu() {
+    EXPECT_CALL(m_mockRunsTabView, disableReflectometryMenuAction(OPEN_TABLE));
+    EXPECT_CALL(m_mockRunsTabView, disableReflectometryMenuAction(NEW_TABLE));
     EXPECT_CALL(m_mockRunsTabView,
-                disableAction(ReflectometryAction::OPEN_TABLE));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableAction(ReflectometryAction::NEW_TABLE));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableAction(ReflectometryAction::SAVE_TABLE_AS));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableAction(ReflectometryAction::SAVE_TABLE));
-    EXPECT_CALL(m_mockRunsTabView,
-                disableAction(ReflectometryAction::IMPORT_TBL));
+                disableReflectometryMenuAction(SAVE_TABLE_AS));
+    EXPECT_CALL(m_mockRunsTabView, disableReflectometryMenuAction(SAVE_TABLE));
+    EXPECT_CALL(m_mockRunsTabView, disableReflectometryMenuAction(IMPORT_TBL_FILE));
   }
 
+  
   void expectPreventsTableModificationThroughDataProcessor() {
     EXPECT_CALL(m_mockRunsTabView,
-                disableAction(DataProcessorAction::INSERT_ROW_AFTER))
+                disableEditMenuAction(INSERT_ROW_AFTER))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                disableAction(DataProcessorAction::INSERT_GROUP_AFTER))
+                disableEditMenuAction(INSERT_GROUP_AFTER))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                disableAction(DataProcessorAction::GROUP_SELECTED))
+                disableEditMenuAction(GROUP_SELECTED))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                disableAction(DataProcessorAction::COPY_SELECTED))
+                disableEditMenuAction(COPY_SELECTED))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                disableAction(DataProcessorAction::CUT_SELECTED))
+                disableEditMenuAction(CUT_SELECTED))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                disableAction(DataProcessorAction::PASTE_SELECTED))
+                disableEditMenuAction(PASTE_SELECTED))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                disableAction(DataProcessorAction::CLEAR_SELECTED))
+                disableEditMenuAction(CLEAR_SELECTED))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                disableAction(DataProcessorAction::DELETE_ROW))
+                disableEditMenuAction(DELETE_ROW))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                disableAction(DataProcessorAction::DELETE_GROUP))
+                disableEditMenuAction(DELETE_GROUP))
         .Times(Exactly(1));
   }
 
@@ -240,9 +263,10 @@ public:
   }
 
   void test_disables_processing_on_resume() {
-    EXPECT_CALL(m_mockRunsTabView, disableAction(DataProcessorAction::PROCESS))
+    EXPECT_CALL(m_mockRunsTabView,
+                disableEditMenuAction(PROCESS))
         .Times(Exactly(1));
-    EXPECT_CALL(m_mockRunsTabView, enableAction(DataProcessorAction::PAUSE))
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(PAUSE))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView, disableAutoreduce()).Times(Exactly(1));
 
@@ -250,7 +274,7 @@ public:
   }
 
   void test_re_enable_pause_on_resume() {
-    EXPECT_CALL(m_mockRunsTabView, enableAction(DataProcessorAction::PAUSE))
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(PAUSE))
         .Times(Exactly(1));
     m_presenter.resume();
   }
@@ -266,45 +290,40 @@ public:
   }
 
   void expectAllowsTableModificationThroughReflectometryMenu() {
-    EXPECT_CALL(m_mockRunsTabView,
-                enableAction(ReflectometryAction::OPEN_TABLE));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableAction(ReflectometryAction::NEW_TABLE));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableAction(ReflectometryAction::SAVE_TABLE_AS));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableAction(ReflectometryAction::SAVE_TABLE));
-    EXPECT_CALL(m_mockRunsTabView,
-                enableAction(ReflectometryAction::IMPORT_TBL));
+    EXPECT_CALL(m_mockRunsTabView, enableReflectometryMenuAction(OPEN_TABLE));
+    EXPECT_CALL(m_mockRunsTabView, enableReflectometryMenuAction(NEW_TABLE));
+    EXPECT_CALL(m_mockRunsTabView, enableReflectometryMenuAction(SAVE_TABLE_AS));
+    EXPECT_CALL(m_mockRunsTabView, enableReflectometryMenuAction(SAVE_TABLE));
+    EXPECT_CALL(m_mockRunsTabView, enableReflectometryMenuAction(IMPORT_TBL_FILE));
   }
 
   void expectAllowsTableModificationThroughDataProcessor() {
     EXPECT_CALL(m_mockRunsTabView,
-                enableAction(DataProcessorAction::INSERT_ROW_AFTER))
+                enableEditMenuAction(INSERT_ROW_AFTER))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                enableAction(DataProcessorAction::INSERT_GROUP_AFTER))
+                enableEditMenuAction(INSERT_GROUP_AFTER))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                enableAction(DataProcessorAction::GROUP_SELECTED))
+                enableEditMenuAction(GROUP_SELECTED))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                enableAction(DataProcessorAction::COPY_SELECTED))
+                enableEditMenuAction(COPY_SELECTED))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                enableAction(DataProcessorAction::CUT_SELECTED))
+                enableEditMenuAction(CUT_SELECTED))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                enableAction(DataProcessorAction::PASTE_SELECTED))
+                enableEditMenuAction(PASTE_SELECTED))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                enableAction(DataProcessorAction::CLEAR_SELECTED))
+                enableEditMenuAction(CLEAR_SELECTED))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                enableAction(DataProcessorAction::DELETE_ROW))
+                enableEditMenuAction(DELETE_ROW))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView,
-                enableAction(DataProcessorAction::DELETE_GROUP))
+                enableEditMenuAction(DELETE_GROUP))
         .Times(Exactly(1));
   }
 
@@ -320,7 +339,7 @@ public:
   }
 
   void test_processing_re_enabled_on_pause_confirmation() {
-    EXPECT_CALL(m_mockRunsTabView, enableAction(DataProcessorAction::PROCESS))
+    EXPECT_CALL(m_mockRunsTabView, enableEditMenuAction(PROCESS))
         .Times(Exactly(1));
     EXPECT_CALL(m_mockRunsTabView, enableAutoreduce()).Times(Exactly(1));
 

@@ -8,7 +8,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
@@ -18,6 +17,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
@@ -118,39 +118,50 @@ public:
     delete suite;
   }
 
-  void test_publish_commands() {
+  template <typename T>
+  bool notNullAndHasType(DataProcessorCommand_uptr const& ptr) const {
+    return dynamic_cast<T *>(ptr.get()) != nullptr;
+  }
+
+  void test_get_edit_commands() {
     NiceMock<MockDataProcessorPresenter> presenter;
     DataProcessorOneLevelTreeManager manager(&presenter,
                                              DataProcessorWhiteList());
+    auto commands = manager.getEditCommands();
 
-    auto comm = manager.publishCommands();
+    TS_ASSERT(commands.size() > 12);
+    TS_ASSERT(notNullAndHasType<DataProcessorProcessCommand>(commands[0]));
+    TS_ASSERT(notNullAndHasType<DataProcessorPauseCommand>(commands[1]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[2]));
+    TS_ASSERT(notNullAndHasType<DataProcessorPlotRowCommand>(commands[3]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[4]));
+    TS_ASSERT(notNullAndHasType<DataProcessorAppendRowCommand>(commands[5]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[6]));
+    TS_ASSERT(notNullAndHasType<DataProcessorCopySelectedCommand>(commands[7]));
+    TS_ASSERT(notNullAndHasType<DataProcessorCutSelectedCommand>(commands[8]));
+    TS_ASSERT(
+        notNullAndHasType<DataProcessorPasteSelectedCommand>(commands[9]));
+    TS_ASSERT(
+        notNullAndHasType<DataProcessorClearSelectedCommand>(commands[10]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[11]));
+    TS_ASSERT(notNullAndHasType<DataProcessorDeleteRowCommand>(commands[12]));
+  }
 
-    TS_ASSERT_EQUALS(comm.size(), 23);
-    TS_ASSERT(dynamic_cast<DataProcessorOpenTableCommand *>(comm[0].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorNewTableCommand *>(comm[1].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSaveTableCommand *>(comm[2].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSaveTableAsCommand *>(comm[3].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[4].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorImportTableCommand *>(comm[5].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorExportTableCommand *>(comm[6].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[7].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorOptionsCommand *>(comm[8].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[9].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorProcessCommand *>(comm[10].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorPauseCommand *>(comm[11].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[12].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorPlotRowCommand *>(comm[13].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[14].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorAppendRowCommand *>(comm[15].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[16].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorCopySelectedCommand *>(comm[17].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorCutSelectedCommand *>(comm[18].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorPasteSelectedCommand *>(comm[19].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorClearSelectedCommand *>(comm[20].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[21].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorDeleteRowCommand *>(comm[22].get()));
+  void test_get_table_commands() {
+    NiceMock<MockDataProcessorPresenter> presenter;
+    DataProcessorOneLevelTreeManager manager(&presenter,
+                                             DataProcessorWhiteList());
+    auto commands = manager.getTableCommands();
+    TS_ASSERT(commands.size() > 8);
+    TS_ASSERT(notNullAndHasType<DataProcessorOpenTableCommand>(commands[0]));
+    TS_ASSERT(notNullAndHasType<DataProcessorNewTableCommand>(commands[1]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSaveTableCommand>(commands[2]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSaveTableAsCommand>(commands[3]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[4]));
+    TS_ASSERT(notNullAndHasType<DataProcessorImportTableCommand>(commands[5]));
+    TS_ASSERT(notNullAndHasType<DataProcessorExportTableCommand>(commands[6]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[7]));
+    TS_ASSERT(notNullAndHasType<DataProcessorOptionsCommand>(commands[8]));
   }
 
   void test_append_row() {
@@ -313,12 +324,12 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
     TS_ASSERT_EQUALS(data.size(), 4);
-    QStringList firstRow = {"12345", "0.5",                       "20000",
-                            "0.1",   "0.2",                       "0.04",
-                            "5",     "CorrectDetectorPositions=1"};
-    QStringList secondRow = {"12346", "0.6",                       "20001",
-                             "0.1",   "0.2",                       "0.04",
-                             "4",     "CorrectDetectorPositions=0"};
+    QStringList firstRow = {
+        "12345", "0.5",  "20000", "0.1",
+        "0.2",   "0.04", "5",     "CorrectDetectorPositions=1"};
+    QStringList secondRow = {
+        "12346", "0.6",  "20001", "0.1",
+        "0.2",   "0.04", "4",     "CorrectDetectorPositions=0"};
     QStringList thirdRow = {"12347", "0.7",  "20003", "0.3",
                             "0.4",   "0.01", "3",     ""};
     QStringList fourthRow = {"12348", "0.8",  "20004", "0.4",

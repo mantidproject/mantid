@@ -77,8 +77,9 @@ public:
   MOCK_METHOD0(addEditActionsProxy, void());
 
   // Calls we don't care about
-  void showTable(boost::shared_ptr<
-      MantidQt::MantidWidgets::AbstractDataProcessorTreeModel>) override{};
+  void showTable(
+      boost::shared_ptr<
+          MantidQt::MantidWidgets::AbstractDataProcessorTreeModel>) override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
@@ -142,6 +143,7 @@ public:
   MOCK_METHOD1(setForcedReProcessing, void(bool));
 
 private:
+  
   // Calls we don't care about
   const std::map<QString, QVariant> &options() const override {
     return m_options;
@@ -151,7 +153,7 @@ private:
     getEditCommandsMocked();
     return std::vector<DataProcessorCommand_uptr>();
   };
-  
+
   std::vector<DataProcessorCommand_uptr> getTableCommands() override {
     // for (size_t i = 0; i < 31; i++)
     //   commands.push_back(
