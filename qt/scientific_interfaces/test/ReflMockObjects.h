@@ -1,9 +1,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "MantidKernel/ICatalogInfo.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "../ISISReflectometry/IReflEventPresenter.h"
 #include "../ISISReflectometry/IReflEventTabPresenter.h"
 #include "../ISISReflectometry/IReflEventView.h"
@@ -17,6 +14,9 @@
 #include "../ISISReflectometry/IReflSettingsTabPresenter.h"
 #include "../ISISReflectometry/IReflSettingsView.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
+#include "MantidKernel/ICatalogInfo.h"
+#include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
 #include <gmock/gmock.h>
 
@@ -36,16 +36,15 @@ public:
   // of the vector of unique pointers
   // I will mock a proxy method, setTableCommandsProxy, I just want to test that
   // this method is invoked by the presenter's constructor
-  virtual void setTableCommands(
-      std::vector<MantidQt::MantidWidgets::DataProcessorCommand_uptr>)
-      override {
-    setTableCommandsProxy();
+  virtual void setReflectometryMenuCommands(
+      typename IReflRunsTabView::CommandVector) override {
+    setReflectometryMenuCommandsProxy();
   }
   // The same happens for setRowCommands
-  virtual void setRowCommands(
-      std::vector<MantidQt::MantidWidgets::DataProcessorCommand_uptr>)
+  virtual void setEditMenuCommands(
+      typename IReflRunsTabView::CommandVector)
       override {
-    setRowCommandsProxy();
+    setEditMenuCommandsProxy();
   }
 
   // IO
@@ -57,15 +56,15 @@ public:
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
   MOCK_CONST_METHOD0(getSelectedGroup, int());
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
-  MOCK_METHOD0(setTableCommandsProxy, void());
-  MOCK_METHOD0(setRowCommandsProxy, void());
+  MOCK_METHOD0(setReflectometryMenuCommandsProxy, void());
+  MOCK_METHOD0(setEditMenuCommandsProxy, void());
   MOCK_METHOD0(clearCommands, void());
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
-  MOCK_METHOD1(enableAction, void(DataProcessorAction));
-  MOCK_METHOD1(enableAction, void(ReflectometryAction));
-  MOCK_METHOD1(disableAction, void(DataProcessorAction));
-  MOCK_METHOD1(disableAction, void(ReflectometryAction));
+  MOCK_METHOD1(enableEditMenuAction, void(int));
+  MOCK_METHOD1(enableReflectometryMenuAction, void(int));
+  MOCK_METHOD1(disableEditMenuAction, void(int));
+  MOCK_METHOD1(disableReflectometryMenuAction, void(int));
   MOCK_METHOD0(enableTransfer, void());
   MOCK_METHOD0(disableTransfer, void());
   MOCK_METHOD0(enableAutoreduce, void());
@@ -74,7 +73,8 @@ public:
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
   void setAllSearchRowsSelected() override{};
-  IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
+  IReflRunsTabPresenter *getPresenter() const override {
+    return nullptr; };
 };
 
 class MockSettingsView : public IReflSettingsView {

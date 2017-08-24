@@ -5,11 +5,13 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableAction.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/EditAction.h"
+#include <QStringList>
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
-#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -53,6 +55,12 @@ public:
   /// Actions/commands
 
   /// Publish actions/commands
+  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
+  getTableCommands() = 0;
+  virtual int indexOfCommand(TableAction action) = 0;
+  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
+  getEditCommands() = 0;
+  virtual int indexOfCommand(EditAction action) = 0;
   virtual std::vector<std::unique_ptr<DataProcessorCommand>>
   publishCommands() = 0;
   /// Append a row

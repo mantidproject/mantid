@@ -2,6 +2,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
@@ -11,11 +12,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
@@ -26,10 +27,9 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h"
-#include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -63,11 +63,123 @@ DataProcessorTwoLevelTreeManager::DataProcessorTwoLevelTreeManager(
     : DataProcessorTwoLevelTreeManager(
           presenter, createDefaultWorkspace(whitelist), whitelist) {}
 
+std::vector<DataProcessorCommand_uptr>
+DataProcessorTwoLevelTreeManager::getTableCommands() {
+  std::vector<DataProcessorCommand_uptr> commands;
+  addCommand(commands, make_unique<DataProcessorOpenTableCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorNewTableCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorSaveTableCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorImportTableCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorExportTableCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorOptionsCommand>(m_presenter));
+  return commands;
+}
+
+int DataProcessorTwoLevelTreeManager::indexOfCommand(TableAction action) {
+  switch (action) {
+  case TableAction::OPEN_TABLE:
+    return 0;
+  case TableAction::NEW_TABLE:
+    return 1;
+  case TableAction::SAVE_TABLE:
+    return 2;
+  case TableAction::SAVE_TABLE_AS:
+    return 3;
+  case TableAction::IMPORT_TBL_FILE:
+    return 5;
+  case TableAction::EXPORT_TBL_FILE:
+    return 6;
+  case TableAction::OPTIONS:
+    return 8;
+  }
+}
+
 /**
 * Destructor
 */
 DataProcessorTwoLevelTreeManager::~DataProcessorTwoLevelTreeManager() {}
 
+std::vector<DataProcessorCommand_uptr>
+DataProcessorTwoLevelTreeManager::getEditCommands() {
+  std::vector<DataProcessorCommand_uptr> commands;
+  addCommand(commands, make_unique<DataProcessorProcessCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorPauseCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorExpandCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorExpandGroupsCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorCollapseGroupsCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorPlotRowCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorPlotGroupCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorAppendRowCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorAppendGroupCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorGroupRowsCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorCopySelectedCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorCutSelectedCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorClearSelectedCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<DataProcessorDeleteRowCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorDeleteGroupCommand>(m_presenter));
+  return commands;
+}
+
+int DataProcessorTwoLevelTreeManager::indexOfCommand(EditAction action) {
+  switch (action) {
+  case EditAction::PROCESS:
+    return 0;
+  case EditAction::PAUSE:
+    return 1;
+  case EditAction::SELECT_GROUP:
+    return 3;
+  case EditAction::EXPAND_GROUP:
+    return 4;
+  case EditAction::COLAPSE_GROUP:
+    return 5;
+  case EditAction::PLOT_RUNS:
+    return 7;
+  case EditAction::PLOT_GROUP:
+    return 8;
+  case EditAction::INSERT_ROW_AFTER:
+    return 10;
+  case EditAction::INSERT_GROUP_AFTER:
+    return 11;
+  case EditAction::GROUP_SELECTED:
+    return 13;
+  case EditAction::COPY_SELECTED:
+    return 14;
+  case EditAction::CUT_SELECTED:
+    return 15;
+  case EditAction::PASTE_SELECTED:
+    return 16;
+  case EditAction::CLEAR_SELECTED:
+    return 17;
+  case EditAction::DELETE_ROW:
+    return 19;
+  case EditAction::DELETE_GROUP:
+    return 20;
+  case EditAction::WHATS_THIS:
+    return 21;
+  default:
+    throw std::logic_error("Unknown action for two level manager specified.");
+  }
+}
 /**
 * Publishes a list of available commands
 * @return : The list of available commands
@@ -359,7 +471,7 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const QString &text) {
 
         // Paste as many columns as we can from this line
         for (int col = 0; col < m_model->columnCount() &&
-                              col < static_cast<int>(values.size());
+                          col < static_cast<int>(values.size());
              ++col)
           m_model->setData(
               m_model->index(*rowIt, col, m_model->index(groupId, 0)),

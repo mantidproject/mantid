@@ -15,8 +15,8 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h"
@@ -215,9 +215,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
-  std::transform(std::begin(in), std::end(in), std::inserter(out, out.begin()),
-                 [](QString const &inStr)
-                     -> std::string { return inStr.toStdString(); });
+  std::transform(
+      std::begin(in), std::end(in), std::inserter(out, out.begin()),
+      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
   return out;
 }
 }
@@ -1052,8 +1052,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                             ? propValue.right(propValue.indexOf("e"))
                             : "";
           propValue =
-              propValue.mid(0, propValue.indexOf(".") +
-                                   m_options["RoundPrecision"].toInt() + 1) +
+              propValue.mid(0,
+                            propValue.indexOf(".") +
+                                m_options["RoundPrecision"].toInt() + 1) +
               exp;
         }
 
@@ -1581,12 +1582,7 @@ void GenericDataProcessorPresenter::initOptions() {
 /** Tells the view which of the actions should be added to the toolbar
 */
 void GenericDataProcessorPresenter::addActionsToEditMenu() {
-
-  auto commands = m_manager->publishCommands();
-  std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;
-  for (auto comm = 10u; comm < commands.size(); comm++)
-    commandsToShow.push_back(std::move(commands.at(comm)));
-  m_view->addEditActions(std::move(commandsToShow));
+  m_view->addEditActions(m_manager->getEditCommands());
 }
 
 /**
@@ -1629,20 +1625,26 @@ void GenericDataProcessorPresenter::setPromptUser(bool allowPrompt) {
   m_promptUser = allowPrompt;
 }
 
-/**
-* Publishes a list of available commands
-* @return : The list of available commands
-*/
-std::vector<std::unique_ptr<DataProcessorCommand>>
-GenericDataProcessorPresenter::publishCommands() {
-
-  auto commands = m_manager->publishCommands();
-
-  // "Open Table" needs the list of "child" commands, i.e. the list of
-  // available workspaces in the ADS
-  commands.at(0)->setChild(getTableList());
-
+typename GenericDataProcessorPresenter::CommandVector
+GenericDataProcessorPresenter::getTableCommands() {
+  auto commands = m_manager->getTableCommands();
+  // "Open Table" needs the the list of available workspaces in the ADS
+  commands.at(m_manager->indexOfCommand(TableAction::OPEN_TABLE))
+      ->setChild(getTableList());
   return commands;
+}
+
+typename GenericDataProcessorPresenter::CommandVector
+GenericDataProcessorPresenter::getEditCommands() {
+  return m_manager->getEditCommands();
+}
+
+int GenericDataProcessorPresenter::indexOfCommand(TableAction action) {
+  return m_manager->indexOfCommand(action);
+}
+
+int GenericDataProcessorPresenter::indexOfCommand(EditAction action) {
+  return m_manager->indexOfCommand(action);
 }
 
 /** Register a workspace receiver

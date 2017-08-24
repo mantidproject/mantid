@@ -51,8 +51,11 @@ public:
   /// Destructor
   ~DataProcessorTwoLevelTreeManager() override;
 
-  /// Publish commands
+  int indexOfCommand(EditAction action) override;
+  std::vector<std::unique_ptr<DataProcessorCommand>> getEditCommands() override;
   std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
+  int indexOfCommand(TableAction action) override;
+  std::vector<std::unique_ptr<DataProcessorCommand>> getTableCommands() override;
   /// Append a row
   void appendRow() override;
   /// Append a group to the model

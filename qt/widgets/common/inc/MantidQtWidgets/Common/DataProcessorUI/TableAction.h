@@ -1,11 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLACTION_H
 #define MANTID_CUSTOMINTERFACES_REFLACTION_H
 namespace MantidQt {
-namespace CustomInterfaces {
-/** @enum ReflectometryAction
+namespace MantidWidgets {
+/** @enum TableAction
 
-ReflectometryAction is an enumerations of reflectometry actions which may be
-enabled or disabled individually.
+TableAction is an enumeration of actions concerned with the entire table.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -28,13 +27,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-enum class ReflectometryAction {
+enum class TableAction {
   OPEN_TABLE,
   NEW_TABLE,
   SAVE_TABLE,
   SAVE_TABLE_AS,
-  IMPORT_TBL,
-  EXPORT_TBL
+  IMPORT_TBL_FILE,
+  EXPORT_TBL_FILE,
+  OPTIONS
 };
 }
 }

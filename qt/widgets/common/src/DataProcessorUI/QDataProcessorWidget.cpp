@@ -121,7 +121,7 @@ void QDataProcessorWidget::createTable() {
   connect(ui.buttonProcess, SIGNAL(clicked()), this, SLOT(processClicked()));
 }
 
-/** Add actions to the toolbar
+/** Add actions to the toolbar and context menu
 * @param commands :: A vector of actions (commands)
 */
 void QDataProcessorWidget::addEditActions(

@@ -1,4 +1,6 @@
 #include "ReflRunsTabPresenter.h"
+#include "IReflMainWindowPresenter.h"
+#include "IReflRunsTabView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,17 +9,15 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "IReflMainWindowPresenter.h"
-#include "IReflRunsTabView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflCatalogSearcher.h"
+#include "ReflFromStdStringMap.h"
 #include "ReflLegacyTransferStrategy.h"
 #include "ReflMeasureTransferStrategy.h"
 #include "ReflNexusMeasurementItemSource.h"
 #include "ReflSearchModel.h"
-#include "ReflFromStdStringMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/ProgressPresenter.h"
 
 #include <QStringList>
 #include <algorithm>
@@ -145,30 +145,34 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
 
 /** Pushes the list of commands (actions) */
 void ReflRunsTabPresenter::pushCommands() {
-
   m_view->clearCommands();
+  auto &presenter = tablePresenter();
+  pushEditCommands(presenter);
+  pushTableCommands(presenter);
+}
 
-  // The expected number of commands
-  const constexpr auto nCommands = 31u;
-  auto commands =
-      m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
-  if (commands.size() == nCommands) {
-    // The index at which "row" commands start
-    const constexpr auto rowCommStart = 10u;
-    // We want to have two menus
-    // Populate the "Reflectometry" menu
-    std::vector<DataProcessorCommand_uptr> tableCommands;
-    for (auto i = 0u; i < rowCommStart; i++)
-      tableCommands.push_back(std::move(commands[i]));
-    m_view->setTableCommands(std::move(tableCommands));
-    // Populate the "Edit" menu
-    std::vector<DataProcessorCommand_uptr> rowCommands;
-    for (auto i = rowCommStart; i < nCommands; i++)
-      rowCommands.push_back(std::move(commands[i]));
-    m_view->setRowCommands(std::move(rowCommands));
-  } else {
-    throw std::runtime_error("Invalid list of commands");
-  }
+int ReflRunsTabPresenter::indexOfCommand(TableAction command) {
+  return tablePresenter().indexOfCommand(command);
+}
+
+int ReflRunsTabPresenter::indexOfCommand(EditAction command) {
+  return tablePresenter().indexOfCommand(command);
+}
+
+DataProcessorPresenter &ReflRunsTabPresenter::tablePresenter() {
+  return *m_tablePresenters.at(m_view->getSelectedGroup());
+}
+
+void ReflRunsTabPresenter::pushEditCommands(
+    DataProcessorPresenter &tablePresenter) {
+  auto editCommands = tablePresenter.getEditCommands();
+  m_view->setEditMenuCommands(std::move(editCommands));
+}
+
+void ReflRunsTabPresenter::pushTableCommands(
+    DataProcessorPresenter &tablePresenter) {
+  auto tableCommands = tablePresenter.getTableCommands();
+  m_view->setReflectometryMenuCommands(std::move(tableCommands));
 }
 
 /** Searches for runs that can be used */
@@ -443,36 +447,34 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 /** Tells view to enable all 'process' buttons and disable the 'pause' button
 * when data reduction is paused
 */
-void ReflRunsTabPresenter::pause() {
-  disableAction(DataProcessorAction::PAUSE);
-}
+void ReflRunsTabPresenter::pause() { disableAction(EditAction::PAUSE); }
 
 /** Disables the 'process' button and enables the 'pause' button when data
  * reduction is resumed. Also notifies main presenter that data reduction is
  * confirmed to be resumed.
 */
 void ReflRunsTabPresenter::resume() {
-  disableAction(DataProcessorAction::PROCESS);
-  enableAction(DataProcessorAction::PAUSE);
+  disableAction(EditAction::PROCESS);
+  enableAction(EditAction::PAUSE);
   preventTableModification();
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
 
-void ReflRunsTabPresenter::enableAction(ReflectometryAction action) {
-  m_view->enableAction(action);
+void ReflRunsTabPresenter::enableAction(EditAction action) {
+  m_view->enableEditMenuAction(indexOfCommand(action));
 }
 
-void ReflRunsTabPresenter::disableAction(ReflectometryAction action) {
-  m_view->disableAction(action);
+void ReflRunsTabPresenter::disableAction(EditAction action) {
+  m_view->disableEditMenuAction(indexOfCommand(action));
 }
 
-void ReflRunsTabPresenter::enableAction(DataProcessorAction action) {
-  m_view->enableAction(action);
+void ReflRunsTabPresenter::enableAction(TableAction action) {
+  m_view->enableReflectometryMenuAction(indexOfCommand(action));
 }
 
-void ReflRunsTabPresenter::disableAction(DataProcessorAction action) {
-  m_view->disableAction(action);
+void ReflRunsTabPresenter::disableAction(TableAction action) {
+  m_view->disableReflectometryMenuAction(indexOfCommand(action));
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
@@ -480,22 +482,22 @@ void ReflRunsTabPresenter::disableAction(DataProcessorAction action) {
 void ReflRunsTabPresenter::confirmReductionPaused() {
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
-  enableAction(DataProcessorAction::PROCESS);
+  enableAction(EditAction::PROCESS);
   allowTableModification();
 }
 
-const std::array<ReflectometryAction, 5>
+const std::array<TableAction const, 5>
     ReflRunsTabPresenter::disabledWhileProcessing = {
-        {ReflectometryAction::OPEN_TABLE, ReflectometryAction::NEW_TABLE,
-         ReflectometryAction::SAVE_TABLE, ReflectometryAction::SAVE_TABLE_AS,
-         ReflectometryAction::IMPORT_TBL}};
+        {TableAction::OPEN_TABLE, TableAction::NEW_TABLE,
+         TableAction::SAVE_TABLE, TableAction::SAVE_TABLE_AS,
+         TableAction::IMPORT_TBL_FILE}};
 
 void ReflRunsTabPresenter::preventTableModification() {
   m_view->disableAutoreduce();
   m_view->disableTransfer();
 
-  disableTableModification([this](DataProcessorAction action)
-                               -> void { this->disableAction(action); });
+  disableModificationActions(
+      [this](EditAction const action) -> void { this->disableAction(action); });
   for (auto reflectometryMenuAction : disabledWhileProcessing)
     disableAction(reflectometryMenuAction);
 }
@@ -504,8 +506,8 @@ void ReflRunsTabPresenter::allowTableModification() {
   m_view->enableAutoreduce();
   m_view->enableTransfer();
 
-  enableTableModification([this](DataProcessorAction action)
-                              -> void { this->enableAction(action); });
+  enableModificationActions(
+      [this](EditAction const action) -> void { this->enableAction(action); });
   for (auto reflectometryMenuAction : disabledWhileProcessing)
     enableAction(reflectometryMenuAction);
 }
@@ -525,7 +527,7 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
 void ReflRunsTabPresenter::confirmReductionResumed() {
-  enableAction(DataProcessorAction::PAUSE);
+  enableAction(EditAction::PAUSE);
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }

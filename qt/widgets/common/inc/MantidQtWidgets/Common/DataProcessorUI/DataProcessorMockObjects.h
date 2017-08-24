@@ -50,9 +50,9 @@ public:
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD0(selectAll, void());
-  MOCK_METHOD0(pause, void());
-  MOCK_METHOD0(resume, void());
-  MOCK_METHOD0(confirmReductionPaused, void());
+  MOCK_METHOD0(pauseRequested, void());
+  MOCK_METHOD0(resumed, void());
+  MOCK_METHOD0(reductionPaused, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const QString &text));
 
@@ -70,11 +70,11 @@ public:
 
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
-  // copyable which means we have to mock addActions() via a proxy method
-  void addActions(std::vector<DataProcessorCommand_uptr>) override {
-    addActionsProxy();
+  // copyable which means we have to mock addEditActions() via a proxy method
+  void addEditActions(std::vector<DataProcessorCommand_uptr>) override {
+    addEditActionsProxy();
   }
-  MOCK_METHOD0(addActionsProxy, void());
+  MOCK_METHOD0(addEditActionsProxy, void());
 
   // Calls we don't care about
   void showTable(boost::shared_ptr<
@@ -135,7 +135,10 @@ public:
                      bool(const QString &prompt, const QString &title));
   MOCK_CONST_METHOD2(giveUserWarning,
                      void(const QString &prompt, const QString &title));
-  MOCK_METHOD0(publishCommandsMocked, void());
+  MOCK_METHOD0(getTableCommandsMocked, void());
+  MOCK_METHOD1(indexOfCommand, int(TableAction));
+  MOCK_METHOD1(indexOfCommand, int(EditAction));
+  MOCK_METHOD0(getEditCommandsMocked, void());
   MOCK_METHOD1(setForcedReProcessing, void(bool));
 
 private:
@@ -144,14 +147,19 @@ private:
     return m_options;
   };
 
-  std::vector<DataProcessorCommand_uptr> publishCommands() override {
-    std::vector<DataProcessorCommand_uptr> commands;
-    for (size_t i = 0; i < 31; i++)
-      commands.push_back(
-          Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
-    publishCommandsMocked();
-    return commands;
+  std::vector<DataProcessorCommand_uptr> getEditCommands() override {
+    getEditCommandsMocked();
+    return std::vector<DataProcessorCommand_uptr>();
   };
+  
+  std::vector<DataProcessorCommand_uptr> getTableCommands() override {
+    // for (size_t i = 0; i < 31; i++)
+    //   commands.push_back(
+    //       Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
+    getTableCommandsMocked();
+    return std::vector<DataProcessorCommand_uptr>();
+  };
+
   std::set<QString> getTableList() const { return std::set<QString>(); };
   // Calls we don't care about
   void setOptions(const std::map<QString, QVariant> &) override {}

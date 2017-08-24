@@ -1,12 +1,10 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 #define MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 
-#include "MantidKernel/System.h"
-#include "ReflectometryAction.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
+#include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 
 #include "ui_ReflRunsTabWidget.h"
@@ -32,7 +30,6 @@ class ReflSearchModel;
 using MantidWidgets::DataProcessorCommand;
 using MantidWidgets::DataProcessorCommandAdapter;
 using MantidWidgets::SlitCalculator;
-using MantidWidgets::DataProcessorAction;
 
 /** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
@@ -75,16 +72,14 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void setTableCommands(std::vector<std::unique_ptr<DataProcessorCommand>>
-                            tableCommands) override;
-  void setRowCommands(
-      std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
+  void setReflectometryMenuCommands(CommandVector commands) override;
+  void setEditMenuCommands(CommandVector rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
-  void enableAction(DataProcessorAction action) override;
-  void enableAction(ReflectometryAction action) override;
-  void disableAction(ReflectometryAction action) override;
-  void disableAction(DataProcessorAction action) override;
+  void enableEditMenuAction(int action) override;
+  void disableEditMenuAction(int action) override;
+  void enableReflectometryMenuAction(int action) override;
+  void disableReflectometryMenuAction(int action) override;
   void enableTransfer() override;
   void disableTransfer() override;
   void enableAutoreduce() override;
@@ -111,9 +106,6 @@ private:
   void initLayout();
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
-
-  int toRowIndex(DataProcessorAction action);
-  int toMenuIndex(ReflectometryAction action);
   void enable(QAction &toEnable);
   void disable(QAction &toDisable);
   void setTransferEnabled(bool enabled);

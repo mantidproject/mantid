@@ -3,8 +3,8 @@
 
 #include "MantidAPI/IAlgorithm.h"
 #include "ReflTransferStrategy.h"
-#include "ReflectometryAction.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/EditAction.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableAction.h"
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -29,7 +29,8 @@ class ReflTransferStrategy;
 
 using MantidWidgets::DataProcessorPresenter;
 using MantidWidgets::ProgressableView;
-using MantidWidgets::DataProcessorAction;
+using MantidWidgets::TableAction;
+using MantidWidgets::EditAction;
 
 /** @class ReflRunsTabPresenter
 
@@ -88,6 +89,8 @@ public:
   void confirmReductionResumed() override;
 
 private:
+  void pushTableCommands(DataProcessorPresenter& tablePresenter);
+  void pushEditCommands(DataProcessorPresenter& tablePresenter);
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   /// The main view we're managing
@@ -107,7 +110,7 @@ private:
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
   /// Reflectometry menu actions which should be disabled during processing
-  static const std::array<ReflectometryAction, 5> disabledWhileProcessing;
+  static const std::array<const TableAction, 5> disabledWhileProcessing;
   /// The current search string used for autoreduction
   std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
@@ -119,10 +122,13 @@ private:
   void autoreduce(bool startNew);
   void transfer();
   void pushCommands();
-  void enableAction(ReflectometryAction action);
-  void disableAction(ReflectometryAction action);
-  void enableAction(DataProcessorAction action);
-  void disableAction(DataProcessorAction action);
+  void enableAction(TableAction action);
+  void disableAction(TableAction action);
+  void enableAction(EditAction action);
+  void disableAction(EditAction action);
+  int indexOfCommand(TableAction action);
+  int indexOfCommand(EditAction action);
+  DataProcessorPresenter& tablePresenter();
   /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument

@@ -72,7 +72,7 @@ public:
                        QWidget *parent);
   ~QDataProcessorWidget() override;
 
-  // Add actions to the toolbar
+  // Add actions to the toolbar and context menu
   void addEditActions(
       std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
 
