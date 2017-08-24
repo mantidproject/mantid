@@ -30,6 +30,7 @@ endfunction()
 # keyword: NOMOC Additional headers that are not to be passed to moc
 # keyword: RES Any resource .qrc files
 # keyword: DEFS Compiler definitions to set to the target
+# keyword: QT_PLUGIN If included, the target is a Qt plugin. The value is the name of the plugin library
 # keyword: INCLUDE_DIRS A list of include directories to add to the target
 # keyword: LINK_LIBRARIES A list of additional libraries to link to the
 #          target that are not dependent on Qt
@@ -38,7 +39,7 @@ endfunction()
 #          will have the -Qt{QT_VERSION} suffix appended.
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
-  set (oneValueArgs TARGET_NAME QT_VERSION)
+  set (oneValueArgs TARGET_NAME QT_VERSION QT_PLUGIN)
   set (multiValueArgs SRC UI MOC NOMOC RES DEFS INCLUDE_DIRS LINK_LIBRARIES MTD_QT_LINK_LIBRARIES)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
@@ -95,6 +96,21 @@ function (mtd_add_qt_target)
   if (OSX_VERSION VERSION_GREATER 10.8)
     set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
   endif ()
+
+  if (PARSED_QT_PLUGIN)
+    # Define a compiler variable to set the name of the library within the code. This
+    # is required by the Qt plugin mechanism
+    #set( LIB_NAME MantidWidgetPlugins )
+    add_definitions( -DLIBRARY_NAME=${PARSED_QT_PLUGIN} )
+
+    # Change the destination of the target as Qt expects this in a directory called "designer"
+    # if you set QT_PLUGIN_PATH environment variable this might put it there???
+    SET_TARGET_OUTPUT_DIRECTORY( ${_target} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/designer )
+
+    # Set the name of the generated library
+    set_target_properties ( ${_target} PROPERTIES OUTPUT_NAME ${PARSED_QT_PLUGIN} )
+  endif()
+  
   if (NOT ${PARSED_EXCLUDE_FROM_ALL})
     install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
   endif()
