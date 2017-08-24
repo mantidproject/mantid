@@ -117,15 +117,13 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   const size_t numSpectra = inputWS->getNumberHistograms();
 
   // pad out the ranges by copying the first value to the rest that are needed
-  if (xmins.size() == 1) {
+  if (xmins.size() == 1 && numSpectra > xmins.size()) {
     const double value = xmins.front();
-    while (xmins.size() < numSpectra)
-      xmins.push_back(value);
+    xmins.insert(xmins.end(), numSpectra - xmins.size(), value);
   }
-  if (xmaxs.size() == 1) {
+  if (xmaxs.size() == 1 && numSpectra > xmaxs.size()) {
     const double value = xmaxs.front();
-    while (xmaxs.size() < numSpectra)
-      xmaxs.push_back(value);
+    xmaxs.insert(xmaxs.end(), numSpectra - xmaxs.size(), value);
   }
 
   // should the individiual values be calculated?
