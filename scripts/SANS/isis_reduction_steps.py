@@ -1117,9 +1117,6 @@ class Mask_ISIS(ReductionStep):
         # reset the instrument to mask the current detector
         instrum.setDetector(original)
 
-        # # Mark up "dead" detectors with error value
-        # FindDeadDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, LiveValue=0, DeadValue=1)
-
         # opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors)
         instrum.view(wksp)
 
