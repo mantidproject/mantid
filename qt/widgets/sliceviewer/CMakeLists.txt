@@ -162,7 +162,7 @@ endif ()
 
 # ... and links to other required libs
 target_link_libraries ( MantidQtWidgetsSliceViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsCommon
+            MantidQtWidgetsCommonQt4
             DataObjects
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}

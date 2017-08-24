@@ -63,7 +63,7 @@ endif ()
 find_Package(Threads)
 
 target_link_libraries ( MantidScientificInterfacesEnggDiffraction LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsCommon
+            MantidQtWidgetsCommonQt4
             MantidScientificInterfacesMuon
             ${CORE_MANTIDLIBS}
             ${QT_LIBRARIES}

@@ -72,6 +72,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/MatrixSizeDialog.cpp
                    src/MatrixValuesDialog.cpp
                    src/MdiSubWindow.cpp
+                   src/MdPlottingCmapsProvider.cpp
                    src/MultiLayer.cpp
                    src/MultiPeakFit.cpp
                    src/MultiPeakFitTool.cpp
@@ -269,6 +270,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/MatrixSizeDialog.h
                    src/MatrixValuesDialog.h
                    src/MdiSubWindow.h
+                   src/MdPlottingCmapsProvider.h
                    src/MultiLayer.h
                    src/MultiPeakFit.h
                    src/MultiPeakFitTool.h
@@ -790,10 +792,10 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 # Library dependencies
 target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
-            MantidQtWidgetsCommon
+            MantidQtWidgetsCommonQt4
+            MantidQtWidgetsFactoryQt4
             MantidQtWidgetsInstrumentView
             MantidQtWidgetsSliceViewer
-            MantidQtWidgetsFactoryQt4
             MantidQtWidgetsSpectrumViewer
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
@@ -810,7 +812,7 @@ target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
 
 if(MAKE_VATES)
   target_include_directories( MantidPlot SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
-  target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering )
+  target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering vtkPVServerManagerRendering ${vtkjsoncpp_LIBRARIES})
 endif()
 
 if (WITH_ASAN)

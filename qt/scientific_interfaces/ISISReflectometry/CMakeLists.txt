@@ -121,7 +121,7 @@ endif ()
 find_Package(Threads)
 
 target_link_libraries ( MantidScientificInterfacesISISReflectometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsCommon
+            MantidQtWidgetsCommonQt4
             ${CORE_MANTIDLIBS}
             ${QT_LIBRARIES}
             ${QWT_LIBRARIES}

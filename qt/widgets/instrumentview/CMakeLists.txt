@@ -142,7 +142,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 target_link_libraries ( MantidQtWidgetsInstrumentView LINK_PRIVATE 
-  MantidQtWidgetsCommon
+  MantidQtWidgetsCommonQt4
   ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS}
   ${QT_LIBRARIES}

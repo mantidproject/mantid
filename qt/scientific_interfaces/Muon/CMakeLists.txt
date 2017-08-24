@@ -114,7 +114,7 @@ endif ()
 find_Package(Threads)
 
 target_link_libraries ( MantidScientificInterfacesMuon LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsCommon
+            MantidQtWidgetsCommonQt4
             MantidScientificInterfacesMultiDatasetFit
             ${CORE_MANTIDLIBS}
             ${QT_LIBRARIES}

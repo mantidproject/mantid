@@ -45,7 +45,7 @@ set_target_properties( MantidQtWidgetsPluginsDesigner PROPERTIES EXCLUDE_FROM_AL
 
 # Set the library dependencies
 target_link_libraries ( MantidQtWidgetsPluginsDesigner LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-            MantidQtWidgetsCommon
+            MantidQtWidgetsCommonQt4
             MantidQtWidgetsSliceViewer
             ${QT_LIBRARIES}
             ${QWT_LIBRARIES}

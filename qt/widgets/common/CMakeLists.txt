@@ -23,7 +23,6 @@
 	src/MantidQwtWorkspaceData.cpp
 	src/MantidWidget.cpp
 	src/MdConstants.cpp
-	src/MdPlottingCmapsProvider.cpp
 	src/MdSettings.cpp
 	src/Message.cpp
 	src/NonOrthogonal.cpp
@@ -285,7 +284,6 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/MantidQwtWorkspaceData.h
 	inc/MantidQtWidgets/Common/MantidAlgorithmMetatype.h
 	inc/MantidQtWidgets/Common/MdConstants.h
-	inc/MantidQtWidgets/Common/MdPlottingCmapsProvider.h
 	inc/MantidQtWidgets/Common/MdSettings.h
 	inc/MantidQtWidgets/Common/NonOrthogonal.h
 	inc/MantidQtWidgets/Common/pixmaps.h
@@ -475,53 +473,42 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
 include(${QT_USE_FILE})
 
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
-
-set ( ALL_SRC
-  ${SRC_FILES}
-  ${MOCCED_FILES}
-)
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
-
-if(MAKE_VATES AND ParaView_FOUND)
-  include( ${PARAVIEW_USE_FILE} )
-endif()
-
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
 add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
 
 # Python includes
 include_directories ( ${PYTHON_INCLUDE_PATH})
-if(MAKE_VATES AND ParaView_FOUND)
-  include_directories (SYSTEM ${PARAVIEW_INCLUDE_DIRS})
-endif()
+
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtWidgets/Common/PrecompiledHeader.h ALL_SRC )
-add_library ( MantidQtWidgetsCommon ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
-set_target_properties ( MantidQtWidgetsCommon PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_COMMON )
-
-# Add support for OSX system libraries if this is an OSX machine
+set ( TARGET_LIBRARIES
+  ${TCMALLOC_LIBRARIES_LINKTIME}
+  ${CORE_MANTIDLIBS}
+  ${QT_LIBRARIES}
+  ${QWT_LIBRARIES}
+  ${POCO_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${PYTHON_LIBRARIES}
+  ${QSCINTILLA_LIBRARIES}
+)
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
- SET( APPLE_SYSTEM_LIBRARIES "-framework CoreFoundation")
+  list ( APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
 
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsCommon PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
-endif ()
-
-target_link_libraries ( MantidQtWidgetsCommon LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-  ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES}
-  ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${QSCINTILLA_LIBRARIES}
-  ${APPLE_SYSTEM_LIBRARIES}
+# Target
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
+                    SRC ${SRC_FILES}
+                    MOC ${MOC_FILES}
+                    NOMOC ${INC_FILES}
+                    UI ${UI_FILES}
+                    DEFS IN_MANTIDQT_COMMON
+                    LINK_LIBRARIES  ${TARGET_LIBRARIES}
 )
 
-if(MAKE_VATES AND ParaView_FOUND)
-  target_link_libraries (MantidQtWidgetsCommon LINK_PRIVATE
-  vtkPVServerManagerRendering
-  ${vtkjsoncpp_LIBRARIES}
-  )
-endif()
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidQtWidgetsCommonQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
+endif ()
 
 ###########################################################################
 # Windows: Generate a qt.conf file so that the dev build finds the qt
@@ -533,7 +520,7 @@ endif()
 if ( WIN32 )
   set ( QT_CONF qt.conf )
   configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
-  add_custom_command ( TARGET MantidQtWidgetsCommon POST_BUILD
+  add_custom_command ( TARGET MantidQtWidgetsCommonQt4 POST_BUILD
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
                                ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
                                ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
@@ -544,14 +531,6 @@ endif()
 ###########################################################################
 
 add_subdirectory ( test )
-
-
-###########################################################################
-# Installation settings
-###########################################################################
-
-install ( TARGETS MantidQtWidgetsCommon ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
-
 
 set ( TEST_FILES
 	ScriptRepositoryViewTest.h

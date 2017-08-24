@@ -81,7 +81,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 # ... and links to other required libs
 target_link_libraries ( MantidQtWidgetsSpectrumViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsCommon
+            MantidQtWidgetsCommonQt4
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}

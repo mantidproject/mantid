@@ -77,7 +77,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif () 
 
 target_link_libraries ( MantidQtWidgetsPluginsAlgorithmDialogs LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-            MantidQtWidgetsCommon
+            MantidQtWidgetsCommonQt4
             ${CORE_MANTIDLIBS}
             ${QT_LIBRARIES}
             ${POCO_LIBRARIES}

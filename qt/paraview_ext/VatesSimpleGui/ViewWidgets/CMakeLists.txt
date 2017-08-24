@@ -141,11 +141,11 @@ vtkPVServerManagerRendering
 vtkRenderingFreeType
 vtksys
 ${QT_LIBRARIES}
-VatesSimpleGuiQtWidgets
-MantidQtWidgetsCommon
 VatesAPI
-MantidQtWidgetsSliceViewer
+VatesSimpleGuiQtWidgets
+MantidQtWidgetsCommonQt4
 MantidQtWidgetsFactoryQt4
+MantidQtWidgetsSliceViewer
 ${PYTHON_LIBRARIES}
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
@@ -175,7 +175,7 @@ target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIB
   Kernel
   HistogramData
   DataObjects
-  MantidQtWidgetsCommon
+  MantidQtWidgetsCommonQt4
   ${CORE_MANTIDLIBS}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}

@@ -25,7 +25,9 @@ endfunction()
 # keyword: QT_VERSION The major version of Qt to build against
 # keyword: SRC .cpp files to include in the target build
 # keyword: MOC Header files that are to be parsed by moc
+# keyword: UI Qt designer ui files that are to be parsed by the UI compiler
 # keyword: NOMOC Additional headers that are not to be passed to moc
+# keyword: DEFS Compiler definitions to set to the target
 # keyword: INCLUDE_DIRS A list of include directories to add to the target
 # keyword: LINK_LIBRARIES A list of additional libraries to link to the
 #          target that are not dependent on Qt
@@ -35,7 +37,7 @@ endfunction()
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX)
   set (oneValueArgs TARGET_NAME QT_VERSION)
-  set (multiValueArgs SRC UI MOC NOMOC INCLUDE_DIRS LINK_LIBRARIES MTD_QT_LINK_LIBRARIES)
+  set (multiValueArgs SRC UI MOC NOMOC DEFS INCLUDE_DIRS LINK_LIBRARIES MTD_QT_LINK_LIBRARIES)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
   if (${PARSED_LIBRARY} AND ${PARSED_EXECUTABLE})
@@ -78,4 +80,11 @@ function (mtd_add_qt_target)
   endforeach ()
   target_link_libraries (${_target} PRIVATE ${_qt_link_libraries}
                          ${PARSED_LINK_LIBRARIES} ${_mtd_qt_libs})
+  if(PARSED_DEFS)
+    set_target_properties ( ${_target} PROPERTIES COMPILE_DEFINITIONS ${PARSED_DEFS} )
+  endif()
+  if (OSX_VERSION VERSION_GREATER 10.8)
+    set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  endif ()
+  install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 endfunction()

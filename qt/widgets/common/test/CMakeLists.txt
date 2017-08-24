@@ -14,7 +14,7 @@ if ( CXXTEST_FOUND )
 
     cxxtest_add_test ( MantidQtCommonTest ${TEST_FILES} )
     target_link_libraries( MantidQtCommonTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsCommon
+            MantidQtWidgetsCommonQt4
             Crystal
             API
             DataObjects
