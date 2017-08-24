@@ -147,18 +147,6 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
                     MTD_QT_LINK_LIBRARIES MantidQtWidgetsCommon
 )
 
-# qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
-# set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
-# qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
-
-# include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-
-# add_library ( MantidQtWidgetsInstrumentView ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
-
-# set_target_properties ( MantidQtWidgetsInstrumentView PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_INSTRUMENTVIEW )
-
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidQtWidgetsInstrumentViewQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
 endif ()
-
-# install ( TARGETS MantidQtWidgetsInstrumentView ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

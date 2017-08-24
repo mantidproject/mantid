@@ -14,13 +14,14 @@ endfunction()
 # For all options see mtd_add_qt_target
 function (mtd_add_qt_executable)
   mtd_add_qt_target (EXECUTABLE QT_VERSION 4 ${ARGN})
-  mtd_add_qt_target (EXECUTABLE QT_VERSION 5 ${ARGN})
+  #mtd_add_qt_target (EXECUTABLE QT_VERSION 5 ${ARGN})
 endfunction()
 
 # Target agnostic function to add either an executable or library linked to Qt
 # option: LIBRARY If included define a library target
 # option: EXECUTABLE If included define an executable target
 # option: NO_SUFFIX If included, no suffix is added to the target name
+# option: EXCLUDE_FROM_ALL If included, the target is excluded from target ALL
 # keyword: TARGET_NAME The name of the target. The target will have -Qt{QT_VERSION} appended to it.
 # keyword: QT_VERSION The major version of Qt to build against
 # keyword: SRC .cpp files to include in the target build
@@ -35,7 +36,7 @@ endfunction()
 #          target. It is assumed each was produced with this function and
 #          will have the -Qt{QT_VERSION} suffix appended.
 function (mtd_add_qt_target)
-  set (options LIBRARY EXECUTABLE NO_SUFFIX)
+  set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
   set (oneValueArgs TARGET_NAME QT_VERSION)
   set (multiValueArgs SRC UI MOC NOMOC DEFS INCLUDE_DIRS LINK_LIBRARIES MTD_QT_LINK_LIBRARIES)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
@@ -65,10 +66,15 @@ function (mtd_add_qt_target)
   else()
     set (_target ${PARSED_TARGET_NAME}${_target_suffix})
   endif()
+  if (${PARSED_EXCLUDE_FROM_ALL})
+    set(_target_exclude_from_all "EXCLUDE_FROM_ALL")
+  else()
+    set(_target_exclude_from_all)
+  endif()
   if (${PARSED_LIBRARY})
-    add_library (${_target} ${PARSED_SRC} ${MOC_GENERATED} ${UI_HEADERS} ${PARSED_NOMOC})
+    add_library (${_target} ${_target_exclude_from_all} ${PARSED_SRC} ${MOC_GENERATED} ${UI_HEADERS} ${PARSED_NOMOC})
   elseif (${PARSED_EXECUTABLE})
-    add_executable (${_target} ${PARSED_SRC} ${MOC_GENERATED} ${UI_HEADERS} ${PARSED_NOMOC})
+    add_executable (${_target} ${_target_exclude_from_all} ${PARSED_SRC} ${MOC_GENERATED} ${UI_HEADERS} ${PARSED_NOMOC})
   else ()
     message (FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
   endif()
@@ -86,5 +92,7 @@ function (mtd_add_qt_target)
   if (OSX_VERSION VERSION_GREATER 10.8)
     set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
   endif ()
-  install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+  if (NOT ${PARSED_EXCLUDE_FROM_ALL})
+    install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+  endif()
 endfunction()
