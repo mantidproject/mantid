@@ -75,6 +75,7 @@ private:
 
   double detectorAngle(const double peakPosition, const double detectorDistance) const ;
   double sampleDetectorDistance() const;
+  double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   /* Values parsed from the nexus file */

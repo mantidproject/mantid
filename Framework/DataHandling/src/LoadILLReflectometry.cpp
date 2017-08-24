@@ -757,12 +757,12 @@ void LoadILLReflectometry::placeDetector() {
 
 /// Update source position.
 void LoadILLReflectometry::placeSource() {
-  if (m_instrumentName != "Figaro") {
-    return;
-  }
-  const double dist = inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+  const double dist = sourceSampleDistance();
   g_log.debug() << "Source-sample distance " << dist << "m.\n";
   const std::string source = "chopper1";
+  // We place the source on the z-axis, although this is not strictly correct.
+  // The position is used for unit conversions only so the inaccuracy matters
+  // not.
   const V3D newPos{0.0, 0.0, -dist};
   m_loader.moveComponent(m_localWorkspace, source, newPos);
 }
@@ -773,6 +773,20 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   if (m_instrumentName == "Figaro")
     dist -= inMeter(doubleFromRun(m_detectorDistance + ".offset_value"));
   return dist;
+}
+
+double LoadILLReflectometry::sourceSampleDistance() const {
+  if (m_instrumentName == "D17") {
+    const double pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
+    // Chopper pair separation is in cm in sample logs.
+    const double pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
+    return pairCentre - 0.5 * pairSeparation;
+  } else if (m_instrumentName == "Figaro") {
+    return inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+  }
+  std::ostringstream out;
+  out << "sourceSampleDistance: unknown instrument " << m_instrumentName;
+  throw std::runtime_error(out.str());
 }
 
 } // namespace DataHandling
