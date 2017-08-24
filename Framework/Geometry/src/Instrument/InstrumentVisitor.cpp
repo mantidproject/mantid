@@ -220,7 +220,8 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 size_t
 InstrumentVisitor::registerRectangularBank(const RectangularDetector &bank) {
   auto index = registerComponentAssembly(bank);
-  (*m_isRectangularBank)[index] = true;
+  size_t rangesIndex = index - m_orderedDetectorIds->size();
+  (*m_isRectangularBank)[rangesIndex] = true;
   return index;
 }
 

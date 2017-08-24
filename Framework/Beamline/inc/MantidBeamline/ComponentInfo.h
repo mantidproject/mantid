@@ -4,6 +4,7 @@
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/iterator/reverse_iterator.hpp>
 #include <vector>
 #include <utility>
 #include <cstddef>
@@ -126,6 +127,13 @@ public:
     bool empty() const { return m_begin == m_end; }
     auto begin() const -> decltype(m_begin) { return m_begin; }
     auto end() const -> decltype(m_end) { return m_end; }
+    boost::reverse_iterator<std::vector<size_t>::const_iterator>
+    rbegin() const {
+      return boost::make_reverse_iterator(m_end);
+    }
+    boost::reverse_iterator<std::vector<size_t>::const_iterator> rend() const {
+      return boost::make_reverse_iterator(m_begin);
+    }
   };
 
   Range detectorRangeInSubtree(const size_t index) const;

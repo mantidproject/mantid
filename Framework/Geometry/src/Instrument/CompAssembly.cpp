@@ -356,6 +356,14 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
  */
 void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
+
+    /*
+    if (hasComponentInfo()) {
+      m_map->componentInfo().getBoundingBox(index(), assemblyBox);
+      return;
+    }
+    */
+
     // Check cache for assembly, inside the ParameterMap
     if (m_map->getCachedBoundingBox(this, assemblyBox)) {
       return;

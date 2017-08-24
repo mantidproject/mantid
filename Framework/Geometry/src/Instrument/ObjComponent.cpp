@@ -177,10 +177,12 @@ double ObjComponent::solidAngle(const V3D &observer) const {
   */
 void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
   if (m_map) {
-    if (hasComponentInfo()) {
-      m_map->componentInfo().getBoundingBox(index(), absoluteBB);
-      return;
-    }
+    /*
+  if (hasComponentInfo()) {
+    m_map->componentInfo().getBoundingBox(index(), absoluteBB);
+    return;
+  }
+  */
   }
   // Start with the box in the shape's coordinates
   const Object_const_sptr s = shape();

@@ -64,6 +64,8 @@ private:
   boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
       m_shapes;
 
+  void doGetBoundingBox(const size_t index, BoundingBox &absoluteBB) const;
+
 public:
   ComponentInfo(
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,
@@ -91,6 +93,8 @@ public:
   bool hasParent(const size_t componentIndex) const;
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
+  bool hasSource() const;
+  bool hasSample() const;
   size_t source() const;
   size_t sample() const;
   double l1() const;

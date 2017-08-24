@@ -42,11 +42,9 @@ ComponentInfo::ComponentInfo(
     throw std::invalid_argument("ComponentInfo should have been provided same "
                                 "number of postions and rotations");
   }
-  if (m_rotations->size() != m_detectorRanges->size()) {
-    throw std::invalid_argument(
-        "ComponentInfo should have as many positions "
-        "and rotations as assembly sorted detector component "
-        "ranges");
+  if (m_rotations->size() != m_positions->size()) {
+    throw std::invalid_argument("ComponentInfo should have as many positions "
+                                "as rotations ranges");
   }
   if (m_rotations->size() != m_componentRanges->size()) {
     throw std::invalid_argument("ComponentInfo should have as many positions "
@@ -343,8 +341,10 @@ ComponentInfo::Range
 ComponentInfo::componentRangeInSubtree(const size_t index) const {
   const auto rangesIndex = compOffsetIndex(index);
   const auto range = (*m_componentRanges)[rangesIndex];
-  return {m_assemblySortedComponentIndices->begin() + range.first,
-          m_assemblySortedComponentIndices->begin() + range.second};
+  ComponentInfo::Range ret = {
+      m_assemblySortedComponentIndices->begin() + range.first,
+      m_assemblySortedComponentIndices->begin() + range.second};
+  return ret;
 }
 Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return (*m_scaleFactors)[componentIndex];
@@ -356,7 +356,8 @@ void ComponentInfo::setScaleFactor(const size_t componentIndex,
 }
 
 bool ComponentInfo::isRectangularBank(const size_t componentIndex) const {
-  return !isDetector(componentIndex) && (*m_isRectangularBank)[componentIndex];
+  const auto rangesIndex = compOffsetIndex(componentIndex);
+  return !isDetector(componentIndex) && (*m_isRectangularBank)[rangesIndex];
 }
 
 } // namespace Beamline

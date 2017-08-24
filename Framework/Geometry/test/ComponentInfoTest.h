@@ -307,19 +307,24 @@ public:
                (Kernel::V3D{position[0] + radius, position[1] + radius,
                             position[2] + radius})).norm() < 1e-9);
     // Nullify shape and retest BoundingBox
+    boundingBox = BoundingBox{};
     shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
     componentInfo.getBoundingBox(0, boundingBox);
     TS_ASSERT(boundingBox.isNull());
   }
 
   void test_boundingBox_complex() {
-    const V3D sourcePos(0, 0, 0);
-    const V3D samplePos(10, 0, 0);
+    const V3D sourcePos(-1, 0, 0);
+    const V3D samplePos(0, 0, 0);
     const V3D detectorPos(11, 0, 0);
     const double radius = 0.01; // See helper creation method for definition
     // Create a very basic real instrument to visit
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
         sourcePos, samplePos, detectorPos);
+
+    // CompAssembly (and hence Instrument 1.0) has getter and setter for
+    // position!
+    instrument->setPos(samplePos);
 
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
     const auto &componentInfo = std::get<0>(wrappers);
@@ -335,14 +340,46 @@ public:
 
     // Check bounding box of root (instrument)
     componentInfo->getBoundingBox(componentInfo->root() /*Root*/, boundingBox);
-    // min in the source
+
+    // min in the sample (source is ignored by design in instrument 1.0 and
+    // instrument 2.0).
     TS_ASSERT((boundingBox.minPoint() -
-               (Kernel::V3D{sourcePos[0] - radius, sourcePos[1] - radius,
-                            sourcePos[2] - radius})).norm() < 1e-9);
+               (Kernel::V3D{samplePos[0] - radius, samplePos[1] - radius,
+                            samplePos[2] - radius})).norm() < 1e-9);
     // max is the detector
     TS_ASSERT((boundingBox.maxPoint() -
                (Kernel::V3D{detectorPos[0] + radius, detectorPos[1] + radius,
                             detectorPos[2] + radius})).norm() < 1e-9);
+  }
+
+  void test_boundingBox_complex_around_rectangular_bank() {
+
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*1 bank*/, 10 /*10 by 10*/);
+
+    // CompAssembly (and hence Instrument 1.0) has getter and setter for
+    // position!
+    instrument->setPos(instrument->getSample()->getPos());
+
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    BoundingBox boundingBoxRoot;
+    // Check bounding box of root (instrument)
+    componentInfo->getBoundingBox(componentInfo->root() /*Root*/,
+                                  boundingBoxRoot);
+    // min Z in the sample
+    BoundingBox boundingBoxSample;
+    componentInfo->getBoundingBox(componentInfo->sample(), boundingBoxSample);
+    TS_ASSERT((boundingBoxRoot.minPoint().Z() -
+               boundingBoxSample.minPoint().Z()) < 1e-9);
+
+    // max is the Rectangular bank
+    auto bankIndex = componentInfo->root() - 3;
+    TS_ASSERT(componentInfo->isRectangularBank(bankIndex));
+    BoundingBox boundingBoxBank;
+    componentInfo->getBoundingBox(bankIndex, boundingBoxBank);
+    TS_ASSERT((boundingBoxRoot.maxPoint() - boundingBoxBank.maxPoint()).norm() <
+              1e-9);
   }
 };
 

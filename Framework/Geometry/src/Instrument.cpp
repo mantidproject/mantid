@@ -816,7 +816,12 @@ std::vector<detid_t> Instrument::getMonitors() const {
  */
 void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
-    // Check cache for assembly
+
+    if (m_map->hasComponentInfo(this->baseInstrument().get())) {
+      m_map->componentInfo().getBoundingBox(index(), assemblyBox);
+      return;
+    }
+
     if (m_map->getCachedBoundingBox(this, assemblyBox)) {
       return;
     }
