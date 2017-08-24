@@ -794,7 +794,7 @@ target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
             MantidQtWidgetsCommonQt4
             MantidQtWidgetsFactoryQt4
-            MantidQtWidgetsInstrumentView
+            MantidQtWidgetsInstrumentViewQt4
             MantidQtWidgetsSliceViewer
             MantidQtWidgetsSpectrumViewer
             ${Boost_LIBRARIES}
