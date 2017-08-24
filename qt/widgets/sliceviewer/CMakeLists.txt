@@ -132,43 +132,33 @@ set ( TEST_PY_FILES
 )
 
 include_directories ( inc )
+include_directories ( ../../Framework/DataObjects/inc )
 
 ###########################################################################
 # Main Library Target
 ###########################################################################
-
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
-
-# --- Add icons qrc ------
-qt4_add_resources ( RES_FILES_SLICEVIEWER ../../resources/icons/SliceViewerIcons.qrc )
-
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} ${RES_FILES_SLICEVIEWER})
-
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
-
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR})
-
-include_directories ( ../../Framework/DataObjects/inc )
-
-# For Windows:
-add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
-
-# This creates the target library
-add_library ( MantidQtWidgetsSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSliceViewer
+                    SRC ${SRC_FILES}
+                    MOC ${MOC_FILES}
+                    NOMOC ${INC_FILES}
+                    UI ${UI_FILES}
+                    RES ../../resources/icons/SliceViewerIcons.qrc
+                    DEFS IN_MANTIDQT_SLICEVIEWER
+                    LINK_LIBRARIES
+                        DataObjects
+                        ${TCMALLOC_LIBRARIES_LINKTIME}
+                        ${CORE_MANTIDLIBS}
+                        ${POCO_LIBRARIES}
+                        ${Boost_LIBRARIES}
+                        ${QT_LIBRARIES}
+                        ${QWT_LIBRARIES}
+                    MTD_QT_LINK_LIBRARIES
+                        MantidQtWidgetsCommon
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsSliceViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( MantidQtWidgetsSliceViewerQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
-
-# ... and links to other required libs
-target_link_libraries ( MantidQtWidgetsSliceViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsCommonQt4
-            DataObjects
-            ${CORE_MANTIDLIBS}
-            ${POCO_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${QT_LIBRARIES}
-            ${QWT_LIBRARIES} )
 
 ###########################################################################
 # Unit tests setup
@@ -191,7 +181,7 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
   target_link_libraries( SliceViewerTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsSliceViewer
+            MantidQtWidgetsSliceViewerQt4
             DataObjects
             Crystal
             ${CORE_MANTIDLIBS}
@@ -206,9 +196,3 @@ if ( CXXTEST_FOUND )
   set_property( TARGET SliceViewerTest PROPERTY FOLDER "UnitTests" )
 
 endif ()
-
-###########################################################################
-# Installation settings
-###########################################################################
-
-install ( TARGETS MantidQtWidgetsSliceViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

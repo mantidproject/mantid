@@ -29,7 +29,7 @@ if ( MSVC_IDE )
   set_property ( TARGET MantidQtWidgetsFactoryQt4 PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsInstrumentViewQt4 PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsRefDetectorViewQt4 PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET MantidQtWidgetsSliceViewer PROPERTY FOLDER "MantidQt" )
+  set_property ( TARGET MantidQtWidgetsSliceViewerQt4 PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsSpectrumViewer PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsPluginsDesigner PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsPluginsAlgorithmDialogs PROPERTY FOLDER "MantidQt" )
@@ -38,7 +38,7 @@ else ()
   add_custom_target ( MantidQt DEPENDS MantidQtWidgetsCommonQt4
                                        MantidQtWidgetsFactoryQt4
                                        MantidQtWidgetsInstrumentViewQt4
-                                       MantidQtWidgetsSliceViewer
+                                       MantidQtWidgetsSliceViewerQt4
                                        MantidQtWidgetsSpectrumViewer
                                        MantidQtWidgetsRefDetectorView
                                        MantidQtWidgetsPluginsAlgorithmDialogs

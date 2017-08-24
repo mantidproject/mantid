@@ -30,14 +30,15 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsFactory
                     SRC ${SRC_FILES}
                     MOC ${MOC_FILES}
                     NOMOC ${INC_FILES}
-                    #INCLUDE_DIRS ${INCLUDES}
-                    MTD_QT_LINK_LIBRARIES MantidQtWidgetsCommon
-                    LINK_LIBRARIES  MantidQtWidgetsSliceViewer
-                                    ${CORE_MANTIDLIBS}
-                                    ${POCO_LIBRARIES}
-                                    ${Boost_LIBRARIES}
-                                    ${QT_LIBRARIES}
-                                    ${QWT_LIBRARIES}
+                    LINK_LIBRARIES  
+                        ${CORE_MANTIDLIBS}
+                        ${POCO_LIBRARIES}
+                        ${Boost_LIBRARIES}
+                        ${QT_LIBRARIES}
+                        ${QWT_LIBRARIES}
+                    MTD_QT_LINK_LIBRARIES
+                        MantidQtWidgetsCommon
+                        MantidQtWidgetsSliceViewer
 )
 
 
