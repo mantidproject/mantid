@@ -449,8 +449,8 @@ class Abins(PythonAlgorithm):
         :param atom_name: name of atom (for example H for hydrogen)
         """
         if atom_name is not None:
-            width = AbinsModules.AbinsParameters.bin_width
-            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name) * width
+
+            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name)
 
         dim = 1
         length = s_points.size
