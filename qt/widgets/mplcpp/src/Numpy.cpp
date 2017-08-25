@@ -17,7 +17,7 @@ namespace {
 struct ImportArray {
   ImportArray() {
     PythonGIL gil;
-    import_array();
+    _import_array();
   }
   ~ImportArray() {}
 };

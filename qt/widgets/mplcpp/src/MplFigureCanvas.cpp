@@ -1,5 +1,5 @@
-#include "MantidQtWidgets/MplCpp//MplFigureCanvas.h"
-#include "MantidQtWidgets/MplCpp//NDArray1D.h"
+#include "MantidQtWidgets/MplCpp/MplFigureCanvas.h"
+#include "MantidQtWidgets/MplCpp/NDArray1D.h"
 #include "MantidQtWidgets/MplCpp/PythonErrors.h"
 #include "MantidQtWidgets/MplCpp/SipUtils.h"
 #include "MantidQtWidgets/Common/PythonThreading.h"
@@ -147,8 +147,8 @@ SubPlotSpec MplFigureCanvas::getGeometry() const {
   auto geometry = PythonObject(NewRef(PyObject_CallMethod(
       axes.get(), PYSTR_LITERAL("get_geometry"), PYSTR_LITERAL(""), nullptr)));
 
-  return SubPlotSpec(PyInt_AS_LONG(PyTuple_GET_ITEM(geometry.get(), 0)),
-                     PyInt_AS_LONG(PyTuple_GET_ITEM(geometry.get(), 1)));
+  return SubPlotSpec(TO_LONG(PyTuple_GET_ITEM(geometry.get(), 0)),
+                     TO_LONG(PyTuple_GET_ITEM(geometry.get(), 1)));
 }
 
 /**
@@ -182,7 +182,7 @@ QString MplFigureCanvas::getLabel(const Axes::Label type) const {
   auto axes = m_pydata->gca();
   auto label = PythonObject(NewRef(PyObject_CallMethod(
       axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr)));
-  return QString::fromAscii(PyString_AsString(label.get()));
+  return QString::fromAscii(TO_CSTRING(label.get()));
 }
 
 /**
@@ -203,7 +203,7 @@ QString MplFigureCanvas::getScale(const Axes::Scale type) {
   auto axes = m_pydata->gca();
   auto scale = PythonObject(NewRef(PyObject_CallMethod(
       axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr)));
-  return QString::fromAscii(PyString_AsString(scale.get()));
+  return QString::fromAscii(TO_CSTRING(scale.get()));
 }
 
 /**

@@ -27,7 +27,7 @@ void tracebackToString(std::string &msg, PyTracebackObject *traceback,
   msg.append(" line ")
       .append(std::to_string(traceback->tb_lineno))
       .append(" in \'")
-      .append(PyString_AsString(traceback->tb_frame->f_code->co_filename))
+      .append(TO_CSTRING(traceback->tb_frame->f_code->co_filename))
       .append("\'");
   tracebackToString(msg, traceback->tb_next, false);
 }
@@ -57,7 +57,7 @@ std::string errorToString(bool withTrace) {
   PyObject *strRepr = PyObject_Str(value);
   std::string error;
   if (value && strRepr) {
-    error.append(PyString_AsString(strRepr));
+    error.append(TO_CSTRING(strRepr));
   } else {
     error.append("Unknown exception has occurred.");
   }
