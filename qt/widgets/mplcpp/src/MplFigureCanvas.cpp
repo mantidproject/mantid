@@ -402,8 +402,10 @@ void MplFigureCanvas::drawNoGIL() {
 // Explicit template instantations
 //------------------------------------------------------------------------------
 using VectorDouble = std::vector<double>;
-template void MplFigureCanvas::plotLine<VectorDouble, VectorDouble>(
-    const VectorDouble &, const VectorDouble &, const char *);
+template EXPORT_OPT_MANTIDQT_MPLCPP void
+MplFigureCanvas::plotLine<VectorDouble, VectorDouble>(const VectorDouble &,
+                                                      const VectorDouble &,
+                                                      const char *);
 }
 }
 }
