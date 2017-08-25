@@ -30,26 +30,20 @@ namespace {
  */
 void setProperty(IPropertyManager &self, const std::string &name,
                  const boost::python::object &value) {
-#if PY_VERSION_HEX < 0x03000000
-  // encode as utf-8 string
-  const boost::python::object value_utf8 =
-      boost::python::str(value).encode("utf-8");
-#else
-  // check if a string value can be extracted
   extract<std::string> cppstr(value);
-#endif
 
   if (cppstr.check()) {
     self.setPropertyValue(name, cppstr());
+#if PY_VERSION_HEX < 0x03000000
+  } else if (PyUnicode_Check(value.ptr())) {
+    self.setPropertyValue(name,
+                          extract<std::string>(str(value).encode("utf-8"))());
+#endif
   } else {
     try {
       Property *p = self.getProperty(name);
       const auto &entry = Registry::TypeRegistry::retrieve(*(p->type_info()));
-#if PY_VERSION_HEX < 0x03000000
-      entry.set(&self, name, value_utf8);
-#else
       entry.set(&self, name, value);
-#endif
     } catch (std::invalid_argument &e) {
       throw std::invalid_argument("When converting parameter \"" + name +
                                   "\": " + e.what());
