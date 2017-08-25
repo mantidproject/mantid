@@ -31,7 +31,10 @@
 #
 #    The variable TESTHELPER_SRCS can be used to pass in extra (non-test) source files
 #    that should be included in the test executable.
-#           
+#
+#    Them variable CXXTEST_EXTRA_HEADER_INCLUDE can be used to pass an additional header
+#    to the --include optional of the cxxtestgen command.
+#
 #       #==============
 #       Example Usage:
 #
@@ -51,13 +54,13 @@
 #                 binary tree from "foo_test.h" in the current source directory.
 #              2. Create an executable and test called unittest_foo.
 #              3. Files specified in TESTHELPER_SRCS will also be compiled and linked in.
-#               
+#
 #      #=============
 #      Example foo_test.h:
 #
 #          #include <cxxtest/TestSuite.h>
-#          
-#          class MyTestSuite : public CxxTest::TestSuite 
+#
+#          class MyTestSuite : public CxxTest::TestSuite
 #          {
 #          public:
 #             void testAddition( void )
@@ -100,13 +103,20 @@ include ( PrecompiledHeaderCommands )
 # CXXTEST_ADD_TEST (public macro to add unit tests)
 #=============================================================
 macro(CXXTEST_ADD_TEST _cxxtest_testname)
+    # Assume all files are relative to the caller's source dir
+    set( _test_dir ${CMAKE_CURRENT_SOURCE_DIR} )
     # determine the cpp filename
     set(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname}_runner.cpp)
+    # add additional include if requested
+    if(CXXTEST_EXTRA_HEADER_INCLUDE)
+      set(_cxxtest_include  --include ${_test_dir}/${CXXTEST_EXTRA_HEADER_INCLUDE})
+    endif()
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
         DEPENDS ${PATH_FILES}
         COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --root
-        --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname}
+        --xunit-printer --world ${_cxxtest_testname} ${_cxxtest_include}
+        -o ${_cxxtest_real_outfname}
     )
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
 
@@ -125,18 +135,17 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
         COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --part
         --world ${_cxxtest_testname} -o ${_cxxtest_cpp} ${_cxxtest_h}
 	)
-    
+
       set_source_files_properties(${_cxxtest_cpp} PROPERTIES GENERATED true)
 
       set (_cxxtest_cpp_files ${_cxxtest_cpp} ${_cxxtest_cpp_files})
       set (_cxxtest_h_files ${part} ${_cxxtest_h_files})
     endforeach (part ${ARGN})
-    
-    set ( _test_dir ${CMAKE_CURRENT_SOURCE_DIR} )
+
     if( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.h )
       ADD_PRECOMPILED_HEADER( ${_test_dir}/PrecompiledHeader.h ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir} ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.cpp _cxxtest_cpp_files _cxxtest_h_files)
-    ENDIF ()     
-    
+    ENDIF ()
+
     # define the test executable and exclude it from the all target
     # The TESTHELPER_SRCS variable can be set outside the macro and used to pass in test helper classes
     add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files} ${_cxxtest_h_files} ${TESTHELPER_SRCS} )
@@ -147,7 +156,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     if (CXXTEST_SINGLE_LOGFILE)
       # add the whole suite as a single test so the output xml doesn't overwrite itself
       add_test ( NAME ${_cxxtest_testname}
-                 COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
+                 COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
                          $<TARGET_FILE:${_cxxtest_testname}> )
 
     else (CXXTEST_SINGLE_LOGFILE)
@@ -158,7 +167,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
         get_filename_component(_suitename ${part} NAME_WE )
         set( _cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
         add_test ( NAME ${_cxxtest_separate_name}
-                  COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
+                  COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
 		          $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
         set_tests_properties ( ${_cxxtest_separate_name} PROPERTIES
                                TIMEOUT ${TESTING_TIMEOUT} )
@@ -172,10 +181,10 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
 			# Is that suite defined in there at all?
 			STRING(REGEX MATCH ${_performance_suite_name} _search_res ${_file_contents} )
 			if (NOT "${_search_res}" STREQUAL "")
-				#MESSAGE( "${_performance_suite_name} Found:                 ${_search_res}" ) 
+				#MESSAGE( "${_performance_suite_name} Found:                 ${_search_res}" )
 				set( _cxxtest_separate_name "${_cxxtest_testname}_${_performance_suite_name}")
 				add_test ( NAME ${_cxxtest_separate_name}
-				          COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
+				          COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
 						  $<TARGET_FILE:${_cxxtest_testname}> ${_performance_suite_name} )
         set_tests_properties ( ${_cxxtest_separate_name} PROPERTIES
                                TIMEOUT ${TESTING_TIMEOUT} )

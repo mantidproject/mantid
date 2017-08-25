@@ -31,6 +31,7 @@ if ( CPPCHECK_EXECUTABLE )
         qt/paraview_ext/VatesSimpleGui/ViewWidgets/inc
         qt/paraview_ext/VatesSimpleGui/QtWidgets/inc
         qt/widgets/common/inc
+        qt/widgets/mplcpp/inc
         qt/widgets/factory/inc
         qt/widgets/instrumentview/inc
         qt/widgets/refdetectrview/inc
