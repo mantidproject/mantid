@@ -41,5 +41,6 @@ endif()
 
 add_subdirectory( Filters )
 add_subdirectory( Readers )
+add_subdirectory( Representations )
 add_subdirectory( Sources )
 add_subdirectory( Widgets )
