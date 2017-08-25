@@ -11,6 +11,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <boost/python/str.hpp>
 
 using namespace Mantid::Kernel;
 namespace Registry = Mantid::PythonInterface::Registry;
@@ -29,16 +30,26 @@ namespace {
  */
 void setProperty(IPropertyManager &self, const std::string &name,
                  const boost::python::object &value) {
-  typedef extract<std::string> from_pystr;
-  // String values can be set directly
-  from_pystr cppstr(value);
+#if PY_VERSION_HEX < 0x03000000
+  // encode as utf-8 string
+  const boost::python::object value_utf8 =
+      boost::python::str(value).encode("utf-8");
+#else
+  // check if a string value can be extracted
+  extract<std::string> cppstr(value);
+#endif
+
   if (cppstr.check()) {
     self.setPropertyValue(name, cppstr());
   } else {
     try {
       Property *p = self.getProperty(name);
       const auto &entry = Registry::TypeRegistry::retrieve(*(p->type_info()));
+#if PY_VERSION_HEX < 0x03000000
+      entry.set(&self, name, value_utf8);
+#else
       entry.set(&self, name, value);
+#endif
     } catch (std::invalid_argument &e) {
       throw std::invalid_argument("When converting parameter \"" + name +
                                   "\": " + e.what());
