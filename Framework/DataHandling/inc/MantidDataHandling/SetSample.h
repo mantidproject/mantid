@@ -64,6 +64,9 @@ private:
                                     const Geometry::ReferenceFrame &refFrame,
                                     bool hollow) const;
 
+  std::string createSphereXML(const Kernel::PropertyManager &args,
+                              const Geometry::ReferenceFrame &refFrame) const;
+
   void runSetSampleShape(API::MatrixWorkspace_sptr &workspace,
                          const std::string &xml);
   void runChildAlgorithm(const std::string &name,
