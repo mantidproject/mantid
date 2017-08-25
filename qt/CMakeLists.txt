@@ -23,6 +23,7 @@ endif ( MAKE_VATES )
 if ( MSVC_IDE )
 #  # Add to the 'MantidQt' group in VS
   set_property ( TARGET MantidQtWidgetsCommon PROPERTY FOLDER "MantidQt" )
+  set_property ( TARGET MantidQtWidgetsMplCpp PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsInstrumentView PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsSliceViewer PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsSpectrumViewer PROPERTY FOLDER "MantidQt" )
@@ -32,7 +33,9 @@ if ( MSVC_IDE )
   set_property ( TARGET MantidQtWidgetsPluginsAlgorithmDialogs PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET mantidqtpython PROPERTY FOLDER "MantidQt" )
 else ()
-  add_custom_target ( MantidQt DEPENDS MantidQtWidgetsCommon 
+  add_custom_target ( MantidQt DEPENDS MantidQtWidgetsCommon
+                                       MantidQtWidgetsMplCpp
+                                       MantidQtWidgetsInstrumentView
                                        MantidQtWidgetsSliceViewer
                                        MantidQtWidgetsSpectrumViewer
                                        MantidQtWidgetsRefDetectorView

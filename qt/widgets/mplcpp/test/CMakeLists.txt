@@ -16,3 +16,5 @@ cxxtest_add_test (MantidQtWidgetsMplCppTest ${TEST_HEADERS} )
 target_include_directories (MantidQtWidgetsMplCppTest PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../inc)
 target_link_libraries (MantidQtWidgetsMplCppTest Qt4::QtGui MantidQtWidgetsMplCpp ${PYTHON_LIBRARIES})
 add_dependencies( GUITests MantidQtWidgetsMplCppTest )
+# Add to the 'UnitTests' group in VS
+set_property( TARGET MantidQtWidgetsMplCppTest PROPERTY FOLDER "UnitTests" )
