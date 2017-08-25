@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <type_traits>
+#include <vector>
 
 namespace {
 // Simply struct to aid in global initialization of numpy
