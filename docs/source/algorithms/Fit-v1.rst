@@ -481,7 +481,7 @@ Output:
         yData.append(2.0)
     yData2=[]
     for x in xData:
-        Data2.append(5.0)
+        yData2.append(5.0)
     # create workspaces
     input = CreateWorkspace(xData,yData)
     input2 = CreateWorkspace(xData,yData2)
