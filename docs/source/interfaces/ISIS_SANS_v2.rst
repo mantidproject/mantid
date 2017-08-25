@@ -231,9 +231,9 @@ information. Note that the geometry information is in millimetre.
 +-------+--------------------+------------------------------------------------------------------+
 | **1** | **Absolute scale** | The absolute, dimensionless scale factor.                        |
 +-------+--------------------+------------------------------------------------------------------+
-| **2** | **Geometry**       | A geometry selection. *Read from file* will use the settings    |
+| **2** | **Geometry**       | A geometry selection. *Read from file* will use the settings     |
 |       |                    | that are stored in the data file. The other options are          |
-|       |                    | *Cylinder AxisUp*, *Cuboid* and *Cylinder AxisAlong*.           |
+|       |                    | *Cylinder AxisUp*, *Cuboid* and *Cylinder AxisAlong*.            |
 +-------+--------------------+------------------------------------------------------------------+
 | **3** | **Height**         | The sample height. If this is not specified,                     |
 |       |                    | the information from the file will be used.                      |
@@ -244,7 +244,7 @@ information. Note that the geometry information is in millimetre.
 | **5** | **Thickness**      | The sample thickness. If this is not specified,                  |
 |       |                    | the information from the file will be used.                      |
 +-------+--------------------+------------------------------------------------------------------+
-| **6** | **Z offset**       | The sample offset.                                                |
+| **6** | **Z offset**       | The sample offset.                                               |
 +-------+--------------------+------------------------------------------------------------------+
 
 
@@ -477,7 +477,7 @@ Adjustment files
 +-------+---------------------------------+------------------------------------------------------------------------------------------------+
 
 Q
-^^^^
+^
 .. _Q:
 
 .. image::  ../images/sans_isis_v2_q_tab_whole.png
