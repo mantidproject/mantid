@@ -507,7 +507,7 @@ class SPowderSemiEmpiricalCalculator(object):
             rebined_broad_spectrum = self._fix_empty_array()
 
         # multiply by k-point weight and scaling constant
-        factor = self._weight * AbinsModules.AbinsConstants.SCALING_CONSTANT
+        factor = self._weight / AbinsModules.AbinsParameters.bin_width
         rebined_broad_spectrum = rebined_broad_spectrum * factor
         return local_freq, local_coeff, rebined_broad_spectrum
 
@@ -538,7 +538,6 @@ class SPowderSemiEmpiricalCalculator(object):
                              b_tensor=None, b_trace=None):
         """
         Calculates S for the second order quantum event for one atom.
-
 
         @param q2: squared values of momentum transfer vectors
         @param frequencies: frequencies for which transitions occur
@@ -585,7 +584,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
                        np.einsum('kli, kil->k',
                        np.take(b_tensor, indices=indices[:, 1], axis=0),
-                       np.take(b_tensor, indices=indices[:, 0], axis=0))) * 16.0 / (15.0 * factor)
+                       np.take(b_tensor, indices=indices[:, 0], axis=0))) / (30.0 * factor)
 
         return s
 
@@ -605,7 +604,7 @@ class SPowderSemiEmpiricalCalculator(object):
         """
         coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
                              (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
-        s = 36.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
+        s = 9.0 / 1086.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
         return s
@@ -626,7 +625,7 @@ class SPowderSemiEmpiricalCalculator(object):
         """
         coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
                              (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
-        s = 27.0 / 9850.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
+        s = 27.0 / 49250.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
         return s

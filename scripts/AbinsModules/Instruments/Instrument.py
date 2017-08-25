@@ -91,7 +91,7 @@ class Instrument(object):
         :return: numpy array with calculated Gaussian values
         """
         sigma_factor = 2.0 * sigma * sigma
-        norm = points.size * AbinsModules.AbinsParameters.bin_width / (2 * AbinsModules.AbinsParameters.fwhm * sigma)
+        norm = AbinsModules.AbinsParameters.pkt_per_peak / (2 * AbinsModules.AbinsParameters.fwhm * sigma)
         return 1.0 / (np.sqrt(sigma_factor * np.pi) * norm) * np.exp(-(points - center) ** 2 / sigma_factor)
 
     def __str__(self):

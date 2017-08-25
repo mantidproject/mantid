@@ -172,5 +172,3 @@ MAX_THRESHOLD = 0.3
 
 ONE_CHARACTER = 1
 EOF = b""
-
-SCALING_CONSTANT = 100.0  # scaling constant so it is easier to compare with aCLIMAX
