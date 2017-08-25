@@ -517,6 +517,10 @@ void Elwin::saveClicked() {
                                    false))
     addSaveWorkspaceToQueue(workspaceBaseName + "_elf");
 
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
+                                   false))
+    addSaveWorkspaceToQueue(workspaceBaseName + "_elt");
+
   m_batchAlgoRunner->executeBatchAsync();
 }
 
