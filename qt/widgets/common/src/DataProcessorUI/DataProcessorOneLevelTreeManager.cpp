@@ -42,7 +42,10 @@ DataProcessorOneLevelTreeManager::DataProcessorOneLevelTreeManager(
     DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
     const DataProcessorWhiteList &whitelist)
     : m_presenter(presenter),
-      m_model(new QDataProcessorOneLevelTreeModel(table, whitelist)) {}
+      m_model(new QDataProcessorOneLevelTreeModel(table, whitelist)) {
+  initializeTableCommands();
+  initializeEditCommands();
+}
 
 /**
 * Constructor (no table workspace given)
@@ -59,30 +62,23 @@ DataProcessorOneLevelTreeManager::DataProcessorOneLevelTreeManager(
 */
 DataProcessorOneLevelTreeManager::~DataProcessorOneLevelTreeManager() {}
 
-std::vector<std::unique_ptr<DataProcessorCommand>>
-DataProcessorOneLevelTreeManager::getEditCommands() {
-  std::vector<DataProcessorCommand_uptr> commands;
-  addCommand(commands, make_unique<DataProcessorProcessCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPauseCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPlotRowCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorAppendRowCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCopySelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCutSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorClearSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorDeleteRowCommand>(m_presenter));
-  return commands;
+void DataProcessorOneLevelTreeManager::initializeEditCommands() {
+  addEditCommand(make_unique<DataProcessorProcessCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorPauseCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorPlotRowCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorAppendRowCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorCopySelectedCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorCutSelectedCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorClearSelectedCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorDeleteRowCommand>(m_presenter));
 }
 
-int DataProcessorOneLevelTreeManager::indexOfCommand(EditAction action) {
+int DataProcessorOneLevelTreeManager::indexOfCommand(EditAction action) const {
   switch (action) {
   case EditAction::PROCESS:
     return 0;
@@ -108,25 +104,29 @@ int DataProcessorOneLevelTreeManager::indexOfCommand(EditAction action) {
   }
 }
 
-std::vector<std::unique_ptr<DataProcessorCommand>>
-DataProcessorOneLevelTreeManager::getTableCommands() {
-  std::vector<DataProcessorCommand_uptr> commands;
-  addCommand(commands, make_unique<DataProcessorOpenTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorNewTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSaveTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorImportTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorExportTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorOptionsCommand>(m_presenter));
-  return commands;
+typename DataProcessorOneLevelTreeManager::CommandIndices
+DataProcessorOneLevelTreeManager::getModifyingTableCommands() const {
+  return getModifyingCommands(getTableCommands());
 }
 
-int DataProcessorOneLevelTreeManager::indexOfCommand(TableAction action) {
+typename DataProcessorOneLevelTreeManager::CommandIndices
+DataProcessorOneLevelTreeManager::getModifyingEditCommands() const {
+  return getModifyingCommands(getEditCommands());
+}
+
+void DataProcessorOneLevelTreeManager::initializeTableCommands() {
+  addTableCommand(make_unique<DataProcessorOpenTableCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorNewTableCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorSaveTableCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorImportTableCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorExportTableCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorOptionsCommand>(m_presenter));
+}
+
+int DataProcessorOneLevelTreeManager::indexOfCommand(TableAction action) const {
   switch (action) {
   case TableAction::OPEN_TABLE:
     return 0;
@@ -145,14 +145,14 @@ int DataProcessorOneLevelTreeManager::indexOfCommand(TableAction action) {
   }
 }
 
-/**
-* Publishes a list of available commands
-* @return : The list of available commands
-*/
-std::vector<DataProcessorCommand_uptr>
-DataProcessorOneLevelTreeManager::publishCommands() {
-  std::vector<DataProcessorCommand_uptr> commands;
-  return commands;
+typename DataProcessorOneLevelTreeManager::CommandIndices
+DataProcessorOneLevelTreeManager::getPausingEditCommands() const {
+  return CommandIndices({indexOfCommand(EditAction::PAUSE)});
+}
+
+typename DataProcessorOneLevelTreeManager::CommandIndices
+DataProcessorOneLevelTreeManager::getProcessingEditCommands() const {
+  return CommandIndices({indexOfCommand(EditAction::PROCESS)});
 }
 
 /**

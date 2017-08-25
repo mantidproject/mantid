@@ -115,10 +115,10 @@ void QtReflRunsTabView::initLayout() {
 * @param command : [input] The command (action) to add
 */
 void QtReflRunsTabView::addToMenu(QMenu *menu,
-                                  DataProcessorCommand_uptr command) {
+                                  DataProcessorCommand* command) {
 
   m_commands.push_back(Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
-      menu, std::move(command)));
+      menu, command));
 }
 
 /**
@@ -127,11 +127,11 @@ void QtReflRunsTabView::addToMenu(QMenu *menu,
 * "Reflectometry" menu
 */
 void QtReflRunsTabView::setReflectometryMenuCommands(
-    std::vector<DataProcessorCommand_uptr> commands) {
+    std::vector<DataProcessorCommand_uptr>& commands) {
 
   ui.menuTable->clear();
   for (auto &command : commands) {
-    addToMenu(ui.menuTable, std::move(command));
+    addToMenu(ui.menuTable, command.get());
   }
 
   // Slit calculator

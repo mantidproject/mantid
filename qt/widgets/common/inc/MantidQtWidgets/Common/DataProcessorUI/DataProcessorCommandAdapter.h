@@ -42,16 +42,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorCommandAdapter
-    : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON DataProcessorCommandAdapter : public QObject {
   Q_OBJECT
 public:
   /** Constructor: Adds actions to a menu
   * @param menu :: The menu where the actions will be added
-  * @param adaptee :: The action to add
+  * @param adaptee :: Non-owning reference to the adaptee.
   */
-  DataProcessorCommandAdapter(QMenu *menu, DataProcessorCommand_uptr adaptee)
-      : m_adaptee(std::move(adaptee)) {
+  DataProcessorCommandAdapter(QMenu *menu, DataProcessorCommand *adaptee)
+      : m_adaptee(adaptee) {
 
     if (m_adaptee->hasChild()) {
       // We are dealing with a submenu
@@ -62,8 +61,8 @@ public:
       auto &child = m_adaptee->getChild();
       for (auto &ch : child) {
         m_adapter.push_back(
-            Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
-                submenu, std::move(ch)));
+            Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(submenu,
+                                                                     ch.get()));
       }
     } else {
       // We are dealing with an action
@@ -76,9 +75,8 @@ public:
   * @param toolbar :: The toolbar where actions will be added
   * @param adaptee :: The action to add
   */
-  DataProcessorCommandAdapter(QToolBar *toolbar,
-                              DataProcessorCommand_uptr adaptee)
-      : m_adaptee(std::move(adaptee)) {
+  DataProcessorCommandAdapter(QToolBar *toolbar, DataProcessorCommand *adaptee)
+      : m_adaptee(adaptee) {
 
     if (!m_adaptee->hasChild()) {
       // Sub-menus cannot be added to a toolbar
@@ -111,12 +109,9 @@ public slots:
 
 private:
   // The adaptee
-  DataProcessorCommand_uptr m_adaptee;
+  DataProcessorCommand *m_adaptee;
   std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_adapter;
 };
-
-typedef std::unique_ptr<DataProcessorCommandAdapter>
-    DataProcessorCommandAdapter_uptr;
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDADAPTER_H*/

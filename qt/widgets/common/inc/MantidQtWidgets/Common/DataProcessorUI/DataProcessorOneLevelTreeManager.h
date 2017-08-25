@@ -52,11 +52,8 @@ public:
   ~DataProcessorOneLevelTreeManager() override;
 
   /// Publish commands
-  std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
-  std::vector<std::unique_ptr<DataProcessorCommand>> getEditCommands() override;
-  int indexOfCommand(EditAction action) override;
-  std::vector<std::unique_ptr<DataProcessorCommand>> getTableCommands() override;
-  int indexOfCommand(TableAction action) override;
+  int indexOfCommand(EditAction action) const override;
+  int indexOfCommand(TableAction action) const override;
 
   /// Append a row
   void appendRow() override;
@@ -103,6 +100,11 @@ public:
   bool isValidModel(Mantid::API::Workspace_sptr ws,
                     size_t whitelistColumns) const override;
 
+  CommandIndices getPausingEditCommands() const override;
+  CommandIndices getProcessingEditCommands() const override;
+  CommandIndices getModifyingTableCommands() const override;
+  CommandIndices getModifyingEditCommands() const override;
+
   /// Return the model
   boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() override;
   /// Return the table workspace
@@ -122,6 +124,8 @@ private:
   /// Validate a table workspace
   void validateModel(Mantid::API::ITableWorkspace_sptr ws,
                      size_t whitelistColumns) const;
+  void initializeTableCommands();
+  void initializeEditCommands();
 };
 }
 }

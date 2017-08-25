@@ -125,13 +125,13 @@ void QDataProcessorWidget::createTable() {
 * @param commands :: A vector of actions (commands)
 */
 void QDataProcessorWidget::addEditActions(
-    std::vector<std::unique_ptr<DataProcessorCommand>> commands) {
+    std::vector<std::unique_ptr<DataProcessorCommand>>& commands) {
 
   // Put the commands in the toolbar
   for (auto &command : commands) {
     m_commands.push_back(
         Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
-            ui.rowToolBar, std::move(command)));
+            ui.rowToolBar, command.get()));
   }
 
   // Add actions to context menu

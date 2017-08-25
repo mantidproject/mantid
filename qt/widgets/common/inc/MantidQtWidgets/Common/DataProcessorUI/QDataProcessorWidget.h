@@ -2,12 +2,12 @@
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtWidgets/Common/ProgressableView.h"
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/ProgressableView.h"
 #include "ui_DataProcessorWidget.h"
 #include <QSignalMapper>
 
@@ -74,7 +74,7 @@ public:
 
   // Add actions to the toolbar and context menu
   void addEditActions(
-      std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
+      std::vector<std::unique_ptr<DataProcessorCommand>>& commands) override;
 
   // Connect the model
   void
@@ -138,21 +138,22 @@ public:
   // Force re-processing of rows
   void setForcedReProcessing(bool forceReProcessing) override;
 
-  void disableProcessButton();
-  void enableProcessButton();
+  void disableProcessButton() override;
+  void enableProcessButton() override;
 
-  void enableAction(int indexToEnable);
-  void disableAction(int indexToDisable);
+  void enableAction(int indexToEnable) override;
+  void disableAction(int indexToDisable) override;
 
-  void disableSelectionAndEditing();
-  void enableSelectionAndEditing();
-rivate:
+  void disableSelectionAndEditing() override;
+  void enableSelectionAndEditing() override;
+
+private:
   void createTable();
   void disableActionOnToolbar(int indexToDisable);
   void disableActionOnContextMenu(int indexToDisable);
   void enableActionOnToolbar(int indexToEnable);
   void enableActionOnContextMenu(int indexToEnable);
-  
+
   static void disableActionOnWidget(QWidget &widget, int index);
   static void enableActionOnWidget(QWidget &widget, int index);
   static void disable(QWidget &widget);

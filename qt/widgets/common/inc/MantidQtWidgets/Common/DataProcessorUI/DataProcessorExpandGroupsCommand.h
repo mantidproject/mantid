@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDGROUPSCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDGROUPSCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,10 +30,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorExpandGroupsCommand : public DataProcessorCommandBase {
+class DataProcessorExpandGroupsCommand : public TableModificationCommandBase {
 public:
-  DataProcessorExpandGroupsCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter) {}
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorExpandGroupsCommand() {}
 
   void execute() override {

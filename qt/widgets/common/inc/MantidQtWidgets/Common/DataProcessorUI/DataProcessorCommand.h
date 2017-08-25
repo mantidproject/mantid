@@ -45,6 +45,7 @@ public:
   virtual QString tooltip() = 0;
   virtual QString whatsthis() = 0;
   virtual QString shortcut() = 0;
+  virtual bool modifiesTable() const = 0;
   virtual bool hasChild() final { return !m_child.empty(); };
   virtual void
   setChild(std::vector<std::unique_ptr<DataProcessorCommand>> child) final {

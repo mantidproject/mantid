@@ -51,7 +51,10 @@ DataProcessorTwoLevelTreeManager::DataProcessorTwoLevelTreeManager(
     DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
     const DataProcessorWhiteList &whitelist)
     : m_presenter(presenter),
-      m_model(new QDataProcessorTwoLevelTreeModel(table, whitelist)) {}
+      m_model(new QDataProcessorTwoLevelTreeModel(table, whitelist)) {
+  initializeTableCommands();
+  initializeEditCommands();
+}
 
 /**
 * Constructor (no table workspace given)
@@ -63,25 +66,19 @@ DataProcessorTwoLevelTreeManager::DataProcessorTwoLevelTreeManager(
     : DataProcessorTwoLevelTreeManager(
           presenter, createDefaultWorkspace(whitelist), whitelist) {}
 
-std::vector<DataProcessorCommand_uptr>
-DataProcessorTwoLevelTreeManager::getTableCommands() {
-  std::vector<DataProcessorCommand_uptr> commands;
-  addCommand(commands, make_unique<DataProcessorOpenTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorNewTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSaveTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorImportTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorExportTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorOptionsCommand>(m_presenter));
-  return commands;
+void DataProcessorTwoLevelTreeManager::initializeTableCommands() {
+  addTableCommand(make_unique<DataProcessorOpenTableCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorNewTableCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorSaveTableCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorImportTableCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorExportTableCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addTableCommand(make_unique<DataProcessorOptionsCommand>(m_presenter));
 }
 
-int DataProcessorTwoLevelTreeManager::indexOfCommand(TableAction action) {
+int DataProcessorTwoLevelTreeManager::indexOfCommand(TableAction action) const {
   switch (action) {
   case TableAction::OPEN_TABLE:
     return 0;
@@ -105,42 +102,41 @@ int DataProcessorTwoLevelTreeManager::indexOfCommand(TableAction action) {
 */
 DataProcessorTwoLevelTreeManager::~DataProcessorTwoLevelTreeManager() {}
 
-std::vector<DataProcessorCommand_uptr>
-DataProcessorTwoLevelTreeManager::getEditCommands() {
-  std::vector<DataProcessorCommand_uptr> commands;
-  addCommand(commands, make_unique<DataProcessorProcessCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPauseCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorExpandCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorExpandGroupsCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCollapseGroupsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPlotRowCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPlotGroupCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorAppendRowCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorAppendGroupCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorGroupRowsCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCopySelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCutSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorClearSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorDeleteRowCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorDeleteGroupCommand>(m_presenter));
-  return commands;
+void DataProcessorTwoLevelTreeManager::initializeEditCommands() {
+  addEditCommand(make_unique<DataProcessorProcessCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorPauseCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorExpandCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorExpandGroupsCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorCollapseGroupsCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorPlotRowCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorPlotGroupCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorAppendRowCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorAppendGroupCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorGroupRowsCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorCopySelectedCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorCutSelectedCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorClearSelectedCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorDeleteRowCommand>(m_presenter));
+  addEditCommand(make_unique<DataProcessorDeleteGroupCommand>(m_presenter));
 }
 
-int DataProcessorTwoLevelTreeManager::indexOfCommand(EditAction action) {
+typename DataProcessorTwoLevelTreeManager::CommandIndices
+DataProcessorTwoLevelTreeManager::getPausingEditCommands() const {
+  return CommandIndices({indexOfCommand(EditAction::PAUSE)});
+}
+
+typename DataProcessorTwoLevelTreeManager::CommandIndices
+DataProcessorTwoLevelTreeManager::getProcessingEditCommands() const {
+  return CommandIndices({indexOfCommand(EditAction::PROCESS)});
+}
+
+int DataProcessorTwoLevelTreeManager::indexOfCommand(EditAction action) const {
   switch (action) {
   case EditAction::PROCESS:
     return 0;
@@ -179,59 +175,6 @@ int DataProcessorTwoLevelTreeManager::indexOfCommand(EditAction action) {
   default:
     throw std::logic_error("Unknown action for two level manager specified.");
   }
-}
-/**
-* Publishes a list of available commands
-* @return : The list of available commands
-*/
-std::vector<DataProcessorCommand_uptr>
-DataProcessorTwoLevelTreeManager::publishCommands() {
-
-  std::vector<DataProcessorCommand_uptr> commands;
-
-  addCommand(commands, make_unique<DataProcessorOpenTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorNewTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSaveTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorImportTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorExportTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorOptionsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorProcessCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPauseCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorExpandCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorExpandGroupsCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCollapseGroupsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPlotRowCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPlotGroupCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorAppendRowCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorAppendGroupCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorGroupRowsCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCopySelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCutSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorClearSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorDeleteRowCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorDeleteGroupCommand>(m_presenter));
-  return commands;
 }
 
 /**

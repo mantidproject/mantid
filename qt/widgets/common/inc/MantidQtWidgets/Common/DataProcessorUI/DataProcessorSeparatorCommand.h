@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableQueryCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -32,12 +32,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorSeparatorCommand : public DataProcessorCommandBase {
+class DataProcessorSeparatorCommand : public TableQueryCommandBase {
 public:
-  DataProcessorSeparatorCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorSeparatorCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableQueryCommandBase::TableQueryCommandBase;
   virtual ~DataProcessorSeparatorCommand(){};
 
   void execute() override{};

@@ -4,9 +4,9 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TableAction.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/EditAction.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableAction.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <QStringList>
 #include <map>
 #include <memory>
@@ -50,19 +50,27 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 class DataProcessorTreeManager {
 public:
+  using CommandIndex = int;
+  using CommandIndices = std::vector<int>;
+  using CommandVector = std::vector<std::unique_ptr<DataProcessorCommand>>;
   virtual ~DataProcessorTreeManager(){};
 
   /// Actions/commands
 
   /// Publish actions/commands
-  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
-  getTableCommands() = 0;
-  virtual int indexOfCommand(TableAction action) = 0;
-  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
-  getEditCommands() = 0;
-  virtual int indexOfCommand(EditAction action) = 0;
-  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
-  publishCommands() = 0;
+  const CommandVector &getTableCommands() const;
+  CommandVector &getTableCommands();
+  virtual CommandIndex indexOfCommand(TableAction action) const = 0;
+  virtual CommandIndices getModifyingTableCommands() const = 0;
+
+  const CommandVector &getEditCommands() const;
+  CommandVector &getEditCommands();
+
+  virtual CommandIndex indexOfCommand(EditAction action) const = 0;
+  virtual CommandIndices getPausingEditCommands() const = 0;
+  virtual CommandIndices getProcessingEditCommands() const = 0;
+  virtual CommandIndices getModifyingEditCommands() const = 0;
+
   /// Append a row
   virtual void appendRow() = 0;
   /// Append a group
@@ -110,19 +118,23 @@ public:
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,
                             size_t whitelistColumns) const = 0;
 
-  /// Return member variables
-
   /// Return the model
   virtual boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() = 0;
   /// Return the table ws
   virtual Mantid::API::ITableWorkspace_sptr getTableWorkspace() = 0;
 
+private:
+  CommandVector m_editCommands;
+  CommandVector m_tableCommands;
+
+  void addCommand(std::vector<std::unique_ptr<DataProcessorCommand>> &commands,
+                  std::unique_ptr<DataProcessorCommand> command);
+
 protected:
   /// Add a command to the list of available commands
-  void addCommand(std::vector<std::unique_ptr<DataProcessorCommand>> &commands,
-                  std::unique_ptr<DataProcessorCommand> command) {
-    commands.push_back(std::move(command));
-  }
+  void addEditCommand(std::unique_ptr<DataProcessorCommand> command);
+  void addTableCommand(std::unique_ptr<DataProcessorCommand> command);
+  static CommandIndices getModifyingCommands(const CommandVector &commands); 
 };
 }
 }

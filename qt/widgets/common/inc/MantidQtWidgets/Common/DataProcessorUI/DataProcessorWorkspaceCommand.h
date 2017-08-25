@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORWORKSPACECOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORWORKSPACECOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableQueryCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,14 +30,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorWorkspaceCommand : public DataProcessorCommandBase {
+class DataProcessorWorkspaceCommand : public TableQueryCommandBase {
 public:
   DataProcessorWorkspaceCommand(DataProcessorPresenter *tablePresenter,
                                 const QString &name)
-      : DataProcessorCommandBase(tablePresenter), m_name(name){};
+      : TableQueryCommandBase(tablePresenter), m_name(name){};
   DataProcessorWorkspaceCommand(const QDataProcessorWidget &widget,
                                 const QString &name)
-      : DataProcessorCommandBase(widget), m_name(name){};
+      : TableQueryCommandBase(widget), m_name(name){};
   virtual ~DataProcessorWorkspaceCommand(){};
 
   void execute() override {

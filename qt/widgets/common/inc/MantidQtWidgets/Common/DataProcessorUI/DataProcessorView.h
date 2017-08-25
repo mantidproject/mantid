@@ -9,7 +9,6 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-class AbstractDataProcessorTreeModel;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -17,6 +16,7 @@ namespace MantidWidgets {
 class HintStrategy;
 class DataProcessorCommand;
 class DataProcessorPresenter;
+class AbstractDataProcessorTreeModel;
 
 /** @class DataProcessorView
 
@@ -52,7 +52,7 @@ public:
   virtual ~DataProcessorView(){};
 
   virtual void
-  addEditActions(std::vector<std::unique_ptr<DataProcessorCommand>> actions) = 0;
+  addEditActions(std::vector<std::unique_ptr<DataProcessorCommand>>& actions) = 0;
 
   // Connect the model
   virtual void
@@ -83,11 +83,6 @@ public:
   // Select all rows/groups
   virtual void selectAll() = 0;
 
-  // Handle pause/resume of data reduction
-  virtual void pauseRequested() = 0;
-  virtual void resumed() = 0;
-  virtual void reductionPaused() = 0;
-
   // Setter methods
   virtual void setTableList(const QSet<QString> &tables) = 0;
   virtual void setInstrumentList(const QString &instruments,
@@ -106,6 +101,15 @@ public:
   virtual QString getClipboard() const = 0;
   virtual QString getProcessInstrument() const = 0;
   virtual DataProcessorPresenter *getPresenter() const = 0;
+  
+  virtual void disableProcessButton() = 0;
+  virtual void enableProcessButton() = 0;
+
+  virtual void enableAction(int indexToEnable) = 0;
+  virtual void disableAction(int indexToDisable) = 0;
+
+  virtual void disableSelectionAndEditing() = 0;
+  virtual void enableSelectionAndEditing() = 0;
 
   // Force re-processing of rows
   virtual void setForcedReProcessing(bool forceReProcessing) = 0;

@@ -30,12 +30,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCopySelectedCommand : public DataProcessorCommandBase {
+class DataProcessorCopySelectedCommand : public TableModificationCommandBase {
 public:
-  DataProcessorCopySelectedCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorCopySelectedCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorCopySelectedCommand(){};
 
   void execute() override {

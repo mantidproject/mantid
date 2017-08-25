@@ -272,8 +272,7 @@ void GenericDataProcessorPresenter::acceptViews(
   // Start with a blank table
   newTable();
 
-  // The view should currently be in the paused state
-  m_view->pauseRequested();
+  disablePauseActions();
 }
 
 /**
@@ -388,7 +387,9 @@ void GenericDataProcessorPresenter::doNextAction() {
 }
 
 void GenericDataProcessorPresenter::reductionPaused() {
-  m_view->reductionPaused();
+  m_view->enableSelectionAndEditing();
+  m_view->enableProcessButton();
+
   m_mainPresenter->confirmReductionPaused();
   m_confirmReductionPaused = true;
 }
@@ -443,10 +444,7 @@ Process a new group
 void GenericDataProcessorPresenter::nextGroup() {
 
   if (m_pauseReduction) {
-    // Notify presenter and view that reduction is paused
-    m_view->reductionPaused();
-    m_mainPresenter->confirmReductionPaused();
-    m_confirmReductionPaused = true;
+    reductionPaused();
     return;
   }
 
@@ -503,9 +501,7 @@ End reduction
 void GenericDataProcessorPresenter::endReduction() {
 
   requestReductionPause();
-  m_confirmReductionPaused = true;
-  m_view->reductionPaused();
-  m_mainPresenter->confirmReductionPaused();
+  reductionPaused();
 }
 
 /**
@@ -1186,7 +1182,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     selectAll();
     break;
   case DataProcessorPresenter::PauseFlag:
-    reductionPauseRequested();
+    requestReductionPause();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -1589,35 +1585,29 @@ void GenericDataProcessorPresenter::addActionsToEditMenu() {
 }
 
 void GenericDataProcessorPresenter::enableProcessActions() {
-  auto pauseActions = m_manager->getProcessActionCommandIndices();
-  for(const auto& action : pauseActions) {
-    m_view->enableAction(action);
-  }
-
-  m_view->disableProcessButton();
+  enableActions(m_manager->getProcessingEditCommands());
+  m_view->enableProcessButton();
 }
 
 void GenericDataProcessorPresenter::disableProcessActions() {
-  auto pauseActions = m_manager->getProcessActionCommandIndices();
-  for(const auto& action : pauseActions) {
-    m_view->disableAction(action);
-  }
-
+  disableActions(m_manager->getProcessingEditCommands());
   m_view->disableProcessButton();
 }
 
 void GenericDataProcessorPresenter::enablePauseActions() {
-  auto pauseActions = m_manager->getPauseActionCommandIndices();
-  for(const auto& action : pauseActions) {
-    m_view->enableAction(action);
-  }
+  enableActions(m_manager->getPausingEditCommands());
 }
 
 void GenericDataProcessorPresenter::disablePauseActions() {
-  auto pauseActions = m_manager->getPauseActionCommandIndices();
-  for(const auto& action : pauseActions) {
-    m_view->disableAction(action);
-  }
+  disableActions(m_manager->getPausingEditCommands());
+}
+
+void GenericDataProcessorPresenter::disableTableModification() {
+  disableActions(m_manager->getModifyingEditCommands());
+}
+
+void GenericDataProcessorPresenter::enableTableModification() {
+  enableActions(m_manager->getModifyingEditCommands());
 }
 
 /**
@@ -1625,7 +1615,7 @@ Pauses reduction. If currently reducing runs, this does not take effect until
 the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::requestReductionPause() {
-  disablePauseActions(); 
+  disablePauseActions();
   m_mainPresenter->pause();
   m_pauseReduction = true;
 }
@@ -1659,16 +1649,16 @@ void GenericDataProcessorPresenter::setPromptUser(bool allowPrompt) {
   m_promptUser = allowPrompt;
 }
 
-typename GenericDataProcessorPresenter::CommandVector
+typename GenericDataProcessorPresenter::CommandVector&
 GenericDataProcessorPresenter::getTableCommands() {
-  auto commands = m_manager->getTableCommands();
+  auto& commands = m_manager->getTableCommands();
   // "Open Table" needs the the list of available workspaces in the ADS
   commands.at(m_manager->indexOfCommand(TableAction::OPEN_TABLE))
       ->setChild(getTableList());
   return commands;
 }
 
-typename GenericDataProcessorPresenter::CommandVector
+typename GenericDataProcessorPresenter::CommandVector&
 GenericDataProcessorPresenter::getEditCommands() {
   return m_manager->getEditCommands();
 }

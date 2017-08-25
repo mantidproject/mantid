@@ -1,14 +1,12 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTABLEMODIFICATIONCOMMANDBASE_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTABLEMODIFICATIONCOMMANDBASE_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** @class DataProcessorCommandBase
+/** @class TableModificationCommandBase
 
 ReflCommandBase is an interface which defines the functions any data processor
 action needs to support. Defines a IReflTablePresenter that will be notified.
@@ -34,20 +32,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCommandBase : public DataProcessorCommand {
+class TableModificationCommandBase : public DataProcessorCommandBase {
 public:
-  DataProcessorCommandBase(DataProcessorPresenter *tablePresenter)
-      : m_presenter(tablePresenter) {
-    if (!tablePresenter) {
-      throw std::invalid_argument("Invalid abstract presenter");
-    }
-  };
-  DataProcessorCommandBase(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget.getPresenter()) {}
-  virtual ~DataProcessorCommandBase() = default;
-protected:
-  DataProcessorPresenter *const m_presenter;
+  using DataProcessorCommandBase::DataProcessorCommandBase;
+  bool modifiesTable() const override;
 };
 }
 }
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H*/
+#endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORTABLEMODIFICATIONCOMMANDBASE_H

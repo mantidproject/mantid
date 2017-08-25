@@ -3,21 +3,22 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-#include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/ProgressPresenter.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 #include <QSet>
 #include <queue>
@@ -30,7 +31,6 @@ namespace MantidWidgets {
 class ProgressableView;
 class DataProcessorView;
 class DataProcessorTreeManager;
-class GenericDataProcessorPresenterThread;
 
 using RowItem = std::pair<int, RowData>;
 using RowQueue = std::queue<RowItem>;
@@ -77,8 +77,8 @@ public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
@@ -92,8 +92,8 @@ public:
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(
@@ -117,8 +117,8 @@ public:
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   void setInstrumentList(const QStringList &instruments,
                          const QString &defaultInstrument) override;
-  CommandVector getTableCommands() override;
-  CommandVector getEditCommands() override;
+  CommandVector& getTableCommands() override;
+  CommandVector& getEditCommands() override;
   int indexOfCommand(TableAction action) override;
   int indexOfCommand(EditAction action) override;
   void acceptViews(DataProcessorView *tableView,
@@ -189,6 +189,23 @@ protected slots:
   void threadFinished(const int exitCode);
   void issueNotFoundWarning(QString const &granule,
                             QSet<QString> const &missingWorkspaces);
+  void enableTableModification();
+  void disableTableModification();
+  void enablePauseActions();
+  void disablePauseActions();
+  void enableProcessActions();
+  void disableProcessActions();
+
+protected:
+  template <typename Container> void disableActions(Container actionIndices) {
+    for (auto index : actionIndices)
+      m_view->enableAction(index);
+  }
+
+  template <typename Container> void enableActions(Container actionIndices) {
+    for (auto index : actionIndices)
+      m_view->enableAction(index);
+  }
 
 private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
@@ -303,7 +320,7 @@ private:
   // pause/resume reduction
   void requestReductionPause();
   void resumeReduction();
-  void reductionPaused()
+  void reductionPaused();
 
   // Check if run has been processed
   bool isProcessed(int position) const;
