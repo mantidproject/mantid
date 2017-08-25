@@ -27,7 +27,7 @@ set (INCLUDES
 )
 
 # Target
-include_directories (SYSTEM ${PYTHON_INCLUDE_DIR})
+include_directories (SYSTEM ${PYTHON_INCLUDE_PATH} ${PYTHON_NUMPY_INCLUDE_DIR})
 
 add_library (MantidQtWidgetsMplCpp ${LIB_SRCS} ${MOC_GENERATED_SRC} ${MOC_HEADERS} ${NOMOC_HEADERS})
 target_include_directories (MantidQtWidgetsMplCpp PUBLIC ${INCLUDES})

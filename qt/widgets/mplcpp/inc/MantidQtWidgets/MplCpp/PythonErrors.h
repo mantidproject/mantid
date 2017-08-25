@@ -17,6 +17,7 @@
  GNU General Public License for more details.
 */
 #include <stdexcept>
+#include <string>
 
 namespace MantidQt {
 namespace Widgets {
