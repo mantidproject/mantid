@@ -217,43 +217,95 @@ different run numbers.
 
 The fundamental class is `StateMove` which has the following parameters:
 
-=============================== ======= ========================= ========= ===============
+=============================== ======= ========================= ========= =============== =============
 Name                            Comment Type                      Optional? Auto-generated? Default value
-=============================== ======= ========================= ========= ===============
-x_translation_correction        -       `FloatParameter`          Y         N
-y_translation_correction        -       `FloatParameter`          Y         N
-z_translation_correction        -       `FloatParameter`          Y         N
-rotation_correction             -       `FloatParameter`          Y         N
-side_correction                 -       `FloatParameter`          Y         N
-radius_correction               -       `FloatParameter`          Y         N
-x_tilt_correction               -       `FloatParameter`          Y         N
-y_tilt_correction               -       `FloatParameter`          Y         N
-z_tilt_correction               -       `FloatParameter`          Y         N
-sample_centre_pos1              -       `FloatParameter`          Y         N
-sample_centre_pos2              -       `FloatParameter`          Y         N
-detector_name                   -       `StringWithNoneParameter` -         Y
-detector_name_short             -       `StringWithNoneParameter` -         Y
-=============================== ================================= ========= ========= =================
+=============================== ======= ========================= ========= =============== =============
+x_translation_correction        -       `FloatParameter`          Y         N               0.0
+y_translation_correction        -       `FloatParameter`          Y         N               0.0
+z_translation_correction        -       `FloatParameter`          Y         N               0.0
+rotation_correction             -       `FloatParameter`          Y         N               0.0
+side_correction                 -       `FloatParameter`          Y         N               0.0
+radius_correction               -       `FloatParameter`          Y         N               0.0
+x_tilt_correction               -       `FloatParameter`          Y         N               0.0
+y_tilt_correction               -       `FloatParameter`          Y         N               0.0
+z_tilt_correction               -       `FloatParameter`          Y         N               0.0
+sample_centre_pos1              -       `FloatParameter`          Y         N               0.0
+sample_centre_pos2              -       `FloatParameter`          Y         N               0.0
+detector_name                   -       `StringWithNoneParameter` -         Y               -
+detector_name_short             -       `StringWithNoneParameter` -         Y               -
+=============================== ================================= ========= =============== ==============
 
-| Name  | Comment    | Type       | Is optional? | Is auto-generated? | Default value |
-|-------|------------|------------|--------------|--------------------|---------------|
-|x_translation_correction| - | `FloatParameter`| Yes | No | 0.0|
-|y_translation_correction| - | `FloatParameter`| Yes | No | 0.0|
-|z_translation_correction| - | `FloatParameter`| Yes | No | 0.0|
-|rotation_correction| - | `FloatParameter`| Yes | No | 0.0|
-|side_correction| - | `FloatParameter`| Yes | No | 0.0|
-|radius_correction| - | `FloatParameter`| Yes | No | 0.0|
-|x_tilt_correction| - | `FloatParameter`| Yes | No | 0.0|
-|y_tilt_correction| - | `FloatParameter`| Yes | No | 0.0|
-|z_tilt_correction| - | `FloatParameter`| Yes | No | 0.0|
-|sample_centre_pos1| - | `FloatParameter`| Yes | No | 0.0|
-|sample_centre_pos2| - | `FloatParameter`| Yes | No | 0.0|
-|detector_name| -| `StringWithNoneParameter`| No | Yes | 0.0|
-|detector_name_short| - | `FloatParameter`| No | Yes | 0.0|
+If nothing is specified, then the detector positions and movements are assumed to be 0.
+Note that each instrument contains additional parameters on their individual state classes. When adding
+a new instrument, this will be most likely one of the main areas to add new code.
+
+`reduction_mode.py`
+*******************
+
+The `StateReductionMode` class contains general settings about the reduction, e.g. if we are dealing with a merged
+reduction. It contains the following parameters:
+
+=============================== =================================================== ===========================================  ========= =============== ===========================================
+Name                            Comment                                             Type                                         Optional? Auto-generated? Default value
+=============================== =================================================== ===========================================  ========= =============== ===========================================
+reduction_mode                  The type of reduction, ie LAB, HAB, merged or both `ClassTypeParameter(ReductionMode)`           N         N               `ISISReductionMode.LAB` enum value
+reduction_dimensionality        If 1D or 2D reduction                              `ClassTypeParameter(ReductionDimensionality)` N         N               `ReductionDimensionality.OneDim` enum value
+merge_fit_mode                  The fit mode for merging                           `ClassTypeParameter(FitModeForMerge)`         Y         N               `FitModeForMerge.NoFit` enum value
+merge_shift                     The shift value for merging                        `FloatParameter`                              Y         N               0.0
+merge_scale                     The scale value for merging                        `FloatParameter`                              Y         N               1.0
+merge_range_min                 The min q value for merging                        `FloatWithNoneParameter`                      Y         N               `None`
+merge_range_max                 The max q value for merging                        `FloatWithNoneParameter`                      Y         N               `None`
+detector_names                  A dict from detector type to detector name         `DictParameter`                               N         Y               -
+=============================== ================================================== ============================================ ========== =============== ============================================
 
 
+`slice.py`
+**********
+
+The `StateSliceEvent` class is only relevant when we are dealing with event-type
+data and the user decides to perform an event-sliced reduction, ie one reduction per event slice.
+
+=========== ======================================= ========================= ========= ===============
+Name        Comment                                 Type                      Optional? Auto-generated?
+=========== ======================================= ========================= ========= ===============
+start_time  A list of start times for event slices  `FloatListParameter`      Y         N
+end_time    A list of stop times for event slices   `FloatListParameter`      Y         N
+=========== ======================================= ========================= ========= ===============
+
+Note that the validation ensures that the number of `start_time` and `end_time`
+entries is matched and that the end time is larger than the start time.
 
 
+`mask.py`
+**********
+
+The `StateMask` class holds information regarding time and pixel masking.
+It also contains two sub-states which contain detector-specific masking information.
+The `StateMask` contains the following parameters:
+
+====================== ======================================================== ========================= ========= ===============
+Name                   Comment                                                  Type                      Optional? Auto-generated?
+====================== ======================================================== ========================= ========= ===============
+radius_min             The min radius of a circular mask on the detector        `FloatParameter`          Y         N
+radius_max             The max radius of a circular mask on the detector        `FloatParameter`          Y         N
+bin_mask_general_start A list of start times for general bin masks               `FloatListParameter`     Y         N
+bin_mask_general_stop  A list of stop times for general bin masks                `FloatListParameter`     Y         N
+mask_files             A list of mask files                                      `StringListParameter`    Y         N
+phi_min                The min angle of an angle mask                            `FloatParameter`         Y         N
+phi_max                The max angle of an angle mask                            `FloatParameter`         Y         N
+use_mask_phi_mirror    If the mirror slice should be used                        `BoolParameter`          Y         N
+beam_stop_arm_width    The width of the beam stop arm                            `PositiveFloatParameter` Y         N
+beam_stop_arm_angle    The angle of the beam stop arm                            `FloatParameter`         Y         N
+beam_stop_arm_pos1     The x position of the beam stop arm                       `FloatParameter`         Y         N
+beam_stop_arm_pos2     The y position of the beam stop arm                       `FloatParameter`         Y         N
+clear                  currently not used                                        `BoolParameter`          Y         N
+clear_time             currently not used                                        `BoolParameter`          Y         N
+detector               A dict of detector type to `StateMaskDetector` sub-states `DictParameter`          N         Y
+idf_path               The path to the IDF                                       `StringParameter`        N         Y
+
+Validation is applied to some of the entries.
+
+The detector-specific settings are stored in the `StateMaskDetector` which contains the following parameters:
 
 
 
