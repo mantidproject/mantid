@@ -193,9 +193,9 @@ public:
     TS_ASSERT_EQUALS(PDF->getNumberHistograms(), nParams + 1);
     TS_ASSERT_EQUALS(PDF->x(0).size(), 21);
     TS_ASSERT_EQUALS(PDF->y(0).size(), 20);
-    TS_ASSERT_DELTA(PDF->y(0)[7], 0.259, 0.01);
-    TS_ASSERT_DELTA(PDF->y(1)[8], 5.505, 0.01);
-    TS_ASSERT_DELTA(PDF->y(2)[0], 0.392, 0.01);
+    TS_ASSERT_DELTA(PDF->y(0)[7], 0.41, 0.3);
+    TS_ASSERT_DELTA(PDF->y(1)[8], 5.24, 1.0);
+    TS_ASSERT_DELTA(PDF->y(2)[0], 0.44, 0.3);
 
     //  Test CostFunction table
     ITableWorkspace_sptr costFunctTable = fit.getProperty("CostFunctionTable");
