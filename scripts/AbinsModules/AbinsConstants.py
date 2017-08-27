@@ -204,5 +204,3 @@ BBOX = "tight"
 BACKGROUND = "white"
 
 EOF = b""
-
-SCALING_CONSTANT = 100.0  # scaling constant so it is easier to compare with aCLIMAX
