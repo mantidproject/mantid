@@ -62,8 +62,9 @@ public:
 
   ///@{
   ///@name Canvas modification
-  void draw();
+  void setCanvasFaceColor(const char *color);
   void addSubPlot(int subplotLayout);
+  void draw();
   ///@}
 
   ///@{
@@ -95,6 +96,7 @@ public:
 
 private:
   void drawNoGIL();
+  void setCanvasFaceColorNoGIL(const char *color);
 
   // Python objects are held in an hidden type to avoid Python
   // polluting the header

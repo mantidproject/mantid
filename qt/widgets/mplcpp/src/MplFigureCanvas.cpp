@@ -207,11 +207,12 @@ QString MplFigureCanvas::getScale(const Axes::Scale type) {
 }
 
 /**
- * @brief MplFigureCanvas::draw
+ * Set the color of the canvas outside of the axes
+ * @param color A matplotlib color string
  */
-void MplFigureCanvas::draw() {
+void MplFigureCanvas::setCanvasFaceColor(const char *color) {
   ScopedPythonGIL gil;
-  drawNoGIL();
+  setCanvasFaceColorNoGIL(color);
 }
 
 /**
@@ -230,6 +231,14 @@ void MplFigureCanvas::addSubPlot(int subplotLayout) {
   if (!result)
     throw PythonError();
   detail::decref(result);
+}
+
+/**
+ * @brief MplFigureCanvas::draw
+ */
+void MplFigureCanvas::draw() {
+  ScopedPythonGIL gil;
+  drawNoGIL();
 }
 
 /**
@@ -396,6 +405,19 @@ void MplFigureCanvas::drawNoGIL() {
   detail::decref(PyObject_CallMethod(m_pydata->canvas.get(),
                                      PYSTR_LITERAL("draw"), PYSTR_LITERAL(""),
                                      nullptr));
+}
+
+/**
+ * Set the face color of the figure. This does not lock the GIL - use
+ * with caution
+ * @param color A matplotlib color string
+ */
+void MplFigureCanvas::setCanvasFaceColorNoGIL(const char *color) {
+  auto figure = PythonObject::fromNewRef(
+      PyObject_GetAttrString(m_pydata->canvas.get(), PYSTR_LITERAL("figure")));
+  detail::decref(
+      PyObject_CallMethod(figure.get(), PYSTR_LITERAL("set_facecolor"),
+                          PYSTR_LITERAL("(s)"), PYSTR_LITERAL(color)));
 }
 
 //------------------------------------------------------------------------------
