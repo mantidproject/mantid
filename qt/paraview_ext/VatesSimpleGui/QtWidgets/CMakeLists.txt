@@ -36,7 +36,6 @@ qt4_wrap_ui( UI_BUILT_SOURCES
 include_directories(
   inc
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
 )
 
 set( ALL_FILES

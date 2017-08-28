@@ -9,6 +9,11 @@ Concepts
 --------
 - The reference frame in :ref:`IDF <InstrumentDefinitionFile>` can now be customized in terms of setting the axis defining the 2theta sign.
 
+Properties
+----------
+
+- The :ref:`IndexProperty` has been added to the list of property types.
+
 Algorithms
 ----------
 
@@ -25,14 +30,15 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
 - :ref:`GroupDetectors <algm-GroupDetectors-v2>` now supports workspaces with detector scans.
 - :ref:`FindPeaksMD <algm-FindPeaksMD-v1>` allows now to normalize by the number of events. This can improve results for data that was originally based on histogram data which has been converted to event-mode.
-- :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` now finds all peaks in each spectrum. It also allows for setting more fine-grained resolutions.
+- :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` now finds all peaks in each spectrum. It also allows for setting more fine-grained resolutions and takes into account any goniometer set on the workspace.
+- :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 - :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` makes the culling of the top one percent of the background events optional.
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` has the culling of the top one percent of the background events now as an optional input.
 - :ref:`IntegrateEllipsoidsTwoStep <algm-IntegrateEllipsoidsTwoStep-v1>` has the culling of the top one percent of the background events now as an optional input.
 - :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` makes the culling of the top one percent of the background events optional.
 - :ref:`Load <algm-Load-v1>` now supports use of tilde in file paths in Python, for example Load(Filename="~/data/test.nxs", ...)
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information.
-- :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays
+- :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays. Also, the NumberOfWavelengthPoints input property is now validated more rigorously.
 - :ref:`SaveGSS <algm-SaveGSS-v1>` now supports saving in the legacy GSAS ALT format. This is useful for older tools however the default format FXYE should be used whenever possible.
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK-v1>` and :ref:`LoadVTK <algm-LoadVTK-v1>` algorithms are now accessible from python.
 - :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
@@ -48,6 +54,15 @@ MD Algorithms (VATES CLI)
 Performance
 -----------
 - Performance of UB indexing routines addressed. `:ref:`FindUBUsingLatticeParameters` running 2x faster than before.
+
+Core Framework Changes
+----------------------
+
+Several changes to the core of how instrument geometry is stored and accessed. These changes have resulted in a few noteworthy performance improvements.
+
+- Partial loading of event nexus files has improved by 22%.
+- The LoadNexusMonitors algorithm has improved by 30%.
+- The ConvertSpectrumAxis algorithm has improved by 8%.
 
 CurveFitting
 ------------

@@ -4,6 +4,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
 #include "MantidAPI/Progress.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 
 #include <cmath>
@@ -90,6 +91,7 @@ SXPeak::SXPeak(double t, double phi, double intensity,
   auto detDir = (detPos - samplePos);
   detDir.normalize();
   _unitWaveVector = beamDir - detDir;
+  _convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
 /**
@@ -130,6 +132,10 @@ Getter for LabQ
 @return q vector
 */
 Mantid::Kernel::V3D SXPeak::getQ() const {
+  double qSign = 1.0;
+  if (_convention == "Crystallography") {
+    qSign = -1.0;
+  }
   double vi = _Ltot / (_t * 1e-6);
   // wavenumber = h_bar / mv
   double wi = PhysicalConstants::h_bar / (PhysicalConstants::NeutronMass * vi);
@@ -138,7 +144,7 @@ Mantid::Kernel::V3D SXPeak::getQ() const {
   // wavevector=1/wavenumber = 2pi/wavelength
   double wvi = 1.0 / wi;
   // Now calculate the wavevector of the scattered neutron
-  return _unitWaveVector * wvi;
+  return _unitWaveVector * wvi * qSign;
 }
 
 /**
