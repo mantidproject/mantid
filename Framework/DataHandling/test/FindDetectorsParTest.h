@@ -458,10 +458,12 @@ private:
         new Geometry::Instrument("basic_ring"));
     Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
     source->setPos(0.0, 0.0, -10.0);
+    spInst->add(source);
     spInst->markAsSource(source);
 
     Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
     sample->setPos(0.0, 0.0, -2);
+    spInst->add(sample);
     spInst->markAsSamplePos(sample);
 
     std::vector<detid_t> detectorIDs;

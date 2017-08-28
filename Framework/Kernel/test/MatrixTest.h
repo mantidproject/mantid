@@ -243,7 +243,7 @@ public:
       data[i] = i;
     }
     Matrix<int> myMat;
-    TSM_ASSERT_THROWS_NOTHING("building matrix by this construcor and data "
+    TSM_ASSERT_THROWS_NOTHING("building matrix by this constructor and data "
                               "with correct number of elements should not "
                               "throw",
                               myMat = Matrix<int>(data));

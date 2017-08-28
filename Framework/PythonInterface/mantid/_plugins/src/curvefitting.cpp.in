@@ -1,0 +1,18 @@
+/*****************************************************************************************/
+/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
+/********** Source = curvefitting.cpp.in **********************************************************/
+/*****************************************************************************************/
+#include <boost/python/def.hpp>
+#include <boost/python/module.hpp>
+#include <boost/python/docstring_options.hpp>
+
+// Forward declare
+@EXPORT_DECLARE@
+
+BOOST_PYTHON_MODULE(_curvefitting)
+{
+  // Doc string options - User defined, python arguments, C++ call signatures
+  boost::python::docstring_options docstrings(true, true, false);
+
+@EXPORT_FUNCTIONS@
+}

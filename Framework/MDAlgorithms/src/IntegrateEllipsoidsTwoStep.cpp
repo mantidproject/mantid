@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h"
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -103,6 +103,11 @@ void IntegrateEllipsoidsTwoStep::init() {
   declareProperty("WeakPeakThreshold", 1.0, mustBePositive,
                   "Intensity threshold use to classify a peak as weak.");
 
+  declareProperty("UseOnePercentBackgroundCorrection", true,
+                  "If this options is enabled, then the the top 1% of the "
+                  "background will be removed"
+                  "before the background subtraction.");
+
   declareProperty(
       make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
                                                      Direction::Output),
@@ -193,7 +198,10 @@ void IntegrateEllipsoidsTwoStep::exec() {
   }
 
   const bool integrateInHKL = getProperty("IntegrateInHKL");
-  Integrate3DEvents integrator(qList, UBinv, getProperty("RegionRadius"));
+  bool useOnePercentBackgroundCorrection =
+      getProperty("UseOnePercentBackgroundCorrection");
+  Integrate3DEvents integrator(qList, UBinv, getProperty("RegionRadius"),
+                               useOnePercentBackgroundCorrection);
 
   if (eventWS) {
     // process as EventWorkspace
@@ -523,7 +531,7 @@ void IntegrateEllipsoidsTwoStep::qListFromHistoWS(Integrate3DEvents &integrator,
  * @param inst: instrument
  */
 void IntegrateEllipsoidsTwoStep::calculateE1(
-    const API::DetectorInfo &detectorInfo) {
+    const Geometry::DetectorInfo &detectorInfo) {
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (detectorInfo.isMonitor(i))
       continue; // skip monitor

@@ -1,12 +1,13 @@
 #include "MantidCrystal/PeakIntensityVsRadius.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
-#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/BoundedValidator.h"
+
 #include "MantidKernel/Strings.h"
 
 using namespace Mantid::Kernel;
@@ -49,8 +50,10 @@ void PeakIntensityVsRadius::init() {
 
   declareProperty("RadiusStart", 0.0, "Radius at which to start integrating.");
   declareProperty("RadiusEnd", 1.0, "Radius at which to stop integrating.");
+  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(0);
   declareProperty(
-      "NumSteps", 10,
+      "NumSteps", 10, mustBePositive,
       "Number of steps, between start and end, to calculate radius.");
 
   declareProperty(

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+import six
 '''
 Notes:
 
@@ -11,6 +13,9 @@ From mantidplot:
 '''
 
 from PyQt4 import QtCore
+
+if six.PY3:
+    unicode = str
 
 
 class GeneralSettings(QtCore.QObject):
