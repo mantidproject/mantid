@@ -10,7 +10,7 @@ import AbinsModules
 import os
 
 
-from mantid.kernel import logger
+from mantid.kernel import logger, ConfigService
 
 
 # noinspection PyMethodMayBeStatic
@@ -44,8 +44,9 @@ class IOmodule(object):
         else:
             raise ValueError("Invalid name of the group. String was expected.")
 
-        core_name = filename[0:filename.find(".")]
-        self._hdf_filename = core_name + ".hdf5"  # name of hdf file
+        core_name = filename[0:filename.rfind(".")]
+        save_dir_path = ConfigService.getString("defaultsave.directory")
+        self._hdf_filename = os.path.join(save_dir_path, core_name + ".hdf5")  # name of hdf file
 
         try:
             self._advanced_parameters = self._get_advanced_parameters()
@@ -431,7 +432,6 @@ class IOmodule(object):
         """
         Helper function for calculating hash.
         :param filename: name of a file to calculate hash
-        :param fun_obj: object function to open file
         :return: string representation of hash
         """
         hash_calculator = hashlib.sha512()

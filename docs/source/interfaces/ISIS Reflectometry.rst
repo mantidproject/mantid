@@ -170,6 +170,15 @@ row highlighted green. Any groups that have been post-processed successfully
 will also be highlighted. Starting a new reduction will clear all highlighted
 rows and groups.
 
+If reduction is paused and then resumed again, the interface will check if any
+data in previously processed rows and groups had been manually changed in
+between. If data within a row has been altered, the row and its containing group
+will be reprocessed. If rows are added or removed from a group, the group will
+need to be processed again as well. Deleting or renaming the output workspaces
+for processed rows or groups will cause only that item to be processed again. It
+is also possible to change the selection of rows and groups and doing so will
+process new data items while ignoring any deselected ones.
+
 Next to the **Process** button there is a checkbox which allows enabling and
 disabling output to an ipython notebook. If the checkbox is enabled, a dialog
 window will ask for a save location for the notebook after processing is
@@ -382,7 +391,7 @@ Failed transfers
 When transferring a run from the Search table to the Processing table there may exist invalid runs. For example, if a Measure-based run has an invalid measurement id.
 In the image below we select three runs from the Search table that we wish to transfer to the processing table.
 
-.. figure:: /images/ISISReflectometryPolref_selecting_transfer_runs.JPG
+.. figure:: /images/ISISReflectometryPolref_selecting_transfer_runs.png
    :alt: Selecting runs from search table to transfer to processing table
 
 Attempting to transfer an invalid run will result in that run not being transferred to the processing table. If the transfer was not successful then that specific
@@ -396,6 +405,20 @@ Hovering over the highlighted run with your cursor will allow you to see why the
 .. figure:: /images/ISISReflectometryPolref_tooltip_failed_run.jpg
    :alt: Showing tooltip from failed transfer.
 
+Autoreduce
+==========
+
+With an investigation id supplied, the **Autoreduce** button when clicked will do the following:
+
+- Searches for runs that are part of the investigation the id was supplied for.
+- Transfers all found runs from the Search table to the Processing table.
+- Selects all of the runs in the Processing table and processes them.
+
+Like the `Process` button in the Processing table, the `Autoreduce` button will be disabled while
+runs are being processed. If processing has been paused, the button will be enabled again. Clicking
+this button again will resume processing runs just like the `Process` button. Changing the
+instrument, investigation id or transfer method while paused and clicking `Autoreduce` however will
+start a new autoreduction instead.
 
 Event Handling tab
 ~~~~~~~~~~~~~~~~~~

@@ -202,9 +202,9 @@ public:
         modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637, 5638"},
                         {"AdjustSampleOffsets", "1"}});
     const auto table = resultsSamplePos.second;
-    TS_ASSERT_DELTA(table->Double(0, 1), 0, .00024);
+    TS_ASSERT_DELTA(table->Double(0, 1), 0, .0004);
     TS_ASSERT_DELTA(table->Double(1, 1), 0, .00024);
-    TS_ASSERT_DELTA(table->Double(2, 1), 0, .00024);
+    TS_ASSERT_DELTA(table->Double(2, 1), 0, .0003);
   }
 
 private:

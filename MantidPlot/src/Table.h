@@ -40,7 +40,7 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 class QTableWidgetItem;
 

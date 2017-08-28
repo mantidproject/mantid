@@ -1,7 +1,7 @@
 #ifndef MANTIDPLOTUTILITIES_H_
 #define MANTIDPLOTUTILITIES_H_
 
-#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
+#include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 
 /**
 * These utilities assist with plotting in Mantid
