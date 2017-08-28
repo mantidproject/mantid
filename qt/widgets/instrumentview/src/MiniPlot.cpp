@@ -1,6 +1,5 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
-
-#include "MantidQtWidgets/MplCpp/MplPlotWidget.h"
+#include "MantidQtWidgets/MplCpp/MplFigureCanvas.h"
 
 #include <QContextMenuEvent>
 #include <QVBoxLayout>
