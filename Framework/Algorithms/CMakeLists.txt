@@ -796,6 +796,7 @@ set ( TEST_FILES
 	GeneratePeaksTest.h
 	GeneratePythonScriptTest.h
 	GetAllEiTest.h
+	CalculateDetOffsetsMultiPeaksTest.h
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
 	GetEiMonDet2Test.h

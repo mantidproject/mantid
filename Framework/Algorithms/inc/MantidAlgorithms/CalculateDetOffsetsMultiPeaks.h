@@ -128,6 +128,10 @@ private:
   /// Remove rows without offset calculated from offset table workspace
   void removeEmptyRowsFromPeakOffsetTable();
 
+  /// print a vector
+  void printVector(const std::string &title,
+                   const std::vector<double> &vec2print);
+
   /// Input workspace
   API::MatrixWorkspace_sptr m_inputWS;
   /// Input EventWorkspace (from m_inputWS)
@@ -135,7 +139,7 @@ private:
   bool m_isEvent;
 
   /// Criterias for fitting peak
-  std::string m_minimizer;
+  // std::string m_minimizer;
   double m_maxChiSq;
 
   double m_maxOffset;
@@ -157,6 +161,8 @@ private:
   DataObjects::TableWorkspace_sptr m_peakOffsetTableWS;
   /// Workspace for calculated detector resolution
   API::MatrixWorkspace_sptr m_resolutionWS;
+  /// reference workspace containing instrument
+  API::MatrixWorkspace_const_sptr m_refWorkspace;
 
   /// Flag to use fit window from TableWorkspace per spectrum
   bool m_useFitWindowTable;

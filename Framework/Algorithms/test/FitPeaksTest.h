@@ -52,7 +52,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
-  void OKtest_singlePeakSpectrum() {
+  void test_singlePeakSpectrum() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
@@ -96,7 +96,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on single peak on multiple spectra
     */
-  void Ptest_singlePeakMultiSpectra() {
+  void test_singlePeakMultiSpectra() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
@@ -153,7 +153,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
-  void OKtest_SingleSpectrum3Peaks() {
+  void test_SingleSpectrum3Peaks() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
@@ -208,7 +208,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
-  void test_highAngle4Peaks() {
+  void Later_test_highAngle4Peaks() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
