@@ -2,7 +2,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidQtWidgets/Common/PythonThreading.h"
-#include <iostream>
 
 //------------------------------------------------------------------------------
 // PythonGIL Public members
