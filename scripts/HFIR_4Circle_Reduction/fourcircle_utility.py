@@ -2,9 +2,12 @@
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import os
-import urllib.request
-import urllib.error
-import urllib.parse
+try: # python3
+    from urllib.request import urlopen
+    from urllib.error import URLError
+except ImportError:
+    from urllib2 import urlopen
+    from urllib2.error import URLError
 import socket
 import numpy
 import math
@@ -26,12 +29,12 @@ def check_url(url, read_lines=False):
     lines = None
     try:
         # Access URL
-        url_stream = urllib.request.urlopen(url, timeout=2)
+        url_stream = urlopen(url, timeout=2)
 
         # Read lines
         if read_lines is True:
             lines = url_stream.readlines()
-    except urllib.error.URLError as url_error:
+    except URLError as url_error:
         url_stream = url_error
     except socket.timeout:
         return False, 'Time out. Try again!'
