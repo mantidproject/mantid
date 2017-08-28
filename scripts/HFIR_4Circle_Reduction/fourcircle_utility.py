@@ -7,7 +7,7 @@ try: # python3
     from urllib.error import URLError
 except ImportError:
     from urllib2 import urlopen
-    from urllib2.error import URLError
+    from urllib2 import URLError
 import socket
 import numpy
 import math
