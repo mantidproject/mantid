@@ -56,8 +56,8 @@ void clearLegacyParameters(ParameterMap *pmap, const IComponent &comp) {
  */
 InstrumentVisitor::InstrumentVisitor(
     boost::shared_ptr<const Instrument> instrument)
-    : m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(std::move(
-          instrument->getDetectorIDs(false /*Do not skip monitors*/)))),
+    : m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(
+          instrument->getDetectorIDs(false /*Do not skip monitors*/))),
       m_componentIds(boost::make_shared<std::vector<ComponentID>>(
           m_orderedDetectorIds->size(), nullptr)),
       m_assemblySortedDetectorIndices(
@@ -70,8 +70,9 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_componentIdToIndexMap(boost::make_shared<
-          std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_componentIdToIndexMap(
+          boost::make_shared<
+              std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
@@ -253,7 +254,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
         Kernel::toVector3d(detector.getPos());
     (*m_detectorRotations)[detectorIndex] =
         Kernel::toQuaterniond(detector.getRotation());
-    (*m_shapes)[detectorIndex] = std::move(detector.shape());
+    (*m_shapes)[detectorIndex] = detector.shape();
     (*m_scaleFactors)[detectorIndex] =
         Kernel::toVector3d(detector.getScaleFactor());
     if (m_instrument->isMonitorViaIndex(detectorIndex)) {
