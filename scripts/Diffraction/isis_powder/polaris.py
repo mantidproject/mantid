@@ -46,11 +46,12 @@ class Polaris(AbstractInst):
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
             return polaris_algs.calculate_van_absorb_corrections(
-                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering)
+                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
+                is_vanadium=self._is_vanadium)
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(
                 ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
-                sample_details_obj=self._sample_details)
+                sample_details_obj=self._sample_details, is_vanadium=self._is_vanadium)
 
     @staticmethod
     def _can_auto_gen_vanadium_cal():

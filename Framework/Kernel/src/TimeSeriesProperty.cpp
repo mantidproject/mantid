@@ -613,38 +613,44 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
 
     // add the continous entries to same target time series property
     bool continue_add = true;
+    const size_t tspTimeVecSize = tsp_time_vec.size();
     while (continue_add) {
+      if (index_tsp_time == tspTimeVecSize) {
+        // last entry. quit all loops
+        continue_add = false;
+        continue_search = false;
+        break;
+      }
+
       // add current entry
       if (outputs[target]->size() == 0 ||
-          outputs[target]->lastTime() < tsp_time) {
+          outputs[target]->lastTime() < tsp_time_vec[index_tsp_time]) {
         // avoid to add duplicate entry
         outputs[target]->addValue(m_values[index_tsp_time].time(),
                                   m_values[index_tsp_time].value());
       }
 
+      const size_t nextTspIndex = index_tsp_time + 1;
+      if (nextTspIndex < tspTimeVecSize) {
+        if (tsp_time_vec[nextTspIndex] > split_stop_time) {
+          // next entry is out of this splitter: add the next one and quit
+          if (outputs[target]->lastTime() < m_values[nextTspIndex].time()) {
+            // avoid the duplicate cases occurred in fast frequency issue
+            outputs[target]->addValue(m_values[nextTspIndex].time(),
+                                      m_values[nextTspIndex].value());
+          }
+          // FIXME - in future, need to find out WHETHER there is way to
+          // skip the
+          // rest without going through the whole sequence
+          continue_add = false;
+          // reset time entry as the next splitter will add
+          // --index_tsp_time;
+        }
+      }
+
       // advance to next entry
       ++index_tsp_time;
 
-      if (index_tsp_time == tsp_time_vec.size()) {
-        // last entry. quit all loops
-        continue_add = false;
-        continue_search = false;
-      } else if (tsp_time_vec[index_tsp_time] > split_stop_time) {
-        // next entry is out of this splitter: add the next one and quit
-        if (outputs[target]->lastTime() < m_values[index_tsp_time].time()) {
-          // avoid the duplicate cases occured in fast frequency issue
-          outputs[target]->addValue(m_values[index_tsp_time].time(),
-                                    m_values[index_tsp_time].value());
-        }
-        // FIXME - in future, need to find out WHETHER there is way to skip the
-        // rest without going through the whole sequence
-        continue_add = false;
-        // reset time entry as the next splitter will add
-        // --index_tsp_time;
-      } else {
-        // advance to next time
-        tsp_time = tsp_time_vec[index_tsp_time];
-      }
     } // END-WHILE continue add
 
     // make splitters to advance to next

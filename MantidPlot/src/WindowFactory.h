@@ -9,7 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <cstring>
 #include <map>
