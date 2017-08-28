@@ -1,9 +1,9 @@
 #include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
 
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -119,8 +119,7 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
  */
 void SplineInterpolation::exec() {
   // read in algorithm parameters
-  const int derivOrder = getProperty("DerivOrder");
-  const size_t order = static_cast<size_t>(derivOrder);
+  const size_t order = getProperty("DerivOrder");
 
   // set input workspaces
   MatrixWorkspace_sptr mws = getProperty("WorkspaceToMatch");
@@ -407,12 +406,12 @@ SplineInterpolation::findInterpolationRange(MatrixWorkspace_const_sptr iwspt,
     }
   }
 
-  std::stringstream log;
-  log << "Workspace index " << row
-      << ": Will perform flat extrapolation outside bin range: " << firstIndex
-      << " to " << lastIndex << "\n";
+  std::string log = "Workspace index " + std::to_string(row) +
+                    ": Will perform flat extrapolation outside bin range: " +
+                    std::to_string(firstIndex) + " to " +
+                    std::to_string(lastIndex) + "\n";
 
-  g_log.debug(log.str());
+  g_log.debug(log);
 
   return std::make_pair(firstIndex, lastIndex);
 }
