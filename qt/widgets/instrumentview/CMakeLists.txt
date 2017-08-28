@@ -143,7 +143,7 @@ endif ()
 
 target_link_libraries ( MantidQtWidgetsInstrumentView LINK_PRIVATE
   MantidQtWidgetsCommon
-  MantidQtWidgetsMplCpp-Qt4
+  MantidQtWidgetsMplCpp
   ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS}
   ${QT_LIBRARIES}
