@@ -23,13 +23,12 @@ class MDNormSCDPreprocessIncoherentTest(unittest.TestCase):
         self.assertEqual(Flux.blocksize(), 10000)
         self.assertEqual(Flux.getNumberHistograms(), 1)
 
-        # Compare every 10-th bin of row 64
-        SA_cmp = np.array([3, 2, 5, 4, 4, 1, 3, 7, 1,
-                           0, 2, 5, 4, 1, 5, 4, 1, 2,
-                           4, 4, 3, 5, 2, 0, 1, 3, 0,
-                           2, 15, 175, 7, 3, 3, 2, 2, 0,
-                           3, 0, 0, 0])
-        np.testing.assert_allclose(SA.extractY().reshape((-1,128))[::10,64], SA_cmp)
+        # Compare every 20-th bin of row 64
+        SA_cmp = np.array([0.11338311, 0.18897185, 0.15117748, 0.11338311, 0.03779437,
+                           0.07558874, 0.15117748, 0.18897185, 0.03779437, 0.15117748,
+                           0.11338311, 0.07558874, 0.03779437, 0.        , 0.56691555,
+                           0.26456059, 0.11338311, 0.07558874, 0.11338311, 0.])
+        np.testing.assert_allclose(SA.extractY().reshape((-1,128))[::20,64], SA_cmp)
         self.assertEqual(SA.getXDimension().name, 'Momentum')
         self.assertEqual(SA.getXDimension().getUnits(), 'Angstrom^-1')
         self.assertEqual(SA.blocksize(), 1)

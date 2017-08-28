@@ -9,7 +9,8 @@ from mantid.simpleapi import (ConvertUnits, CropWorkspace,
                               DeleteWorkspace, LoadIsawDetCal,
                               LoadMask, GroupDetectors, Rebin,
                               MaskDetectors, SumSpectra, SortEvents,
-                              IntegrateFlux, AnvredCorrection)
+                              IntegrateFlux, AnvredCorrection,
+                              NormaliseByCurrent)
 from mantid.kernel import Direction, Property, FloatMandatoryValidator, VisibleWhenProperty, PropertyCriterion
 
 
@@ -50,6 +51,7 @@ class MDNormSCDPreprocessIncoherent(DataProcessorAlgorithm):
                              "A file that consists of lists of spectra numbers to group. See :ref:`GroupDetectors <algm-GroupDetectors>`")
 
         # Corrections
+        self.declareProperty('NormaliseByCurrent', True, "Normalise the Solid Angle workspace by the proton charge.")
         self.declareProperty(FileProperty(name="LoadInstrument",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml"]),
                              "Load a different instrument IDF onto the data from a file. See :ref:`LoadInstrument <algm-LoadInstrument>`")
@@ -84,13 +86,19 @@ class MDNormSCDPreprocessIncoherent(DataProcessorAlgorithm):
         self.setPropertyGroup("BackgroundScale","Background")
 
         # Corrections
+        self.setPropertyGroup("NormaliseByCurrent","Corrections")
         self.setPropertyGroup("LoadInstrument","Corrections")
         self.setPropertyGroup("DetCal","Corrections")
         self.setPropertyGroup("MaskFile","Corrections")
+        self.setPropertyGroup("SphericalAbsorptionCorrection","Corrections")
+        self.setPropertyGroup("LinearScatteringCoef","Corrections")
+        self.setPropertyGroup("LinearAbsorptionCoef","Corrections")
+        self.setPropertyGroup("Radius","Corrections")
 
     def PyExec(self):
         _background = bool(self.getProperty("Background").value)
         _load_inst = bool(self.getProperty("LoadInstrument").value)
+        _norm_current = bool(self.getProperty("NormaliseByCurrent").value)
         _detcal = bool(self.getProperty("DetCal").value)
         _masking = bool(self.getProperty("MaskFile").value)
         _grouping = bool(self.getProperty("GroupingFile").value)
@@ -107,14 +115,23 @@ class MDNormSCDPreprocessIncoherent(DataProcessorAlgorithm):
              FilterByTofMin=self.getProperty("FilterByTofMin").value,
              FilterByTofMax=self.getProperty("FilterByTofMax").value)
 
+        if _norm_current:
+            NormaliseByCurrent(InputWorkspace='__van',
+                               OutputWorkspace='__van')
+
         if _background:
             Load(Filename=self.getProperty("Background").value,
                  OutputWorkspace='__bkg',
                  FilterByTofMin=self.getProperty("FilterByTofMin").value,
                  FilterByTofMax=self.getProperty("FilterByTofMax").value)
-            pc_van = mtd['__van'].run().getProtonCharge()
-            pc_bkg = mtd['__bkg'].run().getProtonCharge()
-            mtd['__bkg'] *= self.getProperty('BackgroundScale').value*pc_van/pc_bkg
+            if _norm_current:
+                NormaliseByCurrent(InputWorkspace='__bkg',
+                                   OutputWorkspace='__bkg')
+            else:
+                pc_van = mtd['__van'].run().getProtonCharge()
+                pc_bkg = mtd['__bkg'].run().getProtonCharge()
+                mtd['__bkg'] *= pc_van/pc_bkg
+            mtd['__bkg'] *= self.getProperty('BackgroundScale').value
             Minus(LHSWorkspace='__van', RHSWorkspace='__bkg', OutputWorkspace='__van')
             DeleteWorkspace('__bkg')
 
