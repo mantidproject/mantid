@@ -66,7 +66,6 @@ public:
   void setTubeXUnits(TubeXUnits units) { m_tubeXUnits = units; }
   void updatePlot();
   void clear();
-  void savePlotToWorkspace();
 
   PlotType getPlotType() { return m_plotType; }
   TubeXUnits getTubeXUnits() { return m_tubeXUnits; }
@@ -75,6 +74,7 @@ public:
   QString getPlotCaption() const;
 
 public slots:
+  void savePlotToWorkspace();
   void showContextMenu(QContextMenuEvent *evt);
 
 signals:
@@ -86,7 +86,7 @@ private slots:
   void setYScaleLinear();
   void setYScaleLog();
   void setTubeXUnits(int unit);
-  void removeCurve(const QString & label);
+  void removeCurve(const QString &label);
   void addPeak(double x, double y);
 
 private:
@@ -102,10 +102,12 @@ private:
                                              bool includeErrors = false);
   MiniPlotCurveData
   prepareDataForSumsPlot(int detid, const InstrumentActor &instrumentActor,
-                         const Mantid::Geometry::ICompAssembly &assembly);
+                         const Mantid::Geometry::ICompAssembly &assembly,
+                         bool includeErrors = false);
   MiniPlotCurveData
   prepareDataForIntegralsPlot(int detid, const InstrumentActor &instrumentActor,
-                              const Mantid::Geometry::ICompAssembly &assembly);
+                              const Mantid::Geometry::ICompAssembly &assembly,
+                              bool includeErrors = false);
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
                                    const Mantid::Kernel::V3D &origin,
                                    const Mantid::Kernel::V3D &normal);
@@ -129,6 +131,7 @@ private:
   QAction *m_detidUnits, *m_lengthUnits, *m_phiUnits, *m_outOfPlaneAngleUnits;
   QActionGroup *m_unitsGroup;
   QSignalMapper *m_unitsMapper;
+  QAction *m_savePlotToWorkspace;
 };
 }
 }

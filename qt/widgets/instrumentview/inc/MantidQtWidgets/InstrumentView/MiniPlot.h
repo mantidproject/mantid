@@ -52,6 +52,7 @@ public:
   // Query
   bool hasActiveCurve() const;
   bool hasStoredCurves() const;
+  QString activeCurveLabel() const { return m_activeCurveLabel; }
   QStringList storedCurveLabels() const { return m_storedCurveLabels; }
 
   // Modify
