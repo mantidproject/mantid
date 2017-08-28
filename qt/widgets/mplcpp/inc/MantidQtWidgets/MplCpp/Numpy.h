@@ -16,7 +16,7 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 */
-#include "MantidQtWidgets/MplCpp/PythonObject.h"
+#include "MantidQtWidgets/MplCpp/NDArray1D.h"
 
 //
 // A collection of utilities for transfer of data to/from numpy arrays.
@@ -32,7 +32,7 @@ namespace MplCpp {
  * @param data A const reference to the data container
  * @return A 1D numpy.ndarray object containing the data
  */
-template <typename Iterable> PythonObject copyToNDArray(const Iterable &data);
+template <typename Iterable> NDArray1D copyToNDArray(const Iterable &data);
 }
 }
 }

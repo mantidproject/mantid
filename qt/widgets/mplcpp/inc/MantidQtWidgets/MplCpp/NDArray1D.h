@@ -17,13 +17,22 @@
  GNU General Public License for more details.
 */
 #include "MantidQtWidgets/MplCpp/PythonObject.h"
-#include "MantidQtWidgets/MplCpp/Numpy.h"
-
 #include <array>
+#include <vector>
 
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
+
+namespace detail {
+/**
+* Create a 1D numpy.ndarray object from the given iterable. It will work with
+* anything support std::begin()/std::end().
+* @param data A const reference to the data container
+* @return A new reference to a 1D numpy.ndarray object containing the data
+*/
+template <typename Iterable> PyObject *copyToNDArray(const Iterable &data);
+}
 
 /**
  * Encapsulates a 1D numpy.ndarray Python object.
@@ -33,15 +42,12 @@ namespace MplCpp {
  */
 class EXPORT_OPT_MANTIDQT_MPLCPP NDArray1D : public PythonObject {
 public:
-  // inherit constructors
-  using PythonObject::PythonObject;
-
   /**
    * Create an array from an Iterable. Iterable must support std::begin/end
    */
   template <typename Iterable>
   NDArray1D(const Iterable &data)
-      : PythonObject(copyToNDArray(data)) {}
+      : PythonObject(detail::copyToNDArray(data)) {}
 
   // Return the shape of the array in numpy parlance
   std::array<size_t, 1> shape() const;

@@ -2,7 +2,6 @@
 set (LIB_SRCS
   src/MplFigureCanvas.cpp
   src/NDArray1D.cpp
-  src/Numpy.cpp
   src/PythonErrors.cpp
   src/PythonObject.cpp
   src/SipUtils.cpp
@@ -15,7 +14,6 @@ qt4_wrap_cpp (MOC_GENERATED_SRC ${MOC_HEADERS})
 
 set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/NDArray1D.h
-  inc/MantidQtWidgets/MplCpp/Numpy.h
   inc/MantidQtWidgets/MplCpp/PythonErrors.h
   inc/MantidQtWidgets/MplCpp/PythonObject.h
   inc/MantidQtWidgets/MplCpp/SipUtils.h

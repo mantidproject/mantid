@@ -35,53 +35,31 @@ inline void decref(PyObject *obj) { Py_DECREF(obj); }
 inline void xdecref(PyObject *obj) { Py_XDECREF(obj); }
 }
 
-struct NewRef {
-  explicit NewRef(PyObject *ref) : ptr(ref) {}
-  // No copy
-  NewRef(const NewRef &) = delete;
-  NewRef &operator=(const NewRef &) = delete;
-  // Move allowed
-  NewRef(NewRef &&) = default;
-  NewRef &operator=(NewRef &&) = default;
-
-  PyObject *ptr;
-};
-struct BorrowedRef {
-  explicit BorrowedRef(PyObject *ref) : ptr(detail::incref(ref)) {}
-  // No copy
-  BorrowedRef(const BorrowedRef &) = delete;
-  BorrowedRef &operator=(const BorrowedRef &) = delete;
-  // Move allowed
-  BorrowedRef(BorrowedRef &&) = default;
-  BorrowedRef &operator=(BorrowedRef &&) = default;
-
-  PyObject *ptr;
-};
-
 /**
  * @brief A handle for Python objects to handle reference counting in an
  * RAII style. By default an object is construct as None.
  */
 class EXPORT_OPT_MANTIDQT_MPLCPP PythonObject {
 public:
+  /// Static creation from a new reference
+  static PythonObject fromNewRef(PyObject *ptr) { return PythonObject(ptr); }
+  /// Static creation from a borrowed reference
+  static PythonObject fromBorrowedRef(PyObject *ptr) {
+    return PythonObject(detail::incref(ptr));
+  }
+
   PythonObject() : m_ptr(detail::incref(Py_None)) {}
-  explicit PythonObject(NewRef ref) : m_ptr(ref.ptr) {}
-  explicit PythonObject(BorrowedRef ref) : m_ptr(ref.ptr) {}
   ~PythonObject() { detail::xdecref(m_ptr); }
-  /// Copy constructor
   PythonObject(const PythonObject &other)
       : m_ptr(detail::incref(other.m_ptr)) {}
-  /// Copy from another object
   PythonObject &operator=(const PythonObject &other) {
     if (&other != this)
       m_ptr = detail::incref(other.m_ptr);
     return *this;
   }
-  /// Move constructor
   PythonObject(PythonObject &&other) : m_ptr(nullptr) {
     std::swap(m_ptr, other.m_ptr);
   }
-  /// Move assignment
   PythonObject &operator=(PythonObject &&other) {
     if (this != &other) {
       std::swap(m_ptr, other.m_ptr);
@@ -99,8 +77,15 @@ public:
 
   /// Return the raw PyObject ptr handle. Use with care
   inline PyObject *get() const { return m_ptr; }
+  /// Return the raw PyObject ptr handle. Use with care
+  inline void reset(PyObject *ptr) { m_ptr = ptr; }
   /// Call the given method and return the object
   PythonObject getAttr(const char *name) const;
+
+protected:
+  /// Protected constructor. You cannot build directly from
+  /// a raw pointer. Use one of the static creation functions
+  PythonObject(PyObject *ptr) : m_ptr(ptr) {}
 
 private:
   PyObject *m_ptr;

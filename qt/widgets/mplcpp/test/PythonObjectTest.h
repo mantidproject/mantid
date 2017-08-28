@@ -21,7 +21,7 @@ public:
 
   void test_Construction_With_New_Reference_Does_Not_Alter_Ref_Count() {
     // Use something with heap allocation so we know it's a new object
-    PythonObject obj(NewRef(PyList_New(1)));
+    auto obj = PythonObject::fromNewRef(PyList_New(1));
     TSM_ASSERT_EQUALS("Reference count should not have changed on"
                       "construction ",
                       1, obj.refCount());
@@ -29,7 +29,7 @@ public:
 
   void test_Copy_Construction_Increases_Ref_Count_By_One() {
     // Use something with heap allocation so we know it's a new object
-    PythonObject original(NewRef(PyList_New(1)));
+    auto original = PythonObject::fromNewRef(PyList_New(1));
     PythonObject copy(original);
     TSM_ASSERT_EQUALS("Copy should reference the same object", original, copy);
     TSM_ASSERT_EQUALS("Copied object should have ref count of 2", 2,
@@ -40,7 +40,7 @@ public:
 
   void test_Copy_Assignment_Increases_Ref_Count_By_One() {
     // Use something with heap allocation so we know it's a new object
-    PythonObject original(NewRef(PyList_New(1)));
+    auto original = PythonObject::fromNewRef(PyList_New(1));
     PythonObject copy;
     copy = original;
     TSM_ASSERT_EQUALS("Copy should equal orignal", original, copy);
@@ -52,7 +52,7 @@ public:
 
   void test_Move_Construction_Keeps_Ref_Count_The_Same_On_Moved_To_Object() {
     // Use something with heap allocation so we know it's a new object
-    PythonObject original(NewRef(PyList_New(1)));
+    auto original = PythonObject::fromNewRef(PyList_New(1));
     PythonObject moved(std::move(original));
     TSM_ASSERT_EQUALS("New object should have same reference count", 1,
                       moved.refCount());
@@ -60,7 +60,7 @@ public:
 
   void test_Move_Assignment_Keeps_Ref_Count_The_Same_On_Moved_To_Object() {
     // Use something with heap allocation so we know it's a new object
-    PythonObject original(NewRef(PyList_New(1)));
+    auto original = PythonObject::fromNewRef(PyList_New(1));
     PythonObject moved;
     moved = std::move(original);
     TSM_ASSERT_EQUALS("New object should have same reference count", 1,
@@ -68,23 +68,23 @@ public:
   }
 
   void test_Equality_Operator() {
-    PythonObject original(NewRef(PyList_New(1)));
+    auto original = PythonObject::fromNewRef(PyList_New(1));
     TSM_ASSERT_EQUALS("Objects should equal each other", original, original);
-    PythonObject other(NewRef(PyList_New(1)));
+    auto other = PythonObject::fromNewRef(PyList_New(1));
     TSM_ASSERT_DIFFERS(
         "Different underlying objects should not equal each other", original,
         other);
   }
 
   void test_Known_Attribute_Returns_Expected_Object() {
-    PythonObject obj(NewRef(PyList_New(1)));
+    auto obj = PythonObject::fromNewRef(PyList_New(1));
     auto attrObj = obj.getAttr("__len__");
     TSM_ASSERT("Attribute object should not be None", !obj.isNone());
   }
 
   // --------------------------- Failure tests -----------------------------
   void test_Unknown_Attribute_Throws_Exception() {
-    PythonObject obj(NewRef(PyList_New(1)));
+    auto obj = PythonObject::fromNewRef(PyList_New(1));
     TSM_ASSERT_THROWS("getAttr should throw for non-existant attribute",
                       obj.getAttr("not_a_method"), PythonError);
   }

@@ -17,7 +17,7 @@ namespace MplCpp {
 PythonObject PythonObject::getAttr(const char *name) const {
   auto objPtr = PyObject_GetAttrString(m_ptr, name);
   if (objPtr)
-    return PythonObject(NewRef(objPtr));
+    return PythonObject::fromNewRef(objPtr);
   else {
     throw PythonError();
   }
@@ -36,7 +36,7 @@ PythonObject importModule(const char *name) {
   auto objPtr = PyImport_ImportModule(name);
   if (!objPtr)
     throw PythonError();
-  return PythonObject(NewRef(objPtr));
+  return PythonObject::fromNewRef(objPtr);
 }
 
 /**

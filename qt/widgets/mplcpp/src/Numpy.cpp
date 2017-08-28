@@ -12,12 +12,19 @@
 #include <type_traits>
 #include <vector>
 
+namespace MantidQt {
+namespace Widgets {
+namespace MplCpp {
+
 namespace {
 // Simply struct to aid in global initialization of numpy
 struct ImportArray {
   ImportArray() {
     PythonGIL gil;
-    _import_array();
+    int result = _import_array();
+    if (result < 0) {
+      throw PythonError();
+    }
   }
   ~ImportArray() {}
 };
@@ -31,18 +38,14 @@ void initializeNumpy() {
 }
 }
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
-
 template <typename Iterable> PythonObject copyToNDArray(const Iterable &data) {
   static_assert(std::is_same<typename Iterable::value_type, double>::value,
                 "Element type must be double.");
   initializeNumpy();
   npy_intp length = static_cast<npy_intp>(data.size());
-  auto ndarray =
-      PyArray_New(&PyArray_Type, 1, &length, NPY_DOUBLE, nullptr, nullptr,
-                  sizeof(npy_double), NPY_ARRAY_CARRAY, nullptr);
+  auto dt = PyArray_DescrFromType(NPY_DOUBLE);
+  Py_INCREF(dt);
+  auto ndarray = PyArray_SimpleNewFromDescr(1, &length, dt);
   if (!ndarray)
     throw PythonError();
   auto emptyData =

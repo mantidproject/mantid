@@ -70,21 +70,21 @@ struct MplFigureCanvas::PyObjectHolder {
     ScopedPythonGIL gil;
     // Create a figure and attach it to a canvas object. This creates a
     // blank widget
-    PythonObject figure(
-        NewRef(PyObject_CallObject(mplFigureType().get(), NULL)));
+    auto figure = PythonObject::fromNewRef(
+        PyObject_CallObject(mplFigureType().get(), NULL));
     // tight layout
-    PythonObject(NewRef(PyObject_CallMethod(figure.get(),
-                                            PYSTR_LITERAL("set_tight_layout"),
-                                            PYSTR_LITERAL("(i)"), 1)));
-    PythonObject(
-        NewRef(PyObject_CallMethod(figure.get(), PYSTR_LITERAL("add_subplot"),
-                                   PYSTR_LITERAL("i"), subplotLayout)));
+    detail::decref(PyObject_CallMethod(figure.get(),
+                                       PYSTR_LITERAL("set_tight_layout"),
+                                       PYSTR_LITERAL("(i)"), 1));
+    detail::decref(PyObject_CallMethod(figure.get(),
+                                       PYSTR_LITERAL("add_subplot"),
+                                       PYSTR_LITERAL("i"), subplotLayout));
     auto instance = PyObject_CallFunction(mplFigureCanvasType().get(),
                                           PYSTR_LITERAL("(O)"), figure.get());
     if (!instance) {
       throw PythonError();
     }
-    canvas = PythonObject(NewRef(instance));
+    canvas = PythonObject::fromNewRef(instance);
     canvasWidget = static_cast<QWidget *>(sipUnwrap(canvas.get()));
     assert(canvasWidget);
   }
@@ -95,10 +95,10 @@ struct MplFigureCanvas::PyObjectHolder {
    */
   PythonObject gca() {
     ScopedPythonGIL gil;
-    auto figure = PythonObject(
-        NewRef(PyObject_GetAttrString(canvas.get(), PYSTR_LITERAL("figure"))));
-    return PythonObject(NewRef(PyObject_CallMethod(
-        figure.get(), PYSTR_LITERAL("gca"), PYSTR_LITERAL(""), nullptr)));
+    auto figure = PythonObject::fromNewRef(
+        PyObject_GetAttrString(canvas.get(), PYSTR_LITERAL("figure")));
+    return PythonObject::fromNewRef(PyObject_CallMethod(
+        figure.get(), PYSTR_LITERAL("gca"), PYSTR_LITERAL(""), nullptr));
   }
 };
 
@@ -144,8 +144,8 @@ QWidget *MplFigureCanvas::canvasWidget() const {
 SubPlotSpec MplFigureCanvas::getGeometry() const {
   ScopedPythonGIL gil;
   auto axes = m_pydata->gca();
-  auto geometry = PythonObject(NewRef(PyObject_CallMethod(
-      axes.get(), PYSTR_LITERAL("get_geometry"), PYSTR_LITERAL(""), nullptr)));
+  auto geometry = PythonObject::fromNewRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL("get_geometry"), PYSTR_LITERAL(""), nullptr));
 
   return SubPlotSpec(TO_LONG(PyTuple_GET_ITEM(geometry.get(), 0)),
                      TO_LONG(PyTuple_GET_ITEM(geometry.get(), 1)));
@@ -157,8 +157,8 @@ SubPlotSpec MplFigureCanvas::getGeometry() const {
 size_t MplFigureCanvas::nlines() const {
   ScopedPythonGIL gil;
   auto axes = m_pydata->gca();
-  auto lines = PythonObject(NewRef(PyObject_CallMethod(
-      axes.get(), PYSTR_LITERAL("get_lines"), PYSTR_LITERAL(""), nullptr)));
+  auto lines = PythonObject::fromNewRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL("get_lines"), PYSTR_LITERAL(""), nullptr));
   return static_cast<size_t>(PyList_Size(lines.get()));
 }
 
@@ -180,8 +180,8 @@ QString MplFigureCanvas::getLabel(const Axes::Label type) const {
 
   ScopedPythonGIL gil;
   auto axes = m_pydata->gca();
-  auto label = PythonObject(NewRef(PyObject_CallMethod(
-      axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr)));
+  auto label = PythonObject::fromNewRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr));
   return QString::fromAscii(TO_CSTRING(label.get()));
 }
 
@@ -201,8 +201,8 @@ QString MplFigureCanvas::getScale(const Axes::Scale type) {
         "MplFigureCanvas::getScale() - Scale type must be X or Y");
   ScopedPythonGIL gil;
   auto axes = m_pydata->gca();
-  auto scale = PythonObject(NewRef(PyObject_CallMethod(
-      axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr)));
+  auto scale = PythonObject::fromNewRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr));
   return QString::fromAscii(TO_CSTRING(scale.get()));
 }
 
@@ -223,8 +223,8 @@ void MplFigureCanvas::draw() {
  */
 void MplFigureCanvas::addSubPlot(int subplotLayout) {
   ScopedPythonGIL gil;
-  auto figure = PythonObject(NewRef(
-      PyObject_GetAttrString(m_pydata->canvas.get(), PYSTR_LITERAL("figure"))));
+  auto figure = PythonObject::fromNewRef(
+      PyObject_GetAttrString(m_pydata->canvas.get(), PYSTR_LITERAL("figure")));
   auto result = PyObject_CallMethod(figure.get(), PYSTR_LITERAL("add_subplot"),
                                     PYSTR_LITERAL("(i)"), subplotLayout);
   if (!result)
@@ -268,7 +268,7 @@ void MplFigureCanvas::plotLine(const XArrayType &x, const YArrayType &y,
     throw PythonError();
   }
   m_pydata->lines.emplace_back(
-      PythonObject(BorrowedRef(PyList_GET_ITEM(lines, 0))));
+      PythonObject::fromBorrowedRef(PyList_GET_ITEM(lines, 0)));
   detail::decref(lines);
 }
 
