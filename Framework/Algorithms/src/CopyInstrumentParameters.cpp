@@ -1,5 +1,5 @@
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 

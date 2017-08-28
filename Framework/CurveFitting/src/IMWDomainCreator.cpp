@@ -145,45 +145,42 @@ std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
 
   setParameters();
 
-  // find the fitting interval: from -> to
+  // From points to the first occurrence of StartX in the workspace interval.
+  // End points to the last occurrence of EndX in the workspace interval.
+  // Find the fitting interval: from -> to
   Mantid::MantidVec::const_iterator from;
   Mantid::MantidVec::const_iterator to;
 
   bool isXAscending = X.front() < X.back();
 
-  if (isXAscending) {
-    if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
-      m_startX = X.front();
-      from = X.begin();
-      m_endX = X.back();
-      to = X.end();
-    } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
-      throw std::invalid_argument(
-          "Both StartX and EndX must be given to set fitting interval.");
-    } else {
-      if (m_startX > m_endX) {
-        std::swap(m_startX, m_endX);
-      }
-      from = std::lower_bound(X.begin(), X.end(), m_startX);
-      to = std::upper_bound(from, X.end(), m_endX);
+  if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
+    m_startX = X.front();
+    from = X.begin();
+    m_endX = X.back();
+    to = X.end();
+  } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
+    throw std::invalid_argument(
+        "Both StartX and EndX must be given to set fitting interval.");
+  } else if (isXAscending) {
+    if (m_startX > m_endX) {
+      std::swap(m_startX, m_endX);
     }
-  } else {
-    // x is descending
-    if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
-      m_startX = X.front();
-      from = X.begin();
-      m_endX = X.back();
-      to = X.end();
-    } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
-      throw std::invalid_argument(
-          "Both StartX and EndX must be given to set fitting interval.");
-    } else {
-      if (m_startX < m_endX) {
-        std::swap(m_startX, m_endX);
-      }
-      from = std::lower_bound(X.begin(), X.end(), m_startX, greaterIsLess);
-      to = std::upper_bound(from, X.end(), m_endX, greaterIsLess);
+    from = std::lower_bound(X.begin(), X.end(), m_startX);
+    to = std::upper_bound(from, X.end(), m_endX);
+  } else { // x is descending
+    if (m_startX < m_endX) {
+      std::swap(m_startX, m_endX);
     }
+    from = std::lower_bound(X.begin(), X.end(), m_startX, greaterIsLess);
+    to = std::upper_bound(from, X.end(), m_endX, greaterIsLess);
+  }
+
+  // Check whether the fitting interval defined by StartX and EndX is 0.
+  // This occurs when StartX and EndX are both less than the minimum workspace
+  // x-value or greater than the maximum workspace x-value.
+  if (to - from == 0) {
+    throw std::invalid_argument("StartX and EndX values do not capture a range "
+                                "within the workspace interval.");
   }
 
   if (m_matrixWorkspace->isHistogramData()) {

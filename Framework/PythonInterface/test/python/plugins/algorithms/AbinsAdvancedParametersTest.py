@@ -3,7 +3,6 @@ import unittest
 import os
 from mantid.simpleapi import mtd, logger
 import numpy as np
-import six
 from mantid.simpleapi import Abins, DeleteWorkspace
 
 from AbinsModules import AbinsParameters, AbinsTestHelpers
@@ -66,22 +65,15 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         AbinsParameters.bin_width = 1.0
         AbinsParameters.max_wavenumber = 4100.0
         AbinsParameters.min_wavenumber = 0.0
-        AbinsParameters.acoustic_phonon_threshold = 0.0
         AbinsParameters.s_relative_threshold = 0.001
         AbinsParameters.s_absolute_threshold = 10e-8
         AbinsParameters.optimal_size = 5000000
-        AbinsParameters.atoms_threads = 1
+        AbinsParameters.threads = 1
 
     def tearDown(self):
-        # remove all created files
-        files = os.listdir(os.getcwd())
-        for filename in files:
-            if self._Si2 in filename:
-                os.remove(filename)
-        try:
-            DeleteWorkspace(self._wrk_name)
-        except ValueError:  # nothing bad happened if there is no workspace to delete
-            pass
+        AbinsTestHelpers.remove_output_files(list_of_names=["Abins", "explicit", "default", "total",
+                                                            "squaricn_scale", "benzene_exp", "experimental"])
+        mtd.clear()
 
     def test_wrong_fwhm(self):
         # fwhm should be positive
@@ -241,13 +233,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         AbinsParameters.max_wavenumber = 10.0
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
-    def test_wrong_acoustic_threshold(self):
-
-        # negative frequencies of phonons indicate that structure is unstable and  we want to perform INS only for
-        # stable structures
-        AbinsParameters.acoustic_phonon_threshold = -10.0
-        self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
-
     def test_wrong_s_absolute_threshold(self):
 
         AbinsParameters.s_absolute_threshold = 1
@@ -280,16 +265,10 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         AbinsParameters.optimal_size = 50.0
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
-    def test_wrong_atom_threads(self):
+    def test_wrong_threads(self):
         if PATHOS_FOUND:
-            AbinsParameters.atoms_threads = -1
+            AbinsParameters.threads = -1
             self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
-
-    def test_wrong_q_threads(self):
-        if PATHOS_FOUND:
-            AbinsParameters.q_threads = -1
-            self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon",
-                              OutputWorkspace=self._wrk_name)
 
     def test_good_case(self):
 

@@ -16,8 +16,8 @@ class SingleCrystalData(AbinsModules.GeneralData):
     def set(self, abins_data=None, dw_crystal_data=None):
 
         """
-        @param abins_data: object of type AbinsData with data from DFT phonon calculation.
-        @param dw_crystal_data: object of type DwCrystalData with DW for the case of crystal.
+        :param abins_data: object of type AbinsData with data from DFT phonon calculation.
+        :param dw_crystal_data: object of type DwCrystalData with DW for the case of crystal.
         """
 
         if isinstance(abins_data, AbinsModules.AbinsData):
@@ -33,8 +33,8 @@ class SingleCrystalData(AbinsModules.GeneralData):
         self._data = {"abins_data": self._abins_data.extract(), "dw_crystal_data": self._dw_crystal_data.extract()}
 
     def extract(self):
-
-        if (self._data["abins_data"]["k_points_data"]["atomic_displacements"].shape[1] ==
+        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
+        if (self._data["abins_data"]["k_points_data"]["atomic_displacements"][gamma].shape[0] ==
                 self._data["dw_crystal_data"].shape[0]):
 
             return self._data

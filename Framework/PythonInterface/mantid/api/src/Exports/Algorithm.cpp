@@ -3,6 +3,7 @@
                                 // dominance, we have no way around it with the
                                 // design
 #endif
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #ifdef _MSC_VER
 #pragma warning(default : 4250)
@@ -50,6 +51,9 @@ typedef void (*declarePropertyType4)(boost::python::object &self,
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 // Overload types
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType1_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 2, 3)
@@ -57,6 +61,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType2_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 3, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 4, 5)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

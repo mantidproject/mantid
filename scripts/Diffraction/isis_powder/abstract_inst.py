@@ -108,14 +108,6 @@ class AbstractInst(object):
         raise NotImplementedError("spline_vanadium_ws must be implemented per instrument")
 
     # Optional overrides
-    def _attenuate_workspace(self, input_workspace):
-        """
-        Applies an attenuation correction to the workspace
-        :param input_workspace: The workspace to correct
-        :return: The corrected workspace
-        """
-        return input_workspace
-
     @staticmethod
     def _can_auto_gen_vanadium_cal():
         """
@@ -188,14 +180,6 @@ class AbstractInst(object):
         """
         return common_enums.INPUT_BATCHING.Summed
 
-    def _get_monitor_spectra_index(self, run_number):
-        """
-        Returns the spectra number a monitor is located at
-        :param run_number: The run number to locate the monitor spectra of
-        :return: The monitor spectra for the current workspace
-        """
-        return str()
-
     def _get_current_tt_mode(self):
         """
         Returns the current tt_mode this is only applicable
@@ -204,13 +188,12 @@ class AbstractInst(object):
         """
         return None
 
-    def _normalise_ws_current(self, ws_to_correct, run_details=None):
+    def _normalise_ws_current(self, ws_to_correct):
         """
         Normalises the workspace by the beam current at the time it was taken using
         normalise by current unless the instrument overrides it with its own custom
         method of normalising by current.
         :param ws_to_correct: The workspace to normalise the current of
-        :param run_details: The run details associated to the run
         :return: The normalised workspace
         """
         return common.run_normalise_by_current(ws_to_correct)

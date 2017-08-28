@@ -1,5 +1,6 @@
 # pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes,
 # pylint: disable = too-many-branches,too-many-locals, too-many-nested-blocks
+from __future__ import (absolute_import, division, print_function)
 
 try:
     from mantidplot import *

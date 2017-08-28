@@ -28,8 +28,15 @@ Plotting Improvements
 Algorithm Toolbox
 #################
 
-Scripting Window
-################
+Workspace History Window
+########################
+
+.. figure:: ../../images/WorkspaceHistoryShortenedValues.png
+   :class: screenshot
+   :align: right
+
+- Algorithm proprties with long values are now shown in a shortened format both in this display and the log.  The full history is still retained, and genereated python scripts will still work as before.
+
 
 Documentation
 #############
@@ -45,6 +52,19 @@ Bugs Resolved
 
 SliceViewer Improvements
 ------------------------
+
+- SliceViewer input of number of bins, thickness, and slice point now waits until the editing is finished to rebin or changing slice point instead of changing with each digit entered.
+
+VSI Improvements
+----------------
+- ParaView has been updated to to `v5.4.0 <https://blog.kitware.com/paraview-5-4-0-release-notes/>`_.
+
+.. figure:: ../../images/LaNaF4_3D_Slices.png
+   :class: screenshot
+   :align: right
+
+- Multislice view uses a custom `representation <https://www.paraview.org/ParaView/index.php/Views_And_Representations>`_ to speed up slicing by taking advantage of the consistent bin 
+  sizes in a MDHistoWorkspace. Smooth interaction with typical data sizes (< 10 million cells) is now possible.
 
 |
 

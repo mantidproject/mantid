@@ -3,6 +3,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/PropertyHistory.h"
 
 namespace Mantid {
@@ -30,7 +31,7 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
       m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock) {}
 
 /** Constructor.
-*  Sets the property and workspace names but initialises the workspace pointer
+*  Sets the property and workspace names but initializes the workspace pointer
 * to null.
 *  @param name :: The name to assign to the property
 *  @param wsName :: The name of the workspace
@@ -53,7 +54,7 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
       m_locking(LockMode::Lock) {}
 
 /** Constructor.
-*  Sets the property and workspace names but initialises the workspace pointer
+*  Sets the property and workspace names but initializes the workspace pointer
 * to null.
 *  @param name :: The name to assign to the property
 *  @param wsName :: The name of the workspace

@@ -38,6 +38,7 @@ private:
   void integrate();
   void integrateEvent();
   int findPixelID(std::string bankName, int col, int row);
+  void removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace &peakWS);
   Geometry::Instrument_const_sptr inst;
 
   /// Input 2D Workspace

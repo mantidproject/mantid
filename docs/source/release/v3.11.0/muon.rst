@@ -8,6 +8,9 @@ Muon Analysis
 Interfaces
 ----------
 
+- Updated the TF asymmetry fit. It now works with multiple fitting.
+- Moved the TF Asymmetry checkbox to the data analysis tab.  
+
 Muon Analysis
 #############
 
@@ -16,6 +19,11 @@ Algorithms
 
 Fit Functions
 -------------
+
+Bug Fixes
+---------
+- Mantid would crash when multiple period data was used in single fits (in muon analysis). This has been fixed. 
+
 
 |
 
