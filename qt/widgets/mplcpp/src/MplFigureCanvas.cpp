@@ -54,6 +54,17 @@ const PythonObject &mplFigureCanvasType() {
 }
 
 /**
+ * Extract a double from a given element of an array or tuple. Warning: No
+ * checks are done on the validity of the object or the index
+ * @param obj A reference to the sequence
+ * @param i The index of interest
+ * @return A C long from this element
+ */
+double doubleInSeq(const PythonObject &obj, Py_ssize_t i) {
+  return PyFloat_AsDouble(PySequence_Fast_GET_ITEM(obj.get(), i));
+}
+
+/**
  * Extract a long from a given element of an array or tuple. Warning: No
  * checks are done on the validity of the object or the index
  * @param obj A reference to the sequence
@@ -157,17 +168,6 @@ SubPlotSpec MplFigureCanvas::geometry() const {
 }
 
 /**
- * @return The number of Line2Ds on the canvas
- */
-size_t MplFigureCanvas::nlines() const {
-  ScopedPythonGIL gil;
-  auto axes = m_pydata->gca();
-  auto lines = PythonObject::fromNewRef(PyObject_CallMethod(
-      axes.get(), PYSTR_LITERAL("get_lines"), PYSTR_LITERAL(""), nullptr));
-  return static_cast<size_t>(PyList_Size(lines.get()));
-}
-
-/**
  * Get a label from the canvas
  * @param type The label type
  * @return The label on the requested axis
@@ -188,6 +188,38 @@ QString MplFigureCanvas::label(const Axes::Label type) const {
   auto label = PythonObject::fromNewRef(PyObject_CallMethod(
       axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr));
   return QString::fromAscii(TO_CSTRING(label.get()));
+}
+
+/** Query the limits for a given axis
+ * @param type An enumeration of Axes::Scale type
+ * @return The limits as a tuple
+ */
+std::tuple<double, double>
+MplFigureCanvas::limits(const Axes::Scale type) const {
+  const char *method;
+  if (type == Axes::Scale::X)
+    method = "get_xlim";
+  else if (type == Axes::Scale::Y)
+    method = "get_ylim";
+  else
+    throw std::logic_error(
+        "MplFigureCanvas::getLimits() - Scale type must be X or Y");
+  ScopedPythonGIL gil;
+  auto axes = m_pydata->gca();
+  auto limits = PythonObject::fromNewRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr));
+  return std::make_tuple(doubleInSeq(limits, 0), doubleInSeq(limits, 1));
+}
+
+/**
+ * @return The number of Line2Ds on the canvas
+ */
+size_t MplFigureCanvas::nlines() const {
+  ScopedPythonGIL gil;
+  auto axes = m_pydata->gca();
+  auto lines = PythonObject::fromNewRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL("get_lines"), PYSTR_LITERAL(""), nullptr));
+  return static_cast<size_t>(PyList_Size(lines.get()));
 }
 
 /**
@@ -217,6 +249,8 @@ QString MplFigureCanvas::scaleType(const Axes::Scale type) const {
  * @param x X coordinate in pixels
  * @param y Y coordinate in pixels
  * @return A (x,y) point in data coordinate space
+ * Set the color of the canvas outside of the axes
+ * @param color A matplotlib color string
  */
 std::tuple<double, double> MplFigureCanvas::toDataCoordinates(double x,
                                                               double y) const {
@@ -234,18 +268,10 @@ std::tuple<double, double> MplFigureCanvas::toDataCoordinates(double x,
 }
 
 /**
- * @brief MplFigureCanvas::draw
- */
-void MplFigureCanvas::draw() {
-  ScopedPythonGIL gil;
-  drawNoGIL();
-}
-
-/**
  * Equivalent of Figure.add_subplot. If the subplot already exists then
  * it simply sets that plot number to be active
  * @param subplotLayout Subplot geometry in matplotlib convenience format,
- * e.g 2,1,2 would stack 2 plots on top of each other and set the second
+ * e.g 212 would stack 2 plots on top of each other and set the second
  * to active
  */
 void MplFigureCanvas::addSubPlot(int subplotLayout) {
@@ -256,6 +282,14 @@ void MplFigureCanvas::addSubPlot(int subplotLayout) {
   if (!result)
     throw PythonError();
   detail::decref(result);
+}
+
+/**
+ * Redraw everything on the canvas
+ */
+void MplFigureCanvas::draw() {
+  ScopedPythonGIL gil;
+  drawNoGIL();
 }
 
 /**
@@ -409,6 +443,19 @@ void MplFigureCanvas::rescaleToData(const Axes::Scale axis, bool redraw) {
                           PYSTR_LITERAL("(iii)"), 1, scaleX, scaleY));
   if (redraw)
     drawNoGIL();
+}
+
+/**
+ * Add an arbitrary text label to the canvas
+ * @param x X position in data coordinates
+ * @param y Y position in data coordinates
+ * @param label The string label to attach to the canvas
+ */
+void MplFigureCanvas::addText(double x, double y, const char *label) {
+  ScopedPythonGIL gil;
+  auto axes = m_pydata->gca();
+  detail::decref(PyObject_CallMethod(axes.get(), PYSTR_LITERAL("text"),
+                                     PYSTR_LITERAL("(ffs)"), x, y, label));
 }
 
 /**

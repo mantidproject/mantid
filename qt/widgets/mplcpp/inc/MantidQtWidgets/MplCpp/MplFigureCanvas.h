@@ -55,16 +55,17 @@ public:
   ///@name Query properties
   QWidget *canvasWidget() const;
   SubPlotSpec geometry() const;
-  size_t nlines() const;
   QString label(const Axes::Label type) const;
+  std::tuple<double, double> limits(const Axes::Scale type) const;
+  size_t nlines() const;
   QString scaleType(const Axes::Scale type) const;
   std::tuple<double, double> toDataCoordinates(double x, double y) const;
   ///@}
 
   ///@{
-  ///@name Canvas modification
-  void draw();
+  ///@name Canvas properties
   void addSubPlot(int subplotLayout);
+  void draw();
   ///@}
 
   ///@{
@@ -92,6 +93,11 @@ public:
   void setScale(const Axes::Scale axis, const char *scaleType,
                 bool redraw = false);
   void rescaleToData(const Axes::Scale axis, bool redraw = false);
+  ///@}
+
+  ///@{
+  ///@name Text labels
+  void addText(double x, double y, const char *label);
   ///@}
 
 private:
