@@ -61,7 +61,7 @@ bool MiniPlot::hasStoredCurves() const { return !m_storedCurveLabels.empty(); }
  * @return A tuple of the current Y-axis limits
  */
 std::tuple<double, double> MiniPlot::getYLimits() const {
-  return m_canvas->getLimits(Axes::Scale::Y);
+  return m_canvas->limits(Axes::Scale::Y);
 }
 
 /**
