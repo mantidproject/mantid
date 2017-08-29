@@ -293,7 +293,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 Scale(InputWorkspace=back_calibration, Factor=self._back_calib_scaling, OutputWorkspace=back_calibration)
                 Minus(LHSWorkspace=calibration, RHSWorkspace=back_calibration, OutputWorkspace=calibration)
 
-            MatchPeaks(InputWorkspace=calibration,OutputWorkspace=calibration,MaskBins=True)
+            # MatchPeaks does not play nicely with the ws groups
+            for ws in mtd[calibration]:
+                MatchPeaks(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(), MaskBins=True, BinRangeTable = '')
+
             Integration(InputWorkspace=calibration,RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
                         OutputWorkspace=calibration)
             self._warn_negative_integral(calibration,'in calibration run.')
@@ -333,6 +336,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         '''
         Reduces the given (single or summed multiple) run
         @param run :: run path
+        @throws RuntimeError : if inconsistent mirror sense is found in container or calibration run
         '''
 
         runs_list = run.split('+')
@@ -399,6 +403,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         for two-wing data or centering the one wing data
         @param ws  :: workspace
         @param run :: runnumber
+        @throws RuntimeError : if the size of the left and right wings do not match in 2-wings case
+                               and the unmirror option is 1 or >3
+        @throws RuntimeError : if the mirros sense in the alignment run is inconsistent
         '''
 
         outname = ws + '_tmp'
@@ -422,10 +429,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
                 CloneWorkspace(InputWorkspace = name, OutputWorkspace = outname)
             elif self._unmirror_option == 6:
-                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True)
+                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
             elif self._unmirror_option == 7:
                 MatchPeaks(InputWorkspace = name, InputWorkspace2 = mtd[alignment].getItem(0).getName(),
-                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True)
+                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
 
         elif wings == 2:  # two wing
 
@@ -434,6 +441,14 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
             mask_min = 0
             mask_max = mtd[left].blocksize()
+
+            if (self._common_args['CropDeadMonitorChannels'] and
+                    (self._unmirror_option == 1 or self._unmirror_option > 3) and
+                    mtd[left].blocksize() != mtd[right].blocksize()):
+                raise RuntimeError("Different number of bins found in the left and right wings"
+                                   " after cropping the dead monitor channels. "
+                                   "Unable to perform the requested unmirror option, consider using option "
+                                   "0, 2 or 3 or switch off the CropDeadMonitorChannels.")
 
             if self._unmirror_option == 0:
                 left_out = '__'+run+'_'+self._red_ws+'_left'

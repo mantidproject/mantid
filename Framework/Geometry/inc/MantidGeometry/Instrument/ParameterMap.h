@@ -17,11 +17,10 @@ namespace Mantid {
 namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 }
-namespace Beamline {
-class DetectorInfo;
-}
 namespace Geometry {
 class BoundingBox;
+class ComponentInfo;
+class DetectorInfo;
 class Instrument;
 
 /** @class ParameterMap ParameterMap.h
@@ -97,6 +96,7 @@ public:
   static const std::string &pString();
   static const std::string &pV3D();
   static const std::string &pQuat();
+  static const std::string &scale();
 
   const std::string diff(const ParameterMap &rhs,
                          const bool &firstDiffOnly = false) const;
@@ -344,11 +344,14 @@ public:
   pmap_cit end() const { return m_map.end(); }
 
   bool hasDetectorInfo(const Instrument *instrument) const;
-  const Beamline::DetectorInfo &detectorInfo() const;
+  bool hasComponentInfo(const Instrument *instrument) const;
+  const Geometry::DetectorInfo &detectorInfo() const;
+  Geometry::DetectorInfo &mutableDetectorInfo();
+  const Geometry::ComponentInfo &componentInfo() const;
+  Geometry::ComponentInfo &mutableComponentInfo();
   size_t detectorIndex(const detid_t detID) const;
+  size_t componentIndex(const Geometry::ComponentID componentId) const;
   const std::vector<Geometry::ComponentID> &componentIds() const;
-  void
-  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
   void setInstrument(const Instrument *instrument);
 
 private:
@@ -378,9 +381,14 @@ private:
   std::unique_ptr<Kernel::Cache<const ComponentID, BoundingBox>>
       m_boundingBoxMap;
 
-  /// Pointer to the DetectorInfo object. NULL unless the instrument is
+  /// Pointer to the DetectorInfo wrapper. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+  std::unique_ptr<Geometry::DetectorInfo> m_detectorInfo;
+
+  /// Pointer to the ComponentInfo wrapper. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  std::unique_ptr<Geometry::ComponentInfo> m_componentInfo;
+
   /// Pointer to the owning instrument for translating detector IDs into
   /// detector indices when accessing the DetectorInfo object. If the workspace
   /// distinguishes between a neutronic instrument and a physical instrument

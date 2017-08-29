@@ -1,16 +1,17 @@
 #include <sstream>
 
-#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>

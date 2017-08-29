@@ -67,6 +67,10 @@ void ConvolutionFitSequential::init() {
                   "The function that describes the parameters of the fit.",
                   Direction::Input);
 
+  declareProperty("PassWSIndexToFunction", false,
+                  "For each spectrum in Input pass its workspace index to all "
+                  "functions that have attribute WorkspaceIndex.");
+
   std::vector<std::string> backType{"Fixed Flat", "Fit Flat", "Fit Linear"};
 
   declareProperty("BackgroundType", "Fixed Flat",
@@ -95,9 +99,11 @@ void ConvolutionFitSequential::init() {
                                           "negative",
                   Direction::Input);
 
-  declareProperty("Convolve", true,
-                  "If true, the fit is treated as a convolution workspace.",
-                  Direction::Input);
+  declareProperty(
+      "Convolve", true,
+      "If true, output fitted model components will be convolved with "
+      "the resolution.",
+      Direction::Input);
 
   declareProperty("Minimizer", "Levenberg-Marquardt",
                   boost::make_shared<MandatoryValidator<std::string>>(),
@@ -130,6 +136,7 @@ void ConvolutionFitSequential::exec() {
   // Initialise variables with properties
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   const std::string function = getProperty("Function");
+  const bool passIndex = getProperty("PassWSIndexToFunction");
   const std::string backType =
       convertBackToShort(getProperty("backgroundType"));
   const double startX = getProperty("StartX");
@@ -178,8 +185,11 @@ void ConvolutionFitSequential::exec() {
   }
   outputWsName += backType + "_s";
   outputWsName += std::to_string(specMin);
-  outputWsName += "_to_";
-  outputWsName += std::to_string(specMax);
+
+  if (specMin != specMax) {
+    outputWsName += "_to_";
+    outputWsName += std::to_string(specMax);
+  }
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
@@ -193,13 +203,6 @@ void ConvolutionFitSequential::exec() {
     nextWs += std::to_string(i);
     plotPeakInput += nextWs + ";";
     plotPeakStringProg.report("Constructing PlotPeak name");
-  }
-
-  // passWSIndex
-  auto passIndex = false;
-  if (funcName.find("Diff") != std::string::npos ||
-      funcName.find("Stretched") != std::string::npos) {
-    passIndex = true;
   }
 
   // Run PlotPeaksByLogValue
@@ -346,8 +349,12 @@ void ConvolutionFitSequential::exec() {
   Progress renamerProg(this, 0.98, 1.0, specMax + 1);
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
-    auto outName = outputWsName + "_";
-    outName += std::to_string(i);
+    auto outName = outputWsName;
+
+    // Check if multiple spectrum were fit.
+    if (specMin != specMax) {
+      outName += "_" + std::to_string(i);
+    }
     outName += "_Workspace";
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();
@@ -567,7 +574,7 @@ void ConvolutionFitSequential::calculateEISF(
         ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
     columnName += "EISF";
     auto errorColumnName = ampErrorName.substr(
-        0, (ampName.size() - std::string("Amplitude_Err").size()));
+        0, (ampErrorName.size() - std::string("Amplitude_Err").size()));
     errorColumnName += "EISF_Err";
 
     tableWs->addColumn("double", columnName);

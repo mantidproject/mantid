@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines,relative-import,invalid-name,too-many-instance-attributes,too-many-arguments
+# pylint: disable=too-many-lines,relative-import,invalid-name,too-many-instance-attributes,too-many-arguments
 ############################################################################
 #
 # HFIR powder reduction control class
@@ -11,6 +11,13 @@ try:
     import urllib.request as urllib
 except ImportError:
     import  urllib
+try: # python3
+    from urllib.request import urlopen
+    from urllib.error import HTTPError
+except ImportError:
+    from urllib2 import urlopen
+    from urllib2 import HTTPError
+
 import math
 from six.moves import range
 
@@ -21,11 +28,12 @@ from . import HfirUtility as hutil
 # Import mantid
 import mantid.simpleapi as api
 from mantid.simpleapi import AnalysisDataService
-#from mantid.kernel import ConfigService
+
+# from mantid.kernel import ConfigService
 
 
-VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,
-                         0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]
+VanadiumPeakPositions = [0.5044, 0.5191, 0.5350, 0.5526, 0.5936, 0.6178, 0.6453, 0.6768,
+                         0.7134, 0.7566, 0.8089, 0.8737, 0.9571, 1.0701, 1.2356, 1.5133, 2.1401]
 
 
 class PDRManager(object):
@@ -59,8 +67,8 @@ class PDRManager(object):
 
         self._wavelength = None
 
-        #register startup
-        mantid.UsageService.registerFeatureUsage("Interface","HfirPowderReduction",False)
+        # register startup
+        api.UsageService.registerFeatureUsage("Interface", "HfirPowderReduction", False)
 
         return
 
@@ -97,7 +105,7 @@ class PDRManager(object):
             moncounts = self._rawSpiceTableWS.cell(irow, imonitor)
             totalcounts += moncounts
 
-        return float(totalcounts)/float(numpts)
+        return float(totalcounts) / float(numpts)
 
     def getProcessedVanadiumWS(self):
         """
@@ -154,7 +162,7 @@ class PDRManager(object):
         """ Set 2 raw SPICE workspaces
         """
         # Validate
-        if  spice_table_ws.id() != 'TableWorkspace' or log_matrix_ws.id() != 'Workspace2D':
+        if spice_table_ws.id() != 'TableWorkspace' or log_matrix_ws.id() != 'Workspace2D':
             raise NotImplementedError("Input workspaces for setRawWorkspaces() are not of correct types.")
 
         self._rawSpiceTableWS = spice_table_ws
@@ -218,7 +226,8 @@ class PDRManager(object):
 
         return
 
-#pylint: disable=too-many-public-methods
+
+# pylint: disable=too-many-public-methods
 
 
 class HFIRPDRedControl(object):
@@ -229,8 +238,8 @@ class HFIRPDRedControl(object):
         """ Initialization
         """
         self._myWorkspaceDict = {}  # dictionary to manage all the workspaces reduced
-                                    # key = Exp/Scan
-        self._myMergedWSDict = {}   # key = Exp/Scan list
+        # key = Exp/Scan
+        self._myMergedWSDict = {}  # key = Exp/Scan list
 
         self._myWavelengthDict = {}
 
@@ -243,7 +252,7 @@ class HFIRPDRedControl(object):
         """
         if ((expno, scanno) in self._myWorkspaceDict) is False:
             raise NotImplementedError("Exp %d Scan %d does not have reduced \
-                    workspace." % (exp, scan))
+                    workspace." % (expno, scanno))
         else:
             rmanager = self._myWorkspaceDict[(expno, scanno)]
             rmanager.applySmoothVanadium(applysmooth)
@@ -281,18 +290,22 @@ class HFIRPDRedControl(object):
         # FUTURE: use **args
         if xlabel is None:
             tempoutws = \
-                    api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
-                                                    MonitorWorkspace=monitormdws,
-                                                    Mode='Detector',
-                                                    DetectorID = detid,
-                                                    NormalizeByMonitorCounts=normalized)
+                api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
+                                                MonitorWorkspace=monitormdws,
+                                                Mode='Detector',
+                                                DetectorID=detid,
+                                                NormalizeByMonitorCounts=normalized)
         else:
+<<<<<<< HEAD
             print("Plot detector %d's counts vs. sample log %s."%(detid, xlabel))
+=======
+            print("Plot detector %d's counts vs. sample log %s." % (detid, xlabel))
+>>>>>>> origin/master
             tempoutws = \
                 api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                 MonitorWorkspace=monitormdws,
                                                 Mode='Detector',
-                                                DetectorID = detid,
+                                                DetectorID=detid,
                                                 XLabel=xlabel,
                                                 NormalizeByMonitorCounts=normalized)
 
@@ -331,7 +344,7 @@ class HFIRPDRedControl(object):
             tempoutws = api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                         MonitorWorkspace=monitormdws,
                                                         Mode='Pt.',
-                                                        Pt = ptno)
+                                                        Pt=ptno)
 
             vecx = tempoutws.readX(0)[:]
             vecy = tempoutws.readY(0)[:]
@@ -348,7 +361,7 @@ class HFIRPDRedControl(object):
         # check
         if ((expno, scanno) in self._myWorkspaceDict) is False:
             raise NotImplementedError("Exp %d Scan %d does not have reduced \
-                    workspace." % (exp, scan))
+                    workspace." % (expno, scanno))
 
         # get data
         rmanager = self._myWorkspaceDict[(expno, scanno)]
@@ -429,7 +442,7 @@ class HFIRPDRedControl(object):
             procVanWs = wsmanager.getProcessedVanadiumWSTemp()
         else:
             procVanWs = wsmanager.getProcessedVanadiumWS()
-            #procVanWs = wsmanager._processedVanWS
+            # procVanWs = wsmanager._processedVanWS
 
         if procVanWs is None:
             raise NotImplementedError("Exp %d Scan %d does not have processed vanadium workspace." % (exp, scan))
@@ -475,7 +488,7 @@ class HFIRPDRedControl(object):
         wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
         if wsmanager.datamdws is None:
             self._logError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
-                monitor MD workspace is not present."  % (exp, scan))
+                monitor MD workspace is not present." % (exp, scan))
             return False
 
         wavelength = wsmanager.getWavelength()
@@ -483,9 +496,9 @@ class HFIRPDRedControl(object):
         # Convert the vanadium peaks' position from dSpacing to 2theta
         vanpeakpos2theta = []
         for peakpos in VanadiumPeakPositions:
-            lambda_over_2d =  wavelength/2./peakpos
+            lambda_over_2d = wavelength / 2. / peakpos
             if abs(lambda_over_2d) <= 1.:
-                twotheta = math.asin(lambda_over_2d)*2.*180/math.pi
+                twotheta = math.asin(lambda_over_2d) * 2. * 180 / math.pi
                 vanpeakpos2theta.append(twotheta)
             else:
                 print("Vanadium peak %f is out of d-Spacing range." % (peakpos))
@@ -559,12 +572,12 @@ class HFIRPDRedControl(object):
 
         # load SPICE
         tablewsname = basewsname + "_RawTable"
-        infowsname  = basewsname + "ExpInfo"
+        infowsname = basewsname + "ExpInfo"
         api.LoadSpiceAscii(Filename=datafilename,
                            OutputWorkspace=tablewsname, RunInfoWorkspace=infowsname)
 
         tablews = AnalysisDataService.retrieve(tablewsname)
-        infows  = AnalysisDataService.retrieve(infowsname)
+        infows = AnalysisDataService.retrieve(infowsname)
         if tablews is None or infows is None:
             raise NotImplementedError('Unable to retrieve either spice table workspace %s or log workspace %s' % (
                 tablewsname, infowsname))
@@ -603,7 +616,7 @@ class HFIRPDRedControl(object):
 
         # Merge and binning
         if len(datamdwslist) > 1:
-            mg_datamdws = datamdwslist[0] +  datamdwslist[1]
+            mg_datamdws = datamdwslist[0] + datamdwslist[1]
             mg_monitormdws = monitormdwslist[0] + monitormdwslist[1]
         else:
             mg_datamdws = datamdwslist[0]
@@ -664,7 +677,8 @@ class HFIRPDRedControl(object):
         if instrument.upper() == 'HB2A':
             excldetlist, errmsg = hutil.parseDetExclusionFile(excldetfname)
         else:
-            raise NotImplementedError('Instrument %s is not supported for parsing excluded detectors file.'%(instrument))
+            raise NotImplementedError(
+                'Instrument %s is not supported for parsing excluded detectors file.' % (instrument))
 
         return excldetlist, errmsg
 
@@ -673,13 +687,13 @@ class HFIRPDRedControl(object):
         """
         # Get reduction manager
         try:
-            wsmanager = self._myWorkspaceDict[ (int(expno), int(scanno) )]
+            wsmanager = self._myWorkspaceDict[(int(expno), int(scanno))]
         except KeyError:
-            raise NotImplementedError("Exp %d Scan %d has not been loaded yet." % (int(expno),int(scanno)))
+            raise NotImplementedError("Exp %d Scan %d has not been loaded yet." % (int(expno), int(scanno)))
 
         # Convert to MDWorkspace
         tablews = wsmanager.getRawSpiceTable()
-        infows  = wsmanager.getRawInfoMatrixWS()
+        infows = wsmanager.getRawInfoMatrixWS()
 
         basewsname = tablews.name().split('_RawTable')[0]
         datamdwsname = basewsname + "_DataMD"
@@ -723,7 +737,7 @@ class HFIRPDRedControl(object):
                 wsmanager = self._myWorkspaceDict[(exp, scan)]
             except ValueError:
                 # type error, return with false
-                return False, 'Scan number %s is not integer.'%(str(scan))
+                return False, 'Scan number %s is not integer.' % (str(scan))
             except KeyError:
                 # data has not been reduced yet. Reduce dat
                 self.reduceSpicePDData(exp, scan, unit='2theta',
@@ -763,7 +777,7 @@ class HFIRPDRedControl(object):
                 wsmanager = self._myWorkspaceDict[(exp, scan)]
             except ValueError:
                 # type error, return with false
-                return False, 'Scan number %s is not integer.'%(str(scan))
+                return False, 'Scan number %s is not integer.' % (str(scan))
             except KeyError:
                 # data has not been reduced yet. Reduce dat
                 self.reduceSpicePDData(exp, scan, unit='2theta',
@@ -783,7 +797,7 @@ class HFIRPDRedControl(object):
         return True, ''
 
     def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None,
-                          excludeddetlist=None,scalefactor=None):
+                          excludeddetlist=None, scalefactor=None):
         """ Reduce SPICE powder diffraction data from MDEventWorkspaces
         Return - Boolean as reduction is successful or not
         """
@@ -815,7 +829,12 @@ class HFIRPDRedControl(object):
         if excludeddetlist is None:
             excludeddetlist = []
         else:
+<<<<<<< HEAD
             print("[DB] Excluded detectors: %s"%(excludeddetlist), "Convert to numpy array", numpy.array(excludeddetlist))
+=======
+            print("[DB] Excluded detectors: %s" % (excludeddetlist), "Convert to numpy array",
+                  numpy.array(excludeddetlist))
+>>>>>>> origin/master
 
         basewsname = datamdws.name().split("_DataMD")[0]
         outwsname = basewsname + "_Reduced"
@@ -823,7 +842,7 @@ class HFIRPDRedControl(object):
                                    InputMonitorWorkspace=monitormdws,
                                    OutputWorkspace=outwsname,
                                    BinningParams=binpar,
-                                   UnitOutput = unit,
+                                   UnitOutput=unit,
                                    NeutronWaveLength=wavelength,
                                    ExcludedDetectorIDs=numpy.array(excludeddetlist),
                                    ScaleFactor=scalefactor)
@@ -930,7 +949,7 @@ class HFIRPDRedControl(object):
         wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
         if wsmanager.reducedws is None:
             raise NotImplementedError("Unable to rebin the data for exp=%d, scan=%d because \
-                    either data MD workspace and monitor MD workspace is not present."  % (exp, scan))
+                    either data MD workspace and monitor MD workspace is not present." % (exp, scan))
         else:
             wksp = wsmanager.reducedws
 
@@ -959,9 +978,8 @@ class HFIRPDRedControl(object):
         # ENDIF
 
         if "topas" in filetype:
-            sfilename = sfilename[:-4]+".xye"
+            sfilename = sfilename[:-4] + ".xye"
             api.SaveFocusedXYE(InputWorkspace=wksp,
-                               StartAtBankNumber=info["bank"],
                                Filename=sfilename,
                                Format="TOPAS")
         # ENDIF
@@ -1004,7 +1022,7 @@ class HFIRPDRedControl(object):
         # Get reduced workspace
         wsmanager = self.getWorkspace(expno, scanno, raiseexception=True)
         vanRun = wsmanager.getProcessedVanadiumWS()
-        outws = vanRun.name()+"_smooth"
+        outws = vanRun.name() + "_smooth"
 
         outws = api.FFTSmooth(InputWorkspace=vanRun,
                               OutputWorkspace=outws,
@@ -1032,7 +1050,7 @@ class HFIRPDRedControl(object):
         wksp = wsmanager.reducedws
         if wksp is None:
             raise NotImplementedError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
-                monitor MD workspace is not present."  % (exp, scan))
+                monitor MD workspace is not present." % (exp, scan))
 
         # Convert unit to Time-of-flight by rebinning
         xaxis_unit = wksp.getAxis(0).getUnit().unitID()
@@ -1048,7 +1066,7 @@ class HFIRPDRedControl(object):
                 raise NotImplementedError('No vanadium peaks has been set up.')
         # ENDIF
 
-        outwsname = wksp.name()+"_rmVan"
+        outwsname = wksp.name() + "_rmVan"
         wksp = api.StripPeaks(InputWorkspace=wksp,
                               OutputWorkspace=outwsname,
                               PeakPositions=numpy.array(vanpeakposlist))
@@ -1066,7 +1084,7 @@ class HFIRPDRedControl(object):
         tablews.addColumn('double', 'Correction')
 
         for detid in sorted(vancorrdict.keys()):
-            tablews.addRow( [detid, vancorrdict[detid]] )
+            tablews.addRow([detid, vancorrdict[detid]])
 
         return tablews
 
@@ -1099,9 +1117,10 @@ class HFIRPDRedControl(object):
 
         return rvalue
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # External Methods
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 
 def downloadFile(url, localfilepath):
@@ -1113,9 +1132,9 @@ def downloadFile(url, localfilepath):
     """
     # open URL
     try:
-        response = urllib.request.urlopen(url)
+        response = urlopen(url)
         wbuf = response.read()
-    except urllib.error.HTTPError as e:
+    except HTTPError as e:
         # Unable to download file
         if str(e).count('HTTP Error 404') == 1:
             return (False, str(e))

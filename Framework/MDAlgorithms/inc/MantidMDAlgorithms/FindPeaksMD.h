@@ -5,11 +5,11 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -37,6 +37,8 @@ public:
   const std::string category() const override {
     return "Optimization\\PeakFinding;MDAlgorithms\\Peaks";
   }
+
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialise the properties
@@ -84,7 +86,7 @@ private:
   signal_t m_densityScaleFactor;
 
   /// Progress reporter.
-  Mantid::API::Progress *prog;
+  std::unique_ptr<Mantid::API::Progress> prog = nullptr;
 
   /** Enum describing which type of dimensions in the MDEventWorkspace */
   enum eDimensionType { HKL, QLAB, QSAMPLE };
@@ -97,6 +99,15 @@ private:
   eDimensionType dimType;
   /// Goniometer matrix
   Mantid::Kernel::Matrix<double> m_goniometer;
+
+  /// Use number of events normalization for event workspaces.
+  bool m_useNumberOfEventsNormalization = false;
+  /// Signal density factor
+  double m_signalThresholdFactor = 1.5;
+  /// VolumeNormalization
+  static const std::string volumeNormalization;
+  /// NumberOfEventNormalization
+  static const std::string numberOfEventsNormalization;
 };
 
 } // namespace Mantid

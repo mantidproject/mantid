@@ -30,7 +30,6 @@
 
 #include "MantidAPI/ExperimentInfo.h"
 
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/NDRandomNumberGenerator.h"
 
@@ -69,6 +68,12 @@ public:
   /// Destructor
   ~TobyFitResolutionModel() override;
 
+  /// Disable copy operator
+  TobyFitResolutionModel(const TobyFitResolutionModel &) = delete;
+
+  /// Disable assignment operator
+  TobyFitResolutionModel &operator=(const TobyFitResolutionModel &) = delete;
+
   /// Returns the function's name
   std::string name() const override { return "TobyFitResolutionModel"; }
   /// Returns the value of the model convoluted with the resolution
@@ -76,8 +81,6 @@ public:
                 const size_t eventIndex) const override;
 
 private:
-  DISABLE_COPY_AND_ASSIGN(TobyFitResolutionModel)
-
   friend class TobyFitYVector;
 
   /// Declare function attributes

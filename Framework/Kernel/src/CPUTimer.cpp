@@ -1,4 +1,5 @@
 #include "MantidKernel/CPUTimer.h"
+#include <ctime>
 #include <sstream>
 #include <iomanip>
 

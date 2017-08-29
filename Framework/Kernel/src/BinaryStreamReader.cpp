@@ -2,11 +2,11 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/BinaryStreamReader.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 
 #include <cassert>
 #include <istream>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {

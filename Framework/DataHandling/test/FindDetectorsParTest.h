@@ -1,16 +1,17 @@
 #ifndef FIND_DETECTORSPAR_H_
 #define FIND_DETECTORSPAR_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <array>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -457,10 +458,12 @@ private:
         new Geometry::Instrument("basic_ring"));
     Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
     source->setPos(0.0, 0.0, -10.0);
+    spInst->add(source);
     spInst->markAsSource(source);
 
     Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
     sample->setPos(0.0, 0.0, -2);
+    spInst->add(sample);
     spInst->markAsSamplePos(sample);
 
     std::vector<detid_t> detectorIDs;

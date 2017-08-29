@@ -38,6 +38,7 @@ set ( TEST_PY_FILES
   SANSFitShiftScaleTest.py
   SANSStitchTest.py
   SavePlot1DTest.py
+  SimpleShapeMonteCarloAbsorptionTest.py
   SimulatedDensityOfStatesTest.py
   SofQWMomentsTest.py
   SofQWMomentsScanTest.py
@@ -50,5 +51,5 @@ set ( TEST_PY_FILES
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test name=PythonWorkflowAlgorithms
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonWorkflowAlgorithms ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.WorkflowAlgorithms ${TEST_PY_FILES} )
 add_subdirectory( sans )

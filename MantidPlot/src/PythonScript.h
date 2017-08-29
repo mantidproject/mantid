@@ -30,11 +30,11 @@
 #define PYTHON_SCRIPT_H
 
 // Python headers have to go first!
-#include "MantidQtAPI/PythonSystemHeader.h"
-#include "MantidQtAPI/PythonThreading.h"
+#include "MantidQtWidgets/Common/PythonSystemHeader.h"
+#include "MantidQtWidgets/Common/PythonThreading.h"
 
 #include "Script.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 #include <QFileInfo>
 #include <QDir>

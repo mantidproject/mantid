@@ -2,9 +2,9 @@
 #define MANTID_KERNEL_ENABLEDWHENPROPERTY_H_
 
 #include "MantidKernel/System.h"
-#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
 #include <memory>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -64,6 +64,10 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+// Forward decelerations
+class IPropertyManager;
+class Property;
+
 // Forward deceleration of structs defined at end of header
 
 /** Enum for use in EnabledWhenProperty */
@@ -121,7 +125,7 @@ public:
   void modify_allowed_values(Property *const);
 
   /// Make a copy of the present type of validator
-  IPropertySettings *clone() override;
+  IPropertySettings *clone() const override;
 
 protected:
   /// Struct which holds associated property details for comparison

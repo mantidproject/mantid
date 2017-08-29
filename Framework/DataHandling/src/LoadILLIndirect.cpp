@@ -1,13 +1,14 @@
 #include "MantidDataHandling/LoadILLIndirect.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -362,7 +363,9 @@ void LoadILLIndirect::moveComponent(const std::string &componentName,
     V3D newPos;
     newPos.spherical(newR, newTheta, phi);
 
-    m_localWorkspace->mutableDetectorInfo().setPosition(*component, newPos);
+    auto &compInfo = m_localWorkspace->mutableComponentInfo();
+    const auto componentIndex = compInfo.indexOf(component->getComponentID());
+    compInfo.setPosition(componentIndex, newPos);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +
@@ -379,7 +382,6 @@ void LoadILLIndirect::moveComponent(const std::string &componentName,
  * This is not implemented yet.
  */
 void LoadILLIndirect::moveSingleDetectors() {
-
   std::string prefix("single_tube_");
 
   for (int i = 1; i <= 8; i++) {

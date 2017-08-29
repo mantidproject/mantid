@@ -6,6 +6,7 @@ class GeneralData(object):
     def __init__(self):
         self._data = []  # data
 
+    # noinspection PyUnusedLocal
     def set(self, items=None):
         """
         Sets a new value for a collection of the data.

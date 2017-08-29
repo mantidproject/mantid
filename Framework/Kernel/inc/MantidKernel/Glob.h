@@ -8,6 +8,9 @@
 #include <Poco/Glob.h>
 #include <Poco/Path.h>
 
+#include <set>
+#include <string>
+
 namespace Mantid {
 namespace Kernel {
 /** This Glob class overrides the glob() method of Poco::Glob class

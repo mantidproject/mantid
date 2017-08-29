@@ -1,10 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/PropertyManager.h"
-
 #include <json/json.h>
+#include <algorithm>
 
 namespace Mantid {
 namespace Kernel {

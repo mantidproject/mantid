@@ -1,10 +1,10 @@
 #ifndef MANTID_MDALGORITHMS_SMOOTHMD_H_
 #define MANTID_MDALGORITHMS_SMOOTHMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
@@ -14,8 +14,9 @@ namespace MDAlgorithms {
 
 DLLExport std::vector<double> gaussianKernel(const double fwhm);
 DLLExport std::vector<double> normaliseKernel(std::vector<double> kernel);
-DLLExport std::vector<double> renormaliseKernel(std::vector<double> kernel,
-                                                std::vector<bool> validity);
+DLLExport std::vector<double>
+renormaliseKernel(std::vector<double> kernel,
+                  const std::vector<bool> &validity);
 
 /** SmoothMD : Algorithm for smoothing MDHistoWorkspaces
 

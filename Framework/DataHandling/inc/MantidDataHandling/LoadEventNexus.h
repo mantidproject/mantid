@@ -5,26 +5,30 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/EventWorkspaceCollection.h"
 
 #ifdef _WIN32 // fixing windows issue causing conflict between
 // winnt char and nexus char
 #undef CHAR
 #endif
 
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/scoped_array.hpp>
+#include <functional>
 #include <memory>
 #include <mutex>
-#include <boost/lexical_cast.hpp>
+#include <numeric>
 
 namespace Mantid {
 
@@ -479,18 +483,35 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     // let it drop on floor
   }
 
-  // get the sample name
+  // get the sample name - nested try/catch to leave the handle in an
+  // appropriate state
   try {
     file.openGroup("sample", "NXsample");
-    file.openData("name");
-    std::string name;
-    if (file.getInfo().type == ::NeXus::CHAR) {
-      name = file.getStrData();
+    try {
+      file.openData("name");
+      const auto info = file.getInfo();
+      std::string name;
+      if (info.type == ::NeXus::CHAR) {
+        if (info.dims.size() == 1) {
+          name = file.getStrData();
+        } else { // something special for 2-d array
+          const int64_t total_length = std::accumulate(
+              info.dims.begin(), info.dims.end(), static_cast<int64_t>(1),
+              std::multiplies<int64_t>());
+          boost::scoped_array<char> val_array(new char[total_length]);
+          file.getData(val_array.get());
+          file.closeData();
+          name = std::string(val_array.get(), total_length);
+        }
+      }
+      file.closeData();
+
+      if (!name.empty()) {
+        WS->mutableSample().setName(name);
+      }
+    } catch (::NeXus::Exception &) {
+      // let it drop on floor
     }
-    if (!name.empty()) {
-      WS->mutableSample().setName(name);
-    }
-    file.closeData();
     file.closeGroup();
   } catch (::NeXus::Exception &) {
     // let it drop on floor
