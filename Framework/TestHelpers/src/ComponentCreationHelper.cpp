@@ -440,18 +440,18 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
   bank->initialize(pixelShape, pixels, 0.0, pixelSpacing, pixels, 0.0,
                    pixelSpacing, idStart, true, pixels);
 
-    // Mark them all as detectors
-    for (int x = 0; x < pixels; x++)
-      for (int y = 0; y < pixels; y++) {
-        boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
-        if (detector)
-          // Mark it as a detector (add to the instrument cache)
-          testInstrument.markAsDetector(detector.get());
-      }
+  // Mark them all as detectors
+  for (int x = 0; x < pixels; x++)
+    for (int y = 0; y < pixels; y++) {
+      boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
+      if (detector)
+        // Mark it as a detector (add to the instrument cache)
+        testInstrument.markAsDetector(detector.get());
+    }
 
-    testInstrument.add(bank);
-    bank->setPos(bankPos);
-    bank->setRot(bankRot);
+  testInstrument.add(bank);
+  bank->setPos(bankPos);
+  bank->setRot(bankRot);
 }
 
 //----------------------------------------------------------------------------------------------
