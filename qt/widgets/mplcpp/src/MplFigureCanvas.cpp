@@ -52,6 +52,28 @@ const PythonObject &mplFigureCanvasType() {
   }
   return figureCanvasType;
 }
+
+/**
+ * Extract a double from a given element of an array or tuple. Warning: No
+ * checks are done on the validity of the object or the index
+ * @param obj A reference to the sequence
+ * @param i The index of interest
+ * @return A C long from this element
+ */
+double doubleInSeq(const PythonObject &obj, Py_ssize_t i) {
+  return PyFloat_AsDouble(PySequence_Fast_GET_ITEM(obj.get(), i));
+}
+
+/**
+ * Extract a long from a given element of an array or tuple. Warning: No
+ * checks are done on the validity of the object or the index
+ * @param obj A reference to the sequence
+ * @param i The index of interest
+ * @return A C long from this element
+ */
+long longInSeq(const PythonObject &obj, Py_ssize_t i) {
+  return TO_LONG(PySequence_Fast_GET_ITEM(obj.get(), i));
+}
 }
 
 //------------------------------------------------------------------------------
@@ -79,12 +101,8 @@ struct MplFigureCanvas::PyObjectHolder {
     detail::decref(PyObject_CallMethod(figure.get(),
                                        PYSTR_LITERAL("add_subplot"),
                                        PYSTR_LITERAL("i"), subplotLayout));
-    auto instance = PyObject_CallFunction(mplFigureCanvasType().get(),
-                                          PYSTR_LITERAL("(O)"), figure.get());
-    if (!instance) {
-      throw PythonError();
-    }
-    canvas = PythonObject::fromNewRef(instance);
+    canvas = PythonObject::fromNewRef(PyObject_CallFunction(
+        mplFigureCanvasType().get(), PYSTR_LITERAL("(O)"), figure.get()));
     canvasWidget = static_cast<QWidget *>(sipUnwrap(canvas.get()));
     assert(canvasWidget);
   }
@@ -95,8 +113,7 @@ struct MplFigureCanvas::PyObjectHolder {
    */
   PythonObject gca() {
     ScopedPythonGIL gil;
-    auto figure = PythonObject::fromNewRef(
-        PyObject_GetAttrString(canvas.get(), PYSTR_LITERAL("figure")));
+    auto figure = canvas.getAttr("figure");
     return PythonObject::fromNewRef(PyObject_CallMethod(
         figure.get(), PYSTR_LITERAL("gca"), PYSTR_LITERAL(""), nullptr));
   }
@@ -141,25 +158,13 @@ QWidget *MplFigureCanvas::canvasWidget() const {
  * Retrieve information about the subplot geometry
  * @return A SubPlotSpec object defining the geometry
  */
-SubPlotSpec MplFigureCanvas::getGeometry() const {
+SubPlotSpec MplFigureCanvas::geometry() const {
   ScopedPythonGIL gil;
   auto axes = m_pydata->gca();
   auto geometry = PythonObject::fromNewRef(PyObject_CallMethod(
       axes.get(), PYSTR_LITERAL("get_geometry"), PYSTR_LITERAL(""), nullptr));
 
-  return SubPlotSpec(TO_LONG(PyTuple_GET_ITEM(geometry.get(), 0)),
-                     TO_LONG(PyTuple_GET_ITEM(geometry.get(), 1)));
-}
-
-/**
- * @return The number of Line2Ds on the canvas
- */
-size_t MplFigureCanvas::nlines() const {
-  ScopedPythonGIL gil;
-  auto axes = m_pydata->gca();
-  auto lines = PythonObject::fromNewRef(PyObject_CallMethod(
-      axes.get(), PYSTR_LITERAL("get_lines"), PYSTR_LITERAL(""), nullptr));
-  return static_cast<size_t>(PyList_Size(lines.get()));
+  return SubPlotSpec(longInSeq(geometry, 0), longInSeq(geometry, 1));
 }
 
 /**
@@ -167,7 +172,7 @@ size_t MplFigureCanvas::nlines() const {
  * @param type The label type
  * @return The label on the requested axis
  */
-QString MplFigureCanvas::getLabel(const Axes::Label type) const {
+QString MplFigureCanvas::label(const Axes::Label type) const {
   const char *method;
   if (type == Axes::Label::X)
     method = "get_xlabel";
@@ -185,12 +190,44 @@ QString MplFigureCanvas::getLabel(const Axes::Label type) const {
   return QString::fromAscii(TO_CSTRING(label.get()));
 }
 
+/** Query the limits for a given axis
+ * @param type An enumeration of Axes::Scale type
+ * @return The limits as a tuple
+ */
+std::tuple<double, double>
+MplFigureCanvas::limits(const Axes::Scale type) const {
+  const char *method;
+  if (type == Axes::Scale::X)
+    method = "get_xlim";
+  else if (type == Axes::Scale::Y)
+    method = "get_ylim";
+  else
+    throw std::logic_error(
+        "MplFigureCanvas::getLimits() - Scale type must be X or Y");
+  ScopedPythonGIL gil;
+  auto axes = m_pydata->gca();
+  auto limits = PythonObject::fromNewRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr));
+  return std::make_tuple(doubleInSeq(limits, 0), doubleInSeq(limits, 1));
+}
+
+/**
+ * @return The number of Line2Ds on the canvas
+ */
+size_t MplFigureCanvas::nlines() const {
+  ScopedPythonGIL gil;
+  auto axes = m_pydata->gca();
+  auto lines = PythonObject::fromNewRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL("get_lines"), PYSTR_LITERAL(""), nullptr));
+  return static_cast<size_t>(PyList_Size(lines.get()));
+}
+
 /**
  * Return the scale type on the given axis
  * @param type An enumeration giving the axis type
  * @return A string defining the scale type
  */
-QString MplFigureCanvas::getScale(const Axes::Scale type) const {
+QString MplFigureCanvas::scaleType(const Axes::Scale type) const {
   const char *method;
   if (type == Axes::Scale::X)
     method = "get_xscale";
@@ -207,48 +244,37 @@ QString MplFigureCanvas::getScale(const Axes::Scale type) const {
 }
 
 /**
- * Query the limits for a given axis
- * @param type An enumeration of Axes::Scale type
- * @return The limits as a tuple
+ * Assume the given coordinates are pixel coordinates, the result of a mouse
+ * click event for example, and transform them to data coordinates
+ * @param x X coordinate in pixels
+ * @param y Y coordinate in pixels
+ * @return A (x,y) point in data coordinate space
  */
-std::tuple<double, double>
-MplFigureCanvas::getLimits(const Axes::Scale type) const {
-  const char *method;
-  if (type == Axes::Scale::X)
-    method = "get_xlim";
-  else if (type == Axes::Scale::Y)
-    method = "get_ylim";
-  else
-    throw std::logic_error(
-        "MplFigureCanvas::getLimits() - Scale type must be X or Y");
+std::tuple<double, double> MplFigureCanvas::toDataCoordinates(double x,
+                                                              double y) const {
   ScopedPythonGIL gil;
   auto axes = m_pydata->gca();
-  auto limits = PythonObject::fromNewRef(PyObject_CallMethod(
-      axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr));
-  return std::make_tuple(PyFloat_AsDouble(PyTuple_GET_ITEM(limits.get(), 0)),
-                         PyFloat_AsDouble(PyTuple_GET_ITEM(limits.get(), 1)));
-}
-
-/**
- * Set the color of the canvas outside of the axes
- * @param color A matplotlib color string
- */
-void MplFigureCanvas::setCanvasFaceColor(const char *color) {
-  ScopedPythonGIL gil;
-  setCanvasFaceColorNoGIL(color);
+  // This essentially duplicates what happens in
+  // matplotlib.backend_bases.LocationEvent
+  auto transData = axes.getAttr("transData");
+  auto invTransform = PythonObject::fromNewRef(PyObject_CallMethod(
+      transData.get(), PYSTR_LITERAL("inverted"), PYSTR_LITERAL(""), nullptr));
+  auto result = NDArray1D<double>::fromNewRef(
+      PyObject_CallMethod(invTransform.get(), PYSTR_LITERAL("transform_point"),
+                          PYSTR_LITERAL("((ff))"), x, y));
+  return std::make_tuple(result[0], result[1]);
 }
 
 /**
  * Equivalent of Figure.add_subplot. If the subplot already exists then
  * it simply sets that plot number to be active
  * @param subplotLayout Subplot geometry in matplotlib convenience format,
- * e.g 2,1,2 would stack 2 plots on top of each other and set the second
+ * e.g 212 would stack 2 plots on top of each other and set the second
  * to active
  */
 void MplFigureCanvas::addSubPlot(int subplotLayout) {
   ScopedPythonGIL gil;
-  auto figure = PythonObject::fromNewRef(
-      PyObject_GetAttrString(m_pydata->canvas.get(), PYSTR_LITERAL("figure")));
+  auto figure = m_pydata->canvas.getAttr("figure");
   auto result = PyObject_CallMethod(figure.get(), PYSTR_LITERAL("add_subplot"),
                                     PYSTR_LITERAL("(i)"), subplotLayout);
   if (!result)
@@ -257,11 +283,18 @@ void MplFigureCanvas::addSubPlot(int subplotLayout) {
 }
 
 /**
- * @brief MplFigureCanvas::draw
+ * Redraw everything on the canvas
  */
 void MplFigureCanvas::draw() {
   ScopedPythonGIL gil;
   drawNoGIL();
+}
+
+/** Set the color of the canvas outside of the axes
+ * @param color A matplotlib color string
+ */
+void MplFigureCanvas::setCanvasFaceColor(const char *color) {
+  setCanvasFaceColorNoGIL(color);
 }
 
 /**
@@ -290,18 +323,14 @@ template <typename XArrayType, typename YArrayType>
 void MplFigureCanvas::plotLine(const XArrayType &x, const YArrayType &y,
                                const char *format) {
   ScopedPythonGIL gil;
-  NDArray1D xnp(x), ynp(y);
+  NDArray1D<double> xnp(x), ynp(y);
   auto axes = m_pydata->gca();
   // This will return a list of lines but we know we are only plotting 1
-  auto lines =
-      PyObject_CallMethod(axes.get(), PYSTR_LITERAL("plot"),
-                          PYSTR_LITERAL("(OOs)"), xnp.get(), ynp.get(), format);
-  if (!lines) {
-    throw PythonError();
-  }
+  auto pylines = PythonObject::fromBorrowedRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL("plot"), PYSTR_LITERAL("(OOs)"), xnp.get(),
+      ynp.get(), format));
   m_pydata->lines.emplace_back(
-      PythonObject::fromBorrowedRef(PyList_GET_ITEM(lines, 0)));
-  detail::decref(lines);
+      PythonObject::fromBorrowedRef(PyList_GET_ITEM(pylines.get(), 0)));
 }
 
 /**

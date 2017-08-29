@@ -54,18 +54,19 @@ public:
   ///@{
   ///@name Query properties
   QWidget *canvasWidget() const;
-  SubPlotSpec getGeometry() const;
+  SubPlotSpec geometry() const;
+  QString label(const Axes::Label type) const;
+  std::tuple<double, double> limits(const Axes::Scale type) const;
   size_t nlines() const;
-  QString getLabel(const Axes::Label type) const;
-  QString getScale(const Axes::Scale type) const;
-  std::tuple<double, double> getLimits(const Axes::Scale type) const;
+  QString scaleType(const Axes::Scale type) const;
+  std::tuple<double, double> toDataCoordinates(double x, double y) const;
   ///@}
 
   ///@{
   ///@name Canvas properties
-  void setCanvasFaceColor(const char *color);
   void addSubPlot(int subplotLayout);
   void draw();
+  void setCanvasFaceColor(const char *color);
   ///@}
 
   ///@{
