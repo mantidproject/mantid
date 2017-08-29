@@ -41,12 +41,8 @@ inline void xdecref(PyObject *obj) { Py_XDECREF(obj); }
  */
 class EXPORT_OPT_MANTIDQT_MPLCPP PythonObject {
 public:
-  /// Static creation from a new reference
-  static PythonObject fromNewRef(PyObject *ptr) { return PythonObject(ptr); }
-  /// Static creation from a borrowed reference
-  static PythonObject fromBorrowedRef(PyObject *ptr) {
-    return PythonObject(detail::incref(ptr));
-  }
+  static PythonObject fromNewRef(PyObject *ptr);
+  static PythonObject fromBorrowedRef(PyObject *ptr);
 
   PythonObject() : m_ptr(detail::incref(Py_None)) {}
   ~PythonObject() { detail::xdecref(m_ptr); }

@@ -8,6 +8,29 @@ namespace MplCpp {
 //-----------------------------------------------------------------------------
 // PythonObject
 //----------------------------------------------------------------------------
+/**
+ * Static creation from a new reference.
+ * @param ptr A reference to a raw PyObject that is assumed to be a new
+ * reference
+ * @throws PythonError on a null ptr
+ */
+PythonObject PythonObject::fromNewRef(PyObject *ptr) {
+  if (!ptr)
+    throw PythonError();
+  return PythonObject(ptr);
+}
+
+/**
+ * Static creation from a borrowed reference.
+ * @param ptr A reference to a raw PyObject that is assumed to be a borrowed
+ * reference. The reference count is incremented in the way in.
+ * @throws PythonError on a null ptr
+ */
+PythonObject PythonObject::fromBorrowedRef(PyObject *ptr) {
+  if (!ptr)
+    throw PythonError();
+  return PythonObject(detail::incref(ptr));
+}
 
 /**
  * @param name Name of the attribute
@@ -33,10 +56,7 @@ PythonObject PythonObject::getAttr(const char *name) const {
  * @throws PythonError if the module cannot be imported
  */
 PythonObject importModule(const char *name) {
-  auto objPtr = PyImport_ImportModule(name);
-  if (!objPtr)
-    throw PythonError();
-  return PythonObject::fromNewRef(objPtr);
+  return PythonObject::fromNewRef(PyImport_ImportModule(name));
 }
 
 /**
