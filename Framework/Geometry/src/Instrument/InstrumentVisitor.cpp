@@ -160,7 +160,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   }
   markAsSourceOrSample(assembly.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
-  m_isRectangularBank->emplace_back(false);
+  m_isRectangularBank->push_back(false);
   m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
   clearLegacyParameters(m_pmap, assembly);
   return componentIndex;
@@ -194,7 +194,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_parentComponentIndices->push_back(componentIndex);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
-  m_isRectangularBank->emplace_back(false);
+  m_isRectangularBank->push_back(false);
   m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
   clearLegacyParameters(m_pmap, component);
   return componentIndex;
