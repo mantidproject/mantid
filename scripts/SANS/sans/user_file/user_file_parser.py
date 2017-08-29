@@ -7,13 +7,13 @@ from math import copysign
 
 
 from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType)
-from sans.user_file.user_file_common import (DetectorId, BackId, range_entry, back_single_monitor_entry,
-                                             single_entry_with_detector, mask_angle_entry, LimitsId,
-                                             simple_range, complex_range, MaskId, mask_block, mask_block_cross,
-                                             mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
-                                             position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
-                                             fit_general, MonId, monitor_length, monitor_file, GravityId,
-                                             monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
+from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
+                                          single_entry_with_detector, mask_angle_entry, LimitsId,
+                                          simple_range, complex_range, MaskId, mask_block, mask_block_cross,
+                                          mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
+                                          position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
+                                          fit_general, MonId, monitor_length, monitor_file, GravityId,
+                                          monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
 
 
 # -----------------------------------------------------------------
@@ -612,7 +612,8 @@ class LimitParser(UserFileComponentParser):
             simple_pattern = self._extract_simple_pattern(event_binning, LimitsId.events_binning)
             rebin_values = simple_pattern[LimitsId.events_binning]
             prefix = -1. if rebin_values.step_type is RangeStepType.Log else 1.
-            binning_string = str(rebin_values.start) + "," + str(prefix*rebin_values.step) + "," + str(rebin_values.stop)  # noqa
+            binning_string = str(rebin_values.start) + "," + str(prefix*rebin_values.step) + "," + \
+                             str(rebin_values.stop)  # noqa
         else:
             rebin_values = extract_float_list(event_binning)
             binning_string = ",".join([str(val) for val in rebin_values])

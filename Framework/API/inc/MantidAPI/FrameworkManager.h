@@ -1,9 +1,6 @@
 #ifndef MANTID_API_FRAMEWORKMANAGER_H_
 #define MANTID_API_FRAMEWORKMANAGER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <string>
 
 #ifdef MPI_BUILD
@@ -18,9 +15,6 @@
 namespace Mantid {
 
 namespace API {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
 class IAlgorithm;
 class Workspace;
 

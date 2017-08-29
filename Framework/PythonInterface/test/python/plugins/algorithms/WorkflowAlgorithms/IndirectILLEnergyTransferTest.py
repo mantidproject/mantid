@@ -81,6 +81,11 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 2, 18, 512)
 
+    def test_spectrum_axis(self):
+        args = {'Run': self._runs['one_wing_EFWS'], 'SpectrumAxis': '2Theta'}
+        res = IndirectILLEnergyTransfer(**args)
+        self.assertTrue(res.getItem(0).getAxis(1).getUnit().unitID(), "Theta")
+
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup),

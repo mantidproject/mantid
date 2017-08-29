@@ -131,7 +131,7 @@ bool CatalogDownloadDataFiles::isDataFile(const std::string &fileName) {
   std::string extension = Poco::Path(fileName).getExtension();
   std::transform(extension.begin(), extension.end(), extension.begin(),
                  tolower);
-  return (extension.compare("raw") == 0 || extension.compare("nxs") == 0);
+  return (extension == "raw" || extension == "nxs");
 }
 
 /**

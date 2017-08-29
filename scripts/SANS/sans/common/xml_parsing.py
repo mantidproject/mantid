@@ -30,15 +30,19 @@ def get_named_elements_from_ipf_file(ipf_file, names_to_search, value_type):
     """
     output = {}
     number_of_elements_to_search = len(names_to_search)
+
     for _, element in eTree.iterparse(ipf_file):
         if element.tag == "parameter" and "name" in list(element.keys()):
-            if element.get("name") in names_to_search:
+            # Ideally we would break the for loop if we have found all the elements we are looking for.
+            # BUT: a not completed generator eTree.iterparse emits a ResourceWarning if we don't finish the generator.
+            #  There is also no method to close the file manually, hence we run through the whole file. Note that there
+            # is an existing bug report here: https://bugs.python.org/issue25707
+            if number_of_elements_to_search != len(output) and element.get("name") in names_to_search:
                 sub_element = element.find("value")
                 value = sub_element.get("val")
                 output.update({element.get("name"): value_type(value)})
                 element.clear()
-                if number_of_elements_to_search == len(output):
-                    break
+
     return output
 
 

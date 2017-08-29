@@ -152,7 +152,7 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
 
   // Get start time, stop time and unit factor
   double timeunitfactor = 1.;
-  if (timeunit.compare("Seconds") == 0)
+  if (timeunit == "Seconds")
     timeunitfactor = 1.E-9;
 
   // Get index for start time

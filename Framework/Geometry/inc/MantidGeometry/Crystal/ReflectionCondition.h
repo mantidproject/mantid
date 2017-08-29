@@ -172,6 +172,12 @@ typedef boost::shared_ptr<ReflectionCondition> ReflectionCondition_sptr;
 
 MANTID_GEOMETRY_DLL std::vector<ReflectionCondition_sptr>
 getAllReflectionConditions();
+MANTID_GEOMETRY_DLL std::vector<std::string> getAllReflectionConditionNames();
+MANTID_GEOMETRY_DLL std::vector<std::string> getAllReflectionConditionSymbols();
+MANTID_GEOMETRY_DLL ReflectionCondition_sptr
+getReflectionConditionByName(const std::string &name);
+MANTID_GEOMETRY_DLL ReflectionCondition_sptr
+getReflectionConditionBySymbol(const std::string &symbol);
 
 } // namespace Mantid
 } // namespace Geometry

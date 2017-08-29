@@ -23,6 +23,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(IndexSetTester set(3));
     // Also empty set is supported
     TS_ASSERT_THROWS_NOTHING(IndexSetTester set(0));
+    TS_ASSERT_THROWS_NOTHING(IndexSetTester set);
   }
 
   void test_rangeConstructor() {
@@ -61,6 +62,11 @@ public:
     TS_ASSERT_EQUALS(set1.size(), fullRange);
     IndexSetTester set2(1, 2, fullRange);
     TS_ASSERT_EQUALS(set2.size(), 2);
+  }
+
+  void test_empty() {
+    TS_ASSERT(IndexSetTester(0).empty());
+    TS_ASSERT(!IndexSetTester(1).empty());
   }
 
   void test_fullRange() {

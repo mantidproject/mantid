@@ -203,7 +203,7 @@ bool IPowderDiffPeakFunction::hasProfileParameter(std::string paramname) {
   if (candname == m_sortedProfileParameterNames.end())
     return false;
 
-  return candname->compare(paramname) != 0;
+  return *candname != paramname;
 }
 
 //-------------------------  External Functions

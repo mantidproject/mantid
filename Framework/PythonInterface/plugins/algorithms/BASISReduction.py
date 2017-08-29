@@ -119,9 +119,7 @@ class BASISReduction(PythonAlgorithm):
                                                 direction=Direction.Input),
                              "Momentum transfer binning scheme")
         self.setPropertyGroup("MomentumTransferBins", titleReflection)
-        self.declareProperty(FileProperty(name="MaskFile",
-                                          defaultValue=pjoin(DEFAULT_MASK_GROUP_DIR,
-                                                             default_reflection["mask_file"]),
+        self.declareProperty(FileProperty(name="MaskFile", defaultValue='',
                                           action=FileAction.OptionalLoad, extensions=['.xml']),
                              "See documentation for latest mask files.")
         self.setPropertyGroup("MaskFile", titleReflection)
@@ -169,6 +167,9 @@ class BASISReduction(PythonAlgorithm):
         self._qBins[2] += self._qBins[1]/2.0  # self._qBins[2] is rightmost bin boundary
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
         self._maskFile = self.getProperty("MaskFile").value
+        maskfile = self.getProperty("MaskFile").value
+        self._maskFile = maskfile if maskfile else pjoin(DEFAULT_MASK_GROUP_DIR,
+                                                         self._reflection["mask_file"])
         self._groupDetOpt = self.getProperty("GroupDetectors").value
         self._normalizeToFirst = self.getProperty("NormalizeToFirst").value
         self._doNorm = self.getProperty("DivideByVanadium").value
@@ -378,7 +379,8 @@ class BASISReduction(PythonAlgorithm):
         self._sumRuns(run_set, wsName, wsName_mon, extra_extension)
         self._calibData(wsName, wsName_mon)
         if not self._debugMode:
-            sapi.DeleteWorkspace(wsName_mon)  # delete monitors
+            if not self._noMonNorm:
+                sapi.DeleteWorkspace(wsName_mon)  # delete monitors
         return wsName
 
     def _group_and_SofQW(self, wsName, etRebins, isSample=True):

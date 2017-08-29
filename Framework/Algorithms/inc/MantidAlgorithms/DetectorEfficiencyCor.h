@@ -6,6 +6,8 @@
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDetector.h"
 
+#include <list>
+
 namespace Mantid {
 namespace Algorithms {
 /**

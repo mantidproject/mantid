@@ -223,10 +223,10 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
                                          const std::string &prop_number_type) {
   // set up the number type right
   bool is_int_series(false);
-  if (prop_number_type.compare(intTypeOption) == 0) {
+  if (prop_number_type == intTypeOption) {
     // integer type
     is_int_series = true;
-  } else if (prop_number_type.compare(autoTypeOption) == 0) {
+  } else if (prop_number_type == autoTypeOption) {
     // auto type. by default
     if (prop_value.size() == 0)
       g_log.warning("For sample log in TimeSeriesProperty and values are given "
@@ -239,7 +239,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
         is_int_series = true;
       }
     }
-  } else if (prop_number_type.compare(doubleTypeOption) != 0) {
+  } else if (prop_number_type != doubleTypeOption) {
     // unsupported type: anything but double, integer or auto
     g_log.error() << "TimeSeriesProperty with data type " << prop_number_type
                   << " is not supported.\n";
@@ -315,7 +315,7 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
   bool epochtime(false);
   std::string timeunit;
   getMetaData(data_ws, epochtime, timeunit);
-  bool is_second = timeunit.compare("Second") == 0;
+  bool is_second = timeunit == "Second";
 
   // convert the data in workspace to time series property value
   std::vector<DateAndTime> time_vec =
@@ -442,7 +442,7 @@ void AddSampleLog::getMetaData(API::MatrixWorkspace_const_sptr dataws,
     // get the meta data from the input workspace
     std::string epochtimestr =
         dataws->run().getProperty("IsEpochTime")->value();
-    epochtime = epochtimestr.compare("true") == 0;
+    epochtime = epochtimestr == "true";
     timeunit = dataws->run().getProperty("TimeUnit")->value();
   } else {
     // get the meta data from input

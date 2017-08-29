@@ -731,12 +731,6 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
 
     _printMessage('CompWavRanges( %s,plot=%s)' % (str(wavelens), plot))
 
-    # this only makes sense for 1D reductions
-    if ReductionSingleton().to_Q.output_type == '2D':
-        issueWarning('This wave ranges check is a 1D analysis, ignoring 2D setting')
-        _printMessage('Set1D()')
-        ReductionSingleton().to_Q.output_type = '1D'
-
     if not isinstance(wavelens, type([])) or len(wavelens) < 2:
         if not isinstance(wavelens, type((1,))):
             raise RuntimeError(
@@ -984,10 +978,6 @@ def DisplayMask(mask_worksp=None):
         @param mask_worksp: optional this named workspace will be modified and should be from the currently selected instrument
         @return the name of the workspace that was displayed
     """
-    # this will be copied from a sample work space if one exists
-    counts_data = None
-    _instrument = ReductionSingleton().instrument
-
     if not mask_worksp:
         mask_worksp = '__CurrentMask'
         samp = LAST_SAMPLE
@@ -1000,18 +990,12 @@ def DisplayMask(mask_worksp=None):
                 CloneWorkspace(InputWorkspace=samp + "_monitors",
                                OutputWorkspace=mask_worksp + "_monitors")
                 su.fromEvent2Histogram(mask_worksp, mtd[mask_worksp + "_monitors"])
-
-            counts_data = '__DisplayMasked_tempory_wksp'
-            Integration(InputWorkspace=mask_worksp, OutputWorkspace=counts_data)
         else:
             msg = 'Cannot display the mask without a sample workspace'
             _printMessage(msg, log=True, no_console=False)
             return
 
-    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton(), counts_data)
-    if counts_data:
-        DeleteWorkspace(counts_data)
-
+    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton())
     return mask_worksp
 
 
@@ -1767,14 +1751,13 @@ def is_current_workspace_an_angle_workspace():
     return is_angle
 
 
-def MatchIDFInReducerAndWorkspace(file_name):
-    '''
-    This method checks if the IDF which gets loaded with the workspace associated
-    with the file name and the current instrument in the reducer singleton refer
-    to the same IDF. If not then switch the IDF in the reducer.
-    '''
-    is_matched = True
+def _get_idf_path_for_run(file_name):
+    """
+    This method finds the full file location for a run number
 
+    :param file_name: the file name or run number
+    :return: the full path to the corresponding IDF
+    """
     # Get measurement time from file
     measurement_time = su.get_measurement_time_from_file(file_name)
 
@@ -1783,16 +1766,30 @@ def MatchIDFInReducerAndWorkspace(file_name):
 
     # Get the path to the instrument definition file
     idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
-    idf_path_workspace = os.path.normpath(idf_path_workspace)
+    return os.path.normpath(idf_path_workspace)
+
+
+def get_idf_path_for_run(file_name):
+    idf_path_workspace = _get_idf_path_for_run(file_name)
+    print(idf_path_workspace)
+    return idf_path_workspace
+
+
+def MatchIDFInReducerAndWorkspace(file_name):
+    '''
+    This method checks if the IDF which gets loaded with the workspace associated
+    with the file name and the current instrument in the reducer singleton refer
+    to the same IDF. If not then switch the IDF in the reducer.
+    '''
+
+    # Get the IDF path
+    idf_path_workspace = _get_idf_path_for_run(file_name)
 
     # Get the idf from the reducer
     idf_path_reducer = get_current_idf_path_in_reducer()
 
-    if ((idf_path_reducer == idf_path_workspace) and
-            su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
-        is_matched = True
-    else:
-        is_matched = False
+    is_matched = ((idf_path_reducer == idf_path_workspace) and
+                  su.are_two_files_identical(idf_path_reducer, idf_path_reducer))
 
     return is_matched
 

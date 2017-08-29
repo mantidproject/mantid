@@ -1,13 +1,15 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Cache.h"
-#include "MantidBeamline/ComponentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include <cstring>
+#include <nexus/NeXusFile.hpp>
 #include <boost/algorithm/string.hpp>
 
 #ifdef _WIN32
@@ -40,6 +42,8 @@ const std::string STRING_PARAM_NAME = "string";
 const std::string V3D_PARAM_NAME = "V3D";
 const std::string QUAT_PARAM_NAME = "Quat";
 
+const std::string SCALE_PARAM_NAME = "sca";
+
 // static logger reference
 Kernel::Logger g_log("ParameterMap");
 
@@ -49,9 +53,6 @@ void checkIsNotMaskingParameter(const std::string &name) {
                              "ParameterMap. Use DetectorInfo instead");
 }
 }
-//--------------------------------------------------------------------------
-// Public method
-//--------------------------------------------------------------------------
 /**
  * Default constructor
  */
@@ -74,7 +75,11 @@ ParameterMap::ParameterMap(const ParameterMap &other)
       m_boundingBoxMap(
           Kernel::make_unique<Kernel::Cache<const ComponentID, BoundingBox>>(
               *other.m_boundingBoxMap)),
-      m_detectorInfo(other.m_detectorInfo), m_instrument(other.m_instrument) {}
+      m_instrument(other.m_instrument) {
+  if (m_instrument)
+    std::tie(m_componentInfo, m_detectorInfo) =
+        m_instrument->makeBeamline(*this, &other);
+}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ParameterMap::~ParameterMap() = default;
@@ -112,6 +117,9 @@ const std::string &ParameterMap::pString() { return STRING_PARAM_NAME; }
 const std::string &ParameterMap::pV3D() { return V3D_PARAM_NAME; }
 
 const std::string &ParameterMap::pQuat() { return QUAT_PARAM_NAME; }
+
+// Scale
+const std::string &ParameterMap::scale() { return SCALE_PARAM_NAME; }
 
 /**
  * Compares the values in this object with that given for inequality
@@ -174,9 +182,8 @@ const std::string ParameterMap::getDescription(const std::string &compName,
   pmap_cit it;
   std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
-      boost::shared_ptr<Parameter> param =
-          get((const IComponent *)(*it).first, name);
+    if (compName == it->first->getName()) {
+      boost::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getDescription();
         if (!result.empty())
@@ -199,7 +206,7 @@ ParameterMap::getShortDescription(const std::string &compName,
   pmap_cit it;
   std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName.compare(it->first->getName()) == 0) {
+    if (compName == it->first->getName()) {
       boost::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getShortDescription();
@@ -424,11 +431,11 @@ void ParameterMap::addPositionCoordinate(
 
   // adjust position
 
-  if (name.compare(posx()) == 0)
+  if (name == posx())
     position.setX(value);
-  else if (name.compare(posy()) == 0)
+  else if (name == posy())
     position.setY(value);
-  else if (name.compare(posz()) == 0)
+  else if (name == posz())
     position.setZ(value);
   else {
     g_log.warning() << "addPositionCoordinate() called with unrecognized "
@@ -483,15 +490,15 @@ void ParameterMap::addRotationParam(const IComponent *comp,
 
   // adjust rotation
   Quat quat;
-  if (name.compare(rotx()) == 0) {
+  if (name == rotx()) {
     addDouble(comp, rotx(), deg);
     quat = Quat(deg, V3D(1, 0, 0)) * Quat(rotY, V3D(0, 1, 0)) *
            Quat(rotZ, V3D(0, 0, 1));
-  } else if (name.compare(roty()) == 0) {
+  } else if (name == roty()) {
     addDouble(comp, roty(), deg);
     quat = Quat(rotX, V3D(1, 0, 0)) * Quat(deg, V3D(0, 1, 0)) *
            Quat(rotZ, V3D(0, 0, 1));
-  } else if (name.compare(rotz()) == 0) {
+  } else if (name == rotz()) {
     addDouble(comp, rotz(), deg);
     quat = Quat(rotX, V3D(1, 0, 0)) * Quat(rotY, V3D(0, 1, 0)) *
            Quat(deg, V3D(0, 0, 1));
@@ -1163,29 +1170,41 @@ bool ParameterMap::hasDetectorInfo(const Instrument *instrument) const {
     return false;
   return static_cast<bool>(m_detectorInfo);
 }
+
+/** Only for use by ExperimentInfo. Returns returns true if this instrument
+ contains a ComponentInfo.
+*/
+bool ParameterMap::hasComponentInfo(const Instrument *instrument) const {
+  if (instrument != m_instrument)
+    return false;
+  return static_cast<bool>(m_componentInfo);
+}
+
 /// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
-const Beamline::DetectorInfo &ParameterMap::detectorInfo() const {
+const Geometry::DetectorInfo &ParameterMap::detectorInfo() const {
   if (!hasDetectorInfo(m_instrument))
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
   return *m_detectorInfo;
 }
 
-/**
- * @brief ParameterMap::hasComponentInfo
- * @return True if a ComponentInfo is stored.
- */
-bool ParameterMap::hasComponentInfo() const {
-  return static_cast<bool>(m_componentInfo);
+/// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
+Geometry::DetectorInfo &ParameterMap::mutableDetectorInfo() {
+  if (!hasDetectorInfo(m_instrument))
+    throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
+  return *m_detectorInfo;
 }
 
-/**
- * @brief ParameterMap::componentInfo
- * @return A const ref to the ComponentInfo if stored. Throws a
- * std::runtime_error
- * exception otherwise.
- */
-const Beamline::ComponentInfo &ParameterMap::componentInfo() const {
-  if (!hasComponentInfo()) {
+/// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
+const Geometry::ComponentInfo &ParameterMap::componentInfo() const {
+  if (!hasComponentInfo(m_instrument)) {
+    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
+  }
+  return *m_componentInfo;
+}
+
+/// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
+Geometry::ComponentInfo &ParameterMap::mutableComponentInfo() {
+  if (!hasComponentInfo(m_instrument)) {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
   return *m_componentInfo;
@@ -1196,21 +1215,27 @@ size_t ParameterMap::detectorIndex(const detid_t detID) const {
   return m_instrument->detectorIndex(detID);
 }
 
-/// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
-void ParameterMap::setDetectorInfo(
-    boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
-  m_detectorInfo = std::move(detectorInfo);
-}
-
-/// Only for use by ExperimentInfo. Sets the pointer to the ComponentInfo.
-void ParameterMap::setComponentInfo(
-    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo) {
-  m_componentInfo = std::move(componentInfo);
+size_t ParameterMap::componentIndex(const ComponentID componentId) const {
+  return m_componentInfo->indexOf(componentId);
 }
 
 /// Only for use by Instrument. Sets the pointer to the owning instrument.
 void ParameterMap::setInstrument(const Instrument *instrument) {
+  if (instrument == m_instrument)
+    return;
+  if (!instrument) {
+    m_componentInfo = nullptr;
+    m_detectorInfo = nullptr;
+    return;
+  }
+  if (m_instrument)
+    throw std::logic_error("ParameterMap::setInstrument: Cannot change "
+                           "instrument once it has been set.");
+  if (instrument->isParametrized())
+    throw std::logic_error("ParameterMap::setInstrument must be called with "
+                           "base instrument, not a parametrized instrument");
   m_instrument = instrument;
+  std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this);
 }
 
 } // Namespace Geometry

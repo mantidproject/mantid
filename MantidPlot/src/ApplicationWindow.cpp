@@ -30,7 +30,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "ApplicationWindow.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 #include "CurvesDialog.h"
 #include "PlotDialog.h"
 #include "AxesDialog.h"
@@ -79,7 +79,7 @@
 #include "Folder.h"
 #include "FindDialog.h"
 #include "ScaleDraw.h"
-#include "MantidQtAPI/ScaleEngine.h"
+#include "MantidQtWidgets/Common/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
 #include "ScriptFileInterpreter.h"
@@ -112,7 +112,7 @@
 #include "DataPickerTool.h"
 #include "TiledWindow.h"
 #include "DockedWindow.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "ProjectSerialiser.h"
 
 // TODO: move tool-specific code to an extension manager
@@ -189,19 +189,19 @@
 #include "Mantid/ManageInterfaceCategories.h"
 #include "Mantid/FirstTimeSetup.h"
 
-#include "MantidQtAPI/InterfaceManager.h"
-#include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
-#include "MantidQtAPI/Message.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/Message.h"
 
-#include "MantidQtMantidWidgets/CatalogHelper.h"
-#include "MantidQtMantidWidgets/CatalogSearch.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MessageDisplay.h"
-#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/TrackedAction.h"
+#include "MantidQtWidgets/Common/CatalogHelper.h"
+#include "MantidQtWidgets/Common/CatalogSearch.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/MessageDisplay.h"
+#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/TrackedAction.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -218,7 +218,7 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "MantidQtAPI/ScriptRepositoryView.h"
+#include "MantidQtWidgets/Common/ScriptRepositoryView.h"
 
 #ifdef MAKE_VATES
 #include "vtkPVDisplayInformation.h"
@@ -6051,7 +6051,7 @@ bool ApplicationWindow::saveProject(bool compress) {
   return true;
 }
 
-void ApplicationWindow::prepareSaveProject() {
+int ApplicationWindow::execSaveProjectDialog() {
   std::vector<IProjectSerialisable *> windows;
 
   for (auto window : getSerialisableWindows()) {
@@ -6060,7 +6060,7 @@ void ApplicationWindow::prepareSaveProject() {
       windows.push_back(win);
   }
 
-  for (auto window : windowsList()) {
+  for (auto window : getAllWindows()) {
     auto win = dynamic_cast<IProjectSerialisable *>(window);
     if (win)
       windows.push_back(win);
@@ -6071,8 +6071,10 @@ void ApplicationWindow::prepareSaveProject() {
       projectname, *serialiser, windows, this);
   connect(m_projectSaveView, SIGNAL(projectSaved()), this,
           SLOT(postSaveProject()));
-  m_projectSaveView->show();
+  return m_projectSaveView->exec();
 }
+
+void ApplicationWindow::prepareSaveProject() { execSaveProjectDialog(); }
 
 /**
  * The project was just saved. Update the main window.
@@ -7752,12 +7754,15 @@ void ApplicationWindow::printAllPlots() {
     dialog.setMinMax(0, plots);
     printer.setFromTo(0, plots);
 
+    bool firstPage = true;
     foreach (MdiSubWindow *w, windows) {
-      if (std::string(w->metaObject()->className()) == "MultiLayer" &&
-          printer.newPage()) {
-        MultiLayer *ml = dynamic_cast<MultiLayer *>(w);
-        if (ml)
-          ml->printAllLayers(paint);
+      if (std::string(w->metaObject()->className()) == "MultiLayer") {
+        if (firstPage || printer.newPage()) {
+          MultiLayer *ml = dynamic_cast<MultiLayer *>(w);
+          if (ml)
+            ml->printAllLayers(paint);
+          firstPage = false;
+        }
       }
     }
     paint->end();
@@ -9175,32 +9180,6 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
   emit modified();
 }
 
-/**
- * Called when the user choses to close the program
- */
-void ApplicationWindow::prepareToCloseMantid() {
-  if (!saved) {
-    QString savemsg =
-        tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
-    int result =
-        QMessageBox::information(this, tr("MantidPlot"), savemsg, tr("Yes"),
-                                 tr("No"), tr("Cancel"), 0, 2);
-    if (result == 0) {
-      prepareSaveProject();
-      // When we're finished saving trigger the close event
-      connect(m_projectSaveView, SIGNAL(finished(int)), qApp,
-              SLOT(closeAllWindows()));
-      return;
-    } else if (result == 2) {
-      // User wanted to cancel, do nothing
-      return;
-    }
-  }
-
-  // Call to close all the windows and shutdown Mantid
-  QApplication::closeAllWindows();
-}
-
 /** Add a serialisable window to the application
  * @param window :: the window to add
  */
@@ -9809,6 +9788,25 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     // script is running.
   }
 
+  if (!saved) {
+    QString savemsg =
+        tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
+    int result =
+        QMessageBox::information(this, tr("MantidPlot"), savemsg, tr("Yes"),
+                                 tr("No"), tr("Cancel"), 0, 2);
+    if (result == 0) {
+      auto response = execSaveProjectDialog();
+      if (response != QDialog::Accepted) {
+        ce->ignore();
+        return;
+      }
+    } else if (result == 2) {
+      // User wanted to cancel, do nothing
+      ce->ignore();
+      return;
+    }
+  }
+
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be
   // cleaned up meaning we cannot rely on the deleteLater functionality to
@@ -9851,6 +9849,7 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
   scriptingEnv()->finalize();
 
   ce->accept();
+  qApp->closeAllWindows();
 }
 
 void ApplicationWindow::customEvent(QEvent *e) {
@@ -11821,8 +11820,7 @@ void ApplicationWindow::createActions() {
   actionCloseAllWindows = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("quit_xpm")), tr("&Quit"), this);
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
-  connect(actionCloseAllWindows, SIGNAL(triggered()), this,
-          SLOT(prepareToCloseMantid()));
+  connect(actionCloseAllWindows, SIGNAL(triggered()), this, SLOT(close()));
 
   actionDeleteFitTables = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("close_xpm")), tr("Delete &Fit Tables"), this);

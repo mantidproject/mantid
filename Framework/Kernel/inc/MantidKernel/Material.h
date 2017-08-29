@@ -7,7 +7,12 @@
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
-#include <nexus/NeXusFile.hpp>
+#include <vector>
+
+// Forward Declares
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 
@@ -24,7 +29,7 @@ namespace Kernel {
   <UL>
     <LI>temperature (Kelvin)</LI>
     <LI>pressure (KPa) </LI>
-    <LI>number density (A^-3)</LI>
+    <LI>number density (nAtoms / Angstrom^3)</LI>
   </UL>
 
 Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge

@@ -69,8 +69,8 @@ public:
 
   Mantid::API::Progress *getProgress() { return m_Progress.get(); }
   void resetProgress(size_t nSteps) {
-    m_Progress =
-        Mantid::Kernel::make_unique<Mantid::API::Progress>(this, 0, 1, nSteps);
+    m_Progress = Mantid::Kernel::make_unique<Mantid::API::Progress>(
+        this, 0.0, 1.0, nSteps);
   }
 
 private:
@@ -307,16 +307,16 @@ Mantid::API::MatrixWorkspace_sptr createGroupedWorkspace2DWithRingsAndBoxes(
     size_t RootOfNumHist = 10, int numBins = 10, double binDelta = 1.0);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataY(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayDataY(Mantid::API::MatrixWorkspace_const_sptr ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayData(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayData(Mantid::API::MatrixWorkspace_const_sptr ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataX(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayDataX(Mantid::API::MatrixWorkspace_const_sptr ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataE(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayDataE(Mantid::API::MatrixWorkspace_const_sptr ws);
 
 void addTSPEntry(Mantid::API::Run &runInfo, std::string name, double val);
 void setOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
@@ -372,7 +372,8 @@ create2DWorkspaceWithReflectometryInstrument(double startX = 0);
 /// Create a 2D workspace with one monitor and three detectors based around
 /// a virtual reflectometry instrument.
 Mantid::API::MatrixWorkspace_sptr
-create2DWorkspaceWithReflectometryInstrumentMultiDetector(double startX = 0);
+create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+    double startX = 0, const double detSize = 0.0);
 
 void createInstrumentForWorkspaceWithDistances(
     Mantid::API::MatrixWorkspace_sptr workspace,

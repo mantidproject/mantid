@@ -8,9 +8,9 @@ if( MSVC )
 
   # Use ExternalProject functionality as it already knows how to do clone/update
   include ( ExternalProject )
-  set( EXTERNAL_ROOT ${PROJECT_SOURCE_DIR}/external )
+  set( EXTERNAL_ROOT ${PROJECT_SOURCE_DIR}/external CACHE PATH "Location to clone third party dependencies to" )
   set( THIRD_PARTY_GIT_URL "https://github.com/mantidproject/thirdparty-msvc2015.git" )
-  set ( THIRD_PARTY_GIT_SHA1 87a8fa24f066725494454c4ff10bcc21088b316a )
+  set ( THIRD_PARTY_GIT_SHA1 9af2288ba00e184b8659edbeedb12ce771b87bb5 )
   set ( THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty )
   # Generates a script to do the clone/update in tmp
   set ( _project_name ThirdParty )

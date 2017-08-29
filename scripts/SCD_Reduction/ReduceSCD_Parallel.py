@@ -168,9 +168,11 @@ first_time = True
 
 if output_nexus:
     #Only need this for instrument for peaks_total
-    short_filename = "%s_%s_event.nxs" % (instrument_name, str(run_nums[0]))
+    short_filename = "%s_%s" % (instrument_name, str(run_nums[0]))
     if data_directory is not None:
-        full_name = data_directory + "/" + short_filename
+        full_name = data_directory + "/" + short_filename + ".nxs.h5"
+        if not os.path.exists(full_name):
+            full_name = data_directory + "/" + short_filename + "_event.nxs"
     else:
         candidates = FileFinder.findRuns(short_filename)
         full_name = ""
@@ -178,10 +180,11 @@ if output_nexus:
             if os.path.exists(item):
                 full_name = str(item)
 
-        if not full_name.endswith('nxs'):
+        if not full_name.endswith('nxs') and not full_name.endswith('h5'):
             print("Exiting since the data_directory was not specified and")
-            print("findnexus failed for event NeXus file: " + instrument_name + " " + str(run))
+            print("findnexus failed for event NeXus file: " + instrument_name + " " + str(run_nums[0]))
             exit(0)
+
     #
     # Load the first data file to find instrument
     #

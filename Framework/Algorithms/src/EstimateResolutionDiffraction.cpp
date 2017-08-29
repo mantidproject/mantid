@@ -1,5 +1,5 @@
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -125,7 +125,7 @@ double EstimateResolutionDiffraction::getWavelength() {
         "LambdaReqeust is not a TimeSeriesProperty in double. ");
 
   string unit = cwltimeseries->units();
-  if (unit.compare("Angstrom") != 0) {
+  if ((unit != "Angstrom") && (unit != "A")) {
     throw runtime_error("Unit is not recognized: " + unit);
   }
 

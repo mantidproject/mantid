@@ -52,6 +52,11 @@ public:
     return std::unique_ptr<MDEventWorkspace>(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<MDEventWorkspace> cloneEmpty() const {
+    return std::unique_ptr<MDEventWorkspace>(doCloneEmpty());
+  }
+
   /// Perform initialization after dimensions (and others) have been set.
   void initialize() override;
 
@@ -236,6 +241,10 @@ protected:
 private:
   MDEventWorkspace *doClone() const override {
     return new MDEventWorkspace(*this);
+  }
+
+  MDEventWorkspace *doCloneEmpty() const override {
+    return new MDEventWorkspace();
   }
 
   Kernel::SpecialCoordinateSystem m_coordSystem;

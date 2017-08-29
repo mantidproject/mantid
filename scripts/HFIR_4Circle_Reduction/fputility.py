@@ -1,5 +1,6 @@
 #pylint: disable=R0914,R0912,R0913
 # Utility methods for Fullprof
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import math
@@ -70,7 +71,7 @@ def load_scd_fullprof_intensity_file(file_name):
         if line_index == 0:
             # line 1 as header
             header = line
-            print '[INFO] Header: %s' % header
+            print('[INFO] Header:', header)
         elif line.startswith('('):
             # line 2 format line, skip
             continue
@@ -230,7 +231,11 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
         # END-IF-ELSE
 
         # peak intensity and sigma
-        part3 = '%8.2f%8.2f%4d' % (peak_dict['intensity'], peak_dict['sigma'], 1)
+        try:
+            part3 = '%8.2f%8.2f%4d' % (peak_dict['intensity'], peak_dict['sigma'], 1)
+        except TypeError as type_err:
+            raise RuntimeError('In writing Fullprof file, unable to convert intensity {0} and/or sigma {1} to '
+                               'floats. FYI: {2}'.format(peak_dict['intensity'], peak_dict['sigma'], type_err))
 
         peak_line = part1 + part2 + part3
 
@@ -275,8 +280,8 @@ def main(argv):
     """
     # get input
     if len(argv) < 4:
-        print 'Calculate the difference of two measuremnts:\n'
-        print '> %s [intensity file 1]  [intensity file 2]  [output intensity file]' % argv[0]
+        print('Calculate the difference of two measurements:\n')
+        print('> %s [intensity file 1]  [intensity file 2]  [output intensity file]' % argv[0])
         return
     else:
         int_file_1 = argv[1]
@@ -287,9 +292,9 @@ def main(argv):
     intensity_dict2, wave_length2, error_message2 = load_scd_fullprof_intensity_file(int_file_2)
 
     if len(error_message1) == 0:
-        print '[Error] %s: %s' % (int_file_1, error_message1)
+        print('[Error] %s: %s' % (int_file_1, error_message1))
     if len(error_message2) == 0:
-        print '[Error] %s: %s' % (int_file_2, error_message2)
+        print('[Error] %s: %s' % (int_file_2, error_message2))
 
     diff_dict = calculate_intensity_difference(intensity_dict1, intensity_dict2)
     diff_peak_list = convert_to_peak_dict_list(diff_dict)

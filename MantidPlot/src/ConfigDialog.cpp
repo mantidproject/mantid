@@ -32,12 +32,12 @@ Description          : Preferences dialog
 #include "ColorButton.h"
 #include "Graph.h"
 #include "Mantid/MantidUI.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "Matrix.h"
 #include "MultiLayer.h"
 #include "SendToProgramDialog.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QApplication>
 #include <QComboBox>
@@ -76,10 +76,10 @@ Description          : Preferences dialog
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidQtAPI/MdConstants.h"
-#include "MantidQtAPI/MdPlottingCmapsProvider.h"
-#include "MantidQtAPI/MdSettings.h"
-#include "MantidQtMantidWidgets/InstrumentSelector.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
+#include "MantidQtWidgets/Common/MdPlottingCmapsProvider.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
+#include "MantidQtWidgets/Common/InstrumentSelector.h"
 
 #include <limits>
 
@@ -853,6 +853,15 @@ void ConfigDialog::initMdPlottingVsiTab() {
   lblVsiDefaultBackground = new QLabel();
   grid->addWidget(lblVsiDefaultBackground, 1, 0);
   grid->addWidget(vsiDefaultBackground, 1, 1);
+
+  // Axes Color
+  vsiAxesColor = new QGroupBox();
+  vsiAxesColor->setCheckable(true);
+  vsiAxesColor->setChecked(m_mdSettings.getUserSettingAutoColorAxes());
+  vsiAxesColor->setTitle(tr("Automatic axes color selection"));
+  vsiAxesColor->setToolTip(
+      tr("Automatically select a contrasting color for all axes"));
+  vsiTabLayout->addWidget(vsiAxesColor);
 
   const QColor backgroundColor = m_mdSettings.getUserSettingBackgroundColor();
   vsiDefaultBackground->setColor(backgroundColor);
@@ -2721,6 +2730,10 @@ void ConfigDialog::updateMdPlottingSettings() {
   // Read the Vsi color map
   if (vsiDefaultColorMap) {
     m_mdSettings.setUserSettingColorMap(vsiDefaultColorMap->currentText());
+  }
+
+  if (vsiAxesColor) {
+    m_mdSettings.setUserSettingAutoColorAxes(vsiAxesColor->isChecked());
   }
 
   // Read if the usage of the last color map and background color should be

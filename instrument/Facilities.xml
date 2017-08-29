@@ -631,6 +631,17 @@
     <technique>Powder diffraction</technique>
   </instrument>
 
+  <instrument name="D20">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
+  <instrument name="D1B">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
+  <instrument name="D4C">
+    <technique>Liquid diffraction</technique>
+  </instrument>
 
   <instrument name="D17">
     <technique>Reflectometry</technique>
@@ -749,6 +760,7 @@
   </instrument>
 
   <instrument name="TOFTOF">
+    <zeropadding size="8" startRunNumber="69750"/>
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>

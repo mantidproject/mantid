@@ -1,4 +1,5 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/AlgorithmIDProxy.h"
 
 #include <boost/python/class.hpp>
@@ -60,12 +61,16 @@ boost::python::list runningInstancesOf(AlgorithmManagerImpl &self,
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 /// Define overload generators
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads,
                                        AlgorithmManagerImpl::create, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,
                                        AlgorithmManagerImpl::createUnmanaged, 1,
                                        2)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

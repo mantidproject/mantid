@@ -11,7 +11,7 @@
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid;
@@ -196,8 +196,7 @@ public:
     // modify spectra-detector map on the sample workspace to check masking
     std::vector<detid_t> detIDs = source->getInstrument()->getDetectorIDs(true);
     size_t index = 0;
-    auto it = --detIDs.end();
-    for (; it >= detIDs.begin(); --it) {
+    for (auto it = detIDs.rbegin(); it != detIDs.rend(); ++it) {
       const detid_t detId = *it;
       auto &spec = source->getSpectrum(index);
       Mantid::specnum_t specNo =

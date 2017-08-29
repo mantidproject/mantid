@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -140,7 +141,7 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port
-  if (address.host().toString().compare("0.0.0.0") == 0) {
+  if (address.host().toString() == "0.0.0.0") {
     Poco::Net::SocketAddress tempAddress("localhost:31415");
     try {
       m_socket.connect(tempAddress); // BLOCKING connect

@@ -12,26 +12,27 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -50,9 +51,9 @@ using namespace Mantid::HistogramData;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 
-MockAlgorithm::MockAlgorithm(size_t nSteps) {
-  m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
-}
+MockAlgorithm::MockAlgorithm(size_t nSteps)
+    : m_Progress(
+          Mantid::Kernel::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
                          const double height_, const FitStatus fitStatus_)
@@ -526,9 +527,11 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
 * multiple detectors
 * @return workspace with instrument attached.
 * @param startX : X Tof start value for the workspace.
+* @param detSize : optional detector height (default is 0 which puts all
+* detectors at the same position)
 */
-MatrixWorkspace_sptr
-create2DWorkspaceWithReflectometryInstrumentMultiDetector(double startX) {
+MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+    double startX, const double detSize) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
@@ -548,24 +551,29 @@ create2DWorkspaceWithReflectometryInstrumentMultiDetector(double startX) {
   instrument->add(monitor);
   instrument->markAsMonitor(monitor);
 
+  // Place the central detector at 45 degrees (i.e. the distance
+  // from the sample in Y is the same as the distance in X).
+  const double detPosX = 20;
+  const double detPosY = detPosX - sample->getPos().X();
+
   Detector *det1 = new Detector(
       "point-detector", 2,
       ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
-  det1->setPos(20, (20 - sample->getPos().X()), 0);
+  det1->setPos(detPosX, detPosY - detSize, 0); // offset below centre
   instrument->add(det1);
   instrument->markAsDetector(det1);
 
   Detector *det2 = new Detector(
       "point-detector", 3,
       ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
-  det2->setPos(20, (20 - sample->getPos().X()), 0);
+  det2->setPos(detPosX, detPosY, 0); // at centre
   instrument->add(det2);
   instrument->markAsDetector(det2);
 
   Detector *det3 = new Detector(
       "point-detector", 4,
       ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
-  det3->setPos(20, (20 - sample->getPos().X()), 0);
+  det3->setPos(detPosX, detPosY + detSize, 0); // offset above centre
   instrument->add(det3);
   instrument->markAsDetector(det3);
 
@@ -832,7 +840,7 @@ createGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataY(const MatrixWorkspace_sptr ws) {
+void displayDataY(MatrixWorkspace_const_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
@@ -843,11 +851,11 @@ void displayDataY(const MatrixWorkspace_sptr ws) {
     std::cout << '\n';
   }
 }
-void displayData(const MatrixWorkspace_sptr ws) { displayDataX(ws); }
+void displayData(MatrixWorkspace_const_sptr ws) { displayDataX(ws); }
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataX(const MatrixWorkspace_sptr ws) {
+void displayDataX(MatrixWorkspace_const_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
@@ -861,7 +869,7 @@ void displayDataX(const MatrixWorkspace_sptr ws) {
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataE(const MatrixWorkspace_sptr ws) {
+void displayDataE(MatrixWorkspace_const_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";

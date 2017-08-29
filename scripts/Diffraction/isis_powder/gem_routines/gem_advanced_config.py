@@ -8,7 +8,7 @@ absorption_correction_params = {
     "cylinder_position": [0., 0., 0.],
 
     "chemical_formula": "V0.9486 Nb0.0514",  # V 94.86% Nb 5.14%
-    "number_density": 0.07216
+    "number_density": 0.071
 }
 
 

@@ -31,7 +31,7 @@
  ***************************************************************************/
 #include "MatrixValuesDialog.h"
 #include "MatrixCommand.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 #include <QLayout>
 #include <QSpinBox>

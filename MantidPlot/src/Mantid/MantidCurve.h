@@ -3,8 +3,8 @@
 
 #include "../PlotCurve.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidQtAPI/MantidQwtWorkspaceData.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/MantidQwtWorkspaceData.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 class Graph;
 class ErrorBarSettings;
@@ -107,7 +107,8 @@ private:
   mutable QwtDoubleRect m_boundingRect;
 
   // To ensure that all MantidCurves can work with Mantid Workspaces.
-  virtual void init(Graph *g, bool distr, GraphOptions::CurveType style) = 0;
+  virtual void init(Graph *g, bool distr, GraphOptions::CurveType style,
+                    bool multileSpectra = false) = 0;
 };
 
 #endif

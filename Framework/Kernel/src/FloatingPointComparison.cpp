@@ -2,6 +2,8 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/FloatingPointComparison.h"
+#include "MantidKernel/System.h"
+
 #include <limits>
 #include <cmath>
 

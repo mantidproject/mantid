@@ -78,9 +78,10 @@ find the following data acquired on tubes as shown in the image below.
 .. image:: ../../images/Maps_data_on_tube_10.png
 			:width: 300px
 
-There are 5 special points that can be used to the calibration. A rising
-edge, followed by 3 Gaussian through, and finally, a final edge. These 5
-points were measured and the result was:
+There are 5 special points that can be used to the calibration.
+These points must be in **meters**
+The points has a rising edge, followed by 3 Gaussian through,
+and finally, a final edge. These 5 points were measured and the result was:
 
 .. code:: python
 

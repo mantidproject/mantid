@@ -33,12 +33,12 @@
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
 #include "MatrixModel.h"
 #include "MyParser.h"
 #include "UserFunction.h" //Mantid
 
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include <QApplication>
 #include <QBitmap>

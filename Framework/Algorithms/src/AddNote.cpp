@@ -128,7 +128,7 @@ void AddNote::removeExisting(API::MatrixWorkspace_sptr &logWS,
  */
 void AddNote::createOrUpdate(API::Run &run, const std::string &name) {
   std::string time = getProperty("Time");
-  if (time.compare(std::string("")) == 0) {
+  if (time.empty()) {
     namespace pt = boost::posix_time;
     auto dateTimeObj = DateAndTime(pt::second_clock::local_time());
     time = dateTimeObj.toISO8601String();

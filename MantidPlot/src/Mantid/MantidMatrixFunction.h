@@ -4,7 +4,7 @@
 #include "../UserFunction.h"
 #include "MantidMatrix.h"
 
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/HistogramX.h"
 
@@ -75,7 +75,7 @@ private:
 
   void init(const Mantid::API::MatrixWorkspace_const_sptr &workspace);
   void reset(const Mantid::API::MatrixWorkspace_const_sptr &workspace);
-  size_t indexX(size_t row, double s) const;
+  size_t indexX(size_t row, double xValue) const;
   size_t indexY(double s) const;
 
   /* Data */

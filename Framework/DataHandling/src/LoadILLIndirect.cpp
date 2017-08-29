@@ -1,13 +1,14 @@
 #include "MantidDataHandling/LoadILLIndirect.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -32,6 +33,8 @@ LoadILLIndirect::LoadILLIndirect()
       m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
       m_numberOfSimpleDetectors(0), m_numberOfHistograms(0) {
   m_supportedInstruments.emplace_back("IN16B");
+  useAlgorithm("LoadILLIndirect", 2);
+  deprecatedDate("01.04.2017");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -246,8 +249,8 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   size_t nb_monitors = monitorsData.size();
   size_t nb_SD_detectors = dataSD.dim0();
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube +
-                                    nb_monitors + nb_SD_detectors);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube +
+                                        nb_monitors + nb_SD_detectors);
 
   // Assign fake values to first X axis
   const HistogramData::BinEdges histoBinEdges(
@@ -360,7 +363,9 @@ void LoadILLIndirect::moveComponent(const std::string &componentName,
     V3D newPos;
     newPos.spherical(newR, newTheta, phi);
 
-    m_localWorkspace->mutableDetectorInfo().setPosition(*component, newPos);
+    auto &compInfo = m_localWorkspace->mutableComponentInfo();
+    const auto componentIndex = compInfo.indexOf(component->getComponentID());
+    compInfo.setPosition(componentIndex, newPos);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +
@@ -377,7 +382,6 @@ void LoadILLIndirect::moveComponent(const std::string &componentName,
  * This is not implemented yet.
  */
 void LoadILLIndirect::moveSingleDetectors() {
-
   std::string prefix("single_tube_");
 
   for (int i = 1; i <= 8; i++) {

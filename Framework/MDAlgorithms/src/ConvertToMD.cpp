@@ -330,7 +330,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   bool detector_found(false);
   const auto &spectrumInfo = m_InWS2D->spectrumInfo();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
-    if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMonitor(i)) {
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       spectra_index = i;
       detector_found = true;
       g_log.debug() << "Using spectra N " << i

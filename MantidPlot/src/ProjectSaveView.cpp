@@ -1,6 +1,6 @@
-#include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtAPI/WindowIcons.h"
-#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/WindowIcons.h"
+#include "MantidQtWidgets/Common/ProjectSavePresenter.h"
 
 #include "ProjectSaveView.h"
 
@@ -205,6 +205,9 @@ void ProjectSaveView::save(bool checked) {
   emit projectSaved();
 
   close();
+  // Set the result code after calling close() because
+  // close() sets it to QDialog::Rejected
+  setResult(QDialog::Accepted);
 }
 
 /**

@@ -65,7 +65,7 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
   std::vector<double> P, A, D;
   auto &fun = *costFunction.getFittingFunction();
   for (size_t i = 0, j = 0; i < fun.nParams(); ++i) {
-    if (fun.isFixed(i)) {
+    if (!fun.isActive(i)) {
       continue;
     }
     auto lBound = ranges[j].first;
@@ -372,7 +372,7 @@ void EstimateFitParameters::execConcrete() {
   std::vector<std::pair<double, double>> ranges;
   ranges.reserve(costFunction->nParams());
   for (size_t i = 0; i < func->nParams(); ++i) {
-    if (func->isFixed(i)) {
+    if (!func->isActive(i)) {
       continue;
     }
     auto constraint = func->getConstraint(i);
@@ -427,7 +427,7 @@ void EstimateFitParameters::execConcrete() {
       }
 
       for (size_t i = 0, ia = 0; i < m_function->nParams(); ++i) {
-        if (!m_function->isFixed(i)) {
+        if (m_function->isActive(i)) {
           TableRow row = table->appendRow();
           row << m_function->parameterName(i);
           for (size_t j = 0; j < output.size(); ++j) {

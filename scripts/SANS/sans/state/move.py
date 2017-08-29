@@ -223,7 +223,8 @@ class StateMoveSANS2DBuilder(object):
     def __init__(self, data_info):
         super(StateMoveSANS2DBuilder, self).__init__()
         self.state = StateMoveSANS2D()
-        # TODO Automate this
+        # TODO: At the moment we set the monitor names up manually here. In principle we have all necessary information
+        #       in the IDF we should be able to parse it and get.
         invalid_monitor_names = ["monitor5", "monitor6", "monitor7", "monitor8"]
         setup_idf_and_ipf_content(self.state, data_info, invalid_monitor_names=invalid_monitor_names)
 
@@ -245,7 +246,8 @@ class StateMoveLARMORBuilder(object):
         self.state = StateMoveLARMOR()
         # There are several invalid monitor names which are not setup for LARMOR, also the IPF has a high-angle-bank
         # but this is not setup for LARMOR
-        # TODO Automate this
+        # TODO: At the moment we set the monitor names up manually here. In principle we have all necessary information
+        #       in the IDF we should be able to parse it and get.
         invalid_monitor_names = ["monitor6", "monitor7", "monitor8", "monitor9", "monitor10"]
         invalid_detector_types = [DetectorType.HAB]
         setup_idf_and_ipf_content(self.state, data_info,

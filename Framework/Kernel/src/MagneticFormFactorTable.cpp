@@ -1,6 +1,8 @@
 // Includes
 #include "MantidKernel/MagneticFormFactorTable.h"
 
+#include "MantidKernel/MagneticIon.h" // for MagneticIon
+
 namespace Mantid {
 namespace PhysicalConstants {
 

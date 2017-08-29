@@ -95,21 +95,21 @@ void GetSpiceDataRawCountsFromMD::exec() {
   std::vector<double> vecX;
   std::vector<double> vecY;
   std::string ylabel;
-  if (mode.compare("Pt.") == 0) {
+  if (mode == "Pt.") {
     // export detector counts for one specific Pt./run number
     int runnumber = getProperty("Pt");
     if (isEmpty(runnumber))
       throw std::runtime_error("For 'Pt.', value of 'Pt.' must be specified.");
     exportDetCountsOfRun(datamdws, monitormdws, runnumber, vecX, vecY, xlabel,
                          ylabel, donormalize);
-  } else if (mode.compare("Detector") == 0) {
+  } else if (mode == "Detector") {
     int detid = getProperty("DetectorID");
     if (isEmpty(detid))
       throw std::runtime_error(
           "For mode 'Detector', value of 'DetectorID' must be specified.");
     exportIndividualDetCounts(datamdws, monitormdws, detid, vecX, vecY, xlabel,
                               ylabel, donormalize);
-  } else if (mode.compare("Sample Log") == 0) {
+  } else if (mode == "Sample Log") {
     std::string samplelogname = getProperty("SampleLogName");
     if (samplelogname.empty())
       throw std::runtime_error(

@@ -249,8 +249,8 @@ def convert_to_shape(shape_flag):
     """
     Converts a shape flag to a shape object.
 
-    @param shape_flag: a geometry flag which can be 1, 2 or 3
-    @return: a shape object
+    :param shape_flag: a geometry flag which can be 1, 2 or 3
+    :return: a shape object
     """
     if shape_flag == 1:
         shape = SampleShape.CylinderAxisUp
@@ -374,8 +374,8 @@ def get_geometry_information_isis_nexus(file_name):
     """
     Gets geometry information from the sample folder in the nexus file
 
-    @param file_name:
-    @return: height, width, thickness, shape
+    :param file_name:
+    :return: height, width, thickness, shape
     """
     with h5.File(file_name) as h5_file:
         # Open first entry
@@ -396,6 +396,7 @@ def get_geometry_information_isis_nexus(file_name):
             shape = None
     return height, width, thickness, shape
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for Added data
 # ----------------------------------------------------------------------------------------------------------------------
@@ -406,20 +407,19 @@ def get_geometry_information_isis_nexus(file_name):
 #    file where the first level entry will be named mantid_workspace_X where X=1,2,3,... . Note that the numbers
 #    correspond  to periods.
 # 3. Scenario 2: Added event data, ie files which were added and saved as event data.
-# 3.1 TODO
 
 
 def get_date_and_run_number_added_nexus(file_name):
     with h5.File(file_name) as h5_file:
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
-        logs = first_entry[LOGS]
+        logs = first_entry["logs"]
         # Start time
-        start_time = logs[START_TIME]
-        start_time_value = DateAndTime(start_time[VALUE][0])
+        start_time = logs["start_time"]
+        start_time_value = DateAndTime(start_time["value"][0])
         # Run number
-        run_number = logs[RUN_NUMBER]
-        run_number_value = int(run_number[VALUE][0])
+        run_number = logs["run_number"]
+        run_number_value = int(run_number["value"][0])
     return start_time_value, run_number_value
 
 
@@ -430,6 +430,9 @@ def get_added_nexus_information(file_name):  # noqa
     :param file_name: the full file path.
     :return: if the file was a Nexus file and the number of periods.
     """
+    ADDED_SUFFIX = "-add_added_event_data"
+    ADDED_MONITOR_SUFFIX = "-add_monitors_added_event_data"
+
     def get_all_keys_for_top_level(key_collection):
         top_level_key_collection = []
         for key in key_collection:
@@ -438,10 +441,10 @@ def get_added_nexus_information(file_name):  # noqa
         return sorted(top_level_key_collection)
 
     def check_if_event_mode(entry):
-        return EVENT_WORKSPACE in list(entry.keys())
+        return "event_workspace" in list(entry.keys())
 
     def get_workspace_name(entry):
-        return entry[WORKSPACE_NAME][0].decode("utf-8")
+        return entry["workspace_name"][0].decode("utf-8")
 
     def has_same_number_of_entries(workspace_names, monitor_workspace_names):
         return len(workspace_names) == len(monitor_workspace_names)
@@ -480,7 +483,7 @@ def get_added_nexus_information(file_name):  # noqa
         #    random_name-add_monitors_added_event_data_4.s
         if (has_same_number_of_entries(workspace_names, monitor_workspace_names) and
             has_added_tag(workspace_names, monitor_workspace_names) and
-                entries_match(workspace_names, monitor_workspace_names)):
+            entries_match(workspace_names, monitor_workspace_names)):  # noqa
             is_added_file_event = True
             num_periods = len(workspace_names)
         else:
@@ -537,12 +540,13 @@ def get_added_nexus_information(file_name):  # noqa
 
 
 def get_date_for_added_workspace(file_name):
-    value = get_top_level_nexus_entry(file_name, START_TIME)
+    value = get_top_level_nexus_entry(file_name, "start_time")
     return DateAndTime(value)
 
 
 def has_added_suffix(file_name):
-    return file_name.upper().endswith(ADD_FILE_SUFFIX)
+    suffix = "-ADD.NXS"
+    return file_name.upper().endswith(suffix)
 
 
 def is_added_histogram(file_name):
@@ -559,8 +563,8 @@ def get_geometry_information_isis_added_nexus(file_name):
     """
     Gets geometry information from the sample folder in an added nexus file
 
-    @param file_name: the file name
-    @return: height, width, thickness, shape
+    :param file_name: the file name
+    :return: height, width, thickness, shape
     """
     with h5.File(file_name) as h5_file:
         # Open first entry
@@ -699,8 +703,8 @@ def get_geometry_information_raw(file_name):
     """
     Gets the geometry information form the table workspace with the spb information
 
-    @param file_name: the full file name to an existing raw file.
-    @return: height, width, thickness and shape
+    :param file_name: the full file name to an existing raw file.
+    :return: height, width, thickness and shape
     """
     alg_info = AlgorithmManager.createUnmanaged("RawFileInfo")
     alg_info.initialize()

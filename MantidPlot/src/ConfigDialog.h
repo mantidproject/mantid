@@ -32,7 +32,7 @@ Description          : Preferences dialog
 #include <QDialog>
 #include <QCheckBox>
 #include <map>
-#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
 
 class QLineEdit;
 class QGroupBox;
@@ -238,7 +238,7 @@ private:
       *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap,
       *lblVsiLastSession, *lblVsiInitialView;
   ColorButton *vsiDefaultBackground;
-  QGroupBox *mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom;
+  QGroupBox *mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom, *vsiAxesColor;
   QCheckBox *vsiLastSession;
   MantidQt::API::MdSettings m_mdSettings;
 

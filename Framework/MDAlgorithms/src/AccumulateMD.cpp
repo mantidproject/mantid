@@ -325,7 +325,7 @@ void AccumulateMD::exec() {
 
   // Create progress reporting object
   // Progress prog = Progress(this, 0.0, 1.0, 2);
-  this->progress(0);
+  this->progress(0.0);
 
   const std::string nonexistent =
       filterToExistingSources(input_data, psi, gl, gs, efix);

@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDMULTISPECTRUM_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDMULTISPECTRUM_H_
 
+#include "MantidAPI/FunctionGenerator.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/FortranDefs.h"
-#include "MantidCurveFitting/Functions/FunctionGenerator.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CrystalFieldMultiSpectrum : public FunctionGenerator {
+class DLLExport CrystalFieldMultiSpectrum : public API::FunctionGenerator {
 public:
   CrystalFieldMultiSpectrum();
   std::string name() const override { return "CrystalFieldMultiSpectrum"; }
@@ -66,7 +66,7 @@ private:
                       const DoubleFortranVector &en,
                       const ComplexFortranMatrix &wf,
                       const ComplexFortranMatrix &ham, double temperature,
-                      size_t i) const;
+                      double fwhm, size_t i) const;
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
                        const ComplexFortranMatrix &wf, double temperature,
@@ -78,6 +78,10 @@ private:
   /// Caches of the width functions
   mutable std::vector<std::vector<double>> m_fwhmX;
   mutable std::vector<std::vector<double>> m_fwhmY;
+  /// Cache the temperatures
+  mutable std::vector<double> m_temperatures;
+  /// Cache the default peak FWHMs
+  mutable std::vector<double> m_FWHMs;
 };
 
 } // namespace Functions

@@ -40,7 +40,7 @@ def get_detector_for_component(move_info, component):
         selected_detector = detectors[DetectorType.to_string(DetectorType.LAB)]
     else:
         # Check if the component is part of the detector names
-        for _, detector in detectors.items():
+        for _, detector in list(detectors.items()):
             if detector.detector_name == component or detector.detector_name_short == component:
                 selected_detector = detector
     return selected_detector

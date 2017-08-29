@@ -179,7 +179,7 @@ implementation used for solving crystal structures from powder diffraction data.
 
         # Do a fit from this starting value of the peak centre fitting parameter
         # Note choice of local minimizer will affect the outcome
-    	d0, costFuncVal, d1, d2, d3 = Fit(InputWorkspace='data', WorkspaceIndex=0, \
+        d0, costFuncVal, d1, d2, d3 = Fit(InputWorkspace='data', WorkspaceIndex=0, \
     	   StartX = startX, EndX=endX, Output='fit', \
     	   Function='name=Gaussian,Height=10,PeakCentre='+tryCentre+',Sigma=20',
     	   Minimizer='Conjugate gradient (Fletcher-Reeves imp.)')
