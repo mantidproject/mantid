@@ -303,13 +303,10 @@ public:
 
     const int numberOfIterations = 5;
 
-    // TODO Use different input file. ILLD17-161876-Ni.nxs doesn't load.
-    const std::string inFileName = "ILLD17-161876-Ni.nxs";
+    const std::string inFileName = "ILL/D17/317370.nxs";
     const std::string m_outWSName = "LoadILLReflectomeryWsOut";
 
     LoadILLReflectometry *setupAlg() {
-      // TODO Adding beam position fitting might provide more realistic
-      //      test case.
       LoadILLReflectometry *loader = new LoadILLReflectometry;
       loader->initialize();
       loader->isInitialized();
