@@ -212,6 +212,28 @@ QString MplFigureCanvas::scaleType(const Axes::Scale type) const {
 }
 
 /**
+ * Assume the given coordinates are pixel coordinates, the result of a mouse
+ * click event for example, and transform them to data coordinates
+ * @param x X coordinate in pixels
+ * @param y Y coordinate in pixels
+ * @return A (x,y) point in data coordinate space
+ */
+std::tuple<double, double> MplFigureCanvas::toDataCoordinates(double x,
+                                                              double y) const {
+  ScopedPythonGIL gil;
+  auto axes = m_pydata->gca();
+  // This essentially duplicates what happens in
+  // matplotlib.backend_bases.LocationEvent
+  auto transData = axes.getAttr("transData");
+  auto invTransform = PythonObject::fromNewRef(PyObject_CallMethod(
+      transData.get(), PYSTR_LITERAL("inverted"), PYSTR_LITERAL(""), nullptr));
+  auto result = NDArray1D<double>::fromNewRef(
+      PyObject_CallMethod(invTransform.get(), PYSTR_LITERAL("transform_point"),
+                          PYSTR_LITERAL("((ff))"), x, y));
+  return std::make_tuple(result[0], result[1]);
+}
+
+/**
  * @brief MplFigureCanvas::draw
  */
 void MplFigureCanvas::draw() {

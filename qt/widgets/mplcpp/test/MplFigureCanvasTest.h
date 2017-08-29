@@ -19,14 +19,14 @@ public:
   void test_Default_Construction_Yields_Single_Subplot() {
     MplFigureCanvas canvas;
     TSM_ASSERT_EQUALS("Default canvas should have a single subplot",
-                      SubPlotSpec(1, 1), canvas.getGeometry());
+                      SubPlotSpec(1, 1), canvas.geometry());
     TSM_ASSERT_EQUALS("Default canvas should have 0 lines", 0, canvas.nlines());
   }
 
   void test_Construction_With_SubPlot_Layout_Respects_It() {
     MplFigureCanvas canvas(231);
     TSM_ASSERT_EQUALS("Canvas should respect subplot layout request",
-                      SubPlotSpec(2, 3), canvas.getGeometry());
+                      SubPlotSpec(2, 3), canvas.geometry());
     TSM_ASSERT_EQUALS("Default canvas should have 0 lines", 0, canvas.nlines());
   }
 
@@ -59,32 +59,40 @@ public:
   void test_Setting_Axis_And_Figure_Titles() {
     MplFigureCanvas canvas;
     canvas.setLabel(Axes::Label::X, "new x label");
-    TS_ASSERT_EQUALS("new x label", canvas.getLabel(Axes::Label::X));
+    TS_ASSERT_EQUALS("new x label", canvas.label(Axes::Label::X));
     canvas.setLabel(Axes::Label::Y, "new y label");
-    TS_ASSERT_EQUALS("new y label", canvas.getLabel(Axes::Label::Y));
+    TS_ASSERT_EQUALS("new y label", canvas.label(Axes::Label::Y));
     canvas.setLabel(Axes::Label::Title, "new title");
-    TS_ASSERT_EQUALS("new title", canvas.getLabel(Axes::Label::Title));
+    TS_ASSERT_EQUALS("new title", canvas.label(Axes::Label::Title));
   }
 
   void test_Setting_X_Scale_Does_Not_Change_Y() {
     MplFigureCanvas canvas;
     TS_ASSERT_THROWS_NOTHING(canvas.setScale(Axes::Scale::X, "log"));
-    TS_ASSERT_EQUALS("log", canvas.getScale(Axes::Scale::X).toStdString());
-    TS_ASSERT_EQUALS("linear", canvas.getScale(Axes::Scale::Y).toStdString());
+    TS_ASSERT_EQUALS("log", canvas.scaleType(Axes::Scale::X).toStdString());
+    TS_ASSERT_EQUALS("linear", canvas.scaleType(Axes::Scale::Y).toStdString());
   }
 
   void test_Setting_Y_Scale_Does_Not_Change_X() {
     MplFigureCanvas canvas;
     TS_ASSERT_THROWS_NOTHING(canvas.setScale(Axes::Scale::Y, "log"));
-    TS_ASSERT_EQUALS("log", canvas.getScale(Axes::Scale::Y).toStdString());
-    TS_ASSERT_EQUALS("linear", canvas.getScale(Axes::Scale::X).toStdString());
+    TS_ASSERT_EQUALS("log", canvas.scaleType(Axes::Scale::Y).toStdString());
+    TS_ASSERT_EQUALS("linear", canvas.scaleType(Axes::Scale::X).toStdString());
   }
 
   void test_Setting_Both_Scales() {
     MplFigureCanvas canvas;
     TS_ASSERT_THROWS_NOTHING(canvas.setScale(Axes::Scale::Both, "log"));
-    TS_ASSERT_EQUALS("log", canvas.getScale(Axes::Scale::Y).toStdString());
-    TS_ASSERT_EQUALS("log", canvas.getScale(Axes::Scale::X).toStdString());
+    TS_ASSERT_EQUALS("log", canvas.scaleType(Axes::Scale::Y).toStdString());
+    TS_ASSERT_EQUALS("log", canvas.scaleType(Axes::Scale::X).toStdString());
+  }
+
+  void
+  test_toDataCoordinates_Gives_Valid_Data_Coordinates_For_Valid_Mouse_Coords() {
+    MplFigureCanvas canvas;
+    auto dataCoords = canvas.toDataCoordinates(100., 100.);
+    TS_ASSERT_DIFFERS(0.0, std::get<0>(dataCoords));
+    TS_ASSERT_DIFFERS(0.0, std::get<1>(dataCoords));
   }
 
   //---------------------------------------------------------------------------

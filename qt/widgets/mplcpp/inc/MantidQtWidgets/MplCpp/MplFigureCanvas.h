@@ -58,6 +58,7 @@ public:
   size_t nlines() const;
   QString label(const Axes::Label type) const;
   QString scaleType(const Axes::Scale type) const;
+  std::tuple<double, double> toDataCoordinates(double x, double y) const;
   ///@}
 
   ///@{
