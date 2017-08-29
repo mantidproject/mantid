@@ -76,7 +76,7 @@ public:
   void doFitting(const std::string &focusedRunNo,
                  const std::string &expectedPeaks);
 
-  void runLoadAlg(const std::string focusedFile,
+  void runLoadAlg(const std::string &focusedFile,
                   Mantid::API::MatrixWorkspace_sptr &focusedWS);
 
   void runFittingAlgs(std::string FocusedFitPeaksTableName,
@@ -145,7 +145,7 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
-  bool isDigit(const std::string text) const;
+  bool isDigit(const std::string &text) const;
 
   // Methods related single peak fits
   virtual void
@@ -184,7 +184,7 @@ private:
   getAllBrowsedFilePaths(const std::string &inputFullPath,
                          std::vector<std::string> &foundFullFilePaths);
 
-  std::vector<std::string> processMultiRun(const std::string userInput);
+  std::vector<std::string> processMultiRun(const std::string &userInput);
 
   std::vector<std::string>
   processSingleRun(const std::string &userInputBasename,

@@ -1,7 +1,9 @@
 #pylint: disable=W0403,R0902
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import time
 import random
-from fourcircle_utility import *
+from HFIR_4Circle_Reduction.fourcircle_utility import *
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
 
@@ -66,8 +68,8 @@ class PeakProcessRecord(object):
         # Figure print
         self._fingerPrint = '{0:.7f}.{1}'.format(time.time(), random.randint(0, 10000000))
 
-        # print '[DB...BAT] Create PeakProcessRecord for Exp {0} Scan {1} ({2} | {3}).' \
-        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
+        # print('[DB...BAT] Create PeakProcessRecord for Exp {0} Scan {1} ({2} | {3}).' \
+        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))))
         return
 
     def calculate_peak_center(self, allow_bad_monitor=True):
@@ -91,7 +93,7 @@ class PeakProcessRecord(object):
         q_sample_sum = numpy.array([0., 0., 0.])
         weight_sum = 0.
 
-        for i_peak in xrange(num_found_peaks):
+        for i_peak in range(num_found_peaks):
             # get peak
             peak_i = peak_ws.getPeak(i_peak)
             run_number = peak_i.getRunNumber()
@@ -100,7 +102,7 @@ class PeakProcessRecord(object):
             # get row number and then detector counts and monitor counts
             if pt_number not in pt_spice_row_dict:
                 # skip
-                print '[Error] Scan %d Peak %d Pt %d cannot be located.' % (self._myScanNumber, i_peak, pt_number)
+                print('[Error] Scan %d Peak %d Pt %d cannot be located.' % (self._myScanNumber, i_peak, pt_number))
                 continue
 
             row_index = pt_spice_row_dict[pt_number]
@@ -116,7 +118,7 @@ class PeakProcessRecord(object):
             q_i = peak_i.getQSampleFrame()
             q_array = numpy.array([q_i.X(), q_i.Y(), q_i.Z()])
             # calculate weight
-            print '[DB] Peak {0}: detector counts = {1}, Monitor counts = {2}.'.format(i_peak, det_counts, monitor_counts)
+            print('[DB] Peak {0}: detector counts = {1}, Monitor counts = {2}.'.format(i_peak, det_counts, monitor_counts))
             weight_i = float(det_counts)/float(monitor_counts)
             # contribute to total
             weight_sum += weight_i
@@ -126,7 +128,7 @@ class PeakProcessRecord(object):
         # END-FOR (i_peak)
 
         try:
-            print '[DB] calculate value error: sum(Q-sample) = {0}, sum(weight) = {1}.'.format(q_sample_sum, weight_sum)
+            print('[DB] calculate value error: sum(Q-sample) = {0}, sum(weight) = {1}.'.format(q_sample_sum, weight_sum))
             self._avgPeakCenter = q_sample_sum/weight_sum
         except Exception as e:
             raise RuntimeError('Unable to calculate average peak center due to value error as {0}.'.format(e))
@@ -138,8 +140,8 @@ class PeakProcessRecord(object):
         generate a dictionary for this PeakInfo
         :return:
         """
-        # print '[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) generate report.  Spice HKL: {2}' \
-        #       ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL)
+        # print('[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) generate report.  Spice HKL: {2}' \
+        #       ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL))
 
         report = dict()
 
@@ -280,8 +282,8 @@ class PeakProcessRecord(object):
             self.retrieve_hkl_from_spice_table()
             ret_hkl = self._spiceHKL
 
-            # print '[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) SPICE HKL: {2}' \
-            #       ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL)
+            # print('[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) SPICE HKL: {2}' \
+            #       ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL))
 
         return ret_hkl
 
@@ -319,7 +321,7 @@ class PeakProcessRecord(object):
         peak_center_list = list()
         peak_intensity_list = list()
         num_peaks = peak_ws.getNumberPeaks()
-        for i_peak in xrange(num_peaks):
+        for i_peak in range(num_peaks):
             peak_i = peak_ws.getPeak(i_peak)
             center_i = peak_i.getQSampleFrame()
             intensity_i = peak_i.getIntensity()
@@ -363,8 +365,8 @@ class PeakProcessRecord(object):
         assert isinstance(factor, float), 'Lorentz correction factor'
         self._lorenzFactor = factor
 
-        # print '[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has Lorentz factor set up.' \
-        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
+        # print('[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has Lorentz factor set up.' \
+        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))))
 
         return
 
@@ -405,7 +407,7 @@ class PeakProcessRecord(object):
         hkl = numpy.array([0., 0., 0.])
 
         num_rows = spice_table_ws.rowCount()
-        for row_index in xrange(num_rows):
+        for row_index in range(num_rows):
             mi_h = spice_table_ws.cell(row_index, h_col_index)
             mi_k = spice_table_ws.cell(row_index, k_col_index)
             mi_l = spice_table_ws.cell(row_index, l_col_index)
@@ -517,8 +519,8 @@ class PeakProcessRecord(object):
             'Integrated peak information {0} must be given by a dictionary but not a {1}.' \
             ''.format(peak_integration_dict, type(peak_integration_dict))
 
-        # print '[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has integrated dictionary set up.' \
-        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
+        # print('[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has integrated dictionary set up.' \
+        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))))
 
         self._integrationDict = peak_integration_dict
 
@@ -556,7 +558,7 @@ def build_pt_spice_table_row_map(spice_table_ws):
     num_rows = spice_table_ws.rowCount()
     pt_col_index = spice_table_ws.getColumnNames().index('Pt.')
 
-    for i_row in xrange(num_rows):
+    for i_row in range(num_rows):
         pt_number = int(spice_table_ws.cell(i_row, pt_col_index))
         pt_spice_row_dict[pt_number] = i_row
 
