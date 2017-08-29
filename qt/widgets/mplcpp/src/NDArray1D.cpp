@@ -2,6 +2,8 @@
 #include "MantidQtWidgets/MplCpp/PythonErrors.h"
 #include "MantidQtWidgets/Common/PythonThreading.h"
 
+#include "MantidKernel/WarningSuppressions.h"
+
 // See https://docs.scipy.org/doc/numpy/reference/c-api.array.html#miscellaneous
 #define PY_ARRAY_UNIQUE_SYMBOL MPLCPP_ARRAY_API
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -38,14 +40,17 @@ void initializeNumpy() {
 }
 
 namespace detail {
+
+// Numpy macro expands to code block containing a warning.
+// clang-format off
+GCC_DIAG_OFF(pedantic)
+// clang-format on
 template <typename Iterable> PyObject *copyToNDArray(const Iterable &data) {
   static_assert(std::is_same<typename Iterable::value_type, double>::value,
                 "Element type must be double.");
   initializeNumpy();
   npy_intp length = static_cast<npy_intp>(data.size());
-  auto dt = PyArray_DescrFromType(NPY_DOUBLE);
-  Py_INCREF(dt);
-  auto ndarray = PyArray_SimpleNewFromDescr(1, &length, dt);
+  auto ndarray = PyArray_SimpleNew(1, &length, NPY_DOUBLE);
   if (!ndarray)
     throw PythonError();
   auto emptyData =
@@ -53,6 +58,9 @@ template <typename Iterable> PyObject *copyToNDArray(const Iterable &data) {
   std::copy(std::begin(data), std::end(data), emptyData);
   return ndarray;
 }
+// clang-format off
+GCC_DIAG_ON(pedantic)
+// clang-format on
 
 // Explicit template instantiations
 template EXPORT_OPT_MANTIDQT_MPLCPP PyObject *
