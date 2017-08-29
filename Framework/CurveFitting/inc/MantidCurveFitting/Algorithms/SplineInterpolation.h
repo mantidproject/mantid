@@ -67,7 +67,8 @@ private:
                        API::MatrixWorkspace_sptr iws) const;
 
   /// convert a binned workspace to point data using ConvertToPointData
-  API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr 
+  convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
   /// set the points that define the spline used for interpolation of a
   /// workspace
