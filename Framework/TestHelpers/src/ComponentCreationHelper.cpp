@@ -16,6 +16,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
