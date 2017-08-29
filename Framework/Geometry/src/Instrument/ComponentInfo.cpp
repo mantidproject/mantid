@@ -9,6 +9,7 @@
 #include <exception>
 #include <string>
 #include <Eigen/Geometry>
+#include <stack>
 
 namespace Mantid {
 namespace Geometry {
@@ -248,17 +249,13 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
     return;
   }
   auto rangeComp = m_componentInfo->componentRangeInSubtree(componentIndex);
-  std::vector<std::pair<size_t, size_t>> detExclusions{};
-  auto it = rangeComp.rbegin();
-  while (it != rangeComp.rend()) {
-
-    const size_t index = *it;
+  std::stack<std::pair<size_t, size_t>> detExclusions{};
+  auto compIterator = rangeComp.rbegin();
+  while (compIterator != rangeComp.rend()) {
+    const size_t index = *compIterator;
     if (hasSource() && index == source()) {
-      ++it;
-      continue;
-    }
-    if (isRectangularBank(index)) {
-
+      ++compIterator;
+    } else if (isRectangularBank(index)) {
       auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
       auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
       auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
@@ -275,29 +272,33 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
       doGetBoundingBox(corner3, absoluteBB);
       doGetBoundingBox(corner4, absoluteBB);
 
-      // Get bounding box for rectangular detector
+      // Get bounding box for rectangular bank.
+      // Record detector ranges to skip
       // Skip all sub components.
-      detExclusions.emplace_back(std::make_pair(corner1, corner2));
-      it = innerRangeComp.rend();
+      detExclusions.emplace(std::make_pair(corner1, corner2));
+      compIterator = innerRangeComp.rend();
     } else {
       doGetBoundingBox(index, absoluteBB);
-      ++it;
+      ++compIterator;
     }
   }
 
   // Now deal with bounding boxes for detectors
   auto rangeDet = m_componentInfo->detectorRangeInSubtree(componentIndex);
-  auto it2 = rangeDet.begin();
-  while (it2 != rangeDet.end()) {
-    for (auto exc = detExclusions.rbegin(); exc != detExclusions.rend();
-         ++exc) {
-      if ((*it2) >= exc->first && (*it2) <= exc->second) {
-        it2 += (exc->second - exc->first + 1); // Jump the iterator forward
-      }
-    }
-    if (it2 != rangeDet.end()) {
-      doGetBoundingBox(*it2, absoluteBB);
-      ++it2;
+  auto detIterator = rangeDet.begin();
+  auto *exclusion = detExclusions.empty() ? nullptr : &detExclusions.top();
+  while (detIterator != rangeDet.end()) {
+
+    // Handle detectors in exclusion ranges
+    if (exclusion && (*detIterator) >= exclusion->first &&
+        (*detIterator) <= exclusion->second) {
+      detIterator += (exclusion->second - exclusion->first +
+                      1); // Jump the iterator forward
+      detExclusions.pop();
+      exclusion = detExclusions.empty() ? nullptr : &detExclusions.top();
+    } else if (detIterator != rangeDet.end()) {
+      doGetBoundingBox(*detIterator, absoluteBB);
+      ++detIterator;
     }
   }
 }
