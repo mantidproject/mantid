@@ -7,10 +7,6 @@
 ############################################################################
 from __future__ import (absolute_import, division, print_function)
 import os
-try:
-    import urllib.request as urllib
-except ImportError:
-    import  urllib
 try: # python3
     from urllib.request import urlopen
     from urllib.error import HTTPError
