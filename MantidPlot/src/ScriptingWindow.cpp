@@ -3,20 +3,20 @@
 //-------------------------------------------
 #include "ScriptingWindow.h"
 #include "ApplicationWindow.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "ScriptingEnv.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 // MantidQt
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 // Qt
 #include <QAction>

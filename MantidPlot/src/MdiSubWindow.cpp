@@ -31,7 +31,7 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <QApplication>
 #include <QMessageBox>

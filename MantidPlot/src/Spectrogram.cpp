@@ -25,7 +25,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "MantidQtAPI/qwt_compat.h"
+#include "MantidQtWidgets/Common/qwt_compat.h"
 #include "Spectrogram.h"
 #include <math.h>
 #include <QPen>
@@ -41,11 +41,11 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include "MantidQtAPI/QwtRasterDataMD.h"
-#include "MantidQtAPI/SignalRange.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Common/SignalRange.h"
 
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include <numeric>
 

@@ -26,7 +26,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "ContourLinesEditor.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 #include "Spectrogram.h"
 #include "PenStyleBox.h"
 #include "ColorButton.h"
