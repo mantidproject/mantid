@@ -22,6 +22,7 @@ Powder Diffraction
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now supports loading D2B data with detector scans. The D2B IDF has been updated, as previously it contained some errors in the positions of the tubes and size of the pixels.
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` now correctly supports overloading the grouping file in the presence of a masking workspace.
 - :ref:`PDCalibration <algm-PDCalibration>` has changed how it calculates constants from peak positions to use a simplex optimization rather than Gauss-Markov method.
+- The powder diffraction GUI has had numerous bugfixes and now has an option to override the detector grouping.
 
 
 Single Crystal Diffraction
