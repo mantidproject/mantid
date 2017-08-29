@@ -21,6 +21,7 @@
 using Mantid::API::AnalysisDataService;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::IPeaksWorkspace;
+using Mantid::API::MatrixWorkspace;
 using Mantid::API::WorkspaceFactory;
 using Mantid::Geometry::IDetector;
 using Mantid::Geometry::OrientedLattice;
@@ -286,7 +287,7 @@ void MiniPlotController::plotTubeIntegrals(
 MiniPlotCurveData
 MiniPlotController::prepareDataForSinglePlot(int detid, bool includeErrors) {
   const auto &actor = m_instrWidget->getInstrumentActor();
-  Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
+  auto ws = actor.getWorkspace();
   size_t wi;
   MiniPlotCurveData data;
   try {
@@ -347,8 +348,7 @@ MiniPlotCurveData MiniPlotController::prepareDataForSumsPlot(
 
   const int n = assembly.nelements();
   for (int i = 0; i < n; ++i) {
-    auto idet =
-        boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(assembly[i]);
+    auto idet = boost::dynamic_pointer_cast<IDetector>(assembly[i]);
     if (idet) {
       try {
         size_t index = instrumentActor.getWorkspaceIndex(idet->getID());
@@ -426,8 +426,7 @@ MiniPlotCurveData MiniPlotController::prepareDataForIntegralsPlot(
     return curveData;
   }
   // get the first detector in the tube for lenth calculation
-  auto idet0 =
-      boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(assembly[0]);
+  auto idet0 = boost::dynamic_pointer_cast<IDetector>(assembly[0]);
   if (!idet0) {
     // it's not an assembly of detectors,
     // could be a mixture of monitors and other components
@@ -598,7 +597,7 @@ void MiniPlotController::savePlotToWorkspace() {
       E.insert(E.end(), curveData.e.begin(), curveData.e.end());
     }
   }
-  // call CreateWorkspace algorithm. Created worksapce will have name "Curves"
+  // call CreateWorkspace algorithm. Created workspace will have name "Curves"
   if (!X.empty()) {
     if (nbins == 0)
       nbins = 1;
@@ -617,8 +616,8 @@ void MiniPlotController::savePlotToWorkspace() {
 
     if (!detids.empty()) {
       // set up spectra - detector mapping
-      auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve("Curves"));
+      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve("Curves"));
       if (!ws) {
         throw std::runtime_error("Failed to create Curves workspace");
       }
