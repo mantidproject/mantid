@@ -39,6 +39,7 @@ class InstrumentActor;
 class InstrumentWidget;
 class MiniPlot;
 class MiniPlotCurveData;
+class PeakMarker2D;
 
 /**
  * A controller class that contains logic to display the miniplot
@@ -93,6 +94,7 @@ private:
   void initActions();
 
   void plotSingle(int detid);
+  void addPeakMarker(const PeakMarker2D &marker);
   void plotTube(int detid);
   void plotTubeSums(int detid, const InstrumentActor &instrumentActor,
                     const Mantid::Geometry::ICompAssembly &assembly);

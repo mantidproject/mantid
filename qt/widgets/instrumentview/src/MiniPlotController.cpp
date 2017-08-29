@@ -1,6 +1,7 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlotController.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
+#include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -164,12 +165,37 @@ void MiniPlotController::plotSingle(int detid) {
 
   m_miniplot->setActiveCurve(std::move(plotData));
   // find any markers
-  //  auto surface = m_instrWidget->getSurface();
-  //  if (surface) {
-  //    QList<PeakMarker2D *> markers = surface->getMarkersWithID(detid);
-  //    foreach (PeakMarker2D *marker, markers) { m_plot->addPeakLabel(marker);
-  //    }
-  //  }
+  auto surface = m_instrWidget->getSurface();
+  if (surface) {
+    QList<PeakMarker2D *> markers = surface->getMarkersWithID(detid);
+    for (const auto marker : markers) {
+      addPeakMarker(*marker);
+    }
+  }
+}
+
+/**
+ * Add a label for a single crystal peak
+ * @param marker A reference to the marker class
+ */
+void MiniPlotController::addPeakMarker(const PeakMarker2D &marker) {
+  QString xunit = m_miniplot->getXUnits();
+  if (xunit.isEmpty())
+    return;
+  const auto &peak = marker.getPeak();
+  double peakX(-1.0);
+  if (xunit == "dSpacing") {
+    peakX = peak.getDSpacing();
+  } else if (xunit == "Wavelength") {
+    peakX = peak.getWavelength();
+  } else {
+    peakX = peak.getTOF();
+  }
+  double ymax(-1.0), _(-1.0);
+  std::tie(_, ymax) = m_miniplot->getYLimits();
+  // arbitrarily place the label at 85% of the y-axis height
+  const double peakY = 0.85 * ymax;
+  m_miniplot->addPeakLabel(peakX, peakY, marker.getLabel());
 }
 
 /**

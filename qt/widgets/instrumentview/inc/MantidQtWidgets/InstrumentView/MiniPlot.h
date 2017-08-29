@@ -49,20 +49,20 @@ class MiniPlot : public QWidget {
 public:
   MiniPlot(QWidget *parent = nullptr);
 
-  // Query
   bool hasActiveCurve() const;
   bool hasStoredCurves() const;
   QString activeCurveLabel() const { return m_activeCurveLabel; }
   QStringList storedCurveLabels() const { return m_storedCurveLabels; }
+  QString getXUnits() const { return m_xunit; }
+  std::tuple<double, double> getYLimits() const;
 
-  // Modify
-  /// Redraw the canvas
   void update();
   void setActiveCurve(std::vector<double> x, std::vector<double> y,
                       QString xunit, QString curveLabel);
   void setActiveCurve(MiniPlotCurveData data);
   void removeActiveCurve();
   void removeCurve(QString label);
+  void addPeakLabel(double x, double y, QString label);
 
 public slots:
   void storeCurve();
@@ -79,6 +79,7 @@ private:
   Widgets::MplCpp::MplFigureCanvas *m_canvas;
   QString m_activeCurveLabel;
   QStringList m_storedCurveLabels;
+  QString m_xunit;
 };
 }
 }

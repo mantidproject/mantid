@@ -41,7 +41,7 @@ namespace MantidWidgets {
  */
 MiniPlot::MiniPlot(QWidget *parent)
     : QWidget(parent), m_canvas(new MplFigureCanvas(111, this)),
-      m_activeCurveLabel(), m_storedCurveLabels() {
+      m_activeCurveLabel(), m_storedCurveLabels(), m_xunit() {
   m_canvas->setCanvasFaceColor("white");
   setLayout(new QVBoxLayout);
   layout()->addWidget(m_canvas);
@@ -56,6 +56,13 @@ MiniPlot::MiniPlot(QWidget *parent)
  * @return True if a curve has been stored, false otherwise
  */
 bool MiniPlot::hasStoredCurves() const { return !m_storedCurveLabels.empty(); }
+
+/**
+ * @return A tuple of the current Y-axis limits
+ */
+std::tuple<double, double> MiniPlot::getYLimits() const {
+  return m_canvas->getLimits(Axes::Scale::Y);
+}
 
 /**
  * Check if an active curve is present
@@ -81,17 +88,16 @@ void MiniPlot::setActiveCurve(std::vector<double> x, std::vector<double> y,
   m_canvas->plotLine(std::move(x), std::move(y), ACTIVE_CURVE_FORMAT);
   m_canvas->setLabel(Axes::Label::X, xunit.toAscii().data());
   m_activeCurveLabel = curveLabel;
+  m_xunit = xunit;
 }
 
 /**
  * Set the given data as the active curve on the plot. See MiniPlotCurveData
  * for required data
+ * @param data The data to be plotted
  */
 void MiniPlot::setActiveCurve(MiniPlotCurveData data) {
-  removeActiveCurve();
-  m_canvas->plotLine(std::move(data.x), std::move(data.y), ACTIVE_CURVE_FORMAT);
-  m_canvas->setLabel(Axes::Label::X, data.xunit.toAscii().data());
-  m_activeCurveLabel = data.label;
+  setActiveCurve(std::move(data.x), std::move(data.y), data.xunit, data.label);
 }
 
 /**
@@ -103,6 +109,7 @@ void MiniPlot::removeActiveCurve() {
   // should always be the size of the number of stored curves.
   m_canvas->removeLine(m_storedCurveLabels.size());
   m_activeCurveLabel.clear();
+  m_xunit.clear();
 }
 
 /**
@@ -116,6 +123,16 @@ void MiniPlot::removeCurve(QString label) {
     m_storedCurveLabels.removeAt(lineIndex);
     m_canvas->update();
   }
+}
+
+/**
+ * Add some text at the specified position
+ * @param x X in data coordinates
+ * @param y Y in data coordinates
+ * @param label The text label to attach
+ */
+void MiniPlot::addPeakLabel(double x, double y, QString label) {
+  m_canvas->addText(x, y, label.toAscii().constData());
 }
 
 /**
