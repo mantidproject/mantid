@@ -619,6 +619,12 @@ int RectangularDetector::getPointInObject(V3D &) const {
  * @param assemblyBox :: A BoundingBox object that will be overwritten
  */
 void RectangularDetector::getBoundingBox(BoundingBox &assemblyBox) const {
+  if (m_map) {
+    if (hasComponentInfo()) {
+      m_map->componentInfo().getBoundingBox(index(), absoluteBB);
+      return;
+    }
+  }
   if (!m_cachedBoundingBox) {
     m_cachedBoundingBox = new BoundingBox();
     // Get all the corner

@@ -18,6 +18,9 @@
 
 // Forward declarations
 namespace Mantid {
+namespace Kernel {
+class Quat;
+}
 namespace Geometry {
 class CompAssembly;
 class ObjComponent;
