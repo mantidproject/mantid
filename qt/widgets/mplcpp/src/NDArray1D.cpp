@@ -68,13 +68,42 @@ copyToNDArray<std::vector<double>>(const std::vector<double> &);
 }
 
 /**
+ * Create a new reference to an array
+ * @param ptr A pointer to a type of numpy.ndarray
+ * @return A new wrapper around the bare pointer
+ */
+template <typename ElementType>
+NDArray1D<ElementType> NDArray1D<ElementType>::fromNewRef(PyObject *ptr) {
+  if (!ptr)
+    throw PythonError();
+  return NDArray1D(ptr);
+}
+
+/**
  * Access the shape of the array
  * @return A single element array with the length of the array
  */
-std::array<size_t, 1> NDArray1D::shape() const {
+template <typename ElementType>
+std::array<size_t, 1> NDArray1D<ElementType>::shape() const {
   auto npShape = PyArray_SHAPE((PyArrayObject *)(this->get()));
   return {{static_cast<size_t>(npShape[0])}};
 }
+
+/**
+ * Access an element of the array. Note that there are currently no
+ * checks on the validity of the index
+ * @return An element of the array
+ */
+template <typename ElementType>
+ElementType NDArray1D<ElementType>::operator[](size_t i) const {
+  return *static_cast<ElementType *>(
+             PyArray_GETPTR1((PyArrayObject *)this->get(), i));
+}
+
+//
+// Explicit template instantiations
+//
+template class EXPORT_OPT_MANTIDQT_MPLCPP NDArray1D<double>;
 }
 }
 }

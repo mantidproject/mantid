@@ -40,17 +40,33 @@ template <typename Iterable> PyObject *copyToNDArray(const Iterable &data);
  * Input is an iterable container. The data is copied from the input
  * to the newly created array.
  */
+template <typename ElementType>
 class EXPORT_OPT_MANTIDQT_MPLCPP NDArray1D : public PythonObject {
 public:
+  /// Create a new wrapper object from a new reference
+  static NDArray1D fromNewRef(PyObject *ptr);
+
   /**
    * Create an array from an Iterable. Iterable must support std::begin/end
+   * and contain a value_type typedef indicating the element type
+   * @param data A container holding the source of data
    */
   template <typename Iterable>
   NDArray1D(const Iterable &data)
-      : PythonObject(detail::copyToNDArray(data)) {}
+      : PythonObject(detail::copyToNDArray(data)) {
+    static_assert(
+        std::is_same<typename Iterable::value_type, ElementType>::value,
+        "Element type in iterable must match declared ElementType");
+  }
 
   // Return the shape of the array in numpy parlance
   std::array<size_t, 1> shape() const;
+  // Return the element at the given index
+  ElementType operator[](size_t i) const;
+
+private:
+  /// Private constructor used by static creation methods
+  NDArray1D(PyObject *ptr) : PythonObject(ptr) {}
 };
 }
 }
