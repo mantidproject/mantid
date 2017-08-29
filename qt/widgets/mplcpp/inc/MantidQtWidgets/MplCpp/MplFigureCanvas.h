@@ -57,11 +57,12 @@ public:
   SubPlotSpec getGeometry() const;
   size_t nlines() const;
   QString getLabel(const Axes::Label type) const;
-  QString getScale(const Axes::Scale type);
+  QString getScale(const Axes::Scale type) const;
+  std::tuple<double, double> getLimits(const Axes::Scale type) const;
   ///@}
 
   ///@{
-  ///@name Canvas modification
+  ///@name Canvas properties
   void setCanvasFaceColor(const char *color);
   void addSubPlot(int subplotLayout);
   void draw();
@@ -92,6 +93,11 @@ public:
   void setScale(const Axes::Scale axis, const char *scaleType,
                 bool redraw = false);
   void rescaleToData(const Axes::Scale axis, bool redraw = false);
+  ///@}
+
+  ///@{
+  ///@name Text labels
+  void addText(double x, double y, const char *label);
   ///@}
 
 private:

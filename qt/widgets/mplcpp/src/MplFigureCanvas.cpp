@@ -190,7 +190,7 @@ QString MplFigureCanvas::getLabel(const Axes::Label type) const {
  * @param type An enumeration giving the axis type
  * @return A string defining the scale type
  */
-QString MplFigureCanvas::getScale(const Axes::Scale type) {
+QString MplFigureCanvas::getScale(const Axes::Scale type) const {
   const char *method;
   if (type == Axes::Scale::X)
     method = "get_xscale";
@@ -204,6 +204,29 @@ QString MplFigureCanvas::getScale(const Axes::Scale type) {
   auto scale = PythonObject::fromNewRef(PyObject_CallMethod(
       axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr));
   return QString::fromAscii(TO_CSTRING(scale.get()));
+}
+
+/**
+ * Query the limits for a given axis
+ * @param type An enumeration of Axes::Scale type
+ * @return The limits as a tuple
+ */
+std::tuple<double, double>
+MplFigureCanvas::getLimits(const Axes::Scale type) const {
+  const char *method;
+  if (type == Axes::Scale::X)
+    method = "get_xlim";
+  else if (type == Axes::Scale::Y)
+    method = "get_ylim";
+  else
+    throw std::logic_error(
+        "MplFigureCanvas::getLimits() - Scale type must be X or Y");
+  ScopedPythonGIL gil;
+  auto axes = m_pydata->gca();
+  auto limits = PythonObject::fromNewRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL(method), PYSTR_LITERAL(""), nullptr));
+  return std::make_tuple(PyFloat_AsDouble(PyTuple_GET_ITEM(limits.get(), 0)),
+                         PyFloat_AsDouble(PyTuple_GET_ITEM(limits.get(), 1)));
 }
 
 /**
@@ -396,6 +419,19 @@ void MplFigureCanvas::rescaleToData(const Axes::Scale axis, bool redraw) {
                           PYSTR_LITERAL("(iii)"), 1, scaleX, scaleY));
   if (redraw)
     drawNoGIL();
+}
+
+/**
+ * Add an arbitrary text label to the canvas
+ * @param x X position in data coordinates
+ * @param y Y position in data coordinates
+ * @param label The string label to attach to the canvas
+ */
+void MplFigureCanvas::addText(double x, double y, const char *label) {
+  ScopedPythonGIL gil;
+  auto axes = m_pydata->gca();
+  detail::decref(PyObject_CallMethod(axes.get(), PYSTR_LITERAL("text"),
+                                     PYSTR_LITERAL("(ffs)"), x, y, label));
 }
 
 /**

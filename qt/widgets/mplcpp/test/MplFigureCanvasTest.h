@@ -30,6 +30,17 @@ public:
     TSM_ASSERT_EQUALS("Default canvas should have 0 lines", 0, canvas.nlines());
   }
 
+  void test_Expected_Limits_Returned_Given_Data() {
+    MplFigureCanvas canvas;
+    std::vector<double> dataX{1, 2, 3, 4, 5}, dataY{2, 3, 4, 5, 6};
+    canvas.plotLine(dataX, dataY, "r-");
+
+    auto xlimits = canvas.getLimits(Axes::Scale::X);
+    TS_ASSERT_EQUALS(std::make_tuple(1.0, 5.0), xlimits);
+    auto ylimits = canvas.getLimits(Axes::Scale::Y);
+    TS_ASSERT_EQUALS(std::make_tuple(2.0, 6.0), ylimits);
+  }
+
   void test_Adding_A_Line_Increase_Line_Count_By_One() {
     MplFigureCanvas canvas;
     std::vector<double> data{1, 2, 3, 4, 5};
