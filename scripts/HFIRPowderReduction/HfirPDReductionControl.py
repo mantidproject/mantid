@@ -7,7 +7,6 @@
 ############################################################################
 from __future__ import (absolute_import, division, print_function)
 import os
-
 try: # python3
     from urllib.request import urlopen
     from urllib.error import HTTPError
@@ -16,6 +15,7 @@ except ImportError:
     from urllib2 import HTTPError
 
 import math
+from six.moves import range
 
 import numpy
 
