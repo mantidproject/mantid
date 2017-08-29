@@ -87,7 +87,6 @@ private:
   size_t m_numberOfHistograms{0};
   double m_wavelength{0.0};
   double m_channelWidth{0.0};
-  double m_offsetAngle{0.0};
   std::string m_detectorDistance;
   std::string m_detectorAngleName;
   std::string m_sampleAngleName;

@@ -109,23 +109,6 @@ void rebinIntegralWorkspace(Mantid::API::MatrixWorkspace &ws) {
   std::iota(xs.begin(), xs.end(), 0.0);
 }
 
-/** Computes the coherence and incoherence equation.
- *  @param angle the angle to compute the equation for.
- *  @param peakPos1 first peak position.
- *  @param peakPos2 second peak position.
- *  @param pixelCentre centre of the detector, in pixels.
- *  @param pixelWidth physical pixel width.
- *  @param detDist1 sample to detector distance corresponding to first peak.
- *  @param detDist2 sample to detector distance corresponding to second peak.
- *  @param sign a sign option depending on Figaro's reflection down option.
- *  @return the Bragg angle in degrees.
- */
-double coherenceIncoherenceEq(const double angle, const double peakPos1, const double peakPos2, const double pixelCentre, const double pixelWidth, const double detDist1, const double detDist2, const double sign) {
-  const double angle1 = std::atan2((peakPos1 - pixelCentre) * pixelWidth, detDist1);
-  const double angle2 = std::atan2((peakPos2 - pixelCentre) * pixelWidth, detDist2);
-  return inDeg(inRad(angle) - sign * 0.5 * (angle1 + sign * angle2));
-}
-
 enum class RotationPlane {
   horizontal,
   vertical
@@ -224,12 +207,6 @@ void LoadILLReflectometry::init() {
   declareProperty("XUnit", "Wavelength",
                   boost::make_shared<StringListValidator>(availableUnits),
                   "X unit of the OutputWorkspace");
-
-  const std::vector<std::string> scattering{"coherent", "incoherent"};
-  declareProperty("ScatteringType", "incoherent",
-                  boost::make_shared<StringListValidator>(scattering),
-                  "Scattering type used to calculate the Bragg angle.");
-
 }
 
 /**
@@ -317,7 +294,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_sampleAngleName = "san.value";
     m_offsetFrom = "VirtualChopper";
     m_offsetName = "open_offset";
-    m_pixelCentre = 135.75; // or 135.75 or 132.5
+    m_pixelCentre = 127.5;
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
     // m_wavelength = getFloat("wavelength");
@@ -331,7 +308,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     m_offsetName = "openOffset";
-    m_pixelCentre = double(m_numberOfHistograms) / 2.0;
+    m_pixelCentre = 127.5;
     // Figaro: find out which of the four choppers are used
     NXFloat firstChopper =
         entry.openNXFloat("instrument/ChopperSetting/firstChopper");
@@ -578,19 +555,18 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
   // write monitors
   if (!xVals.empty()) {
     HistogramData::BinEdges binEdges(xVals);
-    for (size_t im = 0; im < nb_monitors; im++) {
-      const int *monitor_p = monitorsData[im].data();
-      const Counts counts(monitor_p, monitor_p + m_numberOfChannels);
-      m_localWorkspace->setHistogram(im, binEdges, std::move(counts));
-      progress.report();
-    }
     // write data
     for (size_t j = 0; j < m_numberOfHistograms; ++j) {
       const int *data_p = &data(0, static_cast<int>(j), 0);
       const Counts counts(data_p, data_p + m_numberOfChannels);
-      m_localWorkspace->setHistogram((j + nb_monitors), binEdges,
-                                     std::move(counts));
+      m_localWorkspace->setHistogram(j, binEdges, std::move(counts));
       progress.report();
+      for (size_t im = 0; im < nb_monitors; ++im) {
+        const int *monitor_p = monitorsData[im].data();
+        const Counts counts(monitor_p, monitor_p + m_numberOfChannels);
+        m_localWorkspace->setHistogram(im + m_numberOfHistograms, binEdges, std::move(counts));
+        progress.report();
+      }
     }
   } else
     g_log.debug("Vector of x values is empty");
@@ -684,15 +660,6 @@ double LoadILLReflectometry::computeBraggAngle() {
   if (userAngle != EMPTY_DBL()) {
     return userAngle;
   }
-  ITableWorkspace_const_sptr posTable = getProperty("BeamPosition");
-  const std::string incidentAngle = posTable ? m_detectorAngleName : m_sampleAngleName;
-  // modify error message "Unknown property search object"
-  if (!m_localWorkspace->run().hasProperty(incidentAngle))
-    throw std::runtime_error(
-        std::string(incidentAngle).append(" is not defined in Nexus file"));
-  // user angle and sample angle behave equivalently for D17
-  const double angle = doubleFromRun(incidentAngle);
-  g_log.debug() << "Use angle (degrees): " << incidentAngle << ' ' << angle << '\n';
   // the reflected beam
   double reflectedCentre;
   double reflectedMaxPosition;
@@ -705,25 +672,20 @@ double LoadILLReflectometry::computeBraggAngle() {
     m.positionOfMaximum = reflectedMaxPosition;
     setProperty("OutputBeamPosition", createBeamPositionTable(m));
   }
-  // Figaro theta sign informs about reflection down (-1.0) or up (1.0)
-  double down{1.0}; // default value for D17
-  if (m_instrumentName == "Figaro") {
-    down = doubleFromRun("theta");
-    down > 0. ? down = 1. : down = -1.;
-  }
-  double sign{-down};
-  const std::string scatteringType = getProperty("ScatteringType");
-  double angleBragg{angle};
-  if (!posTable && scatteringType == "coherent") {
-    angleBragg = coherenceIncoherenceEq(angle, reflectedMaxPosition, reflectedCentre, m_pixelCentre, m_pixelWidth, m_detectorDistanceValue, m_detectorDistanceValue, sign);
-  } else if (posTable) {
+  double angleBragg;
+  ITableWorkspace_const_sptr posTable = getProperty("BeamPosition");
+  if (!posTable) {
+      angleBragg = doubleFromRun(m_detectorAngleName);
+  } else {
+    const double detAngle = doubleFromRun(m_detectorAngleName);
+    g_log.debug() << "Using detector angle (degrees) " << m_detectorAngleName << ": " << detAngle << '\n';
     const auto directBeamMeasurement = parseBeamPositionTable(*posTable);
-    const double angleCentre = down * (angle - directBeamMeasurement.detectorAngle) / 2.;
-    g_log.debug() << "Centre angle: " << angleCentre << '\n';
-    if (scatteringType == "incoherent")
-      angleBragg = coherenceIncoherenceEq(angleCentre, directBeamMeasurement.fittedPeakCentre, reflectedCentre, m_pixelCentre, m_pixelWidth, directBeamMeasurement.detectorDistance, m_detectorDistanceValue, sign);
-    else
-      angleBragg = coherenceIncoherenceEq(angleCentre, directBeamMeasurement.fittedPeakCentre, reflectedMaxPosition + 0.5, m_pixelCentre, m_pixelWidth, directBeamMeasurement.detectorDistance, m_detectorDistanceValue, sign);
+    const double dbOffset = (m_pixelCentre - directBeamMeasurement.fittedPeakCentre) * m_pixelWidth;
+    const double dbOffsetAngle = inDeg(std::atan2(dbOffset, directBeamMeasurement.detectorDistance));
+    const double refOffset = (m_pixelCentre - reflectedCentre) * m_pixelWidth;
+    const double refOffsetAngle = inDeg(std::atan2(refOffset, m_detectorDistanceValue));
+    const double virtualDetAngle = detAngle - directBeamMeasurement.detectorAngle - 2 * dbOffsetAngle + refOffsetAngle;
+    angleBragg = virtualDetAngle;
   }
   g_log.debug() << "Bragg angle " << angleBragg << " degrees.\n";
   return angleBragg;
@@ -738,10 +700,12 @@ void LoadILLReflectometry::placeDetector() {
   if (m_instrumentName == "Figaro")
     dist += doubleFromRun(m_detectorDistance + ".offset_value");
   g_log.debug() << "Sample-detector distance: " << m_detectorDistanceValue << "m.\n";
-  const double rho = computeBraggAngle() + m_offsetAngle / 2.;
-  const double theta = (2. * rho);
+  const double theta = computeBraggAngle();
   // incident angle for using the algorithm ConvertToReflectometryQ
-  m_localWorkspace->mutableRun().addProperty("stheta", inRad(rho));
+  // TODO Doesn't seem to work with ConvertToReflectometryQ. Maybe they
+  //      expect a time series?
+  // TODO They are moving to 2theta in ISIS reflectometry algorithms.
+  m_localWorkspace->mutableRun().addProperty("stheta", inRad(theta) / 2);
   const std::string componentName = "detector";
   const RotationPlane rotPlane = [this]() {
     if (m_instrumentName == "D17") return RotationPlane::horizontal;
@@ -760,9 +724,6 @@ void LoadILLReflectometry::placeSource() {
   const double dist = sourceSampleDistance();
   g_log.debug() << "Source-sample distance " << dist << "m.\n";
   const std::string source = "chopper1";
-  // We place the source on the z-axis, although this is not strictly correct.
-  // The position is used for unit conversions only so the inaccuracy matters
-  // not.
   const V3D newPos{0.0, 0.0, -dist};
   m_loader.moveComponent(m_localWorkspace, source, newPos);
 }
