@@ -296,11 +296,7 @@ class HFIRPDRedControl(object):
                                                 DetectorID=detid,
                                                 NormalizeByMonitorCounts=normalized)
         else:
-<<<<<<< HEAD
-            print("Plot detector %d's counts vs. sample log %s."%(detid, xlabel))
-=======
             print("Plot detector %d's counts vs. sample log %s." % (detid, xlabel))
->>>>>>> origin/master
             tempoutws = \
                 api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                 MonitorWorkspace=monitormdws,
@@ -829,12 +825,8 @@ class HFIRPDRedControl(object):
         if excludeddetlist is None:
             excludeddetlist = []
         else:
-<<<<<<< HEAD
-            print("[DB] Excluded detectors: %s"%(excludeddetlist), "Convert to numpy array", numpy.array(excludeddetlist))
-=======
             print("[DB] Excluded detectors: %s" % (excludeddetlist), "Convert to numpy array",
                   numpy.array(excludeddetlist))
->>>>>>> origin/master
 
         basewsname = datamdws.name().split("_DataMD")[0]
         outwsname = basewsname + "_Reduced"
