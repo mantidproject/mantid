@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -32,7 +31,6 @@
 
 #include <set>
 #include <unordered_map>
-#include <valgrind/callgrind.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -1049,17 +1047,22 @@ public:
     m_provisionedInstrument = tmp.getInstrument();
   }
 
-  void test_getBoundingBox_once() {
-    BoundingBox box;
-    CALLGRIND_START_INSTRUMENTATION;
-    m_provisionedInstrument->getBoundingBox(box);
-    CALLGRIND_STOP_INSTRUMENTATION;
+  void
+  test_setInstrument_when_instrument_lacks_detectorInfo_and_componentInfo() {
+    /*
+     * This is similar to what will happen during LoadEmptyInstrument
+     */
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(m_bareInstrument);
   }
-
-  void test_getBoundingBox_twice() {
-
-    BoundingBox box;
-    m_provisionedInstrument->getBoundingBox(box);
+  void test_setInstrument_when_new_instrument_is_fully_provisioned() {
+    /*
+     * This should be the case for any workspaces after they have initially had
+     * an instrument
+     * set upon them via setInstrument.
+     */
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(m_provisionedInstrument);
   }
 };
 #endif /* MANTID_API_EXPERIMENTINFOTEST_H_ */
