@@ -79,7 +79,7 @@ class MultiScanTabState(object):
         if self._expNo != tab_state.getExpNumber() or self._scanList != tab_state.getScanList:
             return self.RELOAD_DATA
 
-        for attname in list(self.__dict__.keys()):
+        for attname in self.__dict__.keys():
             if self.__getattribute__(attname) != tab_state.__getattribute__(attname):
                 return self.REDUCE_DATA
 
@@ -2517,7 +2517,7 @@ class MainWindow(QtGui.QMainWindow):
                     if returnstatus is False:
                         break
                 # ENDFOR
-                intlist.extend(list(range(templist[0], templist[1]+1)))
+                intlist.extend(range(templist[0], templist[1]+1))
 
             else:
                 # Undefined siutation

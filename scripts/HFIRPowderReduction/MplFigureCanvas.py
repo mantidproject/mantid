@@ -420,7 +420,7 @@ class Qt4MplCanvas(FigureCanvas):
     def clearAllLines(self):
         """ Remove all lines from the canvas
         """
-        for ikey in list(self._lineDict.keys()):
+        for ikey in self._lineDict.keys():
             plot = self._lineDict[ikey]
             if plot is None:
                 continue
