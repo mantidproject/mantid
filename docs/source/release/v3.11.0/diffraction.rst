@@ -31,6 +31,7 @@ Single Crystal Diffraction
 - New algorithm :ref:`SingleCrystalDiffuseReduction <algm-SingleCrystalDiffuseReduction>` which performs the most common reductions done on Corelli (and elsewhere) for single crystal diffuse scattering.
 - New algorithm :ref:`ConvertMultipleRunsToSingleCrystalMD <algm-ConvertMultipleRunsToSingleCrystalMD>` which loads, converts to single crystal MDWorkspace and combines a series of runs.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to only add peaks to runs that contributed to that peak. This is a lot faster when multiple runs are in the same MDworkspace.
+- New algorithm :ref:`MDNormSCDPreprocessIncoherent <algm-MDNormSCDPreprocessIncoherent>` creates the Solid Angle and Flux workspace from Vanadium data for MDNormSCD
 
 
 Imaging
