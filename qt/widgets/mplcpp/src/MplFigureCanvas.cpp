@@ -52,6 +52,17 @@ const PythonObject &mplFigureCanvasType() {
   }
   return figureCanvasType;
 }
+
+/**
+ * Extract a long from a given element of an array or tuple. Warning: No
+ * checks are done on the validity of the object or the index
+ * @param obj A reference to the sequence
+ * @param i The index of interest
+ * @return A C long from this element
+ */
+long longInSeq(const PythonObject &obj, Py_ssize_t i) {
+  return TO_LONG(PySequence_Fast_GET_ITEM(obj.get(), i));
+}
 }
 
 //------------------------------------------------------------------------------
@@ -79,12 +90,8 @@ struct MplFigureCanvas::PyObjectHolder {
     detail::decref(PyObject_CallMethod(figure.get(),
                                        PYSTR_LITERAL("add_subplot"),
                                        PYSTR_LITERAL("i"), subplotLayout));
-    auto instance = PyObject_CallFunction(mplFigureCanvasType().get(),
-                                          PYSTR_LITERAL("(O)"), figure.get());
-    if (!instance) {
-      throw PythonError();
-    }
-    canvas = PythonObject::fromNewRef(instance);
+    canvas = PythonObject::fromNewRef(PyObject_CallFunction(
+        mplFigureCanvasType().get(), PYSTR_LITERAL("(O)"), figure.get()));
     canvasWidget = static_cast<QWidget *>(sipUnwrap(canvas.get()));
     assert(canvasWidget);
   }
@@ -95,8 +102,7 @@ struct MplFigureCanvas::PyObjectHolder {
    */
   PythonObject gca() {
     ScopedPythonGIL gil;
-    auto figure = PythonObject::fromNewRef(
-        PyObject_GetAttrString(canvas.get(), PYSTR_LITERAL("figure")));
+    auto figure = canvas.getAttr("figure");
     return PythonObject::fromNewRef(PyObject_CallMethod(
         figure.get(), PYSTR_LITERAL("gca"), PYSTR_LITERAL(""), nullptr));
   }
@@ -141,14 +147,13 @@ QWidget *MplFigureCanvas::canvasWidget() const {
  * Retrieve information about the subplot geometry
  * @return A SubPlotSpec object defining the geometry
  */
-SubPlotSpec MplFigureCanvas::getGeometry() const {
+SubPlotSpec MplFigureCanvas::geometry() const {
   ScopedPythonGIL gil;
   auto axes = m_pydata->gca();
   auto geometry = PythonObject::fromNewRef(PyObject_CallMethod(
       axes.get(), PYSTR_LITERAL("get_geometry"), PYSTR_LITERAL(""), nullptr));
 
-  return SubPlotSpec(TO_LONG(PyTuple_GET_ITEM(geometry.get(), 0)),
-                     TO_LONG(PyTuple_GET_ITEM(geometry.get(), 1)));
+  return SubPlotSpec(longInSeq(geometry, 0), longInSeq(geometry, 1));
 }
 
 /**
@@ -167,7 +172,7 @@ size_t MplFigureCanvas::nlines() const {
  * @param type The label type
  * @return The label on the requested axis
  */
-QString MplFigureCanvas::getLabel(const Axes::Label type) const {
+QString MplFigureCanvas::label(const Axes::Label type) const {
   const char *method;
   if (type == Axes::Label::X)
     method = "get_xlabel";
@@ -190,7 +195,7 @@ QString MplFigureCanvas::getLabel(const Axes::Label type) const {
  * @param type An enumeration giving the axis type
  * @return A string defining the scale type
  */
-QString MplFigureCanvas::getScale(const Axes::Scale type) {
+QString MplFigureCanvas::scaleType(const Axes::Scale type) const {
   const char *method;
   if (type == Axes::Scale::X)
     method = "get_xscale";
@@ -223,8 +228,7 @@ void MplFigureCanvas::draw() {
  */
 void MplFigureCanvas::addSubPlot(int subplotLayout) {
   ScopedPythonGIL gil;
-  auto figure = PythonObject::fromNewRef(
-      PyObject_GetAttrString(m_pydata->canvas.get(), PYSTR_LITERAL("figure")));
+  auto figure = m_pydata->canvas.getAttr("figure");
   auto result = PyObject_CallMethod(figure.get(), PYSTR_LITERAL("add_subplot"),
                                     PYSTR_LITERAL("(i)"), subplotLayout);
   if (!result)
@@ -258,18 +262,14 @@ template <typename XArrayType, typename YArrayType>
 void MplFigureCanvas::plotLine(const XArrayType &x, const YArrayType &y,
                                const char *format) {
   ScopedPythonGIL gil;
-  NDArray1D xnp(x), ynp(y);
+  NDArray1D<double> xnp(x), ynp(y);
   auto axes = m_pydata->gca();
   // This will return a list of lines but we know we are only plotting 1
-  auto lines =
-      PyObject_CallMethod(axes.get(), PYSTR_LITERAL("plot"),
-                          PYSTR_LITERAL("(OOs)"), xnp.get(), ynp.get(), format);
-  if (!lines) {
-    throw PythonError();
-  }
+  auto pylines = PythonObject::fromBorrowedRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL("plot"), PYSTR_LITERAL("(OOs)"), xnp.get(),
+      ynp.get(), format));
   m_pydata->lines.emplace_back(
-      PythonObject::fromBorrowedRef(PyList_GET_ITEM(lines, 0)));
-  detail::decref(lines);
+      PythonObject::fromBorrowedRef(PyList_GET_ITEM(pylines.get(), 0)));
 }
 
 /**

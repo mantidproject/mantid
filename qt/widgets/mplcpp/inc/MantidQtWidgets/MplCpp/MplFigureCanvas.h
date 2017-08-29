@@ -54,10 +54,10 @@ public:
   ///@{
   ///@name Query properties
   QWidget *canvasWidget() const;
-  SubPlotSpec getGeometry() const;
+  SubPlotSpec geometry() const;
   size_t nlines() const;
-  QString getLabel(const Axes::Label type) const;
-  QString getScale(const Axes::Scale type);
+  QString label(const Axes::Label type) const;
+  QString scaleType(const Axes::Scale type) const;
   ///@}
 
   ///@{
