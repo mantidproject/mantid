@@ -294,6 +294,7 @@ void MplFigureCanvas::draw() {
  * @param color A matplotlib color string
  */
 void MplFigureCanvas::setCanvasFaceColor(const char *color) {
+  ScopedPythonGIL gil;
   setCanvasFaceColorNoGIL(color);
 }
 
