@@ -7,6 +7,7 @@ from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 
 import copy
+import json
 import re
 import numpy as np
 
@@ -52,15 +53,28 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                             flags['diff_mode'], fit_mode,
                                             flags.get('bin_parameters', None))
 
+    # Check if multiple scattering flags have been defined
     if 'ms_flags' in flags:
         ms_flags = flags['ms_flags']
 
-        if 'hydrogen_constraints' in ms_flags and \
-            isinstance(ms_flags['hydrogen_constraints'], list):
+        # Check if hydrogen constraints have been defined
+        if 'HydrogenConstraints' in ms_flags:
+            hydrogen_constraints = ms_flags['HydrogenConstraints']
 
-            flags['ms_flags']['hydrogen_constraints'] = \
-                _parse_ms_hydrogen_constraints(ms_flags['hydrogen_constraints'])
+            # Parse the hydrogen constraints into the correct format
+            if not isinstance(hydrogen_constraints, dict):
+                flags['ms_flags']['HydrogenConstraints'] = \
+                    _parse_ms_hydrogen_constraints(hydrogen_constraints)
+            elif 'symbol' in hydrogen_constraints:
+                symbol = hydrogen_constraints.pop("symbol")
+                flags['ms_flags']['HydrogenConstraints'][symbol] = hydrogen_constraints
 
+    back_scattering = flags['spectra'] == 'backward'
+    flags['ms_flags']['BackScattering'] = back_scattering
+    contains_hydrogen = 'H' in flags['masses']
+
+    if contains_hydrogen and back_scattering:
+        flags['Hydrogen'] = flags['masses'].pop('H', None)
 
     last_results = None
 
@@ -109,12 +123,16 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     """
     # Transform inputs into something the algorithm can understand
     if isinstance(flags['masses'][0], list):
-        mass_values = _create_profile_strs_and_mass_list(copy.deepcopy(flags['masses'][0]))[0]
+        mass_values, _, index_to_symbol_map = \
+            _create_profile_strs_and_mass_list(copy.deepcopy(flags['masses'][0]))[0]
+
         profiles_strs = []
         for mass_spec in flags['masses']:
             profiles_strs.append(_create_profile_strs_and_mass_list(mass_spec)[1])
     else:
-        mass_values, profiles_strs = _create_profile_strs_and_mass_list(flags['masses'])
+        mass_values, profiles_strs, index_to_symbol_map = \
+            _create_profile_strs_and_mass_list(flags['masses'])
+
     background_str = _create_background_str(flags.get('background', None))
     intensity_constraints = _create_intensity_constraint_str(flags['intensity_constraints'])
     ties = _create_user_defined_ties_str(flags['masses'])
@@ -178,6 +196,15 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         gamma_correct = flags.get('gamma_correct', False) \
                         and flags['spectra'] != 'backward'
 
+        # Check if Hydrogen was supplied but not added to the masses in
+        # order to avoid fitting a hydrogen peak for back-scattering
+        # spectra.
+        if 'Hydrogen' in flags:
+            # Add hydrogen to mass values for corrections
+            mBuilder = MaterialBuilder()
+            index_to_symbol_map[len(mass_values)] = flags['Hydrogen']
+            mass_values.append(mBuilder.setFormula('H').build().relativeMolecularMass())
+
         ms.VesuvioCorrections(InputWorkspace=sample_data,
                               OutputWorkspace=corrected_data_name,
                               LinearFitResult=linear_correction_fit_params_name,
@@ -185,11 +212,17 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                               GammaBackground=gamma_correct,
                               Masses=mass_values,
                               MassProfiles=profiles,
+                              MassIndexToSymbolMap=index_to_symbol_map,
                               IntensityConstraints=intensity_constraints,
                               MultipleScattering=True,
                               GammaBackgroundScale=flags.get('fixed_gamma_scaling', 0.0),
                               ContainerScale=flags.get('fixed_container_scaling', 0.0),
                               **corrections_args)
+
+        # Check if Hydrogen was added to mass values for back-scattering
+        # corrections and remove it for the following fit.
+        if 'Hydrogen' in flags:
+            del mass_values[-1]
 
         # Final fit
         fit_ws_name = runs + "_data" + suffix
@@ -460,21 +493,34 @@ def _create_profile_strs_and_mass_list(profile_flags):
     Create a string suitable for the algorithms out of the mass profile flags
     and a list of mass values
     :param profile_flags: A list of dict objects for the mass profile flags
-    :return: A string to pass to the algorithm & a list of masses
+    :return: A tuple of list of masses, a string to pass to the algorithm and
+             a dictionary containing a map from mass index to a symbol - where
+             chemical formula was used to define a mass.
     """
+    mBuilder = MaterialBuilder()
     mass_values, profiles = [], []
-    for mass_prop in profile_flags:
+    index_to_symbol_map = {}
+    for idx, mass_prop in enumerate(profile_flags):
         function_props = ["function={0}".format(mass_prop["function"])]
+
+        mass_value = mass_prop.pop('value', None)
+        if mass_value is None:
+            value = mass_prop.pop('symbol', None)
+            index_to_symbol_map[idx] = value
+            mass_value = mBuilder.setFormula(value).build().relativeMolecularMass()
+        if mass_value is None:
+            raise RuntimeError('Invalid mass specified - ' + str(json.dumps(mass_prop))
+                               + " - either 'value' or 'symbol' must be given.")
+        mass_values.append(mass_value)
+
         del mass_prop["function"]
-        for key, value in iteritems(mass_prop):
-            if key == 'value':
-                mass_values.append(value)
-            else:
-                function_props.append("{0}={1}".format(key, value))
+
+        for key, value in mass_prop.items():
+            function_props.append("{0}={1}".format(key, value))
         profiles.append(",".join(function_props))
     profiles = ";".join(profiles)
 
-    return mass_values, profiles
+    return mass_values, profiles, index_to_symbol_map
 
 
 def _create_background_str(background_flags):

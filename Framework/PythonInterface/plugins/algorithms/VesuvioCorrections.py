@@ -82,8 +82,7 @@ class VesuvioCorrections(VesuvioBase):
                              doc="Mass values for fitting")
 
         self.declareProperty(PropertyManagerProperty("MassIndexToSymbolMap",
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
+                                                     direction=Direction.Input),
                              doc="A map from the index of the mass in the Masses"
                                  " property to a chemical symbol.")
 
@@ -99,8 +98,7 @@ class VesuvioCorrections(VesuvioBase):
                                  "[0,1,0,-4];[1,0,-2,0]")
 
         self.declareProperty(PropertyManagerProperty("HydrogenConstraints",
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
+                                                     direction=Direction.Input),
                              doc="Constraints used to approximate the intensity of"
                                  " the hydrogen peak in back-scattering spectra.")
 
@@ -383,7 +381,7 @@ class VesuvioCorrections(VesuvioBase):
     def _gamma_correction(self):
         correction_background_ws = str(self._correction_wsg) + "_GammaBackground"
 
-        fit_opts = parse_fit_options(mass_values=self.getProperty("Masses").value,
+        fit_opts = parse_fit_options(mass_values=self._masses,
                                      profile_strs=self.getProperty("MassProfiles").value,
                                      constraints_str=self.getProperty("IntensityConstraints").value)
         params_ws_name = self.getPropertyValue("FitParameters")
@@ -405,21 +403,22 @@ class VesuvioCorrections(VesuvioBase):
         Calculates the contributions from multiple scattering
         on the input data from the set of given options
         """
-        masses = self.getProperty("Masses").value
         params_ws_name = self.getPropertyValue("FitParameters")
         params_dict = TableWorkspaceDictionaryFacade(mtd[params_ws_name])
 
         atom_props = list()
         intensities = list()
 
-        for i, mass in enumerate(masses):
+        contains_hydrogen = False
+
+        for i, mass in enumerate(self._masses):
             intensity_prop = 'f%d.Intensity' % i
             c0_prop = 'f%d.C_0' % i
 
             if intensity_prop in params_dict:
                 intensity = params_dict[intensity_prop]
             elif c0_prop in params_dict:
-                intentisy = params_dict[c0_prop]
+                intensity = params_dict[c0_prop]
             else:
                 continue
 
@@ -455,17 +454,27 @@ class VesuvioCorrections(VesuvioBase):
                 continue
 
             atom_props.append(mass)
-            atom_props.append(intentisy)
+            atom_props.append(intensity)
             atom_props.append(width)
-            intensities.append(intentisy)
+            intensities.append(intensity)
 
             if self._back_scattering and i in self._index_to_symbol_map:
                 symbol = self._index_to_symbol_map[i]
-                self._hydrogen_constraints[symbol]['intensity'] = intensity
 
-        if self._back_scattering:
+                if symbol == 'H':
+                    contains_hydrogen = True
+                else:
+                    self._hydrogen_constraints[symbol]['intensity'] = intensity
+
+        if self._back_scattering and contains_hydrogen:
+            mBuilder = MaterialBuilder()
+            hydrogen = mBuilder.setFormula('H').build()
             hydrogen_intensity = \
-                self._calculate_hydrogen_intensity(self._hydrogen_constraints)
+                self._calculate_hydrogen_intensity(hydrogen, self._hydrogen_constraints)
+            hydrogen_width = 5
+            atom_props.append(hydrogen.relativeMolecularMass())
+            atom_props.append(hydrogen_intensity)
+            atom_props.append(hydrogen_width)
             intensities.append(hydrogen_intensity)
 
         intensity_sum = sum(intensities)
@@ -522,17 +531,18 @@ class VesuvioCorrections(VesuvioBase):
 
         return total_scatter_correction, multi_scatter_correction
 
-    def _calculate_hydrogen_intensity(self, constraints):
+    def _calculate_hydrogen_intensity(self, hydrogen, constraints):
         mBuilder = MaterialBuilder()
-        hydrogen_cross_section = mBuilder.setFormula('H').build().totalScatterXSection()
+        hydrogen_cross_section = hydrogen.totalScatterXSection()
         hydrogen_intensity = 0
 
         for symbol, constraint in constraints.items():
             material = mBuilder.setFormula(symbol).build()
             cross_section = material.totalScatterXSection()
             cross_section_ratio = cross_section / hydrogen_cross_section
+            weight = constraint.get('weight', 1)
             hydrogen_intensity += cross_section_ratio * constraint['factor'] \
-                                  * constraint['weight'] * constraint['intensity']
+                                  * weight * constraint['intensity']
 
         return hydrogen_intensity
 
