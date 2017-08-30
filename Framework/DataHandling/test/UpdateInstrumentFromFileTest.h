@@ -7,6 +7,7 @@
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
 #include "MantidDataHandling/LoadInstrumentFromNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -15,6 +16,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
@@ -168,7 +170,7 @@ public:
     auto canCastToGroup(true);
     try {
       const auto &group = dynamic_cast<const DetectorGroup &>(detector);
-      double expectedR(0.6708), expectedTheta(130.4653), expectedPhi(1.4320);
+      double expectedR(0.6708), expectedTheta(130.4653), expectedPhi(-90.0);
       const auto dets = group.getDetectors();
       for (const auto &comp : dets) {
         double r(-1.0), theta(-1.0), phi(-1.0);
@@ -245,24 +247,16 @@ private:
   void loadTestInstrument(bool grouped = false) {
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::Indexing;
+    using namespace Mantid::HistogramData;
 
     const size_t nhist(9);
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", nhist, 1, 1);
+    auto ws = create<Workspace2D>(
+        ComponentCreationHelper::createTestInstrumentCylindrical(1),
+        IndexInfo(nhist), Points(1));
 
-    // Det IDs 1-9
-    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    ws->setInstrument(inst);
-
-    for (size_t i = 0; i < nhist; ++i) {
-      auto &spec = ws->getSpectrum(0);
-      spec.setSpectrumNo(static_cast<Mantid::specnum_t>(i + 1));
-      spec.clearDetectorIDs();
-      spec.addDetectorID(static_cast<Mantid::detid_t>(i + 1));
-    }
-
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().addOrReplace(wsName, ws));
+    AnalysisDataService::Instance().addOrReplace(wsName, std::move(ws));
     if (grouped) {
       using Mantid::DataHandling::GroupDetectors2;
       GroupDetectors2 alg;
