@@ -7,7 +7,7 @@ from mantid.api import *
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
 from vesuvio.fitting import parse_fit_options
 import mantid.simpleapi as ms
-import json
+
 import math
 
 
@@ -211,7 +211,6 @@ class VesuvioCorrections(VesuvioBase):
     # ------------------------------------------------------------------------------
 
     def PyExec(self):
-
         ms.ExtractSingleSpectrum(InputWorkspace=self._input_ws,
                                  OutputWorkspace=self._output_ws,
                                  WorkspaceIndex=self._spec_idx)
@@ -220,7 +219,7 @@ class VesuvioCorrections(VesuvioBase):
         self._define_corrections()
 
         # The workspaces to fit for correction scale factors
-        fit_corrections = [wks for wks in self._correction_workspaces if 'MultipleScattering' not in wks]
+        fit_corrections = [wks for wks in self._correction_workspaces]
 
         # Perform fitting of corrections
         fixed_params = {}
@@ -412,6 +411,16 @@ class VesuvioCorrections(VesuvioBase):
         contains_hydrogen = False
 
         for i, mass in enumerate(self._masses):
+
+            if str(i) in self._index_to_symbol_map:
+                symbol = self._index_to_symbol_map[str(i)].value
+            else:
+                symbol = None
+
+            if self._back_scattering and symbol == 'H':
+                contains_hydrogen = True
+                continue
+
             intensity_prop = 'f%d.Intensity' % i
             c0_prop = 'f%d.C_0' % i
 
@@ -458,13 +467,12 @@ class VesuvioCorrections(VesuvioBase):
             atom_props.append(width)
             intensities.append(intensity)
 
-            if self._back_scattering and i in self._index_to_symbol_map:
-                symbol = self._index_to_symbol_map[i]
-
-                if symbol == 'H':
-                    contains_hydrogen = True
-                else:
-                    self._hydrogen_constraints[symbol]['intensity'] = intensity
+            # Check for NoneType is necessary as hydrogen constraints are
+            # stored in a C++ PropertyManager object, not a dict; call to
+            # __contains__ must match the C++ signature.
+            if self._back_scattering and symbol is not None and \
+                            symbol in self._hydrogen_constraints:
+                self._hydrogen_constraints[symbol].value['intensity'] = intensity
 
         if self._back_scattering and contains_hydrogen:
             mBuilder = MaterialBuilder()
@@ -535,12 +543,13 @@ class VesuvioCorrections(VesuvioBase):
         mBuilder = MaterialBuilder()
         hydrogen_cross_section = hydrogen.totalScatterXSection()
         hydrogen_intensity = 0
+        default_weight = 1.0 / len(constraints)
 
         for symbol, constraint in constraints.items():
             material = mBuilder.setFormula(symbol).build()
             cross_section = material.totalScatterXSection()
             cross_section_ratio = cross_section / hydrogen_cross_section
-            weight = constraint.get('weight', 1)
+            weight = constraint.get('weight', default_weight)
             hydrogen_intensity += cross_section_ratio * constraint['factor'] \
                                   * weight * constraint['intensity']
 

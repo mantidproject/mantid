@@ -13,6 +13,7 @@ import numpy as np
 
 from mantid import mtd
 from mantid.api import (AnalysisDataService, WorkspaceFactory, TextAxis)
+from mantid.kernel import MaterialBuilder
 from vesuvio.instrument import VESUVIO
 
 import mantid.simpleapi as ms
@@ -55,26 +56,24 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
     # Check if multiple scattering flags have been defined
     if 'ms_flags' in flags:
-        ms_flags = flags['ms_flags']
 
         # Check if hydrogen constraints have been defined
-        if 'HydrogenConstraints' in ms_flags:
-            hydrogen_constraints = ms_flags['HydrogenConstraints']
+        if 'HydrogenConstraints' in flags['ms_flags']:
+            flags['ms_flags']['HydrogenConstraints'] = \
+                _parse_ms_hydrogen_constraints(flags['ms_flags']['HydrogenConstraints'])
+        else:
+            flags['ms_flags']['HydrogenConstraints'] = dict()
 
-            # Parse the hydrogen constraints into the correct format
-            if not isinstance(hydrogen_constraints, dict):
-                flags['ms_flags']['HydrogenConstraints'] = \
-                    _parse_ms_hydrogen_constraints(hydrogen_constraints)
-            elif 'symbol' in hydrogen_constraints:
-                symbol = hydrogen_constraints.pop("symbol")
-                flags['ms_flags']['HydrogenConstraints'][symbol] = hydrogen_constraints
+        back_scattering = flags['spectra'] == 'backward'
+        flags['ms_flags']['BackScattering'] = back_scattering
+        contains_hydrogen = 'H' in flags['masses']
 
-    back_scattering = flags['spectra'] == 'backward'
-    flags['ms_flags']['BackScattering'] = back_scattering
-    contains_hydrogen = 'H' in flags['masses']
-
-    if contains_hydrogen and back_scattering:
-        flags['Hydrogen'] = flags['masses'].pop('H', None)
+        # Check if the sample contains hydrogen and back scattering
+        # spectra are being used.
+        if contains_hydrogen and back_scattering:
+            flags['Hydrogen'] = flags['masses'].pop('H', None)
+    else:
+        flags['ms_flags']['HydrogenConstraints'] = dict()
 
     last_results = None
 
@@ -202,7 +201,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         if 'Hydrogen' in flags:
             # Add hydrogen to mass values for corrections
             mBuilder = MaterialBuilder()
-            index_to_symbol_map[len(mass_values)] = flags['Hydrogen']
+            index_to_symbol_map[str(len(mass_values))] = flags['Hydrogen']
             mass_values.append(mBuilder.setFormula('H').build().relativeMolecularMass())
 
         ms.VesuvioCorrections(InputWorkspace=sample_data,
@@ -385,21 +384,24 @@ def _parse_ms_hydrogen_constraints(constraints):
     :raise:             A RuntimeError if a constraint doesn't hasn't been
                         given an associated chemical symbol.
     """
-    import json
+    if not isinstance(constraints, dict):
+        parsed = dict()
 
-    parsed = dict()
+        for constraint in constraints:
+            symbol = constraint.pop("symbol", None)
 
-    for constraint in constraints:
-        symbol = constraint.pop("symbol", None)
+            if symbol is None:
+                raise RuntimeError("Invalid hydrogen constraint: " +
+                                    str(json.dumps(constraint)) +
+                                    " - No symbol provided")
 
-        if symbol is None:
-            raise RuntimeError("Invalid hydrogen constraint: " +
-                               str(json.dumps(constraint)) +
-                               " - No symbol provided")
-
-        parsed[symbol] = constraint
-
-    return parsed
+            parsed[symbol] = constraint
+        return parsed
+    elif 'symbol' in constraints:
+        symbol = constraints.pop("symbol")
+        return {symbol: constraints}
+    else:
+        raise RuntimeError("HydrogenConstraints are incorrectly formatted.")
 
 
 def _update_masses_from_params(old_masses, param_ws):
@@ -499,14 +501,14 @@ def _create_profile_strs_and_mass_list(profile_flags):
     """
     mBuilder = MaterialBuilder()
     mass_values, profiles = [], []
-    index_to_symbol_map = {}
+    index_to_symbol_map = dict()
     for idx, mass_prop in enumerate(profile_flags):
         function_props = ["function={0}".format(mass_prop["function"])]
 
         mass_value = mass_prop.pop('value', None)
         if mass_value is None:
             value = mass_prop.pop('symbol', None)
-            index_to_symbol_map[idx] = value
+            index_to_symbol_map[str(idx)] = value
             mass_value = mBuilder.setFormula(value).build().relativeMolecularMass()
         if mass_value is None:
             raise RuntimeError('Invalid mass specified - ' + str(json.dumps(mass_prop))
