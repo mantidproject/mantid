@@ -106,7 +106,7 @@ void CentroidPeaks::integrate() {
     const auto &X = inWS->x(workspaceIndex);
     int chan = Kernel::VectorHelper::getBinIndex(X.rawData(), TOFPeakd);
     std::string bankName = peak.getBankName();
-    int nCols=0, nRows=0;
+    int nCols = 0, nRows = 0;
     sizeBanks(bankName, nCols, nRows);
 
     double intensity = 0.0;
@@ -116,10 +116,10 @@ void CentroidPeaks::integrate() {
     int chanend = std::min(static_cast<int>(X.size()), chan + PeakRadius);
     double rowcentroid = 0.0;
     int rowstart = std::max(0, row - PeakRadius);
-    int rowend = std::min(nRows-1, row + PeakRadius);
+    int rowend = std::min(nRows - 1, row + PeakRadius);
     double colcentroid = 0.0;
     int colstart = std::max(0, col - PeakRadius);
-    int colend = std::min(nCols-1, col + PeakRadius);
+    int colend = std::min(nCols - 1, col + PeakRadius);
     for (int ichan = chanstart; ichan <= chanend; ++ichan) {
       for (int irow = rowstart; irow <= rowend; ++irow) {
         for (int icol = colstart; icol <= colend; ++icol) {
@@ -143,10 +143,10 @@ void CentroidPeaks::integrate() {
     // Set pixelID to change row and col
     row = int(rowcentroid / intensity);
     row = std::max(0, row);
-    row = std::min(nRows-1, row);
+    row = std::min(nRows - 1, row);
     col = int(colcentroid / intensity);
     col = std::max(0, col);
-    col = std::min(nCols-1, col);
+    col = std::min(nCols - 1, col);
     chan = int(chancentroid / intensity);
     chan = std::max(0, chan);
     chan = std::min(static_cast<int>(inWS->blocksize()), chan);
@@ -228,7 +228,7 @@ void CentroidPeaks::integrateEvent() {
     int row = peak.getRow();
     double TOFPeakd = peak.getTOF();
     std::string bankName = peak.getBankName();
-    int nCols=0, nRows=0;
+    int nCols = 0, nRows = 0;
     sizeBanks(bankName, nCols, nRows);
 
     double intensity = 0.0;
@@ -240,10 +240,10 @@ void CentroidPeaks::integrateEvent() {
     double tofend = TOFPeakd * std::pow(1.004, PeakRadius);
     double rowcentroid = 0.0;
     int rowstart = std::max(0, row - PeakRadius);
-    int rowend = std::min(nRows-1, row + PeakRadius);
+    int rowend = std::min(nRows - 1, row + PeakRadius);
     double colcentroid = 0.0;
     int colstart = std::max(0, col - PeakRadius);
-    int colend = std::min(nCols-1, col + PeakRadius);
+    int colend = std::min(nCols - 1, col + PeakRadius);
     for (int irow = rowstart; irow <= rowend; ++irow) {
       for (int icol = colstart; icol <= colend; ++icol) {
         if (edgePixel(inst, bankName, icol, irow, Edge))
@@ -270,10 +270,10 @@ void CentroidPeaks::integrateEvent() {
     // Set pixelID to change row and col
     row = int(rowcentroid / intensity);
     row = std::max(0, row);
-    row = std::min(nRows-1, row);
+    row = std::min(nRows - 1, row);
     col = int(colcentroid / intensity);
     col = std::max(0, col);
-    col = std::min(nCols-1, col);
+    col = std::min(nCols - 1, col);
     if (!edgePixel(inst, bankName, col, row, Edge)) {
       peak.setDetectorID(findPixelID(bankName, col, row));
 
@@ -389,7 +389,6 @@ void CentroidPeaks::sizeBanks(std::string bankName, int &nCols, int &nRows) {
     nCols = static_cast<int>(children.size());
   }
 }
-
 
 } // namespace Mantid
 } // namespace Crystal
