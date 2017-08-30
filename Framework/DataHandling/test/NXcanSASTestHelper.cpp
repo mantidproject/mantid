@@ -96,6 +96,7 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
 
   // Set instrument
   set_instrument(ws, parameters.instrumentName);
+  ws->getSpectrum(0).setDetectorID(1);
 
   // Set to point data or histogram data
   if (parameters.isHistogram) {
