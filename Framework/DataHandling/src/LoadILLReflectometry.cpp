@@ -298,7 +298,6 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_pixelCentre = 127.5;
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
-    // m_wavelength = getFloat("wavelength");
   } else if (m_instrumentName == "Figaro") {
     // TODO Figaro's detector position should be calculated from
     // some motor positions, not from DTR and some offset value.
@@ -374,10 +373,6 @@ void LoadILLReflectometry::initWorkspace(
     m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
   m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
-  if (m_wavelength > 0.0) {
-    double ei = m_loader.calculateEnergy(m_wavelength);
-    m_localWorkspace->mutableRun().addProperty<double>("Ei", ei, true);
-  }
 }
 
 /**

@@ -85,7 +85,6 @@ private:
   double m_tofDelay{0.0};
   // number of tubes (always 1) times number of pixels per tube
   size_t m_numberOfHistograms{0};
-  double m_wavelength{0.0};
   double m_channelWidth{0.0};
   std::string m_detectorDistance;
   std::string m_detectorAngleName;
