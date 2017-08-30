@@ -59,12 +59,12 @@ public:
   static AlignedCutter *New();
 
 protected:
-  AlignedCutter(vtkImplicitFunction *cf = NULL);
+  explicit AlignedCutter(vtkImplicitFunction *cf = nullptr);
   ~AlignedCutter() override;
   int RequestData(vtkInformation *, vtkInformationVector **,
                   vtkInformationVector *) override;
   void AlignedStructuredGridCutter(vtkDataSet *, vtkPolyData *);
-  int AxisNumber;
+  int AxisNumber{0};
 
 private:
   AlignedCutter(const AlignedCutter &) VTK_DELETE_FUNCTION;

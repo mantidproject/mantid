@@ -30,6 +30,7 @@ set ( TEST_PY_FILES
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
+  MDNormSCDPreprocessIncoherentTest.py
   MolDynTest.py
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py

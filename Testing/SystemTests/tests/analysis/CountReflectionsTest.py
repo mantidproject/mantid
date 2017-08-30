@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from SortHKLTest import HKLStatisticsTestMixin
@@ -32,8 +33,8 @@ class CountReflectionsTest(HKLStatisticsTestMixin, stresstesting.MantidStressTes
                                 LatticeCentering=centering, MinDSpacing=0.5, MaxDSpacing=10.0)
 
     def _compare_statistics(self, statistics, reference_statistics):
-        self.assertEquals(round(statistics['Redundancy'], 1), round(reference_statistics['<N>'], 1))
-        self.assertEquals(statistics['UniqueReflections'], int(reference_statistics['Nunique']))
+        self.assertEqual(round(statistics['Redundancy'], 1), round(reference_statistics['<N>'], 1))
+        self.assertEqual(statistics['UniqueReflections'], int(reference_statistics['Nunique']))
         self.assertDelta(round(statistics['Completeness'] * 100.0, 1),
                          round(reference_statistics['Completeness'], 1),
                          0.5)
