@@ -157,19 +157,12 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
   if (badPeaks.empty())
     return;
   std::sort(badPeaks.begin(), badPeaks.end());
-  auto index = peaks.begin();
-  auto end = peaks.end();
-  auto result = index;
-  for (int i = 0; index < end; ++index, ++i) {
-    // if index of peak is not in badPeaks
-    if (!std::binary_search(badPeaks.begin(), badPeaks.end(), i)) {
-      // include in result
-      *result = std::move(*index);
-      ++result;
+  for (int i = static_cast<int>(peaks.size()) - 1; i >=0; i--) {
+    // if index of peak is in badPeaks remove
+    if (std::binary_search(badPeaks.begin(), badPeaks.end(), i)) {
+      removePeak(i);
     }
   }
-  // erase peaks outside of result
-  peaks.erase(result, peaks.end());
 }
 
 //---------------------------------------------------------------------------------------------
