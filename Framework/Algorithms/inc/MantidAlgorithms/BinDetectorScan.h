@@ -44,7 +44,11 @@ private:
 
   double m_startAngle;
   double m_endAngle;
-  double m_stepSize;
+  double m_stepAngle;
+
+  double m_startHeight;
+  double m_endHeight;
+  double m_stepHeight;
 };
 
 } // namespace Algorithms
