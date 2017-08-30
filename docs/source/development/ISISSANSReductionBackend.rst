@@ -14,11 +14,11 @@ What is calculated in a SANS reduction?
 
 Here the focus is to give a summary of what is calculated for ISIS SANS reduction
 without going into details of how this is done in the code. The latter is done
- in some detail in the section below.
+in some detail in the section below.
 
 The starting point is here taken to be equation 5 in the article by
 Richard Heenan et al, *J. Appl. Cryst.* (1997), pages 1140-1147. The coherent
- macroscopic cross section is calculated at ISIS using :
+macroscopic cross section is calculated at ISIS using :
 
 
 .. math::
@@ -41,15 +41,15 @@ to empirical adjustments. In reality the detector efficiencies implied in
 accounted for by :math:`F(R)`, which is called the flat cell or flood source
 calibration file. :math:`F(R)` is also determined experimentally, and aims to
 contain information about the relative efficiency of individual detector pixels.
- It is normalised to values close to 1 in order not to change the overall scaling
+It is normalised to values close to 1 in order not to change the overall scaling
 of the equation. The experimental flood source data are divided by detector pixel
- solid angles at their measurement set up to give :math:`F(R)`.
+solid angles at their measurement set up to give :math:`F(R)`.
 Detector pixel solid angles are calculated for the instrument geometry at the
 time of the SANS experiment. :math:`Cor(R,\lambda)` optionally takes into account
 any corrections that cannot be described as only pixel dependent or only
 wavelength dependent. One such example is for the angle dependence of
 transmissions, :ref:`SANSWideAngleCorrection <algm-SANSWideAngleCorrection>`. :math:`T(\lambda)`
- is the transmission, which measures the ratio of neutron counts after the sample,
+is the transmission, which measures the ratio of neutron counts after the sample,
 divided by the neutron counts before the sample. :math:`T(\lambda)` is calculated
 from a “transmission run” and a “direct run”. There are at least three ways to
 measure transmission: using a monitor that drops in after the sample position,
@@ -58,12 +58,12 @@ and using the main detector itself. In all cases counts on the “transmission d
 with a sample in the beam are divided by those for an empty (or “direct”) beam.
 In order to allow for different exposures or changes in moderator spectrum,
 each transmission spectrum is also first normalised to an incident beam monitor spectrum.
- The sample transmission and direct beam transmissions must of course be acquired
- with the same beam line set up, and ideally around the same time in case of any
+The sample transmission and direct beam transmissions must of course be acquired
+with the same beam line set up, and ideally around the same time in case of any
 electronic or performance drift.
 
 Also, note that a SANS experiment frequently involves measurements of the sample
- material of interest contained inside a can or dissolved in a solvent inside a
+material of interest contained inside a can or dissolved in a solvent inside a
 cell. Separate SANS and transmission measurements must be made for the can or for
 the pure solvent in a cell. For convenience this is always referred to as the
 “can” run. (Though for say a solid sample with no can, the “can run” may actually
@@ -160,7 +160,7 @@ the state construction.
 
 
 *state_base.py*
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 The *state_base.py* module contains the essential ingredients for defining a
 state object. These are the *StateBase* class which allows for serialization
@@ -246,9 +246,9 @@ This is the most important state. Since the reduction framework has a data-drive
 approach it is not possible to build up most of the reduction without knowing what
 the actual data for the reduction will be.
 
-=============================== ============================================== ====================================  ========= ===============
+=============================== ============================================== ===================================== ========= ===============
 Name                            Comment                                        Type                                  Optional? Auto-generated?
-=============================== ============================================== ====================================  ========= ===============
+=============================== ============================================== ===================================== ========= ===============
 sample_scatter                  The sample scatter file path                   *StringParameter*                     N         N
 sample_scatter_period           The period to use for the sample scatter       *PositiveIntegerParameter*            Y         N
 sample_transmission             The sample transmission file path              *StringParameter*                     Y         N
@@ -267,7 +267,7 @@ sample_scatter_is_multi_period  If the sample scatter is multi-period          *
 instrument                      Enum for the SANS instrument                   *ClassTypeParameter(SANSInstrument)*  -         Y
 idf_file_path                   Path to the IDF file                           *StringParameter*                     -         Y
 ipf_file_path                   Path to the IPF file                           *StringParameter*                     -         Y
-=============================== ============================================== ==================================== ========= =================
+=============================== ============================================== ===================================== ========= ===============
 
 
 Note that while some parameters are optional they might become mandatory if other
@@ -284,23 +284,23 @@ different run numbers.
 
 The fundamental class is *StateMove* which has the following parameters:
 
-=============================== ======= ========================= ========= =============== =============
-Name                            Comment Type                      Optional? Auto-generated? Default value
-=============================== ======= ========================= ========= =============== =============
-x_translation_correction        -       *FloatParameter*          Y         N               0.0
-y_translation_correction        -       *FloatParameter*          Y         N               0.0
-z_translation_correction        -       *FloatParameter*          Y         N               0.0
-rotation_correction             -       *FloatParameter*          Y         N               0.0
-side_correction                 -       *FloatParameter*          Y         N               0.0
-radius_correction               -       *FloatParameter*          Y         N               0.0
-x_tilt_correction               -       *FloatParameter*          Y         N               0.0
-y_tilt_correction               -       *FloatParameter*          Y         N               0.0
-z_tilt_correction               -       *FloatParameter*          Y         N               0.0
-sample_centre_pos1              -       *FloatParameter*          Y         N               0.0
-sample_centre_pos2              -       *FloatParameter*          Y         N               0.0
-detector_name                   -       *StringWithNoneParameter* -         Y               -
-detector_name_short             -       *StringWithNoneParameter* -         Y               -
-=============================== ================================= ========= =============== ==============
+=============================== ======= ========================== ========= =============== =============
+Name                            Comment Type                       Optional? Auto-generated? Default value
+=============================== ======= ========================== ========= =============== =============
+x_translation_correction        -       *FloatParameter*           Y         N               0.0
+y_translation_correction        -       *FloatParameter*           Y         N               0.0
+z_translation_correction        -       *FloatParameter*           Y         N               0.0
+rotation_correction             -       *FloatParameter*           Y         N               0.0
+side_correction                 -       *FloatParameter*           Y         N               0.0
+radius_correction               -       *FloatParameter*           Y         N               0.0
+x_tilt_correction               -       *FloatParameter*           Y         N               0.0
+y_tilt_correction               -       *FloatParameter*           Y         N               0.0
+z_tilt_correction               -       *FloatParameter*           Y         N               0.0
+sample_centre_pos1              -       *FloatParameter*           Y         N               0.0
+sample_centre_pos2              -       *FloatParameter*           Y         N               0.0
+detector_name                   -       *StringWithNoneParameter*  -         Y               -
+detector_name_short             -       *StringWithNoneParameter*  -         Y               -
+=============================== ================================== ========= =============== =============
 
 If nothing is specified, then the detector positions and movements are assumed to be 0.
 Note that each instrument contains additional parameters on their individual state classes. When adding
@@ -312,9 +312,9 @@ a new instrument, this will be most likely one of the main areas to add new code
 The *StateReductionMode* class contains general settings about the reduction, e.g. if we are dealing with a merged
 reduction. It contains the following parameters:
 
-=============================== =================================================== =============================================  ========= =============== ===========================================
+=============================== =================================================== ============================================== ========= =============== ===========================================
 Name                            Comment                                             Type                                           Optional? Auto-generated? Default value
-=============================== =================================================== =============================================  ========= =============== ===========================================
+=============================== =================================================== ============================================== ========= =============== ===========================================
 reduction_mode                  The type of reduction, ie LAB, HAB, merged or both  *ClassTypeParameter(ReductionMode)*            N         N               *ISISReductionMode.LAB* enum value
 reduction_dimensionality        If 1D or 2D reduction                               *ClassTypeParameter(ReductionDimensionality)*  N         N               *ReductionDimensionality.OneDim* enum value
 merge_fit_mode                  The fit mode for merging                            *ClassTypeParameter(FitModeForMerge)*          Y         N               *FitModeForMerge.NoFit* enum value
@@ -323,7 +323,7 @@ merge_scale                     The scale value for merging                     
 merge_range_min                 The min q value for merging                         *FloatWithNoneParameter*                       Y         N               *None*
 merge_range_max                 The max q value for merging                         *FloatWithNoneParameter*                       Y         N               *None*
 detector_names                  A dict from detector type to detector name          *DictParameter*                                N         Y               -
-=============================== ================================================== ============================================== ========== =============== ============================================
+=============================== =================================================== ============================================== ========= =============== ===========================================
 
 
 *slice.py*
@@ -350,26 +350,26 @@ The *StateMask* class holds information regarding time and pixel masking.
 It also contains two sub-states which contain detector-specific masking information.
 The *StateMask* contains the following parameters:
 
-====================== ======================================================== ========================= ========= ===============
-Name                   Comment                                                  Type                      Optional? Auto-generated?
-====================== ======================================================== ========================= ========= ===============
-radius_min             The min radius of a circular mask on the detector        *FloatParameter*          Y         N
-radius_max             The max radius of a circular mask on the detector        *FloatParameter*          Y         N
-bin_mask_general_start A list of start times for general bin masks               *FloatListParameter*     Y         N
-bin_mask_general_stop  A list of stop times for general bin masks                *FloatListParameter*     Y         N
-mask_files             A list of mask files                                      *StringListParameter*    Y         N
-phi_min                The min angle of an angle mask                            *FloatParameter*         Y         N
-phi_max                The max angle of an angle mask                            *FloatParameter*         Y         N
-use_mask_phi_mirror    If the mirror slice should be used                        *BoolParameter*          Y         N
-beam_stop_arm_width    The width of the beam stop arm                            *PositiveFloatParameter* Y         N
-beam_stop_arm_angle    The angle of the beam stop arm                            *FloatParameter*         Y         N
-beam_stop_arm_pos1     The x position of the beam stop arm                       *FloatParameter*         Y         N
-beam_stop_arm_pos2     The y position of the bThe lower wavelength boundaream stop arm                       *FloatParameter*         Y         N
-clear                  currently not used                                        *BoolParameter*          Y         N
-clear_time             currently not used                                        *BoolParameter*          Y         N
-detector               A dict of detector type to *StateMaskDetector* sub-states *DictParameter*          N         Y
-idf_path               The path to the IDF                                       *StringParameter*        N         Y
-====================== ======================================================== ========================= ========= ===============
+====================== ========================================================== ========================= ========= ===============
+Name                   Comment                                                    Type                      Optional? Auto-generated?
+====================== ========================================================== ========================= ========= ===============
+radius_min             The min radius of a circular mask on the detector          *FloatParameter*          Y         N
+radius_max             The max radius of a circular mask on the detector          *FloatParameter*          Y         N
+bin_mask_general_start A list of start times for general bin masks                *FloatListParameter*      Y         N
+bin_mask_general_stop  A list of stop times for general bin masks                 *FloatListParameter*      Y         N
+mask_files             A list of mask files                                       *StringListParameter*     Y         N
+phi_min                The min angle of an angle mask                             *FloatParameter*          Y         N
+phi_max                The max angle of an angle mask                             *FloatParameter*          Y         N
+use_mask_phi_mirror    If the mirror slice should be used                         *BoolParameter*           Y         N
+beam_stop_arm_width    The width of the beam stop arm                             *PositiveFloatParameter*  Y         N
+beam_stop_arm_angle    The angle of the beam stop arm                             *FloatParameter*          Y         N
+beam_stop_arm_pos1     The x position of the beam stop arm                        *FloatParameter*          Y         N
+beam_stop_arm_pos2     The y position of the beam stop arm                        *FloatParameter*          Y         N
+clear                  currently not used                                         *BoolParameter*           Y         N
+clear_time             currently not used                                         *BoolParameter*           Y         N
+detector               A dict of detector type to *StateMaskDetector* sub-states  *DictParameter*           N         Y
+idf_path               The path to the IDF                                        *StringParameter*         N         Y
+====================== ========================================================== ========================= ========= ===============
 
 Validation is applied to some of the entries.
 
@@ -406,7 +406,7 @@ Again the detector-specific settings contain multiple validation steps on the st
 ***************
 
 The *StateWavelength* class contains the information required to perform the conversion of the scatter data
- from time-of-flight to wavelength units. The parameters are:
+from time-of-flight to wavelength units. The parameters are:
 
 ===================== ==================================== =================================== ========= ===============
 Name                  Comment                              Type                                Optional? Auto-generated?
@@ -536,7 +536,7 @@ the different wavelength ranges (and potentially default prompt peak settings.)
 
 The above mentioned *StateTransmissionFit* class contains fit information for
 the transmission calculation. Note that each data type, can contain its separate
- fit information. The set of parameters describing this fit are:
+fit information. The set of parameters describing this fit are:
 
 ================= ================================================================= ================================ ========= =============== ========================
 Name              Comment                                                           Type                             Optional? Auto-generated? Default
@@ -548,7 +548,7 @@ wavelength_high   Upper wavelength bound for fitting (*None* means no upper boun
 ================= ================================================================= ================================ ========= =============== ========================
 
 Note that the polynomial order is set to 0 by default. This forces the user to set
- actively set a polynomial order if polynomial fitting has been selected.
+actively set a polynomial order if polynomial fitting has been selected.
 
 
 The monitor normalization state:
@@ -582,8 +582,8 @@ Combining wavelength and pixel state:
 
 
 This stage combines wavelength workspaces generated from the transmission and the monitor
- normalization stages with workspaces loaded from files.
- The *StateWavelengthAndPixelAdjustment* class contains the following parameters:
+normalization stages with workspaces loaded from files.
+The *StateWavelengthAndPixelAdjustment* class contains the following parameters:
 
 ====================== ========================================================================== =================================== ========= ===============
 Name                   Comment                                                                    Type                                Optional? Auto-generated?
@@ -686,8 +686,8 @@ in *settings_tags.py*.
 
 Note that the naming of a large chunk of the the enum-like classes in *settings_tags.py*
 was driven by the corresponding name in the user file definition. We can consider
- changing the naming in the future. Also note that some settings only allow one value,
- which means that the director which uses these settings will use the last value in the list.
+changing the naming in the future. Also note that some settings only allow one value,
+which means that the director which uses these settings will use the last value in the list.
 
 The user input dictionary is normally populated by the settings specified in the user file and
 which are parsed by *UserFileParser* in *user_file_parser.py*. In additin the dictinary can
@@ -775,7 +775,7 @@ dictionary for the CLI and GUI case. These directors don't know anything about t
 the state, but are only responsible for providing the user input. An exception to this
 is the *StateData* object, since it is used indirectly to choose the correct builders
 for the other sub states. Hence the role of the outer level directors is to provide the
- *StateDirectorISIS* object with general user input information and information about the data.
+*StateDirectorISIS* object with general user input information and information about the data.
 
 
 User file input
@@ -925,10 +925,55 @@ If a 2D reduction has been selected then the algorithm will perform the follow s
 1. Set data workspace, adjustment workspaces, momentum transfer resolution workspace
    (if applicable), radius and wavelength cutoffs, momentum transfer limits
    and the gravity correction on :ref:`Qxy <algm-Qxy>`
-3. Execute :ref:`Qxy <algm-Qxy>`
-4. Get reduced workspace, the sum-of-counts workspace and the sum-of-norm workspaces
+2. Execute :ref:`Qxy <algm-Qxy>`
+3. Get reduced workspace, the sum-of-counts workspace and the sum-of-norm workspaces
    and set on the output of the algorithm
 
+
+``SANSConvertToWavelength``
+----------------------------
+
+The ``SANSConvertToWavelength`` algorithm acts as a wrapper around
+``SANSConvertToWavelengthAndRebin``. Unlike ``SANSConvertToWavelengthAndRebin``
+it takes a ``SANSState`` object as its input. This algorithm is used for the
+wavelength conversion of the scatter workspace.
+
+
+``SANSConvertToWavelengthAndRebin``
+-----------------------------------
+
+The ``SANSConvertToWavelengthAndRebin`` algorithm is one of the few which does
+not take a ``SANSState`` object as an input.
+
+The algorithm performs the following steps:
+
+1. Unit conversion from time-of-flight units to wavelength units using :ref:`ConvertUnits <algm-ConvertUnits>`
+2. Performs a rebin operation using either :ref:`Rebin <algm-Rebin>` or :ref:`InterpolatingRebin <algm-InterpolatingRebin>`
+
+
+``SANSCreateWavelengthAndPixelAdjustment``
+-------------------------------------------
+
+The ``SANSCreateWavelengthAndPixelAdjustment`` algorithm combines the output of the
+``SANSCalculateTransmission`` algorithm, the output of the ``SANSNormalizeToMonitor`` algorithm
+and flood and direct files to produce the correction workspaces which are required
+for ``SANSConvertToQ``.
+
+The sub-steps of the algorithm are:
+
+1. Create the wavelength-adjustment workspace. The sub-steps are:
+   a. Load the calculate-transmission workspace
+   b. Get the normalization-to-monitor workspace from the input
+   c. Load the wavelength-adjustment file using :ref:`LoadRKH <algm-LoadRKH>`
+   d. Provide all of the above workspaces with the same binning using :ref:`Rebin <algm-Rebin>`
+      and multiply them using :ref:`Multiply <algm-Multiply>`
+2. Create the pixel-adjustment workspace. The sub-states are:
+   a. Load the pixel-adjustment file using :ref:`LoadRKH <algm-LoadRKH>`
+   b. Crop the pixel-adjustment workspace to the desired detector
+3. Set the pixel-adjustment and wavelength-adjustment workspaces on the output of the algorithm
+
+``SANSCrop``
+------------
 
 
 ``SANSSave``
