@@ -333,6 +333,22 @@ void QDataProcessorWidget::disableAction(int indexToDisable) {
   disableActionOnContextMenu(indexToDisable);
 }
 
+void QDataProcessorWidget::disableActionOnToolbar(int indexToDisable) {
+  disableActionOnWidget(*ui.rowToolBar, indexToDisable);
+}
+
+void QDataProcessorWidget::enableActionOnToolbar(int indexToEnable) {
+  enableActionOnWidget(*ui.rowToolBar, indexToEnable);
+}
+
+void QDataProcessorWidget::disableActionOnWidget(QWidget& widget, int indexToDisable) {
+  disable(*(widget.actions()[indexToDisable]));
+}
+
+void QDataProcessorWidget::enableActionOnWidget(QWidget& widget, int indexToEnable) {
+  enable(*(widget.actions()[indexToEnable]));
+}
+
 void QDataProcessorWidget::disableActionOnContextMenu(int indexToDisable) {
   disableActionOnWidget(*m_contextMenu, indexToDisable);
 }
@@ -341,10 +357,22 @@ void QDataProcessorWidget::enableActionOnContextMenu(int indexToEnable) {
   enableActionOnWidget(*m_contextMenu, indexToEnable);
 }
 
-/**
-Save settings
-@param options : map of user options to save
-*/
+void QDataProcessorWidget::disable(QWidget &widget) {
+  widget.setEnabled(false);
+}
+
+void QDataProcessorWidget::disable(QAction &widget) {
+  widget.setEnabled(false);
+}
+
+void QDataProcessorWidget::enable(QWidget &widget) {
+  widget.setEnabled(true);
+}
+
+void QDataProcessorWidget::enable(QAction &widget) {
+  widget.setEnabled(true);
+}
+
 void QDataProcessorWidget::saveSettings(
     const std::map<QString, QVariant> &options) {
   QSettings settings;

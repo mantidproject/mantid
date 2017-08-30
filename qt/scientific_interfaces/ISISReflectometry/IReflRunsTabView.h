@@ -66,8 +66,8 @@ public:
                                  const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
   using CommandVector = std::vector<std::unique_ptr<DataProcessorCommand>>;
-  virtual void setReflectometryMenuCommands(CommandVector commands) = 0;
-  virtual void setEditMenuCommands(CommandVector rowCommands) = 0;
+  virtual void setReflectometryMenuCommands(CommandVector& commands) = 0;
+  virtual void setEditMenuCommands(CommandVector& rowCommands) = 0;
 
   virtual void setAllSearchRowsSelected() = 0;
   virtual void clearCommands() = 0;

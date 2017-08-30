@@ -4,6 +4,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandProvider.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/EditAction.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TableAction.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -48,28 +49,21 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DataProcessorTreeManager {
+class DataProcessorTreeManager : public DataProcessorCommandProvider {
 public:
-  using CommandIndex = int;
-  using CommandIndices = std::vector<int>;
-  using CommandVector = std::vector<std::unique_ptr<DataProcessorCommand>>;
+  using CommandIndex = typename DataProcessorCommandProvider::CommandIndex;
+  using CommandIndices = typename DataProcessorCommandProvider::CommandIndices;
+  using CommandVector = typename DataProcessorCommandProvider::CommandVector;
   virtual ~DataProcessorTreeManager(){};
 
   /// Actions/commands
 
   /// Publish actions/commands
-  const CommandVector &getTableCommands() const;
-  CommandVector &getTableCommands();
-  virtual CommandIndex indexOfCommand(TableAction action) const = 0;
-  virtual CommandIndices getModifyingTableCommands() const = 0;
+  const CommandVector &getTableCommands() const override;
+  CommandVector &getTableCommands() override;
 
-  const CommandVector &getEditCommands() const;
-  CommandVector &getEditCommands();
-
-  virtual CommandIndex indexOfCommand(EditAction action) const = 0;
-  virtual CommandIndices getPausingEditCommands() const = 0;
-  virtual CommandIndices getProcessingEditCommands() const = 0;
-  virtual CommandIndices getModifyingEditCommands() const = 0;
+  const CommandVector &getEditCommands() const override;
+  CommandVector &getEditCommands() override;
 
   /// Append a row
   virtual void appendRow() = 0;

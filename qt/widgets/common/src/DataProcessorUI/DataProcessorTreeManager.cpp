@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -20,22 +21,22 @@ DataProcessorTreeManager::getModifyingCommands(const CommandVector &commands) {
 }
 
 const typename DataProcessorTreeManager::CommandVector&
-getTableCommands() const {
+DataProcessorTreeManager::getTableCommands() const {
   return m_tableCommands;
 }
 
 typename DataProcessorTreeManager::CommandVector&
-getTableCommands() {
+DataProcessorTreeManager::getTableCommands() {
   return m_tableCommands;
 }
 
 typename DataProcessorTreeManager::CommandVector&
-getEditCommands() {
+DataProcessorTreeManager::getEditCommands() {
   return m_editCommands;
 }
 
 const typename DataProcessorTreeManager::CommandVector&
-getEditCommands() const {
+DataProcessorTreeManager::getEditCommands() const {
   return m_editCommands;
 }
 

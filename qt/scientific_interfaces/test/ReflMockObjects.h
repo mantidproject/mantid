@@ -36,13 +36,13 @@ public:
   // of the vector of unique pointers
   // I will mock a proxy method, setTableCommandsProxy, I just want to test that
   // this method is invoked by the presenter's constructor
-  virtual void setReflectometryMenuCommands(
-      typename IReflRunsTabView::CommandVector) override {
+  void setReflectometryMenuCommands(
+      typename IReflRunsTabView::CommandVector&) override {
     setReflectometryMenuCommandsProxy();
   }
   // The same happens for setRowCommands
-  virtual void setEditMenuCommands(
-      typename IReflRunsTabView::CommandVector)
+  void setEditMenuCommands(
+      typename IReflRunsTabView::CommandVector&)
       override {
     setEditMenuCommandsProxy();
   }

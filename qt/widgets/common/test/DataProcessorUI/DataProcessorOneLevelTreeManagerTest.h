@@ -127,7 +127,7 @@ public:
     NiceMock<MockDataProcessorPresenter> presenter;
     DataProcessorOneLevelTreeManager manager(&presenter,
                                              DataProcessorWhiteList());
-    auto commands = manager.getEditCommands();
+    auto& commands = manager.getEditCommands();
 
     TS_ASSERT(commands.size() > 12);
     TS_ASSERT(notNullAndHasType<DataProcessorProcessCommand>(commands[0]));
@@ -151,7 +151,7 @@ public:
     NiceMock<MockDataProcessorPresenter> presenter;
     DataProcessorOneLevelTreeManager manager(&presenter,
                                              DataProcessorWhiteList());
-    auto commands = manager.getTableCommands();
+    auto& commands = manager.getTableCommands();
     TS_ASSERT(commands.size() > 8);
     TS_ASSERT(notNullAndHasType<DataProcessorOpenTableCommand>(commands[0]));
     TS_ASSERT(notNullAndHasType<DataProcessorNewTableCommand>(commands[1]));

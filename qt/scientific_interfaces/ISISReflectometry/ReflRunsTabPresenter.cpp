@@ -165,14 +165,14 @@ DataProcessorPresenter &ReflRunsTabPresenter::tablePresenter() {
 
 void ReflRunsTabPresenter::pushEditCommands(
     DataProcessorPresenter &tablePresenter) {
-  auto editCommands = tablePresenter.getEditCommands();
-  m_view->setEditMenuCommands(std::move(editCommands));
+  auto& editCommands = tablePresenter.getEditCommands();
+  m_view->setEditMenuCommands(editCommands);
 }
 
 void ReflRunsTabPresenter::pushTableCommands(
     DataProcessorPresenter &tablePresenter) {
-  auto tableCommands = tablePresenter.getTableCommands();
-  m_view->setReflectometryMenuCommands(std::move(tableCommands));
+  auto& tableCommands = tablePresenter.getTableCommands();
+  m_view->setReflectometryMenuCommands(tableCommands);
 }
 
 /** Searches for runs that can be used */

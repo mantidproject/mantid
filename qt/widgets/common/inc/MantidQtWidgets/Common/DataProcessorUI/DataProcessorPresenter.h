@@ -87,8 +87,8 @@ public:
   virtual void setInstrumentList(const QStringList &instruments,
                                  const QString &defaultInstrument) = 0;
   using CommandVector = std::vector<std::unique_ptr<DataProcessorCommand>>;
-  virtual CommandVector getEditCommands() = 0;
-  virtual CommandVector getTableCommands() = 0;
+  virtual CommandVector& getEditCommands() = 0;
+  virtual CommandVector& getTableCommands() = 0;
   virtual int indexOfCommand(TableAction action) = 0;
   virtual int indexOfCommand(EditAction action) = 0;
   virtual void accept(DataProcessorMainPresenter *mainPresenter) = 0;

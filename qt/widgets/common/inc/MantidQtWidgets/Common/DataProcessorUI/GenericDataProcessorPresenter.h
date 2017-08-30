@@ -81,6 +81,17 @@ public:
           &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
+      std::unique_ptr<DataProcessorTreeManager> manager,
+      std::unique_ptr<DataProcessorCommandProvider> commandProvider,
+      const std::map<QString, QString> &postprocessMap =
+          std::map<QString, QString>(),
+      const QString &loader = "Load");
+  GenericDataProcessorPresenter(
+      const DataProcessorWhiteList &whitelist,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load");
@@ -117,15 +128,14 @@ public:
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   void setInstrumentList(const QStringList &instruments,
                          const QString &defaultInstrument) override;
-  CommandVector& getTableCommands() override;
-  CommandVector& getEditCommands() override;
+  CommandVector &getTableCommands() override;
+  CommandVector &getEditCommands() override;
   int indexOfCommand(TableAction action) override;
   int indexOfCommand(EditAction action) override;
   void acceptViews(DataProcessorView *tableView,
                    ProgressableView *progressView) override;
   void accept(DataProcessorMainPresenter *mainPresenter) override;
   void setModel(QString const &name) override;
-
   // The following methods are public only for testing purposes
   // Get the whitelist
   DataProcessorWhiteList getWhiteList() const { return m_whitelist; };
@@ -156,6 +166,8 @@ protected:
   DataProcessorMainPresenter *m_mainPresenter;
   // The tree manager, a proxy class to retrieve data from the model
   std::unique_ptr<DataProcessorTreeManager> m_manager;
+  // Owns and manages the collection of commands.
+  std::unique_ptr<DataProcessorCommandProvider> m_commandProvider;
   // Loader
   QString m_loader;
   // The list of selected items to reduce
@@ -208,6 +220,9 @@ protected:
   }
 
 private:
+  std::unique_ptr<DataProcessorTreeManager>
+  chooseTreeManager(QString postprocessorName,
+                    DataProcessorWhiteList whitelist);
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
   // The whitelist

@@ -82,6 +82,9 @@
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataProcessorUI/DataProcessorVectorString.cpp
+    src/DataProcessorUI/TableQueryCommandBase.cpp
+    src/DataProcessorUI/TableModificationCommandBase.cpp
+    src/DataProcessorUI/DataProcessorTreeManager.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DisplayCurveFit.cpp

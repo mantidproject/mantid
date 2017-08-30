@@ -78,6 +78,16 @@ void DataProcessorTwoLevelTreeManager::initializeTableCommands() {
   addTableCommand(make_unique<DataProcessorOptionsCommand>(m_presenter));
 }
 
+typename DataProcessorTwoLevelTreeManager::CommandIndices
+DataProcessorTwoLevelTreeManager::getModifyingTableCommands() const {
+  return CommandIndices{};
+}
+
+typename DataProcessorTwoLevelTreeManager::CommandIndices
+DataProcessorTwoLevelTreeManager::getModifyingEditCommands() const {
+  return CommandIndices{};
+}
+
 int DataProcessorTwoLevelTreeManager::indexOfCommand(TableAction action) const {
   switch (action) {
   case TableAction::OPEN_TABLE:

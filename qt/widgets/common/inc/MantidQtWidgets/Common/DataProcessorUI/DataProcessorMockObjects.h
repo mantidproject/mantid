@@ -6,6 +6,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandProvider.h"
 
 #include <gmock/gmock.h>
 
@@ -50,11 +51,14 @@ public:
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD0(selectAll, void());
-  MOCK_METHOD0(pauseRequested, void());
-  MOCK_METHOD0(resumed, void());
-  MOCK_METHOD0(reductionPaused, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const QString &text));
+  MOCK_METHOD0(disableProcessButton, void());
+  MOCK_METHOD0(enableProcessButton, void());
+  MOCK_METHOD1(enableAction, void(int));
+  MOCK_METHOD1(disableAction, void(int));
+  MOCK_METHOD0(disableSelectionAndEditing, void());
+  MOCK_METHOD0(enableSelectionAndEditing, void());
 
   MOCK_METHOD1(setModel, void(const QString &));
   MOCK_METHOD1(setTableList, void(const QSet<QString> &));
@@ -71,7 +75,7 @@ public:
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
   // copyable which means we have to mock addEditActions() via a proxy method
-  void addEditActions(std::vector<DataProcessorCommand_uptr>) override {
+  void addEditActions(std::vector<DataProcessorCommand_uptr> &) override {
     addEditActionsProxy();
   }
   MOCK_METHOD0(addEditActionsProxy, void());
@@ -123,7 +127,7 @@ public:
 class MockDataProcessorPresenter : public DataProcessorPresenter {
 
 public:
-  MockDataProcessorPresenter(){};
+  MockDataProcessorPresenter() : m_commands(){};
   ~MockDataProcessorPresenter() override = default;
 
   MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
@@ -143,23 +147,19 @@ public:
   MOCK_METHOD1(setForcedReProcessing, void(bool));
 
 private:
-  
   // Calls we don't care about
   const std::map<QString, QVariant> &options() const override {
     return m_options;
   };
 
-  std::vector<DataProcessorCommand_uptr> getEditCommands() override {
+  std::vector<DataProcessorCommand_uptr> &getEditCommands() override {
     getEditCommandsMocked();
-    return std::vector<DataProcessorCommand_uptr>();
+    return m_commands;
   };
 
-  std::vector<DataProcessorCommand_uptr> getTableCommands() override {
-    // for (size_t i = 0; i < 31; i++)
-    //   commands.push_back(
-    //       Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
+  std::vector<DataProcessorCommand_uptr> &getTableCommands() override {
     getTableCommandsMocked();
-    return std::vector<DataProcessorCommand_uptr>();
+    return m_commands;
   };
 
   std::set<QString> getTableList() const { return std::set<QString>(); };
@@ -169,8 +169,26 @@ private:
   void setInstrumentList(const QStringList &, const QString &) override {}
   // void accept(WorkspaceReceiver *) {};
   void acceptViews(DataProcessorView *, ProgressableView *) override {}
-
+  std::vector<DataProcessorCommand_uptr> m_commands;
   std::map<QString, QVariant> m_options;
+};
+
+class MockDataProcessorCommandProvider : DataProcessorCommandProvider {
+public:
+  using CommandVector = typename DataProcessorCommandProvider::CommandVector;
+  using CommandIndex = typename DataProcessorCommandProvider::CommandIndex;
+  using CommandIndices = typename DataProcessorCommandProvider::CommandIndices;
+  MOCK_CONST_METHOD0(getTableCommands, const CommandVector &());
+  MOCK_METHOD0(getTableCommands, CommandVector &());
+  MOCK_CONST_METHOD1(indexOfCommand, CommandIndex(TableAction));
+
+  MOCK_METHOD0(getEditCommands, CommandVector &());
+  MOCK_CONST_METHOD0(getEditCommands, const CommandVector &());
+  MOCK_CONST_METHOD0(getModifyingTableCommands, CommandIndices());
+  MOCK_CONST_METHOD0(getModifyingEditCommands, CommandIndices());
+  MOCK_CONST_METHOD0(getPausingEditCommands, CommandIndices());
+  MOCK_CONST_METHOD0(getProcessingEditCommands, CommandIndices());
+  MOCK_CONST_METHOD1(indexOfCommand, CommandIndex(EditAction));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

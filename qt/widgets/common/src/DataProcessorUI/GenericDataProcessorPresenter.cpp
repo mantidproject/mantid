@@ -119,14 +119,18 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
+    std::unique_ptr<DataProcessorTreeManager> manager,
+    std::unique_ptr<DataProcessorCommandProvider> commandProvider,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
-      m_preprocessMap(preprocessMap), m_processor(processor),
-      m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
-      m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
-      m_tableDirty(false), m_confirmReductionPaused(true),
-      m_pauseReduction(false), m_nextActionFlag(ReductionFlag::StopReduceFlag) {
+      m_mainPresenter(), m_manager(std::move(manager)),
+      m_commandProvider(std::move(commandProvider)), m_loader(loader),
+      m_whitelist(whitelist), m_preprocessMap(preprocessMap),
+      m_processor(processor), m_postprocessor(postprocessor),
+      m_postprocessMap(postprocessMap), m_progressReporter(nullptr),
+      m_postprocess(true), m_promptUser(true), m_tableDirty(false),
+      m_confirmReductionPaused(true), m_pauseReduction(false),
+      m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -159,14 +163,63 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "specified externally, the former prevail.");
 
   m_columns = static_cast<int>(m_whitelist.size());
+}
 
-  if (m_postprocessor.name().isEmpty()) {
+GenericDataProcessorPresenter::GenericDataProcessorPresenter(
+    const DataProcessorWhiteList &whitelist,
+    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor,
+    const DataProcessorPostprocessingAlgorithm &postprocessor,
+    const std::map<QString, QString> &postprocessMap, const QString &loader)
+    : GenericDataProcessorPresenter(
+          whitelist, preprocessMap, processor, postprocessor,
+          chooseTreeManager(postprocessor.name(), whitelist),
+          chooseTreeManager(postprocessor.name(), whitelist), postprocessMap,
+          loader) {
+
+  // Column Options must be added to the whitelist
+  m_whitelist.addElement("Options", "Options",
+                         "<b>Override <samp>" + processor.name() +
+                             "</samp> properties</b><br /><i>optional</i><br "
+                             "/>This column allows you to "
+                             "override the properties used when executing "
+                             "the main reduction algorithm. "
+                             "Options are given as "
+                             "key=value pairs, separated by commas. Values "
+                             "containing commas must be quoted. In case of "
+                             "conflict between options "
+                             "specified via this column and global options "
+                             "specified externally, the former prevail.");
+
+  // Column Hidden Options must be added to the whitelist
+  m_whitelist.addElement("HiddenOptions", "HiddenOptions",
+                         "<b>Override <samp>" + processor.name() +
+                             "</samp> properties</b><br /><i>optional</i><br "
+                             "/>This column allows you to "
+                             "override the properties used when executing "
+                             "the main reduction algorithm in the same way"
+                             "as the Options column, but this column is hidden"
+                             "from the user. "
+                             "Hidden Options are given as "
+                             "key=value pairs, separated by commas. Values "
+                             "containing commas must be quoted. In case of "
+                             "conflict between options "
+                             "specified via this column and global options "
+                             "specified externally, the former prevail.");
+
+  m_columns = static_cast<int>(m_whitelist.size());
+}
+
+std::unique_ptr<DataProcessorTreeManager>
+GenericDataProcessorPresenter::chooseTreeManager(
+    QString postprocessorName, DataProcessorWhiteList whitelist) {
+  if (postprocessorName.isEmpty()) {
     m_postprocess = false;
-    m_manager = Mantid::Kernel::make_unique<DataProcessorOneLevelTreeManager>(
-        this, m_whitelist);
+    return Mantid::Kernel::make_unique<DataProcessorOneLevelTreeManager>(
+        this, whitelist);
   } else {
-    m_manager = Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
-        this, m_whitelist);
+    return Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
+        this, whitelist);
   }
 }
 
@@ -1649,26 +1702,26 @@ void GenericDataProcessorPresenter::setPromptUser(bool allowPrompt) {
   m_promptUser = allowPrompt;
 }
 
-typename GenericDataProcessorPresenter::CommandVector&
+typename GenericDataProcessorPresenter::CommandVector &
 GenericDataProcessorPresenter::getTableCommands() {
-  auto& commands = m_manager->getTableCommands();
+  auto &commands = m_commandProvider->getTableCommands();
   // "Open Table" needs the the list of available workspaces in the ADS
   commands.at(m_manager->indexOfCommand(TableAction::OPEN_TABLE))
       ->setChild(getTableList());
   return commands;
 }
 
-typename GenericDataProcessorPresenter::CommandVector&
+typename GenericDataProcessorPresenter::CommandVector &
 GenericDataProcessorPresenter::getEditCommands() {
-  return m_manager->getEditCommands();
+  return m_commandProvider->getEditCommands();
 }
 
 int GenericDataProcessorPresenter::indexOfCommand(TableAction action) {
-  return m_manager->indexOfCommand(action);
+  return m_commandProvider->indexOfCommand(action);
 }
 
 int GenericDataProcessorPresenter::indexOfCommand(EditAction action) {
-  return m_manager->indexOfCommand(action);
+  return m_commandProvider->indexOfCommand(action);
 }
 
 /** Register a workspace receiver

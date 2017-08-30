@@ -146,11 +146,11 @@ void QtReflRunsTabView::setReflectometryMenuCommands(
 * @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
 void QtReflRunsTabView::setEditMenuCommands(
-    std::vector<DataProcessorCommand_uptr> commands) {
+    std::vector<DataProcessorCommand_uptr>& commands) {
 
   ui.menuRows->clear();
   for (auto &command : commands) {
-    addToMenu(ui.menuRows, std::move(command));
+    addToMenu(ui.menuRows, command.get());
   }
 }
 
