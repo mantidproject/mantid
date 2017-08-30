@@ -253,6 +253,7 @@ void updatePeak(API::IPeakFunction &peak, double centre, double intensity,
     updatePeakWidth(peak, centre, xVec, yVec, fwhmVariation);
     peak.unfixIntensity();
     peak.fixIntensity(fixByDefault);
+    peak.fixCentre(fixByDefault);
     if (fixAllPeaks) {
       peak.fixAll(fixByDefault);
     }

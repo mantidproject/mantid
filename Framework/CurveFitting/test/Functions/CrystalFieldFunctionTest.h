@@ -3,15 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-//#include "MantidAPI/FunctionDomain1D.h"
-//#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FunctionFactory.h"
-//#include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -436,13 +435,7 @@ public:
                       "Temperatures=44,FWHMs=2.3,ToleranceIntensity=0.2,B20="
                       "0.37,B22=3.9,B40=-0.03,B42=-0.1,B44=-0.12,pk0.FWHM=2.2,"
                       "pk1.FWHM=1.8,ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,"
-                      "BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)";
-    std::string fun1 = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
-                      "Temperature=44,FWHM=2.3,ToleranceIntensity=0.2,B20="
-                      "0.37,B22=3.9,B40=-0.03,B42=-0.1,B44=-0.12,f0.FWHM=2.2,"
-                      "f1.FWHM=1.8,ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,"
-                      "BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)";
-
+                      "BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0, IntensityScaling=1)";
     auto ws = makeDataSS();
     Algorithms::Fit fit;
     fit.initialize();
@@ -450,17 +443,102 @@ public:
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("WorkspaceIndex", 1);
     fit.setProperty("Minimizer", "Levenberg-Marquardt");
+    fit.setProperty("CalcErrors", true);
+    fit.setProperty("Output", "fit_ss");
     fit.execute();
-    //IFunction_sptr function = fit.getProperty("Function");
-    //for(size_t i = 0; i < function->nParams(); ++i) {
-    //  std::cerr << function->parameterName(i) << "  " << function->getParameter(i) << std::endl;
-    //}
+
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0, 1e-6);
+
+    API::AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_sm() {
+    auto ws = makeDataSM();
+    auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
+    auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
+
+    std::string fun = "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,"
+                      "Temperatures=(10, 50),FWHMs=2,ToleranceIntensity=0.1,B20="
+                      "0.37,B22=3.97,B40=-0.03,B42=-0.1,B44=-0.12,ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,"
+                      "BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0, sp0.IntensityScaling=1, sp1.IntensityScaling=1)";
+
+    Algorithms::Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", fun);
+    fit.setProperty("InputWorkspace", sp0);
+    fit.setProperty("WorkspaceIndex", 1);
+    fit.setProperty("InputWorkspace_1", sp1);
+    fit.setProperty("WorkspaceIndex_1", 1);
+    fit.setProperty("MaxIterations", 10);
+    fit.setProperty("Output", "fit_sm");
+    fit.execute();
+
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0, 1e-6);
+
+    API::AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_ms() {
+    std::string fun = "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), FixAllPeaks=1,"
+                      "Temperatures=4,FWHMs=2.0,ToleranceIntensity=0.02,"
+                      "ion0.B20=0.37737,ion0.B22=3.9770,ion0.B40=-0.031787,ion0.B42=-0.11611,ion0.B44=-0.12544,"
+                      "ion1.B20=0.4268, ion1.B40=0.001031, ion1.B44=-0.01996, ion1.B60=0.00005, ion1.B64=0.001563,"
+                      "ties=(ion0.BmolX=0,ion0.BmolY=0,ion0.BmolZ=0,ion0.BextX=0,ion0.BextY=0,ion0.BextZ=0, ion0.B60=0,ion0.B62=0,ion0.B64=0,ion0.B66=0, ion0.IntensityScaling=1),"
+                      "ties=(ion1.BmolX=0,ion1.BmolY=0,ion1.BmolZ=0,ion1.BextX=0,ion1.BextY=0,ion1.BextZ=0, ion1.IntensityScaling=1),";
+
+    auto data = makeDataMS();
+
+    Algorithms::Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", fun);
+    fit.setProperty("InputWorkspace", data);
+    fit.setProperty("WorkspaceIndex", 1);
+    fit.setProperty("MaxIterations", 10);
+    fit.setProperty("Output", "fit_ms");
+    fit.execute();
+
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0, 1e-6);
+
+    API::AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_mm() {
+    std::string fun = "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), FixAllPeaks=1,"
+                      "Temperatures=(4, 10),FWHMs=2.0,ToleranceIntensity=0.02,"
+                      "ion0.B20=0.3773,ion0.B22=3.97,ion0.B40=-0.0317,ion0.B42=-0.116,ion0.B44=-0.125,"
+                      "ion1.B20=0.42, ion1.B40=0.001, ion1.B44=-0.019, ion1.B60=0.000051, ion1.B64=0.0015,"
+                      "ties=(ion0.BmolX=0,ion0.BmolY=0,ion0.BmolZ=0,ion0.BextX=0,ion0.BextY=0,ion0.BextZ=0, ion0.B60=0,ion0.B62=0,ion0.B64=0,ion0.B66=0, ion0.IntensityScaling=1),"
+                      "ties=(ion1.BmolX=0,ion1.BmolY=0,ion1.BmolZ=0,ion1.BextX=0,ion1.BextY=0,ion1.BextZ=0, ion1.IntensityScaling=1),"
+                      "ties=(sp0.IntensityScaling=1, sp1.IntensityScaling=1)";
+
+    auto ws = makeDataMM();
+    auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
+    auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
+
+    Algorithms::Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", fun);
+    fit.setProperty("InputWorkspace", sp0);
+    fit.setProperty("WorkspaceIndex", 1);
+    fit.setProperty("InputWorkspace_1", sp1);
+    fit.setProperty("WorkspaceIndex_1", 1);
+    fit.setProperty("MaxIterations", 10);
+    fit.setProperty("Output", "fit_mm");
+    fit.execute();
+
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0, 1e-6);
+
+    API::AnalysisDataService::Instance().clear();
   }
 
 private:
 
   MatrixWorkspace_sptr makeDataSS() {
-    auto ws = create2DWorkspaceBinned(1, 100, 0.0, 0.276);
+    auto ws = create2DWorkspaceBinned(1, 100, 0.0, 0.5);
     std::string fun = "name=CrystalFieldSpectrum,Ion=Ce,Temperature=44,"
                       "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,B40=-0."
                       "031787,B42=-0.11611,B44=-0.12544,f0.FWHM=1.6,f1.FWHM=2."
@@ -473,6 +551,62 @@ private:
     eval.execute();
     auto out = API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     API::AnalysisDataService::Instance().clear();
+    return out;
+  }
+
+  WorkspaceGroup_sptr makeDataSM() {
+    auto ws = create2DWorkspaceBinned(2, 100, 0.0, 0.5);
+    std::string fun = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(10, 50), FWHMs=(2, 2),"
+                      "ToleranceIntensity=0.1,B20=0.37737,B22=3.9770,B40=-0."
+                      "031787,B42=-0.11611,B44=-0.12544";
+    Algorithms::EvaluateFunction eval;
+    eval.initialize();
+    eval.setProperty("Function", fun);
+    eval.setProperty("InputWorkspace", ws);
+    eval.setProperty("InputWorkspace_1", ws);
+    eval.setProperty("WorkspaceIndex_1", 1);
+    eval.setPropertyValue("OutputWorkspace", "out");
+    eval.execute();
+    auto &ads = API::AnalysisDataService::Instance();
+    auto out = ads.retrieveWS<WorkspaceGroup>("out");
+    ads.clear();
+    return out;
+  }
+
+  MatrixWorkspace_sptr makeDataMS() {
+    auto ws = create2DWorkspaceBinned(1, 100, 0.0, 0.5);
+    std::string fun = "name=CrystalFieldSpectrum,Ion=Pr, Symmetry=D4h,Temperature=4, FWHM=2,"
+                      "ToleranceIntensity=0.001,B20=0.4268, B40=0.001031, B44=-0.01996, B60=0.00005, B64=0.001563";
+    std::string fun1 = "name=CrystalFieldSpectrum,Ion=Ce,Temperature=4, FWHM=2,"
+                      "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0.11611,B44=-0.12544";
+    Algorithms::EvaluateFunction eval;
+    eval.initialize();
+    eval.setProperty("Function", fun + ";" + fun1);
+    eval.setProperty("InputWorkspace", ws);
+    eval.setPropertyValue("OutputWorkspace", "out");
+    eval.execute();
+    auto out = API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    API::AnalysisDataService::Instance().clear();
+    return out;
+  }
+
+  WorkspaceGroup_sptr makeDataMM() {
+    auto ws = create2DWorkspaceBinned(2, 100, 0.0, 0.5);
+    std::string fun = "name=CrystalFieldMultiSpectrum,Ion=Pr, Symmetry=D4h,Temperatures=(4, 10), FWHMs=2,"
+                      "ToleranceIntensity=0.001,B20=0.4268, B40=0.001031, B44=-0.01996, B60=0.00005, B64=0.001563";
+    std::string fun1 = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(4, 10), FWHMs=2,"
+                      "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0.11611,B44=-0.12544";
+    Algorithms::EvaluateFunction eval;
+    eval.initialize();
+    eval.setProperty("Function", fun + ";" + fun1);
+    eval.setProperty("InputWorkspace", ws);
+    eval.setProperty("InputWorkspace_1", ws);
+    eval.setProperty("WorkspaceIndex_1", 1);
+    eval.setPropertyValue("OutputWorkspace", "out");
+    eval.execute();
+    auto &ads = API::AnalysisDataService::Instance();
+    auto out = ads.retrieveWS<WorkspaceGroup>("out");
+    ads.clear();
     return out;
   }
 };
