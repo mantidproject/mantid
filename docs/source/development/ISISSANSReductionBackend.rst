@@ -7,6 +7,73 @@ ISIS SANS Reduction Back-end
 .. contents::
   :local:
 
+
+
+What is calculated in a SANS reduction?
+#######################################
+
+Here the focus is to give a summary of what is calculated for ISIS SANS reduction
+without going into details of how this is done in the code. The latter is done
+ in some detail in the section below.
+
+The starting point is here taken to be equation 5 in the article by
+Richard Heenan et al, *J. Appl. Cryst.* (1997), pages 1140-1147. The coherent
+ macroscopic cross section is calculated at ISIS using :
+
+
+.. math::
+  \frac{\partial \Sigma}{\partial \Omega} (Q) = \frac{Scale}{V_{SAM}} \frac{\sum_{R,\lambda \subset Q}C(R,\lambda)}{\sum_{R,\lambda \subset Q}M(\lambda)T(\lambda)D(\lambda)F(R)\Omega (R) Cor(R,\lambda)}
+
+This equation is aiming to do the best job at returning from the measured SANS
+data the quantity of interest, the cross section, :math:`\frac{\partial \Sigma}{\partial \Omega}`,
+which is an absolute scattering probability, in units of :math:`cm_{-1}`. The :math:`Scale`
+factor in the equation above fine tunes the cross section to give the correct
+value (usually based on a fit to scattering from a standard polymer sample).
+The value of :math:`Scale`  varies with the instrument set up, and with how the
+units and normalisation for the other terms are chosen. :math:`C(R,\lambda)`
+are the observed counts at radius vector :math:`R` from the diffractometer axis
+and wavelength :math:`\lambda`. :math:`V_{SAM}` is the volume of the sample.
+:math:`M(\lambda)` is an incident monitor spectrum. :math:`D(\lambda)` contains
+the relative efficiency of the main detector compared to the incident monitor.
+:math:`D(\lambda)` is initially determined experimentally, but later subjected
+to empirical adjustments. In reality the detector efficiencies implied in
+:math:`D(\lambda)` are also pixel dependent. This variation is in part
+accounted for by :math:`F(R)`, which is called the flat cell or flood source
+calibration file. :math:`F(R)` is also determined experimentally, and aims to
+contain information about the relative efficiency of individual detector pixels.
+ It is normalised to values close to 1 in order not to change the overall scaling
+of the equation. The experimental flood source data are divided by detector pixel
+ solid angles at their measurement set up to give :math:`F(R)`.
+Detector pixel solid angles are calculated for the instrument geometry at the
+time of the SANS experiment. :math:`Cor(R,\lambda)` optionally takes into account
+any corrections that cannot be described as only pixel dependent or only
+wavelength dependent. One such example is for the angle dependence of
+transmissions, :ref:`SANSWideAngleCorrection <algm-SANSWideAngleCorrection>`. :math:`T(\lambda)`
+ is the transmission, which measures the ratio of neutron counts after the sample,
+divided by the neutron counts before the sample. :math:`T(\lambda)` is calculated
+from a “transmission run” and a “direct run”. There are at least three ways to
+measure transmission: using a monitor that drops in after the sample position,
+a monitor on the main beam stop or by attenuating the beam, removing the beam stop,
+and using the main detector itself. In all cases counts on the “transmission detector”
+with a sample in the beam are divided by those for an empty (or “direct”) beam.
+In order to allow for different exposures or changes in moderator spectrum,
+each transmission spectrum is also first normalised to an incident beam monitor spectrum.
+ The sample transmission and direct beam transmissions must of course be acquired
+ with the same beam line set up, and ideally around the same time in case of any
+electronic or performance drift.
+
+Also, note that a SANS experiment frequently involves measurements of the sample
+ material of interest contained inside a can or dissolved in a solvent inside a
+cell. Separate SANS and transmission measurements must be made for the can or for
+the pure solvent in a cell. For convenience this is always referred to as the
+“can” run. (Though for say a solid sample with no can, the “can run” may actually
+be simply an empty beam run.) The full data reduction is performed separately for
+sample and then the can, before subtracting the can cross section from the sample
+plus can cross section, to obtain the cross section for the sample alone.
+(In practise there can be some excluded volume and other annoying effects where
+hydrogenous solvents are involved.)
+
+
 General
 #######
 
@@ -52,24 +119,6 @@ The reduction back-end consists of three components:
 - the *SANSState* approach to centrally store the state of the reduction
 - a set of work-flow algorithms which perform the individual reduction steps
 - a algorithm which orchestrates the work-flow algorithms.
-
-
-What is calculated in a SANS reduction?
-#######################################
-
-Here the focus is to give a summary of what is calculated for ISIS SANS reduction
- without going into details of how this is done in the code. The latter is done
- in some detail in the section below.
-
-The starting point is here taken to be equation 5 in the article by
-Richard Heenan et al, *J. Appl. Cryst.* (1997), pages 1140-1147. The coherent
- macroscopic cross section is calculated at ISIS using :
-
-.. math::
-  \frac{\partial \Sigma}{\partial \Omega} (Q) = \frac{Scale}{V_{SAM}} \frac{\sum_{R,\lambda \subset Q}C(R,\lambda)}{\sum_{R,\lambda \subset Q}M(\lambda)T(\lambda)D(\lambda)F(R)\Omega (R) Cor(R,\lambda)}
-
-
-
 
 
 *SANSState*
@@ -816,9 +865,10 @@ The individual algorithms are superficially discussed below.
 ------------------------------
 
 The ``SANSCalculateTransmission`` algorithm is one of the more complex algorithms
-in the reduction chain with many sub-steps and a wide variety
+in the reduction chain with many sub-steps and a wide variety of parameters which
+can be set by the users.
 
-performs the following steps:
+The algorithm performs the following steps:
 
 1. Select the incident monitor. If this is not explicitly set then the default value is taken.
 2. Select the transmission detector ids. The detector ids are chosen to via the following preference:
@@ -854,8 +904,35 @@ performs the following steps:
 
 6. Set the fitted and unfitted workspaces on the output of the algorithm
 
-SANSSave
----------
+
+``SANSConvertToQ``
+------------------
+
+The ``SANSConvertToQ`` algorithm is the most essential algorithm in the reduction chain.
+
+If a 1D reduction has been selected then the algorithm will perform the follow sub-steps:
+
+1. Calculate the momentum transfer resolution workspace using :ref:`TOFSANSResolutionByPixel <algm-TOFSANSResolutionByPixel>` (if applicable)
+2. Set data workspace, adjustment workspaces, momentum transfer resolution workspace
+   (if applicable), radius and wavelength cutoffs, momentum transfer limits
+   and the gravity correction on :ref:`Q1D <algm-Q1D>`
+3. Execute :ref:`Q1D <algm-Q1D>`
+4. Get reduced workspace, the sum-of-counts workspace and the sum-of-norm workspaces
+   and set on the output of the algorithm
+
+If a 2D reduction has been selected then the algorithm will perform the follow sub-steps:
+
+1. Set data workspace, adjustment workspaces, momentum transfer resolution workspace
+   (if applicable), radius and wavelength cutoffs, momentum transfer limits
+   and the gravity correction on :ref:`Qxy <algm-Qxy>`
+3. Execute :ref:`Qxy <algm-Qxy>`
+4. Get reduced workspace, the sum-of-counts workspace and the sum-of-norm workspaces
+   and set on the output of the algorithm
+
+
+
+``SANSSave``
+------------
 
 The *SANSSave* algorithm performs two steps:
 
