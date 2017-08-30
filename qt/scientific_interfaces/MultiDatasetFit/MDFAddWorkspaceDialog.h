@@ -14,7 +14,7 @@ namespace MDF {
 class AddWorkspaceDialog : public QDialog {
   Q_OBJECT
 public:
-  AddWorkspaceDialog(QWidget *parent);
+  explicit AddWorkspaceDialog(QWidget *parent);
   QString workspaceName() const { return m_workspaceName; }
   std::vector<int> workspaceIndices() const { return m_wsIndices; }
 private slots:

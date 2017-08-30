@@ -421,7 +421,7 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
   * @return List of found full file paths for the files specified
   */
 std::vector<std::string>
-EnggDiffFittingPresenter::processMultiRun(const std::string userInput) {
+EnggDiffFittingPresenter::processMultiRun(const std::string &userInput) {
 
   // Split user input into the first and last run number
   std::vector<std::string> firstLastRunNoVec;
@@ -1030,7 +1030,7 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
 }
 
 void EnggDiffFittingPresenter::runLoadAlg(
-    const std::string focusedFile,
+    const std::string &focusedFile,
     Mantid::API::MatrixWorkspace_sptr &focusedWS) {
   // load the focused workspace file to perform single peak fits
   try {
@@ -1713,7 +1713,7 @@ void EnggDiffFittingPresenter::setDefaultBank(
     m_view->setFittingRunNo(selectedFile);
 }
 
-bool EnggDiffFittingPresenter::isDigit(const std::string text) const {
+bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
 

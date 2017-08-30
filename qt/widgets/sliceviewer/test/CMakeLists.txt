@@ -16,7 +16,6 @@ if ( CXXTEST_FOUND )
     target_link_libraries( SliceViewerTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             SliceViewer
             Crystal
-            MantidQtAPI
             API
             DataObjects
             Geometry
