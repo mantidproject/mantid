@@ -835,6 +835,8 @@ createGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
           static_cast<int>(numHist)));
   for (int g = 0; g < static_cast<int>(numHist); g++) {
     auto &spec = retVal->getSpectrum(g);
+    spec.addDetectorID(
+        g + 1); // Legacy comptibilty: Used to be default IDs in Workspace2D.
     for (int i = 1; i <= 9; i++)
       spec.addDetectorID(g * 9 + i);
     spec.setSpectrumNo(g + 1); // Match detector ID and spec NO
