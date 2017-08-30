@@ -55,7 +55,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                             flags.get('bin_parameters', None))
 
     # Add back-scattering spectrum numbers to flags.
-    flags['BackSpectrum'] = list(VESUVIO().backward_banks)
+    flags['BackSpectrum'] = VESUVIO().backward_banks
 
     # Check if multiple scattering flags have been defined
     if 'ms_flags' in flags:
@@ -144,8 +144,8 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     result_workspaces = []
     group_name = runs + '_result'
     for index in range(num_spec):
-        back_scattering = any([lower <= index <= upper for lower, upper in flags['BackSpectrum']])
-        raise RuntimeError(back_scattering)
+        specNo = sample_data.getSpectrum(index).getSpectrumNo()
+        back_scattering = any([lower <= specNo <= upper for lower, upper in flags['BackSpectrum']])
 
         # Check if the sample contains hydrogen and the current spectra
         # is a back-scattering spectra.
@@ -256,7 +256,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         if fit_workspace is None:
             fit_workspace = _create_param_workspace(num_spec, mtd[linear_correction_fit_params_name])
 
-        spec_num_str = str(sample_data.getSpectrum(index).getSpectrumNo())
+        spec_num_str = str(specNo)
         current_spec = 'spectrum_' + spec_num_str
 
         _update_fit_params(pre_correct_pars_workspace,

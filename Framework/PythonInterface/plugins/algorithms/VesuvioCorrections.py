@@ -550,10 +550,10 @@ class VesuvioCorrections(VesuvioBase):
             material = mBuilder.setFormula(symbol).build()
             cross_section = material.totalScatterXSection()
             cross_section_ratio = cross_section / hydrogen_cross_section
-            weight = constraint.get('weight', default_weight)
-            factor = constraint.get('factor', 1)
+            weight = constraint.get('weight', default_weight).value
+            factor = constraint.get('factor', 1).value
             hydrogen_intensity += cross_section_ratio * factor \
-                                  * weight * constraint['intensity']
+                                  * weight * constraint['intensity'].value
 
         return hydrogen_intensity
 
