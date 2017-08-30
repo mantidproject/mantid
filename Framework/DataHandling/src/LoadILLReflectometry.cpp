@@ -471,7 +471,7 @@ LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
  */
 std::vector<double> LoadILLReflectometry::getXValues() {
   std::vector<double> xVals;                  // no initialisation
-  xVals.reserve(int(m_numberOfChannels) + 1); // reserve memory
+  xVals.reserve(m_numberOfChannels + 1); // reserve memory
   try {
     if (m_acqMode) {
       std::string chopper{"Chopper"};
@@ -509,14 +509,14 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       if (chop1Speed <= 0.0) {
         g_log.error() << "First chopper velocity " << chop1Speed << ". Check you NeXus file.\n";
       }
-      const double t_TOF2 = -1.e+6 * 60.0 *
+      const double t_TOF2 = m_tofDelay - 1.e+6 * 60.0 *
                  (POFF - 45.0 + chop2Phase - chop1Phase + openOffset) /
                  (2.0 * 360 * chop1Speed);
       g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
       // compute tof values
       for (int channelIndex = 0; channelIndex <= static_cast<int>(m_numberOfChannels);
            ++channelIndex) {
-        const double t_TOF1 = (channelIndex + 0.5) * m_channelWidth + m_tofDelay;
+        const double t_TOF1 = (channelIndex + 0.5) * m_channelWidth;
         xVals.push_back(t_TOF1 + t_TOF2);
       }
     } else {
