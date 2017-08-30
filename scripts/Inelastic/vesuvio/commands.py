@@ -73,7 +73,8 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         if contains_hydrogen and back_scattering:
             flags['Hydrogen'] = flags['masses'].pop('H', None)
     else:
-        flags['ms_flags']['HydrogenConstraints'] = dict()
+        raise RuntimeError("Multiple scattering flags not provided. Set the ms_flag, 'ms_enabled' "
+                           "to false, in order to disable multiple scattering corrections.")
 
     last_results = None
 
