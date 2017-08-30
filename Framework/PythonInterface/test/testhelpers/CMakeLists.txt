@@ -41,6 +41,7 @@ target_link_libraries ( PythonWorkspaceCreationHelper LINK_PRIVATE ${TCMALLOC_LI
             DataHandling
             API
             HistogramData
+            Indexing
             Kernel
             Geometry
             ${PYTHON_LIBRARIES}
