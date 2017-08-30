@@ -11,9 +11,15 @@ New features
 Algorithms
 ##########
 
+Vesuvio
+#######
+- Added flag for disabling multiple scattering corrections: flags['ms_flags']['ms_enabled']
+- Added method for specifying a mass by chemical symbol e.g. H for hydrogen, O16 for oxygen-16 isotope
+- Gamma Corrections are no longer done for back-scattering spectra
+- Multiple scattering corrections for back-scattering spectra now approximate hydrogen peak, this peak can be constrained with masses specified by symbol
+
 Bayes
 #####
-
 - Removed fit option from plot options drop-down menu.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 
