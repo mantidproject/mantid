@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/Matrix.h"
@@ -621,7 +622,7 @@ int RectangularDetector::getPointInObject(V3D &) const {
 void RectangularDetector::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
     if (hasComponentInfo()) {
-      m_map->componentInfo().getBoundingBox(index(), absoluteBB);
+      m_map->componentInfo().getBoundingBox(index(), assemblyBox);
       return;
     }
   }

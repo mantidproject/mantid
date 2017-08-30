@@ -412,21 +412,6 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
 
 //----------------------------------------------------------------------------------------------
 
-/**
- * Add a rectangular bank onto an instrument
- * Rectangular detectors, pixels*pixels in size,
- * Banks' lower-left corner is at position (0,0,5*banknum) and they go up to
- (pixels*0.008, pixels*0.008, Z) Pixels are 4 mm wide.
-
- * @param testInstrument :: instrument to add the bank to
- * @param idStart :: start id for first detector id
- * @param pixels :: number of pixels in x (same again in y to give pixels *
- pixels total)
- * @param pixelSpacing :: spacing between pixels
- * @param bankName :: name of the bank
- * @param bankPos :: position of the bank
- * @param bankRot :: rotation of the bank
- */
 void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
                         double pixelSpacing, std::string bankName,
                         const V3D &bankPos, const Quat &bankRot) {

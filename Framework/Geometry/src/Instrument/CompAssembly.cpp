@@ -1,5 +1,6 @@
-#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
