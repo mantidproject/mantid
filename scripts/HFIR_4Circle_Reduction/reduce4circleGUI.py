@@ -4,6 +4,9 @@
 # MainWindow application for reducing HFIR 4-circle
 #
 ################################################################################
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+import six
 import os
 import sys
 import csv
@@ -11,8 +14,25 @@ import time
 import datetime
 import random
 import numpy
+import HFIR_4Circle_Reduction.guiutility as gutil
+import HFIR_4Circle_Reduction.peakprocesshelper as peak_util
+import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
+from HFIR_4Circle_Reduction import plot3dwindow
+from HFIR_4Circle_Reduction.multi_threads_helpers import *
+import HFIR_4Circle_Reduction.optimizelatticewindow as ol_window
+from HFIR_4Circle_Reduction import viewspicedialog
+from HFIR_4Circle_Reduction import peak_integration_utility
+from HFIR_4Circle_Reduction import FindUBUtility
+from HFIR_4Circle_Reduction import message_dialog
+
+# import line for the UI python class
+from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
 
 from PyQt4 import QtCore, QtGui
+
+if six.PY3:
+    unicode = str
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -25,20 +45,6 @@ except ImportError as e:
     NO_SCROLL = True
 else:
     NO_SCROLL = False
-
-import guiutility as gutil
-import peakprocesshelper as peak_util
-import fourcircle_utility as hb3a_util
-import plot3dwindow
-from multi_threads_helpers import *
-import optimizelatticewindow as ol_window
-import viewspicedialog
-import peak_integration_utility
-import FindUBUtility
-import message_dialog
-
-# import line for the UI python class
-from ui_MainWindow import Ui_MainWindow
 
 
 # define constants
@@ -514,11 +520,11 @@ class MainWindow(QtGui.QMainWindow):
             yes = gutil.show_message(self, 'Project file %s does exist. This is supposed to be '
                                            'an incremental save.' % project_file_name)
             if yes:
-                print '[INFO] Save project in incremental way.'
+                print('[INFO] Save project in incremental way.')
             else:
-                print '[INFO] Saving activity is cancelled.'
+                print('[INFO] Saving activity is cancelled.')
         else:
-            print '[INFO] Saving current project to %s.' % project_file_name
+            print('[INFO] Saving current project to %s.' % project_file_name)
 
         # gather some useful information
         ui_dict = dict()
@@ -556,7 +562,7 @@ class MainWindow(QtGui.QMainWindow):
         # TODO/NOW/TODAY - Implement a pop-up dialog for this
         information = 'Project has been saved to {0}\n'.format(project_file_name),
         information += 'Including dictionary keys: {0}'.format(ui_dict)
-        print '[INFO]\n{0}'.format(information)
+        print('[INFO]\n{0}'.format(information))
 
         return
 
@@ -604,7 +610,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.do_apply_setup()
                 self.do_set_experiment()
             except KeyError:
-                print '[Error] Some field cannot be found.'
+                print('[Error] Some field cannot be found.')
 
         return
 
@@ -854,7 +860,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
         except AssertionError as ass_err:
-            print '[ERROR] Unable to set ROI due to {0}.'.format(ass_err)
+            print('[ERROR] Unable to set ROI due to {0}.'.format(ass_err))
 
         return
 
@@ -983,7 +989,7 @@ class MainWindow(QtGui.QMainWindow):
         peak_info_list = list()
         status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
         assert status
-        for i_row in xrange(num_rows):
+        for i_row in range(num_rows):
             if self.ui.tableWidget_peaksCalUB.is_selected(i_row) is True:
                 scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
                 if pt_num < 0:
@@ -1107,7 +1113,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
-        row_number_list = range(num_rows)
+        row_number_list = list(range(num_rows))
         self.ui.tableWidget_peaksCalUB.delete_rows(row_number_list)
 
         return
@@ -1265,7 +1271,7 @@ class MainWindow(QtGui.QMainWindow):
         info_str = '# Selected scans: \n'
         info_str += '{0}'.format(scan_number_list)
 
-        print '[TEMP] Selected scans:\n{0}'.format(info_str)
+        print('[TEMP] Selected scans:\n{0}'.format(info_str))
 
         return
 
@@ -1347,7 +1353,7 @@ class MainWindow(QtGui.QMainWindow):
             start_scan_number = 0
         end_scan_number = ret_obj[1]
         if end_scan_number is None:
-            end_scan_number = sys.maxint
+            end_scan_number = sys.maxsize
 
         status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_filterCountsLower,
                                                      self.ui.lineEdit_filterCountsUpper],
@@ -1441,14 +1447,14 @@ class MainWindow(QtGui.QMainWindow):
         # plot calculated motor position (or Pt.) - integrated intensity per Pts.
         motor_pos_vec = int_peak_dict['motor positions']
         pt_intensity_vec = int_peak_dict['pt intensities']
-        # print '[DB...BAT] motor position vector: {0} of type {1}'.format(motor_pos_vec, type(motor_pos_vec))
+        # print('[DB...BAT] motor position vector: {0} of type {1}'.format(motor_pos_vec, type(motor_pos_vec)))
         motor_std = motor_pos_vec.std()
         if motor_std > 0.005:
             self.ui.graphicsView_integratedPeakView.plot_raw_data(motor_pos_vec, pt_intensity_vec)
         else:
             # motor position fixed
             # KEEP-IN-MIND:  Make this an option from
-            self.ui.graphicsView_integratedPeakView.plot_raw_data(numpy.array(range(1, len(pt_intensity_vec)+1)),
+            self.ui.graphicsView_integratedPeakView.plot_raw_data(numpy.arange(1, len(pt_intensity_vec)+1),
                                                                   pt_intensity_vec)
 
         if self._mySinglePeakIntegrationDialog is None:
@@ -1486,7 +1492,7 @@ class MainWindow(QtGui.QMainWindow):
             raise RuntimeError('Peak integration result dictionary has keys {0}. Error is caused by {1}.'
                                ''.format(int_peak_dict.keys(), key_err))
         except ValueError as value_err:
-            print '[ERROR] Unable to fit by Gaussian due to {0}.'.format(value_err)
+            print('[ERROR] Unable to fit by Gaussian due to {0}.'.format(value_err))
         else:
             self.plot_model_data(motor_pos_vec, fit_gauss_dict)
 
@@ -1638,12 +1644,12 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get UB matrix
         ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix()
-        print '[Info] Get UB matrix from table ', ub_matrix
+        print('[Info] Get UB matrix from table ', ub_matrix)
 
         # Index all peaks
         num_peaks = self.ui.tableWidget_peaksCalUB.rowCount()
         err_msg = ''
-        for i_peak in xrange(num_peaks):
+        for i_peak in range(num_peaks):
             scan_no = self.ui.tableWidget_peaksCalUB.get_exp_info(i_peak)[0]
             status, ret_obj = self._myControl.index_peak(ub_matrix, scan_number=scan_no)
             if status is True:
@@ -2162,7 +2168,7 @@ class MainWindow(QtGui.QMainWindow):
             self.do_set_experiment()
 
         except KeyError:
-            print '[Error] Some field cannot be found.'
+            print('[Error] Some field cannot be found.')
 
         # set experiment configurations
         # set sample distance
@@ -2186,7 +2192,7 @@ class MainWindow(QtGui.QMainWindow):
             self._myControl.set_detector_center(exp_number, center_row, center_col)
 
         # TODO/ISSUE/NOW/TODAY - Shall pop out a dialog to notify the completion
-        print '[INFO] Project from file {0} is loaded.'.format(project_file_name)
+        print('[INFO] Project from file {0} is loaded.'.format(project_file_name))
 
         return
 
@@ -2214,10 +2220,10 @@ class MainWindow(QtGui.QMainWindow):
         # get the UB matrix value
         ub_src_tab = self._refineConfigWindow.get_ub_source()
         if ub_src_tab == 3:
-            print '[INFO] UB matrix comes from tab "Calculate UB".'
+            print('[INFO] UB matrix comes from tab "Calculate UB".')
             ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix_str()
         elif ub_src_tab == 4:
-            print '[INFO] UB matrix comes from tab "UB Matrix".'
+            print('[INFO] UB matrix comes from tab "UB Matrix".')
             ub_matrix = self.ui.tableWidget_ubInUse.get_matrix_str()
         else:
             self.pop_one_button_dialog('UB source tab %s is not supported.' % str(ub_src_tab))
@@ -2319,7 +2325,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # reset all rows back to SPICE HKL
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
-        for i_row in xrange(num_rows):
+        for i_row in range(num_rows):
             scan, pt = self.ui.tableWidget_peaksCalUB.get_scan_pt(i_row)
             if pt < 0:
                 pt = None
@@ -2399,8 +2405,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # construct string
         ub_str = '# UB matrix\n# %s\n' % str(self.ui.label_ubInfoLabel.text())
-        for i_row in xrange(3):
-            for j_col in xrange(3):
+        for i_row in range(3):
+            for j_col in range(3):
                 ub_str += '%.15f  ' % in_use_ub[i_row][j_col]
             ub_str += '\n'
 
@@ -2637,8 +2643,8 @@ class MainWindow(QtGui.QMainWindow):
                 self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, is_spice, round_error)
             except RuntimeError as run_err:
                 scan_number, pt_number = self.ui.tableWidget_peaksCalUB.get_scan_pt(row_index)
-                print '[ERROR] Unable to convert HKL to integer for scan {0} due to {1}.' \
-                      ''.format(scan_number, run_err)
+                print('[ERROR] Unable to convert HKL to integer for scan '
+                      '{0} due to {1}.'.format(scan_number, run_err))
         # END-FOR
 
         # disable the set to integer button and enable the revert/undo button
@@ -2670,8 +2676,8 @@ class MainWindow(QtGui.QMainWindow):
                 intensity2, error2 = peak_info_obj.get_intensity(integrate_type, True)
                 self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity1, intensity2, error2, integrate_type)
             except RuntimeError as run_err:
-                print '[ERROR] Unable to get peak intensity of scan {0} due to {1}.' \
-                      ''.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err)
+                print('[ERROR] Unable to get peak intensity of scan'
+                      ' {0} due to {1}.'.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err))
         # END-FOR
 
         return
@@ -2725,7 +2731,7 @@ class MainWindow(QtGui.QMainWindow):
                 try:
                     ub_matrix = self._myControl.get_ub_matrix(exp_number)
                 except KeyError as key_err:
-                    print '[Error] unable to get UB matrix: %s' % str(key_err)
+                    print('[Error] unable to get UB matrix: %s' % str(key_err))
                     self.pop_one_button_dialog('Unable to get UB matrix.\nCheck whether UB matrix is set.')
                     return
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i, allow_magnetic=True)
@@ -2993,8 +2999,8 @@ class MainWindow(QtGui.QMainWindow):
         ub_matrix = self.ui.tableWidget_ubInUse.get_matrix()
 
         text = ''
-        for i in xrange(3):
-            for j in xrange(3):
+        for i in range(3):
+            for j in range(3):
                 text += '%.7f, ' % ub_matrix[i][j]
             text += '\n'
 
@@ -3184,7 +3190,7 @@ class MainWindow(QtGui.QMainWindow):
         if self._my3DWindow is None:
             self._my3DWindow = plot3dwindow.Plot3DWindow(self)
 
-        print '[INFO] Write file to %s' % md_file_name
+        print('[INFO] Write file to %s' % md_file_name)
         self._my3DWindow.add_plot_by_file(md_file_name)
         self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
         self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
@@ -3217,8 +3223,8 @@ class MainWindow(QtGui.QMainWindow):
 
         pt_peak_centre_array = numpy.ndarray(shape=(num_pt_peaks, 3), dtype='float')
         pt_peak_intensity_array = numpy.ndarray(shape=(num_pt_peaks,), dtype='float')
-        for i_pt in xrange(num_pt_peaks):
-            for j in xrange(3):
+        for i_pt in range(num_pt_peaks):
+            for j in range(3):
                 pt_peak_centre_array[i_pt][j] = weight_peak_centers[i_pt][j]
             pt_peak_intensity_array[i_pt] = weight_peak_intensities[i_pt]
 
@@ -3271,7 +3277,7 @@ class MainWindow(QtGui.QMainWindow):
         # get values
         try:
             scan_num, pt_num = self.ui.tableWidget_surveyTable.get_selected_run_surveyed()
-        except RuntimeError, err:
+        except RuntimeError as err:
             self.pop_one_button_dialog(str(err))
             return
 
@@ -3319,13 +3325,13 @@ class MainWindow(QtGui.QMainWindow):
 
         # collection all the information
         report_dict = dict()
-        print '[DB] Selected rows: {0}'.format(row_number_list)
+        print('[DB] Selected rows: {0}'.format(row_number_list))
         for row_number in row_number_list:
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             peak_info = self._myControl.get_peak_info(exp_number, scan_number)
             peak_integrate_dict = peak_info.generate_integration_report()
             report_dict[scan_number] = peak_integrate_dict
-            print '[DB] Report Scan {0}. Keys: {1}'.format(scan_number, peak_integrate_dict.keys())
+            print('[DB] Report Scan {0}. Keys: {1}'.format(scan_number, peak_integrate_dict.keys()))
         # END-FOR
 
         return report_dict
@@ -3400,7 +3406,7 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.set_working_directory(str(self.ui.lineEdit_workDir.text()))
         self._myControl.set_server_url(str(self.ui.lineEdit_url.text()))
 
-        print '[INFO] Session {0} has been loaded.'.format(filename)
+        print('[INFO] Session {0} has been loaded.'.format(filename))
 
         return
 
@@ -3718,7 +3724,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             error_msg = roi
             # self.pop_one_button_dialog(error_msg)
-            print '[Error] %s' % error_msg
+            print('[Error] %s' % error_msg)
         # END-IF
 
         # Information

@@ -4,11 +4,13 @@ Test some features of MDWorkspaces, such as
 file-backed MDWorkspaces.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import os
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
+from six.moves import range
 
 ###############################################################################
 
@@ -25,7 +27,7 @@ class PlusMDTest(stresstesting.MantidStressTest):
         ws = mtd["test_binned"]
         EqualToMD(LHSWorkspace=ws, RHSWorkspace=self.original_binned, OutputWorkspace='comparison')
         comparison = mtd['comparison']
-        for i in xrange(comparison.getNPoints()):
+        for i in range(comparison.getNPoints()):
             if not comparison.signalAt(i):
                 raise Exception("Difference in workspace %s vs original_binned at index %d" % (wsname, i))
 
@@ -152,8 +154,8 @@ class MergeMDTest(stresstesting.MantidStressTest):
         LoadEventNexus(Filename='CNCS_7860_event.nxs',
                        OutputWorkspace='CNCS_7860_event_NXS',CompressTolerance=0.1)
 
-        for omega in xrange(0, 5):
-            print "Starting omega %03d degrees" % omega
+        for omega in range(0, 5):
+            print("Starting omega %03d degrees" % omega)
             CreateMDWorkspace(Dimensions='3',Extents='-5,5,-5,5,-5,5',Names='Q_sample_x,Q_sample_y,Q__sample_z',
                               Units='A,A,A',SplitInto='3',SplitThreshold='200',MaxRecursionDepth='3',
                               MinRecursionDepth='3', OutputWorkspace='CNCS_7860_event_MD')
