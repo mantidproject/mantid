@@ -7,10 +7,6 @@ try:
 except ImportError:
     canMantidPlot = False  #
 
-from .ui_refl_window import Ui_windowRefl
-from .refl_save import Ui_SaveWindow
-from .refl_choose_col import ReflChoose
-from. refl_options import ReflOptions
 import csv
 import os
 import re
@@ -25,6 +21,11 @@ from isis_reflectometry.combineMulti import *
 import mantidqtpython
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
 from mantid import UsageService
+
+from ui.reflectometer.ui_refl_window import Ui_windowRefl
+from ui.reflectometer.refl_save import Ui_SaveWindow
+from ui.reflectometer.refl_choose_col import ReflChoose
+from ui.reflectometer.refl_options import ReflOptions
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -1307,11 +1308,11 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
         """
         try:
 
-            dialog_controller = refl_options.ReflOptions(def_method=self.live_method, def_freq=self.live_freq,
-                                                         def_alg_use=self.__alg_use,
-                                                         def_icat_download=self.__icat_download,
-                                                         def_group_tof_workspaces=self.__group_tof_workspaces,
-                                                         def_stitch_right=self.__scale_right)
+            dialog_controller = ReflOptions(def_method=self.live_method, def_freq=self.live_freq,
+                                            def_alg_use=self.__alg_use,
+                                            def_icat_download=self.__icat_download,
+                                            def_group_tof_workspaces=self.__group_tof_workspaces,
+                                            def_stitch_right=self.__scale_right)
             if dialog_controller.exec_():
                 # Fetch the settings back off the controller
                 self.live_freq = dialog_controller.frequency()

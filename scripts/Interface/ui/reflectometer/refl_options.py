@@ -1,7 +1,7 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from .ui_refl_options_window import Ui_OptionsDialog
 from PyQt4 import QtCore, QtGui
+from ui.reflectometer.ui_refl_options_window import Ui_OptionsDialog
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
