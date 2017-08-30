@@ -277,7 +277,7 @@ entries is matched and that the end time is larger than the start time.
 
 
 `mask.py`
-**********
+*********
 
 The `StateMask` class holds information regarding time and pixel masking.
 It also contains two sub-states which contain detector-specific masking information.
@@ -297,15 +297,163 @@ use_mask_phi_mirror    If the mirror slice should be used                       
 beam_stop_arm_width    The width of the beam stop arm                            `PositiveFloatParameter` Y         N
 beam_stop_arm_angle    The angle of the beam stop arm                            `FloatParameter`         Y         N
 beam_stop_arm_pos1     The x position of the beam stop arm                       `FloatParameter`         Y         N
-beam_stop_arm_pos2     The y position of the beam stop arm                       `FloatParameter`         Y         N
+beam_stop_arm_pos2     The y position of the bThe lower wavelength boundaream stop arm                       `FloatParameter`         Y         N
 clear                  currently not used                                        `BoolParameter`          Y         N
 clear_time             currently not used                                        `BoolParameter`          Y         N
 detector               A dict of detector type to `StateMaskDetector` sub-states `DictParameter`          N         Y
 idf_path               The path to the IDF                                       `StringParameter`        N         Y
+====================== ======================================================== ========================= ========= ===============
 
 Validation is applied to some of the entries.
 
 The detector-specific settings are stored in the `StateMaskDetector` which contains the following parameters:
+
+============================ ============ =============================== ========= ===============
+Name                           Comment      Type                          Optional? Auto-generated?
+============================ ============ =============================== ========= ===============
+single_vertical_strip_mask   -            `PositiveIntegerListParameter`  Y         N
+range_vertical_strip_start   -            `PositiveIntegerListParameter`  Y         N
+range_vertical_strip_stop    -            `PositiveIntegerListParameter`  Y         N
+single_horizontal_strip_mask -            `PositiveIntegerListParameter`  Y         N
+range_horizontal_strip_start -            `PositiveIntegerListParameter`  Y         N
+range_horizontal_strip_stop  -            `PositiveIntegerListParameter`  Y         N
+block_horizontal_start       -            `PositiveIntegerListParameter`  Y         N
+block_horizontal_stop        -            `PositiveIntegerListParameter`  Y         N
+block_vertical_start         -            `PositiveIntegerListParameter`  Y         N
+block_vertical_stop          -            `PositiveIntegerListParameter`  Y         N
+block_cross_horizontal       -            `PositiveIntegerListParameter`  Y         N
+block_cross_vertical         -            `PositiveIntegerListParameter`  Y         N
+bin_mask_start               -            `FloatListParameter`            Y         N
+bin_mask_stop                -            `FloatListParameter`            Y         N
+detector_name                -            `StringParameter`               Y         N
+detector_name_short          -            `StringParameter`               Y         N
+single_spectra               -            `PositiveIntegerListParameter`  Y         N
+spectrum_range_start         -            `PositiveIntegerListParameter`  Y         N
+spectrum_range_stop          -            `PositiveIntegerListParameter`  Y         N
+============================ ============ =============================== ========= ===============
+
+Again the detector-specific settings contain multiple validation steps on the state.
+
+
+`wavelength.py`
+**************
+The `StateWavelength` class contains the information required to perform the conversion of the scatter data
+ from time-of-flight to wavelength units. The parameters are:
+
+===================== ==================================== =================================== ========= ===============
+Name                  Comment                              Type                                Optional? Auto-generated?
+===================== ==================================== =================================== ========= ===============
+rebin_type            The type of rebinning                `ClassTypeParameter(RebinType)      N         N
+wavelength_low        The lower wavelength boundary        `PositiveFloatParameter`            N         N
+wavelength_high       The upper wavelength boundary        `PositiveFloatParameter`            N         N
+wavelength_step       The wavelength step                  `PositiveFloatParameter`            N         N
+wavelength_step_type  This is either linear or logarithmic `ClassTypeParameter(RangeStepType)` N         N
+===================== ==================================== =================================== ========= ===============
+
+The validation ensures that all entries are specified and that the lower wavelength boundary is smaller than the upper wavelength boundary.
+
+`save.py`
+*********
+
+The `StateSave` class does not hold information which is direclty related to the reduction but contains the all the required information about saving the reduced data. The relevant parameters are:
+
+================================== ================================================== =================================== ========= =============== =======
+Name                               Comment                                            Type                                Optional? Auto-generated? Default
+================================== ================================================== =================================== ========= =============== =======
+zero_free_correction               If zero error correction (inflation) should happen `BoolParameter`                     Y         N               True
+file_format                        A list of file formats to save into                `ClassTypeListParameter(SaveType)`  Y         N               True
+user_specified_output_name         A custom user-specified name for the saved file    `StringWithNoneParameter`           Y         N               -
+user_specified_output_name_suffix  A custom user-specified suffix for the saved file  `StringParameter`                   Y         N               -
+use_reduction_mode_as_suffix       If the reduction mode should be used as a suffix   `BoolParameter`                     Y         N               -
+================================== ================================================== =================================== ========= =============== =======
+
+
+`scale.py`
+*********
+
+The `StateScale` class contains the information which is required for the absolute value scaling
+and the volume information. The parameters are:
+
+
+===================== ======================================== ================================== ========= ===============
+Name                  Comment                                  Type                               Optional? Auto-generated?
+===================== ======================================== ================================== ========= ===============
+shape                 The user-specified shape of the sample   `ClassTypeParameter(SampleShape)`  N         Y
+thickness             The user-specified sample thickness      `PositiveFloatParameter`           N         Y
+width                 The user-specified sample width          `PositiveFloatParameter`           N         Y
+height                The user-specified sample height         `PositiveFloatParameter`           N         Y
+scale                 The user-specified absolute scale        `PositiveFloatParameter`           N         Y
+shape_from_file       The file-extracted shape of the sample   `ClassTypeParameter(SampleShape)`  N         Y
+thickness_from_file   The file-extracted sample thickness      `PositiveFloatParameter`           N         Y
+width_from_file       The file-extracted sample width          `PositiveFloatParameter`           N         Y
+height_from_file      The file-extracted sample height         `PositiveFloatParameter`           N         Y
+===================== ======================================== ================================== ========= ===============
+
+
+`adjustment.py`
+***************
+
+Adjustment workspaces are generated to be consumed in the momentum transfer conversion step.
+There are three types of adjustments
+
+- Pure wavelength adjustments, ie adjustments which only affect the bins
+- Pure pixel adjustments, ie adjustments which only affect the spectra
+- Pixel-and-wavelength adjustments, ie adjustments which affect both the bins and spectra
+
+The `StateAdjustment` class is a composite state which is made of information
+relating to the different types of adjustments
+
+The parameters are:
+
+================================ ==================================================== =================================================== ========= =============== =======
+Name                             Comment                                              Type                                                Optional? Auto-generated? Default
+================================ ==================================================== =================================================== ========= =============== =======
+calculate_transmission           Information for the transmission calculation         `TypedParameter(StateCalculateTransmission)`        N         N               -
+normalize_to_monitor             Information for the monitor normalization            `TypedParameter(StateNormalizeToMonitor)`           N         N               -
+wavelength_and_pixel_adjustment  Information for combining different adjustment       `TypedParameter(StateWavelengthAndPixelAdjustment)` N         N               -
+wide_angle_correction            If wide angle calculation should be performed.       `BoolParameter`                                     Y         N               False
+                                 Note that this will produce the pixel-and-wavelength
+                                 adjustment
+================================ ==================================================== =================================================== ========= =============== =======
+
+
+The transmission calculation state
+----------------------------------
+
+The transmission calculation produces one of the wavelength adjustment workspaces.
+This reduction step is one of the more complicated bits of the reduction and hence has a
+large variety of settings. The `StateCalculateTransmission` class contains the
+following parameters parameters are:
+
+================================ ================================================================================================ =============================== ========= =============== =======
+Name                             Comment                                                                                          Type                            Optional? Auto-generated? Default
+================================ ================================================================================================ =============================== ========= =============== =======
+transmission_radius_on_detector  A radius around the beam centre for transmission ROI on the bank                                 `PositiveFloatParameter`        Y         N               -
+transmission_roi_files           A list of ROI files for transmission ROI on the bank                                             `StringListParameter`           Y         N               -
+transmission_mask_files          A list of mask files for transmission ROI on the bank                                            `StringListParameter`           Y         N               -
+default_transmission_monitor     The default transmission monitor (if nothing else has been specified)                            `PositiveIntegerParameter`      N         Y               -
+transmission_monitor             The relevant transmission monitor (if no ROI is being used)                                      `PositiveIntegerParameter`      Y         N               -
+default_incident_monitor         The default incident monitor (if nothing else has been specified)                                `PositiveIntegerParameter`      N         Y
+incident_monitor                 The incident monitor                                                                             `PositiveIntegerParameter`      Y         N               -
+prompt_peak_correction_min       The start time of a prompt peak correction                                                       `PositiveFloatParameter`        Y         N               -
+prompt_peak_correction_max       The stop time of a prompt peak correction                                                        `PositiveFloatParameter`        Y         N               -
+prompt_peak_correction_enabled   If the prompt peak correction should occur                                                       `BoolParameter`                 Y         N               True
+rebin_type                       The type of wavelength rebinning, ie standard or interpolating                                   `ClassTypeParameter(RebinType)` Y         N               -
+wavelength_low                   The lower wavelength boundary                                                                    `PositiveFloatParameter         Y         N               -
+wavelength_high                  The upper wavelength boundary                                                                    `PositiveFloatParameter         Y         N               -
+wavelength_step                  The wavelength step                                                                              `PositiveFloatParameter         Y         N               -
+wavelength_step_type             The wavelength step type, ie lin or log                                                          `ClassTypeParameter(RebinType)` Y         N               -
+use_full_wavelength_range        If the full wavelength range of the instrument should be used                                    `BoolParameter`                 Y         N               -
+wavelength_full_range_low        The lower wavelength boundary of the full wavelength range                                       `PositiveFloatParameter`        Y         N               -
+wavelength_full_range_high       The upper wavelength boundary of the full wavelength range                                       `PositiveFloatParameter`        Y         N               -
+background_TOF_general_start     General lower boundary for background correction                                                 `FloatParameter`                Y         N               -
+background_TOF_general_stop      General upper boundary for background correction                                                 `FloatParameter`                Y         N               -
+background_TOF_monitor_start     Monitor specific lower boundary for background correction (monitor vs. start value)              `DictParameter`                 Y         N               -
+background_TOF_monitor_stop      Monitor specific upper boundary for background correction (monitor vs. stop value)               `DictParameter`                 Y         N               -
+background_TOF_roi_start         Lower bound of background correction when using ROI on detector                                  `FloatParameter`                Y         N               -
+background_TOF_roi_stop          Upper bound of background correction when using ROI on detector                                  `FloatParameter`                Y         N               -
+fit                              A dict for each data type (sample and can) to the state of fit settings (`StateTransmissionFit`) `DictParameter`                 Y         N               -
+================================ ================================================================================================ =============================== ========= =============== =======
 
 
 
