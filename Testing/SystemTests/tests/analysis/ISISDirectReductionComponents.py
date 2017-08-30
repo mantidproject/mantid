@@ -8,6 +8,10 @@ from mantid.api import Workspace,IEventWorkspace
 
 from Direct.PropertyManager import PropertyManager
 import ISIS_MariReduction as mr
+try:
+    from importlib import reload
+except ImportError:
+    pass
 
 #----------------------------------------------------------------------
 
