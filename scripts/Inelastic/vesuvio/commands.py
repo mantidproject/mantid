@@ -54,6 +54,9 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                             flags['diff_mode'], fit_mode,
                                             flags.get('bin_parameters', None))
 
+    # Add back-scattering spectrum numbers to flags.
+    flags['BackSpectrum'] = list(VESUVIO().backward_banks)
+
     # Check if multiple scattering flags have been defined
     if 'ms_flags' in flags:
 
@@ -63,15 +66,6 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                 _parse_ms_hydrogen_constraints(flags['ms_flags']['HydrogenConstraints'])
         else:
             flags['ms_flags']['HydrogenConstraints'] = dict()
-
-        back_scattering = flags['spectra'] == 'backward'
-        flags['ms_flags']['BackScattering'] = back_scattering
-        contains_hydrogen = 'H' in flags['masses']
-
-        # Check if the sample contains hydrogen and back scattering
-        # spectra are being used.
-        if contains_hydrogen and back_scattering:
-            flags['Hydrogen'] = flags['masses'].pop('H', None)
     else:
         raise RuntimeError("Multiple scattering flags not provided. Set the ms_flag, 'ms_enabled' "
                            "to false, in order to disable multiple scattering corrections.")
@@ -142,6 +136,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     pars_workspace = None
     fit_workspace = None
     max_fit_iterations = flags.get('max_fit_iterations', 5000)
+    contains_hydrogen = 'H' in flags['masses']
 
     output_groups = []
     chi2_values = []
@@ -149,6 +144,14 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     result_workspaces = []
     group_name = runs + '_result'
     for index in range(num_spec):
+        back_scattering = any([lower <= index <= upper for lower, upper in flags['BackSpectrum']])
+        raise RuntimeError(back_scattering)
+
+        # Check if the sample contains hydrogen and the current spectra
+        # is a back-scattering spectra.
+        if contains_hydrogen and back_scattering:
+            flags['Hydrogen'] = flags['masses'].pop('H', None)
+
         if isinstance(profiles_strs, list):
             profiles = profiles_strs[index]
         else:
@@ -199,7 +202,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         # Check if Hydrogen was supplied but not added to the masses in
         # order to avoid fitting a hydrogen peak for back-scattering
         # spectra.
-        if 'Hydrogen' in flags:
+        if back_scattering and 'Hydrogen' in flags:
             # Add hydrogen to mass values for corrections
             mBuilder = MaterialBuilder()
             index_to_symbol_map[str(len(mass_values))] = flags['Hydrogen']
@@ -217,6 +220,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                               MultipleScattering=True,
                               GammaBackgroundScale=flags.get('fixed_gamma_scaling', 0.0),
                               ContainerScale=flags.get('fixed_container_scaling', 0.0),
+                              BackScattering=back_scattering,
                               **corrections_args)
 
         # Check if Hydrogen was added to mass values for back-scattering

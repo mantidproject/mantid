@@ -225,7 +225,7 @@ class VesuvioCorrections(VesuvioBase):
         fixed_params = {}
 
         fixed_gamma_factor = self.getProperty("GammaBackgroundScale").value
-        if fixed_gamma_factor != 0.0:
+        if fixed_gamma_factor != 0.0 and not self._back_scattering:
             fixed_params['GammaBackground'] = fixed_gamma_factor
 
         fixed_container_scale = self.getProperty("ContainerScale").value
@@ -236,7 +236,7 @@ class VesuvioCorrections(VesuvioBase):
         self.setProperty("LinearFitResult", params_ws)
 
         # Scale gamma background
-        if self.getProperty("GammaBackground").value:
+        if self.getProperty("GammaBackground").value and not self._back_scattering:
             gamma_correct_ws = self._get_correction_workspace('GammaBackground')[1]
             gamma_factor = self._get_correction_scale_factor('GammaBackground',
                                                              fit_corrections, params_ws)
@@ -309,7 +309,7 @@ class VesuvioCorrections(VesuvioBase):
             self._correction_workspaces.append(self._container_ws.name())
 
         # Do gamma correction
-        if self.getProperty("GammaBackground").value:
+        if self.getProperty("GammaBackground").value and not self._back_scattering:
             self._correction_workspaces.append(self._gamma_correction())
 
         # Do multiple scattering correction
@@ -545,7 +545,8 @@ class VesuvioCorrections(VesuvioBase):
         hydrogen_intensity = 0
         default_weight = 1.0 / len(constraints)
 
-        for symbol, constraint in constraints.items():
+        for symbol in constraints.keys():
+            constraint = constraints[symbol].value
             material = mBuilder.setFormula(symbol).build()
             cross_section = material.totalScatterXSection()
             cross_section_ratio = cross_section / hydrogen_cross_section
