@@ -410,10 +410,9 @@ ReflectometryReductionOneAuto2::calculateTheta(const std::string &instructions,
   alg->setProperty("DetectorComponentName", detectorsOfInterest[0]);
   alg->execute();
   const double theta = alg->getProperty("TwoTheta");
-  // First factor 0.5 detector position, which isexpected to be at 2 * theta
-  // Second factor 0.5 comes from SpecularReflectionCalculateTheta, which
-  // outputs 2 * theta
-  return theta * 0.5 * 0.5;
+  // Take a factor of 0.5 of the detector position, which isexpected to be at 2
+  // * theta
+  return theta * 0.5;
 }
 
 /** Set direct beam properties

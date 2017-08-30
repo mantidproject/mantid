@@ -280,6 +280,7 @@ set ( SRC_FILES
 	src/SpectrumAlgorithm.cpp
 	src/SpecularReflectionAlgorithm.cpp
 	src/SpecularReflectionCalculateTheta.cpp
+	src/SpecularReflectionCalculateTheta2.cpp
 	src/SpecularReflectionPositionCorrect.cpp
 	src/SpecularReflectionPositionCorrect2.cpp
 	src/SphericalAbsorption.cpp
@@ -603,6 +604,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SpectrumAlgorithm.h
 	inc/MantidAlgorithms/SpecularReflectionAlgorithm.h
 	inc/MantidAlgorithms/SpecularReflectionCalculateTheta.h
+	inc/MantidAlgorithms/SpecularReflectionCalculateTheta2.h
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect2.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
@@ -912,6 +914,7 @@ set ( TEST_FILES
 	SparseInstrumentTest.h
 	SpatialGroupingTest.h
 	SpecularReflectionCalculateThetaTest.h
+	SpecularReflectionCalculateTheta2Test.h
 	SpecularReflectionPositionCorrect2Test.h
 	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
