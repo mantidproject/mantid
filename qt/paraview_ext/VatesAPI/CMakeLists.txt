@@ -248,6 +248,7 @@ target_link_libraries( VatesAPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   DataHandling
   Kernel
   DataObjects
+  Indexing
   vtkCommonCore
   vtkCommonDataModel
   vtkIOLegacy
