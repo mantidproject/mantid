@@ -5,56 +5,47 @@
 #include "MantidAlgorithms/SpatialGrouping.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <fstream>
 
+using namespace Mantid;
+
 class SpatialGroupingTest : public CxxTest::TestSuite {
 public:
   void testMetaInfo() {
-    alg = new Mantid::Algorithms::SpatialGrouping();
-    TS_ASSERT_EQUALS(alg->name(), "SpatialGrouping");
-    TS_ASSERT_EQUALS(alg->version(), 1);
-    delete alg;
+    Algorithms::SpatialGrouping alg;
+    TS_ASSERT_EQUALS(alg.name(), "SpatialGrouping");
+    TS_ASSERT_EQUALS(alg.version(), 1);
   }
 
   void testInit() {
-    alg = new Mantid::Algorithms::SpatialGrouping();
-    TS_ASSERT(!alg->isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg->initialize());
-    TS_ASSERT(alg->isInitialized());
-    delete alg;
+    Algorithms::SpatialGrouping alg;
+    TS_ASSERT(!alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
   }
 
   void testExec() {
-    // Test the algorithm
-    // Create a workspace
     const int nhist(18);
-    Mantid::API::MatrixWorkspace_sptr workspace =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, 1));
-    // Create a parameterised instrument
-    Mantid::Geometry::Instrument_sptr instrument =
-        boost::dynamic_pointer_cast<Mantid::Geometry::Instrument>(
-            ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    workspace->setInstrument(instrument);
+    auto workspace = DataObjects::create<DataObjects::Workspace2D>(
+        ComponentCreationHelper::createTestInstrumentCylindrical(2),
+        Indexing::IndexInfo(nhist), HistogramData::BinEdges(2));
 
-    alg = new Mantid::Algorithms::SpatialGrouping();
-    alg->initialize();
-    alg->setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace",
-                                                        workspace);
-    alg->setProperty("Filename", "test_SpatialGrouping");
-    alg->execute();
+    Algorithms::SpatialGrouping alg;
+    alg.initialize();
+    alg.setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace",
+                                                       std::move(workspace));
+    alg.setProperty("Filename", "test_SpatialGrouping");
+    alg.execute();
 
-    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT(alg.isExecuted());
 
-    std::string file = alg->getProperty("Filename");
+    std::string file = alg.getProperty("Filename");
 
     Poco::File fileobj(file);
     const bool fileExists = fileobj.exists();
@@ -106,8 +97,5 @@ public:
     // delete file
     remove(file.c_str());
   }
-
-private:
-  Mantid::Algorithms::SpatialGrouping *alg;
 };
 #endif

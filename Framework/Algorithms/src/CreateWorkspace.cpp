@@ -199,13 +199,6 @@ void CreateWorkspace::exec() {
     const std::vector<double>::difference_type yEnd = yStart + ySize;
     auto local_i = localIndices[0];
 
-    if (!parentWS) {
-      // There is no instrument so setting detector IDs makes no sense, but if
-      // we don't we break quite a few unit tests relying on this legacy
-      // behavior.
-      outputWS->getSpectrum(local_i).setDetectorID(i + 1);
-    }
-
     // Just set the pointer if common X bins. Otherwise, copy in the right chunk
     // (as we do for Y).
     if (!commonX)

@@ -82,7 +82,6 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
     data[i] = new Histogram1D(spec);
     // Default spectrum number = starts at 1, for workspace index 0.
     data[i]->setSpectrumNo(specnum_t(i + 1));
-    data[i]->setDetectorID(detid_t(i + 1));
   }
 
   // Add axes that reference the data
@@ -113,7 +112,6 @@ void Workspace2D::init(const std::size_t &NVectors,
     data[i] = new Histogram1D(spec);
     // Default spectrum number = starts at 1, for workspace index 0.
     data[i]->setSpectrumNo(specnum_t(i + 1));
-    data[i]->setDetectorID(detid_t(i + 1));
   }
 
   // Add axes that reference the data
