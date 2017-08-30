@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-import ui_refl_options_window
+from .ui_refl_options_window import Ui_OptionsDialog
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -10,7 +10,7 @@ except AttributeError:
         return s
 
 
-class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
+class ReflOptions(QtGui.QDialog, Ui_OptionsDialog):
     """
     Member variables
     """

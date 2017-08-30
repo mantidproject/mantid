@@ -7,10 +7,10 @@ try:
 except ImportError:
     canMantidPlot = False  #
 
-import ui_refl_window
-import refl_save
-import refl_choose_col
-import refl_options
+from .ui_refl_window import Ui_windowRefl
+from .refl_save import Ui_SaveWindow
+from .refl_choose_col import ReflChoose
+from. refl_options import ReflOptions
 import csv
 import os
 import re
@@ -35,7 +35,7 @@ except AttributeError:
 canMantidPlot = True
 
 
-class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
+class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
     current_instrument = None
     current_table = None
     current_polarisation_method = None
@@ -1294,7 +1294,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         try:
             Dialog = QtGui.QDialog()
-            u = refl_save.Ui_SaveWindow()
+            u = Ui_SaveWindow()
             u.setupUi(Dialog)
             Dialog.exec_()
         except Exception as ex:
@@ -1343,7 +1343,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         shows the choose columns dialog for hiding and revealing of columns
         """
         try:
-            dialog = refl_choose_col.ReflChoose(self.shown_cols, self.tableMain)
+            dialog = ReflChoose(self.shown_cols, self.tableMain)
             if dialog.exec_():
                 settings = QtCore.QSettings()
                 settings.beginGroup(self.__column_settings)

@@ -4,7 +4,7 @@ try:
 except ImportError:
     canMantidPlot = False
 
-import ui_poldi_window
+from .ui_poldi_window import Ui_PoldiWindow
 from PyQt4 import QtGui
 from mantid.simpleapi import *
 from mantidqtpython import MantidQt
@@ -63,7 +63,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
         self.gui.add_actions_to_menus(workspace_list)
 
 
-class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
+class PoldiGui(QtGui.QMainWindow, Ui_PoldiWindow):
 
     data_processor_table = None
     main_presenter = None
