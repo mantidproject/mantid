@@ -27,11 +27,13 @@ using Mantid::DataObjects::create;
 using Mantid::DataObjects::Workspace2D;
 
 namespace {
+/// A helper type to define the position of a peak.
 struct Peak {
   double fittedCentre;
   double positionOfMaximum;
 };
 
+/// A struct for information needed for detector angle calibration.
 struct DirectBeamMeasurement {
   double detectorAngle;
   double detectorDistance;
@@ -39,18 +41,34 @@ struct DirectBeamMeasurement {
   double positionOfMaximum;
 };
 
+/** Convert degrees to radians.
+ *  @param x an angle in degrees
+ *  @return the angle in radians
+ */
 constexpr double inRad(const double x) {
   return x * M_PI / 180;
 }
 
+/** Convert radians to degrees.
+ *  @param x an angle in radians
+ *  @return the angle in degrees
+ */
 constexpr double inDeg(const double x) {
   return x * 180 / M_PI;
 }
 
+/** Convert millimeters to meters.
+ *  @param x a distance in millimeters
+ *  @return the distance in meters
+ */
 constexpr double inMeter(const double x) {
   return x * 1e-3;
 }
 
+/** Create a table with data needed for detector angle calibration.
+ * @param info data to be written to the table
+ * @return a TableWorkspace containing the beam position info
+ */
 Mantid::API::ITableWorkspace_sptr createBeamPositionTable(const DirectBeamMeasurement &info) {
   auto table = Mantid::API::WorkspaceFactory::Instance().createTable();
   table->addColumn("double", "DetectorAngle");
@@ -69,6 +87,10 @@ Mantid::API::ITableWorkspace_sptr createBeamPositionTable(const DirectBeamMeasur
   return table;
 }
 
+/** Strip monitors from the beginning and end of a workspace.
+ *  @param ws a workspace to work on
+ *  @return begin and end ws indices for non-monitor histograms
+ */
 std::pair<size_t, size_t> fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
   const size_t nHisto = ws.getNumberHistograms();
   size_t begin = 0;
@@ -89,6 +111,10 @@ std::pair<size_t, size_t> fitIntegrationWSIndexRange(const Mantid::API::MatrixWo
   return std::pair<size_t, size_t>{begin, end};
 }
 
+/** Construct a DirectBeamMeasurement object from a beam position table.
+ *  @param table a beam position TableWorkspace
+ *  @return a DirectBeamMeasurement object corresonding to the table parameter.
+ */
 DirectBeamMeasurement parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
   if (table.rowCount() != 1) {
     throw std::runtime_error("BeamPosition table should have a single row.");
@@ -105,16 +131,26 @@ DirectBeamMeasurement parseBeamPositionTable(const Mantid::API::ITableWorkspace 
   return m;
 }
 
+/** Fill the X values of the first histogram of ws with values 0, 1, 2,...
+ *  @param ws a workspace to modify
+ */
 void rebinIntegralWorkspace(Mantid::API::MatrixWorkspace &ws) {
   auto &xs = ws.mutableX(0);
   std::iota(xs.begin(), xs.end(), 0.0);
 }
 
+/// Enumerations to define the rotation plane of the detector.
 enum class RotationPlane {
   horizontal,
   vertical
 };
 
+/** Calculate the detector position from given parameters.
+ *  @param plane rotation plane of the detector
+ *  @param distance sample to detector centre distance in meters
+ *  @param angle an angle between the Z axis and a vector to detector centre in degrees
+ *  @return a vector pointing to the new detector centre
+ */
 Mantid::Kernel::V3D detectorPosition(const RotationPlane plane, const double distance, const double angle) {
   const double a = inRad(angle);
   double x, y, z;
@@ -133,6 +169,11 @@ Mantid::Kernel::V3D detectorPosition(const RotationPlane plane, const double dis
   return Mantid::Kernel::V3D(x, y, z);
 }
 
+/** Calculates the detector rotation such that it faces the origin.
+ *  @param plane rotation plane of the detectorPosition
+ *  @param angle an angle between the Z axis and a vector to detector centre in degrees
+ *  @return the calculated rotation transformation
+ */
 Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane, const double angle) {
   const Mantid::Kernel::V3D axis = [plane]() {
     double x, y;
@@ -162,6 +203,7 @@ using namespace NeXus;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
+/// A list of supported instruments.
 const std::unordered_set<std::string> LoadILLReflectometry::m_supportedInstruments{"D17", "d17", "Figaro", "figaro"};
 
 /**
@@ -434,7 +476,7 @@ double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
  * Load single monitor
  *
  * @param entry :: The Nexus entry
- * @param monitor_id :: A std::string containing the Nexus path to the monitor
+ * @param monitor_data :: A std::string containing the Nexus path to the monitor
  *data
  * @return monitor :: A std::vector containing monitor values
  */
@@ -724,6 +766,9 @@ void LoadILLReflectometry::placeSource() {
   m_loader.moveComponent(m_localWorkspace, source, newPos);
 }
 
+/** Return the sample to detector distance for the current instrument.
+ *  @return the sample to detector distance in meters
+ */
 double LoadILLReflectometry::sampleDetectorDistance() const {
   // TODO This is incorrect for Figaro.
   double dist = inMeter(doubleFromRun(m_detectorDistance + ".value"));
@@ -732,6 +777,9 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   return dist;
 }
 
+/** Return the source to sample distance for the current instrument.
+ *  @return the source to sample distance in meters
+ */
 double LoadILLReflectometry::sourceSampleDistance() const {
   if (m_instrumentName == "D17") {
     const double pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
