@@ -81,7 +81,7 @@ QGroupBox::title {
                  <enum>QFrame::NoFrame</enum>
                 </property>
                 <property name="text">
-                 <string>User File:</string>
+                 <string>&amp;User File:</string>
                 </property>
                 <property name="buddy">
                  <cstring>masking_table</cstring>
@@ -553,7 +553,7 @@ QGroupBox::title {
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the data reduction will run in the compatibility mode. This means that the reduction workflow is equivalent to the previous legacy reduction workflow. Most of the time you don't want to have this checked as the unchecked state will provide more precise results.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
-                     <string>Use compatibility mode</string>
+                     <string>&amp;Use compatibility mode</string>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -795,7 +795,6 @@ QGroupBox::title {
                   <height>0</height>
                  </size>
                 </property>
-                <layout class="QVBoxLayout" name="mask_tab_left_layout"/>
                </widget>
               </item>
               <item>
@@ -1890,7 +1889,7 @@ QGroupBox::title {
      <x>0</x>
      <y>0</y>
      <width>1072</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuEdit">
