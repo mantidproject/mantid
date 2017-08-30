@@ -273,7 +273,7 @@ public:
 
     // Set up default detector IDs. Note there are no corresponding detectors.
     for (int i = 0; i < 5; ++i)
-      dataws->getSpectrum(i).setDetectorID(i+1);
+      dataws->getSpectrum(i).setDetectorID(i + 1);
 
     // Generate a TableWorksapce
     auto tablews = boost::make_shared<TableWorkspace>();
