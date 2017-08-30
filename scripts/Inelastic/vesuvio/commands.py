@@ -118,7 +118,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     # Transform inputs into something the algorithm can understand
     if isinstance(flags['masses'][0], list):
         mass_values, _, index_to_symbol_map = \
-            _create_profile_strs_and_mass_list(copy.deepcopy(flags['masses'][0]))[0]
+            _create_profile_strs_and_mass_list(copy.deepcopy(flags['masses'][0]))
 
         profiles_strs = []
         for mass_spec in flags['masses']:
@@ -256,8 +256,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         if fit_workspace is None:
             fit_workspace = _create_param_workspace(num_spec, mtd[linear_correction_fit_params_name])
 
-        spec_num_str = str(specNo)
-        current_spec = 'spectrum_' + spec_num_str
+        current_spec = 'spectrum_' + str(specNo)
 
         _update_fit_params(pre_correct_pars_workspace,
                            index, mtd[pre_correction_pars_name],
@@ -425,7 +424,7 @@ def _update_masses_from_params(old_masses, param_ws):
     """
     for mass in old_masses:
         for param in mass.keys():
-            params_list = ['value', 'function', 'hermite_coeffs',
+            params_list = ['symbol', 'value', 'function', 'hermite_coeffs',
                            'k_free', 'sears_flag', 'width']
             if param.lower() not in params_list:
                 del mass[param]
@@ -520,10 +519,12 @@ def _create_profile_strs_and_mass_list(profile_flags):
         if mass_value is None:
             value = mass_prop.pop('symbol', None)
             index_to_symbol_map[str(idx)] = value
-            mass_value = mBuilder.setFormula(value).build().relativeMolecularMass()
-        if mass_value is None:
-            raise RuntimeError('Invalid mass specified - ' + str(json.dumps(mass_prop))
-                               + " - either 'value' or 'symbol' must be given.")
+
+            try:
+                mass_value = mBuilder.setFormula(value).build().relativeMolecularMass()
+            except BaseException:
+                raise RuntimeError('Invalid mass specified - ' + str(json.dumps(mass_prop))
+                                    + " - either 'value' or 'symbol' must be given.")
         mass_values.append(mass_value)
 
         del mass_prop["function"]
