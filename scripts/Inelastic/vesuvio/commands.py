@@ -387,21 +387,27 @@ def _parse_ms_hydrogen_constraints(constraints):
     if not isinstance(constraints, dict):
         parsed = dict()
 
-        for constraint in constraints:
-            symbol = constraint.pop("symbol", None)
+        try:
+            for constraint in constraints:
+                parsed.update(_parse_ms_hydrogen_constraint(constraint))
+        except AttributeError:
+            raise RuntimeError("HydrogenConstraints are incorrectly formatted.")
 
-            if symbol is None:
-                raise RuntimeError("Invalid hydrogen constraint: " +
-                                    str(json.dumps(constraint)) +
-                                    " - No symbol provided")
-
-            parsed[symbol] = constraint
         return parsed
-    elif 'symbol' in constraints:
-        symbol = constraints.pop("symbol")
-        return {symbol: constraints}
-    else:
+
+    try:
+        return _parse_ms_hydrogen_constraint(constraints)
+    except AttributeError:
         raise RuntimeError("HydrogenConstraints are incorrectly formatted.")
+
+def _parse_ms_hydrogen_constraint(constraint):
+    symbol = constraint.pop("symbol", None)
+
+    if symbol is None:
+        raise RuntimeError("Invalid hydrogen constraint: " +
+                           str(json.dumps(constraint)) +
+                           " - No symbol provided")
+    return {symbol : constraint}
 
 
 def _update_masses_from_params(old_masses, param_ws):
