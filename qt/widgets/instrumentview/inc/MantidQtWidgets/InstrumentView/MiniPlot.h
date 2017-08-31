@@ -16,18 +16,12 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 */
-
+#include "MantidQtWidgets/MplCpp/MplFigureCanvas.h"
 #include <QActionGroup>
 #include <QStringList>
 #include <QWidget>
 
 namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
-class MplFigureCanvas;
-}
-}
-
 namespace MantidWidgets {
 
 /// Encapsulate the data required for a plot. Error data is optional.
@@ -43,7 +37,7 @@ struct MiniPlotCurveData {
  * Extends an MplFigureCanvas to provide a the mini plot functionality
  * embedded within the instrument view pick tab.
  */
-class MiniPlot : public QWidget {
+class MiniPlot : public Widgets::MplCpp::MplFigureCanvas {
   Q_OBJECT
 
 public:
@@ -76,7 +70,6 @@ protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
 
 private:
-  Widgets::MplCpp::MplFigureCanvas *m_canvas;
   QString m_activeCurveLabel;
   QStringList m_storedCurveLabels;
   QString m_xunit;

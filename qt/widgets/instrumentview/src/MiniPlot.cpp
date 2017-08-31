@@ -1,5 +1,4 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
-#include "MantidQtWidgets/MplCpp/MplFigureCanvas.h"
 
 #include <QContextMenuEvent>
 #include <QVBoxLayout>
@@ -40,15 +39,11 @@ namespace MantidWidgets {
  * @param parent A widget to be the parent
  */
 MiniPlot::MiniPlot(QWidget *parent)
-    : QWidget(parent), m_canvas(new MplFigureCanvas(111, this)),
-      m_activeCurveLabel(), m_storedCurveLabels(), m_xunit() {
-  m_canvas->setCanvasFaceColor("white");
-  setLayout(new QVBoxLayout);
-  layout()->addWidget(m_canvas);
-  layout()->setContentsMargins(0, 0, 0, 0);
-
+    : MplFigureCanvas(111, parent), m_activeCurveLabel(), m_storedCurveLabels(),
+      m_xunit() {
+  setCanvasFaceColor("white");
   // install event filter on "real" canvas to monitor mouse events
-  m_canvas->canvasWidget()->installEventFilter(this);
+  canvasWidget()->installEventFilter(this);
 }
 
 /**
@@ -61,7 +56,7 @@ bool MiniPlot::hasStoredCurves() const { return !m_storedCurveLabels.empty(); }
  * @return A tuple of the current Y-axis limits
  */
 std::tuple<double, double> MiniPlot::getYLimits() const {
-  return m_canvas->limits(Axes::Scale::Y);
+  return limits(Axes::Scale::Y);
 }
 
 /**
@@ -73,7 +68,7 @@ bool MiniPlot::hasActiveCurve() const { return !m_activeCurveLabel.isEmpty(); }
 /**
  * Redraw the canvas based on the current data
  */
-void MiniPlot::update() { m_canvas->rescaleToData(Axes::Scale::Both, true); }
+void MiniPlot::update() { rescaleToData(Axes::Scale::Both, true); }
 
 /**
  * Set the given data as the active curve on the plot
@@ -85,8 +80,8 @@ void MiniPlot::update() { m_canvas->rescaleToData(Axes::Scale::Both, true); }
 void MiniPlot::setActiveCurve(std::vector<double> x, std::vector<double> y,
                               QString xunit, QString curveLabel) {
   removeActiveCurve();
-  m_canvas->plotLine(std::move(x), std::move(y), ACTIVE_CURVE_FORMAT);
-  m_canvas->setLabel(Axes::Label::X, xunit.toAscii().data());
+  plotLine(std::move(x), std::move(y), ACTIVE_CURVE_FORMAT);
+  setLabel(Axes::Label::X, xunit.toAscii().data());
   m_activeCurveLabel = curveLabel;
   m_xunit = xunit;
 }
@@ -107,7 +102,7 @@ void MiniPlot::removeActiveCurve() {
   // The active curve will always be the last thing that was added to
   // the canvas so we want to remove the index of the last curve, which
   // should always be the size of the number of stored curves.
-  m_canvas->removeLine(m_storedCurveLabels.size());
+  removeLine(m_storedCurveLabels.size());
   m_activeCurveLabel.clear();
   m_xunit.clear();
 }
@@ -119,9 +114,9 @@ void MiniPlot::removeActiveCurve() {
 void MiniPlot::removeCurve(QString label) {
   auto lineIndex = m_storedCurveLabels.indexOf(label);
   if (lineIndex >= 0) {
-    m_canvas->removeLine(static_cast<size_t>(lineIndex));
+    removeLine(static_cast<size_t>(lineIndex));
     m_storedCurveLabels.removeAt(lineIndex);
-    m_canvas->update();
+    update();
   }
 }
 
@@ -132,7 +127,7 @@ void MiniPlot::removeCurve(QString label) {
  * @param label The text label to attach
  */
 void MiniPlot::addPeakLabel(double x, double y, QString label) {
-  m_canvas->addText(x, y, label.toAscii().constData());
+  addText(x, y, label.toAscii().constData());
 }
 
 /**
@@ -149,21 +144,21 @@ void MiniPlot::storeCurve() {
   m_storedCurveLabels.insert(m_storedCurveLabels.end(), m_activeCurveLabel);
   m_activeCurveLabel.clear();
   // switch color
-  m_canvas->setLineColor(lineIndex, storedLineColor(lineIndex));
+  setLineColor(lineIndex, storedLineColor(lineIndex));
 }
 
 /**
  * Switch the Y scale to linear
  */
 void MiniPlot::setYScaleLinear() {
-  m_canvas->setScale(Axes::Scale::Y, "linear", true);
+  setScale(Axes::Scale::Y, "linear", true);
 }
 
 /**
  * Switch the Y scale to logarithmic
  */
 void MiniPlot::setYScaleLog() {
-  m_canvas->setScale(Axes::Scale::Y, "log", true);
+  setScale(Axes::Scale::Y, "log", true);
 }
 
 /**
@@ -173,7 +168,7 @@ void MiniPlot::setYScaleLog() {
  * @return True if it is a mouse event or context menu event, false otherwise
  */
 bool MiniPlot::eventFilter(QObject *watched, QEvent *evt) {
-  assert(watched == m_canvas->canvasWidget());
+  assert(watched == canvasWidget());
   auto eventType = evt->type();
   bool filtered(false);
   switch (eventType) {
