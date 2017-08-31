@@ -215,7 +215,7 @@ Output:
 
    # Lets load the data without detector angle calibration just for reference
 
-   refWS = Load('317370')
+   refWS = Load('ILL/D17/317370.nxs')
 
    detAngle = numpy.degrees(reflectedBeamWS.getRun().getProperty('stheta').value)
    refAngle = numpy.degrees(refWS.getRun().getProperty('stheta').value)
