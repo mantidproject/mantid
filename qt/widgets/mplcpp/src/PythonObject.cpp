@@ -35,7 +35,7 @@ PythonObject PythonObject::fromBorrowedRef(PyObject *ptr) {
 /**
  * @param name Name of the attribute
  * @return The object defining this attribute
- * @throws
+ * @throws A PythonError if the attribute does not exist
  */
 PythonObject PythonObject::getAttr(const char *name) const {
   auto objPtr = PyObject_GetAttrString(m_ptr, name);

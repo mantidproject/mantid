@@ -1,9 +1,12 @@
 #include "MantidQtWidgets/MplCpp/MplFigureCanvas.h"
+#include "MantidQtWidgets/MplCpp/MplEvent.h"
 #include "MantidQtWidgets/MplCpp/NDArray1D.h"
 #include "MantidQtWidgets/MplCpp/PythonErrors.h"
 #include "MantidQtWidgets/MplCpp/SipUtils.h"
 #include "MantidQtWidgets/Common/PythonThreading.h"
 
+#include <QContextMenuEvent>
+#include <QMouseEvent>
 #include <QVBoxLayout>
 
 namespace MantidQt {
@@ -103,7 +106,7 @@ struct MplFigureCanvas::PyObjectHolder {
                                        PYSTR_LITERAL("i"), subplotLayout));
     canvas = PythonObject::fromNewRef(PyObject_CallFunction(
         mplFigureCanvasType().get(), PYSTR_LITERAL("(O)"), figure.get()));
-    canvasWidget = static_cast<QWidget *>(sipUnwrap(canvas.get()));
+    canvasWidget = static_cast<QWidget *>(SipUtils::unwrap(canvas.get()));
     assert(canvasWidget);
   }
 
@@ -137,6 +140,7 @@ MplFigureCanvas::MplFigureCanvas(int subplotLayout, QWidget *parent)
   setLayout(new QVBoxLayout);
   layout()->addWidget(m_pydata->canvasWidget);
   m_pydata->canvasWidget->setMouseTracking(false);
+  m_pydata->canvasWidget->installEventFilter(this);
 }
 
 /**
@@ -244,25 +248,60 @@ QString MplFigureCanvas::scaleType(const Axes::Scale type) const {
 }
 
 /**
- * Assume the given coordinates are pixel coordinates, the result of a mouse
+ * Assume the given coordinates are Qt pixel coordinates, the result of a mouse
  * click event for example, and transform them to data coordinates
- * @param x X coordinate in pixels
- * @param y Y coordinate in pixels
- * @return A (x,y) point in data coordinate space
+ * @param pos
+ * @return A QPointF defining the data position. It can be null if the pos
+ * is not within he axis limits
  */
-std::tuple<double, double> MplFigureCanvas::toDataCoordinates(double x,
-                                                              double y) const {
+QPointF MplFigureCanvas::toDataCoordinates(QPoint pos) const {
+  // This duplicates what happens in
+  // matplotlib.backends.backend_qt5.FigureCanvasQT &
+  // matplotlib.backend_bases.LocationEvent where we transform first to
+  // matplotlib's coordinate system, (0,0) is bottom left
+  // and then to the data coordinates
   ScopedPythonGIL gil;
+  // Get dpi to take into to transform to physical pixels
+  auto GetDpiRatio = [](const PythonObject &canvas) {
+    double dpiRatio(1.0);
+    // This needs to be fast so avoid the exception throwing
+    // PythonObject::getAttr
+    auto result =
+        PyObject_GetAttrString(canvas.get(), PYSTR_LITERAL("_dpi_ratio"));
+    if (result) {
+      dpiRatio = PyFloat_AsDouble(result);
+      detail::decref(result);
+    } else {
+      PyErr_Clear();
+    }
+    return dpiRatio;
+  };
+  const auto &canvas = m_pydata->canvas;
+  const double dpiRatio = GetDpiRatio(canvas);
+  const double xPosPhysical = pos.x() * dpiRatio;
+  // Y=0 is at the bottom
+  auto pyHeight = canvas.getAttr("figure").getAttr("bbox").getAttr("height");
+  double cppHeight = PyFloat_AsDouble(pyHeight.get());
+  const double yPosPhysical = ((cppHeight / dpiRatio) - pos.y()) * dpiRatio;
+
+  // Transform to data coordinates
+  QPointF dataCoords;
   auto axes = m_pydata->gca();
-  // This essentially duplicates what happens in
-  // matplotlib.backend_bases.LocationEvent
-  auto transData = axes.getAttr("transData");
-  auto invTransform = PythonObject::fromNewRef(PyObject_CallMethod(
-      transData.get(), PYSTR_LITERAL("inverted"), PYSTR_LITERAL(""), nullptr));
-  auto result = NDArray1D<double>::fromNewRef(
-      PyObject_CallMethod(invTransform.get(), PYSTR_LITERAL("transform_point"),
-                          PYSTR_LITERAL("((ff))"), x, y));
-  return std::make_tuple(result[0], result[1]);
+  try {
+    auto transData = axes.getAttr("transData");
+    auto invTransform = PythonObject::fromNewRef(
+        PyObject_CallMethod(transData.get(), PYSTR_LITERAL("inverted"),
+                            PYSTR_LITERAL(""), nullptr));
+    auto result = NDArray1D<double>::fromNewRef(PyObject_CallMethod(
+        invTransform.get(), PYSTR_LITERAL("transform_point"),
+        PYSTR_LITERAL("((ff))"), xPosPhysical, yPosPhysical));
+    dataCoords =
+        QPointF(static_cast<qreal>(result[0]), static_cast<qreal>(result[1]));
+  } catch (PythonError &) {
+    // an exception indicates no transform possible. Matplotlib sets this as
+    // an empty data coordinate so we will do the same
+  }
+  return dataCoords;
 }
 
 /**
@@ -294,6 +333,7 @@ void MplFigureCanvas::draw() {
  * @param color A matplotlib color string
  */
 void MplFigureCanvas::setCanvasFaceColor(const char *color) {
+  ScopedPythonGIL gil;
   setCanvasFaceColorNoGIL(color);
 }
 
@@ -461,6 +501,36 @@ void MplFigureCanvas::addText(double x, double y, const char *label) {
   auto axes = m_pydata->gca();
   detail::decref(PyObject_CallMethod(axes.get(), PYSTR_LITERAL("text"),
                                      PYSTR_LITERAL("(ffs)"), x, y, label));
+}
+
+/**
+ * Intercept events destined for the child canvas
+ * @param watched A pointer to the object being watched
+ * @param evt The event dispatched to the watched object
+ * @return True if the event was filtered by this function, false otherwise
+ */
+bool MplFigureCanvas::eventFilter(QObject *watched, QEvent *evt) {
+  assert(watched == canvasWidget());
+
+  // This feels ugly...
+  const auto type = evt->type();
+  if (type == QEvent::ContextMenu) {
+    contextMenuEvent(static_cast<QContextMenuEvent *>(evt));
+    return true;
+  } else if (type == QEvent::MouseButtonPress ||
+             type == QEvent::MouseButtonRelease ||
+             type == QEvent::MouseButtonDblClick) {
+    auto qtEvent = static_cast<QMouseEvent *>(evt);
+    MplMouseEvent mplEvent(toDataCoordinates(qtEvent->pos()));
+    if (type == QEvent::MouseButtonPress)
+      mplMousePressEvent(qtEvent, &mplEvent);
+    else if (type == QEvent::MouseButtonRelease)
+      mplMouseReleaseEvent(qtEvent, &mplEvent);
+    else if (type == QEvent::MouseButtonDblClick)
+      mplMouseDoubleClickEvent(qtEvent, &mplEvent);
+    return true;
+  }
+  return false;
 }
 
 /**

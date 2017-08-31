@@ -1,9 +1,26 @@
 #ifndef MPLFIGURECANVAS_H
 #define MPLFIGURECANVAS_H
+/*
+ Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
+
+ This file is part of Mantid.
+
+ Mantid is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ Mantid is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+*/
 #include "MantidQtWidgets/MplCpp/DllOption.h"
 #include <QWidget>
-
 #include <tuple>
+
+class MplMouseEvent;
 
 namespace MantidQt {
 namespace Widgets {
@@ -59,7 +76,7 @@ public:
   std::tuple<double, double> limits(const Axes::Scale type) const;
   size_t nlines() const;
   QString scaleType(const Axes::Scale type) const;
-  std::tuple<double, double> toDataCoordinates(double x, double y) const;
+  QPointF toDataCoordinates(QPoint pos) const;
   ///@}
 
   ///@{
@@ -101,7 +118,16 @@ public:
   void addText(double x, double y, const char *label);
   ///@}
 
+protected:
+  bool eventFilter(QObject *watched, QEvent *evt) override;
+  // operations analogous to standard mousePressEvent etc but with additional
+  // information
+  virtual void mplMousePressEvent(QMouseEvent *, MplMouseEvent *) {}
+  virtual void mplMouseReleaseEvent(QMouseEvent *, MplMouseEvent *) {}
+  virtual void mplMouseDoubleClickEvent(QMouseEvent *, MplMouseEvent *) {}
+
 private:
+  // Operations that do not acquire the GIL
   void drawNoGIL();
   void setCanvasFaceColorNoGIL(const char *color);
 

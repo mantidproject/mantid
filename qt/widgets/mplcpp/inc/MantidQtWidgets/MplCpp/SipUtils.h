@@ -18,15 +18,17 @@
 */
 #include "MantidQtWidgets/MplCpp/PythonObject.h"
 
+namespace MantidQt {
+namespace Widgets {
+namespace MplCpp {
+
 /**
  * A collection of utility functions to deal with sip wrapped
  * C++ objects.
  */
-
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
-void *sipUnwrap(PyObject *obj_ptr);
+struct SipUtils {
+  static void *unwrap(PyObject *obj_ptr);
+};
 }
 }
 }
