@@ -127,8 +127,9 @@ void LoadEmptyInstrument::exec() {
     CountStandardDeviations v_monitor_e(1, monitor_value);
 
     const auto &spectrumInfo = ws2D->spectrumInfo();
+    const auto size = static_cast<int64_t>(spectrumInfo->size());
 #pragma omp parallel for
-    for (size_t i = 0; i < ws2D->getNumberHistograms(); i++) {
+    for (size_t i = 0; i < size; i++) {
       if (spectrumInfo.isMonitor(i)) {
         ws2D->setCounts(i, v_monitor_y);
         ws2D->setCountStandardDeviations(i, v_monitor_e);
