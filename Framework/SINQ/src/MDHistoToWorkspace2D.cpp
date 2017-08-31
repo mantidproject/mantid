@@ -58,6 +58,8 @@ void MDHistoToWorkspace2D::exec() {
   outWS = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
       WorkspaceFactory::Instance().create(
           "Workspace2D", nSpectra, lastDim->getNBins(), lastDim->getNBins()));
+  for (size_t i = 0; i < nSpectra; ++i)
+    outWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outWS->setYUnit("Counts");
 
   coord_t *pos = reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));

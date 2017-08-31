@@ -304,6 +304,7 @@ void LoadNXSPE::exec() {
   for (std::size_t i = 0; i < numSpectra; ++i) {
     itdataend = itdata + numBins;
     iterrorend = iterror + numBins;
+    outputWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
     outputWS->setBinEdges(i, edges);
     if ((!std::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
