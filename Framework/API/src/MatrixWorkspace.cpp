@@ -1973,6 +1973,7 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
   const auto &detInfo = detectorInfo();
   const auto &allDetIDs = detInfo.detectorIDs();
   const auto &specDefs = m_indexInfo->spectrumDefinitions();
+#pragma omp parallel for
   for (size_t i = 0; i < m_indexInfo->size(); ++i) {
     auto &spec = getSpectrum(i);
     // Prevent setting flags that require spectrum definition updates
