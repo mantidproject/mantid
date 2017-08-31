@@ -31,7 +31,7 @@ namespace DynamicPDF {
 class WorkspaceRecord {
 
 public:
-  WorkspaceRecord(const std::string &workspaceName);
+  explicit WorkspaceRecord(const std::string &workspaceName);
   ~WorkspaceRecord();
   void updateMetadata(const size_t &newIndex);
   std::pair<double, double> getErange();
@@ -47,7 +47,7 @@ class SliceSelector : public QMainWindow,
   Q_OBJECT
 
 public:
-  SliceSelector(QWidget *parent = nullptr);
+  explicit SliceSelector(QWidget *parent = nullptr);
   ~SliceSelector();
 
 protected:

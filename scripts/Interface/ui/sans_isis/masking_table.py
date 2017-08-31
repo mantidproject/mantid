@@ -1,8 +1,17 @@
+""" View for the masking table.
+
+The view for the masking table displays all available masks for a SANS reduction. It also allows to display the moved
+and masked SANS workspace.
+"""
+
 from __future__ import (absolute_import, division, print_function)
-import ui_masking_table
-from PyQt4 import QtGui
+
 from abc import ABCMeta, abstractmethod
+
+from PyQt4 import QtGui
 from six import with_metaclass
+
+import ui_masking_table
 
 
 class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):

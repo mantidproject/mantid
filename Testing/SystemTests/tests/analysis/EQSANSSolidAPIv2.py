@@ -1,4 +1,5 @@
 #pylint: disable=no-init,attribute-defined-outside-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
@@ -12,7 +13,7 @@ def do_cleanup():
     absfile = FileFinder.getFullPath("EQSANS_1466_event_reduction.log")
     if os.path.exists(absfile):
         os.remove(absfile)
-        print "cleaned"
+        print("cleaned")
     return True
 
 
