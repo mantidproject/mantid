@@ -81,7 +81,7 @@ def string_convertible(cls):
 #  Instrument and facility types
 # --------------------------------
 @string_convertible
-@serializable_enum("LOQ", "LARMOR", "SANS2D", "NoInstrument")
+@serializable_enum("LOQ", "LARMOR", "SANS2D", "ZOOM", "NoInstrument")
 class SANSInstrument(object):
     pass
 

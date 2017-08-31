@@ -84,6 +84,8 @@ private:
   int npixels;
   /// Unit vector in the direction of the wavevector
   Kernel::V3D _unitWaveVector;
+  /// Q Convention
+  std::string _convention;
 };
 
 using yIt = Mantid::HistogramData::HistogramY::const_iterator;
