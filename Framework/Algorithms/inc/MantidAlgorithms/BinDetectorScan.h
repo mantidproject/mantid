@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MultiPeriodGroupAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,13 +42,17 @@ private:
   void init() override;
   void exec() override;
 
-  double m_startAngle;
-  double m_endAngle;
-  double m_stepAngle;
+  std::list<API::MatrixWorkspace_sptr> m_workspaceList;
+
+  double m_startScatteringAngle;
+  double m_endScatteringAngle;
+  double m_stepScatteringAngle;
 
   double m_startHeight;
   double m_endHeight;
   double m_stepHeight;
+
+  void getInputParameters();
 };
 
 } // namespace Algorithms

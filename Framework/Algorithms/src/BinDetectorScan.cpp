@@ -37,7 +37,7 @@ void BinDetectorScan::init() {
                   "Name of the output workspace.");
   declareProperty(
       make_unique<ArrayProperty<double>>(
-          "ThetaBinning", boost::make_shared<RebinParamsValidator>()),
+          "ScatteringAngleBinning", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of the first scattering angle, the scattering "
       "angle step size and the final scattering angle. Optionally this can "
       "also be a single number, which is the angle step size. In this case, "
@@ -48,43 +48,21 @@ void BinDetectorScan::init() {
           "HeightBinning", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of the first y value, the y value step size and "
       "the final y value. Optionally this can also be a single number, which "
-      "is the y valuee step size. In this case, the boundary of binning will "
+      "is the y value step size. In this case, the boundary of binning will "
       "be determined by minimum and maximum y values present in the "
       "workspaces.");
 }
 
 void BinDetectorScan::exec() {
-  std::vector<double> thetaBinning = getProperty("ThetaBinning");
-  if (thetaBinning.size() == 0) {
-    m_stepAngle = thetaBinning[0];
-  } else if (thetaBinning.size() == 3) {
-    m_startAngle = thetaBinning[0];
-    m_stepAngle = thetaBinning[1];
-    m_endAngle = thetaBinning[2];
-  }
+  getInputParameters();
 
-  std::vector<double> heightBinning = getProperty("HeightBinning");
-  if (heightBinning.size() == 0) {
-    m_stepHeight = heightBinning[0];
-  } else if (heightBinning.size() == 3) {
-    m_startHeight = heightBinning[0];
-    m_stepHeight = heightBinning[1];
-    m_endHeight = heightBinning[2];
-  }
-
-  const std::vector<std::string> inputWorkspaces =
-      getProperty("InputWorkspaces");
-  auto workspaces = RunCombinationHelper::unWrapGroups(inputWorkspaces);
-  RunCombinationHelper combHelper;
-  auto workspaceList = combHelper.validateInputWorkspaces(workspaces, g_log);
-
-  // TODO: loop to check minimum and maximum extents for workspace
-
-  size_t numBins = int(ceil((m_endAngle - m_startAngle) / m_stepAngle));
+  size_t numBins = int(ceil((m_endScatteringAngle - m_startScatteringAngle) /
+                            m_stepScatteringAngle));
   g_log.information() << "Number of bins in output workspace:" << numBins
                       << std::endl;
-  HistogramData::BinEdges x(numBins + 1,
-                            LinearGenerator(m_startAngle, m_stepAngle));
+  HistogramData::BinEdges x(
+      numBins + 1,
+      LinearGenerator(m_startScatteringAngle, m_stepScatteringAngle));
   size_t numHistograms =
       int(ceil((m_endHeight - m_startHeight) / m_stepHeight));
   g_log.information() << "Number of histograms in output workspace:"
@@ -104,7 +82,7 @@ void BinDetectorScan::exec() {
   outputWS->replaceAxis(1, newAxis);
 
   // loop over spectra
-  for (auto &ws : workspaceList) {
+  for (auto &ws : m_workspaceList) {
     const auto &specInfo = ws->spectrumInfo();
     for (size_t i = 0; i < specInfo.size(); ++i) {
       if (specInfo.isMonitor(i))
@@ -112,15 +90,10 @@ void BinDetectorScan::exec() {
       const auto &pos = specInfo.position(i);
       const auto y = pos.Y();
       auto theta = atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
-      if (theta < 0)
-        theta += 360.0;
       size_t yIndex = size_t((y - m_startHeight) / m_stepHeight);
-      size_t thetaIndex = size_t((theta - m_startAngle) / m_stepAngle);
+      size_t thetaIndex =
+          size_t((theta - m_startScatteringAngle) / m_stepScatteringAngle);
       if (yIndex > numHistograms || thetaIndex > numBins) {
-        // TODO: This is a bit spammy, replace this with check earlier
-        g_log.warning()
-            << "Found a detector outside the range, skipping. Spectrum number:"
-            << i;
         continue;
       }
       auto counts = ws->histogram(i).y()[0];
@@ -129,6 +102,64 @@ void BinDetectorScan::exec() {
     }
   }
   setProperty("OutputWorkspace", outputWS);
+}
+
+void BinDetectorScan::getInputParameters() {
+  const std::vector<std::string> inputWorkspaces =
+      getProperty("InputWorkspaces");
+  auto workspaces = RunCombinationHelper::unWrapGroups(inputWorkspaces);
+  RunCombinationHelper combHelper;
+  m_workspaceList = combHelper.validateInputWorkspaces(workspaces, g_log);
+
+  m_startScatteringAngle = 0;
+  m_endScatteringAngle = 0;
+
+  // Loop to check minimum and maximum extents for workspace
+  for (auto &ws : m_workspaceList) {
+    const auto &specInfo = ws->spectrumInfo();
+    for (size_t i = 0; i < specInfo.size(); ++i) {
+      if (specInfo.isMonitor(i))
+        continue;
+      const auto &pos = specInfo.position(i);
+      double thetaAngle = atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
+      m_startScatteringAngle = std::min(m_startScatteringAngle, thetaAngle);
+      m_endScatteringAngle = std::max(m_endScatteringAngle, thetaAngle);
+    }
+  }
+
+  g_log.information() << "Found start scattering angle of "
+                      << m_startScatteringAngle
+                      << " and end scattering angle of " << m_endScatteringAngle
+                      << "\n";
+
+  std::vector<double> scatteringBinning = getProperty("ScatteringAngleBinning");
+  if (scatteringBinning.size() == 1) {
+    m_stepScatteringAngle = scatteringBinning[0];
+  } else if (scatteringBinning.size() == 3) {
+    if (scatteringBinning[0] > m_startScatteringAngle ||
+        scatteringBinning[2] < m_endScatteringAngle)
+      g_log.warning() << "Some detectors outside of scattering angle range.\n";
+    m_startScatteringAngle = scatteringBinning[0];
+    m_stepScatteringAngle = scatteringBinning[1];
+    m_endScatteringAngle = scatteringBinning[2];
+  }
+
+  std::vector<double> heightBinning = getProperty("HeightBinning");
+  if (heightBinning.size() == 1) {
+    m_stepHeight = heightBinning[0];
+  } else if (heightBinning.size() == 3) {
+    if (heightBinning[0] > m_startHeight || heightBinning[2] < m_endHeight)
+      g_log.warning() << "Some detectors outside of height range.\n";
+    m_startHeight = heightBinning[0];
+    m_stepHeight = heightBinning[1];
+    m_endHeight = heightBinning[2];
+  }
+
+  g_log.information() << "Scattering angle binning:" << m_startScatteringAngle
+                      << ", " << m_stepScatteringAngle << ", "
+                      << m_endScatteringAngle << "\n";
+  g_log.information() << "Height binning:" << m_startHeight << ", "
+                      << m_stepHeight << ", " << m_endHeight << "\n";
 }
 
 } // namespace Algorithms
