@@ -44,7 +44,7 @@ public:
 
   int version() const override;
   const std::string category() const override;
-  
+
 private:
   void init() override;
   void exec() override;
