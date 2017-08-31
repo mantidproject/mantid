@@ -45,31 +45,26 @@ struct DirectBeamMeasurement {
  *  @param x an angle in degrees
  *  @return the angle in radians
  */
-constexpr double inRad(const double x) {
-  return x * M_PI / 180;
-}
+constexpr double inRad(const double x) { return x * M_PI / 180; }
 
 /** Convert radians to degrees.
  *  @param x an angle in radians
  *  @return the angle in degrees
  */
-constexpr double inDeg(const double x) {
-  return x * 180 / M_PI;
-}
+constexpr double inDeg(const double x) { return x * 180 / M_PI; }
 
 /** Convert millimeters to meters.
  *  @param x a distance in millimeters
  *  @return the distance in meters
  */
-constexpr double inMeter(const double x) {
-  return x * 1e-3;
-}
+constexpr double inMeter(const double x) { return x * 1e-3; }
 
 /** Create a table with data needed for detector angle calibration.
  * @param info data to be written to the table
  * @return a TableWorkspace containing the beam position info
  */
-Mantid::API::ITableWorkspace_sptr createBeamPositionTable(const DirectBeamMeasurement &info) {
+Mantid::API::ITableWorkspace_sptr
+createBeamPositionTable(const DirectBeamMeasurement &info) {
   auto table = Mantid::API::WorkspaceFactory::Instance().createTable();
   table->addColumn("double", "DetectorAngle");
   table->addColumn("double", "DetectorDistance");
@@ -91,7 +86,8 @@ Mantid::API::ITableWorkspace_sptr createBeamPositionTable(const DirectBeamMeasur
  *  @param ws a workspace to work on
  *  @return begin and end ws indices for non-monitor histograms
  */
-std::pair<size_t, size_t> fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
+std::pair<size_t, size_t>
+fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
   const size_t nHisto = ws.getNumberHistograms();
   size_t begin = 0;
   const auto &spectrumInfo = ws.spectrumInfo();
@@ -115,7 +111,8 @@ std::pair<size_t, size_t> fitIntegrationWSIndexRange(const Mantid::API::MatrixWo
  *  @param table a beam position TableWorkspace
  *  @return a DirectBeamMeasurement object corresonding to the table parameter.
  */
-DirectBeamMeasurement parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
+DirectBeamMeasurement
+parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
   if (table.rowCount() != 1) {
     throw std::runtime_error("BeamPosition table should have a single row.");
   }
@@ -140,18 +137,17 @@ void rebinIntegralWorkspace(Mantid::API::MatrixWorkspace &ws) {
 }
 
 /// Enumerations to define the rotation plane of the detector.
-enum class RotationPlane {
-  horizontal,
-  vertical
-};
+enum class RotationPlane { horizontal, vertical };
 
 /** Calculate the detector position from given parameters.
  *  @param plane rotation plane of the detector
  *  @param distance sample to detector centre distance in meters
- *  @param angle an angle between the Z axis and a vector to detector centre in degrees
+ *  @param angle an angle between the Z axis and the detector in degrees
  *  @return a vector pointing to the new detector centre
  */
-Mantid::Kernel::V3D detectorPosition(const RotationPlane plane, const double distance, const double angle) {
+Mantid::Kernel::V3D detectorPosition(const RotationPlane plane,
+                                     const double distance,
+                                     const double angle) {
   const double a = inRad(angle);
   double x, y, z;
   switch (plane) {
@@ -171,13 +167,14 @@ Mantid::Kernel::V3D detectorPosition(const RotationPlane plane, const double dis
 
 /** Calculates the detector rotation such that it faces the origin.
  *  @param plane rotation plane of the detectorPosition
- *  @param angle an angle between the Z axis and a vector to detector centre in degrees
+ *  @param angle an angle between the Z axis and the detector in degrees
  *  @return the calculated rotation transformation
  */
-Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane, const double angle) {
+Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane,
+                                          const double angle) {
   const Mantid::Kernel::V3D axis = [plane]() {
     double x, y;
-    switch(plane) {
+    switch (plane) {
     case RotationPlane::horizontal:
       x = 0;
       y = 1;
@@ -204,7 +201,9 @@ using namespace NeXus;
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
 /// A list of supported instruments.
-const std::unordered_set<std::string> LoadILLReflectometry::m_supportedInstruments{"D17", "d17", "Figaro", "figaro"};
+const std::unordered_set<std::string>
+    LoadILLReflectometry::m_supportedInstruments{"D17", "d17", "Figaro",
+                                                 "figaro"};
 
 /**
  * Return the confidence with this algorithm can load the file
@@ -240,9 +239,16 @@ void LoadILLReflectometry::init() {
                       "OutputWorkspace", std::string(), Direction::Output),
                   "Name of the output workspace");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputBeamPosition", std::string(), Direction::Output, PropertyMode::Optional), "Name of the fitted beam position output workspace");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputBeamPosition", std::string(), Direction::Output,
+                      PropertyMode::Optional),
+                  "Name of the fitted beam position output workspace");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>("BeamPosition", std::string(), Direction::Input, PropertyMode::Optional), "A workspace defining the beam position; used to calculate the Bragg angle");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "BeamPosition", std::string(), Direction::Input,
+                      PropertyMode::Optional),
+                  "A workspace defining the beam position; used to calculate "
+                  "the Bragg angle");
 
   declareProperty("BraggAngle", EMPTY_DBL(),
                   "User defined Bragg angle in degrees");
@@ -258,11 +264,15 @@ void LoadILLReflectometry::init() {
  */
 std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   std::map<std::string, std::string> result;
-  if (!getPointerToProperty("BeamPosition")->isDefault() && !getPointerToProperty("BraggAngle")->isDefault()) {
-    result["BraggAngle"] = "User defined Bragg angle cannot be given simultaneously to BeamPosition.";
+  if (!getPointerToProperty("BeamPosition")->isDefault() &&
+      !getPointerToProperty("BraggAngle")->isDefault()) {
+    result["BraggAngle"] = "User defined Bragg angle cannot be given "
+                           "simultaneously to BeamPosition.";
   }
-  if (!getPointerToProperty("BraggAngle")->isDefault() && !getPointerToProperty("OutputBeamPosition")->isDefault()) {
-    result["OutputBeamPosition"] = "Beam position will not be calculated as user defined Bragg angle was given.";
+  if (!getPointerToProperty("BraggAngle")->isDefault() &&
+      !getPointerToProperty("OutputBeamPosition")->isDefault()) {
+    result["OutputBeamPosition"] = "Beam position will not be calculated as "
+                                   "user defined Bragg angle was given.";
   }
   return result;
 }
@@ -309,7 +319,9 @@ void LoadILLReflectometry::loadInstrument() {
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     loadInst->executeAsChildAlg();
   } catch (std::runtime_error &e) {
-    g_log.information() << "Unable to succesfully run LoadInstrument child algorithm: " << e.what() << '\n';
+    g_log.information()
+        << "Unable to succesfully run LoadInstrument child algorithm: "
+        << e.what() << '\n';
   }
 }
 
@@ -395,7 +407,8 @@ void LoadILLReflectometry::initWorkspace(
   g_log.debug() << "Number of monitors: " << monitorsData.size() << '\n';
   for (size_t i = 0; i < monitorsData.size(); ++i) {
     if (monitorsData[i].size() != m_numberOfChannels)
-      g_log.debug() << "Data size of monitor ID " << i << " is " << monitorsData[i].size() << '\n';
+      g_log.debug() << "Data size of monitor ID " << i << " is "
+                    << monitorsData[i].size() << '\n';
   }
   // create the workspace
   try {
@@ -405,14 +418,13 @@ void LoadILLReflectometry::initWorkspace(
   } catch (std::out_of_range &) {
     throw std::runtime_error(
         "Workspace2D cannot be created, check number of histograms (" +
-            std::to_string(m_numberOfHistograms) +
-            "), monitors (" +
-            std::to_string(monitorsData.size()) +
-            "), and channels (" +
-            std::to_string(m_numberOfChannels) + '\n');
+        std::to_string(m_numberOfHistograms) + "), monitors (" +
+        std::to_string(monitorsData.size()) + "), and channels (" +
+        std::to_string(m_numberOfChannels) + '\n');
   }
   if (m_acqMode)
-    m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    m_localWorkspace->getAxis(0)->unit() =
+        UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
   m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
 }
@@ -451,17 +463,16 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   else if (m_instrumentName == "Figaro")
     widthName = "mppy";
 
-  NXFloat pixelWidth =
-      entry.openNXFloat("instrument/PSD/" + widthName);
+  NXFloat pixelWidth = entry.openNXFloat("instrument/PSD/" + widthName);
   pixelWidth.load();
   m_pixelWidth = inMeter(static_cast<double>(pixelWidth[0]));
 
-  g_log.debug() << "Please note that ILL reflectometry instruments have "
-              "several tubes, after integration one "
-              "tube remains in the Nexus file.\n Number of tubes (banks): 1\n";
+  g_log.debug()
+      << "Please note that ILL reflectometry instruments have "
+         "several tubes, after integration one "
+         "tube remains in the Nexus file.\n Number of tubes (banks): 1\n";
   g_log.debug() << "Number of pixels per tube (number of detectors and number "
-           "of histograms): "
-           << m_numberOfHistograms << '\n';
+                   "of histograms): " << m_numberOfHistograms << '\n';
   g_log.debug() << "Number of time channels: " << m_numberOfChannels << '\n';
   g_log.debug() << "Channel width: " << m_channelWidth << " 1e-6 sec\n";
   g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
@@ -512,7 +523,7 @@ LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
  * @return :: vector holding the x values
  */
 std::vector<double> LoadILLReflectometry::getXValues() {
-  std::vector<double> xVals;                  // no initialisation
+  std::vector<double> xVals;             // no initialisation
   xVals.reserve(m_numberOfChannels + 1); // reserve memory
   try {
     if (m_acqMode) {
@@ -530,14 +541,16 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         chop1Phase = 0.0;
       }
       const double POFF = doubleFromRun(m_offsetFrom + ".poff");
-      const double openOffset = doubleFromRun(m_offsetFrom + "." + m_offsetName);
-      if (m_instrumentName == "D17" && chop1Speed != 0.0 && chop2Speed != 0.0 && chop2Phase != 0.0) {
+      const double openOffset =
+          doubleFromRun(m_offsetFrom + "." + m_offsetName);
+      if (m_instrumentName == "D17" && chop1Speed != 0.0 && chop2Speed != 0.0 &&
+          chop2Phase != 0.0) {
         // virtual chopper entries are valid
         chopper = "Virtual chopper";
       } else {
         // use chopper values
         chop1Speed = doubleFromRun(m_chopper1Name + ".rotation_speed");
-        chop2Speed = doubleFromRun(m_chopper2Name +  ".rotation_speed");
+        chop2Speed = doubleFromRun(m_chopper2Name + ".rotation_speed");
         chop2Phase = doubleFromRun(m_chopper2Name + ".phase");
       }
       // logging
@@ -549,14 +562,17 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       g_log.debug() << chopper << " 2 speed: " << chop2Speed << '\n';
 
       if (chop1Speed <= 0.0) {
-        g_log.error() << "First chopper velocity " << chop1Speed << ". Check you NeXus file.\n";
+        g_log.error() << "First chopper velocity " << chop1Speed
+                      << ". Check you NeXus file.\n";
       }
-      const double t_TOF2 = m_tofDelay - 1.e+6 * 60.0 *
-                 (POFF - 45.0 + chop2Phase - chop1Phase + openOffset) /
-                 (2.0 * 360 * chop1Speed);
+      const double t_TOF2 =
+          m_tofDelay -
+          1.e+6 * 60.0 * (POFF - 45.0 + chop2Phase - chop1Phase + openOffset) /
+              (2.0 * 360 * chop1Speed);
       g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
       // compute tof values
-      for (int channelIndex = 0; channelIndex <= static_cast<int>(m_numberOfChannels);
+      for (int channelIndex = 0;
+           channelIndex <= static_cast<int>(m_numberOfChannels);
            ++channelIndex) {
         const double t_TOF1 = (channelIndex + 0.5) * m_channelWidth;
         xVals.push_back(t_TOF1 + t_TOF2);
@@ -567,7 +583,8 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         xVals.push_back(double(t));
     }
   } catch (std::runtime_error &e) {
-    g_log.information() << "Unable to access NeXus file entry: " << e.what() << '\n';
+    g_log.information() << "Unable to access NeXus file entry: " << e.what()
+                        << '\n';
   }
   return xVals;
 }
@@ -579,9 +596,9 @@ std::vector<double> LoadILLReflectometry::getXValues() {
  * @param monitorsData :: Monitors data already loaded
  * @param xVals :: X values
  */
-void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
-                                    const std::vector<std::vector<int>> &monitorsData,
-                                    const std::vector<double> &xVals) {
+void LoadILLReflectometry::loadData(
+    NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
+    const std::vector<double> &xVals) {
   g_log.debug("Loading data...");
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
@@ -602,7 +619,8 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
       for (size_t im = 0; im < nb_monitors; ++im) {
         const int *monitor_p = monitorsData[im].data();
         const Counts counts(monitor_p, monitor_p + m_numberOfChannels);
-        m_localWorkspace->setHistogram(im + m_numberOfHistograms, binEdges, std::move(counts));
+        m_localWorkspace->setHistogram(im + m_numberOfHistograms, binEdges,
+                                       std::move(counts));
         progress.report();
       }
     }
@@ -635,7 +653,8 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
 std::pair<double, double> LoadILLReflectometry::fitReflectometryPeak() {
   size_t startIndex;
   size_t endIndex;
-  std::tie(startIndex, endIndex) = fitIntegrationWSIndexRange(*m_localWorkspace);
+  std::tie(startIndex, endIndex) =
+      fitIntegrationWSIndexRange(*m_localWorkspace);
   IAlgorithm_sptr integration = createChildAlgorithm("Integration");
   integration->initialize();
   integration->setProperty("InputWorkspace", m_localWorkspace);
@@ -663,15 +682,18 @@ std::pair<double, double> LoadILLReflectometry::fitReflectometryPeak() {
   auto lessThanHalfMax = [height](const double x) { return x < 0.5 * height; };
   using IterType = HistogramData::HistogramY::const_iterator;
   std::reverse_iterator<IterType> revMaxValueIt{maxValueIt};
-  auto revMinFwhmIt = std::find_if(revMaxValueIt, integralWS->y(0).crend(), lessThanHalfMax);
-  auto maxFwhmIt = std::find_if(maxValueIt, integralWS->y(0).cend(), lessThanHalfMax);
+  auto revMinFwhmIt =
+      std::find_if(revMaxValueIt, integralWS->y(0).crend(), lessThanHalfMax);
+  auto maxFwhmIt =
+      std::find_if(maxValueIt, integralWS->y(0).cend(), lessThanHalfMax);
   std::reverse_iterator<IterType> revMaxFwhmIt{maxFwhmIt};
-  const double fwhm = static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
-  g_log.debug() << "Initial fwhm (fixed window at half maximum): " << fwhm << '\n';
+  const double fwhm =
+      static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
+  g_log.debug() << "Initial fwhm (fixed window at half maximum): " << fwhm
+                << '\n';
   // generate Gaussian
   auto func = API::FunctionFactory::Instance().createFunction("Gaussian");
-  auto initialGaussian =
-      boost::dynamic_pointer_cast<API::IPeakFunction>(func);
+  auto initialGaussian = boost::dynamic_pointer_cast<API::IPeakFunction>(func);
   initialGaussian->setHeight(height);
   initialGaussian->setCentre(centreByMax);
   initialGaussian->setFwhm(fwhm);
@@ -679,8 +701,7 @@ std::pair<double, double> LoadILLReflectometry::fitReflectometryPeak() {
   API::IAlgorithm_sptr fitGaussian = createChildAlgorithm("Fit");
   fitGaussian->initialize();
   fitGaussian->setProperty(
-      "Function",
-      boost::dynamic_pointer_cast<API::IFunction>(initialGaussian));
+      "Function", boost::dynamic_pointer_cast<API::IFunction>(initialGaussian));
   fitGaussian->setProperty("InputWorkspace", integralWS);
   bool success = fitGaussian->execute();
   if (!success)
@@ -713,16 +734,22 @@ double LoadILLReflectometry::computeBraggAngle() {
   double angleBragg;
   ITableWorkspace_const_sptr posTable = getProperty("BeamPosition");
   if (!posTable) {
-      angleBragg = doubleFromRun(m_detectorAngleName);
+    angleBragg = doubleFromRun(m_detectorAngleName);
   } else {
     const double detAngle = doubleFromRun(m_detectorAngleName);
-    g_log.debug() << "Using detector angle (degrees) " << m_detectorAngleName << ": " << detAngle << '\n';
+    g_log.debug() << "Using detector angle (degrees) " << m_detectorAngleName
+                  << ": " << detAngle << '\n';
     const auto directBeamMeasurement = parseBeamPositionTable(*posTable);
-    const double dbOffset = (m_pixelCentre - directBeamMeasurement.fittedPeakCentre) * m_pixelWidth;
-    const double dbOffsetAngle = inDeg(std::atan2(dbOffset, directBeamMeasurement.detectorDistance));
+    const double dbOffset =
+        (m_pixelCentre - directBeamMeasurement.fittedPeakCentre) * m_pixelWidth;
+    const double dbOffsetAngle =
+        inDeg(std::atan2(dbOffset, directBeamMeasurement.detectorDistance));
     const double refOffset = (m_pixelCentre - reflectedCentre) * m_pixelWidth;
-    const double refOffsetAngle = inDeg(std::atan2(refOffset, m_detectorDistanceValue));
-    const double virtualDetAngle = detAngle - directBeamMeasurement.detectorAngle - 2 * dbOffsetAngle + refOffsetAngle;
+    const double refOffsetAngle =
+        inDeg(std::atan2(refOffset, m_detectorDistanceValue));
+    const double virtualDetAngle = detAngle -
+                                   directBeamMeasurement.detectorAngle -
+                                   2 * dbOffsetAngle + refOffsetAngle;
     angleBragg = virtualDetAngle;
   }
   g_log.debug() << "Bragg angle " << angleBragg << " degrees.\n";
@@ -737,7 +764,8 @@ void LoadILLReflectometry::placeDetector() {
   // TODO offset_value cannot be used like this for Figaro.
   if (m_instrumentName == "Figaro")
     dist += doubleFromRun(m_detectorDistance + ".offset_value");
-  g_log.debug() << "Sample-detector distance: " << m_detectorDistanceValue << "m.\n";
+  g_log.debug() << "Sample-detector distance: " << m_detectorDistanceValue
+                << "m.\n";
   const double theta = computeBraggAngle();
   // incident angle for using the algorithm ConvertToReflectometryQ
   // TODO Doesn't seem to work with ConvertToReflectometryQ. Maybe they
@@ -746,11 +774,15 @@ void LoadILLReflectometry::placeDetector() {
   m_localWorkspace->mutableRun().addProperty("stheta", inRad(theta) / 2);
   const std::string componentName = "detector";
   const RotationPlane rotPlane = [this]() {
-    if (m_instrumentName == "D17") return RotationPlane::horizontal;
-    else if (m_instrumentName == "Figaro") return RotationPlane::vertical;
-    else return RotationPlane::horizontal;
+    if (m_instrumentName == "D17")
+      return RotationPlane::horizontal;
+    else if (m_instrumentName == "Figaro")
+      return RotationPlane::vertical;
+    else
+      return RotationPlane::horizontal;
   }();
-  const auto newpos = detectorPosition(rotPlane, m_detectorDistanceValue, theta);
+  const auto newpos =
+      detectorPosition(rotPlane, m_detectorDistanceValue, theta);
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
   const auto rotation = detectorFaceRotation(rotPlane, theta);

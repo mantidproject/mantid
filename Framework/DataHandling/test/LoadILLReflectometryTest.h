@@ -92,9 +92,7 @@ public:
   }
   static void destroySuite(LoadILLReflectometryTest *suite) { delete suite; }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().clear();
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testName() {
     LoadILLReflectometry loader;
@@ -118,15 +116,26 @@ public:
     getWorkspaceFor(output, m_d17File, m_outWSName, "XUnit", "TimeOfFlight");
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "TOF");
     const auto &run = output->run();
-    const auto channelWidth = run.getPropertyValueAsType<double>("PSD.time_of_flight_0");
-    const auto channelCount = static_cast<size_t>(run.getPropertyValueAsType<double>("PSD.time_of_flight_1"));
-    const auto tofDelay = run.getPropertyValueAsType<double>("PSD.time_of_flight_2");
-    const auto chopper1Speed = run.getPropertyValueAsType<double>("VirtualChopper.chopper1_speed_average");
-    const auto chopper1Phase = run.getPropertyValueAsType<double>("Chopper1.phase");
-    const auto chopper2Phase = run.getPropertyValueAsType<double>("VirtualChopper.chopper2_phase_average");
-    const auto pOffset = run.getPropertyValueAsType<double>("VirtualChopper.poff");
-    const auto openOffset = run.getPropertyValueAsType<double>("VirtualChopper.open_offset");
-    const auto tof0 = tofDelay + 0.5 * channelWidth - 60e6 * (pOffset - 45 + chopper2Phase - chopper1Phase + openOffset) / (2 * 360 * chopper1Speed);
+    const auto channelWidth =
+        run.getPropertyValueAsType<double>("PSD.time_of_flight_0");
+    const auto channelCount = static_cast<size_t>(
+        run.getPropertyValueAsType<double>("PSD.time_of_flight_1"));
+    const auto tofDelay =
+        run.getPropertyValueAsType<double>("PSD.time_of_flight_2");
+    const auto chopper1Speed = run.getPropertyValueAsType<double>(
+        "VirtualChopper.chopper1_speed_average");
+    const auto chopper1Phase =
+        run.getPropertyValueAsType<double>("Chopper1.phase");
+    const auto chopper2Phase = run.getPropertyValueAsType<double>(
+        "VirtualChopper.chopper2_phase_average");
+    const auto pOffset =
+        run.getPropertyValueAsType<double>("VirtualChopper.poff");
+    const auto openOffset =
+        run.getPropertyValueAsType<double>("VirtualChopper.open_offset");
+    const auto tof0 =
+        tofDelay + 0.5 * channelWidth -
+        60e6 * (pOffset - 45 + chopper2Phase - chopper1Phase + openOffset) /
+            (2 * 360 * chopper1Speed);
     TS_ASSERT_EQUALS(output->blocksize(), channelCount);
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < 1; ++j) {
@@ -140,8 +149,10 @@ public:
     MatrixWorkspace_sptr output;
     getWorkspaceFor(output, m_d17File, m_outWSName, "XUnit", "TimeOfFlight");
     const auto &run = output->run();
-    const auto chopperCentre = run.getPropertyValueAsType<double>("VirtualChopper.dist_chop_samp");
-    const auto chopperSeparation = run.getPropertyValueAsType<double>("Distance.ChopperGap") / 100;
+    const auto chopperCentre =
+        run.getPropertyValueAsType<double>("VirtualChopper.dist_chop_samp");
+    const auto chopperSeparation =
+        run.getPropertyValueAsType<double>("Distance.ChopperGap") / 100;
     const auto sourceSample = chopperCentre - 0.5 * chopperSeparation;
     const auto &spectrumInfo = output->spectrumInfo();
     const auto l1 = spectrumInfo.l1();
@@ -163,7 +174,8 @@ public:
     const auto &run = output->run();
     const auto detDist = run.getPropertyValueAsType<double>("det.value") / 1000;
     const auto pixWidth = run.getPropertyValueAsType<double>("PSD.mppx") / 1000;
-    const auto detAngle = run.getPropertyValueAsType<double>("dan.value") * M_PI / 180;
+    const auto detAngle =
+        run.getPropertyValueAsType<double>("dan.value") * M_PI / 180;
     for (size_t i = 0; i < spectrumInfo.size(); ++i) {
       if (spectrumInfo.isMonitor(i)) {
         continue;
@@ -196,7 +208,8 @@ public:
   void testUserAngleD17() {
     MatrixWorkspace_sptr output;
     const double angle = 23.23;
-    getWorkspaceFor(output, m_d17File, m_outWSName, "BraggAngle", std::to_string(angle));
+    getWorkspaceFor(output, m_d17File, m_outWSName, "BraggAngle",
+                    std::to_string(angle));
     const auto &spectrumInfo = output->spectrumInfo();
     TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(128) * 180 / M_PI, angle)
     TS_ASSERT_LESS_THAN_EQUALS(angle, spectrumInfo.twoTheta(127) * 180 / M_PI)
@@ -204,118 +217,147 @@ public:
     TS_ASSERT_EQUALS(2 * stheta * 180 / M_PI, angle)
   }
 
-
   void testPropertiesD17() {
     MatrixWorkspace_sptr output;
     getWorkspaceFor(output, m_d17File, m_outWSName);
     commonProperties(output, "D17");
     const auto &spectrumInfo = output->spectrumInfo();
-    const auto detAngle = (spectrumInfo.twoTheta(127) + spectrumInfo.twoTheta(128)) / 2;
+    const auto detAngle =
+        (spectrumInfo.twoTheta(127) + spectrumInfo.twoTheta(128)) / 2;
     TS_ASSERT_DELTA(2 * output->run().getPropertyValueAsType<double>("stheta"),
-                     detAngle, 1e-10)
+                    detAngle, 1e-10)
   }
 
   void testDirectBeamOutput() {
     using namespace Mantid::DataObjects;
     MatrixWorkspace_sptr output;
     const std::string beamPosWSName{"LoadILLReflectometryTest_BeapPositionWS"};
-    getWorkspaceFor(output, m_d17DirectBeamFile, m_outWSName, "OutputBeamPosition", beamPosWSName);
+    getWorkspaceFor(output, m_d17DirectBeamFile, m_outWSName,
+                    "OutputBeamPosition", beamPosWSName);
     TableWorkspace_sptr beamPosWS =
-        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(beamPosWSName);
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            beamPosWSName);
     TS_ASSERT(beamPosWS)
     TS_ASSERT_EQUALS(beamPosWS->rowCount(), 1)
     TS_ASSERT_EQUALS(beamPosWS->columnCount(), 4)
     const auto colNames = beamPosWS->getColumnNames();
-    TS_ASSERT_EQUALS(std::count(colNames.cbegin(), colNames.cend(), "DetectorAngle"), 1)
+    TS_ASSERT_EQUALS(
+        std::count(colNames.cbegin(), colNames.cend(), "DetectorAngle"), 1)
     const auto &detAngles = beamPosWS->getColVector<double>("DetectorAngle");
     const auto &run = output->run();
     const auto dan = run.getPropertyValueAsType<double>("dan.value");
     TS_ASSERT_EQUALS(detAngles.front(), dan)
-    TS_ASSERT_EQUALS(std::count(colNames.cbegin(), colNames.cend(), "DetectorDistance"), 1)
-    const auto &detDistances = beamPosWS->getColVector<double>("DetectorDistance");
+    TS_ASSERT_EQUALS(
+        std::count(colNames.cbegin(), colNames.cend(), "DetectorDistance"), 1)
+    const auto &detDistances =
+        beamPosWS->getColVector<double>("DetectorDistance");
     const auto detDist = run.getPropertyValueAsType<double>("det.value") / 1000;
     TS_ASSERT_EQUALS(detDistances.front(), detDist)
-    TS_ASSERT_EQUALS(std::count(colNames.cbegin(), colNames.cend(), "PositionOfMaximum"), 1)
-    const auto maxPositions = beamPosWS->getColVector<double>("PositionOfMaximum");
+    TS_ASSERT_EQUALS(
+        std::count(colNames.cbegin(), colNames.cend(), "PositionOfMaximum"), 1)
+    const auto maxPositions =
+        beamPosWS->getColVector<double>("PositionOfMaximum");
     TS_ASSERT_EQUALS(maxPositions.front(), 202)
-    TS_ASSERT_EQUALS(std::count(colNames.cbegin(), colNames.cend(), "FittedPeakCentre"), 1)
-    const auto peakCentres = beamPosWS->getColVector<double>("FittedPeakCentre");
+    TS_ASSERT_EQUALS(
+        std::count(colNames.cbegin(), colNames.cend(), "FittedPeakCentre"), 1)
+    const auto peakCentres =
+        beamPosWS->getColVector<double>("FittedPeakCentre");
     TS_ASSERT_DELTA(peakCentres.front(), maxPositions.front(), 0.5)
   }
 
   void testDirectBeamInput() {
     using namespace Mantid::DataObjects;
     MatrixWorkspace_sptr dbOutput;
-    const std::string dbBeamPosWSName{"LoadILLReflectometryTest_DbBeamPositionWS"};
-    getWorkspaceFor(dbOutput, m_d17DirectBeamFile, "LoadILLReflectometryTest_DirectBeamWS", "OutputBeamPosition", dbBeamPosWSName);
+    const std::string dbBeamPosWSName{
+        "LoadILLReflectometryTest_DbBeamPositionWS"};
+    getWorkspaceFor(dbOutput, m_d17DirectBeamFile,
+                    "LoadILLReflectometryTest_DirectBeamWS",
+                    "OutputBeamPosition", dbBeamPosWSName);
     TableWorkspace_sptr dbBeamPosWS =
-        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(dbBeamPosWSName);
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            dbBeamPosWSName);
     MatrixWorkspace_sptr refOutput;
-    // Due to limitation of getWorkspaceFor, we run it twice for the reflected beam.
-    const std::string refBeamPosWSName{"LoadILLReflectometryTest_RefBeamPositionWS"};
-    getWorkspaceFor(refOutput, m_d17File, m_outWSName, "OutputBeamPosition", refBeamPosWSName);
+    // Due to limitation of getWorkspaceFor, we run it twice for the reflected
+    // beam.
+    const std::string refBeamPosWSName{
+        "LoadILLReflectometryTest_RefBeamPositionWS"};
+    getWorkspaceFor(refOutput, m_d17File, m_outWSName, "OutputBeamPosition",
+                    refBeamPosWSName);
     TableWorkspace_sptr refBeamPosWS =
-        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(refBeamPosWSName);
-    getWorkspaceFor(refOutput, m_d17File, m_outWSName, "BeamPosition", dbBeamPosWSName);
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            refBeamPosWSName);
+    getWorkspaceFor(refOutput, m_d17File, m_outWSName, "BeamPosition",
+                    dbBeamPosWSName);
     const auto dbDetAngle = dbBeamPosWS->cell_cast<double>(0, "DetectorAngle");
-    const auto dbDetDist = dbBeamPosWS->cell_cast<double>(0, "DetectorDistance");
-    const auto dbPeakPos = dbBeamPosWS->cell_cast<double>(0, "FittedPeakCentre");
-    const auto dbPixWidth = dbOutput->run().getPropertyValueAsType<double>("PSD.mppx") / 1000;
+    const auto dbDetDist =
+        dbBeamPosWS->cell_cast<double>(0, "DetectorDistance");
+    const auto dbPeakPos =
+        dbBeamPosWS->cell_cast<double>(0, "FittedPeakCentre");
+    const auto dbPixWidth =
+        dbOutput->run().getPropertyValueAsType<double>("PSD.mppx") / 1000;
     const auto dbPeakOffset = (127.5 - dbPeakPos) * dbPixWidth;
     const auto dbOffsetAngle = std::atan2(dbPeakOffset, dbDetDist) * 180 / M_PI;
-    const auto refDetAngle = refOutput->run().getPropertyValueAsType<double>("dan.value");
-    const auto refDetDist = refOutput->run().getPropertyValueAsType<double>("det.value") / 1000;
-    const auto refPeakPos = refBeamPosWS->cell_cast<double>(0, "FittedPeakCentre");
-    const auto refPixWidth = refOutput->run().getPropertyValueAsType<double>("PSD.mppx") / 1000;
+    const auto refDetAngle =
+        refOutput->run().getPropertyValueAsType<double>("dan.value");
+    const auto refDetDist =
+        refOutput->run().getPropertyValueAsType<double>("det.value") / 1000;
+    const auto refPeakPos =
+        refBeamPosWS->cell_cast<double>(0, "FittedPeakCentre");
+    const auto refPixWidth =
+        refOutput->run().getPropertyValueAsType<double>("PSD.mppx") / 1000;
     const auto refPeakOffset = (127.5 - refPeakPos) * refPixWidth;
-    const auto refOffsetAngle = std::atan2(refPeakOffset, refDetDist) * 180 / M_PI;
-    const auto newDetAngle = refDetAngle - dbDetAngle - 2 * dbOffsetAngle + refOffsetAngle;
+    const auto refOffsetAngle =
+        std::atan2(refPeakOffset, refDetDist) * 180 / M_PI;
+    const auto newDetAngle =
+        refDetAngle - dbDetAngle - 2 * dbOffsetAngle + refOffsetAngle;
     const auto &spectrumInfo = refOutput->spectrumInfo();
-    TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(128) * 180 / M_PI, newDetAngle)
-    TS_ASSERT_LESS_THAN_EQUALS(newDetAngle, spectrumInfo.twoTheta(127) * 180 / M_PI)
+    TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(128) * 180 / M_PI,
+                               newDetAngle)
+    TS_ASSERT_LESS_THAN_EQUALS(newDetAngle,
+                               spectrumInfo.twoTheta(127) * 180 / M_PI)
   }
 };
 
-  class LoadILLReflectometryTestPerformance : public CxxTest::TestSuite {
-  public:
-    void setUp() override {
-      for (int i = 0; i < numberOfIterations; ++i) {
-        loadAlgPtrs.emplace_back(setupAlg());
-      }
+class LoadILLReflectometryTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    for (int i = 0; i < numberOfIterations; ++i) {
+      loadAlgPtrs.emplace_back(setupAlg());
     }
+  }
 
-    void testLoadILLReflectometryPerformance() {
-      for (auto alg : loadAlgPtrs) {
-        TS_ASSERT_THROWS_NOTHING(alg->execute());
-      }
+  void testLoadILLReflectometryPerformance() {
+    for (auto alg : loadAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
     }
+  }
 
-    void tearDown() override {
-      for (int i = 0; i < numberOfIterations; i++) {
-        delete loadAlgPtrs[i];
-        loadAlgPtrs[i] = nullptr;
-      }
-      Mantid::API::AnalysisDataService::Instance().remove(m_outWSName);
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete loadAlgPtrs[i];
+      loadAlgPtrs[i] = nullptr;
     }
+    Mantid::API::AnalysisDataService::Instance().remove(m_outWSName);
+  }
 
-  private:
-    std::vector<LoadILLReflectometry *> loadAlgPtrs;
+private:
+  std::vector<LoadILLReflectometry *> loadAlgPtrs;
 
-    const int numberOfIterations = 5;
+  const int numberOfIterations = 5;
 
-    const std::string inFileName = "ILL/D17/317370.nxs";
-    const std::string m_outWSName = "LoadILLReflectomeryWsOut";
+  const std::string inFileName = "ILL/D17/317370.nxs";
+  const std::string m_outWSName = "LoadILLReflectomeryWsOut";
 
-    LoadILLReflectometry *setupAlg() {
-      LoadILLReflectometry *loader = new LoadILLReflectometry;
-      loader->initialize();
-      loader->isInitialized();
-      loader->setPropertyValue("Filename", inFileName);
-      loader->setPropertyValue("OutputWorkspace", m_outWSName);
+  LoadILLReflectometry *setupAlg() {
+    LoadILLReflectometry *loader = new LoadILLReflectometry;
+    loader->initialize();
+    loader->isInitialized();
+    loader->setPropertyValue("Filename", inFileName);
+    loader->setPropertyValue("OutputWorkspace", m_outWSName);
 
-      loader->setRethrows(true);
-      return loader;
-    }
-  };
+    loader->setRethrows(true);
+    return loader;
+  }
+};
 
 #endif /* MANTID_DATAHANDLING_LOADILLREFLECTOMETRYTEST_H_ */

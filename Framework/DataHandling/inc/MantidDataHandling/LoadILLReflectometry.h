@@ -57,12 +57,12 @@ private:
   void initWorkspace(const std::vector<std::vector<int>> &monitorsData);
   void initNames(NeXus::NXEntry &entry);
   void loadDataDetails(NeXus::NXEntry &entry);
-  double doubleFromRun(const std::string& entryName) const;
+  double doubleFromRun(const std::string &entryName) const;
   std::vector<double> getXValues();
   void convertTofToWavelength();
   std::pair<double, double> fitReflectometryPeak();
   void loadData(NeXus::NXEntry &entry,
-                const std::vector<std::vector<int> > &monitorsData,
+                const std::vector<std::vector<int>> &monitorsData,
                 const std::vector<double> &xVals);
   void loadNexusEntriesIntoProperties();
   std::vector<int> loadSingleMonitor(NeXus::NXEntry &entry,
@@ -73,7 +73,8 @@ private:
   void placeDetector();
   void placeSource();
 
-  double detectorAngle(const double peakPosition, const double detectorDistance) const ;
+  double detectorAngle(const double peakPosition,
+                       const double detectorDistance) const;
   double sampleDetectorDistance() const;
   double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
