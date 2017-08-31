@@ -316,6 +316,17 @@ class StateCalculateTransmissionLARMOR(StateCalculateTransmission):
         super(StateCalculateTransmissionLARMOR, self).validate()
 
 
+class StateCalculateTransmissionZOOM(StateCalculateTransmission):
+    def __init__(self):
+        super(StateCalculateTransmissionZOOM, self).__init__()
+        # Set the LOQ full wavelength range
+        self.wavelength_full_range_low = Configurations.ZOOM.wavelength_full_range_low
+        self.wavelength_full_range_high = Configurations.ZOOM.wavelength_full_range_high
+
+    def validate(self):
+        super(StateCalculateTransmissionZOOM, self).validate()
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
@@ -378,6 +389,19 @@ class StateCalculateTransmissionBuilderLARMOR(object):
         return copy.copy(self.state)
 
 
+class StateCalculateTransmissionBuilderZOOM(object):
+    @automatic_setters(StateCalculateTransmissionZOOM)
+    def __init__(self, data_info):
+        super(StateCalculateTransmissionBuilderZOOM, self).__init__()
+        self._data = data_info
+        self.state = StateCalculateTransmissionZOOM()
+        set_default_monitors(self.state, self._data)
+
+    def build(self):
+        self.state.validate()
+        return copy.copy(self.state)
+
+
 # ------------------------------------------
 # Factory method for StateCalculateTransmissionBuilder
 # ------------------------------------------
@@ -389,6 +413,8 @@ def get_calculate_transmission_builder(data_info):
         return StateCalculateTransmissionBuilderSANS2D(data_info)
     elif instrument is SANSInstrument.LOQ:
         return StateCalculateTransmissionBuilderLOQ(data_info)
+    elif instrument is SANSInstrument.ZOOM:
+        return StateCalculateTransmissionBuilderZOOM(data_info)
     else:
         raise NotImplementedError("StateCalculateTransmissionBuilder: Could not find any valid transmission "
                                   "builder for the specified StateData object {0}".format(str(data_info)))
