@@ -20,6 +20,13 @@ Bayes
 Data Analysis
 #############
 
+Elwin
+~~~~~
+
+Bugfixes
+--------
+- Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
+
 ConvFit
 ~~~~~~~
 
