@@ -890,7 +890,7 @@ The algorithm performs the following steps:
 
    a. Load the transmission workspace
    b. Extract the transmission detector ids with :ref:`ExtractSpectra <algm-ExtractSpectra>`
-   c. Perform prompt peak correction
+   c. Perform prompt peak correction (if applicable) using :ref:`RemoveBins <algm-RemoveBins>`
    d. Perform flat background correction to monitors (if applicable) using :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`
    e. Perform flat background correction to other detectors (if applicable) using :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`
    f. Convert to wavelength and rebin using :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
@@ -962,18 +962,145 @@ for ``SANSConvertToQ``.
 The sub-steps of the algorithm are:
 
 1. Create the wavelength-adjustment workspace. The sub-steps are:
+
    a. Load the calculate-transmission workspace
    b. Get the normalization-to-monitor workspace from the input
    c. Load the wavelength-adjustment file using :ref:`LoadRKH <algm-LoadRKH>`
    d. Provide all of the above workspaces with the same binning using :ref:`Rebin <algm-Rebin>`
       and multiply them using :ref:`Multiply <algm-Multiply>`
+
 2. Create the pixel-adjustment workspace. The sub-states are:
+
    a. Load the pixel-adjustment file using :ref:`LoadRKH <algm-LoadRKH>`
    b. Crop the pixel-adjustment workspace to the desired detector
+
 3. Set the pixel-adjustment and wavelength-adjustment workspaces on the output of the algorithm
 
 ``SANSCrop``
 ------------
+
+The ``SANSCrop`` algorithm crops the input workspace to a specified component using the
+:ref:`CropToComponent <algm-CropToComponent>`.
+
+``SANSLoad``
+------------
+
+The ``SANSLoad`` algorithm is responsible for loading data and apply the calibration
+where required. This algorithm loads SANS data sets. The loading can handle nexus
+and raw files which can be plain or multi-period data. In addition the algorithm
+has to be able to handle added files. The SANS data sets which can be loaded
+with this algorithm are:
+
+* sample scatter data which is the actual data under investigation. The algorithm
+  loads the corresponding monitor workspace separately
+* sample transmission data
+* sample direct data
+* can scatter data. The algorithm also loads the corresponding monitor workspace
+* can transmission data
+* can direct data
+
+In addition a calibration file which is applied after the data has been loaded
+can be specified.
+
+The algorithm sub-steps are:
+
+1. Based on the input data a loading strategy is selected.
+2. For each workspace in the ``StateData`` state object we load the data. The sub-states are:
+
+   a. If optimizations are enabled check if the desired workspace already exists
+      on the ADS. If so fetch it and return it. We are done with loading this data set.
+   b. Else get the correct loader strategy (e.g. for event-mode files) and load
+      the data. This will load either all periods or just the specified period
+      where applicable. If scatter data is loaded, then the monitor data is loaded
+      into a separate workspace with the suffix "_monitors".
+
+3. Apply calibration if required. Note that the algorithm loads the calibration
+   workspace from the ADS if it exists there when optimizations are enabled. Else
+   it loads it from file and places it on the ADS.
+4. Set the loaded workspaces on the output of the algorithm.
+5. For LOQ apply transmission corrections if applicable. This will apply a different
+   instrument definition for transmission runs.
+
+``SANSMaskWorkspace``
+---------------------
+
+The ``SANSMaskWorkspace`` algorithm is responsible for masking detectors and time bins
+on the scatter workspaces. There are several types of masking which are currently supported:
+
+- Time/Bin masking.
+- Radius masking.
+- Mask files.
+- Spectrum masking which includes individual spectra, spectra ranges, spectra blocks and spectra cross blocks. These masks are partially specified on a detector level (see below).
+- Angle masking.
+- Beam stop masking.
+
+Note that only those of the following steps are executed where the user has specified
+settings to perform the specific masking type. The algorithm sub-steps are:
+
+1. Select the correct masking strategy (currently only ISIS)
+2. Apply time bin masking. The sub-steps are:
+
+   a. Apply general time bin masks using :ref:`MaskBins <algm-MaskBins>`
+   b. Apply detector specific time bin masks using :ref:`MaskBins <algm-MaskBins>`
+
+3. Apply cylinder masking. This generates a hollow cylinder which masks the
+   the beam stop (defined by an inner radius) and anything outside of the beam
+   area (defined by an outer radius). The sub-steps are:
+
+   a. Set up the inner and the outer radius of the cylinder mask.
+   b. Mask everything outside of the hollow cylinder using :ref:`MaskDetectorsInShape <algm-MaskDetectorsInShape>`
+
+4. Apply a list of mask files. For each mask file the sub-steps are:
+
+   a. Load the mask file into a workspace using :ref:`LoadMask <algm-LoadMask>`
+   b. Apply the mask workspace to the scatter workspace using :ref:`MaskDetectors <algm-MaskDetectors>`
+
+5. Apply spectrum masks. The sub-steps are:
+   a. Get the spectra to mask for single spectra, spectrum ranges,
+      single horizontal spectrum strips, single vertical spectrum strips,
+      horizontal spectrum range (several strips next to each other),
+      vertical spectrum range (several strips next to each other),
+      block masks and block cross masks.
+   b. Mask the selected spectra using :ref:`MaskDetectors <algm-MaskDetectors>`
+
+6. Apply angle masking. This is used for pizza-slice masking. The sub-steps are:
+   a. Mask a pizza slice using :ref:`MaskDetectorsInShape <algm-MaskDetectorsInShape>`
+
+
+``SANSMove``
+------------
+
+The ``SANSMove`` algorithm moves a SANS workspace according to the settings in
+the state object. Additionally the user can specify the beam centre.
+Note that if the beam centre is also specified in the state object, then the
+manual selection takes precedence. The way we perform a move is highly-instrument
+and in fact data-dependent. Currently the move mechanism is implemented for
+**SANS2D**, **LOQ**, **LARMOR** and **ZOOM**.
+
+The main purpose is to shift a freshly loaded data set into its default position.
+The sub-steps to achieve this are:
+
+TODO
+
+
+
+``SANSNormalizeToMonitor``
+--------------------------
+
+The  ``SANSNormalizeToMonitor`` algorithm provides a monitor normalization
+workspace for subsequent wavelength correction in :ref:`algm-Q1D` or
+:ref:`algm-Qxy`. The settings of the algorithm are provided by the state object.
+The user can provide a *ScaleFactor* which is normally obtained during
+event slicing.
+
+The sub-steps of this algorithm are:
+
+1. Get the incident monitor spectrum number and the scale factor
+2. Extract the monitor spectrum using :ref:`ExtractSingleSpectrum <algm-ExtractSingleSpectrum>` into a monitor workspace
+3. Apply the scale factor to the monitor workspace using :ref:`Scale <algm-Scale>`
+4. Perform a prompt peak correction (if applicable) using :ref:`RemoveBins <algm-RemoveBins>`
+5. Perform a flat background correction (if applicable) using :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`
+6. Convert to wavelenght and rebin using :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 
 
 ``SANSSave``
@@ -983,6 +1110,48 @@ The *SANSSave* algorithm performs two steps:
 
 1. Create a cloned workspace where the zero-error values are inflated (if this is requested)
 2. Save the workspace into each specified file format.
+
+
+``SANSScale``
+-------------
+
+The ``SANSScale`` algorithm scales a SANS workspace according to the settings
+in the state object. The scaling includes division by the volume of the sample and
+multiplication by an absolute scale.
+
+The sub-steps of this algorithm are:
+
+1. Multiply by the absolute scale. The sub-steps are:
+
+   a. If a scale is specified multiply the scale by 100, else set the scale to 100
+   b. If the instrument is LOQ divide by :math:`\pi`
+   c. Multiply the scatter workspace by the scale using :ref:`Multiply <algm-Multiply>` (and :ref:`CreateSingleValuedWorkspace <algm-CreateSingleValuedWorkspace>`)
+
+2. Divide by the sample volume. The sub-steps are:
+
+   a. Calculate the sample volume based either on the user settings or on the sample information from the file.
+   b. Divide by the scatter workspace by the sample volume using :ref:`Divide <algm-Divide>` (and :ref:`CreateSingleValuedWorkspace <algm-CreateSingleValuedWorkspace>`)
+
+
+``SANSSliceEvent``
+------------------
+
+The ``SANSSliceEvent`` algorithm creates a sliced workspaces from an event-based
+SANS input workspace according to the settings in the state object. The algorithm
+will extract a slice based on a start and end time which are set in the state
+object. In addition the data type, ie if the slice is to be taken from a sample
+or a can workspace can be specified. Note that the monitor workspace is not
+being sliced but scaled by the ratio of the proton charge of the sliced
+workspace to the full workspace.
+
+The sub=states of this algorithm are:
+
+1. Get the start time and the end time of the time slice
+2. If the data set is from a Can measurement, then don't perform a slice
+3. Slice the scatter workspace using the start and end time and :ref:`FilterByTime <algm-FilterByTime>`
+4. Get the partial charge for the sliced data and calculate the slice factor which is *(partial charge) / (total charge)*
+5. Multiply the monitor workspace with the scale factor
+6. Set the sliced scatter data, the scaled monitor data and the slice factor on the output of this algorithm
 
 
 .. rubric:: Footnotes
