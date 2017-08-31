@@ -44,15 +44,18 @@ private:
 
   std::list<API::MatrixWorkspace_sptr> m_workspaceList;
 
+  size_t m_numHistograms;
+  size_t m_numBins;
+
   double m_startScatteringAngle;
   double m_endScatteringAngle;
   double m_stepScatteringAngle;
 
-  double m_startHeight;
-  double m_endHeight;
-  double m_stepHeight;
+  std::vector<double> m_heightAxis;
 
   void getInputParameters();
+  void getScatteringAngleBinning();
+  void getHeightAxis();
 };
 
 } // namespace Algorithms
