@@ -122,6 +122,10 @@ public:
     EXPECT_CALL(mockTablePresenter_3, accept(_)).Times(Exactly(1));
 
     setUpPresenter(tablePresenterVec);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_2));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_3));
   }
 
   void test_presenter_sets_commands_when_ADS_changed() {
