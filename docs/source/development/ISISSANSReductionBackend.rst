@@ -1180,11 +1180,11 @@ This class is the entry point for any reduction and takes three important inputs
 
 - A list of sans state objects. Each state object defines a reduction. In fact if the state object contains
   period data with :math:`N` periods and :math:`M` time slices it will in fact define :math:`N \cross M` reductions.
-- A ``use_optimizations` boolean flag. If true the data loading mechanism will check the ADS first if
+- A ``use_optimizations`` boolean flag. If true the data loading mechanism will check the ADS first if
   the required data is available from there and only load the data if it is not present. It will place newly
   loaded data into the ADS. The ADS is also checked for can reductions.
 - An ``output_mode`` enum, which can be:
-  
+
   - ``PublishToADS`` which means that the reduced data is added to the ADS
   - ``SaveToFile`` which means that the reduced data is saved only to file
   - ``Both`` which means that the reduced data is added to the ADS and saved to file
