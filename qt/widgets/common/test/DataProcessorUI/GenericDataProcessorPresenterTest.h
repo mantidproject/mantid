@@ -137,6 +137,12 @@ private:
         "Stitch1DMany", "IvsQ_",
         std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
   }
+  
+  ITableWorkspace_sptr
+  createWorkspace(const QString &wsName) {
+    return createWorkspace(wsName, m_presenter->getWhiteList());
+  }
+
 
   ITableWorkspace_sptr
   createWorkspace(const QString &wsName,
@@ -204,7 +210,7 @@ private:
   }
 
   ITableWorkspace_sptr createPrefilledWorkspace(const QString &wsName) {
-    auto ws = createWorkspace(wsName, m_presenter->getWhiteList());
+    auto ws = createWorkspace(wsName);
     TableRow row = ws->appendRow();
     row << "0"
         << "12345"
@@ -252,7 +258,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspaceThreeGroups(const QString &wsName) {
-    auto ws = createWorkspace(wsName, m_presenter->getWhiteList());
+    auto ws = createWorkspace(wsName);
     TableRow row = ws->appendRow();
     row << "0"
         << "12345"
@@ -317,9 +323,8 @@ private:
   }
 
   ITableWorkspace_sptr
-  createPrefilledWorkspaceWithTrans(const QString &wsName,
-                                    const DataProcessorWhiteList &whitelist) {
-    auto ws = createWorkspace(wsName, whitelist);
+  createPrefilledWorkspaceWithTrans(const QString &wsName) {
+    auto ws = createWorkspace(wsName);
     TableRow row = ws->appendRow();
     row << "0"
         << "12345"
@@ -396,10 +401,12 @@ public:
   void setUpDefaultPresenter() { m_presenter = makeUniqueDefaultPresenter(); }
 
   void setUpPresenterWithCommandProvider(
+      std::unique_ptr<DataProcessorTreeManager> treeManager,
       std::unique_ptr<DataProcessorCommandProvider> commandProvider) {
     m_presenter = std::make_unique<GenericDataProcessorPresenter>(
-        std::make_unique<MockDataProcessorCommandProvider>();
-        )
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor(),
+        std::move(treeManager), std::move(commandProvider));
   }
 
   void injectViews(DataProcessorView &dataProcessorView,
@@ -957,8 +964,9 @@ public:
 
   void testProcess() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    MockDataProcessorCommandProvider mockCommandProvider;
-    setUpDefaultPresenterWithCommandProvider(mockCommandProvider);
+    auto mockCommandProvider = std::make_unique<MockDataProcessorCommandProvider>();
+    auto mockTreeManager = std::make_unique<DataProcessorOneLevelTreeManager>();
+    setUpPresenterWithCommandProvider(std::move(mockTreeManager), std::move(mockCommandProvider));
     injectParentPresenter(mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -998,13 +1006,13 @@ public:
     using CommandIndices =
         typename MockDataProcessorCommandProvider::CommandIndices;
 
-    EXPECT_CALL(mockCommandProvider, getPausingEditCommands())
+    EXPECT_CALL(*mockCommandProvider, getPausingEditCommands())
         .WillRepeatedly(Return(CommandIndices(PAUSE_ACTION_INDEX)));
 
-    EXPECT_CALL(mockCommandProvider, getProcessingEditCommands())
+    EXPECT_CALL(*mockCommandProvider, getProcessingEditCommands())
         .WillRepeatedly(Return(CommandIndices(PROCESS_ACTION_INDEX)));
 
-    EXPECT_CALL(mockCommandProvider, getModifyingEditCommands())
+    EXPECT_CALL(*mockCommandProvider, getModifyingEditCommands())
         .WillRepeatedly(Return(CommandIndices(MODIFICATION_ACTION_INDEX_0,
                                               MODIFICATION_ACTION_INDEX_1)));
 
@@ -1055,7 +1063,7 @@ public:
 
   void testTreeUpdatedAfterProcess() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    injectParentPresenter(&mockMainPresenter);
+    injectParentPresenter(mockMainPresenter);
 
     auto ws = createPrefilledWorkspace("TestWorkspace");
     ws->String(0, ThetaCol) = "";
@@ -1139,7 +1147,7 @@ public:
 
   void testTreeUpdatedAfterProcessMultiPeriod() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    injectParentPresenter(&mockMainPresenter);
+    injectParentPresenter(mockMainPresenter);
 
     auto ws = createPrefilledWorkspace("TestWorkspace");
     ws->String(0, ThetaCol) = "";
@@ -1219,7 +1227,7 @@ public:
 
   void testProcessOnlyRowsSelected() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    injectParentPresenter(&mockMainPresenter);
+    injectParentPresenter(mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
@@ -1297,7 +1305,7 @@ public:
 
   void testProcessWithNotebook() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    injectParentPresenter(&mockMainPresenter);
+    injectParentPresenter(mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
@@ -1358,7 +1366,7 @@ public:
 
   void testExpandAllGroups() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    injectParentPresenter(&mockMainPresenter);
+    injectParentPresenter(mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
@@ -1379,7 +1387,7 @@ public:
 
   void testCollapseAllGroups() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    injectParentPresenter(&mockMainPresenter);
+    injectParentPresenter(mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
@@ -1400,7 +1408,7 @@ public:
 
   void testSelectAll() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    m_presenter.accept(&mockMainPresenter);
+    injectParentPresenter(mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
@@ -1426,7 +1434,7 @@ public:
   void testProcessCustomNames() {
     auto m_presenter = makeDefaultPresenterWithMockViews();
     NiceMock<MockMainPresenter> mockMainPresenter;
-    injectParentPresenter(&mockMainPresenter);
+    injectParentPresenter(mockMainPresenter);
 
     auto ws = createWorkspace("TestWorkspace", m_presenter.getWhiteList());
     TableRow row = ws->appendRow();
@@ -1784,7 +1792,7 @@ public:
   }
 
   void testExpandSelection() {
-    auto ws = createWorkspace("TestWorkspace", m_presenter.getWhiteList());
+    auto ws = createWorkspace("TestWorkspace");
     TableRow row = ws->appendRow();
     row << "0"
         << ""
@@ -1981,7 +1989,7 @@ public:
   }
 
   void testGroupRows() {
-    auto ws = createWorkspace("TestWorkspace", m_presenter.getWhiteList());
+    auto ws = createWorkspace("TestWorkspace");
     TableRow row = ws->appendRow();
     row << "0"
         << "0"
@@ -2060,7 +2068,7 @@ public:
   }
 
   void testGroupRowsNothingSelected() {
-    auto ws = createWorkspace("TestWorkspace", m_presenter.getWhiteList());
+    auto ws = createWorkspace("TestWorkspace");
     TableRow row = ws->appendRow();
     row << "0"
         << "0"
@@ -2515,7 +2523,7 @@ public:
 
   void testPasteToNonexistentGroup() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    injectParentPresenter(&mockMainPresenter);
+    injectParentPresenter(mockMainPresenter);
 
     // Empty clipboard
     EXPECT_CALL(m_mockDataProcessorView, getClipboard())
@@ -2553,7 +2561,7 @@ public:
     auto presenter = makeDefaultPresenter();
     presenter.acceptViews(&m_mockDataProcessorView, &mockProgress);
 
-    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    createPrefilledWorkspace("TestWorkspace");
     createTOFWorkspace("TOF_12345", "12345");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
@@ -2606,7 +2614,7 @@ public:
     auto presenter = makeDefaultPresenter();
     presenter.acceptViews(&m_mockDataProcessorView, &mockProgress);
 
-    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    createPrefilledWorkspace("TestWorkspace");
     createTOFWorkspace("TOF_12345", "12345");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
@@ -2638,7 +2646,7 @@ public:
     setUpDefaultPresenter();
     injectViews(m_mockDataProcessorView, mockProgress);
 
-    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    createPrefilledWorkspace("TestWorkspace");
     createTOFWorkspace("TOF_12345", "12345");
     createTOFWorkspace("TOF_12346", "12346");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
@@ -2696,8 +2704,7 @@ public:
   }
 
   void testWorkspaceNamesWithTrans() {
-    createPrefilledWorkspaceWithTrans(QString("TestWorkspace"),
-                                      m_presenter.getWhiteList());
+    createPrefilledWorkspaceWithTrans("TestWorkspace");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
@@ -2730,8 +2737,7 @@ public:
   }
 
   void testWorkspaceNameWrongData() {
-    createPrefilledWorkspaceWithTrans(QString("TestWorkspace"),
-                                      m_presenter.getWhiteList());
+    createPrefilledWorkspaceWithTrans("TestWorkspace");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
@@ -2857,7 +2863,7 @@ public:
     setUpDefaultPresenter();
     injectViews(m_mockDataProcessorView, mockProgress);
 
-    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
@@ -2897,14 +2903,14 @@ public:
 
   void testPlotGroupPythonCode() {
     MockProgressableView mockProgress;
-    auto presenter = makeDefaultPresenter();
-    presenter.acceptViews(&m_mockDataProcessorView, &mockProgress);
+    setUpDefaultPresenter();
+    injectViews(&m_mockDataProcessorView, &mockProgress);
 
-    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    createPrefilledWorkspace("TestWorkspace");
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    notifyPresenter(DataProcessorPresenter::OpenTableFlag);
     createTOFWorkspace("IvsQ_TOF_12345_TOF_12346");
 
     std::set<int> group = {0};
@@ -2926,7 +2932,7 @@ public:
 
     EXPECT_CALL(m_mockDataProcessorView, runPythonAlgorithm(pythonCode))
         .Times(1);
-    presenter.notify(DataProcessorPresenter::PlotGroupFlag);
+    notifyPresenter(DataProcessorPresenter::PlotGroupFlag);
 
     // Tidy up
     removeWorkspace("TestWorkspace");
@@ -3048,7 +3054,7 @@ public:
 
   void testPauseReduction() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    m_presenter.accept(&mockMainPresenter);
+    injectParentPresenter(mockMainPresenter);
 
     // User hits the 'pause' button
     EXPECT_CALL(mockMainPresenter, pause()).Times(1);
