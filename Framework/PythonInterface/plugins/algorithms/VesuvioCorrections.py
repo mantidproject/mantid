@@ -6,6 +6,7 @@ from mantid.kernel import *
 from mantid.api import *
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
 from vesuvio.fitting import parse_fit_options
+from vesuvio.instrument import VESUVIO
 import mantid.simpleapi as ms
 
 import math
@@ -62,7 +63,11 @@ class VesuvioCorrections(VesuvioBase):
 
     # pylint: disable=too-many-locals
     def PyInit(self):
-        # Inputs
+
+        # -------------------------------------------------------------------------------------------
+
+        # Input Property setup
+
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input),
                              doc="Input TOF workspace")
@@ -75,6 +80,15 @@ class VesuvioCorrections(VesuvioBase):
                                                      optional=PropertyMode.Optional),
                              doc="Table containing the calculated fit parameters"
                                  "for the data in the workspace")
+
+        input_group = "Input Options"
+        self.setPropertyGroup("InputWorkspace", input_group)
+        self.setPropertyGroup("WorkspaceIndex", input_group)
+        self.setPropertyGroup("FitParameters", input_group)
+
+        # -------------------------------------------------------------------------------------------
+
+        # Mass Property setup
 
         float_length_validator = FloatArrayLengthValidator()
         float_length_validator.setLengthMin(1)
@@ -92,6 +106,15 @@ class VesuvioCorrections(VesuvioBase):
                                  "function=Function1Name,param1=val1,param2=val2;"
                                  "function=Function2Name,param3=val3,param4=val4")
 
+        mass_group = "Mass Options"
+        self.setPropertyGroup("Masses", mass_group)
+        self.setPropertyGroup("MassIndexToSymbolMap", mass_group)
+        self.setPropertyGroup("MassProfiles", mass_group)
+
+        # -------------------------------------------------------------------------------------------
+
+        # Mass Constraints Property setup
+
         self.declareProperty("IntensityConstraints", "",
                              doc="A semi-colon separated list of intensity "
                                  "constraints defined as lists e.g "
@@ -100,9 +123,17 @@ class VesuvioCorrections(VesuvioBase):
         self.declareProperty(PropertyManagerProperty("HydrogenConstraints", {},
                                                      direction=Direction.Input),
                              doc="Constraints used to approximate the intensity of"
-                                 " the hydrogen peak in back-scattering spectra.")
+                                 " the hydrogen peak in back-scattering spectra for"
+                                 " multiple scattering corrections.")
 
-        # Container
+        mass_constraints_group = "Mass Constraints"
+        self.setPropertyGroup("IntensityConstraints", mass_constraints_group)
+        self.setPropertyGroup("HydrogenConstraints", mass_constraints_group)
+
+        # -------------------------------------------------------------------------------------------
+
+        # Container Property setup
+
         self.declareProperty(MatrixWorkspaceProperty("ContainerWorkspace", "",
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
@@ -112,11 +143,14 @@ class VesuvioCorrections(VesuvioBase):
                              doc="Scale factor to apply to container, set to 0 for "
                                  "automatic scale based on linear fit")
 
-        self.declareProperty("BackScattering", False, direction=Direction.Input,
-                             doc="If true, perform relevant corrections for "
-                                 "back-scattering spectra.")
+        container_group = "Container Options"
+        self.setPropertyGroup("ContainerWorkspace", container_group)
+        self.setPropertyGroup("ContainerScale", container_group)
 
-        # Gamma background
+        # -------------------------------------------------------------------------------------------
+
+        # Gamma Background Property setup
+
         self.declareProperty("GammaBackground", True, direction=Direction.Input,
                              doc="If true, correct for the gamma background")
 
@@ -124,7 +158,17 @@ class VesuvioCorrections(VesuvioBase):
                              doc="Scale factor to apply to gamma background, set to 0 "
                                  "for automatic scale based on linear fit")
 
-        # Multiple scattering
+        gamma_group = "Gamma Correction Options"
+        self.setPropertyGroup("GammaBackground", gamma_group)
+        self.setPropertyGroup("GammaBackgroundScale", gamma_group)
+
+        gamma_enabled = VisibleWhenProperty('GammaBackground', PropertyCriterion.IsEqualTo, "1")
+        self.setPropertySettings("GammaBackgroundScale", gamma_enabled)
+
+        # -------------------------------------------------------------------------------------------
+
+        # Multiple Scattering Property setup
+
         self.declareProperty("MultipleScattering", True, direction=Direction.Input,
                              doc="If true, correct for the effects of multiple scattering")
 
@@ -158,7 +202,38 @@ class VesuvioCorrections(VesuvioBase):
         self.declareProperty("SmoothNeighbours", 3,
                              doc="")
 
-        # Outputs
+        ms_group = "Multiple Scattering Options"
+        self.setPropertyGroup("MultipleScattering", ms_group)
+        self.setPropertyGroup("BeamRadius", ms_group)
+        self.setPropertyGroup("SampleHeight", ms_group)
+        self.setPropertyGroup("SampleWidth", ms_group)
+        self.setPropertyGroup("SampleDepth", ms_group)
+        self.setPropertyGroup("SampleDensity", ms_group)
+        self.setPropertyGroup("Seed", ms_group)
+        self.setPropertyGroup("NumScatters", ms_group)
+        self.setPropertyGroup("NumRuns", ms_group)
+        self.setPropertyGroup("NumEvents", ms_group)
+        self.setPropertyGroup("SmoothNeighbours", ms_group)
+
+        ms_enabled = VisibleWhenProperty('MultipleScattering', PropertyCriterion.IsEqualTo, "1")
+        self.setPropertySettings("BeamRadius", ms_enabled)
+        self.setPropertySettings("SampleHeight", ms_enabled)
+        self.setPropertySettings("SampleWidth", ms_enabled)
+        self.setPropertySettings("SampleDepth", ms_enabled)
+        self.setPropertySettings("SampleDensity", ms_enabled)
+        self.setPropertySettings("Seed", ms_enabled)
+        self.setPropertySettings("NumScatters", ms_enabled)
+        self.setPropertySettings("NumRuns", ms_enabled)
+        self.setPropertySettings("NumEvents", ms_enabled)
+        self.setPropertySettings("SmoothNeighbours", ms_enabled)
+
+        # Disable hydrogen constraints when there is no multiple scattering
+        self.setPropertySettings("HydrogenConstraints", ms_enabled)
+
+        # -------------------------------------------------------------------------------------------
+
+        # Outputs Property setup
+
         self.declareProperty(WorkspaceGroupProperty("CorrectionWorkspaces", "",
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
@@ -181,6 +256,12 @@ class VesuvioCorrections(VesuvioBase):
                                                      direction=Direction.Output),
                              doc="The name of the output workspace")
 
+        output_group = "Output Options"
+        self.setPropertyGroup("CorrectionWorkspaces", output_group)
+        self.setPropertyGroup("CorrectedWorkspaces", output_group)
+        self.setPropertyGroup("LinearFitResult", output_group)
+        self.setPropertyGroup("OutputWorkspace", output_group)
+
     # ------------------------------------------------------------------------------
 
     def validateInputs(self):
@@ -196,7 +277,7 @@ class VesuvioCorrections(VesuvioBase):
     # ------------------------------------------------------------------------------
 
     def _get_properties(self):
-        self._input_ws = self.getPropertyValue("InputWorkspace")
+        self._input_ws = self.getProperty("InputWorkspace").value
         self._container_ws = self.getPropertyValue("ContainerWorkspace")
         self._spec_idx = self.getProperty("WorkspaceIndex").value
         self._output_ws = self.getPropertyValue("OutputWorkspace")
@@ -206,7 +287,9 @@ class VesuvioCorrections(VesuvioBase):
         self._masses = self.getProperty("Masses").value
         self._index_to_symbol_map = self.getProperty("MassIndexToSymbolMap").value
         self._hydrogen_constraints = self.getProperty("HydrogenConstraints").value
-        self._back_scattering = self.getProperty("BackScattering").value
+        spec_no = self._input_ws.getSpectrum(self._spec_idx).getSpectrumNo()
+        back_spectra = VESUVIO().backward_banks
+        self._back_scattering = any([lower <= spec_no <= upper for lower, upper in back_spectra])
 
     # ------------------------------------------------------------------------------
 
@@ -417,7 +500,7 @@ class VesuvioCorrections(VesuvioBase):
             else:
                 symbol = None
 
-            if self._back_scattering and symbol == 'H':
+            if symbol == 'H' and self._back_scattering:
                 contains_hydrogen = True
                 continue
 
