@@ -297,7 +297,7 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
     auto intensity =
         isGood ? centresAndIntensities.getCalculated(i + nGoodPeaks) : 0.0;
 
-    if (i < nFunctions) {
+    if (i < nFunctions - iFirst) {
       auto fun = spectrum.getFunction(i + iFirst);
       auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
       updatePeak(peak, centre, intensity, xVec, yVec, fwhmVariation, isGood,

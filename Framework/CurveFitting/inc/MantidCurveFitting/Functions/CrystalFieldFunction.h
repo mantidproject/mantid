@@ -182,7 +182,7 @@ private:
                       const DoubleFortranVector &en,
                       const ComplexFortranMatrix &wf,
                       const ComplexFortranMatrix &ham, double temperature,
-                      double fwhm, size_t i) const;
+                      double fwhm, size_t iSpec, size_t iFirst) const;
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
                        const ComplexFortranMatrix &wf, double temperature,
@@ -245,6 +245,8 @@ private:
   mutable std::vector<std::string> m_mapIndices2Names;
   /// Attribute names
   mutable std::vector<std::string> m_attributeNames;
+  /// Map parameter/attribute prefixes to pointers to phys prop functions
+  mutable std::unordered_map<std::string, API::IFunction_sptr> m_mapPrefixes2PhysProps;
 };
 
 } // namespace Functions

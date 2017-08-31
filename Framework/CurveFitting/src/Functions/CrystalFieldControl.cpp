@@ -162,7 +162,7 @@ void CrystalFieldControl::checkConsistent()  {
       // Conflicting width attributes
       throw std::runtime_error("Either FWHMs or (FWHMX and FWHMY) can be set but not all.");
     }
-  } else {
+  } else if (physProps().empty()) {
     throw std::runtime_error("No temperatures are set.");
   }
 }
