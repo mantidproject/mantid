@@ -27,6 +27,8 @@ Elwin
 Bugfixes
 --------
 - Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
+- Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
+  convolution fitting into their own workspaces.
 
 ConvFit
 ~~~~~~~
