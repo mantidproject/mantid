@@ -329,7 +329,7 @@ void LoadILLReflectometry::loadInstrument() {
   * Init names of member variables based on instrument specific NeXus file
   * entries
   *
-  * @params entry :: the NeXus file entry
+  * @param entry :: the NeXus file entry
   */
 void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   std::string instrumentNamePath = m_loader.findInstrumentNexusPath(entry);
