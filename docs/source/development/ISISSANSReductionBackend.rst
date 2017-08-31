@@ -1183,11 +1183,11 @@ This class is the entry point for any reduction and takes three important inputs
 - A ``use_optimizations` boolean flag. If true the data loading mechanism will check the ADS first if
   the required data is available from there and only load the data if it is not present. It will place newly
   loaded data into the ADS. The ADS is also checked for can reductions.
-- A ``output_mode`` enum, which can be:
-
-  a. ``PublishToADS`` which means that the reduced data is added to the ADS
-  b. ``SaveToFile`` which means that the reduced data is saved only to file
-  c. ``Both`` which means that the reduced data is added to the ADS and saved to file
+- An ``output_mode`` enum, which can be:
+  
+  - ``PublishToADS`` which means that the reduced data is added to the ADS
+  - ``SaveToFile`` which means that the reduced data is saved only to file
+  - ``Both`` which means that the reduced data is added to the ADS and saved to file
 
 
 ``SANSBatchReduction`` reduces the list of states sequentially. The for-loop in
