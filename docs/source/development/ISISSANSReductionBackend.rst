@@ -159,12 +159,12 @@ These include the states themselves, the parameters in a state and
 the state construction.
 
 
-*state_base.py*
-^^^^^^^^^^^^^^^^
+``state_base.py``
+^^^^^^^^^^^^^^^^^^
 
-The *state_base.py* module contains the essential ingredients for defining a
-state object. These are the *StateBase* class which allows for serialization
-and a set of *TypedParameter*s.
+The ``state_base.py`` module contains the essential ingredients for defining a
+state object. These are the ``StateBase`` class which allows for serialization
+and a set of ``TypedParameter``.
 
 The *StateBase*'s *property_manager* property is responsible for serialization.
 Due to the nature of the *PropertyManagerProperty* of algorithms it serializes
@@ -830,8 +830,8 @@ our own enums. Two things are noteworthy here:
 - The *serializable_enum* decorator allows to correctly register the enum values.
   Note that this decorator alters the *__module__* of the nested classes.
 
-Work-flow algorithms
-#####################
+Work-flow algorithms for individual reduction steps
+###################################################
 
 Here we intend to discuss the functionality of the the individual work-flow algorithms
 which make up the SANS reduction. The algorithms can be found in *Framework/PythonInterface/plugins/WorkflowAlgorithms/SANS*.
@@ -849,16 +849,17 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - ``SANSMaskWorkspace``
 - ``SANSMove``
 - ``SANSNormalizeToMonitor``
-- ``SANSReductionCore``
 - ``SANSSave``
 - ``SANSScale``
-- ``SANSSingleReduction``
 - ``SANSSliceEvent``
 
 Note that the vast majority of the these algorithms takes a *SANSState* object as
 an input.
 
 The individual algorithms are superficially discussed below.
+
+There are two further algorithms which coordinate these algorithms, they are ``SANSReductionCore``
+and ``SANSSingleReduction`` which are discussed further down.
 
 
 ``SANSCalculateTransmission``
@@ -1056,14 +1057,16 @@ settings to perform the specific masking type. The algorithm sub-steps are:
    b. Apply the mask workspace to the scatter workspace using :ref:`MaskDetectors <algm-MaskDetectors>`
 
 5. Apply spectrum masks. The sub-steps are:
+
    a. Get the spectra to mask for single spectra, spectrum ranges,
       single horizontal spectrum strips, single vertical spectrum strips,
       horizontal spectrum range (several strips next to each other),
       vertical spectrum range (several strips next to each other),
-      block masks and block cross masks.
+      block masks and block cross masks
    b. Mask the selected spectra using :ref:`MaskDetectors <algm-MaskDetectors>`
 
 6. Apply angle masking. This is used for pizza-slice masking. The sub-steps are:
+
    a. Mask a pizza slice using :ref:`MaskDetectorsInShape <algm-MaskDetectorsInShape>`
 
 
@@ -1100,7 +1103,7 @@ The sub-steps of this algorithm are:
 3. Apply the scale factor to the monitor workspace using :ref:`Scale <algm-Scale>`
 4. Perform a prompt peak correction (if applicable) using :ref:`RemoveBins <algm-RemoveBins>`
 5. Perform a flat background correction (if applicable) using :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`
-6. Convert to wavelenght and rebin using :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
+6. Convert to wavelength and rebin using :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 
 
 ``SANSSave``
@@ -1152,6 +1155,64 @@ The sub=states of this algorithm are:
 4. Get the partial charge for the sliced data and calculate the slice factor which is *(partial charge) / (total charge)*
 5. Multiply the monitor workspace with the scale factor
 6. Set the sliced scatter data, the scaled monitor data and the slice factor on the output of this algorithm
+
+
+Work-flow algorithm orchestration
+#################################
+
+The orchestration of the work-flow algorithms is mainly handled by the ``SANSReductionCore``
+class in ``sans_reduction_core.py``. It defines the sequence of work-flow algorithms and how data is
+passed between them. However, executing the algorithm ``SANSReductionCore`` does not run a full
+reduction, but rather only reduces either the sample or the can dataself.
+
+For this the ``SANSSingleReduction`` algorithm was developed. It runs ``SANSReductionCore``
+with the appropriate data (sample or can) and performs the required post processing, e.g. stitching.
+This algorithm will produce a fully reduced output. However it will not produce it in the desired form,
+eg correct name of the output workspaces, grouping of mult-period reduced data etc. This is achieved with
+an instance of ``SANSBatchReduction`` (not a work-flow algorithm!) in module ``sans_batch.py``. This
+is the entry point for any reduction.
+
+
+``SANSBatchReduction``
+----------------------
+
+This class is the entry point for any reduction and takes three important inputs:
+
+- A list of sans state objects. Each state object defines a reduction. In fact if the state object contains
+  period data with :math:`N` periods and :math:`M` time slices it will in fact define :math:`N \cross M` reductions.
+- A ``use_optimizations` boolean flag. If true the data loading mechanism will check the ADS first if
+  the required data is available from there and only load the data if it is not present. It will place newly
+  loaded data into the ADS. The ADS is also checked for can reductions.
+- A ``output_mode`` enum, which can be:
+
+  a. ``PublishToADS`` which means that the reduced data is added to the ADS
+  b. ``SaveToFile`` which means that the reduced data is saved only to file
+  c. ``Both`` which means that the reduced data is added to the ADS and saved to file
+
+
+``SANSBatchReduction`` reduces the list of states sequentially. The for-loop in
+the ``execute`` method lends it self for parallelization via *MPI*. The sub-steps for
+handle each state object are:
+
+1. Load the data which is relevant for the particular reduction (make use of optimizations if applicable)
+2. If the state object contains multi-period data with :math:`N` periods and/or :math:`M` time slices
+   then generate :math:`N \cross M` state objects
+3. For each state object run the ``SANSSingleReduction`` algorithm
+4. Group the output workspaces if required, e.g. for reduced multi-period data
+5. Provide workspaces to the selected output channel, i.e. ADS, files or both.
+
+Note that ``SANSBatchReduction`` also sets the name of the reduced data.
+
+The users can interact with the new SANS reduction back-end either via the GUI or
+the Python interface. Both of these methods utilize the ``SANSBatchReduction``
+to perform the reduction.
+
+
+``SANSSingleReduction``
+-----------------------
+
+# The ``SANSSingleReduction`` algorithm defines a single complete reduction of a data set, i.e.
+# it contains
 
 
 .. rubric:: Footnotes
