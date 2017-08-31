@@ -199,29 +199,23 @@ double ComponentInfo::solidAngle(const size_t componentIndex,
 }
 
 /**
- * The absolute bounding box is cleared/reassigned as part of this.
- * The absoluteBB is not grown.
+ * Calculates the absolute bounding box for the leaf item at index
  *
  * @param index : Component index
- * @param absoluteBB : Absolute bounding box. This is rewritten.
+ * @param reference : Optional reference for coordinate system for non-axis
+ *aligned bounding boxes
+ * @return Absolute bounding box.
  */
-void ComponentInfo::componentBoundingBox(const size_t index,
-                                         BoundingBox &absoluteBB) const {
+BoundingBox
+ComponentInfo::componentBoundingBox(const size_t index,
+                                    const BoundingBox *reference) const {
   // Check that we have a valid shape here
   if (!hasShape(index)) {
-    absoluteBB.nullify();
-    return; // This index will not contribute to bounding box
+    return BoundingBox(); // Return null bounding box
   }
   const auto &s = this->shape(index);
-  const BoundingBox &shapeBox = s.getBoundingBox();
+  BoundingBox absoluteBB = s.getBoundingBox();
 
-  std::vector<Kernel::V3D> coordSystem;
-  if (!absoluteBB.isAxisAligned()) { // copy coordinate system (it is better
-
-    coordSystem.assign(absoluteBB.getCoordSystem().begin(),
-                       absoluteBB.getCoordSystem().end());
-  }
-  absoluteBB = BoundingBox(shapeBox);
   // modify in place for speed
   const Eigen::Vector3d scaleFactor = m_componentInfo->scaleFactor(index);
   // Scale
@@ -245,23 +239,38 @@ void ComponentInfo::componentBoundingBox(const size_t index,
   absoluteBB.zMin() += localPos[2];
   absoluteBB.zMax() += localPos[2];
 
-  if (!coordSystem.empty()) {
+  if (reference && !reference->isAxisAligned()) { // copy coordinate system
+
+    std::vector<Kernel::V3D> coordSystem;
+    coordSystem.assign(reference->getCoordSystem().begin(),
+                       reference->getCoordSystem().end());
+
+    // realign to reference coordinate system
     absoluteBB.realign(&coordSystem);
   }
+  return absoluteBB;
 }
 
-void ComponentInfo::getBoundingBox(const size_t componentIndex,
-                                   BoundingBox &absoluteBB) const {
-
+/**
+ * Compute the bounding box for the component with componentIndex taking into
+ *account
+ * all sub components.
+ *
+ * @param componentIndex : Component index to get the bounding box for
+ * @param reference : Optional reference for coordinate system for non-axis
+ *aligned bounding boxes
+ * @return Absolute bounding box
+ */
+BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
+                                       const BoundingBox *reference) const {
   if (isDetector(componentIndex)) {
-    componentBoundingBox(componentIndex, absoluteBB);
-    return;
+    return componentBoundingBox(componentIndex, reference);
   }
+  BoundingBox absoluteBB;
   auto rangeComp = m_componentInfo->componentRangeInSubtree(componentIndex);
   std::stack<std::pair<size_t, size_t>> detExclusions{};
   auto compIterator = rangeComp.rbegin();
   while (compIterator != rangeComp.rend()) {
-    BoundingBox temp;
     const size_t index = *compIterator;
     if (hasSource() && index == source()) {
       ++compIterator;
@@ -278,14 +287,10 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
       size_t corner3 = corner1 + (nY - 1);
       size_t corner4 = corner2 - (nY - 1);
 
-      componentBoundingBox(corner1, temp);
-      absoluteBB.grow(temp);
-      componentBoundingBox(corner2, temp);
-      absoluteBB.grow(temp);
-      componentBoundingBox(corner3, temp);
-      absoluteBB.grow(temp);
-      componentBoundingBox(corner4, temp);
-      absoluteBB.grow(temp);
+      absoluteBB.grow(componentBoundingBox(corner1, reference));
+      absoluteBB.grow(componentBoundingBox(corner2, reference));
+      absoluteBB.grow(componentBoundingBox(corner3, reference));
+      absoluteBB.grow(componentBoundingBox(corner4, reference));
 
       // Get bounding box for rectangular bank.
       // Record detector ranges to skip
@@ -293,8 +298,7 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
       detExclusions.emplace(std::make_pair(corner1, corner2));
       compIterator = innerRangeComp.rend();
     } else {
-      componentBoundingBox(index, temp);
-      absoluteBB.grow(temp);
+      absoluteBB.grow(componentBoundingBox(index, reference));
       ++compIterator;
     }
   }
@@ -313,12 +317,11 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
       detExclusions.pop();
       exclusion = detExclusions.empty() ? nullptr : &detExclusions.top();
     } else if (detIterator != rangeDet.end()) {
-      BoundingBox temp;
-      componentBoundingBox(*detIterator, temp);
-      absoluteBB.grow(temp);
+      absoluteBB.grow(componentBoundingBox(*detIterator, reference));
       ++detIterator;
     }
   }
+  return absoluteBB;
 }
 
 bool ComponentInfo::isRectangularBank(const size_t componentIndex) const {

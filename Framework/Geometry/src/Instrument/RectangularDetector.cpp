@@ -622,7 +622,7 @@ int RectangularDetector::getPointInObject(V3D &) const {
 void RectangularDetector::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
     if (hasComponentInfo()) {
-      m_map->componentInfo().getBoundingBox(index(), assemblyBox);
+      assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
       return;
     }
   }

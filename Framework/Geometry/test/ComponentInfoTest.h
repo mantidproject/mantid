@@ -297,8 +297,7 @@ public:
     ComponentInfo componentInfo(std::move(internalInfo), componentIds,
                                 makeComponentIDMap(componentIds), shapes);
 
-    BoundingBox boundingBox;
-    componentInfo.getBoundingBox(0 /*componentIndex*/, boundingBox);
+    BoundingBox boundingBox = componentInfo.boundingBox(0 /*componentIndex*/);
 
     TS_ASSERT((boundingBox.minPoint() -
                (Kernel::V3D{position[0] - radius, position[1] - radius,
@@ -307,9 +306,8 @@ public:
                (Kernel::V3D{position[0] + radius, position[1] + radius,
                             position[2] + radius})).norm() < 1e-9);
     // Nullify shape and retest BoundingBox
-    boundingBox = BoundingBox{};
     shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
-    componentInfo.getBoundingBox(0, boundingBox);
+    boundingBox = componentInfo.boundingBox(0);
     TS_ASSERT(boundingBox.isNull());
   }
 
@@ -328,9 +326,8 @@ public:
 
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
     const auto &componentInfo = std::get<0>(wrappers);
-    BoundingBox boundingBox;
     // Check bounding box of detector
-    componentInfo->getBoundingBox(0 /*detector index*/, boundingBox);
+    auto boundingBox = componentInfo->boundingBox(0 /*detector index*/);
     TS_ASSERT((boundingBox.minPoint() -
                (Kernel::V3D{detectorPos[0] - radius, detectorPos[1] - radius,
                             detectorPos[2] - radius})).norm() < 1e-9);
@@ -339,7 +336,7 @@ public:
                             detectorPos[2] + radius})).norm() < 1e-9);
 
     // Check bounding box of root (instrument)
-    componentInfo->getBoundingBox(componentInfo->root() /*Root*/, boundingBox);
+    boundingBox = componentInfo->boundingBox(componentInfo->root() /*Root*/);
 
     // min in the sample (source is ignored by design in instrument 1.0 and
     // instrument 2.0).
@@ -363,21 +360,20 @@ public:
 
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
     const auto &componentInfo = std::get<0>(wrappers);
-    BoundingBox boundingBoxRoot;
     // Check bounding box of root (instrument)
-    componentInfo->getBoundingBox(componentInfo->root() /*Root*/,
-                                  boundingBoxRoot);
+    auto boundingBoxRoot =
+        componentInfo->boundingBox(componentInfo->root() /*Root*/
+                                   );
     // min Z in the sample
-    BoundingBox boundingBoxSample;
-    componentInfo->getBoundingBox(componentInfo->sample(), boundingBoxSample);
+    auto boundingBoxSample =
+        componentInfo->boundingBox(componentInfo->sample());
     TS_ASSERT((boundingBoxRoot.minPoint().Z() -
                boundingBoxSample.minPoint().Z()) < 1e-9);
 
     // max is the Rectangular bank
     auto bankIndex = componentInfo->root() - 3;
     TS_ASSERT(componentInfo->isRectangularBank(bankIndex));
-    BoundingBox boundingBoxBank;
-    componentInfo->getBoundingBox(bankIndex, boundingBoxBank);
+    auto boundingBoxBank = componentInfo->boundingBox(bankIndex);
     TS_ASSERT((boundingBoxRoot.maxPoint() - boundingBoxBank.maxPoint()).norm() <
               1e-9);
   }
@@ -436,10 +432,9 @@ public:
 
     auto wrappers = InstrumentVisitor::makeWrappers(instrument);
     const auto &componentInfo = std::get<0>(wrappers);
-    BoundingBox boundingBoxRoot;
     // Check bounding box of root (instrument)
-    componentInfo->getBoundingBox(componentInfo->root() /*Root*/,
-                                  boundingBoxRoot);
+    auto boundingBoxRoot =
+        componentInfo->boundingBox(componentInfo->root() /*Root*/);
 
     // Check free detector not ignored because it's sandwidged between banks.
     // Should not be skipped over.
@@ -448,17 +443,15 @@ public:
                     det->getPos().Z() + detRadius, 1e-9);
 
     // Check bank1 represents max point in y
-    BoundingBox boundingBoxBank1;
     const size_t bank1Index = componentInfo->root() - 4 - 10;
-    componentInfo->getBoundingBox(bank1Index, boundingBoxBank1);
+    auto boundingBoxBank1 = componentInfo->boundingBox(bank1Index);
     TS_ASSERT(componentInfo->isRectangularBank(bank1Index));
     TS_ASSERT_DELTA(boundingBoxRoot.maxPoint().Y(),
                     boundingBoxBank1.maxPoint().Y(), 1e-9);
 
     // Check bank2 represents min point in y
-    BoundingBox boundingBoxBank2;
     const size_t bank2Index = componentInfo->root() - 1;
-    componentInfo->getBoundingBox(bank2Index, boundingBoxBank2);
+    auto boundingBoxBank2 = componentInfo->boundingBox(bank2Index);
     TS_ASSERT(componentInfo->isRectangularBank(bank2Index));
     TS_ASSERT_DELTA(boundingBoxRoot.minPoint().Y(),
                     boundingBoxBank2.minPoint().Y(), 1e-9);

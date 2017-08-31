@@ -64,7 +64,8 @@ private:
   boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
       m_shapes;
 
-  void componentBoundingBox(const size_t index, BoundingBox &absoluteBB) const;
+  BoundingBox componentBoundingBox(const size_t index,
+                                   const BoundingBox *reference) const;
 
 public:
   ComponentInfo(
@@ -110,8 +111,8 @@ public:
   const Geometry::Object &shape(const size_t componentIndex) const;
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;
-  void getBoundingBox(const size_t componentIndex,
-                      BoundingBox &absoluteBB) const;
+  BoundingBox boundingBox(const size_t componentIndex,
+                          const BoundingBox *reference = nullptr) const;
   bool isRectangularBank(const size_t componentIndex) const;
   friend class Instrument;
 };

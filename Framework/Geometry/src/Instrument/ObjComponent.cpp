@@ -178,7 +178,7 @@ double ObjComponent::solidAngle(const V3D &observer) const {
 void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
   if (m_map) {
     if (hasComponentInfo()) {
-      m_map->componentInfo().getBoundingBox(index(), absoluteBB);
+      absoluteBB = m_map->componentInfo().boundingBox(index(), &absoluteBB);
       return;
     }
   }

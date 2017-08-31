@@ -818,7 +818,7 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
 
     if (m_map->hasComponentInfo(this->baseInstrument().get())) {
-      m_map->componentInfo().getBoundingBox(index(), assemblyBox);
+      assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
       return;
     }
 
