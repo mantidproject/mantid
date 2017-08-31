@@ -10,6 +10,7 @@
 #include <string>
 #include <Eigen/Geometry>
 #include <stack>
+#include <iterator>
 
 namespace Mantid {
 namespace Geometry {
@@ -197,80 +198,94 @@ double ComponentInfo::solidAngle(const size_t componentIndex,
   }
 }
 
-void ComponentInfo::doGetBoundingBox(const size_t index,
-                                     BoundingBox &absoluteBB) const {
+/**
+ * The absolute bounding box is cleared/reassigned as part of this.
+ * The absoluteBB is not grown.
+ *
+ * @param index : Component index
+ * @param absoluteBB : Absolute bounding box. This is rewritten.
+ */
+void ComponentInfo::componentBoundingBox(const size_t index,
+                                         BoundingBox &absoluteBB) const {
   // Check that we have a valid shape here
   if (!hasShape(index)) {
+    absoluteBB.nullify();
     return; // This index will not contribute to bounding box
   }
   const auto &s = this->shape(index);
   const BoundingBox &shapeBox = s.getBoundingBox();
+
   std::vector<Kernel::V3D> coordSystem;
   if (!absoluteBB.isAxisAligned()) { // copy coordinate system (it is better
 
     coordSystem.assign(absoluteBB.getCoordSystem().begin(),
                        absoluteBB.getCoordSystem().end());
   }
-  auto currentBB = BoundingBox(shapeBox);
+  absoluteBB = BoundingBox(shapeBox);
   // modify in place for speed
   const Eigen::Vector3d scaleFactor = m_componentInfo->scaleFactor(index);
   // Scale
-  currentBB.xMin() *= scaleFactor[0];
-  currentBB.xMax() *= scaleFactor[0];
-  currentBB.yMin() *= scaleFactor[1];
-  currentBB.yMax() *= scaleFactor[1];
-  currentBB.zMin() *= scaleFactor[2];
-  currentBB.zMax() *= scaleFactor[2];
+  absoluteBB.xMin() *= scaleFactor[0];
+  absoluteBB.xMax() *= scaleFactor[0];
+  absoluteBB.yMin() *= scaleFactor[1];
+  absoluteBB.yMax() *= scaleFactor[1];
+  absoluteBB.zMin() *= scaleFactor[2];
+  absoluteBB.zMax() *= scaleFactor[2];
   // Rotate
   (this->rotation(index))
-      .rotateBB(currentBB.xMin(), currentBB.yMin(), currentBB.zMin(),
-                currentBB.xMax(), currentBB.yMax(), currentBB.zMax());
+      .rotateBB(absoluteBB.xMin(), absoluteBB.yMin(), absoluteBB.zMin(),
+                absoluteBB.xMax(), absoluteBB.yMax(), absoluteBB.zMax());
 
   // Shift
   const Eigen::Vector3d localPos = m_componentInfo->position(index);
-  currentBB.xMin() += localPos[0];
-  currentBB.xMax() += localPos[0];
-  currentBB.yMin() += localPos[1];
-  currentBB.yMax() += localPos[1];
-  currentBB.zMin() += localPos[2];
-  currentBB.zMax() += localPos[2];
+  absoluteBB.xMin() += localPos[0];
+  absoluteBB.xMax() += localPos[0];
+  absoluteBB.yMin() += localPos[1];
+  absoluteBB.yMax() += localPos[1];
+  absoluteBB.zMin() += localPos[2];
+  absoluteBB.zMax() += localPos[2];
 
   if (!coordSystem.empty()) {
-    currentBB.realign(&coordSystem);
+    absoluteBB.realign(&coordSystem);
   }
-  absoluteBB.grow(currentBB);
 }
 
 void ComponentInfo::getBoundingBox(const size_t componentIndex,
                                    BoundingBox &absoluteBB) const {
 
   if (isDetector(componentIndex)) {
-    doGetBoundingBox(componentIndex, absoluteBB);
+    componentBoundingBox(componentIndex, absoluteBB);
     return;
   }
   auto rangeComp = m_componentInfo->componentRangeInSubtree(componentIndex);
   std::stack<std::pair<size_t, size_t>> detExclusions{};
   auto compIterator = rangeComp.rbegin();
   while (compIterator != rangeComp.rend()) {
+    BoundingBox temp;
     const size_t index = *compIterator;
     if (hasSource() && index == source()) {
       ++compIterator;
     } else if (isRectangularBank(index)) {
       auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
+      // nSubComponents, subtract off self hence -1.
       auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
       auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
-      auto nSubDetectors = innerRangeDet.end() - innerRangeDet.begin();
+      auto nSubDetectors =
+          std::distance(innerRangeDet.begin(), innerRangeDet.end());
       auto nY = nSubDetectors / nSubComponents;
-      auto nX = nSubComponents;
       size_t corner1 = *innerRangeDet.begin();
-      size_t corner2 = *(innerRangeDet.end() - 1);
-      size_t corner3 = *(innerRangeDet.begin() + nY);
-      size_t corner4 = *(innerRangeDet.end() - 1 - nX);
+      size_t corner2 = corner1 + nSubDetectors - 1;
+      size_t corner3 = corner1 + (nY - 1);
+      size_t corner4 = corner2 - (nY - 1);
 
-      doGetBoundingBox(corner1, absoluteBB);
-      doGetBoundingBox(corner2, absoluteBB);
-      doGetBoundingBox(corner3, absoluteBB);
-      doGetBoundingBox(corner4, absoluteBB);
+      componentBoundingBox(corner1, temp);
+      absoluteBB.grow(temp);
+      componentBoundingBox(corner2, temp);
+      absoluteBB.grow(temp);
+      componentBoundingBox(corner3, temp);
+      absoluteBB.grow(temp);
+      componentBoundingBox(corner4, temp);
+      absoluteBB.grow(temp);
 
       // Get bounding box for rectangular bank.
       // Record detector ranges to skip
@@ -278,7 +293,8 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
       detExclusions.emplace(std::make_pair(corner1, corner2));
       compIterator = innerRangeComp.rend();
     } else {
-      doGetBoundingBox(index, absoluteBB);
+      componentBoundingBox(index, temp);
+      absoluteBB.grow(temp);
       ++compIterator;
     }
   }
@@ -297,7 +313,9 @@ void ComponentInfo::getBoundingBox(const size_t componentIndex,
       detExclusions.pop();
       exclusion = detExclusions.empty() ? nullptr : &detExclusions.top();
     } else if (detIterator != rangeDet.end()) {
-      doGetBoundingBox(*detIterator, absoluteBB);
+      BoundingBox temp;
+      componentBoundingBox(*detIterator, temp);
+      absoluteBB.grow(temp);
       ++detIterator;
     }
   }

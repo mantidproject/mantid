@@ -64,7 +64,7 @@ private:
   boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
       m_shapes;
 
-  void doGetBoundingBox(const size_t index, BoundingBox &absoluteBB) const;
+  void componentBoundingBox(const size_t index, BoundingBox &absoluteBB) const;
 
 public:
   ComponentInfo(
