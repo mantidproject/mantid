@@ -374,8 +374,6 @@ void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols,
   auto allBankDetectorIndexes =
       compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
 
-  nCols = static_cast<int>(allBankDetectorIndexes.size());
-
   // Get one of the bank rows
   auto bankRowID =
       boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)
@@ -385,7 +383,24 @@ void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols,
       compInfo.detectorsInSubtree(compInfo.indexOf(bankRowID));
 
   nRows = static_cast<int>(allRowDetectorIndexes.size());
-  std::cout << nCols << "  " << nRows << "\n";
+  nCols = static_cast<int>(allBankDetectorIndexes.size()) / nRows;
+
+  if (nCols == 1) {
+    // Need grandchild instead of child
+    auto bankChild =
+        boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)
+            ->getChild(0);
+    bankRowID =
+        boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
+            bankChild)
+            ->getChild(0)
+            ->getComponentID();
+    allRowDetectorIndexes =
+        compInfo.detectorsInSubtree(compInfo.indexOf(bankRowID));
+
+    nRows = static_cast<int>(allRowDetectorIndexes.size());
+    nCols = static_cast<int>(allBankDetectorIndexes.size()) / nRows;
+  }
 }
 
 } // namespace Mantid
