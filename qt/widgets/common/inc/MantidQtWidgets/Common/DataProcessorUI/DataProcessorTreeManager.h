@@ -97,7 +97,12 @@ public:
   /// Set the 'processed' status of a data item
   virtual void setProcessed(bool processed, int position) = 0;
   virtual void setProcessed(bool processed, int position, int parent) = 0;
-
+  /// Access cells
+  virtual void setCell(int row, int column, int parentRow, int parentColumn,
+                       const std::string &value) = 0;
+  virtual std::string getCell(int row, int column, int parentRow,
+                              int parentColumn) = 0;
+  virtual int getNumberOfRows() = 0;
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,
                             size_t whitelistColumns) const = 0;

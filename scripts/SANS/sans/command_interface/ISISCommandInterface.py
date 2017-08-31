@@ -382,8 +382,10 @@ def SetMonitorSpectrum(specNum, interp=False):
                    default no interpolation
     """
     specNum = int(specNum)
-    monitor_spectrum_command = NParameterCommand(command_id=NParameterCommandId.monitor_spectrum, values=[specNum,
-                                                                                                          interp])
+    is_trans = False
+    monitor_spectrum_command = NParameterCommand(command_id=NParameterCommandId.incident_spectrum, values=[specNum,
+                                                                                                           interp,
+                                                                                                           is_trans])
     director.add_command(monitor_spectrum_command)
 
 
@@ -396,8 +398,9 @@ def SetTransSpectrum(specNum, interp=False):
                    default no interpolation
     """
     specNum = int(specNum)
-    transmission_spectrum_command = NParameterCommand(command_id=NParameterCommandId.transmission_spectrum,
-                                                      values=[specNum, interp])
+    is_trans = True
+    transmission_spectrum_command = NParameterCommand(command_id=NParameterCommandId.incident_spectrum,
+                                                      values=[specNum, interp, is_trans])
     director.add_command(transmission_spectrum_command)
 
 
@@ -529,7 +532,7 @@ def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
     if mode == "LINEAR" or mode == "STRAIGHT" or mode == "LIN":
         fit_type = FitType.Linear
     elif mode == "LOGARITHMIC" or mode == "LOG" or mode == "YLOG":
-        fit_type = FitType.Log
+        fit_type = FitType.Logarithmic
     elif does_pattern_match(polynomial_pattern, mode):
         fit_type = FitType.Polynomial
         polynomial_order = extract_polynomial_order(mode)

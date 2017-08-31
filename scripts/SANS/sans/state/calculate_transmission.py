@@ -28,14 +28,14 @@ class StateTransmissionFit(StateBase):
 
     def __init__(self):
         super(StateTransmissionFit, self).__init__()
-        self.fit_type = FitType.Log
+        self.fit_type = FitType.Logarithmic
         self.polynomial_order = 0
 
     def validate(self):  # noqa
         is_invalid = {}
-        if self.fit_type is not FitType.Polynomial and self.polynomial_order != 0:
-            entry = validation_message("You can only set a polynomial order of you selected polynomial fitting.",
-                                       "Make sure that you select polynomial fitting.",
+        if self.fit_type is FitType.Polynomial and self.polynomial_order == 0:
+            entry = validation_message("You can only select a polynomial fit if you set a polynomial order (2 to 6).",
+                                       "Make sure that you select a polynomial order.",
                                        {"fit_type": self.fit_type,
                                         "polynomial_order": self.polynomial_order})
             is_invalid.update(entry)

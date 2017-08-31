@@ -64,7 +64,7 @@ class StateData(StateBase):
         is_invalid = dict()
 
         # A sample scatter must be specified
-        if self.sample_scatter is None:
+        if not self.sample_scatter:
             entry = validation_message("Sample scatter was not specified.",
                                        "Make sure that the sample scatter file is specified.",
                                        {"sample_scatter": self.sample_scatter})
