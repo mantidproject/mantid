@@ -373,8 +373,21 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_1d_max_line_edit.setEnabled(not is_variable)
         self.q_1d_step_line_edit.setEnabled(not is_variable)
         if is_variable:
+            comma_separated_floats_regex_string = "^(\s*[-+]?[0-9]*\.?[0-9]*)(\s*,\s*[-+]?[0-9]*\.?[0-9]*)+\s*$"
+            reg_ex = QtCore.QRegExp(comma_separated_floats_regex_string)
+            validator = QtGui.QRegExpValidator(reg_ex)
+            self.q_1d_min_line_edit.setValidator(validator)
+
             self.q_min_label.setText("Rebin String")
         else:
+            # If rebin string data
+            data_q_min = str(self.q_1d_min_line_edit.text())
+            if "," in data_q_min:
+                self.q_1d_min_line_edit.setText("")
+            validator = QtGui.QDoubleValidator()
+            validator.setBottom(0.0)
+            self.q_1d_min_line_edit.setValidator(validator)
+
             label = u"Min [\u00c5^-1]"
             self.q_min_label.setText(label)
 
