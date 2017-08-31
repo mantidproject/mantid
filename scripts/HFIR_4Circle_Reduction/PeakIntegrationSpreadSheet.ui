@@ -70,7 +70,7 @@
   <customwidget>
    <class>PeaksIntegrationSpreadSheet</class>
    <extends>QTableWidget</extends>
-   <header>hfctables.h</header>
+   <header>HFIR_4Circle_Reduction/hfctables.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
