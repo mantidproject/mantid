@@ -1,6 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
+
 import mantid
+
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
 
 

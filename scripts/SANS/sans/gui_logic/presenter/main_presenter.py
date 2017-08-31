@@ -1,4 +1,13 @@
+"""  The main presenter.
+
+The MainPresenter provides the QDataProcessorWidget with additional processing options which have not been
+set on the data table. The MainPresenter is required by the DataProcessorWidget framework.
+"""
+
+from __future__ import (absolute_import, division, print_function)
+
 from mantidqtpython import MantidQt
+
 from sans.gui_logic.sans_data_processor_gui_algorithm import (get_gui_algorithm_name, get_white_list,
                                                               get_black_list)
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter

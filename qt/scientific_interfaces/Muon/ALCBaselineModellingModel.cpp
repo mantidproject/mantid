@@ -1,7 +1,5 @@
 #include "ALCBaselineModellingModel.h"
 
-#include "ALCHelper.h"
-
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"

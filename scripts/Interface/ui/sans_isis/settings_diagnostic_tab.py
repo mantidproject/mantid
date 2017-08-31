@@ -1,8 +1,18 @@
-from __future__ import (absolute_import)
-import ui_settings_diagnostic_tab
-from PyQt4 import QtGui
+""" The settings diagnostic tab view.
+
+The settings diagnostic tab allows to display the state information in a tree view. The user can select the data
+from the individual rows in the data table. This view is useful for checking the overall settings of a reduction
+and helps the developer to identify issues.
+"""
+
+from __future__ import (absolute_import, division, print_function)
+
 from abc import ABCMeta, abstractmethod
+
 from six import with_metaclass
+from PyQt4 import QtGui
+
+import ui_settings_diagnostic_tab
 
 
 class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_SettingsDiagnosticTab):

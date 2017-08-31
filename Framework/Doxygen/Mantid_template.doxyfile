@@ -131,7 +131,7 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/spectrumviewer/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/refdetectorview/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/refdetectorview/src \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/ParaviewPlugins \
+	@CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/PVPlugins \
 	@CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesAPI/inc \
 	@CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesAPI/src \
 	@CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesSimpleGui/QtWidgets \
@@ -155,7 +155,7 @@ EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoapGenerated \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN_complete.cpp \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/src/QtPropertyBrowser \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/ParaviewPlugins
+			 @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/PVPlugins
 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 

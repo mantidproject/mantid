@@ -86,7 +86,6 @@ public:
   }
   /// Set multiple fitting mode on or off
   void setMultiFittingMode(bool enabled) override;
-  void setTFAsymmMode(bool enabled) override;
 
   /// After fit checks done, continue
   void continueAfterChecks(bool sequential) override;
@@ -106,6 +105,7 @@ public:
   QStringList getChosenGroups() const;
   QStringList getChosenPeriods() const;
 
+  void setTFAsymm(bool state);
   /// Clear list of selected groups
   void clearChosenGroups() const;
   void setAllGroups();
@@ -182,6 +182,7 @@ private:
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
 
+  void setTFAsymmMode(bool state);
   void clearGroupCheckboxes();
   void addGroupCheckbox(const QString &name);
   void genGroupWindow();
@@ -202,7 +203,7 @@ private:
   QtProperty *m_normalization;
   QStringList m_normalizationValue;
   QtProperty *m_keepNorm;
-
+  QtProperty *m_TFAsymmMode;
   QtBrowserItem *m_multiFitSettingsGroup;
   QtProperty *m_groupsToFit;
   QStringList m_groupsToFitOptions;

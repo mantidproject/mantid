@@ -1,5 +1,13 @@
+"""  The GuiStateDirector generates the state object from the models.
+
+The GuiStateDirector gets the information from the table and state model and generates state objects. It delegates
+the main part of the work to an StateDirectorISIS object.
+"""
+
 from __future__ import (absolute_import, division, print_function)
+
 import copy
+
 from sans.state.data import get_data_builder
 from sans.user_file.state_director import StateDirectorISIS
 

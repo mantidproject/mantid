@@ -1,4 +1,11 @@
+""" The state gui model contains all the reduction information which is not explictily available in the data table.
+
+This is one of the two models which is used for the data reduction. It contains generally all the settings which
+are not available in the model associated with the data table.
+"""
+
 from __future__ import (absolute_import, division, print_function)
+
 from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, SampleId, MonId, TransId, GravityId,
                                           QResolutionId, FitId, event_binning_string_values, set_scales_entry,
                                           monitor_spectrum, simple_range, monitor_file, det_fit_range,

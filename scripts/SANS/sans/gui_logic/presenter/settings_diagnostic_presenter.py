@@ -1,3 +1,5 @@
+""" The settings diagnostic tab which visualizes the SANS state object. """
+
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 
 

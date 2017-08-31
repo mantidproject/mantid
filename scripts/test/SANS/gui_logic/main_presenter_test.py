@@ -1,6 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
+
 import mantid
+
 from sans.test_helper.mock_objects import (create_mock_view2)
 from sans.gui_logic.presenter.main_presenter import MainPresenter
 from sans.common.enums import SANSFacility
