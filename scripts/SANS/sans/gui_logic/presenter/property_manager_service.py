@@ -1,32 +1,28 @@
-from mantid.api import Algorithm
-from mantid.kernel import (PropertyManagerProperty, PropertyManagerDataService)
+""" The property manager service.
+
+The property manager service serializes a SANS state object into a PropertyManager object and places it on the
+ PropertyManagerDataService. It is also used to retrieve the state from this service.
+"""
+
+from __future__ import (absolute_import, division, print_function)
+
+from mantid.kernel import (PropertyManagerDataService)
+
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
 class PropertyManagerService(object):
     sans_property_manager_prefix = "SANS_PROPERTY_MANAGER_THIS_NEEDS_TO_BE_UNIQUE_"
 
-    class ConverterAlgorithm(Algorithm):
-        def PyInit(self):
-            self.declareProperty(PropertyManagerProperty("Args"))
-
-        def PyExec(self):
-            pass
-
     def __init__(self):
         super(PropertyManagerService, self).__init__()
-        self._convert_alg = PropertyManagerService.ConverterAlgorithm()
-        self._convert_alg.initialize()
 
     def add_states_to_pmds(self, states):
         # 1. Remove all property managers which belong to the sans property manager type
         self.remove_sans_property_managers()
 
-        # 2. Convert states to property managers
-        property_managers = self._convert_states_to_property_managers(states)
-
         # 2. Add all property managers
-        self._add_property_managers_to_pmds(property_managers)
+        self._add_property_managers_to_pmds(states)
 
     def get_single_state_from_pmds(self, index_to_retrieve):
         # 1. Find all sans state names
@@ -70,21 +66,10 @@ class PropertyManagerService(object):
         for element in property_manager_names_to_delete:
             PropertyManagerDataService.remove(element)
 
-    def _convert_states_to_property_managers(self, states):
-        property_managers = {}
+    def _add_property_managers_to_pmds(self, states):
         for index, state in states.items():
-            property_manager = self._convert_state_to_property_manager(state)
-            property_managers.update({index: property_manager})
-        return property_managers
-
-    def _convert_state_to_property_manager(self, state):
-        self._convert_alg.setProperty("Args", state.property_manager)
-        return self._convert_alg.getProperty("Args").value
-
-    def _add_property_managers_to_pmds(self, property_managers):
-        for index, property_manager in property_managers.items():
             name = self.sans_property_manager_prefix + str(index)
-            PropertyManagerDataService.addOrReplace(name, property_manager)
+            PropertyManagerDataService.addOrReplace(name, state.property_manager)
 
     def _get_index_from_name(self, name):
         return int(name.replace(self.sans_property_manager_prefix, ""))

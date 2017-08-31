@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid import config
 import os
 import stresstesting
@@ -26,18 +27,18 @@ class ValidateFacilitiesFile(stresstesting.MantidStressTest):
         # run the tests
         failed = []
         try:
-            print "----------------------------------------"
-            print "Validating Facilities.xml"
+            print("----------------------------------------")
+            print("Validating Facilities.xml")
             pyxsval.parseAndValidateXmlInput(filename, xsdFile=xsdFile, validateSchema=0)
-        except Exception, e:
-            print "VALIDATION OF Facilities.xml FAILED WITH ERROR:"
-            print e
+        except Exception as e:
+            print("VALIDATION OF Facilities.xml FAILED WITH ERROR:")
+            print(e)
             failed.append(filename)
 
         # final say on whether or not it 'worked'
-        print "----------------------------------------"
+        print("----------------------------------------")
         if len(failed) != 0:
-            print "SUMMARY OF FAILED FILES"
+            print("SUMMARY OF FAILED FILES")
             raise RuntimeError("Failed Validation of Facilities.xml")
         else:
-            print "Succesfully Validated Facilities.xml"
+            print("Succesfully Validated Facilities.xml")

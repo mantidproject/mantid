@@ -1,11 +1,13 @@
 from __future__ import (absolute_import, division, print_function)
 
-import mantid
 import tempfile
 import unittest
 import sys
 import os
 import json
+
+import mantid
+
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock, FakeState, create_mock_settings_diagnostic_tab)
 if sys.version_info.major == 3:

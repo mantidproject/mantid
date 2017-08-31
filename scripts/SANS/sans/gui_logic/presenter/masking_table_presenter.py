@@ -1,11 +1,17 @@
-from ui.sans_isis.masking_table import MaskingTable
+"""  The presenter associated with the masking table view. """
+
+from __future__ import (absolute_import, division, print_function)
+
 from collections import namedtuple
 import copy
+
 from mantid.api import (AnalysisDataService)
 try:
     import mantidplot
 except ImportError:
     pass
+
+from ui.sans_isis.masking_table import MaskingTable
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm

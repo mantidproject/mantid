@@ -10,7 +10,7 @@ from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
-from sans.common.constants import (SANS2D, LARMOR, LOQ)
+from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
 from six import with_metaclass
 
 
@@ -48,7 +48,6 @@ MANTID_WORKSPACE_PREFIX = 'mantid_workspace_'
 EVENT_WORKSPACE = "event_workspace"
 
 # Other
-ALTERNATIVE_SANS2D_NAME = "SAN"
 DEFINITION = "Definition"
 PARAMETERS = "Parameters"
 
@@ -642,12 +641,9 @@ def get_from_raw_header(file_name, index):
     return element
 
 
-def instrument_name_correction(instrument_name):
-    return SANS2D if instrument_name == ALTERNATIVE_SANS2D_NAME else instrument_name
-
-
 def get_instrument_name_for_raw(file_name):
     instrument_name = get_from_raw_header(file_name, 0)
+    # We sometimes need an instrument name correction, eg SANS2D is sometimes stored as SAN
     return instrument_name_correction(instrument_name)
 
 
@@ -700,19 +696,6 @@ def get_date_for_raw(file_name):
     return get_raw_measurement_time(date, time)
 
 
-def get_instrument(instrument_name):
-    instrument_name = instrument_name.upper()
-    if instrument_name == SANS2D:
-        instrument = SANSInstrument.SANS2D
-    elif instrument_name == LARMOR:
-        instrument = SANSInstrument.LARMOR
-    elif instrument_name == LOQ:
-        instrument = SANSInstrument.LOQ
-    else:
-        instrument = SANSInstrument.NoInstrument
-    return instrument
-
-
 def get_geometry_information_raw(file_name):
     """
     Gets the geometry information form the table workspace with the spb information
@@ -761,6 +744,10 @@ class SANSFileInformation(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def get_instrument(self):
+        pass
+
+    @abstractmethod
+    def get_facility(self):
         pass
 
     @abstractmethod
@@ -829,6 +816,9 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
         self._instrument = SANSInstrument.from_string(instrument_name)
 
+        # Setup the facility
+        self._facility = get_facility(self._instrument)
+
         # Setup date
         self._date = get_date_for_isis_nexus(self._full_file_name)
 
@@ -853,6 +843,9 @@ class SANSFileInformationISISNexus(SANSFileInformation):
 
     def get_instrument(self):
         return self._instrument
+
+    def get_facility(self):
+        return self._facility
 
     def get_date(self):
         return self._date
@@ -890,7 +883,10 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         super(SANSFileInformationISISAdded, self).__init__(file_name)
         # Setup instrument name
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
-        self._instrument_name = get_instrument(instrument_name)
+        self._instrument = get_instrument(instrument_name)
+
+        # Setup the facility
+        self._facility = get_facility(self._instrument)
 
         date, run_number = get_date_and_run_number_added_nexus(self._full_file_name)
         self._date = date
@@ -911,7 +907,10 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         return self._full_file_name
 
     def get_instrument(self):
-        return self._instrument_name
+        return self._instrument
+
+    def get_facility(self):
+        return self._facility
 
     def get_date(self):
         return self._date
@@ -951,6 +950,9 @@ class SANSFileInformationRaw(SANSFileInformation):
         instrument_name = get_instrument_name_for_raw(self._full_file_name)
         self._instrument = SANSInstrument.from_string(instrument_name)
 
+        # Setup the facility
+        self._facility = get_facility(self._instrument)
+
         # Setup date
         self._date = get_date_for_raw(self._full_file_name)
 
@@ -973,6 +975,9 @@ class SANSFileInformationRaw(SANSFileInformation):
 
     def get_instrument(self):
         return self._instrument
+
+    def get_facility(self):
+        return self._facility
 
     def get_date(self):
         return self._date

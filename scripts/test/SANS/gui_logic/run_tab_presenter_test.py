@@ -1,17 +1,19 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import mantid
 import unittest
 import sys
+
+import mantid
 from mantid.kernel import config
+from mantid.kernel import PropertyManagerDataService
+
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, OutputMode, ISISReductionMode,
                                RangeStepType, FitType)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file, save_to_csv)
-from mantid.kernel import PropertyManagerDataService
 
 if sys.version_info.major == 3:
     from unittest import mock

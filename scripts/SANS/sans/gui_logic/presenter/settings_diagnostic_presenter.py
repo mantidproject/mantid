@@ -1,4 +1,6 @@
+""" The settings diagnostic tab which visualizes the SANS state object. """
 from __future__ import (absolute_import, division, print_function)
+
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 import os
 import json

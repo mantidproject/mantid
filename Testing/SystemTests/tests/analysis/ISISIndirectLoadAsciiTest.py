@@ -1,4 +1,5 @@
 #pylint: disable=no-init,attribute-defined-outside-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import mantid.simpleapi as ms
 
@@ -70,7 +71,7 @@ class IN13CaFTest(stresstesting.MantidStressTest):
         checker.execute()
 
         if not checker.getProperty("Result"):
-            print self.__class__.__name__
+            print(self.__class__.__name__)
             ms.SaveNexus(InputWorkspace=ws2,Filename=self.__class__.__name__+'-mismatch.nxs')
             return False
 

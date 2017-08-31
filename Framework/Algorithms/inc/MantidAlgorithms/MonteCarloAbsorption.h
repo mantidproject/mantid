@@ -62,6 +62,7 @@ public:
 private:
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 
   API::MatrixWorkspace_uptr
   doSimulation(const API::MatrixWorkspace &inputWS, const size_t nevents,
