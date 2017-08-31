@@ -121,8 +121,10 @@ public:
 signals:
   void mouseButtonRelease(MplMouseEvent);
 
-private:
+protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
+
+private:
   MplMouseEvent createMplMouseEvent(QMouseEvent *evt) const;
 
   // Operations that do not acquire the GIL
