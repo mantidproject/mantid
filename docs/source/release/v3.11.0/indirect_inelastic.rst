@@ -45,6 +45,11 @@ Improvements
 - EISF is now generated when performing a Single Fit, with a delta function, in the ConvFit interface.
 - :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` now supports `Direct` and `Indirect` modes.
 
+Dropped
+-------
+- :ref:`algm-LoadILLIndirect-v1`, :ref:`algm-IndirectILLReduction`, :ref:`algm-ILLIN16BCalibration` algorithms deprecated since v3.9, are now removed.
+
+
 Bugfixes
 --------
 - ElasticWindowMultiple now correctly normalizes by the lowest temperature - rather than the first one.
