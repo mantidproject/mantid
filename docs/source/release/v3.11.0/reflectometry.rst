@@ -12,6 +12,7 @@ Algorithms
   - the incorrect angle was being used in the final conversion to Q in the divergent beam case
   - the input was being cropped, causing loss of counts
 - A new property, ``Diagnostics``, has been added to :ref:`algm-ReflectometryReductionOne` to allow the output of additional interim workspaces for debug purposes.
+- :ref:`algm-LoadILLReflectometry` has been fixed to correctly load D17 files acquired in the TOF mode.
 
 Reflectometry Reduction Interface
 ---------------------------------
