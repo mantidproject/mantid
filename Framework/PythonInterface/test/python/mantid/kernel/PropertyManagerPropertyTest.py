@@ -87,9 +87,28 @@ class PropertyManagerPropertyTest(unittest.TestCase):
             has_raised = True
         self.assertTrue(has_raised)
 
+    def test_create_with_dictionary_as_default_value(self):
+        name = "Args"
+        direc = Direction.Input
+        default = { 'A' : {}, 'B' : 1 }
+        arr = PropertyManagerProperty(name, default, direc)
+        self._check_object_attributes(arr, name, direc)
+        self._check_values(arr, default)
+
     def _check_object_attributes(self, prop, name, direction):
         self.assertEquals(prop.name, name)
         self.assertEquals(prop.direction, direction)
+
+    def _check_values(self, prop, **kwargs):
+
+        for key, value in kwargs:
+            propValue = prop.getProperty(key).value
+
+            if(isinstance(propValue, PropertyManager)):
+                self.assertTrue(isinstance(value, dict))
+                self._check_values(propValue, value)
+            else:
+                self.assertEqual(propValue, value)
 
 if __name__ == "__main__":
     unittest.main()
