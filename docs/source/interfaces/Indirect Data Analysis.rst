@@ -327,8 +327,8 @@ preview plot.
 The 'ExtractMembers' property, found represented as a checkbox in the properties
 table of the ConvFit interface, can be used to extract the members of a fit, each
 into their own workspace, which are subsequently grouped in a GroupWorkspace. Members
-of a fit include the sample, calculated fit, difference and any peak functions used
-cin the convolution fit such as Lorenztian or Delta functions.
+of a fit include the sample, calculated fit, difference, and any peak functions used
+in the convolution fit such as Lorenztian or Delta functions.
 
 
 Fitting Model
