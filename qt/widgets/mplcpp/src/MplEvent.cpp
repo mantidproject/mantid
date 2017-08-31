@@ -7,6 +7,4 @@
  * that the event was not within the Axis limits
  * @param button The button that was pressed
  */
-MplMouseEvent::MplMouseEvent(QPoint pos, QPointF dataPos,
-                             Qt::MouseButton button)
-    : m_pos(pos), m_dataPos(dataPos), m_button(button) {}
+MplMouseEvent::MplMouseEvent(QPointF dataPos) : m_dataPos(dataPos) {}

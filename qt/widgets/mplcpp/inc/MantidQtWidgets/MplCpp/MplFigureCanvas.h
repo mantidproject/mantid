@@ -17,10 +17,10 @@
  GNU General Public License for more details.
 */
 #include "MantidQtWidgets/MplCpp/DllOption.h"
-#include "MantidQtWidgets/MplCpp/MplEvent.h"
 #include <QWidget>
-
 #include <tuple>
+
+class MplMouseEvent;
 
 namespace MantidQt {
 namespace Widgets {
@@ -116,17 +116,17 @@ public:
   ///@{
   ///@name Text labels
   void addText(double x, double y, const char *label);
-///@}
-
-signals:
-  void mouseButtonRelease(MplMouseEvent);
+  ///@}
 
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
+  // operations analogous to standard mousePressEvent etc but with additional
+  // information
+  virtual void mplMousePressEvent(QMouseEvent *, MplMouseEvent *) {}
+  virtual void mplMouseReleaseEvent(QMouseEvent *, MplMouseEvent *) {}
+  virtual void mplMouseDoubleClickEvent(QMouseEvent *, MplMouseEvent *) {}
 
 private:
-  MplMouseEvent createMplMouseEvent(QMouseEvent *evt) const;
-
   // Operations that do not acquire the GIL
   void drawNoGIL();
   void setCanvasFaceColorNoGIL(const char *color);

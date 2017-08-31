@@ -30,29 +30,17 @@
 //
 
 /**
- * The MplLocationEvent class is a rough counterpart to
- * matplotlib.backend_bases.MouseEvent
+ * The MplMouseEvent class is designed to stores additional information on top
+ * of the standard QMouseEvent. It is generally dispatched alongside
+ * the QMouseEvent to avoid copying any data
  */
 class EXPORT_OPT_MANTIDQT_MPLCPP MplMouseEvent {
 public:
-  // Q_DECLARE_METATYPE requires a default constructor
-  MplMouseEvent() = default;
-  MplMouseEvent(QPoint pos, QPointF dataPos, Qt::MouseButton button);
+  MplMouseEvent(QPointF dataPos);
 
-  inline QPoint pos() const { return m_pos; }
   inline QPointF dataPos() const { return m_dataPos; }
-  inline Qt::MouseButton button() const { return m_button; }
 
 private:
-  QPoint m_pos;
   QPointF m_dataPos;
-  Qt::MouseButton m_button;
 };
-
-//
-// Declare these types to the Qt metatype system. The specializations must
-// be in the same namespace that QMetaType is declared.
-//
-Q_DECLARE_METATYPE(MplMouseEvent)
-
 #endif // MPLEVENT_H

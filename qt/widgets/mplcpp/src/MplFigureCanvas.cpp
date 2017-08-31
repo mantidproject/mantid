@@ -1,9 +1,11 @@
 #include "MantidQtWidgets/MplCpp/MplFigureCanvas.h"
+#include "MantidQtWidgets/MplCpp/MplEvent.h"
 #include "MantidQtWidgets/MplCpp/NDArray1D.h"
 #include "MantidQtWidgets/MplCpp/PythonErrors.h"
 #include "MantidQtWidgets/MplCpp/SipUtils.h"
 #include "MantidQtWidgets/Common/PythonThreading.h"
 
+#include <QContextMenuEvent>
 #include <QMouseEvent>
 #include <QVBoxLayout>
 
@@ -509,26 +511,26 @@ void MplFigureCanvas::addText(double x, double y, const char *label) {
  */
 bool MplFigureCanvas::eventFilter(QObject *watched, QEvent *evt) {
   assert(watched == canvasWidget());
-  bool filtered(false);
-  switch (evt->type()) {
-  case QEvent::MouseButtonRelease:
-    emit mouseButtonRelease(
-        createMplMouseEvent(static_cast<QMouseEvent *>(evt)));
-    filtered = true;
-  default:
-    break;
-  }
-  return filtered;
-}
 
-/**
- * Create an MplMouseEvent type based on the given Qt mouse event
- * @param evt A pointer to the source QMouseEvent
- * @return A new MplMouseEvent type
- */
-MplMouseEvent MplFigureCanvas::createMplMouseEvent(QMouseEvent *evt) const {
-  return MplMouseEvent(evt->pos(), toDataCoordinates(evt->pos()),
-                       evt->button());
+  // This feels ugly...
+  const auto type = evt->type();
+  if (type == QEvent::ContextMenu) {
+    contextMenuEvent(static_cast<QContextMenuEvent *>(evt));
+    return true;
+  } else if (type == QEvent::MouseButtonPress ||
+             type == QEvent::MouseButtonRelease ||
+             type == QEvent::MouseButtonDblClick) {
+    auto qtEvent = static_cast<QMouseEvent *>(evt);
+    MplMouseEvent mplEvent(toDataCoordinates(qtEvent->pos()));
+    if (type == QEvent::MouseButtonPress)
+      mplMousePressEvent(qtEvent, &mplEvent);
+    else if (type == QEvent::MouseButtonRelease)
+      mplMouseReleaseEvent(qtEvent, &mplEvent);
+    else if (type == QEvent::MouseButtonDblClick)
+      mplMouseDoubleClickEvent(qtEvent, &mplEvent);
+    return true;
+  }
+  return false;
 }
 
 /**
