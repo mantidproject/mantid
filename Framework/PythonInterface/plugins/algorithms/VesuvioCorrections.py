@@ -81,7 +81,7 @@ class VesuvioCorrections(VesuvioBase):
         self.declareProperty(FloatArrayProperty("Masses", float_length_validator),
                              doc="Mass values for fitting")
 
-        self.declareProperty(PropertyManagerProperty("MassIndexToSymbolMap",
+        self.declareProperty(PropertyManagerProperty("MassIndexToSymbolMap", {},
                                                      direction=Direction.Input),
                              doc="A map from the index of the mass in the Masses"
                                  " property to a chemical symbol.")
@@ -97,7 +97,7 @@ class VesuvioCorrections(VesuvioBase):
                                  "constraints defined as lists e.g "
                                  "[0,1,0,-4];[1,0,-2,0]")
 
-        self.declareProperty(PropertyManagerProperty("HydrogenConstraints",
+        self.declareProperty(PropertyManagerProperty("HydrogenConstraints", {},
                                                      direction=Direction.Input),
                              doc="Constraints used to approximate the intensity of"
                                  " the hydrogen peak in back-scattering spectra.")
