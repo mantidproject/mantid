@@ -23,11 +23,11 @@
 
 //
 // A collection of classes to mirror the matplotlib events in
-// matplotlib.backend_bases
+// matplotlib.backend_bases.
 //
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+// They are delibarately not defined within a namespace as this complicates
+// the signal/slot connection syntax
+//
 
 /**
  * The MplLocationEvent class is a rough counterpart to
@@ -48,14 +48,11 @@ private:
   QPointF m_dataPos;
   Qt::MouseButton m_button;
 };
-}
-}
-}
 
 //
 // Declare these types to the Qt metatype system. The specializations must
 // be in the same namespace that QMetaType is declared.
 //
-Q_DECLARE_METATYPE(MantidQt::Widgets::MplCpp::MplMouseEvent)
+Q_DECLARE_METATYPE(MplMouseEvent)
 
 #endif // MPLEVENT_H
