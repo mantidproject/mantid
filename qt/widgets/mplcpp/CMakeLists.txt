@@ -1,5 +1,6 @@
 # Rules for matplotlib cpp library
 set (LIB_SRCS
+  src/MplEvent.cpp
   src/MplFigureCanvas.cpp
   src/NDArray1D.cpp
   src/PythonErrors.cpp
@@ -13,6 +14,7 @@ set (MOC_HEADERS
 qt4_wrap_cpp (MOC_GENERATED_SRC ${MOC_HEADERS})
 
 set (NOMOC_HEADERS
+  inc/MantidQtWidgets/MplCpp/MplEvent.h
   inc/MantidQtWidgets/MplCpp/NDArray1D.h
   inc/MantidQtWidgets/MplCpp/PythonErrors.h
   inc/MantidQtWidgets/MplCpp/PythonObject.h

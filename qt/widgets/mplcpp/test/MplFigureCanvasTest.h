@@ -98,12 +98,18 @@ public:
     TS_ASSERT_EQUALS("log", canvas.scaleType(Axes::Scale::X).toStdString());
   }
 
-  void
-  test_toDataCoordinates_Gives_Valid_Data_Coordinates_For_Valid_Mouse_Coords() {
+  void test_toDataCoordinates_Gives_Data_Point_Inside_Axes() {
     MplFigureCanvas canvas;
-    auto dataCoords = canvas.toDataCoordinates(100., 100.);
-    TS_ASSERT_DIFFERS(0.0, std::get<0>(dataCoords));
-    TS_ASSERT_DIFFERS(0.0, std::get<1>(dataCoords));
+    std::vector<double> data{1, 2, 3, 4, 5};
+    canvas.plotLine(data, data, "r-");
+
+    // Middle canvas should be roughly the middle of the data
+    QPoint pixelPos(static_cast<int>(0.5 * canvas.canvasWidget()->width()),
+                    static_cast<int>(0.5 * canvas.canvasWidget()->height()));
+    QPointF dataCoords;
+    TS_ASSERT_THROWS_NOTHING(dataCoords = canvas.toDataCoordinates(pixelPos));
+    TS_ASSERT_DELTA(2.9f, dataCoords.x(), 0.1f);
+    TS_ASSERT_DELTA(3.0f, dataCoords.y(), 0.1f);
   }
 
   //---------------------------------------------------------------------------

@@ -1,6 +1,23 @@
 #ifndef MPLFIGURECANVAS_H
 #define MPLFIGURECANVAS_H
+/*
+ Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
+
+ This file is part of Mantid.
+
+ Mantid is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ Mantid is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+*/
 #include "MantidQtWidgets/MplCpp/DllOption.h"
+#include "MantidQtWidgets/MplCpp/MplEvent.h"
 #include <QWidget>
 
 #include <tuple>
@@ -59,7 +76,7 @@ public:
   std::tuple<double, double> limits(const Axes::Scale type) const;
   size_t nlines() const;
   QString scaleType(const Axes::Scale type) const;
-  std::tuple<double, double> toDataCoordinates(double x, double y) const;
+  QPointF toDataCoordinates(QPoint pos) const;
   ///@}
 
   ///@{
@@ -99,9 +116,16 @@ public:
   ///@{
   ///@name Text labels
   void addText(double x, double y, const char *label);
-  ///@}
+///@}
+
+signals:
+  void mouseButtonRelease(MplMouseEvent);
 
 private:
+  bool eventFilter(QObject *watched, QEvent *evt) override;
+  MplMouseEvent createMplMouseEvent(QMouseEvent *evt) const;
+
+  // Operations that do not acquire the GIL
   void drawNoGIL();
   void setCanvasFaceColorNoGIL(const char *color);
 
