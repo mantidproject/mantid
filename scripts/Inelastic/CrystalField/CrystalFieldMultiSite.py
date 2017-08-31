@@ -11,7 +11,7 @@ class CrystalFieldMultiSite(object):
     def __init__(self, Ions, Symmetries, kwargs):
 
         self._makeFunction(Ions, Symmetries)
-        self.Ions = Ions  # lists of these?
+        self.Ions = Ions
         self.Symmetries = Symmetries
 
         free_parameters = []
@@ -48,7 +48,6 @@ class CrystalFieldMultiSite(object):
     def _makeFunction(self, ion, symmetry):
         from mantid.simpleapi import FunctionFactory
         self.function = FunctionFactory.createFunction('CrystalFieldFunction')
-        self._isMultiSpectrum = True
 
     @property
     def Ions(self):
@@ -103,13 +102,9 @@ class CrystalFieldMultiSite(object):
             paramName = 'IntensityScaling%s' % i
             self.function.setParameter(paramName, value[i])
 
-        self._dirty_peaks = True
-        self._dirty_spectra = True
-
     @property
     def Temperature(self):
-        attrName = 'Temperatures' if self._isMultiSpectrum else 'Temperature'
-        return self.function.getAttributeValue(attrName)
+        return self.function.getAttributeValue("Temperatures")
 
     @Temperature.setter
     def Temperature(self, value):
