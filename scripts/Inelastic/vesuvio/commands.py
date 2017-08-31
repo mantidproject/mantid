@@ -503,7 +503,7 @@ def _create_profile_strs_and_mass_list(profile_flags):
     """
     mBuilder = MaterialBuilder()
     mass_values, profiles = [], []
-    hydrogen_values, hydrogen_profiles = None, None
+    hydrogen_values, hydrogen_profiles = [], []
     index_to_symbol_map = dict()
 
     for idx, mass_prop in enumerate(profile_flags):
