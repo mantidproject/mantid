@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
+#include "MantidQtWidgets/MplCpp/MplEvent.h"
 
 #include <QContextMenuEvent>
 #include <QVBoxLayout>
@@ -42,8 +43,6 @@ MiniPlot::MiniPlot(QWidget *parent)
     : MplFigureCanvas(111, parent), m_activeCurveLabel(), m_storedCurveLabels(),
       m_xunit() {
   setCanvasFaceColor("white");
-  // install event filter on "real" canvas to monitor mouse events
-  canvasWidget()->installEventFilter(this);
 }
 
 /**
@@ -150,36 +149,30 @@ void MiniPlot::storeCurve() {
 /**
  * Switch the Y scale to linear
  */
-void MiniPlot::setYScaleLinear() {
-  setScale(Axes::Scale::Y, "linear", true);
-}
+void MiniPlot::setYScaleLinear() { setScale(Axes::Scale::Y, "linear", true); }
 
 /**
  * Switch the Y scale to logarithmic
  */
-void MiniPlot::setYScaleLog() {
-  setScale(Axes::Scale::Y, "log", true);
+void MiniPlot::setYScaleLog() { setScale(Axes::Scale::Y, "log", true); }
+
+/**
+ * Called by the base class when a context menu is required
+ * @param evt A pointer to the event source
+ */
+void MiniPlot::contextMenuEvent(QContextMenuEvent *evt) {
+  emit contextMenuRequested(evt->globalPos());
 }
 
 /**
- * Intercepts events on the watched object
- * @param watched The object whose events are to be filtered
- * @param evt A pointer to the event object
- * @return True if it is a mouse event or context menu event, false otherwise
+ * Called by the base class when a mouse click is released
+ * @param evt A pointer to the QMouseEvent source (unused)
+ * @param mplEvt A pointer to the MplMouseEvent source
  */
-bool MiniPlot::eventFilter(QObject *watched, QEvent *evt) {
-  assert(watched == canvasWidget());
-  auto eventType = evt->type();
-  bool filtered(false);
-  switch (eventType) {
-  case QEvent::ContextMenu:
-    emit contextMenuRequested(static_cast<QContextMenuEvent *>(evt));
-    filtered = true;
-    break;
-  default:
-    break;
-  }
-  return filtered;
+void MiniPlot::mplMouseReleaseEvent(QMouseEvent *evt, MplMouseEvent *mplEvt) {
+  Q_UNUSED(evt);
+  const auto dataPos = mplEvt->dataPos();
+  emit clickedAtDataCoord(dataPos.x(), dataPos.y());
 }
 }
 }

@@ -17,6 +17,7 @@
  GNU General Public License for more details.
 */
 #include <QObject>
+#include <QPoint>
 
 class QAction;
 class QActionGroup;
@@ -76,7 +77,7 @@ public:
 
 public slots:
   void savePlotToWorkspace();
-  void showContextMenu(QContextMenuEvent *evt);
+  void showContextMenu(QPoint pos);
 
 signals:
   void plotTypeChanged(QString title);

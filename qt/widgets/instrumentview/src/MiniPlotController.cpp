@@ -63,11 +63,10 @@ MiniPlotController::MiniPlotController(InstrumentWidget *instrWidget,
       m_plotType(PlotType::Single), m_enabled(true),
       m_tubeXUnits(TubeXUnits::DETECTOR_ID), m_currentDetID(-1) {
   initActions();
-  connect(m_miniplot, SIGNAL(contextMenuRequested(QContextMenuEvent *)), this,
-          SLOT(showContextMenu(QContextMenuEvent *)));
-
-  //  connect(m_miniplot, SIGNAL(clickedAt(double, double)), this,
-  //          SLOT(addPeak(double, double)));
+  connect(m_miniplot, SIGNAL(contextMenuRequested(QPoint)), this,
+          SLOT(showContextMenu(QPoint)));
+  connect(m_miniplot, SIGNAL(clickedAtDataCoord(double, double)), this,
+          SLOT(addPeak(double, double)));
 }
 
 /**
@@ -709,7 +708,7 @@ QString MiniPlotController::getPlotCaption() const {
 /**
  * Display the miniplot's context menu.
  */
-void MiniPlotController::showContextMenu(QContextMenuEvent *evt) {
+void MiniPlotController::showContextMenu(QPoint pos) {
   QMenu context(m_miniplot);
 
   auto plotType = getPlotType();
@@ -754,7 +753,7 @@ void MiniPlotController::showContextMenu(QContextMenuEvent *evt) {
   }
 
   // show menu
-  context.exec(evt->globalPos());
+  context.exec(pos);
 }
 
 /**
@@ -827,7 +826,7 @@ void MiniPlotController::addPeak(double x, double y) {
     if (tw) {
       peakTableName = tw->getName();
     } else {
-      peakTableName = "PlotType::SingleCrystalPeakTable";
+      peakTableName = "SingleCrystalPeakTable";
       // This does need to get the instrument from the workspace as it's doing
       // calculations
       // .....and this method should be an algorithm! Or at least somewhere
@@ -861,6 +860,7 @@ void MiniPlotController::addPeak(double x, double y) {
     // Run the AddPeak algorithm
     const auto &mtdAlgMgr = AlgorithmManager::Instance();
     auto alg = mtdAlgMgr.createUnmanaged("AddPeak");
+    alg->initialize();
     alg->setPropertyValue("RunWorkspace", ws->getName());
     alg->setPropertyValue("PeaksWorkspace", peakTableName);
     alg->setProperty("DetectorID", m_currentDetID);
@@ -880,6 +880,7 @@ void MiniPlotController::addPeak(double x, double y) {
     // if there is a UB available calculate HKL for the new peak
     if (tw->sample().hasOrientedLattice()) {
       auto alg = mtdAlgMgr.createUnmanaged("CalculatePeaksHKL");
+      alg->initialize();
       alg->setPropertyValue("PeaksWorkspace", peakTableName);
       alg->execute();
     }

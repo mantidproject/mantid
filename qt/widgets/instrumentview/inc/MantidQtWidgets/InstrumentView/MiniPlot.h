@@ -64,10 +64,12 @@ public slots:
   void setYScaleLog();
 
 signals:
-  void contextMenuRequested(QContextMenuEvent *evt);
+  void contextMenuRequested(QPoint pos);
+  void clickedAtDataCoord(double x, double y);
 
 protected:
-  bool eventFilter(QObject *watched, QEvent *evt) override;
+  void contextMenuEvent(QContextMenuEvent *evt) override;
+  void mplMouseReleaseEvent(QMouseEvent *evt, MplMouseEvent *mplEvt) override;
 
 private:
   QString m_activeCurveLabel;
