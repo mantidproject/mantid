@@ -90,9 +90,8 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   m_axes[1] = new API::SpectraAxis(this);
 }
 
-void Workspace2D::init(const std::size_t &NVectors,
-                       const HistogramData::Histogram &histogram) {
-  data.resize(NVectors);
+void Workspace2D::init(const HistogramData::Histogram &histogram) {
+  data.resize(numberOfDetectorGroups());
 
   HistogramData::Histogram initializedHistogram(histogram);
   if (!histogram.sharedY()) {
@@ -110,8 +109,6 @@ void Workspace2D::init(const std::size_t &NVectors,
   spec.setHistogram(initializedHistogram);
   for (size_t i = 0; i < data.size(); i++) {
     data[i] = new Histogram1D(spec);
-    // Default spectrum number = starts at 1, for workspace index 0.
-    data[i]->setSpectrumNo(specnum_t(i + 1));
   }
 
   // Add axes that reference the data
