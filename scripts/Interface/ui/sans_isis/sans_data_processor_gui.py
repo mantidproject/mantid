@@ -88,15 +88,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         # Q Settings
         self.__generic_settings = "Mantid/ISISSANS"
-        self.__user_file_path_key = "user_file_path"
-        self.__batch_file_path_key = "batch_file_path"
-        self.__pixel_adjustment_det_1_path_key = "pixel_adjustment_det_1_path"
-        self.__pixel_adjustment_det_2_path_key = "pixel_adjustment_det_2_path"
-        self.__wavelength_adjustment_det_1_path_key = "wavelength_adjustment_det_1_path"
-        self.__wavelength_adjustment_det_2_path_key = "wavelength_adjustment_det_2_path"
-        self.__transmission_roi_files_path_key = "transmission_roi_files_path"
-        self.__transmission_mask_files_path_key = "transmission_roi_files_path"
-        self.__q_resolution_moderator_path_key = "q_resolution_moderator_file_path"
+        self.__path_key = "sans_path"
         self.__instrument_name = "sans_instrument"
 
         # Logger
@@ -266,7 +258,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         Load the user file
         """
         # Load the user file
-        self._load_file(self.user_file_line_edit, "*.*", self.__generic_settings, self.__user_file_path_key,
+        self._load_file(self.user_file_line_edit, "*.*", self.__generic_settings, self.__path_key,
                         self.get_user_file_path)
 
         # Notify presenters
@@ -276,7 +268,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         """
         Load the batch file
         """
-        self._load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_path_key,
+        self._load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__path_key,
                         self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 
@@ -322,28 +314,28 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _on_load_pixel_adjustment_det_1(self):
         self._load_file(self.pixel_adjustment_det_1_line_edit, "*.*", self.__generic_settings,
-                        self.__pixel_adjustment_det_1_path_key,  self.get_pixel_adjustment_det_1)
+                        self.__path_key,  self.get_pixel_adjustment_det_1)
 
     def get_pixel_adjustment_det_1(self):
         return str(self.pixel_adjustment_det_1_line_edit.text())
 
     def _on_load_pixel_adjustment_det_2(self):
         self._load_file(self.pixel_adjustment_det_2_line_edit, "*.*", self.__generic_settings,
-                        self.__pixel_adjustment_det_2_path_key,  self.get_pixel_adjustment_det_2)
+                        self.__path_key,  self.get_pixel_adjustment_det_2)
 
     def get_pixel_adjustment_det_2(self):
         return str(self.pixel_adjustment_det_2_line_edit.text())
 
     def _on_load_wavelength_adjustment_det_1(self):
         self._load_file(self.wavelength_adjustment_det_1_line_edit, "*.*", self.__generic_settings,
-                        self.__wavelength_adjustment_det_1_path_key,  self.get_wavelength_adjustment_det_1)
+                        self.__path_key,  self.get_wavelength_adjustment_det_1)
 
     def get_wavelength_adjustment_det_1(self):
         return str(self.wavelength_adjustment_det_1_line_edit.text())
 
     def _on_load_wavelength_adjustment_det_2(self):
         self._load_file(self.wavelength_adjustment_det_2_line_edit, "*.*", self.__generic_settings,
-                        self.__wavelength_adjustment_det_2_path_key,  self.get_wavelength_adjustment_det_2)
+                        self.__path_key,  self.get_wavelength_adjustment_det_2)
 
     def get_wavelength_adjustment_det_2(self):
         return str(self.wavelength_adjustment_det_2_line_edit.text())
@@ -451,21 +443,21 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _on_load_transmission_roi_files(self):
         self._load_file(self.transmission_roi_files_line_edit, "*.*", self.__generic_settings,
-                        self.__transmission_roi_files_path_key,  self.get_transmission_roi_files)
+                        self.__path_key,  self.get_transmission_roi_files)
 
     def get_transmission_mask_files(self):
         return str(self.transmission_mask_files_line_edit.text())
 
     def _on_load_transmission_mask_files(self):
         self._load_file(self.transmission_mask_files_line_edit, "*.*", self.__generic_settings,
-                        self.__transmission_mask_files_path_key,  self.get_transmission_mask_files)
+                        self.__path_key,  self.get_transmission_mask_files)
 
     def get_moderator_file(self):
         return str(self.q_resolution_moderator_file_line_edit.text())
 
     def _on_load_moderator_file(self):
         self._load_file(self.q_resolution_moderator_file_line_edit, "*.*", self.__generic_settings,
-                        self.__q_resolution_moderator_path_key,  self.get_moderator_file)
+                        self.__path_key,  self.get_moderator_file)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
