@@ -14,7 +14,7 @@ Algorithms
 Vesuvio
 #######
 - Added flag for disabling multiple scattering corrections: flags['ms_flags']['ms_enabled']
-- Added method for specifying a mass by chemical symbol e.g. H for hydrogen, O16 for oxygen-16 isotope
+- Added method for specifying a mass by chemical symbol e.g. H for hydrogen, O for oxygen
 - Gamma Corrections are no longer done for back-scattering spectra
 - Multiple scattering corrections for back-scattering spectra now approximate hydrogen peak, this peak can be constrained with masses specified by symbol
 
