@@ -126,8 +126,6 @@ public:
   void buildTargetFunction() const;
   /// Get number of the number of spectra (excluding phys prop data).
   size_t nSpectra() const;
-  /// Get the i-th spectrum
-  API::CompositeFunction_sptr getSpectrum(size_t spectrumIndex);
 
 protected:
   /// Declare a new parameter
@@ -210,17 +208,6 @@ private:
   std::pair<API::IFunction*, std::string> getAttributeReference(const std::string& attName) const;
   /// Build and cache the attribute names
   void buildAttributeNames() const;
-
-  /// Get a reference to the control function
-  API::IFunction *getControl() const;
-  /// Get a reference to a spectrum control function
-  API::IFunction *getSpectrumControl(size_t spectrumIndex) const;
-  /// Get a reference to a function with ion parameters
-  API::IFunction *getIon(size_t ionIndex) const;
-  /// Get a reference to a function with background parameters
-  API::IFunction *getBackground(size_t spectrumIndex) const;
-  /// Get a reference to a function with peak parameters
-  API::IFunction *getPeak(size_t ionIndex, size_t spectrumIndex, size_t peakIndex) const;
 
   /// Make maps between parameter names and indices
   void makeMaps() const;
