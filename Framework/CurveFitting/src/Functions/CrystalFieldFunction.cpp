@@ -54,7 +54,7 @@ const std::regex PEAK_ATTR_REGEX(PEAK_PREFIX + "([0-9]+)\\.(.+)");
 const std::regex ION_ATTR_REGEX(ION_PREFIX + "([0-9]+)\\.(.+)");
 // Regex for names of attributes/parameters for physical properties
 // Example: cv.ScaleFactor
-const std::regex PHYS_PROP_ATTR_REGEX("(cv|chi|mh|mt)\\.(.+)");
+const std::regex PHYS_PROP_ATTR_REGEX("((ion[0-9]+\\.)?(cv|chi|mh|mt))\\.(.+)");
 
 
 /// Define the source function for CrystalFieldFunction.
@@ -496,6 +496,8 @@ bool CrystalFieldFunction::hasAttribute(const std::string &attName) const {
 /// name that the IFunction has.
 std::pair<API::IFunction *, std::string>
 CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
+  std::string attributeName;
+  size_t ion(0);
   std::smatch match;
   if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
     auto i = std::stoul(match[1]);
@@ -513,7 +515,7 @@ CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
     return std::make_pair(nullptr, "");
   } else if (std::regex_match(attName, match, PHYS_PROP_ATTR_REGEX)) {
     auto prop = match[1].str();
-    auto name = match[2].str();
+    auto name = match[4].str();
     auto propIt = m_mapPrefixes2PhysProps.find(prop);
     if (propIt != m_mapPrefixes2PhysProps.end()) {
       return std::make_pair(propIt->second.get(), name);
@@ -820,7 +822,11 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
 
     size_t i = 0;
     for (auto &prop : physProps) {
-      compositePhysProps[i]->addFunction(buildPhysprop(nre, en, wf, ham, prop));
+      auto physPropFun = buildPhysprop(nre, en, wf, ham, prop);
+      compositePhysProps[i]->addFunction(physPropFun);
+      std::string propName = "ion";
+      propName.append(std::to_string(ionIndex)).append(".").append(prop);
+      m_mapPrefixes2PhysProps[propName] = physPropFun;
       ++i;
     }
   }
@@ -1072,6 +1078,15 @@ void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {
       auto &ionSpectrum = dynamic_cast<CompositeFunction &>(*spectrum.getFunction(ionIndex));
       updateSpectrum(ionSpectrum, nre, en, wf, ham, temperatures[iSpec],
                       FWHMs[iSpec], iSpec, iFirst);
+    }
+  
+    std::string prefix("ion");
+    prefix.append(std::to_string(ionIndex)).append(".");
+    auto prefixSize = prefix.size();
+    for(auto prop: m_mapPrefixes2PhysProps) {
+      if (prop.first.substr(0, prefixSize) == prefix) {
+        updatePhysprop(nre, en, wf, ham, *prop.second);
+      }
     }
   }
 }

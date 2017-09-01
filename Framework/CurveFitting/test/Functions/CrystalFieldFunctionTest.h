@@ -12,6 +12,9 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include "D:/Work/mantid_stuff/Testing/class/MyTestDef.h"
+#include <regex>
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -21,7 +24,7 @@ using namespace WorkspaceCreationHelper;
 class CrystalFieldFunctionTest : public CxxTest::TestSuite {
 public:
 
-  void test_names_ss() {
+  void xtest_names_ss() {
     CrystalFieldFunction cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", "C2v");
@@ -56,7 +59,7 @@ public:
     TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1}));
   }
 
-  void test_names_ss_with_backgrund() {
+  void xtest_names_ss_with_backgrund() {
     CrystalFieldFunction cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", "C2v");
@@ -94,7 +97,7 @@ public:
     TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1}));
   }
 
-  void test_names_sm() {
+  void xtest_names_sm() {
     CrystalFieldFunction cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", "C2v");
@@ -138,7 +141,7 @@ public:
     TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1, 2}));
   }
 
-  void test_names_sm_with_background() {
+  void xtest_names_sm_with_background() {
     CrystalFieldFunction cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", "C2v");
@@ -187,7 +190,7 @@ public:
     TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1, 2}));
   }
 
-  void test_names_ms() {
+  void xtest_names_ms() {
     CrystalFieldFunction cf;
     cf.setAttributeValue("Ions", "Ce, Yb");
     cf.setAttributeValue("Symmetries", "C2v, D6h");
@@ -240,7 +243,7 @@ public:
 
   }
 
-  void test_names_ms_with_background() {
+  void xtest_names_ms_with_background() {
     CrystalFieldFunction cf;
     cf.setAttributeValue("Ions", "Ce, Yb");
     cf.setAttributeValue("Symmetries", "C2v, D6h");
@@ -296,7 +299,7 @@ public:
 
   }
 
-  void test_names_mm() {
+  void xtest_names_mm() {
     CrystalFieldFunction cf;
     cf.setAttributeValue("Ions", "Ce, Yb");
     cf.setAttributeValue("Symmetries", "C2v, D6h");
@@ -359,7 +362,7 @@ public:
 
   }
 
-  void test_names_mm_with_background() {
+  void xtest_names_mm_with_background() {
     CrystalFieldFunction cf;
     cf.setAttributeValue("Ions", "Ce, Yb");
     cf.setAttributeValue("Symmetries", "C2v, D6h");
@@ -430,7 +433,7 @@ public:
 
   }
 
-  void test_fit_ss() {
+  void xtest_fit_ss() {
     std::string fun = "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,"
                       "Temperatures=44,FWHMs=2.3,ToleranceIntensity=0.2,B20="
                       "0.37,B22=3.9,B40=-0.03,B42=-0.1,B44=-0.12,pk0.FWHM=2.2,"
@@ -453,7 +456,7 @@ public:
     API::AnalysisDataService::Instance().clear();
   }
 
-  void test_fit_sm() {
+  void xtest_fit_sm() {
     auto ws = makeDataSM();
     auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
     auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
@@ -482,7 +485,7 @@ public:
     ads.clear();
   }
 
-  void test_fit_ms() {
+  void xtest_fit_ms() {
     std::string fun = "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), FixAllPeaks=1,"
                       "Temperatures=4,FWHMs=2.0,ToleranceIntensity=0.02,"
                       "ion0.B20=0.37737,ion0.B22=3.9770,ion0.B40=-0.031787,ion0.B42=-0.11611,ion0.B44=-0.12544,"
@@ -507,7 +510,7 @@ public:
     API::AnalysisDataService::Instance().clear();
   }
 
-  void test_fit_mm() {
+  void xtest_fit_mm() {
     std::string fun = "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), FixAllPeaks=1,"
                       "Temperatures=(4, 10),FWHMs=2.0,ToleranceIntensity=0.02,"
                       "ion0.B20=0.3773,ion0.B22=3.97,ion0.B40=-0.0317,ion0.B42=-0.116,ion0.B44=-0.125,"
@@ -538,7 +541,7 @@ public:
   }
 
 
-  void test_fit_mm_with_background() {
+  void xtest_fit_mm_with_background() {
     std::string fun = "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), FixAllPeaks=1,"
                       "Temperatures=(4, 10),FWHMs=2.0,ToleranceIntensity=0.001,Background=\"name=LinearBackground,A0=20,\","
                       "ion0.B20=0.37737,ion0.B22=3.9770,ion0.B40=-0.031787,ion0.B42=-0.11611,ion0.B44=-0.12544,"
@@ -575,7 +578,7 @@ public:
     ads.clear();
   }
 
-  void test_phys_props_s() {
+  void xtest_phys_props_s() {
     auto ws = makeDataSP();
     auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
     auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
@@ -604,6 +607,49 @@ public:
 
     auto &ads = API::AnalysisDataService::Instance();
     ads.clear();
+  }
+
+  void test_phys_props_m() {
+    try{
+
+    auto ws = makeDataMP();
+    auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
+    auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
+
+    _start;
+    _funn(sp0, sp0->histogram(1).points().rawData(), sp0->histogram(1).counts().rawData());
+    _funn(sp1, sp1->histogram(1).points().rawData(), sp1->histogram(1).counts().rawData());
+
+    return;
+
+    std::string fun = "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,PhysicalProperties=\"cv, chi\","
+                      "B20=0.37737,B22=3.9770,chi.Lambda=0.4,"
+                      "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0, BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0),"
+                      "ties=(B40=-0.031787,B42=-0.11611,B44=-0.12544)";
+
+    Algorithms::Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", fun);
+    fit.setProperty("InputWorkspace", sp0);
+    fit.setProperty("WorkspaceIndex", 1);
+    fit.setProperty("InputWorkspace_1", sp1);
+    fit.setProperty("WorkspaceIndex_1", 1);
+    fit.setProperty("MaxIterations", 20);
+    fit.setProperty("Output", "fit");
+    fit.execute();
+
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0, 1e-6);
+
+    IFunction_sptr function = fit.getProperty("Function");
+    TS_ASSERT_DELTA(function->getParameter("chi.Lambda"), 0.5, 1e-3);
+
+    auto &ads = API::AnalysisDataService::Instance();
+    ads.clear();
+
+    } catch (std::exception &e) {
+      std::cerr << e.what() << std::endl;
+    }
   }
 
 private:
@@ -706,6 +752,25 @@ private:
     auto ws1 = create2DWorkspaceBinned(1, 100, 0.0, 0.01);
     std::string fun = "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,PhysicalProperties=\"cv, chi\","
                       "B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0.11611,B44=-0.12544, chi.Lambda=0.5";
+    Algorithms::EvaluateFunction eval;
+    eval.initialize();
+    eval.setProperty("Function", fun);
+    eval.setProperty("InputWorkspace", ws0);
+    eval.setProperty("InputWorkspace_1", ws1);
+    eval.setPropertyValue("OutputWorkspace", "out");
+    eval.execute();
+    auto &ads = API::AnalysisDataService::Instance();
+    auto out = ads.retrieveWS<WorkspaceGroup>("out");
+    ads.clear();
+    return out;
+  }
+
+  WorkspaceGroup_sptr makeDataMP() {
+    auto ws0 = create2DWorkspaceBinned(1, 100, 0.0, 0.5);
+    auto ws1 = create2DWorkspaceBinned(1, 100, 0.0, 0.3);
+    std::string fun = "name=CrystalFieldFunction,Ions=\"Ce, Pr\",Symmetries=\"C2v, D4h\",PhysicalProperties=\"cv, chi\","
+                      "ion0.B20=0.37737,ion0.B22=3.9770, ion0.B40=-0.031787, ion0.B42=-0.11611, ion0.B44=-0.12544, ion0.chi.Lambda=0.,"
+                      "ion1.B20=0.4268, ion1.B40=0.001031, ion1.B44=-0.01996, ion1.B60=0.00005, ion1.B64=0.001563, ion1.chi.Lambda=0., ion1.cv.ScaleFactor = 0.1";
     Algorithms::EvaluateFunction eval;
     eval.initialize();
     eval.setProperty("Function", fun);
