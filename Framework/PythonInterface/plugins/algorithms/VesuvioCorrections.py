@@ -493,10 +493,12 @@ class VesuvioCorrections(VesuvioBase):
 
         contains_hydrogen = False
 
-        for i, mass in enumerate(self._masses):
+        i = 0
 
-            if str(i) in self._index_to_symbol_map:
-                symbol = self._index_to_symbol_map[str(i)].value
+        for idx, mass in enumerate(self._masses):
+
+            if str(idx) in self._index_to_symbol_map:
+                symbol = self._index_to_symbol_map[str(idx)].value
             else:
                 symbol = None
 
@@ -556,6 +558,8 @@ class VesuvioCorrections(VesuvioBase):
             if self._back_scattering and symbol is not None and \
                             symbol in self._hydrogen_constraints:
                 self._hydrogen_constraints[symbol].value['intensity'] = intensity
+
+            i = i + 1
 
         if self._back_scattering and contains_hydrogen:
             mBuilder = MaterialBuilder()
