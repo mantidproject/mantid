@@ -93,12 +93,22 @@ void BinDetectorScan::exec() {
           fabs(m_heightAxis[index] - y) < fabs(m_heightAxis[index - 1] - y)
               ? index
               : index - 1;
-
-      size_t thetaIndex =
-          size_t((theta - m_startScatteringAngle) / m_stepScatteringAngle);
-      if (yIndex > m_numHistograms || thetaIndex > m_numBins) {
-        continue;
+      size_t thetaIndex = size_t(
+          (theta - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
+      if (fabs(m_startScatteringAngle +
+               double(thetaIndex) * m_stepScatteringAngle - theta) >
+          m_stepScatteringAngle * 0.15) {
+        g_log.warning() << "Detector outside expected range " << thetaIndex
+                        << " " << theta << " "
+                        << fabs(m_startScatteringAngle +
+                                double(thetaIndex) * m_stepScatteringAngle -
+                                theta) << " "
+                        << m_startScatteringAngle +
+                               double(thetaIndex) * m_stepScatteringAngle
+                        << "\n";
       }
+      if (yIndex > m_numHistograms || thetaIndex > m_numBins)
+        continue;
       auto counts = ws->histogram(i).y()[0];
       auto &yData = outputWS->mutableY(yIndex);
       yData[thetaIndex] += counts;
@@ -116,9 +126,6 @@ void BinDetectorScan::getInputParameters() {
 
   getScatteringAngleBinning();
   getHeightAxis();
-
-  g_log.information() << "Height binning:" << m_heightAxis[0] << ", "
-                      << m_heightAxis[m_numHistograms] << "\n";
 }
 
 void BinDetectorScan::getScatteringAngleBinning() {
@@ -184,10 +191,8 @@ void BinDetectorScan::getHeightAxis() {
 
   g_log.information() << "Number of histograms in output workspace:"
                       << m_numHistograms << std::endl;
-  g_log.information() << "Found start scattering angle of "
-                      << m_startScatteringAngle
-                      << " and end scattering angle of " << m_endScatteringAngle
-                      << "\n";
+  g_log.information() << "Height binning:" << m_heightAxis[0] << ", "
+                      << m_heightAxis[m_numHistograms] << "\n";
 }
 
 } // namespace Algorithms
