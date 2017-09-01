@@ -76,12 +76,12 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     exit_iteration = 0
 
     index_to_symbol_map = filter(lambda x: 'symbol' in x[1], enumerate(flags['masses']))
-    index_to_symbol_map = { str(k) : v['symbol'] for k, v in index_to_symbol_map }
+    index_to_symbol_map = {str(k): v['symbol'] for k, v in index_to_symbol_map}
 
     hydrogen_indices = set()
     if flags['back_scattering']:
-        hydrogen_indices = { int(k) for k, _ in filter(lambda x: x[1] == 'H',
-                                                       index_to_symbol_map.items()) }
+        hydrogen_indices = {int(k) for k, _ in filter(lambda x: x[1] == 'H',
+                                                      index_to_symbol_map.items())}
 
         symbols = set()
         for symbol in flags['ms_flags']['HydrogenConstraints']:
@@ -170,11 +170,11 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
 
     # Do check if profiles_str is a list once outside of loop.
     if isinstance(profiles_strs, list):
-        get_profiles = lambda idx: (all_profiles_strs[index],
-                                    profiles_strs[idx] if back_scattering else all_profiles_strs[index])
+        def get_profiles(idx):
+            return all_profiles_strs[idx], profiles_strs[idx] if back_scattering else all_profiles_strs[idx]
     else:
-        get_profiles = lambda _: (all_profiles_strs,
-                                  profiles_strs if back_scattering else all_profiles_strs)
+        def get_profiles(_):
+            return all_profiles_strs, profiles_strs if back_scattering else all_profiles_strs
     fit_masses = mass_values if back_scattering else all_mass_values
 
     for index in range(num_spec):
@@ -469,7 +469,7 @@ def _update_masses_from_params(old_masses, param_ws, ignore_indices=set()):
             param_name = param_re.group(2).lower()
             if param_name == 'width' and isinstance(masses[spec_idx][mass_idx].get(param_name, None), list):
                 masses[spec_idx][mass_idx][param_name][1] = param_ws.dataY(idx)[spec_idx]
-            elif not 'symbol' in masses[spec_idx][mass_idx] or param_name != 'mass':
+            elif 'symbol' not in masses[spec_idx][mass_idx] or param_name != 'mass':
                 masses[spec_idx][mass_idx][param_name] = param_ws.dataY(idx)[spec_idx]
 
     return masses
