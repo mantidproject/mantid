@@ -7,7 +7,6 @@ from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 
 import copy
-import json
 import re
 import numpy as np
 
@@ -417,7 +416,7 @@ def _parse_ms_hydrogen_constraint(constraint):
 
     if symbol is None:
         raise RuntimeError("Invalid hydrogen constraint: " +
-                           str(json.dumps(constraint)) +
+                           str(constraint) +
                            " - No symbol provided")
     return {symbol: constraint}
 
@@ -540,7 +539,7 @@ def _create_profile_strs_and_mass_list(profile_flags):
             symbol = mass_prop.pop('symbol', None)
 
             if symbol is None:
-                raise RuntimeError('Invalid mass specified - ' + str(json.dumps(mass_prop))
+                raise RuntimeError('Invalid mass specified - ' + str(mass_prop)
                                    + " - either 'value' or 'symbol' must be given.")
 
             try:
@@ -552,7 +551,7 @@ def _create_profile_strs_and_mass_list(profile_flags):
 
                 mass_value = material_builder.setFormula(symbol).build().relativeMolecularMass()
             except BaseException as exc:
-                raise RuntimeError('Error when parsing mass - ' + str(json.dumps(mass_prop)) + ": "
+                raise RuntimeError('Error when parsing mass - ' + str(mass_prop) + ": "
                                    + "\n" + str(exc))
 
         all_mass_values.append(mass_value)
