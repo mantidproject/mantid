@@ -655,7 +655,7 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
 
     // calculate derivatievs
     const auto &Y = input->y(m_wsIndex);
-    auto &S = diffed->mutableY(m_wsIndex);
+    auto &S = diffed->mutableY(0);
     // Go through each spectrum calculating the second difference at each point
     // First and last points in each spectrum left as zero (you'd never be able
     // to find peaks that close to the edge anyway)
@@ -735,7 +735,7 @@ void FindPeaks::calculateStandardDeviation(
     // single spectrum.  smoothed workspace has 1 and only 1 spectrum
     smoothed->setSharedE(0, input->sharedE(m_wsIndex));
     std::transform(smoothed->e(0).cbegin(), smoothed->e(0).cend(),
-                   smoothed->mutableE(m_wsIndex).begin(),
+                   smoothed->mutableE(0).begin(),
                    std::bind2nd(std::multiplies<double>(), constant));
   } else {
     const size_t numHists = smoothed->getNumberHistograms();
