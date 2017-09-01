@@ -83,13 +83,13 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     if flags['back_scattering']:
         hydrogen_indices = { int(k) for k, _ in filter(lambda x: x[1] == 'H',
                                                        index_to_symbol_map.items()) }
-    flags['index_to_symbol_map'] = index_to_symbol_map
 
-    symbols = set()
-    for symbol in flags['ms_flags']['HydrogenConstraints']:
-        symbols.add(symbol)
-    for symbol in index_to_symbol_map.values():
-        symbols.discard(symbol)
+        symbols = set()
+        for symbol in flags['ms_flags']['HydrogenConstraints']:
+            symbols.add(symbol)
+        for symbol in index_to_symbol_map.values():
+            symbols.discard(symbol)
+    flags['index_to_symbol_map'] = index_to_symbol_map
 
     if symbols:
         raise RuntimeError("HydrogenConstraints contains references to the following,"
