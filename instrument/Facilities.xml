@@ -647,6 +647,10 @@
     <technique>Reflectometry</technique>
   </instrument>
 
+  <instrument name="Figaro">
+    <technique>Reflectometry</technique>
+  </instrument>
+
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">
