@@ -20,10 +20,12 @@ using Mantid::PythonInterface::PropertyWithValueExporter;
 namespace Registry = Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
-PropertyManagerProperty *createPropertyManagerPropertyWithDict(const std::string& name, 
-                                                               const boost::python::dict& value,
-                                                               const unsigned int& direction) {
-  return new PropertyManagerProperty(name, Registry::createPropertyManager(value), direction);
+PropertyManagerProperty *
+createPropertyManagerPropertyWithDict(const std::string &name,
+                                      const boost::python::dict &value,
+                                      const unsigned int &direction) {
+  return new PropertyManagerProperty(
+      name, Registry::createPropertyManager(value), direction);
 }
 
 void export_PropertyManagerProperty() {
@@ -35,14 +37,14 @@ void export_PropertyManagerProperty() {
   // leaf class type
   typedef PropertyManagerProperty::BaseClass BaseClassType;
   class_<PropertyManagerProperty, bases<BaseClassType>, boost::noncopyable>(
-    "PropertyManagerProperty", no_init)
-    .def(init<const std::string &, const unsigned int>(
-    (arg("self"), arg("name"), arg("direction") = Direction::Input),
-      "Construct an PropertyManagerProperty"))
-    .def("__init__",
-      make_constructor(
-        &createPropertyManagerPropertyWithDict, default_call_policies(),
-        (arg("name"), arg("value"), arg("direction") = Direction::Input)));
+      "PropertyManagerProperty", no_init)
+      .def(init<const std::string &, const unsigned int>(
+          (arg("self"), arg("name"), arg("direction") = Direction::Input),
+          "Construct an PropertyManagerProperty"))
+      .def("__init__", make_constructor(&createPropertyManagerPropertyWithDict,
+                                        default_call_policies(),
+                                        (arg("name"), arg("value"),
+                                         arg("direction") = Direction::Input)));
 
   // type handler for alg.setProperty calls
   Registry::TypeRegistry::subscribe(typeid(BaseValueType),
