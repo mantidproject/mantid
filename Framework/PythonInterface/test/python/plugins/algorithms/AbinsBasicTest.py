@@ -55,8 +55,8 @@ class AbinsBasicTest(unittest.TestCase):
     _tolerance = 0.0001
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=["Abins", "explicit",  "default", "total",
-                                                            "squaricn_scale", "benzene_exp", "experimental"])
+        AbinsTestHelpers.remove_output_files(list_of_names=["explicit",  "default", "total", "squaricn_sum_Abins",
+                                                            "squaricn_scale", "benzene", "experimental"])
         mtd.clear()
 
     def test_wrong_input(self):
