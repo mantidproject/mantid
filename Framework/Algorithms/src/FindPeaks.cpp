@@ -218,12 +218,14 @@ void FindPeaks::processAlgorithmProperties() {
   singleSpectrum = !isEmpty(m_wsIndex);
   if (singleSpectrum &&
       m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms())) {
-    g_log.warning() << "The value of WorkspaceIndex provided (" << m_wsIndex
-                    << ") is larger than the size of this workspace ("
-                    << m_dataWS->getNumberHistograms() << ")\n";
+    std::stringstream errss;
+    errss << "FindPeaks WorkspaceIndex property: "
+          << "The value of WorkspaceIndex provided (" << m_wsIndex
+          << ") is larger than the size of this workspace ("
+          << m_dataWS->getNumberHistograms();
     throw Kernel::Exception::IndexError(m_wsIndex,
                                         m_dataWS->getNumberHistograms() - 1,
-                                        "FindPeaks WorkspaceIndex property");
+                                        errss.str());
   }
 
   // Peak width
@@ -462,8 +464,12 @@ void FindPeaks::findPeaksUsingMariscotti() {
   const int blocksize = static_cast<int>(smoothedData->blocksize());
 
   for (int k = start; k < end; ++k) {
-    const auto &S = smoothedData->y(k);
-    const auto &F = smoothedData->e(k);
+    int ws_i(k);
+    if (singleSpectrum)
+      ws_i = 0;
+
+    const auto &S = smoothedData->y(ws_i);
+    const auto &F = smoothedData->e(ws_i);
 
     // This implements the flow chart given on page 320 of Mariscotti
     int i0 = 0, i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
@@ -632,23 +638,50 @@ void FindPeaks::findPeaksUsingMariscotti() {
 API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
     const API::MatrixWorkspace_const_sptr &input) {
   // We need a new workspace the same size as the input ont
-  MatrixWorkspace_sptr diffed = WorkspaceFactory::Instance().create(input);
+  MatrixWorkspace_sptr diffed = 0;
 
-  const size_t numHists = input->getNumberHistograms();
   const size_t blocksize = input->blocksize();
+  if (singleSpectrum)
+  {
+    // single spectrum: only work on 1 spectrum. no need to calculate derivative to the other spectra.
+    size_t nvector = 1;
+    size_t xlength = input->sharedX(m_wsIndex)->size();
+    size_t ylength = input->sharedY(m_wsIndex)->size();
 
-  // Loop over spectra
-  for (size_t i = 0; i < size_t(numHists); ++i) {
-    // Copy over the X values
-    diffed->setSharedX(i, input->sharedX(i));
+    diffed = WorkspaceFactory::Instance().create("Workspace2D", nvector, xlength, ylength);
 
-    const auto &Y = input->y(i);
-    auto &S = diffed->mutableY(i);
+    // copy over the X values
+    diffed->setSharedX(0, input->sharedX(m_wsIndex));
+
+    // calculate derivatievs
+    const auto &Y = input->y(m_wsIndex);
+    auto &S = diffed->mutableY(m_wsIndex);
     // Go through each spectrum calculating the second difference at each point
     // First and last points in each spectrum left as zero (you'd never be able
     // to find peaks that close to the edge anyway)
     for (size_t j = 1; j < blocksize - 1; ++j) {
       S[j] = Y[j - 1] - 2 * Y[j] + Y[j + 1];
+    }
+  }
+  else
+  {
+    diffed = WorkspaceFactory::Instance().create(input);
+
+    const size_t numHists = input->getNumberHistograms();
+
+    // Loop over spectra
+    for (size_t i = 0; i < size_t(numHists); ++i) {
+      // Copy over the X values
+      diffed->setSharedX(i, input->sharedX(i));
+
+      const auto &Y = input->y(i);
+      auto &S = diffed->mutableY(i);
+      // Go through each spectrum calculating the second difference at each point
+      // First and last points in each spectrum left as zero (you'd never be able
+      // to find peaks that close to the edge anyway)
+      for (size_t j = 1; j < blocksize - 1; ++j) {
+        S[j] = Y[j - 1] - 2 * Y[j] + Y[j + 1];
+      }
     }
   }
 
@@ -698,12 +731,23 @@ void FindPeaks::calculateStandardDeviation(
   const double constant =
       sqrt(static_cast<double>(this->computePhi(w))) / factor;
 
-  const size_t numHists = smoothed->getNumberHistograms();
-  for (size_t i = 0; i < size_t(numHists); ++i) {
-    smoothed->setSharedE(i, input->sharedE(i));
-    std::transform(smoothed->e(i).cbegin(), smoothed->e(i).cend(),
-                   smoothed->mutableE(i).begin(),
+  if (singleSpectrum)
+  {
+    // single spectrum.  smoothed workspace has 1 and only 1 spectrum
+    smoothed->setSharedE(0, input->sharedE(m_wsIndex));
+    std::transform(smoothed->e(0).cbegin(), smoothed->e(0).cend(),
+                   smoothed->mutableE(m_wsIndex).begin(),
                    std::bind2nd(std::multiplies<double>(), constant));
+  }
+  else
+  {
+    const size_t numHists = smoothed->getNumberHistograms();
+    for (size_t i = 0; i < size_t(numHists); ++i) {
+      smoothed->setSharedE(i, input->sharedE(i));
+      std::transform(smoothed->e(i).cbegin(), smoothed->e(i).cend(),
+                     smoothed->mutableE(i).begin(),
+                     std::bind2nd(std::multiplies<double>(), constant));
+    }
   }
 }
 
