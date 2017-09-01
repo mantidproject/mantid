@@ -376,7 +376,7 @@ class VesuvioCorrections(VesuvioBase):
             for wksp in self._correction_workspaces:
                 ms.DeleteWorkspace(wksp)
 
-            # ------------------------------------------------------------------------------
+                # ------------------------------------------------------------------------------
 
     def _define_corrections(self):
         """
@@ -405,7 +405,7 @@ class VesuvioCorrections(VesuvioBase):
                                OutputWorkspace=self._correction_wsg)
             self.setProperty("CorrectionWorkspaces", self._correction_wsg)
 
-        # ------------------------------------------------------------------------------
+            # ------------------------------------------------------------------------------
 
     def _fit_corrections(self, fit_workspaces, param_table_name, **fixed_parameters):
         functions = []
@@ -555,15 +555,14 @@ class VesuvioCorrections(VesuvioBase):
             # Check for NoneType is necessary as hydrogen constraints are
             # stored in a C++ PropertyManager object, not a dict; call to
             # __contains__ must match the C++ signature.
-            if self._back_scattering and symbol is not None and \
-                            symbol in self._hydrogen_constraints:
+            if self._back_scattering and symbol is not None and symbol in self._hydrogen_constraints:
                 self._hydrogen_constraints[symbol].value['intensity'] = intensity
 
             i = i + 1
 
         if self._back_scattering and contains_hydrogen:
-            mBuilder = MaterialBuilder()
-            hydrogen = mBuilder.setFormula('H').build()
+            material_builder = MaterialBuilder()
+            hydrogen = material_builder.setFormula('H').build()
             hydrogen_intensity = \
                 self._calculate_hydrogen_intensity(hydrogen, self._hydrogen_constraints)
             hydrogen_width = 5
@@ -627,20 +626,19 @@ class VesuvioCorrections(VesuvioBase):
         return total_scatter_correction, multi_scatter_correction
 
     def _calculate_hydrogen_intensity(self, hydrogen, constraints):
-        mBuilder = MaterialBuilder()
+        material_builder = MaterialBuilder()
         hydrogen_cross_section = hydrogen.totalScatterXSection()
         hydrogen_intensity = 0
         default_weight = 1.0 / len(constraints)
 
         for symbol in constraints.keys():
             constraint = constraints[symbol].value
-            material = mBuilder.setFormula(symbol).build()
+            material = material_builder.setFormula(symbol).build()
             cross_section = material.totalScatterXSection()
             cross_section_ratio = cross_section / hydrogen_cross_section
             weight = constraint.get('weight', default_weight).value
             factor = constraint.get('factor', 1).value
-            hydrogen_intensity += cross_section_ratio * factor \
-                                  * weight * constraint['intensity'].value
+            hydrogen_intensity += cross_section_ratio * factor * weight * constraint['intensity'].value
 
         return hydrogen_intensity
 
