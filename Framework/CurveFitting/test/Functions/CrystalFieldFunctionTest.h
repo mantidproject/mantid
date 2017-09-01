@@ -575,10 +575,35 @@ public:
     ads.clear();
   }
 
-  void test_phys_props() {
+  void test_phys_props_s() {
     auto ws = makeDataSP();
     auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
     auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
+
+    std::string fun = "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,PhysicalProperties=\"cv, chi\","
+                      "B20=0.37737,B22=3.9770,chi.Lambda=0.4,"
+                      "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0, BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0),"
+                      "ties=(B40=-0.031787,B42=-0.11611,B44=-0.12544)";
+
+    Algorithms::Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", fun);
+    fit.setProperty("InputWorkspace", sp0);
+    fit.setProperty("WorkspaceIndex", 1);
+    fit.setProperty("InputWorkspace_1", sp1);
+    fit.setProperty("WorkspaceIndex_1", 1);
+    fit.setProperty("MaxIterations", 20);
+    fit.setProperty("Output", "fit");
+    fit.execute();
+
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0, 1e-6);
+
+    IFunction_sptr function = fit.getProperty("Function");
+    TS_ASSERT_DELTA(function->getParameter("chi.Lambda"), 0.5, 1e-3);
+
+    auto &ads = API::AnalysisDataService::Instance();
+    ads.clear();
   }
 
 private:
@@ -677,15 +702,15 @@ private:
   }
 
   WorkspaceGroup_sptr makeDataSP() {
-    auto ws = create2DWorkspaceBinned(2, 100, 0.0, 0.5);
+    auto ws0 = create2DWorkspaceBinned(1, 100, 0.0, 0.5);
+    auto ws1 = create2DWorkspaceBinned(1, 100, 0.0, 0.01);
     std::string fun = "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,PhysicalProperties=\"cv, chi\","
-                      "B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0.11611,B44=-0.12544";
+                      "B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0.11611,B44=-0.12544, chi.Lambda=0.5";
     Algorithms::EvaluateFunction eval;
     eval.initialize();
     eval.setProperty("Function", fun);
-    eval.setProperty("InputWorkspace", ws);
-    eval.setProperty("InputWorkspace_1", ws);
-    eval.setProperty("WorkspaceIndex_1", 1);
+    eval.setProperty("InputWorkspace", ws0);
+    eval.setProperty("InputWorkspace_1", ws1);
     eval.setPropertyValue("OutputWorkspace", "out");
     eval.execute();
     auto &ads = API::AnalysisDataService::Instance();

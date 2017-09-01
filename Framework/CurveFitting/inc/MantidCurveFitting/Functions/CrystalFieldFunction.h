@@ -193,6 +193,11 @@ private:
                                     const ComplexFortranMatrix &wf,
                                     const ComplexFortranMatrix &ham,
                                     const std::string &propName) const;
+  /// Update a physical property function.
+  void updatePhysprop(int nre, const DoubleFortranVector &en,
+                                    const ComplexFortranMatrix &wf,
+                                    const ComplexFortranMatrix &ham,
+                                    API::IFunction &fun) const;
 
   /// Set the source function
   void setSource(API::IFunction_sptr source) const;
@@ -203,8 +208,6 @@ private:
 
   /// Get a reference to an attribute
   std::pair<API::IFunction*, std::string> getAttributeReference(const std::string& attName) const;
-  /// Get a reference to a parameter
-  API::ParameterReference getParameterReference(const std::string &paramName) const;
   /// Build and cache the attribute names
   void buildAttributeNames() const;
 

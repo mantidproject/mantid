@@ -249,7 +249,7 @@ double CrystalFieldFunction::getParameter(size_t i) const {
 /// Check if function has a parameter with this name.
 bool CrystalFieldFunction::hasParameter(const std::string &name) const{
   try {
-    getParameterReference(name);
+    parameterIndex(name);
     return true;
   } catch (std::invalid_argument&) {
     return false;
@@ -260,22 +260,21 @@ bool CrystalFieldFunction::hasParameter(const std::string &name) const{
 void CrystalFieldFunction::setParameter(const std::string &name,
                                         const double &value,
                                         bool explicitlySet) {
-  auto ref = getParameterReference(name);
-  ref.setParameter(value, explicitlySet);
+  auto index = parameterIndex(name);
+  setParameter(index, value, explicitlySet);
 }
 
 /// Set description of parameter by name.
 void CrystalFieldFunction::setParameterDescription(
     const std::string &name, const std::string &description) {
-  auto ref = getParameterReference(name);
-  ref.getLocalFunction()->setParameterDescription(ref.getLocalIndex(),
-                                                  description);
+  auto index = parameterIndex(name);
+  setParameterDescription(index, description);
 }
 
 /// Get parameter by name.
 double CrystalFieldFunction::getParameter(const std::string &name) const {
-  auto ref = getParameterReference(name);
-  return ref.getParameter();
+  auto index = parameterIndex(name);
+  return getParameter(index);
 }
 
 /// Total number of parameters
@@ -579,66 +578,6 @@ CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
     return std::make_pair(nullptr, "");
   }
   return std::make_pair(&m_control, attName);
-}
-
-/// Get a reference to a parameter
-API::ParameterReference CrystalFieldFunction::getParameterReference(
-    const std::string &paramName) const {
-  checkSourceFunction();
-  checkTargetFunction();
-  if (nParams() != m_mapIndices2Names.size()) {
-    makeMaps();
-  }
-
-  const auto refTuple = getReferenceTuple(paramName);
-  const auto &ionIndex = refTuple.ionIndex;
-  const auto &spectrumIndex = refTuple.spectrumIndex;
-  auto &name = refTuple.name;
-
-  try {
-  // Check if it's a background's parameter
-  if (refTuple.type == Background) {
-    auto function = getBackground(spectrumIndex);
-    return API::ParameterReference(function, function->parameterIndex(name));
-  }
-
-  // Check if it's a peak parameter
-  if (refTuple.type == Peak) {
-    auto function = getPeak(ionIndex, spectrumIndex, refTuple.peakIndex);
-    return API::ParameterReference(function, function->parameterIndex(name));
-  }
-
-  // Check if it's a phys prop parameter
-  if (refTuple.type == PhysProp) {
-    throw Kernel::Exception::NotImplementedError("PhysProps are not implemented.");
-  }
-
-  // Check if it's a parameter of a spectrum function
-  if (spectrumIndex != UNDEFINED_INDEX) {
-    auto function = getSpectrumControl(spectrumIndex);
-    return API::ParameterReference(function, function->parameterIndex(name));
-  }
-
-  // Check for a ion-specific params
-  if (ionIndex != UNDEFINED_INDEX) {
-    auto function = getIon(ionIndex);
-    return API::ParameterReference(function,
-                                   function->parameterIndex(name));
-  }
-
-  // A parameter without a prefix is a parameter of m_control
-  // for multi-site ...
-  if (isMultiSite()) {
-    return API::ParameterReference(&m_control,
-                                   m_control.parameterIndex(paramName));
-  }
-
-  // ... and m_source for single site
-  return API::ParameterReference(m_source.get(),
-                                 m_source->parameterIndex(paramName));
-  } catch (std::invalid_argument &) {
-    throw std::invalid_argument("Parameter " + paramName + " not found.");
-  }
 }
 
 /// Get number of the number of spectra (excluding phys prop data).
@@ -1136,6 +1075,32 @@ API::IFunction_sptr CrystalFieldFunction::buildPhysprop(
   throw std::runtime_error("Physical property type not understood: " + propName);
 }
 
+/// Update a physical property function.
+void CrystalFieldFunction::updatePhysprop(
+  int nre, const DoubleFortranVector &en,
+  const ComplexFortranMatrix &wf,
+  const ComplexFortranMatrix &ham,
+  API::IFunction &fun) const {
+
+  auto propName = fun.name();
+
+  if (propName == "cv") { // HeatCapacity
+    auto &propFun = dynamic_cast<CrystalFieldHeatCapacityCalculation&>(fun);
+    propFun.setEnergy(en);
+  } else if (propName == "chi") { // Susceptibility
+    auto &propFun = dynamic_cast<CrystalFieldSusceptibilityCalculation&>(fun);
+    propFun.setEigensystem(en, wf, nre);
+  } else if (propName == "mh") { // Magnetisation
+    auto &propFun = dynamic_cast<CrystalFieldMagnetisationCalculation&>(fun);
+    propFun.setHamiltonian(ham, nre);
+  } else if (propName == "mt") { // MagneticMoment
+    auto &propFun = dynamic_cast<CrystalFieldMomentCalculation&>(fun);
+    propFun.setHamiltonian(ham, nre);
+  } else {
+    throw std::runtime_error("Physical property type not understood: " + propName);
+  }
+}
+
 
 /// Update m_spectrum function.
 void CrystalFieldFunction::updateTargetFunction() const {
@@ -1209,6 +1174,10 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
   for (size_t iSpec = 0; iSpec < temperatures.size(); ++iSpec) {
     updateSpectrum(*fun.getFunction(iSpec), nre, en, wf, ham, temperatures[iSpec],
                     FWHMs[iSpec], iSpec, iFirst);
+  }
+
+  for(auto &prop: m_mapPrefixes2PhysProps) {
+    updatePhysprop(nre, en, wf, ham, *prop.second);
   }
 }
 
