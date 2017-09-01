@@ -45,82 +45,18 @@ using Runs = std::vector<std::map<QString, QString>>;
 // Functional tests
 //=====================================================================================
 class DataProcessorTwoLevelTreeManagerTest : public CxxTest::TestSuite {
-
-private:
-  // Return a reflectometry whitelist
-  DataProcessorWhiteList reflWhitelist() {
-
-    // Reflectometry white list
-    DataProcessorWhiteList whitelist;
-    whitelist.addElement("Run(s)", "InputWorkspace", "", true, "TOF_");
-    whitelist.addElement("Angle", "ThetaIn", "");
-    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
-                         true, "TRANS_");
-    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
-    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
-    whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
-    whitelist.addElement("Scale", "ScaleFactor", "");
-    whitelist.addElement("Options", "Options", "");
-    return whitelist;
-  }
-
-  ITableWorkspace_sptr reflTable() {
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-
-    ws->addColumn("str", "Group");
-    ws->addColumn("str", "Run(s)");
-    ws->addColumn("str", "Angle");
-    ws->addColumn("str", "Transmission Run(s)");
-    ws->addColumn("str", "Q min");
-    ws->addColumn("str", "Q max");
-    ws->addColumn("str", "dQ/Q");
-    ws->addColumn("str", "Scale");
-    ws->addColumn("str", "Options");
-
-    TableRow row = ws->appendRow();
-    row << "0"
-        << "12345"
-        << "0.5"
-        << ""
-        << "0.1"
-        << "1.6"
-        << "0.04"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "0"
-        << "12346"
-        << "1.5"
-        << ""
-        << "1.4"
-        << "2.9"
-        << "0.04"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "1"
-        << "24681"
-        << "0.5"
-        << ""
-        << "0.1"
-        << "1.6"
-        << "0.04"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "1"
-        << "24682"
-        << "1.5"
-        << ""
-        << "1.4"
-        << "2.9"
-        << "0.04"
-        << "1"
-        << "";
-    return ws;
-  }
-
 public:
+  NiceMock<MockDataProcessorPresenter> m_presenter;
+  DataProcessorTwoLevelTreeManager m_manager;
+    
+  void setUp() override {
+    m_manager = DataProcessorTwoLevelTreeManager();
+  }
+
+  void tearDown() override {
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_presenter));
+  }
+
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static DataProcessorTwoLevelTreeManagerTest *createSuite() {
@@ -133,6 +69,67 @@ public:
   template <typename T>
   bool notNullAndHasType(DataProcessorCommand_uptr const &ptr) const {
     return dynamic_cast<T *>(ptr.get()) != nullptr;
+  }
+
+  int indexOf(EditAction action) {
+    return m_manager.indexOfCommand(action);
+  }
+
+  void test_get_table_commands() {
+    NiceMock<MockDataProcessorPresenter> presenter;
+    DataProcessorTwoLevelTreeManager manager(&presenter,
+                                             DataProcessorWhiteList());
+
+    auto &commands = manager.getTableCommands();
+
+    TS_ASSERT(commands.size() > 8);
+    TS_ASSERT(notNullAndHasType<DataProcessorOpenTableCommand>(commands[0]));
+    TS_ASSERT(notNullAndHasType<DataProcessorNewTableCommand>(commands[1]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSaveTableCommand>(commands[2]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSaveTableAsCommand>(commands[3]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[4]));
+    TS_ASSERT(notNullAndHasType<DataProcessorImportTableCommand>(commands[5]));
+    TS_ASSERT(notNullAndHasType<DataProcessorExportTableCommand>(commands[6]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[7]));
+    TS_ASSERT(notNullAndHasType<DataProcessorOptionsCommand>(commands[8]));
+  }
+
+  int indexOf()
+
+  void test_get_edit_commands() {
+    NiceMock<MockDataProcessorPresenter> presenter;
+    DataProcessorTwoLevelTreeManager manager(&presenter,
+                                             DataProcessorWhiteList());
+
+    auto &commands = manager.getEditCommands();
+
+    TS_ASSERT(commands.size() > 12);
+    TS_ASSERT(notNullAndHasType<DataProcessorProcessCommand>(commands[0]));
+    TS_ASSERT(notNullAndHasType<DataProcessorPauseCommand>(commands[1]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[2]));
+    TS_ASSERT(notNullAndHasType<DataProcessorExpandCommand>(commands[3]));
+    TS_ASSERT(
+        notNullAndHasType<DataProcessorExpandGroupsCommand>(commands[4]));
+    TS_ASSERT(
+        notNullAndHasType<DataProcessorCollapseGroupsCommand>(commands[5]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[6]));
+    TS_ASSERT(notNullAndHasType<DataProcessorPlotRowCommand>(commands[7]));
+    TS_ASSERT(notNullAndHasType<DataProcessorPlotGroupCommand>(commands[8]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[9]));
+    TS_ASSERT(notNullAndHasType<DataProcessorAppendRowCommand>(commands[10]));
+    TS_ASSERT(notNullAndHasType<DataProcessorAppendGroupCommand>(commands[11]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[12]));
+    TS_ASSERT(notNullAndHasType<DataProcessorGroupRowsCommand>(commands[13]));
+    TS_ASSERT(
+        notNullAndHasType<DataProcessorCopySelectedCommand>(commands[14]));
+    TS_ASSERT(notNullAndHasType<DataProcessorCutSelectedCommand>(commands[15]));
+    TS_ASSERT(
+        notNullAndHasType<DataProcessorPasteSelectedCommand>(commands[16]));
+    TS_ASSERT(
+        notNullAndHasType<DataProcessorClearSelectedCommand>(commands[17]));
+    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[18]));
+    TS_ASSERT(notNullAndHasType<DataProcessorDeleteRowCommand>(commands[19]));
+    TS_ASSERT(notNullAndHasType<DataProcessorDeleteGroupCommand>(commands[20]));
   }
 
   void test_append_row() {

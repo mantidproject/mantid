@@ -191,6 +191,11 @@ public:
   MOCK_CONST_METHOD1(indexOfCommand, CommandIndex(EditAction));
 };
 
+class MockDataProcessorCommandProviderFactory : public ::MantidQt::MantidWidgets::CommandProviderFactory {
+  public:
+    MOCK_CONST_METHOD0(fromPostprocessorName, std::unique_ptr<DataProcessorCommandProvider>(const QString&, GenericDataProcessorPresenter&));
+};
+
 GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /*MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H*/

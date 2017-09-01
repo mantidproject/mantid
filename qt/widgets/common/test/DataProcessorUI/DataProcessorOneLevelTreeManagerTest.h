@@ -123,47 +123,6 @@ public:
     return dynamic_cast<T *>(ptr.get()) != nullptr;
   }
 
-  void test_get_edit_commands() {
-    NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter,
-                                             DataProcessorWhiteList());
-    auto& commands = manager.getEditCommands();
-
-    TS_ASSERT(commands.size() > 12);
-    TS_ASSERT(notNullAndHasType<DataProcessorProcessCommand>(commands[0]));
-    TS_ASSERT(notNullAndHasType<DataProcessorPauseCommand>(commands[1]));
-    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[2]));
-    TS_ASSERT(notNullAndHasType<DataProcessorPlotRowCommand>(commands[3]));
-    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[4]));
-    TS_ASSERT(notNullAndHasType<DataProcessorAppendRowCommand>(commands[5]));
-    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[6]));
-    TS_ASSERT(notNullAndHasType<DataProcessorCopySelectedCommand>(commands[7]));
-    TS_ASSERT(notNullAndHasType<DataProcessorCutSelectedCommand>(commands[8]));
-    TS_ASSERT(
-        notNullAndHasType<DataProcessorPasteSelectedCommand>(commands[9]));
-    TS_ASSERT(
-        notNullAndHasType<DataProcessorClearSelectedCommand>(commands[10]));
-    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[11]));
-    TS_ASSERT(notNullAndHasType<DataProcessorDeleteRowCommand>(commands[12]));
-  }
-
-  void test_get_table_commands() {
-    NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter,
-                                             DataProcessorWhiteList());
-    auto& commands = manager.getTableCommands();
-    TS_ASSERT(commands.size() > 8);
-    TS_ASSERT(notNullAndHasType<DataProcessorOpenTableCommand>(commands[0]));
-    TS_ASSERT(notNullAndHasType<DataProcessorNewTableCommand>(commands[1]));
-    TS_ASSERT(notNullAndHasType<DataProcessorSaveTableCommand>(commands[2]));
-    TS_ASSERT(notNullAndHasType<DataProcessorSaveTableAsCommand>(commands[3]));
-    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[4]));
-    TS_ASSERT(notNullAndHasType<DataProcessorImportTableCommand>(commands[5]));
-    TS_ASSERT(notNullAndHasType<DataProcessorExportTableCommand>(commands[6]));
-    TS_ASSERT(notNullAndHasType<DataProcessorSeparatorCommand>(commands[7]));
-    TS_ASSERT(notNullAndHasType<DataProcessorOptionsCommand>(commands[8]));
-  }
-
   void test_append_row() {
     NiceMock<MockDataProcessorPresenter> presenter;
     DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
