@@ -113,11 +113,9 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 dim = 3
                 vectors = []
                 for i in range(dim):
-                    vec = []
                     line = crystal_file.readline().split()[1:]
-                    for item in line:
-                        vec.append(float(item))
-                    vectors.append(vec)
+                    vector = [float(item) for item in line]
+                    vectors.append(vector)
             temp = np.asarray(vectors).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
             self._inv_expansion_matrix = np.linalg.inv(temp)
 
@@ -136,9 +134,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         for i in range(dim):
             line = file_obj.readline()
             line = line.split()
-            vector = []
-            for item in line:
-                vector.append(float(item))
+            vector = [float(item) for item in line]
             vectors.append(vector)
         return vectors
 
@@ -302,8 +298,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         line = self._parser.find_first(file_obj=file_obj, msg="FREQ(CM**-1)")
 
         if append:
-            for item in line.replace(b"\n", b" ").replace(b"FREQ(CM**-1)", b" ").split():
-                freq.append(float(item))
+            freq.extend([float(item) for item in line.replace(b"\n", b" ").replace(b"FREQ(CM**-1)", b" ").split()])
 
     def _read_coord_block(self, file_obj=None, xdisp=None, ydisp=None, zdisp=None, part="real"):
         """
@@ -361,10 +356,10 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         pos = file_obj.tell()
         line = file_obj.readline()
         file_obj.seek(pos)
-        for key in allowed_keywords:
-            if key in line:
-                return False
-        return True
+
+        # if there isn't any keyword from set "allowed_keywords" it means that we reached end of k-block
+        # if any keyword in line we are still in k-block
+        return not any([key in line for key in allowed_keywords])
 
     def _get_num_kpoints(self, file_obj=None):
         self._parser.find_first(file_obj=file_obj, msg="K       WEIGHT       COORD")
@@ -491,6 +486,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         ydisp = atomic_displacements[1]
         zdisp = atomic_displacements[2]
         atom_num = -1
+
         # Compute normalisation constant for displacements
         # and build block of normalised coordinates.
         normalised_coordinates = []
@@ -500,11 +496,10 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
             l = line.split()
             indx = row * len(atomic_coordinates) * 6 + atom_num * row_width + column
             if indx <= len(xdisp) - 1:
-                x = xdisp[indx]
-                y = ydisp[indx]
-                z = zdisp[indx]
+                x, y, z = xdisp[indx], ydisp[indx], zdisp[indx]
                 norm_const1 += (x * x.conjugate() + y * y.conjugate() + z * z.conjugate()).real
-                normalised_coordinates += [[atom_num + 1, l[2], int(l[1]), x, y, z]]
+                normalised_coordinates += [[l[2], x, y, z]]
+
         # Normalise displacements and multiply displacements by sqrt(mass)-> xn, yn, zn
         xn = []
         yn = []
@@ -513,26 +508,16 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         norm = 0.0
 
         for item in normalised_coordinates:
-            atom = Atom(symbol=str(item[1].decode("utf-8").capitalize()))
+            atom = Atom(symbol=str(item[0].decode("utf-8").capitalize()))
             mass = atom.mass
-            x = item[3] / norm_const1 * sqrt(mass)
-            y = item[4] / norm_const1 * sqrt(mass)
-            z = item[5] / norm_const1 * sqrt(mass)
+            x = item[1] / norm_const1 * sqrt(mass)
+            y = item[2] / norm_const1 * sqrt(mass)
+            z = item[3] / norm_const1 * sqrt(mass)
             xn += [x]
             yn += [y]
             zn += [z]
             norm += (x * x.conjugate() + y * y.conjugate() + z * z.conjugate()).real
-        # Normalise displacements
-        normf = 0.0
-        ii = -1
-        # noinspection PyAssignmentToLoopOrWithParameter
-        local_displacements = []
-        for _ in normalised_coordinates:
-            ii += 1
-            x = xn[ii] / sqrt(norm)
-            y = yn[ii] / sqrt(norm)
-            z = zn[ii] / sqrt(norm)
-            normf += (x * x.conjugate() + y * y.conjugate() + z * z.conjugate()).real
-            local_displacements.append([x, y, z])
-        logger.debug("Mode {0} normalised to {1}".format(str(freq_num + 1), str(normf)))
+
+        # Final normalization
+        local_displacements = np.transpose(np.asarray([xn, yn, zn])) / sqrt(norm)
         return local_displacements
