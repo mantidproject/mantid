@@ -1432,7 +1432,7 @@ public:
   * and without run_number information in the sample log.
   */
   void testProcessCustomNames() {
-    auto m_presenter = makeDefaultPresenterWithMockViews();
+    setUpDefaultPresenterWithMockViews();
     NiceMock<MockMainPresenter> mockMainPresenter;
     injectParentPresenter(mockMainPresenter);
 
@@ -2553,13 +2553,13 @@ public:
     EXPECT_CALL(m_mockDataProcessorView,
                 runPythonAlgorithm(QString(
                     "try:\n  algm = SaveTBLDialog()\nexcept:\n  pass\n")));
-    presenter.notify(DataProcessorPresenter::ExportTableFlag);
+    notifyPresenter(DataProcessorPresenter::ExportTableFlag);
   }
 
   void testPlotRowWarn() {
     MockProgressableView mockProgress;
-    auto presenter = makeDefaultPresenter();
-    presenter.acceptViews(&m_mockDataProcessorView, &mockProgress);
+    setUpDefaultPresenter();
+    injectViews(&m_mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     createTOFWorkspace("TOF_12345", "12345");
@@ -2568,7 +2568,7 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
 
     // We should be warned
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    notifyPresenter(DataProcessorPresenter::OpenTableFlag);
 
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(0);
@@ -2582,7 +2582,7 @@ public:
     EXPECT_CALL(m_mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter.notify(DataProcessorPresenter::PlotRowFlag);
+    notifyPresenter(DataProcessorPresenter::PlotRowFlag);
 
     // Tidy up
     removeWorkspace("TestWorkspace");
@@ -2591,8 +2591,8 @@ public:
 
   void testPlotEmptyRow() {
     MockProgressableView mockProgress;
-    auto presenter = makeDefaultPresenter();
-    presenter.acceptViews(&m_mockDataProcessorView, &mockProgress);
+    setUpDefaultPresenter();
+    injectViews(&m_mockDataProcessorView, &mockProgress);
 
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(0);
@@ -2604,15 +2604,15 @@ public:
         .WillRepeatedly(Return(std::set<int>()));
     EXPECT_CALL(m_mockDataProcessorView, giveUserWarning(_, _));
     // Append an empty row to our table
-    presenter.notify(DataProcessorPresenter::AppendRowFlag);
+    notifyPresenter(DataProcessorPresenter::AppendRowFlag);
     // Attempt to plot the empty row (should result in critical warning)
-    presenter.notify(DataProcessorPresenter::PlotRowFlag);
+    notifyPresenter(DataProcessorPresenter::PlotRowFlag);
   }
 
   void testPlotGroupWithEmptyRow() {
     MockProgressableView mockProgress;
-    auto presenter = makeDefaultPresenter();
-    presenter.acceptViews(&m_mockDataProcessorView, &mockProgress);
+    setUpDefaultPresenter();
+    injectViews(&m_mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace");
     createTOFWorkspace("TOF_12345", "12345");
@@ -2632,11 +2632,11 @@ public:
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(m_mockDataProcessorView, giveUserWarning(_, _));
     // Open up our table with one row
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    notifyPresenter(DataProcessorPresenter::OpenTableFlag);
     // Append an empty row to the table
-    presenter.notify(DataProcessorPresenter::AppendRowFlag);
+    notifyPresenter(DataProcessorPresenter::AppendRowFlag);
     // Attempt to plot the group (should result in critical warning)
-    presenter.notify(DataProcessorPresenter::PlotGroupFlag);
+    notifyPresenter(DataProcessorPresenter::PlotGroupFlag);
     removeWorkspace("TestWorkspace");
     removeWorkspace("TOF_12345");
   }
@@ -2652,7 +2652,7 @@ public:
     EXPECT_CALL(m_mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    notifyPresenter(DataProcessorPresenter::OpenTableFlag);
 
     std::set<int> grouplist;
     grouplist.insert(0);
@@ -2666,7 +2666,7 @@ public:
     EXPECT_CALL(m_mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
-    presenter.notify(DataProcessorPresenter::PlotGroupFlag);
+    notifyPresenter(DataProcessorPresenter::PlotGroupFlag);
 
     // Tidy up
     removeWorkspace("TestWorkspace");

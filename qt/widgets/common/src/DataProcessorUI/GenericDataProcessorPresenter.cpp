@@ -15,9 +15,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericCommandProviderFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorTreeManagerFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
@@ -119,13 +121,15 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
-    std::unique_ptr<DataProcessorTreeManager> manager,
-    std::unique_ptr<DataProcessorCommandProvider> commandProvider,
+    std::unique_ptr<DataProcessorTreeManagerFactory> managerFactory,
+    std::unique_ptr<CommandProviderFactory> commandProviderFactory,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_manager(std::move(manager)),
-      m_commandProvider(std::move(commandProvider)), m_loader(loader),
-      m_whitelist(whitelist), m_preprocessMap(preprocessMap),
+      m_mainPresenter(), m_manager(chooseTreeManager(
+                             *managerFactory, postprocessor.name(), whitelist)),
+      m_commandProvider(commandProviderFactory->fromPostprocessorName(
+          postprocessor.name(), *this)),
+      m_loader(loader), m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor),
       m_postprocessMap(postprocessMap), m_progressReporter(nullptr),
       m_postprocess(true), m_promptUser(true), m_tableDirty(false),
@@ -173,8 +177,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : GenericDataProcessorPresenter(
           whitelist, preprocessMap, processor, postprocessor,
-          chooseTreeManager(postprocessor.name(), whitelist),
-          chooseTreeManager(postprocessor.name(), whitelist), postprocessMap,
+          std::make_unique<GenericDataProcessorTreeManagerFactory>(),
+          std::make_unique<GenericCommandProviderFactory>(), postprocessMap,
           loader) {
 
   // Column Options must be added to the whitelist
@@ -212,15 +216,13 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 
 std::unique_ptr<DataProcessorTreeManager>
 GenericDataProcessorPresenter::chooseTreeManager(
-    QString postprocessorName, DataProcessorWhiteList whitelist) {
-  if (postprocessorName.isEmpty()) {
-    m_postprocess = false;
-    return Mantid::Kernel::make_unique<DataProcessorOneLevelTreeManager>(
-        this, whitelist);
-  } else {
-    return Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
-        this, whitelist);
-  }
+    DataProcessorTreeManagerFactory &chooser, QString const &postprocessorName,
+    DataProcessorWhiteList whitelist) {
+  auto choice =
+      chooser.fromPostProcessorName(*this, postprocessorName, whitelist);
+  m_postprocess =
+      (choice.second == DataProcessorTreeManagerFactory::PostProcessing::Yes);
+  return std::move(choice.first);
 }
 
 /**
@@ -1634,33 +1636,33 @@ void GenericDataProcessorPresenter::initOptions() {
 /** Tells the view which of the actions should be added to the toolbar
 */
 void GenericDataProcessorPresenter::addActionsToEditMenu() {
-  m_view->addEditActions(m_manager->getEditCommands());
+  m_view->addEditActions(m_commandProvider->getEditCommands());
 }
 
 void GenericDataProcessorPresenter::enableProcessActions() {
-  enableActions(m_manager->getProcessingEditCommands());
+  enableActions(m_commandProvider->getProcessingEditCommands());
   m_view->enableProcessButton();
 }
 
 void GenericDataProcessorPresenter::disableProcessActions() {
-  disableActions(m_manager->getProcessingEditCommands());
+  disableActions(m_commandProvider->getProcessingEditCommands());
   m_view->disableProcessButton();
 }
 
 void GenericDataProcessorPresenter::enablePauseActions() {
-  enableActions(m_manager->getPausingEditCommands());
+  enableActions(m_commandProvider->getPausingEditCommands());
 }
 
 void GenericDataProcessorPresenter::disablePauseActions() {
-  disableActions(m_manager->getPausingEditCommands());
+  disableActions(m_commandProvider->getPausingEditCommands());
 }
 
 void GenericDataProcessorPresenter::disableTableModification() {
-  disableActions(m_manager->getModifyingEditCommands());
+  disableActions(m_commandProvider->getModifyingEditCommands());
 }
 
 void GenericDataProcessorPresenter::enableTableModification() {
-  enableActions(m_manager->getModifyingEditCommands());
+  enableActions(m_commandProvider->getModifyingEditCommands());
 }
 
 /**
@@ -1706,7 +1708,7 @@ typename GenericDataProcessorPresenter::CommandVector &
 GenericDataProcessorPresenter::getTableCommands() {
   auto &commands = m_commandProvider->getTableCommands();
   // "Open Table" needs the the list of available workspaces in the ADS
-  commands.at(m_manager->indexOfCommand(TableAction::OPEN_TABLE))
+  commands.at(m_commandProvider->indexOfCommand(TableAction::OPEN_TABLE))
       ->setChild(getTableList());
   return commands;
 }

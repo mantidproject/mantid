@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -43,8 +44,6 @@ DataProcessorOneLevelTreeManager::DataProcessorOneLevelTreeManager(
     const DataProcessorWhiteList &whitelist)
     : m_presenter(presenter),
       m_model(new QDataProcessorOneLevelTreeModel(table, whitelist)) {
-  initializeTableCommands();
-  initializeEditCommands();
 }
 
 /**
@@ -61,99 +60,6 @@ DataProcessorOneLevelTreeManager::DataProcessorOneLevelTreeManager(
 * Destructor
 */
 DataProcessorOneLevelTreeManager::~DataProcessorOneLevelTreeManager() {}
-
-void DataProcessorOneLevelTreeManager::initializeEditCommands() {
-  addEditCommand(make_unique<DataProcessorProcessCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorPauseCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorPlotRowCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorAppendRowCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorCopySelectedCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorCutSelectedCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorClearSelectedCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addEditCommand(make_unique<DataProcessorDeleteRowCommand>(m_presenter));
-}
-
-int DataProcessorOneLevelTreeManager::indexOfCommand(EditAction action) const {
-  switch (action) {
-  case EditAction::PROCESS:
-    return 0;
-  case EditAction::PAUSE:
-    return 1;
-  case EditAction::PLOT_RUNS:
-    return 3;
-  case EditAction::INSERT_ROW_AFTER:
-    return 5;
-  case EditAction::COPY_SELECTED:
-    return 7;
-  case EditAction::CUT_SELECTED:
-    return 8;
-  case EditAction::PASTE_SELECTED:
-    return 9;
-  case EditAction::CLEAR_SELECTED:
-    return 10;
-  case EditAction::DELETE_ROW:
-    return 12;
-  default:
-    throw std::logic_error(
-        "Unknown edit action for one level manager specified.");
-  }
-}
-
-typename DataProcessorOneLevelTreeManager::CommandIndices
-DataProcessorOneLevelTreeManager::getModifyingTableCommands() const {
-  return getModifyingCommands(getTableCommands());
-}
-
-typename DataProcessorOneLevelTreeManager::CommandIndices
-DataProcessorOneLevelTreeManager::getModifyingEditCommands() const {
-  return getModifyingCommands(getEditCommands());
-}
-
-void DataProcessorOneLevelTreeManager::initializeTableCommands() {
-  addTableCommand(make_unique<DataProcessorOpenTableCommand>(m_presenter));
-  addTableCommand(make_unique<DataProcessorNewTableCommand>(m_presenter));
-  addTableCommand(make_unique<DataProcessorSaveTableCommand>(m_presenter));
-  addTableCommand(make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
-  addTableCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addTableCommand(make_unique<DataProcessorImportTableCommand>(m_presenter));
-  addTableCommand(make_unique<DataProcessorExportTableCommand>(m_presenter));
-  addTableCommand(make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addTableCommand(make_unique<DataProcessorOptionsCommand>(m_presenter));
-}
-
-int DataProcessorOneLevelTreeManager::indexOfCommand(TableAction action) const {
-  switch (action) {
-  case TableAction::OPEN_TABLE:
-    return 0;
-  case TableAction::NEW_TABLE:
-    return 1;
-  case TableAction::SAVE_TABLE:
-    return 2;
-  case TableAction::SAVE_TABLE_AS:
-    return 3;
-  case TableAction::IMPORT_TBL_FILE:
-    return 5;
-  case TableAction::EXPORT_TBL_FILE:
-    return 6;
-  case TableAction::OPTIONS:
-    return 8;
-  }
-}
-
-typename DataProcessorOneLevelTreeManager::CommandIndices
-DataProcessorOneLevelTreeManager::getPausingEditCommands() const {
-  return CommandIndices({indexOfCommand(EditAction::PAUSE)});
-}
-
-typename DataProcessorOneLevelTreeManager::CommandIndices
-DataProcessorOneLevelTreeManager::getProcessingEditCommands() const {
-  return CommandIndices({indexOfCommand(EditAction::PROCESS)});
-}
 
 /**
 Insert a row after the last selected row. If nothing was selected, the new row

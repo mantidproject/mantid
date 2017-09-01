@@ -84,7 +84,11 @@
 	src/DataProcessorUI/DataProcessorVectorString.cpp
     src/DataProcessorUI/TableQueryCommandBase.cpp
     src/DataProcessorUI/TableModificationCommandBase.cpp
-    src/DataProcessorUI/DataProcessorTreeManager.cpp
+    src/DataProcessorUI/GenericDataProcessorTreeManagerFactory.cpp
+    src/DataProcessorUI/GenericCommandProviderFactory.cpp
+    src/DataProcessorUI/GenericTwoLevelCommandProvider.cpp
+    src/DataProcessorUI/GenericOneLevelCommandProvider.cpp
+    src/DataProcessorUI/CommandProviderBase.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DisplayCurveFit.cpp

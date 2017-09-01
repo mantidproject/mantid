@@ -50,11 +50,6 @@ public:
                                    const DataProcessorWhiteList &whitelist);
   /// Destructor
   ~DataProcessorOneLevelTreeManager() override;
-
-  /// Publish commands
-  int indexOfCommand(EditAction action) const override;
-  int indexOfCommand(TableAction action) const override;
-
   /// Append a row
   void appendRow() override;
   /// Append a group to the model
@@ -100,11 +95,6 @@ public:
   bool isValidModel(Mantid::API::Workspace_sptr ws,
                     size_t whitelistColumns) const override;
 
-  CommandIndices getPausingEditCommands() const override;
-  CommandIndices getProcessingEditCommands() const override;
-  CommandIndices getModifyingTableCommands() const override;
-  CommandIndices getModifyingEditCommands() const override;
-
   /// Return the model
   boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() override;
   /// Return the table workspace
@@ -124,8 +114,6 @@ private:
   /// Validate a table workspace
   void validateModel(Mantid::API::ITableWorkspace_sptr ws,
                      size_t whitelistColumns) const;
-  void initializeTableCommands();
-  void initializeEditCommands();
 };
 }
 }

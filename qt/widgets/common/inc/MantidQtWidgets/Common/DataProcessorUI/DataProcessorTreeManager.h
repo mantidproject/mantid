@@ -49,22 +49,10 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DataProcessorTreeManager : public DataProcessorCommandProvider {
+class DataProcessorTreeManager {
 public:
-  using CommandIndex = typename DataProcessorCommandProvider::CommandIndex;
-  using CommandIndices = typename DataProcessorCommandProvider::CommandIndices;
-  using CommandVector = typename DataProcessorCommandProvider::CommandVector;
   virtual ~DataProcessorTreeManager(){};
-
-  /// Actions/commands
-
-  /// Publish actions/commands
-  const CommandVector &getTableCommands() const override;
-  CommandVector &getTableCommands() override;
-
-  const CommandVector &getEditCommands() const override;
-  CommandVector &getEditCommands() override;
-
+  
   /// Append a row
   virtual void appendRow() = 0;
   /// Append a group
@@ -116,19 +104,6 @@ public:
   virtual boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() = 0;
   /// Return the table ws
   virtual Mantid::API::ITableWorkspace_sptr getTableWorkspace() = 0;
-
-private:
-  CommandVector m_editCommands;
-  CommandVector m_tableCommands;
-
-  void addCommand(std::vector<std::unique_ptr<DataProcessorCommand>> &commands,
-                  std::unique_ptr<DataProcessorCommand> command);
-
-protected:
-  /// Add a command to the list of available commands
-  void addEditCommand(std::unique_ptr<DataProcessorCommand> command);
-  void addTableCommand(std::unique_ptr<DataProcessorCommand> command);
-  static CommandIndices getModifyingCommands(const CommandVector &commands); 
 };
 }
 }

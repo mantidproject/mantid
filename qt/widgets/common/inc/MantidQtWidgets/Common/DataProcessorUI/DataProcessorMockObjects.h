@@ -173,7 +173,7 @@ private:
   std::map<QString, QVariant> m_options;
 };
 
-class MockDataProcessorCommandProvider : DataProcessorCommandProvider {
+class MockDataProcessorCommandProvider : public ::MantidQt::MantidWidgets::DataProcessorCommandProvider {
 public:
   using CommandVector = typename DataProcessorCommandProvider::CommandVector;
   using CommandIndex = typename DataProcessorCommandProvider::CommandIndex;

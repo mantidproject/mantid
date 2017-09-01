@@ -11,6 +11,8 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManagerFactory.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CommandProviderFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
@@ -81,8 +83,8 @@ public:
           &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
-      std::unique_ptr<DataProcessorTreeManager> manager,
-      std::unique_ptr<DataProcessorCommandProvider> commandProvider,
+      std::unique_ptr<DataProcessorTreeManagerFactory> managerFactory,
+      std::unique_ptr<CommandProviderFactory> commandProviderFactory,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load");
@@ -221,7 +223,8 @@ protected:
 
 private:
   std::unique_ptr<DataProcessorTreeManager>
-  chooseTreeManager(QString postprocessorName,
+  chooseTreeManager(DataProcessorTreeManagerFactory &chooser,
+                    const QString &postprocessorName,
                     DataProcessorWhiteList whitelist);
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
