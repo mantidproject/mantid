@@ -30,6 +30,7 @@ set ( TEST_PY_FILES
   PropertyManagerPropertyTest.py
   PythonPluginsTest.py
   StatisticsTest.py
+  StringContainsValidatorTest.py
   TimeSeriesPropertyTest.py
   QuatTest.py
   UnitConversionTest.py
