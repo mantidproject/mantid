@@ -93,7 +93,7 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         default = { 'A' : {}, 'B' : 1 }
         arr = PropertyManagerProperty(name, default, direc)
         self._check_object_attributes(arr, name, direc)
-        self._check_values(arr, default)
+        self._check_values(arr, **default)
 
     def _check_object_attributes(self, prop, name, direction):
         self.assertEquals(prop.name, name)
@@ -106,7 +106,7 @@ class PropertyManagerPropertyTest(unittest.TestCase):
 
             if(isinstance(propValue, PropertyManager)):
                 self.assertTrue(isinstance(value, dict))
-                self._check_values(propValue, value)
+                self._check_values(propValue, **value)
             else:
                 self.assertEqual(propValue, value)
 
