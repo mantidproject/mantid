@@ -223,9 +223,8 @@ void FindPeaks::processAlgorithmProperties() {
           << "The value of WorkspaceIndex provided (" << m_wsIndex
           << ") is larger than the size of this workspace ("
           << m_dataWS->getNumberHistograms();
-    throw Kernel::Exception::IndexError(m_wsIndex,
-                                        m_dataWS->getNumberHistograms() - 1,
-                                        errss.str());
+    throw Kernel::Exception::IndexError(
+        m_wsIndex, m_dataWS->getNumberHistograms() - 1, errss.str());
   }
 
   // Peak width
@@ -641,14 +640,15 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
   MatrixWorkspace_sptr diffed = 0;
 
   const size_t blocksize = input->blocksize();
-  if (singleSpectrum)
-  {
-    // single spectrum: only work on 1 spectrum. no need to calculate derivative to the other spectra.
+  if (singleSpectrum) {
+    // single spectrum: only work on 1 spectrum. no need to calculate derivative
+    // to the other spectra.
     size_t nvector = 1;
     size_t xlength = input->sharedX(m_wsIndex)->size();
     size_t ylength = input->sharedY(m_wsIndex)->size();
 
-    diffed = WorkspaceFactory::Instance().create("Workspace2D", nvector, xlength, ylength);
+    diffed = WorkspaceFactory::Instance().create("Workspace2D", nvector,
+                                                 xlength, ylength);
 
     // copy over the X values
     diffed->setSharedX(0, input->sharedX(m_wsIndex));
@@ -662,9 +662,7 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
     for (size_t j = 1; j < blocksize - 1; ++j) {
       S[j] = Y[j - 1] - 2 * Y[j] + Y[j + 1];
     }
-  }
-  else
-  {
+  } else {
     diffed = WorkspaceFactory::Instance().create(input);
 
     const size_t numHists = input->getNumberHistograms();
@@ -676,8 +674,10 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
 
       const auto &Y = input->y(i);
       auto &S = diffed->mutableY(i);
-      // Go through each spectrum calculating the second difference at each point
-      // First and last points in each spectrum left as zero (you'd never be able
+      // Go through each spectrum calculating the second difference at each
+      // point
+      // First and last points in each spectrum left as zero (you'd never be
+      // able
       // to find peaks that close to the edge anyway)
       for (size_t j = 1; j < blocksize - 1; ++j) {
         S[j] = Y[j - 1] - 2 * Y[j] + Y[j + 1];
@@ -731,16 +731,13 @@ void FindPeaks::calculateStandardDeviation(
   const double constant =
       sqrt(static_cast<double>(this->computePhi(w))) / factor;
 
-  if (singleSpectrum)
-  {
+  if (singleSpectrum) {
     // single spectrum.  smoothed workspace has 1 and only 1 spectrum
     smoothed->setSharedE(0, input->sharedE(m_wsIndex));
     std::transform(smoothed->e(0).cbegin(), smoothed->e(0).cend(),
                    smoothed->mutableE(m_wsIndex).begin(),
                    std::bind2nd(std::multiplies<double>(), constant));
-  }
-  else
-  {
+  } else {
     const size_t numHists = smoothed->getNumberHistograms();
     for (size_t i = 0; i < size_t(numHists); ++i) {
       smoothed->setSharedE(i, input->sharedE(i));
