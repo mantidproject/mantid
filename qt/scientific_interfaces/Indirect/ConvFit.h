@@ -82,6 +82,7 @@ private:
   QtStringPropertyManager *m_stringManager;
   QtTreePropertyBrowser *m_cfTree;
   QMap<QtProperty *, QtProperty *> m_fixedProps;
+  // Pointer to sample workspace object
   Mantid::API::MatrixWorkspace_sptr m_cfInputWS;
   Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
   QString m_cfInputWSName;

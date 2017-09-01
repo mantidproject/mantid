@@ -98,7 +98,6 @@ def set_detector_names(state, ipf_path, invalid_detector_types=None):
             detector_name_short = found_detector_names[detector_name_short_tag]
         except KeyError:
             continue
-
         state.detectors[detector_type].detector_name = detector_name
         state.detectors[detector_type].detector_name_short = detector_name_short
 
