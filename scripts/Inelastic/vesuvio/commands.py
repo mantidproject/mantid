@@ -89,11 +89,11 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
             symbols.add(symbol)
         for symbol in index_to_symbol_map.values():
             symbols.discard(symbol)
-    flags['index_to_symbol_map'] = index_to_symbol_map
 
-    if symbols:
-        raise RuntimeError("HydrogenConstraints contains references to the following,"
-                           " undefined masses: " + ','.join(symbols))
+        if symbols:
+            raise RuntimeError("HydrogenConstraints contains references to the following,"
+                               " undefined masses: " + ','.join(symbols))
+    flags['index_to_symbol_map'] = index_to_symbol_map
 
     for iteration in range(1, iterations + 1):
         iteration_flags = copy.deepcopy(flags)
