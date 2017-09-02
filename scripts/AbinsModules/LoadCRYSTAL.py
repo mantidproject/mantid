@@ -208,7 +208,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
                         if self._parser.block_end(file_obj=file_obj, msg=["DISPERSION K POINT NUMBER"]):
                             break
-                        if self._check_kpoints_end(file_obj=file_obj):
+                        if not self._inside_k_block(file_obj=file_obj):
                             break
 
                 # parse k-points for which atomic displacements are complex
@@ -239,7 +239,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
                         if self._parser.block_end(file_obj=file_obj, msg=["DISPERSION K POINT NUMBER"]):
                             break
-                        if self._check_kpoints_end(file_obj=file_obj):
+                        if not self._inside_k_block(file_obj=file_obj):
                             break
 
                     # reconstruct complex atomic displacements
@@ -335,7 +335,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         else:
             raise ValueError("Real or imaginary part of complex number was expected.")
 
-    def _check_kpoints_end(self, file_obj=None):
+    def _inside_k_block(self, file_obj=None):
         """
         Checks if end of k-points block.
         :param file_obj: file object from which we read
@@ -359,7 +359,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
         # if there isn't any keyword from set "allowed_keywords" it means that we reached end of k-block
         # if any keyword in line we are still in k-block
-        return not any([key in line for key in allowed_keywords])
+        return any([key in line for key in allowed_keywords])
 
     def _get_num_kpoints(self, file_obj=None):
         self._parser.find_first(file_obj=file_obj, msg="K       WEIGHT       COORD")
