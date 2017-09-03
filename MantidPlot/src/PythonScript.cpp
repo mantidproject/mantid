@@ -455,6 +455,26 @@ void PythonScript::endStdoutRedirect() {
 }
 
 /**
+ * To be called from the main thread before an async call that is
+ * recursive. See ApplicationWindow::runPythonScript
+ */
+void PythonScript::recursiveAsyncSetup() {
+  if (gil().locked()) {
+    gil().release();
+  }
+}
+
+/**
+ * To be called from the main thread immediately after an async call
+ * that is recursive. See ApplicationWindow::runPythonScript
+ */
+void PythonScript::recursiveAsyncTeardown() {
+  if (!gil().locked()) {
+    gil().acquire();
+  }
+}
+
+/**
  * Compile the code returning true if successful, false otherwise
  * @param code
  * @return True if success, false otherwise
@@ -792,112 +812,4 @@ PyObject *PythonScript::compileToByteCode(bool for_eval) {
     m_codeFileObject = NULL;
   }
   return compiledCode;
-}
-
-//--------------------------------------------------------------------------------------------
-
-/**
- * Listen to add notifications from the ADS and add a Python variable of the
- * workspace name
- * to the current scope
- * @param wsName The name of the workspace
- * @param ws The ws ptr (unused)
- */
-void PythonScript::addHandle(const std::string &wsName,
-                             const Mantid::API::Workspace_sptr ws) {
-  addPythonReference(wsName, ws);
-}
-
-/**
- * Listen to add/replace notifications from the ADS and add a Python variable
- * of
- * the workspace name
- * to the current scope
- * @param wsName The name of the workspace
- * @param ws The ws ptr (unused)
- */
-void PythonScript::afterReplaceHandle(const std::string &wsName,
-                                      const Mantid::API::Workspace_sptr ws) {
-  addPythonReference(wsName, ws);
-}
-
-/**
- * Removes a Python variable of the workspace name from the current scope
- * @param wsName The name of the workspace
- * @param ws The ws ptr (unused)
- */
-void PythonScript::postDeleteHandle(const std::string &wsName) {
-  deletePythonReference(wsName);
-}
-
-/**
- * Clear all workspace handle references
- */
-void PythonScript::clearADSHandle() {
-  for (auto itr = m_workspaceHandles.cbegin();
-       itr != m_workspaceHandles.cend();) {
-    // This also erases the element from current set. The standard says that
-    // erase only invalidates
-    // iterators of erased elements so we need to increment the iterator and
-    // get
-    // back the previous value
-    // i.e. the postfix operator
-    this->deletePythonReference(*(itr++));
-  }
-
-  assert(m_workspaceHandles.empty());
-}
-
-/**
- * Add a Python variable of the workspace name
- * to the current scope
- * @param wsName The name of the workspace
- * @param ws The ws ptr (unused)
- */
-void PythonScript::addPythonReference(const std::string &wsName,
-                                      const Mantid::API::Workspace_sptr ws) {
-  UNUSED_ARG(ws);
-
-  // Compile a code object
-  const size_t length = wsName.length() * 2 + 10;
-  char *code = new char[length + 1];
-  const char *name = wsName.c_str();
-  sprintf(code, "%s = mtd['%s']", name, name);
-  PyObject *codeObj =
-      Py_CompileString(code, "PythonScript::addPythonReference", Py_file_input);
-  if (codeObj) {
-    PyObject *ret = PyEval_EvalCode(CODE_OBJECT(codeObj), localDict, localDict);
-    Py_XDECREF(ret);
-  }
-  if (PyErr_Occurred()) {
-    PyErr_Clear();
-  } else {
-    // Keep track of it
-    m_workspaceHandles.insert(m_workspaceHandles.end(), wsName);
-  }
-  Py_XDECREF(codeObj);
-  delete[] code;
-}
-
-/**
- * Delete a Python reference to the given workspace name
- * @param wsName The name of the workspace
- */
-void PythonScript::deletePythonReference(const std::string &wsName) {
-  const size_t length = wsName.length() + 4;
-  char *code = new char[length + 1];
-  sprintf(code, "del %s", wsName.c_str());
-  PyObject *codeObj =
-      Py_CompileString(code, "PythonScript::deleteHandle", Py_file_input);
-  if (codeObj) {
-    PyObject *ret = PyEval_EvalCode(CODE_OBJECT(codeObj), localDict, localDict);
-    Py_XDECREF(ret);
-  }
-  if (PyErr_Occurred()) {
-    PyErr_Clear();
-  } else {
-    m_workspaceHandles.erase(wsName);
-  }
-  Py_XDECREF(codeObj);
-  delete[] code;
 }

@@ -195,24 +195,6 @@ private:
   /// Compile to bytecode
   PyObject *compileToByteCode(bool for_eval = true);
 
-  // ---------------------------- Variable reference
-  // ---------------------------------------------
-  /// Listen to add notifications from the ADS
-  void addHandle(const std::string &wsName,
-                 const Mantid::API::Workspace_sptr ws) override;
-  /// Listen to add/replace notifications from the ADS
-  void afterReplaceHandle(const std::string &wsName,
-                          const Mantid::API::Workspace_sptr ws) override;
-  /// Listen to delete notifications
-  void postDeleteHandle(const std::string &wsName) override;
-  /// Listen to ADS clear notifications
-  void clearADSHandle() override;
-  /// Add/update a Python reference to the given workspace
-  void addPythonReference(const std::string &wsName,
-                          const Mantid::API::Workspace_sptr ws);
-  /// Delete a Python reference to the given workspace name
-  void deletePythonReference(const std::string &wsName);
-
   /// Send out an error and clear it from python.
   void emit_error();
 
