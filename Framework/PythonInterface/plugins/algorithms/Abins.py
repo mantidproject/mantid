@@ -802,11 +802,13 @@ class Abins(PythonAlgorithm):
         msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
+        dft_program = self.getProperty("DFTprogram").value
+
         # check  extension of a file
         filename_ext = os.path.splitext(filename_full_path)[1]
         if filename_ext != ".outmol":
             return dict(Invalid=True,
-                        Comment=msg_err + "Output from DFT program " + self._dft_program + " is expected." +
+                        Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
                         " The expected extension of file is .outmol . (found: " + filename_ext + ") " +
                         msg_rename)
         return output
@@ -823,11 +825,13 @@ class Abins(PythonAlgorithm):
         msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
+        dft_program = self.getProperty("DFTprogram").value
+
         # check  extension of a file
         filename_ext = os.path.splitext(filename_full_path)[1]
         if filename_ext != ".out":
             return dict(Invalid=True,
-                        Comment=msg_err + "Output from DFT program " + self._dft_program + " is expected." +
+                        Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
                         " The expected extension of file is .out . (found: " + filename_ext + ") " +
                         msg_rename)
         return output
@@ -848,12 +852,14 @@ class Abins(PythonAlgorithm):
         msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
+        dft_program = self.getProperty("DFTprogram").value
+
         # check  extension of a file
         filename_ext = os.path.splitext(filename_full_path)[1]
         if filename_ext != ".phonon":
             return dict(Invalid=True,
-                        Comment=msg_err + "Output from DFT program " + self._dft_program + " is expected." +
-                        " The expected extension of file is .phonon . (found: " + filename_ext + ") " +
+                        Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
+                        " The expected extension of file is .phonon . Found: " + filename_ext + ". " +
                         msg_rename)
 
         # check a structure of the header part of file.

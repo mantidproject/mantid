@@ -62,7 +62,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         vectors = []
         for i in range(dim):
             line = obj_file.readline().split()
-            vector = list(map(self._convert_to_angstroms, line))
+            vector = [self._convert_to_angstroms(string=s) for s in line]
             vectors.append(vector)
 
         data["unit_cell"] = np.asarray(vectors).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
@@ -180,8 +180,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         self._parser.move_to(file_obj=file_obj, msg=":")
         items = file_obj.readline().replace(b"\n", b" ").split()
         length = len(items)
-        for i in range(1, length, 2):
-            freq.append(float(items[i]))
+        freq.extend([float(items[i]) for i in range(1, length, 2)])
 
     def _read_coord_block(self, file_obj=None, xdisp=None, ydisp=None, zdisp=None, part="real"):
         """

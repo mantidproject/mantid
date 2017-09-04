@@ -364,9 +364,7 @@ class SPowderSemiEmpiricalCalculator(object):
             p_local = ProcessingPool(nodes=AbinsModules.AbinsParameters.threads)
             result = p_local.map(self._calculate_s_powder_one_atom, atoms)
         else:
-            result = []
-            for atom in atoms:
-                result.append(self._calculate_s_powder_one_atom(atom=atom))
+            result = [self._calculate_s_powder_one_atom(atom=atom) for atom in atoms]
 
         for atom in range(self._num_atoms):
             atoms_items["atom_%s" % atom] = {"s": result[atoms.index(atom)]}
