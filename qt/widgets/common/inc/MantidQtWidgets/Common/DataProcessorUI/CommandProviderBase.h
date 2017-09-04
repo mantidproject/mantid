@@ -31,10 +31,10 @@ class CommandProviderBase : public DataProcessorCommandProvider {
 public:
   CommandProviderBase(DataProcessorPresenter &presenter);
   const CommandVector &getTableCommands() const override;
-  CommandVector &getTableCommands() override;
+  CommandVector &getTableCommands();// override;
 
   const CommandVector &getEditCommands() const override;
-  CommandVector &getEditCommands() override;
+  CommandVector &getEditCommands();// override;
 
 protected:
   DataProcessorPresenter &getPresenter();

@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandProvider.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CommandProviderFactory.h"
 
 #include <gmock/gmock.h>
 
@@ -75,7 +76,7 @@ public:
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
   // copyable which means we have to mock addEditActions() via a proxy method
-  void addEditActions(std::vector<DataProcessorCommand_uptr> &) override {
+  void addEditActions(const std::vector<DataProcessorCommand_uptr> &) override {
     addEditActionsProxy();
   }
   MOCK_METHOD0(addEditActionsProxy, void());
@@ -173,16 +174,14 @@ private:
   std::map<QString, QVariant> m_options;
 };
 
-class MockDataProcessorCommandProvider : public ::MantidQt::MantidWidgets::DataProcessorCommandProvider {
+class MockDataProcessorCommandProvider : public DataProcessorCommandProvider {
 public:
   using CommandVector = typename DataProcessorCommandProvider::CommandVector;
   using CommandIndex = typename DataProcessorCommandProvider::CommandIndex;
   using CommandIndices = typename DataProcessorCommandProvider::CommandIndices;
   MOCK_CONST_METHOD0(getTableCommands, const CommandVector &());
-  MOCK_METHOD0(getTableCommands, CommandVector &());
   MOCK_CONST_METHOD1(indexOfCommand, CommandIndex(TableAction));
 
-  MOCK_METHOD0(getEditCommands, CommandVector &());
   MOCK_CONST_METHOD0(getEditCommands, const CommandVector &());
   MOCK_CONST_METHOD0(getModifyingTableCommands, CommandIndices());
   MOCK_CONST_METHOD0(getModifyingEditCommands, CommandIndices());
@@ -191,9 +190,9 @@ public:
   MOCK_CONST_METHOD1(indexOfCommand, CommandIndex(EditAction));
 };
 
-class MockDataProcessorCommandProviderFactory : public ::MantidQt::MantidWidgets::CommandProviderFactory {
+class MockDataProcessorCommandProviderFactory : public CommandProviderFactory {
   public:
-    MOCK_CONST_METHOD0(fromPostprocessorName, std::unique_ptr<DataProcessorCommandProvider>(const QString&, GenericDataProcessorPresenter&));
+    MOCK_CONST_METHOD2(fromPostprocessorName, std::unique_ptr<DataProcessorCommandProvider>(const QString&, GenericDataProcessorPresenter&));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

@@ -52,7 +52,7 @@ public:
   virtual ~DataProcessorView(){};
 
   virtual void
-  addEditActions(std::vector<std::unique_ptr<DataProcessorCommand>>& actions) = 0;
+  addEditActions(const std::vector<std::unique_ptr<DataProcessorCommand>>& actions) = 0;
 
   // Connect the model
   virtual void

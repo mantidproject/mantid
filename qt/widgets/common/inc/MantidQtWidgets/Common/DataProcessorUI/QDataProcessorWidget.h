@@ -74,7 +74,7 @@ public:
 
   // Add actions to the toolbar and context menu
   void addEditActions(
-      std::vector<std::unique_ptr<DataProcessorCommand>>& commands) override;
+      const std::vector<std::unique_ptr<DataProcessorCommand>>& commands) override;
 
   // Connect the model
   void

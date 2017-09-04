@@ -130,8 +130,8 @@ public:
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   void setInstrumentList(const QStringList &instruments,
                          const QString &defaultInstrument) override;
-  CommandVector &getTableCommands() override;
-  CommandVector &getEditCommands() override;
+  const CommandVector &getTableCommands() override;
+  const CommandVector &getEditCommands() override;
   int indexOfCommand(TableAction action) override;
   int indexOfCommand(EditAction action) override;
   void acceptViews(DataProcessorView *tableView,

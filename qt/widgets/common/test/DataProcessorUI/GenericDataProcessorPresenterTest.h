@@ -11,10 +11,10 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorTreeManagerFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorTreeManagerFactory.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
@@ -208,7 +208,9 @@ private:
     AnalysisDataService::Instance().addOrReplace(stdWorkspaceName, group);
   }
 
-  ITableWorkspace_sptr createPrefilledWorkspace(const QString &wsName, const DataProcessorWhiteList& whitelist) {
+  ITableWorkspace_sptr
+  createPrefilledWorkspace(const QString &wsName,
+                           const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
@@ -453,6 +455,7 @@ public:
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
         std::move(treeManagerFactory), std::move(commandProviderFactory));
+    m_presenter->acceptViews(&m_mockDataProcessorView, &m_mockProgress);
   }
 
   void injectViews(DataProcessorView &dataProcessorView,
@@ -1010,9 +1013,47 @@ public:
 
   void testProcess() {
     NiceMock<MockMainPresenter> mockMainPresenter;
+    auto mockCommandProvider =
+        std::make_unique<MockDataProcessorCommandProvider>();
+    auto constexpr PAUSE_ACTION_INDEX = 12;
+    auto constexpr PROCESS_ACTION_INDEX = 23;
+    auto constexpr MODIFICATION_ACTION_INDEX_0 = 16;
+    auto constexpr MODIFICATION_ACTION_INDEX_1 = 15;
+
+    using CommandIndices =
+        typename MockDataProcessorCommandProvider::CommandIndices;
+    using CommandVector =
+        typename MockDataProcessorCommandProvider::CommandVector;
+    
+    auto const editCommands = CommandVector();
+    auto const tableCommands = CommandVector();
+
+    EXPECT_CALL(*mockCommandProvider, getEditCommands())
+        .WillOnce(ReturnRef(editCommands));
+    EXPECT_CALL(*mockCommandProvider, getTableCommands())
+        .WillOnce(ReturnRef(tableCommands));
+    EXPECT_CALL(*mockCommandProvider, getPausingEditCommands())
+        .WillRepeatedly(Return(CommandIndices(PAUSE_ACTION_INDEX)));
+
+    EXPECT_CALL(*mockCommandProvider, getProcessingEditCommands())
+        .WillRepeatedly(Return(CommandIndices(PROCESS_ACTION_INDEX)));
+
+    EXPECT_CALL(*mockCommandProvider, getModifyingEditCommands())
+        .WillRepeatedly(Return(CommandIndices(MODIFICATION_ACTION_INDEX_0,
+                                              MODIFICATION_ACTION_INDEX_1)));
+
     auto mockCommandProviderFactory =
         std::make_unique<MockDataProcessorCommandProviderFactory>();
-    auto treeManagerFactory = std::make_unique<GenericDataProcessorTreeManagerFactory>();
+    ON_CALL(*mockCommandProviderFactory, fromPostprocessorName(_, _))
+        .WillByDefault(::testing::Invoke(
+            [&mockCommandProvider](QString const &,
+                                   GenericDataProcessorPresenter &)
+                -> std::unique_ptr<DataProcessorCommandProvider> {
+              return std::move(mockCommandProvider);
+            }));
+
+    auto treeManagerFactory =
+        std::make_unique<GenericDataProcessorTreeManagerFactory>();
     setUpPresenterWithCommandProvider(std::move(treeManagerFactory),
                                       std::move(mockCommandProviderFactory));
     injectParentPresenter(mockMainPresenter);
@@ -1033,6 +1074,7 @@ public:
     EXPECT_CALL(m_mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
+
     EXPECT_CALL(m_mockDataProcessorView, getSelectedChildren())
         .WillOnce(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(m_mockDataProcessorView, getSelectedParents())
@@ -1046,23 +1088,6 @@ public:
         .WillOnce(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .WillOnce(Return(QString("Params = \"0.1\"")));
-
-    auto constexpr PAUSE_ACTION_INDEX = 12;
-    auto constexpr PROCESS_ACTION_INDEX = 23;
-    auto constexpr MODIFICATION_ACTION_INDEX_0 = 16;
-    auto constexpr MODIFICATION_ACTION_INDEX_1 = 15;
-    using CommandIndices =
-        typename MockDataProcessorCommandProvider::CommandIndices;
-
-    EXPECT_CALL(*mockCommandProvider, getPausingEditCommands())
-        .WillRepeatedly(Return(CommandIndices(PAUSE_ACTION_INDEX)));
-
-    EXPECT_CALL(*mockCommandProvider, getProcessingEditCommands())
-        .WillRepeatedly(Return(CommandIndices(PROCESS_ACTION_INDEX)));
-
-    EXPECT_CALL(*mockCommandProvider, getModifyingEditCommands())
-        .WillRepeatedly(Return(CommandIndices(MODIFICATION_ACTION_INDEX_0,
-                                              MODIFICATION_ACTION_INDEX_1)));
 
     // Expect disables modification controls, enables pause and disables
     // processing.
@@ -1107,6 +1132,8 @@ public:
     removeWorkspace("IvsQ_TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockCommandProvider));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockCommandProviderFactory));
   }
 
   void testTreeUpdatedAfterProcess() {
@@ -3115,7 +3142,7 @@ public:
     // When processing first group, it should confirm reduction has been paused
     EXPECT_CALL(mockMainPresenter, confirmReductionPaused()).Times(1);
     // EXPECT_CALL(m_mockDataProcessorView, reductionPaused()).Times(1);
-    
+
     // Expect pause button re-enabled, process button enabled and
     // table modification re-enabled.
 

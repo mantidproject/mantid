@@ -125,7 +125,7 @@ void QDataProcessorWidget::createTable() {
 * @param commands :: A vector of actions (commands)
 */
 void QDataProcessorWidget::addEditActions(
-    std::vector<std::unique_ptr<DataProcessorCommand>>& commands) {
+    const std::vector<std::unique_ptr<DataProcessorCommand>>& commands) {
 
   // Put the commands in the toolbar
   for (auto &command : commands) {

@@ -1704,7 +1704,7 @@ void GenericDataProcessorPresenter::setPromptUser(bool allowPrompt) {
   m_promptUser = allowPrompt;
 }
 
-typename GenericDataProcessorPresenter::CommandVector &
+const typename GenericDataProcessorPresenter::CommandVector &
 GenericDataProcessorPresenter::getTableCommands() {
   auto &commands = m_commandProvider->getTableCommands();
   // "Open Table" needs the the list of available workspaces in the ADS
@@ -1713,7 +1713,7 @@ GenericDataProcessorPresenter::getTableCommands() {
   return commands;
 }
 
-typename GenericDataProcessorPresenter::CommandVector &
+const typename GenericDataProcessorPresenter::CommandVector &
 GenericDataProcessorPresenter::getEditCommands() {
   return m_commandProvider->getEditCommands();
 }
