@@ -69,7 +69,7 @@ signals:
 
 protected:
   void contextMenuEvent(QContextMenuEvent *evt) override;
-  void mplMouseReleaseEvent(QMouseEvent *evt, MplMouseEvent *mplEvt) override;
+  void mouseReleaseEvent(QMouseEvent *evt) override;
 
 private:
   QString m_activeCurveLabel;

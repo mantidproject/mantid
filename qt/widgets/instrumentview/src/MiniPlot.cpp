@@ -1,5 +1,4 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
-#include "MantidQtWidgets/MplCpp/MplEvent.h"
 
 #include <QContextMenuEvent>
 #include <QVBoxLayout>
@@ -43,6 +42,7 @@ MiniPlot::MiniPlot(QWidget *parent)
     : MplFigureCanvas(111, parent), m_activeCurveLabel(), m_storedCurveLabels(),
       m_xunit() {
   setCanvasFaceColor("white");
+  toggleZoomMode();
 }
 
 /**
@@ -157,22 +157,30 @@ void MiniPlot::setYScaleLinear() { setScale(Axes::Scale::Y, "linear", true); }
 void MiniPlot::setYScaleLog() { setScale(Axes::Scale::Y, "log", true); }
 
 /**
- * Called by the base class when a context menu is required
+ * Called by the base class when a context menu is requested. We handle this
+ * with mouseReleaseEvent and ignore the event here.
  * @param evt A pointer to the event source
  */
-void MiniPlot::contextMenuEvent(QContextMenuEvent *evt) {
-  emit contextMenuRequested(evt->globalPos());
-}
+void MiniPlot::contextMenuEvent(QContextMenuEvent *evt) { evt->ignore(); }
 
 /**
  * Called by the base class when a mouse click is released
  * @param evt A pointer to the QMouseEvent source (unused)
- * @param mplEvt A pointer to the MplMouseEvent source
  */
-void MiniPlot::mplMouseReleaseEvent(QMouseEvent *evt, MplMouseEvent *mplEvt) {
-  Q_UNUSED(evt);
-  const auto dataPos = mplEvt->dataPos();
-  emit clickedAtDataCoord(dataPos.x(), dataPos.y());
+void MiniPlot::mouseReleaseEvent(QMouseEvent *evt) {
+  if (evt->button() == Qt::LeftButton) {
+    const auto dataPos = toDataCoordinates(evt->pos());
+    emit clickedAtDataCoord(dataPos.x(), dataPos.y());
+    evt->accept();
+  }
+  if (evt->button() == Qt::RightButton) {
+    if (isZoomed()) {
+      home();
+    } else {
+      emit contextMenuRequested(evt->globalPos());
+    }
+    evt->accept();
+  }
 }
 }
 }
