@@ -1,10 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as s_api
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress, mtd)
-from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, StringMandatoryValidator,
-                           IntBoundedValidator,
-                           FloatBoundedValidator, Direction, logger, CompositeValidator, LogicOperator)
+                        WorkspaceGroupProperty, Progress, mtd)
+from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
+                           FloatBoundedValidator, Direction, logger, LogicOperator)
 
 
 class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
