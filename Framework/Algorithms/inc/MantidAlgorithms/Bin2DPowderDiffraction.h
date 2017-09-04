@@ -53,8 +53,7 @@ private:
     void init() override;
     void exec() override;
     /// Setup the output workspace
-    API::MatrixWorkspace_sptr createOutputWorkspace(HistogramData::BinEdges &newXBins,
-            HistogramData::BinEdges &newYBins);
+    API::MatrixWorkspace_sptr createOutputWorkspace();
     void ReadBinsFromFile(std::vector<double> &Ybins, std::vector<std::vector<double>>&Xbins) const;
     size_t UnifyXBins(std::vector<std::vector<double> > &Xbins) const;
 

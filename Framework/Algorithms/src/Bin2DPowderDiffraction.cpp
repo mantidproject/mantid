@@ -23,6 +23,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/HistogramValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,11 +64,13 @@ void Bin2DPowderDiffraction::init() {
     wsValidator->add<WorkspaceUnitValidator>("Wavelength");
     wsValidator->add<SpectraAxisValidator>();
     wsValidator->add<InstrumentValidator>();
+    wsValidator->add<HistogramValidator>();
 
     declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                         "InputWorkspace", "", Direction::Input,
                         wsValidator),
-                    "An input EventWorkspace. X-axis units must be wavelength.");
+                    "An input EventWorkspace must be a Histogram workspace, not Point data."
+                    "X-axis units must be wavelength.");
 
     declareProperty(
                 make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
@@ -108,13 +111,9 @@ void Bin2DPowderDiffraction::exec() {
     g_log.debug() << "Number of spectra in input workspace: " << m_numberOfSpectra
                   << "\n";
 
-    const auto &oldXEdges = m_inputWS->x(0);
-    BinEdges newXBins(oldXEdges.size());
-    BinEdges newYBins(oldXEdges.size());
+    MatrixWorkspace_sptr outputWS = createOutputWorkspace();
 
-    MatrixWorkspace_sptr outputWS = createOutputWorkspace(newXBins, newYBins);
-
-    bool normalizeByBinArea = this->getProperty("NormalizeByBinArea");
+    const bool normalizeByBinArea = this->getProperty("NormalizeByBinArea");
     if (normalizeByBinArea)
         normalizeToBinArea(outputWS);
 
@@ -128,32 +127,17 @@ void Bin2DPowderDiffraction::exec() {
 std::map<std::string, std::string> Bin2DPowderDiffraction::validateInputs() {
     std::map<std::string, std::string> result;
 
-    int numWays = 0;
-
-    const std::string beFileName = getProperty("BinEdgesFile");
-    if (!beFileName.empty())
-        numWays += 1;
-
-    const std::vector<double> axis1Binning = getProperty("Axis1Binning");
-    const std::vector<double> axis2Binning = getProperty("Axis2Binning");
-
-    if (!axis1Binning.empty() && !axis2Binning.empty())
-        numWays += 1;
-
-
-    std::string message;
-    if (numWays == 0) {
-        message = "You must specify either Axis1Binning and Axis2Binning, "
-                  "or a BinEdgesFile.";
-    }
-    if (numWays > 1) {
-        message = "You must specify either Axis1Binning and Axis2Binning, "
-                  "or a BinEdgesFile, but not both.";
-    }
-
-    if (!message.empty()) {
-        result["Axis1Binning"] = message;
-        result["BinEdgesFile"] = message;
+    const auto useBinFile = !getPointerToProperty("BinEdgesFile")->isDefault();
+    const auto useBinning1 = !getPointerToProperty("Axis1Binning")->isDefault();
+    const auto useBinning2 = !getPointerToProperty("Axis2Binning")->isDefault();
+    if (!useBinFile && !useBinning1 && !useBinning2) {
+        const std::string msg = "You must specify either Axis1Binning and Axis2Binning, or a BinEdgesFile.";
+        result["Axis1Binning"] = msg;
+        result["Axis2Binning"] = msg;
+        result["BinEdgesFile"] = msg;
+    } else if (useBinFile && (useBinning1 || useBinning2)) {
+        const std::string msg = "You must specify either Axis1Binning and Axis2Binning, or a BinEdgesFile, but not both.";
+        result["BinEdgesFile"] = msg;
     }
 
     return result;
@@ -161,18 +145,14 @@ std::map<std::string, std::string> Bin2DPowderDiffraction::validateInputs() {
 //----------------------------------------------------------------------------------------------
 /**
  * @brief createOutputWorkspace create an output workspace and setup axis
- * @param parent
- * @param newXBins
- * @param newYBins
  * @return
  */
 
-MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace(
-        HistogramData::BinEdges &newXBins, HistogramData::BinEdges &newYBins) {
+MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
 
     using VectorHelper::createAxisFromRebinParams;
     bool binsFromFile(false);
-    int newYSize = 0;
+    size_t newYSize = 0;
     size_t newXSize = 0;
     MatrixWorkspace_sptr outputWS;
     const auto &spectrumInfo = m_inputWS->spectrumInfo();
@@ -181,6 +161,10 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace(
     if (!beFileName.empty())
         binsFromFile=true;
 
+    const auto &oldXEdges = m_inputWS->x(0);
+    BinEdges newXBins(oldXEdges.size());
+    BinEdges newYBins(oldXEdges.size());
+
     auto &newY = newYBins.mutableRawData();
     std::vector<std::vector<double>> fileXbins;
 
@@ -188,7 +172,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace(
     if (binsFromFile) {
         newY.clear();
         ReadBinsFromFile(newY, fileXbins);
-        newYSize = static_cast<int>(newY.size());
+        newYSize = newY.size();
         // unify xbins
         newXSize = UnifyXBins(fileXbins);
         g_log.debug() << "Maximal size of Xbins = " << newXSize;
@@ -196,7 +180,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace(
         g_log.debug() << "Outws has " << outputWS->getNumberHistograms() << " histograms and " << outputWS->blocksize() << " bins." << std::endl;
 
         size_t idx = 0;
-        for (auto Xbins : fileXbins) {
+        for (const auto Xbins : fileXbins) {
             g_log.debug() << "Xbins size: " << Xbins.size() << std::endl;
             BinEdges binEdges (Xbins);
             outputWS->setBinEdges(idx, binEdges);
@@ -211,7 +195,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace(
                 createAxisFromRebinParams(getProperty("Axis2Binning"), newY);
         newXSize = binEdges.size();
         outputWS =  WorkspaceFactory::Instance().create(m_inputWS, newYSize - 1, newXSize, newXSize-1);
-        for (auto idx=0; idx<newYSize-1; idx++)
+        for (size_t idx=0; idx<newYSize-1; idx++)
             outputWS->setBinEdges(idx, binEdges);
         NumericAxis *const abscissa = new BinEdgeAxis(newXBins.mutableRawData());
         outputWS->replaceAxis(0, abscissa);
@@ -253,8 +237,8 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace(
             std::vector<double>::iterator upy = std::lower_bound(dp_vec.begin(), dp_vec.end(), dp);
             // long int h_index = (upy-dp_vec.begin()) -1;
             long int h_index = std::distance(dp_vec.begin(), upy) -1;
-            if ((h_index < newYSize -1) && h_index > -1) {
-                if (h_index == newYSize-1)
+            if ((h_index < static_cast<int>(newYSize) -1) && h_index > -1) {
+                if (h_index == static_cast<int>(newYSize)-1)
                     g_log.error("h_index is equal to the size of the Y axis!");
                 auto xs = binsFromFile ? fileXbins[h_index] : newXBins.rawData();
                 std::vector<double>::iterator lowx = std::lower_bound(xs.begin(), xs.end(), d);
@@ -347,7 +331,7 @@ void Bin2DPowderDiffraction::ReadBinsFromFile(std::vector<double> &Ybins, std::v
  *
  * @param Xbins[in] --- bins to unify. Will be overwritten.
  */
-size_t Bin2DPowderDiffraction::UnifyXBins(std::vector<std::vector<double> > &Xbins) const
+size_t Bin2DPowderDiffraction::UnifyXBins(std::vector<std::vector<double>> &Xbins) const
 {
     // get maximal vector size
     size_t max_size = 0;
