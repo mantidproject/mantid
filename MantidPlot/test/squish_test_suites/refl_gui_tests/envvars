@@ -1,1 +1,2 @@
-LD_LIBRARY_PATH=/opt/mantidnightly/lib/paraview-5.3
+LD_LIBRARY_PATH=/opt/mantidnightly/lib/paraview-5.4:/opt/mantidnightly/plugins/qtplugins/mantid
+QT_API=pyqt

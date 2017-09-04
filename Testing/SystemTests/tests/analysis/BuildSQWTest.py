@@ -7,6 +7,7 @@
     the result file that is ~30Gb. The files are not included with the standard
     repository & required to be accessible from any machine that wishes to run the test.
 """
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import os
 from mantid.simpleapi import *
@@ -70,7 +71,7 @@ class BuildSQWTest(stresstesting.MantidStressTest):
             if os.path.exists(target):
                 os.remove(target)
 
-            print "Converting '%s' to '%s' " % (source_path,target)
+            print("Converting '%s' to '%s' " % (source_path,target))
             _cur_spe_ws = LoadNXSPE(Filename=source_path)
             SetUB(Workspace=_cur_spe_ws,a='2.87',b='2.87',c='2.87')
             # rotated by proper number of degrees around axis Y

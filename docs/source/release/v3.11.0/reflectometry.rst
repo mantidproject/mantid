@@ -5,9 +5,13 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-ConvertToReflectometryQ
------------------------
+Algorithms
+----------
 
+- The following bugs have been fixed in the summation in Q functionality in :ref:`algm-ReflectometryReductionOne`:
+  - the incorrect angle was being used in the final conversion to Q in the divergent beam case
+  - the input was being cropped, causing loss of counts
+- A new property, ``Diagnostics``, has been added to :ref:`algm-ReflectometryReductionOne` to allow the output of additional interim workspaces for debug purposes.
 
 Reflectometry Reduction Interface
 ---------------------------------

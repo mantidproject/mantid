@@ -7,13 +7,13 @@ from math import copysign
 
 
 from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType)
-from sans.user_file.user_file_common import (DetectorId, BackId, range_entry, back_single_monitor_entry,
-                                             single_entry_with_detector, mask_angle_entry, LimitsId,
-                                             simple_range, complex_range, MaskId, mask_block, mask_block_cross,
-                                             mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
-                                             position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
-                                             fit_general, MonId, monitor_length, monitor_file, GravityId,
-                                             monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
+from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
+                                          single_entry_with_detector, mask_angle_entry, LimitsId,
+                                          simple_range, complex_range, MaskId, mask_block, mask_block_cross,
+                                          mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
+                                          position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
+                                          fit_general, MonId, monitor_length, monitor_file, GravityId,
+                                          monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
 
 
 # -----------------------------------------------------------------
@@ -1439,8 +1439,8 @@ class QResolutionParser(UserFileComponentParser):
         self._w2_pattern = re.compile(start_string + self._w2 + float_number + end_string)
 
         # Moderator
-        self._moderator = "\\s*MODERATOR\\s*=\\s*"
-        self._file = "[\\w]+(\\.TXT)"
+        self._moderator = "\\s*MODERATOR\\s*=\\s*(\")?"
+        self._file = "[\\w]+(\\.TXT)(\")?"
         self._moderator_pattern = re.compile(start_string + self._moderator + self._file)
 
     def parse_line(self, line):
@@ -1532,7 +1532,9 @@ class QResolutionParser(UserFileComponentParser):
 
     def _extract_moderator(self, line, original_line):
         moderator_capital = re.sub(self._moderator, "", line)
+        moderator_capital = re.sub("\"", "", moderator_capital)
         moderator = re.search(moderator_capital, original_line, re.IGNORECASE).group(0)
+        # Remove quotation marks
         return {QResolutionId.moderator: moderator}
 
     @staticmethod
@@ -1682,7 +1684,7 @@ class FitParser(UserFileComponentParser):
 
     def _get_fit_type(self, line):
         if re.search(self._log, line) is not None:
-            fit_type = FitType.Log
+            fit_type = FitType.Logarithmic
         elif re.search(self._lin, line) is not None:
             fit_type = FitType.Linear
         elif re.search(self._polynomial, line) is not None:
@@ -2101,6 +2103,28 @@ class LARMORParser(UserFileComponentParser):
         return "\\s*" + LARMORParser.get_type() + "(\\s*)"
 
 
+class ZOOMParser(UserFileComponentParser):
+    """
+    The ZOOMParser is a hollow parser to ensure backwards compatibility
+    """
+    Type = "ZOOM"
+
+    def __init__(self):
+        super(ZOOMParser, self).__init__()
+
+    def parse_line(self, line):
+        return {}
+
+    @staticmethod
+    def get_type():
+        return ZOOMParser.Type
+
+    @staticmethod
+    @abc.abstractmethod
+    def get_type_pattern():
+        return "\\s*" + ZOOMParser.get_type() + "(\\s*)"
+
+
 class IgnoredParser(object):
     """
     The IgnoredParser deals with known commands which are not relevant any longer, but might appear in legacy files.
@@ -2185,7 +2209,8 @@ class UserFileParser(object):
                          PrintParser.get_type(): PrintParser(),
                          SANS2DParser.get_type(): SANS2DParser(),
                          LOQParser.get_type(): LOQParser(),
-                         LARMORParser.get_type(): LARMORParser()}
+                         LARMORParser.get_type(): LARMORParser(),
+                         ZOOMParser.get_type(): ZOOMParser()}
         self._ignored_parser = IgnoredParser()
 
     def _get_correct_parser(self, line):

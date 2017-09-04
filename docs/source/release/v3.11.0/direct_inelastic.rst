@@ -11,3 +11,8 @@ Algorithms
 ##########
 
 - A bug was fixed in :ref:`DPDFReduction <algm-DPDFReduction>` to comply with the signature of one of the underlying C-functions.
+
+Other changes
+#############
+
+- New T0 formula for CNCS instrument

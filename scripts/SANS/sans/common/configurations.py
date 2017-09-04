@@ -24,3 +24,8 @@ class Configurations(object):
         # The default prompt peak range for LOQ
         prompt_peak_correction_min = 19000.0
         prompt_peak_correction_max = 20500.0
+
+    class ZOOM(object):
+        # The full wavelength range of the instrument
+        wavelength_full_range_low = 1.75
+        wavelength_full_range_high = 16.5
