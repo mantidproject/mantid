@@ -2,7 +2,6 @@
 # Unit tests for MplCpp library
 #
 set (TEST_HEADERS
-  MplEventTest.h
   MplFigureCanvasTest.h
   PythonObjectTest.h
   NDArray1DTest.h

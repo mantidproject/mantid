@@ -20,8 +20,6 @@
 #include <QWidget>
 #include <tuple>
 
-class MplMouseEvent;
-
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -123,11 +121,6 @@ public:
 
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
-  // operations analogous to standard mousePressEvent etc but with additional
-  // information
-  virtual void mplMousePressEvent(QMouseEvent *, MplMouseEvent *) {}
-  virtual void mplMouseReleaseEvent(QMouseEvent *, MplMouseEvent *) {}
-  virtual void mplMouseDoubleClickEvent(QMouseEvent *, MplMouseEvent *) {}
 
 private:
   // Operations that do not acquire the GIL

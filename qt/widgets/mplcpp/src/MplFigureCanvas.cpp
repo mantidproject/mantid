@@ -1,5 +1,4 @@
 #include "MantidQtWidgets/MplCpp/MplFigureCanvas.h"
-#include "MantidQtWidgets/MplCpp/MplEvent.h"
 #include "MantidQtWidgets/MplCpp/NDArray1D.h"
 #include "MantidQtWidgets/MplCpp/PythonErrors.h"
 #include "MantidQtWidgets/MplCpp/SipUtils.h"
@@ -377,6 +376,11 @@ void MplFigureCanvas::home() {
   ScopedPythonGIL gil;
   detail::decref(PyObject_CallMethod(m_pydata->toolbar.get(),
                                      PYSTR_LITERAL("home"), PYSTR_LITERAL("")));
+  // we clear the navigation stack so that isZoomed works correctly
+  // this is a bit hacky but there seems to be no better way of detecting if
+  // the canvas has a zoom level
+  detail::decref(PyObject_CallMethod(
+      m_pydata->toolbar.get(), PYSTR_LITERAL("update"), PYSTR_LITERAL("")));
   // without this the tight layout is not recomputed quite correctly
   drawNoGIL();
 }
@@ -570,39 +574,26 @@ void MplFigureCanvas::addText(double x, double y, const char *label) {
  * defines its own event handlers for certain events. As this class
  * does not directly inherit from the matplotlib canvas we cannot use the
  * standard virtual event methods to intercept them. Instead this
- * event filter allows us to capture and process them.
+ * event filter allows us to capture and process them. We simply
+ * call the standard event handler functions that a widget would
+ * expect to call. The toDataCoordinates() method can be used to obtain
+ * the data coordinates for a given mouse location.
  * @param watched A pointer to the object being watched
  * @param evt The event dispatched to the watched object
  * @return True if the event was filtered by this function, false otherwise
  */
 bool MplFigureCanvas::eventFilter(QObject *watched, QEvent *evt) {
   assert(watched == canvasWidget());
-  // It is useful for client code to be able to retrieve information
-  // about mouse events such as the data location of clicks etc. Matplotlib
-  // defines its own events for such use cases. We create a similar, but
-  // stripped down, event type here. The various virtual mpl*Event methods
-  // can then be used on inheriting classes to retrieve this information.
-  // Matplotlib is left to handle the zoom behaviour on its own so we take
-  // care not to interfere with that. Any events filtered here will **not**
-  // be propagated to the matplotlib canvas.
-
-  bool filtered(false);
   auto type = evt->type();
-  if (type == QEvent::MouseButtonPress || type == QEvent::MouseButtonRelease ||
-      type == QEvent::MouseButtonDblClick) {
-    // ignore by default
-    evt->ignore();
-    auto qtEvent = static_cast<QMouseEvent *>(evt);
-    MplMouseEvent mplEvent(toDataCoordinates(qtEvent->pos()));
-    if (type == QEvent::MouseButtonPress)
-      mplMousePressEvent(qtEvent, &mplEvent);
-    else if (type == QEvent::MouseButtonRelease)
-      mplMouseReleaseEvent(qtEvent, &mplEvent);
-    else if (type == QEvent::MouseButtonDblClick)
-      mplMouseDoubleClickEvent(qtEvent, &mplEvent);
-    filtered = evt->isAccepted();
-  }
-  return filtered;
+  if (type == QEvent::MouseButtonPress)
+    mousePressEvent(static_cast<QMouseEvent *>(evt));
+  else if (type == QEvent::MouseButtonRelease)
+    mouseReleaseEvent(static_cast<QMouseEvent *>(evt));
+  else if (type == QEvent::MouseButtonDblClick)
+    mouseDoubleClickEvent(static_cast<QMouseEvent *>(evt));
+
+  // default doesn't filter
+  return false;
 }
 
 /**
