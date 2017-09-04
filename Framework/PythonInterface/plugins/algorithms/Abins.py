@@ -665,7 +665,7 @@ class Abins(PythonAlgorithm):
         if filename_ext != ".phonon":
             return dict(Invalid=True,
                         Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
-                        " The expected extension of file is .phonon . (found: " + filename_ext + ") " +
+                        " The expected extension of file is .phonon . Found: " + filename_ext + ". " +
                         msg_rename)
 
         # check a structure of the header part of file.
