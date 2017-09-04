@@ -235,6 +235,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         # set up progress reporting
         prog = Progress(self, 0, 1, 10)
 
+        elastic = self._emode == 'Elastic'
+
         prog.report('Converting to wavelength')
         sample_wave_ws = self._convert_to_wavelength(self._sample_ws_name, '__sample_wave')
 
@@ -262,6 +264,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             sample_kwargs['OuterRadius'] = self._sample_outer_radius
 
         s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=sample_wave_ws,
+                                              Elastic=elastic,
                                               OutputWorkspace=self._ass_ws,
                                               **sample_kwargs)
 
@@ -297,6 +300,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 container_kwargs['Center'] = -offset_front
 
                 s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
+                                                      Elastic=elastic,
                                                       OutputWorkspace='_acc_1',
                                                       **container_kwargs)
 
@@ -305,6 +309,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 container_kwargs['Center'] = offset_back
 
                 s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_2,
+                                                      Elastic=elastic,
                                                       OutputWorkspace='_acc_2',
                                                       **container_kwargs)
 
@@ -318,6 +323,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 container_kwargs['Shape'] = 'Annulus'
 
                 s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
+                                                      Elastic=elastic,
                                                       OutputWorkspace=self._acc_ws,
                                                       **container_kwargs)
 
@@ -326,10 +332,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 container_kwargs['OuterRadius'] = self._sample_inner_radius
 
                 s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
+                                                      Elastic=elastic,
                                                       OutputWorkspace='_acc_1',
                                                       **container_kwargs)
 
                 s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_2,
+                                                      Elastic=elastic,
                                                       OutputWorkspace='_acc_2',
                                                       **container_kwargs)
 
