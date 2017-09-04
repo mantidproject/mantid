@@ -5,8 +5,8 @@ import numpy as np
 import os.path
 
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress, SpectraAxis,
-                        Transpose)
-from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion,
+                        Transpose, mtd)
+from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion, logger, config,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
 from mantid.simpleapi import (SetBeam, SetSample, MonteCarloAbsorption, LoadInstrument, UpdateInstrumentFromFile,
                               ConvertToHistogram)

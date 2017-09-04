@@ -2,7 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as s_api
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress, mtd)
-from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, StringMandatoryValidator, IntBoundedValidator,
+from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, StringMandatoryValidator,
+                           IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator, LogicOperator)
 
 
@@ -103,7 +104,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='Container Workspace')
 
-        containerCondition = VisibleWhenProperty('ContainerWorkspace', PropertyCriterion.IsNotDefault)
+        container_condition = VisibleWhenProperty('ContainerWorkspace', PropertyCriterion.IsNotDefault)
 
         self.declareProperty(name='ContainerChemicalFormula', defaultValue='',
                              doc='Chemical formula for the container material')
@@ -119,18 +120,18 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerDensityType', 'Container Options')
         self.setPropertyGroup('ContainerDensity', 'Container Options')
 
-        self.setPropertySettings('ContainerChemicalFormula', containerCondition)
-        self.setPropertySettings('ContainerDensityType', containerCondition)
-        self.setPropertySettings('ContainerDensity', containerCondition)
+        self.setPropertySettings('ContainerChemicalFormula', container_condition)
+        self.setPropertySettings('ContainerDensityType', container_condition)
+        self.setPropertySettings('ContainerDensity', container_condition)
 
         # Shape options
         self.declareProperty(name='Shape', defaultValue='FlatPlate',
                              validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
                              doc='Geometric shape of the sample environment')
 
-        flatPlateCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
-        cylinderCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
-        annulusCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
+        flat_plate_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
+        cylinder_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
+        annulus_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
 
         # height is common to all, and should be the same for sample and container
         self.declareProperty('Height', defaultValue=0.0, validator=FloatBoundedValidator(0.0),
@@ -153,10 +154,10 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Angle of the sample environment with respect to the beam (degrees)')
 
-        self.setPropertySettings('SampleWidth', flatPlateCondition)
-        self.setPropertySettings('SampleThickness', flatPlateCondition)
-        self.setPropertySettings('SampleCenter', flatPlateCondition)
-        self.setPropertySettings('SampleAngle', flatPlateCondition)
+        self.setPropertySettings('SampleWidth', flat_plate_condition)
+        self.setPropertySettings('SampleThickness', flat_plate_condition)
+        self.setPropertySettings('SampleCenter', flat_plate_condition)
+        self.setPropertySettings('SampleAngle', flat_plate_condition)
 
         self.setPropertyGroup('SampleWidth', 'Sample Shape Options')
         self.setPropertyGroup('SampleThickness', 'Sample Shape Options')
@@ -168,7 +169,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Radius of the sample environment (cm)')
 
-        self.setPropertySettings('SampleRadius', cylinderCondition)
+        self.setPropertySettings('SampleRadius', cylinder_condition)
         self.setPropertyGroup('SampleRadius', 'Sample Shape Options')
 
         # Annulus
@@ -179,8 +180,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the sample environment (cm)')
 
-        self.setPropertySettings('SampleInnerRadius', annulusCondition)
-        self.setPropertySettings('SampleOuterRadius', annulusCondition)
+        self.setPropertySettings('SampleInnerRadius', annulus_condition)
+        self.setPropertySettings('SampleOuterRadius', annulus_condition)
 
         self.setPropertyGroup('SampleInnerRadius', 'Sample Shape Options')
         self.setPropertyGroup('SampleOuterRadius', 'Sample Shape Options')
@@ -194,19 +195,19 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Back thickness of the container environment (cm)')
 
-        containerFlatPlateCondition = VisibleWhenProperty(containerCondition, flatPlateCondition, LogicOperator.And)
+        container_flat_plate_condition = VisibleWhenProperty(container_condition, flat_plate_condition, LogicOperator.And)
 
-        self.setPropertySettings('ContainerFrontThickness', containerFlatPlateCondition)
-        self.setPropertySettings('ContainerBackThickness', containerFlatPlateCondition)
+        self.setPropertySettings('ContainerFrontThickness', container_flat_plate_condition)
+        self.setPropertySettings('ContainerBackThickness', container_flat_plate_condition)
 
         self.setPropertyGroup('ContainerFrontThickness', 'Container Shape Options')
         self.setPropertyGroup('ContainerBackThickness', 'Container Shape Options')
 
         # Both cylinder and annulus have an annulus container
 
-        notFlatPlateCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsNotEqualTo, 'FlatPlate')
+        not_flat_plate_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsNotEqualTo, 'FlatPlate')
 
-        containerNFPCondition = VisibleWhenProperty(containerCondition, notFlatPlateCondition, LogicOperator.And)
+        container_n_f_p_condition = VisibleWhenProperty(container_condition, not_flat_plate_condition, LogicOperator.And)
 
         self.declareProperty(name='ContainerInnerRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
@@ -215,8 +216,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the container environment (cm)')
 
-        self.setPropertySettings('ContainerInnerRadius', containerNFPCondition)
-        self.setPropertySettings('ContainerOuterRadius', containerNFPCondition)
+        self.setPropertySettings('ContainerInnerRadius', container_n_f_p_condition)
+        self.setPropertySettings('ContainerOuterRadius', container_n_f_p_condition)
 
         self.setPropertyGroup('ContainerInnerRadius', 'Container Shape Options')
         self.setPropertyGroup('ContainerOuterRadius', 'Container Shape Options')
@@ -339,7 +340,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             for log_name, log_value in container_kwargs.items():
                 sample_log_names.append("container_" + log_name.lower())
                 sample_log_values.append(log_value)
-
 
             self._acc_ws = self._convert_from_wavelength(self._acc_ws, self._acc_ws)
 
@@ -530,6 +530,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         sample_log_mult_alg.setProperty("LogNames", log_names)
         sample_log_mult_alg.setProperty("LogValues", log_values)
         sample_log_mult_alg.execute()
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CalculateMonteCarloAbsorption)
