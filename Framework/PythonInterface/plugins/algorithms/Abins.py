@@ -615,7 +615,7 @@ class Abins(PythonAlgorithm):
         if filename_ext != ".outmol":
             return dict(Invalid=True,
                         Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
-                        " The expected extension of file is .outmol . (found: " + filename_ext + ") " +
+                        " The expected extension of file is .outmol. Found: " + filename_ext + ". " +
                         msg_rename)
         return output
 
@@ -638,7 +638,7 @@ class Abins(PythonAlgorithm):
         if filename_ext != ".out":
             return dict(Invalid=True,
                         Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
-                        " The expected extension of file is .out . (found: " + filename_ext + ") " +
+                        " The expected extension of file is .out. Found: " + filename_ext + ". " +
                         msg_rename)
         return output
 
@@ -665,7 +665,7 @@ class Abins(PythonAlgorithm):
         if filename_ext != ".phonon":
             return dict(Invalid=True,
                         Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
-                        " The expected extension of file is .phonon . Found: " + filename_ext + ". " +
+                        " The expected extension of file is .phonon. Found: " + filename_ext + ". " +
                         msg_rename)
 
         # check a structure of the header part of file.
