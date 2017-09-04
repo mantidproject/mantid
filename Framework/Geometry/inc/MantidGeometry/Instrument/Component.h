@@ -146,6 +146,9 @@ public:
   /// Get the bounding box for this component and store it in the given argument
   void getBoundingBox(BoundingBox &boundingBox) const override;
 
+  /// Get whether this component should be rendered in the instrument view
+  bool isVisible() const override;
+
   /** @name ParameterMap access */
   //@{
   // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to

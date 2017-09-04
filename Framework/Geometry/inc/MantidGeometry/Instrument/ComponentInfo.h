@@ -88,6 +88,7 @@ public:
   void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
   size_t parent(const size_t componentIndex) const;
   bool hasParent(const size_t componentIndex) const;
+  bool isVisible(const size_t componentIndex) const;
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
   size_t source() const;

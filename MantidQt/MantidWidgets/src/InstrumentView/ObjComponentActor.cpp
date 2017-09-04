@@ -53,8 +53,7 @@ ObjComponentActor::ObjComponentActor(const InstrumentActor &instrActor,
   // set the displayed colour
   setColors();
 
-  if (compID->hasParameter(ParameterMap::isHidden()) &&
-      compID->getBoolParameter(ParameterMap::isHidden())[0]) {
+  if (!compID->isVisible()) {
     // If the user has explicitly stated that this component should be hidden,
     // then hide it;
     setAlwaysHidden();

@@ -448,6 +448,14 @@ void Component::getBoundingBox(BoundingBox &boundingBox) const {
 }
 
 /**
+* Get whether this component should be rendered in the instrument view
+* @return True if the component should be rendered
+*/
+bool Component::isVisible() const {
+	return m_map->componentInfo().isVisible(index());
+}
+
+/**
 * Get the names of the parameters for this component.
 * @param recursive :: If true, the parameters for all of the parent components
 * are also included
