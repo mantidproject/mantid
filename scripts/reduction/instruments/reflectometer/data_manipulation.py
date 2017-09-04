@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import os
 from mantid.simpleapi import *
 
@@ -9,7 +10,7 @@ def tof_distribution(file_path, callback=None,
         Plot counts as a function of TOF for a given REF_L data file
     """
 
-    print 'entering tof_distribution'
+    print('entering tof_distribution')
 
     basename = os.path.basename(file_path)
     ws_raw = "__%s" % basename
@@ -90,7 +91,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                                 NXentryName=entry)
 
             if ws.getNumberEvents()==0:
-                print 'No data in entry %s' % entry
+                print('No data in entry %s' % entry)
                 return
 
             instr_dir = config.getInstrumentDirectory()

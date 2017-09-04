@@ -1,9 +1,12 @@
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 
 #include <Poco/XML/XMLWriter.h>
 #include <Poco/SAX/AttributesImpl.h>
@@ -284,19 +287,6 @@ void Component::rotate(double angle, const V3D &axis) {
       "Rotate(double angle, const V3D& axis) has not been implemented");
 }
 
-/** Gets the position relative to the parent
-* @returns A vector of the relative position
-*/
-V3D Component::getRelativePos() const {
-  if (m_map) {
-    if (m_map->contains(m_base, "pos")) {
-      return m_map->get(m_base, "pos")->value<V3D>();
-    } else
-      return m_base->m_pos;
-  } else
-    return m_pos;
-}
-
 /** Get ScaleFactor of detector.  Looks at the "sca" parameter in the parameter
 *map.
 *
@@ -304,42 +294,83 @@ V3D Component::getRelativePos() const {
 */
 V3D Component::getScaleFactor() const {
   if (m_map) {
-    Parameter_sptr par = m_map->get(m_base, "sca");
-    if (par) {
-      return par->value<V3D>();
+    if (hasComponentInfo()) {
+      return m_map->componentInfo().scaleFactor(index());
+    } else {
+      Parameter_sptr par = m_map->get(m_base, ParameterMap::scale());
+      if (par) {
+        return par->value<V3D>();
+      }
     }
   }
   return V3D(1, 1, 1);
 }
 
-/** Gets the absolute position of the Component
-* @returns A vector of the absolute position
-*/
-V3D Component::getPos() const {
-  if (this->m_map) {
-    // Avoid instantiation of the parent's parameterized object if possible
-    const IComponent *baseParent = m_base->m_parent;
-    if (!baseParent) {
-      return this->getRelativePos();
+/// Helper for legacy access mode. Returns the index of the component.
+size_t Component::index() const {
+  return m_map->componentIndex(this->getComponentID());
+}
+
+bool Component::hasComponentInfo() const {
+  const IComponent *root = m_base;
+  while (auto parent = root->getBareParent())
+    root = parent;
+  auto instrument = dynamic_cast<const Instrument *>(root);
+  return m_map->hasComponentInfo(instrument);
+}
+
+/// Return the relative position to the parent Component
+Kernel::V3D Component::getRelativePos() const {
+  if (m_map) {
+
+    if (hasComponentInfo()) {
+      return m_map->componentInfo().relativePosition(index());
     } else {
-      // Avoid instantiation of parent shared pointer if we can
-      V3D absPos = this->getRelativePos();
-      // get the parent rotation, try to get it from the cache first to avoid
-      // instantiaing the class
-      Quat parentRot;
-      V3D parentPos;
-      if (!(m_map->getCachedLocation(baseParent, parentPos) &&
-            m_map->getCachedRotation(baseParent, parentRot))) {
-        // Couldn't get them from the cache, so I have to instantiate the class
-        boost::shared_ptr<const IComponent> parParent = getParent();
-        if (parParent) {
-          parentRot = parParent->getRotation();
-          parentPos = parParent->getPos();
+      if (m_map->contains(m_base, "pos")) {
+        return m_map->get(m_base, "pos")->value<V3D>();
+      } else
+        return m_base->m_pos;
+    }
+  } else {
+    return m_pos;
+  }
+}
+
+/// Return the absolute position of the Component
+Kernel::V3D Component::getPos() const {
+  if (m_map) {
+    if (hasComponentInfo()) {
+      return m_map->componentInfo().position(index());
+    } else {
+      // We currently have to treat detectors in a different way because
+      // InfoComponentVisitor functionality is incomplete w.r.t DetectorInfo
+
+      // Avoid instantiation of the parent's parameterized object if possible
+      const IComponent *baseParent = m_base->m_parent;
+      if (!baseParent) {
+        return this->getRelativePos();
+      } else {
+        // Avoid instantiation of parent shared pointer if we can
+        V3D absPos = this->getRelativePos();
+        // get the parent rotation, try to get it from the cache first to avoid
+        // instantiaing the class
+
+        Quat parentRot;
+        V3D parentPos;
+        if (!(m_map->getCachedLocation(baseParent, parentPos) &&
+              m_map->getCachedRotation(baseParent, parentRot))) {
+          // Couldn't get them from the cache, so I have to instantiate the
+          // class
+          boost::shared_ptr<const IComponent> parParent = getParent();
+          if (parParent) {
+            parentRot = parParent->getRotation();
+            parentPos = parParent->getPos();
+          }
         }
+        parentRot.rotate(absPos);
+        absPos += parentPos;
+        return absPos;
       }
-      parentRot.rotate(absPos);
-      absPos += parentPos;
-      return absPos;
     }
   } else {
     if (!m_parent) {
@@ -352,38 +383,43 @@ V3D Component::getPos() const {
   }
 }
 
-/** Gets the rotation relative to the parent
-* @returns A quaternion of the relative rotation
-*/
-Quat Component::getRelativeRot() const {
+/// Return the relative rotation of the Compoonent to the parent
+Kernel::Quat Component::getRelativeRot() const {
   if (m_map) {
-    if (m_map->contains(m_base, "rot")) {
-      return m_map->get(m_base, "rot")->value<Quat>();
+    if (hasComponentInfo()) {
+      return m_map->componentInfo().relativeRotation(index());
+    } else {
+      if (m_map->contains(m_base, "rot")) {
+        return m_map->get(m_base, "rot")->value<Quat>();
+      }
+      return m_base->m_rot;
     }
-    return m_base->m_rot;
-  } else
+  } else {
     return m_rot;
+  }
 }
 
-/** Returns the absolute rotation of the Component
-*  @return A quaternion representing the total rotation
-*/
-Quat Component::getRotation() const {
+/// Return the absolute rotation of the Component
+Kernel::Quat Component::getRotation() const {
   if (m_map) {
-    // Avoid instantiation of the parent's parameterized object if possible
-    const IComponent *baseParent = m_base->m_parent;
-    if (!baseParent) {
-      return getRelativeRot();
+    if (hasComponentInfo()) {
+      return m_map->componentInfo().rotation(index());
     } else {
-      Quat parentRot;
-      if (!m_map->getCachedRotation(baseParent, parentRot)) {
-        // Get the parent's rotation
-        boost::shared_ptr<const IComponent> parParent = getParent();
-        if (parParent) {
-          parentRot = parParent->getRotation();
+      // Avoid instantiation of the parent's parameterized object if possible
+      const IComponent *baseParent = m_base->m_parent;
+      if (!baseParent) {
+        return getRelativeRot();
+      } else {
+        Quat parentRot;
+        if (!m_map->getCachedRotation(baseParent, parentRot)) {
+          // Get the parent's rotation
+          boost::shared_ptr<const IComponent> parParent = getParent();
+          if (parParent) {
+            parentRot = parParent->getRotation();
+          }
         }
+        return parentRot * getRelativeRot();
       }
-      return parentRot * getRelativeRot();
     }
   } else {
     // Not parametrized
@@ -643,10 +679,10 @@ void Component::setDescription(const std::string &descr) {
                                                  "non-Parametrized Component)");
 }
 
-void Component::registerContents(
-    class ComponentVisitor &componentVisitor) const {
+size_t
+Component::registerContents(class ComponentVisitor &componentVisitor) const {
 
-  componentVisitor.registerGenericComponent(*this);
+  return componentVisitor.registerGenericComponent(*this);
 }
 
 } // Namespace Geometry

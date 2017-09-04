@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidBeamline/DetectorInfo.h"
 #include <boost/python/class.hpp>
 
 using Mantid::Geometry::DetectorGroup;
