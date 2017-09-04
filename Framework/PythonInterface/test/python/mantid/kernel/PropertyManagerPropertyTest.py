@@ -88,14 +88,11 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self.assertTrue(has_raised)
 
     def test_create_with_dictionary_as_default_value(self):
-        name = "Args"
-        direc = Direction.Input
         default = { 'A' : {}, 'B' : 1 }
         fake = FakeAlgorithm()
         fake.initialize()
         fake.setProperty("Args", default)
         prop = fake.getProperty("Args").value
-        self._check_object_attributes(prop, name, direc)
         self._check_values(prop, **default)
 
     def _check_object_attributes(self, prop, name, direction):
