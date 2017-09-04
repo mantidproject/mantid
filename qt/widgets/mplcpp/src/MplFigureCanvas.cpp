@@ -104,17 +104,15 @@ struct MplFigureCanvas::PyObjectHolder {
   // constructor
   PyObjectHolder(int subplotLayout) {
     ScopedPythonGIL gil;
-    // Create a figure and attach it to a canvas object. This creates a
-    // blank widget
+    // Create a figure and axes with the given layout
     auto figure = PythonObject::fromNewRef(
         PyObject_CallObject(mplFigureType().get(), NULL));
-    // tight layout
+    auto axes = PythonObject::fromNewRef(
+        PyObject_CallMethod(figure.get(), PYSTR_LITERAL("add_subplot"),
+                            PYSTR_LITERAL("i"), subplotLayout));
     detail::decref(PyObject_CallMethod(figure.get(),
                                        PYSTR_LITERAL("set_tight_layout"),
-                                       PYSTR_LITERAL("{sf}"), "pad", 0.5));
-    detail::decref(PyObject_CallMethod(figure.get(),
-                                       PYSTR_LITERAL("add_subplot"),
-                                       PYSTR_LITERAL("i"), subplotLayout));
+                                       PYSTR_LITERAL("{s:f}"), "pad", 0.5));
     canvas = PythonObject::fromNewRef(PyObject_CallFunction(
         mplFigureCanvasType().get(), PYSTR_LITERAL("(O)"), figure.get()));
     canvasWidget = static_cast<QWidget *>(SipUtils::unwrap(canvas.get()));
@@ -136,7 +134,6 @@ struct MplFigureCanvas::PyObjectHolder {
    * @return matplotlib.axes.Axes object
    */
   PythonObject gca() {
-    ScopedPythonGIL gil;
     auto figure = canvas.getAttr("figure");
     return PythonObject::fromNewRef(PyObject_CallMethod(
         figure.get(), PYSTR_LITERAL("gca"), PYSTR_LITERAL(""), nullptr));
@@ -196,15 +193,23 @@ SubPlotSpec MplFigureCanvas::geometry() const {
  * @return True if the canvas has been zoomed
  */
 bool MplFigureCanvas::isZoomed() const {
-  // We have to rely on a "private" attribute to determine
-  // if any views other than the default exist as there
-  // seems to be no other API. The presence of the attribute
-  // is checked on construction.
+  // We have to rely on a "private" attribute of the toolbar
+  // to determine if the first view (unzoomed) matches the current or not
   ScopedPythonGIL gil;
   auto views = m_pydata->toolbar.getAttr("_views");
-  auto len = PythonObject::fromNewRef(
-      PyObject_CallMethod(views.get(), PYSTR_LITERAL("__len__"), nullptr));
-  return PyLong_AsLong(len.get()) > 1;
+  auto firstViewRaw = PyObject_CallMethod(
+      views.get(), PYSTR_LITERAL("__getitem__"), PYSTR_LITERAL("(i)"), 0);
+  // no elements indicates no zoom has taken place yet
+  if (!firstViewRaw) {
+    PyErr_Clear();
+    return false;
+  }
+  // deal with the ref count properly
+  auto firstView = PythonObject::fromNewRef(firstViewRaw);
+  auto cur = PythonObject::fromNewRef(
+      PyObject_CallMethod(views.get(), PYSTR_LITERAL("__call__"), nullptr));
+  // zero indicates false comparison, i.e. cur != first so we are zoomed
+  return PyObject_RichCompareBool(cur.get(), firstView.get(), Py_EQ) == 0;
 }
 
 /**
@@ -367,22 +372,12 @@ void MplFigureCanvas::draw() {
 
 /**
  * Resets the current view to it's original state before
- * any zoom/pan operations were called. It also clears
- * any view state history so that query for
- * if a zoom operation has been called returns the correct
- * value
+ * any zoom/pan operations were called.
  */
 void MplFigureCanvas::home() {
   ScopedPythonGIL gil;
   detail::decref(PyObject_CallMethod(m_pydata->toolbar.get(),
                                      PYSTR_LITERAL("home"), PYSTR_LITERAL("")));
-  // we clear the navigation stack so that isZoomed works correctly
-  // this is a bit hacky but there seems to be no better way of detecting if
-  // the canvas has a zoom level
-  detail::decref(PyObject_CallMethod(
-      m_pydata->toolbar.get(), PYSTR_LITERAL("update"), PYSTR_LITERAL("")));
-  // without this the tight layout is not recomputed quite correctly
-  drawNoGIL();
 }
 
 /** Set the color of the canvas outside of the axes
@@ -519,8 +514,11 @@ void MplFigureCanvas::setScale(const Axes::Scale axis, const char *scaleType,
   if (axis == Axes::Scale::Both || axis == Axes::Scale::Y)
     scaleSetter(axes, "set_yscale", scaleType);
 
-  if (redraw)
+  if (redraw) {
+    PyObject_CallMethod(axes.get(), PYSTR_LITERAL("autoscale"),
+                        PYSTR_LITERAL("(i)"), 1);
     drawNoGIL();
+  }
 }
 
 /**
@@ -549,11 +547,12 @@ void MplFigureCanvas::rescaleToData(const Axes::Scale axis, bool redraw) {
   auto axes = m_pydata->gca();
   detail::decref(PyObject_CallMethod(axes.get(), PYSTR_LITERAL("relim"),
                                      PYSTR_LITERAL(""), nullptr));
-  detail::decref(
-      PyObject_CallMethod(axes.get(), PYSTR_LITERAL("autoscale_view"),
-                          PYSTR_LITERAL("(iii)"), 1, scaleX, scaleY));
-  if (redraw)
+  if (redraw) {
+    detail::decref(
+        PyObject_CallMethod(axes.get(), PYSTR_LITERAL("autoscale_view"),
+                            PYSTR_LITERAL("(iii)"), 1, scaleX, scaleY));
     drawNoGIL();
+  }
 }
 
 /**
