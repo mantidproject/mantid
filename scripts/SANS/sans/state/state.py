@@ -7,7 +7,7 @@ import json
 import pickle
 import inspect
 import copy
-from sans.common.enums import SANSInstrument
+from sans.common.enums import SANSFacility
 from sans.state.state_base import (StateBase, TypedParameter,
                                    rename_descriptor_names, validator_sub_state)
 from sans.state.data import StateData
@@ -113,8 +113,8 @@ class StateBuilder(object):
 # Factory method for SANStateDataBuilder
 # ------------------------------------------
 def get_state_builder(data_info):
-    instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    facility = data_info.facility
+    if facility is SANSFacility.ISIS:
         return StateBuilder()
     else:
         raise NotImplementedError("SANSStateBuilder: Could not find any valid state builder for the "

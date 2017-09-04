@@ -70,6 +70,10 @@ public:
   inline bool isNone() const { return m_ptr == Py_None; }
   /// Return the reference count of the held object
   inline Py_ssize_t refCount() const { return Py_REFCNT(m_ptr); }
+  /// Return the reference count of the held object
+  inline bool hasAttr(const char *attr) const {
+    return (PyObject_HasAttrString(m_ptr, attr) == 1);
+  }
 
   /// Return the raw PyObject ptr handle. Use with care
   inline PyObject *get() const { return m_ptr; }

@@ -20,6 +20,21 @@ Bayes
 Data Analysis
 #############
 
+Elwin
+~~~~~
+
+Bugfixes
+--------
+- Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
+
+ConvFit
+~~~~~~~
+
+Bugfixes
+--------
+- Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
+- Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
+
 Jump Fit
 ~~~~~~~~
 
@@ -29,6 +44,11 @@ Improvements
 - The *S(Q, W)* interface now automatically replaces NaN values with 0.
 - EISF is now generated when performing a Single Fit, with a delta function, in the ConvFit interface.
 - :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` now supports `Direct` and `Indirect` modes.
+
+Dropped
+-------
+- :ref:`algm-LoadILLIndirect-v1`, :ref:`algm-IndirectILLReduction`, :ref:`algm-ILLIN16BCalibration` algorithms deprecated since v3.9, are now removed.
+
 
 Bugfixes
 --------

@@ -38,7 +38,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class EXPORT_OPT_MANTIDQT_COMMON DataProcessorProcessingAlgorithm
     : public DataProcessorProcessingAlgorithmBase {
 public:
-  DataProcessorProcessingAlgorithm() = delete;
+  DataProcessorProcessingAlgorithm();
   // Constructor
   DataProcessorProcessingAlgorithm(
       const QString &name, const std::vector<QString> &prefix,

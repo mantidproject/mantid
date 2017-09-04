@@ -1,11 +1,9 @@
 #include "MantidQtWidgets/MplCpp/MplFigureCanvas.h"
-#include "MantidQtWidgets/MplCpp/MplEvent.h"
 #include "MantidQtWidgets/MplCpp/NDArray1D.h"
 #include "MantidQtWidgets/MplCpp/PythonErrors.h"
 #include "MantidQtWidgets/MplCpp/SipUtils.h"
 #include "MantidQtWidgets/Common/PythonThreading.h"
 
-#include <QContextMenuEvent>
 #include <QMouseEvent>
 #include <QVBoxLayout>
 
@@ -56,6 +54,17 @@ const PythonObject &mplFigureCanvasType() {
   return figureCanvasType;
 }
 
+// Return static instance of navigation toolbar type
+// The GIL must be held to call this
+const PythonObject &mplNavigationToolbarType() {
+  static PythonObject navigationToolbarType;
+  if (navigationToolbarType.isNone()) {
+    navigationToolbarType =
+        getAttrOnModule(MPL_QT_BACKEND, "NavigationToolbar2QT");
+  }
+  return navigationToolbarType;
+}
+
 /**
  * Extract a double from a given element of an array or tuple. Warning: No
  * checks are done on the validity of the object or the index
@@ -85,6 +94,8 @@ long longInSeq(const PythonObject &obj, Py_ssize_t i) {
 struct MplFigureCanvas::PyObjectHolder {
   // QtAgg canvas object
   PythonObject canvas;
+  // Navigation toolbar instance
+  PythonObject toolbar;
   // A pointer to the C++ data contained within the Python object
   QWidget *canvasWidget;
   // List of lines on current plot
@@ -100,7 +111,7 @@ struct MplFigureCanvas::PyObjectHolder {
     // tight layout
     detail::decref(PyObject_CallMethod(figure.get(),
                                        PYSTR_LITERAL("set_tight_layout"),
-                                       PYSTR_LITERAL("(i)"), 1));
+                                       PYSTR_LITERAL("{sf}"), "pad", 0.5));
     detail::decref(PyObject_CallMethod(figure.get(),
                                        PYSTR_LITERAL("add_subplot"),
                                        PYSTR_LITERAL("i"), subplotLayout));
@@ -108,6 +119,16 @@ struct MplFigureCanvas::PyObjectHolder {
         mplFigureCanvasType().get(), PYSTR_LITERAL("(O)"), figure.get()));
     canvasWidget = static_cast<QWidget *>(SipUtils::unwrap(canvas.get()));
     assert(canvasWidget);
+
+    // Hidden toolbar - used to access the zoom functionality
+    toolbar = PythonObject::fromNewRef(PyObject_CallFunction(
+        mplNavigationToolbarType().get(), PYSTR_LITERAL("(OOi)"), canvas.get(),
+        Py_None, 0));
+    // check for _views attribute
+    if (!toolbar.hasAttr("_views")) {
+      throw std::logic_error("NavigationToolbar class expects an _views "
+                             "attribute but none was found");
+    }
   }
 
   /**
@@ -169,6 +190,21 @@ SubPlotSpec MplFigureCanvas::geometry() const {
       axes.get(), PYSTR_LITERAL("get_geometry"), PYSTR_LITERAL(""), nullptr));
 
   return SubPlotSpec(longInSeq(geometry, 0), longInSeq(geometry, 1));
+}
+
+/**
+ * @return True if the canvas has been zoomed
+ */
+bool MplFigureCanvas::isZoomed() const {
+  // We have to rely on a "private" attribute to determine
+  // if any views other than the default exist as there
+  // seems to be no other API. The presence of the attribute
+  // is checked on construction.
+  ScopedPythonGIL gil;
+  auto views = m_pydata->toolbar.getAttr("_views");
+  auto len = PythonObject::fromNewRef(
+      PyObject_CallMethod(views.get(), PYSTR_LITERAL("__len__"), nullptr));
+  return PyLong_AsLong(len.get()) > 1;
 }
 
 /**
@@ -329,12 +365,42 @@ void MplFigureCanvas::draw() {
   drawNoGIL();
 }
 
+/**
+ * Resets the current view to it's original state before
+ * any zoom/pan operations were called. It also clears
+ * any view state history so that query for
+ * if a zoom operation has been called returns the correct
+ * value
+ */
+void MplFigureCanvas::home() {
+  ScopedPythonGIL gil;
+  detail::decref(PyObject_CallMethod(m_pydata->toolbar.get(),
+                                     PYSTR_LITERAL("home"), PYSTR_LITERAL("")));
+  // we clear the navigation stack so that isZoomed works correctly
+  // this is a bit hacky but there seems to be no better way of detecting if
+  // the canvas has a zoom level
+  detail::decref(PyObject_CallMethod(
+      m_pydata->toolbar.get(), PYSTR_LITERAL("update"), PYSTR_LITERAL("")));
+  // without this the tight layout is not recomputed quite correctly
+  drawNoGIL();
+}
+
 /** Set the color of the canvas outside of the axes
  * @param color A matplotlib color string
  */
 void MplFigureCanvas::setCanvasFaceColor(const char *color) {
   ScopedPythonGIL gil;
   setCanvasFaceColorNoGIL(color);
+}
+
+/**
+ * Similar to pushing the zoom button on the standard matplotlib
+ * toolbar. Toggle this once to enable zoom support
+ */
+void MplFigureCanvas::toggleZoomMode() {
+  ScopedPythonGIL gil;
+  detail::decref(PyObject_CallMethod(m_pydata->toolbar.get(),
+                                     PYSTR_LITERAL("zoom"), PYSTR_LITERAL("")));
 }
 
 /**
@@ -504,32 +570,29 @@ void MplFigureCanvas::addText(double x, double y, const char *label) {
 }
 
 /**
- * Intercept events destined for the child canvas
+ * Intercept events destined for the child canvas. The Matplotlib canvas
+ * defines its own event handlers for certain events. As this class
+ * does not directly inherit from the matplotlib canvas we cannot use the
+ * standard virtual event methods to intercept them. Instead this
+ * event filter allows us to capture and process them. We simply
+ * call the standard event handler functions that a widget would
+ * expect to call. The toDataCoordinates() method can be used to obtain
+ * the data coordinates for a given mouse location.
  * @param watched A pointer to the object being watched
  * @param evt The event dispatched to the watched object
  * @return True if the event was filtered by this function, false otherwise
  */
 bool MplFigureCanvas::eventFilter(QObject *watched, QEvent *evt) {
   assert(watched == canvasWidget());
+  auto type = evt->type();
+  if (type == QEvent::MouseButtonPress)
+    mousePressEvent(static_cast<QMouseEvent *>(evt));
+  else if (type == QEvent::MouseButtonRelease)
+    mouseReleaseEvent(static_cast<QMouseEvent *>(evt));
+  else if (type == QEvent::MouseButtonDblClick)
+    mouseDoubleClickEvent(static_cast<QMouseEvent *>(evt));
 
-  // This feels ugly...
-  const auto type = evt->type();
-  if (type == QEvent::ContextMenu) {
-    contextMenuEvent(static_cast<QContextMenuEvent *>(evt));
-    return true;
-  } else if (type == QEvent::MouseButtonPress ||
-             type == QEvent::MouseButtonRelease ||
-             type == QEvent::MouseButtonDblClick) {
-    auto qtEvent = static_cast<QMouseEvent *>(evt);
-    MplMouseEvent mplEvent(toDataCoordinates(qtEvent->pos()));
-    if (type == QEvent::MouseButtonPress)
-      mplMousePressEvent(qtEvent, &mplEvent);
-    else if (type == QEvent::MouseButtonRelease)
-      mplMouseReleaseEvent(qtEvent, &mplEvent);
-    else if (type == QEvent::MouseButtonDblClick)
-      mplMouseDoubleClickEvent(qtEvent, &mplEvent);
-    return true;
-  }
+  // default doesn't filter
   return false;
 }
 

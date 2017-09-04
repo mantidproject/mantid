@@ -20,8 +20,6 @@
 #include <QWidget>
 #include <tuple>
 
-class MplMouseEvent;
-
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -72,6 +70,7 @@ public:
   ///@name Query properties
   QWidget *canvasWidget() const;
   SubPlotSpec geometry() const;
+  bool isZoomed() const;
   QString label(const Axes::Label type) const;
   std::tuple<double, double> limits(const Axes::Scale type) const;
   size_t nlines() const;
@@ -83,7 +82,9 @@ public:
   ///@name Canvas properties
   void addSubPlot(int subplotLayout);
   void draw();
+  void home();
   void setCanvasFaceColor(const char *color);
+  void toggleZoomMode();
   ///@}
 
   ///@{
@@ -120,11 +121,6 @@ public:
 
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
-  // operations analogous to standard mousePressEvent etc but with additional
-  // information
-  virtual void mplMousePressEvent(QMouseEvent *, MplMouseEvent *) {}
-  virtual void mplMouseReleaseEvent(QMouseEvent *, MplMouseEvent *) {}
-  virtual void mplMouseDoubleClickEvent(QMouseEvent *, MplMouseEvent *) {}
 
 private:
   // Operations that do not acquire the GIL

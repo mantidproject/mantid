@@ -72,6 +72,7 @@ New
 
 - :ref:`PrimStretchedExpFT <func-PrimStretchedExpFT>` Provides the Fourier Transform of the Symmetrized Stretched Exponential Function integrated over each energy bin. Use in place of :ref:`StretchedExpFT <func-StretchedExpFT>` for fitting sample data featuring relaxation times longer than the resolution of the instrument.
 - :ref:`GramCharlier <func-GramCharlier>` is a new fit function primarily for use in neutron compton scattering.
+- :ref:`SplineInterpolation <algm-SplineInterpolation>` is extended to support also linear interpolation, if only 2 points are given.
 
 Bug fixes
 #########
