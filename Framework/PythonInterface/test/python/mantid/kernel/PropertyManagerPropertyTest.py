@@ -101,7 +101,7 @@ class PropertyManagerPropertyTest(unittest.TestCase):
 
     def _check_values(self, prop, **kwargs):
 
-        for key, value in kwargs:
+        for key, value in kwargs.items():
             propValue = prop.getProperty(key).value
 
             if(isinstance(propValue, PropertyManager)):
