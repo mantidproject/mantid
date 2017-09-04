@@ -83,6 +83,18 @@ The following parameter may optionally be passed:
 
 - :ref:`mode_hrpd_isis-powder-diffraction-ref`
 
+Example
+=======
+
+.. code-block:: python
+
+  cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
+
+  hrpd_example.create_vanadium(calibration_mapping_file=cal_mapping_file,
+                               first_cycle_run_no=66058, window="10-110",
+			       do_absorb_correction=True,
+			       multiple_scattering=False)
+  
 .. _focus_hrpd_isis-powder-diffraction-ref:
 
 focus
@@ -115,6 +127,18 @@ the following parameter is required in addition to the above:
 
 - :ref:`sample_empty_scale_hrpd_isis-powder-diffraction-ref`
 
+Example
+=======
+
+.. code-block:: python
+
+  cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
+
+  hrpd_example.focus(run_number=66845, calibration_mapping_file=cal_mapping_file,
+                     vanadium_normalisation=True, do_absorb_corrections=True,
+		     sample_empty=66829, sample_empty_scale=1,
+		     multiple_scattering=False, window="10-110")
+  
 .. _set_sample_hrpd_isis-powder-diffraction-ref:
 
 set_sample
@@ -380,7 +404,7 @@ specified, they will be summed before being subtracted from the data.
 This input uses the same syntax as
 :ref:`run_number_hrpd_isis-powder-diffraction-ref`.
 
-*Note: If this is set to* **True**,
+*Note: If this is set to anything other than* **False**,
 *:ref:`sample_empty_scale_hrpd_isis-powder-diffraction-ref` must also
 be specified*
      
@@ -398,7 +422,7 @@ Example Input:
 sample_empty_scale
 ^^^^^^^^^^^^^^^^^^
 Required if :ref:`sample_empty_hrpd_isis-powder-diffraction-ref` is set to
-**True**.
+anything other than **False**.
 
 Sets a factor to scale the sample empty run(s) by before
 subtracting. This value is multiplied after summing the empty runs and
