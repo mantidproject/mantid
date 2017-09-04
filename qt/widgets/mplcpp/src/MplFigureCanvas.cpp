@@ -104,17 +104,15 @@ struct MplFigureCanvas::PyObjectHolder {
   // constructor
   PyObjectHolder(int subplotLayout) {
     ScopedPythonGIL gil;
-    // Create a figure and attach it to a canvas object. This creates a
-    // blank widget
+    // Create a figure and axes with the given layout
     auto figure = PythonObject::fromNewRef(
         PyObject_CallObject(mplFigureType().get(), NULL));
-    // tight layout
+    auto axes = PythonObject::fromNewRef(
+        PyObject_CallMethod(figure.get(), PYSTR_LITERAL("add_subplot"),
+                            PYSTR_LITERAL("i"), subplotLayout));
     detail::decref(PyObject_CallMethod(figure.get(),
                                        PYSTR_LITERAL("set_tight_layout"),
-                                       PYSTR_LITERAL("{sf}"), "pad", 0.5));
-    detail::decref(PyObject_CallMethod(figure.get(),
-                                       PYSTR_LITERAL("add_subplot"),
-                                       PYSTR_LITERAL("i"), subplotLayout));
+                                       PYSTR_LITERAL("{s:f}"), "pad", 0.5));
     canvas = PythonObject::fromNewRef(PyObject_CallFunction(
         mplFigureCanvasType().get(), PYSTR_LITERAL("(O)"), figure.get()));
     canvasWidget = static_cast<QWidget *>(SipUtils::unwrap(canvas.get()));
@@ -136,7 +134,6 @@ struct MplFigureCanvas::PyObjectHolder {
    * @return matplotlib.axes.Axes object
    */
   PythonObject gca() {
-    ScopedPythonGIL gil;
     auto figure = canvas.getAttr("figure");
     return PythonObject::fromNewRef(PyObject_CallMethod(
         figure.get(), PYSTR_LITERAL("gca"), PYSTR_LITERAL(""), nullptr));
