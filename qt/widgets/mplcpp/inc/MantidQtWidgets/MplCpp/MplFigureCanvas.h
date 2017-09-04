@@ -72,6 +72,7 @@ public:
   ///@name Query properties
   QWidget *canvasWidget() const;
   SubPlotSpec geometry() const;
+  bool isZoomed() const;
   QString label(const Axes::Label type) const;
   std::tuple<double, double> limits(const Axes::Scale type) const;
   size_t nlines() const;
@@ -83,7 +84,9 @@ public:
   ///@name Canvas properties
   void addSubPlot(int subplotLayout);
   void draw();
+  void home();
   void setCanvasFaceColor(const char *color);
+  void toggleZoomMode();
   ///@}
 
   ///@{
