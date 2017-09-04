@@ -13,12 +13,30 @@ Algorithms
 
 Bayes
 #####
-
 - Removed fit option from plot options drop-down menu.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 
 Data Analysis
 #############
+- Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
+  convolution fitting into their own workspaces.
+
+Elwin
+~~~~~
+
+Bugfixes
+--------
+- Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
+- Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
+  convolution fitting into their own workspaces.
+
+ConvFit
+~~~~~~~
+
+Bugfixes
+--------
+- Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
+- Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
 
 Elwin
 ~~~~~
