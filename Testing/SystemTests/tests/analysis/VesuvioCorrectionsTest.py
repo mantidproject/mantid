@@ -1,4 +1,4 @@
-#pylint: disable=too-many-public-methods,invalid-name,no-init
+# pylint: disable=too-many-public-methods,invalid-name,no-init
 
 """
 Unit test for Vesuvio corrections steps
@@ -11,15 +11,15 @@ import stresstesting
 import numpy as np
 import platform
 
-
 from mantid.api import *
 import mantid.simpleapi as ms
 from mantid import *
 
-#====================================Helper Functions=======================================
+
+# ====================================Helper Functions=======================================
 
 
-def setUp():
+def setup():
     test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par",
                              Mode="SingleDifference", SpectrumList="135-136")
     test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par",
@@ -27,7 +27,8 @@ def setUp():
 
     return test_ws, test_container_ws
 
-def setUpBackScattering():
+
+def setup_back_scattering():
     test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par",
                              Mode="SingleDifference", SpectrumList="3-6")
     test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par",
@@ -35,8 +36,9 @@ def setUpBackScattering():
 
     return test_ws, test_container_ws
 
-def tearDown():
-    workspace_names =['__Correction','__Corrected','__Output','__LinearFit']
+
+def tear_down():
+    workspace_names = ['__Correction', '__Corrected', '__Output', '__LinearFit']
     for name in workspace_names:
         if mtd.doesExist(name):
             mtd.remove(name)
@@ -118,6 +120,7 @@ def _create_dummy_fit_parameters_ws_index_2():
 
     return params
 
+
 def _create_dummy_fit_parameters_no_hydrogen():
     params = ms.CreateEmptyTableWorkspace(OutputWorkspace='__VesuvioCorrections_test_fit_params')
 
@@ -138,8 +141,10 @@ def _create_dummy_fit_parameters_no_hydrogen():
 
     return params
 
+
 def _create_dummy_masses():
     return [1.0079, 16.0, 27.0, 133.0]
+
 
 def _create_dummy_profiles():
     return "function=GramCharlier,hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1," \
@@ -147,18 +152,17 @@ def _create_dummy_profiles():
            + "function=Gaussian,width=30"
 
 
-#===========================================================================================
-#========================================Success cases======================================
+# ===========================================================================================
+# ========================================Success cases======================================
 
 class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
-
     _algorithm = None
     _is_linux = None
     _is_rhel6 = None
     _input_bins = None
 
     def runTest(self):
-        test_ws, _ = setUp()
+        test_ws, _ = setup()
         self._input_bins = test_ws.blocksize()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             GammaBackground=True,
@@ -208,18 +212,17 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         _validate_table_workspace(self, linear_params, 7, 3)
         expected_values = [1.22397896029, 0.0, 1.0, 13.361671534, 0.0, 1.0, 3.1344868843]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
-        tearDown()
+        tear_down()
 
 
 class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
-
     _algorithm = None
     _is_linux = None
     _is_rhel6 = None
     _input_bins = None
 
     def runTest(self):
-        test_ws, _ = setUp()
+        test_ws, _ = setup()
         self._input_bins = test_ws.blocksize()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             GammaBackground=True,
@@ -269,16 +272,15 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         _validate_table_workspace(self, linear_params, 7, 3)
         expected_values = [1.04135754461, 0.0, 1.0, 13.9161945793, 0.0, 1.0, 2.93792229714]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
-        tearDown()
+        tear_down()
 
 
 class TestMsCorrectWithContainer(stresstesting.MantidStressTest):
-
     _algorithm = None
     _input_bins = None
 
     def runTest(self):
-        test_ws, test_container_ws = setUp()
+        test_ws, test_container_ws = setup()
         self._input_bins = test_ws.blocksize()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             ContainerWorkspace=test_container_ws,
@@ -331,16 +333,15 @@ class TestMsCorrectWithContainer(stresstesting.MantidStressTest):
         _validate_table_workspace(self, linear_params, 7, 3)
         expected_values = [0.0592426949865, 0.0, 1.0, 11.7152355823, 0.0, 1.0, 3.16613507481]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
-        tearDown()
+        tear_down()
 
 
 class TestGammaAndMsCorrectWithContainer(stresstesting.MantidStressTest):
-
     _algorithm = None
     _input_bins = None
 
     def runTest(self):
-        test_ws, test_container_ws = setUp()
+        test_ws, test_container_ws = setup()
         self._input_bins = test_ws.blocksize()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             ContainerWorkspace=test_container_ws,
@@ -388,16 +389,15 @@ class TestGammaAndMsCorrectWithContainer(stresstesting.MantidStressTest):
         _validate_table_workspace(self, linear_params, 10, 3)
         expected_values = [0.0547199700231, 0.0, 1.0, 1.18398261145, 0.0, 1.0, 12.5103939279]
         _validate_table_values_top_to_bottom(self, linear_params, expected_values)
-        tearDown()
+        tear_down()
 
 
 class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressTest):
-
     _algorithm = None
     _input_bins = None
 
     def runTest(self):
-        test_ws, test_container_ws = setUp()
+        test_ws, test_container_ws = setup()
         self._input_bins = test_ws.blocksize()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             ContainerWorkspace=test_container_ws,
@@ -447,20 +447,20 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressT
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 10, 3)
-        expected_table_values = [0.1,0.0,1.0,0.2,0.0,1.0,'skip',0.0,1.0]
+        expected_table_values = [0.1, 0.0, 1.0, 0.2, 0.0, 1.0, 'skip', 0.0, 1.0]
         _validate_table_values_top_to_bottom(self, linear_params, expected_table_values)
-        tearDown()
+        tear_down()
+
 
 class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
-
     _algorithm = None
     _input_bins = None
 
     def runTest(self):
-        test_ws, test_container_ws = setUpBackScattering()
+        test_ws, test_container_ws = setup_back_scattering()
         self._input_bins = test_ws.blocksize()
-        index_to_symbol = {'0':'H', '1':'O'}
-        hydrogen_constraints = { 'O' : { 'factor' : 2.0 } }
+        index_to_symbol = {'0': 'H', '1': 'O'}
+        hydrogen_constraints = {'O': {'factor': 2.0}}
 
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             ContainerWorkspace=test_container_ws,
@@ -509,18 +509,18 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 10, 3)
-        expected_table_values = [0.1,0.0,1.0,7.58019154346,0.0,1.0,'skip',0.0,1.0]
+        expected_table_values = [0.1, 0.0, 1.0, 7.58019154346, 0.0, 1.0, 'skip', 0.0, 1.0]
         _validate_table_values_top_to_bottom(self, linear_params, expected_table_values)
-        tearDown()
+        tear_down()
 
-#========================================Failure cases======================================
+
+# ========================================Failure cases======================================
 
 class TestRunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
-
     _algorithm = None
 
     def runTest(self):
-        test_ws, _ = setUp()
+        test_ws, _ = setup()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             Masses=_create_dummy_masses(),
                                             MassProfiles=_create_dummy_profiles())
@@ -530,11 +530,10 @@ class TestRunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
 
 
 class TestRunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
-
     _algorithm = None
 
     def runTest(self):
-        test_ws, _ = setUp()
+        test_ws, _ = setup()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             FitParameters=_create_dummy_fit_parameters_ws_index_1(),
                                             MassProfiles=_create_dummy_profiles())
@@ -544,11 +543,10 @@ class TestRunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
 
 
 class TestRunningWithoutProfilesRaisesError(stresstesting.MantidStressTest):
-
     _algorithm = None
 
     def runTest(self):
-        test_ws, _ = setUp()
+        test_ws, _ = setup()
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             FitParameters=_create_dummy_fit_parameters_ws_index_1(),
                                             Masses=_create_dummy_masses())
@@ -557,8 +555,8 @@ class TestRunningWithoutProfilesRaisesError(stresstesting.MantidStressTest):
         self.assertRaises(RuntimeError, self._algorithm.execute)
 
 
-#=========================================Validation======================================
-#=========================================Structure=======================================
+# =========================================Validation======================================
+# =========================================Structure=======================================
 
 def _validate_group_structure(self, ws_group, expected_entries):
     """
@@ -598,7 +596,8 @@ def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
     self.assertEqual(num_rows, expected_rows)
     self.assertEqual(num_columns, expected_columns)
 
-#=======================================Values===========================================
+
+# =======================================Values===========================================
 
 
 def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolerance=0.05):
@@ -612,10 +611,11 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
     for i in range(0, len(expected_values)):
         if expected_values[i] != 'skip':
             tolerance_value = expected_values[i] * tolerance
-            abs_difference = abs(expected_values[i] - table_ws.cell(i,1))
+            abs_difference = abs(expected_values[i] - table_ws.cell(i, 1))
             self.assertTrue(abs_difference <= abs(tolerance_value))
 
-#pylint: disable=too-many-arguments
+
+# pylint: disable=too-many-arguments
 
 
 def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin, ws_index=0, tolerance=0.05):
