@@ -514,6 +514,7 @@ class VesuvioCorrections(VesuvioBase):
             elif c0_prop in params_dict:
                 intensity = params_dict[c0_prop]
             else:
+                i = i + 1
                 continue
 
             # The program DINSMS_BATCH uses those sample parameters together with the sigma divided

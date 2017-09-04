@@ -27,6 +27,13 @@ def setUp():
 
     return test_ws, test_container_ws
 
+def setUpBackScattering():
+    test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par",
+                             Mode="SingleDifference", SpectrumList="3-6")
+    test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par",
+                                       Mode="SingleDifference", SpectrumList="3-6")
+
+    return test_ws, test_container_ws
 
 def tearDown():
     workspace_names =['__Correction','__Corrected','__Output','__LinearFit']
@@ -111,10 +118,28 @@ def _create_dummy_fit_parameters_ws_index_2():
 
     return params
 
+def _create_dummy_fit_parameters_no_hydrogen():
+    params = ms.CreateEmptyTableWorkspace(OutputWorkspace='__VesuvioCorrections_test_fit_params')
+
+    params.addColumn('str', 'Name')
+    params.addColumn('float', 'Value')
+    params.addColumn('float', 'Error')
+
+    params.addRow(['f0.Mass', 16.0, 0.0])
+    params.addRow(['f0.Width', 10.0, 0.0])
+    params.addRow(['f0.Intensity', 4.03064, 0.41762])
+    params.addRow(['f1.Mass', 27.0, 0.0])
+    params.addRow(['f1.Width', 13.0, 0.0])
+    params.addRow(['f1.Intensity', 3.23823, 0.447593])
+    params.addRow(['f2.Mass', 133.0, 0.0])
+    params.addRow(['f2.Width', 30.0, 0.0])
+    params.addRow(['f2.Intensity', 0.882613, 0.218913])
+    params.addRow(['Cost function value', 3.19573, 0.0])
+
+    return params
 
 def _create_dummy_masses():
     return [1.0079, 16.0, 27.0, 133.0]
-
 
 def _create_dummy_profiles():
     return "function=GramCharlier,hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1," \
@@ -426,6 +451,67 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressT
         _validate_table_values_top_to_bottom(self, linear_params, expected_table_values)
         tearDown()
 
+class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
+
+    _algorithm = None
+    _input_bins = None
+
+    def runTest(self):
+        test_ws, test_container_ws = setUpBackScattering()
+        self._input_bins = test_ws.blocksize()
+        index_to_symbol = {'0':'H', '1':'O'}
+        hydrogen_constraints = { 'O' : { 'factor' : 2.0 } }
+
+        self._algorithm = _create_algorithm(InputWorkspace=test_ws,
+                                            ContainerWorkspace=test_container_ws,
+                                            GammaBackground=True,
+                                            FitParameters=_create_dummy_fit_parameters_no_hydrogen(),
+                                            Masses=_create_dummy_masses(),
+                                            MassProfiles=_create_dummy_profiles(),
+                                            MassIndexToSymbolMap=index_to_symbol,
+                                            HydrogenConstraints=hydrogen_constraints,
+                                            ContainerScale=0.1,
+                                            GammaBackgroundScale=0.2,
+                                            NumEvents=500)
+
+        self._algorithm.execute()
+
+    def validate(self):
+        self.assertTrue(self._algorithm.isExecuted())
+
+        # Test Corrections Workspaces
+        corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
+        _validate_group_structure(self, corrections_wsg, 3)
+        corrections_ts_peak = 0.157042198628
+        corrections_ms_peak = 0.00679639284666
+        corrections_ms_bin = 724
+        if _is_old_boost_version():
+            corrections_ms_bin = 722
+
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, 458)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
+
+        # Test Corrected Workspaces
+        corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
+        _validate_group_structure(self, corrected_wsg, 3)
+        corrected_ts_peak = 0.24119589358
+        corrected_ms_peak = 0.24119589358
+
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, 325)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, 220)
+
+        # Test OutputWorkspace
+        output_ws = self._algorithm.getProperty("OutputWorkspace").value
+        _validate_matrix_structure(self, output_ws, 1, self._input_bins)
+        output_expected_peak = 0.226039019062
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 325)
+
+        # Test Linear fit Result Workspace
+        linear_params = self._algorithm.getProperty("LinearFitResult").value
+        _validate_table_workspace(self, linear_params, 10, 3)
+        expected_table_values = [0.1,0.0,1.0,7.58019154346,0.0,1.0,'skip',0.0,1.0]
+        _validate_table_values_top_to_bottom(self, linear_params, expected_table_values)
+        tearDown()
 
 #========================================Failure cases======================================
 
