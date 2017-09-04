@@ -91,13 +91,12 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         name = "Args"
         direc = Direction.Input
         default = { 'A' : {}, 'B' : 1 }
-        arr = PropertyManagerProperty(name, default, direc)
         fake = FakeAlgorithm()
         fake.initialize()
-        fake.setProperty("Args")
+        fake.setProperty("Args", default)
         prop = fake.getProperty("Args").value
         self._check_object_attributes(prop, name, direc)
-        self._check_values(arr, **default)
+        self._check_values(prop, **default)
 
     def _check_object_attributes(self, prop, name, direction):
         self.assertEquals(prop.name, name)
