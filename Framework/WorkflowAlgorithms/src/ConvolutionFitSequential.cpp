@@ -67,6 +67,10 @@ void ConvolutionFitSequential::init() {
                   "The function that describes the parameters of the fit.",
                   Direction::Input);
 
+  declareProperty("PassWSIndexToFunction", false,
+                  "For each spectrum in Input pass its workspace index to all "
+                  "functions that have attribute WorkspaceIndex.");
+
   std::vector<std::string> backType{"Fixed Flat", "Fit Flat", "Fit Linear"};
 
   declareProperty("BackgroundType", "Fixed Flat",
@@ -95,9 +99,11 @@ void ConvolutionFitSequential::init() {
                                           "negative",
                   Direction::Input);
 
-  declareProperty("Convolve", true,
-                  "If true, the fit is treated as a convolution workspace.",
-                  Direction::Input);
+  declareProperty(
+      "Convolve", true,
+      "If true, output fitted model components will be convolved with "
+      "the resolution.",
+      Direction::Input);
 
   declareProperty("Minimizer", "Levenberg-Marquardt",
                   boost::make_shared<MandatoryValidator<std::string>>(),
@@ -130,6 +136,7 @@ void ConvolutionFitSequential::exec() {
   // Initialise variables with properties
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   const std::string function = getProperty("Function");
+  const bool passIndex = getProperty("PassWSIndexToFunction");
   const std::string backType =
       convertBackToShort(getProperty("backgroundType"));
   const double startX = getProperty("StartX");
@@ -196,13 +203,6 @@ void ConvolutionFitSequential::exec() {
     nextWs += std::to_string(i);
     plotPeakInput += nextWs + ";";
     plotPeakStringProg.report("Constructing PlotPeak name");
-  }
-
-  // passWSIndex
-  auto passIndex = false;
-  if (funcName.find("Diff") != std::string::npos ||
-      funcName.find("Stretched") != std::string::npos) {
-    passIndex = true;
   }
 
   // Run PlotPeaksByLogValue

@@ -4,10 +4,17 @@
 # Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
 ################################################################################
 
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import numpy
 import os
+try:
+    import urllib.request as urllib
+except ImportError:
+    import  urllib
 
-from ui_MainWindow import Ui_MainWindow #import line for the UI python class
+
+from .ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -17,7 +24,7 @@ except AttributeError:
 
 import mantid
 import mantidqtpython as mqt
-from HfirPDReductionControl import *
+from . import HfirPDReductionControl
 
 #----- default configuration ---------------
 DEFAULT_SERVER = 'http://neutron.ornl.gov/user_data'
@@ -354,7 +361,7 @@ class MainWindow(QtGui.QMainWindow):
         self._currUnit = '2theta'
 
         # Workspaces
-        self._myControl = HFIRPDRedControl()
+        self._myControl = HfirPDReductionControl.HFIRPDRedControl()
 
         # Interactive graphics
         self._viewMerge_X = None
@@ -465,7 +472,7 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # Parse det exclusion file
-        print "Detector exclusion file name is %s." % (excldetfname)
+        print("Detector exclusion file name is %s." % (excldetfname))
         excludedetlist, errmsg = self._myControl.parseExcludedDetFile('HB2A', excldetfname)
         if len(errmsg) > 0:
             self._logError(errmsg)
@@ -492,8 +499,8 @@ class MainWindow(QtGui.QMainWindow):
         useserver = self.ui.radioButton_useServer.isChecked()
         uselocal = self.ui.radioButton_useLocal.isChecked()
 
-        print "Use Server: ", useserver
-        print "Use Local : ", uselocal
+        print("Use Server: ", useserver)
+        print("Use Local : ", uselocal)
 
         if (useserver is True and uselocal is True) or \
                 (useserver is False and uselocal is False):
@@ -580,7 +587,7 @@ class MainWindow(QtGui.QMainWindow):
         clearcache = self.ui.checkBox_delCache.isChecked()
 
         if clearcache is True:
-            delAllFile(self._cache)
+            urllib.delAllFile(self._cache)
 
         self.close()
 
@@ -599,10 +606,10 @@ class MainWindow(QtGui.QMainWindow):
             self.assistantProcess.close()
             self.assistantProcess.waitForFinished()
             self.assistantProcess.start(helpapp, args)
-            print "Show help from (app) ", helpapp
+            print("Show help from (app) ", helpapp)
         else:
             mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
-            print "Show help from (url)", QtCore.QUrl(self.externalUrl)
+            print("Show help from (url)", QtCore.QUrl(self.externalUrl))
 
         return
 
@@ -615,7 +622,7 @@ class MainWindow(QtGui.QMainWindow):
         # Kick away unsupported tabs
         itab = self.ui.tabWidget.currentIndex()
         tabtext = str(self.ui.tabWidget.tabText(itab))
-        print "[DB] Current active tab is No. %d as %s." % (itab, tabtext)
+        print("[DB] Current active tab is No. %d as %s." % (itab, tabtext))
 
         # Rule out unsupported tab
         if itab == 5:
@@ -719,7 +726,7 @@ class MainWindow(QtGui.QMainWindow):
             allowedwavelengths = [2.41, 1.54, 1.12]
             numitems = self.ui.comboBox_wavelength.count()
             good = False
-            for ic in xrange(numitems-1):
+            for ic in range(numitems-1):
                 if abs(autowavelength - allowedwavelengths[ic]) < 0.01:
                     good = True
                     self.ui.comboBox_wavelength.setCurrentIndex(ic)
@@ -753,7 +760,7 @@ class MainWindow(QtGui.QMainWindow):
             if vancorrfname is not None:
                 detefftablews, errmsg = self._myControl.parseDetEffCorrFile('HB2A', vancorrfname)
                 if detefftablews is None:
-                    print "Parsing detectors efficiency file error: %s." % (errmsg)
+                    print("Parsing detectors efficiency file error: %s." % (errmsg))
             else:
                 detefftablews = None
             # ENDIF
@@ -765,7 +772,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Parse SPICE data to MDEventWorkspaces
         try:
-            print "Det Efficiency Table WS: ", str(detefftablews)
+            print("Det Efficiency Table WS: ", str(detefftablews))
             execstatus = self._myControl.parseSpiceData(expno, scanno, detefftablews)
             if execstatus is False:
                 cause = "Parse data failed."
@@ -896,7 +903,7 @@ class MainWindow(QtGui.QMainWindow):
         # Load data
         self.ui.lineEdit_scanNo.setText(str(scanno))
         execstatus = self.doLoadData()
-        print "[DB] Load data : ", execstatus
+        print("[DB] Load data : ", execstatus)
 
         # Reduce data
         self._uiReducePlotNoramlized(self._currUnit)
@@ -919,7 +926,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             wl_list = []
             for scanno in scanlist:
-                print "Exp %d Scan %d. Wavelength = %s." % (expno, scanno, str(self._myControl.getWavelength(expno, scanno)))
+                print("Exp %d Scan %d. Wavelength = %s." % (expno, scanno, str(self._myControl.getWavelength(expno, scanno))))
                 wl_list.append(float(self._myControl.getWavelength(expno, scanno)))
 
             wl_list = sorted(wl_list)
@@ -1062,10 +1069,10 @@ class MainWindow(QtGui.QMainWindow):
             status, detidlist = self._getIntArray(self.ui.lineEdit_detID.text())
             if status is False:
                 errmsg = detidlist
-                print "Unable to parse detector IDs due to %s."%(errmsg)
+                print("Unable to parse detector IDs due to %s."%(errmsg))
                 return
             else:
-                print "[DB] Detectors to plot: %s"%(detidlist)
+                print("[DB] Detectors to plot: %s"%(detidlist))
         except EmptyError:
             self._logError("Detector ID must be specified for plotting individual detector.")
             return
@@ -1228,7 +1235,7 @@ class MainWindow(QtGui.QMainWindow):
             ptNo = None
 
         # plot
-        print "[DB] Plot Raw Detector: PlotMode = %s." % (plotmode)
+        print("[DB] Plot Raw Detector: PlotMode = %s." % (plotmode))
         execstatus = self._plotRawDetSignal(expno, scanno, plotmode, ptNo, doOverPlot)
 
         # set global values if good
@@ -1238,7 +1245,7 @@ class MainWindow(QtGui.QMainWindow):
             self._rawDetScanNo = scanno
             self._rawDetPlotMode = plotmode
         else:
-            print "[Error] Execution fails with signal %s. " % (str(execstatus))
+            print("[Error] Execution fails with signal %s. " % (str(execstatus)))
 
         return
 
@@ -1572,7 +1579,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         index = self.ui.comboBox_wavelength.currentIndex()
 
-        print "Update wavelength to ", index
+        print("Update wavelength to ", index)
 
         if index == 0:
             wavelength = 2.41
@@ -1607,7 +1614,7 @@ class MainWindow(QtGui.QMainWindow):
             # mouse is clicked within graph
             if button == 1:
                 msg = "Mouse 1: You've clicked on a bar with coords:\n %f, %f\n and button %d" % (x, y, button)
-                print msg
+                print(msg)
             elif button == 2:
                 msg = "Mouse 2: You've clicked on a bar with coords:\n %f, %f\n and button %d" % (x, y, button)
                 QtGui.QMessageBox.information(self, "Click!", msg)
@@ -1654,7 +1661,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         """
         # FUTURE - Need to implement how to deal with this
-        print "Add scan back to merge"
+        print("Add scan back to merge")
 
         return
 
@@ -1662,7 +1669,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         """
         # FUTURE - Need to implement how to deal with this
-        print "Remove a scan from merged data."
+        print("Remove a scan from merged data.")
 
         return
 
@@ -1793,7 +1800,7 @@ class MainWindow(QtGui.QMainWindow):
     def _plotPeakIndicators(self, canvas, peakposlist):
         """ Plot indicators for peaks
         """
-        print "[DB] Peak indicators are at ", peakposlist
+        print("[DB] Peak indicators are at ", peakposlist)
 
         rangey = canvas.getYLimit()
         rangex = canvas.getXLimit()
@@ -2121,7 +2128,7 @@ class MainWindow(QtGui.QMainWindow):
                 self._serverAddress += '/'
             fullurl = "%s%s/exp%d/Datafiles/%s_exp%04d_scan%04d.dat" % (self._serverAddress,
                                                                         self._instrument.lower(), exp, self._instrument.upper(), exp, scan)
-            print "URL: ", fullurl
+            print("URL: ", fullurl)
 
             cachedir = str(self.ui.lineEdit_cache.text()).strip()
             if os.path.exists(cachedir) is False:
@@ -2133,7 +2140,7 @@ class MainWindow(QtGui.QMainWindow):
 
             filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
             srcFileName = os.path.join(cachedir, filename)
-            status, errmsg = downloadFile(fullurl, srcFileName)
+            status, errmsg = urllib.downloadFile(fullurl, srcFileName)
             if status is False:
                 self._logError(errmsg)
                 srcFileName = None
@@ -2245,7 +2252,7 @@ class MainWindow(QtGui.QMainWindow):
         # scans = [startscan, endscan] + [others] - [excluded]
         status, extrascanlist = self._getIntArray(str(self.ui.lineEdit_extraScans.text()))
         if status is False:
-            raise RuntimeError(extrascanlsit)
+            raise RuntimeError(extrascanlist)
 
         status, excludedlist = self._getIntArray(str(self.ui.lineEdit_exclScans.text()))
         self._logDebug("Excluded list: %s" %(str(excludedlist)))
@@ -2253,7 +2260,7 @@ class MainWindow(QtGui.QMainWindow):
             self._logError(excludedlist)
             return
 
-        scanslist = range(startscan, endscan+1)
+        scanslist = list(range(startscan, endscan+1))
         scanslist.extend(extrascanlist)
         scanslist = list(set(scanslist))
         for scan in excludedlist:
@@ -2270,7 +2277,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # check binning
         same = True
-        for i in xrange(3):
+        for i in range(3):
             par_0 = binparams[i]
             par_1 = newbinparams[i]
 
@@ -2287,12 +2294,12 @@ class MainWindow(QtGui.QMainWindow):
 
         change = not same
         if change is True:
-            print "[D...............B]",
-            print "%s vs %s "  % (str(xmin), str(self._tabBinParamDict[itab][0])),
-            print "%s vs %s "  % (str(xmax), str(self._tabBinParamDict[itab][2])),
-            print "%s vs %s "  % (str(binsize), str(self._tabBinParamDict[itab][1]))
+            print("[D...............B]", end=' ')
+            print("%s vs %s "  % (str(xmin), str(self._tabBinParamDict[itab][0])), end=' ')
+            print("%s vs %s "  % (str(xmax), str(self._tabBinParamDict[itab][2])), end=' ')
+            print("%s vs %s "  % (str(binsize), str(self._tabBinParamDict[itab][1])))
         else:
-            print "[DB] Rebin = False"
+            print("[DB] Rebin = False")
 
         return change
 
@@ -2401,7 +2408,7 @@ class MainWindow(QtGui.QMainWindow):
     def _logDebug(self, dbinfo):
         """ Log debug information
         """
-        print dbinfo
+        print(dbinfo)
 
     def _logError(self, errinfo):
         """ Log error information
@@ -2412,7 +2419,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Log error information
         """
         msg = '[Notice] %s' % loginfo
-        print msg
+        print(msg)
         # QtGui.QMessageBox.information(self, "Click!", msg)
 
     def _logWarning(self, warning_info):
@@ -2493,7 +2500,7 @@ class MainWindow(QtGui.QMainWindow):
                 # Integer range
                 twoterms = level0term.split("-")
                 templist = []
-                for i in xrange(2):
+                for i in range(2):
                     valuestr = twoterms[i]
                     try:
                         intvalue = int(valuestr)
@@ -2515,7 +2522,7 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 # Undefined siutation
                 returnstatus = False
-                errmsg = "Term %s contains more than 1 dash." % (level0terms)
+                errmsg = "Term %s contains more than 1 dash." % (level0term)
             # ENDIFELSE
 
             # break loop if something is wrong
