@@ -36,32 +36,6 @@ PyObject *getCategories(IFunction &self) {
   return registered;
 }
 
-/// An object for constructing a shared_ptr that won't ever delete its pointee
-class NoDeleting {
-public:
-  /// Does nothing
-  void operator()(void *) {}
-  /// Does nothing
-  void operator()(const void *) {}
-};
-
-//------------------------------------------------------------------------------------------------------
-/**
-* Something that makes IFunction return to python a composite function
-* for Product function, Convolution or
-* any similar superclass of composite function.
-* @param self :: Enables it to be called as a member function on the
-* IFunction class
-*/
-Mantid::API::CompositeFunction_sptr castToCompositeFunction(IFunction &self) {
-  auto composite = dynamic_cast<Mantid::API::CompositeFunction *>(&self);
-  if (composite) {
-    return boost::shared_ptr<Mantid::API::CompositeFunction>(composite,
-                                                             NoDeleting());
-  }
-  return boost::shared_ptr<Mantid::API::CompositeFunction>();
-}
-
 // -- Set property overloads --
 // setProperty(index,value,explicit)
 typedef void (IFunction::*setParameterType1)(size_t, const double &value, bool);
@@ -111,9 +85,6 @@ void export_IFunction() {
 
       .def("initialize", &IFunction::initialize, arg("self"),
            "Declares any parameters and attributes on the function")
-
-      .def("castToComposite", &castToCompositeFunction, arg("self"),
-           "Casts an Ifunction to Composite")
 
       .def("getCategories", &getCategories, arg("self"),
            "Returns a list of the categories for an algorithm")

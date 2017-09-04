@@ -290,7 +290,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
             :param name: name or index in the []
         """
  
-        comp = self.fun.castToComposite()
+        comp = self.fun
         item = comp[nameorindex]
         if isinstance(item, float):
            return  item
@@ -310,7 +310,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
             :param name: name or index in the []
             :param newValue: new value for item
         """
-        comp = self.fun.castToComposite()
+        comp = self.fun
         if isinstance( newValue, FunctionWrapper):
            comp[name] = newValue.fun
         else:
@@ -339,7 +339,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
            It should not be called directly.
        """
  
-       composite = self.fun.castToComposite()
+       composite = self.fun
        if(composite):
            return composite.__len__()
        raise RuntimeError("Not a composite Function")
