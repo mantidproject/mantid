@@ -92,7 +92,11 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         direc = Direction.Input
         default = { 'A' : {}, 'B' : 1 }
         arr = PropertyManagerProperty(name, default, direc)
-        self._check_object_attributes(arr, name, direc)
+        fake = FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args")
+        prop = fake.getProperty("Args").value
+        self._check_object_attributes(prop, name, direc)
         self._check_values(arr, **default)
 
     def _check_object_attributes(self, prop, name, direction):
