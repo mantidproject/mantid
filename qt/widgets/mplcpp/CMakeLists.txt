@@ -31,6 +31,7 @@ add_library (MantidQtWidgetsMplCpp ${LIB_SRCS} ${MOC_GENERATED_SRC} ${MOC_HEADER
 target_include_directories (MantidQtWidgetsMplCpp PUBLIC ${INCLUDES})
 target_link_libraries (MantidQtWidgetsMplCpp PRIVATE Qt4::QtGui MantidQtWidgetsCommon ${PYTHON_LIBRARIES})
 set_target_properties (MantidQtWidgetsMplCpp PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_MPLCPP)
+install ( TARGETS MantidQtWidgetsMplCpp ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 # Tests
 add_subdirectory (test)
