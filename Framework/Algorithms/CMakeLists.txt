@@ -17,8 +17,8 @@ set ( SRC_FILES
 	src/AsymmetryCalc.cpp
 	src/AverageLogData.cpp
 	src/BinaryOperateMasks.cpp
-        src/BinaryOperation.cpp
-        src/Bin2DPowderDiffraction.cpp
+       src/BinaryOperation.cpp
+       src/Bin2DPowderDiffraction.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
 	src/CalculateCountRate.cpp
