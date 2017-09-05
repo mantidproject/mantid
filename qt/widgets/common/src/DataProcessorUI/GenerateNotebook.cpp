@@ -2,7 +2,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 
 #include <boost/algorithm/string.hpp>

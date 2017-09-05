@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORVECTORSTRING_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORVECTORSTRING_H
 
-/** @class DataProcessorVectorString
+/** @class VectorString
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
     National Laboratory & European Spallation Source

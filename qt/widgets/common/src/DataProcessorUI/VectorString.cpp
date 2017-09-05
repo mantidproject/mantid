@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {

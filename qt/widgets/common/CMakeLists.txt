@@ -80,7 +80,7 @@
 	src/DataProcessorUI/QTwoLevelTreeModel.cpp
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
-	src/DataProcessorUI/DataProcessorVectorString.cpp
+	src/DataProcessorUI/VectorString.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DisplayCurveFit.cpp
@@ -338,7 +338,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/TreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/VectorString.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h
