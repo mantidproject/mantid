@@ -48,6 +48,12 @@ DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm(
     : DataProcessorProcessingAlgorithm(name, convertStringToVector(prefix),
                                        convertStringToSet(blacklist)) {}
 
+/**
+ * Constructor
+*/
+DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm()
+    : m_prefix(), m_inputProperties(), m_outputProperties() {}
+
 // Destructor
 DataProcessorProcessingAlgorithm::~DataProcessorProcessingAlgorithm() {}
 

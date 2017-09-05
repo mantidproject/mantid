@@ -5893,42 +5893,42 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>UBMatrixPeakTable</class>
    <extends>QTableWidget</extends>
-   <header>hfctables.h</header>
+   <header>HFIR_4Circle_Reduction/hfctables.h</header>
   </customwidget>
   <customwidget>
    <class>UBMatrixTable</class>
    <extends>QTableWidget</extends>
-   <header>hfctables.h</header>
+   <header>HFIR_4Circle_Reduction/hfctables.h</header>
   </customwidget>
   <customwidget>
    <class>ProcessTableWidget</class>
    <extends>QTableWidget</extends>
-   <header>hfctables.h</header>
+   <header>HFIR_4Circle_Reduction/hfctables.h</header>
   </customwidget>
   <customwidget>
    <class>ScanSurveyTable</class>
    <extends>QTableWidget</extends>
-   <header>hfctables.h</header>
+   <header>HFIR_4Circle_Reduction/hfctables.h</header>
   </customwidget>
   <customwidget>
    <class>IntegratedPeakView</class>
    <extends>QGraphicsView</extends>
-   <header>integratedpeakview.h</header>
+   <header>HFIR_4Circle_Reduction/integratedpeakview.h</header>
   </customwidget>
   <customwidget>
    <class>Detector2DView</class>
    <extends>QGraphicsView</extends>
-   <header>detector2dview.h</header>
+   <header>HFIR_4Circle_Reduction/detector2dview.h</header>
   </customwidget>
   <customwidget>
    <class>KShiftTableWidget</class>
    <extends>QTableWidget</extends>
-   <header>hfctables.h</header>
+   <header>HFIR_4Circle_Reduction/hfctables.h</header>
   </customwidget>
   <customwidget>
    <class>MatrixTable</class>
    <extends>QTableWidget</extends>
-   <header>hfctables.h</header>
+   <header>HFIR_4Circle_Reduction/hfctables.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

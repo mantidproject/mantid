@@ -1542,6 +1542,8 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessor
                      const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessingAlgorithm &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
+                     QWidget *parent );
+QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::DataProcessorPreprocessMap &,
                      const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessingAlgorithm &,
                      QWidget *parent );
@@ -1556,11 +1558,19 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessor
                      QWidget *parent );
 void accept(MantidQt::MantidWidgets::DataProcessor::DataProcessorMainPresenter *);
 void setInstrumentList(const QString &instruments, const QString &defaultInstrument);
+QString getCurrentInstrument() const;
 void transfer(const QList<QString> &);
 void setForcedReProcessing(bool);
+void setCell(const QString &, int, int, int parentRow = 0, int parentColumn = 0);
+QString getCell(int, int, int parentRow = 0, int parentColumn = 0);
+int getNumberOfRows();
+void clearTable();
 
 signals:
 void runPythonCode(const QString &);
+void processButtonClicked();
+void processingFinished();
+void instrumentHasChanged();
 
 private:
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);

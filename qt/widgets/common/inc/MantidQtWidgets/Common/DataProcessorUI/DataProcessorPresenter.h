@@ -99,6 +99,12 @@ public:
                                const QString &title) const = 0;
   virtual bool isProcessing() const = 0;
   virtual void setForcedReProcessing(bool forceReProcessing) = 0;
+  virtual void setCell(int row, int column, int parentRow, int parentColumn,
+                       const std::string &value) = 0;
+  virtual std::string getCell(int row, int column, int parentRow,
+                              int parentColumn) = 0;
+  virtual int getNumberOfRows() = 0;
+  virtual void clearTable() = 0;
 };
 }
 }

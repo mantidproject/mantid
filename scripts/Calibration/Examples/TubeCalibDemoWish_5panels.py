@@ -11,6 +11,9 @@ This examples show how you can use these runs to produce a single calibration ta
 to calibrate the whole instrument.
 
 """
+
+from __future__ import absolute_import, division, print_function
+
 import numpy
 import mantid.simpleapi as mantid
 

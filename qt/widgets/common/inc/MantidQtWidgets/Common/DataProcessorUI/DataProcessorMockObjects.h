@@ -68,6 +68,9 @@ public:
   // Processing options
   MOCK_METHOD1(setForcedReProcessing, void(bool));
 
+  // Accessor
+  MOCK_CONST_METHOD0(getCurrentInstrument, QString());
+
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
   // copyable which means we have to mock addActions() via a proxy method
@@ -80,6 +83,9 @@ public:
   void showTable(boost::shared_ptr<
       MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>) override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
+
+  void emitProcessClicked() override{};
+  void emitProcessingFinished() override{};
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
 };
@@ -160,7 +166,13 @@ private:
   void transfer(const std::vector<std::map<QString, QString>> &) override {}
   void setInstrumentList(const QStringList &, const QString &) override {}
   // void accept(WorkspaceReceiver *) {};
-  void acceptViews(DataProcessorView *, ProgressableView *) override {}
+  void acceptViews(DataProcessorView *, ProgressableView *) override{};
+
+  void setCell(int, int, int, int, const std::string &) override{};
+  std::string getCell(int, int, int, int) override { return ""; };
+  int getNumberOfRows() override { return 2; }
+
+  void clearTable() override {}
 
   std::map<QString, QVariant> m_options;
 };

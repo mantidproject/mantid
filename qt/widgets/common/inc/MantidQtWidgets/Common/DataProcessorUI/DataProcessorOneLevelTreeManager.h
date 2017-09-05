@@ -88,6 +88,11 @@ public:
   /// Get the number of rows of a given parent
   int rowCount() const override;
   int rowCount(int parent) const override;
+  void setCell(int row, int column, int parentRow, int parentColumn,
+               const std::string &value) override;
+  int getNumberOfRows() override;
+  std::string getCell(int row, int column, int parentRow,
+                      int parentColumn) override;
   /// Get the 'processed' status of a data item
   bool isProcessed(int position) const override;
   bool isProcessed(int position, int parent) const override;
