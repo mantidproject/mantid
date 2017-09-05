@@ -28,7 +28,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/PlotRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
@@ -146,7 +146,7 @@ public:
 
   void test_process_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorProcessCommand command(&mockPresenter);
+    ProcessCommand command(&mockPresenter);
 
     // The presenter should be notified with the ProcessFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ProcessFlag))

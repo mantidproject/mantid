@@ -8,7 +8,7 @@ namespace MantidWidgets {
 namespace DataProcessor {
 /** @class PauseCommand
 
-DataProcessorProcessCommand defines the action "Pause"
+ProcessCommand defines the action "Pause"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

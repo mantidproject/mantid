@@ -1904,13 +1904,13 @@ PlotRowCommand();
 PlotRowCommand(const MantidQt::MantidWidgets::DataProcessor::PlotRowCommand &);
 };
 
-class DataProcessorProcessCommand
+class ProcessCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h"
 %End
 public:
-DataProcessorProcessCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+ProcessCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1919,8 +1919,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorProcessCommand();
-DataProcessorProcessCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessCommand &);
+ProcessCommand();
+ProcessCommand(const MantidQt::MantidWidgets::DataProcessor::ProcessCommand &);
 };
 
 class DataProcessorSaveTableCommand
