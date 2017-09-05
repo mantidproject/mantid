@@ -39,7 +39,7 @@ namespace MantidWidgets {
 class InstrumentActor;
 class InstrumentWidget;
 class MiniPlot;
-class MiniPlotCurveData;
+struct MiniPlotCurveData;
 class PeakMarker2D;
 
 /**

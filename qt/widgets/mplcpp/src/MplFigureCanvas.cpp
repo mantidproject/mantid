@@ -583,6 +583,7 @@ void MplFigureCanvas::addText(double x, double y, const char *label) {
  */
 bool MplFigureCanvas::eventFilter(QObject *watched, QEvent *evt) {
   assert(watched == canvasWidget());
+  Q_UNUSED(watched); // make release build happy
   auto type = evt->type();
   if (type == QEvent::MouseButtonPress)
     mousePressEvent(static_cast<QMouseEvent *>(evt));

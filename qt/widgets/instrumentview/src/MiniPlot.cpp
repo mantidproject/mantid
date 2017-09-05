@@ -3,7 +3,7 @@
 #include <QContextMenuEvent>
 #include <QVBoxLayout>
 
-#include <cassert>
+#include <array>
 
 namespace {
 
