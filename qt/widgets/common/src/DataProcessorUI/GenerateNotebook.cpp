@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/make_unique.h"
@@ -48,7 +48,7 @@ the corresponding hinting line edit in the view
 specified via the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
-DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
+GenerateNotebook::GenerateNotebook(
     QString name, const QString instrument,
     const DataProcessorWhiteList &whitelist,
     const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
@@ -73,7 +73,7 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
   @param data : the processed data
   @returns ipython notebook string
   */
-QString DataProcessorGenerateNotebook::generateNotebook(const TreeData &data) {
+QString GenerateNotebook::generateNotebook(const TreeData &data) {
 
   auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
 

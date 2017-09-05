@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORGENERATENOTEBOOK_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORGENERATENOTEBOOK_H
 
-/** @class DataProcessorGenerateNotebook
+/** @class GenerateNotebook
 
     This class creates ipython notebooks from the ISIS DataProcessorUI
     (Polref) interface
@@ -95,10 +95,10 @@ loadRunString(const QString &run, const QString &instrument,
 QString DLLExport
 completeOutputProperties(const QString &algName, size_t currentProperties);
 
-class DLLExport DataProcessorGenerateNotebook {
+class DLLExport GenerateNotebook {
 
 public:
-  DataProcessorGenerateNotebook(
+  GenerateNotebook(
       QString name, const QString instrument,
       const DataProcessorWhiteList &whitelist,
       const std::map<QString, DataProcessorPreprocessingAlgorithm> &
@@ -108,7 +108,7 @@ public:
       const std::map<QString, QString> preprocessingInstructionsMap,
       const QString processingInstructions,
       const QString postprocessingInstructions);
-  virtual ~DataProcessorGenerateNotebook(){};
+  virtual ~GenerateNotebook(){};
 
   QString generateNotebook(const TreeData &data);
 

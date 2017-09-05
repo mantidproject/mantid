@@ -10,7 +10,7 @@
 #include <boost/algorithm/string/split.hpp>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h"
 
 using namespace MantidQt::MantidWidgets;
@@ -18,7 +18,7 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 using namespace testing;
 
-class DataProcessorGenerateNotebookTest : public CxxTest::TestSuite {
+class GenerateNotebookTest : public CxxTest::TestSuite {
 
 private:
   // Creates a map with pre-processing instruction for reflectometry
@@ -95,10 +95,10 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DataProcessorGenerateNotebookTest *createSuite() {
-    return new DataProcessorGenerateNotebookTest();
+  static GenerateNotebookTest *createSuite() {
+    return new GenerateNotebookTest();
   }
-  static void destroySuite(DataProcessorGenerateNotebookTest *suite) {
+  static void destroySuite(GenerateNotebookTest *suite) {
     delete suite;
   }
 
@@ -127,7 +127,7 @@ public:
     }
   }
 
-  DataProcessorGenerateNotebookTest() { FrameworkManager::Instance(); }
+  GenerateNotebookTest() { FrameworkManager::Instance(); }
 
   // Create a notebook to test
   void setUp() override {
@@ -137,7 +137,7 @@ public:
 
   void testGenerateNotebookFirstLines() {
 
-    auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
+    auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
         std::map<QString, DataProcessorPreprocessingAlgorithm>(),
         reflProcessor(), reflPostprocessor(), std::map<QString, QString>(), "",
@@ -624,7 +624,7 @@ public:
     auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
     auto postprocessingOptions = "Params=0.04";
 
-    auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
+    auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
         postProcessor, preprocessingOptions, processingOptions,
         postprocessingOptions);
@@ -721,7 +721,7 @@ public:
     auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
     auto postprocessingOptions = "Params=0.04";
 
-    auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
+    auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
         postProcessor, preprocessingOptions, processingOptions,
         postprocessingOptions);
