@@ -238,7 +238,7 @@ void export_IFunction() {
            (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
       .def("nDomains", &IFunction::getNumberDomains, arg("self"),
-          "Get the number of domains.")
+           "Get the number of domains.")
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"),
            "Return a string representation of the function");
