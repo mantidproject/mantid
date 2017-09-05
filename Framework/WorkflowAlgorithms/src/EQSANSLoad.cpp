@@ -832,7 +832,6 @@ void EQSANSLoad::exec() {
                                    getPropertyValue("OutputWorkspace"), true);
   setProperty<MatrixWorkspace_sptr>(
       "OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
-  // m_output_message = "Loaded " + fileName + '\n' + m_output_message;
   setPropertyValue("OutputMessage", m_output_message);
 }
 
