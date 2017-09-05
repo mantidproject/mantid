@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 
 namespace MantidQt {
@@ -15,7 +15,7 @@ class QTwoLevelTreeModel;
 /** @class TwoLevelTreeManager
 
 TwoLevelTreeManager is a concrete implementation of a
-DataProcessorTreeManager that handles a two-level tree view (which corresponds
+TreeManager that handles a two-level tree view (which corresponds
 to a DataProcessorUI with a post-processing algorithm defined).
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -40,7 +40,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON TwoLevelTreeManager
-    : public DataProcessorTreeManager {
+    : public TreeManager {
 public:
   /// Constructor
   TwoLevelTreeManager(DataProcessorPresenter *presenter,
