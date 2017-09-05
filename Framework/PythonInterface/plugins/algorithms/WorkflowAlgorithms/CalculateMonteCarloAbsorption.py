@@ -198,7 +198,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Back thickness of the container environment (cm)')
 
-        container_flat_plate_condition = VisibleWhenProperty(container_condition, flat_plate_condition, LogicOperator.And)
+        container_flat_plate_condition = VisibleWhenProperty(container_condition, flat_plate_condition,
+                                                             LogicOperator.And)
 
         self.setPropertySettings('ContainerFrontThickness', container_flat_plate_condition)
         self.setPropertySettings('ContainerBackThickness', container_flat_plate_condition)
@@ -210,7 +211,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         not_flat_plate_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsNotEqualTo, 'FlatPlate')
 
-        container_n_f_p_condition = VisibleWhenProperty(container_condition, not_flat_plate_condition, LogicOperator.And)
+        container_n_f_p_condition = VisibleWhenProperty(container_condition, not_flat_plate_condition,
+                                                        LogicOperator.And)
 
         self.declareProperty(name='ContainerInnerRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
@@ -281,7 +283,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
             prog.report('Calculating container absorption factors')
 
-            container_wave_1 = self._convert_to_wavelength(self._container_ws_name, '__container_wave_1')
+            container_wave_1 = self._convert_to_wavelength(self._container_ws_name)
             container_wave_2 = self._clone_ws(container_wave_1)
 
             container_kwargs = dict()
