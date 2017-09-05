@@ -49,11 +49,11 @@ class PowderILLReduction(PythonAlgorithm):
                              doc='File path of run(s).')
 
         self.declareProperty(FileProperty('CalibrationFile', '',
-                                          action=FileAction.OptionalLoad, extensions=['.nxs']),
+                                          action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the detector efficiencies.')
 
         self.declareProperty(FileProperty('ROCFile', '',
-                                          action=FileAction.OptionalLoad, extensions=['.nxs']),
+                                          action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the radial oscillating collimator (ROC) corrections.')
 
         self.declareProperty(name='NormaliseTo',
