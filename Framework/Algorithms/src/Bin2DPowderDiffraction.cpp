@@ -70,7 +70,7 @@ void Bin2DPowderDiffraction::init() {
     declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                         "InputWorkspace", "", Direction::Input,
                         wsValidator),
-                    "An input EventWorkspace must be a Histogram workspace, not Point data."
+                    "An input EventWorkspace must be a Histogram workspace, not Point data. "
                     "X-axis units must be wavelength.");
 
     declareProperty(
