@@ -248,7 +248,6 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # basic options
         self._input_ws_name = self.getPropertyValue('InputWorkspace')
-        self._indirect_inelastic = self.getProperty("IndirectElastic").value
         self._material_defined = self.getProperty('MaterialAlreadyDefined').value
         self._chemical_formula = self.getPropertyValue('ChemicalFormula')
         self._density_type = self.getPropertyValue('DensityType')
