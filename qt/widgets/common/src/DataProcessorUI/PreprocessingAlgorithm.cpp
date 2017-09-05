@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -10,7 +10,7 @@ namespace DataProcessor {
  * @param blacklist : The list of properties we don't want to show
  * algorithm in the processed workspace's name
  */
-DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
+PreprocessingAlgorithm::PreprocessingAlgorithm(
     const QString &name, const QString &prefix,
     const std::set<QString> &blacklist)
     : DataProcessorProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
@@ -42,36 +42,36 @@ DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
 * @param blacklist : The list of properties we don't want to show, as a string
 * algorithm in the processed workspace's name
 */
-DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
+PreprocessingAlgorithm::PreprocessingAlgorithm(
     const QString &name, const QString &prefix, const QString &blacklist)
-    : DataProcessorPreprocessingAlgorithm(name, prefix,
+    : PreprocessingAlgorithm(name, prefix,
                                           convertStringToSet(blacklist)) {}
 
 /** Default constructor: do nothing
 */
-DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm()
+PreprocessingAlgorithm::PreprocessingAlgorithm()
     : m_prefix(), m_lhs(), m_rhs(), m_outProperty() {}
 
 // Destructor
-DataProcessorPreprocessingAlgorithm::~DataProcessorPreprocessingAlgorithm() {}
+PreprocessingAlgorithm::~PreprocessingAlgorithm() {}
 
 // Returns the name of the lhs input property
-QString DataProcessorPreprocessingAlgorithm::lhsProperty() const {
+QString PreprocessingAlgorithm::lhsProperty() const {
   return m_lhs;
 }
 
 // Returns the name of the rhs input property
-QString DataProcessorPreprocessingAlgorithm::rhsProperty() const {
+QString PreprocessingAlgorithm::rhsProperty() const {
   return m_rhs;
 }
 
 // Returns the name of the output property
-QString DataProcessorPreprocessingAlgorithm::outputProperty() const {
+QString PreprocessingAlgorithm::outputProperty() const {
   return m_outProperty;
 }
 
 // Returns the prefix to add to the output property
-QString DataProcessorPreprocessingAlgorithm::prefix() const { return m_prefix; }
+QString PreprocessingAlgorithm::prefix() const { return m_prefix; }
 }
 }
 }

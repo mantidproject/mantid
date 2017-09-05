@@ -390,7 +390,7 @@ Then in the implementation, the following should be enough:
         const std::string &loader)
         : GenericDataProcessorPresenter(
               whitelist,
-              std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
+              std::map<std::string, PreprocessingAlgorithm>(),
               processor, PostprocessingAlgorithm(),
               std::map<std::string, std::string>(), loader) {}
 

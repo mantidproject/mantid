@@ -22,15 +22,15 @@ class GenerateNotebookTest : public CxxTest::TestSuite {
 
 private:
   // Creates a map with pre-processing instruction for reflectometry
-  std::map<QString, DataProcessorPreprocessingAlgorithm>
+  std::map<QString, PreprocessingAlgorithm>
   reflPreprocessMap(const QString &plusPrefix = "") {
 
     // Reflectometry pre-process map
-    return std::map<QString, DataProcessorPreprocessingAlgorithm>{
-        {"Run(s)", DataProcessorPreprocessingAlgorithm("Plus", plusPrefix,
+    return std::map<QString, PreprocessingAlgorithm>{
+        {"Run(s)", PreprocessingAlgorithm("Plus", plusPrefix,
                                                        std::set<QString>())},
         {"Transmission Run(s)",
-         DataProcessorPreprocessingAlgorithm(
+         PreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
              std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
                                "OutputWorkspace"})}};
@@ -139,7 +139,7 @@ public:
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
-        std::map<QString, DataProcessorPreprocessingAlgorithm>(),
+        std::map<QString, PreprocessingAlgorithm>(),
         reflProcessor(), reflPostprocessor(), std::map<QString, QString>(), "",
         "");
 
@@ -258,7 +258,7 @@ public:
   }
 
   void testLoadWorkspaceStringThreeRunsWithOptions() {
-    DataProcessorPreprocessingAlgorithm preprocessor("WeightedMean");
+    PreprocessingAlgorithm preprocessor("WeightedMean");
     auto output = loadWorkspaceString("RUN1+RUN2,RUN3", "INST_", preprocessor,
                                       "Property1 = 1, Property2 = 2");
     auto outputLines = splitIntoLines(boost::get<0>(output));
@@ -330,8 +330,8 @@ public:
     whitelist.addElement("Options", "Options", "");
 
     // Create a pre-process map
-    std::map<QString, DataProcessorPreprocessingAlgorithm> preprocessMap = {
-        {"Run", DataProcessorPreprocessingAlgorithm("Plus", "RUN_",
+    std::map<QString, PreprocessingAlgorithm> preprocessMap = {
+        {"Run", PreprocessingAlgorithm("Plus", "RUN_",
                                                     std::set<QString>())}};
     // Specify some pre-processing options
     std::map<QString, QString> userPreProcessingOptions = {
@@ -370,7 +370,7 @@ public:
     // Reduce a run without pre-processing algorithm specified (i.e. empty
     // pre-process map)
 
-    std::map<QString, DataProcessorPreprocessingAlgorithm> emptyPreProcessMap;
+    std::map<QString, PreprocessingAlgorithm> emptyPreProcessMap;
     std::map<QString, QString> emptyPreProcessingOptions;
 
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",

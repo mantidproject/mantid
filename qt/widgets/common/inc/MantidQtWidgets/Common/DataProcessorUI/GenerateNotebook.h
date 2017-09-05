@@ -30,7 +30,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -73,19 +73,19 @@ getReducedWorkspaceName(const RowData &data,
 boost::tuple<QString, QString> DLLExport reduceRowString(
     const RowData &data, const QString &instrument,
     const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const std::map<QString, QString> &preprocessOoptionsMap,
     const QString &processingOptions);
 
 boost::tuple<QString, QString> DLLExport
 loadWorkspaceString(const QString &runStr, const QString &instrument,
-                    const DataProcessorPreprocessingAlgorithm &preprocessor,
+                    const PreprocessingAlgorithm &preprocessor,
                     const QString &options);
 
 QString DLLExport
 plusString(const QString &input_name, const QString &output_name,
-           const DataProcessorPreprocessingAlgorithm &preprocessor,
+           const PreprocessingAlgorithm &preprocessor,
            const QString &options);
 
 boost::tuple<QString, QString> DLLExport
@@ -101,7 +101,7 @@ public:
   GenerateNotebook(
       QString name, const QString instrument,
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
+      const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
@@ -122,7 +122,7 @@ private:
   DataProcessorWhiteList m_whitelist;
   // The map indicating the columns that were pre-processed and their
   // corresponding pre-processing algorithms
-  std::map<QString, DataProcessorPreprocessingAlgorithm> m_preprocessMap;
+  std::map<QString, PreprocessingAlgorithm> m_preprocessMap;
   // The processing (reduction) algorithm
   DataProcessorProcessingAlgorithm m_processor;
   // The post-processing algorithm

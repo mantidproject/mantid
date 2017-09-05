@@ -51,7 +51,7 @@ specified via the corresponding hinting line edit in the view
 GenerateNotebook::GenerateNotebook(
     QString name, const QString instrument,
     const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> preprocessingOptionsMap,
@@ -405,7 +405,7 @@ void addProperties(QStringList &algProperties, const Map &optionsMap) {
 boost::tuple<QString, QString> reduceRowString(
     const RowData &data, const QString &instrument,
     const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const std::map<QString, QString> &preprocessingOptionsMap,
     const QString &processingOptions) {
@@ -443,7 +443,7 @@ boost::tuple<QString, QString> reduceRowString(
         // Some runs were given for pre-processing
 
         // The pre-processing alg
-        const DataProcessorPreprocessingAlgorithm preprocessor =
+        const PreprocessingAlgorithm preprocessor =
             preprocessMap.at(colName);
         // The pre-processing options
         const QString options = preprocessingOptionsMap.count(colName) > 0
@@ -534,7 +534,7 @@ boost::tuple<QString, QString> reduceRowString(
 */
 boost::tuple<QString, QString>
 loadWorkspaceString(const QString &runStr, const QString &instrument,
-                    const DataProcessorPreprocessingAlgorithm &preprocessor,
+                    const PreprocessingAlgorithm &preprocessor,
                     const QString &options) {
 
   auto runs = runStr.split(QRegExp("[+,]"));
@@ -583,7 +583,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
  @return string of python code
 */
 QString plusString(const QString &input_name, const QString &output_name,
-                   const DataProcessorPreprocessingAlgorithm &preprocessor,
+                   const PreprocessingAlgorithm &preprocessor,
                    const QString &options) {
   QString plusString;
 

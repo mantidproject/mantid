@@ -26,13 +26,13 @@ void DataProcessorPreprocessMap::addElement(const QString &column,
                                             const QString &blacklist) {
 
   m_map[column] =
-      DataProcessorPreprocessingAlgorithm(algorithm, prefix, blacklist);
+      PreprocessingAlgorithm(algorithm, prefix, blacklist);
 }
 
 /** Return a map where keys are columns and values pre-processing algorithms
 * @return :: Pre-processing instructions as a map
 */
-std::map<QString, DataProcessorPreprocessingAlgorithm>
+std::map<QString, PreprocessingAlgorithm>
 DataProcessorPreprocessMap::asMap() const {
   return m_map;
 }
