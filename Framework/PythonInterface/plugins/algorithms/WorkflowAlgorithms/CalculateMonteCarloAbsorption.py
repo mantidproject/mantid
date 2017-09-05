@@ -344,7 +344,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
             self._output_ws = self._group_ws([ass_ws, acc_ws])
         else:
-            self._output_ws = self._ass_ws
+            self._output_ws = ass_ws
 
         self.setProperty('CorrectionsWorkspace', self._output_ws)
 
