@@ -326,7 +326,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PlotGroupCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/PlotRowCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h
