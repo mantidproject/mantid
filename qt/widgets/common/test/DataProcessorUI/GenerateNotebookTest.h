@@ -11,7 +11,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
