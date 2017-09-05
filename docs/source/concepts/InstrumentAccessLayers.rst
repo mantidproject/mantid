@@ -1,8 +1,8 @@
 .. _InstrumentAccessLayers:
 
-===================================================
-Instrument Access via SpectrumInfo and DetectorInfo
-===================================================
+================================================================
+Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo
+================================================================
 
 .. contents::
   :local:
@@ -38,7 +38,7 @@ There is also a near-complete implementation of the "real" ``DetectorInfo`` clas
 ``ExperimentInfo`` now also provides a method ``mutableDetectorInfo()`` so that non-const access to the DetectorInfo is possible for purposes of writing detector related information such as positions or rotations. These should be used wherever possible, but note, much like the existing instrument, writes are not guranteed to be thread safe.
 
 ComponentInfo
-____________
+______________
 ``ComponentInfo`` can be obtatined from a call to ``ExperimentInfo::componentInfo()`` (usually this method would be called on ``MatrixWorkspace``). Much like ``DetectorInfo``, the ``ComponentInfo`` yielded from this method call is a wrapper, which contains shape and index information, that cannot yet be moved in to the real ``Beamline::ComponentInfo``. However, replacing existing usage of ``IComponent`` and ``IObjComponent`` wherever possible with ``ComponentInfo`` across the framework will represent a major step forwards.
 
 For writing to the component tree. You can extract a non-const ``ComponentInfo`` via ``ExperimentInfo::mutableComponentInfo``.
@@ -54,7 +54,7 @@ Before starting the refactoring work please take a look at the state of any perf
 Each PR should include the runtime metrics for the algorithms changed, so that improvements can be captured for the release notes.
 
 ComponentInfo
-############
+#############
 
 Basics
 ______
@@ -128,7 +128,7 @@ Below is an example refactoring.
   }
 
 Access to Components and working with Detectors
-___________________
+_______________________________________________
 
 Detector Indices are the same as the corresponding Component Indices. Note that there are no dynamic casts.
 
@@ -175,7 +175,7 @@ Detector Indices are the same as the corresponding Component Indices. Note that 
   }
 
 Mutable ComponentInfo
-____________________
+_____________________
 
 The method ``ExperimentInfo::mutableComponentInfo()`` returns a non-const ``ComponentInfo`` object. This allows the methods below to be used.
 
@@ -190,16 +190,6 @@ ___________
 * If a ``ComponentInfo`` object is required for more than one workspace, include the workspace name in the variable name to avoid confusion.
 * Get the ``ComponentInfo`` object as a const-ref and use ``const auto &componentInfo = ws->componentInfo();``, do not get a non-const reference unless you really do need to modify the object, and ensure that the ``&`` is always included to prevent accidental copies.
 * ``ComponentInfo`` is widely forward declared. Ensure that you import - ``#include "MantidGeometry/Instrument/ComponentInfo.h"``
-
-Complete Examples
-_________________
-
-TODO
-
-Rollout status
---------------
-
-TODO
 
 Dealing with problems
 ---------------------
