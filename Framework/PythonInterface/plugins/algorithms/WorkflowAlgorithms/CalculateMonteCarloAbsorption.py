@@ -271,10 +271,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         ss_monte_carlo_alg.execute()
         ass_ws = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
 
-        #SimpleShapeMonteCarloAbsorption(InputWorkspace=sample_wave_ws,
-        #                                OutputWorkspace=self._ass_ws_name,
-        #                                **sample_kwargs)
-
         sample_log_names = []
         sample_log_values = []
 
@@ -414,8 +410,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 self._container_outer_radius = self.getProperty('ContainerOuterRadius').value
 
         self._output_ws = self.getProperty('CorrectionsWorkspace').value
-        self._ass_ws_name = self._output_ws + '_ass'
-        self._acc_ws = self._output_ws + '_acc'
 
     def validateInputs(self):
         issues = dict()
