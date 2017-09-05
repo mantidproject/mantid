@@ -592,9 +592,8 @@ void EQSANSLoad::exec() {
     if (!isEmpty(sample_det_offset))
       sfdd += sample_det_offset;
     if (!isEmpty(sample_det_offset) && !isEmpty(sampleflange_det_offset))
-      g_log.error()
-          << "Both DetectorOffset and SampleDetectorDistanceOffset "
-             "are set. Only one should be used.\n";
+      g_log.error() << "Both DetectorOffset and SampleDetectorDistanceOffset "
+                       "are set. Only one should be used.\n";
 
     s2d = sfdd;
     // Modify S2D according to the SampleDistance offset if given
@@ -611,11 +610,13 @@ void EQSANSLoad::exec() {
       mvAlg->setProperty("Z", sampleflange_sample_offset / 1000.0);
       mvAlg->setProperty("RelativePosition", false);
       mvAlg->executeAsChildAlg();
-      g_log.information() << "Moving sample to " << sampleflange_sample_offset / 1000.0 << " meters\n";
+      g_log.information() << "Moving sample to "
+                          << sampleflange_sample_offset / 1000.0 << " meters\n";
       m_output_message += "   Sample position: " +
-                          Poco::NumberFormatter::format(sampleflange_sample_offset / 1000.0, 3) + " m\n";
+                          Poco::NumberFormatter::format(
+                              sampleflange_sample_offset / 1000.0, 3) +
+                          " m\n";
     }
-
   }
   dataWS->mutableRun().addProperty("sampleflange_detector_distance", sfdd, "mm",
                                    true);
