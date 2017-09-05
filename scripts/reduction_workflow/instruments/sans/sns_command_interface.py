@@ -133,4 +133,3 @@ def SetDetectorOffset(distance):
 
 def SetSampleOffset(distance):
     ReductionSingleton().reduction_properties["SampleOffset"] = distance
-
