@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -48,7 +48,7 @@ namespace DataProcessor {
 * @param table :: a table workspace
 * @param whitelist :: a whitelist
 */
-DataProcessorTwoLevelTreeManager::DataProcessorTwoLevelTreeManager(
+TwoLevelTreeManager::TwoLevelTreeManager(
     DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
     const DataProcessorWhiteList &whitelist)
     : m_presenter(presenter),
@@ -59,22 +59,22 @@ DataProcessorTwoLevelTreeManager::DataProcessorTwoLevelTreeManager(
 * @param presenter :: [input] The DataProcessor presenter
 * @param whitelist :: [input] A whitelist containing the number of columns
 */
-DataProcessorTwoLevelTreeManager::DataProcessorTwoLevelTreeManager(
+TwoLevelTreeManager::TwoLevelTreeManager(
     DataProcessorPresenter *presenter, const DataProcessorWhiteList &whitelist)
-    : DataProcessorTwoLevelTreeManager(
+    : TwoLevelTreeManager(
           presenter, createDefaultWorkspace(whitelist), whitelist) {}
 
 /**
 * Destructor
 */
-DataProcessorTwoLevelTreeManager::~DataProcessorTwoLevelTreeManager() {}
+TwoLevelTreeManager::~TwoLevelTreeManager() {}
 
 /**
 * Publishes a list of available commands
 * @return : The list of available commands
 */
 std::vector<Command_uptr>
-DataProcessorTwoLevelTreeManager::publishCommands() {
+TwoLevelTreeManager::publishCommands() {
 
   std::vector<Command_uptr> commands;
 
@@ -128,7 +128,7 @@ Insert a row after the last selected row. If a group was selected, the new row
 is appended to that group. If nothing was selected, the new row is appended to
 the last group in the table.
 */
-void DataProcessorTwoLevelTreeManager::appendRow() {
+void TwoLevelTreeManager::appendRow() {
 
   auto selectedGroups = m_presenter->selectedParents();
   auto selectedRows = m_presenter->selectedChildren();
@@ -165,7 +165,7 @@ void DataProcessorTwoLevelTreeManager::appendRow() {
   }
 }
 
-void DataProcessorTwoLevelTreeManager::appendGroup() {
+void TwoLevelTreeManager::appendGroup() {
   auto selectedGroups = m_presenter->selectedParents();
 
   if (selectedGroups.empty()) {
@@ -180,7 +180,7 @@ void DataProcessorTwoLevelTreeManager::appendGroup() {
 /**
 Delete row(s) from the model
 */
-void DataProcessorTwoLevelTreeManager::deleteRow() {
+void TwoLevelTreeManager::deleteRow() {
 
   auto selectedRows = m_presenter->selectedChildren();
   for (auto it = selectedRows.rbegin(); it != selectedRows.rend(); ++it) {
@@ -195,7 +195,7 @@ void DataProcessorTwoLevelTreeManager::deleteRow() {
 /**
 Delete group(s) from the model
 */
-void DataProcessorTwoLevelTreeManager::deleteGroup() {
+void TwoLevelTreeManager::deleteGroup() {
   auto selectedGroups = m_presenter->selectedParents();
   for (auto group = selectedGroups.rbegin(); group != selectedGroups.rend();
        ++group) {
@@ -206,7 +206,7 @@ void DataProcessorTwoLevelTreeManager::deleteGroup() {
 /**
 Group rows together
 */
-void DataProcessorTwoLevelTreeManager::groupRows() {
+void TwoLevelTreeManager::groupRows() {
 
   // Find if rows belong to the same group
   // If they do, do nothing
@@ -256,7 +256,7 @@ void DataProcessorTwoLevelTreeManager::groupRows() {
 * selected rows belong)
 * @return :: Groups containing selected rows
 */
-std::set<int> DataProcessorTwoLevelTreeManager::expandSelection() {
+std::set<int> TwoLevelTreeManager::expandSelection() {
   std::set<int> groupIds;
 
   auto items = m_presenter->selectedChildren();
@@ -270,7 +270,7 @@ std::set<int> DataProcessorTwoLevelTreeManager::expandSelection() {
 }
 
 /** Clear the currently selected rows */
-void DataProcessorTwoLevelTreeManager::clearSelected() {
+void TwoLevelTreeManager::clearSelected() {
 
   const auto selectedRows = m_presenter->selectedChildren();
 
@@ -286,7 +286,7 @@ void DataProcessorTwoLevelTreeManager::clearSelected() {
 }
 
 /** Return the currently selected rows as a string */
-QString DataProcessorTwoLevelTreeManager::copySelected() {
+QString TwoLevelTreeManager::copySelected() {
   QStringList lines;
 
   const auto selectedRows = m_presenter->selectedChildren();
@@ -318,7 +318,7 @@ QString DataProcessorTwoLevelTreeManager::copySelected() {
 * append new rows
 * @param text :: Selected rows to paste as a string
 */
-void DataProcessorTwoLevelTreeManager::pasteSelected(const QString &text) {
+void TwoLevelTreeManager::pasteSelected(const QString &text) {
 
   if (text.isEmpty())
     return;
@@ -373,7 +373,7 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const QString &text) {
 /** Opens a blank table
 * @param whitelist :: A whitelist with the columns for the new table
 */
-void DataProcessorTwoLevelTreeManager::newTable(
+void TwoLevelTreeManager::newTable(
     const DataProcessorWhiteList &whitelist) {
 
   m_model.reset(new QDataProcessorTwoLevelTreeModel(
@@ -384,7 +384,7 @@ void DataProcessorTwoLevelTreeManager::newTable(
 * @param table :: A table to open
 * @param whitelist :: A whitelist with the columns for the new table
 */
-void DataProcessorTwoLevelTreeManager::newTable(
+void TwoLevelTreeManager::newTable(
     ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
 
   if (isValidModel(table, whitelist.size())) {
@@ -399,7 +399,7 @@ Inserts a new row to the specified group in the specified location
 @param groupIndex :: The index to insert the new row after
 @param rowIndex :: The index to insert the new row after
 */
-void DataProcessorTwoLevelTreeManager::insertRow(int groupIndex, int rowIndex) {
+void TwoLevelTreeManager::insertRow(int groupIndex, int rowIndex) {
 
   m_model->insertRow(rowIndex, m_model->index(groupIndex, 0));
 }
@@ -408,7 +408,7 @@ void DataProcessorTwoLevelTreeManager::insertRow(int groupIndex, int rowIndex) {
 Inserts a new group in the specified location
 @param groupIndex :: The index to insert the new row after
 */
-void DataProcessorTwoLevelTreeManager::insertGroup(int groupIndex) {
+void TwoLevelTreeManager::insertGroup(int groupIndex) {
 
   m_model->insertRow(groupIndex);
 }
@@ -417,7 +417,7 @@ void DataProcessorTwoLevelTreeManager::insertGroup(int groupIndex) {
 @param group : The group to count the rows of
 @returns The number of rows in the group
 */
-int DataProcessorTwoLevelTreeManager::numRowsInGroup(int group) const {
+int TwoLevelTreeManager::numRowsInGroup(int group) const {
 
   return m_model->rowCount(m_model->index(group, 0));
 }
@@ -428,7 +428,7 @@ int DataProcessorTwoLevelTreeManager::numRowsInGroup(int group) const {
 * @return :: Selected data as a map where keys are units of post-processing and
 * values are
 */
-TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
+TreeData TwoLevelTreeManager::selectedData(bool prompt) {
 
   TreeData selectedData;
 
@@ -525,7 +525,7 @@ TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
 * @param runs :: [input] Data to transfer as a vector of maps
 * @param whitelist :: [input] Whitelist containing number of columns
 */
-void DataProcessorTwoLevelTreeManager::transfer(
+void TwoLevelTreeManager::transfer(
     const std::vector<std::map<QString, QString>> &runs,
     const DataProcessorWhiteList &whitelist) {
 
@@ -574,7 +574,7 @@ void DataProcessorTwoLevelTreeManager::transfer(
 * @param child :: the row
 * @param data :: the data
 */
-void DataProcessorTwoLevelTreeManager::update(int parent, int child,
+void TwoLevelTreeManager::update(int parent, int child,
                                               const QStringList &data) {
 
   if (static_cast<int>(data.size()) != m_model->columnCount())
@@ -588,7 +588,7 @@ void DataProcessorTwoLevelTreeManager::update(int parent, int child,
 /** Gets the number of groups in the table
 * @return : Number of groups
 */
-int DataProcessorTwoLevelTreeManager::rowCount() const {
+int TwoLevelTreeManager::rowCount() const {
   return m_model->rowCount();
 }
 
@@ -596,7 +596,7 @@ int DataProcessorTwoLevelTreeManager::rowCount() const {
 * @param parent : Index of the parent group
 * @return : Number of rows of a group
 */
-int DataProcessorTwoLevelTreeManager::rowCount(int parent) const {
+int TwoLevelTreeManager::rowCount(int parent) const {
   return m_model->rowCount(m_model->index(parent, 0));
 }
 
@@ -604,7 +604,7 @@ int DataProcessorTwoLevelTreeManager::rowCount(int parent) const {
 * @param position : The row index
 * @return : 'process' status
 */
-bool DataProcessorTwoLevelTreeManager::isProcessed(int position) const {
+bool TwoLevelTreeManager::isProcessed(int position) const {
   return m_model->isProcessed(position);
 }
 
@@ -613,7 +613,7 @@ bool DataProcessorTwoLevelTreeManager::isProcessed(int position) const {
 * @param parent : The parent of the row
 * @return : 'process' status
 */
-bool DataProcessorTwoLevelTreeManager::isProcessed(int position,
+bool TwoLevelTreeManager::isProcessed(int position,
                                                    int parent) const {
   return m_model->isProcessed(position, m_model->index(parent, 0));
 }
@@ -622,7 +622,7 @@ bool DataProcessorTwoLevelTreeManager::isProcessed(int position,
 * @param processed : True to set group as processed, false to set unprocessed
 * @param position : The index of the group to be set
 */
-void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
+void TwoLevelTreeManager::setProcessed(bool processed,
                                                     int position) {
   m_model->setProcessed(processed, position);
 }
@@ -632,7 +632,7 @@ void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
 * @param position : The index of the row to be set
 * @param parent : The parent of the row
 */
-void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
+void TwoLevelTreeManager::setProcessed(bool processed,
                                                     int position, int parent) {
   m_model->setProcessed(processed, position, m_model->index(parent, 0));
 }
@@ -641,14 +641,14 @@ void DataProcessorTwoLevelTreeManager::setProcessed(bool processed,
 * @return :: A shared ptr to the model
 */
 boost::shared_ptr<AbstractTreeModel>
-DataProcessorTwoLevelTreeManager::getModel() {
+TwoLevelTreeManager::getModel() {
   return m_model;
 }
 
 /** Returns the table workspace containing the data
 * @return :: The table workspace
 */
-ITableWorkspace_sptr DataProcessorTwoLevelTreeManager::getTableWorkspace() {
+ITableWorkspace_sptr TwoLevelTreeManager::getTableWorkspace() {
 
   return m_model->getTableWorkspace();
 }
@@ -658,7 +658,7 @@ ITableWorkspace_sptr DataProcessorTwoLevelTreeManager::getTableWorkspace() {
 * @param whitelist :: The whitelist that will be used to create a new table
 * @return : A default table
 */
-ITableWorkspace_sptr DataProcessorTwoLevelTreeManager::createDefaultWorkspace(
+ITableWorkspace_sptr TwoLevelTreeManager::createDefaultWorkspace(
     const DataProcessorWhiteList &whitelist) {
   ITableWorkspace_sptr ws =
       Mantid::API::WorkspaceFactory::Instance().createTable();
@@ -681,7 +681,7 @@ ITableWorkspace_sptr DataProcessorTwoLevelTreeManager::createDefaultWorkspace(
 * @param ws :: the table workspace
 * @param whitelistColumns :: the number of columns as specified in a whitelist
 */
-void DataProcessorTwoLevelTreeManager::validateModel(
+void TwoLevelTreeManager::validateModel(
     ITableWorkspace_sptr ws, size_t whitelistColumns) const {
 
   if (!ws)
@@ -709,7 +709,7 @@ void DataProcessorTwoLevelTreeManager::validateModel(
 * @param whitelistColumns : [input] The number of columns in the whitelist
 * @throws std::runtime_error if the number of columns in the table is incorrect
 */
-bool DataProcessorTwoLevelTreeManager::isValidModel(
+bool TwoLevelTreeManager::isValidModel(
     Workspace_sptr ws, size_t whitelistColumns) const {
 
   try {
@@ -730,7 +730,7 @@ bool DataProcessorTwoLevelTreeManager::isValidModel(
  * @param parentColumn : the column index of the parent item
  * @param value : the new value to populate the cell with
 */
-void DataProcessorTwoLevelTreeManager::setCell(int row, int column,
+void TwoLevelTreeManager::setCell(int row, int column,
                                                int parentRow, int parentColumn,
                                                const std::string &value) {
 
@@ -747,7 +747,7 @@ void DataProcessorTwoLevelTreeManager::setCell(int row, int column,
  * @param parentColumn : the column index of the parent item (unused)
  * @return : the value in the cell as a string
 */
-std::string DataProcessorTwoLevelTreeManager::getCell(int row, int column,
+std::string TwoLevelTreeManager::getCell(int row, int column,
                                                       int parentRow,
                                                       int parentColumn) {
 
@@ -761,7 +761,7 @@ std::string DataProcessorTwoLevelTreeManager::getCell(int row, int column,
  * Get number of rows.
  * @return the number of rows.
  */
-int DataProcessorTwoLevelTreeManager::getNumberOfRows() {
+int TwoLevelTreeManager::getNumberOfRows() {
   return m_model->rowCount();
 }
 
