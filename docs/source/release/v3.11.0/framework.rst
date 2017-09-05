@@ -44,6 +44,9 @@ Improved
 - :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 - :ref:`SumSpectra <algm-SumSpectra-v1>`: Fixed a bug where a wrong fallback value would be used in case of invalid values being set for min/max worspace index, and improved input validation for those properties.
+- :ref:`LoadBBY <algm-LoadBBY-v1>`: Fixed bug where the logManager did not work with sample_name, sample_aperture and source_aperture. Also added more information regarding the sample and the selected choppers.
+
+
 
 Deprecated
 ##########
@@ -72,6 +75,7 @@ New
 
 - :ref:`PrimStretchedExpFT <func-PrimStretchedExpFT>` Provides the Fourier Transform of the Symmetrized Stretched Exponential Function integrated over each energy bin. Use in place of :ref:`StretchedExpFT <func-StretchedExpFT>` for fitting sample data featuring relaxation times longer than the resolution of the instrument.
 - :ref:`GramCharlier <func-GramCharlier>` is a new fit function primarily for use in neutron compton scattering.
+- :ref:`SplineInterpolation <algm-SplineInterpolation>` is extended to support also linear interpolation, if only 2 points are given.
 
 Bug fixes
 #########

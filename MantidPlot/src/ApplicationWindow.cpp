@@ -573,8 +573,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
 
   // Scripting
   m_script_envs = QHash<QString, ScriptingEnv *>();
+  m_iface_script = nullptr;
   setScriptingLanguage(defaultScriptingLang);
-  m_iface_script = NULL;
 
   m_interpreterDock = new QDockWidget(this);
   m_interpreterDock->setObjectName(
@@ -15043,10 +15043,9 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
                                         bool quiet, bool redirect) {
   if (code.isEmpty())
     return false;
-
-  if (m_iface_script == NULL) {
+  if (!m_iface_script) {
     if (setScriptingLanguage("Python")) {
-      m_iface_script = scriptingEnv()->newScript("<Interface>", NULL,
+      m_iface_script = scriptingEnv()->newScript("<Interface>", nullptr,
                                                  Script::NonInteractive);
     } else {
       return false;
@@ -15065,12 +15064,20 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
   }
   bool success(false);
   if (async) {
-    QFuture<bool> job = m_iface_script->executeAsync(ScriptCode(code));
-    while (job.isRunning()) {
-      QCoreApplication::instance()->processEvents();
+    m_iface_script->recursiveAsyncSetup();
+    auto job = m_iface_script->executeAsync(ScriptCode(code));
+    // Start a local event loop to keep processing events
+    // while we are running the script. Inspired by the IPython
+    // Qt inputhook in IPython.terminal.pt_inputhooks.qt
+    QEventLoop eventLoop(QApplication::instance());
+    QTimer timer;
+    connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
+    while (!job.isFinished()) {
+      timer.start(50);
+      eventLoop.exec();
+      timer.stop();
     }
-    // Ensure the remaining events are processed
-    QCoreApplication::instance()->processEvents();
+    m_iface_script->recursiveAsyncTeardown();
     success = job.result();
   } else {
     success = m_iface_script->execute(ScriptCode(code));
