@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorOpenTableCommand
+/** @class OpenTableCommand
 
-DataProcessorOpenTableCommand defines the action "Open Table"
+OpenTableCommand defines the action "Open Table"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorOpenTableCommand : public CommandBase {
+class OpenTableCommand : public CommandBase {
 public:
-  DataProcessorOpenTableCommand(DataProcessorPresenter *tablePresenter)
+  OpenTableCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorOpenTableCommand(const QDataProcessorWidget &widget)
+  OpenTableCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorOpenTableCommand(){};
+  virtual ~OpenTableCommand(){};
 
   void execute() override{
       // This action should do nothing

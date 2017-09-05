@@ -1819,13 +1819,13 @@ NewTableCommand();
 NewTableCommand(const MantidQt::MantidWidgets::DataProcessor::NewTableCommand &);
 };
 
-class DataProcessorOpenTableCommand
+class OpenTableCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h"
 %End
 public:
-DataProcessorOpenTableCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+OpenTableCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1834,8 +1834,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorOpenTableCommand();
-DataProcessorOpenTableCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorOpenTableCommand &);
+OpenTableCommand();
+OpenTableCommand(const MantidQt::MantidWidgets::DataProcessor::OpenTableCommand &);
 };
 
 class DataProcessorOptionsCommand
