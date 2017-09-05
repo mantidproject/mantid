@@ -20,7 +20,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPauseCommand.h"
@@ -54,7 +54,7 @@ public:
 
   void test_open_table_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorOpenTableCommand command(&mockPresenter);
+    OpenTableCommand command(&mockPresenter);
 
     // The presenter should be notified with the OpenTableFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::OpenTableFlag))

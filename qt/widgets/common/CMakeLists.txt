@@ -321,7 +321,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPauseCommand.h

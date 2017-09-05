@@ -164,7 +164,7 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
         self._create_action(MantidQt.MantidWidgets.DeleteGroupCommand(self.data_processor_table), self.menuEdit)
 
         # Actions that go in the 'File' menu
-        self._create_action(MantidQt.MantidWidgets.DataProcessorOpenTableCommand(self.data_processor_table), self.menuFile, workspace_list)
+        self._create_action(MantidQt.MantidWidgets.OpenTableCommand(self.data_processor_table), self.menuFile, workspace_list)
         self._create_action(MantidQt.MantidWidgets.NewTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableAsCommand(self.data_processor_table), self.menuFile)
@@ -181,7 +181,7 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
     def _create_action(self, command, menu, workspace_list = None):
         """
         Create an action from a given Command and add it to a given menu
-        A 'workspace_list' can be provided but it is only intended to be used with DataProcessorOpenTableCommand.
+        A 'workspace_list' can be provided but it is only intended to be used with OpenTableCommand.
         It refers to the list of table workspaces in the ADS that could be loaded into the widget. Note that only
         table workspaces with an appropriate number of columns and column types can be loaded.
         """

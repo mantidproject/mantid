@@ -48,7 +48,7 @@ set ( SIP_HDRS
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h
-  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h

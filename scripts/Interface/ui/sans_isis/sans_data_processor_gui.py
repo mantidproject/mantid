@@ -1483,7 +1483,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                             self.menuEdit)
 
         # Actions that go in the 'File' menu
-        self._create_action(MantidQt.MantidWidgets.DataProcessorOpenTableCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.OpenTableCommand(self.data_processor_table),
                             self.menuFile, workspace_list)
         self._create_action(MantidQt.MantidWidgets.NewTableCommand(self.data_processor_table),
                             self.menuFile)
@@ -1501,7 +1501,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def _create_action(self, command, menu, workspace_list=None):
         """
         Create an action from a given DataProcessorCommand and add it to a given menu
-        A 'workspace_list' can be provided but it is only intended to be used with DataProcessorOpenTableCommand.
+        A 'workspace_list' can be provided but it is only intended to be used with OpenTableCommand.
         It refers to the list of table workspaces in the ADS that could be loaded into the widget. Note that only
         table workspaces with an appropriate number of columns and column types can be loaded.
         """
