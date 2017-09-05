@@ -25,9 +25,8 @@ std::ostream &operator<<(std::ostream &os, QString const &str) {
 class ReflDataProcessorPresenterTest : public CxxTest::TestSuite {
 
 private:
-  ITableWorkspace_sptr
-  createWorkspace(const QString &wsName,
-                  const WhiteList &whitelist) {
+  ITableWorkspace_sptr createWorkspace(const QString &wsName,
+                                       const WhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
     const int ncols = static_cast<int>(whitelist.size());
@@ -47,9 +46,8 @@ private:
     return ws;
   }
 
-  ITableWorkspace_sptr
-  createPrefilledWorkspace(const QString &wsName,
-                           const WhiteList &whitelist) {
+  ITableWorkspace_sptr createPrefilledWorkspace(const QString &wsName,
+                                                const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::vector<std::string> group{"0", "0", "1", "1"};
     const std::vector<std::string> run{"13460", "13462", "13469", "13470"};

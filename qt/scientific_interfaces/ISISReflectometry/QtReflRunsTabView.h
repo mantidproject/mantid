@@ -75,8 +75,8 @@ public:
   void setTransferMethods(const std::set<std::string> &methods) override;
   void setTableCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
                             tableCommands) override;
-  void setRowCommands(
-      std::vector<std::unique_ptr<DataProcessor::Command>> rowCommands) override;
+  void setRowCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
+                          rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
   void setRowActionEnabled(int index, bool enabled) override;
