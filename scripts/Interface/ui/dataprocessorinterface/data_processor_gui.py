@@ -166,7 +166,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_DataProcessorWindow):
         self._create_action(MantidQt.MantidWidgets.DataProcessorPlotGroupCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.AppendRowCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.AppendGroupCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorGroupRowsCommand(self.data_processor_table), self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.GroupRowsCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.CopySelectedCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.CutSelectedCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorPasteSelectedCommand(self.data_processor_table), self.menuEdit)
