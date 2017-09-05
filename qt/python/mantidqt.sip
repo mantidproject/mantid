@@ -1771,13 +1771,13 @@ GroupRowsCommand();
 GroupRowsCommand(const MantidQt::MantidWidgets::DataProcessor::GroupRowsCommand &);
 };
 
-class DataProcessorImportTableCommand
+class ImportTableCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h"
 %End
 public:
-DataProcessorImportTableCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+ImportTableCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1786,8 +1786,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorImportTableCommand();
-DataProcessorImportTableCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorImportTableCommand &);
+ImportTableCommand();
+ImportTableCommand(const MantidQt::MantidWidgets::DataProcessor::ImportTableCommand &);
 };
 
 class DataProcessorNewTableCommand

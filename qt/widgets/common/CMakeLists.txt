@@ -317,7 +317,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h

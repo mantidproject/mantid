@@ -17,7 +17,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ExpandGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
@@ -106,7 +106,7 @@ public:
 
   void test_import_table_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorImportTableCommand command(&mockPresenter);
+    ImportTableCommand command(&mockPresenter);
 
     // The presenter should be notified with the ImportTableFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ImportTableFlag))
