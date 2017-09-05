@@ -23,7 +23,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPauseCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
@@ -159,7 +159,7 @@ public:
 
   void test_pause_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorPauseCommand command(&mockPresenter);
+    PauseCommand command(&mockPresenter);
 
     // The presenter should be notified with the PauseFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PauseFlag))
