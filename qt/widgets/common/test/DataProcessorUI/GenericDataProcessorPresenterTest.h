@@ -34,7 +34,7 @@ public:
   // Standard constructor
   GenericDataProcessorPresenterNoThread(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
+      const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
@@ -50,7 +50,7 @@ public:
       const DataProcessorProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor)
       : GenericDataProcessorPresenter(
-            whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
+            whitelist, std::map<QString, PreprocessingAlgorithm>(),
             processor, postprocessor) {}
 
   // Destructor
@@ -107,16 +107,16 @@ private:
     return whitelist;
   }
 
-  std::map<QString, DataProcessorPreprocessingAlgorithm>
+  std::map<QString, PreprocessingAlgorithm>
   createReflectometryPreprocessMap() {
 
-    return std::map<QString, DataProcessorPreprocessingAlgorithm>{
+    return std::map<QString, PreprocessingAlgorithm>{
         {"Run(s)",
-         DataProcessorPreprocessingAlgorithm(
+         PreprocessingAlgorithm(
              "Plus", "TOF_", std::set<QString>{"LHSWorkspace", "RHSWorkspace",
                                                "OutputWorkspace"})},
         {"Transmission Run(s)",
-         DataProcessorPreprocessingAlgorithm(
+         PreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
              std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
                                "OutputWorkspace"})}};

@@ -117,7 +117,7 @@ namespace DataProcessor {
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
@@ -183,7 +183,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor)
     : GenericDataProcessorPresenter(
-          whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
+          whitelist, std::map<QString, PreprocessingAlgorithm>(),
           processor, postprocessor) {}
 
 /**
@@ -193,7 +193,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist)
     : GenericDataProcessorPresenter(
-          whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
+          whitelist, std::map<QString, PreprocessingAlgorithm>(),
           DataProcessorProcessingAlgorithm(),
           PostprocessingAlgorithm()) {}
 
@@ -206,7 +206,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     PostprocessingAlgorithm()) {}
@@ -221,7 +221,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor)
     : GenericDataProcessorPresenter(
-          whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
+          whitelist, std::map<QString, PreprocessingAlgorithm>(),
           processor, PostprocessingAlgorithm()) {}
 
 /**
@@ -661,7 +661,7 @@ desired workspace
 */
 Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     const QString &runStr,
-    const DataProcessorPreprocessingAlgorithm &preprocessor,
+    const PreprocessingAlgorithm &preprocessor,
     const std::map<std::string, std::string> &optionsMap) {
   auto const instrument = m_view->getProcessInstrument();
 

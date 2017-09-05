@@ -30,7 +30,7 @@ namespace CustomInterfaces {
 */
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> &postprocessMap, const QString &loader)

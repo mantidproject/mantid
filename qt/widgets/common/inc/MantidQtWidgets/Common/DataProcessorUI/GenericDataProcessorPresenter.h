@@ -10,7 +10,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
@@ -77,7 +77,7 @@ public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
+      const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
@@ -92,7 +92,7 @@ public:
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
+      const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor);
   // Constructor: no pre-processing, no post-processing
@@ -193,7 +193,7 @@ private:
   // The whitelist
   DataProcessorWhiteList m_whitelist;
   // The pre-processing instructions
-  std::map<QString, DataProcessorPreprocessingAlgorithm> m_preprocessMap;
+  std::map<QString, PreprocessingAlgorithm> m_preprocessMap;
   // The data processor algorithm
   DataProcessorProcessingAlgorithm m_processor;
   // Post-processing algorithm
@@ -237,7 +237,7 @@ private:
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const QString &run,
-                      const DataProcessorPreprocessingAlgorithm &alg,
+                      const PreprocessingAlgorithm &alg,
                       const std::map<std::string, std::string> &optionsMap);
   // add row(s) to the model
   void appendRow();

@@ -39,13 +39,13 @@ public:
 
     auto preprocessingInstructions = preprocessMap.asMap();
 
-    DataProcessorPreprocessingAlgorithm algPlus =
+    PreprocessingAlgorithm algPlus =
         preprocessingInstructions["Runs"];
     TS_ASSERT_EQUALS(algPlus.name(), "Plus");
     TS_ASSERT_EQUALS(algPlus.prefix(), "");
     TS_ASSERT_EQUALS(algPlus.blacklist(), std::set<QString>());
 
-    DataProcessorPreprocessingAlgorithm algTrans =
+    PreprocessingAlgorithm algTrans =
         preprocessingInstructions["Transmission Runs"];
     TS_ASSERT_EQUALS(algTrans.name(), "CreateTransmissionWorkspaceAuto");
     TS_ASSERT_EQUALS(algTrans.prefix(), "TRANS_");

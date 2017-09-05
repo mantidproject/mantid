@@ -16,7 +16,7 @@ namespace DataProcessor {
 
 DataProcessorProcessingAlgorithmBase defines shared code to be used by derived
 classes
-(DataProcessorPreprocessingAlgorithm, DataProcessorProcessingAlgorithm and
+(PreprocessingAlgorithm, DataProcessorProcessingAlgorithm and
 PostprocessingAlgorithm).
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge

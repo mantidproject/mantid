@@ -8,9 +8,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorPreprocessingAlgorithm
+/** @class PreprocessingAlgorithm
 
-DataProcessorPreprocessingAlgorithm defines a pre-processor algorithm that will
+PreprocessingAlgorithm defines a pre-processor algorithm that will
 be
 responsible for pre-processsing a specific column in a Data Processor UI.
 
@@ -35,21 +35,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorPreprocessingAlgorithm
+class EXPORT_OPT_MANTIDQT_COMMON PreprocessingAlgorithm
     : public DataProcessorProcessingAlgorithmBase {
 public:
   // Constructor
-  DataProcessorPreprocessingAlgorithm(
+  PreprocessingAlgorithm(
       const QString &name, const QString &prefix = "",
       const std::set<QString> &blacklist = std::set<QString>());
   // Delegating constructor
-  DataProcessorPreprocessingAlgorithm(const QString &name,
+  PreprocessingAlgorithm(const QString &name,
                                       const QString &prefix,
                                       const QString &blacklist);
   // Default constructor
-  DataProcessorPreprocessingAlgorithm();
+  PreprocessingAlgorithm();
   // Destructor
-  virtual ~DataProcessorPreprocessingAlgorithm();
+  virtual ~PreprocessingAlgorithm();
 
   // The name of the lhs input property
   QString lhsProperty() const;

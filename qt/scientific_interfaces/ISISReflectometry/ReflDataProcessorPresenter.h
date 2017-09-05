@@ -45,7 +45,7 @@ public:
   // Constructor
   ReflDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
+      const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
