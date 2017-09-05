@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -39,7 +39,7 @@ namespace DataProcessor {
 * @param table :: a table workspace
 * @param whitelist :: a whitelist
 */
-DataProcessorOneLevelTreeManager::DataProcessorOneLevelTreeManager(
+OneLevelTreeManager::OneLevelTreeManager(
     DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
     const DataProcessorWhiteList &whitelist)
     : m_presenter(presenter),
@@ -50,22 +50,22 @@ DataProcessorOneLevelTreeManager::DataProcessorOneLevelTreeManager(
 * @param presenter :: [input] The DataProcessor presenter
 * @param whitelist :: [input] A whitelist containing the number of columns
 */
-DataProcessorOneLevelTreeManager::DataProcessorOneLevelTreeManager(
+OneLevelTreeManager::OneLevelTreeManager(
     DataProcessorPresenter *presenter, const DataProcessorWhiteList &whitelist)
-    : DataProcessorOneLevelTreeManager(
+    : OneLevelTreeManager(
           presenter, createDefaultWorkspace(whitelist), whitelist) {}
 
 /**
 * Destructor
 */
-DataProcessorOneLevelTreeManager::~DataProcessorOneLevelTreeManager() {}
+OneLevelTreeManager::~OneLevelTreeManager() {}
 
 /**
 * Publishes a list of available commands
 * @return : The list of available commands
 */
 std::vector<Command_uptr>
-DataProcessorOneLevelTreeManager::publishCommands() {
+OneLevelTreeManager::publishCommands() {
 
   std::vector<Command_uptr> commands;
 
@@ -107,7 +107,7 @@ Insert a row after the last selected row. If nothing was selected, the new row
 is appended to
 to the last row the table.
 */
-void DataProcessorOneLevelTreeManager::appendRow() {
+void OneLevelTreeManager::appendRow() {
 
   auto selectedRows = m_presenter->selectedParents();
 
@@ -120,7 +120,7 @@ void DataProcessorOneLevelTreeManager::appendRow() {
 
 /** Appends a group.
 */
-void DataProcessorOneLevelTreeManager::appendGroup() {
+void OneLevelTreeManager::appendGroup() {
 
   // This method should never be called
   throw std::runtime_error("Can't append group to table");
@@ -129,7 +129,7 @@ void DataProcessorOneLevelTreeManager::appendGroup() {
 /**
 Delete row(s) from the model
 */
-void DataProcessorOneLevelTreeManager::deleteRow() {
+void OneLevelTreeManager::deleteRow() {
 
   auto selectedRows = m_presenter->selectedParents();
 
@@ -144,7 +144,7 @@ void DataProcessorOneLevelTreeManager::deleteRow() {
 /**
 Delete group(s) from the model
 */
-void DataProcessorOneLevelTreeManager::deleteGroup() {
+void OneLevelTreeManager::deleteGroup() {
 
   // This method should never be called
   throw std::runtime_error("Can't delete group");
@@ -153,7 +153,7 @@ void DataProcessorOneLevelTreeManager::deleteGroup() {
 /**
 Group rows together
 */
-void DataProcessorOneLevelTreeManager::groupRows() {
+void OneLevelTreeManager::groupRows() {
 
   // This method should never be called
   throw std::runtime_error("Can't group rows");
@@ -162,14 +162,14 @@ void DataProcessorOneLevelTreeManager::groupRows() {
 /** Expands the current selection to all the rows in the selected groups
 * @return :: Groups containing selected rows
 */
-std::set<int> DataProcessorOneLevelTreeManager::expandSelection() {
+std::set<int> OneLevelTreeManager::expandSelection() {
 
   // This method should never be called
   throw std::runtime_error("Can't expand selection");
 }
 
 /** Clear the currently selected rows */
-void DataProcessorOneLevelTreeManager::clearSelected() {
+void OneLevelTreeManager::clearSelected() {
 
   const auto selectedRows = m_presenter->selectedParents();
 
@@ -183,7 +183,7 @@ void DataProcessorOneLevelTreeManager::clearSelected() {
 }
 
 /** Return the currently selected rows as a string */
-QString DataProcessorOneLevelTreeManager::copySelected() {
+QString OneLevelTreeManager::copySelected() {
   const auto selectedRows = m_presenter->selectedParents();
 
   QStringList lines;
@@ -201,7 +201,7 @@ QString DataProcessorOneLevelTreeManager::copySelected() {
 * append new rows
 * @param text :: Selected rows to paste as a string
 */
-void DataProcessorOneLevelTreeManager::pasteSelected(const QString &text) {
+void OneLevelTreeManager::pasteSelected(const QString &text) {
 
   if (text.isEmpty())
     return;
@@ -238,7 +238,7 @@ void DataProcessorOneLevelTreeManager::pasteSelected(const QString &text) {
 /** Opens a blank table
 * @param whitelist :: A whitelist with the columns for the new table
 */
-void DataProcessorOneLevelTreeManager::newTable(
+void OneLevelTreeManager::newTable(
     const DataProcessorWhiteList &whitelist) {
 
   m_model.reset(new QDataProcessorOneLevelTreeModel(
@@ -249,7 +249,7 @@ void DataProcessorOneLevelTreeManager::newTable(
 * @param table :: A table to open
 * @param whitelist :: A whitelist with the columns for the new table
 */
-void DataProcessorOneLevelTreeManager::newTable(
+void OneLevelTreeManager::newTable(
     ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
 
   if (isValidModel(table, whitelist.size())) {
@@ -263,7 +263,7 @@ void DataProcessorOneLevelTreeManager::newTable(
 Inserts a new row to the specified group in the specified location
 @param rowIndex :: The index to insert the new row after
 */
-void DataProcessorOneLevelTreeManager::insertRow(int rowIndex) {
+void OneLevelTreeManager::insertRow(int rowIndex) {
 
   m_model->insertRow(rowIndex);
 }
@@ -274,7 +274,7 @@ void DataProcessorOneLevelTreeManager::insertRow(int rowIndex) {
 * @return :: Selected data as a map where keys are units of post-processing and
 * values are
 */
-TreeData DataProcessorOneLevelTreeManager::selectedData(bool prompt) {
+TreeData OneLevelTreeManager::selectedData(bool prompt) {
 
   TreeData selectedData;
 
@@ -323,7 +323,7 @@ TreeData DataProcessorOneLevelTreeManager::selectedData(bool prompt) {
 * @param runs :: [input] Data to transfer as a vector of maps
 * @param whitelist :: [input] Whitelist containing number of columns
 */
-void DataProcessorOneLevelTreeManager::transfer(
+void OneLevelTreeManager::transfer(
     const std::vector<std::map<QString, QString>> &runs,
     const DataProcessorWhiteList &whitelist) {
 
@@ -366,7 +366,7 @@ void DataProcessorOneLevelTreeManager::transfer(
 * @param child :: the row
 * @param data :: the data
 */
-void DataProcessorOneLevelTreeManager::update(int parent, int child,
+void OneLevelTreeManager::update(int parent, int child,
                                               const QStringList &data) {
 
   UNUSED_ARG(child);
@@ -381,7 +381,7 @@ void DataProcessorOneLevelTreeManager::update(int parent, int child,
 /** Gets the number of rows in the table
 * @return : Number of rows
 */
-int DataProcessorOneLevelTreeManager::rowCount() const {
+int OneLevelTreeManager::rowCount() const {
   return m_model->rowCount();
 }
 
@@ -389,7 +389,7 @@ int DataProcessorOneLevelTreeManager::rowCount() const {
 * @param parent : The parent of the row
 * @return : Number of rows
 */
-int DataProcessorOneLevelTreeManager::rowCount(int parent) const {
+int OneLevelTreeManager::rowCount(int parent) const {
   UNUSED_ARG(parent);
   return m_model->rowCount();
 }
@@ -398,7 +398,7 @@ int DataProcessorOneLevelTreeManager::rowCount(int parent) const {
 * @param position : The row index
 * @return : 'process' status
 */
-bool DataProcessorOneLevelTreeManager::isProcessed(int position) const {
+bool OneLevelTreeManager::isProcessed(int position) const {
   return m_model->isProcessed(position);
 }
 
@@ -407,7 +407,7 @@ bool DataProcessorOneLevelTreeManager::isProcessed(int position) const {
 * @param parent : The parent of the row
 * @return : 'process' status
 */
-bool DataProcessorOneLevelTreeManager::isProcessed(int position,
+bool OneLevelTreeManager::isProcessed(int position,
                                                    int parent) const {
   UNUSED_ARG(parent);
   return m_model->isProcessed(position);
@@ -417,7 +417,7 @@ bool DataProcessorOneLevelTreeManager::isProcessed(int position,
 * @param processed : True to set row as processed, false to set unprocessed
 * @param position : The index of the row to be set
 */
-void DataProcessorOneLevelTreeManager::setProcessed(bool processed,
+void OneLevelTreeManager::setProcessed(bool processed,
                                                     int position) {
   m_model->setProcessed(processed, position);
 }
@@ -427,7 +427,7 @@ void DataProcessorOneLevelTreeManager::setProcessed(bool processed,
 * @param position : The index of the row to be set
 * @param parent : The parent of the row
 */
-void DataProcessorOneLevelTreeManager::setProcessed(bool processed,
+void OneLevelTreeManager::setProcessed(bool processed,
                                                     int position, int parent) {
   UNUSED_ARG(parent);
   m_model->setProcessed(processed, position);
@@ -437,14 +437,14 @@ void DataProcessorOneLevelTreeManager::setProcessed(bool processed,
 * @return :: A shared ptr to the model
 */
 boost::shared_ptr<AbstractTreeModel>
-DataProcessorOneLevelTreeManager::getModel() {
+OneLevelTreeManager::getModel() {
   return m_model;
 }
 
 /** Returns the table workspace containing the data
  * @return :: The table workspace
  */
-ITableWorkspace_sptr DataProcessorOneLevelTreeManager::getTableWorkspace() {
+ITableWorkspace_sptr OneLevelTreeManager::getTableWorkspace() {
 
   return m_model->getTableWorkspace();
 }
@@ -454,7 +454,7 @@ ITableWorkspace_sptr DataProcessorOneLevelTreeManager::getTableWorkspace() {
 * @param whitelist :: The whitelist that will be used to create a new table
 * @return : A default table
 */
-ITableWorkspace_sptr DataProcessorOneLevelTreeManager::createDefaultWorkspace(
+ITableWorkspace_sptr OneLevelTreeManager::createDefaultWorkspace(
     const DataProcessorWhiteList &whitelist) {
   ITableWorkspace_sptr ws =
       Mantid::API::WorkspaceFactory::Instance().createTable();
@@ -473,7 +473,7 @@ ITableWorkspace_sptr DataProcessorOneLevelTreeManager::createDefaultWorkspace(
 * @param ws :: the table workspace
 * @param whitelistColumns :: the number of columns as specified in a whitelist
 */
-void DataProcessorOneLevelTreeManager::validateModel(
+void OneLevelTreeManager::validateModel(
     ITableWorkspace_sptr ws, size_t whitelistColumns) const {
 
   if (!ws)
@@ -501,7 +501,7 @@ void DataProcessorOneLevelTreeManager::validateModel(
 * @param whitelistColumns : [input] The number of columns in the whitelist
 * @throws std::runtime_error if the number of columns in the table is incorrect
 */
-bool DataProcessorOneLevelTreeManager::isValidModel(
+bool OneLevelTreeManager::isValidModel(
     Workspace_sptr ws, size_t whitelistColumns) const {
 
   try {
@@ -511,6 +511,50 @@ bool DataProcessorOneLevelTreeManager::isValidModel(
     return false;
   }
   return true;
+}
+
+/** Sets a value in a cell
+ *
+ * @param row : the row index
+ * @param column : the column index
+ * @param parentRow : the row index of the parent item (unused)
+ * @param parentColumn : the column index of the parent item (unused)
+ * @param value : the new value to populate the cell with
+*/
+void OneLevelTreeManager::setCell(int row, int column,
+                                               int parentRow, int parentColumn,
+                                               const std::string &value) {
+
+  UNUSED_ARG(parentRow);
+  UNUSED_ARG(parentColumn);
+
+  m_model->setData(m_model->index(row, column),
+                   QVariant(QString::fromStdString(value)));
+}
+
+/** Returns the value in a cell as a string
+ *
+ * @param row : the row index
+ * @param column : the column index
+ * @param parentRow : the row index of the parent item (unused)
+ * @param parentColumn : the column index of the parent item (unused)
+ * @return : the value in the cell as a string
+*/
+std::string OneLevelTreeManager::getCell(int row, int column,
+                                                      int parentRow,
+                                                      int parentColumn) {
+  UNUSED_ARG(parentRow);
+  UNUSED_ARG(parentColumn);
+
+  return m_model->data(m_model->index(row, column)).toString().toStdString();
+}
+
+/**
+ * Gets the number of rows.
+ * @return : the number of rows.
+ */
+int OneLevelTreeManager::getNumberOfRows() {
+  return m_model->rowCount();
 }
 }
 }

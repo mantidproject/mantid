@@ -8,7 +8,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
@@ -38,7 +38,7 @@ using Runs = std::vector<std::map<QString, QString>>;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class DataProcessorOneLevelTreeManagerTest : public CxxTest::TestSuite {
+class OneLevelTreeManagerTest : public CxxTest::TestSuite {
 
 private:
   // Return a reflectometry whitelist
@@ -112,16 +112,16 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DataProcessorOneLevelTreeManagerTest *createSuite() {
-    return new DataProcessorOneLevelTreeManagerTest();
+  static OneLevelTreeManagerTest *createSuite() {
+    return new OneLevelTreeManagerTest();
   }
-  static void destroySuite(DataProcessorOneLevelTreeManagerTest *suite) {
+  static void destroySuite(OneLevelTreeManagerTest *suite) {
     delete suite;
   }
 
   void test_publish_commands() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter,
+    OneLevelTreeManager manager(&presenter,
                                              DataProcessorWhiteList());
 
     auto comm = manager.publishCommands();
@@ -156,7 +156,7 @@ public:
 
   void test_append_row() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents())
         .Times(1)
@@ -168,13 +168,13 @@ public:
 
   void test_append_group() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
     TS_ASSERT_THROWS_ANYTHING(manager.appendGroup());
   }
 
   void test_delete_row() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents())
         .Times(1)
@@ -187,21 +187,21 @@ public:
 
   void test_delete_group() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
     TS_ASSERT_THROWS_ANYTHING(manager.deleteGroup());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
 
   void test_expand_selection() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
     TS_ASSERT_THROWS_ANYTHING(manager.expandSelection());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
 
   void test_clear_selected() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents())
         .Times(1)
@@ -213,7 +213,7 @@ public:
 
   void test_copy_selected() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents())
         .Times(1)
@@ -225,7 +225,7 @@ public:
 
   void test_paste_selected() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
     EXPECT_CALL(presenter, selectedParents()).Times(0);
     EXPECT_CALL(presenter, selectedChildren()).Times(0);
     TS_ASSERT_THROWS_NOTHING(manager.pasteSelected(""));
@@ -236,7 +236,7 @@ public:
     NiceMock<MockDataProcessorPresenter> presenter;
     auto table = reflTable();
     auto whitelist = reflWhitelist();
-    DataProcessorOneLevelTreeManager manager(&presenter, whitelist);
+    OneLevelTreeManager manager(&presenter, whitelist);
     TS_ASSERT_THROWS_NOTHING(manager.newTable(table, whitelist));
 
     QStringList firstRow = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
@@ -261,7 +261,7 @@ public:
 
   void test_transfer_fails_wrong_whitelist() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
 
     Runs runs = {{{"Group", "0"}, {"Runs", "12345"}}};
     TS_ASSERT_THROWS_ANYTHING(manager.transfer(runs, DataProcessorWhiteList()));
@@ -269,7 +269,7 @@ public:
 
   void test_transfer_good_data() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
 
     Runs runs = {{{"Run(s)", "12345"},
                   {"Angle", "0.5"},
@@ -332,7 +332,7 @@ public:
 
   void test_update() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
 
     QStringList newRow = {"0", "1", "2", "3", "4", "5", "6", "7"};
 

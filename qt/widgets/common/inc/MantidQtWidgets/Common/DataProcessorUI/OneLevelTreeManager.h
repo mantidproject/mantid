@@ -12,9 +12,9 @@ class DataProcessorPresenter;
 class DataProcessorWhiteList;
 class QDataProcessorOneLevelTreeModel;
 
-/** @class DataProcessorOneLevelTreeManager
+/** @class OneLevelTreeManager
 
-DataProcessorOneLevelTreeManager is a concrete implementation of a
+OneLevelTreeManager is a concrete implementation of a
 DataProcessorTreeManager that handles a one-level tree view (which corresponds
 to a DataProcessorUI with no post-processing algorithm defined).
 
@@ -39,18 +39,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorOneLevelTreeManager
+class EXPORT_OPT_MANTIDQT_COMMON OneLevelTreeManager
     : public DataProcessorTreeManager {
 public:
   /// Constructor
-  DataProcessorOneLevelTreeManager(DataProcessorPresenter *presenter,
+  OneLevelTreeManager(DataProcessorPresenter *presenter,
                                    Mantid::API::ITableWorkspace_sptr table,
                                    const DataProcessorWhiteList &whitelist);
   /// Constructor (no table ws given)
-  DataProcessorOneLevelTreeManager(DataProcessorPresenter *presenter,
+  OneLevelTreeManager(DataProcessorPresenter *presenter,
                                    const DataProcessorWhiteList &whitelist);
   /// Destructor
-  ~DataProcessorOneLevelTreeManager() override;
+  ~OneLevelTreeManager() override;
 
   /// Publish commands
   std::vector<std::unique_ptr<Command>> publishCommands() override;

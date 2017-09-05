@@ -65,7 +65,7 @@
 	src/ColorBarWidget.cpp
 	src/DataProcessorUI/AbstractTreeModel.cpp
 	src/DataProcessorUI/GenerateNotebook.cpp
-	src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
+	src/DataProcessorUI/OneLevelTreeManager.cpp
 	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorPreprocessMap.cpp
@@ -320,7 +320,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h
@@ -442,7 +442,7 @@ set( TEST_FILES
    TrackedActionTest.h
    DataProcessorUI/CommandsTest.h
    DataProcessorUI/GenerateNotebookTest.h
-   DataProcessorUI/DataProcessorOneLevelTreeManagerTest.h
+   DataProcessorUI/OneLevelTreeManagerTest.h
    DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
    DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
    DataProcessorUI/DataProcessorPreprocessMapTest.h

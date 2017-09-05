@@ -163,7 +163,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 
   if (m_postprocessor.name().isEmpty()) {
     m_postprocess = false;
-    m_manager = Mantid::Kernel::make_unique<DataProcessorOneLevelTreeManager>(
+    m_manager = Mantid::Kernel::make_unique<OneLevelTreeManager>(
         this, m_whitelist);
   } else {
     m_manager = Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
