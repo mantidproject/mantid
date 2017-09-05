@@ -222,6 +222,9 @@ void export_IFunction() {
            "Split this function (if needed) into a list of "
            "independent functions")
 
+      .def("nDomains", &IFunction::getNumberDomains, arg("self"),
+          "Get the number of domains.")
+
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),
            "Returns a list of the categories for an algorithm")
@@ -237,8 +240,7 @@ void export_IFunction() {
       .def("getParamValue",
            (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
-      .def("nDomains", &IFunction::getNumberDomains, arg("self"),
-           "Get the number of domains.")
+
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"),
            "Return a string representation of the function");
