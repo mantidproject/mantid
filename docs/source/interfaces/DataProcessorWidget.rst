@@ -115,7 +115,7 @@ names and values are pre-processing algorithms. In this example, a pre-process m
 
 .. code-block:: python
 
-    preprocess_map = MantidQt.MantidWidgets.DataProcessorPreprocessMap()
+    preprocess_map = MantidQt.MantidWidgets.PreprocessMap()
     preprocess_map.addElement('Runs', 'Plus')
     preprocess_map.addElement('Transmission Runs', 'CreateTransmissionWorkspaceAuto')
 
@@ -156,7 +156,7 @@ the loaded workspaces. The example below:
 
 .. code-block:: python
 
-    preprocess_map = MantidQt.MantidWidgets.DataProcessorPreprocessMap()
+    preprocess_map = MantidQt.MantidWidgets.PreprocessMap()
     preprocess_map.addElement('Runs', 'Plus', 'TOF_')
     preprocess_map.addElement('Transmission Runs', 'CreateTransmissionWorkspaceAuto', 'TRANS_')
 

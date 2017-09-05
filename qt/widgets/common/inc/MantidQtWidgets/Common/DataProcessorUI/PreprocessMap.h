@@ -10,9 +10,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorPreprocessMap
+/** @class PreprocessMap
 
-DataProcessorPreprocessMap defines a pre-processor algorithm that will
+PreprocessMap defines a pre-processor algorithm that will
 be
 responsible for pre-processsing a specific column in a Data Processor UI.
 
@@ -37,12 +37,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorPreprocessMap {
+class EXPORT_OPT_MANTIDQT_COMMON PreprocessMap {
 public:
   // Default constructor
-  DataProcessorPreprocessMap();
+  PreprocessMap();
   // Destructor
-  virtual ~DataProcessorPreprocessMap();
+  virtual ~PreprocessMap();
   // Add a column to pre-process
   void addElement(const QString &column, const QString &algorithm,
                   const QString &prefix = "", const QString &blacklist = "");

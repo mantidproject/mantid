@@ -9,7 +9,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
@@ -102,12 +102,12 @@ public:
   // Delegating constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const DataProcessorPreprocessMap &preprocessMap,
+      const PreprocessMap &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor);
   // Delegating Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const DataProcessorPreprocessMap &preprocessMap,
+      const PreprocessMap &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor);
   virtual ~GenericDataProcessorPresenter() override;
