@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorWorkspaceCommand
+/** @class WorkspaceCommand
 
-DataProcessorWorkspaceCommand defines a workspace action
+WorkspaceCommand defines a workspace action
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,15 +31,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorWorkspaceCommand : public CommandBase {
+class WorkspaceCommand : public CommandBase {
 public:
-  DataProcessorWorkspaceCommand(DataProcessorPresenter *tablePresenter,
+  WorkspaceCommand(DataProcessorPresenter *tablePresenter,
                                 const QString &name)
       : CommandBase(tablePresenter), m_name(name){};
-  DataProcessorWorkspaceCommand(const QDataProcessorWidget &widget,
+  WorkspaceCommand(const QDataProcessorWidget &widget,
                                 const QString &name)
       : CommandBase(widget), m_name(name){};
-  virtual ~DataProcessorWorkspaceCommand(){};
+  virtual ~WorkspaceCommand(){};
 
   void execute() override {
     // Tell the presenter which of the available workspaces was selected

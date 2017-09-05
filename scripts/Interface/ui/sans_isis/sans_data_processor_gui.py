@@ -1510,7 +1510,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             submenu.setIcon(QtGui.QIcon(command.icon()))
 
             for ws in workspace_list:
-                ws_command = MantidQt.MantidWidgets.DataProcessorWorkspaceCommand(self.data_processor_table, ws)
+                ws_command = MantidQt.MantidWidgets.WorkspaceCommand(self.data_processor_table, ws)
                 action = QtGui.QAction(QtGui.QIcon(ws_command.icon()), ws_command.name(), self)
                 action.triggered.connect(lambda: self._connect_action(ws_command))
                 submenu.addAction(action)

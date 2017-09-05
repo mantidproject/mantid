@@ -32,7 +32,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -371,7 +371,7 @@ public:
 
   void test_workspace_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorWorkspaceCommand command(&mockPresenter, "workspace");
+    WorkspaceCommand command(&mockPresenter, "workspace");
 
     // The presenter should set the name of the ws
     EXPECT_CALL(mockPresenter, setModel(QString("workspace")))

@@ -341,7 +341,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtWidgets/Common/ParseKeyValueString.h
 	inc/MantidQtWidgets/Common/ParseNumerics.h
