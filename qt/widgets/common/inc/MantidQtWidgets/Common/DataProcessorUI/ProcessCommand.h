@@ -7,9 +7,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-/** @class DataProcessorProcessCommand
+/** @class ProcessCommand
 
-DataProcessorProcessCommand defines the action "Process"
+ProcessCommand defines the action "Process"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,13 +32,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorProcessCommand : public CommandBase {
+class ProcessCommand : public CommandBase {
 public:
-  DataProcessorProcessCommand(DataProcessorPresenter *tablePresenter)
+  ProcessCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorProcessCommand(const QDataProcessorWidget &widget)
+  ProcessCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorProcessCommand(){};
+  virtual ~ProcessCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ProcessFlag);

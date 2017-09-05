@@ -160,7 +160,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_DataProcessorWindow):
         self.menuFile.clear()
 
         # Actions that go in the 'Edit' menu
-        self._create_action(MantidQt.MantidWidgets.DataProcessorProcessCommand(self.data_processor_table), self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.ProcessCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.ExpandCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.PlotRowCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.PlotGroupCommand(self.data_processor_table), self.menuEdit)
