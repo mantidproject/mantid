@@ -28,7 +28,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PlotGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
@@ -158,7 +158,7 @@ public:
         dynamic_cast<CollapseGroupsCommand *>(comm[15].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[16].get()));
     TS_ASSERT(dynamic_cast<DataProcessorPlotRowCommand *>(comm[17].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorPlotGroupCommand *>(comm[18].get()));
+    TS_ASSERT(dynamic_cast<PlotGroupCommand *>(comm[18].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[19].get()));
     TS_ASSERT(dynamic_cast<AppendRowCommand *>(comm[20].get()));
     TS_ASSERT(dynamic_cast<AppendGroupCommand *>(comm[21].get()));

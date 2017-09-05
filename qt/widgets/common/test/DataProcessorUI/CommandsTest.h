@@ -24,7 +24,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PlotGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
@@ -227,7 +227,7 @@ public:
 
   void test_plot_group_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorPlotGroupCommand command(&mockPresenter);
+    PlotGroupCommand command(&mockPresenter);
 
     // The presenter should be notified with the PlotGroupFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PlotGroupFlag))

@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorPlotGroupCommand
+/** @class PlotGroupCommand
 
-DataProcessorPlotGroupCommand defines the action "Plot Selected Groups"
+PlotGroupCommand defines the action "Plot Selected Groups"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorPlotGroupCommand : public CommandBase {
+class PlotGroupCommand : public CommandBase {
 public:
-  DataProcessorPlotGroupCommand(DataProcessorPresenter *tablePresenter)
+  PlotGroupCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorPlotGroupCommand(const QDataProcessorWidget &widget)
+  PlotGroupCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorPlotGroupCommand(){};
+  virtual ~PlotGroupCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PlotGroupFlag);
