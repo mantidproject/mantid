@@ -1,5 +1,6 @@
 #include <fstream>
 #include <algorithm>
+#include <stdexcept>
 #include "MantidAlgorithms/Bin2DPowderDiffraction.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/FileProperty.h"
@@ -95,7 +96,7 @@ void Bin2DPowderDiffraction::init() {
     declareProperty(make_unique<FileProperty>("BinEdgesFile", "",
                                               FileProperty::OptionalLoad, exts),
                     "Optional: The ascii file containing the list of bin edges. "
-                    "Either this or Axis1- and Axis2Binning needs to be specified.");
+                    "Either this or Axis1- and Axis2Binning need to be specified.");
 
     declareProperty(
           Kernel::make_unique<PropertyWithValue<bool>>("NormalizeByBinArea", true),
@@ -145,7 +146,8 @@ std::map<std::string, std::string> Bin2DPowderDiffraction::validateInputs() {
 //----------------------------------------------------------------------------------------------
 /**
  * @brief createOutputWorkspace create an output workspace and setup axis
- * @return
+ * @throw std::runtime_error If theta=0 or cos(theta)<=0
+ * @return MatrixWorkspace with binned events
  */
 
 MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
@@ -215,14 +217,21 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     std::vector<std::vector<double>> newEValues(newYSize-1, std::vector<double>(newXSize-1, 0.0));
 
     // fill the workspace with data
-    g_log.notice() << "newYSize = " << newYSize << std::endl;
-    g_log.notice() << "newXSize = " << newXSize << std::endl;
+    g_log.debug() << "newYSize = " << newYSize << std::endl;
+    g_log.debug() << "newXSize = " << newXSize << std::endl;
     std::vector<double> dp_vec (verticalAxis->getValues());
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
     for (int64_t snum=0; snum<numSpectra; ++snum) {
         PARALLEL_START_INTERUPT_REGION
+        if (!spectrumInfo.isMasked(snum)) {
         double theta = 0.5*spectrumInfo.twoTheta(snum);
+        if (theta==0){
+            throw std::runtime_error("Spectrum " + std::to_string(snum) + " has theta=0. Cannot calculate d-Spacing!");
+        }
+        if (cos(theta)<=0){
+            throw std::runtime_error("Spectrum " + std::to_string(snum) + " has cos(theta) <= 0. Cannot calculate d-SpacingPerpendicular!");
+        }
         EventList &evList = m_inputWS->getSpectrum(snum);
 
         // Switch to weighted if needed.
@@ -235,7 +244,6 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
             double d, dp;
             convertToDSpacing(ev.tof(), theta, &d, &dp);
             std::vector<double>::iterator upy = std::lower_bound(dp_vec.begin(), dp_vec.end(), dp);
-            // long int h_index = (upy-dp_vec.begin()) -1;
             long int h_index = std::distance(dp_vec.begin(), upy) -1;
             if ((h_index < static_cast<int>(newYSize) -1) && h_index > -1) {
                 if (h_index == static_cast<int>(newYSize)-1)
@@ -250,11 +258,10 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
                         newEValues[h_index][index] += ev.errorSquared();
                     }
                 }
-                // g_log.notice() << "wl = " << ev.tof() << ", theta = " << theta << ", d = " << d << ", dp = " << dp << std::endl;
-                // g_log.notice() << "h_index = " << static_cast<int>(h_index) << ", x_index = " << static_cast<int>(index) << std::endl;
 
             }
 
+        }
         }
         prog.report("Binning event data...");
         PARALLEL_END_INTERUPT_REGION
@@ -279,8 +286,8 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
 //----------------------------------------------------------------------------------------------
 /**
  * @brief Bin2DPowderDiffraction::ReadBinsFromFile
- * @param[out] Ybins vector of doubles to save the dOrth bin parameters
- * @param[out] Xbins vector of vectors of doubles to sabe the dSpacing bin edges
+ * @param[out] Ybins vector of doubles to save the dSpacingPerpendicular bin edges
+ * @param[out] Xbins vector of vectors of doubles to save the dSpacing bin edges
  */
 void Bin2DPowderDiffraction::ReadBinsFromFile(std::vector<double> &Ybins, std::vector<std::vector<double> > &Xbins) const
 {
@@ -368,7 +375,6 @@ void Bin2DPowderDiffraction::normalizeToBinArea(MatrixWorkspace_sptr outWS)
     }
 }
 
-//TODO: take care of theta=0.
 void convertToDSpacing(double wavelength, double theta, double *d, double *dp)
 {
     *d = wavelength*0.5/sin(theta);

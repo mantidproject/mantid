@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <fstream>
+#include <cstdio>
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
@@ -92,27 +93,6 @@ public:
       TS_ASSERT_EQUALS(outputWS->y(0)[1], 0);
       TS_ASSERT_EQUALS(outputWS->y(1)[0], 0);
       TS_ASSERT_EQUALS(outputWS->y(1)[1], numbins*numSpectra);
-
-
-      std::cout << "Events: " << std::endl;
-
-      const auto &spectrumInfo = eventWS->spectrumInfo();
-      for (int64_t snum=0; snum<numSpectra; ++snum) {
-              double theta = 0.5*spectrumInfo.twoTheta(snum);
-              EventList &evList = eventWS->getSpectrum(snum);
-
-              // Switch to weighted if needed.
-              if (evList.getEventType() == TOF)
-                  evList.switchTo(WEIGHTED);
-
-              std::vector<WeightedEvent> events = evList.getWeightedEvents();
-
-              for(WeightedEvent ev:events){
-                  double d = ev.tof()*0.5/sin(theta);
-                  double dp = sqrt(ev.tof()*ev.tof() - 2.0*log(cos(theta)));
-                  std::cout << ev.tof() << ", " << 2.0*theta*180.0/3.14 << ", d = " << d << ", dp = " << dp << std::endl;
-              }
-      }
      
   }
 
@@ -213,8 +193,33 @@ public:
         TS_ASSERT_EQUALS(outputWS->y(1)[1], 5);
         TS_ASSERT_EQUALS(outputWS->y(1)[2], 20);
 
-        //std::remove(binFileName); // delete file
+        std::remove(binFileName.c_str()); // delete file
     }
+
+//-------------------- Test failure --------------------------------------
+
+  void test_Zero2theta()
+    {
+        using Mantid::API::IAlgorithm;
+        using Mantid::DataHandling::MoveInstrumentComponent;
+        using Mantid::Kernel::Unit;
+
+        EventWorkspace_sptr eventWS =
+                WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 5, true);
+        eventWS->getAxis(0)->setUnit("Wavelength");
+
+        Bin2DPowderDiffraction alg;
+        alg.setRethrows(true);
+        TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+        TS_ASSERT( alg.isInitialized() );
+        TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", eventWS));
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_bin2d_test3") );
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis1Binning", "2,2,6") );
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis2Binning", "1,2,5") );
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("NormalizeByBinArea", "0") );
+        TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+        TS_ASSERT(!alg.isExecuted());
+  }
 
 //-------------------- Helpers --------------------------------------
 private:
@@ -235,7 +240,6 @@ private:
            ax0->setUnit("Wavelength");
            for (size_t i = 0; i < xSize; i++) {
              ax0->setValue(i, 1.0 + 0.05*xVals[i]);
-             //std::cout << "i, xVals[i]: " << i << ", " << 1.0 + 0.05*xVals[i] << std::endl;
            }
            eventWS->replaceAxis(0, ax0);
            // detector angles
@@ -249,12 +253,7 @@ private:
            algc->setPropertyValue("RelativePosition", "0");
            algc->execute();
 
-//           const auto &spectrumInfo = eventWS->spectrumInfo();
            int numSpectra = static_cast<int>(eventWS->getNumberHistograms());
-//           for (int snum=0; snum<numSpectra; ++snum) {
-//               double ttheta = spectrumInfo.twoTheta(snum);
-//               std::cout << "i, 2theta: " << snum << ", " << ttheta*180.0/3.14 << std::endl;
-//           }
 
            // add events
            // Make up some data for each pixels
