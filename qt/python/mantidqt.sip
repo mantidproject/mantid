@@ -1885,13 +1885,13 @@ PlotGroupCommand();
 PlotGroupCommand(const MantidQt::MantidWidgets::DataProcessor::PlotGroupCommand &);
 };
 
-class DataProcessorPlotRowCommand
+class PlotRowCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PlotRowCommand.h"
 %End
 public:
-DataProcessorPlotRowCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+PlotRowCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1900,8 +1900,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorPlotRowCommand();
-DataProcessorPlotRowCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorPlotRowCommand &);
+PlotRowCommand();
+PlotRowCommand(const MantidQt::MantidWidgets::DataProcessor::PlotRowCommand &);
 };
 
 class DataProcessorProcessCommand

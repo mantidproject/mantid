@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorPlotRowCommand
+/** @class PlotRowCommand
 
-DataProcessorPlotRowCommand defines the action "Plot Selected Rows"
+PlotRowCommand defines the action "Plot Selected Rows"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorPlotRowCommand : public CommandBase {
+class PlotRowCommand : public CommandBase {
 public:
-  DataProcessorPlotRowCommand(DataProcessorPresenter *tablePresenter)
+  PlotRowCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorPlotRowCommand(const QDataProcessorWidget &widget)
+  PlotRowCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorPlotRowCommand(){};
+  virtual ~PlotRowCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PlotRowFlag);
