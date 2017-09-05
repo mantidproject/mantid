@@ -33,7 +33,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 
 using namespace Mantid::API;
@@ -143,26 +143,26 @@ public:
     TS_ASSERT(dynamic_cast<NewTableCommand *>(comm[1].get()));
     TS_ASSERT(dynamic_cast<SaveTableCommand *>(comm[2].get()));
     TS_ASSERT(dynamic_cast<SaveTableAsCommand *>(comm[3].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[4].get()));
+    TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[4].get()));
     TS_ASSERT(dynamic_cast<ImportTableCommand *>(comm[5].get()));
     TS_ASSERT(dynamic_cast<ExportTableCommand *>(comm[6].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[7].get()));
+    TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[7].get()));
     TS_ASSERT(dynamic_cast<OptionsCommand *>(comm[8].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[9].get()));
+    TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[9].get()));
     TS_ASSERT(dynamic_cast<ProcessCommand *>(comm[10].get()));
     TS_ASSERT(dynamic_cast<PauseCommand *>(comm[11].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[12].get()));
+    TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[12].get()));
     TS_ASSERT(dynamic_cast<ExpandCommand *>(comm[13].get()));
     TS_ASSERT(dynamic_cast<ExpandGroupsCommand *>(comm[14].get()));
     TS_ASSERT(
         dynamic_cast<CollapseGroupsCommand *>(comm[15].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[16].get()));
+    TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[16].get()));
     TS_ASSERT(dynamic_cast<PlotRowCommand *>(comm[17].get()));
     TS_ASSERT(dynamic_cast<PlotGroupCommand *>(comm[18].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[19].get()));
+    TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[19].get()));
     TS_ASSERT(dynamic_cast<AppendRowCommand *>(comm[20].get()));
     TS_ASSERT(dynamic_cast<AppendGroupCommand *>(comm[21].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[22].get()));
+    TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[22].get()));
     TS_ASSERT(dynamic_cast<GroupRowsCommand *>(comm[23].get()));
     TS_ASSERT(dynamic_cast<CopySelectedCommand *>(comm[24].get()));
     TS_ASSERT(dynamic_cast<CutSelectedCommand *>(comm[25].get()));
@@ -170,7 +170,7 @@ public:
         dynamic_cast<PasteSelectedCommand *>(comm[26].get()));
     TS_ASSERT(
         dynamic_cast<ClearSelectedCommand *>(comm[27].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[28].get()));
+    TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[28].get()));
     TS_ASSERT(dynamic_cast<DeleteRowCommand *>(comm[29].get()));
     TS_ASSERT(dynamic_cast<DeleteGroupCommand *>(comm[30].get()));
   }

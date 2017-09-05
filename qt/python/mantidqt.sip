@@ -1961,13 +1961,13 @@ SaveTableAsCommand();
 SaveTableAsCommand(const MantidQt::MantidWidgets::DataProcessor::SaveTableAsCommand &);
 };
 
-class DataProcessorSeparatorCommand
+class SeparatorCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h"
 %End
 public:
-DataProcessorSeparatorCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+SeparatorCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1976,8 +1976,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorSeparatorCommand();
-DataProcessorSeparatorCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorSeparatorCommand &);
+SeparatorCommand();
+SeparatorCommand(const MantidQt::MantidWidgets::DataProcessor::SeparatorCommand &);
 };
 
 class DataProcessorWorkspaceCommand
