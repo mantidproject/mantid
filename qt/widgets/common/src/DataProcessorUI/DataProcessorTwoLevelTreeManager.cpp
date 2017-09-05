@@ -19,7 +19,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPauseCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessCommand.h"
@@ -92,7 +92,7 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<OptionsCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorProcessCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPauseCommand>(m_presenter));
+  addCommand(commands, make_unique<PauseCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<ExpandCommand>(m_presenter));
   addCommand(commands,
