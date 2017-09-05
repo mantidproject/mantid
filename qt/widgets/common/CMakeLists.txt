@@ -76,8 +76,8 @@
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
 	src/ParseKeyValueString.cpp
 	src/ParseNumerics.cpp
-	src/DataProcessorUI/QDataProcessorOneLevelTreeModel.cpp
-	src/DataProcessorUI/QDataProcessorTwoLevelTreeModel.cpp
+	src/DataProcessorUI/QOneLevelTreeModel.cpp
+	src/DataProcessorUI/QTwoLevelTreeModel.cpp
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataProcessorUI/DataProcessorVectorString.cpp
@@ -189,8 +189,8 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorOneLevelTreeModel.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/QOneLevelTreeModel.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h
   inc/MantidQtWidgets/Common/DataProcessorUI/TreeData.h
@@ -452,8 +452,8 @@ set( TEST_FILES
    DataProcessorUI/DataProcessorWhiteListTest.h
    DataProcessorUI/GenericDataProcessorPresenterTest.h
    ParseKeyValueStringTest.h
-   DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
-   DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
+   DataProcessorUI/QOneLevelTreeModelTest.h
+   DataProcessorUI/QTwoLevelTreeModelTest.h
    ProjectSaveModelTest.h
    ProjectSavePresenterTest.h
    WorkspacePresenter/ADSAdapterTest.h

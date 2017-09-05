@@ -26,7 +26,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h"
 #include "MantidQtWidgets/Common/ParseNumerics.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h"
 #include "MantidKernel/make_unique.h"
@@ -52,7 +52,7 @@ TwoLevelTreeManager::TwoLevelTreeManager(
     DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
     const DataProcessorWhiteList &whitelist)
     : m_presenter(presenter),
-      m_model(new QDataProcessorTwoLevelTreeModel(table, whitelist)) {}
+      m_model(new QTwoLevelTreeModel(table, whitelist)) {}
 
 /**
 * Constructor (no table workspace given)
@@ -376,7 +376,7 @@ void TwoLevelTreeManager::pasteSelected(const QString &text) {
 void TwoLevelTreeManager::newTable(
     const DataProcessorWhiteList &whitelist) {
 
-  m_model.reset(new QDataProcessorTwoLevelTreeModel(
+  m_model.reset(new QTwoLevelTreeModel(
       createDefaultWorkspace(whitelist), whitelist));
 }
 
@@ -388,7 +388,7 @@ void TwoLevelTreeManager::newTable(
     ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
 
   if (isValidModel(table, whitelist.size())) {
-    m_model.reset(new QDataProcessorTwoLevelTreeModel(table, whitelist));
+    m_model.reset(new QTwoLevelTreeModel(table, whitelist));
   } else
     throw std::runtime_error("Selected table has the incorrect number of "
                              "columns to be used as a data processor table.");
@@ -566,7 +566,7 @@ void TwoLevelTreeManager::transfer(
     }
   }
 
-  m_model.reset(new QDataProcessorTwoLevelTreeModel(ws, whitelist));
+  m_model.reset(new QTwoLevelTreeModel(ws, whitelist));
 }
 
 /** Updates a row with new data

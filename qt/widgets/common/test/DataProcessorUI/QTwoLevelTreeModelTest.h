@@ -4,18 +4,18 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 
-class QDataProcessorTwoLevelTreeModelTest : public CxxTest::TestSuite {
+class QTwoLevelTreeModelTest : public CxxTest::TestSuite {
 
 public:
   // Constructor (initializes whitelist)
-  QDataProcessorTwoLevelTreeModelTest() {
+  QTwoLevelTreeModelTest() {
     m_whitelist.addElement("Column1", "Property1", "Description1");
     m_whitelist.addElement("Column2", "Property2", "Description2");
   }
@@ -90,18 +90,18 @@ public:
     auto ws = oneRowTable();
 
     ws->removeColumn("Group");
-    TS_ASSERT_THROWS(QDataProcessorTwoLevelTreeModel(ws, m_whitelist),
+    TS_ASSERT_THROWS(QTwoLevelTreeModel(ws, m_whitelist),
                      std::invalid_argument);
 
     ws->addColumn("str", "Group1");
     ws->addColumn("str", "Group2");
-    TS_ASSERT_THROWS(QDataProcessorTwoLevelTreeModel(ws, m_whitelist),
+    TS_ASSERT_THROWS(QTwoLevelTreeModel(ws, m_whitelist),
                      std::invalid_argument);
   }
 
   void testConstructorOneRowTable() {
     auto ws = oneRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // One group
     TS_ASSERT_EQUALS(model.rowCount(), 1);
@@ -135,7 +135,7 @@ public:
 
   void testConstructorFourRowTable() {
     auto ws = fourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // TWo groups
     TS_ASSERT_EQUALS(model.rowCount(), 2);
@@ -186,13 +186,13 @@ public:
 
   void testColumnCount() {
     auto ws = oneRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
     TS_ASSERT_EQUALS(model.columnCount(), m_whitelist.size());
   }
 
   void testIndex() {
     auto ws = fourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Group indices
     TS_ASSERT_EQUALS(model.index(0, 0).row(), 0);
@@ -207,7 +207,7 @@ public:
 
   void testParent() {
     auto ws = fourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Group parent
     TS_ASSERT_EQUALS(model.parent(model.index(0, 0)), QModelIndex());
@@ -226,7 +226,7 @@ public:
 
   void testSetData() {
     auto ws = fourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Rename groups
     model.setData(model.index(0, 0), "new_group_0");
@@ -280,7 +280,7 @@ public:
 
   void testInsertRowsOneRowTable() {
     auto ws = oneRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Insert rows
 
@@ -302,7 +302,7 @@ public:
 
   void testInsertGroupsOneRowTable() {
     auto ws = oneRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Insert groups
 
@@ -338,7 +338,7 @@ public:
 
   void testRemoveRowsOneRowTable() {
     auto ws = oneRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Remove the only row, this should remove the group
     TS_ASSERT_EQUALS(model.removeRows(0, 1, model.index(0, 0)), true);
@@ -351,7 +351,7 @@ public:
 
   void testRemoveGroupsFourRowTable() {
     auto ws = fourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Non-existing group
     TS_ASSERT_EQUALS(model.removeRows(10, 1), false);
@@ -373,7 +373,7 @@ public:
 
   void testRemoveRowsFourRowTable() {
     auto ws = fourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Non-existing row in first group
     TS_ASSERT_EQUALS(model.removeRows(10, 1, model.index(0, 1)), false);
@@ -453,7 +453,7 @@ public:
         << "13469"
         << "0.7";
 
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Delete second row
     TS_ASSERT_EQUALS(model.removeRows(0, 1, model.index(1, 0)), true);
@@ -493,7 +493,7 @@ public:
   void testRemoveRowUnsortedTable() {
     // Create a table ws
     ITableWorkspace_sptr ws = unsortedFourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Delete second row
     TS_ASSERT_EQUALS(model.removeRows(1, 1, model.index(0, 0)), true);
@@ -513,7 +513,7 @@ public:
   void testRemoveRowsUnsortedTable() {
     // Create a table ws
     ITableWorkspace_sptr ws = unsortedFourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Delete two consecutive rows belonging to second group
     TS_ASSERT_EQUALS(model.removeRows(0, 2, model.index(1, 0)), true);
@@ -531,7 +531,7 @@ public:
   void testRemoveGroupUnsortedTable() {
     // Create a table ws
     ITableWorkspace_sptr ws = unsortedFourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Delete second group
     TS_ASSERT_EQUALS(model.removeRows(1, 1), true);
@@ -559,7 +559,7 @@ public:
         << "group2_row1_col0"
         << "group2_row1_col1";
 
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Delete second and third groups
     TS_ASSERT_EQUALS(model.removeRows(1, 2), true);
@@ -604,7 +604,7 @@ public:
         << "13460"
         << "0.7";
 
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
     ITableWorkspace_sptr ws_model = model.getTableWorkspace();
 
     TS_ASSERT_EQUALS(ws_model->rowCount(), 5);
@@ -622,14 +622,14 @@ public:
 
   void testCountRowsOfNonexistentGroup() {
 
-    QDataProcessorTwoLevelTreeModel model(oneRowTable(), m_whitelist);
+    QTwoLevelTreeModel model(oneRowTable(), m_whitelist);
 
     TS_ASSERT_THROWS_NOTHING(model.rowCount(model.index(1, 0)));
   }
 
   void testHighlightTable() {
     auto ws = fourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Non-existent row
     TS_ASSERT_EQUALS(model.setProcessed(true, 10, model.index(0, 0)), false);
@@ -676,7 +676,7 @@ public:
 
   void testIsProcessed() {
     auto ws = fourRowTable();
-    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    QTwoLevelTreeModel model(ws, m_whitelist);
 
     // Set 1st row of 1st group and 2nd group processed
     model.setProcessed(true, 0, model.index(0, 0));

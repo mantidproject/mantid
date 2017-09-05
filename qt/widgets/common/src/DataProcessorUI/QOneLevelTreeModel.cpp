@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorOneLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QOneLevelTreeModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
@@ -12,7 +12,7 @@ using namespace Mantid::API;
 @param tableWorkspace : The table workspace to wrap
 @param whitelist : A DataProcessorWhiteList containing the columns
 */
-QDataProcessorOneLevelTreeModel::QDataProcessorOneLevelTreeModel(
+QOneLevelTreeModel::QOneLevelTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
     : AbstractTreeModel(tableWorkspace, whitelist) {
@@ -25,14 +25,14 @@ QDataProcessorOneLevelTreeModel::QDataProcessorOneLevelTreeModel(
   m_rows = std::vector<bool>(tableWorkspace->rowCount(), false);
 }
 
-QDataProcessorOneLevelTreeModel::~QDataProcessorOneLevelTreeModel() {}
+QOneLevelTreeModel::~QOneLevelTreeModel() {}
 
 /** Returns data for specified index
 * @param index : The index
 * @param role : The role
 * @return : The data associated with the given index
 */
-QVariant QDataProcessorOneLevelTreeModel::data(const QModelIndex &index,
+QVariant QOneLevelTreeModel::data(const QModelIndex &index,
                                                int role) const {
   if (!index.isValid())
     return QVariant();
@@ -57,7 +57,7 @@ QVariant QDataProcessorOneLevelTreeModel::data(const QModelIndex &index,
 * @param role : The role
 * @return : The column name
 */
-QVariant QDataProcessorOneLevelTreeModel::headerData(
+QVariant QOneLevelTreeModel::headerData(
     int section, Qt::Orientation orientation, int role) const {
 
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
@@ -73,7 +73,7 @@ QVariant QDataProcessorOneLevelTreeModel::headerData(
 * @return : The index of the element
 */
 QModelIndex
-QDataProcessorOneLevelTreeModel::index(int row, int column,
+QOneLevelTreeModel::index(int row, int column,
                                        const QModelIndex &parent) const {
 
   UNUSED_ARG(parent);
@@ -85,7 +85,7 @@ QDataProcessorOneLevelTreeModel::index(int row, int column,
 * @param parent : The parent of this item
 * @return : The 'processed' status
 */
-bool QDataProcessorOneLevelTreeModel::isProcessed(
+bool QOneLevelTreeModel::isProcessed(
     int position, const QModelIndex &parent) const {
 
   // No parent items exists, this should not be possible
@@ -107,7 +107,7 @@ bool QDataProcessorOneLevelTreeModel::isProcessed(
 * @return : Its parent
 */
 QModelIndex
-QDataProcessorOneLevelTreeModel::parent(const QModelIndex &index) const {
+QOneLevelTreeModel::parent(const QModelIndex &index) const {
 
   UNUSED_ARG(index);
   return QModelIndex();
@@ -119,7 +119,7 @@ QDataProcessorOneLevelTreeModel::parent(const QModelIndex &index) const {
 * @param parent : The parent of the set of elements
 * @return : Boolean indicating whether the insertion was successful or not
 */
-bool QDataProcessorOneLevelTreeModel::insertRows(int position, int count,
+bool QOneLevelTreeModel::insertRows(int position, int count,
                                                  const QModelIndex &parent) {
   if (parent.isValid())
     return false;
@@ -152,7 +152,7 @@ bool QDataProcessorOneLevelTreeModel::insertRows(int position, int count,
 * @return : Boolean indicating whether the elements were removed successfully or
 * not
 */
-bool QDataProcessorOneLevelTreeModel::removeRows(int position, int count,
+bool QOneLevelTreeModel::removeRows(int position, int count,
                                                  const QModelIndex &parent) {
 
   if (parent.isValid())
@@ -183,7 +183,7 @@ bool QDataProcessorOneLevelTreeModel::removeRows(int position, int count,
 * @param parent : The parent item
 * @return : The number of rows
 */
-int QDataProcessorOneLevelTreeModel::rowCount(const QModelIndex &parent) const {
+int QOneLevelTreeModel::rowCount(const QModelIndex &parent) const {
 
   if (parent.isValid())
     return 0;
@@ -196,7 +196,7 @@ int QDataProcessorOneLevelTreeModel::rowCount(const QModelIndex &parent) const {
 * @param value : the new value
 * @param role : the role
 */
-bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
+bool QOneLevelTreeModel::setData(const QModelIndex &index,
                                               const QVariant &value, int role) {
 
   if (role != Qt::EditRole)
@@ -222,7 +222,7 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
 * @param parent : The parent of this row
 * @return : Boolean indicating whether process status was set successfully
 */
-bool QDataProcessorOneLevelTreeModel::setProcessed(bool processed, int position,
+bool QOneLevelTreeModel::setProcessed(bool processed, int position,
                                                    const QModelIndex &parent) {
 
   // No parent items exists, this should not be possible
@@ -244,7 +244,7 @@ bool QDataProcessorOneLevelTreeModel::setProcessed(bool processed, int position,
 * @return :: the underlying table workspace
 */
 ITableWorkspace_sptr
-QDataProcessorOneLevelTreeModel::getTableWorkspace() const {
+QOneLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 
