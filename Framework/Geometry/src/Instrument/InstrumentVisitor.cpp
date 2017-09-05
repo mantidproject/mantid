@@ -154,6 +154,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
   m_isVisible->emplace_back(componentIsVisible(componentID));
+  m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
   clearLegacyParameters(m_pmap, assembly);
   // Now that we know what the index of the parent is we can apply it to the
   // children
@@ -185,6 +186,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
   m_isVisible->emplace_back(componentIsVisible(componentID));
+  m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
   const size_t componentStart = m_assemblySortedComponentIndices->size();
   m_componentRanges->emplace_back(
       std::make_pair(componentStart, componentStart + 1));

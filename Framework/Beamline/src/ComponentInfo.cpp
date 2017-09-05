@@ -34,6 +34,7 @@ ComponentInfo::ComponentInfo(
       m_parentIndices(std::move(parentIndices)),
       m_isVisible(std::move(isVisible)), m_positions(std::move(positions)),
       m_rotations(std::move(rotations)),
+	  m_scaleFactors(std::move(scaleFactors)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
       m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex) {
