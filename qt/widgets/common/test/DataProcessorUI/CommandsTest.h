@@ -16,7 +16,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ExpandGroupsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
@@ -266,7 +266,7 @@ public:
 
   void test_group_rows_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorGroupRowsCommand command(&mockPresenter);
+    GroupRowsCommand command(&mockPresenter);
 
     // The presenter should be notified with the GroupRowsFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::GroupRowsFlag))
