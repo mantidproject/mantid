@@ -1,5 +1,5 @@
 """
-    Test of FunctiomWrapper and related classes
+    Test of fitFunctions.py and related classes
 """
 from __future__ import (absolute_import, division, print_function)
 
@@ -13,7 +13,7 @@ from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
 
-class FunctionWrapperTest(unittest.TestCase):
+class FitFunctionsTest(unittest.TestCase):
 
     _raw_ws = None
 
