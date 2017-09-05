@@ -5,7 +5,11 @@ class FunctionWrapper(object):
   """ Wrapper class for Fitting Function 
   """
   def __init__ (self, name, **kwargs):
-    """ Called when creating an instance
+    """ 
+    Called when creating an instance
+    :param name: name of fitting function to create or 
+    an Ifunction object to wrap.
+    :param **kwargs: standard argument for __init__ function
     """
     if not isinstance(name, str):
        self.fun = name
@@ -109,6 +113,8 @@ class FunctionWrapper(object):
          
   def tie (self, *args, **kwargs):
     """ Add ties.
+        :param *args: one or more dictionaries of ties
+        :param **kwargs: one or more ties
     """
     for a in args:
         if isinstance(a, dict):
@@ -192,6 +198,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
     def __init__ (self, *args):
        """ Called when creating an instance
            It should not be called directly
+           :param *args: names of functions in composite function
        """
        self.pureAddition = True
        self.pureMultiplication = False
@@ -206,6 +213,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
            subclasses.
             
           :param name: name of class calling this.
+          :param *args: names of functions in composite function
        """
        if len(args) == 1 and  not isinstance(args[0], FunctionWrapper):
           # We have a composite function to wrap
@@ -379,7 +387,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
                 pass
            
     def unconstrainAll (self, name):
-       """ Constrain all parameters of given local name.
+       """ Unconstrain all parameters of given local name.
             
            :param name: local name of parameter
        """
@@ -443,6 +451,7 @@ class ProductFunctionWrapper(CompositeFunctionWrapper):
     def __init__ (self, *args):
        """ Called when creating an instance
            It should not be called directly.
+           :param *args: names of functions in composite function
        """
        self.pureAddition = False
        self.pureMultiplication = True
@@ -454,6 +463,7 @@ class ConvolutionWrapper(CompositeFunctionWrapper):
     def __init__ (self, *args):
        """ Called when creating an instance
            It should not be called directly.
+           :param *args: names of functions in composite function
        """
        self.pureAddition = False
        self.pureMultiplication = False
@@ -465,6 +475,7 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
     def __init__ (self, *args, **kwargs):
        """ Called when creating an instance
            It should not be called directly
+           :param *args: names of functions in composite function
        """
        # Assume it's not safe to flatten
        self.pureAddition = False
