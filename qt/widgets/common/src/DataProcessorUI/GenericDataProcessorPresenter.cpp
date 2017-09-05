@@ -108,7 +108,7 @@ namespace DataProcessor {
 * Constructor
 * @param whitelist : The set of properties we want to show as columns
 * @param preprocessMap : A map containing instructions for pre-processing
-* @param processor : A DataProcessorProcessingAlgorithm
+* @param processor : A ProcessingAlgorithm
 * @param postprocessor : A PostprocessingAlgorithm
 * workspaces
 * @param postprocessMap : A map containing instructions for post-processing.
@@ -118,7 +118,7 @@ namespace DataProcessor {
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor,
+    const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
@@ -174,13 +174,13 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 /**
 * Delegating constructor (no pre-processing needed)
 * @param whitelist : The set of properties we want to show as columns
-* @param processor : A DataProcessorProcessingAlgorithm
+* @param processor : A ProcessingAlgorithm
 * @param postprocessor : A PostprocessingAlgorithm
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const DataProcessorProcessingAlgorithm &processor,
+    const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor)
     : GenericDataProcessorPresenter(
           whitelist, std::map<QString, PreprocessingAlgorithm>(),
@@ -194,7 +194,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist)
     : GenericDataProcessorPresenter(
           whitelist, std::map<QString, PreprocessingAlgorithm>(),
-          DataProcessorProcessingAlgorithm(),
+          ProcessingAlgorithm(),
           PostprocessingAlgorithm()) {}
 
 /**
@@ -202,25 +202,25 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * Delegating constructor (no post-processing needed)
 * @param whitelist : The set of properties we want to show as columns
 * @param preprocessMap : A map containing instructions for pre-processing
-* @param processor : A DataProcessorProcessingAlgorithm
+* @param processor : A ProcessingAlgorithm
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor)
+    const ProcessingAlgorithm &processor)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     PostprocessingAlgorithm()) {}
 
 /**
 * Delegating constructor (no pre-processing needed, no post-processing needed)
 * @param whitelist : The set of properties we want to show as columns
-* @param processor : A DataProcessorProcessingAlgorithm
+* @param processor : A ProcessingAlgorithm
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const DataProcessorProcessingAlgorithm &processor)
+    const ProcessingAlgorithm &processor)
     : GenericDataProcessorPresenter(
           whitelist, std::map<QString, PreprocessingAlgorithm>(),
           processor, PostprocessingAlgorithm()) {}

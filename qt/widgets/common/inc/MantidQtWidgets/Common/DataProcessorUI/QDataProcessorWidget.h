@@ -17,7 +17,7 @@ namespace DataProcessor {
 class QtCommandAdapter;
 class DataProcessorMainPresenter;
 class PreprocessMap;
-class DataProcessorProcessingAlgorithm;
+class ProcessingAlgorithm;
 class PostprocessingAlgorithm;
 class DataProcessorWhiteList;
 
@@ -55,19 +55,19 @@ public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = 0);
   QDataProcessorWidget(const DataProcessorWhiteList &,
-                       const DataProcessorProcessingAlgorithm &,
+                       const ProcessingAlgorithm &,
                        QWidget *parent);
   QDataProcessorWidget(const DataProcessorWhiteList &,
                        const PreprocessMap &,
-                       const DataProcessorProcessingAlgorithm &,
+                       const ProcessingAlgorithm &,
                        QWidget *parent);
   QDataProcessorWidget(const DataProcessorWhiteList &,
-                       const DataProcessorProcessingAlgorithm &,
+                       const ProcessingAlgorithm &,
                        const PostprocessingAlgorithm &,
                        QWidget *parent);
   QDataProcessorWidget(const DataProcessorWhiteList &,
                        const PreprocessMap &,
-                       const DataProcessorProcessingAlgorithm &,
+                       const ProcessingAlgorithm &,
                        const PostprocessingAlgorithm &,
                        QWidget *parent);
   ~QDataProcessorWidget() override;

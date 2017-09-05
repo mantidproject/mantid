@@ -4,26 +4,26 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
-class DataProcessorProcessingAlgorithmBaseTest : public CxxTest::TestSuite {
+class ProcessingAlgorithmBaseTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DataProcessorProcessingAlgorithmBaseTest *createSuite() {
-    return new DataProcessorProcessingAlgorithmBaseTest();
+  static ProcessingAlgorithmBaseTest *createSuite() {
+    return new ProcessingAlgorithmBaseTest();
   }
-  static void destroySuite(DataProcessorProcessingAlgorithmBaseTest *suite) {
+  static void destroySuite(ProcessingAlgorithmBaseTest *suite) {
     delete suite;
   }
-  DataProcessorProcessingAlgorithmBaseTest() { FrameworkManager::Instance(); };
+  ProcessingAlgorithmBaseTest() { FrameworkManager::Instance(); };
 
   void test_MatrixWorkspace_properties() {
     // Test MatrixWorkspace properties
-    DataProcessorProcessingAlgorithmBase alg("MultiplyRange");
+    ProcessingAlgorithmBase alg("MultiplyRange");
     TS_ASSERT_EQUALS(alg.getInputWsProperties(),
                      std::vector<QString>{"InputWorkspace"});
     TS_ASSERT_EQUALS(alg.getOutputWsProperties(),
@@ -35,7 +35,7 @@ public:
 
   void test_Workspace_properties() {
     // Test Workspace properties
-    DataProcessorProcessingAlgorithmBase alg("CompareWorkspaces");
+    ProcessingAlgorithmBase alg("CompareWorkspaces");
     TS_ASSERT_EQUALS(alg.getInputWsProperties().size(), 2);
     TS_ASSERT_EQUALS(alg.getInputStrListProperties(), std::vector<QString>());
 
@@ -43,7 +43,7 @@ public:
   }
 
   void test_StrList_properties() {
-    DataProcessorProcessingAlgorithmBase alg("Stitch1DMany");
+    ProcessingAlgorithmBase alg("Stitch1DMany");
     TS_ASSERT_EQUALS(alg.getInputStrListProperties(),
                      std::vector<QString>{"InputWorkspaces"});
     TS_ASSERT_EQUALS(alg.getOutputWsProperties(),

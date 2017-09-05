@@ -68,7 +68,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
       "the value of this column. <br /><br /><b>Example:</b> <samp>1</samp>");
 
   // The data processor algorithm
-  DataProcessorProcessingAlgorithm processor(
+  ProcessingAlgorithm processor(
       /*The name of the algorithm */
       "ReflectometryReductionOneAuto",
       /*Prefixes to the output workspaces*/

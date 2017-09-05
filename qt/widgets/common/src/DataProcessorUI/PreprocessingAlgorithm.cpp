@@ -13,7 +13,7 @@ namespace DataProcessor {
 PreprocessingAlgorithm::PreprocessingAlgorithm(
     const QString &name, const QString &prefix,
     const std::set<QString> &blacklist)
-    : DataProcessorProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
+    : ProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
 
   auto inputWsProperties = getInputWsProperties();
 

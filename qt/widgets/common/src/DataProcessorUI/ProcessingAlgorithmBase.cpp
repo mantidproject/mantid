@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h"
 #include <QStringList>
 #include <boost/algorithm/string.hpp>
 
@@ -7,7 +7,7 @@ namespace MantidWidgets {
 namespace DataProcessor {
 
 /** Constructor */
-DataProcessorProcessingAlgorithmBase::DataProcessorProcessingAlgorithmBase(
+ProcessingAlgorithmBase::ProcessingAlgorithmBase(
     const QString &name, const std::set<QString> &blacklist)
     : m_algName(name), m_blacklist(blacklist), m_inputWsProperties(),
       m_inputStrListProperties(), m_OutputWsProperties() {
@@ -16,15 +16,15 @@ DataProcessorProcessingAlgorithmBase::DataProcessorProcessingAlgorithmBase(
 }
 
 /** Default constructor (nothing to do) */
-DataProcessorProcessingAlgorithmBase::DataProcessorProcessingAlgorithmBase()
+ProcessingAlgorithmBase::ProcessingAlgorithmBase()
     : m_algName(), m_blacklist(), m_inputWsProperties(),
       m_inputStrListProperties(), m_OutputWsProperties() {}
 
 /** Destructor */
-DataProcessorProcessingAlgorithmBase::~DataProcessorProcessingAlgorithmBase() {}
+ProcessingAlgorithmBase::~ProcessingAlgorithmBase() {}
 
 /** Counts the number of input/output workspace properties */
-void DataProcessorProcessingAlgorithmBase::countWsProperties() {
+void ProcessingAlgorithmBase::countWsProperties() {
 
   Mantid::API::IAlgorithm_sptr alg =
       Mantid::API::AlgorithmManager::Instance().create(m_algName.toStdString());
@@ -53,17 +53,17 @@ void DataProcessorProcessingAlgorithmBase::countWsProperties() {
 
 // Returns the input workspaces properties defined for this algorithm
 std::vector<QString>
-DataProcessorProcessingAlgorithmBase::getInputWsProperties() {
+ProcessingAlgorithmBase::getInputWsProperties() {
   return m_inputWsProperties;
 }
 // Returns the input str list properties defined for this algorithm
 std::vector<QString>
-DataProcessorProcessingAlgorithmBase::getInputStrListProperties() {
+ProcessingAlgorithmBase::getInputStrListProperties() {
   return m_inputStrListProperties;
 }
 // Returns the output workspaces properties defined for this algorithm
 std::vector<QString>
-DataProcessorProcessingAlgorithmBase::getOutputWsProperties() {
+ProcessingAlgorithmBase::getOutputWsProperties() {
   return m_OutputWsProperties;
 }
 
@@ -73,7 +73,7 @@ DataProcessorProcessingAlgorithmBase::getOutputWsProperties() {
 * @return :: the string as a vector
 */
 std::vector<QString>
-DataProcessorProcessingAlgorithmBase::convertStringToVector(
+ProcessingAlgorithmBase::convertStringToVector(
     const QString &text) {
 
   if (text.isEmpty())
@@ -88,7 +88,7 @@ DataProcessorProcessingAlgorithmBase::convertStringToVector(
 * @return :: the string as a set
 */
 std::set<QString>
-DataProcessorProcessingAlgorithmBase::convertStringToSet(const QString &text) {
+ProcessingAlgorithmBase::convertStringToSet(const QString &text) {
 
   if (text.isEmpty())
     return std::set<QString>();

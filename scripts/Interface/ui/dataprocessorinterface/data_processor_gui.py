@@ -123,7 +123,7 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
         # the whitelist above
         # Additionally (not specified here) a blacklist of properties can be specified as the third
         # argument. These properties will not appear in the 'Options' column when typing
-        alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_','')
+        alg = MantidQt.MantidWidgets.ProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_','')
 
         # Post-processing algorithm (optional, but functionality not well tested when not supplied)
         # Algorithm to post-process runs belonging to the same group

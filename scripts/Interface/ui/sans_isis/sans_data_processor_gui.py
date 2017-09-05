@@ -160,7 +160,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Setup the black list, ie the properties which should not appear in the Options column
 
         # Processing algorithm (mandatory)
-        alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm(self._gui_algorithm_name, 'unused_',
+        alg = MantidQt.MantidWidgets.ProcessingAlgorithm(self._gui_algorithm_name, 'unused_',
                                                                       self._black_list)
 
         # --------------------------------------------------------------------------------------------------------------

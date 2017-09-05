@@ -69,8 +69,8 @@
 	src/DataProcessorUI/PostprocessingAlgorithm.cpp
 	src/DataProcessorUI/PreprocessingAlgorithm.cpp
 	src/DataProcessorUI/PreprocessMap.cpp
-	src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
-	src/DataProcessorUI/DataProcessorProcessingAlgorithmBase.cpp
+	src/DataProcessorUI/ProcessingAlgorithm.cpp
+	src/DataProcessorUI/ProcessingAlgorithmBase.cpp
 	src/DataProcessorUI/TwoLevelTreeManager.cpp
 	src/DataProcessorUI/DataProcessorWhiteList.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
@@ -332,8 +332,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h
@@ -446,8 +446,8 @@ set( TEST_FILES
    DataProcessorUI/PostprocessingAlgorithmTest.h
    DataProcessorUI/PreprocessingAlgorithmTest.h
    DataProcessorUI/PreprocessMapTest.h
-   DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h
-   DataProcessorUI/DataProcessorProcessingAlgorithmTest.h
+   DataProcessorUI/ProcessingAlgorithmBaseTest.h
+   DataProcessorUI/ProcessingAlgorithmTest.h
    DataProcessorUI/TwoLevelTreeManagerTest.h
    DataProcessorUI/DataProcessorWhiteListTest.h
    DataProcessorUI/GenericDataProcessorPresenterTest.h

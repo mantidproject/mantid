@@ -111,7 +111,7 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
         # the whitelist above
         # Additionally (not specified here) a blacklist of properties can be specified as the third
         # argument. These properties will not appear in the 'Options' column when typing
-        alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('PoldiDataAnalysis','Poldi_','')
+        alg = MantidQt.MantidWidgets.ProcessingAlgorithm('PoldiDataAnalysis','Poldi_','')
 
         # Post-processing algorithm (optional)
         # Not used in this interface

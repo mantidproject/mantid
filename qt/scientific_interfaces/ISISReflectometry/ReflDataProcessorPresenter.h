@@ -47,7 +47,7 @@ public:
       const DataProcessorWhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
-      const DataProcessorProcessingAlgorithm &processor,
+      const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),

@@ -12,11 +12,11 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorProcessingAlgorithmBase
+/** @class ProcessingAlgorithmBase
 
-DataProcessorProcessingAlgorithmBase defines shared code to be used by derived
+ProcessingAlgorithmBase defines shared code to be used by derived
 classes
-(PreprocessingAlgorithm, DataProcessorProcessingAlgorithm and
+(PreprocessingAlgorithm, ProcessingAlgorithm and
 PostprocessingAlgorithm).
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -40,18 +40,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorProcessingAlgorithmBase {
+class EXPORT_OPT_MANTIDQT_COMMON ProcessingAlgorithmBase {
 public:
   // Default constructor
-  DataProcessorProcessingAlgorithmBase();
+  ProcessingAlgorithmBase();
 
   // Constructor
-  DataProcessorProcessingAlgorithmBase(
+  ProcessingAlgorithmBase(
       const QString &name,
       const std::set<QString> &blacklist = std::set<QString>());
 
   // Destructor
-  ~DataProcessorProcessingAlgorithmBase();
+  ~ProcessingAlgorithmBase();
 
   // Returns the input workspaces properties defined for this algorithm
   virtual std::vector<QString> getInputWsProperties() final;

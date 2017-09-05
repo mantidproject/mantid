@@ -52,7 +52,7 @@ GenerateNotebook::GenerateNotebook(
     QString name, const QString instrument,
     const DataProcessorWhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor,
+    const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> preprocessingOptionsMap,
     const QString processingOptions, const QString postprocessingOptions)
@@ -162,7 +162,7 @@ QString titleString(const QString &wsName) {
   @return string containing the python code
   */
 QString plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
-                    const DataProcessorProcessingAlgorithm &processor) {
+                    const ProcessingAlgorithm &processor) {
 
   // First, we have to parse 'output_ws'
   // This is a vector containing all the output workspace produced during the
@@ -289,7 +289,7 @@ QString tableString(const TreeData &treeData,
   */
 boost::tuple<QString, QString> postprocessGroupString(
     const GroupData &rowMap, const DataProcessorWhiteList &whitelist,
-    const DataProcessorProcessingAlgorithm &processor,
+    const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const QString &postprocessingOptions) {
   QString stitchString;
@@ -406,7 +406,7 @@ boost::tuple<QString, QString> reduceRowString(
     const RowData &data, const QString &instrument,
     const DataProcessorWhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor,
+    const ProcessingAlgorithm &processor,
     const std::map<QString, QString> &preprocessingOptionsMap,
     const QString &processingOptions) {
 

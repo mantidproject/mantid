@@ -37,9 +37,9 @@ private:
   }
 
   // Creates a reflectometry processing algorithm
-  DataProcessorProcessingAlgorithm reflProcessor() {
+  ProcessingAlgorithm reflProcessor() {
 
-    return DataProcessorProcessingAlgorithm(
+    return ProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
         std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
