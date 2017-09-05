@@ -485,7 +485,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 y_unit = workspace.getAxis(1).getUnit().unitID()
 
                 # Check whether to create wavelength workspace for Indirect Elastic
-                if x_unit == 'MomentumTransfer' or y_unit == 'MomentumTransfer':
+                if x_unit == 'MomentumTransfer' or (y_unit == 'MomentumTransfer'
+                                                    and not x_unit == 'EnergyTransfer'):
 
                     if x_unit == 'MomentumTransfer':
                         logger.information('X-Axis of the input workspace is Q')
