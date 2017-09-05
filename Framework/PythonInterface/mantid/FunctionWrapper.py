@@ -219,11 +219,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
           # We have a composite function to wrap
           self.fun = args[0]
        else:
-          if name == "CompositeFunction":
-             the_function = FunctionFactory.createFunction(name)
-             self.fun = the_function
-          else:
-             self.fun = FunctionFactory.createCompositeFunction(name)
+          self.fun = FunctionFactory.createCompositeFunction(name)
     
           #Add the functions, checking for Composite & Product functions
           for a in args:
@@ -348,9 +344,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
        """
  
        composite = self.fun
-       if(composite):
-           return composite.__len__()
-       raise RuntimeError("Not a composite Function")
+       return composite.__len__()
+
         
     def tieAll (self, name):
        """ For each member function, tie the parameter of the given name 
