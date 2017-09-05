@@ -176,7 +176,7 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
 
         # Actions that go in the 'File' menu
         self._create_action(MantidQt.MantidWidgets.DataProcessorOpenTableCommand(self.data_processor_table), self.menuFile, workspace_list)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorNewTableCommand(self.data_processor_table), self.menuFile)
+        self._create_action(MantidQt.MantidWidgets.NewTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableAsCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.ImportTableCommand(self.data_processor_table), self.menuFile)

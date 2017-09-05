@@ -9,7 +9,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
@@ -70,7 +70,7 @@ DataProcessorOneLevelTreeManager::publishCommands() {
   std::vector<Command_uptr> commands;
 
   addCommand(commands, make_unique<DataProcessorOpenTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorNewTableCommand>(m_presenter));
+  addCommand(commands, make_unique<NewTableCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSaveTableCommand>(m_presenter));
   addCommand(commands,
              make_unique<DataProcessorSaveTableAsCommand>(m_presenter));

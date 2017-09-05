@@ -23,7 +23,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
@@ -140,7 +140,7 @@ public:
 
     TS_ASSERT_EQUALS(comm.size(), 31);
     TS_ASSERT(dynamic_cast<DataProcessorOpenTableCommand *>(comm[0].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorNewTableCommand *>(comm[1].get()));
+    TS_ASSERT(dynamic_cast<NewTableCommand *>(comm[1].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSaveTableCommand *>(comm[2].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSaveTableAsCommand *>(comm[3].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[4].get()));

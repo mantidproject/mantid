@@ -19,7 +19,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
@@ -67,7 +67,7 @@ public:
 
   void test_new_table_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorNewTableCommand command(&mockPresenter);
+    NewTableCommand command(&mockPresenter);
 
     // The presenter should be notified with the NewTableFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::NewTableFlag))

@@ -319,7 +319,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h
