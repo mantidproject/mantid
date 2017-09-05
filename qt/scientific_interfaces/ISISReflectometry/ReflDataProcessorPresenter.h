@@ -45,8 +45,7 @@ public:
   // Constructor
   ReflDataProcessorPresenter(
       const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
       const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
@@ -110,8 +109,9 @@ private:
   retrieveWorkspace(QString const &name) const;
 
   // Asks user if they wish to proceed if a type of workspace exists in the ADS
-  bool proceedIfWSTypeInADS(const MantidQt::MantidWidgets::DataProcessor::TreeData &data,
-                            const bool findEventWS);
+  bool proceedIfWSTypeInADS(
+      const MantidQt::MantidWidgets::DataProcessor::TreeData &data,
+      const bool findEventWS);
 
   std::map<int, std::map<int, size_t>> m_numSlicesMap;
   std::map<int, size_t> m_numGroupSlicesMap;
