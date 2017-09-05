@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorSaveTableAsCommand
+/** @class SaveTableAsCommand
 
-DataProcessorSaveTableAsCommand defines the action "Save Table As"
+SaveTableAsCommand defines the action "Save Table As"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorSaveTableAsCommand : public CommandBase {
+class SaveTableAsCommand : public CommandBase {
 public:
-  DataProcessorSaveTableAsCommand(DataProcessorPresenter *tablePresenter)
+  SaveTableAsCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorSaveTableAsCommand(const QDataProcessorWidget &widget)
+  SaveTableAsCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorSaveTableAsCommand(){};
+  virtual ~SaveTableAsCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::SaveAsFlag);
