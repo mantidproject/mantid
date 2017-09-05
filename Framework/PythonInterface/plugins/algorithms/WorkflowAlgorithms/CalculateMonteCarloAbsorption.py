@@ -279,6 +279,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         ass_ws = self._convert_from_wavelength(ass_ws)
         self._add_sample_log_multiple(ass_ws, sample_log_names, sample_log_values)
 
+        if not self.isChild():
+            mtd.addOrReplace(self._ass_ws_name, ass_ws)
+
         if self._container_ws:
             prog.report('Calculating container absorption factors')
 
@@ -341,6 +344,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             acc_ws = self._convert_from_wavelength(acc_ws)
 
             self._add_sample_log_multiple(acc_ws, sample_log_names, sample_log_values)
+
+            if not self.isChild():
+                mtd.addOrReplace(self._acc_ws_name, acc_ws)
 
             self._output_ws = self._group_ws([ass_ws, acc_ws])
         else:
@@ -406,6 +412,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 self._container_outer_radius = self.getProperty('ContainerOuterRadius').value
 
         self._output_ws = self.getProperty('CorrectionsWorkspace').value
+        output_ws_name = self.getPropertyValue('CorrectionsWorkspace')
+        self._ass_ws_name = output_ws_name + "_ass"
+        self._acc_ws_name = output_ws_name + "_acc"
 
     def validateInputs(self):
         issues = dict()
