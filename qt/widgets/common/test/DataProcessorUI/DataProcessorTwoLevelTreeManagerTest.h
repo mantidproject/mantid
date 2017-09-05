@@ -32,7 +32,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/PlotRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 
@@ -141,7 +141,7 @@ public:
     TS_ASSERT_EQUALS(comm.size(), 31);
     TS_ASSERT(dynamic_cast<OpenTableCommand *>(comm[0].get()));
     TS_ASSERT(dynamic_cast<NewTableCommand *>(comm[1].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSaveTableCommand *>(comm[2].get()));
+    TS_ASSERT(dynamic_cast<SaveTableCommand *>(comm[2].get()));
     TS_ASSERT(dynamic_cast<SaveTableAsCommand *>(comm[3].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[4].get()));
     TS_ASSERT(dynamic_cast<ImportTableCommand *>(comm[5].get()));

@@ -1923,13 +1923,13 @@ ProcessCommand();
 ProcessCommand(const MantidQt::MantidWidgets::DataProcessor::ProcessCommand &);
 };
 
-class DataProcessorSaveTableCommand
+class SaveTableCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
 %End
 public:
-DataProcessorSaveTableCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+SaveTableCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1938,8 +1938,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorSaveTableCommand();
-DataProcessorSaveTableCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorSaveTableCommand &);
+SaveTableCommand();
+SaveTableCommand(const MantidQt::MantidWidgets::DataProcessor::SaveTableCommand &);
 };
 
 class SaveTableAsCommand

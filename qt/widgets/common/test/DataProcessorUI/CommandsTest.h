@@ -30,7 +30,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 
@@ -80,7 +80,7 @@ public:
 
   void test_save_table_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorSaveTableCommand command(&mockPresenter);
+    SaveTableCommand command(&mockPresenter);
 
     // The presenter should be notified with the SaveFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::SaveFlag))
