@@ -223,7 +223,7 @@ void export_IFunction() {
            "independent functions")
 
       .def("nDomains", &IFunction::getNumberDomains, arg("self"),
-          "Get the number of domains.")
+           "Get the number of domains.")
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),
