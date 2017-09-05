@@ -14,7 +14,7 @@
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
@@ -1679,7 +1679,7 @@ GenericDataProcessorPresenter::getTableList() {
   // Create a command for each of the workspaces in the ADS
   for (const auto &name : m_workspaceList) {
     workspaces.push_back(
-        Mantid::Kernel::make_unique<DataProcessorWorkspaceCommand>(this, name));
+        Mantid::Kernel::make_unique<WorkspaceCommand>(this, name));
   }
   return workspaces;
 }

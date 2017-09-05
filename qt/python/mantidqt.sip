@@ -1990,13 +1990,13 @@ SeparatorCommand();
 SeparatorCommand(const MantidQt::MantidWidgets::DataProcessor::SeparatorCommand &);
 };
 
-class DataProcessorWorkspaceCommand
+class WorkspaceCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h"
 %End
 public:
-DataProcessorWorkspaceCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &, const QString &);
+WorkspaceCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &, const QString &);
 void execute();
 QString name();
 QString icon();
@@ -2005,8 +2005,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorWorkspaceCommand();
-DataProcessorWorkspaceCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWorkspaceCommand &);
+WorkspaceCommand();
+WorkspaceCommand(const MantidQt::MantidWidgets::DataProcessor::WorkspaceCommand &);
 };
 
 }; // end namespace DataProcessor
