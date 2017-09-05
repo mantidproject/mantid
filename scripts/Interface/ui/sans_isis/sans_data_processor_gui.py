@@ -1489,7 +1489,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                             self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableCommand(self.data_processor_table),
                             self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableAsCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.SaveTableAsCommand(self.data_processor_table),
                             self.menuFile)
         self._create_action(MantidQt.MantidWidgets.ImportTableCommand(self.data_processor_table),
                             self.menuFile)
