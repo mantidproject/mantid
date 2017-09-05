@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import SimpleShapeMonteCarloAbsorption
+
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, Progress, mtd, SpectraAxis)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
