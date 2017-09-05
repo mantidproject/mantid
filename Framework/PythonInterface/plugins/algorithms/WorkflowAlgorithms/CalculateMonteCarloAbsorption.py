@@ -424,9 +424,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self._acc_ws = self._output_ws + '_acc'
 
     def validateInputs(self):
-
-        self._setup()
         issues = dict()
+
+        try:
+            self._setup()
+        except ValueError as err:
+            issues['SampleWorkspace'] = str(err)
 
         if self._shape == 'Annulus':
             if self._sample_inner_radius >= self._sample_outer_radius:
