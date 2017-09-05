@@ -56,7 +56,7 @@ set ( SIP_HDRS
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h
-  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h
   ../widgets/common/inc/MantidQtWidgets/Common/SlitCalculator.h
   ../widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h

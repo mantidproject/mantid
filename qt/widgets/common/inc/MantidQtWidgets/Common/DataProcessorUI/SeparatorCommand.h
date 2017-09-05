@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorSeparatorCommand
+/** @class SeparatorCommand
 
-DataProcessorSeparatorCommand defines a separator. It has no name, no icon and
+SeparatorCommand defines a separator. It has no name, no icon and
 empty
 execute() method
 
@@ -33,13 +33,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorSeparatorCommand : public CommandBase {
+class SeparatorCommand : public CommandBase {
 public:
-  DataProcessorSeparatorCommand(DataProcessorPresenter *tablePresenter)
+  SeparatorCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorSeparatorCommand(const QDataProcessorWidget &widget)
+  SeparatorCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorSeparatorCommand(){};
+  virtual ~SeparatorCommand(){};
 
   void execute() override{};
   QString name() override { return QString(); }

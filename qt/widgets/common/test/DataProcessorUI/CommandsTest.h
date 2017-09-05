@@ -31,7 +31,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 
 using namespace MantidQt::MantidWidgets;
@@ -359,7 +359,7 @@ public:
 
   void test_separator_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorSeparatorCommand command(&mockPresenter);
+    SeparatorCommand command(&mockPresenter);
 
     // The presenter should not be notified with any of the flags
     EXPECT_CALL(mockPresenter, notify(_)).Times(Exactly(0));

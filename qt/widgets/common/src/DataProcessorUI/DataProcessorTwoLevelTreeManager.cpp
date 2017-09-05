@@ -25,7 +25,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtWidgets/Common/ParseNumerics.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h"
@@ -83,30 +83,30 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<SaveTableCommand>(m_presenter));
   addCommand(commands,
              make_unique<SaveTableAsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands,
              make_unique<ImportTableCommand>(m_presenter));
   addCommand(commands,
              make_unique<ExportTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<OptionsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<ProcessCommand>(m_presenter));
   addCommand(commands, make_unique<PauseCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<ExpandCommand>(m_presenter));
   addCommand(commands,
              make_unique<ExpandGroupsCommand>(m_presenter));
   addCommand(commands,
              make_unique<CollapseGroupsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<PlotRowCommand>(m_presenter));
   addCommand(commands, make_unique<PlotGroupCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<AppendRowCommand>(m_presenter));
   addCommand(commands,
              make_unique<AppendGroupCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<GroupRowsCommand>(m_presenter));
   addCommand(commands,
              make_unique<CopySelectedCommand>(m_presenter));
@@ -116,7 +116,7 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
              make_unique<PasteSelectedCommand>(m_presenter));
   addCommand(commands,
              make_unique<ClearSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
+  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DeleteRowCommand>(m_presenter));
   addCommand(commands,
              make_unique<DeleteGroupCommand>(m_presenter));
