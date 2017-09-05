@@ -1,9 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress)
-from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion, logger,
+from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion, logger, mtd,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
-from mantid.simpleapi import (SetBeam, SetSample, MonteCarloAbsorption)
 
 
 class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
@@ -164,10 +163,12 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         prog.report('Setting up sample environment')
 
         # set the beam shape
-        SetBeam(self._input_ws_name,
-                Geometry={'Shape': 'Slit',
-                          'Width': self._beam_width,
-                          'Height': self._beam_height})
+        set_beam_alg = self.createChildAlgorithm("SetBeam", enableLogging=False)
+        set_beam_alg.setProperty("InputWorkspace", self._input_ws)
+        set_beam_alg.setProperty("Geometry", {'Shape': 'Slit',
+                                              'Width': self._beam_width,
+                                              'Height': self._beam_height})
+        set_beam_alg.execute()
 
         # set the sample geometry
         sample_geometry = dict()
@@ -192,11 +193,14 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
             sample_geometry['Center'] = [0.0, 0.0, 0.0]
             sample_geometry['Axis'] = 1
 
+        set_sample_alg = self.createChildAlgorithm("SetSample", enableLogging=False)
+        set_sample_alg.setProperty("InputWorkspace", self._input_ws)
+        set_sample_alg.setProperty("Geometry", sample_geometry)
+
         # set sample
         if self._material_defined:
             # set sample without sample material
-            SetSample(InputWorkspace=self._input_ws_name,
-                      Geometry=sample_geometry)
+            set_sample_alg.execute()
 
         else:
             # set the sample material
@@ -208,17 +212,20 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
             if self._density_type == 'Number Density':
                 sample_material['SampleNumberDensity'] = self._density
 
-            SetSample(InputWorkspace=self._input_ws_name,
-                      Geometry=sample_geometry,
-                      Material=sample_material)
+            set_sample_alg.setProperty("Material", sample_material)
+            set_sample_alg.execute()
 
         prog.report('Calculating sample corrections')
 
-        MonteCarloAbsorption(InputWorkspace=self._input_ws_name,
-                             OutputWorkspace=self._output_ws,
-                             EventsPerPoint=self._events,
-                             NumberOfWavelengthPoints=self._number_wavelengths,
-                             Interpolation=self._interpolation)
+        monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True)
+        monte_carlo_alg.setProperty("InputWorkspace", self._input_ws)
+        monte_carlo_alg.setProperty("OutputWorkspace", self._output_ws)
+        monte_carlo_alg.setProperty("EventsPerPoint", self._events)
+        monte_carlo_alg.setProperty("NumberOfWavelengthPoints", self._number_wavelengths)
+        monte_carlo_alg.setProperty("Interpolation", self._interpolation)
+        monte_carlo_alg.execute()
+
+        output_ws = monte_carlo_alg.getProperty("OutputWorkspace").value
 
         prog.report('Recording Sample Logs')
 
@@ -231,23 +238,26 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
             log_values.append(value)
 
         add_sample_log_alg = self.createChildAlgorithm('AddSampleLogMultiple', enableLogging=False)
-        add_sample_log_alg.setProperty('Workspace', self._output_ws)
+        add_sample_log_alg.setProperty('Workspace', output_ws)
         add_sample_log_alg.setProperty('LogNames', log_names)
         add_sample_log_alg.setProperty('LogValues', log_values)
         add_sample_log_alg.execute()
 
         if self._elastic and self._q_axis == 'X':
-            Transpose(InputWorkspace=self._output_ws,
-                      OutputWorkspace=self._output_ws)
-            mtd[self._output_ws].setX(0, self._q_values)
-            mtd[self._output_ws].getAxis(0).setUnit("MomentumTransfer")
+            transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
+            transpose_alg.setProperty(output_ws)
+            transpose_alg.execute()
 
-        self.setProperty('OutputWorkspace', self._output_ws)
+            output_ws = transpose_alg.getProperty("OutputWorkspace").value
+            output_ws.setX(0, self._q_values)
+            output_ws.getAxis(0).setUnit("MomentumTransfer")
+
+        self.setProperty('OutputWorkspace', output_ws)
 
     def _setup(self):
 
         # basic options
-        self._input_ws_name = self.getPropertyValue('InputWorkspace')
+        self._input_ws = self.getProperty('InputWorkspace').value
         self._material_defined = self.getProperty('MaterialAlreadyDefined').value
         self._chemical_formula = self.getPropertyValue('ChemicalFormula')
         self._density_type = self.getPropertyValue('DensityType')
