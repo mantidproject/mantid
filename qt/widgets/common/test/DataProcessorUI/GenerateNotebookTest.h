@@ -54,10 +54,10 @@ private:
   }
 
   // Creates a reflectometry whitelist
-  DataProcessorWhiteList reflWhitelist() {
+  WhiteList reflWhitelist() {
 
     // Reflectometry white list
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Run(s)", "InputWorkspace", "", true, "TOF_");
     whitelist.addElement("Angle", "ThetaIn", "");
     whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
@@ -175,7 +175,7 @@ public:
   void testTableStringWrongData() {
     // Whitelist and data incompatible
 
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Run", "Run", "");
     whitelist.addElement("Angle", "Angle", "");
 
@@ -319,7 +319,7 @@ public:
     // Reduce a single row, one column need pre-processing
 
     // Create a whitelist
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Run", "InputWorkspace", "", true);
     whitelist.addElement("Angle", "ThetaIn", "", true, "angle_");
     whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "");
@@ -394,7 +394,7 @@ public:
     // Whitelist and data differ in size
 
     // Create a whitelist
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Run", "", "", true, "run_");
     whitelist.addElement("Angle", "", "", false, "");
     whitelist.addElement("Trans", "", "", false, "");
@@ -410,7 +410,7 @@ public:
   void testReducedWorkspaceNameOnlyRun() {
 
     // Create a whitelist
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Run", "", "", true, "run_");
     whitelist.addElement("Angle", "", "", false, "");
     whitelist.addElement("Trans", "", "", false, "");
@@ -432,7 +432,7 @@ public:
   void testReducedWorkspaceNameRunAndTrans() {
 
     // Create a whitelist
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Run", "", "", true, "run_");
     whitelist.addElement("Angle", "", "", false, "");
     whitelist.addElement("Trans", "", "", true, "trans_");
@@ -454,7 +454,7 @@ public:
   void testReducedWorkspaceNameTransNoPrefix() {
 
     // Create a whitelist
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Run", "", "", false, "");
     whitelist.addElement("Angle", "", "", false, "");
     whitelist.addElement("Trans", "", "", true, "");

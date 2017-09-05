@@ -13,7 +13,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
@@ -76,7 +76,7 @@ class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
 public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
-      const DataProcessorWhiteList &whitelist,
+      const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const ProcessingAlgorithm &processor,
@@ -86,29 +86,29 @@ public:
       const QString &loader = "Load");
   // Constructor: no pre-processing, post-processing
   GenericDataProcessorPresenter(
-      const DataProcessorWhiteList &whitelist,
+      const WhiteList &whitelist,
       const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor);
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
-      const DataProcessorWhiteList &whitelist,
+      const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const ProcessingAlgorithm &processor);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(
-      const DataProcessorWhiteList &whitelist,
+      const WhiteList &whitelist,
       const ProcessingAlgorithm &processor);
   // Constructor: only whitelist
-  GenericDataProcessorPresenter(const DataProcessorWhiteList &whitelist);
+  GenericDataProcessorPresenter(const WhiteList &whitelist);
   // Delegating constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
-      const DataProcessorWhiteList &whitelist,
+      const WhiteList &whitelist,
       const PreprocessMap &preprocessMap,
       const ProcessingAlgorithm &processor);
   // Delegating Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
-      const DataProcessorWhiteList &whitelist,
+      const WhiteList &whitelist,
       const PreprocessMap &preprocessMap,
       const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor);
@@ -127,7 +127,7 @@ public:
 
   // The following methods are public only for testing purposes
   // Get the whitelist
-  DataProcessorWhiteList getWhiteList() const { return m_whitelist; };
+  WhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
   QString getReducedWorkspaceName(const QStringList &data,
                                   const QString &prefix = "");
@@ -191,7 +191,7 @@ private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
   // The whitelist
-  DataProcessorWhiteList m_whitelist;
+  WhiteList m_whitelist;
   // The pre-processing instructions
   std::map<QString, PreprocessingAlgorithm> m_preprocessMap;
   // The data processor algorithm

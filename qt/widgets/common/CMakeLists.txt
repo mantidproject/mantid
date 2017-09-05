@@ -72,7 +72,7 @@
 	src/DataProcessorUI/ProcessingAlgorithm.cpp
 	src/DataProcessorUI/ProcessingAlgorithmBase.cpp
 	src/DataProcessorUI/TwoLevelTreeManager.cpp
-	src/DataProcessorUI/DataProcessorWhiteList.cpp
+	src/DataProcessorUI/WhiteList.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
 	src/ParseKeyValueString.cpp
 	src/ParseNumerics.cpp
@@ -340,7 +340,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/VectorString.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/WhiteList.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtWidgets/Common/ParseKeyValueString.h
@@ -449,7 +449,7 @@ set( TEST_FILES
    DataProcessorUI/ProcessingAlgorithmBaseTest.h
    DataProcessorUI/ProcessingAlgorithmTest.h
    DataProcessorUI/TwoLevelTreeManagerTest.h
-   DataProcessorUI/DataProcessorWhiteListTest.h
+   DataProcessorUI/WhiteListTest.h
    DataProcessorUI/GenericDataProcessorPresenterTest.h
    ParseKeyValueStringTest.h
    DataProcessorUI/QOneLevelTreeModelTest.h

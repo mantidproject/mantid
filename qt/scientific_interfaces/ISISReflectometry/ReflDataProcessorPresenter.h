@@ -44,7 +44,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflDataProcessorPresenter
 public:
   // Constructor
   ReflDataProcessorPresenter(
-      const DataProcessorWhiteList &whitelist,
+      const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const ProcessingAlgorithm &processor,

@@ -11,11 +11,11 @@ using namespace Mantid::API;
 /** Constructor: initialise member variables common to all data processing tree
 * model implementations
 * @param tableWorkspace : The table workspace to wrap
-* @param whitelist : A DataProcessorWhiteList containing the columns
+* @param whitelist : A WhiteList containing the columns
 */
 AbstractTreeModel::AbstractTreeModel(
     ITableWorkspace_sptr tableWorkspace,
-    const DataProcessorWhiteList &whitelist)
+    const WhiteList &whitelist)
     : m_tWS(tableWorkspace), m_whitelist(whitelist) {}
 
 AbstractTreeModel::~AbstractTreeModel() {}

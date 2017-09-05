@@ -21,7 +21,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
   // 'dq/Q' column will be linked to 'MomentumTransferStep'
   // 'Scale' column will be linked to 'ScaleFactor'
   // Descriptions can also be added
-  DataProcessorWhiteList whitelist;
+  WhiteList whitelist;
   whitelist.addElement("Run(s)", "InputWorkspace",
                        "<b>Sample runs to be processed.</b><br "
                        "/><i>required</i><br />Runs may be given as run "

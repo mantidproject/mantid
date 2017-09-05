@@ -34,7 +34,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
@@ -49,10 +49,10 @@ class TwoLevelTreeManagerTest : public CxxTest::TestSuite {
 
 private:
   // Return a reflectometry whitelist
-  DataProcessorWhiteList reflWhitelist() {
+  WhiteList reflWhitelist() {
 
     // Reflectometry white list
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Run(s)", "InputWorkspace", "", true, "TOF_");
     whitelist.addElement("Angle", "ThetaIn", "");
     whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
@@ -134,7 +134,7 @@ public:
   void test_publish_commands() {
     NiceMock<MockDataProcessorPresenter> presenter;
     TwoLevelTreeManager manager(&presenter,
-                                             DataProcessorWhiteList());
+                                             WhiteList());
 
     auto comm = manager.publishCommands();
 
@@ -362,7 +362,7 @@ public:
     TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     Runs runs = {{{"Group", "0"}, {"Runs", "12345"}}};
-    TS_ASSERT_THROWS_ANYTHING(manager.transfer(runs, DataProcessorWhiteList()));
+    TS_ASSERT_THROWS_ANYTHING(manager.transfer(runs, WhiteList()));
   }
 
   void test_transfer_nothing_transferred() {

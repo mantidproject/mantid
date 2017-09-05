@@ -34,12 +34,23 @@ QDataProcessorWidget::QDataProcessorWidget(
 }
 
 /** Delegating constructor
+ * @param whitelist :: [input] The white list
+ * @param parent :: [input] The parent of this view
+ */
+QDataProcessorWidget::QDataProcessorWidget(
+    const WhiteList &whitelist, QWidget *parent)
+    : QDataProcessorWidget(
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist),
+          parent) {}
+
+
+/** Delegating constructor
 * @param whitelist :: [input] The white list
 * @param algorithm :: [input] The processing algorithm
 * @param parent :: [input] The parent of this view
 */
 QDataProcessorWidget::QDataProcessorWidget(
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const ProcessingAlgorithm &algorithm, QWidget *parent)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
@@ -53,7 +64,7 @@ QDataProcessorWidget::QDataProcessorWidget(
 * @param parent :: [input] The parent of this view
 */
 QDataProcessorWidget::QDataProcessorWidget(
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const PreprocessMap &preprocessMap,
     const ProcessingAlgorithm &algorithm, QWidget *parent)
     : QDataProcessorWidget(
@@ -68,7 +79,7 @@ QDataProcessorWidget::QDataProcessorWidget(
 * @param parent :: [input] The parent of this view
 */
 QDataProcessorWidget::QDataProcessorWidget(
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const ProcessingAlgorithm &algorithm,
     const PostprocessingAlgorithm &postprocessor, QWidget *parent)
     : QDataProcessorWidget(
@@ -84,7 +95,7 @@ QDataProcessorWidget::QDataProcessorWidget(
 * @param parent :: [input] The parent of this view
 */
 QDataProcessorWidget::QDataProcessorWidget(
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const PreprocessMap &preprocessMap,
     const ProcessingAlgorithm &algorithm,
     const PostprocessingAlgorithm &postprocessor, QWidget *parent)

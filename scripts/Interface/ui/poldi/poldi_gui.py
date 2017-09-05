@@ -91,7 +91,7 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
         # The fifth arument is a prefix added to the value in this column used to generate the name of the reduced run
         # (unused if the previous argument is false)
         # In addition to the specified columns, a last column 'Options' is always added
-        whitelist = MantidQt.MantidWidgets.DataProcessorWhiteList()
+        whitelist = MantidQt.MantidWidgets.WhiteList()
         whitelist.addElement('Run(s)', 'InputWorkspace', 'Workspace with Poldi 2D-data and valid IDF', True)
         whitelist.addElement('Expected peak(s)', 'ExpectedPeaks', 'TableWorkspace with expected peaks used for indexing')
         whitelist.addElement('Maximum number of peaks', 'MaximumPeakNumber', 'Maximum number of peaks to process')

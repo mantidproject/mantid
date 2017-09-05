@@ -19,7 +19,7 @@ class DataProcessorMainPresenter;
 class PreprocessMap;
 class ProcessingAlgorithm;
 class PostprocessingAlgorithm;
-class DataProcessorWhiteList;
+class WhiteList;
 
 /** QDataProcessorWidget : Provides an interface for processing table
 data.
@@ -54,18 +54,19 @@ class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget
 public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = 0);
-  QDataProcessorWidget(const DataProcessorWhiteList &,
+  QDataProcessorWidget(const WhiteList &, QWidget *parent);
+  QDataProcessorWidget(const WhiteList &,
                        const ProcessingAlgorithm &,
                        QWidget *parent);
-  QDataProcessorWidget(const DataProcessorWhiteList &,
+  QDataProcessorWidget(const WhiteList &,
                        const PreprocessMap &,
                        const ProcessingAlgorithm &,
                        QWidget *parent);
-  QDataProcessorWidget(const DataProcessorWhiteList &,
+  QDataProcessorWidget(const WhiteList &,
                        const ProcessingAlgorithm &,
                        const PostprocessingAlgorithm &,
                        QWidget *parent);
-  QDataProcessorWidget(const DataProcessorWhiteList &,
+  QDataProcessorWidget(const WhiteList &,
                        const PreprocessMap &,
                        const ProcessingAlgorithm &,
                        const PostprocessingAlgorithm &,

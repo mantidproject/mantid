@@ -30,7 +30,7 @@ set ( SIP_HDRS
   ../widgets/refdetectorview/inc/MantidQtWidgets/RefDetectorView/RefIVConnections.h
   ../widgets/refdetectorview/inc/MantidQtWidgets/RefDetectorView/RefMatrixWSImageView.h
   ../widgets/common/inc/MantidQtWidgets/Common/FitPropertyBrowser.h
-  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/WhiteList.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h

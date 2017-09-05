@@ -150,7 +150,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Algorithm setup
         # --------------------------------------------------------------------------------------------------------------
         # Setup white list
-        white_list = MantidQt.MantidWidgets.DataProcessorWhiteList()
+        white_list = MantidQt.MantidWidgets.WhiteList()
         for entry in self._white_list_entries:
             # If there is a column name specified, then it is a white list entry.
             if entry.column_name:
