@@ -19,7 +19,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPauseCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h"
@@ -135,7 +135,7 @@ public:
     TS_ASSERT(dynamic_cast<ImportTableCommand *>(comm[5].get()));
     TS_ASSERT(dynamic_cast<ExportTableCommand *>(comm[6].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[7].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorOptionsCommand *>(comm[8].get()));
+    TS_ASSERT(dynamic_cast<OptionsCommand *>(comm[8].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[9].get()));
     TS_ASSERT(dynamic_cast<DataProcessorProcessCommand *>(comm[10].get()));
     TS_ASSERT(dynamic_cast<DataProcessorPauseCommand *>(comm[11].get()));

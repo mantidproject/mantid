@@ -1828,13 +1828,13 @@ OpenTableCommand();
 OpenTableCommand(const MantidQt::MantidWidgets::DataProcessor::OpenTableCommand &);
 };
 
-class DataProcessorOptionsCommand
+class OptionsCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h"
 %End
 public:
-DataProcessorOptionsCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+OptionsCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1843,8 +1843,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorOptionsCommand();
-DataProcessorOptionsCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorOptionsCommand &);
+OptionsCommand();
+OptionsCommand(const MantidQt::MantidWidgets::DataProcessor::OptionsCommand &);
 };
 
 class DataProcessorPasteSelectedCommand

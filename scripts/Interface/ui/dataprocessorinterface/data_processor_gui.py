@@ -181,7 +181,7 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableAsCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.ImportTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.ExportTableCommand(self.data_processor_table), self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorOptionsCommand(self.data_processor_table), self.menuFile)
+        self._create_action(MantidQt.MantidWidgets.OptionsCommand(self.data_processor_table), self.menuFile)
 
     def _create_action(self, command, menu, workspace_list = None):
         """

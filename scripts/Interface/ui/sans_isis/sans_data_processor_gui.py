@@ -1495,7 +1495,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                             self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorExportTableCommand(self.data_processor_table),
                             self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorOptionsCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.OptionsCommand(self.data_processor_table),
                             self.menuFile)
 
     def _create_action(self, command, menu, workspace_list=None):

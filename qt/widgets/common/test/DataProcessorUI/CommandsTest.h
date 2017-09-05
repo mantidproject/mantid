@@ -21,7 +21,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPauseCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h"
@@ -132,7 +132,7 @@ public:
 
   void test_options_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorOptionsCommand command(&mockPresenter);
+    OptionsCommand command(&mockPresenter);
 
     // The presenter should be notified with the OptionsDialogFlag
     EXPECT_CALL(mockPresenter,

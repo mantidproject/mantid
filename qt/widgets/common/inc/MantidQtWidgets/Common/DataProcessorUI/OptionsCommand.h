@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorOptionsCommand
+/** @class OptionsCommand
 
-DataProcessorOptionsCommand defines the action "Import .TBL"
+OptionsCommand defines the action "Import .TBL"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorOptionsCommand : public CommandBase {
+class OptionsCommand : public CommandBase {
 public:
-  DataProcessorOptionsCommand(DataProcessorPresenter *tablePresenter)
+  OptionsCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorOptionsCommand(const QDataProcessorWidget &widget)
+  OptionsCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorOptionsCommand(){};
+  virtual ~OptionsCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::OptionsDialogFlag);
