@@ -147,6 +147,7 @@ target_link_libraries ( MantidQtWidgetsInstrumentView LINK_PRIVATE
   ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS}
   ${QT_LIBRARIES}
+  ${QWT_LIBRARIES}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
   ${PYTHON_LIBRARIES}
