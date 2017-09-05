@@ -20,7 +20,5 @@ void export_MultiDomainFunction() {
            (arg("self"), arg("function")), "Add a member function.")
       .def("setDomainIndex", &MultiDomainFunction::setDomainIndex,
            (arg("self"), arg("funIndex"), arg("domainIndex")),
-           "Associate a function and a domain.")
-      .def("nDomains", &MultiDomainFunction::getNumberDomains, arg("self"),
-           "Get the number of domains.");
+           "Associate a function and a domain.");
 }

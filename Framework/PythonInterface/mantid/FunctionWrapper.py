@@ -492,7 +492,6 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
     @property     
     def nDomains (self):
        """ Return number of domains 
-           Used for testing
        """
        return self.fun.nDomains()
       
