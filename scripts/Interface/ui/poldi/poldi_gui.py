@@ -169,7 +169,7 @@ class PoldiGui(QtGui.QMainWindow, Ui_PoldiWindow):
         self._create_action(MantidQt.MantidWidgets.DataProcessorNewTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableAsCommand(self.data_processor_table), self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorImportTableCommand(self.data_processor_table), self.menuFile)
+        self._create_action(MantidQt.MantidWidgets.ImportTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.ExportTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorOptionsCommand(self.data_processor_table), self.menuFile)
 

@@ -13,7 +13,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ExpandGroupsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
@@ -85,7 +85,7 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
              make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands,
-             make_unique<DataProcessorImportTableCommand>(m_presenter));
+             make_unique<ImportTableCommand>(m_presenter));
   addCommand(commands,
              make_unique<ExportTableCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));

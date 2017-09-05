@@ -6,9 +6,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorImportTableCommand
+/** @class ImportTableCommand
 
-DataProcessorImportTableCommand defines the action "Import .TBL"
+ImportTableCommand defines the action "Import .TBL"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,13 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorImportTableCommand : public CommandBase {
+class ImportTableCommand : public CommandBase {
 public:
-  DataProcessorImportTableCommand(DataProcessorPresenter *tablePresenter)
+  ImportTableCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DataProcessorImportTableCommand(const QDataProcessorWidget &widget)
+  ImportTableCommand(const QDataProcessorWidget &widget)
       : CommandBase(widget){};
-  virtual ~DataProcessorImportTableCommand(){};
+  virtual ~ImportTableCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ImportTableFlag);
