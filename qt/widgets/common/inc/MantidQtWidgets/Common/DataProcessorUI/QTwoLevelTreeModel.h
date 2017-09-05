@@ -12,7 +12,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-/** QDataProcessorTwoLevelTreeModel : Provides a QAbstractItemModel for a
+/** QTwoLevelTreeModel : Provides a QAbstractItemModel for a
 DataProcessorUI with post-processing defined. The first argument to the
 constructor is a Mantid ITableWorkspace containing the values to use in the
 reduction. Each row corresponds to an independent reduction and the first column
@@ -44,14 +44,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorTwoLevelTreeModel
+class EXPORT_OPT_MANTIDQT_COMMON QTwoLevelTreeModel
     : public AbstractTreeModel {
   Q_OBJECT
 public:
-  QDataProcessorTwoLevelTreeModel(
+  QTwoLevelTreeModel(
       Mantid::API::ITableWorkspace_sptr tableWorkspace,
       const DataProcessorWhiteList &whitelist);
-  ~QDataProcessorTwoLevelTreeModel() override;
+  ~QTwoLevelTreeModel() override;
 
   // Functions to read data from the model
 
@@ -104,8 +104,8 @@ private:
   std::vector<std::vector<std::pair<int, bool>>> m_rowsOfGroup;
 };
 
-/// Typedef for a shared pointer to \c QDataProcessorTwoLevelTreeModel
-using QDataProcessorTwoLevelTreeModel_sptr = boost::shared_ptr<QDataProcessorTwoLevelTreeModel>;
+/// Typedef for a shared pointer to \c QTwoLevelTreeModel
+using QTwoLevelTreeModel_sptr = boost::shared_ptr<QTwoLevelTreeModel>;
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

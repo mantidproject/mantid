@@ -19,7 +19,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorOneLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QOneLevelTreeModel.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -43,7 +43,7 @@ OneLevelTreeManager::OneLevelTreeManager(
     DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
     const DataProcessorWhiteList &whitelist)
     : m_presenter(presenter),
-      m_model(new QDataProcessorOneLevelTreeModel(table, whitelist)) {}
+      m_model(new QOneLevelTreeModel(table, whitelist)) {}
 
 /**
 * Constructor (no table workspace given)
@@ -241,7 +241,7 @@ void OneLevelTreeManager::pasteSelected(const QString &text) {
 void OneLevelTreeManager::newTable(
     const DataProcessorWhiteList &whitelist) {
 
-  m_model.reset(new QDataProcessorOneLevelTreeModel(
+  m_model.reset(new QOneLevelTreeModel(
       createDefaultWorkspace(whitelist), whitelist));
 }
 
@@ -253,7 +253,7 @@ void OneLevelTreeManager::newTable(
     ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
 
   if (isValidModel(table, whitelist.size())) {
-    m_model.reset(new QDataProcessorOneLevelTreeModel(table, whitelist));
+    m_model.reset(new QOneLevelTreeModel(table, whitelist));
   } else
     throw std::runtime_error("Selected table has the incorrect number of "
                              "columns to be used as a data processor table.");
@@ -358,7 +358,7 @@ void OneLevelTreeManager::transfer(
     }
   }
 
-  m_model.reset(new QDataProcessorOneLevelTreeModel(ws, whitelist));
+  m_model.reset(new QOneLevelTreeModel(ws, whitelist));
 }
 
 /** Updates a row with new data

@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
@@ -13,7 +13,7 @@ using namespace Mantid::API;
 @param whitelist : A DataProcessorWhiteList containing information about the
 columns, their indices and descriptions
 */
-QDataProcessorTwoLevelTreeModel::QDataProcessorTwoLevelTreeModel(
+QTwoLevelTreeModel::QTwoLevelTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
     : AbstractTreeModel(tableWorkspace, whitelist) {
@@ -30,14 +30,14 @@ QDataProcessorTwoLevelTreeModel::QDataProcessorTwoLevelTreeModel(
   setupModelData(tableWorkspace);
 }
 
-QDataProcessorTwoLevelTreeModel::~QDataProcessorTwoLevelTreeModel() {}
+QTwoLevelTreeModel::~QTwoLevelTreeModel() {}
 
 /** Returns data for specified index
 * @param index : The index
 * @param role : The role
 * @return : The data associated with the given index
 */
-QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
+QVariant QTwoLevelTreeModel::data(const QModelIndex &index,
                                                int role) const {
 
   if (!index.isValid())
@@ -80,7 +80,7 @@ QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
 * @param role : The role
 * @return : The column name
 */
-QVariant QDataProcessorTwoLevelTreeModel::headerData(
+QVariant QTwoLevelTreeModel::headerData(
     int section, Qt::Orientation orientation, int role) const {
 
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
@@ -99,7 +99,7 @@ QVariant QDataProcessorTwoLevelTreeModel::headerData(
 * @return : The index of the element
 */
 QModelIndex
-QDataProcessorTwoLevelTreeModel::index(int row, int column,
+QTwoLevelTreeModel::index(int row, int column,
                                        const QModelIndex &parent) const {
 
   return parent.isValid() ? createIndex(row, column, parent.row())
@@ -111,7 +111,7 @@ QDataProcessorTwoLevelTreeModel::index(int row, int column,
 * @param parent : The parent of this item
 * @return : The 'processed' status
 */
-bool QDataProcessorTwoLevelTreeModel::isProcessed(
+bool QTwoLevelTreeModel::isProcessed(
     int position, const QModelIndex &parent) const {
 
   if (!parent.isValid()) {
@@ -142,7 +142,7 @@ bool QDataProcessorTwoLevelTreeModel::isProcessed(
 * @return : Its parent
 */
 QModelIndex
-QDataProcessorTwoLevelTreeModel::parent(const QModelIndex &index) const {
+QTwoLevelTreeModel::parent(const QModelIndex &index) const {
 
   int internalIdInt = int(index.internalId());
 
@@ -155,7 +155,7 @@ QDataProcessorTwoLevelTreeModel::parent(const QModelIndex &index) const {
 * @param parent : The parent of the set of elements
 * @return : Boolean indicating whether the insertion was successful or not
 */
-bool QDataProcessorTwoLevelTreeModel::insertRows(int position, int count,
+bool QTwoLevelTreeModel::insertRows(int position, int count,
                                                  const QModelIndex &parent) {
 
   bool success = false;
@@ -177,7 +177,7 @@ bool QDataProcessorTwoLevelTreeModel::insertRows(int position, int count,
 * @param parent : The parent index (as integer)
 * @return : Boolean indicating if the insertion was successful
 */
-bool QDataProcessorTwoLevelTreeModel::insertRows(int position, int count,
+bool QTwoLevelTreeModel::insertRows(int position, int count,
                                                  int parent) {
 
   // Parent does not exist
@@ -237,7 +237,7 @@ bool QDataProcessorTwoLevelTreeModel::insertRows(int position, int count,
 * @param count : The number of groups to insert
 * @return : True if insertion was successful, false otherwise
 */
-bool QDataProcessorTwoLevelTreeModel::insertGroups(int position, int count) {
+bool QTwoLevelTreeModel::insertGroups(int position, int count) {
 
   // Invalid position
   if (position < 0 || position > rowCount())
@@ -275,7 +275,7 @@ bool QDataProcessorTwoLevelTreeModel::insertGroups(int position, int count) {
 * @return : Boolean indicating whether the elements were removed successfully or
 * not
 */
-bool QDataProcessorTwoLevelTreeModel::removeRows(int position, int count,
+bool QTwoLevelTreeModel::removeRows(int position, int count,
                                                  const QModelIndex &parent) {
 
   bool success = false;
@@ -296,7 +296,7 @@ bool QDataProcessorTwoLevelTreeModel::removeRows(int position, int count,
 * @param count : The number of groups to remove
 * @return : Boolean indicating whether or not groups were removed
 */
-bool QDataProcessorTwoLevelTreeModel::removeGroups(int position, int count) {
+bool QTwoLevelTreeModel::removeGroups(int position, int count) {
 
   // Invalid position
   if (position < 0 || position >= rowCount())
@@ -347,7 +347,7 @@ bool QDataProcessorTwoLevelTreeModel::removeGroups(int position, int count) {
 * @param parent : The parent item
 * @return : Boolean indicating whether or not rows were removed
 */
-bool QDataProcessorTwoLevelTreeModel::removeRows(int position, int count,
+bool QTwoLevelTreeModel::removeRows(int position, int count,
                                                  int parent) {
 
   // Parent does not exist
@@ -400,7 +400,7 @@ bool QDataProcessorTwoLevelTreeModel::removeRows(int position, int count,
 * @param parent : The parent item
 * @return : The number of rows
 */
-int QDataProcessorTwoLevelTreeModel::rowCount(const QModelIndex &parent) const {
+int QTwoLevelTreeModel::rowCount(const QModelIndex &parent) const {
 
   // We are counting the number of groups
   if (!parent.isValid())
@@ -423,7 +423,7 @@ int QDataProcessorTwoLevelTreeModel::rowCount(const QModelIndex &parent) const {
 * @param value : the new value
 * @param role : the role
 */
-bool QDataProcessorTwoLevelTreeModel::setData(const QModelIndex &index,
+bool QTwoLevelTreeModel::setData(const QModelIndex &index,
                                               const QVariant &value, int role) {
 
   if (role != Qt::EditRole)
@@ -474,7 +474,7 @@ bool QDataProcessorTwoLevelTreeModel::setData(const QModelIndex &index,
 * whitelist
 * @param table : A table workspace containing the data
 */
-void QDataProcessorTwoLevelTreeModel::setupModelData(
+void QTwoLevelTreeModel::setupModelData(
     ITableWorkspace_sptr table) {
 
   int nrows = static_cast<int>(table->rowCount());
@@ -502,7 +502,7 @@ void QDataProcessorTwoLevelTreeModel::setupModelData(
 * @return :: the underlying table workspace
 */
 ITableWorkspace_sptr
-QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
+QTwoLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 
@@ -512,7 +512,7 @@ QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
 * @param parent : The parent of this item
 * @return : Boolean indicating whether process status was set successfully
 */
-bool QDataProcessorTwoLevelTreeModel::setProcessed(bool processed, int position,
+bool QTwoLevelTreeModel::setProcessed(bool processed, int position,
                                                    const QModelIndex &parent) {
 
   if (!parent.isValid()) {

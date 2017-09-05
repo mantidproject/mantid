@@ -10,7 +10,7 @@ namespace DataProcessor {
 
 class DataProcessorPresenter;
 class DataProcessorWhiteList;
-class QDataProcessorTwoLevelTreeModel;
+class QTwoLevelTreeModel;
 
 /** @class TwoLevelTreeManager
 
@@ -113,7 +113,7 @@ private:
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model
-  boost::shared_ptr<QDataProcessorTwoLevelTreeModel> m_model;
+  boost::shared_ptr<QTwoLevelTreeModel> m_model;
 
   /// Insert a row in the model
   void insertRow(int groupIndex, int rowIndex);

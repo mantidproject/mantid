@@ -4,18 +4,18 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorOneLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QOneLevelTreeModel.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 
-class QDataProcessorOneLevelTreeModelTest : public CxxTest::TestSuite {
+class QOneLevelTreeModelTest : public CxxTest::TestSuite {
 
 public:
   // Create a white list
-  QDataProcessorOneLevelTreeModelTest() {
+  QOneLevelTreeModelTest() {
     m_whitelist.addElement("Column1", "Property1", "Description1");
     m_whitelist.addElement("Column2", "Property2", "Description2");
   }
@@ -58,18 +58,18 @@ public:
     auto ws = oneRowTable();
 
     ws->addColumn("str", "Group");
-    TS_ASSERT_THROWS(QDataProcessorOneLevelTreeModel(ws, m_whitelist),
+    TS_ASSERT_THROWS(QOneLevelTreeModel(ws, m_whitelist),
                      std::invalid_argument);
 
     ws->addColumn("str", "Group1");
     ws->addColumn("str", "Group2");
-    TS_ASSERT_THROWS(QDataProcessorOneLevelTreeModel(ws, m_whitelist),
+    TS_ASSERT_THROWS(QOneLevelTreeModel(ws, m_whitelist),
                      std::invalid_argument);
   }
 
   void testConstructorOneRowTable() {
     auto ws = oneRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
 
     // One row
     TS_ASSERT_EQUALS(model.rowCount(), 1);
@@ -90,7 +90,7 @@ public:
 
   void testConstructorFourRowTable() {
     auto ws = fourRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
 
     // Four rows
     TS_ASSERT_EQUALS(model.rowCount(), 4);
@@ -115,13 +115,13 @@ public:
 
   void testColumnCount() {
     auto ws = oneRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
     TS_ASSERT_EQUALS(model.columnCount(), m_whitelist.size());
   }
 
   void testIndex() {
     auto ws = fourRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
 
     TS_ASSERT_EQUALS(model.index(0, 0).row(), 0);
     TS_ASSERT_EQUALS(model.index(1, 0).row(), 1);
@@ -131,7 +131,7 @@ public:
 
   void testParent() {
     auto ws = fourRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
 
     TS_ASSERT_EQUALS(model.parent(model.index(0, 0)), QModelIndex());
     TS_ASSERT_EQUALS(model.parent(model.index(1, 0)), QModelIndex());
@@ -141,7 +141,7 @@ public:
 
   void testSetData() {
     auto ws = fourRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
 
     // Update some cells with new data
     model.setData(model.index(0, 0), "new_value1");
@@ -169,7 +169,7 @@ public:
 
   void testInsertRowsOneRowTable() {
     auto ws = oneRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
 
     // Insert rows
 
@@ -191,7 +191,7 @@ public:
 
   void testRemoveRowsOneRowTable() {
     auto ws = oneRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
 
     // Remove the only row
     TS_ASSERT_EQUALS(model.removeRows(0, 1), true);
@@ -204,7 +204,7 @@ public:
 
   void testRemoveRowsFourRowTable() {
     auto ws = fourRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
 
     // Non-existing row
     TS_ASSERT_EQUALS(model.removeRows(10, 1), false);
@@ -222,7 +222,7 @@ public:
 
   void testHighlightFourRowTable() {
     auto ws = fourRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
 
     // Non-existent row
     TS_ASSERT_EQUALS(model.setProcessed(true, 10), false);
@@ -253,7 +253,7 @@ public:
 
   void testIsProcessedFourRowTable() {
     auto ws = fourRowTable();
-    QDataProcessorOneLevelTreeModel model(ws, m_whitelist);
+    QOneLevelTreeModel model(ws, m_whitelist);
 
     // Set the 1st and 3rd rows processed
     model.setProcessed(true, 0);

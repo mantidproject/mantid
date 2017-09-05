@@ -12,7 +12,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-/** QDataProcessorOneLevelTreeModel : Provides a QAbstractItemModel for a
+/** QOneLevelTreeModel : Provides a QAbstractItemModel for a
 DataProcessorUI with no post-processing defined. The first argument to the
 constructor is a Mantid ITableWorkspace containing the values to use in the
 reduction. Each row in the table corresponds to an independent reduction. The
@@ -41,14 +41,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorOneLevelTreeModel
+class EXPORT_OPT_MANTIDQT_COMMON QOneLevelTreeModel
     : public AbstractTreeModel {
   Q_OBJECT
 public:
-  QDataProcessorOneLevelTreeModel(
+  QOneLevelTreeModel(
       Mantid::API::ITableWorkspace_sptr tableWorkspace,
       const DataProcessorWhiteList &whitelist);
-  ~QDataProcessorOneLevelTreeModel() override;
+  ~QOneLevelTreeModel() override;
 
   // Functions to read data from the model
 
@@ -92,9 +92,9 @@ private:
   std::vector<bool> m_rows;
 };
 
-/// Typedef for a shared pointer to \c QDataProcessorOneLevelTreeModel
-using QDataProcessorOneLevelTreeModel_sptr =
-    boost::shared_ptr<QDataProcessorOneLevelTreeModel>;
+/// Typedef for a shared pointer to \c QOneLevelTreeModel
+using QOneLevelTreeModel_sptr =
+    boost::shared_ptr<QOneLevelTreeModel>;
 
 } // namespace DataProcessor
 } // namespace MantidWidgets
