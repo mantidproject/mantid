@@ -1475,7 +1475,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                                                                                     ), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorCutSelectedCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorPasteSelectedCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.PasteSelectedCommand(self.data_processor_table),
                             self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorClearSelectedCommand(self.data_processor_table),
                             self.menuEdit)

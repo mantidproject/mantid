@@ -26,7 +26,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPauseCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h"
@@ -167,7 +167,7 @@ public:
     TS_ASSERT(dynamic_cast<CopySelectedCommand *>(comm[24].get()));
     TS_ASSERT(dynamic_cast<CutSelectedCommand *>(comm[25].get()));
     TS_ASSERT(
-        dynamic_cast<DataProcessorPasteSelectedCommand *>(comm[26].get()));
+        dynamic_cast<PasteSelectedCommand *>(comm[26].get()));
     TS_ASSERT(
         dynamic_cast<ClearSelectedCommand *>(comm[27].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[28].get()));
