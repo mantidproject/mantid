@@ -1514,13 +1514,13 @@ PreprocessMap();
 void addElement(const QString &, const QString &, const QString &prefix = "", const QString &blacklist = "");
 };
 
-class DataProcessorProcessingAlgorithm
+class ProcessingAlgorithm
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 %End
 public:
-DataProcessorProcessingAlgorithm(const QString &, const QString &, const QString &blacklist = "");
+ProcessingAlgorithm(const QString &, const QString &, const QString &blacklist = "");
 };
 
 class PostprocessingAlgorithm
@@ -1539,21 +1539,21 @@ class QDataProcessorWidget : QWidget
 %End
 public:
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
-                     const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessingAlgorithm &,
+                     const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::PreprocessMap &,
-                     const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessingAlgorithm &,
+                     const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
-                     const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessingAlgorithm &,
+                     const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                      const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::PreprocessMap &,
-                     const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessingAlgorithm &,
+                     const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                      const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
                      QWidget *parent );
 void accept(MantidQt::MantidWidgets::DataProcessor::DataProcessorMainPresenter *);

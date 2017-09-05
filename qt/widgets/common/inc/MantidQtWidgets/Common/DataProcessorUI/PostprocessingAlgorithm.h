@@ -2,7 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPOSTPROCESSINGALGORITHM_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h"
 
 #include <QString>
 
@@ -36,7 +36,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON PostprocessingAlgorithm
-    : public DataProcessorProcessingAlgorithmBase {
+    : public ProcessingAlgorithmBase {
 public:
   // Constructor
   PostprocessingAlgorithm(

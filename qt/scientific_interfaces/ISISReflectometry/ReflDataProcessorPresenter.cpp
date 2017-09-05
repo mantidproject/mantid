@@ -21,7 +21,7 @@ namespace CustomInterfaces {
 * Constructor
 * @param whitelist : The set of properties we want to show as columns
 * @param preprocessMap : A map containing instructions for pre-processing
-* @param processor : A DataProcessorProcessingAlgorithm
+* @param processor : A ProcessingAlgorithm
 * @param postprocessor : A PostprocessingAlgorithm
 * workspaces
 * @param postprocessMap : A map containing instructions for post-processing.
@@ -31,7 +31,7 @@ namespace CustomInterfaces {
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor,
+    const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,

@@ -200,7 +200,7 @@ A processing algorithm can be created like this:
 
 .. code-block:: python
 
-    alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_')
+    alg = MantidQt.MantidWidgets.ProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_')
 
 This tells the widget that each rown in the table should be reduced with :ref:`algm-ReflectometryReductionOneAuto`, and
 the output workspaces resulting from the reduction should be named with prefixes :literal:`IvsQ_binned_`, :literal:`Ivs_Q` and
@@ -210,7 +210,7 @@ blacklist of algorithms properties can be provided as a string of comma-separate
 
 .. code-block:: python
 
-    alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('ReflectometryReductionOneAuto', 'IvsQ_binned_, IvsQ_, IvsLam_',
+    alg = MantidQt.MantidWidgets.ProcessingAlgorithm('ReflectometryReductionOneAuto', 'IvsQ_binned_, IvsQ_, IvsLam_',
 															  'InputWorkspace,'
 															  'ThetaIn,'
 															  'FirstTransmissionWorkspace,'
@@ -362,7 +362,7 @@ assuming that you don't need to pre-process and post-process groups of runs, the
     // Constructor: no pre-processing, no post-processing
     GenericDataProcessorPresenter(
         const DataProcessorWhiteList &whitelist,
-        const DataProcessorProcessingAlgorithm &processor);
+        const ProcessingAlgorithm &processor);
 
 should become:
 
@@ -371,7 +371,7 @@ should become:
     // Constructor: no pre-processing, no post-processing
     GenericDataProcessorPresenter(
         const DataProcessorWhiteList &whitelist,
-        const DataProcessorProcessingAlgorithm &processor,
+        const ProcessingAlgorithm &processor,
         const std::string &loader = "Load");
 
 Then in the implementation, the following should be enough:
@@ -386,7 +386,7 @@ Then in the implementation, the following should be enough:
     */
     GenericDataProcessorPresenter::GenericDataProcessorPresenter(
         const DataProcessorWhiteList &whitelist,
-        const DataProcessorProcessingAlgorithm &processor,
+        const ProcessingAlgorithm &processor,
         const std::string &loader)
         : GenericDataProcessorPresenter(
               whitelist,
@@ -403,7 +403,7 @@ Assuming the example above, i.e. no pre-processing and no post-processing, the c
 
     // Constructor: no pre-processing, no post-processing
     QDataProcessorWidget(const DataProcessorWhiteList &,
-                         const DataProcessorProcessingAlgorithm &,
+                         const ProcessingAlgorithm &,
                          QWidget *parent);
 
 should become:
@@ -412,7 +412,7 @@ should become:
 
     // Constructor: no pre-processing, no post-processing
     QDataProcessorWidget(const DataProcessorWhiteList &,
-                         const DataProcessorProcessingAlgorithm &,
+                         const ProcessingAlgorithm &,
                          const QString &loader,
                          QWidget *parent);
 
@@ -428,7 +428,7 @@ and then the implementation would be:
     */
     QDataProcessorWidget::QDataProcessorWidget(
         const DataProcessorWhiteList &whitelist,
-        const DataProcessorProcessingAlgorithm &algorithm,
+        const ProcessingAlgorithm &algorithm,
 		const QString &loader, QWidget *parent)
         : QDataProcessorWidget(
               Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
@@ -448,7 +448,7 @@ above constructor:
     %End
     public:
     QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
-                         const MantidQt::MantidWidgets::DataProcessorProcessingAlgorithm &,
+                         const MantidQt::MantidWidgets::ProcessingAlgorithm &,
                          const QString &,
                          QWidget *parent );
     ...
@@ -573,7 +573,7 @@ the processing algorithm, that is, if the processing algorithm was created as:
 
 .. code-block:: python
 
-    alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_','')
+    alg = MantidQt.MantidWidgets.ProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_','')
 
 the name of the first output workspace returned by the processing algorithm will start with prefix
 :literal:`IvsQ_binned_`, the name of the second output workspace return by the algorithm will start with

@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -10,10 +10,10 @@ namespace DataProcessor {
 * workspaces' names
 * @param blacklist : The list of properties we do not want to show
 */
-DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm(
+ProcessingAlgorithm::ProcessingAlgorithm(
     const QString &name, const std::vector<QString> &prefix,
     const std::set<QString> &blacklist)
-    : DataProcessorProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
+    : ProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
 
   m_inputProperties = getInputWsProperties();
   if (!m_inputProperties.size())
@@ -31,7 +31,7 @@ DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm(
   // workspaces
   if (m_outputProperties.size() != m_prefix.size()) {
     throw std::invalid_argument(
-        "Invalid DataProcessorProcessingAlgorithm. The number of prefixes "
+        "Invalid ProcessingAlgorithm. The number of prefixes "
         "given must "
         "match the number of output ws properties defined for this algorithm");
   }
@@ -43,29 +43,29 @@ DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm(
 * workspaces' names, as a string
 * @param blacklist : The list of properties we do not want to show, as a string
 */
-DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm(
+ProcessingAlgorithm::ProcessingAlgorithm(
     const QString &name, const QString &prefix, const QString &blacklist)
-    : DataProcessorProcessingAlgorithm(name, convertStringToVector(prefix),
+    : ProcessingAlgorithm(name, convertStringToVector(prefix),
                                        convertStringToSet(blacklist)) {}
 
 /**
  * Constructor
 */
-DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm()
+ProcessingAlgorithm::ProcessingAlgorithm()
     : m_prefix(), m_inputProperties(), m_outputProperties() {}
 
 // Destructor
-DataProcessorProcessingAlgorithm::~DataProcessorProcessingAlgorithm() {}
+ProcessingAlgorithm::~ProcessingAlgorithm() {}
 
 // Returns the number of output properties
-size_t DataProcessorProcessingAlgorithm::numberOfOutputProperties() const {
+size_t ProcessingAlgorithm::numberOfOutputProperties() const {
   return m_outputProperties.size();
 }
 
 /** Returns the prefix that will be added to the name of this output ws property
  *@param index : The property index
  */
-QString DataProcessorProcessingAlgorithm::prefix(size_t index) const {
+QString ProcessingAlgorithm::prefix(size_t index) const {
   return m_prefix[index];
 }
 
@@ -73,7 +73,7 @@ QString DataProcessorProcessingAlgorithm::prefix(size_t index) const {
  *@param index : The property index
  */
 QString
-DataProcessorProcessingAlgorithm::inputPropertyName(size_t index) const {
+ProcessingAlgorithm::inputPropertyName(size_t index) const {
   return m_inputProperties[index];
 }
 
@@ -81,7 +81,7 @@ DataProcessorProcessingAlgorithm::inputPropertyName(size_t index) const {
  *@param index : The property index
  */
 QString
-DataProcessorProcessingAlgorithm::outputPropertyName(size_t index) const {
+ProcessingAlgorithm::outputPropertyName(size_t index) const {
   return m_outputProperties[index];
 }
 }

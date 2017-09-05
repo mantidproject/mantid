@@ -7,7 +7,7 @@
 #include <QStringList>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -17,19 +17,19 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class DataProcessorProcessingAlgorithmTest : public CxxTest::TestSuite {
+class ProcessingAlgorithmTest : public CxxTest::TestSuite {
 
 private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DataProcessorProcessingAlgorithmTest *createSuite() {
-    return new DataProcessorProcessingAlgorithmTest();
+  static ProcessingAlgorithmTest *createSuite() {
+    return new ProcessingAlgorithmTest();
   }
-  static void destroySuite(DataProcessorProcessingAlgorithmTest *suite) {
+  static void destroySuite(ProcessingAlgorithmTest *suite) {
     delete suite;
   }
-  DataProcessorProcessingAlgorithmTest() { FrameworkManager::Instance(); };
+  ProcessingAlgorithmTest() { FrameworkManager::Instance(); };
 
   void test_valid_algorithms() {
     // Any algorithm with at least one input ws property and one output ws
@@ -37,11 +37,11 @@ public:
     // Currently ws must be either MatrixWorkspace or Workspace but this can be
     // changed
     std::vector<QString> prefix = {"run_"};
-    TS_ASSERT_THROWS_NOTHING(DataProcessorProcessingAlgorithm("Rebin", prefix));
+    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm("Rebin", prefix));
     TS_ASSERT_THROWS_NOTHING(
-        DataProcessorProcessingAlgorithm("ExtractSpectra", prefix));
+        ProcessingAlgorithm("ExtractSpectra", prefix));
     TS_ASSERT_THROWS_NOTHING(
-        DataProcessorProcessingAlgorithm("ConvertUnits", prefix));
+        ProcessingAlgorithm("ConvertUnits", prefix));
   }
 
   void test_invalid_algorithms() {
@@ -49,10 +49,10 @@ public:
     std::vector<QString> prefix = {"IvsQ_"};
 
     // Algorithms with no input workspace properties
-    TS_ASSERT_THROWS(DataProcessorProcessingAlgorithm("Stitch1DMany", prefix),
+    TS_ASSERT_THROWS(ProcessingAlgorithm("Stitch1DMany", prefix),
                      std::invalid_argument);
     // Algorithms with no output workspace properties
-    TS_ASSERT_THROWS(DataProcessorProcessingAlgorithm("SaveAscii", prefix),
+    TS_ASSERT_THROWS(ProcessingAlgorithm("SaveAscii", prefix),
                      std::invalid_argument);
   }
   void test_ReflectometryReductionOneAuto() {
@@ -64,21 +64,21 @@ public:
     std::vector<QString> prefixes;
     prefixes.emplace_back("IvsQ_binned_");
     // This should throw
-    TS_ASSERT_THROWS(DataProcessorProcessingAlgorithm(algName, prefixes,
+    TS_ASSERT_THROWS(ProcessingAlgorithm(algName, prefixes,
                                                       std::set<QString>()),
                      std::invalid_argument);
 
     prefixes.push_back("IvsQ_");
     // This should also throw
-    TS_ASSERT_THROWS(DataProcessorProcessingAlgorithm(algName, prefixes,
+    TS_ASSERT_THROWS(ProcessingAlgorithm(algName, prefixes,
                                                       std::set<QString>()),
                      std::invalid_argument);
     // But this should be OK
     prefixes.push_back("IvsLam_");
-    TS_ASSERT_THROWS_NOTHING(DataProcessorProcessingAlgorithm(
+    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm(
         algName, prefixes, std::set<QString>()));
 
-    auto alg = DataProcessorProcessingAlgorithm(algName, prefixes,
+    auto alg = ProcessingAlgorithm(algName, prefixes,
                                                 std::set<QString>());
     TS_ASSERT_EQUALS(alg.name(), "ReflectometryReductionOneAuto");
     TS_ASSERT_EQUALS(alg.numberOfOutputProperties(), 3);

@@ -31,7 +31,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
@@ -57,13 +57,13 @@ QString DLLExport titleString(const QString &wsName);
 
 boost::tuple<QString, QString> DLLExport postprocessGroupString(
     const GroupData &rowMap, const DataProcessorWhiteList &whitelist,
-    const DataProcessorProcessingAlgorithm &processor,
+    const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const QString &postprocessingOptions);
 
 QString DLLExport
 plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
-            const DataProcessorProcessingAlgorithm &processor);
+            const ProcessingAlgorithm &processor);
 
 QString DLLExport
 getReducedWorkspaceName(const RowData &data,
@@ -74,7 +74,7 @@ boost::tuple<QString, QString> DLLExport reduceRowString(
     const RowData &data, const QString &instrument,
     const DataProcessorWhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor,
+    const ProcessingAlgorithm &processor,
     const std::map<QString, QString> &preprocessOoptionsMap,
     const QString &processingOptions);
 
@@ -103,7 +103,7 @@ public:
       const DataProcessorWhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
-      const DataProcessorProcessingAlgorithm &processor,
+      const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> preprocessingInstructionsMap,
       const QString processingInstructions,
@@ -124,7 +124,7 @@ private:
   // corresponding pre-processing algorithms
   std::map<QString, PreprocessingAlgorithm> m_preprocessMap;
   // The processing (reduction) algorithm
-  DataProcessorProcessingAlgorithm m_processor;
+  ProcessingAlgorithm m_processor;
   // The post-processing algorithm
   PostprocessingAlgorithm m_postprocessor;
   // A map containing pre-processing instructions displayed in the view via

@@ -2,16 +2,16 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHM_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h"
 
 #include <QString>
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/** @class DataProcessorProcessingAlgorithm
+/** @class ProcessingAlgorithm
 
-DataProcessorProcessingAlgorithm defines a processing algorithm that will
+ProcessingAlgorithm defines a processing algorithm that will
 perform the
 reduction in a Data ProcessorProcessing UI.
 
@@ -36,19 +36,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorProcessingAlgorithm
-    : public DataProcessorProcessingAlgorithmBase {
+class EXPORT_OPT_MANTIDQT_COMMON ProcessingAlgorithm
+    : public ProcessingAlgorithmBase {
 public:
-  DataProcessorProcessingAlgorithm();
+  ProcessingAlgorithm();
   // Constructor
-  DataProcessorProcessingAlgorithm(
+  ProcessingAlgorithm(
       const QString &name, const std::vector<QString> &prefix,
       const std::set<QString> &blacklist = std::set<QString>());
   // Delegating constructor
-  DataProcessorProcessingAlgorithm(const QString &name, const QString &prefix,
+  ProcessingAlgorithm(const QString &name, const QString &prefix,
                                    const QString &blacklist = "");
   // Destructor
-  virtual ~DataProcessorProcessingAlgorithm();
+  virtual ~ProcessingAlgorithm();
   // The number of output properties
   size_t numberOfOutputProperties() const;
   // The prefix for this output property

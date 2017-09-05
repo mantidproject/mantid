@@ -36,7 +36,7 @@ public:
       const DataProcessorWhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
-      const DataProcessorProcessingAlgorithm &processor,
+      const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
@@ -47,7 +47,7 @@ public:
   // Delegating constructor (no pre-processing required)
   GenericDataProcessorPresenterNoThread(
       const DataProcessorWhiteList &whitelist,
-      const DataProcessorProcessingAlgorithm &processor,
+      const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor)
       : GenericDataProcessorPresenter(
             whitelist, std::map<QString, PreprocessingAlgorithm>(),
@@ -122,9 +122,9 @@ private:
                                "OutputWorkspace"})}};
   }
 
-  DataProcessorProcessingAlgorithm createReflectometryProcessor() {
+  ProcessingAlgorithm createReflectometryProcessor() {
 
-    return DataProcessorProcessingAlgorithm(
+    return ProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
         std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
