@@ -50,7 +50,7 @@ Improvements
 
 Dropped
 -------
-- :ref:`algm-LoadILLIndirect-v1`, :ref:`algm-IndirectILLReduction`, :ref:`algm-ILLIN16BCalibration` algorithms deprecated since v3.9, are now removed.
+- `LoadILLIndirect-v1 <http://docs.mantidproject.org/v3.10.1/algorithms/LoadILLIndirect-v1.html>`_, `IndirectILLReduction <http://docs.mantidproject.org/v3.10.1/algorithms/IndirectILLReduction-v1.html>`_, `ILLIN16BCalibration <http://docs.mantidproject.org/v3.10.1/algorithms/ILLIN16BCalibration-v1.html>`_ algorithms deprecated since v3.9, are now removed.
 
 
 Bugfixes
