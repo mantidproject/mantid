@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress)
-from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion, logger, mtd,
+from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
 
 
@@ -242,15 +242,6 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         add_sample_log_alg.setProperty('LogNames', log_names)
         add_sample_log_alg.setProperty('LogValues', log_values)
         add_sample_log_alg.execute()
-
-        if self._elastic and self._q_axis == 'X':
-            transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
-            transpose_alg.setProperty(output_ws)
-            transpose_alg.execute()
-
-            output_ws = transpose_alg.getProperty("OutputWorkspace").value
-            output_ws.setX(0, self._q_values)
-            output_ws.getAxis(0).setUnit("MomentumTransfer")
 
         self.setProperty('OutputWorkspace', output_ws)
 
