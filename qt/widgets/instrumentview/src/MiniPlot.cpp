@@ -67,7 +67,13 @@ bool MiniPlot::hasActiveCurve() const { return !m_activeCurveLabel.isEmpty(); }
 /**
  * Redraw the canvas based on the current data
  */
-void MiniPlot::update() { rescaleToData(Axes::Scale::Both, true); }
+void MiniPlot::update() {
+  if (nlines() > 0) {
+    rescaleToData(Axes::Scale::Both, true);
+  } else {
+    draw();
+  }
+}
 
 /**
  * Set the given data as the active curve on the plot
