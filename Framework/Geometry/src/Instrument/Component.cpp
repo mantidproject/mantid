@@ -453,10 +453,10 @@ void Component::getBoundingBox(BoundingBox &boundingBox) const {
 * @return True if the component should be rendered
 */
 bool Component::isVisible() const {
-	if (hasParameter(m_map->isHidden())) {
-		return getParameter<bool>(m_map->isHidden(), false)[0];
-	}
-	return true;
+  if (hasParameter(m_map->isHidden())) {
+    return getParameter<bool>(m_map->isHidden(), false)[0];
+  }
+  return true;
 }
 
 /**

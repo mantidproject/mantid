@@ -316,9 +316,7 @@ void DetectorGroup::getBoundingBox(BoundingBox &boundingBox) const {
 * Get whether this group should be rendered. This is assumed to be True, and
 * the check then delegated to the child components.
 */
-bool DetectorGroup::isVisible() const {
-	return true;
-}
+bool DetectorGroup::isVisible() const { return true; }
 
 /**
 *Returns a boolean indicating if the component has the named parameter
