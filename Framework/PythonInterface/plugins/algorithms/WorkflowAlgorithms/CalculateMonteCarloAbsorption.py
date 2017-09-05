@@ -1,8 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import (SimpleShapeMonteCarloAbsorption, Transpose, UpdateInstrumentFromFile,
-                              ConvertToHistogram, LoadInstrument)
+from mantid.simpleapi import (SimpleShapeMonteCarloAbsorption)
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, Progress, mtd, SpectraAxis)
+                        WorkspaceGroupProperty, Progress, mtd)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, LogicOperator, config)
 
