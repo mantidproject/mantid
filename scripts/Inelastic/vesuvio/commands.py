@@ -66,10 +66,16 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         raise RuntimeError("Multiple scattering flags not provided. Set the ms_flag, 'ms_enabled' "
                            "to false, in order to disable multiple scattering corrections.")
 
-    first_spec = int(spectra.split("-")[0])
-    back_banks = VESUVIO().backward_banks
-    flags['back_scattering'] = any([lower <= first_spec <= upper for lower, upper in back_banks])
-    flags['back_scattering'] = flags['back_scattering'] or spectra == 'backward'
+    if spectra=='backward' or spectra=='forward':
+        flags['back_scattering'] = spectra == 'backward'
+    else:
+        try:
+            first_spec = int(spectra.split("-")[0])
+            back_banks = VESUVIO().backward_banks
+            flags['back_scattering'] = any([lower <= first_spec <= upper for lower, upper in back_banks])
+        except:
+            raise RuntimeError("Invalid value given for spectrum range: Range must either be 'forward', "
+                               "'backward' or specified with the syntax 'a-b'.")
 
     last_results = None
 
