@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -16,22 +16,22 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class DataProcessorPreprocessMapTest : public CxxTest::TestSuite {
+class PreprocessMapTest : public CxxTest::TestSuite {
 
 private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DataProcessorPreprocessMapTest *createSuite() {
-    return new DataProcessorPreprocessMapTest();
+  static PreprocessMapTest *createSuite() {
+    return new PreprocessMapTest();
   }
-  static void destroySuite(DataProcessorPreprocessMapTest *suite) {
+  static void destroySuite(PreprocessMapTest *suite) {
     delete suite;
   }
-  DataProcessorPreprocessMapTest() { FrameworkManager::Instance(); };
+  PreprocessMapTest() { FrameworkManager::Instance(); };
 
   void test_add_element() {
-    DataProcessorPreprocessMap preprocessMap;
+    PreprocessMap preprocessMap;
     preprocessMap.addElement("Runs", "Plus");
     preprocessMap.addElement("Transmission Runs",
                              "CreateTransmissionWorkspaceAuto", "TRANS_",

@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -6,10 +6,10 @@ namespace DataProcessor {
 
 /** Constructor
 */
-DataProcessorPreprocessMap::DataProcessorPreprocessMap() : m_map() {}
+PreprocessMap::PreprocessMap() : m_map() {}
 
 // Destructor
-DataProcessorPreprocessMap::~DataProcessorPreprocessMap() {}
+PreprocessMap::~PreprocessMap() {}
 
 /** Add a column that needs pre-processing
 * @param column :: the name of the column that needs pre-processing
@@ -20,7 +20,7 @@ DataProcessorPreprocessMap::~DataProcessorPreprocessMap() {}
 * @param blacklist :: the list of algorithm properties to black list, as a
 * string
 */
-void DataProcessorPreprocessMap::addElement(const QString &column,
+void PreprocessMap::addElement(const QString &column,
                                             const QString &algorithm,
                                             const QString &prefix,
                                             const QString &blacklist) {
@@ -33,7 +33,7 @@ void DataProcessorPreprocessMap::addElement(const QString &column,
 * @return :: Pre-processing instructions as a map
 */
 std::map<QString, PreprocessingAlgorithm>
-DataProcessorPreprocessMap::asMap() const {
+PreprocessMap::asMap() const {
   return m_map;
 }
 }

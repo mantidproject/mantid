@@ -110,7 +110,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_DataProcessorWindow):
         # Third argument is a prefix to name the pre-processed workspace
         # Fourth argument is used if a 'HintingLineEdit' is used in the interface. In this case it indicates
         # the blacklist of properties that should be hidden in the hinting line edit
-        preprocess_map = MantidQt.MantidWidgets.DataProcessorPreprocessMap()
+        preprocess_map = MantidQt.MantidWidgets.PreprocessMap()
         preprocess_map.addElement('Runs', 'Plus', '', '')
         preprocess_map.addElement('Transmission Runs', 'CreateTransmissionWorkspaceAuto', '', '')
 

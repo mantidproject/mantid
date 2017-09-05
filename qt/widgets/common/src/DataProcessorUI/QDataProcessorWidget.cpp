@@ -65,7 +65,7 @@ QDataProcessorWidget::QDataProcessorWidget(
 */
 QDataProcessorWidget::QDataProcessorWidget(
     const DataProcessorWhiteList &whitelist,
-    const DataProcessorPreprocessMap &preprocessMap,
+    const PreprocessMap &preprocessMap,
     const DataProcessorProcessingAlgorithm &algorithm, QWidget *parent)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
@@ -96,7 +96,7 @@ QDataProcessorWidget::QDataProcessorWidget(
 */
 QDataProcessorWidget::QDataProcessorWidget(
     const DataProcessorWhiteList &whitelist,
-    const DataProcessorPreprocessMap &preprocessMap,
+    const PreprocessMap &preprocessMap,
     const DataProcessorProcessingAlgorithm &algorithm,
     const PostprocessingAlgorithm &postprocessor, QWidget *parent)
     : QDataProcessorWidget(

@@ -1504,13 +1504,13 @@ DataProcessorWhiteList();
 void addElement(const QString &, const QString &, const QString &, bool showValue = false, const QString &prefix = "");
 };
 
-class DataProcessorPreprocessMap
+class PreprocessMap
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h"
 %End
 public:
-DataProcessorPreprocessMap();
+PreprocessMap();
 void addElement(const QString &, const QString &, const QString &prefix = "", const QString &blacklist = "");
 };
 
@@ -1544,7 +1544,7 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessor
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
-                     const MantidQt::MantidWidgets::DataProcessor::DataProcessorPreprocessMap &,
+                     const MantidQt::MantidWidgets::DataProcessor::PreprocessMap &,
                      const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessingAlgorithm &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
@@ -1552,7 +1552,7 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessor
                      const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
-                     const MantidQt::MantidWidgets::DataProcessor::DataProcessorPreprocessMap &,
+                     const MantidQt::MantidWidgets::DataProcessor::PreprocessMap &,
                      const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessingAlgorithm &,
                      const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
                      QWidget *parent );
