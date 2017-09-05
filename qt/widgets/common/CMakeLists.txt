@@ -336,7 +336,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/TreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h

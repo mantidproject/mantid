@@ -3,7 +3,7 @@
 
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
 
 #include "DllConfig.h"

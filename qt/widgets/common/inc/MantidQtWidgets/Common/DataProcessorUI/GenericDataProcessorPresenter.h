@@ -30,7 +30,7 @@ class ProgressableView;
 namespace DataProcessor {
 // Forward decs
 class DataProcessorView;
-class DataProcessorTreeManager;
+class TreeManager;
 class GenericDataProcessorPresenterThread;
 
 using RowItem = std::pair<int, RowData>;
@@ -152,7 +152,7 @@ protected:
   // A workspace receiver we want to notify
   DataProcessorMainPresenter *m_mainPresenter;
   // The tree manager, a proxy class to retrieve data from the model
-  std::unique_ptr<DataProcessorTreeManager> m_manager;
+  std::unique_ptr<TreeManager> m_manager;
   // Loader
   QString m_loader;
   // The list of selected items to reduce

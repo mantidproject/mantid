@@ -18,9 +18,9 @@ namespace DataProcessor {
 class Command;
 class DataProcessorWhiteList;
 
-/** @class DataProcessorTreeManager
+/** @class TreeManager
 
-DataProcessorTreeManager is an abstract base class defining some methods meant
+TreeManager is an abstract base class defining some methods meant
 to be used by the Generic Data Processor presenter, which will delegate some
 functionality to concrete tree manager implementations, depending on whether or
 not a post-processing algorithm has been defined.
@@ -47,9 +47,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DataProcessorTreeManager {
+class TreeManager {
 public:
-  virtual ~DataProcessorTreeManager(){};
+  virtual ~TreeManager(){};
 
   /// Actions/commands
 

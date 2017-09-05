@@ -3,7 +3,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ParseNumerics.h"

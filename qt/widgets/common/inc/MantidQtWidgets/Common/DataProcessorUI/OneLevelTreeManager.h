@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 
 namespace MantidQt {
@@ -15,7 +15,7 @@ class QOneLevelTreeModel;
 /** @class OneLevelTreeManager
 
 OneLevelTreeManager is a concrete implementation of a
-DataProcessorTreeManager that handles a one-level tree view (which corresponds
+TreeManager that handles a one-level tree view (which corresponds
 to a DataProcessorUI with no post-processing algorithm defined).
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -40,7 +40,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON OneLevelTreeManager
-    : public DataProcessorTreeManager {
+    : public TreeManager {
 public:
   /// Constructor
   OneLevelTreeManager(DataProcessorPresenter *presenter,
