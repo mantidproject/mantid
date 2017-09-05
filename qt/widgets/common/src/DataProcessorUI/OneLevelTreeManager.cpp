@@ -17,7 +17,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/PlotRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorOneLevelTreeModel.h"
 #include "MantidKernel/make_unique.h"
@@ -71,7 +71,7 @@ OneLevelTreeManager::publishCommands() {
 
   addCommand(commands, make_unique<OpenTableCommand>(m_presenter));
   addCommand(commands, make_unique<NewTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSaveTableCommand>(m_presenter));
+  addCommand(commands, make_unique<SaveTableCommand>(m_presenter));
   addCommand(commands,
              make_unique<SaveTableAsCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
