@@ -374,12 +374,16 @@ void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols,
   auto allBankDetectorIndexes =
       compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
 
-  nRows = static_cast<int>(compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() - allBankDetectorIndexes.size() - 1);
+  nRows = static_cast<int>(
+      compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() -
+      allBankDetectorIndexes.size() - 1);
   nCols = static_cast<int>(allBankDetectorIndexes.size()) / nRows;
 
-  if (nCols*nRows != static_cast<int>(allBankDetectorIndexes.size())) {
+  if (nCols * nRows != static_cast<int>(allBankDetectorIndexes.size())) {
     // Need grandchild instead of child
-    nRows = static_cast<int>(compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() - allBankDetectorIndexes.size() - 2);
+    nRows = static_cast<int>(
+        compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() -
+        allBankDetectorIndexes.size() - 2);
     nCols = static_cast<int>(allBankDetectorIndexes.size()) / nRows;
   }
 }
