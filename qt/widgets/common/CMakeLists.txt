@@ -64,7 +64,7 @@
 	src/CheckboxHeader.cpp
 	src/ColorBarWidget.cpp
 	src/DataProcessorUI/AbstractTreeModel.cpp
-	src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
+	src/DataProcessorUI/GenerateNotebook.cpp
 	src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
 	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
@@ -315,7 +315,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/ExpandGroupsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h
@@ -441,7 +441,7 @@ set( TEST_FILES
    AlgorithmHintStrategyTest.h
    TrackedActionTest.h
    DataProcessorUI/CommandsTest.h
-   DataProcessorUI/DataProcessorGenerateNotebookTest.h
+   DataProcessorUI/GenerateNotebookTest.h
    DataProcessorUI/DataProcessorOneLevelTreeManagerTest.h
    DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
    DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h

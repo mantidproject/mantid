@@ -12,7 +12,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
@@ -541,7 +541,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
     const auto preprocessingOptionsMap =
         convertStringToMap(m_preprocessingOptions);
 
-    auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
+    auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
         m_processor, m_postprocessor, preprocessingOptionsMap,
         m_processingOptions, m_postprocessingOptions);
