@@ -31,7 +31,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     _sample_unit = None
     _sample_width = None
     _sample_ws = None
-    _sample_ws_name = None
 
     # Container variables
     _container_angle = None
@@ -43,7 +42,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     _container_outer_radius = None
     _container_thickness = None
     _container_width = None
-    _container_ws_name = None
 
     # Output workspaces
     _ass_ws = None
@@ -344,8 +342,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
             self._add_sample_log_multiple(acc_ws, sample_log_names, sample_log_values)
 
-            mtd.addOrReplace(self._acc_ws_name, acc_ws)
-
             self._output_ws = self._group_ws([ass_ws, acc_ws])
         else:
             self._output_ws = self._ass_ws
@@ -444,7 +440,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
     def _get_efixed(self):
         """
-        Returns the efixed value relating to the sample workspace
+        Returns the efixed value relating to the specified workspace
         """
         inst = self._sample_ws.getInstrument()
 
@@ -498,7 +494,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         if self._sample_unit != 'Wavelength':
             convert_unit_alg.setProperty("InputWorkspace", workspace)
-            convert_unit_alg.setProperty("Target", self._unit)
+            convert_unit_alg.setProperty("Target", self._sample_unit)
             convert_unit_alg.setProperty("EMode", self._emode)
             if self._emode == 'Indirect':
                 convert_unit_alg.setProperty("EFixed", self._efixed)
