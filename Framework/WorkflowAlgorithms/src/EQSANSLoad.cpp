@@ -590,7 +590,7 @@ void EQSANSLoad::exec() {
     // This assumes that a positive offset moves the sample toward the detector
     const double sampleflange_sample_offset = getProperty("SampleOffset");
     if (!isEmpty(sampleflange_sample_offset))
-      s2d = s2d - sampleflange_sample_offset + sampleflange_det_offset;
+      s2d -= sampleflange_sample_offset;
 
     // Modify SDD according to SampleDetectorDistanceOffset offset if given
     const double sample_det_offset =
