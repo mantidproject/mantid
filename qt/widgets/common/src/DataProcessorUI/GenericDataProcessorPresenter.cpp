@@ -166,7 +166,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     m_manager = Mantid::Kernel::make_unique<OneLevelTreeManager>(
         this, m_whitelist);
   } else {
-    m_manager = Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
+    m_manager = Mantid::Kernel::make_unique<TwoLevelTreeManager>(
         this, m_whitelist);
   }
 }

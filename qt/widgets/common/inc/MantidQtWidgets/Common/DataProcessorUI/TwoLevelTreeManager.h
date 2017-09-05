@@ -12,9 +12,9 @@ class DataProcessorPresenter;
 class DataProcessorWhiteList;
 class QDataProcessorTwoLevelTreeModel;
 
-/** @class DataProcessorTwoLevelTreeManager
+/** @class TwoLevelTreeManager
 
-DataProcessorTwoLevelTreeManager is a concrete implementation of a
+TwoLevelTreeManager is a concrete implementation of a
 DataProcessorTreeManager that handles a two-level tree view (which corresponds
 to a DataProcessorUI with a post-processing algorithm defined).
 
@@ -39,18 +39,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorTwoLevelTreeManager
+class EXPORT_OPT_MANTIDQT_COMMON TwoLevelTreeManager
     : public DataProcessorTreeManager {
 public:
   /// Constructor
-  DataProcessorTwoLevelTreeManager(DataProcessorPresenter *presenter,
+  TwoLevelTreeManager(DataProcessorPresenter *presenter,
                                    Mantid::API::ITableWorkspace_sptr table,
                                    const DataProcessorWhiteList &whitelist);
   /// Constructor (no table ws given)
-  DataProcessorTwoLevelTreeManager(DataProcessorPresenter *presenter,
+  TwoLevelTreeManager(DataProcessorPresenter *presenter,
                                    const DataProcessorWhiteList &whitelist);
   /// Destructor
-  ~DataProcessorTwoLevelTreeManager() override;
+  ~TwoLevelTreeManager() override;
 
   /// Publish commands
   std::vector<std::unique_ptr<Command>> publishCommands() override;

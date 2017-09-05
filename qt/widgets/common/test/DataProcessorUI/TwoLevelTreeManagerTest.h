@@ -8,7 +8,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
@@ -45,7 +45,7 @@ using Runs = std::vector<std::map<QString, QString>>;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class DataProcessorTwoLevelTreeManagerTest : public CxxTest::TestSuite {
+class TwoLevelTreeManagerTest : public CxxTest::TestSuite {
 
 private:
   // Return a reflectometry whitelist
@@ -124,16 +124,16 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DataProcessorTwoLevelTreeManagerTest *createSuite() {
-    return new DataProcessorTwoLevelTreeManagerTest();
+  static TwoLevelTreeManagerTest *createSuite() {
+    return new TwoLevelTreeManagerTest();
   }
-  static void destroySuite(DataProcessorTwoLevelTreeManagerTest *suite) {
+  static void destroySuite(TwoLevelTreeManagerTest *suite) {
     delete suite;
   }
 
   void test_publish_commands() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter,
+    TwoLevelTreeManager manager(&presenter,
                                              DataProcessorWhiteList());
 
     auto comm = manager.publishCommands();
@@ -180,7 +180,7 @@ public:
     // checking that the presenter is called
 
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents())
         .Times(1)
@@ -197,7 +197,7 @@ public:
     // checking that the presenter is called
 
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents())
         .Times(1)
@@ -212,7 +212,7 @@ public:
     // checking that the presenter is called
 
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents()).Times(0);
     EXPECT_CALL(presenter, selectedChildren())
@@ -227,7 +227,7 @@ public:
     // checking that the presenter is called
 
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents())
         .Times(1)
@@ -242,7 +242,7 @@ public:
     // checking that the presenter is called
 
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents()).Times(0);
     EXPECT_CALL(presenter, selectedChildren())
@@ -257,7 +257,7 @@ public:
     // checking that the presenter is called
 
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents()).Times(0);
     EXPECT_CALL(presenter, selectedChildren())
@@ -272,7 +272,7 @@ public:
     // checking that the presenter is called
 
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents()).Times(0);
     EXPECT_CALL(presenter, selectedChildren())
@@ -287,7 +287,7 @@ public:
     // checking that the presenter is called
 
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents()).Times(0);
     EXPECT_CALL(presenter, selectedChildren()).Times(0);
@@ -299,7 +299,7 @@ public:
     NiceMock<MockDataProcessorPresenter> presenter;
     auto table = reflTable();
     auto whitelist = reflWhitelist();
-    DataProcessorTwoLevelTreeManager manager(&presenter, whitelist);
+    TwoLevelTreeManager manager(&presenter, whitelist);
     TS_ASSERT_THROWS_NOTHING(manager.newTable(table, whitelist));
 
     QStringList firstRow = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
@@ -328,7 +328,7 @@ public:
     NiceMock<MockDataProcessorPresenter> presenter;
     auto table = reflTable();
     auto whitelist = reflWhitelist();
-    DataProcessorTwoLevelTreeManager manager(&presenter, whitelist);
+    TwoLevelTreeManager manager(&presenter, whitelist);
 
     TS_ASSERT_THROWS_NOTHING(manager.newTable(table, whitelist));
     TS_ASSERT_EQUALS(manager.getTableWorkspace()->rowCount(), 4);
@@ -351,7 +351,7 @@ public:
 
   void test_transfer_fails_no_group() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     Runs runs = {{{"Runs", "12345"}}};
     TS_ASSERT_THROWS_ANYTHING(manager.transfer(runs, reflWhitelist()));
@@ -359,7 +359,7 @@ public:
 
   void test_transfer_fails_wrong_whitelist() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     Runs runs = {{{"Group", "0"}, {"Runs", "12345"}}};
     TS_ASSERT_THROWS_ANYTHING(manager.transfer(runs, DataProcessorWhiteList()));
@@ -367,7 +367,7 @@ public:
 
   void test_transfer_nothing_transferred() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     Runs runs = {{{"Group", "0"}, {"Runs", "12345"}}};
     TS_ASSERT_THROWS_NOTHING(manager.transfer(runs, reflWhitelist()));
@@ -375,7 +375,7 @@ public:
 
   void test_transfer_good_data() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     Runs runs = {{{"Group", "Group0"},
                   {"Run(s)", "12345"},
@@ -445,7 +445,7 @@ public:
 
   void test_update() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     QStringList newRow = {"0", "1", "2", "3", "4", "5", "6", "7"};
 
