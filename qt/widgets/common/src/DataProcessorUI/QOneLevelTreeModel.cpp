@@ -10,11 +10,11 @@ using namespace Mantid::API;
 //----------------------------------------------------------------------------------------------
 /** Constructor
 @param tableWorkspace : The table workspace to wrap
-@param whitelist : A DataProcessorWhiteList containing the columns
+@param whitelist : A WhiteList containing the columns
 */
 QOneLevelTreeModel::QOneLevelTreeModel(
     ITableWorkspace_sptr tableWorkspace,
-    const DataProcessorWhiteList &whitelist)
+    const WhiteList &whitelist)
     : AbstractTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size())

@@ -32,7 +32,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <boost/tuple/tuple.hpp>
@@ -51,12 +51,12 @@ QStringList DLLExport splitByCommas(const QString &namesString);
 QString DLLExport plot1DString(const QStringList &ws_names);
 
 QString DLLExport
-tableString(const TreeData &treeData, const DataProcessorWhiteList &whitelist);
+tableString(const TreeData &treeData, const WhiteList &whitelist);
 
 QString DLLExport titleString(const QString &wsName);
 
 boost::tuple<QString, QString> DLLExport postprocessGroupString(
-    const GroupData &rowMap, const DataProcessorWhiteList &whitelist,
+    const GroupData &rowMap, const WhiteList &whitelist,
     const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const QString &postprocessingOptions);
@@ -67,12 +67,12 @@ plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
 
 QString DLLExport
 getReducedWorkspaceName(const RowData &data,
-                        const DataProcessorWhiteList &whitelist,
+                        const WhiteList &whitelist,
                         const QString &prefix = "");
 
 boost::tuple<QString, QString> DLLExport reduceRowString(
     const RowData &data, const QString &instrument,
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
     const std::map<QString, QString> &preprocessOoptionsMap,
@@ -100,7 +100,7 @@ class DLLExport GenerateNotebook {
 public:
   GenerateNotebook(
       QString name, const QString instrument,
-      const DataProcessorWhiteList &whitelist,
+      const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const ProcessingAlgorithm &processor,
@@ -119,7 +119,7 @@ private:
   const QString m_instrument;
   // The whitelist defining the number of columns, their names and how they
   // relate to the algorithm properties
-  DataProcessorWhiteList m_whitelist;
+  WhiteList m_whitelist;
   // The map indicating the columns that were pre-processed and their
   // corresponding pre-processing algorithms
   std::map<QString, PreprocessingAlgorithm> m_preprocessMap;

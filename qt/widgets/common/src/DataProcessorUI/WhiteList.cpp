@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 
 #include <QString>
 
@@ -14,7 +14,7 @@ namespace DataProcessor {
 * @param prefix : the prefix to be added to the value of this column
 * @param description : a description of this column
 */
-void DataProcessorWhiteList::addElement(const QString &colName,
+void WhiteList::addElement(const QString &colName,
                                         const QString &algProperty,
                                         const QString &description,
                                         bool showValue, const QString &prefix) {
@@ -30,34 +30,34 @@ void DataProcessorWhiteList::addElement(const QString &colName,
 /** Returns the column index for a column specified via its name
     @param colName : The column name
 */
-int DataProcessorWhiteList::colIndexFromColName(const QString &colName) const {
+int WhiteList::colIndexFromColName(const QString &colName) const {
   return m_colNameToColIndex.at(colName);
 }
 
 /** Returns the column name for a column specified via its index
     @param index : The column index
 */
-QString DataProcessorWhiteList::colNameFromColIndex(int index) const {
+QString WhiteList::colNameFromColIndex(int index) const {
   return m_colIndexToColName.at(index);
 }
 
 /** Returns the algorithm property linked to a column specified via its index
     @param index : The column index
 */
-QString DataProcessorWhiteList::algPropFromColIndex(int index) const {
+QString WhiteList::algPropFromColIndex(int index) const {
   return m_colIndexToAlgProp.at(index);
 }
 
 /** Returns the column description for a column specified via its index
     @param index : The column index
 */
-QString DataProcessorWhiteList::description(int index) const {
+QString WhiteList::description(int index) const {
   return m_description.at(index);
 }
 
 /** Returns the size of this whitelist, i.e. the number of columns
 */
-size_t DataProcessorWhiteList::size() const {
+size_t WhiteList::size() const {
   return m_colNameToColIndex.size();
 }
 
@@ -65,7 +65,7 @@ size_t DataProcessorWhiteList::size() const {
  * name of the output ws
  * @param index : The column index
 */
-bool DataProcessorWhiteList::showValue(int index) const {
+bool WhiteList::showValue(int index) const {
   return m_showValue.at(index);
 }
 
@@ -73,7 +73,7 @@ bool DataProcessorWhiteList::showValue(int index) const {
 * only be used if showValue is true for this column
 * @param index : The column index
 */
-QString DataProcessorWhiteList::prefix(int index) const {
+QString WhiteList::prefix(int index) const {
   return m_prefix.at(index);
 }
 }

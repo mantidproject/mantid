@@ -33,7 +33,7 @@ class GenericDataProcessorPresenterNoThread
 public:
   // Standard constructor
   GenericDataProcessorPresenterNoThread(
-      const DataProcessorWhiteList &whitelist,
+      const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const ProcessingAlgorithm &processor,
@@ -46,7 +46,7 @@ public:
 
   // Delegating constructor (no pre-processing required)
   GenericDataProcessorPresenterNoThread(
-      const DataProcessorWhiteList &whitelist,
+      const WhiteList &whitelist,
       const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor)
       : GenericDataProcessorPresenter(
@@ -93,9 +93,9 @@ private:
 class GenericDataProcessorPresenterTest : public CxxTest::TestSuite {
 
 private:
-  DataProcessorWhiteList createReflectometryWhiteList() {
+  WhiteList createReflectometryWhiteList() {
 
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Run(s)", "InputWorkspace", "", true, "TOF_");
     whitelist.addElement("Angle", "ThetaIn", "");
     whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
@@ -141,7 +141,7 @@ private:
 
   ITableWorkspace_sptr
   createWorkspace(const QString &wsName,
-                  const DataProcessorWhiteList &whitelist) {
+                  const WhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
     const int ncols = static_cast<int>(whitelist.size());
@@ -206,7 +206,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspace(const QString &wsName,
-                           const DataProcessorWhiteList &whitelist) {
+                           const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
@@ -255,7 +255,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspaceThreeGroups(const QString &wsName,
-                                      const DataProcessorWhiteList &whitelist) {
+                                      const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
@@ -322,7 +322,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspaceWithTrans(const QString &wsName,
-                                    const DataProcessorWhiteList &whitelist) {
+                                    const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"

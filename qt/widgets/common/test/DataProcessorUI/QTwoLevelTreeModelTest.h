@@ -704,7 +704,7 @@ public:
   }
 
 private:
-  DataProcessorWhiteList m_whitelist;
+  WhiteList m_whitelist;
 };
 
 #endif /* MANTID_MANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODELTEST_H */

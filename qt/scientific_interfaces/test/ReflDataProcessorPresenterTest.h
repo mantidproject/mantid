@@ -27,7 +27,7 @@ class ReflDataProcessorPresenterTest : public CxxTest::TestSuite {
 private:
   ITableWorkspace_sptr
   createWorkspace(const QString &wsName,
-                  const DataProcessorWhiteList &whitelist) {
+                  const WhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
     const int ncols = static_cast<int>(whitelist.size());
@@ -49,7 +49,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspace(const QString &wsName,
-                           const DataProcessorWhiteList &whitelist) {
+                           const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::vector<std::string> group{"0", "0", "1", "1"};
     const std::vector<std::string> run{"13460", "13462", "13469", "13470"};
@@ -70,7 +70,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledMixedWorkspace(const QString &wsName,
-                                const DataProcessorWhiteList &whitelist) {
+                                const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::string group = "0";
     const std::vector<std::string> run{"38415", "38417"};
@@ -91,7 +91,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledMinimalWorkspace(const QString &wsName,
-                                  const DataProcessorWhiteList &whitelist) {
+                                  const WhiteList &whitelist) {
 
     auto ws = createWorkspace(wsName, whitelist);
     const std::string group = "0";

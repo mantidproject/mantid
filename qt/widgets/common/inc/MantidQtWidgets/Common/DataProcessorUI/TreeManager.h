@@ -16,7 +16,7 @@ namespace MantidWidgets {
 namespace DataProcessor {
 
 class Command;
-class DataProcessorWhiteList;
+class WhiteList;
 
 /** @class TreeManager
 
@@ -75,10 +75,10 @@ public:
   /// Paste selected
   virtual void pasteSelected(const QString &text) = 0;
   /// Blank table
-  virtual void newTable(const DataProcessorWhiteList &whitelist) = 0;
+  virtual void newTable(const WhiteList &whitelist) = 0;
   /// Blank table
   virtual void newTable(Mantid::API::ITableWorkspace_sptr table,
-                        const DataProcessorWhiteList &whitelist) = 0;
+                        const WhiteList &whitelist) = 0;
 
   /// Read/write data
 
@@ -86,7 +86,7 @@ public:
   virtual TreeData selectedData(bool prompt = false) = 0;
   /// Transfer new data to model
   virtual void transfer(const std::vector<std::map<QString, QString>> &runs,
-                        const DataProcessorWhiteList &whitelist) = 0;
+                        const WhiteList &whitelist) = 0;
   /// Update row with new data
   virtual void update(int parent, int child, const QStringList &data) = 0;
   /// Get the number of rows of a given parent

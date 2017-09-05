@@ -50,7 +50,7 @@ specified via the corresponding hinting line edit in the view
 */
 GenerateNotebook::GenerateNotebook(
     QString name, const QString instrument,
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
@@ -234,7 +234,7 @@ QString plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
   @return string containing the markdown code
   */
 QString tableString(const TreeData &treeData,
-                    const DataProcessorWhiteList &whitelist) {
+                    const WhiteList &whitelist) {
 
   QString tableString;
 
@@ -288,7 +288,7 @@ QString tableString(const TreeData &treeData,
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<QString, QString> postprocessGroupString(
-    const GroupData &rowMap, const DataProcessorWhiteList &whitelist,
+    const GroupData &rowMap, const WhiteList &whitelist,
     const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const QString &postprocessingOptions) {
@@ -353,7 +353,7 @@ QString plot1DString(const QStringList &ws_names) {
  @return : the workspace name
 */
 QString getReducedWorkspaceName(const RowData &data,
-                                const DataProcessorWhiteList &whitelist,
+                                const WhiteList &whitelist,
                                 const QString &prefix) {
 
   int ncols = static_cast<int>(whitelist.size());
@@ -404,7 +404,7 @@ void addProperties(QStringList &algProperties, const Map &optionsMap) {
 */
 boost::tuple<QString, QString> reduceRowString(
     const RowData &data, const QString &instrument,
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
     const std::map<QString, QString> &preprocessingOptionsMap,

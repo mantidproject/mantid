@@ -41,7 +41,7 @@ namespace DataProcessor {
 */
 OneLevelTreeManager::OneLevelTreeManager(
     DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
-    const DataProcessorWhiteList &whitelist)
+    const WhiteList &whitelist)
     : m_presenter(presenter),
       m_model(new QOneLevelTreeModel(table, whitelist)) {}
 
@@ -51,7 +51,7 @@ OneLevelTreeManager::OneLevelTreeManager(
 * @param whitelist :: [input] A whitelist containing the number of columns
 */
 OneLevelTreeManager::OneLevelTreeManager(
-    DataProcessorPresenter *presenter, const DataProcessorWhiteList &whitelist)
+    DataProcessorPresenter *presenter, const WhiteList &whitelist)
     : OneLevelTreeManager(
           presenter, createDefaultWorkspace(whitelist), whitelist) {}
 
@@ -239,7 +239,7 @@ void OneLevelTreeManager::pasteSelected(const QString &text) {
 * @param whitelist :: A whitelist with the columns for the new table
 */
 void OneLevelTreeManager::newTable(
-    const DataProcessorWhiteList &whitelist) {
+    const WhiteList &whitelist) {
 
   m_model.reset(new QOneLevelTreeModel(
       createDefaultWorkspace(whitelist), whitelist));
@@ -250,7 +250,7 @@ void OneLevelTreeManager::newTable(
 * @param whitelist :: A whitelist with the columns for the new table
 */
 void OneLevelTreeManager::newTable(
-    ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
+    ITableWorkspace_sptr table, const WhiteList &whitelist) {
 
   if (isValidModel(table, whitelist.size())) {
     m_model.reset(new QOneLevelTreeModel(table, whitelist));
@@ -325,7 +325,7 @@ TreeData OneLevelTreeManager::selectedData(bool prompt) {
 */
 void OneLevelTreeManager::transfer(
     const std::vector<std::map<QString, QString>> &runs,
-    const DataProcessorWhiteList &whitelist) {
+    const WhiteList &whitelist) {
 
   ITableWorkspace_sptr ws = m_model->getTableWorkspace();
 
@@ -455,7 +455,7 @@ ITableWorkspace_sptr OneLevelTreeManager::getTableWorkspace() {
 * @return : A default table
 */
 ITableWorkspace_sptr OneLevelTreeManager::createDefaultWorkspace(
-    const DataProcessorWhiteList &whitelist) {
+    const WhiteList &whitelist) {
   ITableWorkspace_sptr ws =
       Mantid::API::WorkspaceFactory::Instance().createTable();
 

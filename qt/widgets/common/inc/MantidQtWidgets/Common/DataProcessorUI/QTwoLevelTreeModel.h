@@ -3,7 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
@@ -50,7 +50,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QTwoLevelTreeModel
 public:
   QTwoLevelTreeModel(
       Mantid::API::ITableWorkspace_sptr tableWorkspace,
-      const DataProcessorWhiteList &whitelist);
+      const WhiteList &whitelist);
   ~QTwoLevelTreeModel() override;
 
   // Functions to read data from the model

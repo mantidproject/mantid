@@ -12,9 +12,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-/** @class DataProcessorWhiteList
+/** @class WhiteList
 
-DataProcessorWhiteList is an class defining a whitelist
+WhiteList is an class defining a whitelist
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -37,10 +37,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorWhiteList {
+class EXPORT_OPT_MANTIDQT_COMMON WhiteList {
 public:
-  DataProcessorWhiteList() : m_lastIndex(0){};
-  virtual ~DataProcessorWhiteList(){};
+  WhiteList() : m_lastIndex(0){};
+  virtual ~WhiteList(){};
 
   void addElement(const QString &colName, const QString &algProperty,
                   const QString &description, bool showValue = false,

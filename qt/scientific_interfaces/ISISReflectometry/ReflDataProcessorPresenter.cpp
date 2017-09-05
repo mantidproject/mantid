@@ -29,7 +29,7 @@ namespace CustomInterfaces {
 * @param loader : The algorithm responsible for loading data
 */
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,

@@ -2,7 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_ABSTRACTDATAPROCESSORTREEMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QAbstractItemModel>
 #include <QColor>
@@ -44,7 +44,7 @@ class EXPORT_OPT_MANTIDQT_COMMON AbstractTreeModel
 public:
   AbstractTreeModel(
       Mantid::API::ITableWorkspace_sptr tableWorkspace,
-      const DataProcessorWhiteList &whitelist);
+      const WhiteList &whitelist);
   ~AbstractTreeModel() override;
 
   // Functions to read data from the model
@@ -64,7 +64,7 @@ protected:
   /// Collection of data for viewing.
   Mantid::API::ITableWorkspace_sptr m_tWS;
   /// Map of column indexes to names and viceversa
-  DataProcessorWhiteList m_whitelist;
+  WhiteList m_whitelist;
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets

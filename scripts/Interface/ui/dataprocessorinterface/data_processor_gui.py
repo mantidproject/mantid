@@ -91,7 +91,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_DataProcessorWindow):
         # The fifth arument is a prefix added to the value in this column used to generate the name of the reduced run
         # (unused if the previous argument is false)
         # In addition to the specified columns, a last column 'Options' is always added
-        whitelist = MantidQt.MantidWidgets.DataProcessorWhiteList()
+        whitelist = MantidQt.MantidWidgets.WhiteList()
         whitelist.addElement('Runs', 'InputWorkspace', 'The run to reduce', True, '')
         whitelist.addElement('Angle', 'ThetaIn', 'The incident angle', False, '')
         whitelist.addElement('Transmission Runs', 'FirstTransmissionRun', 'Transmission runs', False, '')

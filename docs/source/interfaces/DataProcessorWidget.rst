@@ -50,7 +50,7 @@ Below is an example illustrating how to create a white list and add some columns
 
 .. code-block:: python
 
-    whitelist = MantidQt.MantidWidgets.DataProcessorWhiteList()
+    whitelist = MantidQt.MantidWidgets.WhiteList()
     whitelist.addElement('Runs', 'InputWorkspace', 'The run to reduce')
     whitelist.addElement('Angle', 'ThetaIn', 'The incident angle')
     whitelist.addElement('Transmission Runs', 'FirstTransmissionRun', 'Transmission runs')
@@ -80,7 +80,7 @@ no effect on the way the table is displayed. Therefore, the following whitelist:
 
 .. code-block:: python
 
-    whitelist = MantidQt.MantidWidgets.DataProcessorWhiteList()
+    whitelist = MantidQt.MantidWidgets.WhiteList()
     whitelist.addElement('Runs', 'InputWorkspace', 'The run to reduce', True, '')
     whitelist.addElement('Angle', 'ThetaIn', 'The incident angle', False, '')
     whitelist.addElement('Transmission Runs', 'FirstTransmissionRun', 'Transmission runs', False, '')
@@ -361,7 +361,7 @@ assuming that you don't need to pre-process and post-process groups of runs, the
 
     // Constructor: no pre-processing, no post-processing
     GenericDataProcessorPresenter(
-        const DataProcessorWhiteList &whitelist,
+        const WhiteList &whitelist,
         const ProcessingAlgorithm &processor);
 
 should become:
@@ -370,7 +370,7 @@ should become:
 
     // Constructor: no pre-processing, no post-processing
     GenericDataProcessorPresenter(
-        const DataProcessorWhiteList &whitelist,
+        const WhiteList &whitelist,
         const ProcessingAlgorithm &processor,
         const std::string &loader = "Load");
 
@@ -385,7 +385,7 @@ Then in the implementation, the following should be enough:
     * @param loader :: The loading algorithm
     */
     GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-        const DataProcessorWhiteList &whitelist,
+        const WhiteList &whitelist,
         const ProcessingAlgorithm &processor,
         const std::string &loader)
         : GenericDataProcessorPresenter(
@@ -402,7 +402,7 @@ Assuming the example above, i.e. no pre-processing and no post-processing, the c
 .. code-block:: c
 
     // Constructor: no pre-processing, no post-processing
-    QDataProcessorWidget(const DataProcessorWhiteList &,
+    QDataProcessorWidget(const WhiteList &,
                          const ProcessingAlgorithm &,
                          QWidget *parent);
 
@@ -411,7 +411,7 @@ should become:
 .. code-block:: c
 
     // Constructor: no pre-processing, no post-processing
-    QDataProcessorWidget(const DataProcessorWhiteList &,
+    QDataProcessorWidget(const WhiteList &,
                          const ProcessingAlgorithm &,
                          const QString &loader,
                          QWidget *parent);
@@ -427,7 +427,7 @@ and then the implementation would be:
     * @param parent :: The parent of this view
     */
     QDataProcessorWidget::QDataProcessorWidget(
-        const DataProcessorWhiteList &whitelist,
+        const WhiteList &whitelist,
         const ProcessingAlgorithm &algorithm,
 		const QString &loader, QWidget *parent)
         : QDataProcessorWidget(
@@ -447,7 +447,7 @@ above constructor:
     #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
     %End
     public:
-    QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
+    QDataProcessorWidget(const MantidQt::MantidWidgets::WhiteList &,
                          const MantidQt::MantidWidgets::ProcessingAlgorithm &,
                          const QString &,
                          QWidget *parent );

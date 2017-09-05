@@ -116,7 +116,7 @@ namespace DataProcessor {
 * @param loader : The algorithm responsible for loading data
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
@@ -179,7 +179,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor)
     : GenericDataProcessorPresenter(
@@ -191,7 +191,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
  * @param whitelist : The set of properties we want to show as columns
  */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist)
+    const WhiteList &whitelist)
     : GenericDataProcessorPresenter(
           whitelist, std::map<QString, PreprocessingAlgorithm>(),
           ProcessingAlgorithm(),
@@ -205,7 +205,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
@@ -218,7 +218,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist,
+    const WhiteList &whitelist,
     const ProcessingAlgorithm &processor)
     : GenericDataProcessorPresenter(
           whitelist, std::map<QString, PreprocessingAlgorithm>(),

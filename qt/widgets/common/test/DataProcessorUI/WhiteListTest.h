@@ -5,7 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -14,19 +14,19 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class DataProcessorWhiteListTest : public CxxTest::TestSuite {
+class WhiteListTest : public CxxTest::TestSuite {
 
 private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DataProcessorWhiteListTest *createSuite() {
-    return new DataProcessorWhiteListTest();
+  static WhiteListTest *createSuite() {
+    return new WhiteListTest();
   }
-  static void destroySuite(DataProcessorWhiteListTest *suite) { delete suite; }
+  static void destroySuite(WhiteListTest *suite) { delete suite; }
 
   void test_column_index() {
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Column1", "Property1", "Description1");
     whitelist.addElement("Column2", "Property2", "Description2");
     whitelist.addElement("Column3", "Property3", "Description3");
@@ -47,7 +47,7 @@ public:
   }
 
   void test_column_name() {
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Column1", "Property1", "Description1");
     whitelist.addElement("Column2", "Property2", "Description2");
     whitelist.addElement("Column3", "Property3", "Description3");
@@ -62,7 +62,7 @@ public:
   }
 
   void test_column_property() {
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Column1", "Property1", "Description1");
     whitelist.addElement("Column2", "Property2", "Description2");
     whitelist.addElement("Column3", "Property3", "Description3");
@@ -76,7 +76,7 @@ public:
   }
 
   void test_column_description() {
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Column1", "Property1", "Description1");
     whitelist.addElement("Column2", "Property2", "Description2");
     whitelist.addElement("Column3", "Property3", "Description3");
@@ -91,7 +91,7 @@ public:
   }
 
   void test_column_showValue() {
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Column1", "Property1", "Description1");
     whitelist.addElement("Column3", "Property3", "Description3", true);
 
@@ -102,7 +102,7 @@ public:
   }
 
   void test_column_prefix() {
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Column1", "Property1", "Description1");
     whitelist.addElement("Column3", "Property3", "Description3", true, "blah");
 

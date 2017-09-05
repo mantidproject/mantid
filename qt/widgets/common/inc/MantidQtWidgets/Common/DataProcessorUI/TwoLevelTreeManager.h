@@ -9,7 +9,7 @@ namespace MantidWidgets {
 namespace DataProcessor {
 
 class DataProcessorPresenter;
-class DataProcessorWhiteList;
+class WhiteList;
 class QTwoLevelTreeModel;
 
 /** @class TwoLevelTreeManager
@@ -45,10 +45,10 @@ public:
   /// Constructor
   TwoLevelTreeManager(DataProcessorPresenter *presenter,
                                    Mantid::API::ITableWorkspace_sptr table,
-                                   const DataProcessorWhiteList &whitelist);
+                                   const WhiteList &whitelist);
   /// Constructor (no table ws given)
   TwoLevelTreeManager(DataProcessorPresenter *presenter,
-                                   const DataProcessorWhiteList &whitelist);
+                                   const WhiteList &whitelist);
   /// Destructor
   ~TwoLevelTreeManager() override;
 
@@ -73,16 +73,16 @@ public:
   /// Paste selected
   void pasteSelected(const QString &text) override;
   /// Blank table
-  void newTable(const DataProcessorWhiteList &whitelist) override;
+  void newTable(const WhiteList &whitelist) override;
   /// New table
   void newTable(Mantid::API::ITableWorkspace_sptr table,
-                const DataProcessorWhiteList &whitelist) override;
+                const WhiteList &whitelist) override;
 
   /// Return selected data
   TreeData selectedData(bool prompt) override;
   /// Transfer new data to model
   void transfer(const std::vector<std::map<QString, QString>> &runs,
-                const DataProcessorWhiteList &whitelist) override;
+                const WhiteList &whitelist) override;
   /// Update row with new data
   void update(int parent, int child, const QStringList &data) override;
   /// Get the number of rows of a given parent
@@ -123,7 +123,7 @@ private:
   int numRowsInGroup(int groupId) const;
   /// Create a default table workspace
   Mantid::API::ITableWorkspace_sptr
-  createDefaultWorkspace(const DataProcessorWhiteList &whitelist);
+  createDefaultWorkspace(const WhiteList &whitelist);
   /// Validate a table workspace
   void validateModel(Mantid::API::ITableWorkspace_sptr ws,
                      size_t whitelistColumns) const;
