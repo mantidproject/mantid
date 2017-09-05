@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -9,7 +9,7 @@ namespace DataProcessor {
 * @param prefix : The prefix that will be added to the output workspace name
 * @param blacklist : The list of properties we don't want to show
 */
-DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
+PostprocessingAlgorithm::PostprocessingAlgorithm(
     const QString &name, const QString &prefix,
     const std::set<QString> &blacklist)
     : DataProcessorProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
@@ -36,35 +36,35 @@ DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
 * @param prefix : The prefix that will be added to the output workspace name
 * @param blacklist : The list of properties we don't want to show, as a string
 */
-DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
+PostprocessingAlgorithm::PostprocessingAlgorithm(
     const QString &name, const QString &prefix, const QString &blacklist)
-    : DataProcessorPostprocessingAlgorithm(name, prefix,
+    : PostprocessingAlgorithm(name, prefix,
                                            convertStringToSet(blacklist)) {}
 
 /** Default constructor: no algorithm defined */
-DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm()
+PostprocessingAlgorithm::PostprocessingAlgorithm()
     : m_prefix(), m_inputProp(), m_outputProp() {}
 
 // Destructor
-DataProcessorPostprocessingAlgorithm::~DataProcessorPostprocessingAlgorithm() {}
+PostprocessingAlgorithm::~PostprocessingAlgorithm() {}
 
 // Returns the name of the input workspace property
-QString DataProcessorPostprocessingAlgorithm::inputProperty() const {
+QString PostprocessingAlgorithm::inputProperty() const {
   return m_inputProp;
 }
 
 // Returns the name of the output workspace property
-QString DataProcessorPostprocessingAlgorithm::outputProperty() const {
+QString PostprocessingAlgorithm::outputProperty() const {
   return m_outputProp;
 }
 
 // Returns the number of output workspace properties (currently only 1)
-size_t DataProcessorPostprocessingAlgorithm::numberOfOutputProperties() const {
+size_t PostprocessingAlgorithm::numberOfOutputProperties() const {
   return 1;
 }
 
 // Returns the prefix that will be added to the output ws
-QString DataProcessorPostprocessingAlgorithm::prefix() const {
+QString PostprocessingAlgorithm::prefix() const {
   return m_prefix;
 }
 }

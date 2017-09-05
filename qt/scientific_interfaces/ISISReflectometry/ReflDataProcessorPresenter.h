@@ -48,7 +48,7 @@ public:
       const std::map<QString, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
-      const DataProcessorPostprocessingAlgorithm &postprocessor,
+      const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load");

@@ -1523,13 +1523,13 @@ public:
 DataProcessorProcessingAlgorithm(const QString &, const QString &, const QString &blacklist = "");
 };
 
-class DataProcessorPostprocessingAlgorithm
+class PostprocessingAlgorithm
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
 %End
 public:
-DataProcessorPostprocessingAlgorithm(const QString &, const QString &, const QString &);
+PostprocessingAlgorithm(const QString &, const QString &, const QString &);
 };
 
 class QDataProcessorWidget : QWidget
@@ -1549,12 +1549,12 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessor
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessingAlgorithm &,
-                     const MantidQt::MantidWidgets::DataProcessor::DataProcessorPostprocessingAlgorithm &,
+                     const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::DataProcessorWhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::DataProcessorPreprocessMap &,
                      const MantidQt::MantidWidgets::DataProcessor::DataProcessorProcessingAlgorithm &,
-                     const MantidQt::MantidWidgets::DataProcessor::DataProcessorPostprocessingAlgorithm &,
+                     const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
                      QWidget *parent );
 void accept(MantidQt::MantidWidgets::DataProcessor::DataProcessorMainPresenter *);
 void setInstrumentList(const QString &instruments, const QString &defaultInstrument);

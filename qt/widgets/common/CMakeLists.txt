@@ -66,7 +66,7 @@
 	src/DataProcessorUI/AbstractTreeModel.cpp
 	src/DataProcessorUI/GenerateNotebook.cpp
 	src/DataProcessorUI/OneLevelTreeManager.cpp
-	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
+	src/DataProcessorUI/PostprocessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorPreprocessMap.cpp
 	src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
@@ -327,7 +327,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PlotGroupCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PlotRowCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h
@@ -443,7 +443,7 @@ set( TEST_FILES
    DataProcessorUI/CommandsTest.h
    DataProcessorUI/GenerateNotebookTest.h
    DataProcessorUI/OneLevelTreeManagerTest.h
-   DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
+   DataProcessorUI/PostprocessingAlgorithmTest.h
    DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
    DataProcessorUI/DataProcessorPreprocessMapTest.h
    DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h

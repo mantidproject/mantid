@@ -53,7 +53,7 @@ GenerateNotebook::GenerateNotebook(
     const DataProcessorWhiteList &whitelist,
     const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
-    const DataProcessorPostprocessingAlgorithm &postprocessor,
+    const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> preprocessingOptionsMap,
     const QString processingOptions, const QString postprocessingOptions)
     : m_wsName(name), m_instrument(instrument), m_whitelist(whitelist),
@@ -290,7 +290,7 @@ QString tableString(const TreeData &treeData,
 boost::tuple<QString, QString> postprocessGroupString(
     const GroupData &rowMap, const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
-    const DataProcessorPostprocessingAlgorithm &postprocessor,
+    const PostprocessingAlgorithm &postprocessor,
     const QString &postprocessingOptions) {
   QString stitchString;
 

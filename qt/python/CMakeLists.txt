@@ -33,7 +33,7 @@ set ( SIP_HDRS
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h
-  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
+  ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h
   ../widgets/common/inc/MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h

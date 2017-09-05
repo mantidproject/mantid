@@ -47,8 +47,8 @@ private:
                           "FirstTransmissionRun", "SecondTransmissionRun"});
   }
 
-  DataProcessorPostprocessingAlgorithm reflPostprocessor() {
-    return DataProcessorPostprocessingAlgorithm(
+  PostprocessingAlgorithm reflPostprocessor() {
+    return PostprocessingAlgorithm(
         "Stitch1DMany", "IvsQ_",
         std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
   }

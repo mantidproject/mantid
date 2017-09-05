@@ -37,7 +37,7 @@ public:
       const std::map<QString, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
-      const DataProcessorPostprocessingAlgorithm &postprocessor,
+      const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load")
@@ -48,7 +48,7 @@ public:
   GenericDataProcessorPresenterNoThread(
       const DataProcessorWhiteList &whitelist,
       const DataProcessorProcessingAlgorithm &processor,
-      const DataProcessorPostprocessingAlgorithm &postprocessor)
+      const PostprocessingAlgorithm &postprocessor)
       : GenericDataProcessorPresenter(
             whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
             processor, postprocessor) {}
@@ -132,9 +132,9 @@ private:
                           "FirstTransmissionRun", "SecondTransmissionRun"});
   }
 
-  DataProcessorPostprocessingAlgorithm createReflectometryPostprocessor() {
+  PostprocessingAlgorithm createReflectometryPostprocessor() {
 
-    return DataProcessorPostprocessingAlgorithm(
+    return PostprocessingAlgorithm(
         "Stitch1DMany", "IvsQ_",
         std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
   }

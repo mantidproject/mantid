@@ -35,21 +35,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON DataProcessorPostprocessingAlgorithm
+class EXPORT_OPT_MANTIDQT_COMMON PostprocessingAlgorithm
     : public DataProcessorProcessingAlgorithmBase {
 public:
   // Constructor
-  DataProcessorPostprocessingAlgorithm(
+  PostprocessingAlgorithm(
       const QString &name, const QString &prefix = "",
       const std::set<QString> &blacklist = std::set<QString>());
   // Delegating constructor
-  DataProcessorPostprocessingAlgorithm(const QString &name,
+  PostprocessingAlgorithm(const QString &name,
                                        const QString &prefix,
                                        const QString &blacklist);
   // Default constructor
-  DataProcessorPostprocessingAlgorithm();
+  PostprocessingAlgorithm();
   // Destructor
-  virtual ~DataProcessorPostprocessingAlgorithm();
+  virtual ~PostprocessingAlgorithm();
   // The name of the input workspace property
   QString inputProperty() const;
   // The name of the output workspace property

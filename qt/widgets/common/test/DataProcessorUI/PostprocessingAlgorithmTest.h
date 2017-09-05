@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -16,41 +16,41 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class DataProcessorPostprocessingAlgorithmTest : public CxxTest::TestSuite {
+class PostprocessingAlgorithmTest : public CxxTest::TestSuite {
 
 private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DataProcessorPostprocessingAlgorithmTest *createSuite() {
-    return new DataProcessorPostprocessingAlgorithmTest();
+  static PostprocessingAlgorithmTest *createSuite() {
+    return new PostprocessingAlgorithmTest();
   }
-  static void destroySuite(DataProcessorPostprocessingAlgorithmTest *suite) {
+  static void destroySuite(PostprocessingAlgorithmTest *suite) {
     delete suite;
   }
-  DataProcessorPostprocessingAlgorithmTest() { FrameworkManager::Instance(); };
+  PostprocessingAlgorithmTest() { FrameworkManager::Instance(); };
 
   void test_invalid_algorithms() {
     // Algorithms with no 'str list' property
-    TS_ASSERT_THROWS(DataProcessorPostprocessingAlgorithm("StepScan"),
+    TS_ASSERT_THROWS(PostprocessingAlgorithm("StepScan"),
                      std::invalid_argument);
     // Algorithms with more than one 'str list' property
     TS_ASSERT_THROWS(
-        DataProcessorPostprocessingAlgorithm("PDDetermineCharacterizations"),
+        PostprocessingAlgorithm("PDDetermineCharacterizations"),
         std::invalid_argument);
     // Algorithms with invalid output ws properties
-    TS_ASSERT_THROWS(DataProcessorPostprocessingAlgorithm("GroupWorkspaces"),
+    TS_ASSERT_THROWS(PostprocessingAlgorithm("GroupWorkspaces"),
                      std::invalid_argument);
   }
 
   void test_valid_algorithms() {
     // MergeRuns
-    TS_ASSERT_THROWS_NOTHING(DataProcessorPostprocessingAlgorithm("MergeRuns"));
+    TS_ASSERT_THROWS_NOTHING(PostprocessingAlgorithm("MergeRuns"));
   }
 
   void test_Stitch1DMany() {
 
-    auto stitch = DataProcessorPostprocessingAlgorithm(
+    auto stitch = PostprocessingAlgorithm(
         "Stitch1DMany", "IvsQ_",
         std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
     TS_ASSERT_EQUALS(stitch.name(), "Stitch1DMany");
