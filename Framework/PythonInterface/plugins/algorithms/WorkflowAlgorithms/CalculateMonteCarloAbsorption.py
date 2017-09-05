@@ -1,9 +1,14 @@
 from __future__ import (absolute_import, division, print_function)
-import mantid.simpleapi as s_api
+from mantid.simpleapi import (SimpleShapeMonteCarloAbsorption, Transpose, UpdateInstrumentFromFile,
+                              ConvertToHistogram, LoadInstrument)
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, Progress, mtd)
+                        WorkspaceGroupProperty, Progress, mtd, SpectraAxis)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
-                           FloatBoundedValidator, Direction, logger, LogicOperator)
+                           FloatBoundedValidator, Direction, logger, LogicOperator, config)
+
+import math
+import numpy as np
+import os.path
 
 
 class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
@@ -53,8 +58,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         return "Calculates indirect absorption corrections for a given sample shape."
 
     def PyInit(self):
-        # General properties
-
+        # Beam Options
         self.declareProperty(name='BeamHeight', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Height of the beam (cm)')
@@ -234,10 +238,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         # set up progress reporting
         prog = Progress(self, 0, 1, 10)
 
-        elastic = self._emode == 'Elastic'
-
         prog.report('Converting to wavelength')
-        sample_wave_ws = self._convert_to_wavelength(self._sample_ws_name, '__sample_wave')
+        sample_wave_ws = self._convert_to_wavelength(self._sample_ws)
 
         prog.report('Calculating sample absorption factors')
 
@@ -262,10 +264,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             sample_kwargs['InnerRadius'] = self._sample_inner_radius
             sample_kwargs['OuterRadius'] = self._sample_outer_radius
 
-        s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=sample_wave_ws,
-                                              Elastic=elastic,
-                                              OutputWorkspace=self._ass_ws,
-                                              **sample_kwargs)
+        SimpleShapeMonteCarloAbsorption(InputWorkspace=sample_wave_ws,
+                                        OutputWorkspace=self._ass_ws,
+                                        **sample_kwargs)
 
         sample_log_names = []
         sample_log_values = []
@@ -298,19 +299,17 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 container_kwargs['Thickness'] = self._container_front_thickness
                 container_kwargs['Center'] = -offset_front
 
-                s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
-                                                      Elastic=elastic,
-                                                      OutputWorkspace='_acc_1',
-                                                      **container_kwargs)
+                SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
+                                                OutputWorkspace='_acc_1',
+                                                **container_kwargs)
 
                 offset_back = 0.5 * (self._container_back_thickness + self._sample_thickness)
                 container_kwargs['Thickness'] = self._container_back_thickness
                 container_kwargs['Center'] = offset_back
 
-                s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_2,
-                                                      Elastic=elastic,
-                                                      OutputWorkspace='_acc_2',
-                                                      **container_kwargs)
+                SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_2,
+                                                OutputWorkspace='_acc_2',
+                                                **container_kwargs)
 
                 self._acc_ws = self._multiply('_acc_1', '_acc_2', self._acc_ws)
                 mtd['_acc_1'].delete()
@@ -321,24 +320,21 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 container_kwargs['OuterRadius'] = self._container_outer_radius
                 container_kwargs['Shape'] = 'Annulus'
 
-                s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
-                                                      Elastic=elastic,
-                                                      OutputWorkspace=self._acc_ws,
-                                                      **container_kwargs)
+                SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
+                                                OutputWorkspace=self._acc_ws,
+                                                **container_kwargs)
 
             if self._shape == 'Annulus':
                 container_kwargs['InnerRadius'] = self._container_inner_radius
                 container_kwargs['OuterRadius'] = self._sample_inner_radius
 
-                s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
-                                                      Elastic=elastic,
-                                                      OutputWorkspace='_acc_1',
-                                                      **container_kwargs)
+                SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_1,
+                                                OutputWorkspace='_acc_1',
+                                                **container_kwargs)
 
-                s_api.SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_2,
-                                                      Elastic=elastic,
-                                                      OutputWorkspace='_acc_2',
-                                                      **container_kwargs)
+                SimpleShapeMonteCarloAbsorption(InputWorkspace=container_wave_2,
+                                                OutputWorkspace='_acc_2',
+                                                **container_kwargs)
 
                 self._acc_ws = self._multiply('_acc_1', '_acc_2', self._acc_ws)
                 mtd['_acc_1'].delete()
@@ -377,8 +373,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                                 'EventsPerPoint': self.getProperty('EventsPerPoint').value,
                                 'Interpolation': self.getProperty('Interpolation').value}
 
-        self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
-        self._sample_ws = mtd[self._sample_ws_name]
+        self._sample_ws = self.getProperty("SampleWorkspace").value
         self._container_ws_name = self.getPropertyValue('ContainerWorkspace')
         self._shape = self.getProperty('Shape').value
         self._height = self.getProperty('Height').value
@@ -474,18 +469,32 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
     # ------------------------------- Converting to/from wavelength -------------------------------
 
-    def _convert_to_wavelength(self, input_ws, output_ws):
+    def _convert_to_wavelength(self, workspace):
 
         if self._sample_unit == 'Wavelength':
-            return self._clone_ws(input_ws, output_ws)
+            return self._clone_ws(workspace)
 
         else:
             convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
-            convert_unit_alg.setProperty("InputWorkspace", input_ws)
-            convert_unit_alg.setProperty("OutputWorkspace", output_ws)
+            convert_unit_alg.setProperty("InputWorkspace", workspace)
             convert_unit_alg.setProperty("Target", 'Wavelength')
             convert_unit_alg.setProperty("EMode", self._emode)
+
             if self._emode == 'Indirect':
+                x_unit = workspace.getAxis(0).getUnit().unitID()
+                y_unit = workspace.getAxis(1).getUnit().unitID()
+
+                # Check whether to create wavelength workspace for Indirect Elastic
+                if x_unit == 'MomentumTransfer' or y_unit == 'MomentumTransfer':
+
+                    if x_unit == 'MomentumTransfer':
+                        logger.information('X-Axis of the input workspace is Q')
+                        transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
+                        transpose_alg.setProperty("InputWorkspace", workspace)
+                        transpose_alg.execute()
+                        workspace = transpose_alg.getProperty("OutputWorkspace").value
+                    return self._create_waves_indirect_inelastic(workspace)
+
                 convert_unit_alg.setProperty("EFixed", self._efixed)
             convert_unit_alg.execute()
             return convert_unit_alg.getProperty("OutputWorkspace").value
@@ -506,6 +515,104 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         else:
             return input_ws
+
+    # ------------------------------- Converting IndirectElastic to wavelength ------------------------------
+
+    def _create_waves_indirect_inelastic(self, workspace):
+        """
+        Creates a wavelength workspace, from the workspace with the specified input workspace
+        name, using an Elastic instrument definition file. E-Mode must be Indirect and the y-axis
+        of the input workspace must be in units of Q.
+
+        :param workspace:   The input workspace.
+        :return:            The output wavelength workspace.
+        """
+        q_values = workspace.getAxis(1).extractValues()
+
+        # ---------- Load Elastic Instrument Definition File ----------
+
+        idf_name = workspace.getInstrument().getName() + '_Elastic_Definition.xml'
+        idf_path = os.path.join(config.getInstrumentDirectory(), idf_name)
+        logger.information('IDF = %s' % idf_path)
+
+        load_alg = self.createChildAlgorithm("LoadInstrument", enableLogging=False)
+        load_alg.setProperty("Workspace", workspace)
+        load_alg.setProperty("Filename", idf_path)
+        load_alg.setProperty("RewriteSpectraMap", True)
+        load_alg.execute()
+
+        # Replace y-axis with spectra axis
+        workspace.replaceAxis(1, SpectraAxis.create(workspace))
+        e_fixed = float(self._efixed)
+        logger.information('Efixed = %f' % e_fixed)
+
+        # ---------- Set Instrument Parameters ----------
+
+        sip_alg = self.createChildAlgorithm("SetInstrumentParameter", enableLogging=False)
+        sip_alg.setProperty("Workspace", workspace)
+        sip_alg.setProperty("ParameterName", 'EFixed')
+        sip_alg.setProperty("ParameterType", 'Number')
+        sip_alg.setProperty("Value", str(e_fixed))
+        sip_alg.execute()
+
+        # ---------- Calculate Wavelength ----------
+
+        self._wave = math.sqrt(81.787 / e_fixed)
+        logger.information('Wavelength = %f' % self._wave)
+        workspace.getAxis(0).setUnit('Wavelength')
+
+        # ---------- Format Input Workspace ---------
+
+        convert_alg = self.createChildAlgorithm("ConvertToHistogram", enableLogging=False)
+        convert_alg.setProperty("InputWorkspace", workspace)
+        convert_alg.executeAsChildAlg()
+
+        workspace = self._crop_ws(convert_alg.getProperty("OutputWorkspace").value)
+
+        # --------- Set wavelengths as X-values in Output Workspace ----------
+
+        waves = (0.01 * np.arange(-1, workspace.blocksize() - 1)) + self._wave
+        logger.information('Waves : ' + str(waves))
+        nhist = workspace.getNumberHistograms()
+        for idx in range(nhist):
+            workspace.setX(idx, waves)
+        self._change_angles(workspace, q_values)
+
+        return workspace
+
+    def _change_angles(self, workspace, q_values):
+        work_dir = config['defaultsave.directory']
+        k0 = 4.0 * math.pi / self._wave
+        theta = 2.0 * np.degrees(np.arcsin(q_values / k0))  # convert to angle
+
+        filename = 'Elastic_angles.txt'
+        path = os.path.join(work_dir, filename)
+        logger.information('Creating angles file : ' + path)
+        handle = open(path, 'w')
+        head = 'spectrum,theta'
+        handle.write(head + " \n")
+        for n in range(0, len(theta)):
+            handle.write(str(n + 1) + '   ' + str(theta[n]) + "\n")
+        handle.close()
+
+        update_alg = self.createChildAlgorithm("UpdateInstrumentFromFile", enableLogging=False)
+        update_alg.setProperty("Workspace", workspace)
+        update_alg.setProperty("Filename", path)
+        update_alg.setProperty("MoveMonitors", False)
+        update_alg.setProperty("IgnorePhi")
+        update_alg.setProperty("AsciiHeader", head)
+        update_alg.setProperty("SkipFirstNLines", 1)
+
+    def _crop_ws(self, workspace):
+        x = workspace.dataX(0)
+        xmin = x[0]
+        xmax = x[1]
+        crop_alg = self.createChildAlgorithm("CropWorkspace", enableLogging=False)
+        crop_alg.setProperty("InputWorkspace", workspace)
+        crop_alg.setProperty("XMin", xmin)
+        crop_alg.setProperty("XMax", xmax)
+        crop_alg.execute()
+        return crop_alg.getProperty("OutputWorkspace").value
 
     # ------------------------------- Child algorithms -------------------------------
 

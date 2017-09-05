@@ -1,15 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
-import math
-import numpy as np
-import os.path
-
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress, SpectraAxis,
-                        Transpose, mtd)
-from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion, logger, config,
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress)
+from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion, logger,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
-from mantid.simpleapi import (SetBeam, SetSample, MonteCarloAbsorption, LoadInstrument, UpdateInstrumentFromFile,
-                              ConvertToHistogram)
+from mantid.simpleapi import (SetBeam, SetSample, MonteCarloAbsorption)
 
 
 class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
@@ -54,10 +48,6 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='Input workspace')
-
-        self.declareProperty(name="Elastic", defaultValue=False,
-                             doc="Select this option to perform elastic absorption corrections;"
-                                 " uses elastic instrument definition file.")
 
         self.declareProperty(name='MaterialAlreadyDefined', defaultValue=False,
                              doc='Select this option if the material has already been defined')
@@ -171,9 +161,6 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         # setup progress reporting
         prog = Progress(self, 0.0, 1.0, 3)
 
-        if self._elastic:
-            self._check_qaxis()
-
         prog.report('Setting up sample environment')
 
         # set the beam shape
@@ -261,7 +248,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # basic options
         self._input_ws_name = self.getPropertyValue('InputWorkspace')
-        self._elastic = self.getProperty("Elastic").value
+        self._indirect_inelastic = self.getProperty("IndirectElastic").value
         self._material_defined = self.getProperty('MaterialAlreadyDefined').value
         self._chemical_formula = self.getPropertyValue('ChemicalFormula')
         self._density_type = self.getPropertyValue('DensityType')
@@ -327,131 +314,6 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
                 issues['OuterRadius'] = 'Must be greater than InnerRadius'
 
         return issues
-
-    def _check_qaxis(self):
-        self._emode = mtd[self._input_ws_name].getEMode()
-        logger.information('Emode is %s' % self._emode)
-
-        # elastic indirect
-        if self._emode == 'Indirect':
-            self._efixed = self._get_efixed()
-            logger.information('Efixed is %f' % self._efixed)
-            x_unit = mtd[self._input_ws_name].getAxis(0).getUnit().unitID()
-            y_unit = mtd[self._input_ws_name].getAxis(1).getUnit().unitID()
-
-            if x_unit == 'MomentumTransfer':
-                self._q_axis = 'X'
-                logger.information('Input X-unit is Q')
-                axis = mtd[self._input_ws_name].getAxis(0)
-            elif y_unit == 'MomentumTransfer':
-                self._q_axis = 'Y'
-                logger.information('Input Y-unit is Q')
-                axis = mtd[self._input_ws_name].getAxis(1)
-            else:
-                logger.warning('Q-Values not found in input workspace.')
-                return
-
-            self._q_values = axis.extractValues()
-
-            if self._q_axis == 'X':
-                Transpose(InputWorkspace=self._input_ws_name,
-                          OutputWorkspace=self._input_ws_name)
-            self._create_waves(self._input_ws_name)
-
-    def _get_efixed(self):
-        inst = mtd[self._input_ws_name].getInstrument()
-
-        if inst.hasParameter('Efixed'):
-            return inst.getNumberParameter('EFixed')[0]
-
-        if inst.hasParameter('analyser'):
-            analyser_name = inst.getStringParameter('analyser')[0]
-            analyser_comp = inst.getComponentByName(analyser_name)
-
-            if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
-                return analyser_comp.getNumberParameter('EFixed')[0]
-
-        raise ValueError('No Efixed parameter found')
-
-    def _create_waves(self, input_ws):
-        # ---------- Load Elastic Instrument Definition File ----------
-
-        ws = mtd[input_ws]
-        idf_name = ws.getInstrument().getName() + '_Elastic_Definition.xml'
-        idf_path = os.path.join(config.getInstrumentDirectory(), idf_name)
-        logger.information('IDF = %s' % idf_path)
-        LoadInstrument(Workspace=input_ws,
-                       Filename=idf_path,
-                       RewriteSpectraMap=True)
-
-        # Replace y-axis with spectra axis
-        ws.replaceAxis(1, SpectraAxis.create(ws))
-        e_fixed = float(self._efixed)
-        logger.information('Efixed = %f' % e_fixed)
-
-        # ---------- Set Instrument Parameters ----------
-
-        sip_alg = self.createChildAlgorithm("SetInstrumentParameter", enableLogging=False)
-        sip_alg.setProperty("Workspace", input_ws)
-        sip_alg.setProperty("ParameterName", 'EFixed')
-        sip_alg.setProperty("ParameterType", 'Number')
-        sip_alg.setProperty("Value", str(e_fixed))
-        sip_alg.execute()
-
-        # ---------- Calculate Wavelength ----------
-
-        self._wave = math.sqrt(81.787 / e_fixed)
-        logger.information('Wavelength = %f' % self._wave)
-        ws.getAxis(0).setUnit('Wavelength')
-
-        # ---------- Format Input Workspace ---------
-
-        ConvertToHistogram(InputWorkspace=input_ws,
-                           OutputWorkspace=input_ws)
-        self._crop_ws(input_ws, input_ws)
-
-        # --------- Set wavelengths as X-values in Input Workspace ----------
-
-        ws = mtd[input_ws]
-        waves = (0.01 * np.arange(-1, ws.blocksize()-1)) + self._wave
-        logger.information('waves : ' + str(waves))
-        nhist = ws.getNumberHistograms()
-        for idx in range(nhist):
-            ws.setX(idx, waves)
-        self._change_angles(input_ws)
-
-    def _change_angles(self, input_ws):
-        work_dir = config['defaultsave.directory']
-        k0 = 4.0 * math.pi / self._wave
-        theta = 2.0 * np.degrees(np.arcsin(self._q_values / k0))  # convert to angle
-
-        filename = 'Elastic_angles.txt'
-        path = os.path.join(work_dir, filename)
-        logger.information('Creating angles file : ' + path)
-        handle = open(path, 'w')
-        head = 'spectrum,theta'
-        handle.write(head + " \n")
-        for n in range(0, len(theta)):
-            handle.write(str(n + 1) + '   ' + str(theta[n]) + "\n")
-        handle.close()
-        UpdateInstrumentFromFile(Workspace=input_ws,
-                                 Filename=path,
-                                 MoveMonitors=False,
-                                 IgnorePhi=True,
-                                 AsciiHeader=head,
-                                 SkipFirstNLines=1)
-
-    def _crop_ws(self, input_ws, output_ws):
-        x = mtd[input_ws].dataX(0)
-        xmin = x[0]
-        xmax = x[1]
-        crop_alg = self.createChildAlgorithm("CropWorkspace", enableLogging=False)
-        crop_alg.setProperty("InputWorkspace", input_ws)
-        crop_alg.setProperty("OutputWorkspace", output_ws)
-        crop_alg.setProperty("XMin", xmin)
-        crop_alg.setProperty("XMax", xmax)
-        crop_alg.execute()
-        mtd.addOrReplace(output_ws, crop_alg.getProperty("OutputWorkspace").value)
 
 
 # Register algorithm with Mantid
