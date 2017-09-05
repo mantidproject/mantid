@@ -99,7 +99,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
                              "OutputWorkspace"})}};
 
   // The post-processing algorithm
-  DataProcessorPostprocessingAlgorithm postprocessor(
+  PostprocessingAlgorithm postprocessor(
       "Stitch1DMany", "IvsQ_",
       std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
 

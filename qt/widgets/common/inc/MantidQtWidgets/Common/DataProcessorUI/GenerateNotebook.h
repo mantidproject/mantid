@@ -29,7 +29,7 @@
     */
 
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
@@ -58,7 +58,7 @@ QString DLLExport titleString(const QString &wsName);
 boost::tuple<QString, QString> DLLExport postprocessGroupString(
     const GroupData &rowMap, const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
-    const DataProcessorPostprocessingAlgorithm &postprocessor,
+    const PostprocessingAlgorithm &postprocessor,
     const QString &postprocessingOptions);
 
 QString DLLExport
@@ -104,7 +104,7 @@ public:
       const std::map<QString, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
-      const DataProcessorPostprocessingAlgorithm &postprocessor,
+      const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> preprocessingInstructionsMap,
       const QString processingInstructions,
       const QString postprocessingInstructions);
@@ -126,7 +126,7 @@ private:
   // The processing (reduction) algorithm
   DataProcessorProcessingAlgorithm m_processor;
   // The post-processing algorithm
-  DataProcessorPostprocessingAlgorithm m_postprocessor;
+  PostprocessingAlgorithm m_postprocessor;
   // A map containing pre-processing instructions displayed in the view via
   // hinting line edits
   std::map<QString, QString> m_preprocessingOptionsMap;

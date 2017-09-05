@@ -299,7 +299,7 @@ algorithm is in this case :ref:`algm-Stitch1DMany`, and can be defined as:
 
 .. code-block:: python
 
-    post_alg = MantidQt.MantidWidgets.DataProcessorPostprocessingAlgorithm('Stitch1DMany', 'IvsQ_')
+    post_alg = MantidQt.MantidWidgets.PostprocessingAlgorithm('Stitch1DMany', 'IvsQ_')
 
 As with pre-processing and processing algorithms, a third parameter indicating the list of properties
 to blacklist can be used. As with the pre-process map, you must add manually a hinting line edit
@@ -307,7 +307,7 @@ and link the post-processing black list to it, as this functionality is not avai
 	
 .. code-block:: python
 
-    post_alg = MantidQt.MantidWidgets.DataProcessorPostprocessingAlgorithm('Stitch1DMany', 'IvsQ_', 'InputWorkspaces, OutputWorkspaces')
+    post_alg = MantidQt.MantidWidgets.PostprocessingAlgorithm('Stitch1DMany', 'IvsQ_', 'InputWorkspaces, OutputWorkspaces')
 
 .. note::
 
@@ -391,7 +391,7 @@ Then in the implementation, the following should be enough:
         : GenericDataProcessorPresenter(
               whitelist,
               std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
-              processor, DataProcessorPostprocessingAlgorithm(),
+              processor, PostprocessingAlgorithm(),
               std::map<std::string, std::string>(), loader) {}
 
 In addition, if you are using the widget in a Python interface, you will have to expose this
@@ -607,7 +607,7 @@ If a post-processing algorithm is defined:
 
 .. code-block:: python
 
-    post_alg = MantidQt.MantidWidgets.DataProcessorPostprocessingAlgorithm('Stitch1DMany', 'stitched_', 'InputWorkspaces, OutputWorkspaces')
+    post_alg = MantidQt.MantidWidgets.PostprocessingAlgorithm('Stitch1DMany', 'stitched_', 'InputWorkspaces, OutputWorkspaces')
 
 the name of the post-processed workspace will start with prefix specified in the post-processing algorithm, stitched in this case,
 plus the names of the reduced workspaces without their prefixes joined with "_". That is, in this example we would get a workspace

@@ -18,7 +18,7 @@ class QtCommandAdapter;
 class DataProcessorMainPresenter;
 class DataProcessorPreprocessMap;
 class DataProcessorProcessingAlgorithm;
-class DataProcessorPostprocessingAlgorithm;
+class PostprocessingAlgorithm;
 class DataProcessorWhiteList;
 
 /** QDataProcessorWidget : Provides an interface for processing table
@@ -63,12 +63,12 @@ public:
                        QWidget *parent);
   QDataProcessorWidget(const DataProcessorWhiteList &,
                        const DataProcessorProcessingAlgorithm &,
-                       const DataProcessorPostprocessingAlgorithm &,
+                       const PostprocessingAlgorithm &,
                        QWidget *parent);
   QDataProcessorWidget(const DataProcessorWhiteList &,
                        const DataProcessorPreprocessMap &,
                        const DataProcessorProcessingAlgorithm &,
-                       const DataProcessorPostprocessingAlgorithm &,
+                       const PostprocessingAlgorithm &,
                        QWidget *parent);
   ~QDataProcessorWidget() override;
 
