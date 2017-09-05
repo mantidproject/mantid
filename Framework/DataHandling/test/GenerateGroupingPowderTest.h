@@ -9,7 +9,7 @@
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 
 using namespace Mantid;

@@ -50,11 +50,10 @@ set ( SRC_FILES
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
-	src/LoadILLDiffraction.cpp
-	src/LoadILLIndirect.cpp
+        src/LoadILLDiffraction.cpp
 	src/LoadILLIndirect2.cpp
 	src/LoadILLReflectometry.cpp
-  src/LoadILLSANS.cpp
+        src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadInstrument.cpp
@@ -223,11 +222,10 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
-	inc/MantidDataHandling/LoadILLDiffraction.h
-	inc/MantidDataHandling/LoadILLIndirect.h
+        inc/MantidDataHandling/LoadILLDiffraction.h
 	inc/MantidDataHandling/LoadILLIndirect2.h
-	inc/MantidDataHandling/LoadILLReflectometry.h
-  inc/MantidDataHandling/LoadILLSANS.h
+        inc/MantidDataHandling/LoadILLReflectometry.h
+        inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadILLTOF2.h
 	inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadInstrument.h
@@ -392,11 +390,10 @@ set ( TEST_FILES
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLDiffractionTest.h
-	LoadILLIndirect2Test.h
-	LoadILLIndirectTest.h
+        LoadILLIndirect2Test.h
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
-  LoadILLTOF2Test.h
+        LoadILLTOF2Test.h
 	LoadISISNexusTest.h
 	LoadInstrumentFromNexusTest.h
 	LoadInstrumentFromRawTest.h

@@ -23,6 +23,16 @@ of the first input workspace. Workspace data members other than the data
 (but if they're not identical anyway, then you probably shouldn't be
 using this algorithm!). Both input workspaces will be deleted.
 
+ConjoinWorkspaces operation
+---------------------------
+
++------------------------------------------+---------------------------------------------+
+|Example case with input workspaces having | .. image:: ../images/ConjoinWorkspaces.png  |
+|2 and 3 spectra respectively.             |    :height: 150                             |
+|                                          |    :width: 400                              |
+|                                          |    :alt: ConjoinWorkspaces operation        |
++------------------------------------------+---------------------------------------------+
+
 Conflict Spectrum Numbers
 #########################
 

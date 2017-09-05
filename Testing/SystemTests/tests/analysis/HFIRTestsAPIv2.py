@@ -7,6 +7,7 @@
     The following tests were converted from the unittest framework
     that is part of python to the stresstesting framework used in Mantid.
 """
+from __future__ import (absolute_import, division, print_function)
 import types
 
 import traceback
@@ -18,6 +19,7 @@ from mantid.api import *
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
 from reduction_workflow.command_interface import AppendDataFile, Reduce, Reduce1D
+from functools import reduce
 
 
 # Set directory containing the test data, relative to the Mantid release
@@ -58,7 +60,7 @@ def _read_IGOR(filepath):
                 diq = float(toks[2])
                 data.append([q, iq, diq])
             except:
-                print "_read_IGOR:", sys.exc_value
+                print("_read_IGOR:", sys.exc_info()[1])
                 raise
     return data
 
@@ -75,14 +77,14 @@ def _check_result(ws, test_file, tolerance=1e-6):
     x = ws.dataX(0)[:len(ws.dataX(0))]
     y = ws.dataY(0)
     e = ws.dataE(0)
-    data_mantid = zip(x, y, e)
+    data_mantid = list(zip(x, y, e))
 
     # Read the test data to compare with
     data_igor = _read_IGOR(test_file)
 
     # Check length
     if not len(data_mantid) == len(data_igor):
-        print "Incompatible data lengths"
+        print("Incompatible data lengths")
         return False
 
     # Utility methods for manipulating the lists
@@ -99,25 +101,25 @@ def _check_result(ws, test_file, tolerance=1e-6):
         return x + y
 
     # Check that I(q) is the same for both data sets
-    deltas = map(_diff_iq, data_mantid, data_igor)
+    deltas = list(map(_diff_iq, data_mantid, data_igor))
     delta = reduce(_add, deltas) / len(deltas)
     if math.fabs(delta) > tolerance or math.isnan(delta):
         passed = False
-        print "Sum of I(q) deltas is outside tolerance: %g > %g" % (math.fabs(delta), tolerance)
+        print("Sum of I(q) deltas is outside tolerance: %g > %g" % (math.fabs(delta), tolerance))
 
     # Then compare the errors
-    deltas = map(_diff_err, data_mantid, data_igor)
+    deltas = list(map(_diff_err, data_mantid, data_igor))
     delta_err = reduce(_add, deltas) / len(deltas)
     if math.fabs(delta_err) > tolerance or math.isnan(delta):
         passed = False
-        print "Sum of dI(q) deltas is outside tolerance: %g > %g" % (math.fabs(delta_err), tolerance)
+        print("Sum of dI(q) deltas is outside tolerance: %g > %g" % (math.fabs(delta_err), tolerance))
 
     # Compute chi2 of our result relative to IGOR
-    deltas = map(_diff_chi2, data_mantid, data_igor)
+    deltas = list(map(_diff_chi2, data_mantid, data_igor))
     chi2 = reduce(_add, deltas) / len(data_igor)
     if chi2 > 10.0 * tolerance or math.isnan(delta):
         passed = False
-        print "Chi2 is outside tolerance: %g > %g" % (chi2, 10.0 * tolerance)
+        print("Chi2 is outside tolerance: %g > %g" % (chi2, 10.0 * tolerance))
 
     return passed
 
@@ -184,10 +186,10 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                 ReductionSingleton.clean()
                 # Execute the test
                 try:
-                    print self._test_method.__name__
+                    print(self._test_method.__name__)
                     return self._test_method()
                 except:
-                    print traceback.format_exc()
+                    print(traceback.format_exc())
                     raise
                 return False
 
@@ -360,7 +362,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                  0.192082, 0.193783, 0.193787, 0.190557, 0.190471, 0.186827, 0.190088, 0.188204, 0.187547, 0.182206,
                  0.181384, 0.180358, 0.182663, 0.178844, 0.176556]
 
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.00001)
 
@@ -415,10 +417,10 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
             0.05658625,0.05933774,0.06222303,0.06524861,0.06842131,0.07174829,
             0.07523703,0.07889542,0.08273169,0.08675451,0.09097293,0.09539647,
             0.1000351,0.10489929,0.11]
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.00001)
-        print data
+        print(data)
 
     def test_no_solid_angle(self):
         GPSANS()
@@ -471,7 +473,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                  0.190122, 0.189119, 0.18864, 0.185473,
                  0.184958, 0.183981, 0.182581]
 
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.00001)
 
@@ -504,7 +506,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                  0.195653, 0.19322, 0.193537, 0.191503, 0.190253,
                  0.189253, 0.188771, 0.1856, 0.185099, 0.184111, 0.182717]
 
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.00001)
 
@@ -540,7 +542,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                  0.369733, 0.370353, 0.366464, 0.364109, 0.362184, 0.361299,
                  0.355246, 0.354339, 0.352412, 0.349748]
 
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.001)
 
@@ -693,12 +695,12 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                  0.3479, 0.352355, 0.344987, 0.340605]
 
         # Check that I(q) is the same for both data sets
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.00001)
 
     def test_SampleGeometry_functions(self):
-        print "SKIPPING test_SampleGeometry_functions()"
+        print("SKIPPING test_SampleGeometry_functions()")
         return
         # pylint: disable=unreachable
         GPSANS()
@@ -724,7 +726,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
         check = [500091.0, 60.0, 40.8333, 13.6333, 13.4667, 13.6667]
         # Check that I(q) is the same for both data sets
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.1)
 
@@ -948,9 +950,9 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         self.assertAlmostEqual(data[20], -0.047785, delta=0.00001)
 
     def validate(self):
-        print "HFIRTests: %d / %d tests passed" % (self.n_passed, self.n_tests)
+        print("HFIRTests: %d / %d tests passed" % (self.n_passed, self.n_tests))
         for items in self.failed_tests:
-            print items
+            print(items)
         return self.all_passed
 
 
@@ -970,9 +972,9 @@ def assertAlmostEqual(first, second, places=None, _msg=None, delta=None, rel_del
         if abs(first - second) <= delta:
             return True
         elif abs(first - second) / abs(second) < rel_delta:
-            print '\n-----> %s != %s but within %s percent' % (str(first),
+            print('\n-----> %s != %s but within %s percent' % (str(first),
                                                                str(second),
-                                                               str(rel_delta * 100.0))
+                                                               str(rel_delta * 100.0)))
             return True
 
         standardMsg = '%s != %s within %s delta' % (str(first),
@@ -988,5 +990,5 @@ def assertAlmostEqual(first, second, places=None, _msg=None, delta=None, rel_del
         standardMsg = '%s != %s within %r places' % (str(first),
                                                      str(second),
                                                      places)
-    print standardMsg
+    print(standardMsg)
     return False

@@ -1,8 +1,10 @@
 #pylint: disable=too-many-lines,invalid-name,too-many-arguments, too-many-locals, unused-argument
+from __future__ import (absolute_import, division, print_function)
 from numpy import zeros, arctan2, arange, shape, sqrt, fliplr, asfarray, mean, sum, NAN
 from mantid.simpleapi import *
 import math
 import os.path
+from six.moves import range
 
 h = 6.626e-34 #m^2 kg s^-1
 m = 1.675e-27 #kg
@@ -37,7 +39,7 @@ def getSequenceRuns(run_numbers):
 
 def getProtonCharge(st=None):
     """
-        Returns the proton charge of the given workspace in picoCoulomb
+    Returns the proton charge of the given workspace in picoCoulomb
     """
     if st is not None:
         mt_run = st.getRun()
@@ -61,7 +63,7 @@ def getIndex(value, array):
 
 def getSh(mt, top_tag, bottom_tag):
     """
-        returns the height and units of the given slit#
+    returns the height and units of the given slit#
     """
     mt_run = mt.getRun()
     st = mt_run.getProperty(top_tag).value
@@ -73,7 +75,7 @@ def getSh(mt, top_tag, bottom_tag):
 
 def getSheight(mt, index):
     """
-        return the DAS hardware slits height of slits # index
+    return the DAS hardware slits height of slits # index
     """
     mt_run = mt.getRun()
     if index == 2:
@@ -95,7 +97,7 @@ def getSheight(mt, index):
 
 def getS1h(mt=None):
     """
-        returns the height and units of the slit #1
+    returns the height and units of the slit #1
     """
     if mt is not None:
 #        _h, units = getSh(mt, 's1t', 's1b')
@@ -106,7 +108,7 @@ def getS1h(mt=None):
 
 def getS2h(mt=None):
     """
-        returns the height and units of the slit #2
+    returns the height and units of the slit #2
     """
     if mt is not None:
         [isSi, _h] = getSheight(mt, 2)
@@ -116,8 +118,8 @@ def getS2h(mt=None):
 
 def getSwidth(mt, index):
     """
-        returns the width and units of the given index slits
-        defined by the DAS hardware
+    returns the width and units of the given index slits
+    defined by the DAS hardware
     """
     mt_run = mt.getRun()
     if index==2:
@@ -138,7 +140,7 @@ def getSwidth(mt, index):
 
 def getSw(mt, left_tag, right_tag):
     """
-        returns the width and units of the given slits
+    returns the width and units of the given slits
     """
     mt_run = mt.getRun()
     sl = mt_run.getProperty(left_tag).value
@@ -150,7 +152,7 @@ def getSw(mt, left_tag, right_tag):
 
 def getS1w(mt=None):
     """
-        returns the width and units of the slit #1
+    returns the width and units of the slit #1
     """
     if mt is not None:
 #        _w, units = getSw(mt, 's1l', 's1r')
@@ -161,7 +163,7 @@ def getS1w(mt=None):
 
 def getS2w(mt=None):
     """
-        returns the width and units of the slit #2
+    returns the width and units of the slit #2
     """
     if mt is not None:
         [isSi, _w] = getSwidth(mt, 2)
@@ -180,7 +182,7 @@ def getLambdaValue(mt_name):
 
 def getPixelXPixelY(mt1, maxX=304, maxY=256):
     """
-        returns the PixelX_vs_PixelY array of the workspace data specified
+    returns the PixelX_vs_PixelY array of the workspace data specified
     """
     pixelX_vs_pixelY = zeros((maxY, maxX))
     for x in range(maxX):
@@ -193,7 +195,7 @@ def getPixelXPixelY(mt1, maxX=304, maxY=256):
 
 def getPixelXPixelYError(mt1):
     """
-        returns the PixelX_vs_PixelY_error array of the workspace data specified
+    returns the PixelX_vs_PixelY_error array of the workspace data specified
     """
     pixel_error = zeros((256, 304))
     for x in range(304):
@@ -206,7 +208,7 @@ def getPixelXPixelYError(mt1):
 
 def getPixelXTOF(mt1, maxX=304, maxY=256):
     """
-        returns the PixelX_vs_TOF array of the workspace data specified
+    returns the PixelX_vs_TOF array of the workspace data specified
     """
     _init = mt1.readY(0)[:]
     pixelX_vs_tof = zeros((maxY, len(_init)))
@@ -220,8 +222,8 @@ def getPixelXTOF(mt1, maxX=304, maxY=256):
 
 def findQaxisMinMax(q_axis):
     """
-        Find the position of the common Qmin and Qmax in
-        each q array
+    Find the position of the common Qmin and Qmax in
+    each q array
     """
 
     nbr_row = shape(q_axis)[0]
@@ -258,13 +260,10 @@ def cleanup_data(InputWorkspace=None,
     _tof_axis = mti.readX(0)[:]
     nbr_tof = shape(_tof_axis)[0]-1
 
-    tof_range = range(nbr_tof-1)
-    x_range = range(maxY)
-
     _new_y = zeros((maxY, nbr_tof))
     _new_e = zeros((maxY, nbr_tof))
-    for px in x_range:
-        for tof in tof_range:
+    for px in range(maxY):
+        for tof in range(nbr_tof-1):
             _y = mti.readY(px)[tof]
             if _y != 0:
                 _e = mti.readE(px)[tof]
@@ -293,8 +292,8 @@ def createIntegratedWorkspace(mt1,
                               maxX=304, maxY=256,
                               bCleaning=False):
     """
-        This creates the integrated workspace over the second pixel range (304 here) and
-        returns the new workspace handle
+    This creates the integrated workspace over the second pixel range (304 here) and
+    returns the new workspace handle
     """
 
     _tof_axis = mt1.readX(0)[:]
@@ -348,8 +347,8 @@ def convertWorkspaceToQ(ws_data,
                         geo_correction=False,
                         q_binning=None):
     """
-        This creates the integrated workspace over the second pixel range (304 here) and
-        returns the new workspace handle
+    This creates the integrated workspace over the second pixel range (304 here) and
+    returns the new workspace handle
     """
 
     mt1 = ws_data
@@ -431,7 +430,7 @@ def convertWorkspaceToQ(ws_data,
             _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis * 1e-6)
         else:
             _q_axis = _tof_axis
-            print 'should not reach this condition !'
+            print('should not reach this condition !')
 
         y_size = toYpixel - fromYpixel + 1
         y_range = arange(y_size) + fromYpixel
@@ -507,8 +506,7 @@ def create_grouping(workspace=None, xmin=0, xmax=None, filename=".refl_grouping.
 
 def angleUnitConversion(value, from_units='degree', to_units='rad'):
     """
-        This function converts the angle units
-
+    This function converts the angle units
     """
 
     if from_units == to_units:
@@ -537,7 +535,6 @@ def convertToThetaVsLambda(_tof_axis,
     """
     This function converts the pixel/tof array
     to theta/lambda
-
     """
     # h = 6.626e-34 #m^2 kg s^-1
     # m = 1.675e-27 #kg
@@ -585,9 +582,7 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1.0, tof=None, yrange=None,
     sz_tof = len(tof)
     q_array = zeros((len(yrange), sz_tof - 1))
 
-    yrange = range(len(yrange))
-    for y in yrange:
-        _px = yrange[y]
+    for _px in range(len(yrange)):
         dangle = ref_beamdiv_correct(cpix, mt, dSD, _px)
 
         if dangle is not None:
@@ -600,7 +595,7 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1.0, tof=None, yrange=None,
             tof2 = tof[t+1]
             tofm = (tof1+tof2)/2.
             _Q = _const * math.sin(_theta) / (tofm*1e-6)
-            q_array[y, t] = _Q * 1e-10
+            q_array[_px, t] = _Q * 1e-10
 
     return q_array
 
@@ -800,122 +795,6 @@ def isWithinPrecisionRange(value_file, value_run, precision):
     else:
         return False
 
-#def applySF(InputWorkspace,
-            #incidentMedium,
-            #sfFile,
-            #valuePrecision,
-            #slitsWidthFlag):
-    #"""
-    #Function that apply scaling factor to data using sfCalculator.txt
-    #file created by the sfCalculator procedure
-    #"""
-
-    ##check if config file is there
-    #if os.path.isfile(sfFile):
-
-        ##parse file and put info into array
-        #f = open(sfFile, 'r')
-        #sfFactorTable = []
-        #for line in f.read().split('\n'):
-            #if len(line) > 0 and line[0] != '#':
-                #sfFactorTable.append(line.split(' '))
-        #f.close()
-
-        #sz_table = shape(sfFactorTable)
-        #nbr_row = sz_table[0]
-
-        #_incidentMedium = incidentMedium.strip()
-
-        #_lr = getLambdaValue(mtd[InputWorkspace])
-        #_lr_value = _lr[0]
-        #_lr_value = float("{0:.2f}".format(_lr_value))
-
-        ##retrieve s1h and s2h values
-        #s1h = getS1h(mtd[InputWorkspace])
-        #s2h = getS2h(mtd[InputWorkspace])
-
-        #s1h_value = abs(s1h)
-        #s2h_value = abs(s2h)
-
-        ##retrieve s1w and s2w values
-        #s1w = getS1w(mtd[InputWorkspace])
-        #s2w = getS2w(mtd[InputWorkspace])
-
-        #s1w_value = abs(s1w)
-        #s2w_value = abs(s2w)
-
-##        print sfFactorTable
-
-        #print '--> Data Lambda Requested: {0:2f}'.format(_lr_value)
-        #print '--> Data S1H: {0:2f}'.format(s1h_value)
-        #print '--> Data S2H: {0:2f}'.format(s2h_value)
-        #print '--> Data S1W: {0:2f}'.format(s1w_value)
-        #print '--> Data S2W: {0:2f}'.format(s2w_value)
-
-        #print 'mERDDEEEEDEDEED'
-        #for i in range(nbr_row):
-
-            #_file_incidentMedium = getFieldValue(sfFactorTable,i,0)
-            #if _file_incidentMedium.strip() == _incidentMedium.strip():
-                #print '--- incident medium match ---'
-                #_file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
-                #if (isWithinPrecisionRange(_file_lambdaRequested,
-                                           #_lr_value,
-                                           #valuePrecision)):
-                    #print '--- lambda requested match ---'
-                    #_file_s1h = getFieldValue(sfFactorTable,i,2)
-                    #if(isWithinPrecisionRange(_file_s1h,
-                                              #s1h_value,
-                                              #valuePrecision)):
-                        #print '--- S1H match ---'
-                        #_file_s2h = getFieldValue(sfFactorTable,i,3)
-                        #if(isWithinPrecisionRange(_file_s2h,
-                                                  #s2h_value,
-                                                  #valuePrecision)):
-                            #print '--- S2H match ---'
-                            #if slitsWidthFlag:
-                                #print '--- (with Width flag) ----'
-                                #_file_s1w = getFieldValue(sfFactorTable,i,4)
-                                #if(isWithinPrecisionRange(_file_s1w,
-                                                          #s1w_value,
-                                                          #valuePrecision)):
-                                    #print '--- S1W match ---'
-                                    #_file_s2w = getFieldValue(sfFactorTable,i,5)
-                                    #if(isWithinPrecisionRange(_file_s2w,
-                                                              #s2w_value,
-                                                              #valuePrecision)):
-                                        #print '--- S2W match ---'
-
-                                        #print '--> Found a perfect match'
-                                        #a = float(getFieldValue(sfFactorTable,i,6))
-                                        #b = float(getFieldValue(sfFactorTable,i,7))
-                                        #a_error = float(getFieldValue(sfFactorTable,i,8))
-                                        #b_error = float(getFieldValue(sfFactorTable,i,9))
-
-                                        #OutputWorkspace = _applySFtoArray(InputWorkspace,
-                                                                          #a, b, a_error, b_error)
-
-                                        #return OutputWorkspace
-
-                            #else:
-
-                                #print '--> Found a perfect match'
-                                #a = float(getFieldValue(sfFactorTable,i,6))
-                                #b = float(getFieldValue(sfFactorTable,i,7))
-                                #a_error = float(getFieldValue(sfFactorTable,i,8))
-                                #b_error = float(getFieldValue(sfFactorTable,i,9))
-
-                                #OutputWorkspace = _applySFtoArray(InputWorkspace,
-                                                                  #a, b, a_error, b_error)
-
-                                #return OutputWorkspace
-
-    #else:
-
-        #print '-> scaling factor file for requested lambda NOT FOUND!'
-
-    #return InputWorkspace
-
 
 def _applySFtoArray(workspace, a, b, a_error, b_error):
     """
@@ -960,14 +839,14 @@ def loadNeXus(runNumbers, type):
     else:
         wks_name = 'ws_event_norm'
 
-    print '-> loading ', type
+    print('-> loading ', type)
     if (type == 'data') and len(runNumbers) > 1:
 
         _list = []
         for _run in runNumbers:
             _list.append(str(_run))
         list_run = ','.join(_list)
-        print '--> working with runs: ' + str(list_run)
+        print('--> working with runs:', str(list_run))
 
         _index = 0
         for _run in runNumbers:
@@ -991,7 +870,7 @@ def loadNeXus(runNumbers, type):
                 DeleteWorkspace(tmp)
     else:
 
-        print '--> Working with run: ' + str(runNumbers)
+        print('--> Working with run: ' + str(runNumbers))
 
         try:
             data_file = FileFinder.findRuns("REF_L%d" %runNumbers)[0]
@@ -1012,7 +891,7 @@ def rebinNeXus(inputWorkspace, params, type):
     params[1]: bin size
     params[2]: max value
     """
-    print '--> rebin ', type
+    print('--> rebin ', type)
     ws_histo_data = Rebin(InputWorkspace=inputWorkspace,
                           Params=params,
                           PreserveEvents=True)
@@ -1024,7 +903,7 @@ def cropTOF(inputWorkspace, min, max, type):
     will crop the nexus (workspace) using min and max value
     used here to crop the TOF range
     """
-    print '--> crop ' , type , ' workspace in TOF'
+    print('--> crop ' , type , ' workspace in TOF')
     ws_histo_data = CropWorkspace(InputWorkspace = inputWorkspace,
                                   XMin = min,
                                   XMax = max)
@@ -1035,7 +914,7 @@ def normalizeNeXus(inputWorkspace, type):
     """
     normalize nexus by proton charge
     """
-    print '--> normalize ', type
+    print('--> normalize ', type)
     ws_histo_data = NormaliseByCurrent(InputWorkspace=inputWorkspace)
     return ws_histo_data
 
@@ -1052,7 +931,7 @@ def integrateOverLowResRange(mt1,
         is 0 !
     """
 
-    print '--> integrated over low res range of ', type
+    print('--> integrated over low res range of ', type)
     _tof_axis = mt1.readX(0)[:].copy()
 #     t_range = arange(nbr_tof-1)
 
@@ -1071,7 +950,7 @@ def integrateOverLowResRange(mt1,
     x_size = toXpixel - fromXpixel + 1
     x_range = arange(x_size) + fromXpixel
 
-    y_range = range(sz_y_axis)
+    y_range = arange(sz_y_axis)
 
     for x in x_range:
         for y in y_range:
@@ -1108,10 +987,10 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
     backMax = backRange[1]-1
 
     if not backFlag:
-        print '---> no ', type, ' background requested!'
+        print('---> no ', type, ' background requested!')
         return [y_axis[peakMin:peakMax+1,:], y_error_axis[peakMin:peakMax+1,:]]
 
-    print '--> background subtraction of ', type
+    print('--> background subtraction of ', type)
 
     # retrieve data
     _tofAxis = tof_axis
@@ -1167,7 +1046,7 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
             final_y_error_axis[x,t] = float(math.sqrt(pow(y_error_axis[peakMin+x,t],2) + pow(background_error,2)))
 
 #         if t == nbrTof-2:
-#             print float(y_axis[peakMin + x,t]) - float(background)
+#             print(float(y_axis[peakMin + x,t]) - float(background))
 
     return [final_y_axis, final_y_error_axis]
 
@@ -1262,7 +1141,7 @@ def divideDataByNormalization(data_y_axis,
                               av_norm,
                               av_norm_error):
 
-    print '-> divide data by normalization'
+    print('-> divide data by normalization')
 
     data_size = data_y_axis.shape
     nbr_pixel = data_size[0]
@@ -1400,7 +1279,7 @@ def divideData1DbyNormalization(inte_data_y_axis,
                                 av_norm,
                                 av_norm_error):
 
-    print '-> divide data by normalization'
+    print('-> divide data by normalization')
 
     nbrPixel = inte_data_y_axis.shape
 
@@ -1437,7 +1316,7 @@ def applyScalingFactor(tof_axis,
     #sf_file = 'NaN'
     if os.path.isfile(sf_file):
 
-        print '-> scaling factor file FOUND! (', sf_file, ')'
+        print('-> scaling factor file FOUND! (', sf_file, ')')
 
         #parse file and put info into array
         f = open(sf_file, 'r')
@@ -1470,52 +1349,52 @@ def applyScalingFactor(tof_axis,
         s1w_value = abs(s1w)
         s2w_value = abs(s2w)
 
-        print '--> Data Lambda Requested: {0:2f}'.format(_lr_value)
-        print '--> Data S1H: {0:2f}'.format(s1h_value)
+        print('--> Data Lambda Requested: {0:2f}'.format(_lr_value))
+        print('--> Data S1H: {0:2f}'.format(s1h_value))
         if isSih:
-            print '--> Data SiH: {0:2f}'.format(s2h_value)
+            print('--> Data SiH: {0:2f}'.format(s2h_value))
         else:
-            print '--> Data S2H: {0:2f}'.format(s2h_value)
-        print '--> Data S1W: {0:2f}'.format(s1w_value)
+            print('--> Data S2H: {0:2f}'.format(s2h_value))
+        print('--> Data S1W: {0:2f}'.format(s1w_value))
         if isSiw:
-            print '--> Data SiW: {0:2f}'.format(s2w_value)
+            print('--> Data SiW: {0:2f}'.format(s2w_value))
         else:
-            print '--> Data S2W: {0:2f}'.format(s2w_value)
+            print('--> Data S2W: {0:2f}'.format(s2w_value))
 
         for i in range(nbr_row):
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
             if _file_incidentMedium.strip() == _incidentMedium.strip():
-                print '*** incident medium match ***'
+                print('*** incident medium match ***')
                 _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
                 if (isWithinPrecisionRange(_file_lambdaRequested,
                                            _lr_value,
                                            valuePrecision)):
-                    print '*** lambda requested match ***'
+                    print('*** lambda requested match ***')
                     _file_s1h = getFieldValue(sfFactorTable,i,2)
                     if(isWithinPrecisionRange(_file_s1h,
                                               s1h_value,
                                               valuePrecision)):
-                        print '*** s1h match ***'
+                        print('*** s1h match ***')
                         _file_s2h = getFieldValue(sfFactorTable,i,3)
                         if(isWithinPrecisionRange(_file_s2h,
                                                   s2h_value,
                                                   valuePrecision)):
-                            print '*** s2h match ***'
+                            print('*** s2h match ***')
                             if slitsWidthFlag:
-                                print '*** (with slits width flag) ***'
+                                print('*** (with slits width flag) ***')
                                 _file_s1w = getFieldValue(sfFactorTable,i,4)
                                 if(isWithinPrecisionRange(_file_s1w,
                                                           s1w_value,
                                                           valuePrecision)):
-                                    print '*** s1w match ***'
+                                    print('*** s1w match ***')
                                     _file_s2w = getFieldValue(sfFactorTable,i,5)
                                     if(isWithinPrecisionRange(_file_s2w,
                                                               s2w_value,
                                                               valuePrecision)):
-                                        print '*** s2w match ***'
+                                        print('*** s2w match ***')
 
-                                        print '--> Found a perfect match'
+                                        print('--> Found a perfect match')
                                         a = float(getFieldValue(sfFactorTable,i,6))
                                         b = float(getFieldValue(sfFactorTable,i,7))
                                         a_error = float(getFieldValue(sfFactorTable,i,8))
@@ -1531,7 +1410,7 @@ def applyScalingFactor(tof_axis,
 
                             else:
 
-                                print '--> Found a perfect match'
+                                print('--> Found a perfect match')
                                 a = float(getFieldValue(sfFactorTable,i,6))
                                 b = float(getFieldValue(sfFactorTable,i,7))
                                 a_error = float(getFieldValue(sfFactorTable,i,8))
@@ -1548,7 +1427,7 @@ def applyScalingFactor(tof_axis,
 
     else:
 
-        print '-> scaling factor file for requested lambda NOT FOUND!'
+        print('-> scaling factor file for requested lambda NOT FOUND!')
         return [tof_axis, y_data, y_data_error]
 
 
@@ -1652,7 +1531,7 @@ def getCentralPixel(ws_event_data, dataPeakRange, is_new_geometry):
         start_pixel = start_pixel + 1
         _den += pixelXtof_roi[i]
     data_cpix = _num / _den
-    print '--> central pixel is {0:.1f}'.format(data_cpix)
+    print('--> central pixel is {0:.1f}'.format(data_cpix))
 
     return data_cpix
 
@@ -1663,7 +1542,7 @@ def getDistances(ws_event_data):
     and the distance between the sample and the detector
     """
 
-    print '--> calculating dMD (moderator-detector) and dSD (sample-detector)'
+    print('--> calculating dMD (moderator-detector) and dSD (sample-detector)')
     sample = ws_event_data.getInstrument().getSample()
     source = ws_event_data.getInstrument().getSource()
     dSM = sample.getDistance(source)
@@ -1688,7 +1567,7 @@ def  getTheta(ws_event_data, angleOffsetDeg):
     """
     will calculate the theta angle offset
     """
-    print '--> retrieving thi and tthd'
+    print('--> retrieving thi and tthd')
     mt_run = ws_event_data.getRun()
     thi_value = mt_run.getProperty('thi').value[0]
     thi_units = mt_run.getProperty('thi').units
@@ -1697,26 +1576,26 @@ def  getTheta(ws_event_data, angleOffsetDeg):
     thi_rad = angleUnitConversion(value=thi_value,
                                   from_units=thi_units,
                                   to_units='rad')
-    print '---> thi (rad): ', thi_rad
+    print('---> thi (rad): ', thi_rad)
     tthd_rad = angleUnitConversion(value=tthd_value,
                                    from_units=tthd_units,
                                    to_units='rad')
-    print '---> tthd (rad): ', tthd_rad
+    print('---> tthd (rad): ', tthd_rad)
 
     theta = math.fabs(tthd_rad - thi_rad)/2.
     angleOffsetRad = (angleOffsetDeg * math.pi) / 180.
     theta += angleOffsetRad
-    print '---> theta (rad): ', theta
+    print('---> theta (rad): ', theta)
 
     return theta
 
 
 def getSlitsSize(mt):
-    print '---> retrieving slits size'
+    print('---> retrieving slits size')
     first_slit_size = getSheight(mt, '1')
     last_slit_size = getSheight(mt,'2')
-    print '----> first_slit_size: ' , first_slit_size
-    print '----> last_slit_size: ' , last_slit_size
+    print('----> first_slit_size: ' , first_slit_size)
+    print('----> last_slit_size: ' , last_slit_size)
     return [first_slit_size, last_slit_size]
 
 
@@ -1725,7 +1604,7 @@ def getQrange(ws_histo_data, theta, dMD, q_min, q_step):
     will determine the true q axis according to the qMin and qStep specified
     and the geometry of the instrument
     """
-    print '---> calculating Qrange'
+    print('---> calculating Qrange')
     _tof_axis = ws_histo_data.readX(0)
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = shape(_tof_axis)[0]
@@ -1739,9 +1618,9 @@ def getQrange(ws_histo_data, theta, dMD, q_min, q_step):
     q_max = max(_q_axis)
     if q_min >= q_max:
         q_min = min(_q_axis)
-    print '----> q_min: ', q_min
-    print '----> q_step: ', q_step
-    print '----> q_max: ', q_max
+    print('----> q_min: ', q_min)
+    print('----> q_step: ', q_step)
+    print('----> q_max: ', q_max)
 
     return [q_min, q_step, q_max]
 
@@ -1873,8 +1752,7 @@ def getQaxis(dMD, dSD, theta,
     sz_tof = len(tof_axis)
     q_array = zeros((len(y_range), sz_tof))
 
-    index_y = range(len(y_range))
-    for y in index_y:
+    for y in range(len(y_range)):
         _px = y_range[y]
         dangle = ref_beamdiv_correct(central_pixel,
                                      dSD,
@@ -1932,7 +1810,7 @@ def integrateOverPeakRange(wks, dataPeakRange):
 #    final_y_error_axis[:] = NAN
 
     # range(nbr_q -2) + 1 to get rid of first and last q values (edge effect)
-    rangeOfQ = range(nbr_q-1)
+    rangeOfQ = arange(nbr_q-1)
 #    for q in rangeOfQ[1:-1]:
     for q in rangeOfQ:
 
@@ -2104,15 +1982,15 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
         final_data_y_axis[t] = _data_tmp
         final_data_y_error_axis[t] = _error_tmp
 
-#        print 'final_data_y_axis[t]: ' , _data_tmp , ' final_data_y_error_axis[t]: ' , _error_tmp
+#        print('final_data_y_axis[t]: ' , _data_tmp , ' final_data_y_error_axis[t]: ' , _error_tmp)
 
     return [final_data_y_axis, final_data_y_error_axis]
 
 
 def isNexusTakeAfterRefDate(nexus_date):
     '''
-   This function parses the output.date and returns true if this date is after the ref date
-   '''
+    This function parses the output.date and returns true if this date is after the ref date
+    '''
     nexus_date_acquistion = nexus_date.split('T')[0]
 
     if nexus_date_acquistion > ref_date:

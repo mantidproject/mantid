@@ -5,7 +5,6 @@ import mantid.simpleapi as mantid
 import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
 import os
-import warnings
 
 
 def focus(run_number_string, instrument, perform_vanadium_norm, absorb):
@@ -36,13 +35,13 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm, absorb):
     # Crop to largest acceptable TOF range
     input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
 
-    # Align
-    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
-                                       CalibrationFile=run_details.offset_file_path)
-
     # Correct for absorption / multiple scattering if required
     if absorb:
         input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
+
+    # Align
+    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
+                                       CalibrationFile=run_details.offset_file_path)
 
     # Focus the spectra into banks
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
@@ -124,11 +123,6 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
 def _test_splined_vanadium_exists(instrument, run_details):
     # Check the necessary splined vanadium file has been created
     if not os.path.isfile(run_details.splined_vanadium_file_path):
-        if instrument._can_auto_gen_vanadium_cal():
-            warnings.warn("\nAttempting to automatically generate vanadium calibration at this path: "
-                          + str(run_details.splined_vanadium_file_path) + " for these settings.\n")
-            instrument._generate_auto_vanadium_calibration(run_details=run_details)
-        else:
-            raise ValueError("Processed vanadium runs not found at this path: "
-                             + str(run_details.splined_vanadium_file_path) +
-                             " \nHave you created a vanadium calibration with these settings yet?\n")
+        raise ValueError("Processed vanadium runs not found at this path: "
+                         + str(run_details.splined_vanadium_file_path) +
+                         " \nHave you run the method to create a Vanadium spline with these settings yet?\n")

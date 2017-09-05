@@ -5,7 +5,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/ClearMaskFlag.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"

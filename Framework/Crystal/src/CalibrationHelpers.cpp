@@ -1,4 +1,4 @@
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidCrystal/CalibrationHelpers.h"
@@ -12,42 +12,37 @@ namespace Crystal {
 
 namespace CalibrationHelpers {
 /**
- * Updates the DetectorInfo for the workspace containing newInstrument to
+ * Updates the ComponentInfo for the workspace containing newInstrument to
  *reflect the position of the source
  *
- * @param newInstrument The instrument whose parameter map will be changed to
  *reflect the new source position
  * @param L0 The new distance from source to sample (should be positive)
  * @param newSampPos The relative shift for the new sample position
- * @param detectorInfo DetectorInfo for the workspace being updated
+ * @param componentInfo ComponentInfo for the workspace being updated
  */
-void adjustUpSampleAndSourcePositions(const Instrument &newInstrument,
-                                      const double L0, const V3D &newSampPos,
-                                      DetectorInfo &detectorInfo) {
+void adjustUpSampleAndSourcePositions(const double L0, const V3D &newSampPos,
+                                      ComponentInfo &componentInfo) {
 
   if (L0 <= 0)
     throw std::runtime_error("L0 is negative, must be positive.");
 
-  IComponent_const_sptr source = newInstrument.getSource();
-  IComponent_const_sptr sample = newInstrument.getSample();
-
   const V3D &oldSourceToSampleDir =
-      detectorInfo.samplePosition() - detectorInfo.sourcePosition();
-  const double oldL1 = detectorInfo.l1();
+      componentInfo.samplePosition() - componentInfo.sourcePosition();
+  const double oldL1 = componentInfo.l1();
 
-  V3D samplePos = detectorInfo.samplePosition();
+  V3D samplePos = componentInfo.samplePosition();
   if (samplePos != newSampPos) {
-    detectorInfo.setPosition(*sample, newSampPos);
+    componentInfo.setPosition(componentInfo.sample(), newSampPos);
   }
 
   double scalee = L0 / oldL1;
   V3D newSourcePos = newSampPos - oldSourceToSampleDir * scalee;
 
-  detectorInfo.setPosition(*source, newSourcePos);
+  componentInfo.setPosition(componentInfo.source(), newSourcePos);
 }
 
 /**
- * Updates DetectorInfo for newInstrument to reflect the changes in the
+ * Updates ComponentInfo for newInstrument to reflect the changes in the
  *associated panel information
  *
  * @param bankNames The names of the banks (panels) that will be updated
@@ -62,14 +57,14 @@ void adjustUpSampleAndSourcePositions(const Instrument &newInstrument,
  * @param detHtScale The factor to multiply the current detector height, from
  *old NewInstrument, by to get the new detector height for the banks in
  *bankNames.
- * @param detectorInfo DetectorInfo object for the
+ * @param componentInfo ComponentInfo object for the modifications
  */
 void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
                                  const Instrument &newInstrument,
                                  const V3D &pos, const Quat &rot,
                                  const double detWScale,
                                  const double detHtScale,
-                                 DetectorInfo &detectorInfo) {
+                                 ComponentInfo &componentInfo) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument.getParameterMap();
 
   for (const auto &bankName : bankNames) {
@@ -82,12 +77,14 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
     Quat parentRot = bank->getParent()->getRotation();
     Quat newRot = parentRot * rot * relRot;
 
-    detectorInfo.setRotation(*bank, newRot);
+    const auto bankComponentIndex =
+        componentInfo.indexOf(bank->getComponentID());
+    componentInfo.setRotation(bankComponentIndex, newRot);
 
     V3D rotatedPos = V3D(pos);
     bank->getParent()->getRotation().rotate(rotatedPos);
 
-    detectorInfo.setPosition(*bank, rotatedPos + bank->getPos());
+    componentInfo.setPosition(bankComponentIndex, rotatedPos + bank->getPos());
 
     std::vector<double> oldScalex =
         pmap->getDouble(bank->getName(), std::string("scalex"));
@@ -109,8 +106,8 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
     pmap->addDouble(bank.get(), std::string("scaley"), scaley);
 
     if (detWScale != 1.0 || detHtScale != 1.0)
-      applyRectangularDetectorScaleToDetectorInfo(detectorInfo, *bank,
-                                                  detWScale, detHtScale);
+      applyRectangularDetectorScaleToComponentInfo(
+          componentInfo, bank->getComponentID(), detWScale, detHtScale);
   }
 }
 

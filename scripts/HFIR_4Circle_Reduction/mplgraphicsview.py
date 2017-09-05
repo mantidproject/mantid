@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches,C0302
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import os
 import numpy as np
 
@@ -1222,7 +1224,7 @@ class Qt4MplCanvas(FigureCanvas):
             self._lineDict[line_key] = r[0]
             self._lineIndex += 1
         else:
-            print "Impoooooooooooooooosible!"
+            print("Impoooooooooooooooosible!")
 
         # Flush/commit
         self.draw()
@@ -1250,7 +1252,7 @@ class Qt4MplCanvas(FigureCanvas):
         # set y ticks as an option:
         if yticklabels is not None:
             # it will always label the first N ticks even image is zoomed in
-            print "--------> [FixMe]: The way to set up the Y-axis ticks is wrong!"
+            print("--------> [FixMe]: The way to set up the Y-axis ticks is wrong!")
             #self.axes.set_yticklabels(yticklabels)
 
         # explicitly set aspect ratio of the image
@@ -1291,7 +1293,7 @@ class Qt4MplCanvas(FigureCanvas):
         contour_plot = self.axes.contourf(grid_x, grid_y, matrix_z, 100)
 
         labels = [item.get_text() for item in self.axes.get_yticklabels()]
-        print '[DB...BAT] Number of Y labels = ', len(labels), ', Number of Y = ', len(vec_y)
+        print('[DB...BAT] Number of Y labels = ', len(labels), ', Number of Y = ', len(vec_y))
 
         # TODO/ISSUE/55: how to make this part more powerful
         if len(labels) == 2*len(vec_y) - 1:
@@ -1350,8 +1352,8 @@ class Qt4MplCanvas(FigureCanvas):
                 try:
                     self.axes.lines.remove(plot)
                 except ValueError as e:
-                    print "[Error] Plot %s is not in axes.lines which has %d lines. Error mesage: %s" % (
-                        str(plot), len(self.axes.lines), str(e))
+                    print("[Error] Plot %s is not in axes.lines which has %d lines. Error mesage: %s" % (
+                        str(plot), len(self.axes.lines), str(e)))
                 del self._lineDict[ikey]
             else:
                 # error bar
@@ -1571,7 +1573,7 @@ class Qt4MplCanvas(FigureCanvas):
         """
         line = self._lineDict[ikey]
         if line is None:
-            print '[ERROR] Line (key = %d) is None. Unable to update' % ikey
+            print('[ERROR] Line (key = %d) is None. Unable to update' % ikey)
             return
 
         if vecx is not None and vecy is not None:
@@ -1640,9 +1642,9 @@ class Qt4MplCanvas(FigureCanvas):
         num_markers = len(MplLineMarkers)
         num_colors = len(MplBasicColors)
 
-        for i in xrange(num_markers):
+        for i in range(num_markers):
             marker = MplLineMarkers[i]
-            for j in xrange(num_colors):
+            for j in range(num_colors):
                 color = MplBasicColors[j]
                 combo_list.append((marker, color))
             # ENDFOR (j)
@@ -1797,7 +1799,7 @@ class MyNavigationToolbar(NavigationToolbar2):
             # into pan mode
             self._myMode = MyNavigationToolbar.NAVIGATION_MODE_PAN
 
-        print 'PANNED'
+        print('PANNED')
 
         return
 
