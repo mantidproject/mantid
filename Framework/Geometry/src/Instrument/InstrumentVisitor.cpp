@@ -110,6 +110,7 @@ InstrumentVisitor::InstrumentVisitor(
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors); // Exact
   m_componentIdToIndexMap->reserve(nDetectors);         // Approximation
+  m_shapes->reserve(nDetectors);                        // Approximation
   m_isVisible->reserve(nDetectors);                     // Approximation
 }
 
@@ -153,7 +154,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   m_componentIds->emplace_back(componentID);
   m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
-  m_isVisible->emplace_back(componentIsVisible(componentID));
+  m_isVisible->emplace_back(assembly.isVisible());
   m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
   clearLegacyParameters(m_pmap, assembly);
   // Now that we know what the index of the parent is we can apply it to the
@@ -162,6 +163,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
     (*m_parentComponentIndices)[child] = componentIndex;
   }
   markAsSourceOrSample(componentID, componentIndex);
+  m_shapes->emplace_back(m_nullShape);
   return componentIndex;
 }
 
@@ -185,7 +187,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_componentIds->emplace_back(componentID);
   m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
-  m_isVisible->emplace_back(componentIsVisible(componentID));
+  m_isVisible->emplace_back(component.isVisible());
   m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
   const size_t componentStart = m_assemblySortedComponentIndices->size();
   m_componentRanges->emplace_back(
@@ -196,6 +198,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_parentComponentIndices->push_back(componentIndex);
   clearLegacyParameters(m_pmap, component);
   markAsSourceOrSample(componentID, componentIndex);
+  m_shapes->emplace_back(m_nullShape);
   return componentIndex;
 }
 
@@ -262,7 +265,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
     if (m_instrument->isMonitorViaIndex(detectorIndex)) {
       m_monitorIndices->push_back(detectorIndex);
     }
-    m_isVisible->emplace_back(componentIsVisible(componentID));
+    m_isVisible->emplace_back(detector.isVisible());
     clearLegacyParameters(m_pmap, detector);
   }
   /* Note that positions and rotations for detectors are currently
@@ -345,12 +348,6 @@ InstrumentVisitor::makeWrappers() const {
       std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
 
   return {std::move(compInfoWrapper), std::move(detInfoWrapper)};
-}
-
-bool InstrumentVisitor::componentIsVisible(
-    Mantid::Geometry::IComponent *componentID) {
-  return m_pmap->contains(componentID, m_pmap->isHidden()) &&
-         m_pmap->get(componentID, m_pmap->isHidden(), m_pmap->pBool());
 }
 
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>

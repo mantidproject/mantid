@@ -143,8 +143,6 @@ private:
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers() const;
 
-  bool componentIsVisible(Mantid::Geometry::IComponent *componentID);
-
 public:
   InstrumentVisitor(boost::shared_ptr<const Instrument> instrument);
 

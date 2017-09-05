@@ -54,6 +54,7 @@ Component::Component(const std::string &name, IComponent *parent)
 */
 Component::Component(const std::string &name, const V3D &position,
                      IComponent *parent)
+
     : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name),
       m_pos(position), m_rot() {}
 
@@ -452,7 +453,10 @@ void Component::getBoundingBox(BoundingBox &boundingBox) const {
 * @return True if the component should be rendered
 */
 bool Component::isVisible() const {
-	return m_map->componentInfo().isVisible(index());
+	if (hasParameter(m_map->isHidden())) {
+		return getParameter<bool>(m_map->isHidden(), false)[0];
+	}
+	return true;
 }
 
 /**
