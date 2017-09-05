@@ -1847,13 +1847,13 @@ OptionsCommand();
 OptionsCommand(const MantidQt::MantidWidgets::DataProcessor::OptionsCommand &);
 };
 
-class DataProcessorPasteSelectedCommand
+class PasteSelectedCommand
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h"
 %End
 public:
-DataProcessorPasteSelectedCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
+PasteSelectedCommand(const MantidQt::MantidWidgets::DataProcessor::QDataProcessorWidget &);
 void execute();
 QString name();
 QString icon();
@@ -1862,8 +1862,8 @@ QString whatsthis();
 QString shortcut();
 
 private:
-DataProcessorPasteSelectedCommand();
-DataProcessorPasteSelectedCommand(const MantidQt::MantidWidgets::DataProcessor::DataProcessorPasteSelectedCommand &);
+PasteSelectedCommand();
+PasteSelectedCommand(const MantidQt::MantidWidgets::DataProcessor::PasteSelectedCommand &);
 };
 
 class DataProcessorPlotGroupCommand

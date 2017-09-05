@@ -22,7 +22,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPauseCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h"
@@ -305,7 +305,7 @@ public:
 
   void test_paste_selected_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorPasteSelectedCommand command(&mockPresenter);
+    PasteSelectedCommand command(&mockPresenter);
 
     // The presenter should be notified with the PasteSelectedFlag
     EXPECT_CALL(mockPresenter,
