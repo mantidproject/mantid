@@ -16,6 +16,7 @@ class ReflectometryILLReductionTest(unittest.TestCase):
         args = {
             'Run': 'ILL/D17/317370.nxs',
             'OutputWorkspace': preprocessOutWSName,
+            'ForegroundHalfWidth': 0,
             'rethrow': True
         }
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
