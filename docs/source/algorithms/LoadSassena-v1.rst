@@ -76,7 +76,7 @@ Usage
     print("Fitted centre value is: %.2f" % abs(paramTable.column(1)[1]))
     print("Fitted sigma value is: %.1f" % paramTable.column(1)[2])
     # fitWorkspace contains the data, the calculated and the difference patterns
-    print( "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms()))
+    print("Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms()))
     print("The 989th y-value of the fitted curve: %.3f" % fitWorkspace.readY(1)[989])
 
 Output:

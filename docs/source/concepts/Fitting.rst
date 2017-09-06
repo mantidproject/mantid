@@ -191,7 +191,7 @@ implementation used for solving crystal structures from powder diffraction data.
         if costFuncVal < costFuncBest:
             costFuncBest = costFuncVal
             # here keep clone of best fit
-            CloneWorkspace(InputWorkspace='fit_Workspace',OutputWorkspace='fitBest')
+            CloneWorkspace(InputWorkspace='fit_Workspace', OutputWorkspace='fitBest')
 
         # Uncomment the sleep if would like to watch this algorithm trying to
         # find the global minima (graphically and/or from command line)

@@ -406,7 +406,7 @@ Usage
    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
    fitWorkspace = fit_output.OutputWorkspace
 
-   print( "The fit was: " + fit_output.OutputStatus)
+   print("The fit was: " + fit_output.OutputStatus)
    print("chi-squared of fit is: %.2f" % fit_output.OutputChi2overDoF)
    print("Fitted Height value is: %.2f" % paramTable.column(1)[0])
    print("Fitted centre value is: %.2f" % paramTable.column(1)[1])
