@@ -187,7 +187,7 @@ public:
 
   void test_delete_row_with_populated_table() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorOneLevelTreeManager manager(&presenter, reflWhitelist());
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents())
         .Times(3)
