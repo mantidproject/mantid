@@ -66,7 +66,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         raise RuntimeError("Multiple scattering flags not provided. Set the ms_flag, 'ms_enabled' "
                            "to false, in order to disable multiple scattering corrections.")
 
-    if spectra=='backward' or spectra=='forward':
+    if spectra == 'backward' or spectra == 'forward':
         flags['back_scattering'] = spectra == 'backward'
     else:
         try:
@@ -177,7 +177,8 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     # Do check if profiles_str is a list once outside of loop.
     if isinstance(profiles_strs, list):
         def get_profiles(idx):
-            return all_profiles_strs[idx], profiles_strs[idx] if back_scattering else all_profiles_strs[idx], all_profiles_strs[idx]
+            return all_profiles_strs[idx], profiles_strs[idx] if back_scattering else all_profiles_strs[idx], \
+                   all_profiles_strs[idx]
     else:
         def get_profiles(_):
             return all_profiles_strs, profiles_strs if back_scattering else all_profiles_strs, all_profiles_strs
