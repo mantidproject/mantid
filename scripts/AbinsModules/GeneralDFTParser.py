@@ -70,15 +70,26 @@ class GeneralDFTParser(object):
         :param msg: list with messages which end kpoint block.
         :return: True if end of block otherwise False
         """
-        for item in msg:
+        # case when blank line terminates a block
+        if msg is None:
             pos = file_obj.tell()
             line = file_obj.readline()
-            file_obj.seek(pos)
-            if six.PY3:
-                item = bytes(item, "utf8")
-            if item in line:
+            if not line.strip():
                 return True
-        return False
+            else:
+                file_obj.seek(pos)
+                return False
+        # case when characteristic keyword terminates a block
+        else:
+            for item in msg:
+                pos = file_obj.tell()
+                line = file_obj.readline()
+                file_obj.seek(pos)
+                if six.PY3:
+                    item = bytes(item, "utf8")
+                if item in line:
+                    return True
+            return False
 
     def move_to(self, file_obj=None, msg=None):
         """
