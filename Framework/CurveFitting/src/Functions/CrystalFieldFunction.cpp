@@ -495,8 +495,6 @@ bool CrystalFieldFunction::hasAttribute(const std::string &attName) const {
 /// name that the IFunction has.
 std::pair<API::IFunction *, std::string>
 CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
-  std::string attributeName;
-  size_t ion(0);
   std::smatch match;
   if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
     auto i = std::stoul(match[1]);
@@ -861,7 +859,6 @@ void CrystalFieldFunction::calcExcitations(int nre,
                        iEnergies);
   calculateExcitations(eEnergies, iEnergies, de, di, eExcitations,
                        iExcitations);
-  const size_t nSpec = nSpectra();
   const auto nPeaks = eExcitations.size();
   values.expand(2 * nPeaks);
   for (size_t i = 0; i < nPeaks; ++i) {
