@@ -214,7 +214,7 @@ time-of-flight units to wavelength units. Note that all units are Angstrom.
 | **3** | **Step**      | The step of the wavelength bins.         |
 +-------+---------------+------------------------------------------+
 | **4** | **Step type** | The step type of the wavelength bins,    |
-|       |               | i.e. linear or logarithmic.              |
+|       |               | i.e. linear, logarithmic or variable.    |
 +-------+---------------+------------------------------------------+
 
 Scale and Sample
@@ -226,7 +226,7 @@ Scale and Sample
    :width: 800px
 
 This grouping allows the user to specify the absolute scale and sample geometry
-information. Note that the geometry information is in millimetre.
+information. Note that the geometry information is in millimetres.
 
 +-------+--------------------+------------------------------------------------------------------+
 | **1** | **Absolute scale** | The absolute, dimensionless scale factor.                        |
@@ -600,7 +600,7 @@ Note that the settings are logically grouped by significant stages in the reduct
 | **slice**         | This group contains information about event slicing.                                           |
 +-------------------+---------------------------------------+--------------------------------------------------------+
 | **wavelength**    | This group contains information about the wavelength conversion.                               |
-+-------+---------------------------------------+--------------------------------------------------------------------+
++-------------------+---------------------------+--------------------------------------------------------------------+
 
 
 Feedback & Comments
@@ -609,4 +609,4 @@ Feedback & Comments
 If you have any questions or comments about this interface or this help page, please
 contact the `Mantid team <http://www.mantidproject.org/Contact>`__.
 
-.. categories:: Interfaces Muon
+.. categories:: Interfaces SANS
