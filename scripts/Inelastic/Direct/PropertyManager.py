@@ -6,6 +6,7 @@ from collections import OrderedDict, Iterable
 from six import iteritems
 from mantid.kernel import funcinspect
 
+
 class PropertyManager(NonIDF_Properties):
     """ Class defines the interface for Direct inelastic reduction with properties
         present in Instrument_Properties.xml file
