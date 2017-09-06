@@ -168,7 +168,7 @@ class Abins(PythonAlgorithm):
 
         # 2) read DFT data
         dft_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
-                       "DMOL3": AbinsModules.LoadDMOL3}
+                       "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
         dft_reader = dft_loaders[self._dft_program](input_dft_filename=self._phonon_file)
         dft_data = dft_reader.get_formatted_data()
         prog_reporter.report("Phonon data has been read.")
