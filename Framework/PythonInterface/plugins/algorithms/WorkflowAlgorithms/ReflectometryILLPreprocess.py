@@ -352,6 +352,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         #      It seems to have some issues ATM, though.
         peakPos = self._foregroundCentre(beamPosWS)
         peakHalfWidth = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
+        if peakHalfWidth == Property.EMPTY_INT:
+            peakHalfWidth = 0
         # At least on D17, the detectors are numbered in descending angle.
         lowerOffset = self.getProperty(Prop.LOWER_BKG_OFFSET).value
         lowerWidth = self.getProperty(Prop.LOWER_BKG_WIDTH).value
