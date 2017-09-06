@@ -11,7 +11,6 @@ from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
     PropertyManagerDataService, StringListValidator
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
-# Use xrange in Python 2
 from six.moves import range #pylint: disable=redefined-builtin
 
 if AlgorithmFactory.exists('GatherWorkspaces'):
