@@ -170,7 +170,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              doc='Spectrum number of the foreground centre pixel.')
         self.declareProperty(Prop.FOREGROUND_HALF_WIDTH,
                              defaultValue=Property.EMPTY_INT,
-                             validator=positiveInt,
+                             validator=nonnegativeInt,
                              doc='Number of pixels to include to the foreground region on either side of the centre pixel.')
         self.declareProperty(ITableWorkspaceProperty(Prop.OUTPUT_BEAM_POS,
                                                      defaultValue='',
