@@ -80,4 +80,5 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
         self.setProperty("OutputWorkspace", GroupWorkspaces(workspace_list))
         self.log().information(str("Created Group: "+ self.getPropertyValue("OutputWorkspace")))
 
+
 AlgorithmFactory.subscribe(GetNegMuMuonicXRD)

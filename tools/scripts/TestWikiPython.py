@@ -131,6 +131,7 @@ def ensureDirectoriesExist(path):
 
 ################################################################################################################
 
+
 parser = argparse.ArgumentParser(description='Extracts code blocks marked as python from mediawiki pages and tests they run.')
 parser.add_argument('-i', '--i',
                     help='The title of a mediawiki page, if not specified it will search the Tested Examples category')

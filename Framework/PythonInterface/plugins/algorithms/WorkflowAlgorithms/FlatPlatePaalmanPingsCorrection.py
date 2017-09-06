@@ -615,5 +615,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     # ------------------------------------------------------------------------------
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(FlatPlatePaalmanPingsCorrection)

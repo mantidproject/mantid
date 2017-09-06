@@ -497,5 +497,6 @@ def build_pylint_cmd(srcpath, options):
 
 #------------------------------------------------------------------------------
 
+
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

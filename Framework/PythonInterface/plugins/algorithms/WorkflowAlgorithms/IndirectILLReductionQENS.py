@@ -511,5 +511,6 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         DeleteWorkspace(ws)
         RenameWorkspace(InputWorkspace=outname,OutputWorkspace=ws)
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionQENS)

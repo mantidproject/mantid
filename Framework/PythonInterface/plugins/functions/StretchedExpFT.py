@@ -86,5 +86,6 @@ class StretchedExpFT(IFunction1D):
         # partial derivatives with respect to the fitting parameters
         pass
 
+
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(StretchedExpFT)
