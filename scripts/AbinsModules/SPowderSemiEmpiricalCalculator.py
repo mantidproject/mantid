@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import AbinsModules
-import  gc
+import gc
 try:
     # noinspection PyUnresolvedReferences
     from pathos.multiprocessing import ProcessingPool
