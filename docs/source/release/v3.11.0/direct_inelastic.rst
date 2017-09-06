@@ -12,6 +12,11 @@ Algorithms
 
 - A bug was fixed in :ref:`DPDFReduction <algm-DPDFReduction>` to comply with the signature of one of the underlying C-functions.
 
+Crystal Field
+#############
+
+- Added new fitting :ref:`function <func-CrystalFieldFunction>` that calculates crystal field spectra and physical properties for a multi-site case.
+
 Other changes
 #############
 
