@@ -66,6 +66,7 @@ void CrystalFieldControl::setAttribute(const std::string &name,
 
 /// Parse a comma-separated list attribute
 /// @param attName :: A name of the attribute to parse.
+/// @param value :: A value to parse.
 /// @param cache :: A vector to chache the parsed values.
 void CrystalFieldControl::parseStringListAttribute(
     const std::string &attName, const std::string &value,
