@@ -32,9 +32,9 @@ from hfir_command_interface import BckTransmissionDirectBeamCenter, BckTransmiss
 from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance  # noqa: F401
 from hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide  # noqa: F401
 from hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale  # noqa: F401
-from hfir_command_interface import Stitch
 
 from reduction_workflow.find_data import find_data
+
 
 def EQSANS(keep_events=False, property_manager=None):
     Clear()
