@@ -31,13 +31,13 @@ public:
   }
 
   static void destroySuite(ReflRunsTabPresenterTest *suite) { delete suite; }
-  
+
   static auto constexpr OPEN_TABLE = 0;
   static auto constexpr NEW_TABLE = 1;
   static auto constexpr SAVE_TABLE = 2;
   static auto constexpr SAVE_TABLE_AS = 3;
   static auto constexpr IMPORT_TBL_FILE = 5;
-  
+
   static auto constexpr PROCESS = 0;
   static auto constexpr PAUSE = 1;
   static auto constexpr INSERT_ROW_AFTER = 10;
@@ -63,14 +63,15 @@ public:
         .WillByDefault(Return(SAVE_TABLE_AS));
     ON_CALL(m_mockTablePresenter, indexOfCommand(TableAction::IMPORT_TBL_FILE))
         .WillByDefault(Return(IMPORT_TBL_FILE));
-    
+
     ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::PROCESS))
         .WillByDefault(Return(PROCESS));
     ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::PAUSE))
         .WillByDefault(Return(PAUSE));
     ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::INSERT_ROW_AFTER))
         .WillByDefault(Return(INSERT_ROW_AFTER));
-    ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::INSERT_GROUP_AFTER))
+    ON_CALL(m_mockTablePresenter,
+            indexOfCommand(EditAction::INSERT_GROUP_AFTER))
         .WillByDefault(Return(INSERT_GROUP_AFTER));
     ON_CALL(m_mockTablePresenter, indexOfCommand(EditAction::GROUP_SELECTED))
         .WillByDefault(Return(GROUP_SELECTED));
@@ -98,7 +99,6 @@ public:
 
   void setUp() override { setUpPresenter(); }
 
-  
   void test_constructor_sets_possible_transfer_methods() {
     // Expect that the transfer methods get initialized on the view
     EXPECT_CALL(m_mockRunsTabView, setTransferMethods(_)).Times(Exactly(1));
@@ -228,14 +228,12 @@ public:
     EXPECT_CALL(m_mockMainPresenter, runPythonAlgorithm(pythonSrc.str()))
         .Times(Exactly(1))
         .WillRepeatedly(ICATRuntimeException());
-    EXPECT_CALL(m_mockMainPresenter,
-                giveUserCritical("Error Logging in:\n", "login failed"))
-        .Times(1);
+    EXPECT_CALL(m_mockMainPresenter, giveUserCritical("Error Logging in:\n",
+                                                      "login failed")).Times(1);
     EXPECT_CALL(
         m_mockMainPresenter,
         giveUserInfo("Error Logging in: Please press 'Search' to try again.",
-                     "Login Failed"))
-        .Times(1);
+                     "Login Failed")).Times(1);
     m_presenter.notify(IReflRunsTabPresenter::SearchFlag);
   }
 
@@ -254,7 +252,7 @@ public:
 
     m_presenter.resume();
   }
-  
+
   void expectPreventsTableModificationThroughReflectometryMenu() {
     EXPECT_CALL(m_mockRunsTabView, disableReflectometryMenuAction(OPEN_TABLE));
     EXPECT_CALL(m_mockRunsTabView, disableReflectometryMenuAction(NEW_TABLE));

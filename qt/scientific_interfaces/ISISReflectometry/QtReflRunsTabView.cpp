@@ -114,8 +114,7 @@ void QtReflRunsTabView::initLayout() {
 * @param menu : [input] The menu where actions will be added
 * @param command : [input] The command (action) to add
 */
-void QtReflRunsTabView::addToMenu(QMenu *menu,
-                                  DataProcessorCommand *command) {
+void QtReflRunsTabView::addToMenu(QMenu *menu, DataProcessorCommand *command) {
 
   m_commands.push_back(
       Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(menu, command));
@@ -130,7 +129,7 @@ void QtReflRunsTabView::setReflectometryMenuCommands(
     const CommandVector &commands) {
 
   ui.menuTable->clear();
-  for (const auto& command : commands) {
+  for (const auto &command : commands) {
     addToMenu(ui.menuTable, command.get());
   }
 

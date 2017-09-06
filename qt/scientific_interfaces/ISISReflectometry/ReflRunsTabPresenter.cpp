@@ -165,13 +165,13 @@ DataProcessorPresenter &ReflRunsTabPresenter::tablePresenter() {
 
 void ReflRunsTabPresenter::pushEditCommands(
     DataProcessorPresenter &tablePresenter) {
-  auto& editCommands = tablePresenter.getEditCommands();
+  auto &editCommands = tablePresenter.getEditCommands();
   m_view->setEditMenuCommands(editCommands);
 }
 
 void ReflRunsTabPresenter::pushTableCommands(
     DataProcessorPresenter &tablePresenter) {
-  auto& tableCommands = tablePresenter.getTableCommands();
+  auto &tableCommands = tablePresenter.getTableCommands();
   m_view->setReflectometryMenuCommands(tableCommands);
 }
 
@@ -448,8 +448,8 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 * when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() {
-  //tablePresenter().pause();
-  disableAction(EditAction::PAUSE); 
+  // tablePresenter().pause();
+  disableAction(EditAction::PAUSE);
 }
 
 /** Disables the 'process' button and enables the 'pause' button when data
@@ -490,18 +490,17 @@ void ReflRunsTabPresenter::confirmReductionPaused() {
   allowTableModification();
 }
 
-const std::array<TableAction const, 5>
-    ReflRunsTabPresenter::disabledWhileProcessing = {
-        {TableAction::OPEN_TABLE, TableAction::NEW_TABLE,
-         TableAction::SAVE_TABLE, TableAction::SAVE_TABLE_AS,
-         TableAction::IMPORT_TBL_FILE}};
+const std::array<TableAction const,
+                 5> ReflRunsTabPresenter::disabledWhileProcessing = {
+    {TableAction::OPEN_TABLE, TableAction::NEW_TABLE, TableAction::SAVE_TABLE,
+     TableAction::SAVE_TABLE_AS, TableAction::IMPORT_TBL_FILE}};
 
 void ReflRunsTabPresenter::preventTableModification() {
   m_view->disableAutoreduce();
   m_view->disableTransfer();
 
-  disableModificationActions(
-      [this](EditAction const action) -> void { this->disableAction(action); });
+  disableModificationActions([this](EditAction const action)
+                                 -> void { this->disableAction(action); });
   for (auto reflectometryMenuAction : disabledWhileProcessing)
     disableAction(reflectometryMenuAction);
 }
@@ -510,8 +509,8 @@ void ReflRunsTabPresenter::allowTableModification() {
   m_view->enableAutoreduce();
   m_view->enableTransfer();
 
-  enableModificationActions(
-      [this](EditAction const action) -> void { this->enableAction(action); });
+  enableModificationActions([this](EditAction const action)
+                                -> void { this->enableAction(action); });
   for (auto reflectometryMenuAction : disabledWhileProcessing)
     enableAction(reflectometryMenuAction);
 }

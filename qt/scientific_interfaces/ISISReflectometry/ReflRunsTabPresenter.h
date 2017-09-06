@@ -89,8 +89,8 @@ public:
   void confirmReductionResumed() override;
 
 private:
-  void pushTableCommands(DataProcessorPresenter& tablePresenter);
-  void pushEditCommands(DataProcessorPresenter& tablePresenter);
+  void pushTableCommands(DataProcessorPresenter &tablePresenter);
+  void pushEditCommands(DataProcessorPresenter &tablePresenter);
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   /// The main view we're managing
@@ -128,7 +128,7 @@ private:
   void disableAction(EditAction action);
   int indexOfCommand(TableAction action);
   int indexOfCommand(EditAction action);
-  DataProcessorPresenter& tablePresenter();
+  DataProcessorPresenter &tablePresenter();
   /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument

@@ -72,8 +72,8 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void setReflectometryMenuCommands(const CommandVector& commands) override;
-  void setEditMenuCommands(const CommandVector& rowCommands) override;
+  void setReflectometryMenuCommands(const CommandVector &commands) override;
+  void setEditMenuCommands(const CommandVector &rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
   void enableEditMenuAction(int action) override;
@@ -105,7 +105,7 @@ private:
   /// initialise the interface
   void initLayout();
   // Adds an action (command) to a menu
-  void addToMenu(QMenu *menu, DataProcessorCommand* command);
+  void addToMenu(QMenu *menu, DataProcessorCommand *command);
   void enable(QAction &toEnable);
   void disable(QAction &toDisable);
   void setTransferEnabled(bool enabled);
