@@ -39,27 +39,29 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL Bin2DPowderDiffraction : public API::Algorithm {
 public:
-    const std::string name() const override;
-    int version() const override;
-    const std::string category() const override;
-    const std::string summary() const override;
-    /// Cross-check properties with each other @see IAlgorithm::validateInputs
-    std::map<std::string, std::string> validateInputs() override;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
 
 protected:
-    boost::shared_ptr<API::Progress> m_progress;
+  boost::shared_ptr<API::Progress> m_progress;
 
 private:
-    void init() override;
-    void exec() override;
-    /// Setup the output workspace
-    API::MatrixWorkspace_sptr createOutputWorkspace();
-    void ReadBinsFromFile(std::vector<double> &Ybins, std::vector<std::vector<double>>&Xbins) const;
-    size_t UnifyXBins(std::vector<std::vector<double> > &Xbins) const;
+  void init() override;
+  void exec() override;
+  /// Setup the output workspace
+  API::MatrixWorkspace_sptr createOutputWorkspace();
+  void ReadBinsFromFile(std::vector<double> &Ybins,
+                        std::vector<std::vector<double>> &Xbins) const;
+  size_t UnifyXBins(std::vector<std::vector<double>> &Xbins) const;
 
-    DataObjects::EventWorkspace_sptr m_inputWS;    ///< Pointer to the input event workspace
-    int m_numberOfSpectra; ///< The number of spectra in the workspace
-    void normalizeToBinArea (API::MatrixWorkspace_sptr outWS);
+  DataObjects::EventWorkspace_sptr
+      m_inputWS;         ///< Pointer to the input event workspace
+  int m_numberOfSpectra; ///< The number of spectra in the workspace
+  void normalizeToBinArea(API::MatrixWorkspace_sptr outWS);
 };
 
 void convertToDSpacing(double wavelength, double theta, double *d, double *dp);
