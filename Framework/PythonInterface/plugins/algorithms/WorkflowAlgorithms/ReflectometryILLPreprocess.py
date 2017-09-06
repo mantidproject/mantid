@@ -5,8 +5,8 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty, MatrixWorkspaceProperty,
                         MultipleFileProperty, PropertyMode)
 from mantid.kernel import (Direction, IntBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (ConvertUnits, CropWorkspace, ExtractMonitors, GroupDetectors, Integration,
-                              LoadILLReflectometry, MergeRuns, Minus, mtd, NormaliseToMonitor, Scale, SumSpectra)
+from mantid.simpleapi import (ConvertUnits, CreateSingleValuedWorkspace, CropWorkspace, Divide, ExtractMonitors, GroupDetectors,
+                              Integration, LoadILLReflectometry, MergeRuns, Minus, mtd, NormaliseToMonitor, Plus, Scale, SumSpectra)
 import numpy
 import os.path
 import ReflectometryILL_common as common
@@ -77,17 +77,17 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         cleanupMode = common.WSCleanup.OFF
         self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
         self._names = common.WSNameSource('ReflectometryILLPreprocess', cleanupMode)
+
         ws, beamPosWS = self._inputWS()
 
         self._outputBeamPosition(beamPosWS)
 
-        # TODO Add normalisation to slits.
-        self.log().warning('Skipping slit normalisation as it is not yet implemented.')
+        ws, monWS = self._extractMonitors(ws)
 
         # TODO Add calibration to water measurement.
         self.log().warning('Skipping water calibration as it is not yet implemented.')
 
-        ws, monWS = self._extractMonitors(ws)
+        ws = self._normaliseToSlits(ws)
 
         ws = self._normaliseToFlux(ws, monWS)
         self._cleanup.cleanup(monWS)
@@ -219,7 +219,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _foregroundCentre(self, beamPosWS):
         """Return the detector id of the foreground centre pixel."""
         if self.getProperty(Prop.FOREGROUND_CENTRE).isDefault:
-            int(numpy.rint(beamPosWS.cell('FittedPeakCentre', 0)))
+            return int(numpy.rint(beamPosWS.cell('FittedPeakCentre', 0)))
         return self.getProperty(Prop.FOREGROUND_CENTRE).value
 
     def _groupForeground(self, ws, beamPosWS):
@@ -318,6 +318,25 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             return scaledWS
         return detWS
 
+    def _normaliseToSlits(self, ws):
+        """Normalise ws to slit opening."""
+        if self.getProperty(Prop.SLIT_NORM).value == SlitNorm.OFF:
+            return ws
+        r = ws.run()
+        slit2width = r.get('VirtualSlitAxis.s2w_actual_width')
+        slit3width = r.get('VirtualSlitAxis.s3w_actual_width')
+        if slit2width is None or slit3width is None:
+            self.log().warning('Slit information not found in sample logs. Slit normalisation disabled.')
+            return ws
+        f = slit2width.value * slit3width.value
+        normalisedWSName = self._names.withSuffix('normalised_to_slits')
+        normalisedWS = Scale(InputWorkspace=ws,
+                             OutputWorkspace=normalisedWSName,
+                             Factor=1.0 / f,
+                             EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(ws)
+        return normalisedWS
+
     def _outputBeamPosition(self, ws):
         """Set ws as OUTPUT_BEAM_POS, if desired."""
         if not self.getProperty(Prop.OUTPUT_BEAM_POS).isDefault:
@@ -329,47 +348,88 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if method == BkgMethod.OFF:
             return ws
         # method == BkgMethod.AVERAGE
-        beamPos = self._foregroundCentre(beamPosWS)
-        lowerBkgOffset = self.getProperty(Prop.LOWER_BKG_OFFSET).value
-        lowerBkgWidth = self.getProperty(Prop.LOWER_BKG_WIDTH).value
-        upperBkgOffset = self.getProperty(Prop.UPPER_BKG_OFFSET).value
-        upperBkgWidth = self.getProperty(Prop.UPPER_BKG_WIDTH).value
         # TODO We should rather use LRSubtractAverageBackground here.
         #      It seems to have some issues ATM, though.
-        lowerBkgWSName = self._names.withSuffix('lower_bkg_region')
-        lowerBkgWS = CropWorkspace(InputWorkspace=ws,
-                                   OutputWorkspace=lowerBkgWSName,
-                                   StartWorkspaceIndex=beamPos - lowerBkgOffset - lowerBkgWidth,
-                                   EndWorkspaceIndex=beamPos - lowerBkgOffset,
-                                   EnableLogging=self._subalgLogging)
-        lowerSize = lowerBkgWS.getNumberHistograms() * lowerBkgWS.blocksize()
-        lowerBkgAverageWSName = self._names.withSuffix('lower_bkg_average')
-        Integration(InputWorkspace=lowerBkgWS,
-                    OutputWorkspace=lowerBkgAverageWSName,
-                    EnableLogging=self._subalgLogging)
-        lowerAverageWS = SumSpectra(InputWorkspace=lowerBkgAverageWSName,
-                                    OutputWorkspace=lowerBkgAverageWSName,
-                                    EnableLogging=self._subalgLogging)
-        lowerAverageWS = lowerAverageWS / lowerSize
-        upperBkgWSName = self._names.withSuffix('upper_bkg_region')
-        upperBkgWS = CropWorkspace(InputWorkspace=ws,
-                                   OutputWorkspace=upperBkgWSName,
-                                   StartWorkspaceIndex=beamPos + upperBkgOffset,
-                                   EndWorkspaceIndex=beamPos + upperBkgOffset + upperBkgWidth,
-                                   EnableLogging=self._subalgLogging)
-        upperSize = upperBkgWS.getNumberHistograms() * upperBkgWS.blocksize()
-        upperBkgAverageWSName = self._names.withSuffix('upper_bkg_average')
-        Integration(InputWorkspace=upperBkgWS,
-                    OutputWorkspace=upperBkgAverageWSName,
-                    EnableLogging=self._subalgLogging)
-        upperAverageWS = SumSpectra(InputWorkspace=upperBkgAverageWSName,
-                                    OutputWorkspace=upperBkgAverageWSName,
-                                    EnableLogging=self._subalgLogging)
-        upperAverageWS = upperAverageWS / upperSize
-        fullBkgAverageWS = (upperAverageWS + lowerAverageWS) * 0.5
+        peakPos = self._foregroundCentre(beamPosWS)
+        peakHalfWidth = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
+        # At least on D17, the detectors are numbered in descending angle.
+        lowerOffset = self.getProperty(Prop.LOWER_BKG_OFFSET).value
+        lowerWidth = self.getProperty(Prop.LOWER_BKG_WIDTH).value
+        lowerStartIndex = peakPos + peakHalfWidth + lowerOffset
+        lowerEndIndex = lowerStartIndex + lowerWidth
+        print('lower start: {} end: {}'.format(lowerStartIndex, lowerEndIndex))
+        if lowerEndIndex >= ws.getNumberHistograms():
+            lowerEndIndex = ws.getNumberHistograms() - 1
+            self.log().warning('Lower flat background region cropped to fit the workspace.')
+            print('new lower start: {} end: {}'.format(lowerStartIndex, lowerEndIndex))
+        if lowerStartIndex < lowerEndIndex:
+            lowerBkgWSName = self._names.withSuffix('lower_bkg_region')
+            lowerBkgWS = CropWorkspace(InputWorkspace=ws,
+                                       OutputWorkspace=lowerBkgWSName,
+                                       StartWorkspaceIndex=lowerStartIndex,
+                                       EndWorkspaceIndex=lowerEndIndex,
+                                       EnableLogging=self._subalgLogging)
+            lowerSize = lowerBkgWS.getNumberHistograms() * lowerBkgWS.blocksize()
+            lowerBkgSumWSName = self._names.withSuffix('lower_bkg_sum')
+            Integration(InputWorkspace=lowerBkgWS,
+                        OutputWorkspace=lowerBkgSumWSName,
+                        EnableLogging=self._subalgLogging)
+            lowerBkgSumWS = SumSpectra(InputWorkspace=lowerBkgSumWSName,
+                                       OutputWorkspace=lowerBkgSumWSName,
+                                       EnableLogging=self._subalgLogging)
+        else:
+            lowerStartIndex = lowerEndIndex
+            lowerBkgSumWSName = self._names.withSuffix('lower_bkg_sum')
+            lowerBkgSumWS = CreateSingleValuedWorkspace(OutputWorkspace=lowerBkgSumWSName,
+                                                     EnableLogging=self._subalgLogging)
+            print('newer lower start: {} end: {}'.format(lowerStartIndex, lowerEndIndex))
+        upperOffset = self.getProperty(Prop.UPPER_BKG_OFFSET).value
+        upperWidth = self.getProperty(Prop.UPPER_BKG_WIDTH).value
+        upperEndIndex = peakPos - peakHalfWidth - upperOffset
+        upperStartIndex = upperEndIndex - upperWidth
+        print('uppert start: {} end: {}'.format(upperStartIndex, upperEndIndex))
+        if  upperStartIndex < 0:
+            upperStartIndex = 0
+            self.log().warning('Upper flat background region cropped to fit the workspace.')
+            print('new uppert start: {} end: {}'.format(upperStartIndex, upperEndIndex))
+        if upperStartIndex < upperEndIndex:
+            upperBkgWSName = self._names.withSuffix('upper_bkg_region')
+            upperBkgWS = CropWorkspace(InputWorkspace=ws,
+                                       OutputWorkspace=upperBkgWSName,
+                                       StartWorkspaceIndex=upperStartIndex,
+                                       EndWorkspaceIndex=upperEndIndex,
+                                       EnableLogging=self._subalgLogging)
+            upperSize = upperBkgWS.getNumberHistograms() * upperBkgWS.blocksize()
+            upperBkgSumWSName = self._names.withSuffix('upper_bkg_sum')
+            Integration(InputWorkspace=upperBkgWS,
+                        OutputWorkspace=upperBkgSumWSName,
+                        EnableLogging=self._subalgLogging)
+            upperBkgSumWS = SumSpectra(InputWorkspace=upperBkgSumWSName,
+                                       OutputWorkspace=upperBkgSumWSName,
+                                       EnableLogging=self._subalgLogging)
+        else:
+            upperStartIndex = upperEndIndex
+            upperBkgSumWSName = self._names.withSuffix('upper_bkg_sum')
+            upperBkgSumWS = CreateSingleValuedWorkspace(OutputWorkspace=upperBkgSumWSName,
+                                                        EnableLogging=self._subalgLogging)
+            print('newer uppert start: {} end: {}'.format(upperStartIndex, upperEndIndex))
+        bkgArea = ws.blocksize() * (lowerEndIndex - lowerStartIndex + upperEndIndex - upperStartIndex)
+        if bkgArea == 0:
+            raise RuntimeError('Flat background region size is zero - cannot calculate average background.')
+        averageBkgWSName = self._names.withSuffix('total_average_bkg')
+        averageBkgWS = Plus(LHSWorkspace=lowerBkgSumWS,
+                            RHSWorkspace=upperBkgSumWS,
+                            EnableLogging=self._subalgLogging)
+        bkgAreaWSName = self._names.withSuffix('bkg_area')
+        bkgAreaWS = CreateSingleValuedWorkspace(OutputWorkspace=bkgAreaWSName,
+                                                EnableLogging=self._subalgLogging)
+        averageBkgWS = Divide(LHSWorkspace=averageBkgWS,
+                              RHSWorkspace=bkgAreaWS,
+                              OutputWorkspace=bkgAreaWSName,
+                              EnableLogging=self._subalgLogging)
         subtractedWSName = self._names.withSuffix('flat_bkg_subtracted')
         subtractedWS = Minus(LHSWorkspace=ws,
-                             RHSWorkspace=fullBkgAverageWS,
+                             RHSWorkspace=averageBkgWS,
                              OutputWorkspace=subtractedWSName,
                              EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
