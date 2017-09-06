@@ -764,5 +764,6 @@ class PropertyManager(NonIDF_Properties):
     #    raise KeyError(' Help for this class is not yet implemented: see {0}_Parameter.xml
     # in the file for the parameters description'.format())
 
+
 if __name__=="__main__":
     pass
