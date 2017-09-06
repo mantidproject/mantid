@@ -177,8 +177,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : GenericDataProcessorPresenter(
           whitelist, preprocessMap, processor, postprocessor,
-          std::make_unique<GenericDataProcessorTreeManagerFactory>(),
-          std::make_unique<GenericCommandProviderFactory>(), postprocessMap,
+          Mantid::Kernel::make_unique<GenericDataProcessorTreeManagerFactory>(),
+          Mantid::Kernel::make_unique<GenericCommandProviderFactory>(), postprocessMap,
           loader) {
 
   // Column Options must be added to the whitelist

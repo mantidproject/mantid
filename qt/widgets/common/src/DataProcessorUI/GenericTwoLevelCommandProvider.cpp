@@ -23,6 +23,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
+#include <stdexcept>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -86,6 +87,8 @@ GenericTwoLevelCommandProvider::indexOfCommand(TableAction action) const {
     return 6;
   case TableAction::OPTIONS:
     return 8;
+  default:
+    throw std::logic_error("Unknown table action for two level provider specified.");
   }
 }
 
