@@ -24,7 +24,6 @@ void FunctionGenerator::setSource(IFunction_sptr source) const {
   m_source = source;
 }
 
-
 /// Set i-th parameter
 void FunctionGenerator::setParameter(size_t i, const double &value,
                                      bool explicitlySet) {

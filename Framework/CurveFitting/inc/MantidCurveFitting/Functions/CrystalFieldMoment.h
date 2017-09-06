@@ -42,13 +42,15 @@ public:
   CrystalFieldMomentBase();
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
+
 protected:
   mutable ComplexFortranMatrix m_ham;
   mutable int m_nre;
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldMoment : public CrystalFieldPeaksBase,
-                                                   public CrystalFieldMomentBase {
+class MANTID_CURVEFITTING_DLL CrystalFieldMoment
+    : public CrystalFieldPeaksBase,
+      public CrystalFieldMomentBase {
 public:
   CrystalFieldMoment();
   std::string name() const override { return "CrystalFieldMoment"; }
@@ -56,12 +58,14 @@ public:
   void setHamiltonian(const ComplexFortranMatrix &ham, const int nre);
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
+
 private:
   bool m_setDirect;
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldMomentCalculation : public API::ParamFunction,
-                                                   public CrystalFieldMomentBase {
+class MANTID_CURVEFITTING_DLL CrystalFieldMomentCalculation
+    : public API::ParamFunction,
+      public CrystalFieldMomentBase {
 public:
   CrystalFieldMomentCalculation();
   std::string name() const override { return "mt"; }

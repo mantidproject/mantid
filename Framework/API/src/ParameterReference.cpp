@@ -81,9 +81,7 @@ double ParameterReference::getParameter() const {
   return m_function->getParameter(m_index);
 }
 
-IFunction *ParameterReference::ownerFunction() const {
-  return m_owner;
-}
+IFunction *ParameterReference::ownerFunction() const { return m_owner; }
 
 /// Returns the default value flag
 bool ParameterReference::isDefault() const { return m_isDefault; }

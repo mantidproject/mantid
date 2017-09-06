@@ -12,7 +12,6 @@ using namespace Mantid::CurveFitting::Functions;
 
 class CrystalFieldControlTest : public CxxTest::TestSuite {
 public:
-
   //:GEN_TEST:CrystalField:Control: defaults
   void test_defaults() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;

@@ -36,16 +36,15 @@ namespace Functions {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class CrystalFieldHeatCapacityBase
-    : public API::IFunction1D {
+class CrystalFieldHeatCapacityBase : public API::IFunction1D {
 public:
   CrystalFieldHeatCapacityBase();
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
+
 protected:
   mutable DoubleFortranVector m_en;
 };
-
 
 class MANTID_CURVEFITTING_DLL CrystalFieldHeatCapacity
     : public CrystalFieldPeaksBase,
@@ -57,10 +56,10 @@ public:
   void setEnergy(const DoubleFortranVector &en);
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
+
 private:
   bool m_setDirect;
 };
-
 
 class MANTID_CURVEFITTING_DLL CrystalFieldHeatCapacityCalculation
     : public API::ParamFunction,

@@ -61,7 +61,8 @@ class MANTID_CURVEFITTING_DLL CrystalFieldPeaksBaseImpl
     : public CrystalFieldPeaksBase {
 public:
   std::string name() const override;
-  void function(const API::FunctionDomain &, API::FunctionValues &) const override;
+  void function(const API::FunctionDomain &,
+                API::FunctionValues &) const override;
 };
 
 } // namespace Functions

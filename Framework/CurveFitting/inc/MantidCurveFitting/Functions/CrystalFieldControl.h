@@ -33,7 +33,8 @@ namespace Functions {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldControl :public API::CompositeFunction {
+class MANTID_CURVEFITTING_DLL CrystalFieldControl
+    : public API::CompositeFunction {
 public:
   CrystalFieldControl();
   /// Set a value to attribute attName
@@ -74,7 +75,9 @@ private:
   /// Check that everything is consistent
   void checkConsistent();
   /// Parse a comma-separated list attribute
-  void parseStringListAttribute(const std::string &attName, const std::string &value, std::vector<std::string> &cache);
+  void parseStringListAttribute(const std::string &attName,
+                                const std::string &value,
+                                std::vector<std::string> &cache);
   ///// @name Attribute caches
   ////@{
   /// The ion names
@@ -86,7 +89,7 @@ private:
   /// Cache the default peak FWHMs
   std::vector<double> m_FWHMs;
   /// Cache number of fitted peaks
-  //mutable std::vector<size_t> m_nPeaks;
+  // mutable std::vector<size_t> m_nPeaks;
   /// Cache the list of "spectra" corresponding to physical properties
   std::vector<int> m_physprops;
   /// Caches of the width functions
@@ -97,18 +100,22 @@ private:
   //@}
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldSpectrumControl :public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL CrystalFieldSpectrumControl
+    : public API::ParamFunction {
 public:
   CrystalFieldSpectrumControl();
   std::string name() const override;
-  void function(const API::FunctionDomain &, API::FunctionValues &) const override;
+  void function(const API::FunctionDomain &,
+                API::FunctionValues &) const override;
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldPhysPropControl :public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL CrystalFieldPhysPropControl
+    : public API::ParamFunction {
 public:
   CrystalFieldPhysPropControl();
   std::string name() const override;
-  void function(const API::FunctionDomain &, API::FunctionValues &) const override;
+  void function(const API::FunctionDomain &,
+                API::FunctionValues &) const override;
 };
 
 } // namespace Functions
