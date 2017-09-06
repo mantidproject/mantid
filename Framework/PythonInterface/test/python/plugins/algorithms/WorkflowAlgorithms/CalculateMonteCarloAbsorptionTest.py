@@ -64,8 +64,8 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         self._run_correction_and_test(shape)
 
     def _flat_plate_test(self, test_func):
-        self._arguments['Sample Width'] = 2.0
-        self._arguments['Sample Thickness'] = 2.0
+        self._arguments['SampleWidth'] = 2.0
+        self._arguments['SampleThickness'] = 2.0
         test_func('Flat Plate')
 
     def _annulus_test(self, test_func, shape='Annulus'):
