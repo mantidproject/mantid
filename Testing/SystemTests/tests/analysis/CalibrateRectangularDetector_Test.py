@@ -1,7 +1,9 @@
 #pylint: disable=invalid-name,no-init,attribute-defined-outside-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import os
 from mantid.simpleapi import *
+from six import string_types
 
 
 def _skip_test():
@@ -41,7 +43,7 @@ class PG3Calibration(stresstesting.MantidStressTest):
                                                MaxOffset=0.01, PeakPositions = '.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599',
                                                CrossCorrelation = False, RunNumber = 'PG3_2538')
 
-        if isinstance(output, basestring):
+        if isinstance(output, string_types):
             self.saved_cal_file = output.replace('.h5','.cal')
         else:
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
@@ -89,7 +91,7 @@ class PG3CCCalibration(stresstesting.MantidStressTest):
                                                MaxOffset=0.01, PeakPositions = '0.7282933,1.261441',DetectorsPeaks = '17,6',
                                                CrossCorrelation = True, RunNumber = 'PG3_2538')
 
-        if isinstance(output, basestring):
+        if isinstance(output, string_types):
             self.saved_cal_file = output.replace('.h5','.cal')
         else:
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")

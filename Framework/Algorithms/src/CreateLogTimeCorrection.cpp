@@ -1,12 +1,11 @@
 #include "MantidAlgorithms/CreateLogTimeCorrection.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include <fstream>
 
@@ -82,7 +81,7 @@ void CreateLogTimeCorrection::exec() {
 /** Get instrument geometry setup including L2 for each detector and L1
   */
 void CreateLogTimeCorrection::logGeometryInformation(
-    const API::DetectorInfo &detectorInfo) const {
+    const Geometry::DetectorInfo &detectorInfo) const {
 
   g_log.information() << "Sample position = " << detectorInfo.samplePosition()
                       << "; "
@@ -98,7 +97,7 @@ void CreateLogTimeCorrection::logGeometryInformation(
   * to time at sample
   */
 std::vector<double> CreateLogTimeCorrection::calculateCorrections(
-    const API::DetectorInfo &detectorInfo) const {
+    const Geometry::DetectorInfo &detectorInfo) const {
 
   std::vector<double> corrections(detectorInfo.size());
   const double l1 = detectorInfo.l1();
@@ -115,7 +114,7 @@ std::vector<double> CreateLogTimeCorrection::calculateCorrections(
 /** Write L2 map and correction map to a TableWorkspace
   */
 TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
-    const API::DetectorInfo &detectorInfo,
+    const Geometry::DetectorInfo &detectorInfo,
     const std::vector<double> &corrections) const {
   auto tablews = boost::make_shared<TableWorkspace>();
 
@@ -144,7 +143,7 @@ TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
 /** Write correction map to a text file
   */
 void CreateLogTimeCorrection::writeCorrectionToFile(
-    const string filename, const DetectorInfo &detectorInfo,
+    const string filename, const Geometry::DetectorInfo &detectorInfo,
     const std::vector<double> &corrections) const {
   ofstream ofile;
   ofile.open(filename.c_str());

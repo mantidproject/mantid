@@ -4,8 +4,7 @@ if ( CPPCHECK_EXECUTABLE )
   set ( CPPCHECK_SOURCE_DIRS
         Framework
         MantidPlot
-        MantidQt
-        Vates
+        qt
       )
 
   set ( CPPCHECK_USE_INCLUDE_DIRS OFF CACHE BOOL "Use specified include directories. WARNING: cppcheck will run significantly slower." )
@@ -28,17 +27,18 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/TestHelpers/inc
         Framework/Crystal/inc
         Framework/Kernel/inc
-        Vates/VatesAPI/inc
-        Vates/VatesSimpleGui/ViewWidgets/inc
-        Vates/VatesSimpleGui/StandAloneExec/inc
-        Vates/VatesSimpleGui/QtWidgets/inc
-        MantidQt/MantidWidgets/inc
-        MantidQt/CustomDialogs/inc
-        MantidQt/DesignerPlugins/inc
-        MantidQt/CustomInterfaces/inc
-        MantidQt/API/inc
-        MantidQt/Factory/inc
-        MantidQt/SliceViewer/inc
+        qt/paraview_ext/VatesAPI/inc
+        qt/paraview_ext/VatesSimpleGui/ViewWidgets/inc
+        qt/paraview_ext/VatesSimpleGui/QtWidgets/inc
+        qt/widgets/common/inc
+        qt/widgets/factory/inc
+        qt/widgets/instrumentview/inc
+        qt/widgets/refdetectrview/inc
+        qt/widgets/sliceviewer/inc
+        qt/widgets/spectrumviewer/inc
+        qt/widgets/plugins/algorithm_dialogs/inc
+        qt/widgets/plugins/designer/inc
+        qt/scientific_interfaces
       )
 
   set ( CPPCHECK_EXCLUDES
@@ -61,6 +61,8 @@ if ( CPPCHECK_EXECUTABLE )
         MantidPlot/src/origin/OPJFile.cpp
         MantidPlot/src/zlib123/minigzip.c
         Framework/SINQ/src/PoldiPeakFit.cpp
+        qt/widgets/common/src/QtPropertyBrowser/
+        qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/
       )
 
   # Header files to be ignored require different handling

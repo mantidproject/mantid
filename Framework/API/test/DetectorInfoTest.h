@@ -1,9 +1,10 @@
-#ifndef MANTID_API_DETECTORINFOTEST_H_
-#define MANTID_API_DETECTORINFOTEST_H_
+#ifndef MANTID_GEOMETRY_DETECTORINFOTEST_H_
+#define MANTID_GEOMETRY_DETECTORINFOTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
@@ -224,18 +225,6 @@ public:
     detectorInfo.setRotation(0, oldRot);
   }
 
-  void test_setPosition_component_works_without_cached_positions() {
-    auto &detectorInfo = m_workspace.mutableDetectorInfo();
-    const auto &instrument = m_workspace.getInstrument();
-    const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
-    const auto oldPos = root->getPos();
-    const V3D offset(1.0, 0.0, 0.0);
-    // No detector, source, or sample data has been accessed, make sure that
-    // uninitialized caches done break the position update.
-    TS_ASSERT_THROWS_NOTHING(detectorInfo.setPosition(*root, oldPos + offset));
-    TS_ASSERT_THROWS_NOTHING(detectorInfo.setPosition(*root, oldPos));
-  }
-
   void test_setPosition_component() {
     auto &detInfo = m_workspace.mutableDetectorInfo();
     const auto &instrument = m_workspace.getInstrument();
@@ -247,7 +236,9 @@ public:
     TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, 5.0));
 
-    detInfo.setPosition(*root, oldPos + offset);
+    auto &compInfo = m_workspace.mutableComponentInfo();
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()),
+                         oldPos + offset);
 
     TS_ASSERT_EQUALS(detInfo.sourcePosition(), V3D(1.0, 0.0, -20.0));
     TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(1.0, 0.0, 0.0));
@@ -261,7 +252,8 @@ public:
     TS_ASSERT_EQUALS(info.samplePosition(), V3D(1.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(info.position(0), V3D(1.0, -0.1, 5.0));
 
-    detInfo.setPosition(*root, oldPos);
+    // Reset
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), oldPos);
   }
 
   void test_setRotation_component() {
@@ -272,7 +264,8 @@ public:
     V3D e2{0, 1, 0};
     Quat rot(180.0, e2);
 
-    detInfo.setRotation(*root, rot);
+    auto &compInfo = m_workspace.mutableComponentInfo();
+    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), rot);
 
     // Rotations *and* positions have changed since *parent* was rotated
     TS_ASSERT_EQUALS(detInfo.rotation(0), rot);
@@ -292,7 +285,8 @@ public:
     TS_ASSERT_EQUALS(info.samplePosition(), V3D(0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(info.position(0), V3D(0.0, -0.1, -5.0));
 
-    detInfo.setRotation(*root, oldRot);
+    // Reset
+    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), oldRot);
   }
 
   void test_setRotation_component_moved_root() {
@@ -304,8 +298,10 @@ public:
     V3D e2{0, 1, 0};
     Quat rot(180.0, e2);
 
-    detInfo.setPosition(*root, V3D{0.0, 0.0, 1.0});
-    detInfo.setRotation(*root, rot);
+    auto &compInfo = m_workspace.mutableComponentInfo();
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()),
+                         V3D{0.0, 0.0, 1.0});
+    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), rot);
 
     // Rotations *and* positions have changed since *parent* was rotated
     TS_ASSERT_EQUALS(detInfo.rotation(0), rot);
@@ -325,8 +321,9 @@ public:
     TS_ASSERT_EQUALS(info.samplePosition(), V3D(0.0, 0.0, 1.0));
     TS_ASSERT_EQUALS(info.position(0), V3D(0.0, -0.1, -4.0));
 
-    detInfo.setRotation(*root, oldRot);
-    detInfo.setPosition(*root, oldPos);
+    // Reset
+    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), oldRot);
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), oldPos);
   }
 
   void test_setRotation_setPosition_commute() {
@@ -340,10 +337,13 @@ public:
     V3D pos{-11.0, 7.0, 42.0};
 
     // Note the order: We are going in a (figurative) square...
-    detInfo.setRotation(*root, rot);
-    detInfo.setPosition(*root, pos);
-    detInfo.setRotation(*root, oldRot);
-    detInfo.setPosition(*root, oldPos);
+    auto &compInfo = m_workspace.mutableComponentInfo();
+    const size_t rootIndex = compInfo.indexOf(root->getComponentID());
+    compInfo.setRotation(rootIndex, rot);
+    compInfo.setPosition(rootIndex, pos);
+    compInfo.setRotation(rootIndex, oldRot);
+    compInfo.setPosition(rootIndex, oldPos);
+
     // ... and check that we come back to where we started.
     TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, 5.0));
     TS_ASSERT_EQUALS(detInfo.position(1), V3D(0.0, 0.0, 5.0));
@@ -373,13 +373,17 @@ public:
     Quat rot(42.0, axis);
     V3D delta1{-11.0, 7.0, 42.0};
     V3D delta2{1.0, 3.0, 2.0};
-    detInfo.setRotation(*root, rot);
-    detInfo.setPosition(*root, delta1);
-    detInfo.setPosition(*bank, delta1 + delta2);
+
+    auto &compInfo = ws.mutableComponentInfo();
+    const size_t rootIndex = compInfo.indexOf(root->getComponentID());
+    const size_t bankIndex = compInfo.indexOf(bank->getComponentID());
+    compInfo.setRotation(rootIndex, rot);
+    compInfo.setPosition(rootIndex, delta1);
+    compInfo.setPosition(bankIndex, delta1 + delta2);
     // Undo, but *not* in reverse order.
-    detInfo.setRotation(*root, rootRot);
-    detInfo.setPosition(*root, rootPos);
-    detInfo.setPosition(*bank, bankPos);
+    compInfo.setRotation(rootIndex, rootRot);
+    compInfo.setPosition(rootIndex, rootPos);
+    compInfo.setPosition(bankIndex, bankPos);
     TS_ASSERT_EQUALS(detInfo.position(0), (V3D{-0.008, -0.0002, 5.0}));
   }
 
@@ -424,12 +428,6 @@ public:
     auto ws2 = makeWorkspace(2);
     TS_ASSERT_THROWS(ws2->mutableDetectorInfo() = ws1->detectorInfo(),
                      std::runtime_error);
-  }
-
-  void test_fetch_mappings() {
-    const auto &detectorInfo = m_workspace.detectorInfo();
-    auto mappings = detectorInfo.detIdToIndexMap();
-    TS_ASSERT_EQUALS(mappings->size(), detectorInfo.size());
   }
 
 private:
@@ -539,10 +537,12 @@ public:
   }
 
   void test_position_after_parent_move() {
-    auto &detectorInfo = m_workspace.mutableDetectorInfo();
     const auto &instrument = m_workspace.getInstrument();
     const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
-    detectorInfo.setPosition(*root, Kernel::V3D(0.1, 0.0, 0.0));
+
+    auto &compInfo = m_workspace.mutableComponentInfo();
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()),
+                         Kernel::V3D(0.1, 0.0, 0.0));
     for (int repeat = 0; repeat < 32; ++repeat) {
       Kernel::V3D result;
       const auto &detectorInfo = m_workspace.detectorInfo();
@@ -558,4 +558,4 @@ private:
   WorkspaceTester m_workspace;
 };
 
-#endif /* MANTID_API_DETECTORINFOTEST_H_ */
+#endif /* MANTID_GEOMETRY_DETECTORINFOTEST_H_ */

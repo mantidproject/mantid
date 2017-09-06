@@ -1,13 +1,13 @@
 #pylint: disable=R0913,W0403,R0903,C0103
-import fourcircle_utility as util4
-from mantid.api import AnalysisDataService
+from __future__ import (absolute_import, division, print_function)
+import HFIR_4Circle_Reduction.fourcircle_utility as util4
 import math
+from mantid.api import AnalysisDataService
 import numpy
 import numpy.linalg
-
+from six.moves import range
 
 # Do absorption correction
-
 
 class Lattice(object):
     """A simple structure-styled class to hold lattice or lattice*

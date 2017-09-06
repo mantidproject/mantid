@@ -1,7 +1,9 @@
 #pylint: disable=W0403,R0902,R0903,R0904,W0212
-import mpl2dgraphicsview
+from __future__ import (absolute_import, division, print_function)
+from HFIR_4Circle_Reduction import mpl2dgraphicsview
 import numpy as np
 import os
+
 
 
 class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
@@ -112,9 +114,9 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             file_name = '{0}_axis_{1}.dat'.format(base_file_name, axis)
 
             wbuf = ''
-            vec_x = np.array(range(len(array1d))) + start_index
-            for i in range(len(array1d)):
-                wbuf += '{0} \t{1}\n'.format(vec_x[i], array1d[i])
+            vec_x = np.arange(len(array1d)) + start_index
+            for x, d in zip(vec_x, array1d):
+                wbuf += '{0} \t{1}\n'.format(x, d)
 
             ofile = open(file_name, 'w')
             ofile.write(wbuf)
@@ -137,8 +139,10 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         ur_row = max(self._roiStart[0], self._roiEnd[0])
         ur_col = max(self._roiStart[1], self._roiEnd[1])
 
+        #roi_matrix = matrix[ll_col:ur_col, ll_row:ur_row]
+        #sum_0 = roi_matrix.sum(0)
+        #sum_1 = roi_matrix.sum(1)
         roi_matrix = matrix[ll_col:ur_col, ll_row:ur_row]
-
         sum_0 = roi_matrix.sum(0)
         sum_1 = roi_matrix.sum(1)
 

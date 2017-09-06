@@ -28,7 +28,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "MantidQtAPI/qwt_compat.h"
+#include "MantidQtWidgets/Common/qwt_compat.h"
 #include <QVarLengthArray>
 
 #include "ApplicationWindow.h"
@@ -41,7 +41,7 @@
 #include "Grid.h"
 #include "ImageMarker.h"
 #include "LegendWidget.h"
-#include "MantidQtAPI/ScaleEngine.h"
+#include "MantidQtWidgets/Common/ScaleEngine.h"
 #include "PatternBox.h"
 #include "PlotCurve.h"
 #include "QwtBarCurve.h"
@@ -57,18 +57,18 @@
 #include "TitlePicker.h"
 #include "VectorCurve.h"
 #include "cursors.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include "Mantid/ErrorBarSettings.h"
 #include "Mantid/MantidMDCurve.h"
 #include "Mantid/MantidMatrixCurve.h"
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include "MantidQtAPI/QwtRasterDataMD.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
 
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #ifdef EMF_OUTPUT
 #include "EmfEngine.h"
