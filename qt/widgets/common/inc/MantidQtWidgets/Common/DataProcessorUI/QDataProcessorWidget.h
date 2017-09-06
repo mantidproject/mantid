@@ -54,6 +54,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget
 public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = 0);
+  QDataProcessorWidget(const DataProcessorWhiteList &, QWidget *parent);
   QDataProcessorWidget(const DataProcessorWhiteList &,
                        const DataProcessorProcessingAlgorithm &,
                        QWidget *parent);
@@ -131,6 +132,7 @@ public:
   QString getClipboard() const override;
 
   DataProcessorPresenter *getPresenter() const override;
+  QString getCurrentInstrument() const override;
 
   // Forward a main presenter to this view's presenter
   void accept(DataProcessorMainPresenter *);
@@ -146,7 +148,13 @@ public:
 
   void disableSelectionAndEditing() override;
   void enableSelectionAndEditing() override;
-
+  // Get value in a cell
+  QString getCell(int row, int column, int parentRow = 0, int parentColumn = 0);
+  // Set value in a cell
+  void setCell(const QString &value, int row, int column, int parentRow = 0,
+               int parentColumn = 0);
+  int getNumberOfRows();
+  void clearTable();
 private:
   void createTable();
   void disableActionOnToolbar(int indexToDisable);
@@ -178,6 +186,9 @@ private:
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);
   void ranPythonAlgorithm(const QString &pythonCode);
+  void processButtonClicked();
+  void processingFinished();
+  void instrumentHasChanged();
 
 public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);

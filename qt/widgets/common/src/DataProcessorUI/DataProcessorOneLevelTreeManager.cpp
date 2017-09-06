@@ -89,14 +89,16 @@ void DataProcessorOneLevelTreeManager::appendGroup() {
 Delete row(s) from the model
 */
 void DataProcessorOneLevelTreeManager::deleteRow() {
-
   auto selectedRows = m_presenter->selectedParents();
-
-  if (selectedRows.empty())
-    return;
-
-  for (const auto &row : selectedRows) {
+  while(!selectedRows.empty()) {
+    // Remove a row
+    auto row = *selectedRows.begin();
     m_model->removeRow(row);
+
+    // Once one row has been deleted the selcted row
+    // indices are not valid any longer. We need
+    // to update them again.
+    selectedRows = m_presenter->selectedParents();
   }
 }
 
@@ -471,5 +473,50 @@ bool DataProcessorOneLevelTreeManager::isValidModel(
   }
   return true;
 }
+
+/** Sets a value in a cell
+ *
+ * @param row : the row index
+ * @param column : the column index
+ * @param parentRow : the row index of the parent item (unused)
+ * @param parentColumn : the column index of the parent item (unused)
+ * @param value : the new value to populate the cell with
+*/
+void DataProcessorOneLevelTreeManager::setCell(int row, int column,
+                                               int parentRow, int parentColumn,
+                                               const std::string &value) {
+
+  UNUSED_ARG(parentRow);
+  UNUSED_ARG(parentColumn);
+
+  m_model->setData(m_model->index(row, column),
+                   QVariant(QString::fromStdString(value)));
+}
+
+/** Returns the value in a cell as a string
+ *
+ * @param row : the row index
+ * @param column : the column index
+ * @param parentRow : the row index of the parent item (unused)
+ * @param parentColumn : the column index of the parent item (unused)
+ * @return : the value in the cell as a string
+*/
+std::string DataProcessorOneLevelTreeManager::getCell(int row, int column,
+                                                      int parentRow,
+                                                      int parentColumn) {
+  UNUSED_ARG(parentRow);
+  UNUSED_ARG(parentColumn);
+
+  return m_model->data(m_model->index(row, column)).toString().toStdString();
+}
+
+/**
+ * Gets the number of rows.
+ * @return : the number of rows.
+ */
+int DataProcessorOneLevelTreeManager::getNumberOfRows() {
+  return m_model->rowCount();
+}
+
 }
 }

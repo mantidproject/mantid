@@ -21,6 +21,8 @@ New
 ###
 
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` performs concatenation of the workspaces into a single one by handling the sample logs merging as in :ref:`MergeRuns <algm-MergeRuns>`.
+- :ref:`LoadSESANS <algm-LoadSESANS>` Loading SESANS data to a MatrixWorkspace is now supported.
+- :ref:`SaveSESANS <algm-SaveSESANS>` Saving a workspace using the SESANS format is now supported.  
 
 Improved
 
@@ -38,12 +40,15 @@ Improved
 - :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` makes the culling of the top one percent of the background events optional.
 - :ref:`Load <algm-Load-v1>` now supports use of tilde in file paths in Python, for example Load(Filename="~/data/test.nxs", ...)
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information.
-- :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays
+- :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays. Also, the NumberOfWavelengthPoints input property is now validated more rigorously.
 - :ref:`SaveGSS <algm-SaveGSS-v1>` now supports saving in the legacy GSAS ALT format. This is useful for older tools however the default format FXYE should be used whenever possible.
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK-v1>` and :ref:`LoadVTK <algm-LoadVTK-v1>` algorithms are now accessible from python.
 - :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 - :ref:`SumSpectra <algm-SumSpectra-v1>`: Fixed a bug where a wrong fallback value would be used in case of invalid values being set for min/max worspace index, and improved input validation for those properties.
+- :ref:`LoadBBY <algm-LoadBBY-v1>`: Fixed bug where the logManager did not work with sample_name, sample_aperture and source_aperture. Also added more information regarding the sample and the selected choppers.
+
+
 
 Deprecated
 ##########
@@ -72,6 +77,7 @@ New
 
 - :ref:`PrimStretchedExpFT <func-PrimStretchedExpFT>` Provides the Fourier Transform of the Symmetrized Stretched Exponential Function integrated over each energy bin. Use in place of :ref:`StretchedExpFT <func-StretchedExpFT>` for fitting sample data featuring relaxation times longer than the resolution of the instrument.
 - :ref:`GramCharlier <func-GramCharlier>` is a new fit function primarily for use in neutron compton scattering.
+- :ref:`SplineInterpolation <algm-SplineInterpolation>` is extended to support also linear interpolation, if only 2 points are given.
 
 Bug fixes
 #########

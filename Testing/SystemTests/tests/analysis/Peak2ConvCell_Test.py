@@ -9,6 +9,7 @@
 
 
 # import stresstesting
+from __future__ import (absolute_import, division, print_function)
 import numpy
 from numpy import matrix
 import math
@@ -396,13 +397,13 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
 
     def FixUB(self, UB, tolerance):
         done = 1
-        print "A"
+        print("A")
         while done == 1:
             done = 0
             X = UB.T * UB
             #X.I
 
-            print "B1", X
+            print("B1", X)
             if X[0, 0] > X[1, 1] or (math.fabs(X[0, 0] - X[1, 1]) < tolerance / 10 and math.fabs(X[1, 2]) > math.fabs(
                     X[0, 2]) + tolerance / 10):
                 done = 1
@@ -410,10 +411,10 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                     sav = UB[i, 0]
                     UB[i, 0] = UB[i, 1]
                     UB[i, 1] = sav
-                print "B"
+                print("B")
                 continue
 
-            print "B2"
+            print("B2")
             if X[1, 1] > X[2, 2] or (math.fabs(X[1, 1] - X[2, 2]) < tolerance and math.fabs(X[1, 0]) < math.fabs(
                     X[2, 0]) - tolerance / 10):
                 done = 1
@@ -422,18 +423,18 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                     UB[i, 1] = UB[i, 2]
                     UB[i, 2] = sav
 
-                print "C"
+                print("C")
                 continue
 
-            print "B3"
+            print("B3")
             if numpy.linalg.det(UB) < 0:
                 for i in range(0, 3):
                     UB[i, 0] = -1 * UB[i, 0]
 
-                print "D"
+                print("D")
                 done = 1
                 continue
-            print "E"
+            print("E")
             L = [X[0, 1], X[0, 2], X[1, 2]]
 
             nneg = 0
@@ -467,12 +468,12 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
             odd = 2 - odd
             i1 = (odd + 1) % 3
             i2 = (odd + 2) % 3
-            print ["L=", L, odd, i1, i2, is90, tolerance]
-            print UB
+            print(["L=", L, odd, i1, i2, is90, tolerance])
+            print(UB)
             for i in range(0, 3):
                 UB[i, i1] = -1 * UB[i, i1]
                 UB[i, i2] = -1 * UB[i, i2]
-            print UB
+            print(UB)
             done = 1
         return UB
 
@@ -770,7 +771,7 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                     OrLat = mtd["Temp"].sample().getOrientedLattice()
                     Lat1 = [OrLat.a(), OrLat.b(), OrLat.c(), OrLat.alpha(), OrLat.beta(), OrLat.gamma()]
                     Lat1 = self.FixLatParams(Lat1)
-                    print ["Formnum,Lat1,Lat0", FormXtal[i1], Lat1, Lat0]
+                    print(["Formnum,Lat1,Lat0", FormXtal[i1], Lat1, Lat0])
                     if math.fabs(Lat0[0] - Lat1[0]) < tolerance and math.fabs(Lat0[1] - Lat1[1]) < tolerance \
                             and math.fabs(Lat0[2] - Lat1[2]) < tolerance:
 
@@ -828,10 +829,10 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                                 for i1 in range(3):
                                     for i2a in range(1, 3):
                                         if self.newSetting(side1, side2, Xtal, Center, ang, i1, i2a):
-                                            print "============================================================="
+                                            print("=============================================================")
                                             Sides = [startA, startA * side1Ratios[side1], startA * side1Ratios[side2]]
                                             Sides = self.MonoClinicRearrange(Sides, Xtal, Center, i1, i2a)
-                                            print [Sides, Error, Xtal, Center, ang, i1, i2a]
+                                            print([Sides, Error, Xtal, Center, ang, i1, i2a])
 
                                             UBconv = self.CalcConventionalUB(Sides[0], Sides[1], Sides[2], ang, ang,
                                                                              ang, Xtal)
@@ -853,7 +854,7 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                                             Lat0 = self.getLat(UBnig)
 
                                             Lat0 = self.FixLatParams(Lat0)
-                                            print ["UBnig", UBnig, Lat0]
+                                            print(["UBnig", UBnig, Lat0])
 
                                             Peaks = self.getPeaks(Inst, UBnig, Error, Npeaks + Error * 300)
 
@@ -893,8 +894,8 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                                             Lat1 = self.FixLatParams(Lat1)
 
                                             MatchXtalTol = .03 * (1 + 4 * Error) * (side1Ratios[side2])
-                                            print Lat0
-                                            print Lat1
+                                            print(Lat0)
+                                            print(Lat1)
                                             self.MatchXtlparams(Lat1, Lat0, MatchXtalTol, "Niggli values do not match")
 
                                             # Now see if the conventional cell is in list

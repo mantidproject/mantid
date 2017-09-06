@@ -10,7 +10,7 @@ from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
-from sans.common.constants import (SANS2D, LARMOR, LOQ)
+from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
 from six import with_metaclass
 
 
@@ -48,7 +48,6 @@ MANTID_WORKSPACE_PREFIX = 'mantid_workspace_'
 EVENT_WORKSPACE = "event_workspace"
 
 # Other
-ALTERNATIVE_SANS2D_NAME = "SAN"
 DEFINITION = "Definition"
 PARAMETERS = "Parameters"
 
@@ -95,6 +94,9 @@ def find_sans_file(file_name):
     """
     full_path = find_full_file_path(file_name)
     if not full_path:
+        # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
+        #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
+        #       One way to handle this graceful would be a timeout option.
         runs = FileFinder.findRuns(file_name)
         if runs:
             full_path = runs[0]
@@ -157,11 +159,13 @@ def is_multi_period(func, file_name):
     return is_file_type and number_of_periods >= 1
 
 
-def get_instrument_paths_for_sans_file(file_name):
+def get_instrument_paths_for_sans_file(file_name=None, file_information=None):
     """
     Gets the Instrument Definition File (IDF) path and the Instrument Parameter Path (IPF) path associated with a file.
 
-    :param file_name: the file name is a name fo a SANS data file, e.g. SANS2D0001234
+    :param file_name: the file name is a name fo a SANS data file, e.g. SANS2D0001234. This or the file_information
+                      has to be specified.
+    :param file_information: a file_information object. either this or the file_name has to be specified.
     :return: the IDF path and the IPF path
     """
     def get_file_location(path):
@@ -204,9 +208,11 @@ def get_instrument_paths_for_sans_file(file_name):
         return check_for_files(directory, path)
 
     # Get the measurement date
-    file_information_factory = SANSFileInformationFactory()
-    file_information = file_information_factory.create_sans_file_information(file_name)
+    if not isinstance(file_information, SANSFileInformation):
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(file_name)
     measurement_time = file_information.get_date()
+
     # For some odd reason the __str__ method of DateAndTime adds a space which we need to strip here. It seems
     # to be on purpose though since the export method is called IS08601StringPlusSpace --> hence we need to strip it
     # ourselves
@@ -217,6 +223,13 @@ def get_instrument_paths_for_sans_file(file_name):
     instrument_as_string = SANSInstrument.to_string(instrument)
 
     # Get the idf file path
+    # IMPORTANT NOTE: I profiled the call to ExperimentInfo.getInstrumentFilename and it dominates
+    #                 the state creation. Ironically this routine is exported from C++. The problem is
+    #                 that we are performing XML parsing on the C++ side, which is costly. There is a
+    #                 movement currently towards making the IDF redundant and storing instrument info
+    #                 as native nexus information.
+    # TODO for optimization: Add the IDF path to a global cache layer which takes the
+    #                        instrument name and the from-to dates
     idf_path = ExperimentInfo.getInstrumentFilename(instrument_as_string, measurement_time_as_string)
     idf_path = os.path.normpath(idf_path)
 
@@ -628,12 +641,9 @@ def get_from_raw_header(file_name, index):
     return element
 
 
-def instrument_name_correction(instrument_name):
-    return SANS2D if instrument_name == ALTERNATIVE_SANS2D_NAME else instrument_name
-
-
 def get_instrument_name_for_raw(file_name):
     instrument_name = get_from_raw_header(file_name, 0)
+    # We sometimes need an instrument name correction, eg SANS2D is sometimes stored as SAN
     return instrument_name_correction(instrument_name)
 
 
@@ -686,19 +696,6 @@ def get_date_for_raw(file_name):
     return get_raw_measurement_time(date, time)
 
 
-def get_instrument(instrument_name):
-    instrument_name = instrument_name.upper()
-    if instrument_name == SANS2D:
-        instrument = SANSInstrument.SANS2D
-    elif instrument_name == LARMOR:
-        instrument = SANSInstrument.LARMOR
-    elif instrument_name == LOQ:
-        instrument = SANSInstrument.LOQ
-    else:
-        instrument = SANSInstrument.NoInstrument
-    return instrument
-
-
 def get_geometry_information_raw(file_name):
     """
     Gets the geometry information form the table workspace with the spb information
@@ -734,9 +731,8 @@ def get_geometry_information_raw(file_name):
 # SANS file Information
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSFileInformation(with_metaclass(ABCMeta, object)):
-    def __init__(self, file_name):
-        self._file_name = file_name
-        self._full_file_name = SANSFileInformation.get_full_file_name(self._file_name)
+    def __init__(self, full_file_name):
+        self._full_file_name = full_file_name
 
         # Idf and Ipf file path (will be loaded via lazy evaluation)
         self._idf_file_path = None
@@ -748,6 +744,10 @@ class SANSFileInformation(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def get_instrument(self):
+        pass
+
+    @abstractmethod
+    def get_facility(self):
         pass
 
     @abstractmethod
@@ -792,14 +792,14 @@ class SANSFileInformation(with_metaclass(ABCMeta, object)):
 
     def get_idf_file_path(self):
         if self._idf_file_path is None:
-            idf_path, ipf_path = get_instrument_paths_for_sans_file(self._full_file_name)
+            idf_path, ipf_path = get_instrument_paths_for_sans_file(file_information=self)
             self._idf_file_path = idf_path
             self._ipf_file_path = ipf_path
         return self._idf_file_path
 
     def get_ipf_file_path(self):
         if self._ipf_file_path is None:
-            idf_path, ipf_path = get_instrument_paths_for_sans_file(self._full_file_name)
+            idf_path, ipf_path = get_instrument_paths_for_sans_file(file_information=self)
             self._idf_file_path = idf_path
             self._ipf_file_path = ipf_path
         return self._ipf_file_path
@@ -815,6 +815,9 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         # Setup instrument name
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
         self._instrument = SANSInstrument.from_string(instrument_name)
+
+        # Setup the facility
+        self._facility = get_facility(self._instrument)
 
         # Setup date
         self._date = get_date_for_isis_nexus(self._full_file_name)
@@ -840,6 +843,9 @@ class SANSFileInformationISISNexus(SANSFileInformation):
 
     def get_instrument(self):
         return self._instrument
+
+    def get_facility(self):
+        return self._facility
 
     def get_date(self):
         return self._date
@@ -877,7 +883,10 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         super(SANSFileInformationISISAdded, self).__init__(file_name)
         # Setup instrument name
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
-        self._instrument_name = get_instrument(instrument_name)
+        self._instrument = get_instrument(instrument_name)
+
+        # Setup the facility
+        self._facility = get_facility(self._instrument)
 
         date, run_number = get_date_and_run_number_added_nexus(self._full_file_name)
         self._date = date
@@ -898,7 +907,10 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         return self._full_file_name
 
     def get_instrument(self):
-        return self._instrument_name
+        return self._instrument
+
+    def get_facility(self):
+        return self._facility
 
     def get_date(self):
         return self._date
@@ -938,6 +950,9 @@ class SANSFileInformationRaw(SANSFileInformation):
         instrument_name = get_instrument_name_for_raw(self._full_file_name)
         self._instrument = SANSInstrument.from_string(instrument_name)
 
+        # Setup the facility
+        self._facility = get_facility(self._instrument)
+
         # Setup date
         self._date = get_date_for_raw(self._full_file_name)
 
@@ -960,6 +975,9 @@ class SANSFileInformationRaw(SANSFileInformation):
 
     def get_instrument(self):
         return self._instrument
+
+    def get_facility(self):
+        return self._facility
 
     def get_date(self):
         return self._date
@@ -997,6 +1015,7 @@ class SANSFileInformationFactory(object):
         super(SANSFileInformationFactory, self).__init__()
 
     def create_sans_file_information(self, file_name):
+
         full_file_name = find_sans_file(file_name)
         if is_isis_nexus_single_period(full_file_name) or is_isis_nexus_multi_period(full_file_name):
             file_information = SANSFileInformationISISNexus(full_file_name)
