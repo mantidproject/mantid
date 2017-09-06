@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTABLEQUERYCOMMANDBASE_H
 
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -32,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class TableQueryCommandBase : public DataProcessorCommandBase {
+class EXPORT_OPT_MANTIDQT_COMMON TableQueryCommandBase : public DataProcessorCommandBase {
 public:
   using DataProcessorCommandBase::DataProcessorCommandBase;
   bool modifiesTable() const override;

@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDPROVIDERBASE_H
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandProvider.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <MantidKernel/make_unique.h>
 namespace MantidQt {
 namespace MantidWidgets {
@@ -28,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class CommandProviderBase : public DataProcessorCommandProvider {
+class EXPORT_OPT_MANTIDQT_COMMON CommandProviderBase : public DataProcessorCommandProvider {
 public:
   CommandProviderBase(DataProcessorPresenter &presenter);
   const CommandVector &getTableCommands() const override;
