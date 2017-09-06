@@ -185,6 +185,21 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
 
+  void test_delete_row_with_populated_table() {
+    NiceMock<MockDataProcessorPresenter> presenter;
+    OneLevelTreeManager manager(&presenter, reflWhitelist());
+
+    EXPECT_CALL(presenter, selectedParents())
+        .Times(3)
+        .WillOnce(Return(std::set<int>{0, 1}))
+        .WillOnce(Return(std::set<int>{0}))
+        .WillOnce(Return(std::set<int>()));
+    EXPECT_CALL(presenter, selectedChildren()).Times(0);
+
+    TS_ASSERT_THROWS_NOTHING(manager.deleteRow());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
+  }
+
   void test_delete_group() {
     NiceMock<MockDataProcessorPresenter> presenter;
     OneLevelTreeManager manager(&presenter, reflWhitelist());
