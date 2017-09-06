@@ -342,11 +342,11 @@ void Bin2DPowderDiffraction::ReadBinsFromFile(
 /**
  * @brief Bin2DPowderDiffraction::UnifyXBins unifies size of the vectors in
  *Xbins.
- * Just fills std::nans at the end of the shorter bins.
+ * Fills the last vector element at the end of the shorter bins.
  * Required to avoid garbage values in the X values after ws->setHistogram.
  * returns the maximal size
  *
- * @param Xbins[in] --- bins to unify. Will be overwritten.
+ * @param[in] Xbins --- bins to unify. Will be overwritten.
  */
 size_t Bin2DPowderDiffraction::UnifyXBins(
     std::vector<std::vector<double>> &Xbins) const {

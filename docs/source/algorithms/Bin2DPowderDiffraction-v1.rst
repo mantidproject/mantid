@@ -52,7 +52,9 @@ BinEdgesFile
 *BinEdgesFile* is an ascii-file, where the bin edges are specified in a following format.
 
 First 2 lines contain header:
+
 ::
+
     #dp_min #dp_max
     #d_bins
 
