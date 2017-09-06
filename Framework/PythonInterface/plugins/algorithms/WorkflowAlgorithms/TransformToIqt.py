@@ -283,6 +283,13 @@ class TransformToIqt(PythonAlgorithm):
                       OutputWorkspace=self._output_workspace,
                       XMax=bin_v)
 
+
+        # Replace NaN values in last bin, with zeroes
+        ReplaceSpecialValues(InputWorkspace=self._output_workspace,
+                             OutputWorkspace=self._output_workspace,
+                             NaNValue=0.0)
+
+
         # Set Y axis unit and label
         mtd[self._output_workspace].setYUnit('')
         mtd[self._output_workspace].setYUnitLabel('Intensity')
