@@ -34,14 +34,6 @@ def is_numpy_valid(string=None):
     return version_as_tuple(string=string) < version_as_tuple(AbinsModules.AbinsConstants.NUMPY_VERSION_REQUIRED)
 
 
-def old_python():
-    """
-    Checks if Python i not too old
-    :return: True if it is too old otherwise False
-    """
-    return tuple([int(i) for i in re.findall(r'\d+', string=platform.python_version().replace(".", " "))]) < (2, 7)
-
-
 def find_file(filename=None):
     """
     Calculates path of filename with the testing data. Path is determined in the platform independent way.
