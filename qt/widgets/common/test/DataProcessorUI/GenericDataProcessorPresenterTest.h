@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "Mantid/Kernel/make_unique.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -427,6 +428,7 @@ public:
   static GenericDataProcessorPresenterTest *createSuite() {
     return new GenericDataProcessorPresenterTest();
   }
+
   static void destroySuite(GenericDataProcessorPresenterTest *suite) {
     delete suite;
   }
@@ -440,20 +442,20 @@ public:
     DefaultValue<QString>::Set(QString());
   }
 
-    void setUpDefaultPresenterWithMockViews() {
-      setUpDefaultPresenter();
-      injectViews(m_mockDataProcessorView, m_mockProgress);
-    }
+  void setUpDefaultPresenterWithMockViews() {
+    setUpDefaultPresenter();
+    injectViews(m_mockDataProcessorView, m_mockProgress);
+  }
 
-    void injectViews(DataProcessorView &dataProcessorView,
-                     ProgressableView &progressView) {
-      m_presenter->acceptViews(&dataProcessorView, &progressView);
-    }
+  void injectViews(DataProcessorView &dataProcessorView,
+                   ProgressableView &progressView) {
+    m_presenter->acceptViews(&dataProcessorView, &progressView);
+  }
 
-    void setUpDefaultPresenter() { m_presenter = makeUniqueDefaultPresenter(); }
+  void setUpDefaultPresenter() { m_presenter = makeUniqueDefaultPresenter(); }
 
   std::unique_ptr<GenericDataProcessorPresenter> makeUniqueDefaultPresenter() {
-    return std::make_unique<GenericDataProcessorPresenter>(
+    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
   }
@@ -467,14 +469,12 @@ public:
   void setUpPresenterWithCommandProvider(
       std::unique_ptr<DataProcessorTreeManagerFactory> treeManagerFactory,
       std::unique_ptr<CommandProviderFactory> commandProviderFactory) {
-    m_presenter = std::make_unique<GenericDataProcessorPresenter>(
+    m_presenter = Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
         std::move(treeManagerFactory), std::move(commandProviderFactory));
     injectViews(m_mockDataProcessorView, m_mockProgress);
   }
-
-
 
   void injectParentPresenter(MockMainPresenter &mainPresenter) {
     m_presenter->accept(&mainPresenter);
@@ -483,10 +483,6 @@ public:
   void notifyPresenter(DataProcessorPresenter::Flag flag) {
     m_presenter->notify(flag);
   }
-
-
-
-
 
   GenericDataProcessorPresenterTest() { FrameworkManager::Instance(); }
 
@@ -1019,7 +1015,7 @@ public:
 
   void testProcess() {
     auto mockCommandProvider =
-        std::make_unique<MockDataProcessorCommandProvider>();
+        Mantid::Kernel::make_unique<MockDataProcessorCommandProvider>();
     auto constexpr PAUSE_ACTION_INDEX = 12;
     auto constexpr PROCESS_ACTION_INDEX = 23;
     auto constexpr MODIFICATION_ACTION_INDEX_0 = 16;
@@ -1029,7 +1025,7 @@ public:
         typename MockDataProcessorCommandProvider::CommandIndices;
     using CommandVector =
         typename MockDataProcessorCommandProvider::CommandVector;
-    
+
     auto const editCommands = CommandVector();
     auto const tableCommands = CommandVector();
 
@@ -1048,7 +1044,7 @@ public:
                                               MODIFICATION_ACTION_INDEX_1)));
 
     auto mockCommandProviderFactory =
-        std::make_unique<MockDataProcessorCommandProviderFactory>();
+        Mantid::Kernel::make_unique<MockDataProcessorCommandProviderFactory>();
     ON_CALL(*mockCommandProviderFactory, fromPostprocessorName(_, _))
         .WillByDefault(::testing::Invoke(
             [&mockCommandProvider](QString const &,
@@ -1058,12 +1054,11 @@ public:
             }));
 
     auto treeManagerFactory =
-        std::make_unique<GenericDataProcessorTreeManagerFactory>();
+        Mantid::Kernel::make_unique<GenericDataProcessorTreeManagerFactory>();
 
     setUpPresenterWithCommandProvider(std::move(treeManagerFactory),
                                       std::move(mockCommandProviderFactory));
-    std::array<int, 10> x{};
-    for(auto y : x) {
+    for (auto y : x) {
       std::cout << y << std::endl;
     }
 
