@@ -5,9 +5,6 @@ import unittest
 from mantid.api import AlgorithmID, AlgorithmManager
 from testhelpers import run_algorithm
 
-if six.PY3:
-    unicode = str
-
 class AlgorithmTest(unittest.TestCase):
 
     _load = None
