@@ -5,23 +5,15 @@
 #include <iostream>
 #include <fstream>
 #include <cstdio>
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAlgorithms/FilterEvents.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Unit.h"
 
 #include "MantidAlgorithms/Bin2DPowderDiffraction.h"
