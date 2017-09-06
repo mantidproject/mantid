@@ -175,11 +175,8 @@ private:
   void transfer(const std::vector<std::map<QString, QString>> &) override {}
   void setInstrumentList(const QStringList &, const QString &) override {}
   // void accept(WorkspaceReceiver *) {};
-<<<<<<< HEAD
   void acceptViews(DataProcessorView *, ProgressableView *) override {}
   std::vector<DataProcessorCommand_uptr> m_commands;
-=======
-  void acceptViews(DataProcessorView *, ProgressableView *) override{};
 
   void setCell(int, int, int, int, const std::string &) override{};
   std::string getCell(int, int, int, int) override { return ""; };
@@ -187,7 +184,6 @@ private:
 
   void clearTable() override {}
 
->>>>>>> master
   std::map<QString, QVariant> m_options;
 };
 

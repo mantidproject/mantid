@@ -155,6 +155,9 @@ public:
                int parentColumn = 0);
   int getNumberOfRows();
   void clearTable();
+  void setModel(QString const &name) override;
+  void emitProcessClicked() override { emit processClicked(); }
+  void emitProcessingFinished() override { emit processingFinished(); }
 private:
   void createTable();
   void disableActionOnToolbar(int indexToDisable);
@@ -192,7 +195,6 @@ signals:
 
 public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);
-  void setModel(QString const &name) override;
 
 private slots:
   void rowsUpdated(const QModelIndex &parent, int first, int last);
