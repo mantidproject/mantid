@@ -45,7 +45,7 @@ makeTreeExampleAndReturnGeometricArguments() {
   auto parentIndices = boost::make_shared<const std::vector<size_t>>(
       std::vector<size_t>{3, 3, 4, 4, 4});
 
-  auto isVisible = boost::make_shared<std::vector<bool>>();
+  auto isVisible = boost::make_shared<std::vector<bool>>(5, true);
   std::vector<std::pair<size_t, size_t>> detectorRanges;
   detectorRanges.push_back(
       std::make_pair(0, 2)); // sub-assembly (registered first)
@@ -119,7 +119,7 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
   componentRanges.push_back(std::make_pair(
       0, 2)); // instrument assembly (with 1 sub-component and self)
 
-  auto isVisible = boost::make_shared<std::vector<bool>>();
+  auto isVisible = boost::make_shared<std::vector<bool>>(5, true);
   auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
       2, Eigen::Vector3d{0, 0, 0}); // 2 positions provided. 2 non-detectors
   auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
@@ -182,7 +182,7 @@ public:
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{});
-    auto isVisible = boost::make_shared<std::vector<bool>>();
+    auto isVisible = boost::make_shared<std::vector<bool>>(3, true);
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(3);
@@ -636,6 +636,10 @@ public:
     compInfo.setScaleFactor(0, newFactor);
     // Read-back
     TS_ASSERT_EQUALS(compInfo.scaleFactor(0), newFactor);
+  }
+
+  void test_is_visible() {
+	  TS_ASSERT_THROWS_NOTHING(auto infos = makeTreeExample())
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
