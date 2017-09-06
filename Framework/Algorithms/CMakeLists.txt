@@ -335,7 +335,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AverageLogData.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
-        inc/MantidAlgorithms/Bin2DPowderDiffraction.h
+       inc/MantidAlgorithms/Bin2DPowderDiffraction.h
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
@@ -670,7 +670,7 @@ set ( TEST_FILES
 	AverageLogDataTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
-        Bin2DPowderDiffractionTest.h
+       Bin2DPowderDiffractionTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
 	CalculateCountRateTest.h
