@@ -15,7 +15,6 @@
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include <boost/algorithm/string.hpp>
@@ -636,8 +635,8 @@ void FindPeaks::findPeaksUsingMariscotti() {
   *  @param input :: The workspace to calculate the second difference of
   *  @return A workspace containing the second difference
   */
-API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
-    const API::MatrixWorkspace_sptr &input) {
+API::MatrixWorkspace_sptr
+FindPeaks::calculateSecondDifference(const API::MatrixWorkspace_sptr &input) {
   // We need a new workspace the same size as the input ont
   MatrixWorkspace_sptr diffed = 0;
 
@@ -652,19 +651,16 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
 
     diffed = WorkspaceFactory::Instance().create("Workspace2D", nvector,
                                                  xlength, ylength);
-  }
-  else
-  {
+  } else {
     // all spectra: create a workspace from parent
-   //  diffed = Mantid::DataObjects::create<API::MatrixWorkspace>(input);
+    //  diffed = Mantid::DataObjects::create<API::MatrixWorkspace>(input);
     diffed = WorkspaceFactory::Instance().create(input);
     numHists = input->getNumberHistograms();
   }
 
   // calculate derivative
   const size_t blocksize = input->blocksize();
-  for (size_t i = 0; i < numHists; ++i)
-  {
+  for (size_t i = 0; i < numHists; ++i) {
     // get the source wsindex
     size_t wsindex(i);
     if (singleSpectrum)
