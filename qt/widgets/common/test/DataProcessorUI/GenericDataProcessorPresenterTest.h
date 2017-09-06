@@ -1058,9 +1058,6 @@ public:
 
     setUpPresenterWithCommandProvider(std::move(treeManagerFactory),
                                       std::move(mockCommandProviderFactory));
-    for (auto y : x) {
-      std::cout << y << std::endl;
-    }
 
     NiceMock<MockMainPresenter> mockMainPresenter;
     injectParentPresenter(mockMainPresenter);
