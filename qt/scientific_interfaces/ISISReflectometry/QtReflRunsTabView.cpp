@@ -1,18 +1,18 @@
 #include "QtReflRunsTabView.h"
+#include "IReflRunsTabPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/FileDialogHandler.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "IReflRunsTabPresenter.h"
-#include "ReflGenericDataProcessorPresenterFactory.h"
-#include "ReflRunsTabPresenter.h"
-#include "ReflSearchModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
+#include "MantidQtWidgets/Common/FileDialogHandler.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
+#include "ReflGenericDataProcessorPresenterFactory.h"
+#include "ReflRunsTabPresenter.h"
+#include "ReflSearchModel.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -115,10 +115,10 @@ void QtReflRunsTabView::initLayout() {
 * @param command : [input] The command (action) to add
 */
 void QtReflRunsTabView::addToMenu(QMenu *menu,
-                                  DataProcessorCommand* command) {
+                                  DataProcessorCommand *command) {
 
-  m_commands.push_back(Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
-      menu, command));
+  m_commands.push_back(
+      Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(menu, command));
 }
 
 /**
@@ -127,10 +127,10 @@ void QtReflRunsTabView::addToMenu(QMenu *menu,
 * "Reflectometry" menu
 */
 void QtReflRunsTabView::setReflectometryMenuCommands(
-    std::vector<DataProcessorCommand_uptr>& commands) {
+    const CommandVector &commands) {
 
   ui.menuTable->clear();
-  for (auto &command : commands) {
+  for (const auto& command : commands) {
     addToMenu(ui.menuTable, command.get());
   }
 
@@ -145,11 +145,10 @@ void QtReflRunsTabView::setReflectometryMenuCommands(
 * Adds actions to the "Edit" menu
 * @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
-void QtReflRunsTabView::setEditMenuCommands(
-    std::vector<DataProcessorCommand_uptr>& commands) {
+void QtReflRunsTabView::setEditMenuCommands(const CommandVector &commands) {
 
   ui.menuRows->clear();
-  for (auto &command : commands) {
+  for (const auto &command : commands) {
     addToMenu(ui.menuRows, command.get());
   }
 }

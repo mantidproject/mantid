@@ -38,13 +38,13 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::GroupRowsFlag);
   };
-  QString name() override { return QString("Group Selected"); }
-  QString icon() override { return QString("://drag_curves.png"); }
-  QString tooltip() override { return QString("Group selected rows"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Group Selected"); }
+  QString icon() const override { return QString("://drag_curves.png"); }
+  QString tooltip() const override { return QString("Group selected rows"); }
+  QString whatsthis() const override {
     return QString("Places all selected runs into the same group");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

@@ -39,11 +39,11 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::DeleteRowFlag);
   };
-  QString name() override { return QString("Delete Row"); }
-  QString icon() override { return QString("://delete_row.png"); }
-  QString tooltip() override { return QString("Deletes a row"); }
-  QString whatsthis() override { return QString("Deletes the selected row"); }
-  QString shortcut() override { return QString(); }
+  QString name() const override { return QString("Delete Row"); }
+  QString icon() const override { return QString("://delete_row.png"); }
+  QString tooltip() const override { return QString("Deletes a row"); }
+  QString whatsthis() const override { return QString("Deletes the selected row"); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

@@ -38,15 +38,15 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PasteSelectedFlag);
   };
-  QString name() override { return QString("Paste Selected"); }
-  QString icon() override { return QString("://paste.png"); }
-  QString tooltip() override { return QString("Paste selected"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Paste Selected"); }
+  QString icon() const override { return QString("://paste.png"); }
+  QString tooltip() const override { return QString("Paste selected"); }
+  QString whatsthis() const override {
     return QString("Pastes the contents of the clipboard into the selected "
                    "rows. If no rows are selected, new ones are added at "
                    "the end");
   }
-  QString shortcut() override { return QString("Ctrl+V"); }
+  QString shortcut() const override { return QString("Ctrl+V"); }
 };
 }
 }

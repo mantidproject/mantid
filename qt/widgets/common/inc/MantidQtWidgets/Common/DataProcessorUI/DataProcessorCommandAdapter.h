@@ -108,7 +108,6 @@ public slots:
   void call() { m_adaptee->execute(); }
 
 private:
-  // The adaptee
   DataProcessorCommand *m_adaptee;
   std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_adapter;
 };

@@ -125,7 +125,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     std::unique_ptr<CommandProviderFactory> commandProviderFactory,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_manager(chooseTreeManager(
+      m_mainPresenter(nullptr), m_manager(chooseTreeManager(
                              *managerFactory, postprocessor.name(), whitelist)),
       m_commandProvider(commandProviderFactory->fromPostprocessorName(
           postprocessor.name(), *this)),
@@ -958,7 +958,6 @@ QString GenericDataProcessorPresenter::loadRun(const QString &run,
  * @throws std::runtime_error if reduction fails
  */
 void GenericDataProcessorPresenter::reduceRow(RowData *data) {
-
   /* Create the processing algorithm */
 
   IAlgorithm_sptr alg =
@@ -973,7 +972,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   if (!m_preprocessMap.empty())
     globalOptions = convertStringToMap(m_preprocessingOptions);
 
+  assert(m_mainPresenter != nullptr && "Main presenter must be injected with accept().");
   // Pre-processing properties
+  std::cout << m_mainPresenter << std::endl;
   auto preProcessPropMap =
       convertStringToMapWithSet(m_mainPresenter->getPreprocessingProperties());
 
@@ -1732,6 +1733,7 @@ int GenericDataProcessorPresenter::indexOfCommand(EditAction action) {
 void GenericDataProcessorPresenter::accept(
     DataProcessorMainPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
+  std::cout << m_mainPresenter << std::endl;
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
   m_mainPresenter->notifyADSChanged(m_workspaceList);

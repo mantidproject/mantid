@@ -38,16 +38,16 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ProcessFlag);
   };
-  QString name() override { return QString("Process"); }
-  QString icon() override { return QString("://stat_rows.png"); }
-  QString tooltip() override { return QString("Processes selected runs"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Process"); }
+  QString icon() const override { return QString("://stat_rows.png"); }
+  QString tooltip() const override { return QString("Processes selected runs"); }
+  QString whatsthis() const override {
     return QString("Processes the selected runs. Selected runs are reduced "
                    "sequentially and independently. If nothing is "
                    "selected, the behaviour is as if all "
                    "runs were selected.");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

@@ -38,13 +38,13 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::SaveFlag);
   };
-  QString name() override { return QString("Save Table"); }
-  QString icon() override { return QString("://filesave.png"); }
-  QString tooltip() override { return QString("Save Table"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Save Table"); }
+  QString icon() const override { return QString("://filesave.png"); }
+  QString tooltip() const override { return QString("Save Table"); }
+  QString whatsthis() const override {
     return QString("Saves current table as a table workspace");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

@@ -38,14 +38,14 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PlotGroupFlag);
   };
-  QString name() override { return QString("Plot Selected Groups"); }
-  QString icon() override { return QString("://trajectory.png"); }
-  QString tooltip() override { return QString("Plots the selected group"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Plot Selected Groups"); }
+  QString icon() const override { return QString("://trajectory.png"); }
+  QString tooltip() const override { return QString("Plots the selected group"); }
+  QString whatsthis() const override {
     return QString("Creates a plot of the post-processed workspaces "
                    "produced by any groups any selected runs are in");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

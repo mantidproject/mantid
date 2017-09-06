@@ -39,13 +39,13 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);
   };
-  QString name() override { return QString("Delete Group"); }
-  QString icon() override { return QString("://delete_group.png"); }
-  QString tooltip() override { return QString("Deletes selected group"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Delete Group"); }
+  QString icon() const override { return QString("://delete_group.png"); }
+  QString tooltip() const override { return QString("Deletes selected group"); }
+  QString whatsthis() const override {
     return QString("Deletes the selected groups");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

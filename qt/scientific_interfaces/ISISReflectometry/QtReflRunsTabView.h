@@ -72,8 +72,8 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void setReflectometryMenuCommands(CommandVector& commands) override;
-  void setEditMenuCommands(CommandVector& rowCommands) override;
+  void setReflectometryMenuCommands(const CommandVector& commands) override;
+  void setEditMenuCommands(const CommandVector& rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
   void enableEditMenuAction(int action) override;

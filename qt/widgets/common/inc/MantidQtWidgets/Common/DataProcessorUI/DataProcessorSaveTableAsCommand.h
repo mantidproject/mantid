@@ -38,14 +38,14 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::SaveAsFlag);
   };
-  QString name() override { return QString("Save Table As"); }
-  QString icon() override { return QString("://filesaveas.png"); }
-  QString tooltip() override { return QString("Save Table As"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Save Table As"); }
+  QString icon() const override { return QString("://filesaveas.png"); }
+  QString tooltip() const override { return QString("Save Table As"); }
+  QString whatsthis() const override {
     return QString("Saves current table as a table workspace. Asks for the "
                    "name of the ouput table");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

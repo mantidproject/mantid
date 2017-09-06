@@ -38,14 +38,14 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PauseFlag);
   };
-  QString name() override { return QString("Pause"); }
-  QString icon() override { return QString("://pause.png"); }
-  QString tooltip() override { return QString("Pause processing runs"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Pause"); }
+  QString icon() const override { return QString("://pause.png"); }
+  QString tooltip() const override { return QString("Pause processing runs"); }
+  QString whatsthis() const override {
     return QString("Pauses processing any selected runs. Processing may be "
                    "resumed by clicking on the 'Process' button.");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

@@ -38,13 +38,13 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::NewTableFlag);
   };
-  QString name() override { return QString("New Table"); }
-  QString icon() override { return QString("://new.png"); }
-  QString tooltip() override { return QString("New Table"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("New Table"); }
+  QString icon() const override { return QString("://new.png"); }
+  QString tooltip() const override { return QString("New Table"); }
+  QString whatsthis() const override {
     return QString("Loads a blank table into the interface");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

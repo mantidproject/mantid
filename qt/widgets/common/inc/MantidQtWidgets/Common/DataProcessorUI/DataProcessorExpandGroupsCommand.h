@@ -38,15 +38,15 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ExpandAllGroupsFlag);
   };
-  QString name() override { return QString("Expand All Groups"); }
-  QString icon() override { return QString("://expand_all.png"); }
-  QString tooltip() override { return QString("Expands all groups"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Expand All Groups"); }
+  QString icon() const override { return QString("://expand_all.png"); }
+  QString tooltip() const override { return QString("Expands all groups"); }
+  QString whatsthis() const override {
     return QString(
         "If any groups in the table are currently collapsed this will expand "
         "all collapsed groups, revealing their individual runs.");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

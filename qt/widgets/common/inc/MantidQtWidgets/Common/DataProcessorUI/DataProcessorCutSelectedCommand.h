@@ -38,15 +38,15 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::CutSelectedFlag);
   };
-  QString name() override { return QString("Cut Selected"); }
-  QString icon() override { return QString("://cut.png"); }
-  QString tooltip() override { return QString("Cut selected"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Cut Selected"); }
+  QString icon() const override { return QString("://cut.png"); }
+  QString tooltip() const override { return QString("Cut selected"); }
+  QString whatsthis() const override {
     return QString("Copies the selected rows to the clipboard, and then "
                    "deletes them. Each row is placed on a new line, and "
                    "each cell is separated by a tab");
   }
-  QString shortcut() override { return QString("Ctrl+X"); }
+  QString shortcut() const override { return QString("Ctrl+X"); }
 };
 }
 }

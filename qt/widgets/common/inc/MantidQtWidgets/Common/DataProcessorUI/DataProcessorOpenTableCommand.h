@@ -38,15 +38,15 @@ public:
   void execute() override{
       // This action should do nothing
   };
-  QString name() override { return QString("Open Table"); }
-  QString icon() override { return QString("://multiload.png"); }
-  QString tooltip() override { return QString("Open Table"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Open Table"); }
+  QString icon() const override { return QString("://multiload.png"); }
+  QString tooltip() const override { return QString("Open Table"); }
+  QString whatsthis() const override {
     return QString("Loads a table into the interface. Table must exist in "
                    "the ADS and be compatible in terms of the number and "
                    "type of columns");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

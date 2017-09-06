@@ -38,14 +38,14 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PlotRowFlag);
   };
-  QString name() override { return QString("Plot Selected Rows"); }
-  QString icon() override { return QString("://graph.png"); }
-  QString tooltip() override { return QString("Plot the selected runs"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Plot Selected Rows"); }
+  QString icon() const override { return QString("://graph.png"); }
+  QString tooltip() const override { return QString("Plot the selected runs"); }
+  QString whatsthis() const override {
     return QString("Creates a plot of the reduced workspaces produced by "
                    "the selected runs");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

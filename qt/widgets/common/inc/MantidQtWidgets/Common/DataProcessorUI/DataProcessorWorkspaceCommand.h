@@ -44,11 +44,11 @@ public:
     // Tell the presenter which of the available workspaces was selected
     m_presenter->setModel(m_name);
   };
-  QString name() override { return m_name; }
-  QString icon() override { return QString("://worksheet.png"); }
-  QString tooltip() override { return QString("Table Workspace"); }
-  QString whatsthis() override { return QString("Table Workspace"); }
-  QString shortcut() override { return QString(); }
+  QString name() const override { return m_name; }
+  QString icon() const override { return QString("://worksheet.png"); }
+  QString tooltip() const override { return QString("Table Workspace"); }
+  QString whatsthis() const override { return QString("Table Workspace"); }
+  QString shortcut() const override { return QString(); }
 
 private:
   QString m_name;

@@ -440,13 +440,29 @@ public:
     DefaultValue<QString>::Set(QString());
   }
 
+    void setUpDefaultPresenterWithMockViews() {
+      setUpDefaultPresenter();
+      injectViews(m_mockDataProcessorView, m_mockProgress);
+    }
+
+    void injectViews(DataProcessorView &dataProcessorView,
+                     ProgressableView &progressView) {
+      m_presenter->acceptViews(&dataProcessorView, &progressView);
+    }
+
+    void setUpDefaultPresenter() { m_presenter = makeUniqueDefaultPresenter(); }
+
   std::unique_ptr<GenericDataProcessorPresenter> makeUniqueDefaultPresenter() {
     return std::make_unique<GenericDataProcessorPresenter>(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
   }
 
-  void setUpDefaultPresenter() { m_presenter = makeUniqueDefaultPresenter(); }
+  void tearDown() override {
+    DefaultValue<QString>::Clear();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockProgress));
+  }
 
   void setUpPresenterWithCommandProvider(
       std::unique_ptr<DataProcessorTreeManagerFactory> treeManagerFactory,
@@ -455,13 +471,10 @@ public:
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
         std::move(treeManagerFactory), std::move(commandProviderFactory));
-    m_presenter->acceptViews(&m_mockDataProcessorView, &m_mockProgress);
+    injectViews(m_mockDataProcessorView, m_mockProgress);
   }
 
-  void injectViews(DataProcessorView &dataProcessorView,
-                   ProgressableView &progressView) {
-    m_presenter->acceptViews(&dataProcessorView, &progressView);
-  }
+
 
   void injectParentPresenter(MockMainPresenter &mainPresenter) {
     m_presenter->accept(&mainPresenter);
@@ -471,16 +484,9 @@ public:
     m_presenter->notify(flag);
   }
 
-  void setUpDefaultPresenterWithMockViews() {
-    setUpDefaultPresenter();
-    m_presenter->acceptViews(&m_mockDataProcessorView, &m_mockProgress);
-  }
 
-  void tearDown() override {
-    DefaultValue<QString>::Clear();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockProgress));
-  }
+
+
 
   GenericDataProcessorPresenterTest() { FrameworkManager::Instance(); }
 
@@ -1012,7 +1018,6 @@ public:
   }
 
   void testProcess() {
-    NiceMock<MockMainPresenter> mockMainPresenter;
     auto mockCommandProvider =
         std::make_unique<MockDataProcessorCommandProvider>();
     auto constexpr PAUSE_ACTION_INDEX = 12;
@@ -1054,8 +1059,15 @@ public:
 
     auto treeManagerFactory =
         std::make_unique<GenericDataProcessorTreeManagerFactory>();
+
     setUpPresenterWithCommandProvider(std::move(treeManagerFactory),
                                       std::move(mockCommandProviderFactory));
+    std::array<int, 10> x{};
+    for(auto y : x) {
+      std::cout << y << std::endl;
+    }
+
+    NiceMock<MockMainPresenter> mockMainPresenter;
     injectParentPresenter(mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -2720,6 +2732,9 @@ public:
     MockProgressableView mockProgress;
     setUpDefaultPresenter();
     injectViews(m_mockDataProcessorView, mockProgress);
+
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    injectParentPresenter(mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace");
     createTOFWorkspace("TOF_12345", "12345");

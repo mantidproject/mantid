@@ -38,13 +38,13 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ClearSelectedFlag);
   };
-  QString name() override { return QString("Clear Selected"); }
-  QString icon() override { return QString("://erase.png"); }
-  QString tooltip() override { return QString("Clear selected"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Clear Selected"); }
+  QString icon() const override { return QString("://erase.png"); }
+  QString tooltip() const override { return QString("Clear selected"); }
+  QString whatsthis() const override {
     return QString("Clears the contents of the selected rows");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

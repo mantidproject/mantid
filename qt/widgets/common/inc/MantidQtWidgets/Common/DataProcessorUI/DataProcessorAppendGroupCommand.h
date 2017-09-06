@@ -39,15 +39,15 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::AppendGroupFlag);
   };
-  QString name() override { return QString("Insert Group After"); }
-  QString icon() override { return QString("://insert_group.png"); }
-  QString tooltip() override { return QString("Inserts group after"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Insert Group After"); }
+  QString icon() const override { return QString("://insert_group.png"); }
+  QString tooltip() const override { return QString("Inserts group after"); }
+  QString whatsthis() const override {
     return QString("Inserts a new group after the first selected group. If "
                    "no groups are selected then a new group is added at "
                    "the end of the table");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

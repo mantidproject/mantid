@@ -38,11 +38,11 @@ public:
   virtual ~DataProcessorSeparatorCommand(){};
 
   void execute() override{};
-  QString name() override { return QString(); }
-  QString icon() override { return QString(); }
-  QString tooltip() override { return QString(); }
-  QString whatsthis() override { return QString(); }
-  QString shortcut() override { return QString(); }
+  QString name() const override { return QString(); }
+  QString icon() const override { return QString(); }
+  QString tooltip() const override { return QString(); }
+  QString whatsthis() const override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

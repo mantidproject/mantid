@@ -37,12 +37,12 @@ public:
   // I will mock a proxy method, setTableCommandsProxy, I just want to test that
   // this method is invoked by the presenter's constructor
   void setReflectometryMenuCommands(
-      typename IReflRunsTabView::CommandVector&) override {
+      const typename IReflRunsTabView::CommandVector&) override {
     setReflectometryMenuCommandsProxy();
   }
   // The same happens for setRowCommands
   void setEditMenuCommands(
-      typename IReflRunsTabView::CommandVector&)
+      const typename IReflRunsTabView::CommandVector&)
       override {
     setEditMenuCommandsProxy();
   }

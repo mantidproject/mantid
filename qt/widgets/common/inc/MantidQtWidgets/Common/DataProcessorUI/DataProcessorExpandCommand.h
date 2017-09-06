@@ -38,16 +38,16 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ExpandSelectionFlag);
   };
-  QString name() override { return QString("Expand Selection"); }
-  QString icon() override { return QString("://fit_frame.png"); }
-  QString tooltip() override { return QString("Selects an entire group"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Expand Selection"); }
+  QString icon() const override { return QString("://fit_frame.png"); }
+  QString tooltip() const override { return QString("Selects an entire group"); }
+  QString whatsthis() const override {
     return QString("Expands the current selection to include any runs that "
                    "are in the same group as any selected run. This "
                    "effectively means selecting the group to which the "
                    "selected run belongs");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

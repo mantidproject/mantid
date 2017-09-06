@@ -38,13 +38,13 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::OptionsDialogFlag);
   };
-  QString name() override { return QString("Options"); }
-  QString icon() override { return QString("://configure.png"); }
-  QString tooltip() override { return QString("Options"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Options"); }
+  QString icon() const override { return QString("://configure.png"); }
+  QString tooltip() const override { return QString("Options"); }
+  QString whatsthis() const override {
     return QString("Opens a dialog with some options for the table");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }
