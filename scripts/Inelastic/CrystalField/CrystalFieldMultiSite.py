@@ -13,19 +13,32 @@ class CrystalFieldMultiSite(object):
         self._makeFunction(Ions, Symmetries)
         self.Ions = Ions
         self.Symmetries = Symmetries
+        parameter_dict = None
+        attribute_dict = None
 
         free_parameters = []
+        if 'parameters' in kwargs:
+            parameter_dict = kwargs['parameters']
+            del kwargs['parameters']
+        if 'attributes' in kwargs:
+            attribute_dict = kwargs['attributes']
+            del kwargs['attributes']
+        if 'Temperatures' in kwargs:
+            self.Temperatures = kwargs['Temperatures']
+            del kwargs['Temperatures']
+            if 'FWHMs' in kwargs:
+                self.FWHMs = kwargs['FWHMs']
+                del kwargs['FWHMs']
+            elif 'ResolutionModel' in kwargs:
+                self.ResolutionModel = kwargs['ResolutionModel']
+                del kwargs['ResolutionModel']
+            else:
+                raise RuntimeError("If temperatures are set, must also set FWHMs or ResolutionModel")
         for key in kwargs:
-            if key == 'Temperatures':
-                self.Temperatures = kwargs[key]
-            elif key == 'ToleranceEnergy':
+            if key == 'ToleranceEnergy':
                 self.ToleranceEnergy = kwargs[key]
             elif key == 'ToleranceIntensity':
                 self.ToleranceIntensity = kwargs[key]
-            elif key == 'FWHMs':
-                self.FWHMs = kwargs[key]
-            elif key == 'ResolutionModel':
-                self.ResolutionModel = kwargs[key]
             elif key == 'NPeaks':
                 self.NPeaks = kwargs[key]
             elif key == 'FWHMVariation':
@@ -36,12 +49,6 @@ class CrystalFieldMultiSite(object):
                 self.PeakShape = kwargs[key]
             elif key == 'PhysicalProperty':
                 self.PhysicalProperty = kwargs[key]
-            elif key == 'parameters':
-                for name, value in kwargs[key].items():
-                    self.function.setParameter(name, value)
-            elif key == 'attributes':
-                for name, value in kwargs[key].items():
-                    self.function.setAttributeValue(name, value)
             else:
                 # Crystal field parameters
                 self.function.setParameter(key, kwargs[key])
@@ -50,7 +57,15 @@ class CrystalFieldMultiSite(object):
             for param in CrystalFieldMultiSite.field_parameter_names:
                 if param not in free_parameters:
                     self.function.fixParameter(param)
-        #  else:  return to this?
+        if attribute_dict is not None:
+            for name, value in attribute_dict.items():
+                self.function.setAttributeValue(name, value)
+        if parameter_dict is not None:
+            for name, value in parameter_dict.items():
+                self.function.setParameter(name, value)
+
+
+
 
 
     def isMultiSite(self):
@@ -68,6 +83,10 @@ class CrystalFieldMultiSite(object):
             values_as_string += element
         values_as_string = values_as_string[1:]
         return values_as_string
+
+    def getParameter(self, param):
+        print self.function.numParams()
+        self.function.getParameterValue(param)
 
     @property
     def Ions(self):
@@ -135,7 +154,7 @@ class CrystalFieldMultiSite(object):
     def FWHMs(self, value):
         if len(value) == 1:
             value = value[0]
-            value = [value] * self.NumberOfSpectra
+            value = [value] * len(self.Temperatures)
         self.function.setAttributeValue('FWHMs', value)
 
     @property
@@ -145,63 +164,6 @@ class CrystalFieldMultiSite(object):
     @FWHMVariation.setter
     def FWHMVariation(self, value):
         self.function.setAttributeValue('FWHMVariation', float(value))
-
-    @property
-    def ResolutionModel(self):
-        return self._resolutionModel
-
-    @ResolutionModel.setter
-    def ResolutionModel(self, value):
-        from .function import ResolutionModel
-        if isinstance(value, ResolutionModel):
-            self._resolutionModel = value
-        else:
-            self._resolutionModel = ResolutionModel(value)
-        if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != self.NumberOfSpectra:
-            raise RuntimeError('Resolution model is expected to have %s functions, found %s' %
-                                (self.NumberOfSpectra, self._resolutionModel.NumberOfSpectra))
-        for i in range(self.NumberOfSpectra):
-            model = self._resolutionModel.model[i]
-            for i in range(self.NumberOfSpectra):
-                model = self._resolutionModel.model[i]
-                # self.function.setAttributeValue('FWHMX%s' % i, model[0])
-                # self.function.setAttributeValue('FWHMY%s' % i, model[1])
-
-    @property
-    def PhysicalProperty(self):
-        return self._physprop
-
-    @PhysicalProperty.setter
-    def PhysicalProperty(self, value):
-        from .function import PhysicalProperties
-        vlist = value if islistlike(value) else [value]
-        if all([isinstance(pp, PhysicalProperties) for pp in vlist]):
-            nOldPP = len(self._physprop) if islistlike(self._physprop) else (0 if self._physprop is None else 1)
-            self._physprop = value
-        else:
-            errmsg = 'PhysicalProperty input must be a PhysicalProperties'
-            errmsg += ' instance or a list of such instances'
-            raise ValueError(errmsg)
-        # If a spectrum (temperature) is already defined, or multiple physical properties
-        # given, redefine the CrystalFieldMultiSpectrum function.
-        if not self.isPhysicalPropertyOnly or islistlike(self.PhysicalProperty):
-            tt = self.Temperature if islistlike(self.Temperature) else [self.Temperature]
-            ww = list(self.FWHM) if islistlike(self.FWHM) else [self.FWHM]
-            # Last n-set of temperatures correspond to PhysicalProperties
-            if nOldPP > 0:
-                tt = tt[:-nOldPP]
-            # Removes 'negative' temperature, which is a flag for no INS dataset
-            tt = [val for val in tt if val > 0]
-            pptt = [0 if val.Temperature is None else val.Temperature for val in vlist]
-            self._remakeFunction(list(tt) + pptt)
-            if len(tt) > 0 and len(pptt) > 0:
-                ww += [0] * len(pptt)
-            self.FWHM = ww
-            ppids = [pp.TypeID for pp in vlist]
-            self.function.setAttributeValue('PhysicalProperties', [0] * len(tt) + ppids)
-            for attribs in [pp.getAttributes(i + len(tt)) for i, pp in enumerate(vlist)]:
-                for item in attribs.items():
-                    self.function.setAttributeValue(item[0], item[1])
 
     @property
     def FixAllPeaks(self):
@@ -221,7 +183,7 @@ class CrystalFieldMultiSite(object):
 
     @property
     def NumberOfSpectra(self):
-        return len(self.Temperatures)
+        return self.function.getNumberDomains()
 
     @property
     def NPeaks(self):
@@ -230,3 +192,4 @@ class CrystalFieldMultiSite(object):
     @NPeaks.setter
     def NPeaks(self, value):
         self.function.setAttributeValue('NPeaks', value)
+
