@@ -44,7 +44,6 @@ class KpointsData(AbinsModules.GeneralData):
             raise ValueError("Invalid number of k-points.")
 
         if isinstance(num_atoms, six.integer_types) and num_atoms > 0:
-            self._num_freq = dim * num_atoms  # number of phonons for one k-point
             self._num_atoms = num_atoms  # number of displacements for one k-point
         else:
             raise ValueError("Invalid number of atoms.")
@@ -90,8 +89,9 @@ class KpointsData(AbinsModules.GeneralData):
 
         #  "frequencies"
         frequencies = items["frequencies"]
+        num_freq = frequencies.shape[1]
         if not (isinstance(frequencies, np.ndarray) and
-                frequencies.shape == (self._num_k, self._num_freq) and
+                frequencies.shape == (self._num_k, num_freq) and
                 frequencies.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
             raise ValueError("Invalid value of frequencies.")
 
@@ -99,7 +99,7 @@ class KpointsData(AbinsModules.GeneralData):
         atomic_displacements = items["atomic_displacements"]
         if not (isinstance(
                 atomic_displacements, np.ndarray) and
-                atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, dim) and
+                atomic_displacements.shape == (self._num_k, self._num_atoms, num_freq, dim) and
                 atomic_displacements.dtype.num == AbinsModules.AbinsConstants.COMPLEX_ID):
 
             raise ValueError("Invalid value of atomic_displacements.")

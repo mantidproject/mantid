@@ -5,7 +5,7 @@ import numpy as np
 from mantid.kernel import Atom
 
 
-class LoadGaussian(AbinsModules.GeneralDFTProgram):
+class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
     """
     Class for loading GAUSSIAN DFT vibrational data.
     """
@@ -13,7 +13,7 @@ class LoadGaussian(AbinsModules.GeneralDFTProgram):
         """
         @param input_dft_filename: name of file with phonon data (foo.log)
         """
-        super(LoadGaussian, self).__init__(input_dft_filename=input_dft_filename)
+        super(LoadGAUSSIAN, self).__init__(input_dft_filename=input_dft_filename)
         self._dft_program = "GAUSSIAN"
         self._parser = AbinsModules.GeneralDFTParser()
 
@@ -71,8 +71,9 @@ class LoadGaussian(AbinsModules.GeneralDFTProgram):
             entries = line.split()
             z_number = int(entries[1])
             atom = Atom(z_number=z_number)
+            coord = np.asarray([float(i) for i in entries[3:6]])
             atoms["atom_{}".format(atom_indx)] = {"symbol": atom.symbol, "mass": atom.mass, "sort": atom_indx,
-                                                  "coord": np.asarray(entries[3:6])}
+                                                  "coord":coord}
 
             atom_indx += 1
 
@@ -84,7 +85,7 @@ class LoadGaussian(AbinsModules.GeneralDFTProgram):
         :param obj_file: file object from which we read
         :param data: Python dictionary to which found lattice vectors should be added
         """
-        data["unit_cell"] = np.zeros(shape=(3,3), dtype=AbinsModules.AbinsConstant.FLOAT_TYPE)
+        data["unit_cell"] = np.zeros(shape=(3,3), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
     def _read_modes(self, file_obj=None, data=None):
         """
@@ -94,15 +95,22 @@ class LoadGaussian(AbinsModules.GeneralDFTProgram):
         """
         freq = []
         atomic_disp = []
+        end_msg = ["-------------------"]
+        # -------------------
+        # - Thermochemistry -
+        # -------------------
 
         # parse block with frequencies and atomic displacements
-        while not (self._parser.block_end(file_obj=file_obj) or self._parser.file_end(file_obj=file_obj)):
+        while not (self._parser.block_end(file_obj=file_obj, msg=end_msg) or self._parser.file_end(file_obj=file_obj)):
 
             self._read_freq_block(file_obj=file_obj, freq=freq)
-            self._read_coord_block(file_obj=file_obj, disp=atomic_disp)
+            self._read_atomic_disp_block(file_obj=file_obj, disp=atomic_disp)
 
-        data["frequencies"] = np.asarray(freq).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
-        data["k_vectors"] = np.asarray([0.0, 0.0, 0.0])  # we mimic that we have one Gamma k-point
+        data["frequencies"] = np.asarray([freq]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
+
+        # we mimic that we have one Gamma k-point
+        data["k_vectors"] = np.asarray([[0.0, 0.0, 0.0]]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE,
+                                                                 casting="safe")
         data["weights"] = np.asarray([1.0])
 
         # Reshape displacements so that Abins can use it to create its internal data objects
@@ -111,11 +119,12 @@ class LoadGaussian(AbinsModules.GeneralDFTProgram):
         # dim: dimension for each atomic displacement (atoms vibrate in 3D space)
 
         dim = 3
-        num_freq = len(freq[0])
-        num_atoms = len(data["atoms"])
+        num_freq = len(freq)
+        self._num_k = 1
+        self._num_atoms = len(data["atoms"])
 
         # displacements[num_freq, dim, num_atoms]
-        displacements = np.reshape(a=np.asarray(a=atomic_disp, order="C"), newshape=(num_freq, dim, num_atoms))
+        displacements = np.reshape(a=np.asarray(a=atomic_disp, order="C"), newshape=(num_freq, dim, self._num_atoms))
 
         # [num_freq, dim, num_atoms] -> [num_atoms, num_freq, dim]
         displacements = np.transpose(a=displacements, axes=(2, 0, 1))
@@ -128,18 +137,19 @@ class LoadGaussian(AbinsModules.GeneralDFTProgram):
         :param file_obj: file object from which we read
         :param freq: list with frequencies which we update
         """
-        line = self._parser.find_first(file_obj=file_obj, msg="Frequencies --").split()
+        line = self._parser.find_first(file_obj=file_obj, msg="Frequencies --")
+        line = line.split()
         freq.extend([float(i) for i in line[2:]])
 
-    def _read_coord_block(self, file_obj=None, disp=None):
+    def _read_atomic_disp_block(self, file_obj=None, disp=None):
         """
         Parses block with atomic displacements.
         :param file_obj: file object from which we read
         :param disp: list with x coordinates which we update
         """
         sub_block_start = "Atom AN      X      Y      Z        X      Y      Z        X      Y      Z"
-        self._parser.find_first(sub_block_start)
+        self._parser.find_first(file_obj=file_obj, msg=sub_block_start)
         l = file_obj.readline().split()
         while len(l) == len(sub_block_start.split()):
-            disp.extend([float(i) for i in l[2:]])
+            disp.extend([complex(float(i), 0) for i in l[2:]])
             l = file_obj.readline().split()
