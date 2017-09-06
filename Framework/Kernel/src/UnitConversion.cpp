@@ -55,17 +55,6 @@ double UnitConversion::run(Unit &srcUnit, Unit &destUnit, const double srcValue,
   }
 }
 
-/**
- * Convert a single value between the given units (overload for Unit objects)
- * @param theta :: The scattering angle (in radians)
- * @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
- * meV)
- * @return The value converted to the destination unit
- */
-double UnitConversion::run(const double theta, const double efixed) {
-  return convertToElasticQ(theta, efixed);
-}
-
 //---------------------------------------------------------------------------------------------
 // Private methods
 //---------------------------------------------------------------------------------------------

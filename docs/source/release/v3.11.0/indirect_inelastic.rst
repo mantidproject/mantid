@@ -13,12 +13,13 @@ Algorithms
 
 Bayes
 #####
-
 - Removed fit option from plot options drop-down menu.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 
 Data Analysis
 #############
+- Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
+  convolution fitting into their own workspaces.
 
 Elwin
 ~~~~~
@@ -26,6 +27,8 @@ Elwin
 Bugfixes
 --------
 - Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
+- Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
+  convolution fitting into their own workspaces.
 
 ConvFit
 ~~~~~~~
@@ -47,7 +50,7 @@ Improvements
 
 Dropped
 -------
-- :ref:`algm-LoadILLIndirect-v1`, :ref:`algm-IndirectILLReduction`, :ref:`algm-ILLIN16BCalibration` algorithms deprecated since v3.9, are now removed.
+- `LoadILLIndirect-v1 <http://docs.mantidproject.org/v3.10.1/algorithms/LoadILLIndirect-v1.html>`_, `IndirectILLReduction <http://docs.mantidproject.org/v3.10.1/algorithms/IndirectILLReduction-v1.html>`_, `ILLIN16BCalibration <http://docs.mantidproject.org/v3.10.1/algorithms/ILLIN16BCalibration-v1.html>`_ algorithms deprecated since v3.9, are now removed.
 
 
 Bugfixes
