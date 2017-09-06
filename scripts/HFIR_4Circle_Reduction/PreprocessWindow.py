@@ -57,15 +57,12 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         """
         # get scan number or numbers
         try:
-            scan_numbers = self.get_scan_numbers()
+            exp_number = self.get_exp_number()
         except RuntimeError as run_err:
             gui_util.show_message(self, '[ERROR] {0}'.format(run_err))
             return
 
-        if len(scan_numbers) != 1:
-            default_dir = '/HFIR/HB3A/'
-        else:
-            default_dir = os.path.join('/HFIR/HB3A/Exp{0}/shared/'.format(scan_numbers[0]))
+        default_dir = os.path.join('/HFIR/HB3A/Exp{0}/shared/'.format(exp_number))
 
         # get output directory
         output_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
@@ -209,6 +206,20 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         return scan_list
 
+    def get_exp_number(self):
+        """
+        get experiment number
+        :exception: RuntimeError if input is not correct
+        :return:
+        """
+        exp_num_str = str(self.ui.lineEdit_expNumber.text())
+        if len(exp_num_str) == 0:
+            raise RuntimeError('Experiment number is not given')
+        if exp_num_str.isdigit() is False:
+            raise RuntimeError('Experiment number {0} is not a valid integer.'.format(exp_num_str))
+
+        return int(exp_num_str)
+
     def set_calibration_to_reduction_controller(self, exp_number):
         """set user-specified instrument calibrations to the my controller
 
@@ -280,7 +291,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         """
         # experiment number
         assert isinstance(exp_number, int), 'Experiment number {0} must be an integer'.format(exp_number)
-        self.ui.lineEdit_ipts.setText('{0}'.format(exp_number))
+        self.ui.lineEdit_expNumber.setText('{0}'.format(exp_number))
 
         # detector size: must be given
         assert isinstance(det_size, int), 'Square detector size {0} must be an integer'.format(det_size)
@@ -302,6 +313,13 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         # set up wave length
         if wave_length is not None:
             self.ui.lineEdit_infoWavelength.setText('{0}'.format(wave_length))
+
+        # set up the default output directory and create it if it does not exist
+        if self.ui.checkBox_saveToDataServer.isChecked():
+            default_output_dir = os.path.join('/HFIR/HB3A/exp{0}'.format(exp_number), '/Shared/MergedScans')
+            if os.path.exists(default_output_dir) is False:
+                os.mkdir(default_output_dir)
+            self.ui.lineEdit_outputDir.setText(default_output_dir)
 
         return
 
