@@ -260,7 +260,8 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
       outputWorkspace->getSpectrum(currentIndex)
           .copyInfoFrom(inputWS->getSpectrum(it->second));
       ++currentIndex;
-      progress.report("Setting output spectrum #" + std::to_string(currentIndex));
+      progress.report("Setting output spectrum #" +
+                      std::to_string(currentIndex));
     }
   }
 
