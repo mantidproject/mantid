@@ -67,7 +67,7 @@ void ConvertSpectrumAxis2::init() {
                   "(EMode=Indirect))");
 
   declareProperty("OrderAxis", true, "Whether or not to sort the resulting"
-                                     " spectum axis.");
+                                     " spectrum axis.");
 }
 
 void ConvertSpectrumAxis2::exec() {
