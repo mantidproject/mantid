@@ -5,7 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "Mantid/Kernel/make_unique.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
