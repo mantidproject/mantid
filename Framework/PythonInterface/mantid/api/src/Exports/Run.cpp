@@ -199,7 +199,8 @@ void export_Run() {
       //--------------------------- Dictionary
       // access----------------------------
       .def("get", &getWithDefault, (arg("self"), arg("key"), arg("default")),
-           "Returns the value pointed to by the key or the default value given.")
+           "Returns the value pointed to by the key or the default value "
+           "given.")
       .def("get", &get, (arg("self"), arg("key")),
            "Returns the value pointed to by the key or "
            "None if it does not exist.")
