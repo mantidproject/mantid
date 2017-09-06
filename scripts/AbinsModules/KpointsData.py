@@ -129,7 +129,7 @@ class KpointsData(AbinsModules.GeneralData):
     def get_gamma_point_data(self):
         """
         Extracts k points data only for Gamma point.
-        :return: dictionary with data only for Gamma point
+        :returns: dictionary with data only for Gamma point
         """
         gamma_pkt_index = -1
 

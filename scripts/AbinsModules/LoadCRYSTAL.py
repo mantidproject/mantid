@@ -75,7 +75,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
     def _determine_system(self):
         """
         Determines whether the system is a molecule or a crystal.
-        :return: True if calculation for molecule otherwise False
+        :returns: True if calculation for molecule otherwise False
         """
         with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
             lines = crystal_file.read()
@@ -98,7 +98,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Checks if we have data for more than one k-point. If data for more than one k-point then calculates
         transformation matrix to primitive unit cell from super cell.
-        :return: True if many k-points included in calculations otherwise False
+        :returns: True if many k-points included in calculations otherwise False
         """
         with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
             lines = crystal_file.read()
@@ -125,7 +125,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Reads lattice vectors from .out CRYSTAL file.
         :param file_obj:  file object from which we read
-        :return: list with lattice vectors
+        :returns: list with lattice vectors
         """
         self._parser.find_first(file_obj=file_obj, msg="DIRECT LATTICE VECTORS CARTESIAN COMPONENTS (ANGSTROM)")
         file_obj.readline()  # Line: X                    Y                    Z
@@ -142,7 +142,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Reads atomic coordinates from .out CRYSTAL file.
         :param file_obj:  file object from which we read
-        :return: list with atomic coordinates
+        :returns: list with atomic coordinates
         """
         coord_lines = []
         self._parser.find_first(file_obj=file_obj,
@@ -170,7 +170,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         Reads vibrational modes (frequencies and atomic displacements).
         :param phonon_dispersion: True if more then one k-point to parse, otherwise False.
         :param file_obj: file object from which we read
-        :return: Tuple with frequencies and corresponding atomic displacements, weights of k-points and coordinates of
+        :returns: Tuple with frequencies and corresponding atomic displacements, weights of k-points and coordinates of
                  k-points
         """
         # case of more than one k-point
@@ -339,7 +339,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Checks if end of k-points block.
         :param file_obj: file object from which we read
-        :return: True if end of block otherwise False
+        :returns: True if end of block otherwise False
         """
         allowed_keywords = [b" X ", b" Y ", b" Z ", b"-", b"REAL", b"IMAGINARY", b"MODES", b"DISPERSION"]
 

@@ -11,7 +11,7 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
     """
     def __init__(self, input_dft_filename):
         """
-        @param input_dft_filename: name of file with phonon data (foo.log)
+        :param input_dft_filename: name of file with phonon data (foo.log)
         """
         super(LoadGAUSSIAN, self).__init__(input_dft_filename=input_dft_filename)
         self._dft_program = "GAUSSIAN"
@@ -21,7 +21,7 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
         """
         Reads phonon data from GAUSSIAN output files. Saves frequencies and atomic displacements (only molecular
         calculations), hash of the phonon  file (hash) to <>.hdf5.
-        :return: object of type AbinsData.
+        :returns: object of type AbinsData.
         """
 
         data = {}  # container to store read data

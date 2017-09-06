@@ -117,7 +117,7 @@ class GeneralLoadDFTTester(object):
         Reads data from .{extension} file.
         :param loader: DFT loader
         :param filename: name of file with phonon data (name + extension)
-        :return: phonon data
+        :returns: phonon data
         """
         # 1) Read data
         filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension)
@@ -134,7 +134,7 @@ class GeneralLoadDFTTester(object):
     def _get_reader_data(self, dft_reader=None):
         """
         :param dft_reader: object of type  GeneralDFTProgram
-        :return: read data
+        :returns: read data
         """
         abins_type_data = dft_reader.read_phonon_file()
         data = {"datasets": abins_type_data.extract(),

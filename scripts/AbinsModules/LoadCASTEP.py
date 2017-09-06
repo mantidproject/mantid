@@ -13,7 +13,7 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
     def __init__(self, input_dft_filename):
         """
 
-        @param input_dft_filename: name of file with phonon data (foo.phonon)
+        :param input_dft_filename: name of file with phonon data (foo.phonon)
         """
         super(LoadCASTEP, self).__init__(input_dft_filename=input_dft_filename)
 
@@ -27,9 +27,9 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
         """
         Parses the header of a block of frequencies and intensities
 
-        @param header_match: the regex match to the header
-        @param block_count: the count of blocks found so far
-        @return weight for this block of values
+        :param header_match: the regex match to the header
+        :param block_count: the count of blocks found so far
+        :return weight for this block of values
         """
         # Found header block at start of frequencies
         if self._sum_rule and block_count == 0:
@@ -47,8 +47,8 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
         """
         Reads information from the header of a <>.phonon file
 
-        @param f_handle: handle to the file.
-        @return List of ions in file as list of tuple of (ion, mode number)
+        :param f_handle: handle to the file.
+        :return List of ions in file as list of tuple of (ion, mode number)
         """
         file_data = {"atoms": {}}
 
@@ -96,7 +96,7 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
         """
         Reads frequencies block from <>.phonon file.
 
-        @param f_handle: handle to the file.
+        :param f_handle: handle to the file.
         """
 
         freq = []
@@ -111,8 +111,8 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
         """
         Parses the unit cell vectors in a .phonon file.
 
-        @param f_handle: Handle to the file
-        @return Numpy array of unit vectors
+        :param f_handle: Handle to the file
+        :return Numpy array of unit vectors
         """
         data = []
         for _ in range(3):
@@ -126,8 +126,8 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
     def _parse_phonon_eigenvectors(self, f_handle):
         """
 
-        @param f_handle: file object to read
-        @return: eigenvectors (atomic displacements) for all k-points
+        :param f_handle: file object to read
+        :returns: eigenvectors (atomic displacements) for all k-points
         """
 
         dim = 3  # we have 3D space
@@ -153,7 +153,7 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
     def _check_acoustic_sum(self):
         """
         Checks if acoustic sum correction has been applied during calculations.
-        @return: True is correction has been applied, otherwise False.
+        :returns: True is correction has been applied, otherwise False.
         """
         header_str_sum = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + " \
                          r"(%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
@@ -173,7 +173,7 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
         from a <>.phonon file. Save frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic
         displacements, hash of the phonon file (hash) to <>.hdf5
 
-        @return  object of type AbinsData.
+        :return  object of type AbinsData.
         """
         file_data = {}
 
