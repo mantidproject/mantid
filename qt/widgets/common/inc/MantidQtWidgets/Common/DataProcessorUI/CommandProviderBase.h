@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDPROVIDERBASE_H
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandProvider.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include <MantidKernel/make_unique.h>
 namespace MantidQt {
 namespace MantidWidgets {
 /** @class CommandProviderBase
@@ -44,11 +45,11 @@ protected:
   static CommandIndices getModifyingCommands(const CommandVector &commands);
 
   template <typename Command> void addEditCommand() {
-    addEditCommand(std::make_unique<Command>(&m_presenter));
+    addEditCommand(::Mantid::Kernel::make_unique<Command>(&m_presenter));
   }
 
   template <typename Command> void addTableCommand() {
-    addTableCommand(std::make_unique<Command>(&m_presenter));
+    addTableCommand(::Mantid::Kernel::make_unique<Command>(&m_presenter));
   }
 
 private:
