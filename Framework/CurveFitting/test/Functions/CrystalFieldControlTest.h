@@ -12,23 +12,21 @@ using namespace Mantid::CurveFitting::Functions;
 
 class CrystalFieldControlTest : public CxxTest::TestSuite {
 public:
-  //:GEN_TEST:CrystalField:Control: defaults
   void test_defaults() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", "C2v");
     cf.setAttributeValue("Temperatures", std::vector<double>({44}));
     cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-    auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
-    TS_ASSERT_EQUALS(Ions, "Ce");
+    TS_ASSERT_EQUALS(Ions, "\"Ce\"");
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    TS_ASSERT_EQUALS(Symmetries, "C2v");
+    TS_ASSERT_EQUALS(Symmetries, "\"C2v\"");
     std::string PhysicalProperties =
         cf.getAttribute("PhysicalProperties").asString();
     TS_ASSERT_EQUALS(PhysicalProperties, "");
     std::string Background = cf.getAttribute("Background").asString();
-    TS_ASSERT_EQUALS(Background, "");
+    TS_ASSERT_EQUALS(Background, "\"\"");
     std::string PeakShape = cf.getAttribute("PeakShape").asString();
     TS_ASSERT_EQUALS(PeakShape, "Lorentzian");
     double FWHMVariation = cf.getAttribute("FWHMVariation").asDouble();
@@ -38,395 +36,340 @@ public:
     TS_ASSERT_EQUALS(FWHMs[0], 1.0000000000000000e+00);
 
     std::vector<double> f0_FWHMX =
-        cf.getFunction(0)->getAttribute("FWHMX").asVector();
+        cf.getAttribute("FWHMX").asVector();
     TS_ASSERT(f0_FWHMX.empty());
 
     std::vector<double> f0_FWHMY =
-        cf.getFunction(0)->getAttribute("FWHMY").asVector();
+        cf.getAttribute("FWHMY").asVector();
     TS_ASSERT(f0_FWHMY.empty());
   }
 
-  //:GEN_TEST:CrystalField:Control: defaults
-
-  //:GEN_TEST:CrystalField:Control:build
   void test_build_1() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce");
-      cf.setAttributeValue("Symmetries", " C2v");
-      cf.setAttributeValue("PhysicalProperties", "");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce");
-      TS_ASSERT_EQUALS(Symmetries, "C2v");
-      TS_ASSERT_EQUALS(PhysicalProperties, "");
-      TS_ASSERT_EQUALS(isComposite, false);
-      TS_ASSERT_EQUALS(isMultiSite, false);
-      TS_ASSERT_EQUALS(isMultiSpectrum, false);
-      TS_ASSERT_EQUALS(nControls, 1);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce");
+    cf.setAttributeValue("Symmetries", " C2v");
+    cf.setAttributeValue("PhysicalProperties", "");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"C2v\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "");
+    TS_ASSERT_EQUALS(isComposite, false);
+    TS_ASSERT_EQUALS(isMultiSite, false);
+    TS_ASSERT_EQUALS(isMultiSpectrum, false);
+    TS_ASSERT_EQUALS(nControls, 0);
   }
 
   void test_build_2() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce, Yb");
-      cf.setAttributeValue("Symmetries", " D3,  D6h");
-      cf.setAttributeValue("PhysicalProperties", "");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce,Yb");
-      TS_ASSERT_EQUALS(Symmetries, "D3,D6h");
-      TS_ASSERT_EQUALS(PhysicalProperties, "");
-      TS_ASSERT_EQUALS(isComposite, true);
-      TS_ASSERT_EQUALS(isMultiSite, true);
-      TS_ASSERT_EQUALS(isMultiSpectrum, false);
-      TS_ASSERT_EQUALS(nControls, 1);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce, Yb");
+    cf.setAttributeValue("Symmetries", " D3,  D6h");
+    cf.setAttributeValue("PhysicalProperties", "");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce,Yb\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"D3,D6h\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "");
+    TS_ASSERT_EQUALS(isComposite, true);
+    TS_ASSERT_EQUALS(isMultiSite, true);
+    TS_ASSERT_EQUALS(isMultiSpectrum, false);
+    TS_ASSERT_EQUALS(nControls, 0);
   }
 
   void test_build_3() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce");
-      cf.setAttributeValue("Symmetries", " C2v");
-      cf.setAttributeValue("PhysicalProperties", "");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce");
-      TS_ASSERT_EQUALS(Symmetries, "C2v");
-      TS_ASSERT_EQUALS(PhysicalProperties, "");
-      TS_ASSERT_EQUALS(isComposite, false);
-      TS_ASSERT_EQUALS(isMultiSite, false);
-      TS_ASSERT_EQUALS(isMultiSpectrum, true);
-      TS_ASSERT_EQUALS(nControls, 2);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce");
+    cf.setAttributeValue("Symmetries", " C2v");
+    cf.setAttributeValue("PhysicalProperties", "");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"C2v\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "");
+    TS_ASSERT_EQUALS(isComposite, false);
+    TS_ASSERT_EQUALS(isMultiSite, false);
+    TS_ASSERT_EQUALS(isMultiSpectrum, true);
+    TS_ASSERT_EQUALS(nControls, 2);
   }
 
   void test_build_4() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce, Yb");
-      cf.setAttributeValue("Symmetries", " D3,  D6h");
-      cf.setAttributeValue("PhysicalProperties", "");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce,Yb");
-      TS_ASSERT_EQUALS(Symmetries, "D3,D6h");
-      TS_ASSERT_EQUALS(PhysicalProperties, "");
-      TS_ASSERT_EQUALS(isComposite, true);
-      TS_ASSERT_EQUALS(isMultiSite, true);
-      TS_ASSERT_EQUALS(isMultiSpectrum, true);
-      TS_ASSERT_EQUALS(nControls, 2);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce, Yb");
+    cf.setAttributeValue("Symmetries", " D3,  D6h");
+    cf.setAttributeValue("PhysicalProperties", "");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce,Yb\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"D3,D6h\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "");
+    TS_ASSERT_EQUALS(isComposite, true);
+    TS_ASSERT_EQUALS(isMultiSite, true);
+    TS_ASSERT_EQUALS(isMultiSpectrum, true);
+    TS_ASSERT_EQUALS(nControls, 2);
   }
 
   void test_build_5() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce");
-      cf.setAttributeValue("Symmetries", " C2v");
-      cf.setAttributeValue("PhysicalProperties", "");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce");
+    cf.setAttributeValue("Symmetries", " C2v");
+    cf.setAttributeValue("PhysicalProperties", "");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
 
-      // error: Vector of FWHMs must either have same size as Temperatures (1)
-      // or have size 1. std::runtime_error
-      TS_ASSERT_THROWS(cf.buildSource(), std::runtime_error);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    // error: Vector of FWHMs must either have same size as Temperatures (1)
+    // or have size 1. std::runtime_error
+    TS_ASSERT_THROWS(cf.buildSource(), std::runtime_error);
   }
 
-  void test_build_7() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce");
-      cf.setAttributeValue("Symmetries", " C2v");
-      cf.setAttributeValue("PhysicalProperties", "");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce");
-      TS_ASSERT_EQUALS(Symmetries, "C2v");
-      TS_ASSERT_EQUALS(PhysicalProperties, "");
-      TS_ASSERT_EQUALS(isComposite, false);
-      TS_ASSERT_EQUALS(isMultiSite, false);
-      TS_ASSERT_EQUALS(isMultiSpectrum, true);
-      TS_ASSERT_EQUALS(nControls, 2);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+  void xtest_build_7() {
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce");
+    cf.setAttributeValue("Symmetries", " C2v");
+    cf.setAttributeValue("PhysicalProperties", "");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
+    cf.buildControls();
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"C2v\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "");
+    TS_ASSERT_EQUALS(isComposite, false);
+    TS_ASSERT_EQUALS(isMultiSite, false);
+    TS_ASSERT_EQUALS(isMultiSpectrum, true);
+    TS_ASSERT_EQUALS(nControls, 2);
   }
 
   void test_build_8() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce, Yb");
-      cf.setAttributeValue("Symmetries", " D3,  D6h");
-      cf.setAttributeValue("PhysicalProperties", "");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce,Yb");
-      TS_ASSERT_EQUALS(Symmetries, "D3,D6h");
-      TS_ASSERT_EQUALS(PhysicalProperties, "");
-      TS_ASSERT_EQUALS(isComposite, true);
-      TS_ASSERT_EQUALS(isMultiSite, true);
-      TS_ASSERT_EQUALS(isMultiSpectrum, true);
-      TS_ASSERT_EQUALS(nControls, 2);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce, Yb");
+    cf.setAttributeValue("Symmetries", " D3,  D6h");
+    cf.setAttributeValue("PhysicalProperties", "");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce,Yb\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"D3,D6h\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "");
+    TS_ASSERT_EQUALS(isComposite, true);
+    TS_ASSERT_EQUALS(isMultiSite, true);
+    TS_ASSERT_EQUALS(isMultiSpectrum, true);
+    TS_ASSERT_EQUALS(nControls, 2);
   }
 
   void test_build_9() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce");
-      cf.setAttributeValue("Symmetries", " C2v");
-      cf.setAttributeValue("PhysicalProperties", " cv");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce");
-      TS_ASSERT_EQUALS(Symmetries, "C2v");
-      TS_ASSERT_EQUALS(PhysicalProperties, "cv");
-      TS_ASSERT_EQUALS(isComposite, false);
-      TS_ASSERT_EQUALS(isMultiSite, false);
-      TS_ASSERT_EQUALS(isMultiSpectrum, true);
-      TS_ASSERT_EQUALS(nControls, 2);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce");
+    cf.setAttributeValue("Symmetries", " C2v");
+    cf.setAttributeValue("PhysicalProperties", " cv");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"C2v\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "cv");
+    TS_ASSERT_EQUALS(isComposite, false);
+    TS_ASSERT_EQUALS(isMultiSite, false);
+    TS_ASSERT_EQUALS(isMultiSpectrum, true);
+    TS_ASSERT_EQUALS(nControls, 0);
   }
 
   void test_build_10() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce, Yb");
-      cf.setAttributeValue("Symmetries", " D3,  D6h");
-      cf.setAttributeValue("PhysicalProperties", " cv");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce,Yb");
-      TS_ASSERT_EQUALS(Symmetries, "D3,D6h");
-      TS_ASSERT_EQUALS(PhysicalProperties, "cv");
-      TS_ASSERT_EQUALS(isComposite, true);
-      TS_ASSERT_EQUALS(isMultiSite, true);
-      TS_ASSERT_EQUALS(isMultiSpectrum, true);
-      TS_ASSERT_EQUALS(nControls, 2);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce, Yb");
+    cf.setAttributeValue("Symmetries", " D3,  D6h");
+    cf.setAttributeValue("PhysicalProperties", " cv");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce,Yb\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"D3,D6h\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "cv");
+    TS_ASSERT_EQUALS(isComposite, true);
+    TS_ASSERT_EQUALS(isMultiSite, true);
+    TS_ASSERT_EQUALS(isMultiSpectrum, true);
+    TS_ASSERT_EQUALS(nControls, 0);
   }
 
   void test_build_11() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce");
-      cf.setAttributeValue("Symmetries", " C2v");
-      cf.setAttributeValue("PhysicalProperties", " cv");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce");
-      TS_ASSERT_EQUALS(Symmetries, "C2v");
-      TS_ASSERT_EQUALS(PhysicalProperties, "cv");
-      TS_ASSERT_EQUALS(isComposite, false);
-      TS_ASSERT_EQUALS(isMultiSite, false);
-      TS_ASSERT_EQUALS(isMultiSpectrum, true);
-      TS_ASSERT_EQUALS(nControls, 3);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce");
+    cf.setAttributeValue("Symmetries", " C2v");
+    cf.setAttributeValue("PhysicalProperties", " cv");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"C2v\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "cv");
+    TS_ASSERT_EQUALS(isComposite, false);
+    TS_ASSERT_EQUALS(isMultiSite, false);
+    TS_ASSERT_EQUALS(isMultiSpectrum, true);
+    TS_ASSERT_EQUALS(nControls, 2);
   }
 
   void test_build_12() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce, Yb");
-      cf.setAttributeValue("Symmetries", " D3,  D6h");
-      cf.setAttributeValue("PhysicalProperties", " cv");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce,Yb");
-      TS_ASSERT_EQUALS(Symmetries, "D3,D6h");
-      TS_ASSERT_EQUALS(PhysicalProperties, "cv");
-      TS_ASSERT_EQUALS(isComposite, true);
-      TS_ASSERT_EQUALS(isMultiSite, true);
-      TS_ASSERT_EQUALS(isMultiSpectrum, true);
-      TS_ASSERT_EQUALS(nControls, 3);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce, Yb");
+    cf.setAttributeValue("Symmetries", " D3,  D6h");
+    cf.setAttributeValue("PhysicalProperties", " cv");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce,Yb\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"D3,D6h\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "cv");
+    TS_ASSERT_EQUALS(isComposite, true);
+    TS_ASSERT_EQUALS(isMultiSite, true);
+    TS_ASSERT_EQUALS(isMultiSpectrum, true);
+    TS_ASSERT_EQUALS(nControls, 2);
   }
 
   void test_build_15() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce");
-      cf.setAttributeValue("Symmetries", " C2v");
-      cf.setAttributeValue("PhysicalProperties", " cv");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce");
-      TS_ASSERT_EQUALS(Symmetries, "C2v");
-      TS_ASSERT_EQUALS(PhysicalProperties, "cv");
-      TS_ASSERT_EQUALS(isComposite, false);
-      TS_ASSERT_EQUALS(isMultiSite, false);
-      TS_ASSERT_EQUALS(isMultiSpectrum, true);
-      TS_ASSERT_EQUALS(nControls, 3);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce");
+    cf.setAttributeValue("Symmetries", " C2v");
+    cf.setAttributeValue("PhysicalProperties", " cv");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"C2v\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "cv");
+    TS_ASSERT_EQUALS(isComposite, false);
+    TS_ASSERT_EQUALS(isMultiSite, false);
+    TS_ASSERT_EQUALS(isMultiSpectrum, true);
+    TS_ASSERT_EQUALS(nControls, 2);
   }
 
   void test_build_16() {
-    try {
-      Mantid::CurveFitting::Functions::CrystalFieldControl cf;
-      cf.setAttributeValue("Ions", "Ce, Yb");
-      cf.setAttributeValue("Symmetries", " D3,  D6h");
-      cf.setAttributeValue("PhysicalProperties", " cv");
-      cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
-      cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
-      auto source = cf.buildSource();
-      std::string Ions = cf.getAttribute("Ions").asString();
-      std::string Symmetries = cf.getAttribute("Symmetries").asString();
-      std::string PhysicalProperties =
-          cf.getAttribute("PhysicalProperties").asString();
-      bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
-                             source.get()) != nullptr;
-      bool isMultiSite = cf.isMultiSite();
-      bool isMultiSpectrum = cf.isMultiSpectrum();
-      int nControls = (int)cf.nFunctions();
-      TS_ASSERT_EQUALS(Ions, "Ce,Yb");
-      TS_ASSERT_EQUALS(Symmetries, "D3,D6h");
-      TS_ASSERT_EQUALS(PhysicalProperties, "cv");
-      TS_ASSERT_EQUALS(isComposite, true);
-      TS_ASSERT_EQUALS(isMultiSite, true);
-      TS_ASSERT_EQUALS(isMultiSpectrum, true);
-      TS_ASSERT_EQUALS(nControls, 3);
-    } catch (...) {
-      TS_FAIL("Exception is thrown in the wrong place");
-    }
+    Mantid::CurveFitting::Functions::CrystalFieldControl cf;
+    cf.setAttributeValue("Ions", "Ce, Yb");
+    cf.setAttributeValue("Symmetries", " D3,  D6h");
+    cf.setAttributeValue("PhysicalProperties", " cv");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
+    auto source = cf.buildSource();
+    std::string Ions = cf.getAttribute("Ions").asString();
+    std::string Symmetries = cf.getAttribute("Symmetries").asString();
+    std::string PhysicalProperties =
+        cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(
+                            source.get()) != nullptr;
+    bool isMultiSite = cf.isMultiSite();
+    bool isMultiSpectrum = cf.isMultiSpectrum();
+    int nControls = (int)cf.nFunctions();
+    TS_ASSERT_EQUALS(Ions, "\"Ce,Yb\"");
+    TS_ASSERT_EQUALS(Symmetries, "\"D3,D6h\"");
+    TS_ASSERT_EQUALS(PhysicalProperties, "cv");
+    TS_ASSERT_EQUALS(isComposite, true);
+    TS_ASSERT_EQUALS(isMultiSite, true);
+    TS_ASSERT_EQUALS(isMultiSpectrum, true);
+    TS_ASSERT_EQUALS(nControls, 2);
   }
 
-  //:GEN_TEST:CrystalField:Control:build
 };
 
 #endif /*CRYSTALFIELDCONTROLTEST_H_*/

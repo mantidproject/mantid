@@ -202,11 +202,6 @@ void CrystalFieldControl::buildPhysPropControls() {
   if (nSpec == 1) {
     addFunction(API::IFunction_sptr(new CrystalFieldSpectrumControl));
   }
-  // const auto nPProps = m_physProps.size();
-  // for (size_t i = 0; i < nPProps; ++i) {
-  //  auto j = nSpec + i;
-  //  addFunction(API::IFunction_sptr(new CrystalFieldPhysPropControl));
-  //}
 }
 
 /// Check if the function is set up for a multi-site calculations.
