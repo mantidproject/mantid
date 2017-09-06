@@ -103,7 +103,7 @@ private:
 
   /// Methods searving for findPeaksUsingMariscotti()
   API::MatrixWorkspace_sptr
-  calculateSecondDifference(const API::MatrixWorkspace_const_sptr &input);
+  calculateSecondDifference(const API::MatrixWorkspace_sptr &input);
   void smoothData(API::MatrixWorkspace_sptr &WS, const int &w);
   void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input,
                                   const API::MatrixWorkspace_sptr &smoothed,

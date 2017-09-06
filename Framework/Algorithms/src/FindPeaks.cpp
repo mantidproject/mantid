@@ -10,9 +10,11 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FitPeak.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
+
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -635,11 +637,12 @@ void FindPeaks::findPeaksUsingMariscotti() {
   *  @return A workspace containing the second difference
   */
 API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
-    const API::MatrixWorkspace_const_sptr &input) {
+    const API::MatrixWorkspace_sptr &input) {
   // We need a new workspace the same size as the input ont
   MatrixWorkspace_sptr diffed = 0;
 
-  const size_t blocksize = input->blocksize();
+  // create the MatrixWorkspace for derivatives
+  size_t numHists(1);
   if (singleSpectrum) {
     // single spectrum: only work on 1 spectrum. no need to calculate derivative
     // to the other spectra.
@@ -649,39 +652,37 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
 
     diffed = WorkspaceFactory::Instance().create("Workspace2D", nvector,
                                                  xlength, ylength);
+  }
+  else
+  {
+    // all spectra: create a workspace from parent
+   //  diffed = Mantid::DataObjects::create<API::MatrixWorkspace>(input);
+    diffed = WorkspaceFactory::Instance().create(input);
+    numHists = input->getNumberHistograms();
+  }
 
-    // copy over the X values
-    diffed->setSharedX(0, input->sharedX(m_wsIndex));
+  // calculate derivative
+  const size_t blocksize = input->blocksize();
+  for (size_t i = 0; i < numHists; ++i)
+  {
+    // get the source wsindex
+    size_t wsindex(i);
+    if (singleSpectrum)
+      wsindex = m_wsIndex;
 
-    // calculate derivatievs
-    const auto &Y = input->y(m_wsIndex);
-    auto &S = diffed->mutableY(0);
-    // Go through each spectrum calculating the second difference at each point
-    // First and last points in each spectrum left as zero (you'd never be able
+    // Copy over the X values
+    diffed->setSharedX(i, input->sharedX(wsindex));
+
+    // calculate derivatives
+    const auto &Y = input->y(wsindex);
+    auto &S = diffed->mutableY(i);
+    // Go through each spectrum calculating the second difference at each
+    // point
+    // First and last points in each spectrum left as zero (you'd never be
+    // able
     // to find peaks that close to the edge anyway)
     for (size_t j = 1; j < blocksize - 1; ++j) {
       S[j] = Y[j - 1] - 2 * Y[j] + Y[j + 1];
-    }
-  } else {
-    diffed = WorkspaceFactory::Instance().create(input);
-
-    const size_t numHists = input->getNumberHistograms();
-
-    // Loop over spectra
-    for (size_t i = 0; i < size_t(numHists); ++i) {
-      // Copy over the X values
-      diffed->setSharedX(i, input->sharedX(i));
-
-      const auto &Y = input->y(i);
-      auto &S = diffed->mutableY(i);
-      // Go through each spectrum calculating the second difference at each
-      // point
-      // First and last points in each spectrum left as zero (you'd never be
-      // able
-      // to find peaks that close to the edge anyway)
-      for (size_t j = 1; j < blocksize - 1; ++j) {
-        S[j] = Y[j - 1] - 2 * Y[j] + Y[j + 1];
-      }
     }
   }
 
