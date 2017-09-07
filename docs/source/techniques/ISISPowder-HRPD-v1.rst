@@ -189,7 +189,7 @@ the example values for appropriate ones.
         vanadium_run_numbers: "1"
 	empty_run_numbers: "2"
     "decoupled":
-      "100-200:
+      "100-200":
         vanadium_run_numbers: "3"
 	empty_run_numbers: "4"
     label: "1_1"
@@ -349,12 +349,13 @@ Example Input:
 
 output_directory
 ^^^^^^^^^^^^^^^^
-Specified the path to the output directory to save processed files
+Specifies the path to the output directory to save processed files
 into. The script will automatically create a folder with the label
 determined from the
 :ref:`calibration_mapping_file_hrpd_isis-powder-diffraction-ref` and
 within that create another folder for the current
-:ref:`user_name_polaris_isis-powder-diffraction-ref`.
+:ref:`user_name_polaris_isis-powder-diffraction-ref`. NXS and GSAS
+files are saved here automatically.
 
 Example Input:
 
