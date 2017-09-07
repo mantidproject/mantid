@@ -14,6 +14,8 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         red_ws = Load('irs26176_graphite002_red.nxs')
         self._red_ws = red_ws
         self._expected_unit = self._red_ws.getAxis(0).getUnit().unitID()
+        self._expected_hist = 10
+        self._expected_blocksize = 1905
 
         self._arguments = {'SampleChemicalFormula': 'H2-O',
                            'SampleDensityType': 'Mass Density',
@@ -60,10 +62,10 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         self.assertEquals(y_unit, 'Attenuation factor')
 
         num_hists = corr_ws.getNumberHistograms()
-        self.assertEquals(num_hists, 10)
+        self.assertEquals(num_hists, self._expected_hist)
 
         blocksize = corr_ws.blocksize()
-        self.assertEquals(blocksize, 1905)
+        self.assertEquals(blocksize, self._expected_blocksize)
 
     def _test_corrections_workspaces(self, workspaces):
         self.assertNotEquals(workspaces, None)
@@ -92,6 +94,8 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         red_ws = Load('osi104367_elf.nxs')
         self._red_ws = red_ws
         self._expected_unit = "MomentumTransfer"
+        self._expected_hist = 17
+        self._expected_blocksize = 5
         self._run_correction_and_test(shape)
 
     def _flat_plate_test(self, test_func):
