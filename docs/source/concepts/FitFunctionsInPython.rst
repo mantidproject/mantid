@@ -102,12 +102,69 @@ Multi-Domain functions can be constructed like this:
 
     md_fun = MultiDomainFunction(Gaussian(PeakCentre=1, Sigma=0.1), Gaussian(PeakCentre=1, Sigma=0.2), ..., global=['Height'])
 
-
-
 Setting Ties
 ------------
+The parameters of functions can be tied or fixed like this:
+
+.. code:: python
+
+    func1.tie(A0=2.0)
+    func2.tie({'f1.A2': '2*f0.A1', 'f2.A2': '3*f0.A1 + 1'})
+    func3.fix('A0')
+    func4.fix('f2.A2')
+
+Both fixes and ties can be removed by ``untie``:
+
+.. code:: python
+
+    func.untie('f3.Sigma')
+    
+To tie all parameters of the same local name in a composite function, one can use ``TieAll``:
+
+.. code:: python
+
+    func.tieAll('Sigma')
+ 
+All members of the composite function must have this parameter (in this case ``Sigma``).
+Similarly with fixing:
+
+.. code:: python
+
+    spectrum1.fixAll('FWHM')
+    
+Also parameters of a function can be fixed with ``fixAllParameters`` and unfixed with ``untieAllParameters``.
+
+.. code:: python
+
+    c.fixAllParameters()
+    ... 
+    c.untieAllParameters()
+
 
 Setting Constraints
--------------------      
+------------------- 
+One can set and remove constraints as follows:
+
+.. code:: python
+
+    g.constrain("Sigma < 2.0, Height > 7.0") 
+    ...
+    g.unconstrain("Sigma")
+    g.unconstrain("Height")
+            
+    comp.constrain("f1.Sigma < 2, f0.Height > 7") 
+    ...
+    comp.unconstrain("f1.Sigma")
+    comp.unconstrain("f0.Height") 
+
+One can all constrain a given parameter in all members of a composite function that have this parameter 
+and also remove such constraints.
+
+.. code:: python
+
+    comp.constrainAll("Sigma < 1.8")
+    ...
+    comp.unconstrainAll("Sigma")
+    
 
 .. categories:: Concepts
