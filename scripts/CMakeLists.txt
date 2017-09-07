@@ -36,6 +36,7 @@ set ( TEST_PY_FILES
       test/AbinsKpointsDataTest.py
       test/AbinsLoadCASTEPTest.py
       test/AbinsLoadCRYSTALTest.py
+      test/AbinsLoadDMOL3Test.py
       test/AbinsPowderDataTest.py
       test/ConvertToWavelengthTest.py
       test/CrystalFieldTest.py
