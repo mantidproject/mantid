@@ -5,10 +5,6 @@ from mantid.simpleapi import Abins, mtd, DeleteWorkspace
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 
 
-def skip_tests():
-    return not hasattr(np, "einsum")
-
-
 class HelperTestingClass(object):
     def __init__(self):
 

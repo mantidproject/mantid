@@ -128,8 +128,6 @@ NUM_ZERO = 10e-15
 
 MAX_ORDER = 4  # max quantum order event
 
-NUMPY_VERSION_REQUIRED = "1.6.0"  # Abins requires numpy 1.6.0 or higher
-
 ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]

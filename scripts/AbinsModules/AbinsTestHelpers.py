@@ -23,16 +23,6 @@ def version_as_tuple(string=None):
         raise ValueError("Version of package couldn't be converted to number. (version=", string)
 
 
-def is_numpy_valid(string=None):
-    """
-
-    :param string: version of numpy to be checked in the format number1.number2.number3
-    :returns: False if version of numpy  is valid otherwise True
-    """
-
-    return version_as_tuple(string=string) < version_as_tuple(AbinsModules.AbinsConstants.NUMPY_VERSION_REQUIRED)
-
-
 def find_file(filename=None):
     """
     Calculates path of filename with the testing data. Path is determined in the platform independent way.
