@@ -40,6 +40,8 @@ public:
   StartsWithValidator() = default;
   StartsWithValidator(const std::vector<std::string> &values);
   StartsWithValidator(const std::set<std::string> &values);
+  template<std::size_t SIZE>
+  StartsWithValidator(const std::array<std::string, SIZE> &values);
   IValidator_sptr clone() const override;
 
 protected:
