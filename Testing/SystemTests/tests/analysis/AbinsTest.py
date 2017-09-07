@@ -151,9 +151,6 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -184,9 +181,6 @@ class AbinsCRYSTALTestBiggerSystem(stresstesting.MantidStressTest, HelperTesting
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -213,9 +207,6 @@ class AbinsCRYSTALTestT(stresstesting.MantidStressTest, HelperTestingClass):
     """
     tolerance = None
     ref_result = None
-
-    def skipTests(self):
-        return skip_tests()
 
     def runTest(self):
         HelperTestingClass.__init__(self)
@@ -247,9 +238,6 @@ class AbinsCRYSTALTestLargerOrder(stresstesting.MantidStressTest, HelperTestingC
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -280,9 +268,6 @@ class AbinsCRYSTALTestSmallerOrder(stresstesting.MantidStressTest, HelperTesting
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -306,9 +291,6 @@ class AbinsCRYSTALTestScale(stresstesting.MantidStressTest, HelperTestingClass):
     _wrk_1 = None
     _ref_result = None
     tolerance = None
-
-    def skipTests(self):
-        return skip_tests()
 
     def runTest(self):
         HelperTestingClass.__init__(self)
@@ -337,9 +319,6 @@ class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -365,9 +344,6 @@ class AbinsCASTEP1DDispersion(stresstesting.MantidStressTest, HelperTestingClass
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -392,9 +368,6 @@ class AbinsDMOL3TestScratch(stresstesting.MantidStressTest, HelperTestingClass):
     """
     tolerance = None
     ref_result = None
-
-    def skipTests(self):
-        return skip_tests()
 
     def runTest(self):
         HelperTestingClass.__init__(self)

@@ -634,7 +634,7 @@ class Abins(PythonAlgorithm):
         :param filename_full_path: full path of a file to check.
         :returns: True if file is valid otherwise false.
         """
-        logger.information("Validate CRYSTAL phonon file: ")
+        logger.information("Validate GAUSSIAN file with vibration data: ")
         return self._validate_dft_file_extension(filename_full_path=filename_full_path,
                                                  expected_file_extension=".log")
 
