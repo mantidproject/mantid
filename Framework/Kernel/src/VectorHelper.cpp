@@ -453,27 +453,25 @@ size_t indexOfValueFromCenters(const std::vector<double> &bin_centers,
  * @throw std::out_of_range : if vector is empty, contains one element,
  *  or value is out of it's range
  */
-
 size_t indexOfValueFromEdges(const std::vector<double> &bin_edges,
-                               const double value) {
+                             const double value) {
   if (bin_edges.empty()) {
     throw std::out_of_range("indexOfValue - vector is empty");
   }
   if (bin_edges.size() == 1) {
-      throw std::out_of_range("indexOfValue - requires at least two bin edges");
+    throw std::out_of_range("indexOfValue - requires at least two bin edges");
   }
   if (value < bin_edges.front()) {
-    throw std::out_of_range(
-        "indexOfValue - value out of range");
+    throw std::out_of_range("indexOfValue - value out of range");
   }
   const auto it = std::lower_bound(bin_edges.begin(), bin_edges.end(), value);
   if (it == bin_edges.end()) {
-    throw std::out_of_range(
-        "indexOfValue - value out of range");
+    throw std::out_of_range("indexOfValue - value out of range");
   }
   // index of closest edge above value is distance of iterator from start
   size_t edgeIndex = std::distance(bin_edges.begin(), it);
-  // if the element n is the first that is >= value, then the value is in (n-1) th bin
+  // if the element n is the first that is >= value, then the value is in (n-1)
+  // th bin
   if (edgeIndex > 0)
     edgeIndex--;
   return edgeIndex;

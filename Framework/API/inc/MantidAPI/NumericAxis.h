@@ -44,7 +44,6 @@ class MatrixWorkspace;
 */
 class MANTID_API_DLL NumericAxis : public Axis {
 public:
-
   NumericAxis(const std::size_t &length);
   NumericAxis(const std::vector<double> &centres);
 
