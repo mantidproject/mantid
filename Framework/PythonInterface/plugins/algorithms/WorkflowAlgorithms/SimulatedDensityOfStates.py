@@ -787,6 +787,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #------------------------------------------------------------------------------------------
 
+
 try:
     import scipy.constants
     AlgorithmFactory.subscribe(SimulatedDensityOfStates)

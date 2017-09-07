@@ -1500,5 +1500,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return out_ws_name_list
 
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(SNSPowderReduction)
