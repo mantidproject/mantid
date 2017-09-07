@@ -28,6 +28,7 @@ def ticketExists(alg, ticketHash):
 def outputError(alg, algVersion, description, notes=""):
     print "%s, %i, %s, %s" % (alg, algVersion, description, notes)
 
+
 rstdir = r"C:\Mantid\Code\Mantid\docs\source\algorithms"
 ticketList = [9582,9586,9607,9610,9704,9804,9726]
 

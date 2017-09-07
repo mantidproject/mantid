@@ -2,6 +2,7 @@
 """
     Inelastic specific implementation of the Reducer.
 """
+from __future__ import (absolute_import, division, print_function)
 from reduction import Reducer
 # Validate_step is a decorator that allows both Python algorithms and
 # ReductionStep objects to be passed to the Reducer.

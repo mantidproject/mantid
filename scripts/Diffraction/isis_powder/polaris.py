@@ -46,15 +46,12 @@ class Polaris(AbstractInst):
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
             return polaris_algs.calculate_van_absorb_corrections(
-                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering)
+                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
+                is_vanadium=self._is_vanadium)
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(
                 ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
-                sample_details_obj=self._sample_details)
-
-    @staticmethod
-    def _can_auto_gen_vanadium_cal():
-        return True
+                sample_details_obj=self._sample_details, is_vanadium=self._is_vanadium)
 
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)
@@ -68,9 +65,6 @@ class Polaris(AbstractInst):
         cropped_ws = common.crop_banks_using_crop_list(bank_list=van_ws_to_crop,
                                                        crop_values_list=self._inst_settings.van_crop_values)
         return cropped_ws
-
-    def _generate_auto_vanadium_calibration(self, run_details):
-        self.create_vanadium(run_in_range=run_details.run_number)
 
     @staticmethod
     def _generate_input_file_name(run_number):

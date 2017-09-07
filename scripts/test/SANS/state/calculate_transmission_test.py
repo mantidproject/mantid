@@ -175,7 +175,7 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                                                    "background_TOF_monitor_stop": {"1": 2., "2": 2.}})
 
     def test_that_polynomial_order_can_only_be_set_with_polynomial_setting(self):
-        self.check_bad_and_good_values(bad_fit={"fit_type": FitType.Log, "polynomial_order": 4},
+        self.check_bad_and_good_values(bad_fit={"fit_type": FitType.Polynomial, "polynomial_order": 0},
                                        good_fit={"fit_type": FitType.Polynomial,  "polynomial_order": 4})
 
     def test_that_raises_for_inconsistent_wavelength_in_fit(self):

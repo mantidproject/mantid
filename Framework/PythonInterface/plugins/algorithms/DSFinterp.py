@@ -113,6 +113,7 @@ class DSFinterp(PythonAlgorithm):
             outws = mantid.simpleapi.CloneWorkspace( mantid.mtd[workspaces[0]], OutputWorkspace=outworkspaces[i])
             dsf.Save(outws) # overwrite dataY and dataE
 
+
 #############################################################################################
 #pylint: disable=unused-import
 try:

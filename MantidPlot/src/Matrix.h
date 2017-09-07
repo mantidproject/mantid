@@ -44,7 +44,7 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <qwt_double_rect.h>
 #include <qwt_color_map.h>
