@@ -95,7 +95,7 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         self._red_ws = red_ws
         self._expected_unit = "MomentumTransfer"
         self._expected_hist = 17
-        self._expected_blocksize = 5
+        self._expected_blocksize = 1
         self._run_correction_and_test(shape)
 
     def _flat_plate_test(self, test_func):
