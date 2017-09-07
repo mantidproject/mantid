@@ -728,21 +728,24 @@ void FindPeaks::calculateStandardDeviation(
   const double constant =
       sqrt(static_cast<double>(this->computePhi(w))) / factor;
 
-  if (singleSpectrum) {
-    // single spectrum.  smoothed workspace has 1 and only 1 spectrum
-    smoothed->setSharedE(0, input->sharedE(m_wsIndex));
-    std::transform(smoothed->e(0).cbegin(), smoothed->e(0).cend(),
-                   smoothed->mutableE(0).begin(),
+  // determine the number of histogram in 2 ways
+  size_t numHists(1);
+  if (!singleSpectrum)
+    numHists = smoothed->getNumberHistograms();
+  for (size_t i = 0; i < size_t(numHists); ++i) {
+    // set up the source workspace index
+    size_t iws(i);
+    if (singleSpectrum)
+      iws = m_wsIndex;
+
+    // set sharedE
+    smoothed->setSharedE(i, input->sharedE(iws));
+    std::transform(smoothed->e(i).cbegin(), smoothed->e(i).cend(),
+                   smoothed->mutableE(i).begin(),
                    std::bind2nd(std::multiplies<double>(), constant));
-  } else {
-    const size_t numHists = smoothed->getNumberHistograms();
-    for (size_t i = 0; i < size_t(numHists); ++i) {
-      smoothed->setSharedE(i, input->sharedE(i));
-      std::transform(smoothed->e(i).cbegin(), smoothed->e(i).cend(),
-                     smoothed->mutableE(i).begin(),
-                     std::bind2nd(std::multiplies<double>(), constant));
-    }
   }
+
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
