@@ -10,7 +10,7 @@ Mantid enables Fit function objects to be produced in python. For example
 
 .. code:: python
 
-  g = gaussian()
+  g = Gaussian()
 
 will make ``g`` into a Gaussian function with default values and
 

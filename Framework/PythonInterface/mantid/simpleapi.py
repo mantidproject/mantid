@@ -36,7 +36,7 @@ from .kernel.funcinspect import customise_func as _customise_func
 from . import apiVersion, __gui__
 from .kernel._aliases import *
 from .api._aliases import *
-from .FunctionWrapper import *
+from .fitfunctions import *
 
 # ------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
