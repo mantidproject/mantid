@@ -684,11 +684,11 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     // Iterate through all the remaining runs, adding them to the first run
     for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt) {
 
-      for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
+      for (auto& kvp : optionsMap) {
         try {
-          if (kvp->first != preprocessor.lhsProperty() &&
-              kvp->first != preprocessor.rhsProperty())
-          setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
+          if (kvp.first != preprocessor.lhsProperty().toStdString() &&
+              kvp.first != preprocessor.rhsProperty().toStdString())
+          setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // We can't apply this option to this pre-processing alg
           throw;
