@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called, too-many-branches
+from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 
@@ -191,7 +192,7 @@ class MplFigureCanvas(QtGui.QWidget):
         # process marker if it has information
         if marker.count(' (') > 0:
             marker = marker.split(' (')[0]
-        print "[DB] Print line %d: marker = %s, color = %s" % (self._myLineMarkerColorIndex, marker, color)
+        print("[DB] Print line %d: marker = %s, color = %s" % (self._myLineMarkerColorIndex, marker, color))
 
         # update the index
         self._myLineMarkerColorIndex += 1
@@ -336,11 +337,11 @@ class Qt4MplCanvas(FigureCanvas):
             # regular line
             self._lineDict[self._lineIndex] = r[0]
         else:
-            print "Impoooooooooooooooosible! Number of returned tuple is %d"%(len(r))
+            print("Impoooooooooooooooosible! Number of returned tuple is %d"%(len(r)))
             dbmsg = ''
             for sub_r in r:
                 dbmsg += 'Type: %s, Value: %s\n' % (str(type(sub_r)), str(sub_r))
-            print dbmsg
+            print(dbmsg)
         self._lineIndex += 1
 
         # Flush/commit
@@ -362,16 +363,16 @@ class Qt4MplCanvas(FigureCanvas):
         # yticks = [1, 4, 23, 24, 30]
         # self.axes.set_yticks(yticks)
 
-        print "[DBNOW] Before imshow(), number of axes = %d" % (len(self.fig.axes))
+        print("[DBNOW] Before imshow(), number of axes = %d" % (len(self.fig.axes)))
 
         # show image
         imgplot = self.axes.imshow(array2d, extent=[xmin,xmax,ymin,ymax], interpolation='none')
-        print "[DBNOW] After imshow(), number of axes = %d" % (len(self.fig.axes))
+        print("[DBNOW] After imshow(), number of axes = %d" % (len(self.fig.axes)))
 
         # set y ticks as an option:
         if yticklabels is not None:
             # it will always label the first N ticks even image is zoomed in
-            print "--------> [FixMe]: Set up the Y-axis ticks is erroreous"
+            print("--------> [FixMe]: Set up the Y-axis ticks is erroreous")
             #self.axes.set_yticklabels(yticklabels)
 
         # explicitly set aspect ratio of the image
@@ -384,7 +385,7 @@ class Qt4MplCanvas(FigureCanvas):
             self.colorBar = self.fig.colorbar(imgplot)
         else:
             self.colorBar.update_bruteforce(imgplot)
-        print "[DBNOW] After colorbar is added, number of axes = %d" % (len(self.fig.axes))
+        print("[DBNOW] After colorbar is added, number of axes = %d" % (len(self.fig.axes)))
 
         # Flush...
         self._flush()
@@ -427,8 +428,8 @@ class Qt4MplCanvas(FigureCanvas):
                 try:
                     self.axes.lines.remove(plot)
                 except ValueError as e:
-                    print "[Error] Plot %s is not in axes.lines which has %d lines. Error mesage: %s" % (
-                        str(plot), len(self.axes.lines), str(e))
+                    print("[Error] Plot %s is not in axes.lines which has %d lines. Error mesage: %s" % (
+                        str(plot), len(self.axes.lines), str(e)))
                 self._lineDict[ikey] = None
             else:
                 # error bar
@@ -472,7 +473,7 @@ class Qt4MplCanvas(FigureCanvas):
             # Re-create subplot
             self.axes = self.fig.add_subplot(111)
         if len(self.fig.axes) > 0:
-            print "[DBNOW] Type of axes[0] = %s" % (str(type(self.fig.axes[0])))
+            print("[DBNOW] Type of axes[0] = %s" % (str(type(self.fig.axes[0]))))
 
         # flush/commit
         self._flush()
@@ -530,11 +531,11 @@ class Qt4MplCanvas(FigureCanvas):
         """
         # self._lineDict[ikey].remove()
         lines = self.axes.lines
-        print str(type(lines)), lines
-        print "ikey = ", ikey, self._lineDict[ikey]
+        print(str(type(lines)), lines)
+        print("ikey = ", ikey, self._lineDict[ikey])
         self.axes.lines.remove(self._lineDict[ikey])
         #self.axes.remove(self._lineDict[ikey])
-        print self._lineDict[ikey]
+        print(self._lineDict[ikey])
         self._lineDict[ikey] = None
 
         return
@@ -593,9 +594,9 @@ class Qt4MplCanvas(FigureCanvas):
         nummarkers = len(MplLineMarkers)
         numcolors = len(MplBasicColors)
 
-        for i in xrange(nummarkers):
+        for i in range(nummarkers):
             marker = MplLineMarkers[i]
-            for j in xrange(numcolors):
+            for j in range(numcolors):
                 color = MplBasicColors[j]
                 combolist.append( (marker, color) )
             # ENDFOR (j)

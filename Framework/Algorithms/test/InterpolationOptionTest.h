@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/Interpolate.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -87,6 +88,19 @@ public:
   void test_set_From_String_Throws_With_Empty_String() {
     InterpolationOption interpolateOpt;
     TS_ASSERT_THROWS(interpolateOpt.set(""), std::invalid_argument);
+  }
+
+  void test_validateInputSize() {
+    using namespace Mantid::HistogramData;
+    auto minSize = minSizeForCSplineInterpolation();
+    InterpolationOption opt;
+    opt.set("CSpline");
+    TS_ASSERT(opt.validateInputSize(minSize).empty())
+    TS_ASSERT(!opt.validateInputSize(minSize - 1).empty())
+    minSize = minSizeForLinearInterpolation();
+    opt.set("Linear");
+    TS_ASSERT(opt.validateInputSize(minSize).empty())
+    TS_ASSERT(!opt.validateInputSize(minSize - 1).empty())
   }
 
 private:

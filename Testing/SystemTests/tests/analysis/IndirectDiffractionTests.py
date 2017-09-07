@@ -1,18 +1,18 @@
 #pylint: disable=no-init,non-parent-init-called,too-few-public-methods
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
+from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 import stresstesting
 import mantid.simpleapi as ms
 from mantid import mtd
+from six import with_metaclass
 
 
-class ISISIndirectDiffractionReduction(stresstesting.MantidStressTest):
+class ISISIndirectDiffractionReduction(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
     """
     Base class for tests that use the ISISIndirectDiffractionReduction algorithm.
     """
-
-    __metaclass__ = ABCMeta
     _output_workspace = None
 
     @abstractmethod

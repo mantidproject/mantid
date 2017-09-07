@@ -54,8 +54,15 @@ void SetupEQSANSReduction::init() {
   declareProperty(
       "SampleDetectorDistance", EMPTY_DBL(),
       "Sample to detector distance to use (overrides meta data), in mm");
+
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
                   "Offset to the sample to detector distance (use only when "
+                  "using the detector distance found in the meta data), in mm");
+  declareProperty("SampleOffset", EMPTY_DBL(),
+                  "Offset applies to the sample position (use only when "
+                  "using the detector distance found in the meta data), in mm");
+  declareProperty("DetectorOffset", EMPTY_DBL(),
+                  "Offset applies to the detector position (use only when "
                   "using the distance found in the meta data), in mm");
 
   declareProperty(
@@ -81,6 +88,8 @@ void SetupEQSANSReduction::init() {
   setPropertyGroup("SampleDetectorDistance", load_grp);
   setPropertyGroup("SampleDetectorDistanceOffset", load_grp);
 
+  setPropertyGroup("SampleOffset", load_grp);
+  setPropertyGroup("DetectorOffset", load_grp);
   setPropertyGroup("SolidAngleCorrection", load_grp);
   setPropertyGroup("DetectorTubes", load_grp);
 
@@ -658,6 +667,10 @@ void SetupEQSANSReduction::exec() {
   loadAlg->setProperty("SampleDetectorDistance", sdd);
   const double sddOffset = getProperty("SampleDetectorDistanceOffset");
   loadAlg->setProperty("SampleDetectorDistanceOffset", sddOffset);
+  const double dOffset = getProperty("DetectorOffset");
+  loadAlg->setProperty("DetectorOffset", dOffset);
+  const double sOffset = getProperty("SampleOffset");
+  loadAlg->setProperty("SampleOffset", sOffset);
   const double wlStep = getProperty("WavelengthStep");
   loadAlg->setProperty("WavelengthStep", wlStep);
 
