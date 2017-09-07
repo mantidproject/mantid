@@ -225,7 +225,7 @@ void WorkspaceGroup::print() const {
 }
 
 /*
- * @return  A non-const iterator pointing to the first workspace in this 
+ * @return  A non-const iterator pointing to the first workspace in this
  *          workspace group.
  */
 std::vector<Workspace_sptr>::iterator WorkspaceGroup::begin() {

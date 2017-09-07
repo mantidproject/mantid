@@ -70,9 +70,8 @@ void export_WorkspaceGroup() {
                WorkspaceGroup::getItem,
            (arg("self"), arg("index")),
            return_value_policy<Policies::ToWeakPtr>())
-      .def("__iter__",
-           range<return_value_policy<copy_non_const_reference>>(
-             &group_begin, &group_end));
+      .def("__iter__", range<return_value_policy<copy_non_const_reference>>(
+                           &group_begin, &group_end));
 
   Registry::RegisterWorkspacePtrToPython<WorkspaceGroup>();
 }
