@@ -6,8 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import testhelpers
 import platform
-from mantid.simpleapi import CreateWorkspace, Fit, FitDialog
-from mantid.FunctionWrapper import FunctionWrapper
+from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
