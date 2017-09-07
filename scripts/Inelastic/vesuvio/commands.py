@@ -174,19 +174,11 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     result_workspaces = []
     group_name = runs + '_result'
 
-    # Do check if profiles_str is a list once outside of loop.
-    if isinstance(profiles_strs, list):
-        def get_profiles(idx):
-            if back_scattering:
-                return all_profiles_strs[idx], profiles_strs[idx]
-            else:
-                return all_profiles_strs[idx], all_profiles_strs[idx]
-    else:
-        def get_profiles(_):
-            if back_scattering:
-                return all_profiles_strs, profiles_strs
-            else:
-                return all_profiles_strs, all_profiles_strs
+    # Create function for retrieving profiles by index outside of loop,
+    # to reduce for loops done inside loop.
+    get_profiles = _create_get_profiles_function(all_profiles_strs,
+                                                 profiles_strs,
+                                                 back_scattering)
 
     fit_masses = mass_values if back_scattering else all_mass_values
 
@@ -394,6 +386,39 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
 # --------------------------------------------------------------------------------
 # Private Functions
 # --------------------------------------------------------------------------------
+
+def _create_get_profiles_function(all_profiles_strs, profiles_strs, back_scattering):
+    """
+    Create a function which takes an index and returns a tuple of the corresponding
+    mass profiles and fitting mass profiles, where the fitting mass profiles are equal
+    to all mass profiles, unless back_scattering is true, in which case, hydrogen profiles
+    are removed from fitting mass profiles.
+
+    :param all_profiles_strs:   All mass profile strings.
+    :param profiles_strs:       Equivalent to all_profiles_strs with hydrogen profiles
+                                removed.
+    :param back_scattering:     Whether
+    :return:
+    """
+
+    if isinstance(profiles_strs, list):
+
+        if back_scattering:
+            def get_profiles(idx):
+                return all_profiles_strs[idx], profiles_strs[idx]
+        else:
+            def get_profiles(idx):
+                return all_profiles_strs[idx], all_profiles_strs[idx]
+    else:
+
+        if back_scattering:
+            def get_profiles(_):
+                return all_profiles_strs, profiles_strs
+        else:
+            def get_profiles(_):
+                return all_profiles_strs, all_profiles_strs
+
+    return get_profiles
 
 
 def _parse_ms_hydrogen_constraints(constraints):
