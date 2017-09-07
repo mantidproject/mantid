@@ -257,16 +257,16 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
         convertToDSpacing(ev.tof(), theta, &d, &dp);
         std::vector<double>::iterator upy =
             std::lower_bound(dp_vec.begin(), dp_vec.end(), dp);
-        long int h_index = std::distance(dp_vec.begin(), upy) - 1;
+        int64_t h_index = std::distance(dp_vec.begin(), upy) - 1;
         if ((h_index < static_cast<int>(newYSize) - 1) && h_index > -1) {
           if (h_index == static_cast<int>(newYSize) - 1)
             g_log.error("h_index is equal to the size of the Y axis!");
           auto xs = binsFromFile ? fileXbins[h_index] : newXBins.rawData();
           std::vector<double>::iterator lowx =
               std::lower_bound(xs.begin(), xs.end(), d);
-          long int index = std::distance(xs.begin(), lowx) - 1;
+          int64_t index = std::distance(xs.begin(), lowx) - 1;
           if ((index < static_cast<int>(newXSize - 1)) && (index > -1)) {
-            // writing to the same vectors is not threat-safe
+            // writing to the same vectors is not thread-safe
             PARALLEL_CRITICAL(newValues) {
               newYValues[h_index][index] += ev.weight();
               newEValues[h_index][index] += ev.errorSquared();
