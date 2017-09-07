@@ -76,6 +76,21 @@ public:
   }
 
   /** Constructor
+   *  @param values :: An array of values containing the valid values
+   *  @param allowMultiSelection :: True if the list allows multi selection
+   */
+  template<std::size_t SIZE>
+  explicit ListValidator(const std::array<TYPE, SIZE> &values,
+                         const bool allowMultiSelection = false)
+      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
+        m_allowMultiSelection(allowMultiSelection) {
+    if (m_allowMultiSelection) {
+      throw Kernel::Exception::NotImplementedError(
+          "The List Validator does not support Multi selection yet");
+    }
+  }
+
+  /** Constructor
    *  @param values :: A vector of the valid values
    *  @param aliases :: Optional aliases for the valid values.
    *  @param allowMultiSelection :: True if the list allows multi selection
