@@ -505,23 +505,26 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     def _convert_from_wavelength(self, workspace):
 
         convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
+        convert_unit_alg.setProperty("Target", self._sample_unit)
 
         if self._sample_unit != 'Wavelength':
 
             if self._emode == 'Indirect':
 
-                if self._indirect_q_axis == 'X':
-                    transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
-                    transpose_alg.setProperty("InputWorkspace", workspace)
-                    transpose_alg.execute()
-                    workspace = transpose_alg.getProperty("OutputWorkspace").value
-                    workspace.setX(0, self._q_values)
-                    workspace.getAxis(0).setUnit("MomentumTransfer")
-                else:
-                    convert_unit_alg.setProperty("EFixed", self._efixed)
+                if self._indirect_q_axis is not None:
+
+                    if self._indirect_q_axis == 'X':
+                        transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
+                        transpose_alg.setProperty("InputWorkspace", workspace)
+                        transpose_alg.execute()
+                        workspace = transpose_alg.getProperty("OutputWorkspace").value
+                        workspace.setX(0, self._q_values)
+                        workspace.getAxis(0).setUnit("MomentumTransfer")
+                        return workspace
+                    convert_unit_alg.setProperty("Target", "MomentumTransfer")
+                convert_unit_alg.setProperty("EFixed", self._efixed)
 
             convert_unit_alg.setProperty("InputWorkspace", workspace)
-            convert_unit_alg.setProperty("Target", self._sample_unit)
             convert_unit_alg.setProperty("EMode", self._emode)
             convert_unit_alg.execute()
             return convert_unit_alg.getProperty("OutputWorkspace").value
@@ -571,7 +574,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # ---------- Calculate Wavelength ----------
 
-        self._wave = math.sqrt(81.787 / e_fixed)
+        wave = math.sqrt(81.787 / e_fixed)
         logger.information('Wavelength = %f' % self._wave)
         workspace.getAxis(0).setUnit('Wavelength')
 
@@ -585,18 +588,18 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # --------- Set wavelengths as X-values in Output Workspace ----------
 
-        waves = (0.01 * np.arange(-1, workspace.blocksize())) + self._wave
+        waves = (0.01 * np.arange(-1, workspace.blocksize())) + wave
         logger.information('Waves : ' + str(waves))
         nhist = workspace.getNumberHistograms()
         for idx in range(nhist):
             workspace.setX(idx, waves)
-        self._change_angles(workspace, self._q_values)
+        self._change_angles(workspace, self._q_values, wave)
 
         return workspace
 
-    def _change_angles(self, workspace, q_values):
+    def _change_angles(self, workspace, q_values, wave):
         work_dir = config['defaultsave.directory']
-        k0 = 4.0 * math.pi / self._wave
+        k0 = 4.0 * math.pi / wave
         theta = 2.0 * np.degrees(np.arcsin(q_values / k0))  # convert to angle
 
         filename = 'Elastic_angles.txt'
