@@ -178,15 +178,15 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     if isinstance(profiles_strs, list):
         def get_profiles(idx):
             if back_scattering:
-                return (all_profiles_strs[idx], profiles_strs[idx])
+                return all_profiles_strs[idx], profiles_strs[idx]
             else:
-                return (all_profiles_strs[idx], all_profiles_strs[idx])
+                return all_profiles_strs[idx], all_profiles_strs[idx]
     else:
         def get_profiles(_):
             if back_scattering:
-                return (all_profiles_strs, profiles_strs)
+                return all_profiles_strs, profiles_strs
             else:
-                return (all_profiles_strs, all_profiles_strs)
+                return all_profiles_strs, all_profiles_strs
 
     fit_masses = mass_values if back_scattering else all_mass_values
 
