@@ -1771,7 +1771,7 @@ GenericDataProcessorPresenter::getTableList() {
     workspaces.push_back(
         Mantid::Kernel::make_unique<DataProcessorWorkspaceCommand>(this, name));
   }
-  return workspaces;
+  return std::move(workspaces);
 }
 
 /** Asks the view for selected parent items
