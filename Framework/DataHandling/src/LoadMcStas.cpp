@@ -238,7 +238,8 @@ void LoadMcStas::readEventData(
     double longestTOF(0.0);
 
     const size_t numEventEntries = eventEntries.size();
-    Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
+    Progress progEntries(this, progressFractionInitial, 1.0,
+                         numEventEntries * 2);
 
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
@@ -370,13 +371,13 @@ void LoadMcStas::readEventData(
     // ensure that specified name is given to workspace (eventWS) when added to
     // outputGroup
     std::string nameOfGroupWS = getProperty("OutputWorkspace");
-    //Ensure the workspace names are unique, otherwise the workspaces
-    //Overwrite each other in workspaceDataService
-    std::string nameUserSee = std::string("EventWS_")+dataName;
+    // Ensure the workspace names are unique, otherwise the workspaces
+    // Overwrite each other in workspaceDataService
+    std::string nameUserSee = std::string("EventWS_") + dataName;
     std::string extraProperty =
-            "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
+        "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
     declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-            extraProperty, nameUserSee, Direction::Output));
+        extraProperty, nameUserSee, Direction::Output));
     setProperty(extraProperty, boost::static_pointer_cast<Workspace>(eventWS));
     m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
     // unique
