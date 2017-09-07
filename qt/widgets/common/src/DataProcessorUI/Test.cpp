@@ -27,11 +27,11 @@ int my_function() {
   std::vector<std::unique_ptr<Abstract>> things;
   things.push_back(Mantid::Kernel::make_unique<Implementor>());
   things.push_back(make());
-  for (auto &&thing : things) {
+  for (auto& thing : things) {
     std::cout << "pvc: " << thing->pvc() << '\n';
     std::cout << "pv: " << thing->pv() << '\n';
     std::cout << "v: " << thing->v() << '\n';
   }
   std::cout << std::endl;
-  return thing->pvc();
+  return things[0]->pvc();
 }
