@@ -208,6 +208,11 @@ void LoadMcStas::readEventData(
   // Finished reading Instrument. Then open new data folder again
   nxFile.openGroup("data", "NXdetector");
 
+  // Number of eventEntries processed, to allow unique naming
+  // of the event workspaces
+  int numEventEntriesProcessed(0);
+  bool isAnyNeutrons = false;
+
   for (const auto &eventEntry : eventEntries) {
     // create and prepare an event workspace ready to receive the mcstas events
     progInitial.report("Set up EventWorkspace");
@@ -232,7 +237,6 @@ void LoadMcStas::readEventData(
     // the one is here for the moment for backward compatibility
     eventWS->rebuildSpectraMapping(true);
 
-    bool isAnyNeutrons = false;
     // to store shortest and longest recorded TOF
     double shortestTOF(0.0);
     double longestTOF(0.0);
@@ -373,7 +377,9 @@ void LoadMcStas::readEventData(
     std::string nameOfGroupWS = getProperty("OutputWorkspace");
     // Ensure the workspace names are unique, otherwise the workspaces
     // Overwrite each other in workspaceDataService
-    std::string nameUserSee = std::string("EventWS_") + dataName;
+    std::string nameUserSee = nameofGroupWS + std::string("_EventWS_") +
+                              std::to_string(numEventEntriesProcessed);
+    ++numEventEntriesProcessed;
     std::string extraProperty =
         "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
     declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
