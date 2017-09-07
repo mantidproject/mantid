@@ -15,7 +15,7 @@ set ( OUTPUT_DIR ${PYTHON_PKG_ROOT} )
 set ( PY_FILES
   __init__.py
   simpleapi.py
-  fitFunctions.py
+  fitfunctions.py
 )
 
 copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
