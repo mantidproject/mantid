@@ -66,9 +66,8 @@ ComponentInfo::ComponentInfo(
         "number of scale factors as number of components");
   }
   if (m_isVisible->size() != m_size) {
-	  throw std::invalid_argument(
-		  "ComponentInfo should have been provided with "
-		  "'isVisible' flag for every component");
+    throw std::invalid_argument("ComponentInfo should have been provided with "
+                                "'isVisible' flag for every component");
   }
 }
 

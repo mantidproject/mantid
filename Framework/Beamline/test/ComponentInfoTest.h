@@ -639,7 +639,7 @@ public:
   }
 
   void test_is_visible() {
-	  TS_ASSERT_THROWS_NOTHING(auto infos = makeTreeExample())
+    TS_ASSERT_THROWS_NOTHING(auto infos = makeTreeExample())
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
