@@ -447,7 +447,7 @@ size_t indexOfValueFromCenters(const std::vector<double> &bin_centers,
 
 /** Finds the bin index of a value from the vector of bin edges.
  * Assumes the vector is already sorted ascending.
- * @param bin_centers : vector of bin centers
+ * @param bin_edges : vector of bin centers
  * @param value : input value
  * @return : the bin index of the value
  * @throw std::out_of_range : if vector is empty, contains one element,
