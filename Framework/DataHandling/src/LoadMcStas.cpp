@@ -377,7 +377,7 @@ void LoadMcStas::readEventData(
     std::string nameOfGroupWS = getProperty("OutputWorkspace");
     // Ensure the workspace names are unique, otherwise the workspaces
     // Overwrite each other in workspaceDataService
-    std::string nameUserSee = nameofGroupWS + std::string("_EventWS_") +
+    std::string nameUserSee = nameOfGroupWS + std::string("_EventWS_") +
                               std::to_string(numEventEntriesProcessed);
     ++numEventEntriesProcessed;
     std::string extraProperty =
