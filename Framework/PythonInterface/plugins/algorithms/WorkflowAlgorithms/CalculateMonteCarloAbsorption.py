@@ -590,7 +590,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         nhist = workspace.getNumberHistograms()
         for idx in range(nhist):
             workspace.setX(idx, waves)
-        self._change_angles(workspace, q_values)
+        self._change_angles(workspace, self._q_values)
 
         return workspace
 
