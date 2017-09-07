@@ -10,22 +10,30 @@
 Description
 -----------
 
-This algorithm performs binning of the given workspace in :math:`(d, d_{\perp})` space, there :math:`d` is the d-Spacing and
+This algorithm performs binning of the given workspace in :math:`(d, d_{\perp})` space, where :math:`d` is the d-Spacing and
 
 .. math::
    :label:
 
     d_{\perp} = \sqrt{\lambda^2 - 2\log\cos\theta}
 
-As the result a Matrix workspace is created. If :math:`\theta=0` or :math:`\cos\theta\le 0`, algorithm will terminate with the error message,
-since no reasonable :math:`d` or :math:`d_{\perp}` value can be calculated. In this case is recommended to check whether detector positions
-are correct and mask the problem detectors.
+The result is that a Matrix workspace is created. If :math:`\theta=0` or :math:`\cos\theta\le 0`, the algorithm will terminate with an
+error message, since no reasonable :math:`d` or :math:`d_{\perp}` value can be calculated. In this case it is recommended to check
+whether detector positions are correct and to mask the problem detectors.
 
 
-More details on the multidimensional TOF powder diffraction data reduction in:
+More details on the multidimensional TOF powder diffraction data reduction can be found in:
 
--  *J. Appl. Cryst.* (2015) **48**, pp. 1627-1636
--  *J. Appl. Cryst.* (2017) **50**, pp. 866-875.
+[1]  *J. Appl. Cryst.* (2015) **48**, pp. 1627-1636
+
+[2]  *J. Appl. Cryst.* (2017) **50**, pp. 866-875.
+
+
+.. warning::
+
+   The information about correspondence of spectra to detectors is lost in the produced **OutputWorkspace**.
+   Applying any algorithms like :ref:`algm-ConvertUnits`, which require information about :math:`2\theta`,
+   to this workspace may lead to incorrect results.
 
 
 Restrictions on the input workspace
@@ -51,7 +59,7 @@ BinEdgesFile
 
 *BinEdgesFile* is an ascii-file, where the bin edges are specified in a following format.
 
-First 2 lines contain header:
+The first 2 lines contain header:
 
 ::
 
@@ -59,8 +67,8 @@ First 2 lines contain header:
     #d_bins
 
 Then follows the line dp = :math:`d_{\perp\,n}`  :math:`d_{\perp\,n+1}` where the bin edges for the *n*-th bin are specified,
-starting from the lowest values. In the next line bin edges for d-Spacing are listed as :math:`d_0, d_1, \dots, d_m`. The all is
-repeated as many times as necessary. For example:
+starting from the lowest values. In the next line bin edges for d-Spacing are listed as :math:`d_0, d_1, \dots, d_m`. Then this
+can be repeated as many times as necessary. For example:
 
 ::
 
@@ -72,9 +80,9 @@ repeated as many times as necessary. For example:
     dp = 4.0  4.5
         2.0  4.0  5.15  6.0
 
-In this example following bin edges are specified for the :math:`d_{\perp}`-axis: 3.0, 4.0, 4.5. The *d*-axis for the first spectrum
-(:math:`d_{\perp}` from 3.0 to 4.0) will contain bin edges 1.0, 3.0, 6.0 and for the second spectrum (:math:`d_{\perp}` from 4.0 to 4.5)
-bin edges 2.0, 4.0, 5.15, 6.0.
+In this example the following bin edges are specified for the :math:`d_{\perp}`-axis: 3.0, 4.0, 4.5. The *d*-axis for the first spectrum
+(:math:`d_{\perp}` from 3.0 to 4.0) will contain the bin edges 1.0, 3.0, 6.0 and for the second spectrum (:math:`d_{\perp}` from 4.0 to 4.5)
+the bin edges 2.0, 4.0, 5.15, 6.0.
 
 
 Usage
