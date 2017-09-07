@@ -84,8 +84,9 @@ CrystalFieldMagnetisationBase::CrystalFieldMagnetisationBase()
   declareAttribute("ScaleFactor", Attribute(1.0)); // Only for multi-site use
 }
 
-void CrystalFieldMagnetisationBase::function1D(double *out, const double *xValues,
-                                           const size_t nData) const {
+void CrystalFieldMagnetisationBase::function1D(double *out,
+                                               const double *xValues,
+                                               const size_t nData) const {
   // Get the field direction
   auto Hdir = getAttribute("Hdir").asVector();
   if (Hdir.size() != 3) {
@@ -129,8 +130,7 @@ DECLARE_FUNCTION(CrystalFieldMagnetisation)
 
 CrystalFieldMagnetisation::CrystalFieldMagnetisation()
     : CrystalFieldPeaksBase(), CrystalFieldMagnetisationBase(),
-      m_setDirect(false) {
-}
+      m_setDirect(false) {}
 
 // Sets the base crystal field Hamiltonian matrix
 void CrystalFieldMagnetisation::setHamiltonian(const ComplexFortranMatrix &ham,
@@ -153,12 +153,11 @@ void CrystalFieldMagnetisation::function1D(double *out, const double *xValues,
 }
 
 CrystalFieldMagnetisationCalculation::CrystalFieldMagnetisationCalculation()
-    : API::ParamFunction(), CrystalFieldMagnetisationBase() {
-}
+    : API::ParamFunction(), CrystalFieldMagnetisationBase() {}
 
 // Sets the base crystal field Hamiltonian matrix
-void CrystalFieldMagnetisationCalculation::setHamiltonian(const ComplexFortranMatrix &ham,
-                                               const int nre) {
+void CrystalFieldMagnetisationCalculation::setHamiltonian(
+    const ComplexFortranMatrix &ham, const int nre) {
   m_ham = ham;
   m_nre = nre;
 }

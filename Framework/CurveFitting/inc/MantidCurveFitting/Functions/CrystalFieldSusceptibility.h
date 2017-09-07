@@ -35,12 +35,12 @@ namespace Functions {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class CrystalFieldSusceptibilityBase
-    : public API::IFunction1D {
+class CrystalFieldSusceptibilityBase : public API::IFunction1D {
 public:
   CrystalFieldSusceptibilityBase();
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
+
 protected:
   mutable DoubleFortranVector m_en;
   mutable ComplexFortranMatrix m_wf;
@@ -58,6 +58,7 @@ public:
                   const size_t nData) const override;
   void setEigensystem(const DoubleFortranVector &en,
                       const ComplexFortranMatrix &wf, const int nre);
+
 private:
   bool m_setDirect;
 };

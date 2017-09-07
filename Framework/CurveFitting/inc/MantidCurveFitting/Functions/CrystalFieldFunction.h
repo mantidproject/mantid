@@ -126,8 +126,6 @@ public:
   void buildTargetFunction() const;
   /// Get number of the number of spectra (excluding phys prop data).
   size_t nSpectra() const;
-  /// Get the i-th spectrum
-  API::CompositeFunction_sptr getSpectrum(size_t spectrumIndex);
 
 protected:
   /// Declare a new parameter
@@ -144,8 +142,6 @@ protected:
   void updateTargetFunction() const;
 
 private:
-
-
   /// Build the target function in a single site case.
   void buildSingleSite() const;
   /// Build the target function in a multi site case.
@@ -175,14 +171,15 @@ private:
   /// Build a function for a single spectrum.
   API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en,
                                     const ComplexFortranMatrix &wf,
-                                    double temperature, double fwhm,
-                                    size_t i, bool addBackground, double intensityScaling) const;
+                                    double temperature, double fwhm, size_t i,
+                                    bool addBackground,
+                                    double intensityScaling) const;
   /// Update a function for a single spectrum.
   void updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,
                       const ComplexFortranMatrix &wf,
                       const ComplexFortranMatrix &ham, double temperature,
-                      double fwhm, size_t i) const;
+                      double fwhm, size_t iSpec, size_t iFirst) const;
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
                        const ComplexFortranMatrix &wf, double temperature,
@@ -193,6 +190,11 @@ private:
                                     const ComplexFortranMatrix &wf,
                                     const ComplexFortranMatrix &ham,
                                     const std::string &propName) const;
+  /// Update a physical property function.
+  void updatePhysprop(int nre, const DoubleFortranVector &en,
+                      const ComplexFortranMatrix &wf,
+                      const ComplexFortranMatrix &ham,
+                      API::IFunction &fun) const;
 
   /// Set the source function
   void setSource(API::IFunction_sptr source) const;
@@ -202,22 +204,10 @@ private:
   API::CompositeFunction &compositeSource() const;
 
   /// Get a reference to an attribute
-  std::pair<API::IFunction*, std::string> getAttributeReference(const std::string& attName) const;
-  /// Get a reference to a parameter
-  API::ParameterReference getParameterReference(const std::string &paramName) const;
+  std::pair<API::IFunction *, std::string>
+  getAttributeReference(const std::string &attName) const;
   /// Build and cache the attribute names
   void buildAttributeNames() const;
-
-  /// Get a reference to the control function
-  API::IFunction *getControl() const;
-  /// Get a reference to a spectrum control function
-  API::IFunction *getSpectrumControl(size_t spectrumIndex) const;
-  /// Get a reference to a function with ion parameters
-  API::IFunction *getIon(size_t ionIndex) const;
-  /// Get a reference to a function with background parameters
-  API::IFunction *getBackground(size_t spectrumIndex) const;
-  /// Get a reference to a function with peak parameters
-  API::IFunction *getPeak(size_t ionIndex, size_t spectrumIndex, size_t peakIndex) const;
 
   /// Make maps between parameter names and indices
   void makeMaps() const;
@@ -225,7 +215,8 @@ private:
   void makeMapsSM() const;
   void makeMapsMS() const;
   void makeMapsMM() const;
-  size_t makeMapsForFunction(const IFunction& fun, size_t iFirst, const std::string &prefix) const;
+  size_t makeMapsForFunction(const IFunction &fun, size_t iFirst,
+                             const std::string &prefix) const;
 
   /// Function that creates the source function.
   mutable CrystalFieldControl m_control;
@@ -245,6 +236,9 @@ private:
   mutable std::vector<std::string> m_mapIndices2Names;
   /// Attribute names
   mutable std::vector<std::string> m_attributeNames;
+  /// Map parameter/attribute prefixes to pointers to phys prop functions
+  mutable std::unordered_map<std::string, API::IFunction_sptr>
+      m_mapPrefixes2PhysProps;
 };
 
 } // namespace Functions

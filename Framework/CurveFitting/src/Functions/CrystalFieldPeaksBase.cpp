@@ -446,7 +446,8 @@ void CrystalFieldPeaksBase::setAttribute(const std::string &name,
   if (name == "Symmetry") {
     auto symmIter = SYMMETRY_MAP.find(attr.asString());
     if (symmIter == SYMMETRY_MAP.end()) {
-      throw std::runtime_error("Unknown symmetry passed to CrystalFieldPeaks: " + attr.asString());
+      throw std::runtime_error(
+          "Unknown symmetry passed to CrystalFieldPeaks: " + attr.asString());
     }
     symmIter->second(*this);
   }

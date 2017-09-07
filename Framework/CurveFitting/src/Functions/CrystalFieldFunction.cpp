@@ -22,7 +22,6 @@
 #include <limits>
 #include <regex>
 
-
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
@@ -52,7 +51,9 @@ const std::regex PEAK_ATTR_REGEX(PEAK_PREFIX + "([0-9]+)\\.(.+)");
 // Regex for names of attributes/parameters for peaks
 // Example: ion1.pk0.PeakCentre
 const std::regex ION_ATTR_REGEX(ION_PREFIX + "([0-9]+)\\.(.+)");
-
+// Regex for names of attributes/parameters for physical properties
+// Example: cv.ScaleFactor
+const std::regex PHYS_PROP_ATTR_REGEX("((ion[0-9]+\\.)?(cv|chi|mh|mt))\\.(.+)");
 
 /// Define the source function for CrystalFieldFunction.
 /// Its function() method is not needed.
@@ -92,63 +93,6 @@ public:
     }
   }
 };
-
-/// Value representing an undefined index.
-const size_t UNDEFINED_INDEX = std::numeric_limits<size_t>::max();
-
-enum ReferenceTupleType {Background, Peak, PhysProp, Other};
-
-/// A type that defines a structure to reference a parameter or attribute
-/// of a composite function
-struct ReferenceTuple {
-  /// Parameter name in the function specified by the indices
-  std::string name;
-  /// The ion index
-  size_t ionIndex;
-  /// The spectrum
-  size_t spectrumIndex;
-  /// The peak
-  size_t peakIndex;
-  /// What kind of parameter is referenced
-  ReferenceTupleType type;
-};
-
-/// Work out parameter of which function the name referes to..
-/// @param name :: A name to parse.
-ReferenceTuple getReferenceTuple(const std::string &name) {
-  auto localName = name;
-  size_t ionIndex(UNDEFINED_INDEX);
-  size_t spectrumIndex(UNDEFINED_INDEX);
-  size_t peakIndex(UNDEFINED_INDEX);
-  ReferenceTupleType type(Other);
-
-  std::smatch match;
-  if (std::regex_match(name, match, ION_ATTR_REGEX)) {
-    ionIndex = std::stoul(match[1].str());
-    localName = match[2].str();
-  }
-
-  if (std::regex_match(localName, match, SPECTRUM_ATTR_REGEX)) {
-    spectrumIndex = std::stoul(match[1].str());
-    localName = match[2].str();
-  }
-
-  if (std::regex_match(localName, match, BACKGROUND_ATTR_REGEX)) {
-    localName = match[1].str();
-    type = Background;
-  }
-
-  if (std::regex_match(localName, match, PEAK_ATTR_REGEX)) {
-    if (type == Background) {
-      throw std::invalid_argument("Parameter or attribute cannot be both background and peak.");
-    }
-    peakIndex = std::stoul(match[1].str());
-    localName = match[2].str();
-    type = Peak;
-  }
-
-  return ReferenceTuple({localName, ionIndex, spectrumIndex, peakIndex, type});
-}
 
 } // namespace
 
@@ -190,7 +134,12 @@ CrystalFieldFunction::createEquivalentFunctions() const {
   std::vector<IFunction_sptr> funs;
   auto &composite = dynamic_cast<CompositeFunction &>(*m_target);
   for (size_t i = 0; i < composite.nFunctions(); ++i) {
-    funs.push_back(composite.getFunction(i));
+    auto fun = composite.getFunction(i);
+    auto cfun = dynamic_cast<CompositeFunction *>(fun.get());
+    if (cfun) {
+      cfun->checkFunction();
+    }
+    funs.push_back(fun);
   }
   return funs;
 }
@@ -239,11 +188,11 @@ double CrystalFieldFunction::getParameter(size_t i) const {
 }
 
 /// Check if function has a parameter with this name.
-bool CrystalFieldFunction::hasParameter(const std::string &name) const{
+bool CrystalFieldFunction::hasParameter(const std::string &name) const {
   try {
-    getParameterReference(name);
+    parameterIndex(name);
     return true;
-  } catch (std::invalid_argument&) {
+  } catch (std::invalid_argument &) {
     return false;
   }
 }
@@ -252,22 +201,21 @@ bool CrystalFieldFunction::hasParameter(const std::string &name) const{
 void CrystalFieldFunction::setParameter(const std::string &name,
                                         const double &value,
                                         bool explicitlySet) {
-  auto ref = getParameterReference(name);
-  ref.setParameter(value, explicitlySet);
+  auto index = parameterIndex(name);
+  setParameter(index, value, explicitlySet);
 }
 
 /// Set description of parameter by name.
 void CrystalFieldFunction::setParameterDescription(
     const std::string &name, const std::string &description) {
-  auto ref = getParameterReference(name);
-  ref.getLocalFunction()->setParameterDescription(ref.getLocalIndex(),
-                                                  description);
+  auto index = parameterIndex(name);
+  setParameterDescription(index, description);
 }
 
 /// Get parameter by name.
 double CrystalFieldFunction::getParameter(const std::string &name) const {
-  auto ref = getParameterReference(name);
-  return ref.getParameter();
+  auto index = parameterIndex(name);
+  return getParameter(index);
 }
 
 /// Total number of parameters
@@ -287,7 +235,8 @@ size_t CrystalFieldFunction::parameterIndex(const std::string &name) const {
   }
   auto found = m_mapNames2Indices.find(name);
   if (found == m_mapNames2Indices.end()) {
-    throw std::invalid_argument("CrystalFieldFunction parameter not found: " + name);
+    throw std::invalid_argument("CrystalFieldFunction parameter not found: " +
+                                name);
   }
   return found->second;
 }
@@ -440,15 +389,15 @@ void CrystalFieldFunction::buildAttributeNames() const {
     }
   };
   // Prepend a prefix to attribute names, ignore NumDeriv attribute.
-  auto prependPrefix = [&](const std::string &prefix,
-                           const std::vector<std::string> &names) {
-    for (auto name : names) {
-      if (name == "NumDeriv")
-        continue;
-      name.insert(name.begin(), prefix.begin(), prefix.end());
-      m_attributeNames.push_back(name);
-    }
-  };
+  auto prependPrefix =
+      [&](const std::string &prefix, const std::vector<std::string> &names) {
+        for (auto name : names) {
+          if (name == "NumDeriv")
+            continue;
+          name.insert(name.begin(), prefix.begin(), prefix.end());
+          m_attributeNames.push_back(name);
+        }
+      };
   // These names must appear first and in this order in the output vector
   moveAttributeName("Ions");
   moveAttributeName("Symmetries");
@@ -457,7 +406,7 @@ void CrystalFieldFunction::buildAttributeNames() const {
   // Copy the rest of the names
   m_attributeNames.insert(m_attributeNames.end(), controlAttributeNames.begin(),
                           controlAttributeNames.end());
-  // Get 
+  // Get
   for (size_t iSpec = 0; iSpec < m_control.nFunctions(); ++iSpec) {
     std::string prefix(SPECTRUM_PREFIX);
     prefix.append(std::to_string(iSpec)).append(".");
@@ -471,12 +420,12 @@ void CrystalFieldFunction::buildAttributeNames() const {
   // Attributes of physical properties
   for (size_t iSpec = nSpec; iSpec < m_target->nFunctions(); ++iSpec) {
     auto fun = m_target->getFunction(iSpec).get();
-    auto compositePhysProp = dynamic_cast<CompositeFunction*>(fun);
+    auto compositePhysProp = dynamic_cast<CompositeFunction *>(fun);
     if (compositePhysProp) {
       // Multi-site case
       std::string physPropPrefix(compositePhysProp->getFunction(0)->name());
       physPropPrefix.append(".");
-      for(size_t ion = 0; ion < compositePhysProp->nFunctions(); ++ion) {
+      for (size_t ion = 0; ion < compositePhysProp->nFunctions(); ++ion) {
         std::string prefix(ION_PREFIX);
         prefix.append(std::to_string(ion)).append(".").append(physPropPrefix);
         auto names = compositePhysProp->getFunction(ion)->getAttributeNames();
@@ -561,175 +510,22 @@ CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
       }
     }
     return std::make_pair(nullptr, "");
+  } else if (std::regex_match(attName, match, PHYS_PROP_ATTR_REGEX)) {
+    auto prop = match[1].str();
+    auto name = match[4].str();
+    auto propIt = m_mapPrefixes2PhysProps.find(prop);
+    if (propIt != m_mapPrefixes2PhysProps.end()) {
+      return std::make_pair(propIt->second.get(), name);
+    }
+    return std::make_pair(nullptr, "");
   }
   return std::make_pair(&m_control, attName);
-}
-
-/// Get a reference to a parameter
-API::ParameterReference CrystalFieldFunction::getParameterReference(
-    const std::string &paramName) const {
-  checkSourceFunction();
-  checkTargetFunction();
-  if (nParams() != m_mapIndices2Names.size()) {
-    makeMaps();
-  }
-
-  const auto refTuple = getReferenceTuple(paramName);
-  const auto &ionIndex = refTuple.ionIndex;
-  const auto &spectrumIndex = refTuple.spectrumIndex;
-  auto &name = refTuple.name;
-
-  try {
-  // Check if it's a background's parameter
-  if (refTuple.type == Background) {
-    auto function = getBackground(spectrumIndex);
-    return API::ParameterReference(function, function->parameterIndex(name));
-  }
-
-  // Check if it's a peak parameter
-  if (refTuple.type == Peak) {
-    auto function = getPeak(ionIndex, spectrumIndex, refTuple.peakIndex);
-    return API::ParameterReference(function, function->parameterIndex(name));
-  }
-
-  // Check if it's a phys prop parameter
-  if (refTuple.type == PhysProp) {
-    throw Kernel::Exception::NotImplementedError("PhysProps are not implemented.");
-  }
-
-  // Check if it's a parameter of a spectrum function
-  if (spectrumIndex != UNDEFINED_INDEX) {
-    auto function = getSpectrumControl(spectrumIndex);
-    return API::ParameterReference(function, function->parameterIndex(name));
-  }
-
-  // Check for a ion-specific params
-  if (ionIndex != UNDEFINED_INDEX) {
-    auto function = getIon(ionIndex);
-    return API::ParameterReference(function,
-                                   function->parameterIndex(name));
-  }
-
-  // A parameter without a prefix is a parameter of m_control
-  // for multi-site ...
-  if (isMultiSite()) {
-    return API::ParameterReference(&m_control,
-                                   m_control.parameterIndex(paramName));
-  }
-
-  // ... and m_source for single site
-  return API::ParameterReference(m_source.get(),
-                                 m_source->parameterIndex(paramName));
-  } catch (std::invalid_argument &) {
-    throw std::invalid_argument("Parameter " + paramName + " not found.");
-  }
 }
 
 /// Get number of the number of spectra (excluding phys prop data).
 size_t CrystalFieldFunction::nSpectra() const {
   auto nFuns = m_control.nFunctions();
-  if (nFuns == 0) {
-    nFuns = 1;
-  }
   return nFuns;
-}
-
-/// Get a reference to the control function
-IFunction *CrystalFieldFunction::getControl() const {
-  return &m_control;
-}
-
-/// Get a reference to a spectrum control function
-IFunction *CrystalFieldFunction::getSpectrumControl(size_t spectrumIndex) const {
-  return m_control.getFunction(spectrumIndex).get();
-}
-
-/// Get a reference to a function with ion parameters
-IFunction *CrystalFieldFunction::getIon(size_t ionIndex) const {
-  if (isMultiSite()) {
-    return compositeSource().getFunction(ionIndex).get();
-  } else {
-    return m_source.get();
-  }
-}
-
-/// Get a reference to a function with background parameters
-IFunction *CrystalFieldFunction::getBackground(size_t spectrumIndex) const {
-  if (!hasBackground()) {
-    throw std::invalid_argument("Function has no background");
-  }
-  // spectrumIndex must be given for multispectrum only
-  bool invalidArgument = (spectrumIndex == UNDEFINED_INDEX) == isMultiSpectrum();
-  if (invalidArgument) {
-    throw std::invalid_argument("Background parameter not found");
-  }
-  if (isMultiSite()) {
-    if (isMultiSpectrum()) {
-      auto &spectrum = dynamic_cast<CompositeFunction &>(
-          *m_target->getFunction(spectrumIndex));
-      auto &ionSpectrum =
-          dynamic_cast<CompositeFunction &>(*spectrum.getFunction(0));
-      return ionSpectrum.getFunction(0).get();
-    } else {
-      return m_target->getFunction(0).get();
-    }
-  } else {
-    if (isMultiSpectrum()) {
-      auto &spectrum = dynamic_cast<CompositeFunction &>(
-          *m_target->getFunction(spectrumIndex));
-      return spectrum.getFunction(0).get();
-    } else {
-      return m_target->getFunction(0).get();
-    }
-  }
-}
-
-/// Get a reference to a function with peak parameters
-IFunction *CrystalFieldFunction::getPeak(size_t ionIndex, size_t spectrumIndex, size_t peakIndex) const {
-  bool invalidArgument = (spectrumIndex == UNDEFINED_INDEX) == isMultiSpectrum();
-  if (invalidArgument) {
-    throw std::invalid_argument("Peak parameter not found");
-  }
-  if (isMultiSite()) {
-    if (isMultiSpectrum()) {
-      auto &spectrum = dynamic_cast<CompositeFunction &>(
-          *m_target->getFunction(spectrumIndex));
-      auto &ionSpectrum =
-          dynamic_cast<CompositeFunction &>(*spectrum.getFunction(ionIndex));
-      if (ionIndex == 0 && hasBackground()) {
-        ++peakIndex;
-      }
-      return ionSpectrum.getFunction(peakIndex).get();
-    } else {
-      if (hasBackground()) {
-        ++ionIndex;
-      }
-      auto &ionSpectrum =
-          dynamic_cast<CompositeFunction &>(*m_target->getFunction(ionIndex));
-      return ionSpectrum.getFunction(peakIndex).get();
-    }
-  } else {
-    if (hasBackground()) {
-      ++peakIndex;
-    }
-    if (isMultiSpectrum()) {
-      auto &spectrum = dynamic_cast<CompositeFunction &>(
-          *m_target->getFunction(spectrumIndex));
-      return spectrum.getFunction(peakIndex).get();
-    } else {
-      return m_target->getFunction(peakIndex).get();
-    }
-  }
-}
-
-  /// Get the i-th spectrum
-CompositeFunction_sptr CrystalFieldFunction::getSpectrum(size_t spectrumIndex) {
-  checkTargetFunction();
-  if (isMultiSpectrum()) {
-    return boost::dynamic_pointer_cast<CompositeFunction>(m_target->getFunction(spectrumIndex));
-  } else {
-    return m_target;
-  }
 }
 
 /// Get the tie for i-th parameter
@@ -791,11 +587,13 @@ bool CrystalFieldFunction::hasBackground() const {
 bool CrystalFieldFunction::hasPeaks() const { return m_control.hasPeaks(); }
 
 /// Check if there are any phys. properties.
-bool CrystalFieldFunction::hasPhysProperties() const { return m_control.hasPhysProperties(); }
+bool CrystalFieldFunction::hasPhysProperties() const {
+  return m_control.hasPhysProperties();
+}
 
 /// Get a reference to the source function if it's composite
 API::CompositeFunction &CrystalFieldFunction::compositeSource() const {
-  auto composite = dynamic_cast<CompositeFunction*>(m_source.get());
+  auto composite = dynamic_cast<CompositeFunction *>(m_source.get());
   if (composite == nullptr) {
     throw std::logic_error("Source of CrystalFieldFunction is not composite.");
   }
@@ -815,7 +613,6 @@ void CrystalFieldFunction::buildSourceFunction() const {
   m_nControlParams = m_control.nParams();
   m_nControlSourceParams = m_nControlParams + m_source->nParams();
 }
-
 
 /// Update spectrum function if necessary.
 void CrystalFieldFunction::checkTargetFunction() const {
@@ -871,9 +668,6 @@ void CrystalFieldFunction::buildSingleSiteSingleSpectrum() const {
     auto background =
         API::FunctionFactory::Instance().createInitialized(bkgdShape);
     spectrum->addFunction(background);
-    if (fixAllPeaks) {
-      background->fixAll();
-    }
   }
 
   FunctionDomainGeneral domain;
@@ -897,9 +691,9 @@ void CrystalFieldFunction::buildSingleSiteSingleSpectrum() const {
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   auto peakShape = getAttribute("PeakShape").asString();
   size_t nRequiredPeaks = getAttribute("NPeaks").asInt();
-  CrystalFieldUtils::buildSpectrumFunction(
-      *spectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM,
-      nRequiredPeaks, fixAllPeaks);
+  CrystalFieldUtils::buildSpectrumFunction(*spectrum, peakShape, values, xVec,
+                                           yVec, fwhmVariation, defaultFWHM,
+                                           nRequiredPeaks, fixAllPeaks);
 }
 
 /// Build the target function in a single site - multi spectrum case.
@@ -924,14 +718,16 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
     auto intensityScaling =
         m_control.getFunction(i)->getParameter("IntensityScaling");
     fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i], FWHMs[i], i,
-                                    addBackground, intensityScaling));
+                                   addBackground, intensityScaling));
     fun->setDomainIndex(i, i);
   }
   auto &physProps = m_control.physProps();
   size_t i = nSpec;
-  for(auto &prop: physProps) {
-    fun->addFunction(buildPhysprop(nre, en, wf, ham, prop));
+  for (auto &prop : physProps) {
+    auto physPropFun = buildPhysprop(nre, en, wf, ham, prop);
+    fun->addFunction(physPropFun);
     fun->setDomainIndex(i, i);
+    m_mapPrefixes2PhysProps[prop] = physPropFun;
     ++i;
   }
 }
@@ -949,9 +745,6 @@ void CrystalFieldFunction::buildMultiSiteSingleSpectrum() const {
     auto background =
         API::FunctionFactory::Instance().createInitialized(bkgdShape);
     spectrum->addFunction(background);
-    if (fixAllPeaks) {
-      background->fixAll();
-    }
   }
 
   auto &FWHMs = m_control.FWHMs();
@@ -978,9 +771,9 @@ void CrystalFieldFunction::buildMultiSiteSingleSpectrum() const {
     }
 
     auto ionSpectrum = boost::make_shared<CompositeFunction>();
-    CrystalFieldUtils::buildSpectrumFunction(*ionSpectrum, peakShape, values, xVec,
-                                             yVec, fwhmVariation, defaultFWHM,
-                                             nRequiredPeaks, fixAllPeaks);
+    CrystalFieldUtils::buildSpectrumFunction(
+        *ionSpectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM,
+        nRequiredPeaks, fixAllPeaks);
     spectrum->addFunction(ionSpectrum);
   }
 }
@@ -991,7 +784,7 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
   m_target.reset(multiDomain);
 
   const auto nSpec = nSpectra();
-  std::vector<CompositeFunction*> spectra(nSpec);
+  std::vector<CompositeFunction *> spectra(nSpec);
   for (size_t i = 0; i < nSpec; ++i) {
     auto spectrum = boost::make_shared<CompositeFunction>();
     spectra[i] = spectrum.get();
@@ -1011,29 +804,37 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
     ComplexFortranMatrix ham;
     ComplexFortranMatrix hz;
     int nre = 0;
-    auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*compSource.getFunction(ionIndex));
+    auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(
+        *compSource.getFunction(ionIndex));
     peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
     ham += hz;
 
     auto &temperatures = m_control.temperatures();
     auto &FWHMs = m_control.FWHMs();
     const bool addBackground = ionIndex == 0;
-    auto ionIntensityScaling = compSource.getFunction(ionIndex)->getParameter("IntensityScaling");
+    auto ionIntensityScaling =
+        compSource.getFunction(ionIndex)->getParameter("IntensityScaling");
     for (size_t i = 0; i < nSpec; ++i) {
-      auto spectrumIntensityScaling = m_control.getFunction(i)->getParameter("IntensityScaling");
-      spectra[i]->addFunction(
-          buildSpectrum(nre, en, wf, temperatures[i], FWHMs[i], i, addBackground, ionIntensityScaling * spectrumIntensityScaling));
+      auto spectrumIntensityScaling =
+          m_control.getFunction(i)->getParameter("IntensityScaling");
+      spectra[i]->addFunction(buildSpectrum(
+          nre, en, wf, temperatures[i], FWHMs[i], i, addBackground,
+          ionIntensityScaling * spectrumIntensityScaling));
     }
 
     size_t i = 0;
     for (auto &prop : physProps) {
-      compositePhysProps[i]->addFunction(buildPhysprop(nre, en, wf, ham, prop));
+      auto physPropFun = buildPhysprop(nre, en, wf, ham, prop);
+      compositePhysProps[i]->addFunction(physPropFun);
+      std::string propName = "ion";
+      propName.append(std::to_string(ionIndex)).append(".").append(prop);
+      m_mapPrefixes2PhysProps[propName] = physPropFun;
       ++i;
     }
   }
   m_target->checkFunction();
   size_t i = nSpec;
-  for(auto &propFun: compositePhysProps) {
+  for (auto &propFun : compositePhysProps) {
     multiDomain->addFunction(propFun);
     multiDomain->setDomainIndex(i, i);
     ++i;
@@ -1058,7 +859,6 @@ void CrystalFieldFunction::calcExcitations(int nre,
                        iEnergies);
   calculateExcitations(eEnergies, iEnergies, de, di, eExcitations,
                        iExcitations);
-  const size_t nSpec = nSpectra();
   const auto nPeaks = eExcitations.size();
   values.expand(2 * nPeaks);
   for (size_t i = 0; i < nPeaks; ++i) {
@@ -1089,16 +889,13 @@ API::IFunction_sptr CrystalFieldFunction::buildSpectrum(
     auto background =
         API::FunctionFactory::Instance().createInitialized(bkgdShape);
     spectrum->addFunction(background);
-    if (fixAllPeaks) {
-      background->fixAll();
-    }
   }
 
   auto xVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
   auto yVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
-  CrystalFieldUtils::buildSpectrumFunction(
-      *spectrum, peakShape, values, xVec, yVec,
-      fwhmVariation, fwhm, nRequiredPeaks, fixAllPeaks);
+  CrystalFieldUtils::buildSpectrumFunction(*spectrum, peakShape, values, xVec,
+                                           yVec, fwhmVariation, fwhm,
+                                           nRequiredPeaks, fixAllPeaks);
   return IFunction_sptr(spectrum);
 }
 
@@ -1127,9 +924,36 @@ API::IFunction_sptr CrystalFieldFunction::buildPhysprop(
     return propFun;
   }
 
-  throw std::runtime_error("Physical property type not understood: " + propName);
+  throw std::runtime_error("Physical property type not understood: " +
+                           propName);
 }
 
+/// Update a physical property function.
+void CrystalFieldFunction::updatePhysprop(int nre,
+                                          const DoubleFortranVector &en,
+                                          const ComplexFortranMatrix &wf,
+                                          const ComplexFortranMatrix &ham,
+                                          API::IFunction &fun) const {
+
+  auto propName = fun.name();
+
+  if (propName == "cv") { // HeatCapacity
+    auto &propFun = dynamic_cast<CrystalFieldHeatCapacityCalculation &>(fun);
+    propFun.setEnergy(en);
+  } else if (propName == "chi") { // Susceptibility
+    auto &propFun = dynamic_cast<CrystalFieldSusceptibilityCalculation &>(fun);
+    propFun.setEigensystem(en, wf, nre);
+  } else if (propName == "mh") { // Magnetisation
+    auto &propFun = dynamic_cast<CrystalFieldMagnetisationCalculation &>(fun);
+    propFun.setHamiltonian(ham, nre);
+  } else if (propName == "mt") { // MagneticMoment
+    auto &propFun = dynamic_cast<CrystalFieldMomentCalculation &>(fun);
+    propFun.setHamiltonian(ham, nre);
+  } else {
+    throw std::runtime_error("Physical property type not understood: " +
+                             propName);
+  }
+}
 
 /// Update m_spectrum function.
 void CrystalFieldFunction::updateTargetFunction() const {
@@ -1143,6 +967,7 @@ void CrystalFieldFunction::updateTargetFunction() const {
   } else {
     updateSingleSite();
   }
+  m_target->checkFunction();
 }
 
 /// Update the target function in a single site case.
@@ -1179,9 +1004,9 @@ void CrystalFieldFunction::updateSingleSiteSingleSpectrum() const {
   m_source->function(domain, values);
   m_target->setAttributeValue("NumDeriv", true);
   auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
-  CrystalFieldUtils::updateSpectrumFunction(spectrum, peakShape, values, indexShift,
-                                            xVec, yVec, fwhmVariation,
-                                            defaultFWHM, fixAllPeaks);
+  CrystalFieldUtils::updateSpectrumFunction(
+      spectrum, peakShape, values, indexShift, xVec, yVec, fwhmVariation,
+      defaultFWHM, fixAllPeaks);
 }
 
 /// Update the target function in a single site - multi spectrum case.
@@ -1194,18 +1019,18 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
   auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*m_source);
   peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
   ham += hz;
+  size_t iFirst = hasBackground() ? 1 : 0;
 
   auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
-  try {
-    auto &temperatures = m_control.temperatures();
-    auto &FWHMs = m_control.FWHMs();
-    for (size_t i = 0; i < temperatures.size(); ++i) {
-      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, temperatures[i],
-                     FWHMs[i], i);
-    }
-  } catch (std::out_of_range &) {
-    buildTargetFunction();
-    return;
+  auto &temperatures = m_control.temperatures();
+  auto &FWHMs = m_control.FWHMs();
+  for (size_t iSpec = 0; iSpec < temperatures.size(); ++iSpec) {
+    updateSpectrum(*fun.getFunction(iSpec), nre, en, wf, ham,
+                   temperatures[iSpec], FWHMs[iSpec], iSpec, iFirst);
+  }
+
+  for (auto &prop : m_mapPrefixes2PhysProps) {
+    updatePhysprop(nre, en, wf, ham, *prop.second);
   }
 }
 
@@ -1236,30 +1061,38 @@ void CrystalFieldFunction::updateMultiSiteSingleSpectrum() const {
 
 /// Update the target function in a multi site - multi spectrum case.
 void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {
-  try {
-    auto &compSource = compositeSource();
-    for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
-      DoubleFortranVector en;
-      ComplexFortranMatrix wf;
-      ComplexFortranMatrix ham;
-      ComplexFortranMatrix hz;
-      int nre = 0;
-      auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*compSource.getFunction(ionIndex));
-      peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
-      ham += hz;
+  auto &compSource = compositeSource();
+  for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
+    DoubleFortranVector en;
+    ComplexFortranMatrix wf;
+    ComplexFortranMatrix ham;
+    ComplexFortranMatrix hz;
+    int nre = 0;
+    auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(
+        *compSource.getFunction(ionIndex));
+    peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
+    ham += hz;
+    size_t iFirst = ionIndex == 0 && hasBackground() ? 1 : 0;
 
-      auto &temperatures = m_control.temperatures();
-      auto &FWHMs = m_control.FWHMs();
-      for (size_t i = 0; i < temperatures.size(); ++i) {
-        auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target->getFunction(i));
-        auto &ionSpectrum = dynamic_cast<CompositeFunction &>(*spectrum.getFunction(ionIndex));
-        updateSpectrum(ionSpectrum, nre, en, wf, ham, temperatures[i],
-                       FWHMs[i], i);
+    auto &temperatures = m_control.temperatures();
+    auto &FWHMs = m_control.FWHMs();
+    for (size_t iSpec = 0; iSpec < temperatures.size(); ++iSpec) {
+      auto &spectrum =
+          dynamic_cast<CompositeFunction &>(*m_target->getFunction(iSpec));
+      auto &ionSpectrum =
+          dynamic_cast<CompositeFunction &>(*spectrum.getFunction(ionIndex));
+      updateSpectrum(ionSpectrum, nre, en, wf, ham, temperatures[iSpec],
+                     FWHMs[iSpec], iSpec, iFirst);
+    }
+
+    std::string prefix("ion");
+    prefix.append(std::to_string(ionIndex)).append(".");
+    auto prefixSize = prefix.size();
+    for (auto prop : m_mapPrefixes2PhysProps) {
+      if (prop.first.substr(0, prefixSize) == prefix) {
+        updatePhysprop(nre, en, wf, ham, *prop.second);
       }
     }
-  } catch (std::out_of_range &) {
-    buildTargetFunction();
-    return;
   }
 }
 
@@ -1269,19 +1102,20 @@ void CrystalFieldFunction::updateSpectrum(API::IFunction &spectrum, int nre,
                                           const ComplexFortranMatrix &wf,
                                           const ComplexFortranMatrix &ham,
                                           double temperature, double fwhm,
-                                          size_t iSpec) const {
+                                          size_t iSpec, size_t iFirst) const {
   const auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   const auto peakShape = getAttribute("PeakShape").asString();
   const bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
   auto xVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
   auto yVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
-  auto intensityScaling = m_control.getFunction(iSpec)->getParameter("IntensityScaling");
+  auto intensityScaling =
+      m_control.getFunction(iSpec)->getParameter("IntensityScaling");
   FunctionValues values;
   calcExcitations(nre, en, wf, temperature, values, iSpec, intensityScaling);
   auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
-  CrystalFieldUtils::updateSpectrumFunction(
-      composite, peakShape, values, 1, xVec, yVec,
-      fwhmVariation, fwhm, fixAllPeaks);
+  CrystalFieldUtils::updateSpectrumFunction(composite, peakShape, values,
+                                            iFirst, xVec, yVec, fwhmVariation,
+                                            fwhm, fixAllPeaks);
 }
 
 /// Make maps between parameter names and indices
@@ -1315,7 +1149,6 @@ CrystalFieldFunction::makeMapsForFunction(const IFunction &fun, size_t iFirst,
     size_t j = i + iFirst;
     auto name(prefix);
     name.append(fun.parameterName(i));
-    //std::cerr << "map " << j << ": " << name << std::endl;
     m_mapNames2Indices[name] = j;
     m_mapIndices2Names[j] = name;
   }
@@ -1334,7 +1167,7 @@ void CrystalFieldFunction::makeMapsSS() const {
     peakIndex = 1;
   }
   // All other functions are peaks.
-  for(size_t ip = peakIndex; ip < m_target->nFunctions(); ++ip) {
+  for (size_t ip = peakIndex; ip < m_target->nFunctions(); ++ip) {
     std::string prefix(PEAK_PREFIX);
     prefix.append(std::to_string(ip - peakIndex)).append(".");
     i += makeMapsForFunction(*m_target->getFunction(ip), i, prefix);
@@ -1345,7 +1178,7 @@ void CrystalFieldFunction::makeMapsSS() const {
 void CrystalFieldFunction::makeMapsSM() const {
   size_t i = 0;
   // Intensity scalings for each spectrum
-  for(size_t j = 0; j < m_control.nFunctions(); ++j) {
+  for (size_t j = 0; j < m_control.nFunctions(); ++j) {
     std::string prefix(SPECTRUM_PREFIX);
     prefix.append(std::to_string(j)).append(".");
     i += makeMapsForFunction(*m_control.getFunction(j), i, prefix);
@@ -1389,7 +1222,7 @@ void CrystalFieldFunction::makeMapsMS() const {
   size_t i = 0;
   // Intensity scalings for each ion
   auto &crystalField = compositeSource();
-  for(size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
+  for (size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
     std::string prefix(ION_PREFIX);
     prefix.append(std::to_string(ion)).append(".");
     i += makeMapsForFunction(*crystalField.getFunction(ion), i, prefix);
@@ -1408,7 +1241,8 @@ void CrystalFieldFunction::makeMapsMS() const {
     std::string ionPrefix(ION_PREFIX);
     ionPrefix.append(std::to_string(ion - ionIndex)).append(".");
     // All other functions are peaks.
-    auto &spectrum = dynamic_cast<const CompositeFunction&>(*m_target->getFunction(ion));
+    auto &spectrum =
+        dynamic_cast<const CompositeFunction &>(*m_target->getFunction(ion));
     for (size_t ip = 0; ip < spectrum.nFunctions(); ++ip) {
       std::string prefix(ionPrefix);
       prefix.append(PEAK_PREFIX).append(std::to_string(ip)).append(".");
@@ -1421,14 +1255,14 @@ void CrystalFieldFunction::makeMapsMS() const {
 void CrystalFieldFunction::makeMapsMM() const {
   size_t i = 0;
   // Intensity scalings for each spectrum
-  for(size_t j = 0; j < m_control.nFunctions(); ++j) {
+  for (size_t j = 0; j < m_control.nFunctions(); ++j) {
     std::string prefix(SPECTRUM_PREFIX);
     prefix.append(std::to_string(j)).append(".");
     i += makeMapsForFunction(*m_control.getFunction(j), i, prefix);
   }
   // Intensity scalings for each ion
   auto &crystalField = compositeSource();
-  for(size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
+  for (size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
     std::string prefix(ION_PREFIX);
     prefix.append(std::to_string(ion)).append(".");
     i += makeMapsForFunction(*crystalField.getFunction(ion), i, prefix);
@@ -1436,7 +1270,8 @@ void CrystalFieldFunction::makeMapsMM() const {
 
   // The spectra (background and peak) parameters
   for (size_t iSpec = 0; iSpec < nSpectra(); ++iSpec) {
-    auto &spectrum = dynamic_cast<const CompositeFunction&>(*m_target->getFunction(iSpec));
+    auto &spectrum =
+        dynamic_cast<const CompositeFunction &>(*m_target->getFunction(iSpec));
     std::string spectrumPrefix(SPECTRUM_PREFIX);
     spectrumPrefix.append(std::to_string(iSpec)).append(".");
 
@@ -1456,14 +1291,17 @@ void CrystalFieldFunction::makeMapsMM() const {
       // All other functions are peaks.
       for (size_t ip = peakIndex; ip < ionSpectrum.nFunctions(); ++ip) {
         std::string prefix(ionPrefix);
-        prefix.append(PEAK_PREFIX).append(std::to_string(ip - peakIndex)).append(".");
+        prefix.append(PEAK_PREFIX)
+            .append(std::to_string(ip - peakIndex))
+            .append(".");
         i += makeMapsForFunction(*ionSpectrum.getFunction(ip), i, prefix);
       }
     }
   }
   // The phys prop parameters
   for (size_t iSpec = nSpectra(); iSpec < m_target->nFunctions(); ++iSpec) {
-    auto &spectrum = dynamic_cast<const CompositeFunction&>(*m_target->getFunction(iSpec));
+    auto &spectrum =
+        dynamic_cast<const CompositeFunction &>(*m_target->getFunction(iSpec));
     std::string physPropPrefix(spectrum.getFunction(0)->name());
     physPropPrefix.append(".");
     for (size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
