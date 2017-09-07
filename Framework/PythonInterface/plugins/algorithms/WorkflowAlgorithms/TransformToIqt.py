@@ -285,6 +285,7 @@ class TransformToIqt(PythonAlgorithm):
         # Replace NaN values in last bin, with zeroes
         ReplaceSpecialValues(InputWorkspace=self._output_workspace,
                              OutputWorkspace=self._output_workspace,
+                             InfinityValue=0.0,
                              NaNValue=0.0)
 
         # Set Y axis unit and label
