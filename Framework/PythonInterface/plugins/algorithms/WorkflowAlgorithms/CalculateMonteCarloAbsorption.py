@@ -350,7 +350,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
             self._output_ws = self._group_ws([ass_ws, acc_ws])
         else:
-            self._output_ws = ass_ws
+            self._output_ws = self._group_ws([ass_ws])
 
         self.setProperty('CorrectionsWorkspace', self._output_ws)
 
@@ -528,7 +528,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # ---------- Load Elastic Instrument Definition File ----------
 
-        idf_name = workspace.getInstrument().getName() + '_Elastic_Definition.xml'
+        idf_name = workspace.getInstrument().getName() + '_Definition_elastic.xml'
+
         idf_path = os.path.join(config.getInstrumentDirectory(), idf_name)
         logger.information('IDF = %s' % idf_path)
 
