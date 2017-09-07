@@ -415,6 +415,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         output_ws_name = self.getPropertyValue('CorrectionsWorkspace')
         self._ass_ws_name = output_ws_name + "_ass"
         self._acc_ws_name = output_ws_name + "_acc"
+        self._indirect_q_axis = None
 
     def validateInputs(self):
         issues = dict()
@@ -472,9 +473,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             return self._clone_ws(workspace)
         else:
             convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=True)
-            convert_unit_alg.setProperty("InputWorkspace", workspace)
-            convert_unit_alg.setProperty("Target", 'Wavelength')
-            convert_unit_alg.setProperty("EMode", self._emode)
 
             if self._emode == 'Indirect':
                 x_unit = workspace.getAxis(0).getUnit().unitID()
@@ -483,16 +481,23 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 # Check whether to create wavelength workspace for Indirect Elastic
                 if (x_unit == 'MomentumTransfer' and not y_unit == 'EnergyTransfer') \
                         or (y_unit == 'MomentumTransfer' and not x_unit == 'EnergyTransfer'):
+                    self._indirect_q_axis = 'Y'
 
                     if x_unit == 'MomentumTransfer':
+                        self._indirect_q_axis = 'X'
                         logger.information('X-Axis of the input workspace is Q')
                         transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
                         transpose_alg.setProperty("InputWorkspace", workspace)
                         transpose_alg.execute()
                         workspace = transpose_alg.getProperty("OutputWorkspace").value
-                    return self._create_waves_indirect_inelastic(workspace)
+                    return self._create_waves_indirect_elastic(workspace)
+                else:
+                    convert_unit_alg.setProperty("EFixed", self._efixed)
 
-                convert_unit_alg.setProperty("EFixed", self._efixed)
+            convert_unit_alg.setProperty("InputWorkspace", workspace)
+            convert_unit_alg.setProperty("Target", 'Wavelength')
+            convert_unit_alg.setProperty("EMode", self._emode)
+
             convert_unit_alg.execute()
 
             return convert_unit_alg.getProperty("OutputWorkspace").value
@@ -502,11 +507,22 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
 
         if self._sample_unit != 'Wavelength':
+
+            if self._emode == 'Indirect':
+
+                if self._indirect_q_axis == 'X':
+                    transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
+                    transpose_alg.setProperty("InputWorkspace", workspace)
+                    transpose_alg.execute()
+                    workspace = transpose_alg.getProperty("OutputWorkspace").value
+                    workspace.setX(0, self._q_values)
+                    workspace.getAxis(0).setUnit("MomentumTransfer")
+                else:
+                    convert_unit_alg.setProperty("EFixed", self._efixed)
+
             convert_unit_alg.setProperty("InputWorkspace", workspace)
             convert_unit_alg.setProperty("Target", self._sample_unit)
             convert_unit_alg.setProperty("EMode", self._emode)
-            if self._emode == 'Indirect':
-                convert_unit_alg.setProperty("EFixed", self._efixed)
             convert_unit_alg.execute()
             return convert_unit_alg.getProperty("OutputWorkspace").value
 
@@ -515,7 +531,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
     # ------------------------------- Converting IndirectElastic to wavelength ------------------------------
 
-    def _create_waves_indirect_inelastic(self, workspace):
+    def _create_waves_indirect_elastic(self, workspace):
         """
         Creates a wavelength workspace, from the workspace with the specified input workspace
         name, using an Elastic instrument definition file. E-Mode must be Indirect and the y-axis
@@ -524,7 +540,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         :param workspace:   The input workspace.
         :return:            The output wavelength workspace.
         """
-        q_values = workspace.getAxis(1).extractValues()
+        self._q_values = workspace.getAxis(1).extractValues()
 
         # ---------- Load Elastic Instrument Definition File ----------
 
@@ -533,7 +549,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         idf_path = os.path.join(config.getInstrumentDirectory(), idf_name)
         logger.information('IDF = %s' % idf_path)
 
-        load_alg = self.createChildAlgorithm("LoadInstrument", enableLogging=False)
+        load_alg = self.createChildAlgorithm("LoadInstrument", enableLogging=True)
         load_alg.setProperty("Workspace", workspace)
         load_alg.setProperty("Filename", idf_path)
         load_alg.setProperty("RewriteSpectraMap", True)
@@ -563,13 +579,13 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         convert_alg = self.createChildAlgorithm("ConvertToHistogram", enableLogging=False)
         convert_alg.setProperty("InputWorkspace", workspace)
-        convert_alg.executeAsChildAlg()
+        convert_alg.execute()
 
         workspace = self._crop_ws(convert_alg.getProperty("OutputWorkspace").value)
 
         # --------- Set wavelengths as X-values in Output Workspace ----------
 
-        waves = (0.01 * np.arange(-1, workspace.blocksize() - 1)) + self._wave
+        waves = (0.01 * np.arange(-1, workspace.blocksize())) + self._wave
         logger.information('Waves : ' + str(waves))
         nhist = workspace.getNumberHistograms()
         for idx in range(nhist):
@@ -597,7 +613,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         update_alg.setProperty("Workspace", workspace)
         update_alg.setProperty("Filename", path)
         update_alg.setProperty("MoveMonitors", False)
-        update_alg.setProperty("IgnorePhi")
+        update_alg.setProperty("IgnorePhi", True)
         update_alg.setProperty("AsciiHeader", head)
         update_alg.setProperty("SkipFirstNLines", 1)
 
