@@ -134,4 +134,5 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
             EnggUtils.generateOutputParTable(tbl_name, difa, difc, tzero)
             self.log().information("Output parameters added into a table workspace: %s" % tbl_name)
 
+
 AlgorithmFactory.subscribe(EnggFitDIFCFromPeaks)

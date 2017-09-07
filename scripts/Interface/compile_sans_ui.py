@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import (absolute_import, division, print_function)
 import os
 
 # Compile resource file for HFIR SANS and EQSANS
@@ -27,4 +28,4 @@ try:
     os.system("pyuic4 -o ui/ui_data_catalog.py ui/data_catalog.ui")
     os.system("pyuic4 -o ui/ui_stitcher.py ui/stitcher.ui")
 except:
-    print "Could not compile resource file"
+    print("Could not compile resource file")

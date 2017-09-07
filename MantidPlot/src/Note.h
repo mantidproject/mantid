@@ -30,7 +30,7 @@
 #ifndef NOTE_H
 #define NOTE_H
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
 #include <QTextEdit>
 

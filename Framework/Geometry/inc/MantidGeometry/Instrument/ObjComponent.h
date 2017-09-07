@@ -95,6 +95,9 @@ public:
   /// Return the material this component is made from
   const Kernel::Material material() const override;
 
+  virtual size_t
+  registerContents(class ComponentVisitor &componentVisitor) const override;
+
 protected:
   /// The physical geometry representation
   // Made a pointer to a const object. Since this is a shared object we

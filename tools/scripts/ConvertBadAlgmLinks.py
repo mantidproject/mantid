@@ -20,6 +20,7 @@ def grep(patt,lines):
     else:
         return None
 
+
 #get alg names
 algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 regexs= {}

@@ -27,6 +27,7 @@ set ( TEST_PY_FILES
   PropertyHistoryTest.py
   PropertyWithValueTest.py
   PropertyManagerTest.py
+  PropertyManagerDataServiceTest.py
   PropertyManagerPropertyTest.py
   PythonPluginsTest.py
   StatisticsTest.py

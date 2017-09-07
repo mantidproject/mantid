@@ -5,41 +5,18 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidBeamline/DetectorInfo.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-
-namespace {
-boost::shared_ptr<Beamline::DetectorInfo>
-makeDetectorInfo(const Instrument &instrument) {
-  const auto numDets = instrument.getNumberDetectors();
-  std::vector<size_t> monitors;
-  for (size_t i = 0; i < numDets; ++i)
-    if (instrument.isMonitorViaIndex(i))
-      monitors.push_back(i);
-  std::vector<Eigen::Vector3d> positions;
-  std::vector<Eigen::Quaterniond> rotations;
-  const auto &detIDs = instrument.getDetectorIDs();
-  for (const auto &id : detIDs) {
-    const auto &det = instrument.getDetector(id);
-    const auto &pos = det->getPos();
-    positions.emplace_back(pos[0], pos[1], pos[2]);
-    const auto &rot = det->getRotation();
-    rotations.emplace_back(rot.real(), rot.imagI(), rot.imagJ(), rot.imagK());
-  }
-  return boost::make_shared<Beamline::DetectorInfo>(
-      std::move(positions), std::move(rotations), monitors);
-}
-}
 
 class InstrumentTest : public CxxTest::TestSuite {
 public:
@@ -543,27 +520,36 @@ public:
     const V3D bankEpsilon{5e-10, 5e-10, 5e-10};
     const V3D bankAxis{0, 0, 1};
     const Quat bankRot(90.0, bankAxis);
+    const V3D bankScale{1, 2, 3};
     auto pmap = boost::make_shared<ParameterMap>();
     pmap->addV3D(bank1->getComponentID(), ParameterMap::pos(), bankOffset);
     pmap->addV3D(bank2->getComponentID(), ParameterMap::pos(), bankEpsilon);
     pmap->addQuat(bank3->getComponentID(), ParameterMap::rot(), bankRot);
-    Instrument instrument(baseInstrument, pmap);
+    pmap->addV3D(bank3->getComponentID(), ParameterMap::scale(), bankScale);
 
-    // Extract information from instrument to create DetectorInfo
-    auto detInfo = makeDetectorInfo(instrument);
+    // Set instrument in ParameterMap to create DetectorInfo
+    pmap->setInstrument(baseInstrument.get());
+    auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
+    auto &detInfo = pmap->mutableDetectorInfo();
+    auto &compInfo = pmap->mutableComponentInfo();
 
-    instrument.setDetectorInfo(detInfo);
     // bank 1
-    TS_ASSERT(detInfo->position(0).isApprox(
-        toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}), 1e-12));
-    TS_ASSERT(detInfo->position(2).isApprox(
-        toVector3d(bankOffset + V3D{0.008, -0.0002, 0.0}), 1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(0))
+                  .isApprox(toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}),
+                            1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(2))
+                  .isApprox(toVector3d(bankOffset + V3D{0.008, -0.0002, 0.0}),
+                            1e-12));
     // bank 2
-    TS_ASSERT(detInfo->position(9).isApprox(
-        toVector3d(bankEpsilon + V3D{-0.008, -0.0002, 0.0}), 1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(9))
+                  .isApprox(toVector3d(bankEpsilon + V3D{-0.008, -0.0002, 0.0}),
+                            1e-12));
     // bank 3
-    TS_ASSERT(detInfo->position(18)
+    TS_ASSERT(toVector3d(detInfo.position(18))
                   .isApprox(Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
+    TS_ASSERT_EQUALS(
+        compInfo.scaleFactor(compInfo.indexOf(bank3->getComponentID())),
+        bankScale);
 
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-10, 5e-10, 5e-10};
@@ -571,21 +557,26 @@ public:
     const Quat detRot(42.0, detAxis);
     const Quat detRotEps(1e-11, detAxis);
 
-    detInfo->setPosition(0, detInfo->position(0) + toVector3d(detOffset));
-    detInfo->setRotation(18, toQuaterniond(detRot) * detInfo->rotation(18));
+    detInfo.setPosition(0, detInfo.position(0) + detOffset);
+    detInfo.setRotation(18, detRot * detInfo.rotation(18));
     // Shifts/rotations by epsilon below tolerance, should not generate
     // parameter from this:
-    detInfo->setPosition(1, detInfo->position(1) + toVector3d(detEpsilon));
-    detInfo->setPosition(9, detInfo->position(9) + toVector3d(detEpsilon));
-    detInfo->setRotation(19, toQuaterniond(detRotEps) * detInfo->rotation(19));
-    // 3 bank parameters, det pos/rot is in DetectorInfo
-    TS_ASSERT_EQUALS(pmap->size(), 3);
+    detInfo.setPosition(1, detInfo.position(1) + detEpsilon);
+    detInfo.setPosition(9, detInfo.position(9) + detEpsilon);
+    detInfo.setRotation(19, detRotEps * detInfo.rotation(19));
+    // Set a new scale factor
+    const V3D newScaleFactor{2, 2, 2};
+    compInfo.setScaleFactor(compInfo.indexOf(bank3->getComponentID()),
+                            newScaleFactor);
 
-    const auto legacyMap = instrument.makeLegacyParameterMap();
-    // 3 bank parameters + 2 det parameters
-    TS_ASSERT_EQUALS(legacyMap->size(), 5);
+    // All position information should be purged
+    TS_ASSERT_EQUALS(pmap->size(), 0);
+
+    const auto legacyMap = instr->makeLegacyParameterMap();
+    // 3 bank parameters + 2 det parameters + 1 scale parameter
+    TS_ASSERT_EQUALS(legacyMap->size(), 6);
+    TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
     Instrument legacyInstrument(baseInstrument, legacyMap);
-    TS_ASSERT(!legacyInstrument.hasDetectorInfo());
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(),
                      bankOffset + V3D(-0.008, -0.0002, 0.0) + detOffset);
@@ -600,6 +591,10 @@ public:
                      V3D(0.0002, -0.008, 15.0));
     TS_ASSERT(toQuaterniond(legacyInstrument.getDetector(19)->getRotation())
                   .isApprox(toQuaterniond(detRot * bankRot), 1e-10));
+    // Check the scale factor
+    TS_ASSERT(toVector3d(legacyInstrument.getComponentByName("bank3")
+                             ->getScaleFactor())
+                  .isApprox(toVector3d(newScaleFactor), 1e-10));
   }
 
   void test_makeLegacyParameterMap_scaled_RectangularDetector() {
@@ -611,42 +606,44 @@ public:
     double scaley = 1.3;
     pmap->addDouble(bank1->getComponentID(), "scalex", scalex);
     pmap->addDouble(bank1->getComponentID(), "scaley", scaley);
-    Instrument instrument(baseInstrument, pmap);
 
-    // Extract information from instrument to create DetectorInfo
-    auto detInfo = makeDetectorInfo(instrument);
+    // Set instrument in ParameterMap to create DetectorInfo
+    pmap->setInstrument(baseInstrument.get());
+    auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
+    auto &detInfo = pmap->mutableDetectorInfo();
 
-    instrument.setDetectorInfo(detInfo);
     // bank 1
     double pitch = 0.008;
-    TS_ASSERT(
-        detInfo->position(0).isApprox(toVector3d(V3D{0.0, 0.0, 5.0}), 1e-12));
-    TS_ASSERT(detInfo->position(1)
+    TS_ASSERT(toVector3d(detInfo.position(0))
+                  .isApprox(toVector3d(V3D{0.0, 0.0, 5.0}), 1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(1))
                   .isApprox(toVector3d(V3D{0.0, scaley * pitch, 5.0}), 1e-12));
-    TS_ASSERT(detInfo->position(2)
+    TS_ASSERT(toVector3d(detInfo.position(2))
                   .isApprox(toVector3d(V3D{scalex * pitch, 0.0, 5.0}), 1e-12));
-    TS_ASSERT(detInfo->position(3).isApprox(
-        toVector3d(V3D{scalex * pitch, scaley * pitch, 5.0}), 1e-12));
+    TS_ASSERT(
+        toVector3d(detInfo.position(3))
+            .isApprox(toVector3d(V3D{scalex * pitch, scaley * pitch, 5.0}),
+                      1e-12));
 
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-10, 5e-10, 5e-10};
 
-    detInfo->setPosition(2, detInfo->position(2) + toVector3d(detEpsilon));
+    detInfo.setPosition(2, detInfo.position(2) + detEpsilon);
     // 2 bank parameters, det pos/rot is in DetectorInfo
     TS_ASSERT_EQUALS(pmap->size(), 2);
 
-    const auto legacyMap = instrument.makeLegacyParameterMap();
+    const auto legacyMap = instr->makeLegacyParameterMap();
 
     // Legacy instrument does not support positions in ParameterMap for
     // RectangularDetectorPixel (parameters ignored by
     // RectangularDetectorPixel::getRelativePos), so we cannot support this.
-    detInfo->setPosition(3, detInfo->position(3) + toVector3d(detOffset));
-    TS_ASSERT_THROWS(instrument.makeLegacyParameterMap(), std::runtime_error);
+    detInfo.setPosition(3, detInfo.position(3) + detOffset);
+    TS_ASSERT_THROWS(instr->makeLegacyParameterMap(), std::runtime_error);
 
     // 2 bank parameters + 0 det parameters
     TS_ASSERT_EQUALS(legacyMap->size(), 2);
+    TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
     Instrument legacyInstrument(baseInstrument, legacyMap);
-    TS_ASSERT(!legacyInstrument.hasDetectorInfo());
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(),
                      V3D(0.0, 0.0, 5.0));
@@ -669,25 +666,6 @@ public:
     TS_ASSERT(instrument.isEmptyInstrument());
     instrument.add(new CompAssembly{});
     TS_ASSERT(!instrument.isEmptyInstrument());
-  }
-
-  void test_empty_Instrument_does_not_have_Instrument_infos() {
-    Instrument loneInstrument{}; // No Experiment info associated via
-                                 // ExperimentInfo::setInstrumen
-    TSM_ASSERT("Can only be "
-               "available when associated with ExperimentInfo",
-               !loneInstrument.hasInfoVisitor());
-    TSM_ASSERT("Can only be "
-               "available when associated with ExperimentInfo",
-               !loneInstrument.hasDetectorInfo());
-  }
-
-  void test_set_InfoVisitor() {
-    Instrument instrument;
-    TS_ASSERT(!instrument.hasInfoVisitor());
-    InfoComponentVisitor visitor(std::vector<detid_t>{});
-    instrument.setInfoVisitor(visitor);
-    TS_ASSERT(instrument.hasInfoVisitor());
   }
 
 private:

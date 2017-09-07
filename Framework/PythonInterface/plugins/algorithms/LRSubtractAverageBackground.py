@@ -123,4 +123,5 @@ class LRSubtractAverageBackground(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', workspace)
 
+
 AlgorithmFactory.subscribe(LRSubtractAverageBackground)

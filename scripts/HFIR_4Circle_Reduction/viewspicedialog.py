@@ -1,4 +1,5 @@
-import ui_SpiceViewerDialog
+from __future__ import (absolute_import, division, print_function)
+from . import ui_SpiceViewerDialog
 from PyQt4 import QtGui, QtCore
 
 

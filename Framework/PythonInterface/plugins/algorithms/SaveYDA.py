@@ -306,6 +306,7 @@ def _represent_ordered_dict(dumper, data):
 
     return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
 
+
 # Adding representers to yaml
 yaml.add_representer(OrderedDict, _represent_ordered_dict)
 yaml.add_representer(FlowList, _flow_list_rep)

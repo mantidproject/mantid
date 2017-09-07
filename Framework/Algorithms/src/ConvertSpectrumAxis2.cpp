@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include "MantidTypes/SpectrumDefinition.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
@@ -172,7 +172,8 @@ void ConvertSpectrumAxis2::createElasticQMap(
     }
 
     // Convert to MomentumTransfer
-    double elasticQInAngstroms = Kernel::UnitConversion::run(theta, efixed);
+    double elasticQInAngstroms =
+        Kernel::UnitConversion::convertToElasticQ(theta, efixed);
 
     if (targetUnit == "ElasticQ") {
       m_indexMap.emplace(elasticQInAngstroms, i);
@@ -239,7 +240,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
 }
 
 double ConvertSpectrumAxis2::getEfixed(
-    const size_t detectorIndex, const API::DetectorInfo &detectorInfo,
+    const size_t detectorIndex, const Geometry::DetectorInfo &detectorInfo,
     const Mantid::API::MatrixWorkspace &inputWS, const int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
