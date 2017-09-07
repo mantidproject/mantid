@@ -575,7 +575,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         # ---------- Calculate Wavelength ----------
 
         wave = math.sqrt(81.787 / e_fixed)
-        logger.information('Wavelength = %f' % self._wave)
+        logger.information('Wavelength = %f' % wave)
         workspace.getAxis(0).setUnit('Wavelength')
 
         # ---------- Format Input Workspace ---------
