@@ -12,3 +12,9 @@ class HRPD_MODES(object):
     enum_friendly_name = "Grouping mode"
     coupled = "coupled"
     decoupled = "decoupled"
+
+
+class HRPD_SAMPLE_GEOMETRIES(object):
+    enum_friendly_name = "Sample geometry"
+    cylinder = "cylinder"
+    slab = "slab"
