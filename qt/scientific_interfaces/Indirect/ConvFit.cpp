@@ -7,6 +7,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -171,7 +173,7 @@ void ConvFit::setup() {
 
   // Replot input automatically when file / spec no changes
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(updatePlot()));
+          SLOT(plotSpecChanged(int)));
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
 
@@ -288,10 +290,10 @@ void ConvFit::run() {
   m_runMax = m_uiForm.spSpectraMax->value();
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
-  auto cfs = sequentialFit(specMin, specMax, m_baseName);
+  m_fitAlg = sequentialFit(specMin, specMax, m_baseName);
 
   // Add to batch alg runner and execute
-  m_batchAlgoRunner->addAlgorithm(cfs);
+  m_batchAlgoRunner->addAlgorithm(m_fitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(sequentialFitComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
@@ -445,12 +447,14 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
   if (error)
     return;
 
-  const auto resultName = outputWSName.toStdString() + "_Result";
+  std::string outputPrefix = outputWSName.toStdString();
+
+  const auto resultName = outputPrefix + "_Result";
   MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
 
   // Name for GroupWorkspace
-  const auto groupName = outputWSName.toStdString() + "_Workspaces";
+  const auto groupName = outputPrefix + "_Workspaces";
   // Add Sample logs for ResolutionFiles
   const auto resFile = m_uiForm.dsResInput->getCurrentDataName().toStdString();
   addSampleLogsToWorkspace(resultName, "resolution_filename", resFile,
@@ -481,6 +485,15 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
   }
   m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
+
+  std::string paramWsName = outputPrefix + "_Parameters";
+
+  if (AnalysisDataService::Instance().doesExist(paramWsName)) {
+    m_paramWs =
+      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
+    updateParameters(m_uiForm.spPlotSpectrum->value());
+  }
+
   m_uiForm.pbSave->setEnabled(true);
   m_uiForm.pbPlot->setEnabled(true);
 }
@@ -1197,6 +1210,109 @@ void ConvFit::updatePlot() {
   }
 }
 
+void ConvFit::updateParameters(int specNo) {
+  // Check parameter table workspace has been created
+  if (!m_paramWs) return;
+  // Check specified spectrum number is in bounds
+  if (specNo < m_runMin || specNo > m_runMax) {
+    updatePlotOptions();
+    return;
+  }
+
+  size_t row = boost::numeric_cast<size_t>(specNo - m_runMin);
+
+  std::vector<std::string> columnNames = m_paramWs->getColumnNames();
+  QMap<QString, double> parameters;
+
+  for (size_t column = 0; column < columnNames.size(); ++column) {
+    double value = m_paramWs->Double(row, column);
+    parameters.insert(QString::fromStdString(columnNames[column]), value);
+  }
+
+  QString functionName = m_uiForm.cbFitType->currentText();
+
+  QStringList params = getFunctionParameters(functionName);
+  params.reserve(static_cast<int>(parameters.size()));
+
+  // Populate Tree widget with values
+  // Background should always be f0
+  m_dblManager->setValue(m_properties["BGA0"], parameters["f0.A0"]);
+  m_dblManager->setValue(m_properties["BGA1"], parameters["f0.A1"]);
+
+  const int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
+
+  int funcIndex = 0;
+  int subIndex = 0;
+
+  // check if we're using a temperature correction
+  if (m_uiForm.ckTempCorrection->isChecked() &&
+    !m_uiForm.leTempCorrection->text().isEmpty()) {
+    subIndex++;
+  }
+
+  const bool usingDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
+
+  // If using a delta function with any fit type or using two Lorentzians
+  const bool usingCompositeFunc =
+    ((usingDeltaFunc && fitTypeIndex > 0) || fitTypeIndex == 2);
+
+  const QString prefBase = "f1.f1.";
+
+  if (usingDeltaFunc) {
+    QString key = prefBase;
+    if (usingCompositeFunc) {
+      key += "f0.";
+    }
+
+    m_dblManager->setValue(m_properties["DeltaHeight"],
+      parameters[key + "Height"]);
+    m_dblManager->setValue(m_properties["DeltaCentre"],
+      parameters[key + "Centre"]);
+    funcIndex++;
+  }
+
+  QString pref = prefBase;
+
+  if (usingCompositeFunc) {
+    pref += "f" + QString::number(funcIndex) + ".f" +
+      QString::number(subIndex) + ".";
+  }
+  else {
+    pref += "f" + QString::number(subIndex) + ".";
+  }
+
+  if (fitTypeIndex == 2) {
+    functionName = "Lorentzian 1";
+    for (auto it = params.begin(); it != params.end() - 3; ++it) {
+      const QString functionParam = functionName + "." + *it;
+      const QString paramValue = pref + *it;
+      m_dblManager->setValue(m_properties[functionParam],
+        parameters[paramValue]);
+    }
+    funcIndex++;
+    pref = prefBase;
+    pref += "f" + QString::number(funcIndex) + ".f" +
+      QString::number(subIndex) + ".";
+
+    functionName = "Lorentzian 2";
+
+    for (auto it = params.begin() + 3; it != params.end(); ++it) {
+      const QString functionParam = functionName + "." + *it;
+      const QString paramValue = pref + *it;
+      m_dblManager->setValue(m_properties[functionParam],
+        parameters[paramValue]);
+    }
+  }
+  else {
+    for (auto it = params.begin(); it != params.end(); ++it) {
+      const QString functionParam = functionName + "." + *it;
+      const QString paramValue = pref + *it;
+      m_dblManager->setValue(m_properties[functionParam],
+        parameters[paramValue]);
+    }
+  }
+}
+
 /**
 * Updates the guess for the plot
 */
@@ -1269,12 +1385,15 @@ void ConvFit::singleFit() {
              SLOT(singleFit(bool)));
   // ensure algorithm was successful
   m_uiForm.ckPlotGuess->setChecked(false);
-  std::string specNo = m_uiForm.spPlotSpectrum->text().toStdString();
+  int specNo = m_uiForm.spPlotSpectrum->value();
+  m_runMin = specNo;
+  m_runMax = specNo;
+  std::string specNoStr = m_uiForm.spPlotSpectrum->text().toStdString();
 
-  m_singleFitAlg = sequentialFit(specNo, specNo, m_singleFitOutputName);
+  m_fitAlg = sequentialFit(specNoStr, specNoStr, m_singleFitOutputName);
 
   // Connection to singleFitComplete SLOT (post algorithm completion)
-  m_batchAlgoRunner->addAlgorithm(m_singleFitAlg);
+  m_batchAlgoRunner->addAlgorithm(m_fitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(singleFitComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
@@ -1290,6 +1409,11 @@ void ConvFit::singleFitComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(singleFitComplete(bool)));
   algorithmComplete(error, m_singleFitOutputName);
+}
+
+void ConvFit::plotSpecChanged(int value) {
+  updatePlot();
+  updateParameters(value);
 }
 
 /**
@@ -1690,17 +1814,19 @@ void ConvFit::updatePlotOptions() {
     plotOptions << "Height";
   }
 
-  QStringList params;
-
-  if (fitFunctionType != 2) {
-    params = getFunctionParameters(m_uiForm.cbFitType->currentText());
-  } else {
-    params = getFunctionParameters(QString("One Lorentzian"));
-  }
-  if (fitFunctionType < 3 && fitFunctionType != 0) {
-    params.removeAll("PeakCentre");
-  }
   if (fitFunctionType != 0) {
+    QStringList params;
+
+    if (fitFunctionType != 2) {
+      params = getFunctionParameters(m_uiForm.cbFitType->currentText());
+    }
+    else {
+      params = getFunctionParameters(QString("One Lorentzian"));
+    }
+    if (fitFunctionType < 3 && fitFunctionType != 0) {
+      params.removeAll("PeakCentre");
+    }
+
     plotOptions.append(params);
   }
 
