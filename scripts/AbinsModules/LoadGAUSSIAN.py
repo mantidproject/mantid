@@ -16,6 +16,8 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
         super(LoadGAUSSIAN, self).__init__(input_dft_filename=input_dft_filename)
         self._dft_program = "GAUSSIAN"
         self._parser = AbinsModules.GeneralDFTParser()
+        self._num_atoms = None
+        self._num_read_freq = 0
 
     def read_phonon_file(self):
         """
@@ -73,10 +75,10 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
             atom = Atom(z_number=z_number)
             coord = np.asarray([float(i) for i in entries[3:6]])
             atoms["atom_{}".format(atom_indx)] = {"symbol": atom.symbol, "mass": atom.mass, "sort": atom_indx,
-                                                  "coord":coord}
+                                                  "coord": coord}
 
             atom_indx += 1
-
+        self._num_atoms = len(atoms)
         data["atoms"] = atoms
 
     def _generates_lattice_vectors(self, data=None):
@@ -85,7 +87,7 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
         :param obj_file: file object from which we read
         :param data: Python dictionary to which found lattice vectors should be added
         """
-        data["unit_cell"] = np.zeros(shape=(3,3), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        data["unit_cell"] = np.zeros(shape=(3, 3), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
     def _read_modes(self, file_obj=None, data=None):
         """
@@ -94,8 +96,12 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
         :param data: Python dictionary to which k-point data should be added
         """
         freq = []
-        atomic_disp = []
+        # it is a molecule so we subtract 3 translations and 3 rotations
+        num_freq = 3 * self._num_atoms - AbinsModules.AbinsConstants.ROTATIONS_AND_TRANSLATIONS
+        dim = 3
+        atomic_disp = np.zeros(shape=(num_freq, self._num_atoms, dim), dtype=AbinsModules.AbinsConstants.COMPLEX_TYPE)
         end_msg = ["-------------------"]
+        # Next block is:
         # -------------------
         # - Thermochemistry -
         # -------------------
@@ -113,23 +119,30 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
                                                                  casting="safe")
         data["weights"] = np.asarray([1.0])
 
-        # Reshape displacements so that Abins can use it to create its internal data objects
+        # Normalize displacements so that Abins can use it to create its internal data objects
         # num_atoms: number of atoms in the system
         # num_freq: number of modes
         # dim: dimension for each atomic displacement (atoms vibrate in 3D space)
-
-        dim = 3
-        num_freq = len(freq)
         self._num_k = 1
-        self._num_atoms = len(data["atoms"])
 
-        # displacements[num_freq, dim, num_atoms]
-        displacements = np.reshape(a=np.asarray(a=atomic_disp, order="C"), newshape=(num_freq, dim, self._num_atoms))
+        # normalisation
+        # atomic_disp [num_freq, num_atoms, dim]
+        # masses [num_atoms]
 
-        # [num_freq, dim, num_atoms] -> [num_atoms, num_freq, dim]
-        displacements = np.transpose(a=displacements, axes=(2, 0, 1))
+        masses = np.asarray([data["atoms"]["atom_%s" % atom]["mass"] for atom in range(self._num_atoms)])
 
-        data["atomic_displacements"] = np.asarray([displacements])
+        # [num_freq, num_atoms, dim] -> [num_freq, num_atoms, dim, dim] -> [num_freq, num_atoms]
+        temp1 = np.trace(np.einsum("lki, lkj->lkij", atomic_disp, atomic_disp), axis1=2, axis2=3)
+        temp2 = np.einsum("ij, j->ij", temp1, masses)
+
+        # [num_freq, num_atoms] -> [num_freq]
+        norm = np.sum(temp2, axis=1)
+        # noinspection PyTypeChecker
+        atomic_disp = np.einsum("ijk,i->ijk", atomic_disp, 1.0 / np.sqrt(norm))
+        atomic_disp = np.einsum("ijk,j->ijk", atomic_disp, np.sqrt(masses))
+
+        # [num_freq, num_atoms, dim] ->  [num_k, num_atoms, num_freq, dim]
+        data["atomic_displacements"] = np.asarray([np.transpose(a=atomic_disp, axes=(1, 0, 2))])
 
     def _read_freq_block(self, file_obj=None, freq=None):
         """
@@ -145,11 +158,21 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
         """
         Parses block with atomic displacements.
         :param file_obj: file object from which we read
-        :param disp: list with x coordinates which we update
+        :param disp: list with x coordinates which we update [num_freq, num_atoms, dim]
         """
         sub_block_start = "Atom AN      X      Y      Z        X      Y      Z        X      Y      Z"
         self._parser.find_first(file_obj=file_obj, msg=sub_block_start)
+
+        num_atom = 0
+        line_size = len(sub_block_start.split())
+        freq_per_line = sub_block_start.count("X")
+
         l = file_obj.readline().split()
-        while len(l) == len(sub_block_start.split()):
-            disp.extend([complex(float(i), 0) for i in l[2:]])
+        while len(l) == line_size:
+            for f in range(freq_per_line):
+                disp[self._num_read_freq + f, num_atom, 0] = complex(float(l[2 + 3 * f]), 0)
+                disp[self._num_read_freq + f, num_atom, 1] = complex(float(l[3 + 3 * f]), 0)
+                disp[self._num_read_freq + f, num_atom, 2] = complex(float(l[4 + 3 * f]), 0)
             l = file_obj.readline().split()
+            num_atom += 1
+        self._num_read_freq += freq_per_line
