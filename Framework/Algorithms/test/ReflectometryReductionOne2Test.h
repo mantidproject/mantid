@@ -35,8 +35,7 @@ public:
   ReflectometryReductionOne2Test() {
     FrameworkManager::Instance();
     // A single detector ws
-    m_singleDetectorWS =
-        create2DWorkspaceWithReflectometryInstrument(0);
+    m_singleDetectorWS = create2DWorkspaceWithReflectometryInstrument(0);
     // A multi detector ws
     m_multiDetectorWS =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);

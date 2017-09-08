@@ -915,7 +915,9 @@ void ReflectometryReductionOne2::findDetectorGroups() {
   for (const auto &group : m_detectorGroups) {
     for (const auto &spIdx : group) {
       if (spIdx > m_spectrumInfo->size() - 1) {
-        throw std::runtime_error("ProcessingInstructions contains an out-of-range index: " + std::to_string(spIdx));
+        throw std::runtime_error(
+            "ProcessingInstructions contains an out-of-range index: " +
+            std::to_string(spIdx));
       }
     }
   }
