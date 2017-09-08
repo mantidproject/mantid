@@ -459,7 +459,8 @@ void IMWDomainCreator::addFunctionValuesToWS(
       function->calNumericalDeriv(*domain, J);
     }
     if (covar) {
-      // if the function has a covariance matrix attached - use it for the errors
+      // if the function has a covariance matrix attached - use it for the
+      // errors
       const Kernel::Matrix<double> &C = *covar;
       // The formula is E = J * C * J^T
       // We don't do full 3-matrix multiplication because we only need the
@@ -502,10 +503,10 @@ void IMWDomainCreator::addFunctionValuesToWS(
     }
   } else {
     // No errors
-      auto &yValues = ws->mutableY(wsIndex);
-      for (size_t i = 0; i < nData; i++) {
-        yValues[i] = resultValues->getCalculated(i);
-      }
+    auto &yValues = ws->mutableY(wsIndex);
+    for (size_t i = 0; i < nData; i++) {
+      yValues[i] = resultValues->getCalculated(i);
+    }
   }
 }
 

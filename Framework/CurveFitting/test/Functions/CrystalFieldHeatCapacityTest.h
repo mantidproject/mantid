@@ -80,8 +80,10 @@ public:
   }
 
   void test_evaluate_function() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100, 1.0, 3.0);
-    std::string fun = "name=CrystalFieldHeatCapacity,Ion=Ce,Symmetry=C2v,"
+    auto ws =
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100, 1.0, 3.0);
+    std::string fun =
+        "name=CrystalFieldHeatCapacity,Ion=Ce,Symmetry=C2v,"
         "B20=0.37,B22=3.9, B40=-0.03,B42=-0.1,B44=-0.12, "
         "ties=(BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=BextX)";
 
@@ -103,7 +105,6 @@ public:
 
     API::AnalysisDataService::Instance().clear();
   }
-
 };
 
 #endif /*CRYSTALFIELDHEATCAPACITYTEST_H_*/
