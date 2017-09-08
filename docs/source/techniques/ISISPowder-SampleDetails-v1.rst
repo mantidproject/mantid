@@ -30,22 +30,31 @@ Optionally you may also:
 .. _create_sampleDetails_object_isis-powder-diffraction-ref:
 
 Create SampleDetails Object
-------------------------------
+---------------------------
 This method assumes you are familiar with the concept of objects in Python.
 If not more details can be read here: :ref:`intro_to_objects-isis-powder-diffraction-ref`
 
 For more details on any of the parameters set here see:
 :ref:`Set Sample<algm-SetSample>`.
 
-**Note: this assumes a cylinder geometry**
+Two geometries are currently supported - cylinder and slab.
 
-To create a SampleDetails object the following parameters of the 
-sample geometry are required:
+To create a cylindrical SampleDetails object the following parameters
+of the sample geometry are required:
 
 - :ref:`height_sampleDetails_isis-powder-diffraction-ref` - Cylinder height
 - :ref:`radius_sampleDetails_isis-powder-diffraction-ref` - Cylinder radius
 - :ref:`center_sampleDetails_isis-powder-diffraction-ref` - List of x, y, z 
   positions of the cylinder
+
+To create a slab SampleDetails object the following parameters of the
+sample geometry are required:
+
+- :ref:`thickness-sampleDetails_isis-powder-diffraction-ref` - Slab thickness
+
+Both geometries require the following parameters:
+
+- :ref:`shape-sampleDetails_isis-powder-diffraction-ref` - The sample geometry
 
 Example
 ^^^^^^^
@@ -58,7 +67,23 @@ Example
     cylinder_radius = 2.0
     cylinder_position = [0.0, 0.0, 0.2]
     sample_obj = SampleDetails(height=cylinder_height, radius=cylinder_radius,
-                               center=cylinder_position)
+                               center=cylinder_position, shape="cylinder")
+
+    slab_thickness = 1.0
+    slab_obj = SampleDetails(thickness=slab_thickness, shape="slab")
+
+.. _center_sampleDetails_isis-powder-diffraction-ref:
+
+center
+^^^^^^
+The center of the sample cylinder as defined by X, Y and Z
+co-ordinates. This co-ordinates must be numeric.
+
+Example Input:
+
+..  code-block:: python
+
+    sample_obj = SampleDetails(center=[-1.0, 0.0, 1.0], ...)
 
 .. _height_sampleDetails_isis-powder-diffraction-ref:
 
@@ -86,18 +111,32 @@ Example Input:
 
     sample_obj = SampleDetails(radius=5.0, ...)
 
-.. _center_sampleDetails_isis-powder-diffraction-ref:
+.. _shape-sampleDetails_isis-powder-diffraction-ref:
 
-center
-^^^^^^
-The center of the sample cylinder as defined by X, Y and Z
-co-ordinates. This co-ordinates must be numeric.
+shape
+^^^^^
+
+The shape of the sample. Allowed values are currently **cylinder** and
+**slab**.
 
 Example Input:
 
-..  code-block:: python
+.. code-block:: python
 
-    sample_obj = SampleDetails(center=[-1.0, 0.0, 1.0], ...)
+   sample_obj = SampleDetails(shape="cylinder", ...)
+    
+.. _thickness-sampleDetails_isis-powder-diffraction-ref:
+
+thickness
+^^^^^^^^^
+The thickness of the slab sample. This must be greater than 0. In the
+case of HRPD, allowed values are **0.2, 0.5, 1.0, 1.5**
+
+Example Input:
+
+.. code-block:: python
+
+   sample_obj = SampleDetails(thickness=1.0, ...)
 
 .. _set_material_sample_details_isis-powder-diffraction-ref:
 
