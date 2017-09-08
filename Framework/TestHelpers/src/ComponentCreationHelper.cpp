@@ -669,4 +669,39 @@ Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
   instrument->add(trolley2);
   return instrument;
 }
+
+Mantid::Geometry::Instrument_sptr
+createInstrumentWithPSDTubes(const int nTubes, const int nPixelsPerTube) {
+  // Need a tube based instrument.
+  //
+  // Pixels will be numbered simply from 1->nTubes*nPixelsPerTube with a 1:1
+  // mapping
+  Instrument_sptr testInst(new Instrument("PSDTubeInst"));
+
+  // Pixel shape
+  const double pixelRadius(0.01);
+  const double pixelHeight(0.003);
+  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+      pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight, 0.0),
+      V3D(0.0, 1.0, 0.0), "pixelShape");
+  for (int i = 0; i < nTubes; ++i) {
+    std::ostringstream lexer;
+    lexer << "tube-" << i;
+    CompAssembly *tube = new CompAssembly(lexer.str());
+    tube->setPos(V3D(i * 2.0 * pixelRadius, 0.0, 0.0));
+    for (int j = 0; j < nPixelsPerTube; ++j) {
+      lexer.str("");
+      lexer << "pixel-" << i *nPixelsPerTube + j;
+      Detector *pixel = new Detector(lexer.str(), i * nPixelsPerTube + j + 1,
+                                     pixelShape, tube);
+      const double xpos = 0.0;
+      const double ypos = j * pixelHeight;
+      pixel->setPos(xpos, ypos, 0.0);
+      tube->add(pixel);
+      testInst->markAsDetector(pixel);
+    }
+    testInst->add(tube);
+  }
+  return testInst;
+}
 }
