@@ -1213,11 +1213,6 @@ void ConvFit::updatePlot() {
 void ConvFit::updateParameters(int specNo) {
   // Check parameter table workspace has been created
   if (!m_paramWs) return;
-  // Check specified spectrum number is in bounds
-  if (specNo < m_runMin || specNo > m_runMax) {
-    updatePlotOptions();
-    return;
-  }
 
   size_t row = boost::numeric_cast<size_t>(specNo - m_runMin);
 
@@ -1304,6 +1299,7 @@ void ConvFit::updateParameters(int specNo) {
     }
   }
   else {
+    
     for (auto it = params.begin(); it != params.end(); ++it) {
       const QString functionParam = functionName + "." + *it;
       const QString paramValue = pref + *it;
@@ -1413,7 +1409,13 @@ void ConvFit::singleFitComplete(bool error) {
 
 void ConvFit::plotSpecChanged(int value) {
   updatePlot();
-  updateParameters(value);
+
+  if (value < m_runMin || value > m_runMax) {
+    fitFunctionSelected(m_uiForm.cbFitType->currentText());
+  }
+  else {
+    updateParameters(value);
+  }
 }
 
 /**
@@ -1731,10 +1733,10 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   if (m_previousFit.compare("One Lorentzian") == 0 &&
       currentFitFunction.compare("Two Lorentzians") == 0) {
     const double amplitude =
-        m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
+        m_dblManager->value(m_properties["One Lorentzian.Amplitude"]);
     const double peakCentre =
-        m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
-    const double fwhm = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
+        m_dblManager->value(m_properties["One Lorentzian.PeakCentre"]);
+    const double fwhm = m_dblManager->value(m_properties["One Lorentzian.FWHM"]);
     m_defaultParams.insert("PeakCentre", peakCentre);
     m_defaultParams.insert("FWHM", fwhm);
     m_defaultParams.insert("Amplitude", amplitude);
@@ -1823,7 +1825,7 @@ void ConvFit::updatePlotOptions() {
     else {
       params = getFunctionParameters(QString("One Lorentzian"));
     }
-    if (fitFunctionType < 3 && fitFunctionType != 0) {
+    if (fitFunctionType < 3) {
       params.removeAll("PeakCentre");
     }
 
