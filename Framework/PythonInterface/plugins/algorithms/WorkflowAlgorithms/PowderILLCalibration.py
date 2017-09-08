@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
-from mantid.kernel import StringListValidator, Direction
+from mantid.kernel import StringListValidator, Direction, PropertyMode
 from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty
 from mantid.simpleapi import *
 
@@ -14,6 +14,8 @@ class PowderILLCalibration(PythonAlgorithm):
     _progress = None
     _method = None
     _scan_points = None
+    _out_response = None
+    _bin_offset = None
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -43,12 +45,16 @@ class PowderILLCalibration(PythonAlgorithm):
                              doc='The method of how the calibration constant of a '
                                  'pixel relative to the neighbouring one is derived.')
 
+        self.declareProperty(MatrixWorkspaceProperty('OutputResponseWorkspace', '',
+                                                     optional=PropertyMode.optional, direction=Direction.Output),
+                             doc='Output workspace containing the summed diffraction patterns of all the pixels.')
+
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output),
                              doc='Output workspace containing the detector efficiencies for each pixel.')
 
     def _sum_neighbours(self, ref_ws, ws, ws_cropped, factor):
-        #ws_axis = mtd[ws].getAxis(1).extractValues()[-1]
+        # ws_theta_axis = mtd[ws].getAxis(1).extractValues()
         ws_y = mtd[ws].extractY().flatten()[-1]
         ws_e = mtd[ws].extractE().flatten()[-1]
         ws_out = ref_ws + '_temp'
@@ -78,6 +84,7 @@ class PowderILLCalibration(PythonAlgorithm):
         self._calib_file = self.getPropertyValue('CalibrationFile')
         self._out_name = self.getPropertyValue('OutputWorkspace')
         self._method = self.getPropertyValue('CalibrationMethod')
+        self._out_response = self.getPropertyValue('OutputResponseWorkspace')
 
         raw_ws = self._hide('raw')
         LoadILLDiffraction(Filename=self._input_file, OutputWorkspace=raw_ws)
@@ -90,16 +97,18 @@ class PowderILLCalibration(PythonAlgorithm):
         if not is_scanned:
             raise RuntimeError('The input run does not correspond to a detector scan.')
 
-        self._scan_points = mtd[raw_ws].getRun().getLogData('2theta').size()
+        ConvertSpectrumAxis(InputWorkspace=raw_ws, OutputWorkspace=raw_ws, Target='SignedTheta', OrderAxis=False)
 
         calib_ws = self._hide('calib')
         if self._calib_file:
             LoadNexusProcessed(Filename=self._calib_file, OutputWorkspace=calib_ws)
 
         ref_ws = self._hide('ref')
+
+        self._scan_points = mtd[raw_ws].getRun().getLogData('2theta').size()
+
         CropWorkspace(InputWorkspace=raw_ws, OutputWorkspace=ref_ws,
                       StartWorkspaceIndex=self._scan_points, EndWorkspaceIndex=2 * self._scan_points - 1)
-        #ConvertSpectrumAxis(InputWorkspace=ref_ws, OutputWorkspace=ref_ws, Target='SignedTheta')
         if self._calib_file:
             Scale(InputWorkspace=ref_ws, Factor=mtd[calib_ws].readY(0)[0], OutputWorkspace=ref_ws)
         CropWorkspace(InputWorkspace=ref_ws, OutputWorkspace=ref_ws, StartWorkspaceIndex=1)
@@ -120,16 +129,12 @@ class PowderILLCalibration(PythonAlgorithm):
         for det in range(2, n_det):
             ws = '__det_' + str(det)
             start = det * self._scan_points
-            end = (det + 1) * self._scan_points #- 1
+            end = (det + 1) * self._scan_points
             det_y = raw_y[ start : end ]
             det_e = raw_e[ start : end ]
-            #CropWorkspace(InputWorkspace=raw_ws, OutputWorkspace=ws,
-            #             StartWorkspaceIndex=,
-            #              EndWorkspaceIndex=)
 
             CreateWorkspace(DataX=raw_x, DataY=det_y, DataE=det_e, NSpec=self._scan_points, OutputWorkspace=ws, ParentWorkspace=raw_ws)
 
-            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta')
             if self._calib_file:
                 Scale(InputWorkspace=ws, Factor=mtd[calib_ws].readY(det - 1)[0], OutputWorkspace=ws)
             ws_cropped = ws + '_cropped'

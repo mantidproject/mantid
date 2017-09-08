@@ -13,6 +13,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <numeric>
@@ -99,7 +100,7 @@ void LoadILLDiffraction::init() {
  */
 void LoadILLDiffraction::exec() {
 
-  Progress progress(this, 0, 1, 3);
+  Progress progress(this, 0, 1, 4);
 
   m_fileName = getPropertyValue("Filename");
 
@@ -111,6 +112,9 @@ void LoadILLDiffraction::exec() {
 
   progress.report("Loading the metadata");
   loadMetaData();
+
+  progress.report("Setting additional sample logs");
+  setSampleLogs();
 
   setProperty("OutputWorkspace", m_outWorkspace);
 }
@@ -345,14 +349,11 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
     }
   }
 
-  // Dead pixel offset, should be zero except for D20
-  size_t deadOffset = (m_numberDetectorsRead - m_numberDetectorsActual) / 2;
-
   // Then load the detector spectra
   for (size_t i = NUMBER_MONITORS;
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim2;
+      const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
       const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
                             static_cast<int>(pixelInTubeNumber));
@@ -387,12 +388,11 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
                  [](double e) { return sqrt(e); });
 
   // Assign detector counts
-  size_t deadOffset = (m_numberDetectorsRead - m_numberDetectorsActual) / 2;
   for (size_t i = NUMBER_MONITORS;
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
-    const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim2;
+    const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
     const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
@@ -597,37 +597,21 @@ void LoadILLDiffraction::resolveInstrument() {
       // Here we have to hardcode the numbers of pixels.
       // The only way is to read the size of the detectors read from the files
       // and based on it decide which of the 3 alternative IDFs to load.
-      // Some amount of pixels are dead on each end, these have to be
+      // Some amount of pixels are dead on at right end, these have to be
       // subtracted
       // correspondingly dependent on the resolution mode
       m_resolutionMode = m_numberDetectorsRead / D20_NUMBER_PIXELS;
       size_t activePixels = D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS;
       m_numberDetectorsActual = m_resolutionMode * activePixels;
-      // 1: low resolution, 2: nominal, 3: high resolution
-      switch (m_resolutionMode) {
-      case 1: {
-        // low resolution mode
-        m_instName += "_lr";
-        m_numberDetectorsActual =
-            D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS;
-        break;
-      }
-      case 2: {
-        // nominal resolution
-        m_numberDetectorsActual =
-            2 * (D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS);
-        break;
-      }
-      case 3: {
-        // high resolution mode
-        m_instName += "_hr";
-        m_numberDetectorsActual =
-            3 * (D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS);
-        break;
-      }
-      default:
+
+      if (m_resolutionMode > 3 || m_resolutionMode < 1) {
         throw std::runtime_error("Unknown resolution mode for instrument " +
                                  m_instName);
+      }
+      if (m_resolutionMode == 1) {
+        m_instName += "_lr";
+      } else if (m_resolutionMode == 3) {
+        m_instName += "_hr";
       }
     }
     g_log.debug() << "Instrument name is " << m_instName << " and has "
@@ -694,5 +678,31 @@ LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
   return fullPath.toString();
 }
 
+/** Adds some sample logs needed later by reduction
+*/
+void LoadILLDiffraction::setSampleLogs() {
+  Run &run = m_outWorkspace->mutableRun();
+  std::string scanTypeStr = "NoScan";
+  if (m_scanType == DetectorScan) {
+    scanTypeStr = "DetectorScan";
+  } else if (m_scanType == OtherScan) {
+    scanTypeStr = "OtherScan";
+  }
+  run.addLogData(
+      new PropertyWithValue<std::string>("ScanType", std::move(scanTypeStr)));
+  run.addLogData(new PropertyWithValue<double>("PixelSize", D20_PIXEL_SIZE));
+  std::string resModeStr = "Nominal";
+  if (m_resolutionMode == 1) {
+    resModeStr = "Low";
+  } else if (m_resolutionMode == 3) {
+    resModeStr = "High";
+  }
+  run.addLogData(new PropertyWithValue<std::string>("ResolutionMode",
+                                                    std::move(resModeStr)));
+  if (m_scanType != NoScan) {
+    run.addLogData(new PropertyWithValue<int>(
+        "ScanSteps", static_cast<int>(m_numberScanPoints)));
+  }
+}
 } // namespace DataHandling
 } // namespace Mantid
