@@ -444,18 +444,9 @@ void FindPeaks::findPeaksUsingMariscotti() {
     for (size_t i = 0; i < m_dataWS->getNumberHistograms(); ++i)
       m_indexSet[i] = i;
   }
-  // set up Histograms
-  std::vector<HistogramData::Histogram> hist_vector(m_indexSet.size());
-  for (size_t i = 0; i < m_indexSet.size(); ++i)
-  {
-    size_t iws = m_indexSet[i];
-    hist_vector[i] = HistogramData::Histogram(m_dataWS->histogram(iws));
-  }
 
   // At this point the data has not been smoothed yet.
-  this->calculateSecondDifference(m_dataWS, hist_vector);
-  // MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(m_dataWS);
-
+  MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(m_dataWS);
 
   // Carry out the number of smoothing steps given by g_z (should be 5)
   for (int i = 0; i < g_z; ++i) {
@@ -645,11 +636,6 @@ void FindPeaks::findPeaksUsingMariscotti() {
   } // loop over spectra
 }
 
-void FindPeaks::calculateSecondDifference(const API::MatrixWorkspace_sptr &input, std::vector<HistogramData::Histogram> &histograms)
-{
-
-}
-
 //----------------------------------------------------------------------------------------------
 /** Calculates the second difference of the data (Y values) in a workspace.
   *  Done according to equation (3) in Mariscotti: \f$ S_i = N_{i+1} - 2N_i +
@@ -659,55 +645,53 @@ void FindPeaks::calculateSecondDifference(const API::MatrixWorkspace_sptr &input
   *  @param input :: The workspace to calculate the second difference of
   *  @return A workspace containing the second difference
   */
-//API::MatrixWorkspace_sptr
-//FindPeaks::calculateSecondDifference(const API::MatrixWorkspace_sptr &input) {
-//  // We need a new workspace the same size as the input ont
-//  MatrixWorkspace_sptr diffed = 0;
+API::MatrixWorkspace_sptr
+FindPeaks::calculateSecondDifference(const API::MatrixWorkspace_sptr &input) {
+  // We need a new workspace the same size as the input ont
+  MatrixWorkspace_sptr diffed = 0;
 
-//  // create the MatrixWorkspace for derivatives
-//  size_t numHists(1);
-//  if (singleSpectrum) {
-//    // single spectrum: only work on 1 spectrum. no need to calculate derivative
-//    // to the other spectra.
-//    size_t nvector = 1;
-//    size_t xlength = input->sharedX(m_wsIndex)->size();
-//    size_t ylength = input->sharedY(m_wsIndex)->size();
+  // create the MatrixWorkspace for derivatives
+  size_t numHists(1);
+  if (singleSpectrum) {
+    // single spectrum: only work on 1 spectrum. no need to calculate derivative
+    // to the other spectra.
+    size_t nvector = 1;
+    size_t xlength = input->sharedX(m_wsIndex)->size();
+    size_t ylength = input->sharedY(m_wsIndex)->size();
 
-//    diffed = WorkspaceFactory::Instance().create("Workspace2D", nvector,
-//                                                 xlength, ylength);
-//  } else {
-//    // all spectra: create a workspace from parent
-//    //  diffed = Mantid::DataObjects::create<API::MatrixWorkspace>(input);
-//    diffed = WorkspaceFactory::Instance().create(input);
-//    numHists = input->getNumberHistograms();
-//  }
+    diffed = WorkspaceFactory::Instance().create("Workspace2D", nvector,
+                                                 xlength, ylength);
+  } else {
+    // all spectra: create a workspace from parent
+    //  diffed = Mantid::DataObjects::create<API::MatrixWorkspace>(input);
+    diffed = WorkspaceFactory::Instance().create(input);
+    numHists = input->getNumberHistograms();
+  }
 
-//  // calculate derivative
-//  const size_t blocksize = input->blocksize();
-//  for (size_t i = 0; i < numHists; ++i) {
-//    // get the source wsindex
-//    size_t wsindex(i);
-//    if (singleSpectrum)
-//      wsindex = m_wsIndex;
+  // calculate derivative
+  const size_t blocksize = input->blocksize();
+  for (size_t i = 0; i < numHists; ++i)
+  {
+    size_t wsindex = m_indexSet[i];
 
-//    // Copy over the X values
-//    diffed->setSharedX(i, input->sharedX(wsindex));
+    // Copy over the X values
+    diffed->setSharedX(i, input->sharedX(wsindex));
 
-//    // calculate derivatives
-//    const auto &Y = input->y(wsindex);
-//    auto &S = diffed->mutableY(i);
-//    // Go through each spectrum calculating the second difference at each
-//    // point
-//    // First and last points in each spectrum left as zero (you'd never be
-//    // able
-//    // to find peaks that close to the edge anyway)
-//    for (size_t j = 1; j < blocksize - 1; ++j) {
-//      S[j] = Y[j - 1] - 2 * Y[j] + Y[j + 1];
-//    }
-//  }
+    // calculate derivatives
+    const auto &Y = input->y(wsindex);
+    auto &S = diffed->mutableY(i);
+    // Go through each spectrum calculating the second difference at each
+    // point
+    // First and last points in each spectrum left as zero (you'd never be
+    // able
+    // to find peaks that close to the edge anyway)
+    for (size_t j = 1; j < blocksize - 1; ++j) {
+      S[j] = Y[j - 1] - 2 * Y[j] + Y[j + 1];
+    }
+  }
 
-//  return diffed;
-//}
+  return diffed;
+}
 
 //----------------------------------------------------------------------------------------------
 /** Calls the SmoothData algorithm as a Child Algorithm on a workspace.
@@ -730,19 +714,6 @@ void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w) {
   WS = smooth->getProperty("OutputWorkspace");
 }
 
-void FindPeaks::smoothData(std::vector<HistogramData::Histogram> histograms, const int &w) {
-  g_log.information("Smoothing the input data");
-  IAlgorithm_sptr smooth = createChildAlgorithm("SmoothData");
-  smooth->setProperty("InputWorkspace", WS);
-  // The number of points which contribute to each smoothed point
-  std::vector<int> wvec;
-  wvec.push_back(w);
-  smooth->setProperty("NPoints", wvec);
-  smooth->executeAsChildAlg();
-  // Get back the result
-  WS = smooth->getProperty("OutputWorkspace");
-}
-
 ////----------------------------------------------------------------------------------------------
 ///** Calculates the statistical error on the smoothed data.
 //  *  Uses Mariscotti equation (11), amended to use errors of input data rather
@@ -753,41 +724,9 @@ void FindPeaks::smoothData(std::vector<HistogramData::Histogram> histograms, con
 //  *  @param w ::        The value of w (the size of the smoothing 'window')
 //  *  @throw std::invalid_argument if w is greater than 19
 //  */
-//void FindPeaks::calculateStandardDeviation(
-//    const API::MatrixWorkspace_const_sptr &input,
-//    const API::MatrixWorkspace_sptr &smoothed, const int &w) {
-//  // Guard against anyone changing the value of z, which would mean different
-//  // phi values were needed (see Marriscotti p.312)
-//  static_assert(g_z == 5, "Value of z has changed!");
-//  // Have to adjust for fact that I normalise Si (unlike the paper)
-//  const int factor = static_cast<int>(std::pow(static_cast<double>(w), g_z));
-
-//  const double constant =
-//      sqrt(static_cast<double>(this->computePhi(w))) / factor;
-
-//  // determine the number of histogram in 2 ways
-//  size_t numHists(1);
-//  if (!singleSpectrum)
-//    numHists = smoothed->getNumberHistograms();
-//  for (size_t i = 0; i < size_t(numHists); ++i) {
-//    // set up the source workspace index
-//    size_t iws(i);
-//    if (singleSpectrum)
-//      iws = m_wsIndex;
-
-//    // set sharedE
-//    smoothed->setSharedE(i, input->sharedE(iws));
-//    std::transform(smoothed->e(i).cbegin(), smoothed->e(i).cend(),
-//                   smoothed->mutableE(i).begin(),
-//                   std::bind2nd(std::multiplies<double>(), constant));
-//  }
-
-//  return;
-//}
-
 void FindPeaks::calculateStandardDeviation(
     const API::MatrixWorkspace_const_sptr &input,
-    std::vector<Histogram> &smoothed, const int &w) {
+    const API::MatrixWorkspace_sptr &smoothed, const int &w) {
   // Guard against anyone changing the value of z, which would mean different
   // phi values were needed (see Marriscotti p.312)
   static_assert(g_z == 5, "Value of z has changed!");
@@ -797,12 +736,20 @@ void FindPeaks::calculateStandardDeviation(
   const double constant =
       sqrt(static_cast<double>(this->computePhi(w))) / factor;
 
-  for (size_t i = 0; i < m_indexSet.size(); ++i) {
-    smoothed[i].setSharedE(input->sharedE(m_indexSet[i]));
-    std::transform(smoothed[i].e().cbegin(), smoothed[i].e().cend(),
-                   smoothed[i].mutableE().begin(),
+  // determine the number of histogram in 2 ways
+  size_t numHists = smoothed->getNumberHistograms();
+  for (size_t i = 0; i < numHists; ++i) {
+    // set up the source workspace index
+    size_t iws = m_indexSet[i];
+
+    // set sharedE
+    smoothed->setSharedE(i, input->sharedE(iws));
+    std::transform(smoothed->e(i).cbegin(), smoothed->e(i).cend(),
+                   smoothed->mutableE(i).begin(),
                    std::bind2nd(std::multiplies<double>(), constant));
   }
+
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -814,7 +761,7 @@ void FindPeaks::calculateStandardDeviation(
   *  @param  w The value of w (the size of the smoothing 'window')
   *  @return The value of phi(g_z,w)
   */
-long long FindPeaks::computePhi(const int &w) const {
+  long long FindPeaks::computePhi(const int &w) const {
   const int m = (w - 1) / 2;
   int zz = 0;
   int max_index_prev = 1;

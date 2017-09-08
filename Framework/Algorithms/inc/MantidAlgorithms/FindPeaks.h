@@ -11,7 +11,6 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 
@@ -103,9 +102,8 @@ private:
                                     const std::vector<double> &fitwindows);
 
   /// Methods searving for findPeaksUsingMariscotti()
-//  API::MatrixWorkspace_sptr
-//  calculateSecondDifference(const API::MatrixWorkspace_sptr &input);
-  void calculateSecondDifference(const API::MatrixWorkspace_sptr &input, std::vector<HistogramData::Histogram> histograms);
+  API::MatrixWorkspace_sptr
+  calculateSecondDifference(const API::MatrixWorkspace_sptr &input);
 
   void smoothData(API::MatrixWorkspace_sptr &WS, const int &w);
   void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input,
