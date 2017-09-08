@@ -1,5 +1,6 @@
 #pylint: disable=invalid-name,anomalous-backslash-in-string
 from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function)
 import os
 import re
 import argparse
@@ -82,7 +83,7 @@ if __name__=='__main__':
     parser.add_argument('-fix','--fix', default='simple',
                         choices=choices,
                         help='Select things to fix (default: simple). \nSee the choices options below.')
-    parser.add_argument('Filename', type=file, help='The output from "make pylint"')
+    parser.add_argument('Filename', type=argparse.FileType(), help='The output from "make pylint"')
     parser.add_argument('-v','--version', action='version', version='%(prog)s 1.0')
 
     #read pylint.log
