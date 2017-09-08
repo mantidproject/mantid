@@ -409,7 +409,8 @@ class MergePeaksThread(QThread):
             pt_number_list = list()
 
             # emit signal for run start (mode 0)
-            self.peakMergeSignal.emit(scan_number, 'In merging')
+            # self.peakMergeSignal.emit(scan_number, 'In merging')
+            self.mergeMsgSignal.emit(scan_number, 'In merging')
 
             # merge if not merged
             merged_ws_name = None

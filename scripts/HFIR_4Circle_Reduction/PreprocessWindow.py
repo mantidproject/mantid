@@ -246,12 +246,12 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         user_det_center_str = str(self.ui.lineEdit_infoDetCenter.text()).strip()
         user_det_center_str = user_det_center_str.replace('x', ',')
         if len(user_det_center_str) > 0:
-            status, ret_obj = gui_util.parse_integer_list(user_det_center_str)
-            if not status or len(ret_obj) != 2:
-                gui_util.show_message(self, 'User specified detector center must be two floating point,'
-                                            'but not {0}'.format(user_det_center_str))
+            try:
+                det_center = gui_util.parse_integer_list(user_det_center_str, 2)
+            except RuntimeError as run_err:
+                gui_util.show_message(self, 'Unable to parse detector center {0} due to {1}'
+                                            ''.format(user_det_center_str, run_err))
                 return
-            det_center = ret_obj
             self._reductionController.set_detector_center(exp_number, det_center[0], det_center[1])
         # END-IF
 
@@ -313,10 +313,16 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         # set up the default output directory and create it if it does not exist
         if self.ui.checkBox_saveToDataServer.isChecked():
-            default_output_dir = os.path.join('/HFIR/HB3A/exp{0}'.format(exp_number), 'shared/MergedScans')
+            default_output_dir = os.path.join('/HFIR/HB3A/exp{0}'.format(exp_number), 'Shared/MergedScans')
             if os.path.exists(default_output_dir) is False:
-                os.mkdir(default_output_dir)
-            self.ui.lineEdit_outputDir.setText(default_output_dir)
+                try:
+                    os.mkdir(default_output_dir)
+                    self.ui.lineEdit_outputDir.setText(default_output_dir)
+                except OSError:
+                    self.ui.lineEdit_outputDir.setText('/tmp')
+                    default_output_dir = '/tmp'
+            # END-IF
+        # END-IF
 
         return
 
@@ -342,6 +348,19 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         """
         row_number = self._rowScanDict[scan_number]
         self.ui.tableView_scanProcessState.set_status(row_number, message)
+
+        return
+
+    def update_merge_message(self, exp_number, scan_number, mode, message):
+        """
+        update merged data message
+        :param exp_number:
+        :param scan_number:
+        :param mode:
+        :param message:
+        :return:
+        """
+        # blabla
 
         return
 
