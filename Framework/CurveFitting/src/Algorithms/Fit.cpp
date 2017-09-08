@@ -253,118 +253,118 @@ void Fit::createOutput() {
   }
 
   if (doCreateOutput) {
-      copyMinimizerOutput(*m_minimizer);
+    copyMinimizerOutput(*m_minimizer);
 
-      // get the workspace
-      API::Workspace_const_sptr ws = getProperty("InputWorkspace");
+    // get the workspace
+    API::Workspace_const_sptr ws = getProperty("InputWorkspace");
 
+    if (baseName.empty()) {
+      baseName = ws->getName();
       if (baseName.empty()) {
-          baseName = ws->getName();
-          if (baseName.empty()) {
-              baseName = "Output";
+        baseName = "Output";
+      }
+    }
+    baseName += "_";
+
+    declareProperty(
+        Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+            "OutputNormalisedCovarianceMatrix", "", Kernel::Direction::Output),
+        "The name of the TableWorkspace in which to store the final covariance "
+        "matrix");
+    setPropertyValue("OutputNormalisedCovarianceMatrix",
+                     baseName + "NormalisedCovarianceMatrix");
+
+    Mantid::API::ITableWorkspace_sptr covariance =
+        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    covariance->addColumn("str", "Name");
+    // set plot type to Label = 6
+    covariance->getColumn(covariance->columnCount() - 1)->setPlotType(6);
+    for (size_t i = 0; i < m_function->nParams(); i++) {
+      if (m_function->isActive(i)) {
+        covariance->addColumn("double", m_function->parameterName(i));
+      }
+    }
+
+    size_t np = m_function->nParams();
+    size_t ia = 0;
+    for (size_t i = 0; i < np; i++) {
+      if (!m_function->isActive(i))
+        continue;
+      Mantid::API::TableRow row = covariance->appendRow();
+      row << m_function->parameterName(i);
+      size_t ja = 0;
+      for (size_t j = 0; j < np; j++) {
+        if (!m_function->isActive(j))
+          continue;
+        if (j == i)
+          row << 100.0;
+        else {
+          if (!covar.gsl()) {
+            throw std::runtime_error(
+                "There was an error while allocating the (GSL) covariance "
+                "matrix "
+                "which is needed to produce fitting error results.");
           }
+          row << 100.0 * covar.get(ia, ja) /
+                     sqrt(covar.get(ia, ia) * covar.get(ja, ja));
+        }
+        ++ja;
       }
-      baseName += "_";
+      ++ia;
+    }
 
-      declareProperty(
-              Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "OutputNormalisedCovarianceMatrix", "", Kernel::Direction::Output),
-              "The name of the TableWorkspace in which to store the final covariance "
-                      "matrix");
-      setPropertyValue("OutputNormalisedCovarianceMatrix",
-                       baseName + "NormalisedCovarianceMatrix");
+    setProperty("OutputNormalisedCovarianceMatrix", covariance);
 
-      Mantid::API::ITableWorkspace_sptr covariance =
-              Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      covariance->addColumn("str", "Name");
-      // set plot type to Label = 6
-      covariance->getColumn(covariance->columnCount() - 1)->setPlotType(6);
-      for (size_t i = 0; i < m_function->nParams(); i++) {
-          if (m_function->isActive(i)) {
-              covariance->addColumn("double", m_function->parameterName(i));
-          }
-      }
+    // create output parameter table workspace to store final fit parameters
+    // including error estimates if derivative of fitting function defined
 
-      size_t np = m_function->nParams();
-      size_t ia = 0;
-      for (size_t i = 0; i < np; i++) {
-          if (!m_function->isActive(i))
-              continue;
-          Mantid::API::TableRow row = covariance->appendRow();
-          row << m_function->parameterName(i);
-          size_t ja = 0;
-          for (size_t j = 0; j < np; j++) {
-              if (!m_function->isActive(j))
-                  continue;
-              if (j == i)
-                  row << 100.0;
-              else {
-                  if (!covar.gsl()) {
-                      throw std::runtime_error(
-                              "There was an error while allocating the (GSL) covariance "
-                                      "matrix "
-                                      "which is needed to produce fitting error results.");
-                  }
-                  row << 100.0 * covar.get(ia, ja) /
-                         sqrt(covar.get(ia, ia) * covar.get(ja, ja));
-              }
-              ++ja;
-          }
-          ++ia;
-      }
+    declareProperty(
+        Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+            "OutputParameters", "", Kernel::Direction::Output),
+        "The name of the TableWorkspace in which to store the "
+        "final fit parameters");
 
-      setProperty("OutputNormalisedCovarianceMatrix", covariance);
+    setPropertyValue("OutputParameters", baseName + "Parameters");
 
-      // create output parameter table workspace to store final fit parameters
-      // including error estimates if derivative of fitting function defined
+    Mantid::API::ITableWorkspace_sptr result =
+        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    result->addColumn("str", "Name");
+    // set plot type to Label = 6
+    result->getColumn(result->columnCount() - 1)->setPlotType(6);
+    result->addColumn("double", "Value");
+    result->addColumn("double", "Error");
+    // yErr = 5
+    result->getColumn(result->columnCount() - 1)->setPlotType(5);
 
-      declareProperty(
-              Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "OutputParameters", "", Kernel::Direction::Output),
-              "The name of the TableWorkspace in which to store the "
-                      "final fit parameters");
-
-      setPropertyValue("OutputParameters", baseName + "Parameters");
-
-      Mantid::API::ITableWorkspace_sptr result =
-              Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      result->addColumn("str", "Name");
-      // set plot type to Label = 6
-      result->getColumn(result->columnCount() - 1)->setPlotType(6);
-      result->addColumn("double", "Value");
-      result->addColumn("double", "Error");
-      // yErr = 5
-      result->getColumn(result->columnCount() - 1)->setPlotType(5);
-
-      for (size_t i = 0; i < m_function->nParams(); i++) {
-          Mantid::API::TableRow row = result->appendRow();
-          row << m_function->parameterName(i) << m_function->getParameter(i)
-              << m_function->getError(i);
-      }
-      // Add chi-squared value at the end of parameter table
+    for (size_t i = 0; i < m_function->nParams(); i++) {
       Mantid::API::TableRow row = result->appendRow();
+      row << m_function->parameterName(i) << m_function->getParameter(i)
+          << m_function->getError(i);
+    }
+    // Add chi-squared value at the end of parameter table
+    Mantid::API::TableRow row = result->appendRow();
 
-      std::string costfuncname = getPropertyValue("CostFunction");
-      if (costfuncname == "Rwp")
-          row << "Cost function value" << rawcostfuncval;
-      else
-          row << "Cost function value" << finalCostFuncVal;
+    std::string costfuncname = getPropertyValue("CostFunction");
+    if (costfuncname == "Rwp")
+      row << "Cost function value" << rawcostfuncval;
+    else
+      row << "Cost function value" << finalCostFuncVal;
 
-      setProperty("OutputParameters", result);
-      bool outputParametersOnly = getProperty("OutputParametersOnly");
+    setProperty("OutputParameters", result);
+    bool outputParametersOnly = getProperty("OutputParametersOnly");
 
-      if (!outputParametersOnly) {
-          const bool unrollComposites = getProperty("OutputCompositeMembers");
-          bool convolveMembers = existsProperty("ConvolveMembers");
-          if (convolveMembers) {
-              convolveMembers = getProperty("ConvolveMembers");
-          }
-          m_domainCreator->separateCompositeMembersInOutput(unrollComposites,
-                                                            convolveMembers);
-          m_domainCreator->createOutputWorkspace(baseName, m_function,
-                                                 m_costFunction->getDomain(),
-                                                 m_costFunction->getValues());
+    if (!outputParametersOnly) {
+      const bool unrollComposites = getProperty("OutputCompositeMembers");
+      bool convolveMembers = existsProperty("ConvolveMembers");
+      if (convolveMembers) {
+        convolveMembers = getProperty("ConvolveMembers");
       }
+      m_domainCreator->separateCompositeMembersInOutput(unrollComposites,
+                                                        convolveMembers);
+      m_domainCreator->createOutputWorkspace(baseName, m_function,
+                                             m_costFunction->getDomain(),
+                                             m_costFunction->getValues());
+    }
   }
 }
 
