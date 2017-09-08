@@ -8,8 +8,6 @@ from PyQt4 import QtGui
 from mantidqtpython import MantidQt
 from ui.reflectometer.ui_data_processor_window import Ui_DataProcessorWindow
 
-from . import ui_data_processor_window
-
 
 canMantidPlot = True
 

@@ -472,5 +472,7 @@ class SANSReduction(PythonAlgorithm):
                 Logger("SANSReduction").error("No I(Qx,Qy) output found")
 
         return output_msg
+
+
 #############################################################################################
 AlgorithmFactory.subscribe(SANSReduction)

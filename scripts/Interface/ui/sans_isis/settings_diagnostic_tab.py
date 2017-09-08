@@ -6,6 +6,7 @@ and helps the developer to identify issues.
 """
 
 from __future__ import (absolute_import, division, print_function)
+import six
 
 from abc import ABCMeta, abstractmethod
 
@@ -13,6 +14,9 @@ from six import with_metaclass
 from PyQt4 import QtGui
 
 import ui_settings_diagnostic_tab
+
+if six.PY3:
+    unicode = str
 
 
 class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_SettingsDiagnosticTab):
