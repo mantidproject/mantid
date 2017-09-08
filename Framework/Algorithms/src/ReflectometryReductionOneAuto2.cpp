@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -135,6 +136,16 @@ void ReflectometryReductionOneAuto2::init() {
   declareProperty("ThetaIn", Mantid::EMPTY_DBL(), "Angle in degrees",
                   Direction::Input);
 
+  // ThetaInLogName
+  declareProperty("ThetaInLogName", "",
+                  "The name ThetaIn can be found in the run log as");
+
+  // Whether to correct detectors
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
+                                           Direction::Input),
+      "Moves detectors to ThetaIn if ThetaIn or ThetaInLogName is given");
+
   // Detector position correction type
   const std::vector<std::string> correctionType{"VerticalShift",
                                                 "RotateAroundSample"};
@@ -148,6 +159,9 @@ void ReflectometryReductionOneAuto2::init() {
       "Whether detectors should be shifted vertically or rotated around the "
       "sample position.",
       Direction::Input);
+  setPropertySettings("DetectorCorrectionType",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "CorrectDetectors", IS_EQUAL_TO, "1"));
 
   // Wavelength limits
   declareProperty("WavelengthMin", Mantid::EMPTY_DBL(),
@@ -250,15 +264,26 @@ void ReflectometryReductionOneAuto2::exec() {
   // Now that we know the detectors of interest, we can move them if necessary
   // (i.e. if theta is given). If not, we calculate theta from the current
   // detector positions
+  bool correctDetectors = getProperty("CorrectDetectors");
   double theta;
   if (!getPointerToProperty("ThetaIn")->isDefault()) {
     theta = getProperty("ThetaIn");
-    inputWS = correctDetectorPositions(instructions, inputWS);
+  } else if (!getPropertyValue("ThetaInLogName").empty()) {
+    theta = getThetaFromLogs(inputWS, getPropertyValue("ThetaInLogName"));
   } else {
-    // Calculate theta
+    // Calculate theta from detector positions
     theta = calculateTheta(instructions, inputWS);
+    // Never correct detector positions if ThetaIn or ThetaInLogName is not
+    // specified
+    correctDetectors = false;
   }
+
+  // Pass theta to the child algorithm
   alg->setProperty("ThetaIn", theta);
+
+  if (correctDetectors) {
+    inputWS = correctDetectorPositions(instructions, inputWS);
+  }
 
   // Optional properties
 
