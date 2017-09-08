@@ -1,6 +1,4 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -8,19 +6,21 @@
 #include "MantidDataHandling/H5Util.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidKernel/PropertyWithValue.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <numeric>
 
 #include <H5Cpp.h>
-#include <nexus/napi.h>
 #include <Poco/Path.h>
+#include <nexus/napi.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -252,7 +252,8 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   g_log.debug() << "Last time index ends at:"
                 << (m_startTime + std::accumulate(timeDurations.begin(),
                                                   timeDurations.end(), 0.0))
-                       .toISO8601String() << "\n";
+                       .toISO8601String()
+                << "\n";
 
   // Angles in the NeXus files are the absolute position for tube 1
   std::vector<double> tubeAngles =
