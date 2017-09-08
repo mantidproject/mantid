@@ -1,3 +1,18 @@
+import numpy as np
+from six import string_types
+
+
+def makeWorkspace(xArray, yArray):
+    """Create a workspace that doesn't appear in the ADS"""
+    from mantid.api import AlgorithmManager
+    alg = AlgorithmManager.createUnmanaged('CreateWorkspace')
+    alg.initialize()
+    alg.setChild(True)
+    alg.setProperty('DataX', xArray)
+    alg.setProperty('DataY', yArray)
+    alg.setProperty('OutputWorkspace', 'dummy')
+    alg.execute()
+    return alg.getProperty('OutputWorkspace').value
 
 
 class CrystalFieldMultiSite(object):
@@ -53,27 +68,17 @@ class CrystalFieldMultiSite(object):
                 # Crystal field parameters
                 self.function.setParameter(key, kwargs[key])
                 free_parameters.append(key)
-        if not self.isMultiSite():
+        if not self._isMultiSite():
             for param in CrystalFieldMultiSite.field_parameter_names:
                 if param not in free_parameters:
                     self.function.fixParameter(param)
+
         if attribute_dict is not None:
             for name, value in attribute_dict.items():
                 self.function.setAttributeValue(name, value)
         if parameter_dict is not None:
             for name, value in parameter_dict.items():
                 self.function.setParameter(name, value)
-
-
-
-
-
-    def isMultiSite(self):
-        return len(self.Ions) > 1
-
-    def _makeFunction(self, ion, symmetry):
-        from mantid.simpleapi import FunctionFactory
-        self.function = FunctionFactory.createFunction('CrystalFieldFunction')
 
     @staticmethod
     def iterable_to_string(iterable):
@@ -84,9 +89,89 @@ class CrystalFieldMultiSite(object):
         values_as_string = values_as_string[1:]
         return values_as_string
 
+    def _isMultiSite(self):
+        return len(self.Ions) > 1
+
+    def _makeFunction(self, ion, symmetry):
+        from mantid.simpleapi import FunctionFactory
+        self.function = FunctionFactory.createFunction('CrystalFieldFunction')
+
     def getParameter(self, param):
         print self.function.numParams()
         self.function.getParameterValue(param)
+
+    def getSpectrum(self, workspace, i=0, ws_index=None):
+        """
+        Get the i-th spectrum calculated with the current field and peak parameters.
+
+        Alternatively can be called getSpectrum(workspace, ws_index). Spectrum index i is assumed zero.
+
+        Examples:
+            cf.getSpectrum(1, ws, 5) # Calculate the second spectrum using the x-values from the 6th spectrum
+                                     # in workspace ws.
+            cf.getSpectrum(ws) # Calculate the first spectrum using the x-values from the 1st spectrum
+                               # in workspace ws.
+            cf.getSpectrum(ws, 3) # Calculate the first spectrum using the x-values from the 4th spectrum
+                                  # in workspace ws.
+
+        @param i: Index of a spectrum to get.
+        @param workspace: A workspace to base on.
+        @param ws_index:  An index of a spectrum from workspace to use.
+        @return: A tuple of (x, y) arrays
+        """
+        wksp = workspace
+        if isinstance(wksp, int): # allow spectrum index to be passed as first argument
+            wksp = i
+            i = workspace
+        elif not isinstance(i, int):
+            raise RuntimeError('Spectrum index is expected to be int. Got %s' % i.__class__.__name__)
+        elif ws_index is None: # else allow ws_index to be second argument
+            ws_index = i
+            i = 0
+        if ws_index is None: # if ws_index not specified, set to default
+            ws_index = 0
+
+        if self.Temperatures[i] < 0:
+            raise RuntimeError('You must first define a temperature for the spectrum')
+
+        if isinstance(wksp, list) or isinstance(wksp, np.ndarray):
+            xArray = wksp
+            yArray = np.zeros_like(xArray)
+            wksp = makeWorkspace(xArray, yArray)
+            ws_index = 0
+        return self._calcSpectrum(i, wksp, ws_index)
+
+    def _calcSpectrum(self, i, workspace, ws_index, funstr=None):
+        """Calculate i-th spectrum.
+
+        @param i: Index of a spectrum or function string
+        @param workspace: A workspace used to evaluate the spectrum function.
+        @param ws_index:  An index of a spectrum in workspace to use.
+        """
+        from mantid.api import AlgorithmManager
+        alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+        alg.initialize()
+        alg.setChild(True)
+        alg.setProperty('Function', self.makeSpectrumFunction(i))
+        alg.setProperty("InputWorkspace", workspace)
+        alg.setProperty('WorkspaceIndex', ws_index)
+        alg.setProperty('OutputWorkspace', 'dummy')
+        alg.execute()
+        out = alg.getProperty('OutputWorkspace').value
+        # Create copies of the x and y because `out` goes out of scope when this method returns
+        # and x and y get deallocated
+        return np.array(out.readX(0)), np.array(out.readY(1))
+
+    def makeSpectrumFunction(self, i=0):
+        """Form a definition string for the CrystalFieldSpectrum function
+        @param i: Index of a spectrum.
+        """
+        # if self.NumberOfSpectra == 1:
+        #     print "single spectrum"
+        #     return str(self.function)
+        # else:
+        funs = self.function.createEquivalentFunctions()
+        return str(funs[i])
 
     @property
     def Ions(self):
