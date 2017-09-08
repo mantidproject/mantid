@@ -44,8 +44,6 @@ of the sample geometry are required:
 
 - :ref:`height_sampleDetails_isis-powder-diffraction-ref` - Cylinder height
 - :ref:`radius_sampleDetails_isis-powder-diffraction-ref` - Cylinder radius
-- :ref:`center_sampleDetails_isis-powder-diffraction-ref` - List of x, y, z 
-  positions of the cylinder
 
 To create a slab SampleDetails object the following parameters of the
 sample geometry are required:
@@ -55,6 +53,8 @@ sample geometry are required:
 Both geometries require the following parameters:
 
 - :ref:`shape-sampleDetails_isis-powder-diffraction-ref` - The sample geometry
+- :ref:`center_sampleDetails_isis-powder-diffraction-ref` - List of x, y, z 
+  positions of the sample
 
 Example
 ^^^^^^^
@@ -76,7 +76,7 @@ Example
 
 center
 ^^^^^^
-The center of the sample cylinder as defined by X, Y and Z
+The center of the sample as defined by X, Y and Z
 co-ordinates. This co-ordinates must be numeric.
 
 Example Input:
@@ -129,8 +129,8 @@ Example Input:
 
 thickness
 ^^^^^^^^^
-The thickness of the slab sample. This must be greater than 0. In the
-case of HRPD, allowed values are **0.2, 0.5, 1.0, 1.5**
+The thickness of the slab sample in cm. This must be greater
+than 0. In the case of HRPD, allowed values are **0.2, 0.5, 1.0, 1.5**
 
 Example Input:
 

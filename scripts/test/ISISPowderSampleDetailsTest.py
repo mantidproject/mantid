@@ -284,23 +284,62 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
     def test_construct_slab(self):
         expected_thickness = 2.2
+        expected_width = 1.0
+        expected_height = 2.0
+        expected_center = [1.0, 2.0, 3.0]
+        expected_angle = 3.0
 
         # Check easiest case
-        sample_details_obj = sample_details.SampleDetails(thickness=expected_thickness, shape="slab")
+        sample_details_obj = sample_details.SampleDetails(thickness=expected_thickness, shape="slab",
+                                                          height=expected_height, width=expected_width,
+                                                          center=expected_center, angle=expected_angle)
         self.assertEqual(sample_details_obj.thickness(), expected_thickness)
+        self.assertEqual(sample_details_obj.width(), expected_width)
+        self.assertEqual(sample_details_obj.height(), expected_height)
+        self.assertEqual(sample_details_obj.center(), expected_center)
+        self.assertEqual(sample_details_obj.angle(), expected_angle)
 
         # Does it handle ints correctly
         thickness_int = 1
-        sample_details_obj_int = sample_details.SampleDetails(thickness=thickness_int, shape="slab")
-        self.assertTrue(isinstance(sample_details_obj.thickness(), float))
+        width_int = 2
+        height_int = 3
+        center_int = [1, 2, 3]
+        angle_int = 4
+        sample_details_obj_int = sample_details.SampleDetails(thickness=thickness_int, shape="slab",
+                                                              height=height_int, width=width_int, center=center_int,
+                                                              angle=angle_int)
+        self.assertTrue(isinstance(sample_details_obj_int.thickness(), float))
+        self.assertTrue(isinstance(sample_details_obj_int.width(), float))
+        self.assertTrue(isinstance(sample_details_obj_int.height(), float))
+        self.assertTrue(isinstance(sample_details_obj_int.center(), list))
+        self.assertTrue(all(isinstance(p, float) for p in sample_details_obj_int.center()))
+        self.assertTrue(isinstance(sample_details_obj_int.angle(), float))
         self.assertEqual(sample_details_obj_int.thickness(), float(thickness_int))
+        self.assertEqual(sample_details_obj_int.width(), float(width_int))
+        self.assertEqual(sample_details_obj_int.height(), float(height_int))
+        self.assertEqual(sample_details_obj_int.center(), [float(p) for p in center_int])
+        self.assertEqual(sample_details_obj_int.angle(), float(angle_int))
 
         # Does it handle strings correctly
         thickness_string = "5"
-        sample_details_obj_str = sample_details.SampleDetails(thickness=thickness_string, shape="slab")
-        self.assertTrue(isinstance(sample_details_obj.thickness(), float))
+        width_string = "1"
+        height_string = "2"
+        center_string = ["1", "2", "3"]
+        angle_string = "3"
+        sample_details_obj_str = sample_details.SampleDetails(thickness=thickness_string, shape="slab",
+                                                              height=height_string, width=width_string,
+                                                              center=center_string, angle=angle_string)
+        self.assertTrue(isinstance(sample_details_obj_str.thickness(), float))
+        self.assertTrue(isinstance(sample_details_obj_str.width(), float))
+        self.assertTrue(isinstance(sample_details_obj_str.height(), float))
+        self.assertTrue(isinstance(sample_details_obj_str.center(), list))
+        self.assertTrue(all(isinstance(p, float) for p in sample_details_obj_str.center()))
+        self.assertTrue(isinstance(sample_details_obj_str.angle(), float))
         self.assertEqual(sample_details_obj_str.thickness(), float(thickness_string))
-
+        self.assertEqual(sample_details_obj_str.width(), float(width_string))
+        self.assertEqual(sample_details_obj_str.height(), float(height_string))
+        self.assertEqual(sample_details_obj_str.center(), [float(p) for p in center_string])
+        self.assertEqual(sample_details_obj_str.angle(), float(angle_string))
 
 def get_std_out_buffer_obj():
     # Because of the way that strings and bytes

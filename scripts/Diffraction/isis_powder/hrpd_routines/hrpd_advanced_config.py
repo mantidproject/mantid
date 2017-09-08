@@ -13,7 +13,7 @@ absorption_correction_params = {
 
 window_10_110_params = {
     "vanadium_tof_cropping": (1e4, 1.2e5),
-    "focused_cropping_values" : [
+    "focused_cropping_values": [
         (1.5e4, 1.1e5),  # Bank 1
         (1.5e4, 1.2e5),  # Bank 2
         (1.5e4, 1.1e5)   # Bank 3
@@ -39,7 +39,7 @@ window_100_200_params = {
 }
 
 file_names = {
-    "grouping_file_name" : "hrpd_new_072_01_corr.cal"
+    "grouping_file_name": "hrpd_new_072_01_corr.cal"
 }
 
 general_params = {

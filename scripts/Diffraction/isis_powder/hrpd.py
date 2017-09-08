@@ -51,8 +51,10 @@ class HRPD(AbstractInst):
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
             return hrpd_algs.calculate_van_absorb_corrections(
-                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
-                is_vanadium=self._is_vanadium)
+                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering)
+        elif self._sample_details.shape_type == "slab":
+            return hrpd_algs.calculate_slab_absorb_corrections(ws_to_correct=ws_to_correct,
+                                                               sample_details_obj=self._sample_details)
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(
                 ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,

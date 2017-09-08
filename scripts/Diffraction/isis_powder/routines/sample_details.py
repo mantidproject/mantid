@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 from isis_powder.routines import common
 import math
-import warnings
+
+property_err_string = "The following sample property was not passed as an argument: "
 
 
 class SampleDetails(object):
@@ -13,6 +14,10 @@ class SampleDetails(object):
                                                                      "SampleDetails. If you have been using this class "
                                                                      "without worrying about \"shape\", you probably "
                                                                      "want to set this to \"cylinder\"")
+        center = common.dictionary_key_helper(dictionary=kwargs, key="center",
+                                              exception_msg=property_err_string + "center")
+        SampleDetails._validate_center(center)
+        self._center = [float(i) for i in center]  # List of X, Y, Z position
 
         if self.shape_type == "cylinder":
             self.shape = _Cylinder(kwargs)
@@ -60,10 +65,36 @@ class SampleDetails(object):
         self.material_object.set_material_properties(abs_cross_sect=absorption_cross_section,
                                                      scattering_cross_sect=scattering_cross_section)
 
+    @staticmethod
+    def _validate_center(center):
+        # Center has to be checked specially - it has to be a list of floating point values
+        if not isinstance(center, list):
+            raise ValueError("The center of the cylinder must be specified as a list of X, Y, Z co-ordinates."
+                             " For example [0., 1., 2.]")
+
+        # The center of the cylinder can be at any position of X Y Z so don't check against physical constraints
+        if len(center) != 3:
+            raise ValueError("The center must have three values corresponding to X, Y, Z position of the sample."
+                             " For example [0. ,1., 2.]")
+
+        for val in center:
+            _check_can_convert_to_float(property_name="center", value=val)
+
+    @staticmethod
+    def validate_constructor_inputs(values_to_check):
+        # Ensure we got double (or int) types and they are sane
+
+        # Attempt to convert them all to floating point relying on the fact on
+        # the way Python has aliases to an object
+        for key, value in iteritems(values_to_check):
+            _check_value_is_physical(property_name=key, value=value)
+            _check_can_convert_to_float(property_name=key, value=value)
+
     def _print(self):
         print("Sample Details")
         print("------------------------")
         print("Shape type: " + self.shape_type)
+        print("Center X:{}, Y:{}, Z{}".format(self._center[0], self._center[1], self._center[2]))
 
         self.shape.print_shape()
         print("------------------------")
@@ -81,16 +112,22 @@ class SampleDetails(object):
             raise RuntimeError("Radius is not applicable for the shape type \"" + self.shape_type + "\"")
 
     def height(self):
-        if self.shape_type == "cylinder":
-            return self.shape.height
-        else:
-            raise RuntimeError("Height is not applicable for the shape type \"" + self.shape_type + "\"")
+        return self.shape.height
 
     def center(self):
-        if self.shape_type == "cylinder":
-            return self.shape.center
+        return self._center
+
+    def width(self):
+        if self.shape_type == "slab":
+            return self.shape.width
         else:
-            raise RuntimeError("Center is not applicable for the shape type \"" + self.shape_type + "\"")
+            raise RuntimeError("Width is not applicable for the shape type \"" + self.shape_type + "\"")
+
+    def angle(self):
+        if self.shape_type == "slab":
+            return self.shape.angle
+        else:
+            raise RuntimeError("Angle is not applicable for the shape type \"" + self.shape_type + "\"")
 
     def thickness(self):
         if self.shape_type == "slab":
@@ -159,20 +196,19 @@ class _Material(object):
 class _Cylinder(object):
     def __init__(self, kwargs):
         # By using kwargs we get a better error than "init takes n arguments"
-        err_string = "The following sample property was not passed as an argument: "
-        height = common.dictionary_key_helper(dictionary=kwargs, key="height", exception_msg=err_string + "height")
-        radius = common.dictionary_key_helper(dictionary=kwargs, key="radius", exception_msg=err_string + "radius")
-        center = common.dictionary_key_helper(dictionary=kwargs, key="center", exception_msg=err_string + "center")
+        height = common.dictionary_key_helper(dictionary=kwargs, key="height",
+                                              exception_msg=property_err_string + "height")
+        radius = common.dictionary_key_helper(dictionary=kwargs, key="radius",
+                                              exception_msg=property_err_string + "radius")
 
-        _Cylinder._validate_constructor_inputs(height=height, radius=radius, center=center)
-
+        _Cylinder._validate_constructor_inputs(height=height, radius=radius)
+        SampleDetails.validate_constructor_inputs({"height": height, "radius": radius})
         self.height = float(height)
         self.radius = float(radius)
-        self.center = [float(i) for i in center]  # List of X, Y, Z position
         self.shape_type = "cylinder"
 
     @staticmethod
-    def _validate_constructor_inputs(height, radius, center):
+    def _validate_constructor_inputs(height, radius):
         # Ensure we got double (or int) types and they are sane
         values_to_check = {'height': height, 'radius': radius}
 
@@ -180,40 +216,32 @@ class _Cylinder(object):
         # the way Python has aliases to an object
         for key, value in iteritems(values_to_check):
             _check_value_is_physical(property_name=key, value=value)
-
-        # Center has to be checked specially - it has to be a list of floating point values
-        if not isinstance(center, list):
-            raise ValueError("The center of the cylinder must be specified as a list of X, Y, Z co-ordinates."
-                             " For example [0., 1., 2.]")
-
-        # The center of the cylinder can be at any position of X Y Z so don't check against physical constraints
-        if len(center) != 3:
-            raise ValueError("The center must have three values corresponding to X, Y, Z position of the sample."
-                             " For example [0. ,1., 2.]")
-
-        for val in center:
-            _check_can_convert_to_float(property_name="center", value=val)
+            _check_can_convert_to_float(property_name=key, value=value)
 
     def print_shape(self):
         print("Height: {}".format(self.height))
         print("Radius: {}".format(self.radius))
-        print("Center X:{}, Y:{}, Z{}".format(self.center[0], self.center[1], self.center[2]))
 
 
 class _Slab(object):
     def __init__(self, kwargs):
         # By using kwargs we get a better error than "init takes n arguments"
-        err_string = "The following sample property was not passed as an argument: "
         thickness = common.dictionary_key_helper(dictionary=kwargs, key="thickness",
-                                                 exception_msg=err_string + "thickness")
-        _Slab._validate_constructor_inputs(thickness=thickness)
-        self.thickness = float(thickness)
-        self.shape_type = "slab"
+                                                 exception_msg=property_err_string + "thickness")
+        width = common.dictionary_key_helper(dictionary=kwargs, key="width",
+                                             exception_msg=property_err_string + "width")
+        height = common.dictionary_key_helper(dictionary=kwargs, key="height",
+                                              exception_msg=property_err_string + "height")
+        angle = common.dictionary_key_helper(dictionary=kwargs, key="angle",
+                                             exception_msg=property_err_string + "angle")
 
-    @staticmethod
-    def _validate_constructor_inputs(thickness):
-        _check_value_is_physical(property_name="thickness", value=thickness)
-        _check_can_convert_to_float(property_name="thickness", value=thickness)
+        SampleDetails.validate_constructor_inputs({"thickness": thickness, "width": width, "height": height,
+                                                  "angle": angle})
+        self.thickness = float(thickness)
+        self.width = float(width)
+        self.height = float(height)
+        self.angle = float(angle)
+        self.shape_type = "slab"
 
     def print_shape(self):
         print("Thickness: {}".format(self.thickness))

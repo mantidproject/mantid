@@ -3,16 +3,69 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 from isis_powder.hrpd_routines import hrpd_advanced_config
-from isis_powder.routines import common, absorb_corrections
+from isis_powder.routines import common, absorb_corrections, sample_details, common_enums
 from isis_powder.routines.run_details import create_run_details_object, \
                                              RunDetailsWrappedCommonFuncs, CustomFuncForRunDetails
 
 
-def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium):
+def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering):
     absorb_dict = hrpd_advanced_config.absorption_correction_params
     sample_details_obj = absorb_corrections.create_vanadium_sample_details_obj(config_dict=absorb_dict)
     ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(
         ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, sample_details_obj=sample_details_obj)
+    return ws_to_correct
+
+
+def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
+    """
+    Sets a slab sample from the user specified dictionary and performs HRPDSlabCanAbsorption on the workspace.
+    The SampleDetails object defines the sample, material and associated properties.
+    :param ws_to_correct: The workspace to do corrections on
+    :param sample_details_obj: The object containing the sample details
+    :return: The corrected workspace
+    """
+
+    if not isinstance(sample_details_obj, sample_details.SampleDetails):
+        raise RuntimeError("A SampleDetails object was not set or a different object type was found when sample"
+                           " absorption corrections were requested. If you want sample absorption corrections please "
+                           "create a SampleDetails object and set the relevant properties it. "
+                           "Then set the new sample by calling set_sample_details().")
+    if not sample_details_obj.is_material_set():
+        raise RuntimeError("The material for this sample has not been set yet. Please call"
+                           " set_material on the SampleDetails object to set the material")
+
+    geometry_json = {"Shape": "FlatPlate", "Thick": sample_details_obj.thickness(), "Width": sample_details_obj.width(),
+                     "Height": sample_details_obj.height(), "Center": sample_details_obj.center(),
+                     "Angle": sample_details_obj.angle()}
+    material = sample_details_obj.material_object
+    # See SetSampleMaterial for documentation on this dictionary
+    material_json = {"ChemicalFormula": material.chemical_formula}
+    if material.number_density:
+        material_json["SampleNumberDensity"] = material.number_density
+    if material.absorption_cross_section:
+        material_json["AttenuationXSection"] = material.absorption_cross_section
+    if material.scattering_cross_section:
+        material_json["ScatteringXSection"] = material.scattering_cross_section
+
+    mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
+
+    previous_units = ws_to_correct.getAxis(0).getUnit().unitID()
+    ws_units = common_enums.WORKSPACE_UNITS
+
+    # HRPDSlabCanAbsorption must be completed in units of wavelength - convert if needed, than convert back afterwards
+    if previous_units != ws_units.wavelength:
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+                                            Target=ws_units.wavelength)
+
+    absorb_factors = mantid.HRPDSlabCanAbsorption(InputWorkspace=ws_to_correct)
+    ws_to_correct = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=absorb_factors,
+                                  OutputWorkspace=ws_to_correct)
+    mantid.DeleteWorkspace(Workspace=absorb_factors)
+
+    if previous_units != ws_units.wavelength:
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+                                            Target=previous_units)
+
     return ws_to_correct
 
 
