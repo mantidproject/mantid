@@ -14,7 +14,7 @@ class HelperTestingClass(object):
         self._atoms = ""
         self._sum_contributions = True
         self._cross_section_factor = "Incoherent"
-        self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out", "DMOL3": ".outmol"}
+        self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out", "DMOL3": ".outmol", "GAUSSIAN": ".log"}
         self._output_name = "output_workspace"
         self._ref = "reference_workspace"
         self._scale = 1.0
@@ -379,6 +379,34 @@ class AbinsDMOL3TestScratch(stresstesting.MantidStressTest, HelperTestingClass):
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
         self.set_cross_section(cross_section="Total")
+        self.case_from_scratch()
+
+    def excludeInPullRequests(self):
+        return True
+
+    def validate(self):
+        self.tolerance = 1e-2
+        return self._output_name, self.ref_result
+
+
+class AbinsGAUSSIANestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation from scratch with input data from GAUSSIAN and for 1-4 quantum
+    order events is correct.
+    """
+    tolerance = None
+    ref_result = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "C6H5Cl-Gaussian"
+
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("GAUSSIAN")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_cross_section(cross_section="Incoherent")
         self.case_from_scratch()
 
     def excludeInPullRequests(self):
