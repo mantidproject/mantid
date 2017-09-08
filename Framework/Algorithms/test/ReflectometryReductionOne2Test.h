@@ -18,6 +18,7 @@ using namespace WorkspaceCreationHelper;
 
 class ReflectometryReductionOne2Test : public CxxTest::TestSuite {
 private:
+  MatrixWorkspace_sptr m_singleDetectorWS;
   MatrixWorkspace_sptr m_multiDetectorWS;
   MatrixWorkspace_sptr m_transmissionWS;
 
@@ -33,6 +34,9 @@ public:
 
   ReflectometryReductionOne2Test() {
     FrameworkManager::Instance();
+    // A single detector ws
+    m_singleDetectorWS =
+        create2DWorkspaceWithReflectometryInstrument(0);
     // A multi detector ws
     m_multiDetectorWS =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
@@ -597,6 +601,31 @@ public:
     TS_ASSERT_DELTA(outQ->y(0)[0], 2.852088, 1e-6);
     TS_ASSERT_DELTA(outQ->y(0)[3], 2.833380, 1e-6);
     TS_ASSERT_DELTA(outQ->y(0)[7], 2.841288, 1e-6);
+  }
+
+  void test_sum_in_q_IvsQ_point_detector() {
+    // Test IvsQ workspace for a point detector
+    // No monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // Processing instructions : 0
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "0");
+    alg.setProperty("InputWorkspace", m_singleDetectorWS);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 28);
+
+    // X range in outQ
+    TS_ASSERT_DELTA(outQ->x(0)[0], 0.279882, 1e-6);
+    TS_ASSERT_DELTA(outQ->x(0)[3], 0.310524, 1e-6);
+    TS_ASSERT_DELTA(outQ->x(0)[7], 0.363599, 1e-6);
+    // Y counts
+    TS_ASSERT_DELTA(outQ->y(0)[0], 2.900305, 1e-6);
+    TS_ASSERT_DELTA(outQ->y(0)[3], 2.886947, 1e-6);
+    TS_ASSERT_DELTA(outQ->y(0)[7], 2.607359, 1e-6);
   }
 
 private:
