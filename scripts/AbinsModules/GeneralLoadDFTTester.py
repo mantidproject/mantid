@@ -6,7 +6,7 @@ import numpy as np
 
 class GeneralLoadDFTTester(object):
 
-    _loaders_extensions = {"LoadCASTEP": "phonon", "LoadCRYSTAL": "out", "LoadDMOL3": "outmol"}
+    _loaders_extensions = {"LoadCASTEP": "phonon", "LoadCRYSTAL": "out", "LoadDMOL3": "outmol", "LoadGAUSSIAN": "log"}
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):
