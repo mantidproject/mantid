@@ -74,8 +74,8 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
     :return: The workspace with corrections applied
     """
     geometry_json = {'Shape': 'Cylinder',
-                     'Height': sample_details_obj.height, 'Radius': sample_details_obj.radius,
-                     'Center': sample_details_obj.center}
+                     'Height': sample_details_obj.height(), 'Radius': sample_details_obj.radius(),
+                     'Center': sample_details_obj.center()}
     material = sample_details_obj.material_object
     # See SetSampleMaterial for documentation on this dictionary
     material_json = {'ChemicalFormula': material.chemical_formula}

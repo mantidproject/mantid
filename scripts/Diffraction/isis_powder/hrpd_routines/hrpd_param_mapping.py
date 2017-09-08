@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from isis_powder.hrpd_routines.hrpd_enums import HRPD_MODES, HRPD_SAMPLE_GEOMETRIES, HRPD_TOF_WINDOWS
+from isis_powder.hrpd_routines.hrpd_enums import HRPD_MODES, HRPD_TOF_WINDOWS
 from isis_powder.routines.param_map_entry import ParamMapEntry
 
 attr_mapping = \
@@ -20,8 +20,6 @@ attr_mapping = \
         ParamMapEntry(ext_name="run_number",                int_name="run_number"),
         ParamMapEntry(ext_name="sample_empty",              int_name="sample_empty", optional=True),
         ParamMapEntry(ext_name="sample_empty_scale",        int_name="sample_empty_scale"),
-        ParamMapEntry(ext_name="sample_geometry",           int_name="sample_geometry",
-                      enum_class=HRPD_SAMPLE_GEOMETRIES),
         ParamMapEntry(ext_name="user_name",                 int_name="user_name"),
         ParamMapEntry(ext_name="vanadium_normalisation",    int_name="do_van_norm"),
         ParamMapEntry(ext_name="vanadium_tof_cropping",     int_name="van_tof_cropping"),

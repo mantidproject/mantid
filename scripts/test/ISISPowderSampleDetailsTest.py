@@ -19,32 +19,32 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         # Check easiest case
         sample_details_obj = sample_details.SampleDetails(height=expected_height, radius=expected_radius,
-                                                          center=expected_center)
-        self.assertEqual(sample_details_obj.height, expected_height)
-        self.assertEqual(sample_details_obj.radius, expected_radius)
-        self.assertEqual(sample_details_obj.center, expected_center)
+                                                          center=expected_center, shape="cylinder")
+        self.assertEqual(sample_details_obj.height(), expected_height)
+        self.assertEqual(sample_details_obj.radius(), expected_radius)
+        self.assertEqual(sample_details_obj.center(), expected_center)
 
         # Does it handle ints correctly
         height_radius_int = 1
         center_int = [2, 3, 4]
         sample_details_obj_int = sample_details.SampleDetails(height=height_radius_int, radius=height_radius_int,
-                                                              center=center_int)
-        self.assertTrue(isinstance(sample_details_obj.height, float))
-        self.assertTrue(isinstance(sample_details_obj.radius, float))
-        self.assertEqual(sample_details_obj_int.height, float(height_radius_int))
-        self.assertEqual(sample_details_obj_int.radius, float(height_radius_int))
-        self.assertEqual(sample_details_obj_int.center, [2.0, 3.0, 4.0])
+                                                              center=center_int, shape="cylinder")
+        self.assertTrue(isinstance(sample_details_obj.height(), float))
+        self.assertTrue(isinstance(sample_details_obj.radius(), float))
+        self.assertEqual(sample_details_obj_int.height(), float(height_radius_int))
+        self.assertEqual(sample_details_obj_int.radius(), float(height_radius_int))
+        self.assertEqual(sample_details_obj_int.center(), [2.0, 3.0, 4.0])
 
         # Does it handle strings correctly
         height_radius_string = "5"
         center_string = ["2.0", "3.0", "5.0"]
         sample_details_obj_str = sample_details.SampleDetails(height=height_radius_string, radius=height_radius_string,
-                                                              center=center_string)
-        self.assertTrue(isinstance(sample_details_obj.height, float))
-        self.assertTrue(isinstance(sample_details_obj.radius, float))
-        self.assertEqual(sample_details_obj_str.height, float(height_radius_string))
-        self.assertEqual(sample_details_obj_str.radius, float(height_radius_string))
-        self.assertEqual(sample_details_obj_str.center, [2.0, 3.0, 5.0])
+                                                              center=center_string, shape="cylinder")
+        self.assertTrue(isinstance(sample_details_obj.height(), float))
+        self.assertTrue(isinstance(sample_details_obj.radius(), float))
+        self.assertEqual(sample_details_obj_str.height(), float(height_radius_string))
+        self.assertEqual(sample_details_obj_str.radius(), float(height_radius_string))
+        self.assertEqual(sample_details_obj_str.center(), [2.0, 3.0, 5.0])
 
     def test_constructor_non_number_input(self):
         good_input = 1.0
@@ -54,31 +54,34 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         # Check it handles empty input
         with assertRaisesRegex(self, ValueError, "Could not convert the height to a number"):
-            sample_details.SampleDetails(height=empty_input_value, radius=good_input, center=good_center_input)
+            sample_details.SampleDetails(height=empty_input_value, radius=good_input,
+                                         center=good_center_input, shape="cylinder")
 
         # Does it handle bad input and tell us what we put in
         with assertRaisesRegex(self, ValueError, ".*to a number. The input was: '" + char_input_value + "'"):
-            sample_details.SampleDetails(height=char_input_value, radius=good_input, center=good_center_input)
+            sample_details.SampleDetails(height=char_input_value, radius=good_input,
+                                         center=good_center_input, shape="cylinder")
 
         # Does it indicate which field was incorrect
         with assertRaisesRegex(self, ValueError, "radius"):
-            sample_details.SampleDetails(height=good_input, radius=char_input_value, center=good_center_input)
+            sample_details.SampleDetails(height=good_input, radius=char_input_value,
+                                         center=good_center_input, shape="cylinder")
 
         # Can it handle bad center values
         with assertRaisesRegex(self, ValueError, "center"):
-            sample_details.SampleDetails(height=good_input, radius=good_input, center=["", 2, 3])
+            sample_details.SampleDetails(height=good_input, radius=good_input, center=["", 2, 3], shape="cylinder")
 
         # Does it throw if were not using a list for the input
         with assertRaisesRegex(self, ValueError, "must be specified as a list of X, Y, Z"):
-            sample_details.SampleDetails(height=good_input, radius=good_input, center=1)
+            sample_details.SampleDetails(height=good_input, radius=good_input, center=1, shape="cylinder")
 
         # Does it throw if we are using a list of incorrect length (e.g. not 3D)
         with assertRaisesRegex(self, ValueError, "must have three values corresponding to"):
-            sample_details.SampleDetails(height=good_input, radius=good_input, center=[])
+            sample_details.SampleDetails(height=good_input, radius=good_input, center=[], shape="cylinder")
         with assertRaisesRegex(self, ValueError, "must have three values corresponding to"):
-            sample_details.SampleDetails(height=good_input, radius=good_input, center=[1, 2])
+            sample_details.SampleDetails(height=good_input, radius=good_input, center=[1, 2], shape="cylinder")
         with assertRaisesRegex(self, ValueError, "must have three values corresponding to"):
-            sample_details.SampleDetails(height=good_input, radius=good_input, center=[1, 2, 3, 4])
+            sample_details.SampleDetails(height=good_input, radius=good_input, center=[1, 2, 3, 4], shape="cylinder")
 
     def test_constructor_with_impossible_val(self):
         good_input = 1
@@ -90,22 +93,26 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         # Check it handles zero
         with assertRaisesRegex(self, ValueError, "The value set for height was: 0"):
-            sample_details.SampleDetails(height=zero_value, radius=good_input, center=good_center_input)
+            sample_details.SampleDetails(height=zero_value, radius=good_input,
+                                         center=good_center_input, shape="cylinder")
 
         # Very small negative
         with assertRaisesRegex(self, ValueError, "which is impossible for a physical object"):
-            sample_details.SampleDetails(height=good_input, radius=negative_value, center=good_center_input)
+            sample_details.SampleDetails(height=good_input, radius=negative_value,
+                                         center=good_center_input, shape="cylinder")
 
         # Integer negative
         with assertRaisesRegex(self, ValueError, "The value set for height was: -1"):
-            sample_details.SampleDetails(height=negative_int, radius=good_input, center=good_center_input)
+            sample_details.SampleDetails(height=negative_int, radius=good_input,
+                                         center=good_center_input, shape="cylinder")
 
         # String negative
         with assertRaisesRegex(self, ValueError, "The value set for radius was: -1"):
-            sample_details.SampleDetails(height=good_input, radius=negative_string, center=good_center_input)
+            sample_details.SampleDetails(height=good_input, radius=negative_string,
+                                         center=good_center_input, shape="cylinder")
 
     def test_set_material(self):
-        sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[2, 3, 4])
+        sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[2, 3, 4], shape="cylinder")
 
         # Check that we can only set a material once. We will test the underlying class elsewhere
         sample_details_obj.set_material(chemical_formula='V')
@@ -124,7 +131,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertIsNotNone(sample_details_obj.material_object)
 
     def test_set_material_properties(self):
-        sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[2, 3, 5])
+        sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[2, 3, 5], shape="cylinder")
 
         self.assertIsNone(sample_details_obj.material_object)
 
@@ -225,7 +232,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
             sys.stdout = std_out_buffer
 
             sample_details_obj = sample_details.SampleDetails(height=expected_height, radius=expected_radius,
-                                                              center=expected_center)
+                                                              center=expected_center, shape="cylinder")
             # Test with most defaults set
             sample_details_obj.print_sample_details()
             captured_std_out_default = std_out_buffer.getvalue()
@@ -274,6 +281,25 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         finally:
             # Ensure std IO is restored. Do NOT remove this line as all std out will pipe into our buffer otherwise
             sys.stdout = old_std_out
+
+    def test_construct_slab(self):
+        expected_thickness = 2.2
+
+        # Check easiest case
+        sample_details_obj = sample_details.SampleDetails(thickness=expected_thickness, shape="slab")
+        self.assertEqual(sample_details_obj.thickness(), expected_thickness)
+
+        # Does it handle ints correctly
+        thickness_int = 1
+        sample_details_obj_int = sample_details.SampleDetails(thickness=thickness_int, shape="slab")
+        self.assertTrue(isinstance(sample_details_obj.thickness(), float))
+        self.assertEqual(sample_details_obj_int.thickness(), float(thickness_int))
+
+        # Does it handle strings correctly
+        thickness_string = "5"
+        sample_details_obj_str = sample_details.SampleDetails(thickness=thickness_string, shape="slab")
+        self.assertTrue(isinstance(sample_details_obj.thickness(), float))
+        self.assertEqual(sample_details_obj_str.thickness(), float(thickness_string))
 
 
 def get_std_out_buffer_obj():
