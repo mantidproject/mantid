@@ -52,12 +52,30 @@ void BinDetectorScan::init() {
                   "option.");
   declareProperty(
       make_unique<ArrayProperty<double>>(
-          "HeightBinning", boost::make_shared<RebinParamsValidator>()),
+          "HeightBinning", boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of the first y value, the y value step size and "
       "the final y value. Optionally this can also be a single number, which "
       "is the y value step size. In this case, the boundary of binning will "
       "be determined by minimum and maximum y values present in the "
       "workspaces.");
+}
+
+std::map<std::string, std::string> BinDetectorScan::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  const std::string componentForHeightAxis =
+      getProperty("ComponentForHeightAxis");
+  const std::string heightBinning = getProperty("HeightBinning");
+
+  if (componentForHeightAxis.empty() && heightBinning.empty()) {
+    std::string message =
+        "Either a component, such as a tube, must be specified "
+        "to get the height axis, or the binning given explicitly.";
+    result["ComponentForHeightAxis"] = message;
+    result["HeightBinning"] = message;
+  }
+
+  return result;
 }
 
 void BinDetectorScan::exec() {

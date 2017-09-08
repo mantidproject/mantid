@@ -36,6 +36,7 @@ class MANTID_ALGORITHMS_DLL BinDetectorScan : public API::Algorithm {
 public:
   const std::string name() const override { return "BinDetectorScan"; }
   const std::string summary() const override { return "TODO: fill this out."; }
+  std::map<std::string, std::string> validateInputs() override;
   int version() const override { return 1; }
 
 private:
