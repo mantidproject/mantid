@@ -85,7 +85,7 @@ void BinDetectorScan::exec() {
         continue;
       const auto &pos = specInfo.position(i);
       const auto y = pos.Y();
-      auto theta = atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
+      auto theta = -atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
 
       auto it = std::lower_bound(m_heightAxis.begin(), m_heightAxis.end(), y);
       size_t index = std::distance(m_heightAxis.begin(), it);
@@ -139,7 +139,7 @@ void BinDetectorScan::getScatteringAngleBinning() {
       if (specInfo.isMonitor(i))
         continue;
       const auto &pos = specInfo.position(i);
-      double thetaAngle = atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
+      double thetaAngle = -atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
       m_startScatteringAngle = std::min(m_startScatteringAngle, thetaAngle);
       m_endScatteringAngle = std::max(m_endScatteringAngle, thetaAngle);
     }
