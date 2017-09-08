@@ -36,6 +36,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class EXPORT_OPT_MANTIDQT_COMMON TableModificationCommandBase : public DataProcessorCommandBase {
 public:
   using DataProcessorCommandBase::DataProcessorCommandBase;
+  TableModificationCommandBase(TableModificationCommandBase&&) = delete;
+  TableModificationCommandBase &operator=(TableModificationCommandBase&&) = delete;
   bool modifiesTable() const override;
 };
 }

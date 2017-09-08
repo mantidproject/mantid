@@ -32,6 +32,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class EXPORT_OPT_MANTIDQT_COMMON CommandProviderBase : public DataProcessorCommandProvider {
 public:
   CommandProviderBase(DataProcessorPresenter &presenter);
+  CommandProviderBase(CommandProviderBase&&) = delete;
+  CommandProviderBase& operator=(CommandProviderBase&&) = delete;
+  
   const CommandVector &getTableCommands() const override;
   CommandVector &getTableCommands();// override;
 

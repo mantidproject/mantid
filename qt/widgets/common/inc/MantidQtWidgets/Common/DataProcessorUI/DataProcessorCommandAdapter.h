@@ -60,7 +60,7 @@ public:
       // Add the actions
       auto &child = m_adaptee->getChild();
       for (auto &ch : child) {
-        m_adapter.push_back(
+        m_adapter.emplace_back(
             Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(submenu,
                                                                      ch.get()));
       }
@@ -71,7 +71,7 @@ public:
     }
   };
 
-  /** Constructor: Adds actions to a toolbar
+    /** Constructor: Adds actions to a toolbar
   * @param toolbar :: The toolbar where actions will be added
   * @param adaptee :: The action to add
   */
@@ -85,6 +85,9 @@ public:
       toolbar->addAction(action);
     }
   };
+
+  DataProcessorCommandAdapter(DataProcessorCommandAdapter &&) = delete;
+  DataProcessorCommandAdapter &operator=(DataProcessorCommandAdapter &&) = delete;
 
   /**
    * Returns the action

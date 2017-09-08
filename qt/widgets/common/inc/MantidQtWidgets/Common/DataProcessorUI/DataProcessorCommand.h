@@ -37,7 +37,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DataProcessorCommand {
 public:
   DataProcessorCommand() : m_child(){};
+  DataProcessorCommand(DataProcessorCommand&&) = delete;
+  DataProcessorCommand &operator=(DataProcessorCommand&&) = delete;
   virtual ~DataProcessorCommand(){};
+
 
   virtual void execute() = 0;
   virtual QString name() const = 0;
