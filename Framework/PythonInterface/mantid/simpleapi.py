@@ -347,7 +347,7 @@ def fitting_algorithm(f):
         set_properties(algm, **kwargs)
         algm.execute()
 
-        return _gather_returns(function_name, lhs, algm)
+        return _gather_returns(function_name, lhs, algm, inout=True)
     # end
     function_name = f.__name__
     signature = ("\bFunction, InputWorkspace", "**kwargs")
@@ -813,7 +813,7 @@ def _merge_keywords_with_lhs(keywords, lhs_args):
     return final_keywords
 
 
-def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
+def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
     """Gather the return values and ensure they are in the
        correct order as defined by the output properties and
        return them as a tuple. If their is a single return
@@ -824,6 +824,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
        lhs of the function call and the names of these variables.
        :param algm_obj: An executed algorithm object.
        :param ignore_regex: A list of strings containing regex expressions to match
+       :param inout : gather also the InOut properties if True.
        against property names that will be ignored & not returned.
     """
     if ignore_regex is None:
@@ -845,7 +846,10 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
         ignore_regex[index] = re.compile(expr)
 
     retvals = OrderedDict()
-    for name in algm_obj.outputProperties():
+    names = algm_obj.outputProperties()
+    if inout:
+        names.extend(algm_obj.inoutProperties())
+    for name in names:
         if ignore_property(name, ignore_regex):
             continue
         prop = algm_obj.getProperty(name)

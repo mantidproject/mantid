@@ -172,7 +172,7 @@ implementation used for solving crystal structures from powder diffraction data.
     # Set best very high value of the cost function to ensure lower is found at first attempt
     costFuncBest = 1e+100
 
-    # Do local minimization from randow starting positions
+    # Do local minimization from random starting positions
     numOfRandowAttempts = 10
     for i in range(10):
         # pick a randow value for the peak centre fitting parameter in the fitting interval
