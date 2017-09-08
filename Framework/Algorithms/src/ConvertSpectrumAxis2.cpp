@@ -217,10 +217,9 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
 
   MatrixWorkspace_sptr outputWorkspace = nullptr;
   NumericAxis *newAxis = nullptr;
-  size_t size;
   if (m_toOrder) {
     // Can not re-use the input one because the spectra are re-ordered.
-    size = m_indexMap.size();
+    const size_t size = m_indexMap.size();
     outputWorkspace = WorkspaceFactory::Instance().create(
         inputWS, size, inputWS->x(0).size(), inputWS->y(0).size());
     std::vector<double> axis;
