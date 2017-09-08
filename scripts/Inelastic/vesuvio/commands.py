@@ -397,8 +397,10 @@ def _create_get_profiles_function(all_profiles_strs, profiles_strs, back_scatter
     :param all_profiles_strs:   All mass profile strings.
     :param profiles_strs:       Equivalent to all_profiles_strs with hydrogen profiles
                                 removed.
-    :param back_scattering:     Whether
-    :return:
+    :param back_scattering:     Whether back_scattering spectra are being fit
+    :return:                    A function for retrieving a tuple of all mass profile
+                                strings and fitting mass profile strings for a given
+                                spectrum index.
     """
 
     if isinstance(profiles_strs, list):

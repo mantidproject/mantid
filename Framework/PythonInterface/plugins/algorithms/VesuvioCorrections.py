@@ -288,8 +288,8 @@ class VesuvioCorrections(VesuvioBase):
         self._index_to_symbol_map = self.getProperty("MassIndexToSymbolMap").value
         self._hydrogen_constraints = self.getProperty("HydrogenConstraints").value
         spec_no = self._input_ws.getSpectrum(self._spec_idx).getSpectrumNo()
-        back_spectra = VESUVIO().backward_banks
-        self._back_scattering = any([lower <= spec_no <= upper for lower, upper in back_spectra])
+        back_spectra = VESUVIO().backward_spectra
+        self._back_scattering = back_spectra[0] <= spec_no <= back_spectra[1]
 
     # ------------------------------------------------------------------------------
 
@@ -302,7 +302,7 @@ class VesuvioCorrections(VesuvioBase):
         self._define_corrections()
 
         # The workspaces to fit for correction scale factors
-        fit_corrections = [wks for wks in self._correction_workspaces]
+        fit_corrections = [wks for wks in self._correction_workspaces if 'MultipleScattering' not in wks]
 
         # Perform fitting of corrections
         fixed_params = {}
@@ -546,6 +546,7 @@ class VesuvioCorrections(VesuvioBase):
                 sigma_z = float(params_dict[sigma_z_prop])
                 width = math.sqrt((sigma_x ** 2 + sigma_y ** 2 + sigma_z ** 2) / 3.0)
             else:
+                i = i + 1
                 continue
 
             atom_props.append(mass)
