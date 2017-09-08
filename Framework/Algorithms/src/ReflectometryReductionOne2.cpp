@@ -320,7 +320,7 @@ std::string createProcessingCommandsFromDetectorWS(
 * @return : the max/min extent on the given axis
 */
 double getBoundingBoxExtent(const BoundingBox &boundingBox,
-  const PointingAlong axis, const bool top) {
+                            const PointingAlong axis, const bool top) {
 
   double result = 0.0;
   switch (axis) {
@@ -334,7 +334,8 @@ double getBoundingBoxExtent(const BoundingBox &boundingBox,
     result = top ? boundingBox.zMax() : boundingBox.zMin();
     break;
   default:
-    throw std::runtime_error("Axis is not X/Y/Z"); break;
+    throw std::runtime_error("Axis is not X/Y/Z");
+    break;
   }
   return result;
 }
@@ -444,7 +445,6 @@ void ReflectometryReductionOne2::exec() {
     throw std::invalid_argument(
         "InputWorkspace must have units of TOF or Wavelength");
 
-
   // Cache the spectrum info and reference frame
   m_spectrumInfo = &m_runWS->spectrumInfo();
   auto instrument = m_runWS->getInstrument();
@@ -483,24 +483,25 @@ void ReflectometryReductionOne2::exec() {
 * @param spectrumIdx : the workspace index of the spectrum
 * @return : the twoTheta range in radians
 */
-double ReflectometryReductionOne2::getDetectorTwoThetaRange(
-   const size_t spectrumIdx) {
+double
+ReflectometryReductionOne2::getDetectorTwoThetaRange(const size_t spectrumIdx) {
 
   double bTwoTheta = 0;
-  
+
   // Get the sample->detector distance along the beam
-  const V3D detSample = m_spectrumInfo->position(spectrumIdx) -
-    m_spectrumInfo->samplePosition();
-  const double beamOffset = m_refFrame->vecPointingAlongBeam().scalar_prod(detSample);
+  const V3D detSample =
+      m_spectrumInfo->position(spectrumIdx) - m_spectrumInfo->samplePosition();
+  const double beamOffset =
+      m_refFrame->vecPointingAlongBeam().scalar_prod(detSample);
   // Get the bounding box for this detector/group
   BoundingBox boundingBox;
   auto detector = m_runWS->getDetector(spectrumIdx);
   detector->getBoundingBox(boundingBox);
   // Get the top and bottom on the axis pointing up
-  const double top = getBoundingBoxExtent(boundingBox,
-      m_refFrame->pointingUp(), true);
-  const double bottom = getBoundingBoxExtent(boundingBox,
-    m_refFrame->pointingUp(), false);
+  const double top =
+      getBoundingBoxExtent(boundingBox, m_refFrame->pointingUp(), true);
+  const double bottom =
+      getBoundingBoxExtent(boundingBox, m_refFrame->pointingUp(), false);
   // Calculate the difference in twoTheta between the top and bottom
   const double twoThetaTop = std::atan(top / beamOffset);
   const double twoThetaBottom = std::atan(bottom / beamOffset);
@@ -510,7 +511,7 @@ double ReflectometryReductionOne2::getDetectorTwoThetaRange(
   if (bTwoTheta < Tolerance) {
     throw std::runtime_error("Error calculating pixel size.");
   }
-  
+
   return bTwoTheta;
 }
 
@@ -1044,8 +1045,7 @@ void ReflectometryReductionOne2::findIvsLamRange(
 
   const size_t spIdxMin = detectors.front();
   const double twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, spIdxMin);
-  const double bTwoThetaMin =
-      getDetectorTwoThetaRange(spIdxMin);
+  const double bTwoThetaMin = getDetectorTwoThetaRange(spIdxMin);
   // For bLambda, use the average bin size for this spectrum
   auto xValues = detectorWS->x(spIdxMin);
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
@@ -1055,8 +1055,7 @@ void ReflectometryReductionOne2::findIvsLamRange(
 
   const size_t spIdxMax = detectors.back();
   const double twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spIdxMax);
-  const double bTwoThetaMax =
-      getDetectorTwoThetaRange(spIdxMax);
+  const double bTwoThetaMax = getDetectorTwoThetaRange(spIdxMax);
   xValues = detectorWS->x(spIdxMax);
   bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
             static_cast<int>(xValues.size());
@@ -1282,12 +1281,13 @@ void ReflectometryReductionOne2::sumInQShareCounts(
     if (totalWidth > Tolerance) {
       // Share counts out proportionally based on the overlap of this range
       const double overlapWidth =
-        std::min({ bLambda, lambdaMax - binStart, binEnd - lambdaMin });
+          std::min({bLambda, lambdaMax - binStart, binEnd - lambdaMin});
       const double fraction = overlapWidth / totalWidth;
       outputY[outIdx] += inputCounts * fraction;
       outputE[outIdx] += inputErr * fraction;
     } else {
-      // Projection to a single value. Put all counts in the overlapping output bin.
+      // Projection to a single value. Put all counts in the overlapping output
+      // bin.
       outputY[outIdx] += inputCounts;
       outputE[outIdx] += inputCounts;
     }
