@@ -36,7 +36,6 @@ class KpointsData(AbinsModules.GeneralData):
         :param num_atoms: total number of atoms in the unit cell (int)
         """
         super(KpointsData, self).__init__()
-        dim = 3  # number of coordinates
 
         if isinstance(num_k, six.integer_types) and num_k > 0:
             self._num_k = num_k

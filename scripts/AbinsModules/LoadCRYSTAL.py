@@ -1,10 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
-
 import io
-from math import sqrt
-
 import numpy as np
-
 import AbinsModules
 from mantid.kernel import Atom, logger
 

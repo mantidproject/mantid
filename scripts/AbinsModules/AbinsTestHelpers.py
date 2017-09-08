@@ -1,28 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
-import re
 import os
-import AbinsModules
 
 
 # Module with helper functions used to create tests.
-def version_as_tuple(string=None):
-    """
-    Calculates numerical representation of package version as a tuple.
-
-    :param string:  version of package in the format number1.number2.number3....numberN
-    :returns: numerical representation of package version in the form  of tuple (number1, number2 ...., numberN)
-    """
-    if not isinstance(string, str):
-        raise ValueError("Version of package in the form of string is expected.")
-    if "." not in string:
-        raise ValueError("Invalid format of package version.")
-
-    try:
-        return tuple([int(i) for i in re.findall(r'\d+', string=string)])
-    except:
-        raise ValueError("Version of package couldn't be converted to number. (version=", string)
-
-
 def find_file(filename=None):
     """
     Calculates path of filename with the testing data. Path is determined in the platform independent way.
