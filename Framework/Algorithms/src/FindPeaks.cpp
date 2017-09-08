@@ -473,13 +473,12 @@ void FindPeaks::findPeaksUsingMariscotti() {
   m_progress = make_unique<Progress>(this, 0.0, 1.0, end - start);
   const int blocksize = static_cast<int>(smoothedData->blocksize());
 
-  for (int k = start; k < end; ++k) {
-    int ws_i(k);
-    if (singleSpectrum)
-      ws_i = 0;
+  for (size_t smoothed_ws_index = 0; smoothed_ws_index < m_indexSet.size(); ++ smoothed_ws_index){
 
-    const auto &S = smoothedData->y(ws_i);
-    const auto &F = smoothedData->e(ws_i);
+    int k = static_cast<int>(m_indexSet[smoothed_ws_index]);
+
+    const auto &S = smoothedData->y(smoothed_ws_index);
+    const auto &F = smoothedData->e(smoothed_ws_index);
 
     // This implements the flow chart given on page 320 of Mariscotti
     int i0 = 0, i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
