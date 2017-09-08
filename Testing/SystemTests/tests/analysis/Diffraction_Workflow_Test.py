@@ -3,6 +3,7 @@
 System test that loads TOPAZ single-crystal data,
 and runs Diffraction Workflow.
 """
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import numpy
 import os
@@ -153,7 +154,7 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         newUB = numpy.array(mtd["TOPAZ_3132"].sample().getOrientedLattice().getUB())
         # UB Matrices are not necessarily the same, some of the H,K and/or L sign can be reversed
         diff = abs(newUB) - abs(originalUB) < 0.001
-        for c in xrange(3):
+        for c in range(3):
             # This compares each column, allowing old == new OR old == -new
             if not numpy.all(diff[:,c]) :
                 raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s"

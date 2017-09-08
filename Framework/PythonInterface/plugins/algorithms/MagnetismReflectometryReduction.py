@@ -636,4 +636,5 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         AnalysisDataService.remove(str(subtracted))
         return cropped
 
+
 AlgorithmFactory.subscribe(MagnetismReflectometryReduction)
