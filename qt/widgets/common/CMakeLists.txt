@@ -1,5 +1,4 @@
  set ( SRC_FILES
-    src/DataProcessorUI/Test.cpp
 	src/AlgorithmDialog.cpp
 	src/AlgorithmInputHistory.cpp
 	src/AlgorithmPropertiesWidget.cpp
