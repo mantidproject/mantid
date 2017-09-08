@@ -1,5 +1,4 @@
-from mantid.simpleapi import FunctionFactory
-from pdb import set_trace as tr
+from mantid.api import FunctionFactory
  
 class FunctionWrapper(object):
   """ Wrapper class for Fitting Function 
