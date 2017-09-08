@@ -438,8 +438,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
   // set up index set
   if (singleSpectrum)
     m_indexSet.push_back(m_wsIndex);
-  else
-  {
+  else {
     m_indexSet.resize(m_dataWS->getNumberHistograms());
     for (size_t i = 0; i < m_dataWS->getNumberHistograms(); ++i)
       m_indexSet[i] = i;
@@ -473,7 +472,8 @@ void FindPeaks::findPeaksUsingMariscotti() {
   m_progress = make_unique<Progress>(this, 0.0, 1.0, end - start);
   const int blocksize = static_cast<int>(smoothedData->blocksize());
 
-  for (size_t smoothed_ws_index = 0; smoothed_ws_index < m_indexSet.size(); ++ smoothed_ws_index){
+  for (size_t smoothed_ws_index = 0; smoothed_ws_index < m_indexSet.size();
+       ++smoothed_ws_index) {
 
     int k = static_cast<int>(m_indexSet[smoothed_ws_index]);
 
@@ -669,8 +669,7 @@ FindPeaks::calculateSecondDifference(const API::MatrixWorkspace_sptr &input) {
 
   // calculate derivative
   const size_t blocksize = input->blocksize();
-  for (size_t i = 0; i < numHists; ++i)
-  {
+  for (size_t i = 0; i < numHists; ++i) {
     size_t wsindex = m_indexSet[i];
 
     // Copy over the X values
@@ -760,7 +759,7 @@ void FindPeaks::calculateStandardDeviation(
   *  @param  w The value of w (the size of the smoothing 'window')
   *  @return The value of phi(g_z,w)
   */
-  long long FindPeaks::computePhi(const int &w) const {
+long long FindPeaks::computePhi(const int &w) const {
   const int m = (w - 1) / 2;
   int zz = 0;
   int max_index_prev = 1;
