@@ -312,8 +312,11 @@ void LoadILLDiffraction::calculateRelativeRotations(
   double firstTubeRotationAngle =
       firstTubePosition.angle(V3D(0, 0, 1)) * rad2deg;
 
-  if (m_instName == "D20")
-    firstTubeRotationAngle += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE;
+  if (m_instName == "D20") {
+    // this is the magical formula to treat the offset of the 2theta0 decoder.
+    firstTubeRotationAngle += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE -
+                              D20_PIXEL_SIZE / (m_resolutionMode * 2);
+  }
 
   g_log.debug() << "First tube rotation:" << firstTubeRotationAngle << "\n";
 
@@ -653,7 +656,9 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   IComponent_const_sptr component = instrument->getComponentByName("detector");
   double twoTheta0Actual = twoTheta0Read;
   if (m_instName == "D20") {
-    twoTheta0Actual += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE;
+    // this is the magical formula to treat the offset of the 2theta0 decoder.
+    twoTheta0Actual += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE -
+                       D20_PIXEL_SIZE / (m_resolutionMode * 2);
   }
   Quat rotation(twoTheta0Actual, V3D(0, 1, 0));
   g_log.debug() << "Setting 2theta0 to " << twoTheta0Actual;
