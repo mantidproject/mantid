@@ -1,11 +1,13 @@
 #include "MantidCrystal/FindSXPeaksHelper.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidAPI/Progress.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 #include <boost/graph/adjacency_list.hpp>
@@ -252,9 +254,10 @@ bool PerSpectrumBackgroundStrategy::isBelowBackground(
 PeakFindingStrategy::PeakFindingStrategy(
     const BackgroundStrategy *backgroundStrategy,
     const API::SpectrumInfo &spectrumInfo, const double minValue,
-    const double maxValue)
+    const double maxValue, const bool tofUnits)
     : m_backgroundStrategy(backgroundStrategy), m_minValue(minValue),
-      m_maxValue(maxValue), m_spectrumInfo(spectrumInfo) {}
+      m_maxValue(maxValue), m_spectrumInfo(spectrumInfo), m_tofUnits(tofUnits) {
+}
 
 PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x,
                                           const HistogramData::HistogramY &y,
@@ -329,20 +332,33 @@ double PeakFindingStrategy::calculatePhi(size_t workspaceIndex) const {
   return phi;
 }
 
-double PeakFindingStrategy::getTof(const HistogramData::HistogramX &x,
-                                   const size_t peakLocation) const {
+double PeakFindingStrategy::getXValue(const HistogramData::HistogramX &x,
+                                      const size_t peakLocation) const {
   auto leftBinPosition = x.begin() + peakLocation;
   const double leftBinEdge = *leftBinPosition;
   const double rightBinEdge = *std::next(leftBinPosition);
   return 0.5 * (leftBinEdge + rightBinEdge);
 }
 
+double PeakFindingStrategy::convertToTOF(const double xValue,
+                                         const size_t workspaceIndex) const {
+  // check if we're already using TOF
+  if (m_tofUnits)
+    return xValue;
+
+  // else if we're using d-spacing, convert the point to TOF
+  const auto unit = Kernel::UnitFactory::Instance().create("dSpacing");
+  unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex),
+                   m_spectrumInfo.twoTheta(workspaceIndex), 0, 0, 0);
+  return unit->singleToTOF(xValue);
+}
+
 StrongestPeaksStrategy::StrongestPeaksStrategy(
     const BackgroundStrategy *backgroundStrategy,
     const API::SpectrumInfo &spectrumInfo, const double minValue,
-    const double maxValue)
-    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue,
-                          maxValue) {}
+    const double maxValue, const bool tofUnits)
+    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue,
+                          tofUnits) {}
 
 PeakList StrongestPeaksStrategy::dofindSXPeaks(
     const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
@@ -363,7 +379,8 @@ PeakList StrongestPeaksStrategy::dofindSXPeaks(
 
   // Create the SXPeak information
   const auto distance = std::distance(y.begin(), maxY);
-  const auto tof = getTof(x, distance);
+  const auto xValue = getXValue(x, distance);
+  const auto tof = convertToTOF(xValue, workspaceIndex);
   const double phi = calculatePhi(workspaceIndex);
 
   std::vector<int> specs(1, workspaceIndex);
@@ -374,9 +391,10 @@ PeakList StrongestPeaksStrategy::dofindSXPeaks(
 
 AllPeaksStrategy::AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
                                    const API::SpectrumInfo &spectrumInfo,
-                                   const double minValue, const double maxValue)
-    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue,
-                          maxValue) {
+                                   const double minValue, const double maxValue,
+                                   const bool tofUnits)
+    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue,
+                          tofUnits) {
   // We only allow the AbsoluteBackgroundStrategy for now
   if (!dynamic_cast<const AbsoluteBackgroundStrategy *>(m_backgroundStrategy)) {
     throw std::invalid_argument("The AllPeaksStrategy has to be initialized "
@@ -481,7 +499,8 @@ PeakList AllPeaksStrategy::convertToSXPeaks(
     // Get the index of the bin
     auto maxY = peak->getMaxIterator();
     const auto distance = std::distance(y.begin(), maxY);
-    const auto tof = getTof(x, distance);
+    const auto xValue = getXValue(x, distance);
+    const auto tof = convertToTOF(xValue, workspaceIndex);
     const double phi = calculatePhi(workspaceIndex);
 
     std::vector<int> specs(1, workspaceIndex);
@@ -678,9 +697,9 @@ bool RelativeCompareStrategy::compare(const SXPeak &lhs,
 }
 
 AbsoluteCompareStrategy::AbsoluteCompareStrategy(
-    const double tofResolution, const double phiResolution,
+    const double xUnitResolution, const double phiResolution,
     const double twoThetaResolution)
-    : m_tofResolution(tofResolution), m_phiResolution(phiResolution),
+    : m_xUnitResolution(xUnitResolution), m_phiResolution(phiResolution),
       m_twoThetaResolution(twoThetaResolution) {
   // Convert the input from degree to radians
   constexpr double rad2deg = M_PI / 180.;
@@ -690,7 +709,7 @@ AbsoluteCompareStrategy::AbsoluteCompareStrategy(
 
 bool AbsoluteCompareStrategy::compare(const SXPeak &lhs,
                                       const SXPeak &rhs) const {
-  return lhs.compare(rhs, m_tofResolution, m_phiResolution,
+  return lhs.compare(rhs, m_xUnitResolution, m_phiResolution,
                      m_twoThetaResolution);
 }
 

@@ -101,7 +101,7 @@ private:
   getPeakFindingStrategy(
       const FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy,
       const API::SpectrumInfo &spectrumInfo, const double minValue,
-      const double maxValue) const;
+      const double maxValue, const bool tofUnits = true) const;
 
   /// Selects a peak finding strategy
   std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy>

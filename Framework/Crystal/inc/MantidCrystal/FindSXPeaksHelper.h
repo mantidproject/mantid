@@ -146,7 +146,8 @@ public:
   PeakFindingStrategy(const BackgroundStrategy *backgroundStrategy,
                       const API::SpectrumInfo &spectrumInfo,
                       const double minValue = EMPTY_DBL(),
-                      const double maxValue = EMPTY_DBL());
+                      const double maxValue = EMPTY_DBL(),
+                      const bool tofUnits = true);
   PeakList findSXPeaks(const HistogramData::HistogramX &x,
                        const HistogramData::HistogramY &y,
                        const int workspaceIndex) const;
@@ -154,8 +155,9 @@ public:
 protected:
   BoundsIterator getBounds(const HistogramData::HistogramX &x) const;
   double calculatePhi(size_t workspaceIndex) const;
-  double getTof(const HistogramData::HistogramX &x,
-                const size_t peakLocation) const;
+  double getXValue(const HistogramData::HistogramX &x,
+                   const size_t peakLocation) const;
+  double convertToTOF(const double xValue, const size_t workspaceIndex) const;
   virtual PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
                                  const HistogramData::HistogramY &y, Bound low,
                                  Bound high,
@@ -165,6 +167,7 @@ protected:
   const double m_minValue = EMPTY_DBL();
   const double m_maxValue = EMPTY_DBL();
   const API::SpectrumInfo &m_spectrumInfo;
+  const bool m_tofUnits = true;
 };
 
 class DLLExport StrongestPeaksStrategy : public PeakFindingStrategy {
@@ -172,7 +175,8 @@ public:
   StrongestPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
                          const API::SpectrumInfo &spectrumInfo,
                          const double minValue = EMPTY_DBL(),
-                         const double maxValue = EMPTY_DBL());
+                         const double maxValue = EMPTY_DBL(),
+                         const bool tofUnits = true);
   PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
                          const HistogramData::HistogramY &y, Bound low,
                          Bound high, const int workspaceIndex) const override;
@@ -183,7 +187,8 @@ public:
   AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
                    const API::SpectrumInfo &spectrumInfo,
                    const double minValue = EMPTY_DBL(),
-                   const double maxValue = EMPTY_DBL());
+                   const double maxValue = EMPTY_DBL(),
+                   const bool tofUnits = true);
   PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
                          const HistogramData::HistogramY &y, Bound low,
                          Bound high, const int workspaceIndex) const override;
@@ -227,7 +232,7 @@ public:
   bool compare(const SXPeak &lhs, const SXPeak &rhs) const override;
 
 private:
-  const double m_tofResolution;
+  const double m_xUnitResolution;
   double m_phiResolution;
   double m_twoThetaResolution;
 };

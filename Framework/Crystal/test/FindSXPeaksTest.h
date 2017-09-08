@@ -1,12 +1,15 @@
 #ifndef FIND_SX_PEAKSTEST_H_
 #define FIND_SX_PEAKSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/GroupDetectors2.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/Axis.h"
 #include "MantidCrystal/FindSXPeaks.h"
+#include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
@@ -305,6 +308,85 @@ public:
     TSM_ASSERT_DELTA("Q_y should be inverted!", qNoRot.Y(), qRot.Y() * (-1),
                      10e-10);
     TSM_ASSERT_DELTA("Q_z should be unchanged!", qNoRot.Z(), qRot.Z(), 10e-10);
+  }
+
+  void testFindBiggestPeakInSpectraWithDSpacing() {
+    // creates a workspace where all y-values are 2
+    Workspace2D_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+
+    // Change units of workspace
+    const auto xAxis = workspace->getAxis(0);
+    xAxis->setUnit("dSpacing");
+
+    // Stick three peaks in histoIndex = 1.
+    makeOnePeak(1, 30, 2, workspace);
+    makeOnePeak(1, 40, 4, workspace);
+    makeOnePeak(1, 60, 6, workspace); // This is the biggest!
+
+    FindSXPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "found_peaks");
+    alg.execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+
+    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
+                      result->getPeak(0).getIntensity());
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 821.43,
+                     result->getPeak(0).getTOF(), 1e-2);
+  }
+
+  void testFindManyPeaksInSpectraWithDSpacing() {
+    // creates a workspace where all y-values are 2
+    Workspace2D_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+
+    const auto xAxis = workspace->getAxis(0);
+    xAxis->setUnit("dSpacing");
+
+    // Stick three peaks in different histograms.
+    makeOnePeak(1, 40, 2, workspace);
+    makeOnePeak(2, 60, 2, workspace);
+    makeOnePeak(3, 45, 2, workspace); // This is the biggest!
+
+    FindSXPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "found_peaks");
+    alg.execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+
+    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found three peaks!", 3, result->rowCount());
+
+    std::array<double, 3> results;
+    results[0] = result->getPeak(0).getIntensity();
+    results[1] = result->getPeak(1).getIntensity();
+    results[2] = result->getPeak(2).getIntensity();
+    std::sort(results.begin(), results.end(), std::less<double>());
+
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40,
+                      results[0]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 45,
+                      results[1]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
+                      results[2]);
+
+    results[0] = result->getPeak(0).getTOF();
+    results[1] = result->getPeak(1).getTOF();
+    results[2] = result->getPeak(2).getTOF();
+
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 315.938,
+                     results[0], 1e-2);
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 631.668,
+                     results[1], 1e-2);
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 946.988,
+                     results[2], 1e-2);
   }
 };
 
