@@ -26,7 +26,7 @@ def create_vanadium_sample_details_obj(config_dict):
     formula = common.dictionary_key_helper(dictionary=config_dict, key=formula_key, exception_msg=e_msg + formula_key)
     number_density = common.dictionary_key_helper(dictionary=config_dict, key=number_density_key, throws=False)
 
-    vanadium_sample_details = sample_details.SampleDetails(height=height, radius=radius, center=pos)
+    vanadium_sample_details = sample_details.SampleDetails(height=height, radius=radius, center=pos, shape="cylinder")
     vanadium_sample_details.set_material(chemical_formula=formula, number_density=number_density)
     return vanadium_sample_details
 
