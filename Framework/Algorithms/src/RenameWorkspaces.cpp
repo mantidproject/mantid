@@ -61,15 +61,15 @@ std::map<std::string, std::string> RenameWorkspaces::validateInputs() {
   std::string suffix = getPropertyValue("Suffix");
 
   // Check properties
-  if (newWsName.empty() && prefix == "" && suffix == "") {
+  if (newWsName.empty() && prefix.empty() && suffix.empty()) {
     errorList["WorkspaceNames"] =
         "No list of Workspace names, prefix or suffix has been supplied.";
   }
 
-  if (!newWsName.empty() && (prefix != "" || suffix != "")) {
+  if (!newWsName.empty() && (!prefix.empty() || !suffix.empty())) {
     errorList["WorkspaceNames"] = "Both a list of workspace names and a prefix "
                                   "or suffix has been supplied.";
-    if (prefix != "") {
+    if (!prefix.empty()) {
       errorList["Prefix"] = "Both a list of workspace names and a prefix "
                             "or suffix has been supplied.";
     } else {

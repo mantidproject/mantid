@@ -239,7 +239,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 void MatrixWorkspace::initialize(const std::size_t &NVectors,
                                  const HistogramData::Histogram &histogram) {
   // Check validity of arguments
-  if (NVectors == 0 || histogram.x().size() == 0) {
+  if (NVectors == 0 || histogram.x().empty()) {
     throw std::out_of_range(
         "All arguments to init must be positive and non-zero");
   }

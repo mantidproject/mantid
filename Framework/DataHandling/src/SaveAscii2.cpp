@@ -166,7 +166,7 @@ void SaveAscii2::exec() {
   const std::string custom = getPropertyValue("CustomSeparator");
   // If the custom separator property is not empty, then we use that under any
   // circumstance.
-  if (custom != "") {
+  if (!custom.empty()) {
     m_sep = custom;
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
