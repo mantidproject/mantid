@@ -95,7 +95,6 @@ private:
   QString m_cfInputWSName;
   int m_fittedIndex;
   bool m_confitResFileType;
-  Mantid::API::IAlgorithm_sptr m_fitAlg;
   QString m_singleFitOutputName;
   QString m_previousFit;
   QString m_baseName;

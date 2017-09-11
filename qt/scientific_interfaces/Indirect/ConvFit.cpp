@@ -292,10 +292,10 @@ void ConvFit::run() {
   m_runMax = m_uiForm.spSpectraMax->value();
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
-  m_fitAlg = sequentialFit(specMin, specMax, m_baseName);
+  auto cfs = sequentialFit(specMin, specMax, m_baseName);
 
   // Add to batch alg runner and execute
-  m_batchAlgoRunner->addAlgorithm(m_fitAlg);
+  m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(sequentialFitComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
@@ -1417,10 +1417,10 @@ void ConvFit::singleFit() {
   m_runMax = specNo;
   std::string specNoStr = m_uiForm.spPlotSpectrum->text().toStdString();
 
-  m_fitAlg = sequentialFit(specNoStr, specNoStr, m_singleFitOutputName);
+  auto cfs = sequentialFit(specNoStr, specNoStr, m_singleFitOutputName);
 
   // Connection to singleFitComplete SLOT (post algorithm completion)
-  m_batchAlgoRunner->addAlgorithm(m_fitAlg);
+  m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(singleFitComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
