@@ -61,9 +61,8 @@ WorkspaceUnitValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   }
   // now check if the units of the workspace is correct
   else {
-    const auto matchesUnitID = [&unit](const std::string &unitID) {
-      return unit->unitID() == unitID;
-    };
+    const auto matchesUnitID =
+        [&unit](const std::string &unitID) { return unit->unitID() == unitID; };
 
     if (!unit ||
         !std::any_of(m_unitIDs.cbegin(), m_unitIDs.cend(), matchesUnitID)) {
