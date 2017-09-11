@@ -1,5 +1,4 @@
 from __future__ import (absolute_import, division, print_function)
-from six import iteritems
 
 import mantid.simpleapi as mantid
 
@@ -51,7 +50,7 @@ class FFTPresenter(object):
         if self.view.isRaw():
             self.view.addRaw(FFTInputs,"OutputWorkspace")
         self.alg.FFTAlg(FFTInputs)
- 
+
     def get_FFT_input(self):
         FFTInputs=self.view.initFFTInput()
         if  self.view.isAutoShift():
