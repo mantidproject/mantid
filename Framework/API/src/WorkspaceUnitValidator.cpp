@@ -27,8 +27,8 @@ WorkspaceUnitValidator::WorkspaceUnitValidator(const std::string &unitID)
  * not unitless.
  */
 WorkspaceUnitValidator::WorkspaceUnitValidator(
-    const std::vector<std::string> &unitID)
-    : MatrixWorkspaceValidator(), m_unitIDs(unitID) {}
+    const std::vector<std::string> &unitIDs)
+    : MatrixWorkspaceValidator(), m_unitIDs(unitIDs) {}
 
 /**
   * Clone the current state
