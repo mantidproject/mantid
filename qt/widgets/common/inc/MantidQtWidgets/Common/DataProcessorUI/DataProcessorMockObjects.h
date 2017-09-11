@@ -3,13 +3,14 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CommandProviderFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandProvider.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandProvider.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/CommandProviderFactory.h"
 
 #include <gmock/gmock.h>
+#include <cassert>
 
 using namespace MantidQt::MantidWidgets;
 
@@ -204,8 +205,24 @@ public:
 };
 
 class MockDataProcessorCommandProviderFactory : public CommandProviderFactory {
-  public:
-    MOCK_CONST_METHOD2(fromPostprocessorName, std::unique_ptr<DataProcessorCommandProvider>(const QString&, GenericDataProcessorPresenter&));
+public:
+  MockDataProcessorCommandProviderFactory(
+      std::unique_ptr<DataProcessorCommandProvider> mockProvider)
+      : m_mockProvider(std::move(mockProvider)) {
+        ON_CALL(*this, fromPostprocessorName(::testing::_, ::testing::_))
+          .WillByDefault(::testing::Invoke([&m_mockProvider]
+                (const QString&, GenericDataProcessorPresenter&) 
+                  -> std::unique_ptr<DataProcessorCommandProvider> {
+                  assert(m_mockProvider != nullptr);
+                  return std::move(m_mockProvider);
+                });
+      }
+  MOCK_CONST_METHOD2(fromPostprocessorName,
+                     std::unique_ptr<DataProcessorCommandProvider>(
+                         const QString &, GenericDataProcessorPresenter &));
+
+private:
+  std::unique_ptr<DataProcessorCommandProvider> m_mockProvider;
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

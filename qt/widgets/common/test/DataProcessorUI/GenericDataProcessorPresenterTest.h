@@ -5,11 +5,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidKernel/make_unique.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorTreeManagerFactory.h"
@@ -1044,15 +1044,8 @@ public:
                                               MODIFICATION_ACTION_INDEX_1)));
 
     auto mockCommandProviderFactory =
-        Mantid::Kernel::make_unique<MockDataProcessorCommandProviderFactory>();
-    ON_CALL(*mockCommandProviderFactory, fromPostprocessorName(_, _))
-        .WillByDefault(::testing::Invoke(
-            [&mockCommandProvider](QString const &,
-                                   GenericDataProcessorPresenter &)
-                -> std::unique_ptr<DataProcessorCommandProvider> {
-              return std::move(mockCommandProvider);
-            }));
-
+        Mantid::Kernel::make_unique<MockDataProcessorCommandProviderFactory>(
+            std::move(mockCommandProvider));
     auto treeManagerFactory =
         Mantid::Kernel::make_unique<GenericDataProcessorTreeManagerFactory>();
 
