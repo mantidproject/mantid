@@ -12,6 +12,7 @@ def qapp():
         _app = QtGui.QApplication(sys.argv)
     return _app
 
+
 app = qapp()
 reducer = converterGUI.MainWindow()#the main ui class in this file is called MainWindow
 reducer.show()

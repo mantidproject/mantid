@@ -147,5 +147,6 @@ class USANSSimulation(PythonAlgorithm):
         f2 = vol*bes*bes*1.0e-6
         return scale*f2+bck
 
+
 #############################################################################################
 AlgorithmFactory.subscribe(USANSSimulation())

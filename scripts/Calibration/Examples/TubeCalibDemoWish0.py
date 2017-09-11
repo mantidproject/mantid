@@ -9,6 +9,8 @@
 #  because we do not consider the upper and lower position of the tubes around the
 # WISH instrument.
 #
+from __future__ import absolute_import, division, print_function
+
 import tube
 import mantid.simpleapi as mantid
 
@@ -31,5 +33,5 @@ calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent,
 print("Got calibration (new positions of detectors)")
 
 #Apply the calibration
-mantid.ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
+mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
 print("Applied calibration")

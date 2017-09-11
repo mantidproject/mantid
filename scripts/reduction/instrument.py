@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as api
 from mantid.kernel import *
 from mantid.api import *
@@ -11,7 +12,7 @@ def instrument_factory(name):
     if name in globals():
         return globals()[name]()
     else:
-        raise RuntimeError("Instrument %s doesn't exist\n  %s" % (name, sys.exc_value))
+        raise RuntimeError("Instrument %s doesn't exist\n  %s" % (name, sys.exc_info()[1]))
 
 
 class Instrument(object):

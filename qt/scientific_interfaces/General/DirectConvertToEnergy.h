@@ -55,7 +55,7 @@ public: // public constants, ennumerations and types
 
 public: // public constructor, destructor and functions
   /// Default Constructor
-  DirectConvertToEnergy(QWidget *parent = 0);
+  explicit DirectConvertToEnergy(QWidget *parent = 0);
   /// Destructor
   ~DirectConvertToEnergy() override;
   /// Interface name

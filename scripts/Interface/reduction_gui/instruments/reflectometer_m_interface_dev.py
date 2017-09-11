@@ -1,4 +1,5 @@
-from interface import InstrumentInterface
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.reflectometer.refm_reduction import DataReflWidget
 from reduction_gui.widgets.output import OutputWidget
 try:

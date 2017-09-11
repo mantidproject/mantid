@@ -1,69 +1,77 @@
 set ( SRC_FILES
-	MeasurementItem.cpp
-	QtReflEventTabView.cpp
-	QtReflEventView.cpp
-	QtReflMainWindowView.cpp
-	QtReflRunsTabView.cpp
-	QtReflSaveTabView.cpp
-	QtReflSettingsTabView.cpp
-	QtReflSettingsView.cpp
-	ReflCatalogSearcher.cpp
-	ReflDataProcessorPresenter.cpp
-	ReflEventPresenter.cpp
-	ReflEventTabPresenter.cpp
+    MeasurementItem.cpp
+    QtReflEventTabView.cpp
+    QtReflEventView.cpp
+    QtReflMainWindowView.cpp
+    QtReflRunsTabView.cpp
+    QtReflSaveTabView.cpp
+    QtReflSettingsTabView.cpp
+    QtReflSettingsView.cpp
+    ReflCatalogSearcher.cpp
+    ReflDataProcessorPresenter.cpp
+    ReflEventPresenter.cpp
+    ReflEventTabPresenter.cpp
     ReflFromStdStringMap.cpp
-	ReflGenericDataProcessorPresenterFactory.cpp
-	ReflLegacyTransferStrategy.cpp
-	ReflMainWindowPresenter.cpp
-	ReflMeasureTransferStrategy.cpp
-	ReflNexusMeasurementItemSource.cpp
-	ReflRunsTabPresenter.cpp
-	ReflSearchModel.cpp
-	ReflSaveTabPresenter.cpp
-	ReflSettingsPresenter.cpp
-	ReflSettingsTabPresenter.cpp
-	ReflTableSchema.cpp
-	TransferResults.cpp
+    ReflGenericDataProcessorPresenterFactory.cpp
+    ReflLegacyTransferStrategy.cpp
+    ReflMainWindowPresenter.cpp
+    ReflMeasureTransferStrategy.cpp
+    ReflNexusMeasurementItemSource.cpp
+    ReflRunsTabPresenter.cpp
+    ReflSaveTabPresenter.cpp
+    ReflSearchModel.cpp
+    ReflSettingsPresenter.cpp
+    ReflSettingsTabPresenter.cpp
+    ReflTableSchema.cpp
+    TransferResults.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
     DllConfig.h
-	IReflEventPresenter.h
-	IReflEventTabPresenter.h
-	IReflEventView.h
-	IReflMainWindowPresenter.h
-	IReflMainWindowView.h
-	IReflRunsTabPresenter.h
-	IReflRunsTabView.h
-	IReflSearcher.h
-	IReflSaveTabPresenter.h
-	IReflSaveTabView.h
-	IReflSettingsPresenter.h
-	IReflSettingsTabPresenter.h
-	IReflSettingsView.h
-	MeasurementItem.h
-	QtReflMainWindowView.h
-	QtReflRunsTabView.h
-	ReflCatalogSearcher.h
-	ReflDataProcessorPresenter.h
-	ReflEventPresenter.h
-	ReflEventTabPresenter.h
+    IReflEventPresenter.h
+    IReflEventTabPresenter.h
+    IReflEventView.h
+    IReflMainWindowPresenter.h
+    IReflMainWindowView.h
+    IReflRunsTabPresenter.h
+    IReflRunsTabView.h
+    IReflSaveTabPresenter.h
+    IReflSaveTabView.h
+    IReflSearcher.h
+    IReflSettingsPresenter.h
+    IReflSettingsTabPresenter.h
+    IReflSettingsView.h
+    MeasurementItem.h
+    PrecompiledHeader.h
+    QtReflEventTabView.h
+    QtReflEventView.h
+    QtReflMainWindowView.h
+    QtReflRunsTabView.h
+    QtReflSaveTabView.h
+    QtReflSettingsTabView.h
+    QtReflSettingsView.h
+    ReflCatalogSearcher.h
+    ReflDataProcessorMainPresenter.h
+    ReflDataProcessorPresenter.h
+    ReflEventPresenter.h
+    ReflEventTabPresenter.h
     ReflFromStdStringMap.h
-	ReflGenericDataProcessorPresenterFactory.h
-	ReflLegacyTransferStrategy.h
-	ReflMainWindowPresenter.h
-	ReflMeasureTransferStrategy.h
-	ReflMeasurementItemSource.h
-	ReflNexusMeasurementItemSource.h
-	ReflRunsTabPresenter.h
-	ReflSettingsPresenter.h
-	ReflSettingsTabPresenter.h
-	ReflSearchModel.h
-	ReflTableSchema.h
-	ReflTransferStrategy.h
-	TransferResults.h
+    ReflGenericDataProcessorPresenterFactory.h
+    ReflLegacyTransferStrategy.h
+    ReflMainWindowPresenter.h
+    ReflMeasureTransferStrategy.h
+    ReflMeasurementItemSource.h
+    ReflNexusMeasurementItemSource.h
+    ReflRunsTabPresenter.h
+    ReflSaveTabPresenter.h
+    ReflSearchModel.h
+    ReflSettingsPresenter.h
+    ReflSettingsTabPresenter.h
+    ReflTableSchema.h
+    ReflTransferStrategy.h
+    TransferResults.h
 )
 
 set ( MOC_FILES 

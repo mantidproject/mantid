@@ -18,7 +18,6 @@
 #include "ISISCalibration.h"
 #include "ISISDiagnostics.h"
 #include "ISISEnergyTransfer.h"
-#include "ILLCalibration.h"
 #include "ILLEnergyTransfer.h"
 
 #include <QDir>
@@ -117,7 +116,6 @@ void IndirectDataReduction::initLayout() {
   addTab<IndirectSymmetrise>("Symmetrise");
   addTab<IndirectSqw>("S(Q, w)");
   addTab<IndirectMoments>("Moments");
-  addTab<ILLCalibration>("ILL Calibration");
   addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
   // Connect "?" (Help) Button
@@ -475,8 +473,7 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
                 << "ISIS Calibration"
                 << "ISIS Diagnostics";
   } else if (facility == "ILL") {
-    enabledTabs << "ILL Energy Transfer"
-                << "ILL Calibration";
+    enabledTabs << "ILL Energy Transfer";
     disabledInstruments << "IN10"
                         << "IN13"
                         << "IN16";
@@ -522,8 +519,7 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
  * Handles showing the manage directory dialog box.
  */
 void IndirectDataReduction::openDirectoryDialog() {
-  MantidQt::API::ManageUserDirectories *ad =
-      new MantidQt::API::ManageUserDirectories(this);
+  auto ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
 }

@@ -84,4 +84,5 @@ class GetIPTS(PythonAlgorithm):
         self.setPropertyValue('Directory', direc)
         self.log().notice('IPTS directory is: %s' % direc)
 
+
 AlgorithmFactory.subscribe(GetIPTS)
