@@ -9,7 +9,7 @@ namespace DataHandling {
 
 /** Constructor
 *
-* @param alg :: Handle to the main algorithm
+* @param loader :: Handle to the main loader
 * @param entry_name :: The pathname of the bank to load
 * @param entry_type :: The classtype of the entry to load
 * @param numEvents :: The number of events in the bank.
@@ -20,13 +20,13 @@ namespace DataHandling {
 * @param framePeriodNumbers :: Period numbers corresponding to each frame
 */
 LoadBankFromDiskTask::LoadBankFromDiskTask(
-    LoadEventNexus *alg, const std::string &entry_name,
+    DefaultEventLoader &loader, const std::string &entry_name,
     const std::string &entry_type, const std::size_t numEvents,
     const bool oldNeXusFileNames, API::Progress *prog,
-    boost::shared_ptr<std::mutex> ioMutex, Kernel::ThreadScheduler *scheduler,
+    boost::shared_ptr<std::mutex> ioMutex, Kernel::ThreadScheduler &scheduler,
     const std::vector<int> &framePeriodNumbers)
-    : alg(alg), entry_name(entry_name), entry_type(entry_type), prog(prog),
-      scheduler(scheduler), m_loadError(false),
+    : m_loader(loader), entry_name(entry_name), entry_type(entry_type),
+      prog(prog), scheduler(scheduler), m_loadError(false),
       m_oldNexusFileNames(oldNeXusFileNames), m_event_id(nullptr),
       m_event_time_of_flight(nullptr), m_have_weight(false),
       m_event_weight(nullptr), m_framePeriodNumbers(framePeriodNumbers) {
@@ -46,7 +46,7 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   } catch (::NeXus::Exception &) {
     // Field not found error is most likely.
     // Use the "proton_charge" das logs.
-    thisBankPulseTimes = alg->m_allBanksPulseTimes;
+    thisBankPulseTimes = m_loader.alg->m_allBanksPulseTimes;
     return;
   }
   std::string thisStartTime;
@@ -58,7 +58,7 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
 
   // Now, we look through existing ones to see if it is already loaded
   // thisBankPulseTimes = NULL;
-  for (auto &bankPulseTime : alg->m_defaultEventLoader->m_bankPulseTimes) {
+  for (auto &bankPulseTime : m_loader.m_bankPulseTimes) {
     if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
       thisBankPulseTimes = bankPulseTime;
       return;
@@ -68,7 +68,7 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   // Not found? Need to load and add it
   thisBankPulseTimes = boost::make_shared<BankPulseTimes>(boost::ref(file),
                                                           m_framePeriodNumbers);
-  alg->m_defaultEventLoader->m_bankPulseTimes.push_back(thisBankPulseTimes);
+  m_loader.m_bankPulseTimes.push_back(thisBankPulseTimes);
 }
 
 /** Load the event_index field
@@ -87,7 +87,7 @@ void LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file,
   if (file.getInfo().type == ::NeXus::UINT64)
     file.getData(event_index);
   else {
-    alg->getLogger().warning()
+    m_loader.alg->getLogger().warning()
         << "Entry " << entry_name
         << "'s event_index field is not UINT64! It will be skipped.\n";
     m_loadError = true;
@@ -99,7 +99,8 @@ void LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file,
     if (event_index[0] == 0) {
       // One entry, only zero. This means NO events in this bank.
       m_loadError = true;
-      alg->getLogger().debug() << "Bank " << entry_name << " is empty.\n";
+      m_loader.alg->getLogger().debug() << "Bank " << entry_name
+                                        << " is empty.\n";
     }
   }
 }
@@ -132,7 +133,7 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
 
   // Handle the time filtering by changing the start/end offsets.
   for (size_t i = 0; i < thisBankPulseTimes->numPulses; i++) {
-    if (thisBankPulseTimes->pulseTimes[i] >= alg->filter_time_start) {
+    if (thisBankPulseTimes->pulseTimes[i] >= m_loader.alg->filter_time_start) {
       start_event = event_index[i];
       break; // stop looking
     }
@@ -142,7 +143,7 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
     // If the frame indexes are bad then we can't construct the times of the
     // events properly and filtering by time
     // will not work on this data
-    alg->getLogger().warning()
+    m_loader.alg->getLogger().warning()
         << this->entry_name
         << "'s field 'event_index' seems to be invalid (start_index > than "
            "the number of events in the bank)."
@@ -152,26 +153,28 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
     stop_event = static_cast<size_t>(dim0);
   } else {
     for (size_t i = 0; i < thisBankPulseTimes->numPulses; i++) {
-      if (thisBankPulseTimes->pulseTimes[i] > alg->filter_time_stop) {
+      if (thisBankPulseTimes->pulseTimes[i] > m_loader.alg->filter_time_stop) {
         stop_event = event_index[i];
         break;
       }
     }
   }
   // We are loading part - work out the event number range
-  if (alg->chunk != EMPTY_INT()) {
-    start_event = (alg->chunk - alg->firstChunkForBank) * alg->eventsPerChunk;
+  if (m_loader.chunk != EMPTY_INT()) {
+    start_event =
+        (m_loader.chunk - m_loader.firstChunkForBank) * m_loader.eventsPerChunk;
     // Don't change stop_event for the final chunk
-    if (start_event + alg->eventsPerChunk < stop_event)
-      stop_event = start_event + alg->eventsPerChunk;
+    if (start_event + m_loader.eventsPerChunk < stop_event)
+      stop_event = start_event + m_loader.eventsPerChunk;
   }
 
   // Make sure it is within range
   if (stop_event > static_cast<size_t>(dim0))
     stop_event = dim0;
 
-  alg->getLogger().debug() << entry_name << ": start_event " << start_event
-                           << " stop_event " << stop_event << "\n";
+  m_loader.alg->getLogger().debug() << entry_name << ": start_event "
+                                    << start_event << " stop_event "
+                                    << stop_event << "\n";
 }
 
 /** Load the event_id field, which has been open
@@ -186,14 +189,14 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
 
   // Check that the required space is there in the file.
   if (dim0 < m_loadSize[0] + m_loadStart[0]) {
-    alg->getLogger().warning()
+    m_loader.alg->getLogger().warning()
         << "Entry " << entry_name << "'s event_id field is too small (" << dim0
         << ") to load the desired data size (" << m_loadSize[0] + m_loadStart[0]
         << ").\n";
     m_loadError = true;
   }
 
-  if (alg->getCancel())
+  if (m_loader.alg->getCancel())
     m_loadError = true; // To allow cancelling the algorithm
 
   if (!m_loadError) {
@@ -201,7 +204,7 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
     if (id_info.type == ::NeXus::UINT32)
       file.getSlab(m_event_id, m_loadStart, m_loadSize);
     else {
-      alg->getLogger().warning()
+      m_loader.alg->getLogger().warning()
           << "Entry " << entry_name
           << "'s event_id field is not UINT32! It will be skipped.\n";
       m_loadError = true;
@@ -217,8 +220,7 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
         m_max_id = temp;
     }
 
-    if (m_min_id >
-        static_cast<uint32_t>(alg->m_defaultEventLoader->eventid_max)) {
+    if (m_min_id > static_cast<uint32_t>(m_loader.eventid_max)) {
       // All the detector IDs in the bank are higher than the highest 'known'
       // (from the IDF)
       // ID. Setting this will abort the loading of the bank.
@@ -229,17 +231,13 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
     // would not get a negative index into the vector. Note that m_min_id is
     // a uint so we have to be cautious about adding it to an int which may be
     // negative.
-    if (static_cast<int32_t>(m_min_id) +
-            alg->m_defaultEventLoader->pixelID_to_wi_offset <
-        0) {
-      m_min_id = static_cast<uint32_t>(
-          abs(alg->m_defaultEventLoader->pixelID_to_wi_offset));
+    if (static_cast<int32_t>(m_min_id) + m_loader.pixelID_to_wi_offset < 0) {
+      m_min_id = static_cast<uint32_t>(abs(m_loader.pixelID_to_wi_offset));
     }
     // fixup the maximum pixel id in the case that it's higher than the
     // highest 'known' id
-    if (m_max_id >
-        static_cast<uint32_t>(alg->m_defaultEventLoader->eventid_max))
-      m_max_id = static_cast<uint32_t>(alg->m_defaultEventLoader->eventid_max);
+    if (m_max_id > static_cast<uint32_t>(m_loader.eventid_max))
+      m_max_id = static_cast<uint32_t>(m_loader.eventid_max);
   }
 }
 
@@ -261,9 +259,9 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   ::NeXus::Info tof_info = file.getInfo();
   int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
   if (tof_dim0 < m_loadSize[0] + m_loadStart[0]) {
-    alg->getLogger().warning() << "Entry " << entry_name
-                               << "'s event_time_offset field is too small "
-                                  "to load the desired data.\n";
+    m_loader.alg->getLogger().warning()
+        << "Entry " << entry_name << "'s event_time_offset field is too small "
+                                     "to load the desired data.\n";
     m_loadError = true;
   }
 
@@ -271,7 +269,7 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   if (tof_info.type == ::NeXus::FLOAT32)
     file.getSlab(m_event_time_of_flight, m_loadStart, m_loadSize);
   else {
-    alg->getLogger().warning()
+    m_loader.alg->getLogger().warning()
         << "Entry " << entry_name
         << "'s event_time_offset field is not FLOAT32! It will be skipped.\n";
     m_loadError = true;
@@ -281,9 +279,9 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     std::string units;
     file.getAttr("units", units);
     if (units != "microsecond") {
-      alg->getLogger().warning() << "Entry " << entry_name
-                                 << "'s event_time_offset field's units are "
-                                    "not microsecond. It will be skipped.\n";
+      m_loader.alg->getLogger().warning()
+          << "Entry " << entry_name << "'s event_time_offset field's units are "
+                                       "not microsecond. It will be skipped.\n";
       m_loadError = true;
     }
     file.closeData();
@@ -312,7 +310,7 @@ void LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   ::NeXus::Info weight_info = file.getInfo();
   int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
   if (weight_dim0 < m_loadSize[0] + m_loadStart[0]) {
-    alg->getLogger().warning()
+    m_loader.alg->getLogger().warning()
         << "Entry " << entry_name
         << "'s event_weight field is too small to load the desired data.\n";
     m_loadError = true;
@@ -322,7 +320,7 @@ void LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   if (weight_info.type == ::NeXus::FLOAT32)
     file.getSlab(m_event_weight, m_loadStart, m_loadSize);
   else {
-    alg->getLogger().warning()
+    m_loader.alg->getLogger().warning()
         << "Entry " << entry_name
         << "'s event_weight field is not FLOAT32! It will be skipped.\n";
     m_loadError = true;
@@ -349,15 +347,15 @@ void LoadBankFromDiskTask::run() {
   m_event_weight = nullptr;
 
   m_loadError = false;
-  m_have_weight = alg->m_haveWeights;
+  m_have_weight = m_loader.m_haveWeights;
 
   prog->report(entry_name + ": load from disk");
 
   // Open the file
-  ::NeXus::File file(alg->m_filename);
+  ::NeXus::File file(m_loader.alg->m_filename);
   try {
     // Navigate into the file
-    file.openGroup(alg->m_top_entry_name, "NXentry");
+    file.openGroup(m_loader.alg->m_top_entry_name, "NXentry");
     // Open the bankN_event group
     file.openGroup(entry_name, entry_type);
 
@@ -371,7 +369,7 @@ void LoadBankFromDiskTask::run() {
       // The event_index should be the same length as the pulse times from DAS
       // logs.
       if (event_index.size() != thisBankPulseTimes->numPulses)
-        alg->getLogger().warning()
+        m_loader.alg->getLogger().warning()
             << "Bank " << entry_name
             << " has a mismatch between the number of event_index entries "
                "and the number of pulse times in event_time_zero.\n";
@@ -388,7 +386,7 @@ void LoadBankFromDiskTask::run() {
       if ((m_loadSize[0] > 0) && (m_loadStart[0] >= 0)) {
         // Load pixel IDs
         this->loadEventId(file);
-        if (alg->getCancel())
+        if (m_loader.alg->getCancel())
           m_loadError = true; // To allow cancelling the algorithm
 
         // And TOF.
@@ -408,13 +406,13 @@ void LoadBankFromDiskTask::run() {
 
   } // try block
   catch (std::exception &e) {
-    alg->getLogger().error() << "Error while loading bank " << entry_name
-                             << ":\n";
-    alg->getLogger().error() << e.what() << '\n';
+    m_loader.alg->getLogger().error() << "Error while loading bank "
+                                      << entry_name << ":\n";
+    m_loader.alg->getLogger().error() << e.what() << '\n';
     m_loadError = true;
   } catch (...) {
-    alg->getLogger().error() << "Unspecified error while loading bank "
-                             << entry_name << '\n';
+    m_loader.alg->getLogger().error() << "Unspecified error while loading bank "
+                                      << entry_name << '\n';
     m_loadError = true;
   }
 
@@ -435,8 +433,10 @@ void LoadBankFromDiskTask::run() {
   }
 
   const auto bank_size = m_max_id - m_min_id;
-  const uint32_t minSpectraToLoad = static_cast<uint32_t>(alg->m_specMin);
-  const uint32_t maxSpectraToLoad = static_cast<uint32_t>(alg->m_specMax);
+  const uint32_t minSpectraToLoad =
+      static_cast<uint32_t>(m_loader.alg->m_specMin);
+  const uint32_t maxSpectraToLoad =
+      static_cast<uint32_t>(m_loader.alg->m_specMax);
   const uint32_t emptyInt = static_cast<uint32_t>(EMPTY_INT());
   // check that if a range of spectra were requested that these fit within
   // this bank
@@ -464,7 +464,7 @@ void LoadBankFromDiskTask::run() {
 
   // schedule the job to generate the event lists
   auto mid_id = m_max_id;
-  if (alg->splitProcessing && m_max_id > (m_min_id + (bank_size / 4)))
+  if (m_loader.splitProcessing && m_max_id > (m_min_id + (bank_size / 4)))
     // only split if told to and the section to load is at least 1/4 the size
     // of the whole bank
     mid_id = (m_max_id + m_min_id) / 2;
@@ -480,16 +480,16 @@ void LoadBankFromDiskTask::run() {
   boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
 
   ProcessBankData *newTask1 = new ProcessBankData(
-      alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
+      m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
       numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
       event_weight_shrd, m_min_id, mid_id);
-  scheduler->push(newTask1);
-  if (alg->splitProcessing && (mid_id < m_max_id)) {
+  scheduler.push(newTask1);
+  if (m_loader.splitProcessing && (mid_id < m_max_id)) {
     ProcessBankData *newTask2 = new ProcessBankData(
-        alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
+        m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
         numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
         event_weight_shrd, (mid_id + 1), m_max_id);
-    scheduler->push(newTask2);
+    scheduler.push(newTask2);
   }
 }
 

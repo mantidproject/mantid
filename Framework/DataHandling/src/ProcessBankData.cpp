@@ -1,5 +1,6 @@
-#include "MantidDataHandling/ProcessBankData.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/ProcessBankData.h"
 
 using namespace Mantid::DataObjects;
 
@@ -7,19 +8,18 @@ namespace Mantid {
 namespace DataHandling {
 
 ProcessBankData::ProcessBankData(
-    LoadEventNexus *alg, std::string entry_name, API::Progress *prog,
+    DefaultEventLoader &m_loader, std::string entry_name, API::Progress *prog,
     boost::shared_array<uint32_t> event_id,
     boost::shared_array<float> event_time_of_flight, size_t numEvents,
     size_t startAt, boost::shared_ptr<std::vector<uint64_t>> event_index,
     boost::shared_ptr<BankPulseTimes> thisBankPulseTimes, bool have_weight,
     boost::shared_array<float> event_weight, detid_t min_event_id,
     detid_t max_event_id)
-    : Task(), alg(alg), entry_name(entry_name),
-      pixelID_to_wi_vector(alg->m_defaultEventLoader->pixelID_to_wi_vector),
-      pixelID_to_wi_offset(alg->m_defaultEventLoader->pixelID_to_wi_offset),
-      prog(prog), event_id(event_id),
-      event_time_of_flight(event_time_of_flight), numEvents(numEvents),
-      startAt(startAt), event_index(event_index),
+    : Task(), m_loader(m_loader), entry_name(entry_name),
+      pixelID_to_wi_vector(m_loader.pixelID_to_wi_vector),
+      pixelID_to_wi_offset(m_loader.pixelID_to_wi_offset), prog(prog),
+      event_id(event_id), event_time_of_flight(event_time_of_flight),
+      numEvents(numEvents), startAt(startAt), event_index(event_index),
       thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
       event_weight(event_weight), m_min_id(min_event_id),
       m_max_id(max_event_id) {
@@ -27,7 +27,6 @@ ProcessBankData::ProcessBankData(
   m_cost = static_cast<double>(numEvents);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Run the data processing
  * FIXME/TODO - split run() into readable methods
 */
@@ -42,8 +41,9 @@ void ProcessBankData::run() { // override {
 
   prog->report(entry_name + ": precount");
   // ---- Pre-counting events per pixel ID ----
-  auto &outputWS = *(alg->m_ws);
-  if (alg->precount) {
+  auto &outputWS = m_loader.m_ws;
+  auto *alg = m_loader.alg;
+  if (m_loader.precount) {
 
     std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
     for (size_t i = 0; i < numEvents; i++) {
@@ -156,8 +156,7 @@ void ProcessBankData::run() { // override {
         if (have_weight) {
           double weight = static_cast<double>(event_weight[i]);
           double errorSq = weight * weight;
-          auto *eventVector = alg->m_defaultEventLoader
-                                  ->weightedEventVectors[periodIndex][detId];
+          auto *eventVector = m_loader.weightedEventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup
           if (eventVector) {
             eventVector->emplace_back(tof, pulsetime, weight, errorSq);
@@ -166,8 +165,7 @@ void ProcessBankData::run() { // override {
           }
         } else {
           // We have cached the vector of events for this detector ID
-          auto *eventVector =
-              alg->m_defaultEventLoader->eventVectors[periodIndex][detId];
+          auto *eventVector = m_loader.eventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup
           if (eventVector) {
             eventVector->emplace_back(tof, pulsetime);

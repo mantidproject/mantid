@@ -9,8 +9,9 @@ class BankPulseTimes;
 
 namespace Mantid {
 namespace DataHandling {
+class LoadEventNexus;
 
-/** Code extracted from LoadEventNExus that is specific to the current default
+/** Code extracted from LoadEventNexus that is specific to the current default
   loading code for NXevent_data entries in Nexus files, in particular
   LoadBankFromDiskTask and ProcessBankData.
 
@@ -37,9 +38,14 @@ namespace DataHandling {
 */
 class MANTID_DATAHANDLING_DLL DefaultEventLoader {
 public:
-  DefaultEventLoader(EventWorkspaceCollection &ws, bool haveWeights,
-                     bool event_id_is_spec);
+  static void
+  load(LoadEventNexus *alg, EventWorkspaceCollection &ws, bool haveWeights,
+       bool event_id_is_spec, std::vector<std::string> bankNames,
+       const std::vector<int> &periodLog, const std::string &classType,
+       std::vector<std::size_t> bankNumEvents, const bool oldNeXusFileNames,
+       const bool precount, const int chunk, const int totalChunks);
 
+  LoadEventNexus *alg;
   EventWorkspaceCollection &m_ws;
 
   /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
@@ -59,6 +65,9 @@ public:
   /// Offset in the pixelID_to_wi_vector to use.
   detid_t pixelID_to_wi_offset;
 
+  /// Flag for dealing with a simulated file
+  bool m_haveWeights;
+
   /// True if the event_id is spectrum no not pixel ID
   bool event_id_is_spec;
 
@@ -68,7 +77,30 @@ public:
   /// One entry of pulse times for each preprocessor
   std::vector<boost::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
 
+  /// whether or not to launch multiple ProcessBankData jobs per bank
+  bool splitProcessing;
+
+  /// Do we pre-count the # of events in each pixel ID?
+  bool precount;
+
+  /// chunk number
+  int chunk;
+  /// number of chunks
+  int totalChunks;
+  /// for multiple chunks per bank
+  int firstChunkForBank;
+  /// number of chunks per bank
+  size_t eventsPerChunk;
+
 private:
+  DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollection &ws,
+                     bool haveWeights, bool event_id_is_spec,
+                     const std::vector<std::string> &bankNames,
+                     const bool precount, const int chunk,
+                     const int totalChunks);
+  std::pair<size_t, size_t>
+  setupChunking(std::vector<std::string> &bankNames,
+                std::vector<std::size_t> &bankNumEvents);
   /// Map detector IDs to event lists.
   template <class T>
   void makeMapToEventLists(std::vector<std::vector<T>> &vectors);

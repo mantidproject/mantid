@@ -1,6 +1,5 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
-#include "MantidDataHandling/LoadBankFromDiskTask.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
 
 #include "MantidAPI/Axis.h"
@@ -15,8 +14,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
@@ -74,10 +71,8 @@ void copyLogs(const Mantid::DataHandling::EventWorkspaceCollection_sptr &from,
 */
 LoadEventNexus::LoadEventNexus()
     : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0),
-      chunk(0), totalChunks(0), firstChunkForBank(0), eventsPerChunk(0),
       longest_tof(0), shortest_tof(0), bad_tofs(0), discarded_events(0),
-      precount(0), compressTolerance(0), m_file(nullptr),
-      splitProcessing(false), m_haveWeights(false),
+      compressTolerance(0), m_file(nullptr),
       m_instrument_loaded_correctly(false), loadlogs(false),
       m_logs_loaded_correctly(false), event_id_is_spec(false) {}
 
@@ -383,7 +378,6 @@ void LoadEventNexus::exec() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
-  precount = getProperty("Precount");
   compressTolerance = getProperty("CompressTolerance");
 
   loadlogs = getProperty("LoadLogs");
@@ -700,14 +694,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Now we want to go through all the bankN_event entries
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
-  size_t total_events = 0;
   map<string, string> entries = m_file->getEntries();
   map<string, string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   ::NeXus::Info info;
   bool oldNeXusFileNames(false);
   bool hasTotalCounts(true);
-  m_haveWeights = false;
+  bool haveWeights = false;
   for (; it != entries.end(); ++it) {
     std::string entry_name(it->first);
     std::string entry_class(it->second);
@@ -719,12 +712,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames);
       bankNames.push_back(entry_name);
       bankNumEvents.push_back(num);
-      total_events += num;
 
       // Look for weights in simulated file
       try {
         m_file->openData("event_weight");
-        m_haveWeights = true;
+        haveWeights = true;
         m_file->closeData();
       } catch (::NeXus::Exception &) {
         // Swallow exception since flag is already false;
@@ -760,8 +752,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   double filter_time_start_sec, filter_time_stop_sec;
   filter_time_start_sec = getProperty("FilterByTimeStart");
   filter_time_stop_sec = getProperty("FilterByTimeStop");
-  chunk = getProperty("ChunkNumber");
-  totalChunks = getProperty("TotalChunks");
 
   // Default to ALL pulse times
   bool is_time_filtered = false;
@@ -857,9 +847,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   //----------------- Pad Empty Pixels -------------------------------
   createWorkspaceIndexMaps(monitors, someBanks);
 
-  m_defaultEventLoader = Kernel::make_unique<DefaultEventLoader>(
-      *m_ws, m_haveWeights, event_id_is_spec);
-
   // Set all (empty) event lists as sorted by pulse time. That way, calling
   // SortEvents will not try to sort these empty lists.
   for (size_t i = 0; i < m_ws->getNumberHistograms(); i++)
@@ -870,96 +857,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  // Make the thread pool
-  ThreadScheduler *scheduler = new ThreadSchedulerMutexes();
-  ThreadPool pool(scheduler);
-  auto diskIOMutex = boost::make_shared<std::mutex>();
-  size_t bank0 = 0;
-  size_t bankn = bankNames.size();
-
-  if (chunk !=
-      EMPTY_INT()) // We are loading part - work out the bank number range
-  {
-    eventsPerChunk = total_events / totalChunks;
-    // Sort banks by size
-    size_t tmp;
-    string stmp;
-    for (size_t i = 0; i < bankn; i++)
-      for (size_t j = 0; j < bankn - 1; j++)
-        if (bankNumEvents[j] < bankNumEvents[j + 1]) {
-          tmp = bankNumEvents[j];
-          bankNumEvents[j] = bankNumEvents[j + 1];
-          bankNumEvents[j + 1] = tmp;
-          stmp = bankNames[j];
-          bankNames[j] = bankNames[j + 1];
-          bankNames[j + 1] = stmp;
-        }
-    int bigBanks = 0;
-    for (size_t i = 0; i < bankn; i++)
-      if (bankNumEvents[i] > eventsPerChunk)
-        bigBanks++;
-    // Each chunk is part of bank or multiple whole banks
-    // 0.5 for last chunk of a bank with multiple chunks
-    // 0.1 for multiple whole banks not completely filled
-    eventsPerChunk +=
-        static_cast<size_t>((static_cast<double>(bigBanks) /
-                                 static_cast<double>(totalChunks) * 0.5 +
-                             0.05) *
-                            static_cast<double>(eventsPerChunk));
-    double partialChunk = 0.;
-    firstChunkForBank = 1;
-    for (int chunki = 1; chunki <= chunk; chunki++) {
-      if (partialChunk > 1.) {
-        partialChunk = 0.;
-        firstChunkForBank = chunki;
-        bank0 = bankn;
-      }
-      if (bankNumEvents[bank0] > 1) {
-        partialChunk += static_cast<double>(eventsPerChunk) /
-                        static_cast<double>(bankNumEvents[bank0]);
-      }
-      if (chunki < totalChunks)
-        bankn = bank0 + 1;
-      else
-        bankn = bankNames.size();
-      if (chunki == firstChunkForBank && partialChunk > 1.0)
-        bankn += static_cast<size_t>(partialChunk) - 1;
-      if (bankn > bankNames.size())
-        bankn = bankNames.size();
-    }
-    for (size_t i = bank0; i < bankn; i++) {
-      size_t start_event = (chunk - firstChunkForBank) * eventsPerChunk;
-      size_t stop_event = bankNumEvents[i];
-      // Don't change stop_event for the final chunk
-      if (start_event + eventsPerChunk < stop_event)
-        stop_event = start_event + eventsPerChunk;
-      bankNumEvents[i] = stop_event - start_event;
-    }
-  }
-
-  // split banks up if the number of cores is more than twice the number of
-  // banks
-  splitProcessing =
-      bool(bankNames.size() * 2 < ThreadPool::getNumPhysicalCores());
-
-  // set up progress bar for the rest of the (multi-threaded) process
-  size_t numProg = bankNames.size() * (1 + 3); // 1 = disktask, 3 = proc task
-  if (splitProcessing)
-    numProg += bankNames.size() * 3; // 3 = second proc task
-  auto prog2 = make_unique<Progress>(this, 0.3, 1.0, numProg);
-
-  const std::vector<int> periodLogVec = periodLog->valuesAsVector();
-
-  for (size_t i = bank0; i < bankn; i++) {
-    // We make tasks for loading
-    if (bankNumEvents[i] > 0)
-      pool.schedule(new LoadBankFromDiskTask(
-          this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
-          prog2.get(), diskIOMutex, scheduler, periodLogVec));
-  }
-  // Start and end all threads
-  pool.joinAll();
-  diskIOMutex.reset();
+  bool precount = getProperty("Precount");
+  int chunk = getProperty("ChunkNumber");
+  int totalChunks = getProperty("TotalChunks");
+  DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec,
+                           bankNames, periodLog->valuesAsVector(), classType,
+                           bankNumEvents, oldNeXusFileNames, precount, chunk,
+                           totalChunks);
 
   // Info reporting
   const std::size_t eventsLoaded = m_ws->getNumberEvents();

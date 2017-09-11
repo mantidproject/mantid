@@ -29,7 +29,6 @@
 
 namespace Mantid {
 namespace DataHandling {
-class DefaultEventLoader;
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -87,10 +86,6 @@ public:
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
-
-  /** Sets whether the pixel counts will be pre-counted.
-   * @param value :: true if you want to precount. */
-  void setPrecount(bool value) { precount = value; }
 
   template <typename T>
   static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(
@@ -150,14 +145,6 @@ public:
   Kernel::DateAndTime filter_time_start;
   /// Filter by stop time
   Kernel::DateAndTime filter_time_stop;
-  /// chunk number
-  int chunk;
-  /// number of chunks
-  int totalChunks;
-  /// for multiple chunks per bank
-  int firstChunkForBank;
-  /// number of chunks per bank
-  size_t eventsPerChunk;
 
   /// Mutex protecting tof limits
   std::mutex m_tofMutex;
@@ -173,9 +160,6 @@ public:
   /// the IDF
   size_t discarded_events;
 
-  /// Do we pre-count the # of events in each pixel ID?
-  bool precount;
-
   /// Tolerance for CompressEvents; use -1 to mean don't compress.
   double compressTolerance;
 
@@ -185,14 +169,6 @@ public:
   /// name of top level NXentry to use
   std::string m_top_entry_name;
   ::NeXus::File *m_file;
-
-  /// whether or not to launch multiple ProcessBankData jobs per bank
-  bool splitProcessing;
-
-  /// Flag for dealing with a simulated file
-  bool m_haveWeights;
-
-  std::unique_ptr<DefaultEventLoader> m_defaultEventLoader;
 
 private:
   /// Intialisation code

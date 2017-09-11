@@ -12,7 +12,7 @@ class BankPulseTimes;
 
 namespace Mantid {
 namespace DataHandling {
-class LoadEventNexus;
+class DefaultEventLoader;
 
 /** This task does the disk IO from loading the NXS file, and so will be on a
   disk IO mutex
@@ -41,12 +41,13 @@ class LoadEventNexus;
 class MANTID_DATAHANDLING_DLL LoadBankFromDiskTask : public Kernel::Task {
 
 public:
-  LoadBankFromDiskTask(LoadEventNexus *alg, const std::string &entry_name,
+  LoadBankFromDiskTask(DefaultEventLoader &loader,
+                       const std::string &entry_name,
                        const std::string &entry_type,
                        const std::size_t numEvents,
                        const bool oldNeXusFileNames, API::Progress *prog,
                        boost::shared_ptr<std::mutex> ioMutex,
-                       Kernel::ThreadScheduler *scheduler,
+                       Kernel::ThreadScheduler &scheduler,
                        const std::vector<int> &framePeriodNumbers);
 
   void run() override;
@@ -62,7 +63,7 @@ private:
   int64_t recalculateDataSize(const int64_t &size);
 
   /// Algorithm being run
-  LoadEventNexus *alg;
+  DefaultEventLoader &m_loader;
   /// NXS path to bank
   std::string entry_name;
   /// NXS type
@@ -70,7 +71,7 @@ private:
   /// Progress reporting
   API::Progress *prog;
   /// ThreadScheduler running this task
-  Kernel::ThreadScheduler *scheduler;
+  Kernel::ThreadScheduler &scheduler;
   /// Object with the pulse times for this bank
   boost::shared_ptr<BankPulseTimes> thisBankPulseTimes;
   /// Did we get an error in loading
