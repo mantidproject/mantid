@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore, QtGui
-from Muon import widget_helper
+from Muon import table_utils
 
 
 class MaxEntView(QtGui.QWidget):
@@ -25,31 +25,31 @@ class MaxEntView(QtGui.QWidget):
         # populate table
         options=['test']
 
-        widget_helper.setName(self.table,0,"Workspace")
-        self.ws= widget_helper.createComboTable(self.table,0,options)
+        table_utils.setRowName(self.table,0,"Workspace")
+        self.ws= table_utils.addComboToTable(self.table,0,options)
 
-        widget_helper.setName(self.table,1,"Complex Data")
-        self.complex_data_box= widget_helper.createCheckTable(self.table,False,1)
+        table_utils.setRowName(self.table,1,"Complex Data")
+        self.complex_data_box= table_utils.addCheckBoxToTable(self.table,False,1)
         self.complex_data_box.setFlags(QtCore.Qt.ItemIsEnabled)
         # needs an even number of ws to work
         # so lets hide it for now
         self.table.setRowHidden(1,True)
 
-        widget_helper.setName(self.table,2,"Complex Image")
-        self.complex_image_box= widget_helper.createCheckTable(self.table,True,2)
-        widget_helper.setName(self.table,3,"Positive Image")
-        self.positive_image_box= widget_helper.createCheckTable(self.table,False,3)
-        widget_helper.setName(self.table,4,"Resolution")
-        self.resolution_box= widget_helper.createSpinTable(self.table,1,4)
+        table_utils.setRowName(self.table,2,"Complex Image")
+        self.complex_image_box= table_utils.addCheckBoxToTable(self.table,True,2)
+        table_utils.setRowName(self.table,3,"Positive Image")
+        self.positive_image_box= table_utils.addCheckBoxToTable(self.table,False,3)
+        table_utils.setRowName(self.table,4,"Resolution")
+        self.resolution_box= table_utils.addSpinBoxToTable(self.table,1,4)
 
-        widget_helper.setName(self.table,5,"Maximum entropy constant (A)")
-        self.AConst= widget_helper.createDoubleTable(self.table,0.4,5)
+        table_utils.setRowName(self.table,5,"Maximum entropy constant (A)")
+        self.AConst= table_utils.addDoubleToTable(self.table,0.4,5)
 
-        widget_helper.setName(self.table, 6,"Auto shift")
-        self.shift_box= widget_helper.createCheckTable(self.table,False,6)
+        table_utils.setRowName(self.table, 6,"Auto shift")
+        self.shift_box= table_utils.addCheckBoxToTable(self.table,False,6)
 
-        widget_helper.setName(self.table, 7,"Raw")
-        self.raw_box= widget_helper.createCheckTable(self.table,False,7)
+        table_utils.setRowName(self.table, 7,"Raw")
+        self.raw_box= table_utils.addCheckBoxToTable(self.table,False,7)
 
         self.table.resizeRowsToContents()
 
@@ -66,23 +66,23 @@ class MaxEntView(QtGui.QWidget):
 
         self.tableA.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
 
-        widget_helper.setName(self.tableA,0,"Chi target")
-        self.chiTarget= widget_helper.createDoubleTable(self.tableA,100,0)
+        table_utils.setRowName(self.tableA,0,"Chi target")
+        self.chiTarget= table_utils.addDoubleToTable(self.tableA,100,0)
 
-        widget_helper.setName(self.tableA,1,"Chi (precision)")
-        self.chiEps= widget_helper.createDoubleTable(self.tableA,0.001,1)
+        table_utils.setRowName(self.tableA,1,"Chi (precision)")
+        self.chiEps= table_utils.addDoubleToTable(self.tableA,0.001,1)
 
-        widget_helper.setName(self.tableA,2,"Distance Penalty")
-        self.dist= widget_helper.createDoubleTable(self.tableA,0.1,2)
+        table_utils.setRowName(self.tableA,2,"Distance Penalty")
+        self.dist= table_utils.addDoubleToTable(self.tableA,0.1,2)
 
-        widget_helper.setName(self.tableA,3,"Maximum Angle")
-        self.angle= widget_helper.createDoubleTable(self.tableA,0.05,3)
+        table_utils.setRowName(self.tableA,3,"Maximum Angle")
+        self.angle= table_utils.addDoubleToTable(self.tableA,0.05,3)
 
-        widget_helper.setName(self.tableA,4,"Max Iterations")
-        self.max_iterations= widget_helper.createSpinTable(self.tableA,20000,4)
+        table_utils.setRowName(self.tableA,4,"Max Iterations")
+        self.max_iterations= table_utils.addSpinBoxToTable(self.tableA,20000,4)
 
-        widget_helper.setName(self.tableA,5,"Alpha Chop Iterations")
-        self.chop= widget_helper.createSpinTable(self.tableA,500,5)
+        table_utils.setRowName(self.tableA,5,"Alpha Chop Iterations")
+        self.chop= table_utils.addSpinBoxToTable(self.tableA,500,5)
 
         #layout
         # this is if complex data is unhidden

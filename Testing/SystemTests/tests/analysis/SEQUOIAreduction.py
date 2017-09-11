@@ -3,6 +3,7 @@
 Test the SNS inelatic reduction scripts.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import os
 import shutil
@@ -68,19 +69,19 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                 ang_list.append(ang)
         # file with grouping information
         f = open(os.path.join(self.customDataDir,"group.map"),'w')
-        print >>f,len(ang_list)
+        print(len(ang_list), file=f)
         for i in range(len(ang_list)):
-            print >>f,i
-            print >>f,len(detIDlist[i])
+            print(i, file=f)
+            print(len(detIDlist[i]), file=f)
             mystring=str(detIDlist[i]).strip(']').strip('[')
             mystring=mystring.replace(',','')
-            print >>f,mystring
+            print(mystring, file=f)
         f.close()
         # par file
         f = open(os.path.join(self.customDataDir,"group.par"),'w')
-        print >>f,len(ang_list)
+        print(len(ang_list), file=f)
         for angi in ang_list:
-            print >>f,5.5,angi,0.0,1.0,1.0,1
+            print(5.5,angi,0.0,1.0,1.0,1, file=f)
         f.close()
         return [ang_list,detIDlist]
 
@@ -244,7 +245,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         #find the nxspe filename: it should be only one, but the name might depend on the rounding of phi
         nxspelist=glob.glob(os.path.join(self.customDataDir,'*.nxspe'))
         if len(nxspelist)>1 or len(nxspelist) == 0:
-            print "Error: Expected single nxspe file in %s. Found %d" % (self.customDataDir, len(nxspelist))
+            print("Error: Expected single nxspe file in %s. Found %d" % (self.customDataDir, len(nxspelist)))
             return False
 
         # Name encodes rotation

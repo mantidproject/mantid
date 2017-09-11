@@ -3,6 +3,7 @@
     Verifies that a calibration file can be loaded once and reused to apply, using CopyInstrumentParameters, the same calibration
     in successive reductions.
 """
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 
 
@@ -36,5 +37,5 @@ class ReuseExistingCalibration(stresstesting.MantidStressTest):
         if self.det_pos_second_run == self.det_pos_first_run:
             return True
         else:
-            print "Error: Detector position is not the same after the second reduction!"
+            print("Error: Detector position is not the same after the second reduction!")
             return False

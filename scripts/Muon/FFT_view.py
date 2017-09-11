@@ -1,7 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore, QtGui
-from Muon import widget_helper
+
+from Muon import table_utils
 
 
 class FFTView(QtGui.QWidget):
@@ -27,25 +28,25 @@ class FFTView(QtGui.QWidget):
         # populate table
         options=['test']
 
-        widget_helper.setName(self.FFTTable,0,"Workspace")
-        self.ws= widget_helper.createComboTable(self.FFTTable,0,options)
+        table_utils.setRowName(self.FFTTable,0,"Workspace")
+        self.ws= table_utils.addComboToTable(self.FFTTable,0,options)
         self.Im_box_row=1
-        widget_helper.setName(self.FFTTable,self.Im_box_row,"Imaginary Data")
-        self.Im_box= widget_helper.createCheckTable(self.FFTTable,True,self.Im_box_row)
+        table_utils.setRowName(self.FFTTable,self.Im_box_row,"Imaginary Data")
+        self.Im_box= table_utils.addCheckBoxToTable(self.FFTTable,True,self.Im_box_row)
 
-        widget_helper.setName(self.FFTTable,2,"Imaginary Workspace")
-        self.Im_ws= widget_helper.createComboTable(self.FFTTable,2,options)
+        table_utils.setRowName(self.FFTTable,2,"Imaginary Workspace")
+        self.Im_ws= table_utils.addComboToTable(self.FFTTable,2,options)
 
         self.shift_box_row=3
-        widget_helper.setName(self.FFTTable,self.shift_box_row,"Auto shift")
-        self.shift_box= widget_helper.createCheckTable(self.FFTTable,True,self.shift_box_row)
+        table_utils.setRowName(self.FFTTable,self.shift_box_row,"Auto shift")
+        self.shift_box= table_utils.addCheckBoxToTable(self.FFTTable,True,self.shift_box_row)
 
-        widget_helper.setName(self.FFTTable,4,"Shift")
-        self.shift= widget_helper.createDoubleTable(self.FFTTable,0.0,4)
+        table_utils.setRowName(self.FFTTable,4,"Shift")
+        self.shift= table_utils.addDoubleToTable(self.FFTTable,0.0,4)
         self.FFTTable.hideRow(4)
 
-        widget_helper.setName(self.FFTTable,5,"Use Raw data")
-        self.Raw_box= widget_helper.createCheckTable(self.FFTTable,True,5)
+        table_utils.setRowName(self.FFTTable,5,"Use Raw data")
+        self.Raw_box= table_utils.addCheckBoxToTable(self.FFTTable,True,5)
 
         self.FFTTable.resizeRowsToContents()
         #make advanced table options
@@ -59,18 +60,18 @@ class FFTView(QtGui.QWidget):
         self.FFTTableA.verticalHeader().setVisible(False)
         self.FFTTableA.setHorizontalHeaderLabels(("PreProcessing Property;Value").split(";"))
 
-        widget_helper.setName(self.FFTTableA,0,"Apodization Function")
+        table_utils.setRowName(self.FFTTableA,0,"Apodization Function")
         options=["None","Lorentz","Gaussian"]
-        self.apodization = widget_helper.createComboTable(self.FFTTableA,0,options)
+        self.apodization = table_utils.addComboToTable(self.FFTTableA,0,options)
 
-        widget_helper.setName(self.FFTTableA,1,"Decay Constant (micro seconds)")
-        self.decay = widget_helper.createDoubleTable(self.FFTTableA,1.4,1)
+        table_utils.setRowName(self.FFTTableA,1,"Decay Constant (micro seconds)")
+        self.decay = table_utils.addDoubleToTable(self.FFTTableA,1.4,1)
 
-        widget_helper.setName(self.FFTTableA,2,"Negative Padding")
-        self.negativePadding= widget_helper.createCheckTable(self.FFTTableA,True,2)
+        table_utils.setRowName(self.FFTTableA,2,"Negative Padding")
+        self.negativePadding= table_utils.addCheckBoxToTable(self.FFTTableA,True,2)
 
-        widget_helper.setName(self.FFTTableA,3,"Padding")
-        self.padding= widget_helper.createSpinTable(self.FFTTableA,1,3)
+        table_utils.setRowName(self.FFTTableA,3,"Padding")
+        self.padding= table_utils.addSpinBoxToTable(self.FFTTableA,1,3)
         self.FFTTableA.resizeRowsToContents()
 
         #make button
@@ -127,11 +128,11 @@ class FFTView(QtGui.QWidget):
         inputs["Imaginary"] = 0 #always zero
 
     def addFFTShift(self,inputs):
-        inputs['AutoShift']=False
-        inputs['Shift']= float(self.shift.text())
+        inputs['AutoShift'] =False
+        inputs['Shift'] = float(self.shift.text())
 
     def addRaw(self,inputs,key):
-        inputs[key]+="_Raw"
+        inputs[key] += "_Raw"
 
     def initAdvanced(self):
         inputs={}

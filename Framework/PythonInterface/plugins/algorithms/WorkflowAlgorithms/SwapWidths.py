@@ -102,5 +102,6 @@ class SwapWidths(DataProcessorAlgorithm):
     # If we reach here we didn't find it
         raise LookupError("Label '%s' not found on text axis" % label)
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SwapWidths)

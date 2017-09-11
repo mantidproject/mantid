@@ -1,4 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
+from six import iteritems
+
 import mantid.simpleapi as mantid
 
 
@@ -16,9 +18,9 @@ class FFTPresenter(object):
     # only get ws that are groups or pairs
     # ignore raw
     def getWorkspaceNames(self):
-        options=mantid.AnalysisDataService.getObjectNames()
-        options=[item.replace(" ","") for item in options]
-        final_options=[]
+        options = mantid.AnalysisDataService.getObjectNames()
+        options = [item.replace(" ","") for item in options]
+        final_options = []
         for pick in options:
             if ";" in pick and "Raw" not in pick:
                 final_options.append(pick)
@@ -26,9 +28,9 @@ class FFTPresenter(object):
 
     #functions
     def tableClicked(self,row,col):
-        if row == self.view.getImBoxRow() and col ==1:
+        if row == self.view.getImBoxRow() and col == 1:
             self.view.changedHideUnTick(self.view.getImBox(),self.view.getImBoxRow()+1)
-        elif  row == self.view.getShiftBoxRow() and col ==1:
+        elif  row == self.view.getShiftBoxRow() and col == 1:
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
     def handleButton(self):
@@ -49,17 +51,13 @@ class FFTPresenter(object):
         if self.view.isRaw():
             self.view.addRaw(FFTInputs,"OutputWorkspace")
         self.alg.FFTAlg(FFTInputs)
-
-    def get_FFT_input(self):
+ 
+   def get_FFT_input(self):
         FFTInputs=self.view.initFFTInput()
-        #if self.view.isRaw():
-        #    self.view.addRaw(FFTInputs,"InputWorkspace")
         if  self.view.isAutoShift():
             FFTInputs["AutoShift"]=True
         else:
             self.view.addFFTShift(FFTInputs)
         if self.view.isComplex():
             self.view.addFFTComplex(FFTInputs)
-            #if self.view.isRaw():
-            #    self.view.addRaw(FFTInputs,"InputImagWorkspace")
         return FFTInputs
