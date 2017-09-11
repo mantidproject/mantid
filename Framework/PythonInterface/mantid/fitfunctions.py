@@ -109,6 +109,22 @@ class FunctionWrapper(object):
       if prod.pureMultiplication:
          prod = prod.flatten()
       return prod
+      
+  def __call__(self, x, *params):
+      """ Implement function evaluation, such that
+          func(args) is equivalent func.__call__(args)
+           
+          :param x: x value or list of x values
+          :param *params list of parameter values
+      """
+      from mantid.simpleapi import CreateWorkspace, EvaluateFunction
+      
+      for i in range(len(params)):
+          self.fun.setParameter(i, params[i])
+      y = x[:]
+      ws = CreateWorkspace(x, y)
+      out = EvaluateFunction(str(self.fun), ws, OutputWorkspace='out')
+      return out.readY(1)
          
   def tie (self, *args, **kwargs):
     """ Add ties.
