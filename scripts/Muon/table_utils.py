@@ -1,10 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 
-""" 
+"""
 This module contains the methods for
 adding information to tables.
 """
+
 
 def setRowName(table,row,name):
     text = QtGui.QTableWidgetItem((name))
