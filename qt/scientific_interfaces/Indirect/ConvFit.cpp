@@ -209,6 +209,7 @@ void ConvFit::setup() {
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
 
+  m_uiForm.ckTieCentres->setChecked(true);
   m_previousFit = m_uiForm.cbFitType->currentText();
 
   updatePlotOptions();
@@ -1727,19 +1728,26 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     m_defaultParams["FWHM"] = res;
     m_defaultParams["default_FWHM"] = res;
   }
+
   // If the previous fit was One Lorentzian and the new fit is Two Lorentzian
   // preserve the values of One Lorentzian Fit
   const QString currentFitFunction = m_uiForm.cbFitType->currentText();
-  if (m_previousFit.compare("One Lorentzian") == 0 &&
-      currentFitFunction.compare("Two Lorentzians") == 0) {
-    const double amplitude =
+  if (currentFitFunction.compare("Two Lorentzians") == 0) {
+    m_uiForm.ckTieCentres->setChecked(true);
+
+    if (m_previousFit.compare("One Lorentzian") == 0) {
+      const double amplitude =
         m_dblManager->value(m_properties["One Lorentzian.Amplitude"]);
-    const double peakCentre =
+      const double peakCentre =
         m_dblManager->value(m_properties["One Lorentzian.PeakCentre"]);
-    const double fwhm = m_dblManager->value(m_properties["One Lorentzian.FWHM"]);
-    m_defaultParams.insert("PeakCentre", peakCentre);
-    m_defaultParams.insert("FWHM", fwhm);
-    m_defaultParams.insert("Amplitude", amplitude);
+      const double fwhm = m_dblManager->value(m_properties["One Lorentzian.FWHM"]);
+      m_defaultParams.insert("PeakCentre", peakCentre);
+      m_defaultParams.insert("FWHM", fwhm);
+      m_defaultParams.insert("Amplitude", amplitude);
+    }
+  }
+  else {
+    m_uiForm.ckTieCentres->setChecked(false);
   }
 
   // Remove previous parameters from tree
@@ -1747,7 +1755,6 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   m_cfTree->removeProperty(m_properties["FitFunction2"]);
 
   m_uiForm.ckPlotGuess->setChecked(false);
-  m_uiForm.ckTieCentres->setChecked(false);
 
   updatePlotOptions();
 
