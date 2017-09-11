@@ -1295,6 +1295,11 @@ void ConvFit::updateParameters(int specNo) {
     updateParameters(functionName, pref, params, parameters, 3, 0);
   }
   else {
+
+    if (fitTypeIndex == 2 && m_fittedType == "One Lorentzian") {
+      functionName = "One Lorentzian";
+    }
+
     updateParameters(functionName, pref, params, parameters);
   }
 }
