@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/LoadBankFromDiskTask.h"
+#include "MantidDataHandling/DefaultEventLoader.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -75,7 +76,7 @@ LoadEventNexus::LoadEventNexus()
     : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0),
       chunk(0), totalChunks(0), firstChunkForBank(0), eventsPerChunk(0),
       longest_tof(0), shortest_tof(0), bad_tofs(0), discarded_events(0),
-      precount(0), compressTolerance(0), eventid_max(0), m_file(nullptr),
+      precount(0), compressTolerance(0), m_file(nullptr),
       splitProcessing(false), m_haveWeights(false),
       m_instrument_loaded_correctly(false), loadlogs(false),
       m_logs_loaded_correctly(false), event_id_is_spec(false) {}
@@ -449,67 +450,6 @@ void LoadEventNexus::exec() {
   }
 }
 
-//-----------------------------------------------------------------------------
-/** Generate a look-up table where the index = the pixel ID of an event
-* and the value = a pointer to the EventList in the workspace
-* @param vectors :: the array to create the map on
-*/
-template <class T>
-void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
-  vectors.resize(m_ws->nPeriods());
-  if (this->event_id_is_spec) {
-    // Find max spectrum no
-    Axis *ax1 = m_ws->getAxis(1);
-    specnum_t maxSpecNo =
-        -std::numeric_limits<specnum_t>::max(); // So that any number will be
-                                                // greater than this
-    for (size_t i = 0; i < ax1->length(); i++) {
-      specnum_t spec = ax1->spectraNo(i);
-      if (spec > maxSpecNo)
-        maxSpecNo = spec;
-    }
-
-    // These are used by the bank loader to figure out where to put the events
-    // The index of eventVectors is a spectrum number so it is simply resized to
-    // the maximum
-    // possible spectrum number
-    eventid_max = maxSpecNo;
-    for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(maxSpecNo + 1, nullptr);
-    }
-    for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
-      for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
-        const auto &spec = m_ws->getSpectrum(i);
-        getEventsFrom(m_ws->getSpectrum(i, period),
-                      vectors[period][spec.getSpectrumNo()]);
-      }
-    }
-  } else {
-    // To avoid going out of range in the vector, this is the MAX index that can
-    // go into it
-    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size()) +
-                  pixelID_to_wi_offset;
-
-    // Make an array where index = pixel ID
-    // Set the value to NULL by default
-    for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(eventid_max + 1, nullptr);
-    }
-
-    for (size_t j = size_t(pixelID_to_wi_offset);
-         j < pixelID_to_wi_vector.size(); j++) {
-      size_t wi = pixelID_to_wi_vector[j];
-      // Save a POINTER to the vector
-      if (wi < m_ws->getNumberHistograms()) {
-        for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
-          getEventsFrom(m_ws->getSpectrum(wi, period),
-                        vectors[period][j - pixelID_to_wi_offset]);
-        }
-      }
-    }
-  }
-}
-
 /**
 * Get the number of events in the currently opened group.
 *
@@ -561,14 +501,6 @@ void LoadEventNexus::createWorkspaceIndexMaps(
   // Create the required spectra mapping so that the workspace knows what to pad
   // to
   createSpectraMapping(m_filename, monitors, bankNames);
-
-  // This map will be used to find the workspace index
-  if (this->event_id_is_spec)
-    pixelID_to_wi_vector =
-        m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_offset);
-  else
-    pixelID_to_wi_vector =
-        m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_offset, true);
 }
 
 /** Load the instrument from the nexus file
@@ -926,16 +858,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   //----------------- Pad Empty Pixels -------------------------------
   createWorkspaceIndexMaps(monitors, someBanks);
 
-  // Cache a map for speed.
-  if (!m_haveWeights) {
-    this->makeMapToEventLists<EventVector_pt>(eventVectors);
-  } else {
-    // Convert to weighted events
-    for (size_t i = 0; i < m_ws->getNumberHistograms(); i++) {
-      m_ws->getSpectrum(i).switchTo(API::WEIGHTED);
-    }
-    this->makeMapToEventLists<WeightedEventVector_pt>(weightedEventVectors);
-  }
+  m_defaultEventLoader = Kernel::make_unique<DefaultEventLoader>(
+      *m_ws, m_haveWeights, event_id_is_spec);
 
   // Set all (empty) event lists as sorted by pulse time. That way, calling
   // SortEvents will not try to sort these empty lists.

@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/DataBlock.cpp
 	src/DataBlockComposite.cpp
 	src/DataBlockGenerator.cpp
+	src/DefaultEventLoader.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
@@ -187,6 +188,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/DataBlock.h
 	inc/MantidDataHandling/DataBlockComposite.h
 	inc/MantidDataHandling/DataBlockGenerator.h
+	inc/MantidDataHandling/DefaultEventLoader.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h

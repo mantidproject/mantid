@@ -1,7 +1,8 @@
-#include "MantidDataHandling/LoadBankFromDiskTask.h"
-#include "MantidDataHandling/ProcessBankData.h"
-#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidDataHandling/DefaultEventLoader.h"
+#include "MantidDataHandling/LoadBankFromDiskTask.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/ProcessBankData.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -216,7 +217,8 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
         m_max_id = temp;
     }
 
-    if (m_min_id > static_cast<uint32_t>(alg->eventid_max)) {
+    if (m_min_id >
+        static_cast<uint32_t>(alg->m_defaultEventLoader->eventid_max)) {
       // All the detector IDs in the bank are higher than the highest 'known'
       // (from the IDF)
       // ID. Setting this will abort the loading of the bank.
@@ -227,13 +229,17 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
     // would not get a negative index into the vector. Note that m_min_id is
     // a uint so we have to be cautious about adding it to an int which may be
     // negative.
-    if (static_cast<int32_t>(m_min_id) + alg->pixelID_to_wi_offset < 0) {
-      m_min_id = static_cast<uint32_t>(abs(alg->pixelID_to_wi_offset));
+    if (static_cast<int32_t>(m_min_id) +
+            alg->m_defaultEventLoader->pixelID_to_wi_offset <
+        0) {
+      m_min_id = static_cast<uint32_t>(
+          abs(alg->m_defaultEventLoader->pixelID_to_wi_offset));
     }
     // fixup the maximum pixel id in the case that it's higher than the
     // highest 'known' id
-    if (m_max_id > static_cast<uint32_t>(alg->eventid_max))
-      m_max_id = static_cast<uint32_t>(alg->eventid_max);
+    if (m_max_id >
+        static_cast<uint32_t>(alg->m_defaultEventLoader->eventid_max))
+      m_max_id = static_cast<uint32_t>(alg->m_defaultEventLoader->eventid_max);
   }
 }
 

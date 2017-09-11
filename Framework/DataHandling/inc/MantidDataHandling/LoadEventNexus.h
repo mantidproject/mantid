@@ -28,8 +28,8 @@
 #include <numeric>
 
 namespace Mantid {
-
 namespace DataHandling {
+class DefaultEventLoader;
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -179,26 +179,6 @@ public:
   /// Tolerance for CompressEvents; use -1 to mean don't compress.
   double compressTolerance;
 
-  /// Pointer to the vector of events
-  typedef std::vector<Mantid::DataObjects::TofEvent> *EventVector_pt;
-
-  /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
-  /// event list.
-  std::vector<std::vector<EventVector_pt>> eventVectors;
-
-  /// Mutex to protect eventVectors from each task
-  std::recursive_mutex m_eventVectorMutex;
-
-  /// Maximum (inclusive) event ID possible for this instrument
-  int32_t eventid_max;
-
-  /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace
-  /// index)
-  std::vector<size_t> pixelID_to_wi_vector;
-
-  /// Offset in the pixelID_to_wi_vector to use.
-  detid_t pixelID_to_wi_offset;
-
   /// One entry of pulse times for each preprocessor
   std::vector<boost::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
 
@@ -215,13 +195,7 @@ public:
   /// Flag for dealing with a simulated file
   bool m_haveWeights;
 
-  /// Pointer to the vector of weighted events
-  typedef std::vector<Mantid::DataObjects::WeightedEvent> *
-      WeightedEventVector_pt;
-
-  /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>
-  /// in the event list.
-  std::vector<std::vector<WeightedEventVector_pt>> weightedEventVectors;
+  std::unique_ptr<DefaultEventLoader> m_defaultEventLoader;
 
 private:
   /// Intialisation code
@@ -231,10 +205,6 @@ private:
   void exec() override;
 
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
-
-  /// Map detector IDs to event lists.
-  template <class T>
-  void makeMapToEventLists(std::vector<std::vector<T>> &vectors);
 
   void createWorkspaceIndexMaps(const bool monitors,
                                 const std::vector<std::string> &bankNames);

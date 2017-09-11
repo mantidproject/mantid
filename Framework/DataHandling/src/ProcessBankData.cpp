@@ -1,4 +1,5 @@
 #include "MantidDataHandling/ProcessBankData.h"
+#include "MantidDataHandling/DefaultEventLoader.h"
 
 using namespace Mantid::DataObjects;
 
@@ -14,10 +15,11 @@ ProcessBankData::ProcessBankData(
     boost::shared_array<float> event_weight, detid_t min_event_id,
     detid_t max_event_id)
     : Task(), alg(alg), entry_name(entry_name),
-      pixelID_to_wi_vector(alg->pixelID_to_wi_vector),
-      pixelID_to_wi_offset(alg->pixelID_to_wi_offset), prog(prog),
-      event_id(event_id), event_time_of_flight(event_time_of_flight),
-      numEvents(numEvents), startAt(startAt), event_index(event_index),
+      pixelID_to_wi_vector(alg->m_defaultEventLoader->pixelID_to_wi_vector),
+      pixelID_to_wi_offset(alg->m_defaultEventLoader->pixelID_to_wi_offset),
+      prog(prog), event_id(event_id),
+      event_time_of_flight(event_time_of_flight), numEvents(numEvents),
+      startAt(startAt), event_index(event_index),
       thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
       event_weight(event_weight), m_min_id(min_event_id),
       m_max_id(max_event_id) {
@@ -154,8 +156,8 @@ void ProcessBankData::run() { // override {
         if (have_weight) {
           double weight = static_cast<double>(event_weight[i]);
           double errorSq = weight * weight;
-          LoadEventNexus::WeightedEventVector_pt eventVector =
-              alg->weightedEventVectors[periodIndex][detId];
+          auto *eventVector = alg->m_defaultEventLoader
+                                  ->weightedEventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup
           if (eventVector) {
             eventVector->emplace_back(tof, pulsetime, weight, errorSq);
@@ -164,8 +166,8 @@ void ProcessBankData::run() { // override {
           }
         } else {
           // We have cached the vector of events for this detector ID
-          std::vector<Mantid::DataObjects::TofEvent> *eventVector =
-              alg->eventVectors[periodIndex][detId];
+          auto *eventVector =
+              alg->m_defaultEventLoader->eventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup
           if (eventVector) {
             eventVector->emplace_back(tof, pulsetime);
