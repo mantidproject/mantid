@@ -85,7 +85,7 @@ The following methods are useful helpers on ``ComponentInfo`` that allow the ext
 
 The ``ComponentInfo`` object is accessed by an index going from 0 to the number of components (including the instrument iteself). **ALL Detector Indexes have a Component Index which is the EXACT same representation**, this is an important point to understand. In other words, a detector with a Detector Index of 5, for the purposes of working with a ``DetectorInfo`` and  will have a Component Index of 5, when working with a ``ComponentInfo``. Explained in yet another way: The first 0 - n components referenced in the ``ComponentInfo`` are detectors, where n is the total number of detectors. This gurantee can be leveraged to provide speedups, as some of the examples will show.  
 
- A ``ComponentID`` for compatiblity with older code, and be extracted from ``ComponentInfo::componentID(componentIndex)``, but such calls should be avoided where possible.
+A ``ComponentID`` for compatiblity with older code, and be extracted from ``ComponentInfo::componentID(componentIndex)``, but such calls should be avoided where possible.
 
 It is also possible to use the method ``componentInfo.indexOf(componentID)`` to get the index for a particular component ID. However, this is a call to a lookup in an unordered map, so is an expensive calculation which should be avoided where possible.
 
@@ -190,6 +190,8 @@ ___________
 * If a ``ComponentInfo`` object is required for more than one workspace, include the workspace name in the variable name to avoid confusion.
 * Get the ``ComponentInfo`` object as a const-ref and use ``const auto &componentInfo = ws->componentInfo();``, do not get a non-const reference unless you really do need to modify the object, and ensure that the ``&`` is always included to prevent accidental copies.
 * ``ComponentInfo`` is widely forward declared. Ensure that you import - ``#include "MantidGeometry/Instrument/ComponentInfo.h"``
+* As explained above, a detector index is the same thing as a component index. No translation necessary. The fact that the first 0-n component indexes are for detectors is a feature that can be leveraged.
+* A bank always has a higher component index than any of its nested components. The root is the highest component index of all. This feature can be leveraged. Consider reverse iterating through component indexes when performing operations that involve higher-level components. 
 
 Dealing with problems
 ---------------------
