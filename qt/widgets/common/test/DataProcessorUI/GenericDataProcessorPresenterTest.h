@@ -1129,8 +1129,8 @@ public:
     removeWorkspace("IvsQ_TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockCommandProvider));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockCommandProviderFactory));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockCommandProvider.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockCommandProviderFactory.get()));
   }
 
   void testTreeUpdatedAfterProcess() {
