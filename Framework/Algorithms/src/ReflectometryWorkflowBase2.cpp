@@ -34,7 +34,7 @@ void ReflectometryWorkflowBase2::initReductionProperties() {
                                              "NonFlatSample"};
   declareProperty("ReductionType", "Normal",
                   boost::make_shared<StringListValidator>(reductionTypes),
-                  "The type of reduction to perform.", Direction::Input);
+                  "The type of reduction to perform when summing in Q.", Direction::Input);
   setPropertySettings("ReductionType",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SummationType", IS_EQUAL_TO, "SumInQ"));

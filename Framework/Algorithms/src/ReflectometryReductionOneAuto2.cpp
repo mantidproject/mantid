@@ -144,7 +144,7 @@ void ReflectometryReductionOneAuto2::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
                                            Direction::Input),
-      "Moves detectors to ThetaIn if ThetaIn or ThetaInLogName is given");
+      "Moves detectors to twoTheta if ThetaIn or ThetaInLogName is given");
 
   // Detector position correction type
   const std::vector<std::string> correctionType{"VerticalShift",
@@ -156,8 +156,8 @@ void ReflectometryReductionOneAuto2::init() {
       boost::make_shared<StringListValidator>(correctionType));
   declareProperty(
       "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
-      "Whether detectors should be shifted vertically or rotated around the "
-      "sample position.",
+      "When correcting detector positions, this determines whether detectors"
+      "should be shifted vertically or rotated around the sample position.",
       Direction::Input);
   setPropertySettings("DetectorCorrectionType",
                       make_unique<Kernel::EnabledWhenProperty>(
