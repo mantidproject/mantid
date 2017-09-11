@@ -282,7 +282,7 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->setProperty("ThetaIn", theta);
 
   if (correctDetectors) {
-    inputWS = correctDetectorPositions(instructions, inputWS);
+    inputWS = correctDetectorPositions(instructions, inputWS, 2 * theta);
   }
 
   // Optional properties
@@ -374,10 +374,11 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
 * @param instructions :: processing instructions defining the detectors of
 * interest
 * @param inputWS :: the input workspace
+* @param twoTheta :: the angle to move detectors to
 * @return :: the corrected workspace
 */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
-    const std::string &instructions, MatrixWorkspace_sptr inputWS) {
+    const std::string &instructions, MatrixWorkspace_sptr inputWS, const double twoTheta) {
 
   auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
 
@@ -390,7 +391,6 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
   const std::set<std::string> detectorSet(detectorsOfInterest.begin(),
                                           detectorsOfInterest.end());
 
-  const double theta = getProperty("ThetaIn");
   const std::string correctionType = getProperty("DetectorCorrectionType");
 
   MatrixWorkspace_sptr corrected = inputWS;
@@ -399,7 +399,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
     IAlgorithm_sptr alg =
         createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", corrected);
-    alg->setProperty("TwoTheta", theta * 2);
+    alg->setProperty("TwoTheta", twoTheta);
     alg->setProperty("DetectorCorrectionType", correctionType);
     alg->setProperty("DetectorComponentName", detector);
     alg->execute();
