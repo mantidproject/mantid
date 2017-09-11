@@ -483,8 +483,8 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_ts_peak = 0.157042198628
-        corrections_ms_peak = 0.00679639284666
+        corrections_ts_peak = 0.163213297496
+        corrections_ms_peak = 0.00706346254234
         corrections_ms_bin = 724
         if _is_old_boost_version():
             corrections_ms_bin = 722
@@ -510,7 +510,7 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 10, 3)
-        expected_table_values = [0.1, 0.0, 1.0, 7.58019154346, 0.0, 1.0, 'skip', 0.0, 1.0]
+        expected_table_values = [0.1,0.0,1.0,'skip',0.0,1.0,'skip']
         _validate_table_values_top_to_bottom(self, linear_params, expected_table_values)
         tear_down()
 
