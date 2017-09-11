@@ -29,10 +29,7 @@ set( UI_FILES
 )
 
 # Setup the include locations.
-include_directories(
-  inc
-  # ${CMAKE_CURRENT_BINARY_DIR}
-)
+include_directories(inc)
 
 
 mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
@@ -58,4 +55,4 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
 # Set the name of the generated library
 set_target_properties( VatesSimpleGuiQtWidgetsQt4 PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiQtWidgetsQt4 )
 # Add to the 'VatesSimpleGui' group in VS
-set_property( TARGET VatesSimpleGuiQtWidgetsQt4 PROPERTY FOLDER MantidVatesSimpleGuiQt4 )
+set_property( TARGET VatesSimpleGuiQtWidgetsQt4 PROPERTY FOLDER MantidVatesSimpleGui )
