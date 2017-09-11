@@ -136,8 +136,8 @@ private:
   /// Scale factors
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
 
-  /// Rectangular Bank flag
-  boost::shared_ptr<std::vector<bool>> m_isRectangularBank;
+  /// Structured bank flag
+  boost::shared_ptr<std::vector<bool>> m_isStructuredBank;
 
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
                             const size_t componentIndex);
@@ -160,7 +160,7 @@ public:
       const Mantid::Geometry::IObjComponent &objComponent) override;
 
   virtual size_t
-  registerRectangularBank(const RectangularDetector &bank) override;
+  registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;
 
   virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;

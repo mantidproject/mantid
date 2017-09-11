@@ -24,7 +24,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-    boost::shared_ptr<std::vector<bool>> isRectangularBank, int64_t sourceIndex,
+    boost::shared_ptr<std::vector<bool>> isStructuredBank, int64_t sourceIndex,
     int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(
@@ -34,7 +34,7 @@ ComponentInfo::ComponentInfo(
       m_parentIndices(std::move(parentIndices)),
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
       m_scaleFactors(std::move(scaleFactors)),
-      m_isRectangularBank(std::move(isRectangularBank)),
+      m_isStructuredBank(std::move(isStructuredBank)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
       m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex) {
@@ -63,7 +63,7 @@ ComponentInfo::ComponentInfo(
         "ComponentInfo should have been provided same "
         "number of scale factors as number of components");
   }
-  if (m_isRectangularBank->size() != m_componentRanges->size()) {
+  if (m_isStructuredBank->size() != m_componentRanges->size()) {
     throw std::invalid_argument("ComponentInfo should be provided same number "
                                 "of rectangular bank flags as number of "
                                 "non-detector components");
@@ -341,11 +341,10 @@ ComponentInfo::Range
 ComponentInfo::componentRangeInSubtree(const size_t index) const {
   const auto rangesIndex = compOffsetIndex(index);
   const auto range = (*m_componentRanges)[rangesIndex];
-  ComponentInfo::Range ret = {
-      m_assemblySortedComponentIndices->begin() + range.first,
-      m_assemblySortedComponentIndices->begin() + range.second};
-  return ret;
+  return {m_assemblySortedComponentIndices->begin() + range.first,
+          m_assemblySortedComponentIndices->begin() + range.second};
 }
+
 Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return (*m_scaleFactors)[componentIndex];
 }
@@ -355,9 +354,9 @@ void ComponentInfo::setScaleFactor(const size_t componentIndex,
   m_scaleFactors.access()[componentIndex] = scaleFactor;
 }
 
-bool ComponentInfo::isRectangularBank(const size_t componentIndex) const {
+bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
   const auto rangesIndex = compOffsetIndex(componentIndex);
-  return !isDetector(componentIndex) && (*m_isRectangularBank)[rangesIndex];
+  return !isDetector(componentIndex) && (*m_isStructuredBank)[rangesIndex];
 }
 
 } // namespace Beamline

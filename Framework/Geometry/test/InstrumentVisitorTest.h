@@ -344,13 +344,11 @@ public:
 
     const size_t bankIndex = compInfo->indexOf(
         instrument->getComponentByName("bank1")->getComponentID());
-    TS_ASSERT(compInfo->isRectangularBank(bankIndex)); // Bank is rectangular
-    TS_ASSERT(!compInfo->isRectangularBank(
+    TS_ASSERT(compInfo->isStructuredBank(bankIndex)); // Bank is rectangular
+    TS_ASSERT(!compInfo->isStructuredBank(
         compInfo->source())); // Source is not a rectangular bank
-    TS_ASSERT(!compInfo->isRectangularBank(
+    TS_ASSERT(!compInfo->isStructuredBank(
         0)); //  A detector is never a bank, let alone a detector
-    TS_ASSERT(detInfo->isRectangularDetectorPixel(
-        0)); // But the detectors are rectangular detector pixels
   }
 
   void test_visitation_of_non_rectangular_detectors() {
@@ -364,10 +362,8 @@ public:
 
     // Nothing should be marked as a rectangular bank
     for (size_t index = 0; index < compInfo->size(); ++index) {
-      TS_ASSERT(!compInfo->isRectangularBank(index));
+      TS_ASSERT(!compInfo->isStructuredBank(index));
     }
-    // Detectors are not rectangular bank pixels
-    TS_ASSERT(!detInfo->isRectangularDetectorPixel(0));
   }
 
   void test_parent_indices() {

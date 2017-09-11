@@ -113,7 +113,7 @@ public:
                     const Kernel::V3D &observer) const;
   BoundingBox boundingBox(const size_t componentIndex,
                           const BoundingBox *reference = nullptr) const;
-  bool isRectangularBank(const size_t componentIndex) const;
+  bool isStructuredBank(const size_t componentIndex) const;
   friend class Instrument;
 };
 

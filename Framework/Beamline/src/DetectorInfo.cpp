@@ -305,18 +305,6 @@ Eigen::Vector3d DetectorInfo::samplePosition() const {
   return m_componentInfo->samplePosition();
 }
 
-bool DetectorInfo::isRectangularDetectorPixel(const size_t index) const {
-  if (!hasComponentInfo()) {
-    throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
-                             "cannot determine isRectangularDetectorPixel");
-  }
-  // Check grand parent of detector. See Instrument 1.0 RectangularDetector
-  // structure for information.
-  const auto grandParentIndex =
-      m_componentInfo->parent(m_componentInfo->parent(index));
-  return m_componentInfo->isRectangularBank(grandParentIndex);
-}
-
 void DetectorInfo::initScanCounts() {
   checkNoTimeDependence();
   if (m_isSyncScan)

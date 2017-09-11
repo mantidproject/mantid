@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/StructuredDetector.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -641,6 +642,11 @@ std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
   os << "Number of children :" << ass.nelements() << '\n';
   ass.printChildren(os);
   return os;
+}
+
+size_t StructuredDetector::registerContents(
+    class ComponentVisitor &componentVisitor) const {
+  return componentVisitor.registerStructuredBank(*this);
 }
 
 } // namespace Geometry

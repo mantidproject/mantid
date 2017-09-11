@@ -104,10 +104,10 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
       boost::make_shared<std::vector<Eigen::Quaterniond>>(1, rotation);
   auto scaleFactors =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
-  auto isRectangularBank = boost::make_shared<std::vector<bool>>(1, false);
+  auto isStructuredBank = boost::make_shared<std::vector<bool>>(1, false);
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
-      parentIndices, positions, rotations, scaleFactors, isRectangularBank, -1,
+      parentIndices, positions, rotations, scaleFactors, isStructuredBank, -1,
       -1);
 }
 }
@@ -372,7 +372,7 @@ public:
 
     // max is the Rectangular bank
     auto bankIndex = componentInfo->root() - 3;
-    TS_ASSERT(componentInfo->isRectangularBank(bankIndex));
+    TS_ASSERT(componentInfo->isStructuredBank(bankIndex));
     auto boundingBoxBank = componentInfo->boundingBox(bankIndex);
     TS_ASSERT((boundingBoxRoot.maxPoint() - boundingBoxBank.maxPoint()).norm() <
               1e-9);
@@ -445,14 +445,14 @@ public:
     // Check bank1 represents max point in y
     const size_t bank1Index = componentInfo->root() - 4 - 10;
     auto boundingBoxBank1 = componentInfo->boundingBox(bank1Index);
-    TS_ASSERT(componentInfo->isRectangularBank(bank1Index));
+    TS_ASSERT(componentInfo->isStructuredBank(bank1Index));
     TS_ASSERT_DELTA(boundingBoxRoot.maxPoint().Y(),
                     boundingBoxBank1.maxPoint().Y(), 1e-9);
 
     // Check bank2 represents min point in y
     const size_t bank2Index = componentInfo->root() - 1;
     auto boundingBoxBank2 = componentInfo->boundingBox(bank2Index);
-    TS_ASSERT(componentInfo->isRectangularBank(bank2Index));
+    TS_ASSERT(componentInfo->isStructuredBank(bank2Index));
     TS_ASSERT_DELTA(boundingBoxRoot.minPoint().Y(),
                     boundingBoxBank2.minPoint().Y(), 1e-9);
   }

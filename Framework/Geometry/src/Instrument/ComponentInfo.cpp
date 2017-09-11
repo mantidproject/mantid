@@ -274,7 +274,7 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
     const size_t index = *compIterator;
     if (hasSource() && index == source()) {
       ++compIterator;
-    } else if (isRectangularBank(index)) {
+    } else if (isStructuredBank(index)) {
       auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
       // nSubComponents, subtract off self hence -1.
       auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
@@ -324,8 +324,8 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
   return absoluteBB;
 }
 
-bool ComponentInfo::isRectangularBank(const size_t componentIndex) const {
-  return m_componentInfo->isRectangularBank(componentIndex);
+bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
+  return m_componentInfo->isStructuredBank(componentIndex);
 }
 
 } // namespace Geometry

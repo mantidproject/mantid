@@ -8,7 +8,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
@@ -87,7 +86,7 @@ InstrumentVisitor::InstrumentVisitor(
           m_orderedDetectorIds->size(), m_nullShape)),
       m_scaleFactors(boost::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})),
-      m_isRectangularBank(boost::make_shared<std::vector<bool>>()) {
+      m_isStructuredBank(boost::make_shared<std::vector<bool>>()) {
 
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
@@ -160,7 +159,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   }
   markAsSourceOrSample(assembly.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
-  m_isRectangularBank->push_back(false);
+  m_isStructuredBank->push_back(false);
   m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
   clearLegacyParameters(m_pmap, assembly);
   return componentIndex;
@@ -194,7 +193,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_parentComponentIndices->push_back(componentIndex);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
-  m_isRectangularBank->push_back(false);
+  m_isStructuredBank->push_back(false);
   m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
   clearLegacyParameters(m_pmap, component);
   return componentIndex;
@@ -213,15 +212,14 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 }
 
 /**
- * @brief InstrumentVisitor::registerRectangularBank
+ * @brief InstrumentVisitor::registerStructuredBank
  * @param bank : Rectangular Detector
  * @return
  */
-size_t
-InstrumentVisitor::registerRectangularBank(const RectangularDetector &bank) {
+size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
-  (*m_isRectangularBank)[rangesIndex] = true;
+  (*m_isStructuredBank)[rangesIndex] = true;
   return index;
 }
 
@@ -331,7 +329,7 @@ InstrumentVisitor::componentInfo() const {
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_positions, m_rotations, m_scaleFactors,
-      m_isRectangularBank, m_sourceIndex, m_sampleIndex);
+      m_isStructuredBank, m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
