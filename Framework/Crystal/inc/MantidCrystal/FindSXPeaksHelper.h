@@ -1,23 +1,23 @@
 #ifndef MANTID_CRYSTAL_FINDSXPEAKSHELPER_H_
 #define MANTID_CRYSTAL_FINDSXPEAKSHELPER_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/EmptyValues.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 
-#include <vector>
 #include <boost/optional.hpp>
-#include <iterator>
 #include <iostream>
+#include <iterator>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
 class ProgressBase;
 }
-}
+} // namespace Mantid
 
 namespace Mantid {
 namespace Crystal {
@@ -201,8 +201,8 @@ private:
   std::vector<std::unique_ptr<PeakContainer>>
   getAllPeaks(const HistogramData::HistogramX &x,
               const HistogramData::HistogramY &y, Bound low, Bound high,
-              const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy *
-                  backgroundStrategy) const;
+              const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy
+                  *backgroundStrategy) const;
   PeakList
   convertToSXPeaks(const HistogramData::HistogramX &x,
                    const HistogramData::HistogramY &y,
@@ -237,10 +237,10 @@ public:
   bool compare(const SXPeak &lhs, const SXPeak &rhs) const override;
 
 private:
-  const bool m_tofUnits;
   const double m_xUnitResolution;
   double m_phiResolution;
   double m_twoThetaResolution;
+  const bool m_tofUnits;
 };
 
 /* ------------------------------------------------------------------------------------------
