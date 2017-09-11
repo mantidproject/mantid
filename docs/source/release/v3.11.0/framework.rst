@@ -16,7 +16,7 @@ New
 ###
 
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` performs concatenation of the workspaces into a single one by handling the sample logs merging as in :ref:`MergeRuns <algm-MergeRuns>`.
-- :ref:`FFTPreProcessing <algm-FFTPreProcessing-v1>` a new algorithm for padding data and adding an apodization function.
+- :ref:`PaddingAndApodization <algm-PaddingAndApodization-v1>` a new algorithm for padding data and adding an apodization function.
 
 Improved
 

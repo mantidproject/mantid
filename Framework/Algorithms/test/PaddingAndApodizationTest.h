@@ -46,7 +46,7 @@ class PaddingAndApodizationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PaddingAndApodizationTestt *createSuite() {
+  static PaddingAndApodizationTest *createSuite() {
     return new PaddingAndApodizationTest();
   }
   static void destroySuite(PaddingAndApodizationTest *suite) { delete suite; }

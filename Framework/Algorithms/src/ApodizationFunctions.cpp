@@ -1,9 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/ApodizationFunctionHelper.h"
+#include "MantidAlgorithms/ApodizationFunctions.h"
 #include <cmath>
 
+
+namespace Mantid {
+namespace Algorithms {
 /**
 * Returns the evaluation of the Lorentz
 * (an exponential decay)
@@ -38,3 +41,6 @@ double gaussian(const double time, const double decayConstant) {
 * @returns :: Function evaluation
 */
 double none(const double, const double) { return 1.; }
+
+}
+}
