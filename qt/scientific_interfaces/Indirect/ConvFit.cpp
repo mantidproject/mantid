@@ -494,8 +494,8 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
   std::string paramWsName = outputPrefix + "_Parameters";
 
   if (AnalysisDataService::Instance().doesExist(paramWsName)) {
-    m_paramWs =
-      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
+    m_paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+        paramWsName);
     updateParameters(m_uiForm.spPlotSpectrum->value());
   }
 
@@ -1217,7 +1217,8 @@ void ConvFit::updatePlot() {
 
 void ConvFit::updateParameters(int specNo) {
   // Check parameter table workspace has been created
-  if (!m_paramWs) return;
+  if (!m_paramWs)
+    return;
 
   size_t row = boost::numeric_cast<size_t>(specNo - m_runMin);
 
@@ -1246,7 +1247,7 @@ void ConvFit::updateParameters(int specNo) {
 
   // check if we're using a temperature correction
   if (m_uiForm.ckTempCorrection->isChecked() &&
-    !m_uiForm.leTempCorrection->text().isEmpty()) {
+      !m_uiForm.leTempCorrection->text().isEmpty()) {
     subIndex++;
   }
 
@@ -1254,7 +1255,7 @@ void ConvFit::updateParameters(int specNo) {
 
   // If using a delta function with any fit type or using two Lorentzians
   const bool usingCompositeFunc =
-    ((usingDeltaFunc && m_fittedIndex > 0) || m_fittedIndex == 2);
+      ((usingDeltaFunc && m_fittedIndex > 0) || m_fittedIndex == 2);
 
   const QString prefBase = "f1.f1.";
 
@@ -1265,9 +1266,9 @@ void ConvFit::updateParameters(int specNo) {
     }
 
     m_dblManager->setValue(m_properties["DeltaHeight"],
-      parameters[key + "Height"]);
+                           parameters[key + "Height"]);
     m_dblManager->setValue(m_properties["DeltaCentre"],
-      parameters[key + "Centre"]);
+                           parameters[key + "Centre"]);
     funcIndex++;
   }
 
@@ -1275,9 +1276,8 @@ void ConvFit::updateParameters(int specNo) {
 
   if (usingCompositeFunc) {
     pref += "f" + QString::number(funcIndex) + ".f" +
-      QString::number(subIndex) + ".";
-  }
-  else {
+            QString::number(subIndex) + ".";
+  } else {
     pref += "f" + QString::number(subIndex) + ".";
   }
 
@@ -1288,12 +1288,11 @@ void ConvFit::updateParameters(int specNo) {
     funcIndex++;
     pref = prefBase;
     pref += "f" + QString::number(funcIndex) + ".f" +
-      QString::number(subIndex) + ".";
+            QString::number(subIndex) + ".";
 
     functionName = "Lorentzian 2";
     updateParameters(functionName, pref, params, parameters, 3, 0);
-  }
-  else {
+  } else {
 
     if (fitTypeIndex == 2 && m_fittedIndex == 1) {
       functionName = "Lorentzian 1";
@@ -1304,25 +1303,36 @@ void ConvFit::updateParameters(int specNo) {
 }
 
 /*
- * Updates the values of the function parameters for the function with the specified name,
+ * Updates the values of the function parameters for the function with the
+ *specified name,
  * in the parameters table.
  *
- * @param functionName  The name of the function whose parameters to update in the parameters
+ * @param functionName  The name of the function whose parameters to update in
+ *the parameters
  *                      table.
  *
- * @param prefix        The prefixes of the names of the parameters, to be used to find the
+ * @param prefix        The prefixes of the names of the parameters, to be used
+ *to find the
  *                      correct parameter in the specified parameter values map.
  * @param paramNames    The names of the function parameters to update.
- * @param paramValues   The updated parameter values stored in a map from the name of the
- *                      function parameter (preceded by prefix) to the updated value of that
+ * @param paramValues   The updated parameter values stored in a map from the
+ *name of the
+ *                      function parameter (preceded by prefix) to the updated
+ *value of that
  *                      parameter.
- * @param startOffset   The start offset, if set to N, the first N parameters won't be updated.
- * @param endOffset     The end offset, if set to N, the last N parameters won't be updated.
+ * @param startOffset   The start offset, if set to N, the first N parameters
+ *won't be updated.
+ * @param endOffset     The end offset, if set to N, the last N parameters won't
+ *be updated.
  */
-void ConvFit::updateParameters(const QString &functionName, const QString &prefix, const QStringList &paramNames, 
-                               const QMap<QString, double> &paramValues, int startOffset, int endOffset) {
+void ConvFit::updateParameters(const QString &functionName,
+                               const QString &prefix,
+                               const QStringList &paramNames,
+                               const QMap<QString, double> &paramValues,
+                               int startOffset, int endOffset) {
 
-  for (auto it = paramNames.begin()+startOffset; it != paramNames.end()-endOffset; ++it) {
+  for (auto it = paramNames.begin() + startOffset;
+       it != paramNames.end() - endOffset; ++it) {
     const QString functionParam = functionName + "." + *it;
     const QString paramValue = prefix + *it;
     double value = paramValues[paramValue];
@@ -1433,8 +1443,7 @@ void ConvFit::plotSpecChanged(int value) {
 
   if (value < m_runMin || value > m_runMax) {
     fitFunctionSelected(m_uiForm.cbFitType->currentText());
-  }
-  else {
+  } else {
     updateParameters(value);
   }
 }
@@ -1757,16 +1766,16 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
 
     if (m_previousFit.compare("One Lorentzian") == 0) {
       const double amplitude =
-        m_dblManager->value(m_properties["One Lorentzian.Amplitude"]);
+          m_dblManager->value(m_properties["One Lorentzian.Amplitude"]);
       const double peakCentre =
-        m_dblManager->value(m_properties["One Lorentzian.PeakCentre"]);
-      const double fwhm = m_dblManager->value(m_properties["One Lorentzian.FWHM"]);
+          m_dblManager->value(m_properties["One Lorentzian.PeakCentre"]);
+      const double fwhm =
+          m_dblManager->value(m_properties["One Lorentzian.FWHM"]);
       m_defaultParams.insert("PeakCentre", peakCentre);
       m_defaultParams.insert("FWHM", fwhm);
       m_defaultParams.insert("Amplitude", amplitude);
     }
-  }
-  else {
+  } else {
     m_uiForm.ckTieCentres->setChecked(false);
   }
 
@@ -1848,8 +1857,7 @@ void ConvFit::updatePlotOptions() {
 
     if (fitFunctionType != 2) {
       params = getFunctionParameters(m_uiForm.cbFitType->currentText());
-    }
-    else {
+    } else {
       params = getFunctionParameters(QString("One Lorentzian"));
     }
     if (fitFunctionType < 3) {
