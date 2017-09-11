@@ -86,8 +86,8 @@ public:
     }
   };
 
-  DataProcessorCommandAdapter(DataProcessorCommandAdapter &&) = delete;
-  DataProcessorCommandAdapter &operator=(DataProcessorCommandAdapter &&) = delete;
+  DataProcessorCommandAdapter(const DataProcessorCommandAdapter &) = delete;
+  DataProcessorCommandAdapter &operator=(const DataProcessorCommandAdapter &) = delete;
 
   /**
    * Returns the action

@@ -5,6 +5,7 @@ class GenericTwoLevelCommandProvider : public CommandProviderBase {
 public:
   GenericTwoLevelCommandProvider(GenericDataProcessorPresenter& presenter);
   GenericTwoLevelCommandProvider(const GenericTwoLevelCommandProvider&)= delete;
+  GenericTwoLevelCommandProvider(GenericTwoLevelCommandProvider&&)= default;
   GenericTwoLevelCommandProvider& operator=(const GenericTwoLevelCommandProvider&)= delete;
   CommandIndex indexOfCommand(TableAction action) const override;
   CommandIndices getModifyingTableCommands() const override;

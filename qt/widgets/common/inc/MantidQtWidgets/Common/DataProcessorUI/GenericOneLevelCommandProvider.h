@@ -4,6 +4,7 @@ namespace MantidWidgets {
 class GenericOneLevelCommandProvider : public CommandProviderBase {
 public:
   GenericOneLevelCommandProvider(GenericDataProcessorPresenter& presenter);
+  GenericOneLevelCommandProvider(GenericOneLevelCommandProvider&&) = default;
   GenericOneLevelCommandProvider(const GenericOneLevelCommandProvider&) = delete;
   GenericOneLevelCommandProvider& operator=(const GenericOneLevelCommandProvider&) = delete;
 

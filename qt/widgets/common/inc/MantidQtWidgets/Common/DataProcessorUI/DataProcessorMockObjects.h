@@ -214,16 +214,16 @@ public:
 
   std::unique_ptr<DataProcessorCommandProvider>
   fromPostprocessorName(const QString & name,
-                        GenericDataProcessorPresenter &) const override {
-    assert(this->m_mockProvider != nullptr);
-    fromPostprocessorNameProxy(name);
+                        GenericDataProcessorPresenter & presenter) const override {
+    assert(m_mockProvider != nullptr);
+    fromPostprocessorNameProxy(name, presenter);
     return std::move(m_mockProvider);
   }
 
   MOCK_CONST_METHOD2(fromPostprocessorNameProxy, void(const QString &, GenericDataProcessorPresenter &));
 
 private:
-  std::unique_ptr<DataProcessorCommandProvider> m_mockProvider;
+  mutable std::unique_ptr<DataProcessorCommandProvider> m_mockProvider;
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
