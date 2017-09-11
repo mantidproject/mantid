@@ -14,8 +14,7 @@ For more information see:
 
 - `McStas Homepage <http://www.mcstas.org/>`_
 - `McStas Manual <http://www.mcstas.org/documentation/manual/>`_
-- `McStas and Mantid integration <https://arxiv.org/abs/1607.02498>`_ by Torben Nielsen, 
-Anders Markvardsen and Peter Willendrup
+- `McStas and Mantid integration <https://arxiv.org/abs/1607.02498>`_ by Torben Nielsen, Anders Markvardsen and Peter Willendrup
 
 McStas and Mantid integration
 -----------------------------
@@ -27,9 +26,5 @@ When compiled, McStas instrument code is not automatically configured to produce
 an :ref:`Instrument Definition File <InstrumentDefinitionFile>`. Instructions on how to do this can be found on the `McStas and Mantid wiki page <https://github.com/McStasMcXtrace/McCode/wiki/McStas-and-Mantid>`_ in the McStas repository.
 
 Once the NeXus data has been generated it can be loaded into Mantid using :ref:`algm-LoadMcstas` (:ref:`algm-LoadMcstasNexus` still exists for use with older versions of McStas).
-
-References
-----------
-..	[1] `McStas and Mantid integration, arXiv:1607.02498 [physics.ins-det] <https://arxiv.org/abs/1607.02498>`__
 
 .. categories:: Concepts
