@@ -95,9 +95,8 @@ public:
 private:
   DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollection &ws,
                      bool haveWeights, bool event_id_is_spec,
-                     const std::vector<std::string> &bankNames,
-                     const bool precount, const int chunk,
-                     const int totalChunks);
+                     const size_t numBanks, const bool precount,
+                     const int chunk, const int totalChunks);
   std::pair<size_t, size_t>
   setupChunking(std::vector<std::string> &bankNames,
                 std::vector<std::size_t> &bankNumEvents);

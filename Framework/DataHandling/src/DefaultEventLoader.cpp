@@ -19,8 +19,8 @@ void DefaultEventLoader::load(LoadEventNexus *alg, EventWorkspaceCollection &ws,
                               std::vector<std::size_t> bankNumEvents,
                               const bool oldNeXusFileNames, const bool precount,
                               const int chunk, const int totalChunks) {
-  DefaultEventLoader loader(alg, ws, haveWeights, event_id_is_spec, bankNames,
-                            precount, chunk, totalChunks);
+  DefaultEventLoader loader(alg, ws, haveWeights, event_id_is_spec,
+                            bankNames.size(), precount, chunk, totalChunks);
 
   auto bankRange = loader.setupChunking(bankNames, bankNumEvents);
 
@@ -46,10 +46,12 @@ void DefaultEventLoader::load(LoadEventNexus *alg, EventWorkspaceCollection &ws,
   diskIOMutex.reset();
 }
 
-DefaultEventLoader::DefaultEventLoader(
-    LoadEventNexus *alg, EventWorkspaceCollection &ws, bool haveWeights,
-    bool event_id_is_spec, const std::vector<std::string> &bankNames,
-    const bool precount, const int chunk, const int totalChunks)
+DefaultEventLoader::DefaultEventLoader(LoadEventNexus *alg,
+                                       EventWorkspaceCollection &ws,
+                                       bool haveWeights, bool event_id_is_spec,
+                                       const size_t numBanks,
+                                       const bool precount, const int chunk,
+                                       const int totalChunks)
     : alg(alg), m_ws(ws), m_haveWeights(haveWeights),
       event_id_is_spec(event_id_is_spec), precount(precount), chunk(chunk),
       totalChunks(totalChunks) {
@@ -74,8 +76,7 @@ DefaultEventLoader::DefaultEventLoader(
 
   // split banks up if the number of cores is more than twice the number of
   // banks
-  splitProcessing =
-      bool(bankNames.size() * 2 < ThreadPool::getNumPhysicalCores());
+  splitProcessing = bool(numBanks * 2 < ThreadPool::getNumPhysicalCores());
 }
 
 std::pair<size_t, size_t>
