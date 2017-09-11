@@ -24,14 +24,11 @@ LoadBankFromDiskTask::LoadBankFromDiskTask(
     const bool oldNeXusFileNames, API::Progress *prog,
     boost::shared_ptr<std::mutex> ioMutex, Kernel::ThreadScheduler *scheduler,
     const std::vector<int> &framePeriodNumbers)
-    : Task(), alg(alg), entry_name(entry_name), entry_type(entry_type),
-      // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
-      // m_loadError(false),
-      prog(prog), scheduler(scheduler), m_loadError(false),
-      m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
-      m_event_id(nullptr), m_event_time_of_flight(nullptr),
-      m_have_weight(false), m_event_weight(nullptr),
-      m_framePeriodNumbers(framePeriodNumbers) {
+    : alg(alg), entry_name(entry_name), entry_type(entry_type), prog(prog),
+      scheduler(scheduler), m_loadError(false),
+      m_oldNexusFileNames(oldNeXusFileNames), m_event_id(nullptr),
+      m_event_time_of_flight(nullptr), m_have_weight(false),
+      m_event_weight(nullptr), m_framePeriodNumbers(framePeriodNumbers) {
   setMutex(ioMutex);
   m_cost = static_cast<double>(numEvents);
   m_min_id = std::numeric_limits<uint32_t>::max();
