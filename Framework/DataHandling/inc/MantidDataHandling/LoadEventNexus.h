@@ -179,9 +179,6 @@ public:
   /// Tolerance for CompressEvents; use -1 to mean don't compress.
   double compressTolerance;
 
-  /// One entry of pulse times for each preprocessor
-  std::vector<boost::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
-
   /// Pulse times for ALL banks, taken from proton_charge log.
   boost::shared_ptr<BankPulseTimes> m_allBanksPulseTimes;
 

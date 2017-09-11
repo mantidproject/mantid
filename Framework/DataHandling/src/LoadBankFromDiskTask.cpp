@@ -58,7 +58,7 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
 
   // Now, we look through existing ones to see if it is already loaded
   // thisBankPulseTimes = NULL;
-  for (auto &bankPulseTime : alg->m_bankPulseTimes) {
+  for (auto &bankPulseTime : alg->m_defaultEventLoader->m_bankPulseTimes) {
     if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
       thisBankPulseTimes = bankPulseTime;
       return;
@@ -68,7 +68,7 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   // Not found? Need to load and add it
   thisBankPulseTimes = boost::make_shared<BankPulseTimes>(boost::ref(file),
                                                           m_framePeriodNumbers);
-  alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
+  alg->m_defaultEventLoader->m_bankPulseTimes.push_back(thisBankPulseTimes);
 }
 
 /** Load the event_index field

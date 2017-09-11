@@ -678,7 +678,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Make sure you have a non-NULL m_allBanksPulseTimes
   if (m_allBanksPulseTimes == nullptr) {
     std::vector<DateAndTime> temp;
-    // m_allBanksPulseTimes = new BankPulseTimes(temp);
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 

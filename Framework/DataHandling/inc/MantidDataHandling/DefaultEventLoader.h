@@ -5,6 +5,8 @@
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidAPI/Axis.h"
 
+class BankPulseTimes;
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -62,6 +64,9 @@ public:
 
   /// Maximum (inclusive) event ID possible for this instrument
   int32_t eventid_max{0};
+
+  /// One entry of pulse times for each preprocessor
+  std::vector<boost::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
 
 private:
   /// Map detector IDs to event lists.
