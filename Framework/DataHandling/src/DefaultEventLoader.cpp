@@ -87,8 +87,8 @@ DefaultEventLoader::setupChunking(std::vector<std::string> &bankNames,
   if (chunk !=
       EMPTY_INT()) // We are loading part - work out the bank number range
   {
-    const size_t total_events =
-        std::accumulate(bankNumEvents.cbegin(), bankNumEvents.cend(), 0);
+    const size_t total_events = std::accumulate(
+        bankNumEvents.cbegin(), bankNumEvents.cend(), static_cast<size_t>(0));
     eventsPerChunk = total_events / totalChunks;
     // Sort banks by size
     size_t tmp;
