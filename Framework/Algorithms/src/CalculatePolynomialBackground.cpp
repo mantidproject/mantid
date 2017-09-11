@@ -17,7 +17,7 @@ namespace {
 namespace Prop {
 constexpr char *INPUT_WS = "InputWorkspace";
 constexpr char *OUTPUT_WS = "OutputWorkspace";
-constexpr char *POLY_ORDER = "PolynomeOrder";
+constexpr char *POLY_DEGREE = "Degree";
 constexpr char *XRANGES = "XRanges";
 }
 
@@ -30,9 +30,9 @@ std::vector<double> invertRanges(const std::vector<double> &ranges) {
 }
 
 std::string makeFunctionString(const std::vector<double> &parameters) {
-  const auto order = parameters.size() - 1;
+  const auto degree = parameters.size() - 1;
   std::ostringstream s;
-  switch (order) {
+  switch (degree) {
   case 0:
     s << "name=FlatBackground";
     break;
@@ -43,10 +43,10 @@ std::string makeFunctionString(const std::vector<double> &parameters) {
     s << "name=Quadratic";
     break;
   default:
-    s << "name=Polynomial,n=" << order;
+    s << "name=Polynomial,n=" << degree;
   }
-  for (size_t o = 0; o <= order; ++o) {
-    s << ',' << 'A' << o << '=' << parameters[o];
+  for (size_t d = 0; d <= degree; ++d) {
+    s << ',' << 'A' << d << '=' << parameters[d];
   }
   return s.str();
 }
@@ -92,7 +92,7 @@ void CalculatePolynomialBackground::init() {
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::OUTPUT_WS, "",
                                                              Kernel::Direction::Output),
       "A workspace containing the fitted background.");
-  declareProperty(Prop::POLY_ORDER, 0, nonnegativeInt, "Order of the polynome to fit to the input workspace.");
+  declareProperty(Prop::POLY_DEGREE, 0, nonnegativeInt, "Degree of the fitted polynomial.");
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(Prop::XRANGES, std::vector<double>(), orderedPairs), "A list of fitting ranges given as pairs of X values.");
 }
 
@@ -103,8 +103,8 @@ void CalculatePolynomialBackground::exec() {
   API::MatrixWorkspace_sptr inWS = getProperty(Prop::INPUT_WS);
 
   API::MatrixWorkspace_sptr outWS{DataObjects::create<DataObjects::Workspace2D>(*inWS)};
-  const auto polyOrder = static_cast<size_t>(static_cast<int>(getProperty(Prop::POLY_ORDER)));
-  const std::vector<double> initialParams(polyOrder + 1, 0.1);
+  const auto polyDegree = static_cast<size_t>(static_cast<int>(getProperty(Prop::POLY_DEGREE)));
+  const std::vector<double> initialParams(polyDegree + 1, 0.1);
   const auto fitFunction = makeFunctionString(initialParams);
   const auto nHistograms = static_cast<int64_t>(inWS->getNumberHistograms());
   const auto nBins = inWS->blocksize();
@@ -121,8 +121,8 @@ void CalculatePolynomialBackground::exec() {
     fit->setProperty("CreateOutput", true);
     fit->executeAsChildAlg();
     API::ITableWorkspace_sptr fitResult = fit->getProperty("OutputParameters");
-    std::vector<double> parameters(polyOrder + 1);
-    std::vector<double> paramErrors(polyOrder + 1);
+    std::vector<double> parameters(polyDegree + 1);
+    std::vector<double> paramErrors(polyDegree + 1);
     for (size_t row = 0; row < parameters.size(); ++row) {
       parameters[row] = fitResult->cell<double>(row, 1);
       paramErrors[row] = fitResult->cell<double>(row, 2);
@@ -132,7 +132,7 @@ void CalculatePolynomialBackground::exec() {
     // We want bkg to directly write to the output workspace.
     double *bkgY = const_cast<double *>(outWS->mutableY(i).rawData().data());
     bkg->function1D(bkgY, outWS->points(i).rawData().data(), nBins);
-    API::BasicJacobian jacobian{nBins, polyOrder + 1};
+    API::BasicJacobian jacobian{nBins, polyDegree + 1};
     bkg->functionDeriv1D(&jacobian, outWS->points(i).rawData().data(), nBins);
     for (size_t j = 0; j < nBins; ++j) {
       double uncertainty{0.0};
@@ -147,17 +147,23 @@ void CalculatePolynomialBackground::exec() {
 }
 
 std::pair<double, double> CalculatePolynomialBackground::totalRange(API::MatrixWorkspace &ws, const size_t wsIndex) const {
+  const auto minX = ws.x(wsIndex).front();
+  const auto maxX = ws.x(wsIndex).back();
   const std::vector<double> ranges = getProperty(Prop::XRANGES);
+  if (ranges.empty()) {
+    return std::pair<double, double>(minX, maxX);
+  }
   const auto minmaxIt = std::minmax_element(ranges.cbegin(), ranges.cend());
   const auto minEdge = *minmaxIt.first;
   const auto maxEdge = *minmaxIt.second;
-  const auto minX = ws.x(wsIndex).front();
-  const auto maxX = ws.x(wsIndex).back();
   return std::pair<double, double>(std::min(minEdge, minX), std::max(maxEdge, maxX));
 }
 
 std::vector<double> CalculatePolynomialBackground::includedRanges(const std::pair<double, double> &totalRange) const {
   std::vector<double> ranges = getProperty(Prop::XRANGES);
+  if (ranges.empty()) {
+    return {totalRange.first, totalRange.second};
+  }
   // Sort the range edges keeping the information whether the edge
   // 'starts' or 'ends' a range.
   enum class Edge { start, end };
