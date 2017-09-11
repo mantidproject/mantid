@@ -220,7 +220,7 @@ public:
     return std::move(m_mockProvider);
   }
 
-  MOCK_CONST_METHOD2(fromPostprocessorNameProxy, void(const QString &, GenericDataProcessorPresenter &);
+  MOCK_CONST_METHOD2(fromPostprocessorNameProxy, void(const QString &, GenericDataProcessorPresenter &));
 
 private:
   std::unique_ptr<DataProcessorCommandProvider> m_mockProvider;
