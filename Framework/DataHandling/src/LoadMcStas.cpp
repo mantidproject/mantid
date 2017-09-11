@@ -60,6 +60,7 @@ void LoadMcStas::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
+ *
  */
 void LoadMcStas::exec() {
 
@@ -212,20 +213,22 @@ void LoadMcStas::readEventData(
   // of the event workspaces
   int numEventEntriesProcessed(0);
   bool isAnyNeutrons = false;
-
   for (const auto &eventEntry : eventEntries) {
+      ++numEventEntriesProcessed;
     // create and prepare an event workspace ready to receive the mcstas events
     progInitial.report("Set up EventWorkspace");
     EventWorkspace_sptr eventWS(new EventWorkspace());
     // initialize, where create up front number of eventlists = number of
     // detectors
     eventWS->initialize(instrument->getNumberDetectors(), 1, 1);
+
     // Set the units
     eventWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     eventWS->setYUnit("Counts");
     // set the instrument
     eventWS->setInstrument(instrument);
     // assign detector ID to eventlists
+
 
     std::vector<detid_t> detIDs = instrument->getDetectorIDs();
 
@@ -236,6 +239,7 @@ void LoadMcStas::readEventData(
     }
     // the one is here for the moment for backward compatibility
     eventWS->rebuildSpectraMapping(true);
+
 
     // to store shortest and longest recorded TOF
     double shortestTOF(0.0);
@@ -276,10 +280,12 @@ void LoadMcStas::readEventData(
     }
     int64_t nNeutrons = id_info.dims[0];
     int64_t numberOfDataColumn = id_info.dims[1];
+
     if (nNeutrons && numberOfDataColumn != 6) {
       g_log.error() << "Event data in McStas nexus file expecting 6 columns\n";
       return;
     }
+
     if (!isAnyNeutrons && nNeutrons > 0)
       isAnyNeutrons = true;
 
@@ -360,7 +366,7 @@ void LoadMcStas::readEventData(
         }
       }
     } // end reading over number of blocks of an event dataset
-
+    eventWS->setTitle(dataName);
     // nxFile.getData(data);
     nxFile.closeData();
     nxFile.closeGroup();
@@ -377,9 +383,15 @@ void LoadMcStas::readEventData(
     std::string nameOfGroupWS = getProperty("OutputWorkspace");
     // Ensure the workspace names are unique, otherwise the workspaces
     // Overwrite each other in workspaceDataService
-    std::string nameUserSee = nameOfGroupWS + std::string("_EventWS_") +
-                              std::to_string(numEventEntriesProcessed);
-    ++numEventEntriesProcessed;
+      std::string nameUserSee;
+      if (numEventEntries == 1){
+          nameUserSee = "EventData_" + nameOfGroupWS;
+      }
+      else{
+          nameUserSee = std::string("EventData_") + nameOfGroupWS + "_" +
+                        std::to_string(numEventEntriesProcessed);
+      }
+
     std::string extraProperty =
         "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
     declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
@@ -389,7 +401,15 @@ void LoadMcStas::readEventData(
     // unique
 
     outputGroup->addWorkspace(eventWS);
+
+
+
+      // Set EventWSAll equal to eventWS if first, else add
   } // end reading over number of event datasets
+  // Create workspace Event_$WORKSPACEGROUP to contain sum of all event
+  // workspaces
+  // If only one EventData, then only Event_$WORKSPACEGROUP is added to the
+  // wkspGroup
 }
 
 /**
