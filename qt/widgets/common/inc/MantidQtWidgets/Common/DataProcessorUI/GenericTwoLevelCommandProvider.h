@@ -4,6 +4,8 @@ namespace MantidWidgets {
 class GenericTwoLevelCommandProvider : public CommandProviderBase {
 public:
   GenericTwoLevelCommandProvider(GenericDataProcessorPresenter& presenter);
+  GenericTwoLevelCommandProvider(const GenericTwoLevelCommandProvider&)= delete;
+  GenericTwoLevelCommandProvider& operator=(const GenericTwoLevelCommandProvider&)= delete;
   CommandIndex indexOfCommand(TableAction action) const override;
   CommandIndices getModifyingTableCommands() const override;
   CommandIndex indexOfCommand(EditAction action) const override;
