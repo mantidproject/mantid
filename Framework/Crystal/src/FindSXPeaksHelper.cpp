@@ -122,8 +122,8 @@ bool SXPeak::compare(const SXPeak &rhs, double tolerance) const {
 }
 
 bool SXPeak::compare(const SXPeak &rhs, const double xTolerance,
-                     const double phiTolerance,
-                     const double thetaTolerance, bool tofUnits) const {
+                     const double phiTolerance, const double thetaTolerance,
+                     bool tofUnits) const {
 
   const auto x_1 = (tofUnits) ? _t : _d_spacing;
   const auto x_2 = (tofUnits) ? rhs._t : rhs._d_spacing;
@@ -364,7 +364,7 @@ double PeakFindingStrategy::convertToTOF(const double xValue,
   } else {
     // else if we're using d-spacing, convert the point to TOF
     m_unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex),
-         m_spectrumInfo.twoTheta(workspaceIndex), 0, 0, 0);
+                       m_spectrumInfo.twoTheta(workspaceIndex), 0, 0, 0);
     return m_unit->singleToTOF(xValue);
   }
 }

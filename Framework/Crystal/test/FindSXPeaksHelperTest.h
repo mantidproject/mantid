@@ -350,7 +350,8 @@ public:
     TSM_ASSERT("The peaks should not be the same", !result46)
   }
 
-  void testGivenWorkspaceInDSpacingWhenAbsoluteComparisonThatCorrectNumberOfPeaks() {
+  void
+  testGivenWorkspaceInDSpacingWhenAbsoluteComparisonThatCorrectNumberOfPeaks() {
     // GIVEN
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 2);

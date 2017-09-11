@@ -103,7 +103,8 @@ private:
   void reducePeakList(const peakvector &, Mantid::API::Progress &progress);
 
   // Check if this workspace has units of TOF
-  bool workspaceHasTOFUnits(Mantid::API::MatrixWorkspace_const_sptr workspace) const;
+  bool
+  workspaceHasTOFUnits(Mantid::API::MatrixWorkspace_const_sptr workspace) const;
 
   /// The value in X to start the search from
   double m_MinRange;

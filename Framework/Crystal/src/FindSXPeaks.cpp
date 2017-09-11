@@ -327,8 +327,8 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   }
 }
 
-bool FindSXPeaks::workspaceHasTOFUnits(MatrixWorkspace_const_sptr workspace) const
-{
+bool FindSXPeaks::workspaceHasTOFUnits(
+    MatrixWorkspace_const_sptr workspace) const {
   const auto xAxis = workspace->getAxis(0);
   const auto unitID = xAxis->unit()->unitID();
   return unitID == "TOF";
