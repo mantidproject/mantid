@@ -75,13 +75,21 @@ SXPeak::SXPeak(double t, double phi, double intensity,
                                 std::to_string(wsIndex) +
                                 " doesn't have detectors");
   }
+
+  const auto l1 = spectrumInfo.l1();
+  const auto l2 = spectrumInfo.l2(_wsIndex);
+
   _th2 = spectrumInfo.twoTheta(_wsIndex);
-  _Ltot = spectrumInfo.l1() + spectrumInfo.l2(_wsIndex);
+  _Ltot = l1 + l2;
   if (_Ltot < 0) {
     throw std::invalid_argument("SXPeak: Cannot have detector distance < 0");
   }
   _detId = spectrumInfo.detector(_wsIndex).getID();
   npixels = 1;
+
+  const auto unit = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+  unit->initialize(l1, l2, _th2, 0, 0, 0);
+  _d_spacing = unit->singleFromTOF(_t);
 
   const auto samplePos = spectrumInfo.samplePosition();
   const auto sourcePos = spectrumInfo.sourcePosition();
@@ -113,10 +121,14 @@ bool SXPeak::compare(const SXPeak &rhs, double tolerance) const {
   return true;
 }
 
-bool SXPeak::compare(const SXPeak &rhs, const double tofTolerance,
+bool SXPeak::compare(const SXPeak &rhs, const double xTolerance,
                      const double phiTolerance,
-                     const double thetaTolerance) const {
-  if (std::abs(_t - rhs._t) > tofTolerance) {
+                     const double thetaTolerance, bool tofUnits) const {
+
+  const auto x_1 = (tofUnits) ? _t : _d_spacing;
+  const auto x_2 = (tofUnits) ? rhs._t : rhs._d_spacing;
+
+  if (std::abs(x_1 - x_2) > xTolerance) {
     return false;
   }
 
@@ -702,9 +714,9 @@ bool RelativeCompareStrategy::compare(const SXPeak &lhs,
 
 AbsoluteCompareStrategy::AbsoluteCompareStrategy(
     const double xUnitResolution, const double phiResolution,
-    const double twoThetaResolution)
+    const double twoThetaResolution, const bool tofUnits)
     : m_xUnitResolution(xUnitResolution), m_phiResolution(phiResolution),
-      m_twoThetaResolution(twoThetaResolution) {
+      m_twoThetaResolution(twoThetaResolution), m_tofUnits(tofUnits) {
   // Convert the input from degree to radians
   constexpr double rad2deg = M_PI / 180.;
   m_phiResolution *= rad2deg;
@@ -714,7 +726,7 @@ AbsoluteCompareStrategy::AbsoluteCompareStrategy(
 bool AbsoluteCompareStrategy::compare(const SXPeak &lhs,
                                       const SXPeak &rhs) const {
   return lhs.compare(rhs, m_xUnitResolution, m_phiResolution,
-                     m_twoThetaResolution);
+                     m_twoThetaResolution, m_tofUnits);
 }
 
 } // namespace FindSXPeaksHelper

@@ -39,8 +39,9 @@ public:
 
   /// Object comparison. Note that the tolerances are absolute and there is one
   /// per trait.
-  bool compare(const SXPeak &rhs, const double tofTolerance,
-               const double phiTolerance, const double thetaTolerance) const;
+  bool compare(const SXPeak &rhs, const double xTolerance,
+               const double phiTolerance, const double thetaTolerance,
+               const bool tofUnits = true) const;
 
   /// Getter for LabQ
   Mantid::Kernel::V3D getQ() const;
@@ -67,6 +68,8 @@ public:
 private:
   /// TOF
   double _t;
+  /// d-spacing
+  double _d_spacing;
   /// 2 * theta
   double _th2;
   /// PSI angle
@@ -229,10 +232,12 @@ class DLLExport AbsoluteCompareStrategy : public CompareStrategy {
 public:
   AbsoluteCompareStrategy(const double tofResolution,
                           const double phiResolution,
-                          const double twoThetaResolution);
+                          const double twoThetaResolution,
+                          const bool tofUnits = true);
   bool compare(const SXPeak &lhs, const SXPeak &rhs) const override;
 
 private:
+  const bool m_tofUnits;
   const double m_xUnitResolution;
   double m_phiResolution;
   double m_twoThetaResolution;
