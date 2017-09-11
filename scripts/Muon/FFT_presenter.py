@@ -52,7 +52,7 @@ class FFTPresenter(object):
             self.view.addRaw(FFTInputs,"OutputWorkspace")
         self.alg.FFTAlg(FFTInputs)
  
-   def get_FFT_input(self):
+    def get_FFT_input(self):
         FFTInputs=self.view.initFFTInput()
         if  self.view.isAutoShift():
             FFTInputs["AutoShift"]=True

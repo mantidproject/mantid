@@ -9,7 +9,7 @@ class FFTModel(object):
         self.name="FFT"
 
     def preAlg(self,preInputs):
-        preAlg=mantid.AlgorithmManager.create("FFTPreProcessing")
+        preAlg=mantid.AlgorithmManager.create("PaddingAndApodization")
         preAlg.initialize()
         preAlg.setChild(True)
         for name,value in iteritems(preInputs):
