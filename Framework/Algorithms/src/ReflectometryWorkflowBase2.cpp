@@ -630,10 +630,10 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(
 /**
 * Get the value of theta from a named log value
 *
-* @param inputWs : the input workspace
-* @param logName : the name of the log value to use
-* @return : theta found in the logs
-* @throw: NotFoundError if 'Theta' was not found.
+* @param inputWs :: the input workspace
+* @param logName :: the name of the log value to use
+* @return :: the value of theta found from the logs
+* @throw :: NotFoundError if the log value was not found
 */
 double
 ReflectometryWorkflowBase2::getThetaFromLogs(MatrixWorkspace_sptr inputWs,
