@@ -179,8 +179,6 @@ private:
 
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
-  void createWorkspaceIndexMaps(const bool monitors,
-                                const std::vector<std::string> &bankNames);
   void loadEvents(API::Progress *const prog, const bool monitors);
   void createSpectraMapping(
       const std::string &nxsfile, const bool monitorsOnly,
@@ -194,8 +192,9 @@ private:
   void setTimeFilters(const bool monitors);
 
   /// Load a spectra mapping from the given file
-  bool loadSpectraMapping(const std::string &filename, const bool monitorsOnly,
-                          const std::string &entry_name);
+  bool loadISISVMSSpectraMapping(const std::string &filename,
+                                 const bool monitorsOnly,
+                                 const std::string &entry_name);
 
   /// ISIS specific methods for dealing with wide events
   void loadTimeOfFlight(EventWorkspaceCollection_sptr WS,

@@ -490,13 +490,6 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
   return numEvents;
 }
 
-void LoadEventNexus::createWorkspaceIndexMaps(
-    const bool monitors, const std::vector<std::string> &bankNames) {
-  // Create the required spectra mapping so that the workspace knows what to pad
-  // to
-  createSpectraMapping(m_filename, monitors, bankNames);
-}
-
 /** Load the instrument from the nexus file
 *
 * @param nexusfilename :: The name of the nexus file being loaded
@@ -793,7 +786,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     // Set the binning axis using this.
     m_ws->setAllX(axis);
 
-    createWorkspaceIndexMaps(monitors, std::vector<std::string>());
+    createSpectraMapping(m_filename, monitors, std::vector<std::string>());
     return;
   }
 
@@ -845,7 +838,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   //----------------- Pad Empty Pixels -------------------------------
-  createWorkspaceIndexMaps(monitors, someBanks);
+  createSpectraMapping(m_filename, monitors, someBanks);
 
   // Set all (empty) event lists as sorted by pulse time. That way, calling
   // SortEvents will not try to sort these empty lists.
@@ -1120,7 +1113,8 @@ void LoadEventNexus::createSpectraMapping(
     }
 
   } else {
-    spectramap = loadSpectraMapping(nxsfile, monitorsOnly, m_top_entry_name);
+    spectramap =
+        loadISISVMSSpectraMapping(nxsfile, monitorsOnly, m_top_entry_name);
     // Did we load one? If so then the event ID is the spectrum number and not
     // det ID
     if (spectramap)
@@ -1322,9 +1316,9 @@ void LoadEventNexus::runLoadMonitors() {
 * @param entry_name :: name of the NXentry to open.
 * @returns True if the mapping was loaded or false if the block does not exist
 */
-bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
-                                        const bool monitorsOnly,
-                                        const std::string &entry_name) {
+bool LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
+                                               const bool monitorsOnly,
+                                               const std::string &entry_name) {
   const std::string vms_str = "/isis_vms_compat";
   try {
     g_log.debug() << "Attempting to load custom spectra mapping from '"
