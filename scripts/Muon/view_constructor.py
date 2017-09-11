@@ -3,12 +3,14 @@ from __future__ import (absolute_import, division, print_function)
 from Muon import FFT_view
 from Muon import MaxEnt_view
 from Muon import transform_selection_view
+
 """
  simple class to create a single object
  containing all of the views.
  Only need to pass a single object to all
  presenters
 """
+
 
 class viewConstructor(object):
 

@@ -12,7 +12,6 @@ from Muon import transform_presenter
 class frequencyDomainAnalysisGui(QtGui.QMainWindow):
     def __init__(self,parent=None):
         super(frequencyDomainAnalysisGui,self).__init__(parent)
- 
         groupedViews = view_constructor.viewConstructor(True,self)
         groupedModels = model_constructor.modelConstructor(True)
         view =transform_view.transformView(groupedViews,self)
