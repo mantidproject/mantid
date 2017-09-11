@@ -1,9 +1,6 @@
 #ifndef MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
 #define MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
