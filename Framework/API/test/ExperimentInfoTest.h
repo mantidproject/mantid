@@ -491,6 +491,7 @@ public:
     std::unordered_set<std::string> idfIdentifiers;
 
     boost::regex regex(".*_Definition.*\\.xml", boost::regex_constants::icase);
+    boost::regex regexElastic(".*_Definition_elastic.*\\.xml", boost::regex_constants::icase);
     Poco::DirectoryIterator end_iter;
     for (Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString(
              "instrumentDefinition.directory"));
@@ -515,7 +516,10 @@ public:
         else
           ft.to.setFromISO8601("2100-01-01T00:00:00");
 
-        idfFiles.emplace(l_filenamePart.substr(0, found), ft);
+        if (boost::regex_match(l_filenamePart, regexElastic))
+          idfFiles.emplace(l_filenamePart.substr(0, found) + "_elastic", ft);
+        else
+          idfFiles.emplace(l_filenamePart.substr(0, found), ft);
         idfIdentifiers.insert(l_filenamePart.substr(0, found));
       }
     }
