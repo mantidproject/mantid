@@ -319,7 +319,7 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
   // Add fit specific suffix
   const auto bgType = backgroundString();
   const auto fitType = fitTypeString();
-  const auto m_fittedType = m_uiForm.cbFitType->currentText();
+  m_fittedType = m_uiForm.cbFitType->currentText();
   outputWSName += "conv_";
   outputWSName += fitType;
   outputWSName += bgType;
