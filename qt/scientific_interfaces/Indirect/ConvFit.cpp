@@ -1192,24 +1192,39 @@ void ConvFit::updatePlot() {
   }
 
   // If there is a result workspace plot then plot it
-  const auto groupName = m_baseName.toStdString() + "_Workspaces";
+  const auto baseGroupName = m_baseName.toStdString() + "_Workspaces";
+  const auto singleGroupName = m_singleFitOutputName.toStdString() + "_Workspaces";
 
-  if (AnalysisDataService::Instance().doesExist(groupName)) {
-    WorkspaceGroup_sptr outputGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-    if (specNo - m_runMin >= static_cast<int>(outputGroup->size()))
-      return;
-    if ((specNo - m_runMin) >= 0) {
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          outputGroup->getItem(specNo - m_runMin));
-      if (ws) {
-        m_previewPlotData = ws;
-        m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
-        m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
-        if (m_uiForm.ckPlotGuess->isChecked()) {
-          m_uiForm.ppPlot->removeSpectrum("Guess");
-          m_uiForm.ckPlotGuess->setChecked(false);
-        }
+  if (AnalysisDataService::Instance().doesExist(baseGroupName)) {
+    plotOutput(baseGroupName, specNo);
+  }
+  else if (AnalysisDataService::Instance().doesExist(singleGroupName)) {
+    plotOutput(singleGroupName, specNo);
+  }
+}
+
+/*
+ * Plots the specified spectrum of the output group workspace witht the specified name; 
+ * created from Convolution Fitting.
+ *
+ * @param outputWsName  The name of the output workspace whose data to plot.
+ * @param specNo        The spectrum number to plot from the output workspace.
+ */
+void ConvFit::plotOutput(std::string const& outputWsName, int specNo) {
+  WorkspaceGroup_sptr outputGroup =
+    AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName);
+  if (specNo - m_runMin >= static_cast<int>(outputGroup->size()))
+    return;
+  if ((specNo - m_runMin) >= 0) {
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      outputGroup->getItem(specNo - m_runMin));
+    if (ws) {
+      m_previewPlotData = ws;
+      m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
+      m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
+      if (m_uiForm.ckPlotGuess->isChecked()) {
+        m_uiForm.ppPlot->removeSpectrum("Guess");
+        m_uiForm.ckPlotGuess->setChecked(false);
       }
     }
   }

@@ -70,6 +70,7 @@ private:
                         const QMap<QString, double> &paramValues,
                         int startOffset = 0, int endOffset = 0);
   void updatePlotOptions();
+  void plotOutput(std::string const& outputWs, int specNo);
   void addParametersToTree(const QStringList &parameters,
                            const QString &currentFitFunction);
   void addSampleLogsToWorkspace(const std::string &workspaceName,
