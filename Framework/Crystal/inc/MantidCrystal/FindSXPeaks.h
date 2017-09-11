@@ -16,32 +16,20 @@ namespace Crystal {
 
 typedef std::vector<FindSXPeaksHelper::SXPeak> peakvector;
 
-/** Takes a 2D workspace as input and find the FindSXPeaksimum in each 1D
- spectrum.
-  The algorithm creates a new 1D workspace containing all FindSXPeaksima as
- well as their X boundaries
-  and error. This is used in particular for single crystal as a quick way to
- find strong peaks.
+/** Search detector space for single crystal peaks.
 
-  Required Properties:
-  <UL>
-  <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-  <LI> OutputWorkspace - The name of the workspace in which to store the
- result </LI>
-  </UL>
+  This algorithm takes a 2D workspace in TOF or d-spacing as input and uses
+  one of a selection of peak finding & background strategies to search for
+  peaks in each 1D spectrum. Peaks found in multiple spectra within a given
+  resolution of one another will be merged into a single peak.
 
-  Optional Properties (assume that you count from zero):
-  <UL>
-  <LI> Range_lower - The X value to search from (default 0)</LI>
-  <LI> Range_upper - The X value to search to (default FindSXPeaks)</LI>
-  <LI> StartSpectrum - Start spectrum number (default 0)</LI>
-  <LI> EndSpectrum - End spectrum number  (default FindSXPeaks)</LI>
-  </UL>
+  The algorithm creates a peaks workspace containing all of the information
+  about the found peaks. The returned peaks workspace will be unindexed.
 
   @author L C Chapon, ISIS, Rutherford Appleton Laboratory
   @date 11/08/2009
   Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
- Ridge National Laboratory & European Spallation Source
+  Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
