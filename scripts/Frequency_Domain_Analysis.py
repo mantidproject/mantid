@@ -1,6 +1,6 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from PyQt4.QtGui import *
+import PyQt4.QtGui as QtGui
 import sys
 
 from Muon import view_constructor
@@ -8,7 +8,7 @@ from Muon import model_constructor
 from Muon import transform_view
 from Muon import transform_presenter
 
-class frequencyDomainAnalysisGui(QMainWindow):
+class frequencyDomainAnalysisGui(QtGui.QMainWindow):
     def __init__(self,parent=None):
         super(frequencyDomainAnalysisGui,self).__init__(parent)
         groupedViews = view_constructor.viewConstructor(True,self)
