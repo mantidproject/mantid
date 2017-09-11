@@ -611,7 +611,8 @@ public:
     TS_ASSERT_DELTA(a1, -0.1001715899, 1e-3);
     TS_ASSERT_DELTA(a1 + function->getParameter("sp1.bg.A1"), 0.0, 1e-10);
 
-    auto new_fun = FunctionFactory::Instance().createInitialized(function->asString());
+    auto new_fun =
+        FunctionFactory::Instance().createInitialized(function->asString());
     TS_ASSERT(new_fun);
 
     auto &ads = API::AnalysisDataService::Instance();

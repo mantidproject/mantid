@@ -204,7 +204,7 @@ void CrystalFieldFunction::setParameter(const std::string &name,
   try {
     auto index = parameterIndex(name);
     setParameter(index, value, explicitlySet);
-  } catch (std::invalid_argument&) {
+  } catch (std::invalid_argument &) {
     // Allow ignoring peak parameters: the peak may not exist.
     std::smatch match;
     if (!std::regex_search(name, match, PEAK_ATTR_REGEX)) {
