@@ -2,6 +2,7 @@
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
 from mantid.kernel import Logger
@@ -133,6 +134,8 @@ class RunSetupWidget(BaseWidget):
                      self._calfile_browse)
         self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"),
                      self._charfile_browse)
+        self.connect(self._content.groupfile_browse, QtCore.SIGNAL("clicked()"),
+                     self._groupfile_browse)
         self.connect(self._content.pushButton_browseExpIniFile, QtCore.SIGNAL('clicked()'),
                      self.do_browse_ini_file)
         self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),
@@ -176,6 +179,7 @@ class RunSetupWidget(BaseWidget):
         self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-:]*'))
 
         self._content.calfile_edit.setText(state.calibfilename)
+        self._content.groupfile_edit.setText(state.groupfilename)
         self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
         self._content.charfile_edit.setText(state.charfilename)
         self._content.sum_checkbox.setChecked(state.dosum)
@@ -256,6 +260,7 @@ class RunSetupWidget(BaseWidget):
             pass
 
         s.calibfilename = self._content.calfile_edit.text()
+        s.groupfilename = self._content.groupfile_edit.text()
         s.exp_ini_file_name = str(self._content.lineEdit_expIniFile.text())
         s.charfilename = self._content.charfile_edit.text()
         s.dosum = self._content.sum_checkbox.isChecked()
@@ -320,9 +325,18 @@ class RunSetupWidget(BaseWidget):
     def _charfile_browse(self):
         """ Event handing for browsing calibrtion file
         """
-        fname = self.data_browse_dialog("*.txt;;*")
+        fname = self.data_browse_dialog("*.txt;;*", multi=True)
         if fname:
-            self._content.charfile_edit.setText(fname)
+            self._content.charfile_edit.setText(','.join(fname))
+
+        return
+
+    def _groupfile_browse(self):
+        ''' Event handling for browsing for a grouping file
+        '''
+        fname = self.data_browse_dialog(data_type='*.xml;;*.h5;;*')
+        if fname:
+            self._content.groupfile_edit.setText(fname)
 
         return
 

@@ -14,6 +14,9 @@ The algorithm calculates a normalization MD workspace for single crystal diffrac
 Trajectories of each detector in reciprocal space are calculated, and the flux is integrated between intersections with each
 MDBox. A brief introduction to the multi-dimensional data normalization can be found :ref:`here <MDNorm>`.
 
+The algorithm :ref:`MDNormSCDPreprocessIncoherent
+<algm-MDNormSCDPreprocessIncoherent>` can be used to process Vanadium
+data for the Solid Angle and Flux workspaces.
 
 Usage
 -----

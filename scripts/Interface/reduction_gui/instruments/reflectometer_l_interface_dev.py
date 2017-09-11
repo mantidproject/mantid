@@ -1,7 +1,8 @@
-from interface import InstrumentInterface
-
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.reflectometer.refl_reduction import DataReflWidget
 from reduction_gui.reduction.reflectometer.refl_reduction import REFLReductionScripter
+
 try:
     from reduction_gui.widgets.reflectometer.stitcher import StitcherWidget
     HAS_STITCHER = True

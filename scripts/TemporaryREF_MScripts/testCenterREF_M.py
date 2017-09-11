@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import mantid
 
@@ -19,6 +20,7 @@ def calculateCenter(ws):
     avez=(z*intensities).sum()/intensities.sum()
     rotation010=np.degrees(mantid.kernel.V3D(avex,0,avez).angle(mantid.kernel.V3D(0,0,1)))
     return (-avey,-rotation010)
+
 
 central=mantid.simpleapi.LoadEventNexus('REF_M_22715',NXentryName='entry-Off_Off')
 original=mantid.simpleapi.CloneWorkspace(central)

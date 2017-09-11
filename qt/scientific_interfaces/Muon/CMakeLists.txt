@@ -4,7 +4,6 @@ set ( SRC_FILES
 	ALCBaselineModellingView.cpp
 	ALCDataLoadingPresenter.cpp
 	ALCDataLoadingView.cpp
-	ALCHelper.cpp
 	ALCInterface.cpp
 	ALCLatestFileFinder.cpp
 	ALCPeakFittingModel.cpp
@@ -31,13 +30,12 @@ set ( INC_FILES
 	ALCBaselineModellingView.h
 	ALCDataLoadingPresenter.h
 	ALCDataLoadingView.h
-	ALCHelper.h
 	ALCInterface.h
 	ALCLatestFileFinder.h
 	ALCPeakFittingModel.h
 	ALCPeakFittingPresenter.h
 	ALCPeakFittingView.h
-    DllConfig.h
+        DllConfig.h
 	IALCBaselineModellingModel.h
 	IALCBaselineModellingView.h
 	IALCDataLoadingView.h
@@ -56,7 +54,7 @@ set ( INC_FILES
 	MuonSequentialFitDialog.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     ALCBaselineModellingPresenter.h
     ALCBaselineModellingView.h
     ALCDataLoadingPresenter.h
@@ -77,7 +75,7 @@ set ( MOC_FILES
     MuonSequentialFitDialog.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
     ALCBaselineModellingView.ui
     ALCDataLoadingView.ui
     ALCInterface.ui
@@ -86,15 +84,17 @@ set ( UI_FILES
     MuonSequentialFitDialog.ui
 )
 
-include_directories ( ../../qt/widgets/common/inc )
-
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS ${extra_options} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MultiDatasetFit )
+include_directories (
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}/../MultiDatasetFit
+  ${CMAKE_CURRENT_LIST_DIR}/../MultiDatasetFit
+)
+
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers( PrecompiledHeader.h  ALL_SRC )
