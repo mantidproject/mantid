@@ -106,9 +106,13 @@ public:
   virtual QString getClipboard() const = 0;
   virtual QString getProcessInstrument() const = 0;
   virtual DataProcessorPresenter *getPresenter() const = 0;
+  virtual QString getCurrentInstrument() const = 0;
 
   // Force re-processing of rows
   virtual void setForcedReProcessing(bool forceReProcessing) = 0;
+  // Methods to emit signals
+  virtual void emitProcessClicked() = 0;
+  virtual void emitProcessingFinished() = 0;
 };
 }
 }

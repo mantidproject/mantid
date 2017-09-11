@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 from sans.state.state_base import (StateBase, BoolParameter, StringParameter, StringWithNoneParameter,
                                    ClassTypeListParameter, rename_descriptor_names)
-from sans.common.enums import (SaveType, SANSInstrument)
+from sans.common.enums import (SaveType, SANSFacility)
 from sans.state.automatic_setters import (automatic_setters)
 
 
@@ -46,10 +46,10 @@ class StateSaveBuilder(object):
 
 
 def get_save_builder(data_info):
-    # The data state has most of the information that we require to define the move. For the factory method, only
-    # the instrument is of relevance.
-    instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    # The data state has most of the information that we require to define the save. For the factory method, only
+    # the facility/instrument is of relevance.
+    facility = data_info.facility
+    if facility is SANSFacility.ISIS:
         return StateSaveBuilder()
     else:
         raise NotImplementedError("StateSaveBuilder: Could not find any valid save builder for the "

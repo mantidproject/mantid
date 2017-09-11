@@ -531,13 +531,6 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
       itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
   options.groupPairName = table->item(tableRow, 0)->text().toStdString();
   m_groupPairName = table->item(tableRow, 0)->text().toStdString();
-  if (plotType == Muon::PlotType::Asymmetry &&
-      m_dataLoader.isContainedIn(options.groupPairName,
-                                 options.grouping.groupNames)) {
-    setTFAsymm(Muon::TFAsymmState::Enabled); // turn TFAsymm on
-  } else {
-    setTFAsymm(Muon::TFAsymmState::Disabled); // turn TFAsymm off
-  }
   return m_dataLoader.createAnalysisWorkspace(loadedWS, options);
 }
 
@@ -2186,9 +2179,6 @@ void MuonAnalysis::loadFittings() {
   // Set multi fit mode on/off as appropriate
   const auto &multiFitState = m_optionTab->getMultiFitState();
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
-  // Set TF Asymmetry mode on/off as appropriate
-  const auto &TFAsymmState = m_optionTab->getTFAsymmState();
-  setTFAsymm(TFAsymmState);
 }
 /**
 * Handle "groups" selected/deselected
@@ -2552,16 +2542,23 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // repeat setting the fitting ranges as the above code can set them to an
     // unwanted default value
     setFittingRanges(xmin, xmax);
+    // work out if data is a group or pair
+    Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
+    m_uiForm.fitBrowser->setGroupNames(options.grouping.groupNames);
+    auto isItGroup = m_dataLoader.isContainedIn(m_groupPairName,
+                                                options.grouping.groupNames);
     // make sure groups are not on if single fit
     if (m_optionTab->getMultiFitState() == Muon::MultiFitState::Disabled) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
-      Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
-      m_uiForm.fitBrowser->setGroupNames(options.grouping.groupNames);
-      auto isItGroup = m_dataLoader.isContainedIn(m_groupPairName,
-                                                  options.grouping.groupNames);
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
       m_uiForm.fitBrowser->setAllPeriods();
+    }
+    if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
+        isItGroup) {
+      m_uiForm.fitBrowser->setTFAsymm(true);
+    } else {
+      m_uiForm.fitBrowser->setTFAsymm(false);
     }
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
@@ -2612,8 +2609,6 @@ void MuonAnalysis::connectAutoUpdate() {
           SLOT(updateCurrentPlotStyle()));
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
-  connect(m_optionTab, SIGNAL(TFAsymmStateChanged(int)), this,
-          SLOT(changedTFAsymmCheckbox(int)));
 }
 
 /**
@@ -3036,8 +3031,7 @@ void MuonAnalysis::nowDataAvailable() {
 }
 
 void MuonAnalysis::openDirectoryDialog() {
-  MantidQt::API::ManageUserDirectories *ad =
-      new MantidQt::API::ManageUserDirectories(this);
+  auto ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
 }
@@ -3171,34 +3165,6 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
-}
-/**
-* Called when the "TF Asymmetry" checkbox is changed (settings tab.)
-* Forward this to the fit function presenter.
-*/
-void MuonAnalysis::changedTFAsymmCheckbox(int state) {
-  const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
-                                              ? Muon::TFAsymmState::Enabled
-                                              : Muon::TFAsymmState::Disabled;
-  if (TFAsymmState == Muon::TFAsymmState::Enabled) {
-    m_fitDataPresenter->setTFAsymmState(true);
-  } else {
-    m_fitDataPresenter->setTFAsymmState(false);
-  }
-  setTFAsymm(TFAsymmState);
-}
-/**
-* Called when the "TF Asymmetry" is needed (from home tab)
-* Forward this to the fit function presenter.
-*/
-void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
-  // check the TFAsymm box
-  if (TFAsymmState == Muon::TFAsymmState::Enabled) {
-    m_uiForm.chkTFAsymm->setChecked(true);
-  } else {
-    m_uiForm.chkTFAsymm->setChecked(false);
-  }
-  m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
 }
 /**
  * Update the fit data presenter with current overwrite setting

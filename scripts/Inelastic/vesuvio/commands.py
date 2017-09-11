@@ -152,8 +152,9 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         ms.DeleteWorkspace(corrections_fit_name)
         corrections_args['FitParameters'] = pre_correction_pars_name
 
-        # Add the multiple scattering arguments
-        corrections_args.update(flags['ms_flags'])
+        if flags.get('ms_enabled', True):
+            # Add the multiple scattering arguments
+            corrections_args.update(flags['ms_flags'])
 
         corrected_data_name = runs + "_tof_corrected" + suffix
         linear_correction_fit_params_name = runs + "_correction_fit_scale" + suffix
@@ -173,7 +174,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                               Masses=mass_values,
                               MassProfiles=profiles,
                               IntensityConstraints=intensity_constraints,
-                              MultipleScattering=True,
+                              MultipleScattering=flags.get('ms_enabled', True),
                               GammaBackgroundScale=flags.get('fixed_gamma_scaling', 0.0),
                               ContainerScale=flags.get('fixed_container_scaling', 0.0),
                               **corrections_args)

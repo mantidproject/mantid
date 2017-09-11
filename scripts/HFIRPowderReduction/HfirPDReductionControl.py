@@ -5,11 +5,17 @@
 # Key Words: FUTURE
 #
 ############################################################################
+from __future__ import (absolute_import, division, print_function)
 import os
-import urllib.request
-import urllib.error
-import urllib.parse
+try: # python3
+    from urllib.request import urlopen
+    from urllib.error import HTTPError
+except ImportError:
+    from urllib2 import urlopen
+    from urllib2 import HTTPError
+
 import math
+from six.moves import range
 
 import numpy
 
@@ -1114,9 +1120,9 @@ def downloadFile(url, localfilepath):
     """
     # open URL
     try:
-        response = urllib.request.urlopen(url)
+        response = urlopen(url)
         wbuf = response.read()
-    except urllib.error.HTTPError as e:
+    except HTTPError as e:
         # Unable to download file
         if str(e).count('HTTP Error 404') == 1:
             return (False, str(e))

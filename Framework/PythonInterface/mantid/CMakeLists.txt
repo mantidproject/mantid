@@ -15,6 +15,7 @@ set ( OUTPUT_DIR ${PYTHON_PKG_ROOT} )
 set ( PY_FILES
   __init__.py
   simpleapi.py
+  fitfunctions.py
 )
 
 copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
@@ -41,10 +42,11 @@ add_dependencies ( PythonKernelModule PythonModule ) # Ensure the module files a
 add_subdirectory ( geometry )
 add_subdirectory ( api )
 add_subdirectory ( dataobjects )
+add_subdirectory ( _plugins )
 
 # Create an overall target
 add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonGeometryModule 
-                    PythonAPIModule PythonDataObjectsModule )
+                    PythonAPIModule PythonDataObjectsModule PythonCurveFittingModule )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 
 ###########################################################################

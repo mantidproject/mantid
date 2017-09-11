@@ -353,6 +353,9 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         """
         log_binning = self.getProperty("LogBinning").value
         nbins = self.getProperty("NumberOfBins").value
+
+        # This code has been checked that it is using the correct property from the workspace
+        # it just so happens that this is not pointing to what it used to - see EQSANSLoad.cpp
         sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
         nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
         ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
@@ -400,5 +403,6 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
             if f_step-n_step>10e-10:
                 qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
             return qmin, -(math.pow(10.0,qstep)-1.0), qmax
+
 
 AlgorithmFactory.subscribe(EQSANSAzimuthalAverage1D)

@@ -60,5 +60,6 @@ class TeixeiraWater(IFunction1D):
             jacobian.set(i,1,h*(1.0-h*tau)/length)
             i += 1
 
+
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(TeixeiraWater)

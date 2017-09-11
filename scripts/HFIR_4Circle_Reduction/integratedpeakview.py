@@ -1,6 +1,7 @@
 #pylint: disable=W0403,R0904,R0903
+from __future__ import (absolute_import, division, print_function)
 import numpy
-import mplgraphicsview
+from HFIR_4Circle_Reduction import mplgraphicsview
 
 
 class IntegratedPeakView(mplgraphicsview.MplGraphicsView):

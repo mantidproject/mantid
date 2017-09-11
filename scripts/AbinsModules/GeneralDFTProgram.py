@@ -1,9 +1,16 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import logger
 import AbinsModules
+import six
+
+
+class GeneralDFTProgramName(type):
+    def __str__(self):
+        return self.__name__
 
 
 # noinspection PyMethodMayBeStatic
+@six.add_metaclass(GeneralDFTProgramName)
 class GeneralDFTProgram(object):
     """
     A general class which groups all methods which should be inherited or implemented by a DFT program used
@@ -52,7 +59,7 @@ class GeneralDFTProgram(object):
 
               The datasets should be a dictionary with the following entries:
 
-                        "frequencies"  - frequencies for all k-points grouped in one numpy.array
+                        "frequencies"  - frequencies for all k-points grouped in one numpy.array in cm^-1
 
                         "weights"      - weights of all k-points in one numpy.array
 
@@ -63,7 +70,7 @@ class GeneralDFTProgram(object):
 
                         "atomic_displacements" - atomic displacements for all atoms and all k-points in one numpy array
 
-                        "unit_cell"      -   numpy array with unit cell vectors
+                        "unit_cell"      -   numpy array with unit cell vectors in Angstroms
 
               The following structured datasets should be also defined:
 
@@ -82,8 +89,8 @@ class GeneralDFTProgram(object):
                                                           **Notice at the moment this parameter is not functional
                                                             in LoadCastep**
 
-                                               "fract_coord" - equilibrium position of atom; it has a form of numpy
-                                                               array with three floats
+                                               "coord" - equilibrium position of atom in Angstroms;
+                                                         it has a form of numpy array with three floats
 
                                                "mass" - mass of atom
 
