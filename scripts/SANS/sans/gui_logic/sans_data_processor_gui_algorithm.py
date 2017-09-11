@@ -43,6 +43,13 @@ def create_option_column_properties():
                                   default='',
                                   prefix='',
                                   property_type=float),
+             algorithm_list_entry(column_name="",
+                                  algorithm_property="Thickness",
+                                  description='The sample thickness.',
+                                  show_value=True,
+                                  default='',
+                                  prefix='',
+                                  property_type=float),
              ]
     return props
 

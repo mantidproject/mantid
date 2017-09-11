@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
 	src/CalculateMuonAsymmetry.cpp
+	src/CalculatePolynomialBackground.cpp
 	src/CalculateResolution.cpp
 	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
@@ -44,8 +45,8 @@ set ( SRC_FILES
 	src/Comment.cpp
 	src/CommutativeBinaryOperation.cpp
 	src/CompareWorkspaces.cpp
-        src/ConjoinXRuns.cpp
 	src/ConjoinWorkspaces.cpp
+	src/ConjoinXRuns.cpp
 	src/ConvertAxesToRealSpace.cpp
 	src/ConvertAxisByFormula.cpp
 	src/ConvertDiffCal.cpp
@@ -150,6 +151,7 @@ set ( SRC_FILES
 	src/GetEi.cpp
 	src/GetEi2.cpp
 	src/GetEiMonDet2.cpp
+	src/GetQsInQENSData.cpp
 	src/GetTimeSeriesLogInformation.cpp
 	src/GravitySANSHelper.cpp
 	src/GroupWorkspaces.cpp
@@ -161,7 +163,7 @@ set ( SRC_FILES
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
 	src/InterpolationOption.cpp
-        src/InvertMask.cpp
+	src/InvertMask.cpp
 	src/LineProfile.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
@@ -343,6 +345,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
+	inc/MantidAlgorithms/CalculatePolynomialBackground.h
 	inc/MantidAlgorithms/CalculateResolution.h
 	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
@@ -363,7 +366,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/CompareWorkspaces.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
-        inc/MantidAlgorithms/ConjoinXRuns.h
+	inc/MantidAlgorithms/ConjoinXRuns.h
 	inc/MantidAlgorithms/ConvertAxesToRealSpace.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
 	inc/MantidAlgorithms/ConvertDiffCal.h
@@ -469,6 +472,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GetEi.h
 	inc/MantidAlgorithms/GetEi2.h
 	inc/MantidAlgorithms/GetEiMonDet2.h
+	inc/MantidAlgorithms/GetQsInQENSData.h
 	inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
 	inc/MantidAlgorithms/GroupWorkspaces.h
@@ -480,7 +484,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InterpolationOption.h
-        inc/MantidAlgorithms/InvertMask.h
+	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/LineProfile.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
@@ -677,6 +681,7 @@ set ( TEST_FILES
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateMuonAsymmetryTest.h
+	CalculatePolynomialBackgroundTest.h
 	CalculateResolutionTest.h
 	CalculateSlitsTest.h
 	CalculateTransmissionBeamSpreaderTest.h
@@ -685,8 +690,8 @@ set ( TEST_FILES
 	ChainedOperatorTest.h
 	ChangeBinOffsetTest.h
 	ChangeLogTimeTest.h
-	ChangePulsetimeTest.h
 	ChangePulsetime2Test.h
+	ChangePulsetimeTest.h
 	ChangeTimeZeroTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
@@ -698,7 +703,7 @@ set ( TEST_FILES
 	CommutativeBinaryOperationTest.h
 	CompareWorkspacesTest.h
 	ConjoinWorkspacesTest.h
-        ConjoinXRunsTest.h
+	ConjoinXRunsTest.h
 	ConvertAxesToRealSpaceTest.h
 	ConvertAxisByFormulaTest.h
 	ConvertDiffCalTest.h
@@ -799,6 +804,7 @@ set ( TEST_FILES
 	GetEiMonDet2Test.h
 	GetEiTest.h
 	GetEiV1Test.h
+	GetQsInQENSDataTest.h
 	GetTimeSeriesLogInformationTest.h
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
@@ -809,7 +815,7 @@ set ( TEST_FILES
 	IntegrationTest.h
 	InterpolatingRebinTest.h
 	InterpolationOptionTest.h
-        InvertMaskTest.h
+	InvertMaskTest.h
 	LineProfileTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h

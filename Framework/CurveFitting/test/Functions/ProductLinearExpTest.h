@@ -4,13 +4,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/ProductLinearExp.h"
-#include "MantidCurveFitting/Functions/ExpDecay.h"
-#include "MantidCurveFitting/Functions/LinearBackground.h"
-#include "MantidCurveFitting/Functions/ProductFunction.h"
-#include "MantidCurveFitting/Jacobian.h"
+
+#include "MantidAPI/BasicJacobian.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/Functions/ExpDecay.h"
+#include "MantidCurveFitting/Functions/LinearBackground.h"
+#include "MantidCurveFitting/Functions/ProductFunction.h"
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -80,8 +81,8 @@ to check that the results are equal.
     FunctionDomain1DVector domain(xValues);
     FunctionValues valuesBenchmark(domain);
     FunctionValues valuesLinExpDecay(domain);
-    Mantid::CurveFitting::Jacobian jacobianNumerical(nResults, 4);
-    Mantid::CurveFitting::Jacobian jacobianLinExpDecay(nResults, 4);
+    Mantid::API::BasicJacobian jacobianNumerical(nResults, 4);
+    Mantid::API::BasicJacobian jacobianLinExpDecay(nResults, 4);
     // Peform function evaluations.
     benchmark.function(domain, valuesBenchmark);
     func.function(domain, valuesLinExpDecay);
@@ -201,7 +202,7 @@ public:
                   LinearIncrementingAssignment(0, 0.1));
     FunctionDomain1DVector domain(xValues);
 
-    Mantid::CurveFitting::Jacobian jacobian(nResults, 4);
+    Mantid::API::BasicJacobian jacobian(nResults, 4);
 
     ProductLinearExp func;
     TS_ASSERT_THROWS_NOTHING(func.functionDeriv(domain, jacobian));

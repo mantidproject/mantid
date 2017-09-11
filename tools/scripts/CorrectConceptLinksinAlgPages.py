@@ -48,6 +48,7 @@ concepts = ['Algorithm',
 def outputError(alg, algVersion, description, notes=""):
     print "%s, %i, %s, %s" % (alg, algVersion, description, notes)
 
+
 rstdir = r"C:\Mantid\Code\Mantid\docs\source\algorithms"
 conceptsPattern = {}
 for concept in concepts:
