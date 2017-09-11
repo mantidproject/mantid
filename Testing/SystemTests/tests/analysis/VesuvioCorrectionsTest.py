@@ -485,11 +485,12 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_ts_peak = 0.163213297496
         corrections_ms_peak = 0.00706346254234
-        corrections_ms_bin = 724
+        corrections_ts_bin  = 705
+        corrections_ms_bin = 735
         if _is_old_boost_version():
             corrections_ms_bin = 722
 
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, 458)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
 
         # Test Corrected Workspaces
@@ -497,19 +498,21 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         _validate_group_structure(self, corrected_wsg, 3)
         corrected_ts_peak = 0.24119589358
         corrected_ms_peak = 0.24119589358
+        corrected_ts_bin = 17
+        correction_ms_bin = 17
 
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, 325)
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, 220)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, corrected_ts_bin)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, correction_ms_bin)
 
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.226039019062
-        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 325)
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 17)
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
-        _validate_table_workspace(self, linear_params, 10, 3)
+        _validate_table_workspace(self, linear_params, 7, 3)
         expected_table_values = [0.1,0.0,1.0,'skip',0.0,1.0,'skip']
         _validate_table_values_top_to_bottom(self, linear_params, expected_table_values)
         tear_down()
