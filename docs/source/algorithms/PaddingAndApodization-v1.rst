@@ -2,12 +2,9 @@
 
 .. summary::
 
-Allows the user to generate data that has padding (extra measurements of zero) and/or apply an apodization function.
-
 .. alias::
 
 .. properties::
-
 
 Description
 -----------
