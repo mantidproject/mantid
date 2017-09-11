@@ -307,7 +307,6 @@ Kernel::V3D DetectorInfo::samplePosition() const {
 /// Returns L1 (distance from source to sample).
 double DetectorInfo::l1() const { return m_detectorInfo->l1(); }
 
-
 /// Returns a sorted vector of all detector IDs.
 const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
   return *m_detectorIDs;
