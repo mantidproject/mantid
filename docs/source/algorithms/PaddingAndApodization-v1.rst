@@ -2,12 +2,9 @@
 
 .. summary::
 
-Allows the user to generate data that has padding (extra measurements of zero) and/or apply an apodization function.
-
 .. alias::
 
 .. properties::
-
 
 Description
 -----------
@@ -39,7 +36,7 @@ Usage
    y = [100, 150, 50, 10, 5]
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
-   output=FFTPreProcessing(InputWorkspace=input,ApodizationFunction="Gaussian",DecayConstant=2.44,Padding=0,)
+   output=PaddingAndApodization(InputWorkspace=input,ApodizationFunction="Gaussian",DecayConstant=2.44,Padding=0,)
    print  "output: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
    
 Output:
@@ -57,7 +54,7 @@ Output:
    y = [100, 150, 50, 10, 5]
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
-   output=FFTPreProcessing(InputWorkspace=input,Padding=2,)
+   output=PaddingAndApodization(InputWorkspace=input,Padding=2,)
    print  "output: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
    
 Output:
@@ -75,7 +72,7 @@ Output:
    y = [100, 150, 50, 10, 5]
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
-   output=FFTPreProcessing(InputWorkspace=input,ApodizationFunction="Gaussian",DecayConstant=2.44,Padding=2,)
+   output=PaddingAndApodization(InputWorkspace=input,ApodizationFunction="Gaussian",DecayConstant=2.44,Padding=2,)
    print  "output: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
    
 Output:

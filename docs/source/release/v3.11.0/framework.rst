@@ -21,9 +21,11 @@ New
 ###
 
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` performs concatenation of the workspaces into a single one by handling the sample logs merging as in :ref:`MergeRuns <algm-MergeRuns>`.
+<<<<<<< HEAD
 - :ref:`FFTPreProcessing <algm-FFTPreProcessing-v1>` a new algorithm for padding data and adding an apodization function.
 - :ref:`LoadSESANS <algm-LoadSESANS>` Loading SESANS data to a MatrixWorkspace is now supported.
 - :ref:`SaveSESANS <algm-SaveSESANS>` Saving a workspace using the SESANS format is now supported.  
+- :ref:`PaddingAndApodization <algm-PaddingAndApodization-v1>` a new algorithm for padding data and adding an apodization function.
 
 Improved
 

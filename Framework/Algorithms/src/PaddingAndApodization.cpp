@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/FFTPreProcessing.h"
-#include "MantidAlgorithms/ApodizationFunctionHelper.h"
+#include "MantidAlgorithms/ApodizationFunctions.h"
+#include "MantidAlgorithms/PaddingAndApodization.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -25,12 +25,12 @@ using API::Progress;
 using std::size_t;
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(FFTPreProcessing)
+DECLARE_ALGORITHM(PaddingAndApodization)
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
-void FFTPreProcessing::init() {
+void PaddingAndApodization::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input 2D workspace.");
@@ -59,8 +59,7 @@ void FFTPreProcessing::init() {
 /** Executes the algorithm
  *
  */
-void FFTPreProcessing::exec() {
-
+void PaddingAndApodization::exec() {
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   auto numSpectra = inputWS->getNumberHistograms();
@@ -133,7 +132,7 @@ typedef double (*fptr)(const double time, const double decayConstant);
 * @param method :: [input] The name of the chosen function
 * @returns :: pointer to the function
 */
-fptr FFTPreProcessing::getApodizationFunction(const std::string method) {
+fptr PaddingAndApodization::getApodizationFunction(const std::string method) {
   if (method == "None") {
     return none;
   } else if (method == "Lorentz") {
@@ -151,7 +150,7 @@ fptr FFTPreProcessing::getApodizationFunction(const std::string method) {
 * @param decayConstant :: [input] the decay constant for apodization function
 * @returns :: Histogram of the apodized data
 */
-HistogramData::Histogram FFTPreProcessing::applyApodizationFunction(
+HistogramData::Histogram PaddingAndApodization::applyApodizationFunction(
     const HistogramData::Histogram &histogram, const double decayConstant,
     fptr function) {
   HistogramData::Histogram result(histogram);
@@ -177,8 +176,8 @@ HistogramData::Histogram FFTPreProcessing::applyApodizationFunction(
 * @returns :: Histogram of the padded data
 */
 HistogramData::Histogram
-FFTPreProcessing::addPadding(const HistogramData::Histogram &histogram,
-                             const int padding) {
+PaddingAndApodization::addPadding(const HistogramData::Histogram &histogram,
+                                  const int padding) {
   if (padding == 0) {
     return histogram;
   }

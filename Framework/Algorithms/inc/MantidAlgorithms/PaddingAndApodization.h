@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_FFTPreProcessing_H_
-#define MANTID_ALGORITHM_FFTPreProcessing_H_
+#ifndef MANTID_ALGORITHM_PADDINGANDAPODUIZTION_H_
+#define MANTID_ALGORITHM_PADDINGANDAPODUIZTION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -49,10 +49,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FFTPreProcessing : public API::Algorithm {
+class DLLExport PaddingAndApodization : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "FFTPreProcessing"; }
+  const std::string name() const override { return "PaddingAndApodization"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm applies apodization and/or padding to input data.";
@@ -79,4 +79,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_FFTPreProcessing_H_*/
+#endif /*MANTID_PADDINGANDAPODUIZTION_H_*/
