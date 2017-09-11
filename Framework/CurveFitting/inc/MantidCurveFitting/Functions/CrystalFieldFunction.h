@@ -178,12 +178,12 @@ private:
   void updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,
                       const ComplexFortranMatrix &wf,
-                      const ComplexFortranMatrix &ham, double temperature,
+                      double temperature,
                       double fwhm, size_t iSpec, size_t iFirst) const;
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
                        const ComplexFortranMatrix &wf, double temperature,
-                       API::FunctionValues &values, size_t iSpec,
+                       API::FunctionValues &values,
                        double intensityScaling) const;
   /// Build a physical property function.
   API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en,
