@@ -201,8 +201,16 @@ bool CrystalFieldFunction::hasParameter(const std::string &name) const {
 void CrystalFieldFunction::setParameter(const std::string &name,
                                         const double &value,
                                         bool explicitlySet) {
-  auto index = parameterIndex(name);
-  setParameter(index, value, explicitlySet);
+  try {
+    auto index = parameterIndex(name);
+    setParameter(index, value, explicitlySet);
+  } catch (std::invalid_argument&) {
+    // Allow ignoring peak parameters: the peak may not exist.
+    std::smatch match;
+    if (!std::regex_search(name, match, PEAK_ATTR_REGEX)) {
+      throw;
+    }
+  }
 }
 
 /// Set description of parameter by name.
