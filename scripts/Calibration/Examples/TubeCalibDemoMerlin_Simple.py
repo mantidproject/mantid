@@ -12,6 +12,8 @@
 # The workspace with calibrated instrument is saved to a Nexus file
 #
 
+from __future__ import absolute_import, division, print_function
+
 import tube
 from tube_calib_fit_params import TubeCalibFitParams
 import numpy
@@ -81,8 +83,8 @@ def CalibrateMerlin(RunNumber):
     print("Applied calibration")
 
     # == Save workspace ==
-    # SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Simple.py")
-    # print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
+    # mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoMerlinResult.nxs', "Result of Running TubeCalibDemoMerlin_Simple.py")
+    # print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs")
 
     # == Reset dafault instrument ==
     mantid.config['default.instrument'] = previousDefaultInstrument

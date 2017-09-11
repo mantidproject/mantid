@@ -13,3 +13,4 @@ class WORKSPACE_UNITS(object):
     enum_friendly_name = "workspace units"
     d_spacing = "dSpacing"
     tof = "TOF"
+    wavelength = "Wavelength"

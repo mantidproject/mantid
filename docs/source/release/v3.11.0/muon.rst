@@ -9,7 +9,8 @@ Interfaces
 ----------
 -  Added the Frequency Domain Analysis GUI. At present it is only able to transform data from real space to frequency space. 
 
-- Updated the TF asymmetry fit. It now works with multiple fitting. 
+- Updated the TF asymmetry fit. It now works with multiple fitting.
+- Moved the TF Asymmetry checkbox to the data analysis tab.  
 
 Muon Analysis
 #############
