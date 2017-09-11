@@ -78,12 +78,12 @@ Usage
 **Example: A simple spherical sample**
 
 .. testcode:: ExSimpleSpere
-    
+
     #setup the sample shape
     sphere = '''<sphere id="sample-sphere">
-          <centre x="0" y="0" z="0"/>
-          <radius val="0.1" />
-      </sphere>'''
+    <centre x="0" y="0" z="0"/>
+    <radius val="0.1" />
+    </sphere>'''
 
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     ws = ConvertUnits(ws,"Wavelength")
@@ -93,14 +93,21 @@ Usage
 
     #restrict the number of wavelength points to speed up the example
     wsOut = AbsorptionCorrection(ws, NumberOfWavelengthPoints=5, ElementSize=3)
+    wsCorrected = ws / wsOut
 
     print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+    print "Original y values: ", ws.readY(0)
+    print "Corrected y values: ", wsCorrected.readY(0)
 
 Output:
 
 .. testoutput:: ExSimpleSpere
 
     The created workspace has one entry for each spectra: 1
+    Original y values:  [  5.68751434   5.68751434  15.68751434   5.68751434   5.68751434
+       1.56242829]
+    Corrected y values:  [   818.30188422   2375.96165593  14211.52238463   9472.21381511
+      15718.79220638   5747.16759791]
 
 .. categories::
 
