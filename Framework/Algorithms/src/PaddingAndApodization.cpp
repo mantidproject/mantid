@@ -60,7 +60,6 @@ void PaddingAndApodization::init() {
  *
  */
 void PaddingAndApodization::exec() {
-
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   auto numSpectra = inputWS->getNumberHistograms();

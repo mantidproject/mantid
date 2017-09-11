@@ -37,7 +37,7 @@ IAlgorithm_sptr setUpAlg() {
   FFTPreProcess->initialize();
   FFTPreProcess->setChild(true);
   FFTPreProcess->setProperty("DecayConstant", 2.0);
-  FFTPreProcess->setProperty("OutputWorkspace", "FPaddingAndApodization_output");
+  FFTPreProcess->setProperty("OutputWorkspace", "PaddingAndApodization_output");
   return FFTPreProcess;
 }
 }
