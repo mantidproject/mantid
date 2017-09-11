@@ -1,7 +1,9 @@
 # pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from mantid.geometry import *
+from six import iteritems
 
 
 class SpaceGroupReflectionConditionsTest(stresstesting.MantidStressTest):
@@ -18,7 +20,7 @@ class SpaceGroupReflectionConditionsTest(stresstesting.MantidStressTest):
     def runTest(self):
         sgTestDict = self.generateReflectionLists()
 
-        for sgName, hkls in sgTestDict.iteritems():
+        for sgName, hkls in iteritems(sgTestDict):
             sg = SpaceGroupFactory.createSpaceGroup(sgName)
 
             for hkl in hkls:
@@ -47,6 +49,6 @@ class SpaceGroupReflectionConditionsTest(stresstesting.MantidStressTest):
                 hkls = [[int(m) for m in x.split()] for x in reflectionsWs.column(0)]
                 sgDict[sg] = hkls
             except ValueError:
-                print sg
+                print(sg)
 
         return sgDict

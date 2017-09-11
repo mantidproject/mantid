@@ -1,15 +1,16 @@
-#pylint: disable=invalid-name
 #!/usr/bin/env python
-
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import optparse
 import sys
 try:
     import periodictable
     if not periodictable.__version__.startswith("1.3."):
-        print "*****Require periodictable 1.3.*"
+        print("*****Require periodictable 1.3.*")
         sys.exit(-1)
-except ImportError, e:
-    print "*****To use this you must 'easy_install periodictable'"
+except ImportError as e:
+    print("*****To use this you must 'easy_install periodictable'")
     sys.exit(-1)
 
 VERSION = "1.0"
@@ -83,6 +84,7 @@ def readExisting(filename):
     after = "".join(lines[index_stop+1:])
     return (before, after)
 
+
 if __name__ == "__main__":
     # command line options
     info = []
@@ -105,7 +107,7 @@ if __name__ == "__main__":
     (code_before, code_after) = readExisting(filename)
 
     # setup the file for the elements and isotopes
-    print "writing information to %s" % filename
+    print("writing information to %s" % filename)
     handle = open(filename, 'w')
     handle.write(code_before) # write out what was before the delimitor
     handle.write(DELIMITOR_START+"\n")
@@ -122,7 +124,7 @@ if __name__ == "__main__":
     handle.write("/// All of the atoms in a single array so it can be searched.\n")
     handle.write("static Atom ATOMS[] = {\n")
     numAtoms = len(atomNames)
-    for i in xrange(0, numAtoms, 10):
+    for i in range(0, numAtoms, 10):
         handle.write(", ".join(atomNames[i:i+10]))
         if i+10 < numAtoms:
             handle.write(",")

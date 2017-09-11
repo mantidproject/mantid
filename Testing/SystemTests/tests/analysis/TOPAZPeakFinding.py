@@ -4,6 +4,7 @@ System test that loads TOPAZ single-crystal data,
 converts to Q space, finds peaks and indexes
 them.
 """
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import numpy
 from mantid.simpleapi import *
@@ -91,7 +92,7 @@ class TOPAZPeakFinding(stresstesting.MantidStressTest):
         newUB = numpy.array(mtd["topaz_3132"].sample().getOrientedLattice().getUB())
         # UB Matrices are not necessarily the same, some of the H,K and/or L sign can be reversed
         diff = abs(newUB) - abs(originalUB) < 0.001
-        for c in xrange(3):
+        for c in range(3):
             # This compares each column, allowing old == new OR old == -new
             if not numpy.all(diff[:,c]) :
                 raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n"

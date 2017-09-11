@@ -435,7 +435,9 @@ class IOmodule(object):
         :return: string representation of hash
         """
         hash_calculator = hashlib.sha512()
-        buf = 65536  # chop content of a file into 64kb chunks to minimize memory consumption for hash creation
+
+        # chop content of a file into chunks to minimize memory consumption for hash creation
+        buf = AbinsModules.AbinsConstants.BUF
         with io.open(file=filename, mode="rt", encoding=coding, buffering=buf, newline=None) as f:
             while True:
                 data = f.read(buf)

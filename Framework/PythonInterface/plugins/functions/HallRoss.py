@@ -62,5 +62,6 @@ class HallRoss(IFunction1D):
             jacobian.set(i,1,x*x*ex/tau)
             i += 1
 
+
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(HallRoss)

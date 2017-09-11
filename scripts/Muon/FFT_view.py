@@ -1,7 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore, QtGui
-from Muon import widget_helper
+
+from Muon import table_utils
 
 
 class FFTView(QtGui.QWidget):
@@ -12,7 +13,7 @@ class FFTView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(FFTView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
-        self.table 	= QtGui.QTableWidget(self)
+        self.table = QtGui.QTableWidget(self)
 
         #make table
         self.table.resize(800, 800)
@@ -26,25 +27,25 @@ class FFTView(QtGui.QWidget):
         # populate table
         options=['test']
 
-        widget_helper.setName(self.table,0,"Workspace")
-        self.ws= widget_helper.createComboTable(self.table,0,options)
-        self.Im_box_row=1
-        widget_helper.setName(self.table,self.Im_box_row,"Imaginary Data")
-        self.Im_box= widget_helper.createCheckTable(self.table,True,self.Im_box_row)
+        table_utils.setRowName(self.table,0,"Workspace")
+        self.ws= table_utils.addComboToTable(self.table,0,options)
+        self.Im_box_row = 1
+        table_utils.setRowName(self.table,self.Im_box_row,"Imaginary Data")
+        self.Im_box = table_utils.addCheckBoxToTable(self.table,True,self.Im_box_row)
 
-        widget_helper.setName(self.table,2,"Imaginary Workspace")
-        self.Im_ws= widget_helper.createComboTable(self.table,2,options)
+        table_utils.setRowName(self.table,2,"Imaginary Workspace")
+        self.Im_ws = table_utils.addComboToTable(self.table,2,options)
 
-        self.shift_box_row=3
-        widget_helper.setName(self.table,self.shift_box_row,"Auto shift")
-        self.shift_box= widget_helper.createCheckTable(self.table,True,self.shift_box_row)
+        self.shift_box_row = 3
+        table_utils.setRowName(self.table,self.shift_box_row,"Auto shift")
+        self.shift_box = table_utils.addCheckBoxToTable(self.table,True,self.shift_box_row)
 
-        widget_helper.setName(self.table,4,"Shift")
-        self.shift= widget_helper.createDoubleTable(self.table,0.0,4)
+        table_utils.setRowName(self.table,4,"Shift")
+        self.shift = table_utils.addDoubleToTable(self.table,0.0,4)
         self.table.hideRow(4)
 
-        widget_helper.setName(self.table,5,"Use Raw data")
-        self.Raw_box= widget_helper.createCheckTable(self.table,True,5)
+        table_utils.setRowName(self.table,5,"Use Raw data")
+        self.Raw_box = table_utils.addCheckBoxToTable(self.table,True,5)
         #make button
         self.button = QtGui.QPushButton('Calculate FFT', self)
         self.button.setStyleSheet("background-color:lightgrey")
@@ -90,11 +91,11 @@ class FFTView(QtGui.QWidget):
         inputs["Imaginary"] = 0 #always zero
 
     def addFFTShift(self,inputs):
-        inputs['AutoShift']=False
-        inputs['Shift']= float(self.shift.text())
+        inputs['AutoShift'] =False
+        inputs['Shift'] = float(self.shift.text())
 
     def addRaw(self,inputs,key):
-        inputs[key]+="_Raw"
+        inputs[key] += "_Raw"
 
     # get methods
     def isAutoShift(self):
