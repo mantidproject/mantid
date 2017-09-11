@@ -335,11 +335,13 @@ public:
     auto polref = loadRun("CSP79590.raw");
 
     // Correct by shifting detectors vertically
+    // Also explicitly pass CorrectDetectors=1
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", polref);
     alg.setProperty("ThetaIn", 0.25);
+    alg.setProperty("CorrectDetectors", "1");
     alg.setProperty("DetectorCorrectionType", "VerticalShift");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("MomentumTransferStep", 0.01);
