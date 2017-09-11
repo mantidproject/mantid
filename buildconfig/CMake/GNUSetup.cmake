@@ -32,6 +32,8 @@ endif()
 
 # Global warning flags.
 set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" )
+# C++-specific flags
+set( GNUFLAGS_CXX "-Woverloaded-virtual -fno-operator-names")
 # Disable some warnings about deprecated headers and type conversions that
 # we can't do anything about
 # -Wno-deprecated: Do not warn about use of deprecated headers.
@@ -43,7 +45,7 @@ set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings -Wno-unused-result
 if ( CMAKE_COMPILER_IS_GNUCXX )
   set (GNUFLAGS "${GNUFLAGS} -Wpedantic")
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
-    set(GNUFLAGS "${GNUFLAGS} -Wsuggest-override")
+    set(GNUFLAGS_CXX "${GNUFLAGS_CXX} -Wsuggest-override")
   endif()
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "7.1"))
     # Consider enabling once [[fallthrough]] is available on all platforms.
@@ -74,7 +76,7 @@ if(WITH_UBSAN)
   if ( CMAKE_COMPILER_IS_GNUCXX AND GCC_COMPILER_VERSION VERSION_LESS "5.1.0")
     set( UBSAN_NO_RECOVER "")
   endif()
-  # vptr check is generating a lot of false positives, hiding other more serious warnings.  
+  # vptr check is generating a lot of false positives, hiding other more serious warnings.
   set(SAN_FLAGS "-fno-omit-frame-pointer -fno-common -fsanitize=undefined -fno-sanitize=vptr ${UBSAN_NO_RECOVER}")
   add_compile_options(-fno-omit-frame-pointer -fno-common -fsanitize=undefined -fno-sanitize=vptr ${UBSAN_NO_RECOVER})
   set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${SAN_FLAGS}" )
@@ -84,8 +86,7 @@ endif()
 
 # Set the options for gcc and g++
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUFLAGS}" )
-# -Wno-overloaded-virtual is down here because it's not applicable to the C_FLAGS
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} -Woverloaded-virtual -fno-operator-names" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} ${GNUFLAGS_CXX}" )
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED 11)

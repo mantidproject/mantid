@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 
@@ -98,8 +99,8 @@ def validateMD(result,reference,tol=1.e-5,class_name='dummy',mismatchName=None):
 
     checker.execute()
     if checker.getPropertyValue("Equals") != "1":
-        print " Workspaces do not match, result: ",checker.getPropertyValue("Result")
-        print " Test {0} fails".format(class_name)
+        print(" Workspaces do not match, result: ",checker.getPropertyValue("Result"))
+        print(" Test {0} fails".format(class_name))
         if mismatchName:
             targetFilename = class_name+mismatchName+'-mismatch.nxs'
         else:

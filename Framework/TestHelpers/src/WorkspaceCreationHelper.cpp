@@ -13,7 +13,7 @@
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"

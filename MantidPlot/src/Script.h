@@ -91,6 +91,9 @@ public:
   bool redirectStdOut() const { return m_redirectOutput; }
   void redirectStdOut(bool on) { m_redirectOutput = on; }
 
+  virtual void recursiveAsyncSetup() {}
+  virtual void recursiveAsyncTeardown() {}
+
   /// Create a list of keywords for the code completion API
   virtual void generateAutoCompleteList() {}
   // Does the code compile to a complete statement, i.e no more input is
@@ -152,6 +155,8 @@ protected:
   virtual bool executeImpl() = 0;
   /// Implementation of the abort request
   virtual void abortImpl() = 0;
+  /// Setup the code from a script code object
+  void setupCode(const ScriptCode &code);
 
 private:
   /**
@@ -174,12 +179,6 @@ private:
   public:
     ScriptThreadPool();
   };
-
-  /// Setup the code from a script code object
-  void setupCode(const ScriptCode &code);
-  /// Normalise line endings for the given code. The Python C/API does not seem
-  /// to like CRLF endings so normalise to just LF
-  QString normaliseLineEndings(QString text) const;
 
   ScriptingEnv *m_env;
   std::string m_name; // Easier to convert to C string

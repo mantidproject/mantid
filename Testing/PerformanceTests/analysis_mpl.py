@@ -1,6 +1,8 @@
 """ Module containing functions for test
 performance analyis, plotting, and saving
 to other formats (CSV, PDF) """
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 
 import testresult
 import os
@@ -150,7 +152,7 @@ def smart_ticks(index, values):
     tick_strings = []
 
     space_available = 0
-    for i in xrange(len(index)):
+    for i in range(len(index)):
         s = str(values_str[i]);
         s_width = (len(s)+1) * 12.0 # About 12 pixels per letter? And add a space
         space_available +=spacing
@@ -524,7 +526,7 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
 
     # -------- Report for each test ------------------------
     for name in test_names:
-        print "Plotting", name
+        print("Plotting", name)
         html += """<hr><h2>%s</h2>\n""" % name
         overview_html += """<hr><h2>%s</h2>\n""" % name
 
@@ -663,7 +665,7 @@ def generate_html_report(path, last_num, x_field='revision'):
     f.write(overview_html)
     f.close()
 
-    print "Report complete!"
+    print("Report complete!")
 
 
 

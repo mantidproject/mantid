@@ -477,4 +477,5 @@ class SNAPReduce(DataProcessorAlgorithm):
                 propertyName, outputWksp, Direction.Output))
             self.setProperty(propertyName, outputWksp)
 
+
 AlgorithmFactory.subscribe(SNAPReduce)

@@ -72,6 +72,8 @@ public:
    */
   virtual void removePeak(int peakNum) = 0;
 
+  virtual void removePeaks(std::vector<int> badPeaks) = 0;
+
   //---------------------------------------------------------------------------------------------
   /** Add a peak to the list
    * @param ipeak :: Peak object to add (copy) into this.
