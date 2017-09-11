@@ -1283,7 +1283,7 @@ void ConvFit::updateParameters(int specNo) {
 
   // Check whether the selected fit function is
   if (fitTypeIndex == 2 && m_fittedType == "Two Lorentzians") {
-    functionName = "One Lorentzian";
+    functionName = "Lorentzian 1";
     updateParameters(functionName, pref, params, parameters, 0, 3);
 
     funcIndex++;
@@ -1291,13 +1291,13 @@ void ConvFit::updateParameters(int specNo) {
     pref += "f" + QString::number(funcIndex) + ".f" +
       QString::number(subIndex) + ".";
 
-    functionName = "Two Lorentzians";
+    functionName = "Lorentzian 2";
     updateParameters(functionName, pref, params, parameters, 3, 0);
   }
   else {
 
     if (fitTypeIndex == 2 && m_fittedType == "One Lorentzian") {
-      functionName = "One Lorentzian";
+      functionName = "Lorentzian 1";
     }
 
     updateParameters(functionName, pref, params, parameters);
