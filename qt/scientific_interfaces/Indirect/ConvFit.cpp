@@ -211,6 +211,7 @@ void ConvFit::setup() {
 
   m_uiForm.ckTieCentres->setChecked(true);
   m_previousFit = m_uiForm.cbFitType->currentText();
+  m_fittedType = "";
 
   updatePlotOptions();
 }
@@ -318,6 +319,7 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
   // Add fit specific suffix
   const auto bgType = backgroundString();
   const auto fitType = fitTypeString();
+  const auto m_fittedType = m_uiForm.cbFitType->currentText();
   outputWSName += "conv_";
   outputWSName += fitType;
   outputWSName += bgType;
@@ -445,8 +447,10 @@ void ConvFit::plotCurrentPreview() {
 */
 void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
 
-  if (error)
+  if (error) {
+    m_fittedType = "";
     return;
+  }
 
   std::string outputPrefix = outputWSName.toStdString();
 
@@ -1277,36 +1281,48 @@ void ConvFit::updateParameters(int specNo) {
     pref += "f" + QString::number(subIndex) + ".";
   }
 
-  if (fitTypeIndex == 2) {
-    functionName = "Lorentzian 1";
-    for (auto it = params.begin(); it != params.end() - 3; ++it) {
-      const QString functionParam = functionName + "." + *it;
-      const QString paramValue = pref + *it;
-      m_dblManager->setValue(m_properties[functionParam],
-        parameters[paramValue]);
-    }
+  // Check whether the selected fit function is
+  if (fitTypeIndex == 2 && m_fittedType == "Two Lorentzians") {
+    functionName = "One Lorentzian";
+    updateParameters(functionName, pref, params, parameters, 0, 3);
+
     funcIndex++;
     pref = prefBase;
     pref += "f" + QString::number(funcIndex) + ".f" +
       QString::number(subIndex) + ".";
 
-    functionName = "Lorentzian 2";
-
-    for (auto it = params.begin() + 3; it != params.end(); ++it) {
-      const QString functionParam = functionName + "." + *it;
-      const QString paramValue = pref + *it;
-      m_dblManager->setValue(m_properties[functionParam],
-        parameters[paramValue]);
-    }
+    functionName = "Two Lorentzians";
+    updateParameters(functionName, pref, params, parameters, 3, 0);
   }
   else {
-    
-    for (auto it = params.begin(); it != params.end(); ++it) {
-      const QString functionParam = functionName + "." + *it;
-      const QString paramValue = pref + *it;
-      m_dblManager->setValue(m_properties[functionParam],
-        parameters[paramValue]);
-    }
+    updateParameters(functionName, pref, params, parameters);
+  }
+}
+
+/*
+ * Updates the values of the function parameters for the function with the specified name,
+ * in the parameters table.
+ *
+ * @param functionName  The name of the function whose parameters to update in the parameters
+ *                      table.
+ *
+ * @param prefix        The prefixes of the names of the parameters, to be used to find the
+ *                      correct parameter in the specified parameter values map.
+ * @param paramNames    The names of the function parameters to update.
+ * @param paramValues   The updated parameter values stored in a map from the name of the
+ *                      function parameter (preceded by prefix) to the updated value of that
+ *                      parameter.
+ * @param startOffset   The start offset, if set to N, the first N parameters won't be updated.
+ * @param endOffset     The end offset, if set to N, the last N parameters won't be updated.
+ */
+void ConvFit::updateParameters(const QString &functionName, const QString &prefix, const QStringList &paramNames, 
+                               const QMap<QString, double> &paramValues, int startOffset, int endOffset) {
+
+  for (auto it = paramNames.begin()+startOffset; it != paramNames.end()-endOffset; ++it) {
+    const QString functionParam = functionName + "." + *it;
+    const QString paramValue = prefix + *it;
+    m_dblManager->setValue(m_properties[functionParam],
+      paramValues[paramValue]);
   }
 }
 

@@ -65,6 +65,8 @@ private:
   QString minimizerString(QString outputName) const;
   QStringList getFunctionParameters(QString);
   void updateParameters(int specNo);
+  void updateParameters(const QString &functionName, const QString &prefix, const QStringList &paramNames, 
+                        const QMap<QString, double> &paramValues, int startOffset=0, int endOffset=0);
   void updatePlotOptions();
   void addParametersToTree(const QStringList &parameters,
                            const QString &currentFitFunction);
@@ -89,6 +91,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
   Mantid::API::ITableWorkspace_sptr m_paramWs;
   QString m_cfInputWSName;
+  QString m_fittedType;
   bool m_confitResFileType;
   Mantid::API::IAlgorithm_sptr m_fitAlg;
   QString m_singleFitOutputName;
