@@ -793,7 +793,8 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
   }
   auto &physProps = m_control.physProps();
   std::vector<CompositeFunction_sptr> compositePhysProps(physProps.size());
-  std::generate(compositePhysProps.begin(), compositePhysProps.end(), [](){return boost::make_shared<CompositeFunction>();});
+  std::generate(compositePhysProps.begin(), compositePhysProps.end(),
+                []() { return boost::make_shared<CompositeFunction>(); });
 
   auto &compSource = compositeSource();
   for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
@@ -840,12 +841,9 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
 }
 
 /// Calculate excitations at given temperature
-void CrystalFieldFunction::calcExcitations(int nre,
-                                           const DoubleFortranVector &en,
-                                           const ComplexFortranMatrix &wf,
-                                           double temperature,
-                                           FunctionValues &values,
-                                           double intensityScaling) const {
+void CrystalFieldFunction::calcExcitations(
+    int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+    double temperature, FunctionValues &values, double intensityScaling) const {
   IntFortranVector degeneration;
   DoubleFortranVector eEnergies;
   DoubleFortranMatrix iEnergies;
@@ -1023,8 +1021,8 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
   auto &temperatures = m_control.temperatures();
   auto &FWHMs = m_control.FWHMs();
   for (size_t iSpec = 0; iSpec < temperatures.size(); ++iSpec) {
-    updateSpectrum(*fun.getFunction(iSpec), nre, en, wf,
-                   temperatures[iSpec], FWHMs[iSpec], iSpec, iFirst);
+    updateSpectrum(*fun.getFunction(iSpec), nre, en, wf, temperatures[iSpec],
+                   FWHMs[iSpec], iSpec, iFirst);
   }
 
   for (auto &prop : m_mapPrefixes2PhysProps) {

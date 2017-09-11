@@ -177,8 +177,7 @@ private:
   /// Update a function for a single spectrum.
   void updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,
-                      const ComplexFortranMatrix &wf,
-                      double temperature,
+                      const ComplexFortranMatrix &wf, double temperature,
                       double fwhm, size_t iSpec, size_t iFirst) const;
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
