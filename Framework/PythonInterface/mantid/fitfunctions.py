@@ -119,12 +119,23 @@ class FunctionWrapper(object):
       """
       from mantid.simpleapi import CreateWorkspace, EvaluateFunction
       
+      # If the input isn't a list, wrap it in one so we can iterate easily
+      if isinstance(x, list):
+          x_list = x
+          list_input = True
+      else:
+          x_list = [x]
+          list_input = False
+      
       for i in range(len(params)):
           self.fun.setParameter(i, params[i])
-      y = x[:]
-      ws = CreateWorkspace(x, y)
+      y = x_list[:]
+      ws = CreateWorkspace(x_list, y)
       out = EvaluateFunction(str(self.fun), ws, OutputWorkspace='out')
-      return out.readY(1)
+      if list_input:
+        return out.readY(1)
+      else:
+        return out.readY(1)[0]
          
   def tie (self, *args, **kwargs):
     """ Add ties.
