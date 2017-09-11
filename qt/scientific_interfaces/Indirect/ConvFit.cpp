@@ -211,7 +211,7 @@ void ConvFit::setup() {
 
   m_uiForm.ckTieCentres->setChecked(true);
   m_previousFit = m_uiForm.cbFitType->currentText();
-  m_fittedType = -1;
+  m_fittedIndex = -1;
 
   updatePlotOptions();
 }
@@ -319,7 +319,7 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
   // Add fit specific suffix
   const auto bgType = backgroundString();
   const auto fitType = fitTypeString();
-  m_fittedType = m_uiForm.cbFitType->currentIndex();
+  m_fittedIndex = m_uiForm.cbFitType->currentIndex();
   outputWSName += "conv_";
   outputWSName += fitType;
   outputWSName += bgType;
@@ -448,7 +448,7 @@ void ConvFit::plotCurrentPreview() {
 void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
 
   if (error) {
-    m_fittedType = -1;
+    m_fittedIndex = -1;
     return;
   }
 
@@ -1254,7 +1254,7 @@ void ConvFit::updateParameters(int specNo) {
 
   // If using a delta function with any fit type or using two Lorentzians
   const bool usingCompositeFunc =
-    ((usingDeltaFunc && m_fittedType > 0) || m_fittedType == 2);
+    ((usingDeltaFunc && m_fittedIndex > 0) || m_fittedIndex == 2);
 
   const QString prefBase = "f1.f1.";
 
@@ -1281,7 +1281,7 @@ void ConvFit::updateParameters(int specNo) {
     pref += "f" + QString::number(subIndex) + ".";
   }
 
-  if (fitTypeIndex == 2 && m_fittedType == 2) {
+  if (fitTypeIndex == 2 && m_fittedIndex == 2) {
     functionName = "Lorentzian 1";
     updateParameters(functionName, pref, params, parameters, 0, 3);
 
@@ -1295,7 +1295,7 @@ void ConvFit::updateParameters(int specNo) {
   }
   else {
 
-    if (fitTypeIndex == 2 && m_fittedType == 1) {
+    if (fitTypeIndex == 2 && m_fittedIndex == 1) {
       functionName = "Lorentzian 1";
     }
 
