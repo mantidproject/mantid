@@ -4,6 +4,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CommandProviderFactory.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandProvider.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -210,12 +211,12 @@ public:
       std::unique_ptr<DataProcessorCommandProvider> mockProvider)
       : m_mockProvider(std::move(mockProvider)) {
         ON_CALL(*this, fromPostprocessorName(::testing::_, ::testing::_))
-          .WillByDefault(::testing::Invoke([&m_mockProvider]
+          .WillByDefault(::testing::Invoke([this]
                 (const QString&, GenericDataProcessorPresenter&) 
                   -> std::unique_ptr<DataProcessorCommandProvider> {
-                  assert(m_mockProvider != nullptr);
-                  return std::move(m_mockProvider);
-                });
+                  assert(this->m_mockProvider != nullptr);
+                  return std::move(this->m_mockProvider);
+                }));
       }
   MOCK_CONST_METHOD2(fromPostprocessorName,
                      std::unique_ptr<DataProcessorCommandProvider>(
