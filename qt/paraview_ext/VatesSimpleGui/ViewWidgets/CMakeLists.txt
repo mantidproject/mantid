@@ -142,7 +142,7 @@ vtkRenderingFreeType
 vtksys
 ${QT_LIBRARIES}
 VatesAPI
-VatesSimpleGuiQtWidgets
+VatesSimpleGuiQtWidgetsQt4
 MantidQtWidgetsCommonQt4
 MantidQtWidgetsFactoryQt4
 MantidQtWidgetsSliceViewerQt4

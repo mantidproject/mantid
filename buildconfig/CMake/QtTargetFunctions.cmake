@@ -37,9 +37,11 @@ endfunction()
 # keyword: MTD_QT_LINK_LIBRARIES A list of additional libraries to link to the
 #          target. It is assumed each was produced with this function and
 #          will have the -Qt{QT_VERSION} suffix appended.
+# keyword: INSTALL_DIR A destination directory for the install command.
+# keyword: OSX_INSTALL_RPATH Install path for osx version > 10.8
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
-  set (oneValueArgs TARGET_NAME QT_VERSION QT_PLUGIN)
+  set (oneValueArgs TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR OSX_INSTALL_RPATH)
   set (multiValueArgs SRC UI MOC NOMOC RES DEFS INCLUDE_DIRS LINK_LIBRARIES MTD_QT_LINK_LIBRARIES)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
@@ -94,7 +96,10 @@ function (mtd_add_qt_target)
     set_target_properties ( ${_target} PROPERTIES COMPILE_DEFINITIONS ${PARSED_DEFS} )
   endif()
   if (OSX_VERSION VERSION_GREATER 10.8)
-    set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+    if (NOT ${PARSED_OSX_INSTALL_RPATH})
+        set(PARSED_OSX_INSTALL_RPATH "@loader_path/../MacOS")
+    endif()
+    set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH ${PARSED_OSX_INSTALL_RPATH})
   endif ()
 
   if (PARSED_QT_PLUGIN)
@@ -112,6 +117,11 @@ function (mtd_add_qt_target)
   endif()
   
   if (NOT ${PARSED_EXCLUDE_FROM_ALL})
-    install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+    if (NOT ${PARSED_INSTALL_DIR})
+        set(INSTALL_DESTINATION_DIR ${PARSED_INSTALL_DIR})
+    else()
+        set(INSTALL_DESTINATION_DIR ${LIB_DIR})
+    endif()
+    install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${INSTALL_DESTINATION_DIR} )
   endif()
 endfunction()
