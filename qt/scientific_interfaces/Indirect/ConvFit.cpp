@@ -211,7 +211,7 @@ void ConvFit::setup() {
 
   m_uiForm.ckTieCentres->setChecked(true);
   m_previousFit = m_uiForm.cbFitType->currentText();
-  m_fittedType = "";
+  m_fittedType = -1;
 
   updatePlotOptions();
 }
@@ -319,7 +319,7 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
   // Add fit specific suffix
   const auto bgType = backgroundString();
   const auto fitType = fitTypeString();
-  m_fittedType = m_uiForm.cbFitType->currentText();
+  m_fittedType = m_uiForm.cbFitType->currentIndex();
   outputWSName += "conv_";
   outputWSName += fitType;
   outputWSName += bgType;
@@ -448,7 +448,7 @@ void ConvFit::plotCurrentPreview() {
 void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
 
   if (error) {
-    m_fittedType = "";
+    m_fittedType = -1;
     return;
   }
 
@@ -1254,7 +1254,7 @@ void ConvFit::updateParameters(int specNo) {
 
   // If using a delta function with any fit type or using two Lorentzians
   const bool usingCompositeFunc =
-    ((usingDeltaFunc && fitTypeIndex > 0) || fitTypeIndex == 2);
+    ((usingDeltaFunc && m_fittedType > 0) || m_fittedType == 2);
 
   const QString prefBase = "f1.f1.";
 
@@ -1281,8 +1281,7 @@ void ConvFit::updateParameters(int specNo) {
     pref += "f" + QString::number(subIndex) + ".";
   }
 
-  // Check whether the selected fit function is
-  if (fitTypeIndex == 2 && m_fittedType == "Two Lorentzians") {
+  if (fitTypeIndex == 2 && m_fittedType == 2) {
     functionName = "Lorentzian 1";
     updateParameters(functionName, pref, params, parameters, 0, 3);
 
@@ -1296,7 +1295,7 @@ void ConvFit::updateParameters(int specNo) {
   }
   else {
 
-    if (fitTypeIndex == 2 && m_fittedType == "One Lorentzian") {
+    if (fitTypeIndex == 2 && m_fittedType == 1) {
       functionName = "Lorentzian 1";
     }
 
@@ -1326,8 +1325,8 @@ void ConvFit::updateParameters(const QString &functionName, const QString &prefi
   for (auto it = paramNames.begin()+startOffset; it != paramNames.end()-endOffset; ++it) {
     const QString functionParam = functionName + "." + *it;
     const QString paramValue = prefix + *it;
-    m_dblManager->setValue(m_properties[functionParam],
-      paramValues[paramValue]);
+    double value = paramValues[paramValue];
+    m_dblManager->setValue(m_properties[functionParam], value);
   }
 }
 

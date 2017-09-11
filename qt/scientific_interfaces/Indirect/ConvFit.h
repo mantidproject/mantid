@@ -91,7 +91,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
   Mantid::API::ITableWorkspace_sptr m_paramWs;
   QString m_cfInputWSName;
-  QString m_fittedType;
+  int m_fittedType;
   bool m_confitResFileType;
   Mantid::API::IAlgorithm_sptr m_fitAlg;
   QString m_singleFitOutputName;
