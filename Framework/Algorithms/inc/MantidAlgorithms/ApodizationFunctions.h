@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_APODIZATIONFUNCTIONHELPER_H_
-#define MANTID_ALGORITHM_APODIZATIONFUNCTIONHELPER_H_
+#ifndef MANTID_ALGORITHM_APODIZATIONFUNCTIONS_H_
+#define MANTID_ALGORITHM_APODIZATIONFUNCTIONS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -33,8 +33,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+namespace Mantid {
+namespace Algorithms {
 double lorentz(double time, double decayConstant);
 double gaussian(const double time, const double decayConstant);
 double none(const double, const double);
+}
+}
 
-#endif /*MANTID_APODIZATIONFUNCTIONHELPER_H_*/
+#endif /*MANTID_APODIZATIONFUNCTIONS_H_*/

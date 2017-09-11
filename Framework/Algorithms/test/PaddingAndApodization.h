@@ -1,8 +1,8 @@
-#ifndef FFTPREPROCESSINGTEST_H_
-#define FFTPREPROCESSINGTEST_H_
+#ifndef PADDINGANDAPODIZATIONTEST_H_
+#define PADDINGANDAPODIZATIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/FFTPreProcessing.h"
+#include "MantidAlgorithms/PaddingAndApodization.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -13,7 +13,7 @@
 
 using namespace Mantid::API;
 using Mantid::MantidVec;
-using Mantid::Algorithms::FFTPreProcessing;
+using Mantid::Algorithms::PaddingAndApodization;
 
 namespace {
 struct yData {
@@ -33,25 +33,25 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
 
 IAlgorithm_sptr setUpAlg() {
   IAlgorithm_sptr FFTPreProcess =
-      AlgorithmManager::Instance().create("FFTPreProcessing");
+      AlgorithmManager::Instance().create("PaddingAndApodization");
   FFTPreProcess->initialize();
   FFTPreProcess->setChild(true);
   FFTPreProcess->setProperty("DecayConstant", 2.0);
-  FFTPreProcess->setProperty("OutputWorkspace", "FFTPreProcessing_output");
+  FFTPreProcess->setProperty("OutputWorkspace", "FPaddingAndApodization_output");
   return FFTPreProcess;
 }
 }
 
-class FFTPreProcessingTest : public CxxTest::TestSuite {
+class PaddingAndApodizationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FFTPreProcessingTest *createSuite() {
-    return new FFTPreProcessingTest();
+  static PaddingAndApodizationTestt *createSuite() {
+    return new PaddingAndApodizationTest();
   }
-  static void destroySuite(FFTPreProcessingTest *suite) { delete suite; }
+  static void destroySuite(PaddingAndApodizationTest *suite) { delete suite; }
 
-  FFTPreProcessingTest() { FrameworkManager::Instance(); }
+  PaddingAndApodizationTest() { FrameworkManager::Instance(); }
 
   void testInit() {
     IAlgorithm_sptr alg = setUpAlg();
@@ -301,4 +301,4 @@ public:
   }
 };
 
-#endif /*FFTPREPROCESSINGTSTEST_H_*/
+#endif /*PADDINGANDAPODIZATIONTEST_H_*/

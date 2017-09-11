@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_FFTPreProcessing_H_
-#define MANTID_ALGORITHM_FFTPreProcessing_H_
+#ifndef MANTID_ALGORITHM_PADDINGANDAPODUIZTION_H_
+#define MANTID_ALGORITHM_FPADDINGANDAPODUIZTION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -79,4 +79,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_FFTPreProcessing_H_*/
+#endif /*MANTID_PADDINGANDAPODUIZTION_H_*/
