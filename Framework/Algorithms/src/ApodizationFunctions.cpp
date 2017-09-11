@@ -4,7 +4,6 @@
 #include "MantidAlgorithms/ApodizationFunctions.h"
 #include <cmath>
 
-
 namespace Mantid {
 namespace Algorithms {
 /**
@@ -41,6 +40,5 @@ double gaussian(const double time, const double decayConstant) {
 * @returns :: Function evaluation
 */
 double none(const double, const double) { return 1.; }
-
 }
 }

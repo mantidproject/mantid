@@ -177,7 +177,7 @@ HistogramData::Histogram PaddingAndApodization::applyApodizationFunction(
 */
 HistogramData::Histogram
 PaddingAndApodization::addPadding(const HistogramData::Histogram &histogram,
-                             const int padding) {
+                                  const int padding) {
   if (padding == 0) {
     return histogram;
   }
