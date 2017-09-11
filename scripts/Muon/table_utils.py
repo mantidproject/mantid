@@ -1,27 +1,31 @@
 from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 
+""" 
+This module contains the methods for
+adding information to tables.
+"""
 
-def setName(table,row,name):
+def setRowName(table,row,name):
     text = QtGui.QTableWidgetItem((name))
     text.setFlags(QtCore.Qt.ItemIsEnabled)
     table.setItem(row,0, text)
 
 
-def createComboTable(table,row,options):
+def addComboToTable(table,row,options):
     combo=QtGui.QComboBox()
     combo.addItems(options)
     table.setCellWidget(row,1,combo)
     return combo
 
 
-def createDoubleTable(table,value,row):
+def addDoubleToTable(table,value,row):
     numberWidget = QtGui.QTableWidgetItem(str(value))
     table.setItem(row,1, numberWidget)
     return numberWidget
 
 
-def createCheckTable(table,state,row):
+def addCheckBoxToTable(table,state,row):
     box = QtGui.QTableWidgetItem()
     box.setFlags(QtCore.Qt.ItemIsUserCheckable |QtCore.Qt.ItemIsEnabled)
     if state:
