@@ -52,7 +52,6 @@ class SimpleAPIFitTest(unittest.TestCase):
         retvals = Fit("name=FlatBackground", self._raw_ws)
         self.assertTrue(isinstance(retvals.OutputStatus, str))
         self.assertTrue(isinstance(retvals.OutputChi2overDoF, float))
-        self.assertTrue(isinstance(retvals.Function, IFunction))
 
     def test_function_accepts_all_arguments_as_keywords(self):
         if  platform.system() == 'Darwin': # crashes

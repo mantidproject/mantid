@@ -38,6 +38,8 @@ from .kernel._aliases import *
 from .api._aliases import *
 from .fitfunctions import *
 
+from pdb import set_trace as tr
+
 # ------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
 __SPECIALIZED_FUNCTIONS__ = ["Load", "StartLiveData", "CutMD", "RenameWorkspace"]
@@ -346,8 +348,8 @@ def fitting_algorithm(f):
                 del kwargs[key]
         set_properties(algm, **kwargs)
         algm.execute()
-
-        return _gather_returns(function_name, lhs, algm, inout=True)
+        inout = True if 'CreateOutput' in kwargs and kwargs['CreateOutput'] else False
+        return _gather_returns(function_name, lhs, algm, inout=inout)
     # end
     function_name = f.__name__
     signature = ("\bFunction, InputWorkspace", "**kwargs")
