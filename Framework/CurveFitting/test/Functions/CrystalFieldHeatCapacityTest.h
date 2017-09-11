@@ -97,7 +97,7 @@ public:
     auto out =
         API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
 
-    auto &y = out->histogram(1).counts();
+    auto y = out->histogram(1).counts();
     TS_ASSERT_DELTA(y[10], 0.0305, 1e-4);
     TS_ASSERT_DELTA(y[30], 3.7753, 1e-4);
     TS_ASSERT_DELTA(y[70], 5.1547, 1e-4);
