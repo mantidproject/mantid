@@ -6,15 +6,15 @@ from PyQt4 import QtGui
 class transformView(QtGui.QWidget):
     def __init__(self,groupedViews,parent=None):
         super(transformView,self).__init__(parent)
-        self.methods=groupedViews.getTransformMethods()
-        self.selection=groupedViews.getTransformSelection()
-        self.Layout=QtGui.QGridLayout()
+        self.methods = groupedViews.getTransformMethods()
+        self.selection = groupedViews.getTransformSelection()
+        self.Layout = QtGui.QGridLayout()
         self.Layout.addWidget(self.selection,1,0)
         for key in self.methods:
             self.Layout.addWidget(self.methods[key])
         self.setLayout(self.Layout)
         self.hideAll()
-        methods=list(self.methods.keys())
+        methods = list(self.methods.keys())
         self.show(methods[0])
 
     def getMethods(self):

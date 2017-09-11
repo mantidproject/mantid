@@ -1,23 +1,24 @@
 from __future__ import (absolute_import, division, print_function)
+
 from Muon import FFT_view
 from Muon import MaxEnt_view
 from Muon import transform_selection_view
-
-# simple class to create a single object
-# containing all of the views.
-# Only need to pass a single object to all
-# presenters
-
+"""
+ simple class to create a single object
+ containing all of the views.
+ Only need to pass a single object to all
+ presenters
+"""
 
 class viewConstructor(object):
 
     def __init__(self,includeTransform,parent=None ):
         # construct transformation memebers
         if includeTransform:
-            self.transformMethods={}
-            self.transformMethods["FFT"]=FFT_view.FFTView(parent)
-            self.transformMethods["MaxEnt"]=MaxEnt_view.MaxEntView(parent)
-            self.transformSelector=transform_selection_view.TransformSelectionView(parent)
+            self.transformMethods = {}
+            self.transformMethods["FFT"] = FFT_view.FFTView(parent)
+            self.transformMethods["MaxEnt"] = MaxEnt_view.MaxEntView(parent)
+            self.transformSelector = transform_selection_view.TransformSelectionView(parent)
 
     def getTransformMethods(self):
         return self.transformMethods

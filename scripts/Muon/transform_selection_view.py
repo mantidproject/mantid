@@ -10,7 +10,7 @@ class TransformSelectionView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(TransformSelectionView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
-        self.methods=QtGui.QComboBox()
+        self.methods = QtGui.QComboBox()
         options=["FFT"]
         self.methods.addItems(options)
         self.grid.addWidget(self.methods)

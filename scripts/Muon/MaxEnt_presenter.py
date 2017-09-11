@@ -16,8 +16,8 @@ class MaxEntPresenter(object):
     # only get ws that are groups or pairs
     # ignore raw
     def getWorkspaceNames(self):
-        options=mantid.AnalysisDataService.getObjectNames()
-        options=[item.replace(" ","") for item in options]
+        options = mantid.AnalysisDataService.getObjectNames()
+        options = [item.replace(" ","") for item in options]
         final_options=[]
         for pick in options:
             if ";" in pick and "Raw" not in pick:

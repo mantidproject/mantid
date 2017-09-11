@@ -13,7 +13,7 @@ class modelConstructor(object):
         # construct transformation memebers
         if includeTransform:
             self.transformModels={}
-            alg =MaxEnt_model.MaxEntModel()
+            alg = MaxEnt_model.MaxEntModel()
             self.transformModels["MaxEnt"]=MaxEnt_model.MaxEntThread(alg)
 
     def getModel(self,name):

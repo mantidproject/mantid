@@ -38,8 +38,8 @@ def addCheckBoxToTable(table,state,row):
     return box
 
 
-def createSpinTable(table,default,row):
-    box= QtGui.QSpinBox()
+def addSpinBoxToTable(table,default,row):
+    box = QtGui.QSpinBox()
     if default > 99:
         box.setMaximum(default*10)
     box.setValue(default)
