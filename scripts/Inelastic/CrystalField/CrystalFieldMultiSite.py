@@ -166,12 +166,18 @@ class CrystalFieldMultiSite(object):
         """Form a definition string for the CrystalFieldSpectrum function
         @param i: Index of a spectrum.
         """
-        # if self.NumberOfSpectra == 1:
-        #     print "single spectrum"
-        #     return str(self.function)
-        # else:
         funs = self.function.createEquivalentFunctions()
         return str(funs[i])
+
+    def update(self, func):
+        """
+        Update values of the fitting parameters.
+        @param func: A IFunction object containing new parameter values.
+        """
+        if self.NumberOfSpectra == 1:
+            return str(self.function)
+        else:
+            self.function = func
 
     @property
     def Ions(self):

@@ -194,3 +194,30 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertAlmostEqual(y[0], 0.050129858433581413, 6)
         self.assertAlmostEqual(y[1], 0.054427788297191478, 6)
 
+    def test_multi_ion_single_spectrum_fit(self):
+
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit
+        from mantid.simpleapi import CalculateChiSquared
+
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': 44.0, 'FWHM': 1.1}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        x, y = cf.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        params = {'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion0.B40': -0.031787, 'ion0.B42': -0.11611,
+                  'ion0.B44': -0.12544, 'ion1.B20': 0.37737, 'ion1.B22': 3.9770, 'ion1.B40': -0.031787, 'ion1.B42': -0.11611,
+                  'ion1.B44': -0.12544}
+        cf = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1],
+                                   ToleranceIntensity=6.0, ToleranceEnergy=1.0, parameters=params)
+
+        chi2 = CalculateChiSquared(cf.makeSpectrumFunction(), InputWorkspace=ws)[1]
+
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=10)
+        fit.fit()
+
+        self.assertTrue(cf.chi2 > 0.0)
+        self.assertTrue(cf.chi2 < chi2)

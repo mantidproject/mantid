@@ -1414,13 +1414,17 @@ class CrystalFieldFit(object):
         Fit when the model has a single spectrum.
         """
         from mantid.api import AlgorithmManager
-        if self._function is None:
-            if self.model.isPhysicalPropertyOnly:
-                fun = self.model.makePhysicalPropertiesFunction()
-            else:
-                fun = self.model.makeSpectrumFunction()
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+        if isinstance(self.model, CrystalFieldMultiSite):
+            fun = str(self.model.function)
         else:
-            fun = str(self._function)
+            if self._function is None:
+                if self.model.isPhysicalPropertyOnly:
+                    fun = self.model.makePhysicalPropertiesFunction()
+                else:
+                    fun = self.model.makeSpectrumFunction()
+            else:
+                fun = str(self._function)
         if 'CrystalFieldMultiSpectrum' in fun:
             fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('Fit')
@@ -1463,6 +1467,7 @@ class CrystalFieldFit(object):
 
     def check_consistency(self):
         """ Checks that list input variables are consistent """
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         num_ws = self.model.NumberOfSpectra
         errmsg = 'Number of input workspaces not consistent with model'
         if islistlike(self._input_workspace):
@@ -1473,7 +1478,7 @@ class CrystalFieldFit(object):
                 self._input_workspace = self._input_workspace[0]
         elif num_ws != 1:
             raise ValueError(errmsg)
-        if not self.model.isPhysicalPropertyOnly:
+        if not isinstance(self.model, CrystalFieldMultiSite) and not self.model.isPhysicalPropertyOnly:
             tt = self.model.Temperature
             if any([val < 0 for val in (tt if islistlike(tt) else [tt])]):
                 raise RuntimeError('You must first define a temperature for the spectrum')
