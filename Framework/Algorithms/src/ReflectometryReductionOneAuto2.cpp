@@ -136,15 +136,15 @@ void ReflectometryReductionOneAuto2::init() {
   declareProperty("ThetaIn", Mantid::EMPTY_DBL(), "Angle in degrees",
                   Direction::Input);
 
-  // ThetaInLogName
-  declareProperty("ThetaInLogName", "",
+  // ThetaLogName
+  declareProperty("ThetaLogName", "",
                   "The name ThetaIn can be found in the run log as");
 
   // Whether to correct detectors
   declareProperty(
       make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
                                            Direction::Input),
-      "Moves detectors to twoTheta if ThetaIn or ThetaInLogName is given");
+      "Moves detectors to twoTheta if ThetaIn or ThetaLogName is given");
 
   // Detector position correction type
   const std::vector<std::string> correctionType{"VerticalShift",
@@ -268,12 +268,12 @@ void ReflectometryReductionOneAuto2::exec() {
   double theta;
   if (!getPointerToProperty("ThetaIn")->isDefault()) {
     theta = getProperty("ThetaIn");
-  } else if (!getPropertyValue("ThetaInLogName").empty()) {
-    theta = getThetaFromLogs(inputWS, getPropertyValue("ThetaInLogName"));
+  } else if (!getPropertyValue("ThetaLogName").empty()) {
+    theta = getThetaFromLogs(inputWS, getPropertyValue("ThetaLogName"));
   } else {
     // Calculate theta from detector positions
     theta = calculateTheta(instructions, inputWS);
-    // Never correct detector positions if ThetaIn or ThetaInLogName is not
+    // Never correct detector positions if ThetaIn or ThetaLogName is not
     // specified
     correctDetectors = false;
   }

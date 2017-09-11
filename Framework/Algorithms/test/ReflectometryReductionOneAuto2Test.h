@@ -385,7 +385,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inter);
-    alg.setProperty("ThetaInLogName", "theta");
+    alg.setProperty("ThetaLogName", "theta");
     alg.setProperty("CorrectDetectors","1");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("OutputWorkspace", "IvsQ");
