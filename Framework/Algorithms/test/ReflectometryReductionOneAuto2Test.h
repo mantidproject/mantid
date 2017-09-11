@@ -386,7 +386,7 @@ public:
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaLogName", "theta");
-    alg.setProperty("CorrectDetectors","1");
+    alg.setProperty("CorrectDetectors", "1");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
@@ -439,7 +439,7 @@ public:
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", 10.0);
-    alg.setProperty("CorrectDetectors","0");
+    alg.setProperty("CorrectDetectors", "0");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");

@@ -378,7 +378,8 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
 * @return :: the corrected workspace
 */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
-    const std::string &instructions, MatrixWorkspace_sptr inputWS, const double twoTheta) {
+    const std::string &instructions, MatrixWorkspace_sptr inputWS,
+    const double twoTheta) {
 
   auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
 
