@@ -491,7 +491,8 @@ public:
     std::unordered_set<std::string> idfIdentifiers;
 
     boost::regex regex(".*_Definition.*\\.xml", boost::regex_constants::icase);
-    boost::regex regexElastic(".*_Definition_elastic.*\\.xml", boost::regex_constants::icase);
+    boost::regex regexElastic(".*_Definition_elastic.*\\.xml",
+                              boost::regex_constants::icase);
     Poco::DirectoryIterator end_iter;
     for (Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString(
              "instrumentDefinition.directory"));
