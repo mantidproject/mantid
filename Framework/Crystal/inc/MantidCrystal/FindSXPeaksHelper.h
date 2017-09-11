@@ -6,6 +6,7 @@
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/Unit.h"
 
 #include <vector>
 #include <boost/optional.hpp>
@@ -167,7 +168,7 @@ protected:
   const double m_minValue = EMPTY_DBL();
   const double m_maxValue = EMPTY_DBL();
   const API::SpectrumInfo &m_spectrumInfo;
-  const bool m_tofUnits = true;
+  boost::shared_ptr<Mantid::Kernel::Unit> m_unit;
 };
 
 class DLLExport StrongestPeaksStrategy : public PeakFindingStrategy {

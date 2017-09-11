@@ -89,7 +89,6 @@ public:
 private:
   // Overridden Algorithm methods
   void init() override;
-  //
   void exec() override;
 
   /// Selects a background strategy
