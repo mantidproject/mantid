@@ -77,8 +77,7 @@ void NRCalculateSlitResolution::exec() {
   if (!isEmpty(twoTheta)) {
     theta = twoTheta / 2.0;
   } else {
-    const Kernel::Property *logData =
-        ws->mutableRun().getLogData(thetaLogName);
+    const Kernel::Property *logData = ws->mutableRun().getLogData(thetaLogName);
     auto logPWV =
         dynamic_cast<const Kernel::PropertyWithValue<double> *>(logData);
     auto logTSP =
@@ -92,8 +91,7 @@ void NRCalculateSlitResolution::exec() {
       throw std::runtime_error(
           "Value for two theta could not be found in log.");
     }
-    g_log.notice() << "Found '" << theta
-                   << "' as value for theta in log.\n";
+    g_log.notice() << "Found '" << theta << "' as value for theta in log.\n";
   }
 
   Instrument_const_sptr instrument = ws->getInstrument();

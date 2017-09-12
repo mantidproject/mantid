@@ -77,8 +77,7 @@ public:
     auto ws =
         createWorkspace("testCalcTSWS", V3D(0, 0, 0), 1, V3D(0, 0, 1), 0.5);
 
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("ThetaTSP");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("ThetaTSP");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 0.5));
     ws->mutableRun().addProperty(p, true);
 
