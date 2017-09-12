@@ -8,6 +8,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <algorithm>
 #include <sstream>
 
 using Mantid::API::ISpectrum;
@@ -138,9 +139,16 @@ size_t Workspace2D::size() const { return data.size() * blocksize(); }
 
 /// get the size of each vector
 size_t Workspace2D::blocksize() const {
-  return (!data.empty())
-             ? static_cast<ISpectrum const *>(data[0])->dataY().size()
-             : 0;
+  if (data.empty()) {
+    return 0;
+  } else {
+    size_t numBins = static_cast<ISpectrum const *>(data[0])->dataY().size();
+    const auto numHist = this->getNumberHistograms();
+    for (size_t i = 1; i < numHist; ++i)
+      numBins = std::max(
+          numBins, static_cast<ISpectrum const *>(data[i])->dataY().size());
+    return numBins;
+  }
 }
 
 /**
