@@ -6,8 +6,11 @@
 #include "MantidAlgorithms/NRCalculateSlitResolution.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 
 using namespace Mantid::Algorithms;
@@ -30,7 +33,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     const double res = alg.getProperty("Resolution");
-    TS_ASSERT_DELTA(res, 0.0429, 0.0001);
+    TS_ASSERT_DELTA(res, 0.0859414, 1e-6);
   }
 
   void testNRCalculateSlitResolutionZ() {
@@ -45,7 +48,49 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     const double res = alg.getProperty("Resolution");
-    TS_ASSERT_DELTA(res, 0.0429, 0.0001);
+    TS_ASSERT_DELTA(res, 0.0859414, 1e-6);
+  }
+
+  void testNRCalculateSlitResolutionThetaFromLog() {
+    // Test getting theta from a log property with value
+    // Test using the default log name
+    auto ws =
+        createWorkspace("testCalcResLogWS", V3D(0, 0, 0), 1, V3D(0, 0, 1), 0.5);
+
+    PropertyWithValue<double> *p =
+        new PropertyWithValue<double>("Theta", 0.5); // default name is Theta
+    ws->mutableRun().addLogData(p);
+
+    NRCalculateSlitResolution alg;
+    alg.initialize();
+    alg.setPropertyValue("Workspace", ws->getName());
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    const double res = alg.getProperty("Resolution");
+    TS_ASSERT_DELTA(res, 0.0859414, 1e-6);
+  }
+
+  void testNRCalculateSlitResolutionThetaFromTimeSeriesLog() {
+    // Test getting theta from a time series property
+    // Test using a non-default log name
+    auto ws =
+        createWorkspace("testCalcTSWS", V3D(0, 0, 0), 1, V3D(0, 0, 1), 0.5);
+
+    TimeSeriesProperty<double> *p =
+        new TimeSeriesProperty<double>("ThetaTSP");
+    TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 0.5));
+    ws->mutableRun().addProperty(p, true);
+
+    NRCalculateSlitResolution alg;
+    alg.initialize();
+    alg.setPropertyValue("Workspace", ws->getName());
+    alg.setProperty("ThetaLogName", "ThetaTSP");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    const double res = alg.getProperty("Resolution");
+    TS_ASSERT_DELTA(res, 0.0859414, 1e-6);
   }
 
   Workspace2D_sptr createWorkspace(std::string name, V3D s1Pos, double s1VG,
