@@ -547,7 +547,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # ---------- Load Elastic Instrument Definition File ----------
 
-        idf_name = workspace.getInstrument().getName() + '_Definition_elastic.xml'
+        idf_name = workspace.getInstrument().getName() + '_elastic_Definition.xml'
 
         idf_path = os.path.join(config.getInstrumentDirectory(), idf_name)
         logger.information('IDF = %s' % idf_path)
