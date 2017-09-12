@@ -696,7 +696,8 @@ void LoadILLDiffraction::setSampleLogs() {
   }
   run.addLogData(
       new PropertyWithValue<std::string>("ScanType", std::move(scanTypeStr)));
-  run.addLogData(new PropertyWithValue<double>("PixelSize", D20_PIXEL_SIZE));
+  run.addLogData(new PropertyWithValue<double>(
+      "PixelSize", D20_PIXEL_SIZE / m_resolutionMode));
   std::string resModeStr = "Nominal";
   if (m_resolutionMode == 1) {
     resModeStr = "Low";

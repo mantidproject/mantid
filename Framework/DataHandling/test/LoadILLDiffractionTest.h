@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/Load.h"
-#include "MantidDataHandling/LoadILLDiffraction.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::API;
@@ -58,33 +58,53 @@ public:
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
 
+    // two theta of the first pixel
+    TS_ASSERT_DELTA(outputWS->detectorInfo().signedTwoTheta(1) * RAD_2_DEG,
+                    -2.79662, 1E-5)
+
     TS_ASSERT_EQUALS(outputWS->x(0)[0], 0.)
-    TS_ASSERT_EQUALS(outputWS->y(0)[0], 2685529)
-    TS_ASSERT_DELTA(outputWS->e(0)[0], 1638.76, 0.01)
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], 2685529.)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], 1638.75, 0.01)
 
     TS_ASSERT_EQUALS(outputWS->x(1)[0], 0.)
-    TS_ASSERT_EQUALS(outputWS->y(1)[0], 548)
-    TS_ASSERT_DELTA(outputWS->e(1)[0], 23.40, 0.01)
+    TS_ASSERT_EQUALS(outputWS->y(1)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->e(1)[0], 0.)
 
-    TS_ASSERT_EQUALS(outputWS->x(2)[0], 0.)
-    TS_ASSERT_EQUALS(outputWS->y(2)[0], 991)
-    TS_ASSERT_DELTA(outputWS->e(2)[0], 31.48, 0.01)
+    TS_ASSERT_EQUALS(outputWS->x(64)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(64)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->e(64)[0], 0.)
+
+    TS_ASSERT_EQUALS(outputWS->x(65)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(65)[0], 548.)
+    TS_ASSERT_DELTA(outputWS->e(65)[0], 23.4, 0.01)
 
     TS_ASSERT_EQUALS(outputWS->x(1111)[0], 0.)
-    TS_ASSERT_EQUALS(outputWS->y(1111)[0], 7080)
-    TS_ASSERT_DELTA(outputWS->e(1111)[0], 84.14, 0.01)
+    TS_ASSERT_EQUALS(outputWS->y(1111)[0], 6285)
+    TS_ASSERT_DELTA(outputWS->e(1111)[0], 79.27, 0.01)
 
     TS_ASSERT_EQUALS(outputWS->x(3072)[0], 0.)
-    TS_ASSERT_EQUALS(outputWS->y(3072)[0], 0.)
-    TS_ASSERT_EQUALS(outputWS->e(3072)[0], 0.)
+    TS_ASSERT_EQUALS(outputWS->y(3072)[0], 7848.)
+    TS_ASSERT_DELTA(outputWS->e(3072)[0], 88.58, 0.01)
 
-    TS_ASSERT(outputWS->run().hasProperty("simulated_d20"))
-    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy"))
-    TS_ASSERT(outputWS->run().hasProperty("SampleSettings"))
+    const auto& run = outputWS->run();
 
-    const auto sim = outputWS->run().getLogData("simulated_d20");
-    const auto spy = outputWS->run().getLogData("AcquisitionSpy");
-    const auto sample = outputWS->run().getLogData("SampleSettings");
+    TS_ASSERT(run.hasProperty("simulated_d20"))
+    TS_ASSERT(run.hasProperty("AcquisitionSpy"))
+    TS_ASSERT(run.hasProperty("SampleSettings"))
+    TS_ASSERT(run.hasProperty("ScanType"))
+    TS_ASSERT(run.hasProperty("PixelSize"))
+    TS_ASSERT(run.hasProperty("ResolutionMode"))
+
+    const auto sim = run.getLogData("simulated_d20");
+    const auto spy = run.getLogData("AcquisitionSpy");
+    const auto sample = run.getLogData("SampleSettings");
+    const auto scanType = run.getLogData("ScanType");
+    const double pixelSize = run.getLogAsSingleValue("PixelSize");
+    const auto resMode = run.getLogData("ResolutionMode");
+
+    TS_ASSERT_EQUALS(scanType->value(), "NoScan")
+    TS_ASSERT_EQUALS(resMode->value(), "Nominal")
+    TS_ASSERT_DELTA(pixelSize, 0.05, 1E-10)
 
     TS_ASSERT_EQUALS(sim->size(), 1)
     TS_ASSERT_EQUALS(spy->size(), 1)
@@ -131,15 +151,22 @@ public:
       }
     }
 
-    TS_ASSERT(outputWS->run().hasProperty("Omega"))
-    TS_ASSERT(outputWS->run().hasProperty("Detector"))
-    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy"))
-    TS_ASSERT(outputWS->run().hasProperty("SampleSettings"))
-    TS_ASSERT(outputWS->run().hasProperty("MagneticField"))
+    const auto& run = outputWS->run();
 
-    const auto omega = outputWS->run().getLogData("Omega");
+    TS_ASSERT(run.hasProperty("Omega"))
+    TS_ASSERT(run.hasProperty("Detector"))
+    TS_ASSERT(run.hasProperty("AcquisitionSpy"))
+    TS_ASSERT(run.hasProperty("SampleSettings"))
+    TS_ASSERT(run.hasProperty("MagneticField"))
+    TS_ASSERT(run.hasProperty("ScanSteps"))
+    TS_ASSERT(run.hasProperty("ScanType"))
 
+    const auto omega = run.getLogData("Omega");
     TS_ASSERT_EQUALS(omega->size(), 21)
+    const double steps = run.getLogAsSingleValue("ScanSteps");
+    const auto scanType = run.getLogData("ScanType");
+    TS_ASSERT_EQUALS(scanType->value(), "OtherScan")
+    TS_ASSERT_DELTA(steps, 21., 1E-10)
 
     const std::string omegaTimeSeriesValue =
         "2017-Feb-15 08:58:52  1\n2017-Feb-15 08:58:52.521547000  "
