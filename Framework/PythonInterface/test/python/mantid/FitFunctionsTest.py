@@ -527,7 +527,7 @@ class FitFunctionsTest(unittest.TestCase):
         s = lb + g
         self.assertTrue( isinstance( s, CompositeFunctionWrapper) )
     
-    def test_evaluation(self):
+    def test_direct_evaluation(self):
         l0 = FunctionWrapper( "LinearBackground", A0=0, A1=2)
         l1 = FunctionWrapper( "LinearBackground", A0=5, A1=-1)
 
@@ -574,8 +574,19 @@ class FitFunctionsTest(unittest.TestCase):
         s2ws = EvaluateFunction(s2,"ws", OutputWorkspace='out')
         s2vals = s2ws.readY(1)
         self.assertAlmostEqual(s2vals[0], 10.0)
-
         
+    def test_evaluation_by_single_value(self):
+        p = Polynomial(n=4, A0=1, A1=1, A2=1, A3=1, A4=1)
+        self.assertAlmostEqual(p(0),1.0)
+        self.assertAlmostEqual(p(1),5.0)
+        self.assertAlmostEqual(p(2),31.0)
+        
+    def test_evaluation_by_list_of_values(self):
+        p = Polynomial(n=4, A0=1, A1=1, A2=1, A3=1, A4=1)
+        result = p([0,1,3]) 
+        self.assertAlmostEqual(result[0],1.0)
+        self.assertAlmostEqual(result[1],5.0)
+        self.assertAlmostEqual(result[2],121.0)        
        
 if __name__ == '__main__':
     unittest.main()
