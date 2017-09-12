@@ -702,8 +702,8 @@ class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
         self.files = ['osi97935_graphite002_red.nxs',
                       'osi97936_graphite002_red.nxs']
         self.eRange = [-0.02, 0.02]
-        self.startX = 0.195082
-        self.endX = 3.202128
+        self.startX = 0.189077
+        self.endX = 1.8141
 
     def get_reference_files(self):
         return ['II.OSIRISElwinEQ1.nxs',
@@ -720,8 +720,8 @@ class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
         self.files = ['irs53664_graphite002_red.nxs',
                       'irs53665_graphite002_red.nxs']
         self.eRange = [-0.02, 0.02]
-        self.startX = 0.313679
-        self.endX = 3.285377
+        self.startX = 0.441682
+        self.endX = 1.85378
 
     def get_reference_files(self):
         return ['II.IRISElwinEQ1.nxs',
