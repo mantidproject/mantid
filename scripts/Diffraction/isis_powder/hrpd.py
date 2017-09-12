@@ -49,6 +49,9 @@ class HRPD(AbstractInst):
         self._sample_details = sample_details_obj
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
+        if self._sample_details is None:
+            raise RuntimeError("Absorption corrections cannot be run without sample details."
+                               " Please set sample details using set_sample before running absorption corrections.")
         if self._is_vanadium:
             return hrpd_algs.calculate_van_absorb_corrections(
                 ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering)
