@@ -310,7 +310,7 @@ def fitting_algorithm(inout=False):
         """
         def wrapper(*args, **kwargs):
             function, input_workspace = _get_mandatory_args(function_name,
-                                                            ["Function", "InputWorkspace"], *args, **kwargs)
+                ["Function", "InputWorkspace"], *args, **kwargs)
             # Remove from keywords so it is not set twice
             if "Function" in kwargs:
                 del kwargs['Function']
@@ -348,8 +348,8 @@ def fitting_algorithm(inout=False):
             # Check for unknown properties and warn they will not be used
             for key in list(kwargs.keys()):
                 if key not in algm:
-                    msg = "Property (%s) to %s() doesn't apply to any of " + \
-                          "the input workspaces." % (key, function_name)
+                    msg = 'Property {} to {} does not apply to any of the ' +\
+                          ' input workspaces'.format(key, function_name)
                     logger.warning(msg)
                     del kwargs[key]
             set_properties(algm, **kwargs)
@@ -358,8 +358,7 @@ def fitting_algorithm(inout=False):
         # end
         function_name = f.__name__
         signature = ("\bFunction, InputWorkspace", "**kwargs")
-        fwrapper = _customise_func(wrapper, function_name, signature,
-                                   f.__doc__)
+        fwrapper = _customise_func(wrapper, function_name, signature, f.__doc__)
         if function_name not in __SPECIALIZED_FUNCTIONS__:
             __SPECIALIZED_FUNCTIONS__.append(function_name)
         return fwrapper
