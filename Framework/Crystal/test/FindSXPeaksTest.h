@@ -377,17 +377,18 @@ public:
     TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
                       results[2]);
 
-    results[0] = result->getPeak(0).getTOF();
-    results[1] = result->getPeak(1).getTOF();
-    results[2] = result->getPeak(2).getTOF();
-    std::sort(results.begin(), results.end(), std::less<double>());
+    std::array<double, 3> tof;
+    tof[0] = result->getPeak(0).getTOF();
+    tof[1] = result->getPeak(1).getTOF();
+    tof[2] = result->getPeak(2).getTOF();
+    std::sort(tof.begin(), tof.end(), std::less<double>());
 
-    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 315.938,
-                     results[0], 1e-1);
-    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 631.668,
-                     results[1], 1e-1);
-    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 946.988,
-                     results[2], 1e-1);
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 315.938, tof[0],
+                     1e-1);
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 631.668, tof[1],
+                     1e-1);
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 946.988, tof[2],
+                     1e-1);
   }
 };
 
