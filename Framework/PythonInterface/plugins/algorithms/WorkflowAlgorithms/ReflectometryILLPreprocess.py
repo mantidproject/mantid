@@ -5,8 +5,9 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty, MatrixWorkspaceProperty,
                         MultipleFileProperty, PropertyMode)
 from mantid.kernel import (Direction, IntBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (ConvertUnits, CreateSingleValuedWorkspace, CropWorkspace, Divide, ExtractMonitors, GroupDetectors,
-                              Integration, LoadILLReflectometry, MergeRuns, Minus, mtd, NormaliseToMonitor, Plus, Scale, SumSpectra)
+from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits, CreateSingleValuedWorkspace, CropWorkspace,
+                              Divide, ExtractMonitors, GroupDetectors, Integration, LoadILLReflectometry, MergeRuns, Minus, mtd,
+                              NormaliseToMonitor, Plus, Scale, SumSpectra, Transpose)
 import numpy
 import os.path
 import ReflectometryILL_common as common
@@ -27,12 +28,14 @@ class Prop:
     OUTPUT_BEAM_POS = 'OutputBeamPosition'
     RUN = 'Run'
     SLIT_NORM = 'SlitNormalisation'
+    SUM_OUTPUT = 'SumOutput'
     UPPER_BKG_OFFSET = 'UpperBackgroundOffset'
     UPPER_BKG_WIDTH = 'UpperBackgroundWidth'
 
 
 class BkgMethod:
-    AVERAGE = 'Average Background'
+    CONSTANT = ' Background Constant Fit'
+    LINEAR = 'Background Linear Fit'
     OFF = 'Background OFF'
 
 
@@ -40,6 +43,12 @@ class FluxNormMethod:
     MONITOR = 'Normalise To Monitor'
     TIME = 'Normalise To Time'
     OFF = 'Normalisation OFF'
+
+
+class Summation:
+    COHERENT = 'Coherent'
+    INCOHERENT = 'Incoherent'
+    OFF = 'Summation OFF'
 
 
 class SlitNorm:
@@ -96,7 +105,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws = self._subtractFlatBkg(ws, beamPosWS)
 
-        ws = self._groupForeground(ws, beamPosWS)
+        ws = self._sumForeground(ws, beamPosWS)
         self._cleanup.cleanup(beamPosWS)
 
         ws = self._convertToWavelength(ws)
@@ -125,6 +134,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      defaultValue='',
                                                      direction=Direction.Output),
                              doc='The preprocessed output workspace')
+        self.declareProperty(Prop.SUM_OUTPUT,
+                             defaultValue=Summation.COHERENT,
+                             validator=StringListValidator([Summation.COHERENT, Summation.INCOHERENT, Summation.OFF]),
+                             doc='Foreground summation method.')
         self.declareProperty(ITableWorkspaceProperty(Prop.DIRECT_BEAM_POS,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -144,9 +157,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      direction=Direction.Input),
                              doc='A workspace containing the instrument background measurement.')
         self.declareProperty(Prop.BKG_METHOD,
-                             defaultValue=BkgMethod.AVERAGE,
-                             validator=StringListValidator([BkgMethod.AVERAGE, BkgMethod.OFF]),
-                             doc='Flat background subtraction.')
+                             defaultValue=BkgMethod.CONSTANT,
+                             validator=StringListValidator([BkgMethod.CONSTANT, BkgMethod.LINEAR, BkgMethod.OFF]),
+                             doc='Flat background calculation method for background subtraction.')
         self.declareProperty(Prop.LOWER_BKG_OFFSET,
                              defaultValue=7,
                              validator=nonnegativeInt,
@@ -182,6 +195,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
         # TODO check that either RUN or INPUT_WS is given.
+        if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
+            if self.getProperty(Prop.LOWER_BKG_WIDTH).value == 0 and self.getProperty(Prop.UPPER_BKG_WIDTH).value == 0:
+                issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background widths are zero.'
         return issues
 
     def _convertToWavelength(self, ws):
@@ -205,8 +221,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                         DetectorWorkspace=detWSName,
                         MonitorWorkspace=monWSName,
                         EnableLogging=self._subalgLogging)
+        if mtd.doesExist(detWSName)  is None:
+            raise RuntimeError('No detectors in the input data.')
         detWS = mtd[detWSName]
-        monWS = mtd[monWSName]
+        monWS = mtd[monWSName] if mtd.doesExist(monWSName) else None
         self._cleanup.cleanup(ws)
         return (detWS, monWS)
 
@@ -216,18 +234,40 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         self._cleanup.finalCleanup()
 
-    def _foregroundCentre(self, beamPosWS):
+    def _flatBkgRanges(self, ws, peakPosWS):
+        """Return ranges for flat background fitting."""
+        peakPos = self._foregroundCentre(ws, peakPosWS)
+        peakPos = ws.getSpectrum(peakPos).getSpectrumNo()
+        peakHalfWidth = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
+        if peakHalfWidth == Property.EMPTY_INT:
+            peakHalfWidth = 0
+        lowerOffset = self.getProperty(Prop.LOWER_BKG_OFFSET).value
+        lowerWidth = self.getProperty(Prop.LOWER_BKG_WIDTH).value
+        lowerStartIndex = peakPos + peakHalfWidth + lowerOffset
+        lowerEndIndex = lowerStartIndex + lowerWidth
+        lowerRange = [lowerStartIndex + 0.5, lowerEndIndex + 0.5]
+        print(lowerRange)
+        upperOffset = self.getProperty(Prop.UPPER_BKG_OFFSET).value
+        upperWidth = self.getProperty(Prop.UPPER_BKG_WIDTH).value
+        upperEndIndex = peakPos - peakHalfWidth - upperOffset
+        upperStartIndex = upperEndIndex - upperWidth
+        upperRange = [upperStartIndex - 0.5, upperEndIndex - 0.5]
+        print(upperRange)
+        return upperRange + lowerRange
+
+    def _foregroundCentre(self, ws, beamPosWS):
         """Return the detector id of the foreground centre pixel."""
         if self.getProperty(Prop.FOREGROUND_CENTRE).isDefault:
             return int(numpy.rint(beamPosWS.cell('FittedPeakCentre', 0)))
-        return self.getProperty(Prop.FOREGROUND_CENTRE).value
+        spectrumNo = self.getProperty(Prop.FOREGROUND_CENTRE).value
+        return ws.getIndexFromSpectrumNumber(spectrumNo)
 
     def _groupForeground(self, ws, beamPosWS):
         """Group detectors in the foreground region."""
         if self.getProperty(Prop.FOREGROUND_HALF_WIDTH).isDefault:
             return ws
         hw = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
-        beamPos = self._foregroundCentre(beamPosWS)
+        beamPos = self._foregroundCentre(ws, beamPosWS)
         groupIndices = [i for i in range(beamPos - hw, beamPos + hw + 1)]
         foregroundWSName = self._names.withSuffix('foreground_grouped')
         foregroundWS = GroupDetectors(InputWorkspace=ws,
@@ -292,6 +332,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Normalise ws to monitor counts or counting time."""
         method = self.getProperty(Prop.FLUX_NORM_METHOD).value
         if method == FluxNormMethod.MONITOR:
+            if monWS is None:
+                raise RuntimeError('Cannot normalise to monitor data: no monitors in input data.')
             normalisedWSName = self._names.withSuffix('normalised_to_monitor')
             monIndex = normalisationMonitorWorkspaceIndex(monWS)
             monXs = monWS.readX(0)
@@ -342,99 +384,41 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if not self.getProperty(Prop.OUTPUT_BEAM_POS).isDefault:
             self.setProperty(Prop.OUTPUT_BEAM_POS, ws)
 
-    def _subtractFlatBkg(self, ws, beamPosWS):
+    def _subtractFlatBkg(self, ws, peakPosWS):
         """Return a workspace where a flat background has been subtracted from ws."""
         method = self.getProperty(Prop.BKG_METHOD).value
         if method == BkgMethod.OFF:
             return ws
-        # method == BkgMethod.AVERAGE
-        # TODO We should rather use LRSubtractAverageBackground here.
-        #      It seems to have some issues ATM, though.
-        peakPos = self._foregroundCentre(beamPosWS)
-        peakHalfWidth = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
-        if peakHalfWidth == Property.EMPTY_INT:
-            peakHalfWidth = 0
-        # At least on D17, the detectors are numbered in descending angle.
-        lowerOffset = self.getProperty(Prop.LOWER_BKG_OFFSET).value
-        lowerWidth = self.getProperty(Prop.LOWER_BKG_WIDTH).value
-        lowerStartIndex = peakPos + peakHalfWidth + lowerOffset
-        lowerEndIndex = lowerStartIndex + lowerWidth
-        print('lower start: {} end: {}'.format(lowerStartIndex, lowerEndIndex))
-        if lowerEndIndex >= ws.getNumberHistograms():
-            lowerEndIndex = ws.getNumberHistograms() - 1
-            self.log().warning('Lower flat background region cropped to fit the workspace.')
-            print('new lower start: {} end: {}'.format(lowerStartIndex, lowerEndIndex))
-        if lowerStartIndex < lowerEndIndex:
-            lowerBkgWSName = self._names.withSuffix('lower_bkg_region')
-            lowerBkgWS = CropWorkspace(InputWorkspace=ws,
-                                       OutputWorkspace=lowerBkgWSName,
-                                       StartWorkspaceIndex=lowerStartIndex,
-                                       EndWorkspaceIndex=lowerEndIndex,
-                                       EnableLogging=self._subalgLogging)
-            lowerSize = lowerBkgWS.getNumberHistograms() * lowerBkgWS.blocksize()
-            lowerBkgSumWSName = self._names.withSuffix('lower_bkg_sum')
-            Integration(InputWorkspace=lowerBkgWS,
-                        OutputWorkspace=lowerBkgSumWSName,
-                        EnableLogging=self._subalgLogging)
-            lowerBkgSumWS = SumSpectra(InputWorkspace=lowerBkgSumWSName,
-                                       OutputWorkspace=lowerBkgSumWSName,
-                                       EnableLogging=self._subalgLogging)
-        else:
-            lowerStartIndex = lowerEndIndex
-            lowerBkgSumWSName = self._names.withSuffix('lower_bkg_sum')
-            lowerBkgSumWS = CreateSingleValuedWorkspace(OutputWorkspace=lowerBkgSumWSName,
-                                                     EnableLogging=self._subalgLogging)
-            print('newer lower start: {} end: {}'.format(lowerStartIndex, lowerEndIndex))
-        upperOffset = self.getProperty(Prop.UPPER_BKG_OFFSET).value
-        upperWidth = self.getProperty(Prop.UPPER_BKG_WIDTH).value
-        upperEndIndex = peakPos - peakHalfWidth - upperOffset
-        upperStartIndex = upperEndIndex - upperWidth
-        print('uppert start: {} end: {}'.format(upperStartIndex, upperEndIndex))
-        if  upperStartIndex < 0:
-            upperStartIndex = 0
-            self.log().warning('Upper flat background region cropped to fit the workspace.')
-            print('new uppert start: {} end: {}'.format(upperStartIndex, upperEndIndex))
-        if upperStartIndex < upperEndIndex:
-            upperBkgWSName = self._names.withSuffix('upper_bkg_region')
-            upperBkgWS = CropWorkspace(InputWorkspace=ws,
-                                       OutputWorkspace=upperBkgWSName,
-                                       StartWorkspaceIndex=upperStartIndex,
-                                       EndWorkspaceIndex=upperEndIndex,
-                                       EnableLogging=self._subalgLogging)
-            upperSize = upperBkgWS.getNumberHistograms() * upperBkgWS.blocksize()
-            upperBkgSumWSName = self._names.withSuffix('upper_bkg_sum')
-            Integration(InputWorkspace=upperBkgWS,
-                        OutputWorkspace=upperBkgSumWSName,
-                        EnableLogging=self._subalgLogging)
-            upperBkgSumWS = SumSpectra(InputWorkspace=upperBkgSumWSName,
-                                       OutputWorkspace=upperBkgSumWSName,
-                                       EnableLogging=self._subalgLogging)
-        else:
-            upperStartIndex = upperEndIndex
-            upperBkgSumWSName = self._names.withSuffix('upper_bkg_sum')
-            upperBkgSumWS = CreateSingleValuedWorkspace(OutputWorkspace=upperBkgSumWSName,
+
+        clonedWSName = self._names.withSuffix('cloned_for_flat_bkg')
+        clonedWS = CloneWorkspace(InputWorkspace=ws,
+                                  OutputWorkspace=clonedWSName,
+                                  EnableLogging=self._subalgLogging)
+        transposedWSName = self._names.withSuffix('transposed_clone')
+        transposedWS = Transpose(InputWorkspace=clonedWS,
+                                 OutputWorkspace=transposedWSName,
+                                 EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(clonedWS)
+        ranges = self._flatBkgRanges(ws, peakPosWS)
+        polynomialDegree = 0 if self.getProperty(Prop.BKG_METHOD).value == BkgMethod.CONSTANT else 1
+        transposedBkgWSName = self._names.withSuffix('transposed_flat_background')
+        transposedBkgWS = CalculatePolynomialBackground(InputWorkspace=transposedWS,
+                                                        OutputWorkspace=transposedBkgWSName,
+                                                        Degree=polynomialDegree,
+                                                        XRanges=ranges,
                                                         EnableLogging=self._subalgLogging)
-            print('newer uppert start: {} end: {}'.format(upperStartIndex, upperEndIndex))
-        bkgArea = ws.blocksize() * (lowerEndIndex - lowerStartIndex + upperEndIndex - upperStartIndex)
-        if bkgArea == 0:
-            raise RuntimeError('Flat background region size is zero - cannot calculate average background.')
-        averageBkgWSName = self._names.withSuffix('total_average_bkg')
-        averageBkgWS = Plus(LHSWorkspace=lowerBkgSumWS,
-                            RHSWorkspace=upperBkgSumWS,
-                            EnableLogging=self._subalgLogging)
-        bkgAreaWSName = self._names.withSuffix('bkg_area')
-        bkgAreaWS = CreateSingleValuedWorkspace(OutputWorkspace=bkgAreaWSName,
-                                                EnableLogging=self._subalgLogging)
-        averageBkgWS = Divide(LHSWorkspace=averageBkgWS,
-                              RHSWorkspace=bkgAreaWS,
-                              OutputWorkspace=bkgAreaWSName,
-                              EnableLogging=self._subalgLogging)
-        subtractedWSName = self._names.withSuffix('flat_bkg_subtracted')
+        self._cleanup.cleanup(transposedWS)
+        bkgWSName = self._names.withSuffix('flat_background')
+        bkgWS = Transpose(InputWorkspace=transposedBkgWS,
+                          OutputWorkspace=bkgWSName,
+                          EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(transposedBkgWS)
+        subtractedWSName = self._names.withSuffix('flat_background_subtracted')
         subtractedWS = Minus(LHSWorkspace=ws,
-                             RHSWorkspace=averageBkgWS,
+                             RHSWorkspace=bkgWS,
                              OutputWorkspace=subtractedWSName,
                              EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(ws)
+        self._cleanup.cleanup(bkgWS)
         return subtractedWS
 
     def _subtractInstrumentBkg(self, ws):
@@ -449,6 +433,16 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
         return subtractedWS
+
+    def _sumForeground(self, ws, peakPosWS):
+        """Select and apply foreground summation."""
+        method = self.getProperty(Prop.SUM_OUTPUT).value
+        if method == Summation.OFF:
+            return ws
+        elif method == Summation.COHERENT:
+            return self._groupForeground(ws, peakPosWS)
+        else:
+            raise RuntimeError('Selected output summation method is not implemented.')
 
 
 AlgorithmFactory.subscribe(ReflectometryILLPreprocess)
