@@ -6,8 +6,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidQtWidgets/Common/QwtHelper.h"
 #include "EnggDiffFittingPresWorker.h"
-#include "../Muon/ALCHelper.h"
 
 #include <boost/lexical_cast.hpp>
 #include <cctype>
@@ -20,6 +20,7 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt {
+namespace QwtHelper = API::QwtHelper;
 namespace CustomInterfaces {
 
 namespace {
@@ -420,7 +421,7 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
   * @return List of found full file paths for the files specified
   */
 std::vector<std::string>
-EnggDiffFittingPresenter::processMultiRun(const std::string userInput) {
+EnggDiffFittingPresenter::processMultiRun(const std::string &userInput) {
 
   // Split user input into the first and last run number
   std::vector<std::string> firstLastRunNoVec;
@@ -1029,7 +1030,7 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
 }
 
 void EnggDiffFittingPresenter::runLoadAlg(
-    const std::string focusedFile,
+    const std::string &focusedFile,
     Mantid::API::MatrixWorkspace_sptr &focusedWS) {
   // load the focused workspace file to perform single peak fits
   try {
@@ -1712,7 +1713,7 @@ void EnggDiffFittingPresenter::setDefaultBank(
     m_view->setFittingRunNo(selectedFile);
 }
 
-bool EnggDiffFittingPresenter::isDigit(const std::string text) const {
+bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
 
@@ -1729,7 +1730,7 @@ void EnggDiffFittingPresenter::plotFocusedFile(bool plotSinglePeaks) {
   try {
     auto focusedPeaksWS =
         ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
-    auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
+    auto focusedData = QwtHelper::curveDataFromWs(focusedPeaksWS);
 
     // Check that the number of curves to plot isn't excessive
     // lets cap it at 20 to begin with - this number could need
@@ -1781,7 +1782,7 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     if (m_fittingFinishedOK) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
       auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
-      auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
+      auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
       m_view->setDataVector(singlePeaksData, false, true);
       m_view->showStatus("Peaks fitted successfully");
 

@@ -386,4 +386,5 @@ class RefLReduction(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
 
+
 AlgorithmFactory.subscribe(RefLReduction)

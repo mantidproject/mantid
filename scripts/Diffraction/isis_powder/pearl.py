@@ -78,11 +78,6 @@ class Pearl(AbstractInst):
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
 
-    def _generate_auto_vanadium_calibration(self, run_details):
-        # The instrument scientists prefer everything to be explicit on this instrument so
-        # instead we don't try to run this automatically
-        raise NotImplementedError("You must run the create_vanadium method manually on Pearl")
-
     def _get_current_tt_mode(self):
         return self._inst_settings.tt_mode
 

@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveFloatParameter, ClassTypeParameter)
-from sans.common.enums import (SampleShape, SANSInstrument)
+from sans.common.enums import (SampleShape, SANSFacility)
 from sans.common.file_information import (SANSFileInformationFactory)
 from sans.state.automatic_setters import (automatic_setters)
 
@@ -71,10 +71,10 @@ class StateScaleBuilder(object):
 # Factory method for SANStateScaleBuilder
 # ---------------------------------------
 def get_scale_builder(data_info):
-    # The data state has most of the information that we require to define the move. For the factory method, only
-    # the instrument is of relevance.
-    instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    # The data state has most of the information that we require to define the scaling. For the factory method, only
+    # the facility/instrument is of relevance.
+    facility = data_info.facility
+    if facility is SANSFacility.ISIS:
         return StateScaleBuilder(data_info)
     else:
         raise NotImplementedError("StateScaleBuilder: Could not find any valid scale builder for the "

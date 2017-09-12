@@ -10,6 +10,7 @@ import warnings
 def _warning_no_source(msg, *_, **__):
     return str(msg) + '\n'
 
+
 warnings.formatwarning = _warning_no_source
 warnings.simplefilter('always', UserWarning)
 

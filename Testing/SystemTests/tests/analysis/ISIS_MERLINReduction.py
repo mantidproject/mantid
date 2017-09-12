@@ -55,6 +55,7 @@ class ReduceMERLIN(ReductionWrapper):
         ReductionWrapper.__init__(self,'MER',web_var)
 #----------------------------------------------------------------------------------------------------------------------
 
+
 if __name__=="__main__":
     #import os
     #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]

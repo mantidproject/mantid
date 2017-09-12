@@ -1,15 +1,12 @@
 # pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes,
 # pylint: disable = too-many-branches,too-many-locals, too-many-nested-blocks
+from __future__ import (absolute_import, division, print_function)
 
 try:
     from mantidplot import *
 except ImportError:
     canMantidPlot = False  #
 
-import ui_refl_window
-import refl_save
-import refl_choose_col
-import refl_options
 import csv
 import os
 import re
@@ -25,6 +22,11 @@ import mantidqtpython
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
 from mantid import UsageService
 
+from ui.reflectometer.ui_refl_window import Ui_windowRefl
+from ui.reflectometer.refl_save import Ui_SaveWindow
+from ui.reflectometer.refl_choose_col import ReflChoose
+from ui.reflectometer.refl_options import ReflOptions
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -34,7 +36,7 @@ except AttributeError:
 canMantidPlot = True
 
 
-class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
+class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
     current_instrument = None
     current_table = None
     current_polarisation_method = None
@@ -1293,7 +1295,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         try:
             Dialog = QtGui.QDialog()
-            u = refl_save.Ui_SaveWindow()
+            u = Ui_SaveWindow()
             u.setupUi(Dialog)
             Dialog.exec_()
         except Exception as ex:
@@ -1306,11 +1308,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         try:
 
-            dialog_controller = refl_options.ReflOptions(def_method=self.live_method, def_freq=self.live_freq,
-                                                         def_alg_use=self.__alg_use,
-                                                         def_icat_download=self.__icat_download,
-                                                         def_group_tof_workspaces=self.__group_tof_workspaces,
-                                                         def_stitch_right=self.__scale_right)
+            dialog_controller = ReflOptions(def_method=self.live_method, def_freq=self.live_freq,
+                                            def_alg_use=self.__alg_use,
+                                            def_icat_download=self.__icat_download,
+                                            def_group_tof_workspaces=self.__group_tof_workspaces,
+                                            def_stitch_right=self.__scale_right)
             if dialog_controller.exec_():
                 # Fetch the settings back off the controller
                 self.live_freq = dialog_controller.frequency()
@@ -1342,7 +1344,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         shows the choose columns dialog for hiding and revealing of columns
         """
         try:
-            dialog = refl_choose_col.ReflChoose(self.shown_cols, self.tableMain)
+            dialog = ReflChoose(self.shown_cols, self.tableMain)
             if dialog.exec_():
                 settings = QtCore.QSettings()
                 settings.beginGroup(self.__column_settings)
