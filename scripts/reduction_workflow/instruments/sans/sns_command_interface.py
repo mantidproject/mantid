@@ -125,3 +125,11 @@ def Resolution(sample_aperture_diameter=10.0):
 
 def IndependentBinning(independent_binning=True):
     ReductionSingleton().reduction_properties["IQIndependentBinning"]=independent_binning
+
+
+def SetDetectorOffset(distance):
+    ReductionSingleton().reduction_properties["DetectorOffset"] = distance
+
+
+def SetSampleOffset(distance):
+    ReductionSingleton().reduction_properties["SampleOffset"] = distance

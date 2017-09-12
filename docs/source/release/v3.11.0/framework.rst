@@ -104,6 +104,8 @@ Python Fit Functions
 ####################
 
 - A bug that makes it difficult to define and use attributes in python fit functions has been fixed.
+- The usability of the fit functions has been improved, enabling users to construct and modify the functions as objects rather than strings 
+  as described :ref:`here <FitFunctionsInPython>`.
 
 |
 

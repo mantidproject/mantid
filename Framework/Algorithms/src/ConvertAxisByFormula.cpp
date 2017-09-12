@@ -105,7 +105,7 @@ void ConvertAxisByFormula::exec() {
   RefAxis *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
   if (refAxisPtr != nullptr) {
     CommonBinsValidator sameBins;
-    if (sameBins.isValid(outputWs) != "") {
+    if (!sameBins.isValid(outputWs).empty()) {
       isRaggedBins = true;
     }
     isRefAxis = true;
@@ -245,14 +245,14 @@ void ConvertAxisByFormula::exec() {
   }
 
   // Set the Unit of the Axis
-  if ((axisUnits != "") || (axisTitle != "")) {
+  if ((!axisUnits.empty()) || (!axisTitle.empty())) {
     try {
       axisPtr->unit() = UnitFactory::Instance().create(axisUnits);
     } catch (Exception::NotFoundError &) {
-      if (axisTitle == "") {
+      if (axisTitle.empty()) {
         axisTitle = axisPtr->unit()->caption();
       }
-      if (axisUnits == "") {
+      if (axisUnits.empty()) {
         axisUnits = axisPtr->unit()->label();
       }
       axisPtr->unit() = boost::make_shared<Units::Label>(axisTitle, axisUnits);

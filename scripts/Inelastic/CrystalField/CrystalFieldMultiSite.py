@@ -28,6 +28,8 @@ class CrystalFieldMultiSite(object):
         self._makeFunction(Ions, Symmetries)
         self.Ions = Ions
         self.Symmetries = Symmetries
+        self._plot_window = {}
+        self.chi2 = None
         parameter_dict = None
         attribute_dict = None
 
@@ -166,18 +168,55 @@ class CrystalFieldMultiSite(object):
         """Form a definition string for the CrystalFieldSpectrum function
         @param i: Index of a spectrum.
         """
-        funs = self.function.createEquivalentFunctions()
-        return str(funs[i])
+        if self.NumberOfSpectra == 1:
+            return str(self.function)
+        else:
+            funs = self.function.createEquivalentFunctions()
+            return str(funs[i])
 
     def update(self, func):
         """
         Update values of the fitting parameters.
         @param func: A IFunction object containing new parameter values.
         """
-        if self.NumberOfSpectra == 1:
-            return str(self.function)
+        self.function = func
+
+    def plot(self, i=0, workspace=None, ws_index=0, name=None):
+        """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
+        from mantidplot import plotSpectrum
+        from mantid.api import AlgorithmManager
+        createWS = AlgorithmManager.createUnmanaged('CreateWorkspace')
+        createWS.initialize()
+
+        xArray, yArray = self.getSpectrum(i, workspace, ws_index)
+        ws_name = name if name is not None else 'CrystalFieldMultiSite_%s' % self.Ions
+
+        if isinstance(i, int):
+            if workspace is None:
+                if i > 0:
+                    ws_name += '_%s' % i
+                createWS.setProperty('DataX', xArray)
+                createWS.setProperty('DataY', yArray)
+                createWS.setProperty('OutputWorkspace', ws_name)
+                createWS.execute()
+                plot_window = self._plot_window[i] if i in self._plot_window else None
+                self._plot_window[i] = plotSpectrum(ws_name, 0, window=plot_window, clearWindow=True)
+            else:
+                ws_name += '_%s' % workspace
+                if i > 0:
+                    ws_name += '_%s' % i
+                createWS.setProperty('DataX', xArray)
+                createWS.setProperty('DataY', yArray)
+                createWS.setProperty('OutputWorkspace', ws_name)
+                createWS.execute()
+                plotSpectrum(ws_name, 0)
         else:
-            self.function = func
+            ws_name += '_%s' % i
+            createWS.setProperty('DataX', xArray)
+            createWS.setProperty('DataY', yArray)
+            createWS.setProperty('OutputWorkspace', ws_name)
+            createWS.execute()
+            plotSpectrum(ws_name, 0)
 
     @property
     def Ions(self):
@@ -284,3 +323,39 @@ class CrystalFieldMultiSite(object):
     def NPeaks(self, value):
         self.function.setAttributeValue('NPeaks', value)
 
+    def fix(self, *args):
+        for a in args:
+            self.function.fixParameter(a)
+
+    def __getitem__(self, item):
+        if self.function.hasAttribute(item):
+            return self.function.getAttributeValue(item)
+        else:
+            return self.function.getParameterValue(item)
+
+
+    def setBackground(self, *args, peak=None, other=None):
+
+        if len(args) > 0:
+            bg = FunctionFactory.createFunction(args[0])
+            if isComposite(bg):
+                f0 = bg[0]
+                if isPeak(f0):
+                    peak = f0
+            return
+
+        self._background = Function(self.function, prefix='bg.')
+        if peak and other:
+            self._background.peak = Function(self.function, prefix='bg.f0.')
+            self._background.background = Function(self.function, prefix='bg.f1.')
+            self.function.setAttributeValue('Background', '%s;%s' % (peak, other))
+        elif peak:
+            self.function.setAttributeValue('Background', '%s' % peak)
+        elif other:
+            self.function.setAttributeValue('Background', '%s' % other)
+        else:
+            raise RuntimeError('!!!')
+
+    @property
+    def background(self):
+        return self._background

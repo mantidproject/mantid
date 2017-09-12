@@ -1443,7 +1443,11 @@ class CrystalFieldFit(object):
         Fit when the model has multiple spectra.
         """
         from mantid.api import AlgorithmManager
-        fun = self.model.makeMultiSpectrumFunction()
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+        if isinstance(self.model, CrystalFieldMultiSite):
+            fun = str(self.model.function)
+        else:
+            fun = self.model.makeMultiSpectrumFunction()
         if 'CrystalFieldMultiSpectrum' in fun:
             fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('Fit')
