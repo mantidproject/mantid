@@ -1,7 +1,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/ToStdStringMap.h"
 namespace MantidQt {
 namespace MantidWidgets {
-namespace DataProcessor {
 std::map<std::string, std::string> EXPORT_OPT_MANTIDQT_MANTIDWIDGETS
 toStdStringMap(std::map<QString, QString> const &inMap) {
   std::map<std::string, std::string> out;
@@ -12,7 +11,6 @@ toStdStringMap(std::map<QString, QString> const &inMap) {
                                              kvp.second.toStdString());
                      });
   return out;
-}
 }
 }
 }
