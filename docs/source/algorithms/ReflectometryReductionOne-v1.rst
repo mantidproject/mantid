@@ -159,7 +159,7 @@ Where :math:`\lambda_{min}` is the minimum extent of the `IvsLambda` Workspace
 and :math:`\lambda_{max}` is the maximum extent of the `IvsLambda` Workspace.
 
 If you have not provided a value for `MomentumTransferStep` then the algorithm
-will use :ref:`algm-CalculateResolution` to calculate this value for you.
+will use :ref:`algm-NRCalculateSlitResolution` to calculate this value for you.
 
 Scaling
 =======

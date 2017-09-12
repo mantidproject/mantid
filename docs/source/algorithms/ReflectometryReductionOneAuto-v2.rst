@@ -67,7 +67,7 @@ Note that when using a correction algorithm, monitors will not be integrated, ev
 
 Finally, properties :literal:`MomentumTransferMin`, :literal:`MomentumTransferStep` and :literal:`MomentumTransferMax` are
 used to rebin the output workspace in Q, and :literal:`ScaleFactor` is used to scale the rebinned workspace. When they
-are not provided the algorithm will attempt to determine the bin width using :ref:`algm-CalculateResolution` (note that, for
+are not provided the algorithm will attempt to determine the bin width using :ref:`algm-NRCalculateSlitResolution` (note that, for
 the latter to run successfully, a :literal:`slit` component with a :literal:`vertical gap` must be defined in the
 instrument definition file).
 
