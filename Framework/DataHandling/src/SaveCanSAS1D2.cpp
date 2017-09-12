@@ -172,20 +172,20 @@ void SaveCanSAS1D2::createSASTransElement(std::string &sasTrans,
   for (size_t j = 0; j < trans_value.size(); ++j) {
     trans << "\n\t\t\t<Tdata><Lambda unit=\"" << lambda_unit << "\">";
     if (std::isnan(lambda[j]))
-      trans << lambda[j];
-    else
       trans << "NaN";
+    else
+      trans << lambda[j];
     trans << "</Lambda>"
           << "<T unit=\"" << t_unit << "\">";
     if (std::isnan(trans_value[j]))
-      trans << trans_value[j];
-    else
       trans << "NaN";
+    else
+      trans << trans_value[j];
     trans << "</T><Tdev unit=\"none\">";
     if (std::isnan(trans_err[j]))
-      trans << trans_err[j];
-    else
       trans << "NaN";
+    else
+      trans << trans_err[j];
     trans << "</Tdev></Tdata>";
   }
   trans << "\n\t\t</SAStransmission_spectrum>";
