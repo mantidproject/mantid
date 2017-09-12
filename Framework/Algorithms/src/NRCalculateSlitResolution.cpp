@@ -133,8 +133,8 @@ void NRCalculateSlitResolution::exec() {
       sqrt(slitDiff.X() * slitDiff.X() + slitDiff.Y() * slitDiff.Y() +
            slitDiff.Z() * slitDiff.Z());
 
-  const double resolution =
-      atan(totalVertGap / (2 * slitDist)) * 180.0 / M_PI / twoTheta;
+  double resolution =
+      atan(totalVertGap / slitDist) / (2 * std::tan(theta * M_PI / 180.0));
 
   setProperty("Resolution", resolution);
   setProperty("TwoThetaOut", twoTheta);
