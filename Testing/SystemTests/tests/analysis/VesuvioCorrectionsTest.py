@@ -487,7 +487,7 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         corrections_ts_bin  = 699
         corrections_ms_bin = 688
         if _is_old_boost_version():
-            corrections_ms_bin = 722
+            corrections_ms_bin = 688
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
