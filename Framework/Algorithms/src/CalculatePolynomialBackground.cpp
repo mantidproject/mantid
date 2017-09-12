@@ -210,7 +210,7 @@ void CalculatePolynomialBackground::exec() {
   for (int64_t i = 0; i < nHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
     const auto filteredRanges = filterRangesOutsideX(ranges, *inWS, i);
-    if (filteredRanges.empty()) {
+    if (!ranges.empty() && filteredRanges.empty()) {
       throw std::runtime_error("The given XRanges mismatch with the histogram at workspace index " + std::to_string(i));
     }
     const auto fullRange = totalRange(filteredRanges, *inWS, i);
