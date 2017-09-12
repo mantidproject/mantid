@@ -205,7 +205,10 @@ void CalculatePolynomialBackground::exec() {
   const auto fitFunction = makeFunctionString(initialParams);
   const auto nHistograms = static_cast<int64_t>(inWS->getNumberHistograms());
   const auto nBins = inWS->blocksize();
+  API::Progress progress(this, 0, 1.0, nHistograms);
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *outWS))
   for (int64_t i = 0; i < nHistograms; ++i) {
+    PARALLEL_START_INTERUPT_REGION
     const auto filteredRanges = filterRangesOutsideX(ranges, *inWS, i);
     if (filteredRanges.empty()) {
       throw std::runtime_error("The given XRanges mismatch with the histogram at workspace index " + std::to_string(i));
@@ -244,7 +247,10 @@ void CalculatePolynomialBackground::exec() {
       }
       outWS->mutableE(i)[j] = uncertainty;
     }
+    progress.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty(Prop::OUTPUT_WS, outWS);
 }
