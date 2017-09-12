@@ -129,7 +129,7 @@ class FunctionWrapper(object):
       if isinstance(x, np.ndarray):
           # If the input is a numpy array reshape into 1D array, saving
           # original shape to reshape output back to it.
-          x_list = x.reshape(-1)
+          x_list = x.reshape(-1, order='C')
           x_shape = x.shape
           numpy_input = True          
       elif isinstance(x, list):
@@ -147,7 +147,7 @@ class FunctionWrapper(object):
       
       if numpy_input:
          oa = np.array(out.readY(1))
-         return oa.reshape(x_shape)
+         return oa.reshape(x_shape, order='C')
          
       if list_input:
         return out.readY(1)
