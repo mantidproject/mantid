@@ -223,7 +223,7 @@ void SplineInterpolation::exec() {
   }
   // Store the output workspaces
   std::string derivWsName = getPropertyValue("OutputWorkspaceDeriv");
-  if (order > 0 && derivWsName != "") {
+  if (order > 0 && !derivWsName.empty()) {
     // Store derivatives in a grouped workspace
     WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
     for (size_t i = 0; i < histNo; ++i) {

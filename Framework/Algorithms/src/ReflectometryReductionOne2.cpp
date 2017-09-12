@@ -908,7 +908,7 @@ void ReflectometryReductionOne2::findDetectorGroups() {
               return a.front() < b.front();
             });
 
-  if (m_detectorGroups.size() == 0) {
+  if (m_detectorGroups.empty()) {
     throw std::runtime_error("Invalid processing instructions");
   }
 

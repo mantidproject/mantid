@@ -560,13 +560,13 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
           }
 
           //---------------------------------------------------------------------------------------
-          if (data_label == "data" && (bank != "")) {
+          if (data_label == "data" && (!bank.empty())) {
             if (this->WriteDataGroup(bank, is_definition) != NX_OK)
               return NX_ERROR;
             ;
           }
           //---------------------------------------------------------------------------------------
-          else if (data_label == "time_of_flight" && (bank != "")) {
+          else if (data_label == "time_of_flight" && (!bank.empty())) {
             // Get the original info
             if (NXgetinfo(inId, &dataRank, dataDimensions, &dataType) != NX_OK)
               return NX_ERROR;
