@@ -38,8 +38,6 @@ from .kernel._aliases import *
 from .api._aliases import *
 from .fitfunctions import *
 
-from pdb import set_trace as tr
-
 # ------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
 __SPECIALIZED_FUNCTIONS__ = ["Load", "StartLiveData", "CutMD", "RenameWorkspace"]
@@ -298,70 +296,78 @@ def StartLiveData(*args, **kwargs):
 
 # ---------------------------- Fit ---------------------------------------------
 
-
-def fitting_algorithm(f):
+def fitting_algorithm(inout=False):
     """
-    Decorator generating code for fitting algorithms (currently Fit and CalculateChiSquared).
-    When applied to a function definition this decorator replaces its code with code of
-    function 'wrapper' defined below.
+    Decorator generating code for fitting algorithms (Fit, CalculateChiSquared,
+    EvaluateFunction).
+    When applied to a function definition this decorator replaces its code
+    with code of function 'wrapper' defined below.
+    :param inout: if True, return also the InOut properties of algorithm f
     """
-    def wrapper(*args, **kwargs):
-        function, input_workspace = _get_mandatory_args(function_name, ["Function", "InputWorkspace"], *args, **kwargs)
-        # Remove from keywords so it is not set twice
-        if "Function" in kwargs:
-            del kwargs['Function']
-        if "InputWorkspace" in kwargs:
-            del kwargs['InputWorkspace']
+    def inner_fitting_algorithm(f):
+        """
+        :param f: algorithm calling Fit 
+        """
+        def wrapper(*args, **kwargs):
+            function, input_workspace = _get_mandatory_args(function_name,
+                                                            ["Function", "InputWorkspace"], *args, **kwargs)
+            # Remove from keywords so it is not set twice
+            if "Function" in kwargs:
+                del kwargs['Function']
+            if "InputWorkspace" in kwargs:
+                del kwargs['InputWorkspace']
 
-        # Check for behaviour consistent with old API
-        if type(function) == str and function in _api.AnalysisDataService:
-            raise ValueError("Fit API has changed. The function must now come "
-                             "first in the argument list and the workspace second.")
-        # Deal with case where function is a FunctionWrapper.
-        if isinstance(function,FunctionWrapper):
-            function = function.__str__()
-            
-        # Create and execute
-        algm = _create_algorithm_object(function_name)
-        _set_logging_option(algm, kwargs)
-        if 'EvaluationType' in kwargs:
-            algm.setProperty('EvaluationType', kwargs['EvaluationType'])
-            del kwargs['EvaluationType']
-        algm.setProperty('Function', function)  # Must be set first
-        if input_workspace is not None:
-            algm.setProperty('InputWorkspace', input_workspace)
-        else:
-            del algm['InputWorkspace']
+            # Check for behaviour consistent with old API
+            if type(function) == str and function in _api.AnalysisDataService:
+                msg = "Fit API has changed. The function must now come " + \
+                      "first in the argument list and the workspace second."
+                raise ValueError(msg)
+            # Deal with case where function is a FunctionWrapper.
+            if isinstance(function,FunctionWrapper):
+                function = function.__str__()
 
-        # Set all workspace properties before others
-        for key in list(kwargs.keys()):
-            if key.startswith('InputWorkspace_'):
-                algm.setProperty(key, kwargs[key])
-                del kwargs[key]
+            # Create and execute
+            algm = _create_algorithm_object(function_name)
+            _set_logging_option(algm, kwargs)
+            if 'EvaluationType' in kwargs:
+                algm.setProperty('EvaluationType', kwargs['EvaluationType'])
+                del kwargs['EvaluationType']
+            algm.setProperty('Function', function)  # Must be set first
+            if input_workspace is not None:
+                algm.setProperty('InputWorkspace', input_workspace)
+            else:
+                del algm['InputWorkspace']
 
-        lhs = _lhs_info()
-        # Check for any properties that aren't known and warn they will not be used
-        for key in list(kwargs.keys()):
-            if key not in algm:
-                logger.warning("You've passed a property (%s) to %s() that doesn't"
-                               " apply to any of the input workspaces." % (key, function_name))
-                del kwargs[key]
-        set_properties(algm, **kwargs)
-        algm.execute()
-        inout = True if 'CreateOutput' in kwargs and kwargs['CreateOutput'] else False
-        return _gather_returns(function_name, lhs, algm, inout=inout)
-    # end
-    function_name = f.__name__
-    signature = ("\bFunction, InputWorkspace", "**kwargs")
-    fwrapper = _customise_func(wrapper, function_name, signature,
-                               f.__doc__)
-    if function_name not in __SPECIALIZED_FUNCTIONS__:
-        __SPECIALIZED_FUNCTIONS__.append(function_name)
-    return fwrapper
+            # Set all workspace properties before others
+            for key in list(kwargs.keys()):
+                if key.startswith('InputWorkspace_'):
+                    algm.setProperty(key, kwargs[key])
+                    del kwargs[key]
+
+            lhs = _lhs_info()
+            # Check for unknown properties and warn they will not be used
+            for key in list(kwargs.keys()):
+                if key not in algm:
+                    msg = "Property (%s) to %s() doesn't apply to any of " + \
+                          "the input workspaces." % (key, function_name)
+                    logger.warning(msg)
+                    del kwargs[key]
+            set_properties(algm, **kwargs)
+            algm.execute()
+            return _gather_returns(function_name, lhs, algm, inout=inout)
+        # end
+        function_name = f.__name__
+        signature = ("\bFunction, InputWorkspace", "**kwargs")
+        fwrapper = _customise_func(wrapper, function_name, signature,
+                                   f.__doc__)
+        if function_name not in __SPECIALIZED_FUNCTIONS__:
+            __SPECIALIZED_FUNCTIONS__.append(function_name)
+        return fwrapper
+    return inner_fitting_algorithm
 
 
 # Use a python decorator (defined above) to generate the code for this function.
-@fitting_algorithm
+@fitting_algorithm(inout=True)
 def Fit(*args, **kwargs):
     """
     Fit defines the interface to the fitting within Mantid.
@@ -381,7 +387,7 @@ def Fit(*args, **kwargs):
 
 
 # Use a python decorator (defined above) to generate the code for this function.
-@fitting_algorithm
+@fitting_algorithm()
 def CalculateChiSquared(*args, **kwargs):
     """
     This function calculates chi squared calculation for a function and a data set.
@@ -396,7 +402,7 @@ def CalculateChiSquared(*args, **kwargs):
 
 
 # Use a python decorator (defined above) to generate the code for this function.
-@fitting_algorithm
+@fitting_algorithm()
 def EvaluateFunction(*args, **kwargs):
     """
     This function evaluates a function on a data set.
