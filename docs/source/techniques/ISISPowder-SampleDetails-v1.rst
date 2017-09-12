@@ -42,19 +42,25 @@ Two geometries are currently supported - cylinder and slab.
 To create a cylindrical SampleDetails object the following parameters
 of the sample geometry are required:
 
+- :ref:`shape-sampleDetails_isis-powder-diffraction-ref` - The sample
+  shape (in this case a cylinder)
+- :ref:`center_sampleDetails_isis-powder-diffraction-ref` - List of x, y, z 
+  positions of the sample 
 - :ref:`height_sampleDetails_isis-powder-diffraction-ref` - Cylinder height
 - :ref:`radius_sampleDetails_isis-powder-diffraction-ref` - Cylinder radius
 
 To create a slab SampleDetails object the following parameters of the
 sample geometry are required:
 
-- :ref:`thickness-sampleDetails_isis-powder-diffraction-ref` - Slab thickness
-
-Both geometries require the following parameters:
-
-- :ref:`shape-sampleDetails_isis-powder-diffraction-ref` - The sample geometry
+- :ref:`shape-sampleDetails_isis-powder-diffraction-ref` - The sample
+  shape (in this case a slab)
 - :ref:`center_sampleDetails_isis-powder-diffraction-ref` - List of x, y, z 
   positions of the sample
+- :ref:`thickness-sampleDetails_isis-powder-diffraction-ref` - Slab thickness
+- :ref:`width-sampleDetails_isis-powder-diffraction-ref` - Slab width
+- :ref:`height-sampleDetails_isis-powder-diffraction_ref` - Slab
+  height
+- :ref:`sngle-sampleDetails_isis-powder-diffraction_ref` - Slab angle
 
 Example
 ^^^^^^^
@@ -71,6 +77,21 @@ Example
 
     slab_thickness = 1.0
     slab_obj = SampleDetails(thickness=slab_thickness, shape="slab")
+
+.. _angle_sampleDetails_isis-powder-diffraction-ref:
+
+angle
+^^^^^
+The angle in degrees between the positive beam axis and the normal to
+the face perpendicular to the beam axis when not rotated, increasing
+in the anti-clockwise sense. Rotation is performed about the vertical
+axis of the instrument's frame of reference.
+
+Example Input:
+
+.. code-block:: python
+
+   sample_obj = SampleDetails(angle=45, ...)
 
 .. _center_sampleDetails_isis-powder-diffraction-ref:
 
@@ -137,6 +158,18 @@ Example Input:
 .. code-block:: python
 
    sample_obj = SampleDetails(thickness=1.0, ...)
+
+.. _width-sampleDetails_isis-powder-diffraction-ref:
+
+width
+^^^^^
+The width of the slab sample in cm. This must be greater than 0.
+
+Example Input:
+
+.. code-block:: python
+
+   sample_obj = SampleDetails(thickness=1.0, ...)	
 
 .. _set_material_sample_details_isis-powder-diffraction-ref:
 

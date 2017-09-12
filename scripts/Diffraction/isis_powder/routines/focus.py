@@ -40,7 +40,6 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm, absorb):
     if absorb:
         input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
 
-    print(input_workspace)
     # Align
     aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
                                        CalibrationFile=run_details.offset_file_path)
