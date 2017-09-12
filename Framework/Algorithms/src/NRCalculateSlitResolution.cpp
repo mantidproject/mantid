@@ -71,7 +71,7 @@ void NRCalculateSlitResolution::exec() {
   const std::string slit1Name = getProperty("FirstSlitName");
   const std::string slit2Name = getProperty("SecondSlitName");
   const std::string vGapParam = getProperty("VerticalGapParameter");
-  const std::string thetaLogName = getProperty("thetaLogName");
+  const std::string thetaLogName = getProperty("ThetaLogName");
   double theta = 0.0;
 
   if (!isEmpty(twoTheta)) {
