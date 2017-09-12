@@ -95,8 +95,7 @@ public:
     function->setParameter("A1", 2.0);
 
     FunctionDomain1DSpectrum domainOne(1, m_xValues);
-    Mantid::API::BasicJacobian jacobian(domainOne.size(),
-                                            function->nParams());
+    Mantid::API::BasicJacobian jacobian(domainOne.size(), function->nParams());
     function->functionDeriv(domainOne, jacobian);
 
     for (size_t i = 0; i < domainOne.size(); ++i) {

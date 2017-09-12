@@ -28,7 +28,9 @@ constexpr char *XRANGES = "XRanges";
  *  @param wsIndex a workspace index to specify a histogram in ws
  *  @return a ranges-like vector with filtered pairs removed
  */
-std::vector<double> filterRangesOutsideX(const std::vector<double> &ranges, const Mantid::API::MatrixWorkspace &ws, const size_t wsIndex) {
+std::vector<double> filterRangesOutsideX(const std::vector<double> &ranges,
+                                         const Mantid::API::MatrixWorkspace &ws,
+                                         const size_t wsIndex) {
   const auto minX = ws.x(wsIndex).front();
   const auto maxX = ws.x(wsIndex).back();
   std::vector<double> filtered;
@@ -49,7 +51,9 @@ std::vector<double> filterRangesOutsideX(const std::vector<double> &ranges, cons
  *  @param totalRange a pair of start-end values to limit the output ranges
  *  @return a ranges-like vector of processed ranges
  */
-std::vector<double> includedRanges(const std::vector<double> &ranges, const std::pair<double, double> &totalRange) {
+std::vector<double>
+includedRanges(const std::vector<double> &ranges,
+               const std::pair<double, double> &totalRange) {
   if (ranges.empty()) {
     return {totalRange.first, totalRange.second};
   }
@@ -61,12 +65,14 @@ std::vector<double> includedRanges(const std::vector<double> &ranges, const std:
     edges[i].first = ranges[i];
     edges[i].second = i % 2 == 0 ? Edge::start : Edge::end;
   }
-  std::sort(edges.begin(), edges.end(), [](const std::pair<double, Edge> &p1, const std::pair<double, Edge> &p2) {
+  std::sort(edges.begin(), edges.end(), [](const std::pair<double, Edge> &p1,
+                                           const std::pair<double, Edge> &p2) {
     if (p1.first == p2.first)
       return p1.second == Edge::start;
     return p1.first < p2.first;
   });
-  // If an 'end' edge is followed by a 'start', we have a new range. Everything else
+  // If an 'end' edge is followed by a 'start', we have a new range. Everything
+  // else
   // can be merged.
   std::vector<double> mergedRanges;
   mergedRanges.reserve(ranges.size());
@@ -135,7 +141,9 @@ std::string makeFunctionString(const std::vector<double> &parameters) {
  *  @param wsIndex a workspace index identifying a histogram
  *  @return a pair of values spanning a range
  */
-std::pair<double, double> totalRange(const std::vector<double> &ranges, const Mantid::API::MatrixWorkspace &ws, const size_t wsIndex) {
+std::pair<double, double> totalRange(const std::vector<double> &ranges,
+                                     const Mantid::API::MatrixWorkspace &ws,
+                                     const size_t wsIndex) {
   const auto minX = ws.x(wsIndex).front();
   const auto maxX = ws.x(wsIndex).back();
   if (ranges.empty()) {
@@ -144,7 +152,8 @@ std::pair<double, double> totalRange(const std::vector<double> &ranges, const Ma
   const auto minmaxIt = std::minmax_element(ranges.cbegin(), ranges.cend());
   const auto minEdge = *minmaxIt.first;
   const auto maxEdge = *minmaxIt.second;
-  return std::pair<double, double>(std::min(minEdge, minX), std::max(maxEdge, maxX));
+  return std::pair<double, double>(std::min(minEdge, minX),
+                                   std::max(maxEdge, maxX));
 }
 }
 
@@ -157,7 +166,9 @@ DECLARE_ALGORITHM(CalculatePolynomialBackground)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalculatePolynomialBackground::name() const { return "CalculatePolynomialBackground"; }
+const std::string CalculatePolynomialBackground::name() const {
+  return "CalculatePolynomialBackground";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculatePolynomialBackground::version() const { return 1; }
@@ -179,17 +190,21 @@ void CalculatePolynomialBackground::init() {
   auto increasingAxis = boost::make_shared<API::IncreasingAxisValidator>();
   auto nonnegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   nonnegativeInt->setLower(0);
-  auto orderedPairs = boost::make_shared<Kernel::ArrayOrderedPairsValidator<double>>();
+  auto orderedPairs =
+      boost::make_shared<Kernel::ArrayOrderedPairsValidator<double>>();
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::INPUT_WS, "",
-                                                             Kernel::Direction::Input, increasingAxis),
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          Prop::INPUT_WS, "", Kernel::Direction::Input, increasingAxis),
       "An input workspace.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::OUTPUT_WS, "",
-                                                             Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A workspace containing the fitted background.");
-  declareProperty(Prop::POLY_DEGREE, 0, nonnegativeInt, "Degree of the fitted polynomial.");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(Prop::XRANGES, std::vector<double>(), orderedPairs), "A list of fitting ranges given as pairs of X values.");
+  declareProperty(Prop::POLY_DEGREE, 0, nonnegativeInt,
+                  "Degree of the fitted polynomial.");
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                      Prop::XRANGES, std::vector<double>(), orderedPairs),
+                  "A list of fitting ranges given as pairs of X values.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -198,9 +213,11 @@ void CalculatePolynomialBackground::init() {
 void CalculatePolynomialBackground::exec() {
   API::MatrixWorkspace_sptr inWS = getProperty(Prop::INPUT_WS);
 
-  API::MatrixWorkspace_sptr outWS{DataObjects::create<DataObjects::Workspace2D>(*inWS)};
+  API::MatrixWorkspace_sptr outWS{
+      DataObjects::create<DataObjects::Workspace2D>(*inWS)};
   const std::vector<double> ranges = getProperty(Prop::XRANGES);
-  const auto polyDegree = static_cast<size_t>(static_cast<int>(getProperty(Prop::POLY_DEGREE)));
+  const auto polyDegree =
+      static_cast<size_t>(static_cast<int>(getProperty(Prop::POLY_DEGREE)));
   const std::vector<double> initialParams(polyDegree + 1, 0.1);
   const auto fitFunction = makeFunctionString(initialParams);
   const auto nHistograms = static_cast<int64_t>(inWS->getNumberHistograms());
@@ -211,7 +228,9 @@ void CalculatePolynomialBackground::exec() {
     PARALLEL_START_INTERUPT_REGION
     const auto filteredRanges = filterRangesOutsideX(ranges, *inWS, i);
     if (!ranges.empty() && filteredRanges.empty()) {
-      throw std::runtime_error("The given XRanges mismatch with the histogram at workspace index " + std::to_string(i));
+      throw std::runtime_error(
+          "The given XRanges mismatch with the histogram at workspace index " +
+          std::to_string(i));
     }
     const auto fullRange = totalRange(filteredRanges, *inWS, i);
     const auto includedR = includedRanges(filteredRanges, fullRange);
@@ -233,7 +252,8 @@ void CalculatePolynomialBackground::exec() {
       paramErrors[row] = fitResult->cell<double>(row, 2);
     }
     const auto bkgFunction = makeFunctionString(parameters);
-    auto bkg = boost::dynamic_pointer_cast<API::IFunction1D>(API::FunctionFactory::Instance().createInitialized(bkgFunction));
+    auto bkg = boost::dynamic_pointer_cast<API::IFunction1D>(
+        API::FunctionFactory::Instance().createInitialized(bkgFunction));
     // We want bkg to directly write to the output workspace.
     double *bkgY = const_cast<double *>(outWS->mutableY(i).rawData().data());
     bkg->function1D(bkgY, outWS->points(i).rawData().data(), nBins);

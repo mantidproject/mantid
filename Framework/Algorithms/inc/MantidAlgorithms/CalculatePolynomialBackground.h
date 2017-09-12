@@ -30,7 +30,8 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL CalculatePolynomialBackground : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculatePolynomialBackground
+    : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -17,9 +17,12 @@ class CalculatePolynomialBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculatePolynomialBackgroundTest *createSuite() { return new CalculatePolynomialBackgroundTest(); }
-  static void destroySuite( CalculatePolynomialBackgroundTest *suite ) { delete suite; }
-
+  static CalculatePolynomialBackgroundTest *createSuite() {
+    return new CalculatePolynomialBackgroundTest();
+  }
+  static void destroySuite(CalculatePolynomialBackgroundTest *suite) {
+    delete suite;
+  }
 
   CalculatePolynomialBackgroundTest() { API::FrameworkManager::Instance(); }
 
@@ -67,7 +70,8 @@ public:
       const auto &bkgXs = outWS->x(histI);
       for (size_t binI = 0; binI < nBin; ++binI) {
         TS_ASSERT_DELTA(bkgYs[binI], ys[binI], 1e-12)
-        TS_ASSERT_DELTA(bkgEs[binI], es[binI] / std::sqrt(static_cast<double>(nBin)), 1e-12)
+        TS_ASSERT_DELTA(bkgEs[binI],
+                        es[binI] / std::sqrt(static_cast<double>(nBin)), 1e-12)
         TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
       }
     }
@@ -110,7 +114,8 @@ public:
     const auto nBin = edges.size() - 1;
     const HistogramData::Counts counts{1.0, 2.0, 0.0, 0.0, 5.0, 6.0};
     const HistogramData::Histogram h{edges, counts};
-    auto ws = API::MatrixWorkspace_sptr(DataObjects::create<DataObjects::Workspace2D>(nHist, h));
+    auto ws = API::MatrixWorkspace_sptr(
+        DataObjects::create<DataObjects::Workspace2D>(nHist, h));
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
@@ -134,7 +139,8 @@ public:
   }
 
 private:
-  static boost::shared_ptr<Algorithms::CalculatePolynomialBackground> makeAlgorithm() {
+  static boost::shared_ptr<Algorithms::CalculatePolynomialBackground>
+  makeAlgorithm() {
     auto a = boost::make_shared<Algorithms::CalculatePolynomialBackground>();
     a->initialize();
     a->setChild(true);
@@ -142,6 +148,5 @@ private:
     return a;
   }
 };
-
 
 #endif /* MANTID_ALGORITHMS_CALCULATEPOLYNOMIALBACKGROUNDTEST_H_ */

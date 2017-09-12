@@ -10,7 +10,6 @@
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 using Mantid::CurveFitting::Functions::ProductFunction;
 using Mantid::CurveFitting::Functions::Gaussian;
