@@ -586,7 +586,16 @@ class FitFunctionsTest(unittest.TestCase):
         result = p([0,1,3]) 
         self.assertAlmostEqual(result[0],1.0)
         self.assertAlmostEqual(result[1],5.0)
-        self.assertAlmostEqual(result[2],121.0)        
+        self.assertAlmostEqual(result[2],121.0)   
+
+    def test_evaluation_by_workspace(self):    
+        ws = CreateWorkspace(DataX=[0,1,2,3], DataY=[5,5,5])
+        sq = Polynomial(n=2, A0=0, A1=0, A2=1)
+        outWs = sq(ws)
+        sqvals = outWs.readY(1) 
+        self.assertAlmostEqual(sqvals[0], 0.25)
+        self.assertAlmostEqual(sqvals[1], 2.25)
+        self.assertAlmostEqual(sqvals[2], 6.25)        
        
 if __name__ == '__main__':
     unittest.main()

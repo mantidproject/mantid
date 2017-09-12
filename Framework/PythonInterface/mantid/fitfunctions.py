@@ -1,4 +1,4 @@
-from mantid.api import FunctionFactory
+from mantid.api import FunctionFactory, Workspace
  
 class FunctionWrapper(object):
   """ Wrapper class for Fitting Function 
@@ -118,6 +118,10 @@ class FunctionWrapper(object):
           :param *params list of parameter values
       """
       from mantid.simpleapi import CreateWorkspace, EvaluateFunction
+      
+      # If the input is a workspace, simply return the output workspace.
+      if isinstance(x, Workspace):
+         return EvaluateFunction(str(self.fun), x, OutputWorkspace='out')
       
       # If the input isn't a list, wrap it in one so we can iterate easily
       if isinstance(x, list):
