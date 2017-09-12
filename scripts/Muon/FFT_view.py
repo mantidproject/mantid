@@ -13,7 +13,7 @@ class FFTView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(FFTView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
-        
+
         #make table
         self.FFTTable = QtGui.QTableWidget(self)
         self.FFTTable.resize(800, 800)
