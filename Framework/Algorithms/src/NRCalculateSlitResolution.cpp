@@ -111,7 +111,7 @@ void NRCalculateSlitResolution::exec() {
         "'");
 
   const V3D slitDiff =
-      (slit2->getPos() - slit1->getPos()) * 1000; // Convert from mm to m.
+      (slit2->getPos() - slit1->getPos()) * 1000; // Convert from m to mm.
 
   std::vector<double> slit1VGParam = slit1->getNumberParameter(vGapParam);
   std::vector<double> slit2VGParam = slit2->getNumberParameter(vGapParam);
