@@ -60,8 +60,6 @@ void NRCalculateSlitResolution::init() {
 
   declareProperty("Resolution", Mantid::EMPTY_DBL(),
                   "Calculated resolution (dq/q).", Direction::Output);
-  declareProperty("TwoThetaOut", Mantid::EMPTY_DBL(),
-                  "Two theta scattering angle in degrees.", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -137,7 +135,6 @@ void NRCalculateSlitResolution::exec() {
       atan(totalVertGap / slitDist) / (2 * std::tan(theta * M_PI / 180.0));
 
   setProperty("Resolution", resolution);
-  setProperty("TwoThetaOut", twoTheta);
 }
 
 } // namespace Algorithms
