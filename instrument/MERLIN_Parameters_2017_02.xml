@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "MERLIN" valid-from = "2017-09-19T00:00:01">
+<parameter-file instrument = "MERLIN" valid-from = "2017-09-12T11:00:01">
 
 <component-link name = "MERLIN">
 
@@ -12,21 +12,21 @@
 <!-- The file which defines proper (calibrated) detector positions 
      if None - it is undefined -->
 <parameter name="det_cal_file" type="string">
-   <value val="det_corr_123.dat"/>
+   <value val="det_corr_172.dat"/>
    <description is = "The file which defines proper (calibrated) detector positions.
                       If property set to None - this file is undefined."/>
 </parameter>
 <!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
      if None - one2one map is used  -->
 <parameter name="map_file" type="string">
-   <value val="one2one_125.map"/>
+   <value val="one2one_172.map"/>
 </parameter>
 
 <!-- Preferred extension of the data files obtained from DAE, e.g. what to prefer if two 
      files with the same name and different extension are found
  -->
 <parameter name="data_file_ext" type="string">
-   <value val=".raw"/>
+   <value val=".nxs"/>
 </parameter>
 <!-- The name of the hard mask file to use together with diag masking 4to1_124mod.msk-->
 <parameter name="hard_mask_file" type="string">
