@@ -118,24 +118,37 @@ class FunctionWrapper(object):
           :param *params list of parameter values
       """
       from mantid.simpleapi import CreateWorkspace, EvaluateFunction
+      import numpy as np
       
-      # If the input is a workspace, simply return the output workspace.
       if isinstance(x, Workspace):
-         return EvaluateFunction(str(self.fun), x, OutputWorkspace='out')
-      
-      # If the input isn't a list, wrap it in one so we can iterate easily
-      if isinstance(x, list):
+          # If the input is a workspace, simply return the output workspace.
+          return EvaluateFunction(str(self.fun), x, OutputWorkspace='out')
+       
+      list_input = False
+      numpy_input = False       
+      if isinstance(x, np.ndarray):
+          # If the input is a numpy array reshape into 1D array, saving
+          # original shape to reshape output back to it.
+          x_list = x.reshape(-1)
+          x_shape = x.shape
+          numpy_input = True          
+      elif isinstance(x, list):
+          # If the input isn't a list, wrap it in one so we can iterate easily
           x_list = x
           list_input = True
       else:
           x_list = [x]
-          list_input = False
       
       for i in range(len(params)):
           self.fun.setParameter(i, params[i])
       y = x_list[:]
       ws = CreateWorkspace(x_list, y)
       out = EvaluateFunction(str(self.fun), ws, OutputWorkspace='out')
+      
+      if numpy_input:
+         oa = np.array(out.readY(1))
+         return oa.reshape(x_shape)
+         
       if list_input:
         return out.readY(1)
       else:

@@ -595,7 +595,26 @@ class FitFunctionsTest(unittest.TestCase):
         sqvals = outWs.readY(1) 
         self.assertAlmostEqual(sqvals[0], 0.25)
         self.assertAlmostEqual(sqvals[1], 2.25)
-        self.assertAlmostEqual(sqvals[2], 6.25)        
+        self.assertAlmostEqual(sqvals[2], 6.25) 
+
+    def test_evaluation_by_1D_numpy_array(self):
+        import numpy as np
+        a = np.array([0, 1, 3])
+        p = Polynomial(n=4, A0=1, A1=1, A2=1, A3=1, A4=1)
+        result = p(a)
+        self.assertAlmostEqual(result[0],1.0)
+        self.assertAlmostEqual(result[1],5.0)
+        self.assertAlmostEqual(result[2],121.0) 
+
+    def test_evaluation_by_2D_numpy_array(self):
+        import numpy as np
+        a = np.array([[0, 1],[2, 3]])
+        p = Polynomial(n=4, A0=1, A1=1, A2=1, A3=1, A4=1)
+        result = p(a)
+        self.assertAlmostEqual(result[0][0],1.0)
+        self.assertAlmostEqual(result[0][1],5.0)
+        self.assertAlmostEqual(result[1][0],31.0)
+        self.assertAlmostEqual(result[1][1],121.0)         
        
 if __name__ == '__main__':
     unittest.main()
