@@ -4,16 +4,16 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
@@ -26,11 +26,10 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-class ProgressableView;
-namespace DataProcessor {
 // Forward decs
+class ProgressableView;
 class DataProcessorView;
-class TreeManager;
+class DataProcessorTreeManager;
 class GenericDataProcessorPresenterThread;
 
 using RowItem = std::pair<int, RowData>;
@@ -76,42 +75,42 @@ class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
 public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &
+      const DataProcessorWhiteList &whitelist,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
-      const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load");
   // Constructor: no pre-processing, post-processing
   GenericDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor);
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor);
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &
+      const DataProcessorWhiteList &whitelist,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
-      const ProcessingAlgorithm &processor);
+      const DataProcessorProcessingAlgorithm &processor);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const ProcessingAlgorithm &processor);
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorProcessingAlgorithm &processor);
   // Constructor: only whitelist
-  GenericDataProcessorPresenter(const WhiteList &whitelist);
+  GenericDataProcessorPresenter(const DataProcessorWhiteList &whitelist);
   // Delegating constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const PreprocessMap &preprocessMap,
-      const ProcessingAlgorithm &processor);
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorPreprocessMap &preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor);
   // Delegating Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const PreprocessMap &preprocessMap,
-      const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor);
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorPreprocessMap &preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor);
   virtual ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<QString, QVariant> &options() const override;
@@ -119,7 +118,7 @@ public:
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   void setInstrumentList(const QStringList &instruments,
                          const QString &defaultInstrument) override;
-  std::vector<std::unique_ptr<Command>> publishCommands() override;
+  std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
   void acceptViews(DataProcessorView *tableView,
                    ProgressableView *progressView) override;
   void accept(DataProcessorMainPresenter *mainPresenter) override;
@@ -127,7 +126,7 @@ public:
 
   // The following methods are public only for testing purposes
   // Get the whitelist
-  WhiteList getWhiteList() const { return m_whitelist; };
+  DataProcessorWhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
   QString getReducedWorkspaceName(const QStringList &data,
                                   const QString &prefix = "");
@@ -152,7 +151,7 @@ protected:
   // A workspace receiver we want to notify
   DataProcessorMainPresenter *m_mainPresenter;
   // The tree manager, a proxy class to retrieve data from the model
-  std::unique_ptr<TreeManager> m_manager;
+  std::unique_ptr<DataProcessorTreeManager> m_manager;
   // Loader
   QString m_loader;
   // The list of selected items to reduce
@@ -191,13 +190,13 @@ private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
   // The whitelist
-  WhiteList m_whitelist;
+  DataProcessorWhiteList m_whitelist;
   // The pre-processing instructions
-  std::map<QString, PreprocessingAlgorithm> m_preprocessMap;
+  std::map<QString, DataProcessorPreprocessingAlgorithm> m_preprocessMap;
   // The data processor algorithm
-  ProcessingAlgorithm m_processor;
+  DataProcessorProcessingAlgorithm m_processor;
   // Post-processing algorithm
-  PostprocessingAlgorithm m_postprocessor;
+  DataProcessorPostprocessingAlgorithm m_postprocessor;
   // Post-processing map
   std::map<QString, QString> m_postprocessMap;
   // The current queue of groups to be reduced
@@ -237,7 +236,7 @@ private:
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const QString &run,
-                      const PreprocessingAlgorithm &alg,
+                      const DataProcessorPreprocessingAlgorithm &alg,
                       const std::map<std::string, std::string> &optionsMap);
   // add row(s) to the model
   void appendRow();
@@ -316,7 +315,7 @@ private:
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(const TreeData &data);
-  std::vector<std::unique_ptr<Command>> getTableList();
+  std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
 
   // set/get values in the table
   void setCell(int row, int column, int parentRow, int parentColumn,
@@ -326,7 +325,6 @@ private:
   int getNumberOfRows() override;
   void clearTable() override;
 };
-}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H*/

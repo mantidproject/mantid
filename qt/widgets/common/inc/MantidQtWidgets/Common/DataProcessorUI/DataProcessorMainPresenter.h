@@ -8,7 +8,6 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-namespace DataProcessor {
 /** @class DataProcessorMainPresenter
 
 DataProcessorMainPresenter is an interface that defines the functions that
@@ -72,7 +71,6 @@ public:
   virtual void confirmReductionPaused() const {}
   virtual void confirmReductionResumed() const {}
 };
-}
 }
 }
 #endif /* MANTIDQTMANTIDWIDGETS_DATAPROCESSORMAINPRESENTER_H */

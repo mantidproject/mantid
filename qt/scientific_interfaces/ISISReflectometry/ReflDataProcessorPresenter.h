@@ -3,7 +3,7 @@
 
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
 
 #include "DllConfig.h"
@@ -11,7 +11,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using namespace MantidQt::MantidWidgets::DataProcessor;
+using namespace MantidQt::MantidWidgets;
 
 /** @class ReflDataProcessorPresenter
 
@@ -44,10 +44,11 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflDataProcessorPresenter
 public:
   // Constructor
   ReflDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-      const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
+      const DataProcessorWhiteList &whitelist,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load");
@@ -109,9 +110,8 @@ private:
   retrieveWorkspace(QString const &name) const;
 
   // Asks user if they wish to proceed if a type of workspace exists in the ADS
-  bool proceedIfWSTypeInADS(
-      const MantidQt::MantidWidgets::DataProcessor::TreeData &data,
-      const bool findEventWS);
+  bool proceedIfWSTypeInADS(const MantidQt::MantidWidgets::TreeData &data,
+                            const bool findEventWS);
 
   std::map<int, std::map<int, size_t>> m_numSlicesMap;
   std::map<int, size_t> m_numGroupSlicesMap;

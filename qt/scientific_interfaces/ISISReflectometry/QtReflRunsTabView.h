@@ -12,11 +12,9 @@
 namespace MantidQt {
 
 namespace MantidWidgets {
-namespace DataProcessor {
 // Forward decs
-class Command;
-class QtCommandAdapter;
-}
+class DataProcessorCommand;
+class DataProcessorCommandAdapter;
 class SlitCalculator;
 }
 namespace API {
@@ -29,8 +27,9 @@ namespace CustomInterfaces {
 class IReflRunsTabPresenter;
 class ReflSearchModel;
 
+using MantidWidgets::DataProcessorCommand;
+using MantidWidgets::DataProcessorCommandAdapter;
 using MantidWidgets::SlitCalculator;
-namespace DataProcessor = MantidWidgets::DataProcessor;
 
 /** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
@@ -73,10 +72,10 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void setTableCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
+  void setTableCommands(std::vector<std::unique_ptr<DataProcessorCommand>>
                             tableCommands) override;
-  void setRowCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
-                          rowCommands) override;
+  void setRowCommands(
+      std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
   void setRowActionEnabled(int index, bool enabled) override;
@@ -102,7 +101,7 @@ private:
   /// initialise the interface
   void initLayout();
   // Adds an action (command) to a menu
-  void addToMenu(QMenu *menu, std::unique_ptr<DataProcessor::Command> command);
+  void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -115,7 +114,7 @@ private:
   // the slit calculator
   SlitCalculator *m_calculator;
   // Command adapters
-  std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
+  std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
 
 private slots:
   void on_actionSearch_triggered();
