@@ -351,7 +351,7 @@ public:
     // Stick three peaks in different histograms.
     makeOnePeak(1, 40, 2, workspace);
     makeOnePeak(2, 60, 2, workspace);
-    makeOnePeak(3, 45, 2, workspace); // This is the biggest!
+    makeOnePeak(3, 45, 2, workspace);
 
     FindSXPeaks alg;
     alg.initialize();
@@ -380,13 +380,14 @@ public:
     results[0] = result->getPeak(0).getTOF();
     results[1] = result->getPeak(1).getTOF();
     results[2] = result->getPeak(2).getTOF();
+    std::sort(results.begin(), results.end(), std::less<double>());
 
     TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 315.938,
-                     results[0], 1e-2);
+                     results[0], 1e-1);
     TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 631.668,
-                     results[1], 1e-2);
+                     results[1], 1e-1);
     TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 946.988,
-                     results[2], 1e-2);
+                     results[2], 1e-1);
   }
 };
 
