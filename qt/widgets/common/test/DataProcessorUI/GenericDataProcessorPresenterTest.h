@@ -9,14 +9,13 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::MantidWidgets;
-using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace testing;
@@ -33,11 +32,11 @@ class GenericDataProcessorPresenterNoThread
 public:
   // Standard constructor
   GenericDataProcessorPresenterNoThread(
-      const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &
+      const DataProcessorWhiteList &whitelist,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
-      const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load")
@@ -46,11 +45,11 @@ public:
 
   // Delegating constructor (no pre-processing required)
   GenericDataProcessorPresenterNoThread(
-      const WhiteList &whitelist,
-      const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor)
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor)
       : GenericDataProcessorPresenter(
-            whitelist, std::map<QString, PreprocessingAlgorithm>(),
+            whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
             processor, postprocessor) {}
 
   // Destructor
@@ -93,9 +92,9 @@ private:
 class GenericDataProcessorPresenterTest : public CxxTest::TestSuite {
 
 private:
-  WhiteList createReflectometryWhiteList() {
+  DataProcessorWhiteList createReflectometryWhiteList() {
 
-    WhiteList whitelist;
+    DataProcessorWhiteList whitelist;
     whitelist.addElement("Run(s)", "InputWorkspace", "", true, "TOF_");
     whitelist.addElement("Angle", "ThetaIn", "");
     whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
@@ -107,24 +106,24 @@ private:
     return whitelist;
   }
 
-  std::map<QString, PreprocessingAlgorithm>
+  std::map<QString, DataProcessorPreprocessingAlgorithm>
   createReflectometryPreprocessMap() {
 
-    return std::map<QString, PreprocessingAlgorithm>{
+    return std::map<QString, DataProcessorPreprocessingAlgorithm>{
         {"Run(s)",
-         PreprocessingAlgorithm(
+         DataProcessorPreprocessingAlgorithm(
              "Plus", "TOF_", std::set<QString>{"LHSWorkspace", "RHSWorkspace",
                                                "OutputWorkspace"})},
         {"Transmission Run(s)",
-         PreprocessingAlgorithm(
+         DataProcessorPreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
              std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
                                "OutputWorkspace"})}};
   }
 
-  ProcessingAlgorithm createReflectometryProcessor() {
+  DataProcessorProcessingAlgorithm createReflectometryProcessor() {
 
-    return ProcessingAlgorithm(
+    return DataProcessorProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
         std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
@@ -132,16 +131,16 @@ private:
                           "FirstTransmissionRun", "SecondTransmissionRun"});
   }
 
-  PostprocessingAlgorithm createReflectometryPostprocessor() {
+  DataProcessorPostprocessingAlgorithm createReflectometryPostprocessor() {
 
-    return PostprocessingAlgorithm(
+    return DataProcessorPostprocessingAlgorithm(
         "Stitch1DMany", "IvsQ_",
         std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
   }
 
   ITableWorkspace_sptr
   createWorkspace(const QString &wsName,
-                  const WhiteList &whitelist) {
+                  const DataProcessorWhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
     const int ncols = static_cast<int>(whitelist.size());
@@ -206,7 +205,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspace(const QString &wsName,
-                           const WhiteList &whitelist) {
+                           const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
@@ -255,7 +254,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspaceThreeGroups(const QString &wsName,
-                                      const WhiteList &whitelist) {
+                                      const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
@@ -322,7 +321,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspaceWithTrans(const QString &wsName,
-                                    const WhiteList &whitelist) {
+                                    const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"

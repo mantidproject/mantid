@@ -8,9 +8,7 @@
 namespace MantidQt {
 
 namespace MantidWidgets {
-namespace DataProcessor {
-class Command;
-}
+class DataProcessorCommand;
 }
 namespace API {
 class AlgorithmRunner;
@@ -18,7 +16,8 @@ class AlgorithmRunner;
 
 namespace CustomInterfaces {
 
-namespace DataProcessor = MantidWidgets::DataProcessor;
+using MantidWidgets::DataProcessorCommand;
+using API::AlgorithmRunner;
 class IReflRunsTabPresenter;
 class ReflSearchModel;
 
@@ -62,9 +61,9 @@ public:
                                  const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
   virtual void setTableCommands(
-      std::vector<std::unique_ptr<DataProcessor::Command>> tableCommands) = 0;
+      std::vector<std::unique_ptr<DataProcessorCommand>> tableCommands) = 0;
   virtual void setRowCommands(
-      std::vector<std::unique_ptr<DataProcessor::Command>> rowCommands) = 0;
+      std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) = 0;
   virtual void setAllSearchRowsSelected() = 0;
   virtual void clearCommands() = 0;
   virtual void setRowActionEnabled(int index, bool enabled) = 0;
