@@ -67,6 +67,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
                         ${OPENGL_LIBRARIES}
                     MTD_QT_LINK_LIBRARIES
                         MantidQtWidgetsCommon
+                    INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
 )
 
 # Use a precompiled header where they are supported

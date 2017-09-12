@@ -32,6 +32,7 @@ endfunction()
 # keyword: DEFS Compiler definitions to set to the target
 # keyword: QT_PLUGIN If included, the target is a Qt plugin. The value is the name of the plugin library
 # keyword: INCLUDE_DIRS A list of include directories to add to the target
+# keyword: PRECOMPILED A name of the precompiled header
 # keyword: LINK_LIBRARIES A list of additional libraries to link to the
 #          target that are not dependent on Qt
 # keyword: MTD_QT_LINK_LIBRARIES A list of additional libraries to link to the
@@ -41,7 +42,7 @@ endfunction()
 # keyword: OSX_INSTALL_RPATH Install path for osx version > 10.8
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
-  set (oneValueArgs TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR OSX_INSTALL_RPATH)
+  set (oneValueArgs TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR OSX_INSTALL_RPATH PRECOMPILED)
   set (multiValueArgs SRC UI MOC NOMOC RES DEFS INCLUDE_DIRS LINK_LIBRARIES MTD_QT_LINK_LIBRARIES)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
@@ -77,10 +78,17 @@ function (mtd_add_qt_target)
   else()
     set(_target_exclude_from_all)
   endif()
+
+  set(ALL_SRC ${PARSED_SRC} ${MOC_GENERATED})
+  # Use a precompiled header where they are supported
+  if (${PARSED_PRECOMPILED})
+    enable_precompiled_headers( ${PARSED_PRECOMPILED}  ALL_SRC )
+  endif()
+
   if (${PARSED_LIBRARY})
-    add_library (${_target} ${_target_exclude_from_all} ${PARSED_SRC} ${MOC_GENERATED} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
+    add_library (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
   elseif (${PARSED_EXECUTABLE})
-    add_executable (${_target} ${_target_exclude_from_all} ${PARSED_SRC} ${MOC_GENERATED} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
+    add_executable (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
   else ()
     message (FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
   endif()
