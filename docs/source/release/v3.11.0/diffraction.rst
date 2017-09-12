@@ -31,3 +31,8 @@ Single Crystal Diffraction
 - New algorithm :ref:`SingleCrystalDiffuseReduction <algm-SingleCrystalDiffuseReduction>` which performs the most common reductions done on Corelli (and elsewhere) for single crystal diffuse scattering.
 - New algorithm :ref:`ConvertMultipleRunsToSingleCrystalMD <algm-ConvertMultipleRunsToSingleCrystalMD>` which loads, converts to single crystal MDWorkspace and combines a series of runs.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to only add peaks to runs that contributed to that peak. This is a lot faster when multiple runs are in the same MDworkspace.
+
+Powder Diffraction
+------------------
+
+- New set of routines for HRPD (:ref:`isis-powder-diffraction-hrpd-ref`), designed to replace and improve on the old CRI scripts
