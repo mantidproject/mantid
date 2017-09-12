@@ -131,10 +131,12 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
         # First argument is the name of the algorithm
         # Second argument is the prefix to be added to the name of the post-processed workspace
         # Third argument is a black list of properties to hide if a hinting line edit is added to the interface
-        post_alg = MantidQt.MantidWidgets.DataProcessor.PostprocessingAlgorithm('Stitch1DMany', 'IvsQ_', 'InputWorkspaces, OutputWorkspaces')
+        post_alg = MantidQt.MantidWidgets.DataProcessor.PostprocessingAlgorithm(
+                'Stitch1DMany', 'IvsQ_', 'InputWorkspaces, OutputWorkspaces')
 
         # The table widget
-        self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(whitelist, preprocess_map, alg, post_alg, self)
+        self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(
+                whitelist, preprocess_map, alg, post_alg, self)
 
         # A main presenter
         # Needed to supply global options for pre-processing/processing/post-processing to the widget
