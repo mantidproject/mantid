@@ -189,7 +189,8 @@ sansInstrument(const Mantid::Kernel::V3D &sourcePos,
 
 Mantid::Geometry::Instrument_sptr
 createInstrumentWithPSDTubes(const int nTubes = 3,
-                             const int nPixelsPerTube = 50);
+                             const int nPixelsPerTube = 50,
+                             const bool mirrorTubes = false);
 }
 
 #endif // COMPONENTCREATIONHELPERS_H_

@@ -671,24 +671,36 @@ Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
 }
 
 Mantid::Geometry::Instrument_sptr
-createInstrumentWithPSDTubes(const int nTubes, const int nPixelsPerTube) {
+createInstrumentWithPSDTubes(const int nTubes, const int nPixelsPerTube,
+                             bool mirrorTubes) {
   // Need a tube based instrument.
   //
   // Pixels will be numbered simply from 1->nTubes*nPixelsPerTube with a 1:1
   // mapping
+  //
+  // Tubes will be located at 1 m from the sample (0, 0, 0) from 0 -> 90 deg
+  // If mirror is set to true they will go from 0 -> -90 deg
   Instrument_sptr testInst(new Instrument("PSDTubeInst"));
+
+  int xDirection(-1);
+  if (mirrorTubes)
+    xDirection = 1;
 
   // Pixel shape
   const double pixelRadius(0.01);
   const double pixelHeight(0.003);
+  const double radius(1.0);
   Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
       pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight, 0.0),
       V3D(0.0, 1.0, 0.0), "pixelShape");
   for (int i = 0; i < nTubes; ++i) {
     std::ostringstream lexer;
     lexer << "tube-" << i;
+    const auto theta = (M_PI / 2.0) * i / (nTubes - 1);
+    const auto x = xDirection * radius * sin(theta);
+    const auto z = radius * cos(theta);
     CompAssembly *tube = new CompAssembly(lexer.str());
-    tube->setPos(V3D(i * 2.0 * pixelRadius, 0.0, 0.0));
+    tube->setPos(V3D(x, 0.0, z));
     for (int j = 0; j < nPixelsPerTube; ++j) {
       lexer.str("");
       lexer << "pixel-" << i *nPixelsPerTube + j;
