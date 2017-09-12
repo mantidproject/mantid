@@ -1,8 +1,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
-#include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MSDFit.h"
+#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/RangeSelector.h"
 
 #include <QFileInfo>
 
