@@ -112,7 +112,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def add_listener(self, listener):
         if not isinstance(listener, SANSDataProcessorGui.RunTabListener):
-            raise ValueError("The listener ist not of type RunTabListener but rather {}".format(type(listener)))
+            raise ValueError("The listener is not of type RunTabListener but rather {}".format(type(listener)))
         self._settings_listeners.append(listener)
 
     def clear_listeners(self):
