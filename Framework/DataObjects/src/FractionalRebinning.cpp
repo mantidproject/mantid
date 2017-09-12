@@ -81,13 +81,13 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
                      boost::shared_ptr<Progress> progress) {
   for (int64_t i = 0; i < static_cast<int64_t>(outputWS->getNumberHistograms());
        ++i) {
-    MantidVec &outputY = outputWS->dataY(i);
-    MantidVec &outputE = outputWS->dataE(i);
-    for (size_t j = 0; j < outputWS->blocksize(); ++j) {
+    const auto &outputX = outputWS->readX(i);
+    auto &outputY = outputWS->dataY(i);
+    auto &outputE = outputWS->dataE(i);
+    for (size_t j = 0; j < outputY.size(); ++j) {
       if (progress)
         progress->report("Calculating errors");
-      const double binWidth =
-          (outputWS->readX(i)[j + 1] - outputWS->readX(i)[j]);
+      const double binWidth = outputX[j + 1] - outputX[j];
       double eValue = std::sqrt(outputE[j]);
       // Don't do this for a RebinnedOutput workspace. The fractions
       // take care of such things.

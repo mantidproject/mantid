@@ -412,22 +412,26 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace &WS) {
     return true;
 
   // But even if they're not they could still match...
-  const double commonSum =
-      std::accumulate(WS.readX(0).begin(), WS.readX(0).end(), 0.);
+  const auto &x_0 = WS.readX(0);
+  const double commonSum = std::accumulate(x_0.begin(), x_0.end(), 0.);
   // If this results in infinity or NaN, then we can't tell - return false
   if (!std::isfinite(commonSum))
     return false;
   const size_t numHist = WS.getNumberHistograms();
   for (size_t j = 1; j < numHist; ++j) {
-    const double sum =
-        std::accumulate(WS.readX(j).begin(), WS.readX(j).end(), 0.);
+    const auto &x_j = WS.readX(j);
+    // they should all have the same number of x-values
+    if (x_0.size() != x_j.size())
+      return false;
+
+    const double sum = std::accumulate(x_j.begin(), x_j.end(), 0.);
     // If this results in infinity or NaN, then we can't tell - return false
     if (!std::isfinite(sum))
       return false;
 
     if (std::abs(commonSum) < 1.0E-7 && std::abs(sum) < 1.0E-7) {
-      for (size_t i = 0; i < WS.blocksize(); i++) {
-        if (std::abs(WS.readX(0)[i] - WS.readX(j)[i]) > 1.0E-7)
+      for (size_t i = 0; i < x_0.size(); i++) {
+        if (std::abs(x_0[i] - x_j[i]) > 1.0E-7)
           return false;
       }
     } else if (std::abs(commonSum - sum) /

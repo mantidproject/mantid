@@ -400,8 +400,9 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
     const MantidVec Y = inputWs->readY(nHistoIndex);
     const MantidVec E = inputWs->readE(nHistoIndex);
 
-    for (size_t nBinIndex = 0; nBinIndex < inputWs->blocksize(); ++nBinIndex) {
-      auto value_index = outWs->getLinearIndex(nBinIndex, nHistoIndex);
+    const size_t numBins = Y.size();
+    for (size_t nBinIndex = 0; nBinIndex < numBins; ++nBinIndex) {
+      const auto value_index = outWs->getLinearIndex(nBinIndex, nHistoIndex);
       outWs->setSignalAt(value_index, Y[nBinIndex]);
       outWs->setErrorSquaredAt(value_index, E[nBinIndex] * E[nBinIndex]);
     }
