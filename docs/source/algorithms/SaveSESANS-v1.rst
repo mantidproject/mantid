@@ -11,10 +11,7 @@ Description
 
 Saves the given workspace to a file which will be formatted in the
 SESANS data format. A workspace with a single spectrum is expected,
-where the X values are wavelength and the Y values are TODO.
-
-Note that LoadSESANS and SaveSESANS are not symmetric. Save expects a
-workspace with X values of wavelength and Y values of TODO
+where the X values are wavelength and the Y values are polarisation
 
 Usage
 -----
@@ -50,7 +47,7 @@ Output:
 
 .. testoutput:: LoadSESANSRoundTrip
 
-   Y values of loaded workspace = [0.796338, 0., 0.179365, 0.130324]
+   Y values of loaded workspace = [ 0.796338  0.        0.179365  0.130324]
 
 .. categories::
 

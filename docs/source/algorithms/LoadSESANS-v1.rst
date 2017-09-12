@@ -16,9 +16,6 @@ SpinEchoLength, Depolarisation, Depolarisation_error and
 Wavelength. The output workspace has X values of SpinEchoLength and Y
 values of depolarisation.
 
-Note that LoadSESANS and SaveSESANS are not symmetric. Save expects a
-workspace with X values of wavelength and Y values of TODO
-
 Usage
 -----
 
@@ -53,7 +50,7 @@ Output:
 
 .. testoutput:: LoadSESANSRoundTrip
 
-   Y values of loaded workspace = [0.796338, 0., 0.179365,  0.130324]
+   Y values of loaded workspace = [ 0.796338  0.        0.179365  0.130324]
 
 .. categories::
 
