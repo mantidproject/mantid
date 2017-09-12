@@ -212,7 +212,7 @@ This parameter should be the full path to the calibration folder.
 Within the folder the following should be present:
 
 - Grouping .cal file (see:
-  :ref:`grouping_file_name_hrpd_isis-powder-diffraction-ref`
+  :ref:`grouping_file_name_hrpd_isis-powder-diffraction-ref`)
 - Folder(s) with the label name specified in mapping file (e.g. "1_1")
 - Inside each folder should be the offset file with name specified in
   mapping file
@@ -321,7 +321,7 @@ set to **coupled**, but may be overridden as required,
 
   hrpd_example.create_vanadium(mode="coupled", ...)
   # Or
-  hrpd_example.focues(mode="decoupled", ...)
+  hrpd_example.focus(mode="decoupled", ...)
 
 .. _multiple_scattering_hrpd_isis-powder-diffraction-ref:
 
