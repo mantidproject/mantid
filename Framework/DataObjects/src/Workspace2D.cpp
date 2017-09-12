@@ -142,11 +142,10 @@ size_t Workspace2D::blocksize() const {
   if (data.empty()) {
     return 0;
   } else {
-    size_t numBins = static_cast<ISpectrum const *>(data[0])->dataY().size();
+    size_t numBins = data[0]->size();
     const auto numHist = this->getNumberHistograms();
     for (size_t i = 1; i < numHist; ++i)
-      numBins = std::max(
-          numBins, static_cast<ISpectrum const *>(data[i])->dataY().size());
+      numBins = std::max(numBins, data[i]->size());
     return numBins;
   }
 }
