@@ -159,6 +159,69 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  void test_2BankRalfAltFormat() {
+    // Tests saving a 2 bank instrument in RALF - Alternative format
+    const std::string wsName = "SaveGSS_RALF_ALT_ws";
+
+    // Choose a number where mod 4 != 0 to check it handles having
+    // not enough data for one line correctly
+    const int numBins = 10;
+    auto dataWs =
+        generateTestMatrixWorkspace(wsName, m_defaultNumHistograms, numBins);
+
+    auto outFileHandle = Poco::TemporaryFile();
+    const std::string outFilePath = outFileHandle.path();
+
+    auto alg = setupSaveGSSAlg(outFilePath, wsName, "RALF");
+    alg->setProperty("DataFormat", "ALT");
+    alg->setProperty("SplitFiles", false);
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+        "SaveGSS_test2BankRalfAltFormat_ref.gsa", outFilePath));
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void test_splitFiles() {
+    // Tests saving a 2 bank instrument with split files selected
+    const std::string wsName = "SaveGSS_2BankSplit_ws";
+
+    auto dataWs = generateTestMatrixWorkspace(wsName, 2, m_defaultNumBins);
+
+    // Have to do some custom handling of temp files to use extensions
+    auto outFileHandle = Poco::TemporaryFile();
+    const std::string outFilePath = outFileHandle.path();
+    const std::string outFilePathWithExt = outFilePath + ".gsas";
+
+    outFileHandle.registerForDeletion(outFilePathWithExt);
+
+    auto alg = setupSaveGSSAlg(outFilePathWithExt, wsName, "RALF");
+    alg->setProperty("DataFormat", "FXYE");
+    alg->setProperty("SplitFiles", true);
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+
+    // The alg will automatically append 0 and 1 when we split the files
+    const std::string fileOnePath = outFilePath + "-0.gsas";
+    const std::string fileTwoPath = outFilePath + "-1.gsas";
+
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+        "SaveGSS-SplitRef-0.gsas", fileOnePath));
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+        "SaveGSS-SplitRef-1.gsas", fileTwoPath));
+
+    // Use glob to find any files that match the output pattern
+    std::set<std::string> returnedFiles;
+    Poco::Glob::glob(outFilePath, returnedFiles);
+    for (const auto &filename : returnedFiles) {
+      Poco::File pocoFile{filename};
+      pocoFile.remove();
+    }
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
 private:
   const int m_defaultNumHistograms = 2;
   const int m_defaultNumBins = 100;

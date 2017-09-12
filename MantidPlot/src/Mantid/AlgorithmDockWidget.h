@@ -1,7 +1,7 @@
 #ifndef ALGORITHMDOCKWIDGET_H
 #define ALGORITHMDOCKWIDGET_H
 
-#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
+#include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
 #include <QDockWidget>
 
 class MantidUI;
