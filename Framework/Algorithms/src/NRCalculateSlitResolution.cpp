@@ -55,8 +55,8 @@ void NRCalculateSlitResolution::init() {
                   "Component name of the second slit.");
   declareProperty("VerticalGapParameter", "vertical gap",
                   "Parameter the vertical gap of each slit can be found in.");
-  declareProperty("TwoThetaLogName", "Theta",
-                  "Name two theta can be found in the run log as.");
+  declareProperty("ThetaLogName", "Theta",
+                  "Name theta can be found in the run log as.");
 
   declareProperty("Resolution", Mantid::EMPTY_DBL(),
                   "Calculated resolution (dq/q).", Direction::Output);
@@ -71,26 +71,29 @@ void NRCalculateSlitResolution::exec() {
   const std::string slit1Name = getProperty("FirstSlitName");
   const std::string slit2Name = getProperty("SecondSlitName");
   const std::string vGapParam = getProperty("VerticalGapParameter");
-  const std::string twoThetaLogName = getProperty("TwoThetaLogName");
+  const std::string thetaLogName = getProperty("thetaLogName");
+  double theta = 0.0;
 
-  if (isEmpty(twoTheta)) {
+  if (!isEmpty(twoTheta)) {
+    theta = twoTheta / 2.0;
+  } else {
     const Kernel::Property *logData =
-        ws->mutableRun().getLogData(twoThetaLogName);
+        ws->mutableRun().getLogData(thetaLogName);
     auto logPWV =
         dynamic_cast<const Kernel::PropertyWithValue<double> *>(logData);
     auto logTSP =
         dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(logData);
 
     if (logPWV) {
-      twoTheta = *logPWV;
+      theta = *logPWV;
     } else if (logTSP && logTSP->realSize() > 0) {
-      twoTheta = logTSP->lastValue();
+      theta = logTSP->lastValue();
     } else {
       throw std::runtime_error(
           "Value for two theta could not be found in log.");
     }
-    g_log.notice() << "Found '" << twoTheta
-                   << "' as value for two theta in log.\n";
+    g_log.notice() << "Found '" << theta
+                   << "' as value for theta in log.\n";
   }
 
   Instrument_const_sptr instrument = ws->getInstrument();
