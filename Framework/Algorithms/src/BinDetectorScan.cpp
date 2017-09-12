@@ -33,7 +33,7 @@ void BinDetectorScan::init() {
                   "The names of the input workspaces as a list. You may also "
                   "group workspaces using the GUI or [[GroupWorkspaces]], and "
                   "specify the name of the group instead.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
   declareProperty(
@@ -125,7 +125,12 @@ void BinDetectorScan::exec() {
                                double(thetaIndex) * m_stepScatteringAngle
                         << "\n";
       }
-      if (yIndex > m_numHistograms || thetaIndex > m_numBins)
+      //      g_log.error() << yIndex << "--" << y << "--" <<
+      //      m_heightAxis.size()
+      //                    << std::endl;
+      g_log.error() << thetaIndex << "--" << theta << "--" << m_numBins
+                    << std::endl;
+      if (yIndex >= m_numHistograms || thetaIndex >= m_numBins)
         continue;
       auto counts = ws->histogram(i).y()[0];
       auto &yData = outputWS->mutableY(yIndex);
@@ -166,6 +171,8 @@ void BinDetectorScan::getScatteringAngleBinning() {
   std::vector<double> scatteringBinning = getProperty("ScatteringAngleBinning");
   if (scatteringBinning.size() == 1) {
     m_stepScatteringAngle = scatteringBinning[0];
+    m_startScatteringAngle -= m_stepScatteringAngle / 2;
+    m_endScatteringAngle += m_stepScatteringAngle / 2;
   } else if (scatteringBinning.size() == 3) {
     if (scatteringBinning[0] > m_startScatteringAngle ||
         scatteringBinning[2] < m_endScatteringAngle)
