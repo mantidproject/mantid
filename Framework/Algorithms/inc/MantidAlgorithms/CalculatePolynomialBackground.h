@@ -40,8 +40,6 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::vector<double> includedRanges(const std::pair<double, double> &totalRange) const;
-  std::pair<double, double> totalRange(API::MatrixWorkspace &ws, const size_t wsIndex) const;
 };
 
 } // namespace Algorithms
