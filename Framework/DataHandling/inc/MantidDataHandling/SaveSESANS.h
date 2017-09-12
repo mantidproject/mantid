@@ -21,7 +21,7 @@ namespace DataHandling {
   <LI> ThetaZMazUnit - Unit for theta_znmax</LI>
   <LI> ThetaYMax - The angular acceptance in the non-encoding direction</LI>
   <LI> ThetaYMazUnit - Unit for theta_ymax</LI>
-  <LI> EchoConstant - The spin echo length, in nanometers, 
+  <LI> EchoConstant - The spin echo length, in nanometers,
                       probed by a 1A neutron</LI>
   </UL>
 
