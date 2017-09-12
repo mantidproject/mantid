@@ -16,10 +16,10 @@
 namespace {
 /// String constants for algorithm's properties.
 namespace Prop {
-constexpr char *INPUT_WS = "InputWorkspace";
-constexpr char *OUTPUT_WS = "OutputWorkspace";
-constexpr char *POLY_DEGREE = "Degree";
-constexpr char *XRANGES = "XRanges";
+const static std::string INPUT_WS = "InputWorkspace";
+const static std::string OUTPUT_WS = "OutputWorkspace";
+const static std::string POLY_DEGREE = "Degree";
+const static std::string XRANGES = "XRanges";
 }
 
 /** Filters ranges completely outside the histogram X values.
