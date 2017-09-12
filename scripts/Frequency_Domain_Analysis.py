@@ -1,6 +1,6 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-import PyQt4.QtGui as QtGui
+from PyQt4 import QtCore, QtGui
 import sys
 
 from Muon import view_constructor
@@ -18,7 +18,6 @@ class frequencyDomainAnalysisGui(QtGui.QMainWindow):
         self.presenter =transform_presenter.transformPresenter(view,groupedModels)
         self.setCentralWidget(view)
         self.setWindowTitle("Frequency Domain Analysis")
-
 
 def qapp():
     if QtGui.QApplication.instance():

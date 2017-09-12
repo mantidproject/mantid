@@ -13,9 +13,9 @@ class FFTView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(FFTView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
-        self.FFTTable 	= QtGui.QTableWidget(self)
-
+        
         #make table
+        self.FFTTable = QtGui.QTableWidget(self)
         self.FFTTable.resize(800, 800)
         self.FFTTable.setRowCount(6)
         self.FFTTable.setColumnCount(2)
@@ -24,7 +24,6 @@ class FFTView(QtGui.QWidget):
         self.FFTTable.verticalHeader().setVisible(False)
         self.FFTTable.horizontalHeader().setStretchLastSection(True)
         self.FFTTable.setHorizontalHeaderLabels(("FFT Property;Value").split(";"))
-
         # populate table
         options=['test']
 
@@ -51,14 +50,15 @@ class FFTView(QtGui.QWidget):
         self.FFTTable.resizeRowsToContents()
         #make advanced table options
         self.advancedLabel=QtGui.QLabel("\n Advanced Options")
-        self.FFTTableA     = QtGui.QTableWidget(self)
+        self.FFTTableA = QtGui.QTableWidget(self)
+        self.FFTTableA.resize(800, 800)
         self.FFTTableA.setRowCount(4)
         self.FFTTableA.setColumnCount(2)
         self.FFTTableA.setColumnWidth(0,300)
         self.FFTTableA.setColumnWidth(1,300)
-        self.FFTTableA.horizontalHeader().setStretchLastSection(True)
         self.FFTTableA.verticalHeader().setVisible(False)
-        self.FFTTableA.setHorizontalHeaderLabels(("PreProcessing Property;Value").split(";"))
+        self.FFTTableA.horizontalHeader().setStretchLastSection(True)
+        self.FFTTableA.setHorizontalHeaderLabels(("Advanced Property;Value").split(";"))
 
         table_utils.setRowName(self.FFTTableA,0,"Apodization Function")
         options=["None","Lorentz","Gaussian"]
@@ -83,6 +83,9 @@ class FFTView(QtGui.QWidget):
         # add to layout
         self.FFTTable.setMinimumSize(40,158)
         self.FFTTableA.setMinimumSize(40,127)
+        table_utils.setTableHeaders(self.FFTTable)
+        table_utils.setTableHeaders(self.FFTTableA)
+
         self.horizontalSpacer1 = QtGui.QSpacerItem(20, 94, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self.horizontalSpacer2 = QtGui.QSpacerItem(20, 280, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         # add to layout
