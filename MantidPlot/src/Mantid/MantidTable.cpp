@@ -312,6 +312,12 @@ void MantidTable::cellEdited(int row, int col) {
   d_table->setText(row, col, QString::fromStdString(s.str()));
 }
 
+void MantidTable::setPlotDesignation(Table::PlotDesignation pd,
+                                     bool rightColumns) {
+  Table::setPlotDesignation(pd, rightColumns);
+  setPlotTypeForSelectedColumns(pd);
+}
+
 //------------------------------------------------------------------------------------------------
 /** Call an algorithm in order to delete table rows
  *
@@ -420,6 +426,19 @@ void MantidTable::sortColumns(const QStringList &s, int type, int order,
   } else {
     // Fall-back to the default sorting of the table
     Table::sortColumns(s, type, order, leadCol);
+  }
+}
+
+/** Set the plot type on the workspace for each selected column
+ *
+ * @param plotType :: the plot type to set the selected columns to.
+ */
+void MantidTable::setPlotTypeForSelectedColumns(int plotType) {
+  const QStringList list = selectedColumns();
+  for (int i = 0; i < static_cast<int>(list.count()); i++) {
+    const int col = colIndex(list[i]);
+    const auto column = m_ws->getColumn(col);
+    column->setPlotType(plotType);
   }
 }
 
