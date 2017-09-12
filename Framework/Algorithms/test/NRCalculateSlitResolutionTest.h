@@ -1,9 +1,9 @@
-#ifndef CALCULATERESOLUTIONTEST_H_
-#define CALCULATERESOLUTIONTEST_H_
+#ifndef NRCALCULATESLITRESOLUTIONTEST_H_
+#define NRCALCULATESLITRESOLUTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CalculateResolution.h"
+#include "MantidAlgorithms/NRCalculateSlitResolution.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Instrument.h"
@@ -16,13 +16,13 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class CalculateResolutionTest : public CxxTest::TestSuite {
+class NRCalculateSlitResolutionTest : public CxxTest::TestSuite {
 public:
-  void testCalculateResolutionX() {
+  void testNRCalculateSlitResolutionX() {
     auto ws =
         createWorkspace("testCalcResWS2", V3D(1, 0, 0), 0.5, V3D(0, 0, 0), 1);
 
-    CalculateResolution alg;
+    NRCalculateSlitResolution alg;
     alg.initialize();
     alg.setPropertyValue("Workspace", ws->getName());
     alg.setProperty("TwoTheta", 1.0);
@@ -33,11 +33,11 @@ public:
     TS_ASSERT_DELTA(res, 0.0429, 0.0001);
   }
 
-  void testCalculateResolutionZ() {
+  void testNRCalculateSlitResolutionZ() {
     auto ws =
         createWorkspace("testCalcResWS", V3D(0, 0, 0), 1, V3D(0, 0, 1), 0.5);
 
-    CalculateResolution alg;
+    NRCalculateSlitResolution alg;
     alg.initialize();
     alg.setPropertyValue("Workspace", ws->getName());
     alg.setProperty("TwoTheta", 1.0);
@@ -92,4 +92,4 @@ public:
   }
 };
 
-#endif /*CALCULATERESOLUTIONTEST_H_*/
+#endif /*NRCALCULATESLITRESOLUTIONTEST_H_*/

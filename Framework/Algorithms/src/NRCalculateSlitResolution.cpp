@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/CalculateResolution.h"
+#include "MantidAlgorithms/NRCalculateSlitResolution.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -18,30 +18,30 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CalculateResolution)
+DECLARE_ALGORITHM(NRCalculateSlitResolution)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CalculateResolution::name() const {
-  return "CalculateResolution";
+const std::string NRCalculateSlitResolution::name() const {
+  return "NRCalculateSlitResolution";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CalculateResolution::version() const { return 1; }
+int NRCalculateSlitResolution::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CalculateResolution::category() const {
+const std::string NRCalculateSlitResolution::category() const {
   return "Reflectometry\\ISIS";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string CalculateResolution::summary() const {
+const std::string NRCalculateSlitResolution::summary() const {
   return "Calculates the reflectometry resolution (dQ/Q) for a given "
          "workspace.";
 }
 
 /** Initialize the algorithm's properties.
 */
-void CalculateResolution::init() {
+void NRCalculateSlitResolution::init() {
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
@@ -67,7 +67,7 @@ void CalculateResolution::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
 */
-void CalculateResolution::exec() {
+void NRCalculateSlitResolution::exec() {
   const MatrixWorkspace_sptr ws = getProperty("Workspace");
   double twoTheta = getProperty("TwoTheta");
   const std::string slit1Name = getProperty("FirstSlitName");
