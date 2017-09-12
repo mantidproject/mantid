@@ -472,8 +472,7 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
                                             MassIndexToSymbolMap=index_to_symbol,
                                             HydrogenConstraints=hydrogen_constraints,
                                             ContainerScale=0.1,
-                                            GammaBackgroundScale=0.2,
-                                            NumEvents=500)
+                                            GammaBackgroundScale=0.2)
 
         self._algorithm.execute()
 
@@ -483,10 +482,10 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_ts_peak = 0.163213297496
-        corrections_ms_peak = 0.00706346254234
-        corrections_ts_bin  = 705
-        corrections_ms_bin = 735
+        corrections_ts_peak = 0.131359579675
+        corrections_ms_peak = 0.00117365595751
+        corrections_ts_bin  = 699
+        corrections_ms_bin = 688
         if _is_old_boost_version():
             corrections_ms_bin = 722
 
