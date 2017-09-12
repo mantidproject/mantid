@@ -1,4 +1,5 @@
-from interface import InstrumentInterface
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.inelastic.dgs_sample_setup import SampleSetupWidget
 from reduction_gui.widgets.inelastic.dgs_data_corrections import DataCorrectionsWidget
 from reduction_gui.widgets.inelastic.dgs_diagnose_detectors import DiagnoseDetectorsWidget
