@@ -11,6 +11,13 @@ New features
 Algorithms
 ##########
 
+CalculateMonteCarloAbsorptionCorrection
+#######################################
+
+- New algorithm in Mantid 3.11.0; provides functionality for calculating shape-specific absorption corrections,
+  using monte carlo methods
+- Currently supports the following shapes: Flat Plate, Annulus, Cylinder
+
 Bayes
 #####
 
