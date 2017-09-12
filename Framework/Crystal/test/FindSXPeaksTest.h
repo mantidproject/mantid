@@ -350,8 +350,8 @@ public:
 
     // Stick three peaks in different histograms.
     makeOnePeak(1, 40, 2, workspace);
-    makeOnePeak(2, 60, 2, workspace);
-    makeOnePeak(3, 45, 2, workspace);
+    makeOnePeak(4, 60, 5, workspace);
+    makeOnePeak(8, 45, 8, workspace);
 
     FindSXPeaks alg;
     alg.initialize();
@@ -385,9 +385,9 @@ public:
 
     TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 315.938, tof[0],
                      1e-1);
-    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 631.668, tof[1],
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 2775.689, tof[1],
                      1e-1);
-    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 946.988, tof[2],
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 8534.953, tof[2],
                      1e-1);
   }
 };
