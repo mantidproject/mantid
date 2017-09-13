@@ -145,6 +145,9 @@ size_t Workspace2D::blocksize() const {
     size_t numBins = 0;
     for (const auto *iter : data)
       numBins = std::max(numBins, iter->size());
+    if (numBins != data[0]->size())
+      throw std::length_error(
+          "blocksize undefined because size of histograms is not equal");
     return numBins;
   }
 }
