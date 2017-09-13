@@ -45,7 +45,12 @@ void FindSXPeaks::init() {
   std::vector<std::string> units = {"TOF", "dSpacing"};
   auto wsValidation = boost::make_shared<CompositeValidator>();
   wsValidation->add<HistogramValidator>();
-  wsValidation->add<WorkspaceUnitValidator>(units);
+
+  auto unitValidation = boost::make_shared<CompositeValidator>(CompositeRelation::OR);
+  unitValidation->add<WorkspaceUnitValidator>("TOF");
+  unitValidation->add<WorkspaceUnitValidator>("dSpacing");
+
+  wsValidation->add(unitValidation);
 
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidation),
