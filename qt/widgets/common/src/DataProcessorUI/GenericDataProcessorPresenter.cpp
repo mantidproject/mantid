@@ -988,7 +988,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   assert(m_mainPresenter != nullptr && "Main presenter must be injected with accept().");
   // Pre-processing properties
-  std::cout << m_mainPresenter << std::endl;
+ // std::cout << m_mainPresenter << std::endl;
   auto preProcessPropMap =
       convertStringToMapWithSet(m_mainPresenter->getPreprocessingProperties());
 
@@ -1751,7 +1751,7 @@ int GenericDataProcessorPresenter::indexOfCommand(EditAction action) {
 void GenericDataProcessorPresenter::accept(
     DataProcessorMainPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
-  std::cout << m_mainPresenter << std::endl;
+ // std::cout << m_mainPresenter << std::endl;
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
   m_mainPresenter->notifyADSChanged(m_workspaceList);
