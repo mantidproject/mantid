@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/Communicator.cpp
 	src/ExecutionMode.cpp
+	src/IO/EventLoader.cpp
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
@@ -10,6 +11,7 @@ set ( INC_FILES
 	inc/MantidParallel/Collectives.h
 	inc/MantidParallel/Communicator.h
 	inc/MantidParallel/ExecutionMode.h
+	inc/MantidParallel/IO/EventLoader.h
 	inc/MantidParallel/IO/NXEventDataLoader.h
 	inc/MantidParallel/Request.h
 	inc/MantidParallel/StorageMode.h
@@ -19,6 +21,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	CollectivesTest.h
 	CommunicatorTest.h
+	EventLoaderTest.h
 	ExecutionModeTest.h
 	ParallelRunnerTest.h
 	RequestTest.h
