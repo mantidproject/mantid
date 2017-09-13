@@ -4,15 +4,19 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::RunCombinationHelper;
 using Mantid::Algorithms::GroupWorkspaces;
+using Mantid::Algorithms::CreateSampleWorkspace;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace WorkspaceCreationHelper;
@@ -118,11 +122,45 @@ public:
                      "different X units; different spectrum axis units; ");
   }
 
+  void test_scanning_workspaces_throw_no_error() {
+    const auto scanWS1 = createSampleScanningWorkspace(2);
+    const auto scanWS2 = createSampleScanningWorkspace(2);
+
+    m_testee.setReferenceProperties(scanWS1);
+    TS_ASSERT(m_testee.checkCompatibility(scanWS2).empty());
+  }
+
+  void test_mix_of_scanning_and_non_scanning_workspaces_throws_error() {
+    const auto scanWS = createSampleScanningWorkspace(2);
+    const auto nonScanWS = createSampleScanningWorkspace(1);
+
+    m_testee.setReferenceProperties(scanWS);
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(nonScanWS),
+                     "a mix of workspaces with and without detector scans; ");
+  }
+
+  void
+  test_scanning_workspaces_with_different_numbers_of_detectors_throws_error() {
+    const auto scanWS1 = createSampleScanningWorkspace(2);
+    const auto scanWS2 = createSampleScanningWorkspace(2, 5);
+
+    m_testee.setReferenceProperties(scanWS1);
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(scanWS2),
+                     "workspaces with detectors scans have different number of "
+                     "detectors; ");
+  }
+
 private:
   void setUnits(MatrixWorkspace_sptr ws) {
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     ws->getAxis(1)->unit() = UnitFactory::Instance().create("Momentum");
     ws->setYUnit("Counts");
+  }
+
+  MatrixWorkspace_sptr createSampleScanningWorkspace(int nTimeIndexes,
+                                                     int nhist = 2) {
+    return create2DDetectorScanWorkspaceWithFullInstrument(
+        nhist, 3, nTimeIndexes, 0, 1, true, false, true, "test");
   }
 
   RunCombinationHelper m_testee;
