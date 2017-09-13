@@ -87,7 +87,7 @@ class FocusTest(stresstesting.MantidStressTest):
         finally:
             config["datasearch.directories"] = self.existing_config
             mantid.mtd.clear()
-            
+
 
 def _compare_ws(reference_file_name, results):
     ref_ws = mantid.Load(Filename=reference_file_name)
