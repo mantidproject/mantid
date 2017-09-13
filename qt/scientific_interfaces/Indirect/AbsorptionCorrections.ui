@@ -1049,5 +1049,53 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cbCanDensity</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>208</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>112</x>
+     <y>579</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spCanDensity</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>208</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>305</x>
+     <y>579</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leCanChemicalFormula</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>208</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>690</x>
+     <y>579</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>
