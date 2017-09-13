@@ -52,8 +52,12 @@ class Gem(AbstractInst):
             run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
         return self._cached_run_details[run_number_string_key]
 
-    def _generate_auto_vanadium_calibration(self, run_details):
-        raise NotImplementedError()
+    def _generate_output_file_name(self, run_number_string):
+        return self._generate_input_file_name(run_number_string)
+
+    @staticmethod
+    def _generate_input_file_name(run_number):
+        return _gem_generate_inst_name(run_number=run_number)
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:

@@ -16,7 +16,7 @@ def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vana
     sample_details_obj = absorb_corrections.create_vanadium_sample_details_obj(config_dict=absorb_dict)
     ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(
         ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, sample_details_obj=sample_details_obj,
-        is_vanadium=is_vanadium)
+        is_vanadium=True)
     return ws_to_correct
 
 

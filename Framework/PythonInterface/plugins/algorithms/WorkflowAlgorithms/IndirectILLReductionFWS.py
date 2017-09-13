@@ -381,6 +381,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             # Inelastic, do something more complex
             self._ifws_integrate(ws)
 
+        ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+
         self._perform_unmirror(ws)
 
         self._subscribe_run(ws, energy, label)
@@ -554,7 +556,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         for energy in sorted(self._all_runs[label]):
 
             ws_list = self._all_runs[label][energy]
-            size = len(self._all_runs[label][energy])
 
             wsname = self._insert_energy_value(groupname, energy, label)
 
@@ -562,13 +563,9 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             nspectra = mtd[ws_list[0]].getNumberHistograms()
             observable_array = self._get_observable_values(self._all_runs[label][energy])
 
-            y_values = np.zeros(size*nspectra)
-            e_values = np.zeros(size*nspectra)
-            x_values = np.zeros(size*nspectra)
+            ConjoinXRuns(InputWorkspaces=ws_list, OutputWorkspace=wsname)
 
-            CreateWorkspace(DataX=x_values, DataY=y_values, DataE=e_values, NSpec=nspectra,
-                            WorkspaceTitle=wsname, Distribution=True, ParentWorkspace=mtd[ws_list[0]],
-                            OutputWorkspace=wsname)
+            mtd[wsname].setDistribution(True)
 
             run_list = ''  # to set to sample logs
 
@@ -585,16 +582,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             for spectrum in range(nspectra):
 
                 mtd[wsname].setX(spectrum, np.array(observable_array))
-
-                y_data = np.zeros(size)
-                e_data = np.zeros(size)
-
-                for channel in range(size):
-                    y_data[channel] = mtd[ws_list[channel]].readY(spectrum)[0]
-                    e_data[channel] = mtd[ws_list[channel]].readE(spectrum)[0]
-
-                mtd[wsname].setY(spectrum, y_data)
-                mtd[wsname].setE(spectrum, e_data)
 
             if self._sortX:
                 SortXAxis(InputWorkspace=wsname, OutputWorkspace=wsname)
@@ -642,6 +629,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             suffix_pos = ws_name.rfind('_', 0, suffix_pos)
 
         return ws_name[:suffix_pos] + '_' + str(energy) + ws_name[suffix_pos:]
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionFWS)

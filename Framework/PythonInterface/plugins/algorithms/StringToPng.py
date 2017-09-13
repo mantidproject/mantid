@@ -51,4 +51,5 @@ class StringToPng(mantid.api.PythonAlgorithm):
         plt.savefig(filename,bbox_inches='tight')
         plt.close(fig)
 
+
 mantid.api.AlgorithmFactory.subscribe(StringToPng)

@@ -124,12 +124,6 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    // needs basic calibration settings from the user
-    EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
-
     // should set a ready or similar status
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
 
@@ -147,12 +141,6 @@ public:
   void test_loadExistingCalibWithWrongName() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
-
-    // will need basic calibration settings from the user
-    EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
 
     const std::string mockFname = "foo.par";
     EXPECT_CALL(mockView, askExistingCalibFilename())
@@ -185,12 +173,6 @@ public:
         .WillOnce(Return(instrumentName));
 
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
-
-    // will need basic calibration settings from the user
-    EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
 
     // update the selected instrument
     const std::string mockFname = "ENGINX_111111_222222_foo_bar.par";

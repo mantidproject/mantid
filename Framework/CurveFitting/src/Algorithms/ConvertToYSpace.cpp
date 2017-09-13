@@ -289,7 +289,7 @@ void ConvertToYSpace::createOutputWorkspace() {
   m_outputWS->setYUnitLabel("");
 
   // q-Space output workspace
-  if (getPropertyValue("QWorkspace") != "") {
+  if (!getPropertyValue("QWorkspace").empty()) {
     m_qOutputWS = WorkspaceFactory::Instance().create(m_inputWS);
 
     m_qOutputWS->getAxis(0)->unit() = xLabel;

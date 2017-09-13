@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid import config
 import os
 import stresstesting
@@ -22,7 +23,7 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
     def __getDataFileList__(self):
         # get a list of directories to look in
         direc = config['instrumentDefinition.directory']
-        print "Looking for instrument definition files in: %s" % direc
+        print("Looking for instrument definition files in: %s" % direc)
         cwd = os.getcwd()
         os.chdir(direc)
         myFiles = glob.glob("*Parameters*.xml")
@@ -36,7 +37,7 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
         """Main entry point for the test suite"""
         from minixsv import pyxsval # noqa
         direc = config['instrumentDefinition.directory']
-        print direc
+        print(direc)
         self.xsdFile =  os.path.join(direc,'Schema/ParameterFile/1.0/','ParameterFileSchema.xsd')
         files = self.__getDataFileList__()
 
@@ -44,24 +45,25 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
         failed = []
         for filename in files:
             try:
-                print "----------------------------------------"
-                print "Validating '%s'" % filename
+                print("----------------------------------------")
+                print("Validating '%s'" % filename)
                 pyxsval.parseAndValidateXmlInput(filename, xsdFile=self.xsdFile, validateSchema=0)
-            except Exception, e:
-                print "VALIDATION OF '%s' FAILED WITH ERROR:" % filename
-                print e
+            except Exception as e:
+                print("VALIDATION OF '%s' FAILED WITH ERROR:" % filename)
+                print(e)
                 failed.append(filename)
 
         # final say on whether or not it 'worked'
-        print "----------------------------------------"
+        print("----------------------------------------")
         if len(failed) != 0:
-            print "SUMMARY OF FAILED FILES"
+            print("SUMMARY OF FAILED FILES")
             for filename in failed:
-                print filename
+                print(filename)
             raise RuntimeError("Failed Validation for %d of %d files"
                                % (len(failed), len(files)))
         else:
-            print "Succesfully Validated %d files" % len(files)
+            print("Succesfully Validated %d files" % len(files))
+
 
 if __name__ == '__main__':
     valid = ValidateParameterFiles()
