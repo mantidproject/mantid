@@ -239,18 +239,7 @@ void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId,
  */
 size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
 
-  size_t detectorIndex = 0;
-  try {
-    detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
-  } catch (std::out_of_range &) {
-    /*
-     Do not register a detector with an invalid id. if we can't determine
-     the index, we cannot register it in the right place!
-    */
-    ++m_droppedDetectors;
-    return detectorIndex;
-  }
-  if (m_componentIds->at(detectorIndex) == nullptr) {
+  auto detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
 
     /* Already allocated we just need to index into the inital front-detector
     * part of the collection.
@@ -306,9 +295,7 @@ InstrumentVisitor::componentIds() const {
  * @return The total size of the components visited.
  * This will be the same as the number of IDs.
  */
-size_t InstrumentVisitor::size() const {
-  return m_componentIds->size() - m_droppedDetectors;
-}
+size_t InstrumentVisitor::size() const { return m_componentIds->size(); }
 
 bool InstrumentVisitor::isEmpty() const { return size() == 0; }
 
