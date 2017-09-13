@@ -136,6 +136,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_confirmReductionPaused(true), m_pauseReduction(false),
       m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
+	assert(m_manager != nullptr);
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
                          "<b>Override <samp>" + processor.name() +
@@ -459,7 +460,7 @@ void GenericDataProcessorPresenter::reductionPaused() {
   m_view->enableProcessButton();
 
   m_mainPresenter->confirmReductionPaused();
-  m_confirmReductionPaused = true;
+  // m_confirmReductionPaused = true;
 }
 /**
 Process a new row
