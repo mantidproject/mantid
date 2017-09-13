@@ -3,8 +3,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/algorithm/string/join.hpp>
-
 namespace Mantid {
 namespace API {
 
@@ -15,20 +13,7 @@ namespace API {
   * unitless.
   */
 WorkspaceUnitValidator::WorkspaceUnitValidator(const std::string &unitID)
-    : MatrixWorkspaceValidator(), m_unitIDs() {
-  if (!unitID.empty())
-    m_unitIDs.push_back(unitID);
-}
-
-/** Constructor
- *
- * @param unitIDs :: The vector of names of the unit that the workspace must
- * have. If left empty, the validator will simply check that the workspace is
- * not unitless.
- */
-WorkspaceUnitValidator::WorkspaceUnitValidator(
-    const std::vector<std::string> &unitIDs)
-    : MatrixWorkspaceValidator(), m_unitIDs(unitIDs) {}
+    : MatrixWorkspaceValidator(), m_unitID(unitID) {}
 
 /**
   * Clone the current state
@@ -53,7 +38,7 @@ WorkspaceUnitValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   Kernel::Unit_const_sptr unit = value->getAxis(0)->unit();
   // If m_unitID is empty it means that the workspace must have units, which
   // can be anything
-  if (m_unitIDs.empty()) {
+  if (m_unitID.empty()) {
     return (
         unit && (!boost::dynamic_pointer_cast<const Kernel::Units::Empty>(unit))
             ? ""
@@ -61,31 +46,11 @@ WorkspaceUnitValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   }
   // now check if the units of the workspace is correct
   else {
-    const auto matchesUnitID =
-        [&unit](const std::string &unitID) { return unit->unitID() == unitID; };
-
-    if (!unit ||
-        !std::any_of(m_unitIDs.cbegin(), m_unitIDs.cend(), matchesUnitID)) {
-      return buildErrorMessage();
-    }
-
-    return "";
-  }
-}
-
-/** Build a user friendly error message.
- *
- * This will format the message differently depending on the number of unitIDs
- * checked by this validator.
- *
- * @return a user friendly error message.
- */
-std::string WorkspaceUnitValidator::buildErrorMessage() const {
-  if (m_unitIDs.size() == 1) {
-    return "The workspace must have units of " + m_unitIDs[0];
-  } else {
-    return "The workspace must have one of the following units: " +
-           boost::algorithm::join(m_unitIDs, ", ");
+    if ((!unit) || (unit->unitID().compare(m_unitID))) {
+      return "The workspace must have units of " +
+             m_unitID; //+ "; its unit is: " + unit->caption();
+    } else
+      return "";
   }
 }
 

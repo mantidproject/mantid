@@ -33,11 +33,7 @@ namespace API {
 */
 class MANTID_API_DLL WorkspaceUnitValidator : public MatrixWorkspaceValidator {
 public:
-  /// Create a workspace unit validator for a single unit ID
   explicit WorkspaceUnitValidator(const std::string &unitID = "");
-  /// Create a workspace unit validator that will accept multiple unit IDs
-  explicit WorkspaceUnitValidator(const std::vector<std::string> &unitIDs);
-
   /// Gets the type of the validator
   std::string getType() const { return "workspaceunit"; }
   /// Clone the current state
@@ -47,11 +43,8 @@ private:
   /// Check for validity.
   std::string checkValidity(const MatrixWorkspace_sptr &value) const override;
 
-  /// Return a user friendly error message
-  std::string buildErrorMessage() const;
-
-  /// The name of the required units
-  std::vector<std::string> m_unitIDs;
+  /// The name of the required unit
+  const std::string m_unitID;
 };
 
 } // namespace API
