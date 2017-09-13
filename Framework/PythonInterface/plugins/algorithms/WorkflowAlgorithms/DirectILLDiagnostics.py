@@ -393,7 +393,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             wsCleanup.cleanup(peakIntensityWS)
 
         self._outputReports(reportWS, defaultMaskedSpectra, userMaskedSpectra, beamStopMaskedSpectra,
-                            bkgMaskedSpectra, peakMaskedSpectra)
+                            peakMaskedSpectra, bkgMaskedSpectra)
 
         self._finalize(maskWS, wsCleanup, report)
         progress.report('Done')
