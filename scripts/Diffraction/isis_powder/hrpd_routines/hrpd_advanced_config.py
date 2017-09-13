@@ -14,9 +14,9 @@ absorption_correction_params = {
 window_10_110_params = {
     "vanadium_tof_cropping": (1e4, 1.2e5),
     "focused_cropping_values": [
-        (1.5e4, 1.1e5),  # Bank 1
-        (1.5e4, 1.2e5),  # Bank 2
-        (1.5e4, 1.1e5)   # Bank 3
+        (1.5e4, 1.08e5),  # Bank 1
+        (1.5e4, 1.12e5),  # Bank 2
+        (1.5e4, 1e5)   # Bank 3
     ]
 }
 
