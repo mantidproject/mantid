@@ -231,7 +231,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
   // calculate exponential decay outside of the loop
   std::vector<double> expDecay(ws->histogram(0).size()); // make a copy
-  { // limit scope
+  {                                                      // limit scope
     const auto &X = ws->readX(0);
     for (size_t i = 0; i < X.size(); ++i)
       expDecay[i] = exp(-(X[i] - X0) / muLife);
@@ -244,9 +244,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
       const double X = ws->x(h)[i];
       const double exponential = n0[h] * exp(-(X - X0) / muLife);
       const double Y = ws->y(h)[i] - exponential;
-      const double E = (ws->y(h)[i] > poissonLimit)
-                           ? ws->e(h)[i]
-                           : sqrt(exponential);
+      const double E =
+          (ws->y(h)[i] > poissonLimit) ? ws->e(h)[i] : sqrt(exponential);
 
       realY[i] += aj[h] * Y;
       imagY[i] += bj[h] * Y;
