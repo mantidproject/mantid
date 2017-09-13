@@ -143,13 +143,15 @@ size_t EventWorkspace::size() const {
 /// Get the blocksize, aka the number of bins in the histogram
 /// @returns the number of bins in the Y data
 size_t EventWorkspace::blocksize() const {
-  // Pick the first pixel to find the blocksize.
-  auto it = data.begin();
-  if (it == data.end()) {
+  if (data.empty()) {
     throw std::range_error("EventWorkspace::blocksize, no pixels in workspace, "
                            "therefore cannot determine blocksize (# of bins).");
   } else {
-    return (*it)->histogram_size();
+    size_t numBins = 0;
+    for (const auto *iter : data) {
+      numBins = std::max(numBins, iter->histogram_size());
+    }
+    return numBins;
   }
 }
 
