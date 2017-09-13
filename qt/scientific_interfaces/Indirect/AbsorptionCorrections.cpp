@@ -48,11 +48,12 @@ void AbsorptionCorrections::setup() {}
 void AbsorptionCorrections::run() {
   // Get correct corrections algorithm
   QString sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
-  QString algorithmName = "Indirect" + sampleShape + "Absorption";
 
   IAlgorithm_sptr monteCarloAbsCor = 
     AlgorithmManager::Instance().create("CalculateMonteCarloAbsorption");
   monteCarloAbsCor->initialize();
+
+  monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
 
   addShapeSpecificSampleOptions(monteCarloAbsCor, sampleShape);
 
@@ -68,8 +69,6 @@ void AbsorptionCorrections::run() {
   QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
   monteCarloAbsCor->setProperty("SampleChemicalFormula",
                           sampleChemicalFormula.toStdString());
-
-  monteCarloAbsCor->setProperty("Shape", sampleShape);
 
   // General details
   monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
