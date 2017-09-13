@@ -492,6 +492,9 @@
 
    <instrument name="VULCAN" beamline="7">
 	<technique>Neutron Diffraction</technique>
+        <livedata>
+      <connection name="event" address="bl7-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+    </livedata>
    </instrument>
 
    <instrument name="CORELLI" beamline="9">
