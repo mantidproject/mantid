@@ -31,7 +31,7 @@ void PythonInterpreter::finalize() { Py_Finalize(); }
  * @return True if the current thread holds the GIL, false otherwise
  */
 bool PythonGIL::locked() {
-  PyThreadState *ts = _PyThreadState_Current;
+  PyThreadState *ts = GET_CURRENT_THREADSTATE;
   return (ts && ts == PyGILState_GetThisThreadState());
 }
 
