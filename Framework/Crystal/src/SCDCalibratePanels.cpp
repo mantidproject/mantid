@@ -169,7 +169,7 @@ void SCDCalibratePanels::exec() {
 
   // Use new instrument for PeaksWorkspace
   Geometry::Instrument_sptr inst2 =
-      boost::const_pointer_cast<Geometry::Instrument>(inst);
+      boost::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
   Geometry::OrientedLattice lattice0 =
       peaksWs->mutableSample().getOrientedLattice();
   PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
