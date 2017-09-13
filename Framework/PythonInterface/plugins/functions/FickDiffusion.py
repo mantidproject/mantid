@@ -46,5 +46,6 @@ class FickDiffusion(IFunction1D):
             jacobian.set(i,0,2.0*x)
             i += 1
 
+
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(FickDiffusion)

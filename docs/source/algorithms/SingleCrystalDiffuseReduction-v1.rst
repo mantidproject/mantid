@@ -22,7 +22,9 @@ This workflow makes use of :ref:`ConvertToMD <algm-ConvertToMD>` and
 :ref:`MDNormSCD <algm-MDNormSCD>` so these should be reviewed to
 better understand all the options. An example of creating the Solid
 Angle and Flux workspaces are included in :ref:`MDNormSCD
-<algm-MDNormSCD>`.
+<algm-MDNormSCD>`. :ref:`MDNormSCDPreprocessIncoherent
+<algm-MDNormSCDPreprocessIncoherent>` can be used to process Vanadium
+data for the Solid Angle and Flux workspaces.
 
 The resulting workspaces can be saved and loaded with :ref:`SaveMD
 <algm-SaveMD>` and :ref:`LoadMD <algm-LoadMD>` respectively.
@@ -31,28 +33,30 @@ Masking
 #######
 
 The mask from the solid angle workspace is copied to the
-data. Additional masking is provided by :ref:`MaskBTP <algm-MaskBTP>`
-using the Bank, Tube and Pixel parameters. MaskBTP is only run once so
-it can only apply one additional mask to all the data, read
-:ref:`MaskBTP <algm-MaskBTP>` to see the usage.
+data. Additional masking is provided by a masking file. A masking file
+can be created my masking a data file then saving it using
+:ref:`SaveMask <algm-SaveMask>`.
 
 Background
 ##########
 
 The background is processed the same as the data except that the
 Goniometer is copied from the data before setting the UB. If a
-background is included three workspaces are create.
+background is included three workspaces are create. If
+"OutputWorkspace" is set to "ws" you will get the following.
 
-"OutputWorkspace" + '_background' containing the normalised background.
+"ws_normalizedBackground" containing the normalised background.
 
-"OutputWorkspace" + '_data' containing the normalised data.
+"ws_normalizedData" containing the normalised data.
 
-And "OutputWorkspace" where OutputWorkspace = OutputWorkspace\_data - OutputWorkspace\_background * BackgroundScale
+And "ws" where
+
+.. math:: ws = ws\_normalizedData - ws\_normalizedBackground * BackgroundScale
 
 Should the background scale not be correct this allows you to redo the
 background subtraction without rerunning the reduction.
 
-If no background is used then the "OutputWorkspace" is just the normalised data.
+If no background is used then the "ws" is just the normalised data.
 
 Symmetries
 ##########
@@ -66,6 +70,28 @@ groups>` to apply.
 For example setting SymmetryOps to "P 31 2 1", "152" or "x,y,z;
 -y,x-y,z+1/3; -x+y,-x,z+2/3; y,x,-z; x-y,-y,-z+2/3; -x,-x+y,-z+1/3"
 are equivalent.
+
+Temporary Workspaces
+####################
+
+If the KeepTemporaryWorkspaces option is True the data and the
+normalization in addition to the nomalized data will be
+outputted. This allows you to run separate instances of
+SingleCrystalDiffuseReduction and combine the results. They will have
+names "ws_data" and "ws_normalization"
+respectively.
+
+Where
+
+.. math:: ws\_normalizedData = \frac{ws\_data}{ws\_normalization}
+
+If background is subtracted there will be similar
+"ws_background_data" and
+"ws_background_normalization" for the background.
+
+Where
+
+.. math:: ws\_normalizedBackground = \frac{ws\_background\_data}{ws\_backgournd\_normalization}
 
 Workflow
 --------

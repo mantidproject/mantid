@@ -510,4 +510,5 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             samRun = self._focus(samRun)
             RenameWorkspace(InputWorkspace=samRun, OutputWorkspace=str(samRun)+"_calibrated")
 
+
 AlgorithmFactory.subscribe(CalibrateRectangularDetectors)

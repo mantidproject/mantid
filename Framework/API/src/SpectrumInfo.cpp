@@ -1,7 +1,7 @@
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -15,7 +15,7 @@ namespace API {
 
 SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
                            const ExperimentInfo &experimentInfo,
-                           DetectorInfo &detectorInfo)
+                           Geometry::DetectorInfo &detectorInfo)
     : m_experimentInfo(experimentInfo), m_detectorInfo(detectorInfo),
       m_spectrumInfo(spectrumInfo), m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}

@@ -18,7 +18,7 @@ class HelperTestingClass(object):
         self._atoms = ""
         self._sum_contributions = True
         self._cross_section_factor = "Incoherent"
-        self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out"}
+        self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out", "DMOL3": ".outmol"}
         self._output_name = "output_workspace"
         self._ref = "reference_workspace"
         self._scale = 1.0
@@ -347,7 +347,7 @@ class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
 
-        name = "Na2SiF6"
+        name = "Na2SiF6_CASTEP"
         self.ref_result = name + ".nxs"
         self.set_dft_program("CASTEP")
         self.set_name(name)
@@ -358,4 +358,63 @@ class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
 
     def validate(self):
         self.tolerance = 1e-1
+        return self._output_name, self.ref_result
+
+
+# noinspection PyAttributeOutsideInit,PyPep8Naming
+class AbinsCASTEP1DDispersion(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation of S from phonon dispersion is correct (1D case).
+    """
+    tolerance = None
+    ref_result = None
+
+    def skipTests(self):
+        return skip_tests()
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "Mapi"
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("CASTEP")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
+        self.case_from_scratch()
+        self._wrk_1 = self._output_name
+
+    def validate(self):
+
+        self.tolerance = 1e-1
+        return self._output_name, self.ref_result
+
+
+class AbinsDMOL3TestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation from scratch with input data from DMOL3 and for 1-4 quantum
+    order events is correct.
+    """
+    tolerance = None
+    ref_result = None
+
+    def skipTests(self):
+        return skip_tests()
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "Na2SiF6_DMOL3"
+
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("DMOL3")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_cross_section(cross_section="Total")
+        self.case_from_scratch()
+
+    def excludeInPullRequests(self):
+        return True
+
+    def validate(self):
+        self.tolerance = 1e-2
         return self._output_name, self.ref_result

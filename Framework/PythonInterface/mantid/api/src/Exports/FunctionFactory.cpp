@@ -1,5 +1,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
@@ -45,6 +46,28 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
   }
 
   return registered;
+}
+
+//------------------------------------------------------------------------------------------------------
+/**
+* Something that makes Function Factory return to python a composite function
+* for Product function, Convolution or
+* any similar superclass of composite function.
+* @param self :: Enables it to be called as a member function on the
+* FunctionFactory class
+* @param name :: Name of the superclass of composite function,
+* e.g. "ProductFunction".
+*/
+Mantid::API::CompositeFunction_sptr
+createCompositeFunction(FunctionFactoryImpl &self, const std::string &name) {
+  auto fun = self.createFunction(name);
+  auto composite =
+      boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+  if (composite) {
+    return composite;
+  }
+  std::string error_message = name + " is not a composite function.";
+  throw std::invalid_argument(error_message);
 }
 
 //--------------------------------------------- Function registration
@@ -96,6 +119,9 @@ void export_FunctionFactory() {
                                                   no_init)
       .def("getFunctionNames", &getFunctionNames, arg("self"),
            "Returns a list of the currently available functions")
+      .def("createCompositeFunction", &createCompositeFunction,
+           (arg("self"), arg("name")),
+           "Return a pointer to the requested function")
       .def("createFunction", &FunctionFactoryImpl::createFunction,
            (arg("self"), arg("type")),
            "Return a pointer to the requested function")

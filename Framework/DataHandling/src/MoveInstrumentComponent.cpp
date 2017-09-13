@@ -2,7 +2,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace Mantid {
@@ -118,10 +118,13 @@ void MoveInstrumentComponent::exec() {
   if (relativePosition)
     position += comp->getPos();
 
+  const auto componentId = comp->getComponentID();
   if (inputW) {
-    inputW->mutableDetectorInfo().setPosition(*comp, position);
+    auto &componentInfo = inputW->mutableComponentInfo();
+    componentInfo.setPosition(componentInfo.indexOf(componentId), position);
   } else if (inputP) {
-    inputP->mutableDetectorInfo().setPosition(*comp, position);
+    auto &componentInfo = inputP->mutableComponentInfo();
+    componentInfo.setPosition(componentInfo.indexOf(componentId), position);
   }
 }
 

@@ -1,6 +1,6 @@
 #include "MantidDataHandling/LoadMLZ.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
@@ -149,7 +149,7 @@ void LoadMLZ::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
 
   m_instrumentPath = m_mlzloader.findInstrumentNexusPath(firstEntry);
 
-  if (m_instrumentPath == "") {
+  if (m_instrumentPath.empty()) {
     throw std::runtime_error(
         "Cannot set the instrument name from the Nexus file!");
   }

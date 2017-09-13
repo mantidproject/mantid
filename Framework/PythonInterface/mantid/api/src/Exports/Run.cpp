@@ -1,5 +1,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
@@ -119,8 +120,12 @@ bpl::list keys(Run &self) {
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(integrateProtonCharge_Overload,
                                        integrateProtonCharge, 0, 1)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -194,10 +199,11 @@ void export_Run() {
       //--------------------------- Dictionary
       // access----------------------------
       .def("get", &getWithDefault, (arg("self"), arg("key"), arg("default")),
-           "Returns the value pointed to by the key or "
-           "None if it does not exist")
+           "Returns the value pointed to by the key or the default value "
+           "given.")
       .def("get", &get, (arg("self"), arg("key")),
-           "Returns the value pointed to by the key or the default value given")
+           "Returns the value pointed to by the key or "
+           "None if it does not exist.")
       .def("keys", &keys, arg("self"),
            "Returns the names of the properties as list")
       .def("__contains__", &Run::hasProperty, (arg("self"), arg("name")))

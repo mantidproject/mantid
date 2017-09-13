@@ -89,9 +89,13 @@ struct EPPTableRow {
 
   /// Construct a row with the default values.
   EPPTableRow() = default;
-  /// Construct a row with errors set to zero.
+  /// Construct a row with default workspace index and errors set to zero.
   EPPTableRow(const double peakCentre, const double sigma, const double height,
               const FitStatus fitStatus);
+  /// Construct a row with errors set to zero.
+  EPPTableRow(const int index, const double peakCentre, const double sigma,
+              const double height, const FitStatus fitStatus);
+  int workspaceIndex = -1;
   double peakCentre = 0;
   double peakCentreError = 0;
   double sigma = 0;
@@ -223,6 +227,20 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
  */
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
     int nhist, int nbins, bool includeMonitors = false,
+    bool startYNegative = false, bool isHistogram = true,
+    const std::string &instrumentName = std::string("testInst"));
+
+/**
+ * Create a workspace as for create2DWorkspaceWithFullInstrument, but including
+ *time indexing, i.e. detector scans. Note that no positions or rotations are
+ *currently changed for the detector scan workspaces.
+ *
+ * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
+ */
+Mantid::API::MatrixWorkspace_sptr
+create2DDetectorScanWorkspaceWithFullInstrument(
+    int nhist, int nbins, size_t nTimeIndexes, size_t startTime = 0,
+    size_t firstInterval = 1, bool includeMonitors = false,
     bool startYNegative = false, bool isHistogram = true,
     const std::string &instrumentName = std::string("testInst"));
 

@@ -97,12 +97,13 @@ private:
 
   IndexingType m_indexingType;
 
-  void buildOutputDetectorInfo(API::DetectorInfo &outputDetectorInfo) const;
-
-  void buildPositions(API::DetectorInfo &outputDetectorInfo) const;
-  void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
   void
-  buildRelativeRotationsForScans(API::DetectorInfo &outputDetectorInfo) const;
+  buildOutputDetectorInfo(Geometry::DetectorInfo &outputDetectorInfo) const;
+
+  void buildPositions(Geometry::DetectorInfo &outputDetectorInfo) const;
+  void buildRotations(Geometry::DetectorInfo &outputDetectorInfo) const;
+  void buildRelativeRotationsForScans(
+      Geometry::DetectorInfo &outputDetectorInfo) const;
 
   void createTimeOrientedIndexInfo(API::MatrixWorkspace &ws) const;
   void createDetectorOrientedIndexInfo(API::MatrixWorkspace &ws) const;
