@@ -17,7 +17,7 @@
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
 			operators -->
 		<parameter name="formula_eff" type="string">
-			<!-- The xml escape sequence &lt; below means 'less than' -->
+			<!-- The xml escape sequence &gt; below means 'greater than' -->
 			<value val="e &gt; 5.113 ? 0.94*(1-exp(-3.284/sqrt(e))) : exp(-0.0565/sqrt(e))*(1-exp(-3.284/sqrt(e)))" />
 		</parameter>
 
