@@ -74,55 +74,25 @@ void AbsorptionCorrections::run() {
   monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
   monteCarloAbsCor->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
   long wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
-  monteCarloAbsCor->setProperty("NumberWavelengths", wave);
+  monteCarloAbsCor->setProperty("NumberOfWavelengthPoints", wave);
   long events = static_cast<long>(m_uiForm.spNumberEvents->value());
-  monteCarloAbsCor->setProperty("Events", events);
+  monteCarloAbsCor->setProperty("EventsPerPoint", events);
 
   // Can details
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
     std::string canWsName =
         m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-    std::string shiftedCanName = canWsName + "_shifted";
-    IAlgorithm_sptr clone =
-        AlgorithmManager::Instance().create("CloneWorkspace");
-    clone->initialize();
-    clone->setProperty("InputWorkspace", canWsName);
-    clone->setProperty("OutputWorkspace", shiftedCanName);
-    clone->execute();
+    monteCarloAbsCor->setProperty("ContainerWorkspace", canWsName);
 
-    MatrixWorkspace_sptr shiftedCan =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            shiftedCanName);
-    if (m_uiForm.ckShiftCan->isChecked()) {
-      IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-      scaleX->initialize();
-      scaleX->setProperty("InputWorkspace", shiftedCan);
-      scaleX->setProperty("OutputWorkspace", shiftedCanName);
-      scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
-      scaleX->setProperty("Operation", "Add");
-      scaleX->execute();
-      IAlgorithm_sptr rebin =
-          AlgorithmManager::Instance().create("RebinToWorkspace");
-      rebin->initialize();
-      rebin->setProperty("WorkspaceToRebin", shiftedCan);
-      rebin->setProperty("WorkspaceToMatch", sampleWsName.toStdString());
-      rebin->setProperty("OutputWorkspace", shiftedCanName);
-      rebin->execute();
-    }
+    monteCarloAbsCor->setProperty("ContainerDensityType", 
+      m_uiForm.cbCanDensity->currentText().toStdString());
+    monteCarloAbsCor->setProperty("ContainerDensity", 
+      m_uiForm.spCanDensity->value());
 
-    bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
-
-    if (useCanCorrections) {
-
-      monteCarloAbsCor->setProperty(
-          "ContainerDensityType", m_uiForm.cbCanDensity->currentText().toStdString());
-      monteCarloAbsCor->setProperty("ContainerDensity", m_uiForm.spCanDensity->value());
-
-      QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
-      monteCarloAbsCor->setProperty("ContainerChemicalFormula",
-                              canChemicalFormula.toStdString());
-    }
+    QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+    monteCarloAbsCor->setProperty("ContainerChemicalFormula",
+      canChemicalFormula.toStdString());
 
     addShapeSpecificCanOptions(monteCarloAbsCor, sampleShape);
   }
@@ -134,15 +104,10 @@ void AbsorptionCorrections::run() {
 
   QString outputBaseName = sampleWsName.left(nameCutIndex);
 
-  QString outputWsName = outputBaseName + "_" + sampleShape + "_red";
-  monteCarloAbsCor->setProperty("OutputWorkspace", outputWsName.toStdString());
+  QString outputWsName = outputBaseName + "_" + sampleShape + "_Corrections";
 
-  // Set the correction workspace to keep the factors if desired
-  bool keepCorrectionFactors = m_uiForm.ckKeepFactors->isChecked();
-  QString outputFactorsWsName = outputBaseName + "_" + sampleShape + "_Factors";
-  if (keepCorrectionFactors)
-    monteCarloAbsCor->setProperty("CorrectionsWorkspace", 
-      outputFactorsWsName.toStdString());
+  monteCarloAbsCor->setProperty("CorrectionsWorkspace", 
+    outputWsName.toStdString());
 
   // Add correction algorithm to batch
   m_batchAlgoRunner->addAlgorithm(monteCarloAbsCor);
@@ -254,12 +219,10 @@ bool AbsorptionCorrections::validate() {
   if (useCan) {
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
 
-    bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
-    if (useCanCorrections) {
-      if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
-                                   m_uiForm.leCanChemicalFormula))
-        uiv.checkFieldIsValid("Container Chemical Formula",
-                              m_uiForm.leCanChemicalFormula);
+    if (uiv.checkFieldIsNotEmpty("Container Chemical Formula", 
+      m_uiForm.leCanChemicalFormula)) {
+      uiv.checkFieldIsValid("Container Chemical Formula", 
+        m_uiForm.leCanChemicalFormula);
     }
   }
 
@@ -287,17 +250,7 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
     emit showMessageBox(
         "Could not run absorption corrections.\nSee Results Log for details.");
   }
-  if (m_uiForm.ckShiftCan->isChecked()) {
-    IAlgorithm_sptr shiftLog =
-        AlgorithmManager::Instance().create("AddSampleLog");
-    shiftLog->initialize();
-    shiftLog->setProperty("Workspace", m_pythonExportWsName);
-    shiftLog->setProperty("LogName", "container_shift");
-    shiftLog->setProperty("logType", "Number");
-    shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(
-                                         m_uiForm.spCanShift->value()));
-    shiftLog->execute();
-  }
+
   // Enable plot and save
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
@@ -339,12 +292,11 @@ void AbsorptionCorrections::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 
-  if (m_uiForm.ckKeepFactors->isChecked()) {
-    std::string factorsWs =
-        m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
-    if (checkADSForPlotSaveWorkspace(factorsWs, false))
-      addSaveWorkspaceToQueue(QString::fromStdString(factorsWs));
-  }
+  std::string factorsWs = 
+    m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
+  if (checkADSForPlotSaveWorkspace(factorsWs, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(factorsWs));
+
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -357,17 +309,17 @@ void AbsorptionCorrections::plotClicked() {
                           m_uiForm.dsSampleInput->getCurrentDataName()};
   auto outputFactorsWsName =
       m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
-  if (m_uiForm.ckKeepFactors->isChecked()) {
+
     QStringList plotCorr = {QString::fromStdString(outputFactorsWsName) +
                             "_ass"};
-    if (m_uiForm.ckUseCanCorrections->isChecked()) {
+    if (m_uiForm.ckUseCan->isChecked()) {
       plotCorr.push_back(QString::fromStdString(outputFactorsWsName) + "_acc");
       QString shiftedWs = QString::fromStdString(
           m_absCorAlgo->getPropertyValue("CanWorkspace"));
       plotData.push_back(shiftedWs);
     }
     plotSpectrum(plotCorr, 0);
-  }
+
   plotSpectrum(plotData, 0);
 }
 
