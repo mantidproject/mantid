@@ -449,44 +449,49 @@ public:
     setUpDefaultPresenterWithMockViews();
     DefaultValue<QString>::Set(QString());
   }
-
+  
+  void setUpDefaultPresenterWithMockViewsAndCommandProvider(
+	  std::unique_ptr<DataProcessorTreeManagerFactory> treeManagerFactory,
+	  std::unique_ptr<CommandProviderFactory> commandProviderFactory) {
+	  m_presenter = Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+		  createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+		  createReflectometryProcessor(), createReflectometryPostprocessor(),
+		  std::move(treeManagerFactory), std::move(commandProviderFactory));
+	  setUpMockViews();
+	  injectViews(mockDataProcessorView(), mockProgressableView());
+  }
+ 
   void setUpDefaultPresenterWithMockViews() {
-    setUpDefaultPresenter();
-    m_mockDataProcessorView =
-        Mantid::Kernel::make_unique<NiceMock<MockDataProcessorView>>();
-    m_mockProgress =
-        Mantid::Kernel::make_unique<NiceMock<MockProgressableView>>();
-    injectViews(*m_mockDataProcessorView, *m_mockProgress);
+	  setUpDefaultPresenter();
+	  setUpMockViews();
+	  injectViews(mockDataProcessorView(), mockProgressableView());
+  }
+
+  void setUpDefaultPresenter() { 
+	  m_presenter = Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+		createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+		createReflectometryProcessor(), createReflectometryPostprocessor()); 
+  }
+  
+  void setUpMockViews() {
+	  m_mockDataProcessorView =
+		  Mantid::Kernel::make_unique<NiceMock<MockDataProcessorView>>();
+	  m_mockProgress =
+		  Mantid::Kernel::make_unique<NiceMock<MockProgressableView>>();
   }
 
   void injectViews(DataProcessorView &dataProcessorView,
                    ProgressableView &progressView) {
     m_presenter->acceptViews(&dataProcessorView, &progressView);
-  }
-
-  void setUpDefaultPresenter() { m_presenter = makeUniqueDefaultPresenter(); }
-
-  std::unique_ptr<GenericDataProcessorPresenter> makeUniqueDefaultPresenter() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-  }
+  }  
 
   void tearDown() override {
     DefaultValue<QString>::Clear();
+	TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockDataProcessorView));
+	TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockProgress));
     m_presenter = nullptr;
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockProgress));
-  }
-
-  void setUpDefaultPresenterWithMockViewsAndCommandProvider(
-      std::unique_ptr<DataProcessorTreeManagerFactory> treeManagerFactory,
-      std::unique_ptr<CommandProviderFactory> commandProviderFactory) {
-    m_presenter = Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
-        createReflectometryProcessor(), createReflectometryPostprocessor(),
-        std::move(treeManagerFactory), std::move(commandProviderFactory));
-    injectViews(mockDataProcessorView(), mockProgressableView());
+	m_mockProgress = nullptr;
+	m_mockDataProcessorView = nullptr;
   }
 
   void injectParentPresenter(MockMainPresenter &mainPresenter) {
@@ -1151,21 +1156,12 @@ public:
 
   void testTreeUpdatedAfterProcess() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    injectParentPresenter(mockMainPresenter);
-
-    auto ws = createPrefilledWorkspace("TestWorkspace");
-    ws->String(0, ThetaCol) = "";
-    ws->String(1, ScaleCol) = "";
-    EXPECT_CALL(*m_mockDataProcessorView, getWorkspaceToOpen())
+    EXPECT_CALL(mockDataProcessorView(), getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    notifyPresenter(DataProcessorPresenter::OpenTableFlag);
 
     std::set<int> grouplist;
     grouplist.insert(0);
-
-    createTOFWorkspace("TOF_12345", "12345");
-    createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
     EXPECT_CALL(mockDataProcessorView(), giveUserCritical(_, _)).Times(0);
@@ -1195,6 +1191,15 @@ public:
         .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView(), requestNotebookPath()).Times(0);
 
+	injectParentPresenter(mockMainPresenter);
+	createTOFWorkspace("TOF_12345", "12345");
+	createTOFWorkspace("TOF_12346", "12346");
+	
+	auto ws = createPrefilledWorkspace("TestWorkspace");
+	ws->String(0, ThetaCol) = "";
+	ws->String(1, ScaleCol) = "";
+
+	notifyPresenter(DataProcessorPresenter::OpenTableFlag);
     notifyPresenter(DataProcessorPresenter::ProcessFlag);
     notifyPresenter(DataProcessorPresenter::SaveFlag);
 
@@ -1234,23 +1239,12 @@ public:
 
   void testTreeUpdatedAfterProcessMultiPeriod() {
     NiceMock<MockMainPresenter> mockMainPresenter;
-    injectParentPresenter(mockMainPresenter);
 
-    auto ws = createPrefilledWorkspace("TestWorkspace");
-    ws->String(0, ThetaCol) = "";
-    ws->String(0, ScaleCol) = "";
-    ws->String(1, ThetaCol) = "";
-    ws->String(1, ScaleCol) = "";
-    EXPECT_CALL(*m_mockDataProcessorView, getWorkspaceToOpen())
-        .Times(1)
-        .WillRepeatedly(Return("TestWorkspace"));
-    notifyPresenter(DataProcessorPresenter::OpenTableFlag);
+    EXPECT_CALL(mockDataProcessorView(), getWorkspaceToOpen())
+        .WillOnce(Return("TestWorkspace"));
 
     std::set<int> grouplist;
     grouplist.insert(0);
-
-    createMultiPeriodTOFWorkspace("TOF_12345", "12345");
-    createMultiPeriodTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
     EXPECT_CALL(mockDataProcessorView(), giveUserCritical(_, _)).Times(0);
@@ -1280,7 +1274,19 @@ public:
         .Times(1)
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mockDataProcessorView(), requestNotebookPath()).Times(0);
+	
+	injectParentPresenter(mockMainPresenter);
 
+	auto ws = createPrefilledWorkspace("TestWorkspace");
+	ws->String(0, ThetaCol) = "";
+	ws->String(0, ScaleCol) = "";
+	ws->String(1, ThetaCol) = "";
+	ws->String(1, ScaleCol) = "";
+
+	createMultiPeriodTOFWorkspace("TOF_12345", "12345");
+	createMultiPeriodTOFWorkspace("TOF_12346", "12346");
+
+	notifyPresenter(DataProcessorPresenter::OpenTableFlag);
     notifyPresenter(DataProcessorPresenter::ProcessFlag);
     notifyPresenter(DataProcessorPresenter::SaveFlag);
 
@@ -1294,7 +1300,6 @@ public:
     TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "22.5");
     TS_ASSERT_EQUALS(ws->String(1, ScaleCol), "1");
 
-    // Check output workspaces were created as expected
     // Check output workspaces were created as expected
     TS_ASSERT(workspaceExists("IvsQ_binned_TOF_12345"));
     TS_ASSERT(workspaceExists("IvsQ_TOF_12345"));
