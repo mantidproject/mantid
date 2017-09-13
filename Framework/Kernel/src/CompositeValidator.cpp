@@ -98,17 +98,17 @@ std::string CompositeValidator::checkLogicalOr(const boost::any &value) const {
   // Lambda to check if a validator is valid. If it is not valid then
   // capture its error message to a stream so we can potentially print it out
   // to the user if required.
-  const auto checkIfValid = [&errorStream,
-                             &value](const IValidator_sptr validator) {
-    const auto errorMessage = validator->check(value);
-    if (errorMessage.empty()) {
-      return true;
-    } else {
-      // capture error message to possibly later.
-      errorStream << errorMessage << "\n";
-      return false;
-    }
-  };
+  const auto checkIfValid =
+      [&errorStream, &value](const IValidator_sptr validator) {
+        const auto errorMessage = validator->check(value);
+        if (errorMessage.empty()) {
+          return true;
+        } else {
+          // capture error message to possibly later.
+          errorStream << errorMessage << "\n";
+          return false;
+        }
+      };
 
   const auto valid =
       std::any_of(m_children.begin(), m_children.end(), checkIfValid);

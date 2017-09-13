@@ -45,8 +45,7 @@ void export_CompositeValidator() {
            make_constructor(
                &createCompositeValidator, default_call_policies(),
                (arg("validators"), arg("relation") = CompositeRelation::AND)))
-      .def("add",
-           (void (CompositeValidator::*)(IValidator_sptr)) &
-               CompositeValidator::add,
+      .def("add", (void (CompositeValidator::*)(IValidator_sptr)) &
+                      CompositeValidator::add,
            (arg("self"), arg("other")), "Add another validator to the list");
 }
