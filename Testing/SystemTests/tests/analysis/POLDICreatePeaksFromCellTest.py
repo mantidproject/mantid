@@ -1,4 +1,5 @@
 # pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 
@@ -41,11 +42,11 @@ class ReflectionCheckingTest(stresstesting.MantidStressTest):
 
             currentPeak = peakTable.row(idx)
 
-            self.assertEquals([int(x) for x in currentPeak['HKL'].split()], reference[0])
+            self.assertEqual([int(x) for x in currentPeak['HKL'].split()], reference[0])
             self.assertDelta(float(currentPeak['d']), reference[1], 1e-4)
 
             fSquaredReference = reference[2] ** 2 * reference[3]
-            print reference[0], fSquaredReference, float(currentPeak['Intensity'])
+            print(reference[0], fSquaredReference, float(currentPeak['Intensity']))
             self.assertDelta(float(currentPeak['Intensity']) / fSquaredReference, 1.0, structureFactorPrecision)
 
 
@@ -67,7 +68,7 @@ class POLDICreatePeaksFromCellTestSiO2(ReflectionCheckingTest):
             Atoms="Si 0.4723 0.0 2/3 1.0 0.0075; O 0.416 0.2658 0.7881 1.0 0.0175",
             a=4.91427, c=5.4058, LatticeSpacingMin=0.885)
 
-        self.assertEquals(peaks_SiO2.rowCount(), 118)
+        self.assertEqual(peaks_SiO2.rowCount(), 118)
 
         self.checkReflections(peaks_SiO2, self.data)
 
@@ -89,7 +90,7 @@ class POLDICreatePeaksFromCellTestAl2O3(ReflectionCheckingTest):
             Atoms="Al 0 0 0.35216 1.0 0.009; O 0.30668 0 1/4 1.0 0.0125",
             a=4.7605, c=12.9956, LatticeSpacingMin=0.885)
 
-        self.assertEquals(peaks_Al2O3.rowCount(), 44)
+        self.assertEqual(peaks_Al2O3.rowCount(), 44)
 
         self.checkReflections(peaks_Al2O3, self.data)
 
@@ -113,7 +114,7 @@ class POLDICreatePeaksFromCellTestFeTiO3(ReflectionCheckingTest):
             Atoms="Fe 0 0 0.35543 1.0 0.005; Zr 0 0 0.14643 1.0 0.004; O 0.31717 0.02351 0.24498 1.0 0.006",
             a=5.0881, c=14.091, LatticeSpacingMin=0.885)
 
-        self.assertEquals(peaks_FeTiO3.rowCount(), 108)
+        self.assertEqual(peaks_FeTiO3.rowCount(), 108)
 
         self.checkReflections(peaks_FeTiO3, self.data, 6e-5)
 
@@ -137,7 +138,7 @@ class POLDICreatePeaksFromCellTestCO(ReflectionCheckingTest):
             Atoms="C -0.042 -0.042 -0.042 1.0 0.0125; O 0.067 0.067 0.067 1.0 0.0125",
             a=5.63, LatticeSpacingMin=0.885)
 
-        self.assertEquals(peaks_CO.rowCount(), 91)
+        self.assertEqual(peaks_CO.rowCount(), 91)
 
         self.checkReflections(peaks_CO, self.data, 1e-5)
 
@@ -161,6 +162,6 @@ class POLDICreatePeaksFromCellTestBetaQuartz(ReflectionCheckingTest):
             Atoms="Si 1/2 0 0 1.0 0.025; O 0.41570 0.20785 1/6 1.0 0.058",
             a=4.9965, c=5.4546, LatticeSpacingMin=0.885)
 
-        self.assertEquals(peaks_betaSiO2.rowCount(), 65)
+        self.assertEqual(peaks_betaSiO2.rowCount(), 65)
 
         self.checkReflections(peaks_betaSiO2, self.data, 1e-5)

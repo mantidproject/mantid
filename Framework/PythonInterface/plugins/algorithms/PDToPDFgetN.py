@@ -177,5 +177,6 @@ class PDToPDFgetN(DataProcessorAlgorithm):
 
         self.setProperty("OutputWorkspace", wksp)
 
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(PDToPDFgetN)

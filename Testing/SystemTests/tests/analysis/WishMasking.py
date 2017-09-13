@@ -4,6 +4,7 @@ Tests masking functionality specific to WISH. Working masking behaviour is criti
 - Email Pascal Manuel @ ISIS if things break here and let him know how his scripts may need to be modified.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import os
 from mantid.simpleapi import *
@@ -44,7 +45,7 @@ class WishMasking(stresstesting.MantidStressTest):
             self.assertTrue(mask_boundary_inside == expected_masking_identifier)
             self.assertTrue(mask_boundary_outside == expected_not_masking_identifier)
         except LookupError:
-            print "Could not find the requested index"
+            print("Could not find the requested index")
             self.assertTrue(False)
         finally:
             cfile.close()

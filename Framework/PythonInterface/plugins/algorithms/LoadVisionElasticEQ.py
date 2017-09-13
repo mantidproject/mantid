@@ -78,5 +78,6 @@ class LoadVisionElasticEQ(PythonAlgorithm):
         self.setProperty("OutputWorkspace", ws)
         mantid.simpleapi.DeleteWorkspace(wksp_name)
 
+
 # Register
 AlgorithmFactory.subscribe(LoadVisionElasticEQ)

@@ -80,10 +80,19 @@ private:
   /// Creates an output workspace.
   API::MatrixWorkspace_sptr
   createOutputWorkspace(API::Progress &progress, const std::string &targetUnit,
-                        API::MatrixWorkspace_sptr &inputWS, size_t nHist);
+                        API::MatrixWorkspace_sptr &inputWS);
 
-  // Map to which the conversion to the unit is stored.
+  /// Map to which the conversion to the unit is stored.
   std::multimap<double, size_t> m_indexMap;
+
+  /// Vector of axis in case ordering is not asked.
+  std::vector<double> m_axis;
+
+  /// Flag whether ordering is needed.
+  bool m_toOrder;
+
+  /// Emplaces to value and the index pair into the map.
+  void emplaceIndexMap(double value, size_t wsIndex);
 
   /// Getting Efixed
   double getEfixed(const size_t detectorIndex,
