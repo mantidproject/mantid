@@ -4,8 +4,9 @@
 
     Run pylint on selected Python files/directories.
 """
-from __future__ import print_function
 
+
+from __future__ import (absolute_import, division, print_function)
 import logging
 from optparse import OptionParser
 import os.path
@@ -249,7 +250,7 @@ def check_module_imports():
     #pylint: disable=unused-variable
     try:
         import mantid # noqa
-    except ImportError, exc:
+    except ImportError as exc:
         msg = "Unable to import mantid module: '%s'\n"\
               "Try passing the -m option along with the path to the module"\
                 % str(exc)
@@ -299,8 +300,7 @@ def run_checks(relpaths, options):
       bool: Success/failure
     """
     # convert to excludes absolute paths
-    excludes = map(lambda path: os.path.join(options.basedir, path),
-                   options.exclude)
+    excludes = [os.path.join(options.basedir, path) for path in options.exclude]
     # Gather targets first
     target_paths = gather_targets(options.basedir, relpaths, excludes)
     logging.debug("Found {} targets".format(len(target_paths)))
@@ -405,7 +405,7 @@ def gather_targets(basedir, relpaths, excludes=[]):
             if path.startswith(exclude_path):
                 return False
         return True
-    return filter(include_target, targets)
+    return list(filter(include_target, targets))
 
 #------------------------------------------------------------------------------
 
@@ -496,6 +496,7 @@ def build_pylint_cmd(srcpath, options):
     return cmd
 
 #------------------------------------------------------------------------------
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

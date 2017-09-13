@@ -429,7 +429,7 @@ void ExportTimeSeriesLog::calculateFirstDerivative(bool is_event_ws) {
 
   // error message
   std::string errmsg = errmsg_ss.str();
-  if (errmsg.size() > 0)
+  if (!errmsg.empty())
     g_log.error(errmsg);
 
   return;

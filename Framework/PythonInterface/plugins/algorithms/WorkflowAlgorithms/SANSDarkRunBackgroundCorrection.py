@@ -444,4 +444,5 @@ class DarkRunMonitorAndDetectorRemover(object):
         return dark_run
 #############################################################################################
 
+
 AlgorithmFactory.subscribe(SANSDarkRunBackgroundCorrection)

@@ -284,4 +284,5 @@ class MatchPeaks(PythonAlgorithm):
 
         return peak_bin
 
+
 AlgorithmFactory.subscribe(MatchPeaks)
