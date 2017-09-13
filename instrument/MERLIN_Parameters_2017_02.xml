@@ -290,7 +290,7 @@
 </parameter>
 <!-- True if the bleed tests should be run use_bleeding-->
 <parameter name="diag_bleed_test"  type="bool">
-    <value val="True"/>
+    <value val="False"/>
 </parameter>
 
 <!-- **************************************** DIAGNOSTICS DEFAILTS END ****************************************    -->
