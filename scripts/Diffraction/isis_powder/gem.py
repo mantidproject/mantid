@@ -88,3 +88,15 @@ class Gem(AbstractInst):
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
                                                  spline_coefficient=self._inst_settings.spline_coeff)
+
+
+def _gem_generate_inst_name(run_number):
+    if isinstance(run_number, list):
+        # Use recursion on lists
+        updated_list = []
+        for run in run_number:
+            updated_list.append(_gem_generate_inst_name(run))
+        return updated_list
+    else:
+        # Individual entry
+        return "GEM" + str(run_number)

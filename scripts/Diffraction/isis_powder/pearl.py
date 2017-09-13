@@ -141,4 +141,3 @@ class Pearl(AbstractInst):
     def _switch_long_mode_inst_settings(self, long_mode_on):
         self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on),
                                               suppress_warnings=True)
-
