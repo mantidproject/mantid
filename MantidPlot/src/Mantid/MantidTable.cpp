@@ -434,9 +434,9 @@ void MantidTable::sortColumns(const QStringList &s, int type, int order,
  * @param plotType :: the plot type to set the selected columns to.
  */
 void MantidTable::setPlotTypeForSelectedColumns(int plotType) {
-  const QStringList list = selectedColumns();
-  for (int i = 0; i < static_cast<int>(list.count()); i++) {
-    const int col = colIndex(list[i]);
+  const auto list = selectedColumns();
+  for (const auto &name : list) {
+    const auto col = colIndex(name);
     const auto column = m_ws->getColumn(col);
     column->setPlotType(plotType);
   }
