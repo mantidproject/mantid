@@ -23,6 +23,7 @@ New
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` performs concatenation of the workspaces into a single one by handling the sample logs merging as in :ref:`MergeRuns <algm-MergeRuns>`.
 - :ref:`LoadSESANS <algm-LoadSESANS>` Loading SESANS data to a MatrixWorkspace is now supported.
 - :ref:`SaveSESANS <algm-SaveSESANS>` Saving a workspace using the SESANS format is now supported.  
+- :ref:`algm-IntegrateEPP` integrates a workspace around the elastic peak positions given in an EPP table.
 
 Improved
 
