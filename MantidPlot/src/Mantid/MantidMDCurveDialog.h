@@ -3,7 +3,7 @@
 
 #include <QtGui/QWidget>
 #include "ui_MantidMDCurveDialog.h"
-#include "MantidQtSliceViewer/LinePlotOptions.h"
+#include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 
 /** Dialog asking the user for some options on how to plot a MDWorkspace
  * before plotting

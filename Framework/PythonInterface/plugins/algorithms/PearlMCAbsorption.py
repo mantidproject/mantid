@@ -78,5 +78,6 @@ class PearlMCAbsorption(PythonAlgorithm):
 
         return input_ws
 
+
 #############################################################################################
 AlgorithmFactory.subscribe(PearlMCAbsorption)

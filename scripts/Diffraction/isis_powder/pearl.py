@@ -77,14 +77,10 @@ class Pearl(AbstractInst):
         normalised_ws = pearl_algs.normalise_ws_current(ws_to_correct=ws_to_correct, monitor_ws=monitor_ws,
                                                         spline_coeff=self._inst_settings.monitor_spline,
                                                         integration_range=self._inst_settings.monitor_integration_range,
-                                                        lambda_values=self._inst_settings.monitor_lambda)
+                                                        lambda_values=self._inst_settings.monitor_lambda,
+                                                        ex_regions=self._inst_settings.monitor_mask_regions)
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
-
-    def _generate_auto_vanadium_calibration(self, run_details):
-        # The instrument scientists prefer everything to be explicit on this instrument so
-        # instead we don't try to run this automatically
-        raise NotImplementedError("You must run the create_vanadium method manually on Pearl")
 
     def _get_current_tt_mode(self):
         return self._inst_settings.tt_mode

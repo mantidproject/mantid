@@ -2,6 +2,7 @@
 """
     Script used to start the DGS reduction GUI from MantidPlot
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 
 from reduction_application import ReductionGUI
@@ -18,10 +19,10 @@ if reducer.setup_layout(load_last=True):
         # Load configuration
         reducer.open_file(autopath)
     except IOError as e:
-        print "[Error] Unable to load previously reduction setup from file %s.\nReason: %s." % (
-            autopath, str(e))
+        print("[Error] Unable to load previously reduction setup from file %s.\nReason: %s." % (
+            autopath, str(e)))
     else:
-        print "[Info] Load earlier reduction setup from auto-saved %s." % (autopath)
+        print("[Info] Load earlier reduction setup from auto-saved %s." % (autopath))
 
     # Show GUI
     reducer.show()

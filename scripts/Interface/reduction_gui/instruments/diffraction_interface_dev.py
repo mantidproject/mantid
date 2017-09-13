@@ -1,5 +1,5 @@
-from interface import InstrumentInterface
-
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.diffraction.diffraction_run_setup import RunSetupWidget
 from reduction_gui.widgets.diffraction.diffraction_adv_setup import AdvancedSetupWidget
 from reduction_gui.widgets.diffraction.diffraction_filter_setup import FilterSetupWidget

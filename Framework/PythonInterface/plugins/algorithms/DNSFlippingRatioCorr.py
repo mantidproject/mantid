@@ -236,5 +236,6 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
 
         return
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(DNSFlippingRatioCorr)

@@ -11,7 +11,6 @@ set ( TEST_PY_FILES
   DetectorFloodWeightingTest.py
   EnergyWindowScanTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
-  ILLIN16BCalibrationTest.py
   IndirectAnnulusAbsorptionTest.py
   IndirectAnnulusAbsorption2Test.py
   IndirectCalibrationTest.py
@@ -21,7 +20,6 @@ set ( TEST_PY_FILES
   IndirectFlatPlateAbsorptionTest.py
   IndirectFlatPlateAbsorption2Test.py
   IndirectILLEnergyTransferTest.py
-  IndirectILLReductionTest.py
   IndirectILLReductionFWSTest.py
   IndirectILLReductionQENSTest.py
   IndirectResolutionTest.py
@@ -31,6 +29,7 @@ set ( TEST_PY_FILES
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
+  MDNormSCDPreprocessIncoherentTest.py
   MolDynTest.py
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py

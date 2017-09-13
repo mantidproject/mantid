@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import os
 
 import mantid.simpleapi as mantidsimple
@@ -76,7 +77,7 @@ class ProjectManager(object):
         # create workspace directory
         self.create_workspace_directory()
 
-        print '[INFO] Saving {0} MDEventWorkspaces to {1}.'.format(len(self._wsList), self._wsDir)
+        print('[INFO] Saving {0} MDEventWorkspaces to {1}.'.format(len(self._wsList), self._wsDir))
 
         # save MDs
         for ws_name in self._wsList:
@@ -85,9 +86,9 @@ class ProjectManager(object):
                 try:
                     mantidsimple.SaveMD(InputWorkspace=ws_name, Filename=md_file_name)
                 except RuntimeError as run_err:
-                    print '[ERROR] Unable to save {0} due to RuntimeError {1}.'.format(ws_name, run_err)
+                    print('[ERROR] Unable to save {0} due to RuntimeError {1}.'.format(ws_name, run_err))
                 except Exception as arb_err:
-                    print '[ERROR] Unable to save {0} due to arbitrary exception {1}.'.format(ws_name, arb_err)
+                    print('[ERROR] Unable to save {0} due to arbitrary exception {1}.'.format(ws_name, arb_err))
             # END-IF
         # END-FOR (ws_name)
 
@@ -113,11 +114,11 @@ class ProjectManager(object):
             try:
                 mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=ws_name)
             except RuntimeError as run_err:
-                print '[DB] Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err)
+                print('[DB] Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err))
             except OSError as run_err:
-                print '[DB] Unable to load file {0} due to OSError {1}.'.format(md_file_path, run_err)
+                print('[DB] Unable to load file {0} due to OSError {1}.'.format(md_file_path, run_err))
             except IOError as run_err:
-                print '[DB] Unable to load file {0} due to IOError {1}.'.format(md_file_path, run_err)
+                print('[DB] Unable to load file {0} due to IOError {1}.'.format(md_file_path, run_err))
         # END-FOR
 
         return
