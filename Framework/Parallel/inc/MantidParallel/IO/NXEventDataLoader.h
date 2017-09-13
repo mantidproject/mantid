@@ -41,7 +41,7 @@ class MANTID_PARALLEL_DLL NXEventDataLoader {
 public:
   NXEventDataLoader(const H5::H5File &file, const std::string &nxEventDataPath);
 
-  const std::vector<int32_t> &eventIndex() const;
+  const std::vector<int64_t> &eventIndex() const;
   const std::vector<TimeZeroType> &eventTimeZero() const;
   void readEventID(int32_t *event_id, size_t start, size_t count) const;
   void readEventTimeOffset(TimeOffsetType *event_time_offset, size_t start,
@@ -52,7 +52,7 @@ private:
   const std::string m_rootPath;
   const std::string m_id_path;
   const std::string m_time_offset_path;
-  std::vector<int32_t> m_index;
+  std::vector<int64_t> m_index;
   std::vector<TimeZeroType> m_time_zero;
 };
 
@@ -98,14 +98,14 @@ NXEventDataLoader<TimeZeroType, TimeOffsetType>::NXEventDataLoader(
     : m_file(file), m_rootPath(nxEventDataPath),
       m_id_path(m_rootPath + "/event_id"),
       m_time_offset_path(m_rootPath + "/event_time_offset") {
-  m_index = detail::read<int32_t>(file, m_rootPath + "/event_index");
+  m_index = detail::read<int64_t>(file, m_rootPath + "/event_index");
   m_time_zero =
       detail::read<TimeZeroType>(file, m_rootPath + "/event_time_zero");
 }
 
 /// Returns a reference to the vector read from event_index.
 template <class TimeZeroType, class TimeOffsetType>
-const std::vector<int32_t> &
+const std::vector<int64_t> &
 NXEventDataLoader<TimeZeroType, TimeOffsetType>::eventIndex() const {
   return m_index;
 }
