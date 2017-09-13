@@ -46,7 +46,7 @@ private:
   std::list<API::MatrixWorkspace_sptr> m_workspaceList;
 
   size_t m_numHistograms;
-  size_t m_numBins;
+  size_t m_numPoints;
 
   double m_startScatteringAngle;
   double m_endScatteringAngle;

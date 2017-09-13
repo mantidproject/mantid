@@ -81,9 +81,8 @@ std::map<std::string, std::string> BinDetectorScan::validateInputs() {
 void BinDetectorScan::exec() {
   getInputParameters();
 
-  HistogramData::BinEdges x(
-      m_numBins + 1,
-      LinearGenerator(m_startScatteringAngle, m_stepScatteringAngle));
+  HistogramData::Points x(m_numPoints, LinearGenerator(m_startScatteringAngle,
+                                                       m_stepScatteringAngle));
 
   MatrixWorkspace_sptr outputWS = create<Workspace2D>(m_numHistograms, x);
 
@@ -125,12 +124,7 @@ void BinDetectorScan::exec() {
                                double(thetaIndex) * m_stepScatteringAngle
                         << "\n";
       }
-      //      g_log.error() << yIndex << "--" << y << "--" <<
-      //      m_heightAxis.size()
-      //                    << std::endl;
-      g_log.error() << thetaIndex << "--" << theta << "--" << m_numBins
-                    << std::endl;
-      if (yIndex >= m_numHistograms || thetaIndex >= m_numBins)
+      if (yIndex >= m_numHistograms || thetaIndex >= m_numPoints)
         continue;
       auto counts = ws->histogram(i).y()[0];
       auto &yData = outputWS->mutableY(yIndex);
@@ -171,8 +165,6 @@ void BinDetectorScan::getScatteringAngleBinning() {
   std::vector<double> scatteringBinning = getProperty("ScatteringAngleBinning");
   if (scatteringBinning.size() == 1) {
     m_stepScatteringAngle = scatteringBinning[0];
-    m_startScatteringAngle -= m_stepScatteringAngle / 2;
-    m_endScatteringAngle += m_stepScatteringAngle / 2;
   } else if (scatteringBinning.size() == 3) {
     if (scatteringBinning[0] > m_startScatteringAngle ||
         scatteringBinning[2] < m_endScatteringAngle)
@@ -182,9 +174,10 @@ void BinDetectorScan::getScatteringAngleBinning() {
     m_endScatteringAngle = scatteringBinning[2];
   }
 
-  m_numBins = int(ceil((m_endScatteringAngle - m_startScatteringAngle) /
-                       m_stepScatteringAngle));
-  g_log.information() << "Number of bins in output workspace:" << m_numBins
+  m_numPoints = int(ceil((m_endScatteringAngle - m_startScatteringAngle) /
+                         m_stepScatteringAngle)) +
+                1;
+  g_log.information() << "Number of bins in output workspace:" << m_numPoints
                       << std::endl;
   g_log.information() << "Scattering angle binning:" << m_startScatteringAngle
                       << ", " << m_stepScatteringAngle << ", "
@@ -194,9 +187,14 @@ void BinDetectorScan::getScatteringAngleBinning() {
 void BinDetectorScan::getHeightAxis() {
   std::string componentName = getProperty("ComponentForHeightAxis");
   if (componentName.length() > 0) {
+    // Try to get the component. It should be a tube with pixels in the
+    // y-direction, the height bins are then taken as the detector positions.
     const auto &ws = m_workspaceList.front();
     const auto &inst = ws->getInstrument()->baseInstrument();
-    const auto &comp = inst->getComponentByName(componentName);
+    const auto comp = inst->getComponentByName(componentName);
+    if (!comp)
+      throw std::runtime_error("Component " + componentName +
+                               " could not be found.");
     const auto &compAss = dynamic_cast<const ICompAssembly &>(*comp);
     std::vector<IComponent_const_sptr> children;
     compAss.getChildren(children, false);
@@ -205,11 +203,13 @@ void BinDetectorScan::getHeightAxis() {
   } else {
     std::vector<double> heightBinning = getProperty("HeightBinning");
     if (heightBinning.size() != 3)
-      std::runtime_error(
-          "Height binning must have start, step and end values.");
-    for (size_t i = 0; i < heightBinning[2]; i++)
-      m_heightAxis.push_back(heightBinning[0] +
-                             heightBinning[1] * (double(i) + 0.5));
+      throw std::runtime_error(
+          "Currently height binning must have start, step and end values.");
+    double height = heightBinning[0];
+    while (height < heightBinning[2]) {
+      m_heightAxis.push_back(height);
+      height += heightBinning[1];
+    }
   }
 
   m_numHistograms = m_heightAxis.size();
