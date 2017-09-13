@@ -620,7 +620,7 @@ void InstrumentDefinitionParser::saveDOM_Tree(std::string &outFilename) {
 double InstrumentDefinitionParser::attrToDouble(const Poco::XML::Element *pElem,
                                                 const std::string &name) {
   if (pElem->hasAttribute(name)) {
-    const std::string value = pElem->getAttribute(name);
+    const std::string &value = pElem->getAttribute(name);
     if (!value.empty()) {
       try {
         return std::stod(value);
@@ -1282,7 +1282,7 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(
     std::stringstream ss1, ss2;
     ss1 << idList.vec.size();
     ss2 << idList.counted;
-    if (idList.idname == "") {
+    if (idList.idname.empty()) {
       g_log.error("No list of detector IDs found for location element " + name);
       throw Kernel::Exception::InstrumentDefinitionError(
           "Detector location element " + name + " has no idlist.", filename);

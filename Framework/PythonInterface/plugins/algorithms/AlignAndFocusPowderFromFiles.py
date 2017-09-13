@@ -26,6 +26,15 @@ PROPS_FOR_PD_CHARACTER = ['FrequencyLogNames', 'WaveLengthLogNames']
 
 
 def determineChunking(filename, chunkSize):
+    # chunkSize=0 signifies that the user wants to read the whole file
+    if chunkSize == 0.:
+        return [{}]
+
+    # "small" files just get read in
+    sizeGiB = os.path.getsize(filename)/1024./1024./1024.
+    if 6.*sizeGiB < chunkSize:
+        return [{}]
+
     chunks = DetermineChunking(Filename=filename, MaxChunkSize=chunkSize, OutputWorkspace='chunks')
 
     strategy = []
@@ -128,28 +137,38 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             if key not in self.kwargs:
                 self.kwargs[key] = instr + ext
 
-    def __determineCharacterizations(self, filename, wkspname):
-        tempname = '__%s_temp' % wkspname
-        Load(Filename=filename, OutputWorkspace=tempname,
-             MetaDataOnly=True)
+    def __determineCharacterizations(self, filename, wkspname, loadFile):
+        useCharac = bool(self.charac is not None)
+
+        # input workspace is only needed to find a row in the characterizations table
+        tempname = None
+        if loadFile:
+            if useCharac:
+                tempname = '__%s_temp' % wkspname
+                Load(Filename=filename, OutputWorkspace=tempname,
+                     MetaDataOnly=True)
+        else:
+            tempname = wkspname # assume it is already loaded
 
         # put together argument list
-        args = dict(InputWorkspace=tempname,
-                    ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
+        args = dict(ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
         for name in PROPS_FOR_PD_CHARACTER:
             prop = self.getProperty(name)
             if not prop.isDefault:
                 args[name] = prop.value
-        if self.charac is not None:
+        if tempname is not None:
+            args['InputWorkspace']=tempname
+        if useCharac:
             args['Characterizations'] = self.charac
 
         PDDetermineCharacterizations(**args)
-        DeleteWorkspace(Workspace=tempname)
+
+        if loadFile and useCharac:
+            DeleteWorkspace(Workspace=tempname)
 
     def __getCacheName(self, wkspname):
         cachedir = self.getProperty('CacheDir').value
         if len(cachedir) <= 0:
-            self.log().warning('CacheDir is not specified - functionality disabled')
             return None
 
         propman_properties = ['bank', 'd_min', 'd_max', 'tof_min', 'tof_max', 'wavelength_min', 'wavelength_max']
@@ -166,7 +185,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                                    OtherProperties=alignandfocusargs,
                                    CacheDir=cachedir).OutputFilename
 
-    def __processFile(self, filename, wkspname, file_prog_start):
+    def __processFile(self, filename, wkspname, file_prog_start, determineCharacterizations):
         chunks = determineChunking(filename, self.chunkSize)
         self.log().information('Processing \'%s\' in %d chunks' % (filename, len(chunks)))
         prog_per_chunk_step = self.prog_per_file * 1./(6.*float(len(chunks))) # for better progress reporting - 6 steps per chunk
@@ -178,6 +197,10 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             Load(Filename=filename, OutputWorkspace=chunkname,
                  startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step,
                  **chunk)
+            if determineCharacterizations:
+                self.__determineCharacterizations(filename, chunkname, False) # updates instance variable
+                determineCharacterizations = False
+
             prog_start += prog_per_chunk_step
             if self.filterBadPulses > 0.:
                 FilterBadPulses(InputWorkspace=chunkname, OutputWorkspace=chunkname,
@@ -219,6 +242,10 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         self.absorption = self.getProperty('AbsorptionWorkspace').value
         self.charac = self.getProperty('Characterizations').value
         finalname = self.getProperty('OutputWorkspace').valueAsStr
+        useCaching = len(self.getProperty('CacheDir').value) > 0
+
+        if not useCaching:
+            self.log().warning('CacheDir is not specified - functionality disabled')
 
         self.prog_per_file = 1./float(len(filenames)) # for better progress reporting
 
@@ -229,12 +256,17 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         for (i, filename) in enumerate(filenames):
             # default name is based off of filename
             wkspname = os.path.split(filename)[-1].split('.')[0]
-            self.__determineCharacterizations(filename,
-                                              wkspname) # updates instance variable
-            cachefile = self.__getCacheName(wkspname)
+
+            if useCaching:
+                self.__determineCharacterizations(filename,
+                                                  wkspname, True) # updates instance variable
+                cachefile = self.__getCacheName(wkspname)
+            else:
+                cachefile = None
+
             wkspname += '_f%d' % i # add file number to be unique
 
-            if cachefile is not None and os.path.exists(cachefile):
+            if useCaching and os.path.exists(cachefile):
                 LoadNexusProcessed(Filename=cachefile, OutputWorkspace=wkspname)
                 # TODO LoadNexusProcessed has a bug. When it finds the
                 # instrument name without xml it reads in from an IDF
@@ -247,8 +279,9 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 if editinstrargs:
                     EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
             else:
-                self.__processFile(filename, wkspname, self.prog_per_file*float(i))
-                if cachefile is not None:
+                self.__processFile(filename, wkspname, self.prog_per_file*float(i), not useCaching)
+
+                if useCaching:
                     SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
 
             # accumulate runs
@@ -268,6 +301,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         # set the output workspace
         self.setProperty('OutputWorkspace', mtd[finalname])
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(AlignAndFocusPowderFromFiles)

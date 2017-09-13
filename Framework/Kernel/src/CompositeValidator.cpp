@@ -74,7 +74,7 @@ std::string CompositeValidator::check(const boost::any &value) const {
     std::string error = (*itr)->check(value);
     // exit on the first error, to avoid passing doing more tests on invalid
     // objects that could fail
-    if (error != "")
+    if (!error.empty())
       return error;
   }
   // there were no errors

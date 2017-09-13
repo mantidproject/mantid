@@ -22,7 +22,9 @@ This workflow makes use of :ref:`ConvertToMD <algm-ConvertToMD>` and
 :ref:`MDNormSCD <algm-MDNormSCD>` so these should be reviewed to
 better understand all the options. An example of creating the Solid
 Angle and Flux workspaces are included in :ref:`MDNormSCD
-<algm-MDNormSCD>`.
+<algm-MDNormSCD>`. :ref:`MDNormSCDPreprocessIncoherent
+<algm-MDNormSCDPreprocessIncoherent>` can be used to process Vanadium
+data for the Solid Angle and Flux workspaces.
 
 The resulting workspaces can be saved and loaded with :ref:`SaveMD
 <algm-SaveMD>` and :ref:`LoadMD <algm-LoadMD>` respectively.

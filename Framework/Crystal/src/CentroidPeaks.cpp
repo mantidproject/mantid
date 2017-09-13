@@ -5,6 +5,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include <boost/algorithm/clamp.hpp>
 
 using Mantid::DataObjects::PeaksWorkspace;
 
@@ -106,6 +108,8 @@ void CentroidPeaks::integrate() {
     const auto &X = inWS->x(workspaceIndex);
     int chan = Kernel::VectorHelper::getBinIndex(X.rawData(), TOFPeakd);
     std::string bankName = peak.getBankName();
+    int nCols = 0, nRows = 0;
+    sizeBanks(bankName, nCols, nRows);
 
     double intensity = 0.0;
     double chancentroid = 0.0;
@@ -114,10 +118,10 @@ void CentroidPeaks::integrate() {
     int chanend = std::min(static_cast<int>(X.size()), chan + PeakRadius);
     double rowcentroid = 0.0;
     int rowstart = std::max(0, row - PeakRadius);
-    int rowend = row + PeakRadius;
+    int rowend = std::min(nRows - 1, row + PeakRadius);
     double colcentroid = 0.0;
-    int colstart = col - PeakRadius;
-    int colend = col + PeakRadius;
+    int colstart = std::max(0, col - PeakRadius);
+    int colend = std::min(nCols - 1, col + PeakRadius);
     for (int ichan = chanstart; ichan <= chanend; ++ichan) {
       for (int irow = rowstart; irow <= rowend; ++irow) {
         for (int icol = colstart; icol <= colend; ++icol) {
@@ -140,16 +144,15 @@ void CentroidPeaks::integrate() {
     }
     // Set pixelID to change row and col
     row = int(rowcentroid / intensity);
-    row = std::max(0, row);
+    boost::algorithm::clamp(row, 0, nRows - 1);
     col = int(colcentroid / intensity);
-    col = std::max(0, col);
+    boost::algorithm::clamp(col, 0, nCols - 1);
     chan = int(chancentroid / intensity);
-    chan = std::max(0, chan);
-    chan = std::min(static_cast<int>(inWS->blocksize()), chan);
+    boost::algorithm::clamp(chan, 0, static_cast<int>(inWS->blocksize()));
 
-    peak.setDetectorID(findPixelID(bankName, col, row));
     // Set wavelength to change tof for peak object
     if (!edgePixel(inst, bankName, col, row, Edge)) {
+      peak.setDetectorID(findPixelID(bankName, col, row));
       it = wi_to_detid_map.find(findPixelID(bankName, col, row));
       workspaceIndex = (it->second);
       Mantid::Kernel::Units::Wavelength wl;
@@ -168,18 +171,7 @@ void CentroidPeaks::integrate() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  for (int i = int(peakWS->getNumberPeaks()) - 1; i >= 0; --i) {
-    // Get a direct ref to that peak.
-    auto &peak = peakWS->getPeak(i);
-    int col = peak.getCol();
-    int row = peak.getRow();
-    std::string bankName = peak.getBankName();
-
-    if (edgePixel(inst, bankName, col, row, Edge)) {
-      peakWS->removePeak(i);
-    }
-  }
+  removeEdgePeaks(*peakWS);
 
   // Save the output
   setProperty("OutPeaksWorkspace", peakWS);
@@ -235,6 +227,8 @@ void CentroidPeaks::integrateEvent() {
     int row = peak.getRow();
     double TOFPeakd = peak.getTOF();
     std::string bankName = peak.getBankName();
+    int nCols = 0, nRows = 0;
+    sizeBanks(bankName, nCols, nRows);
 
     double intensity = 0.0;
     double tofcentroid = 0.0;
@@ -245,10 +239,10 @@ void CentroidPeaks::integrateEvent() {
     double tofend = TOFPeakd * std::pow(1.004, PeakRadius);
     double rowcentroid = 0.0;
     int rowstart = std::max(0, row - PeakRadius);
-    int rowend = row + PeakRadius;
+    int rowend = std::min(nRows - 1, row + PeakRadius);
     double colcentroid = 0.0;
     int colstart = std::max(0, col - PeakRadius);
-    int colend = col + PeakRadius;
+    int colend = std::min(nCols - 1, col + PeakRadius);
     for (int irow = rowstart; irow <= rowend; ++irow) {
       for (int icol = colstart; icol <= colend; ++icol) {
         if (edgePixel(inst, bankName, icol, irow, Edge))
@@ -274,9 +268,9 @@ void CentroidPeaks::integrateEvent() {
     }
     // Set pixelID to change row and col
     row = int(rowcentroid / intensity);
-    row = std::max(0, row);
+    boost::algorithm::clamp(row, 0, nRows - 1);
     col = int(colcentroid / intensity);
-    col = std::max(0, col);
+    boost::algorithm::clamp(col, 0, nCols - 1);
     if (!edgePixel(inst, bankName, col, row, Edge)) {
       peak.setDetectorID(findPixelID(bankName, col, row));
 
@@ -298,18 +292,8 @@ void CentroidPeaks::integrateEvent() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+  removeEdgePeaks(*peakWS);
 
-  for (int i = int(peakWS->getNumberPeaks()) - 1; i >= 0; --i) {
-    // Get a direct ref to that peak.
-    auto &peak = peakWS->getPeak(i);
-    int col = peak.getCol();
-    int row = peak.getRow();
-    std::string bankName = peak.getBankName();
-
-    if (edgePixel(inst, bankName, col, row, Edge)) {
-      peakWS->removePeak(i);
-    }
-  }
   // Save the output
   setProperty("OutPeaksWorkspace", peakWS);
 }
@@ -354,6 +338,53 @@ int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
     boost::shared_ptr<const Detector> pixel =
         boost::dynamic_pointer_cast<const Detector>(component);
     return pixel->getID();
+  }
+}
+
+void CentroidPeaks::removeEdgePeaks(
+    Mantid::DataObjects::PeaksWorkspace &peakWS) {
+  int Edge = getProperty("EdgePixels");
+  std::vector<int> badPeaks;
+  size_t numPeaks = peakWS.getNumberPeaks();
+  for (int i = 0; i < static_cast<int>(numPeaks); i++) {
+    // Get a direct ref to that peak.
+    const auto &peak = peakWS.getPeak(i);
+    int col = peak.getCol();
+    int row = peak.getRow();
+    const std::string &bankName = peak.getBankName();
+
+    if (edgePixel(inst, bankName, col, row, Edge)) {
+      badPeaks.push_back(i);
+    }
+  }
+  peakWS.removePeaks(std::move(badPeaks));
+}
+
+void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols,
+                              int &nRows) {
+  if (bankName == "None")
+    return;
+  ExperimentInfo expInfo;
+  expInfo.setInstrument(inst);
+  const auto &compInfo = expInfo.componentInfo();
+
+  // Get a single bank
+  auto bank = inst->getComponentByName(bankName);
+  auto bankID = bank->getComponentID();
+  auto allBankDetectorIndexes =
+      compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
+
+  nRows = static_cast<int>(
+      compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() -
+      allBankDetectorIndexes.size() - 1);
+  nCols = static_cast<int>(allBankDetectorIndexes.size()) / nRows;
+
+  if (nCols * nRows != static_cast<int>(allBankDetectorIndexes.size())) {
+    // Need grandchild instead of child
+    nRows = static_cast<int>(
+        compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() -
+        allBankDetectorIndexes.size() - 2);
+    nCols = static_cast<int>(allBankDetectorIndexes.size()) / nRows;
   }
 }
 

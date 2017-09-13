@@ -4,6 +4,7 @@
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
+from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
@@ -198,7 +199,7 @@ class AdvancedSetupScript(BaseScriptElement):
                                                    AdvancedSetupScript.filterbadpulses)
 
             self.bkgdsmoothpars = BaseScriptElement.getStringElement(instrument_dom,
-                                                                     "bkgdsmoothpars", default=AdvancedSetupScript.bkgdsmoothpars)
+                                                                     "backgroundsmoothparams", default=AdvancedSetupScript.bkgdsmoothpars)
 
             self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,
                                                                        "pushdatapositive", default=AdvancedSetupScript.pushdatapositive)
