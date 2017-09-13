@@ -272,20 +272,11 @@
          </sizepolicy>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="pgAbsCorFlatPlate">
          <layout class="QGridLayout" name="loFlatPlate">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item row="1" column="3">
@@ -418,16 +409,7 @@
         </widget>
         <widget class="QWidget" name="pgAbsCorAnnulus">
          <layout class="QGridLayout" name="loAnnulus">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item row="1" column="0">
@@ -546,20 +528,11 @@
         </widget>
         <widget class="QWidget" name="pgAbsCorCylinder">
          <layout class="QGridLayout" name="loCylinder">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item row="0" column="3">
-           <widget class="QDoubleSpinBox" name="spCylCanRadius">
+           <widget class="QDoubleSpinBox" name="spCylCanInnerRadius">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -588,12 +561,12 @@
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QLabel" name="lbCylCanRadius">
+           <widget class="QLabel" name="lbCylCanInnerRadius">
             <property name="enabled">
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Container Radius:</string>
+             <string>Container Inner Radius:</string>
             </property>
            </widget>
           </item>
@@ -621,6 +594,26 @@
            <widget class="QLabel" name="lbCylSampleHeight">
             <property name="text">
              <string>Sample Height:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="lbCylCanOuterRadius">
+            <property name="text">
+             <string>Container Outer Radius</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -901,7 +894,7 @@
   <tabstop>spAnnCanInnerRadius</tabstop>
   <tabstop>spAnnCanOuterRadius</tabstop>
   <tabstop>spCylSampleRadius</tabstop>
-  <tabstop>spCylCanRadius</tabstop>
+  <tabstop>spCylCanInnerRadius</tabstop>
   <tabstop>spSampleDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
   <tabstop>ckUseCanCorrections</tabstop>
@@ -1176,7 +1169,7 @@
   <connection>
    <sender>ckUseCan</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lbCylCanRadius</receiver>
+   <receiver>lbCylCanInnerRadius</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1192,7 +1185,7 @@
   <connection>
    <sender>ckUseCan</sender>
    <signal>toggled(bool)</signal>
-   <receiver>spCylCanRadius</receiver>
+   <receiver>spCylCanInnerRadius</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
