@@ -19,7 +19,7 @@
 <!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
      if None - one2one map is used  -->
 <parameter name="map_file" type="string">
-   <value val="one2one_172.map"/>
+   <value val="None"/>
 </parameter>
 
 <!-- Preferred extension of the data files obtained from DAE, e.g. what to prefer if two 
