@@ -37,6 +37,7 @@ bool isDifferenceLargerThanTolerance(const double angle1, const double angle2,
 }
 
 using namespace boost;
+using Mantid::Kernel::UnitFactory;
 
 namespace Mantid {
 namespace Crystal {
@@ -268,11 +269,7 @@ PeakFindingStrategy::PeakFindingStrategy(
     const API::SpectrumInfo &spectrumInfo, const double minValue,
     const double maxValue, const bool tofUnits)
     : m_backgroundStrategy(backgroundStrategy), m_minValue(minValue),
-      m_maxValue(maxValue), m_spectrumInfo(spectrumInfo), m_unit(nullptr) {
-
-  if (!tofUnits) {
-    m_unit = Kernel::UnitFactory::Instance().create("dSpacing");
-  }
+      m_maxValue(maxValue), m_spectrumInfo(spectrumInfo), m_tofUnits(tofUnits) {
 }
 
 PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x,
@@ -358,14 +355,15 @@ double PeakFindingStrategy::getXValue(const HistogramData::HistogramX &x,
 
 double PeakFindingStrategy::convertToTOF(const double xValue,
                                          const size_t workspaceIndex) const {
-  if (!m_unit) {
-    // check if we're already using TOF
+  if (m_tofUnits) {
+    // we're already using TOF units
     return xValue;
   } else {
-    // else if we're using d-spacing, convert the point to TOF
-    m_unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex),
-                       m_spectrumInfo.twoTheta(workspaceIndex), 0, 0, 0);
-    return m_unit->singleToTOF(xValue);
+    const auto unit = UnitFactory::Instance().create("dSpacing");
+    // we're using d-spacing, convert the point to TOF
+    unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex),
+                     m_spectrumInfo.twoTheta(workspaceIndex), 0, 0, 0);
+    return unit->singleToTOF(xValue);
   }
 }
 

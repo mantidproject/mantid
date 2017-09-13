@@ -171,7 +171,7 @@ protected:
   const double m_minValue = EMPTY_DBL();
   const double m_maxValue = EMPTY_DBL();
   const API::SpectrumInfo &m_spectrumInfo;
-  boost::shared_ptr<Mantid::Kernel::Unit> m_unit;
+  const bool m_tofUnits;
 };
 
 class DLLExport StrongestPeaksStrategy : public PeakFindingStrategy {
