@@ -14,7 +14,7 @@ Algorithms
   - summation in Q was giving incorrect results for a point detector
 - A new property, ``Diagnostics``, has been added to :ref:`algm-ReflectometryReductionOne` to allow the output of additional interim workspaces for debug purposes.
 - The following changes have been made to :ref:`algm-CalculateResolution`:
-  - Some errors in the resolution calculation have been fixed.
+  - Some errors in the resolution calculation have been fixed. Note that this affects the Q binning in the results of :ref:`algm-ReflectometryReductionOneAuto` (versions 1 and 2) and :ref:`ReflectometryReductionOne` (version 1 only).
   - The algorithm has been renamed to :ref:`algm-NRCalculateSlitResolution` as this algorithm is specific to neutron reflectometry, and the resolution it calculates is the slit resolution.
   - The ``TwoThetaLogName`` property has been replaced by ``ThetaLogName``. This still takes ``Theta`` as the default log name, which was causing confusion before because it was being used as two theta. Is is now being used as theta, as the new property name suggests.
   - The output property ``TwoThetaOut`` has been removed because it is not useful. The algorithm now returns a single value which is the resolution.

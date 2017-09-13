@@ -36,8 +36,7 @@ Beam Divergence
 
    \therefore \alpha = \arctan{\frac{d1 + d2}{l}}
 
-where :math:`\alpha` gives is the beam divergence in radians. Parameter *d1* is the vertical distance of *Slit1* opening, *d2* is the same for *Slit2*. parameter *l* is the distance between the slits in the beam direction. See figure above for 
-reference.
+where :math:`\alpha` gives is the beam divergence in radians. Parameter *d1* is the vertical distance of *Slit1* opening, *d2* is the same for *Slit2*. parameter *l* is the distance between the slits in the beam direction. See figure above for reference.
 
 .. math::
    resolution = \frac{\alpha}{2 \tan{\theta}}
@@ -54,7 +53,6 @@ Usage
 .. testoutput::
 
   Resolution: 0.0340
-  Two Theta: 0.7000
 
 .. categories::
 
