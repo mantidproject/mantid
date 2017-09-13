@@ -486,7 +486,7 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
     }
   }
 
-  if (scannedVariable.size() == 0)
+  if (scannedVariable.empty())
     throw std::runtime_error(
         "Can not load file because scanned variable with property name " +
         propertyName + " was not found");

@@ -189,7 +189,7 @@ void LoadFullprofResolution::exec() {
   // Generate output table workspace
   API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
 
-  if (getPropertyValue("OutputTableWorkspace") != "") {
+  if (!getPropertyValue("OutputTableWorkspace").empty()) {
     // Output the output table workspace
     setProperty("OutputTableWorkspace", outTabWs);
   }
@@ -225,7 +225,7 @@ void LoadFullprofResolution::exec() {
         loadParamAlg->execute();
       }
     }
-  } else if (getPropertyValue("OutputTableWorkspace") == "") {
+  } else if (getPropertyValue("OutputTableWorkspace").empty()) {
     // We don't know where to output
     throw std::runtime_error(
         "Either the OutputTableWorkspace or Workspace property must be set.");

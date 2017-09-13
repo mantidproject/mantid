@@ -92,7 +92,7 @@ std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
 
   // two detcal files is only valid for snap
   std::vector<std::string> filenames = getFilenames();
-  if (filenames.size() == 0) {
+  if (filenames.empty()) {
     result["Filename"] = "Must supply .detcal file";
   } else if (filenames.size() == 2) {
     Workspace_const_sptr wksp = getProperty("InputWorkspace");

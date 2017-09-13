@@ -38,6 +38,21 @@ Bugfixes
 - Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
 - Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
 
+Elwin
+~~~~~
+
+Bugfixes
+--------
+- Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
+
+ConvFit
+~~~~~~~
+
+Bugfixes
+--------
+- Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
+- Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
+
 Jump Fit
 ~~~~~~~~
 

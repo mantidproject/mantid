@@ -89,9 +89,13 @@ struct EPPTableRow {
 
   /// Construct a row with the default values.
   EPPTableRow() = default;
-  /// Construct a row with errors set to zero.
+  /// Construct a row with default workspace index and errors set to zero.
   EPPTableRow(const double peakCentre, const double sigma, const double height,
               const FitStatus fitStatus);
+  /// Construct a row with errors set to zero.
+  EPPTableRow(const int index, const double peakCentre, const double sigma,
+              const double height, const FitStatus fitStatus);
+  int workspaceIndex = -1;
   double peakCentre = 0;
   double peakCentreError = 0;
   double sigma = 0;

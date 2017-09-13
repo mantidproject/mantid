@@ -57,8 +57,14 @@ MockAlgorithm::MockAlgorithm(size_t nSteps)
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
                          const double height_, const FitStatus fitStatus_)
-    : peakCentre(peakCentre_), peakCentreError(0), sigma(sigma_), sigmaError(0),
-      height(height_), heightError(0), chiSq(0), fitStatus(fitStatus_) {}
+    : peakCentre(peakCentre_), sigma(sigma_), height(height_),
+      fitStatus(fitStatus_) {}
+
+EPPTableRow::EPPTableRow(const int index, const double peakCentre_,
+                         const double sigma_, const double height_,
+                         const FitStatus fitStatus_)
+    : workspaceIndex(index), peakCentre(peakCentre_), sigma(sigma_),
+      height(height_), fitStatus(fitStatus_) {}
 
 /**
  * @param name :: The name of the workspace
@@ -1409,7 +1415,11 @@ createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
   auto statusColumn = ws->addColumn("str", "FitStatus");
   for (size_t i = 0; i != rows.size(); ++i) {
     const auto &row = rows[i];
-    wsIndexColumn->cell<int>(i) = static_cast<int>(i);
+    if (row.workspaceIndex < 0) {
+      wsIndexColumn->cell<int>(i) = static_cast<int>(i);
+    } else {
+      wsIndexColumn->cell<int>(i) = row.workspaceIndex;
+    }
     centreColumn->cell<double>(i) = row.peakCentre;
     centreErrorColumn->cell<double>(i) = row.peakCentreError;
     sigmaColumn->cell<double>(i) = row.sigma;
