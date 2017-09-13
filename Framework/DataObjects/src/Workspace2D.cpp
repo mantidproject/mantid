@@ -142,10 +142,9 @@ size_t Workspace2D::blocksize() const {
   if (data.empty()) {
     return 0;
   } else {
-    size_t numBins = data[0]->size();
-    const auto numHist = this->getNumberHistograms();
-    for (size_t i = 1; i < numHist; ++i)
-      numBins = std::max(numBins, data[i]->size());
+    size_t numBins = 0;
+    for (const auto *iter : data)
+      numBins = std::max(numBins, iter->size());
     return numBins;
   }
 }
