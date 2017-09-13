@@ -46,8 +46,9 @@ public:
               const std::vector<int32_t> &bankOffsets);
   ~EventLoader();
 
-private:
   void load();
+
+private:
   void load(const H5::DataType &timeZeroType,
             const H5::DataType &timeOffsetType);
   template <class TimeZeroType> void load(const H5::DataType &timeOffsetType);

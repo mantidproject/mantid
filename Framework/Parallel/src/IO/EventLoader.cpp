@@ -1,6 +1,7 @@
 #include <H5Cpp.h>
 
 #include "MantidKernel/make_unique.h"
+#include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
 
@@ -45,9 +46,29 @@ void EventLoader::load(const H5::DataType &timeOffsetType) {
 }
 
 template <class TimeZeroType, class TimeOffsetType> void EventLoader::load() {
-  // determine optimal chunk size
-  // make chunks
-  // main load loop
+  // TODO automatically(?) determine good chunk size
+  // TODO automatically(?) determine good number of ranks to use for load
+  const size_t chunkSize = 1024 * 1024;
+  const auto &ranges = Chunker::determineLoadRanges(*m_file, m_groupName,
+                                                    m_bankNames, chunkSize);
+
+  std::vector<int32_t> event_id(2 * chunkSize);
+  std::vector<TimeOffsetType> event_time_offset(2 * chunkSize);
+
+  std::unique_ptr<NXEventDataLoader<TimeZeroType, TimeOffsetType>> loader;
+  size_t previousBank = 0;
+  for (const auto &range : ranges) {
+    if (!loader || range.bankIndex != previousBank) {
+      loader =
+          Kernel::make_unique<NXEventDataLoader<TimeZeroType, TimeOffsetType>>(
+              *m_file, m_groupName + "/" + m_bankNames[range.bankIndex]);
+    }
+    const auto &event_index = loader->eventIndex();
+    const auto &event_time_zero = loader->eventTimeZero();
+    loader->readEventID(event_id.data(), range.eventOffset, range.eventCount);
+    loader->readEventTimeOffset(event_time_offset.data(), range.eventOffset,
+                                range.eventCount);
+  }
 }
 
 H5::DataType EventLoader::readDataType(const std::string &name) const {
