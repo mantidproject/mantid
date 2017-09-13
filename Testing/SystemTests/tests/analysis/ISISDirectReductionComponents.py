@@ -307,6 +307,7 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
     def validate(self):
         return self.valid
 
+
 if __name__=="__main__":
     tester = ISISLoadFilesLET()
     tester.runTest()

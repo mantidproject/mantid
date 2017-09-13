@@ -38,6 +38,21 @@ Bugfixes
 - Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
 - Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
 
+Elwin
+~~~~~
+
+Bugfixes
+--------
+- Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
+
+ConvFit
+~~~~~~~
+
+Bugfixes
+--------
+- Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
+- Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
+
 Jump Fit
 ~~~~~~~~
 
@@ -50,7 +65,7 @@ Improvements
 
 Dropped
 -------
-- :ref:`algm-LoadILLIndirect-v1`, :ref:`algm-IndirectILLReduction`, :ref:`algm-ILLIN16BCalibration` algorithms deprecated since v3.9, are now removed.
+- `LoadILLIndirect-v1 <http://docs.mantidproject.org/v3.10.1/algorithms/LoadILLIndirect-v1.html>`_, `IndirectILLReduction <http://docs.mantidproject.org/v3.10.1/algorithms/IndirectILLReduction-v1.html>`_, `ILLIN16BCalibration <http://docs.mantidproject.org/v3.10.1/algorithms/ILLIN16BCalibration-v1.html>`_ algorithms deprecated since v3.9, are now removed.
 
 
 Bugfixes

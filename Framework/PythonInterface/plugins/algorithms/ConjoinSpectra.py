@@ -117,4 +117,5 @@ class ConjoinSpectra(PythonAlgorithm):
             logger.information("Could not find log " + labelUsing + " in workspace " + str(ws) + " using workspace label instead.")
         return labelString
 
+
 AlgorithmFactory.subscribe(ConjoinSpectra)
