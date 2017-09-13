@@ -634,7 +634,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             mode = self._chooseElasticChannelMode(mainWS, report)
             if mode == common.ELASTIC_CHANNEL_SAMPLE_LOG:
                 if not mainWS.run().hasProperty('Detector.elasticpeak'):
-                    self.log().warning('No ' + common.PROP_ELASTIC_CHANNEL +
+                    self.log().warning('No ' + common.PROP_ELASTIC_CHANNEL_WS +
                                        ' given. TOF axis will not be adjusted.')
                     return mainWS
                 index = mainWS.run().getLogData('Detector.elasticpeak').value
