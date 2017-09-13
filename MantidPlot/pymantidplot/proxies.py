@@ -5,6 +5,7 @@ reference to None, thus ensuring that further attempts at access do not cause a 
 """
 from __future__ import (absolute_import, division,
                         print_function)
+from six.moves import range
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, pyqtSlot
@@ -738,7 +739,7 @@ class SliceViewerWindowProxy(QtProxyObject):
         else:
             liner.setPlanarWidth(planar_width*0.5)
             if not thicknesses is None:
-                for d in xrange(len(thicknesses)):
+                for d in range(len(thicknesses)):
                     liner.setThickness(d, thicknesses[d])
         # Bins
         liner.setNumBins(num_bins)

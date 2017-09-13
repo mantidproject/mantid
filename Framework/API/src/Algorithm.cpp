@@ -1711,7 +1711,7 @@ void Algorithm::execMasterOnly() {
  * non-master ranks in master-only execution. */
 void Algorithm::execNonMaster() {
   // If there is no output we can simply do nothing.
-  if (m_pureOutputWorkspaceProps.size() == 0)
+  if (m_pureOutputWorkspaceProps.empty())
     return;
   // Does Algorithm have exactly one input and one output workspace property?
   if (m_inputWorkspaceProps.size() == 1 &&

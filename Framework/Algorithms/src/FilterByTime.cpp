@@ -77,12 +77,12 @@ void FilterByTime::exec() {
   start_str = getPropertyValue("AbsoluteStartTime");
   stop_str = getPropertyValue("AbsoluteStopTime");
 
-  if ((start_str != "") && (stop_str != "") && (start_dbl <= 0.0) &&
+  if ((!start_str.empty()) && (!stop_str.empty()) && (start_dbl <= 0.0) &&
       (stop_dbl <= 0.0)) {
     // Use the absolute string
     start = DateAndTime(start_str);
     stop = DateAndTime(stop_str);
-  } else if ((start_str == "") && (stop_str == "") &&
+  } else if ((start_str.empty()) && (stop_str.empty()) &&
              ((start_dbl > 0.0) || (stop_dbl > 0.0))) {
     // Use the relative times in seconds.
     DateAndTime first = inputWS->getFirstPulseTime();
