@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/Communicator.cpp
 	src/ExecutionMode.cpp
+	src/IO/Chunker.cpp
 	src/IO/EventLoader.cpp
 	src/Request.cpp
 	src/StorageMode.cpp
@@ -11,6 +12,7 @@ set ( INC_FILES
 	inc/MantidParallel/Collectives.h
 	inc/MantidParallel/Communicator.h
 	inc/MantidParallel/ExecutionMode.h
+	inc/MantidParallel/IO/Chunker.h
 	inc/MantidParallel/IO/EventLoader.h
 	inc/MantidParallel/IO/NXEventDataLoader.h
 	inc/MantidParallel/Request.h
@@ -19,6 +21,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	ChunkerTest.h
 	CollectivesTest.h
 	CommunicatorTest.h
 	EventLoaderTest.h
