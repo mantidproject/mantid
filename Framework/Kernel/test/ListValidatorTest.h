@@ -21,9 +21,9 @@ public:
   }
 
   void testArrayConstructor() {
-	  std::array<int, 3> arr{ 1, 2, 3 };
-	  ListValidator<int> v(arr);
-	  TS_ASSERT_EQUALS(v.allowedValues().size(), 3)
+    std::array<int, 3> arr{1, 2, 3};
+    ListValidator<int> v(arr);
+    TS_ASSERT_EQUALS(v.allowedValues().size(), 3)
   }
 
   void testIsValid() {

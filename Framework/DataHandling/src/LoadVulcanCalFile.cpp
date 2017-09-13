@@ -26,7 +26,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
@@ -130,7 +129,7 @@ void LoadVulcanCalFile::processInOutProperites() {
   } else if (grouptypestr == "1Bank") {
     m_groupingType = VULCAN_OFFSET_STACK;
   } else {
-	  std::stringstream ess;
+    std::stringstream ess;
     ess << "Group type " << grouptypestr << " is not supported. ";
     throw std::runtime_error(ess.str());
   }
@@ -205,7 +204,7 @@ void LoadVulcanCalFile::processInOutProperites() {
   */
 void LoadVulcanCalFile::setupGroupingWorkspace() {
   // Get the right group option for CreateGroupingWorkspace
-	std::string groupdetby;
+  std::string groupdetby;
   switch (m_groupingType) {
   case VULCAN_OFFSET_BANK:
     groupdetby = "bank";
@@ -271,7 +270,7 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
     boost::algorithm::trim(line);
     if (!line.empty()) {
       // Get the bad pixel's detector ID.  One per line
-		std::stringstream liness(line);
+      std::stringstream liness(line);
       try {
         int pixelid;
         liness >> pixelid;
@@ -305,7 +304,7 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
 /** Generate offset workspace
   */
 void LoadVulcanCalFile::generateOffsetsWorkspace() {
-	std::map<detid_t, double> map_detoffset;
+  std::map<detid_t, double> map_detoffset;
 
   // Read offset file
   readOffsetFile(map_detoffset);
@@ -326,9 +325,9 @@ void LoadVulcanCalFile::generateOffsetsWorkspace() {
 void LoadVulcanCalFile::readOffsetFile(
     std::map<detid_t, double> &map_detoffset) {
   // Read file
-	std::ifstream infile(m_offsetFilename.c_str());
+  std::ifstream infile(m_offsetFilename.c_str());
   if (!infile.is_open()) {
-	  std::stringstream errss;
+    std::stringstream errss;
     errss << "Input offset file " << m_offsetFilename << " cannot be opened.";
     throw std::runtime_error(errss.str());
   }
@@ -377,11 +376,11 @@ void LoadVulcanCalFile::processOffsets(
       // Get bank ID from instrument tree
       const auto &det = spectrumInfo.detector(wsindex);
       Geometry::IComponent_const_sptr parent = det.getParent();
-	  std::string pname = parent->getName();
+      std::string pname = parent->getName();
 
-	  std::vector<std::string> terms;
+      std::vector<std::string> terms;
       boost::split(terms, pname, boost::is_any_of("("));
-	  std::vector<std::string> terms2;
+      std::vector<std::string> terms2;
       boost::split(terms2, terms[0], boost::is_any_of("bank"));
       int bank = std::stoi(terms2.back());
       set_bankID.insert(bank);
@@ -532,7 +531,8 @@ void LoadVulcanCalFile::convertOffsets() {
     // Get effective
     mfiter = m_effLTheta.find(bankid);
     if (mfiter == m_effLTheta.end())
-      throw std::runtime_error("Effective DIFC and 2theta information is missed. ");
+      throw std::runtime_error(
+          "Effective DIFC and 2theta information is missed. ");
 
     double effL = mfiter->second.first;
     double effTheta = mfiter->second.second;

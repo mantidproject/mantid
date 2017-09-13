@@ -41,15 +41,15 @@ public:
   StartsWithValidator(const std::vector<std::string> &values);
   StartsWithValidator(const std::set<std::string> &values);
   IValidator_sptr clone() const override;
-  
+
   /**
    * Constructor
    * @param values :: An array with the allowed values
    */
-  template<std::size_t SIZE>
+  template <std::size_t SIZE>
   StartsWithValidator(const std::array<std::string, SIZE> &values)
-    : Kernel::StringListValidator(values) {}
-  
+      : Kernel::StringListValidator(values) {}
+
 protected:
   std::string checkValidity(const std::string &value) const override;
 };

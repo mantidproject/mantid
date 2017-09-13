@@ -79,7 +79,7 @@ public:
    *  @param values :: An array of values containing the valid values
    *  @param allowMultiSelection :: True if the list allows multi selection
    */
-  template<std::size_t SIZE>
+  template <std::size_t SIZE>
   explicit ListValidator(const std::array<TYPE, SIZE> &values,
                          const bool allowMultiSelection = false)
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
