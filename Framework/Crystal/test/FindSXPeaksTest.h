@@ -6,6 +6,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
@@ -254,6 +255,56 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found zero peaks after cropping", 0,
                       result->rowCount());
+  }
+
+  void testSetGoniometer() {
+    // creates a workspace where all y-values are 2
+    Workspace2D_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    // Stick a peak in histoIndex = 1.
+    makeOnePeak(1, 40, 5, workspace);
+
+    // Get baseline for Q of Peak
+    FindSXPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "found_peaks");
+    alg.execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+
+    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
+
+    Mantid::Kernel::V3D qNoRot = result->getPeak(0).getQSampleFrame();
+
+    // Set Goniometer to 180 degrees
+    Mantid::Geometry::Goniometer gonio;
+    gonio.makeUniversalGoniometer();
+    gonio.setRotationAngle(1, 180);
+    workspace->mutableRun().setGoniometer(gonio, false);
+
+    // Find peaks again
+    FindSXPeaks alg2;
+    alg2.initialize();
+    alg2.setProperty("InputWorkspace", workspace);
+    alg2.setProperty("OutputWorkspace", "found_peaks");
+    alg2.execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg2.isExecuted());
+
+    result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
+
+    Mantid::Kernel::V3D qRot = result->getPeak(0).getQSampleFrame();
+
+    // Peak should be rotated by 180 degrees around y in Q compared to baseline
+    // Use ASSERT_DELTA to account for minor error introduced by deg/rad
+    // conversion
+    TSM_ASSERT_DELTA("Q_x should be unchanged!", qNoRot.X(), qRot.X(), 10e-10);
+    TSM_ASSERT_DELTA("Q_y should be inverted!", qNoRot.Y(), qRot.Y() * (-1),
+                     10e-10);
+    TSM_ASSERT_DELTA("Q_z should be unchanged!", qNoRot.Z(), qRot.Z(), 10e-10);
   }
 };
 

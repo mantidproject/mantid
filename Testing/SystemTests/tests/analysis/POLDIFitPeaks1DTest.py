@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 import numpy as np
@@ -78,7 +79,7 @@ class POLDIFitPeaks1DTest(stresstesting.MantidStressTest):
                 position = [positions[i], positionErrors[i]]
                 fwhm = [fwhms[i], fwhmErrors[i]]
 
-                print position, fwhm, referencePositions
+                print(position, fwhm, referencePositions)
 
                 self.assertTrue(self.positionAcceptable(position))
                 self.assertTrue(self.fwhmAcceptable(fwhm))

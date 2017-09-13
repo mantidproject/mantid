@@ -444,5 +444,6 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
 #==============================================================================
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(LoadNMoldyn3Ascii)

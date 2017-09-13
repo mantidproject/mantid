@@ -80,4 +80,5 @@ class MaskAngle(mantid.api.PythonAlgorithm):
             self.log().information("no detectors within this range")
         self.setProperty("MaskedDetectors", numpy.array(detlist))
 
+
 mantid.api.AlgorithmFactory.subscribe(MaskAngle)

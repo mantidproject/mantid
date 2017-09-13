@@ -93,7 +93,7 @@ void pqCameraReactionNonOrthogonalAxes::updateEnableState() {
     this->parentAction()->setEnabled(true);
   } else if (rview) {
     if (this->ReactionMode == ZOOM_TO_DATA) {
-      this->parentAction()->setEnabled(source != 0);
+      this->parentAction()->setEnabled(source != nullptr);
     } else {
       // Check hints to see if actions should be disabled
       bool cameraResetButtonsEnabled = true;
