@@ -119,8 +119,8 @@ std::string CompositeValidator::checkLogicalOr(const boost::any &value) const {
  *
  * Returns empty string if no errors were found.
  *
- * @param whether all the validator succeded
- * @param errors the combined list of errors from the child validators
+ * @param valid :: whether all the validator succeded
+ * @param errors :: the combined list of errors from the child validators
  * @return a user friendly message with all the child validator messages
  * combined.
  */
