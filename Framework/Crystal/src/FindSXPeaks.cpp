@@ -42,7 +42,6 @@ FindSXPeaks::FindSXPeaks()
  *
  */
 void FindSXPeaks::init() {
-  std::vector<std::string> units = {"TOF", "dSpacing"};
   auto wsValidation = boost::make_shared<CompositeValidator>();
   wsValidation->add<HistogramValidator>();
 
