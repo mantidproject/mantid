@@ -71,7 +71,99 @@ Additionally, a string listing the masked and diagnosed detectors can be accesse
 Usage
 -----
 
-**Example - Not implemented**
+**Example - Diagnostics on fake IN4 workspace**
+
+.. testcode:: FakeIN4Example
+
+    import numpy
+    import scipy.stats
+    
+    # Create a fake IN4 workspace.
+    # We need an instrument and a template first.
+    empty_IN4 = LoadEmptyInstrument(InstrumentName='IN4')
+    nHist = empty_IN4.getNumberHistograms()
+    # Make TOF bin edges.
+    xs = numpy.arange(530.0, 2420.0, 4.0)
+    # Make some Gaussian spectra.
+    ys = 1000.0 * scipy.stats.norm.pdf(xs[:-1], loc=970, scale=60)
+    # Repeat data for each histogram.
+    xs = numpy.tile(xs, nHist)
+    ys = numpy.tile(ys, nHist)
+    ws = CreateWorkspace(
+        DataX=xs,
+        DataY=ys,
+        NSpec=nHist,
+        UnitX='TOF',
+        ParentWorkspace=empty_IN4
+    )
+    # Set some histograms to zero to see if the diagnostics can catch them.
+    ys = ws.dataY(13)
+    ys *= 0.0
+    ys = ws.dataY(101)
+    ys *= 0.0
+    
+    # Manually correct monitor spectrum number as LoadEmptyInstrument does
+    # not know about such details.
+    SetInstrumentParameter(
+        Workspace=ws,
+        ParameterName='default-incident-monitor-spectrum',
+        ParameterType='Number',
+        Value=str(1)
+    )
+    # Add incident energy information to sample logs.
+    AddSampleLog(
+        Workspace=ws,
+        LogName='Ei',
+        LogText=str(57),
+        LogType='Number',
+        LogUnit='meV',
+        NumberType='Double'
+    )
+    # Elastic channel information is missing in the sample logs.
+    # It can be given as single valued workspace, as well.
+    elasticChannelWS = CreateSingleValuedWorkspace(107)
+    
+    DirectILLCollectData(
+        InputWorkspace=ws,
+        OutputWorkspace='preprocessed',
+        ElasticChannelWorkspace=elasticChannelWS,
+        IncidentEnergyCalibration='Energy Calibration OFF', # Normally we would do this for IN4.
+        OutputEPPWorkspace='epps' # Needed for the diagnostics.
+    )
+    
+    diagnostics = DirectILLDiagnostics(
+        InputWorkspace='preprocessed',
+        OutputWorkspace='diagnosed',
+        EPPWorkspace='epps',
+        NoisyBkgLowThreshold=0.01,
+        OutputReportWorkspace='diagnostics_report'
+    )
+    
+    print(diagnostics.OutputReport)
+    print('Some small-angle detectors got diagnosed as bad due to detector solid angle corrections.')
+    report = mtd['diagnostics_report']
+    I0 = report.cell('ElasticIntensity', 0)
+    I304 = report.cell('ElasticIntensity', 303)
+    print('Solid-angle corrected elastic intensity of spectrum 1: {:.8}'.format(I0))
+    print('vs. corrected intensity of spectrum 304: {:.8}'.format(I304))
+
+Output:
+
+.. testoutput:: FakeIN4Example
+
+    Spectra masked by default mask file:
+    None
+    Spectra masked by user:
+    None
+    Spectra masked by beam stop diagnostics:
+    None
+    Spectra marked as bad by elastic peak diagnostics:
+    14, 102, 302-305, 314-317, 326-329, 338-341, 350-353, 362-365, 374-377, 386-389
+    Spectra marked as bad by flat background diagnostics:
+    14, 102
+    Some small-angle detectors got diagnosed as bad due to detector solid angle corrections.
+    Solid-angle corrected elastic intensity of spectrum 1: 555524.7
+    vs. corrected intensity of spectrum 304: 1795774.9
 
 .. categories::
 

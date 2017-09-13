@@ -94,7 +94,70 @@ The *OutputRawWorkspace* property provides an access to a 'raw' data workspace i
 Usage
 -----
 
-**Example - Not implemented**
+**Example - Fake IN4 workspace as input**
+
+.. testcode:: FakeIN4Example
+
+    import numpy
+    import scipy.stats
+    
+    # Create a fake IN4 workspace.
+    # We need an instrument and a template first.
+    empty_IN4 = LoadEmptyInstrument(InstrumentName='IN4')
+    nHist = empty_IN4.getNumberHistograms()
+    # Make TOF bin edges.
+    xs = numpy.arange(530.0, 2420.0, 4.0)
+    # Make some Gaussian spectra.
+    ys = 1000.0 * scipy.stats.norm.pdf(xs[:-1], loc=970, scale=60)
+    # Repeat data for each histogram.
+    xs = numpy.tile(xs, nHist)
+    ys = numpy.tile(ys, nHist)
+    ws = CreateWorkspace(
+        DataX=xs,
+        DataY=ys,
+        NSpec=nHist,
+        UnitX='TOF',
+        ParentWorkspace=empty_IN4
+    )
+    # Manually correct monitor spectrum number as LoadEmptyInstrument does
+    # not know about such details.
+    SetInstrumentParameter(
+        Workspace=ws,
+        ParameterName='default-incident-monitor-spectrum',
+        ParameterType='Number',
+        Value=str(1)
+    )
+    # Add incident energy information to sample logs.
+    AddSampleLog(
+        Workspace=ws,
+        LogName='Ei',
+        LogText=str(57),
+        LogType='Number',
+        LogUnit='meV',
+        NumberType='Double'
+    )
+    # Elastic channel information is missing in the sample logs.
+    # It can be given as single valued workspace, as well.
+    elasticChannelWS = CreateSingleValuedWorkspace(107)
+    
+    DirectILLCollectData(
+        InputWorkspace=ws,
+        OutputWorkspace='preprocessed',
+        ElasticChannelWorkspace=elasticChannelWS,
+        IncidentEnergyCalibration='Energy Calibration OFF', # Normally we would enable this for IN4.
+    )
+    
+    # Notably, the TOF axis got adjusted in DirectILLCollectData
+    preprocessedWS = mtd['preprocessed']
+    print('TOF offset without corrections: {:.4} microseconds'.format(ws.readX(0)[0]))
+    print('Corrected TOF offset: {:.4} microseconds'.format(preprocessedWS.readX(0)[0]))
+
+Output:
+
+.. testoutput:: FakeIN4Example
+
+    TOF offset without corrections: 530.0 microseconds
+    Corrected TOF offset: 380.1 microseconds
 
 .. categories::
 
