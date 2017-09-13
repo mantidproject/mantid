@@ -72,12 +72,15 @@ public:
     const size_t chunkSize = 2;
     const auto ranges =
         Chunker::determineLoadRanges(ranks, rank, bankSizes, chunkSize);
-    TS_ASSERT_EQUALS(ranges.size(), 3);
+    TS_ASSERT_EQUALS(ranges.size(), 4);
     size_t bank = 2;
     TS_ASSERT_EQUALS(ranges[0], (Chunker::LoadRange{bank, 0, 2}));
     TS_ASSERT_EQUALS(ranges[1], (Chunker::LoadRange{bank, 2, 2}));
     bank = 3;
     TS_ASSERT_EQUALS(ranges[2], (Chunker::LoadRange{bank, 0, 2}));
+    // Last range is padding (size 0)
+    bank = 0;
+    TS_ASSERT_EQUALS(ranges[3], (Chunker::LoadRange{bank, 0, 0}));
   }
 
   void test_determineLoadRanges_4_ranks_rank1() {

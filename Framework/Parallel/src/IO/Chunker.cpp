@@ -57,7 +57,22 @@ buildPartition(const int totalWorkers, const size_t totalSize,
 }
 }
 
-/// Returns a vector of LoadRanges for the given banks in file using chunkSize.
+/** Returns a vector of LoadRanges for the given banks in file using chunkSize.
+ *
+ * The ranges are optimized such that the number of ranks per bank is minimized
+ * while at the same time achieving good load balance by making the number of
+ * chunks to be loaded by each rank as equal as possible. The current algorithm
+ * does not find the optimial solution for all edge cases but should usually
+ * yield a 'good-enough' approximation. There are two reasons for minimizing the
+ * number of ranks per bank:
+ * 1. Avoid overhead from loading event_index and event_time_zero for a bank on
+ *    more ranks than necessary.
+ * 2. Reduce the number of banks a rank is loading from to allow more flexible
+ *    ordering when redistributing data with MPI in the loader.
+ * If more than one rank is used to load a subset of banks, chunks are assigned
+ * in a round-robin fashion to ranks. This is not reset when reaching the end of
+ * a bank, i.e., the rank loading the first chunk of the banks in a subset is
+ * *not* guarenteed to be the same for all banks. */
 std::vector<LoadRange>
 determineLoadRanges(const H5::H5File &file, const std::string &groupName,
                     const std::vector<std::string> &bankNames,
@@ -69,21 +84,19 @@ determineLoadRanges(const H5::H5File &file, const std::string &groupName,
 
 /** Returns a vector of LoadRanges for the given bank sizes using chunkSize.
  *
- * Currently there is no guarentee that the returned vector of ranges is of
- * equal length on all ranks. If more than one rank is used to load a subset of
- * banks, chunks are assigned in a round-robin fashion to ranks. This is not
- * reset when reaching the end of a bank, i.e., the rank loading the first chunk
- * of the banks in a subset is *not* guarenteed to be the same for all banks. */
+ * See variant based in H5File for details */
 std::vector<LoadRange> MANTID_PARALLEL_DLL
 determineLoadRanges(const int numRanks, const int rank,
                     const std::vector<size_t> &bankSizes,
                     const size_t chunkSize) {
+  // Create partitions based on chunk counts.
   std::vector<size_t> chunkCounts(bankSizes);
   const auto sizeToChunkCount =
       [&](size_t &value) { value = (value + chunkSize - 1) / chunkSize; };
   std::for_each(chunkCounts.begin(), chunkCounts.end(), sizeToChunkCount);
-
   const auto partitioning = makeBalancedPartitioning(numRanks, chunkCounts);
+
+  // Find our partition.
   size_t partitionIndex = 0;
   int firstRankSharingOurPartition = 0;
   for (; partitionIndex < partitioning.size(); ++partitionIndex) {
@@ -92,10 +105,11 @@ determineLoadRanges(const int numRanks, const int rank,
       break;
     firstRankSharingOurPartition += ranksInPartition;
   }
-
   const auto ranksSharingOurPartition = partitioning[partitionIndex].first;
   const auto &ourBanks = partitioning[partitionIndex].second;
 
+  // Assign all chunks from all banks in this partition to ranks in round-robin
+  // manner.
   int64_t chunk = 0;
   std::vector<LoadRange> ranges;
   for (const auto bank : ourBanks) {
@@ -111,6 +125,20 @@ determineLoadRanges(const int numRanks, const int rank,
       chunk++;
     }
   }
+
+  // Compute maximum chunk count (on any rank).
+  int64_t maxChunkCount = 0;
+  for (const auto &partition : partitioning) {
+    size_t chunksInPartition = 0;
+    for (const auto bank : partition.second)
+      chunksInPartition += chunkCounts[bank];
+    int ranksInPartition = partition.first;
+    int64_t maxChunkCountInPartition =
+        (chunksInPartition + ranksInPartition - 1) / ranksInPartition;
+    maxChunkCount = std::max(maxChunkCount, maxChunkCountInPartition);
+  }
+  ranges.resize(maxChunkCount);
+
   return ranges;
 }
 
