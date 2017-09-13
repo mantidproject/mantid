@@ -709,12 +709,14 @@ void Instrument::markAsDetector(const IDetector *det) {
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   auto it = lower_bound(m_detectorCache, det->getID());
-  // Silently ignore detector IDs that are already marked as detectors, even if
-  // the actual detector is different.
-  if ((it == m_detectorCache.end()) || (std::get<0>(*it) != det->getID())) {
-    bool isMonitor = false;
-    m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitor);
+  // Duplicate detector ids are forbidden
+  if ((it != m_detectorCache.end()) && (std::get<0>(*it) == det->getID())) {
+    std::stringstream sstream;
+    sstream << "Detector with ID " << det->getID() << " already exists";
+    throw std::runtime_error(sstream.str());
   }
+  bool isMonitor = false;
+  m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitor);
 }
 
 /// As markAsDetector but without the required sorting. Must call
