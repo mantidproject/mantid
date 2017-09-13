@@ -46,7 +46,8 @@ void FindSXPeaks::init() {
   auto wsValidation = boost::make_shared<CompositeValidator>();
   wsValidation->add<HistogramValidator>();
 
-  auto unitValidation = boost::make_shared<CompositeValidator>(CompositeRelation::OR);
+  auto unitValidation =
+      boost::make_shared<CompositeValidator>(CompositeRelation::OR);
   unitValidation->add<WorkspaceUnitValidator>("TOF");
   unitValidation->add<WorkspaceUnitValidator>("dSpacing");
 
