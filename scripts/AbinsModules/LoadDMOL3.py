@@ -12,7 +12,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
     """
     def __init__(self, input_dft_filename):
         """
-        @param input_dft_filename: name of file with phonon data (foo.outmol)
+        :param input_dft_filename: name of file with phonon data (foo.outmol)
         """
         super(LoadDMOL3, self).__init__(input_dft_filename=input_dft_filename)
         self._dft_program = "DMOL3"
@@ -23,7 +23,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         """
         Reads phonon data from DMOL3 output files. Saves frequencies, weights of k-point vectors, k-point vectors,
         amplitudes of atomic displacements, hash of the phonon file (hash) to <>.hdf5
-        :return: object of type AbinsData.
+        :returns: object of type AbinsData.
         """
         data = {}  # container to store read data
 
@@ -70,7 +70,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
     def _convert_to_angstroms(self, string=None):
         """
         :param string: string with number
-        :return: converted coordinate of lattice vector to Angstroms
+        :returns: converted coordinate of lattice vector to Angstroms
         """
         au2ang = AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
         return float(string) * au2ang
