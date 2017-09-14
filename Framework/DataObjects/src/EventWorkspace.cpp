@@ -137,7 +137,10 @@ void EventWorkspace::init(const std::size_t &NVectors,
 /// The total size of the workspace
 /// @returns the number of single indexable items in the workspace
 size_t EventWorkspace::size() const {
-  return this->data.size() * this->blocksize();
+  return std::accumulate(data.begin(), data.end(), static_cast<size_t>(0),
+                         [](size_t value, EventList *histo) {
+                           return value + histo->histogram_size();
+                         });
 }
 
 /// Get the blocksize, aka the number of bins in the histogram
