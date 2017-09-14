@@ -23,9 +23,32 @@ masking_information = namedtuple("masking_information", "first, second, third")
 
 
 def load_and_mask_workspace(state, workspace_name):
-    # -------------------------------------------
-    # 1. Load the data
-    # -------------------------------------------
+    workspace_to_mask = load_workspace(state, workspace_name)
+    mask_workspace(state, workspace_name, workspace_to_mask)
+
+def load_workspace(state, workspace_name):
+    prepare_to_load_scatter_sample_only(state)
+    handle_multi_period_data(state)
+    
+    serialized_state = state.property_manager
+
+    workspace = perform_load(serialized_state)
+    perform_move(serialized_state, workspace)
+    store_in_ads_as_hidden(workspace_name, workspace)
+    return workspace
+
+def mask_workspace(state, workspace_name, workspace_to_mask):
+    serialized_state = state.property_manager
+    masking_algorithm = create_masking_algorithm(workspace_to_mask) 
+
+    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)]
+    for detector in detectors:
+        masking_algorithm.setProperty("Component", detector)
+        masking_algorithm.execute()
+
+    return masking_algorithm.getProperty("Workspace").value
+
+def prepare_to_load_scatter_sample_only(state):
     # We only want to load the data for the scatter sample. Hence we set everything else to an empty string.
     # This is ok since we are changing a copy of the state which is not being used for the actual data reduction.
     state.data.sample_transmission = ""
@@ -34,12 +57,29 @@ def load_and_mask_workspace(state, workspace_name):
     state.data.can_transmission = ""
     state.data.can_direct = ""
 
+def handle_multi_period_data(state):
     # If the data is multi-period data, then we select only the first period.
     if state.data.sample_scatter_is_multi_period and state.data.sample_scatter_period == 0:
         state.data.sample_scatter_period = 1
 
-    # Load the workspace
-    serialized_state = state.property_manager
+def perform_load(serialized_state):
+    load_algorithm = create_load_algorithm(serialized_state)
+    load_algorithm.execute()
+    return load_algorithm.getProperty("SampleScatterWorkspace").value
+
+def perform_move(serialized_state, workspace):
+    create_move_algorithm(serialized_state, workspace).execute()
+
+def store_in_ads_as_hidden(workspace_name, workspace):
+    AnalysisDataService.addOrReplace(workspace_name, workspace)
+
+def create_masking_algorithm(workspace_to_mask):
+    mask_name = "SANSMaskWorkspace"
+    mask_options = {"SANSState": serialized_state,
+                    "Workspace": workspace_to_mask}
+    return create_unmanaged_algorithm(mask_name, **mask_options)
+
+def create_load_algorithm(serialized_state):
     load_name = "SANSLoad"
     load_options = {"SANSState": serialized_state,
                     "PublishToCache": True,
@@ -52,37 +92,14 @@ def load_and_mask_workspace(state, workspace_name):
                     "CanScatterMonitorWorkspace": EMPTY_NAME,
                     "CanTransmissionWorkspace": EMPTY_NAME,
                     "CanDirectWorkspace": EMPTY_NAME}
-    load_alg = create_unmanaged_algorithm(load_name, **load_options)
-    load_alg.execute()
-    workspace_to_mask = load_alg.getProperty("SampleScatterWorkspace").value
+    return create_unmanaged_algorithm(load_name, **load_options)
 
-    # Perform an initial move on the workspace
+def create_move_algorithm(serialized_state, workspace_to_move):
     move_name = "SANSMove"
     move_options = {"SANSState": serialized_state,
-                    "Workspace": workspace_to_mask,
+                    "Workspace": workspace_to_move,
                     "MoveType": "InitialMove"}
-    move_alg = create_unmanaged_algorithm(move_name, **move_options)
-    move_alg.execute()
-
-    # Put the workspace onto the ADS as a hidden workspace
-    AnalysisDataService.addOrReplace(workspace_name, workspace_to_mask)
-
-    # -------------------------------------------
-    # 2. Mask the data
-    # -------------------------------------------
-    serialized_state = state.property_manager
-    mask_name = "SANSMaskWorkspace"
-    mask_options = {"SANSState": serialized_state,
-                    "Workspace": workspace_to_mask}
-    mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-
-    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)]
-    for detector in detectors:
-        mask_alg.setProperty("Component", detector)
-        mask_alg.execute()
-
-    return mask_alg.getProperty("Workspace").value
-
+    return create_unmanaged_algorithm(move_name, **move_options)
 
 class MaskingTablePresenter(object):
     DISPLAY_WORKSPACE_NAME = "__sans_mask_display_dummy_workspace"
