@@ -193,7 +193,7 @@ find_Package(Threads)
 
 target_link_libraries ( MantidScientificInterfacesIndirect LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtWidgetsCommonQt4
-            MantidScientificInterfacesGeneral
+            MantidScientificInterfacesGeneralQt4
             ${CORE_MANTIDLIBS}
             ${QT_LIBRARIES}
             ${QWT_LIBRARIES}
