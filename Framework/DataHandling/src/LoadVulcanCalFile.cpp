@@ -45,7 +45,7 @@ void LoadVulcanCalFile::init() {
                                                     FileProperty::Load, ".dat"),
                   "Path to the VULCAN offset file. ");
 
-  std::array<std::string, 3> groupoptions{"6Modules", "2Banks", "1Bank"};
+  std::array<std::string, 3> groupoptions = { {"6Modules", "2Banks", "1Bank"} };
 
   declareProperty(
       "Grouping", "6Modules",

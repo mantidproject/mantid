@@ -40,7 +40,7 @@ void CreateModeratorModel::init() {
                                                            Direction::InOut),
                   "An input workspace.");
 
-  std::array<std::string, 1> keys({"IkedaCarpenterModerator"});
+  std::array<std::string, 1> keys = { {"IkedaCarpenterModerator"} };
   declareProperty("ModelType", "",
                   boost::make_shared<ListValidator<std::string>>(keys),
                   "The string identifier for the model", Direction::Input);

@@ -426,7 +426,7 @@ void SmoothMD::init() {
           Direction::Input),
       docBuffer.str());
 
-  std::array<std::string, 1> unitOptions = {"pixels"};
+  std::array<std::string, 1> unitOptions = { {"pixels"} };
 
   std::stringstream docUnits;
   docUnits << "The units that WidthVector has been specified in. Allowed "
