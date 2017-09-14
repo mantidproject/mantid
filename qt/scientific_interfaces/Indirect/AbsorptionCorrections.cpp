@@ -107,7 +107,6 @@ void AbsorptionCorrections::run() {
   QString outputBaseName = sampleWsName.left(nameCutIndex);
 
   QString outputWsName = outputBaseName + "_" + sampleShape + "_Corrections";
-  std::string outputWsNameStr = outputWsName.toStdString();
 
   monteCarloAbsCor->setProperty("CorrectionsWorkspace",
                                 outputWsName.toStdString());
