@@ -99,6 +99,11 @@ include_directories (Geometry/inc)
 include_directories ( ${MUPARSER_INCLUDE_DIR} )
 set ( MANTIDLIBS ${MANTIDLIBS} ${MUPARSER_LIBRARIES} )
 add_subdirectory (Geometry)
+
+include_directories (NexusGeometry/inc) 
+add_subdirectory (NexusGeometry)
+#NexusGeometry has header-only dependencies on Geometry
+set ( MANTIDLIBS ${MANTIDLIBS} NexusGeometry )
 set ( MANTIDLIBS ${MANTIDLIBS} Geometry )
 
 include_directories (API/inc)
@@ -112,7 +117,8 @@ add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
 add_subdirectory (Nexus)
-add_subdirectory (NexusGeometry)
+
+
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)
 add_subdirectory (WorkflowAlgorithms)

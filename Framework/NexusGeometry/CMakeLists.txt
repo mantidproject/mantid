@@ -1,17 +1,25 @@
 set ( SRC_FILES
-    src/InstrumentHandler.cpp
+    src/InstrumentGeometryAbstraction.cpp
     src/NexusGeometryParser.cpp
     src/ParsingErrors.cpp
         )
 
 set ( INC_FILES
-    inc/MantidNexusGeometry/InstrumentHandler.h
+    inc/MantidNexusGeometry/InstrumentAbstractBuilder.h
+    inc/MantidNexusGeometry/InstrumentGeometryAbstraction.h
     inc/MantidNexusGeometry/NexusGeometryParser.h
     inc/MantidNexusGeometry/ParsingErrors.h
         )
 
 set ( TEST_FILES
+    InstrumentGeometryAbstractionTest.h
         )
+
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 # Add the target for this directory
 add_library ( NexusGeometry ${SRC_FILES} ${INC_FILES})
@@ -29,4 +37,8 @@ include_directories (${HDF5_INCLUDE_DIRS})
 # Add to the 'Framework' group in VS
 set_property ( TARGET NexusGeometry PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc )
+target_link_libraries( NexusGeometry LINK_PRIVATE ${MANTIDLIBS})
+
+# Add the unit tests directory
+add_subdirectory ( test )
+install ( TARGETS NexusGeometry ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR})

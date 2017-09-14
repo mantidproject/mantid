@@ -146,6 +146,7 @@ include_directories ( Framework/Parallel/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
 include_directories ( Framework/Types/inc )
+include_directories ( Framework/NexusGeometry/inc )
 
 set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
 
