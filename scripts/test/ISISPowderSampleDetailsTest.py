@@ -19,10 +19,13 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         # Check easiest case
         sample_details_obj = sample_details.SampleDetails(height=expected_height, radius=expected_radius,
-                                                          center=expected_center, shape="cylinder")
+                                                          center=expected_center)
         self.assertEqual(sample_details_obj.height(), expected_height)
         self.assertEqual(sample_details_obj.radius(), expected_radius)
         self.assertEqual(sample_details_obj.center(), expected_center)
+
+        # Check shape stype defaults to cylinder
+        self.assertEqual(sample_details_obj._shape_type, "cylinder")
 
         # Does it handle ints correctly
         height_radius_int = 1

@@ -3,28 +3,30 @@ from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 from isis_powder.routines import common
 import math
+from mantid import logger
 
 property_err_string = "The following sample property was not passed as an argument: "
 
 
 class SampleDetails(object):
     def __init__(self, **kwargs):
-        self.shape_type = common.dictionary_key_helper(dictionary=kwargs, key="shape",
-                                                       exception_msg="Sample property \"shape\" was not passed to "
-                                                                     "SampleDetails. If you have been using this class "
-                                                                     "without worrying about \"shape\", you probably "
-                                                                     "want to set this to \"cylinder\"")
+        self._shape_type = common.dictionary_key_helper(dictionary=kwargs, key="shape", throws=False)
+        if self._shape_type is None:
+            self._shape_type = "cylinder"
+            warning = "Failed to supply parameter \"shape\" - defaulting to \"cylinder\""
+            logger.warning(warning)
+
         center = common.dictionary_key_helper(dictionary=kwargs, key="center",
                                               exception_msg=property_err_string + "center")
         SampleDetails._validate_center(center)
         self._center = [float(i) for i in center]  # List of X, Y, Z position
 
-        if self.shape_type == "cylinder":
-            self.shape = _Cylinder(kwargs)
-        elif self.shape_type == "slab":
-            self.shape = _Slab(kwargs)
+        if self._shape_type == "cylinder":
+            self._shape = _Cylinder(kwargs)
+        elif self._shape_type == "slab":
+            self._shape = _Slab(kwargs)
         else:
-            raise KeyError("Shape type \"" + self.shape_type + "\" not supported: current supported shape types are "
+            raise KeyError("Shape type \"" + self._shape_type + "\" not supported: current supported shape types are "
                            "\"cylinder\" and \"slab\"")
 
         self.material_object = None
@@ -93,10 +95,10 @@ class SampleDetails(object):
     def _print(self):
         print("Sample Details")
         print("------------------------")
-        print("Shape type: " + self.shape_type)
+        print("Shape type: " + self._shape_type)
         print("Center X:{}, Y:{}, Z{}".format(self._center[0], self._center[1], self._center[2]))
 
-        self.shape.print_shape()
+        self._shape.print_shape()
         print("------------------------")
 
         if self.material_object is None:
@@ -106,34 +108,34 @@ class SampleDetails(object):
         print()  # Newline for visual spacing
 
     def radius(self):
-        if self.shape_type == "cylinder":
-            return self.shape.radius
+        if self._shape_type == "cylinder":
+            return self._shape.radius
         else:
-            raise RuntimeError("Radius is not applicable for the shape type \"" + self.shape_type + "\"")
+            raise RuntimeError("Radius is not applicable for the shape type \"" + self._shape_type + "\"")
 
     def height(self):
-        return self.shape.height
+        return self._shape.height
 
     def center(self):
         return self._center
 
     def width(self):
-        if self.shape_type == "slab":
-            return self.shape.width
+        if self._shape_type == "slab":
+            return self._shape.width
         else:
-            raise RuntimeError("Width is not applicable for the shape type \"" + self.shape_type + "\"")
+            raise RuntimeError("Width is not applicable for the shape type \"" + self._shape_type + "\"")
 
     def angle(self):
-        if self.shape_type == "slab":
-            return self.shape.angle
+        if self._shape_type == "slab":
+            return self._shape.angle
         else:
-            raise RuntimeError("Angle is not applicable for the shape type \"" + self.shape_type + "\"")
+            raise RuntimeError("Angle is not applicable for the shape type \"" + self._shape_type + "\"")
 
     def thickness(self):
-        if self.shape_type == "slab":
-            return self.shape.thickness
+        if self._shape_type == "slab":
+            return self._shape.thickness
         else:
-            raise RuntimeError("Thickness is not applicable for the shape type \"" + self.shape_type + "\"")
+            raise RuntimeError("Thickness is not applicable for the shape type \"" + self._shape_type + "\"")
 
 
 class _Material(object):

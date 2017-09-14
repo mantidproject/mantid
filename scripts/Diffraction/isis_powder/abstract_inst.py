@@ -232,11 +232,8 @@ class AbstractInst(object):
 
     def _generate_inst_filename(self, run_number):
         if isinstance(run_number, list):
-            # Use recursion on lists
-            updated_list = []
-            for run in run_number:
-                updated_list.append(self._generate_inst_filename(run))
-            return updated_list
+            # Multiple entries
+            return [self._generate_inst_filename(run) for run in run_number]
         else:
             # Individual entry
             return self._inst_prefix + str(run_number)
