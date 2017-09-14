@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import stresstesting
@@ -7,6 +8,10 @@ from mantid.api import Workspace,IEventWorkspace
 
 from Direct.PropertyManager import PropertyManager
 import ISIS_MariReduction as mr
+try:
+    from importlib import reload
+except ImportError:
+    pass
 
 #----------------------------------------------------------------------
 
@@ -112,12 +117,12 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
             rez,mess = rd.run_reduction()
             self.result=rez
             if not rez:
-                print "*** Validation failed: {0}".format(mess)
+                print("*** Validation failed: {0}".format(mess))
             if mess.find('Created')>-1: # validation still failed due to missing validation file
-                print "*** Validation failed: {0}".format(mess)
+                print("*** Validation failed: {0}".format(mess))
                 self.result=False
         except RuntimeError as err:
-            print "*** Validation failed with error: {0}".format(err.message)
+            print("*** Validation failed with error: {0}".format(err.message))
             self.result=False
         rd.reducer.prop_man.save_file_name = None
 
@@ -243,7 +248,7 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         self.assertTrue(isinstance(ei_ws,Workspace))
 
         en_peaks = ei_ws.readX(0)
-        self.assertAlmostEquals(len(en_peaks),1)
+        self.assertAlmostEqual(len(en_peaks),1)
         self.assertAlmostEqual(en_peaks[0],108.94,2)
 
         self.valid = True
@@ -301,6 +306,7 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
 
     def validate(self):
         return self.valid
+
 
 if __name__=="__main__":
     tester = ISISLoadFilesLET()

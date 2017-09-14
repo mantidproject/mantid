@@ -2276,7 +2276,7 @@
   <customwidget>
    <class>MplFigureCanvas</class>
    <extends>QGraphicsView</extends>
-   <header>MplFigureCanvas.h</header>
+   <header>HFIRPowderReduction/MplFigureCanvas.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

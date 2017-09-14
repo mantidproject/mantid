@@ -12,6 +12,7 @@ def qapp():
         _app = QtGui.QApplication(sys.argv)
     return _app
 
+
 # try to defeat X11 unsafe thread
 QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads)
 app = qapp()

@@ -49,12 +49,19 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
     //
     int32_t bm_counts;
     int32_t att_pos;
-    bool is_tof; // tof or wavelength data
-    double wavelength;
+    bool is_tof;       // tof or wavelength data
+    double wavelength; // -> /nvs067/lambda
     //
     std::string sample_name;
+    std::string sample_description;
     double sample_aperture;
+    double sample_x;
+    double sample_y;
+    double sample_z;
+    //
     double source_aperture;
+    int32_t master1_chopper_id;
+    int32_t master2_chopper_id;
     //
     double period_master;
     double period_slave;
