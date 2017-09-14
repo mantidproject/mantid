@@ -90,7 +90,7 @@ std::vector<std::vector<int>> Chunker::makeRankGroups() const {
 }
 
 /** Returns a vector of LoadRanges based on parameters passed to the
- *constructor.
+ * constructor.
  *
  * The ranges are optimized such that the number of ranks per bank is minimized
  * while at the same time achieving good load balance by making the number of

@@ -25,6 +25,34 @@ public:
   static ChunkerTest *createSuite() { return new ChunkerTest(); }
   static void destroySuite(ChunkerTest *suite) { delete suite; }
 
+  void test_makeRankGroups_4_ranks() {
+    const int ranks = 4;
+    const int rank = 1;
+    const std::vector<size_t> bankSizes{6, 1, 4, 2};
+    const size_t chunkSize = 2;
+    const Chunker chunker(ranks, rank, bankSizes, chunkSize);
+    const auto &groups = chunker.makeRankGroups();
+    TS_ASSERT_EQUALS(groups.size(), 2);
+    TS_ASSERT_EQUALS(groups[0][0], 0);
+    TS_ASSERT_EQUALS(groups[0][1], 1);
+    TS_ASSERT_EQUALS(groups[1][0], 2);
+    TS_ASSERT_EQUALS(groups[1][1], 3);
+  }
+
+  void test_makeRankGroups_4_ranks_different_group_sizes() {
+    const int ranks = 4;
+    const int rank = 1;
+    const std::vector<size_t> bankSizes{9, 1, 1, 1};
+    const size_t chunkSize = 2;
+    const Chunker chunker(ranks, rank, bankSizes, chunkSize);
+    const auto &groups = chunker.makeRankGroups();
+    TS_ASSERT_EQUALS(groups.size(), 2);
+    TS_ASSERT_EQUALS(groups[0][0], 0);
+    TS_ASSERT_EQUALS(groups[0][1], 1);
+    TS_ASSERT_EQUALS(groups[0][2], 2);
+    TS_ASSERT_EQUALS(groups[1][0], 3);
+  }
+
   void test_makeLoadRanges_1_rank() {
     const int ranks = 1;
     const int rank = 0;
