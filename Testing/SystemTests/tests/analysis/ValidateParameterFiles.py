@@ -64,6 +64,7 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
         else:
             print("Succesfully Validated %d files" % len(files))
 
+
 if __name__ == '__main__':
     valid = ValidateParameterFiles()
     valid.runTest()

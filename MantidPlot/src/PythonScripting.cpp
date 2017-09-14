@@ -69,7 +69,7 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) {
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
     : ScriptingEnv(parent, "Python"), m_globals(NULL), m_math(NULL),
-      m_sys(NULL), m_mainThreadState(NULL) {}
+      m_sys(NULL), m_mainThreadState(NULL), m_gil() {}
 
 PythonScripting::~PythonScripting() {}
 
@@ -77,8 +77,7 @@ PythonScripting::~PythonScripting() {}
  * @param args A list of strings that denoting command line arguments
  */
 void PythonScripting::setSysArgs(const QStringList &args) {
-  ScopedPythonGIL gil;
-
+  ScopedPythonGIL lock(gil());
   PyObject *argv = toPyList(args);
   if (argv && m_sys) {
     PyDict_SetItemString(m_sys, "argv", argv);

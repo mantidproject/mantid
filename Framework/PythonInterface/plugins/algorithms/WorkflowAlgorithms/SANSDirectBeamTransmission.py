@@ -115,4 +115,5 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
 
 #############################################################################################
 
+
 AlgorithmFactory.subscribe(SANSDirectBeamTransmission)

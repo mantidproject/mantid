@@ -72,9 +72,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertFalse(view.pixel_adjustment_det_2)
         self.assertFalse(view.wavelength_adjustment_det_1)
         self.assertFalse(view.wavelength_adjustment_det_2)
-        self.assertTrue(view.q_1d_min == 0.001)
-        self.assertTrue(view.q_1d_max == 0.2)
-        self.assertTrue(view.q_1d_step == 0.001)
+        self.assertTrue(view.q_1d_min_or_rebin_string == "0.001,0.001,0.0126,-0.08,0.2")
         self.assertTrue(view.q_xy_max == 0.05)
         self.assertTrue(view.q_xy_step == 0.001)
         self.assertTrue(view.q_xy_step_type == RangeStepType.Lin)
@@ -212,7 +210,7 @@ class RunTabPresenterTest(unittest.TestCase):
         # Clean up
         remove_file(batch_file_path)
         remove_file(user_file_path)
-
+    #
     def test_that_can_get_state_for_index_if_index_exists(self):
         # Arrange
         content = "# MANTID_BATCH_FILE add more text here\n" \
