@@ -16,12 +16,17 @@ class MaxEntPresenter(object):
 
     # only get ws that are groups or pairs
     # ignore raw
+	# move the generating of the list to a helper?
     def getWorkspaceNames(self):
         options = mantid.AnalysisDataService.getObjectNames()
         options = [item.replace(" ","") for item in options]
+		# for some reason this doesn't work
+        tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
+        runName=tmpWS.getInstrument().getName()+str(tmpWS.getRunNumber()).zfill(8)
+
         final_options=[]
         for pick in options:
-            if ";" in pick and "Raw" not in pick:
+            if ";" in pick and "Raw" not in pick and runName in pick:
                 final_options.append(pick)
         self.view.addItems(final_options)
 
