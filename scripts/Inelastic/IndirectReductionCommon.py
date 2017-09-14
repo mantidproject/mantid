@@ -440,6 +440,8 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
     instrument = workspace.getInstrument()
     group_detectors = AlgorithmManager.create("GroupDetectors")
     group_detectors.setChild(True)
+    group_detectors.setProperty("InputWorkspace", workspace)
+    group_detectors.setProperty("Behaviour", 'Average')
 
     # If grouping as per he IPF is desired
     if method == 'IPF':
@@ -465,9 +467,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         spectra_list = [spec for spec in range(0, num_spec) if spec not in masked_detectors]
 
         # Apply the grouping
-        group_detectors(InputWorkspace=workspace,
-                        Behaviour='Average',
-                        WorkspaceIndexList=spectra_list)
+        group_detectors.setProperty("WorkspaceIndexList", spectra_list)
 
     elif grouping_method == 'File':
         # Get the filename for the grouping file
@@ -491,23 +491,22 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         if len(masked_detectors) > 0:
             mask_detectors = AlgorithmManager.create("MaskDetectors")
             mask_detectors.setChild(True)
-            mask_detectors(Workspace=workspace,
-                           WorkspaceIndexList=masked_detectors)
+            mask_detectors.setProperty("Workspace", workspace)
+            mask_detectors.setProperty("WorkspaceIndexList", masked_detectors)
+            mask_detectors.execute()
 
         # Apply the grouping
-        group_detectors(InputWorkspace=workspace,
-                        Behaviour='Average',
-                        MapFile=grouping_file)
+        group_detectors.setProperty("MapFile", grouping_file)
 
     elif grouping_method == 'Workspace':
         # Apply the grouping
-        group_detectors(InputWorkspace=workspace,
-                        Behaviour='Average',
-                        CopyGroupingFromWorkspace=group_ws)
+        group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
 
     else:
         raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))
 
+    group_detectors.setProperty("OutputWorkspace", "__temp")
+    group_detectors.execute()
     return group_detectors.getProperty("OutputWorkspace").value
 
 
