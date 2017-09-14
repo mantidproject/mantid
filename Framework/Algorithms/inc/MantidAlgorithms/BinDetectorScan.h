@@ -57,6 +57,7 @@ private:
   void getInputParameters();
   void getScatteringAngleBinning();
   void getHeightAxis();
+  void performBinning(API::MatrixWorkspace_sptr &outputWS);
 };
 
 } // namespace Algorithms
