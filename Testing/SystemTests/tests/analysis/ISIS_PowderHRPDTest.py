@@ -120,8 +120,8 @@ def calibration_validator(results):
 
 
 def focus_validation(results):
-    output_path = os.path.join(output_dir, cycle_number, user_name, "rawHRPD66063.nxs")
-    return _compare_ws(reference_file_name=output_path, results=results)
+    reference_file_name = "HRPD66063_focused.nxs"
+    return _compare_ws(reference_file_name=reference_file_name, results=results)
 
 
 def run_vanadium_calibration():
