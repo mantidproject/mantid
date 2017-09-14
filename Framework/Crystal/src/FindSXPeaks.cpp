@@ -58,13 +58,14 @@ void FindSXPeaks::init() {
   declareProperty("RangeLower", EMPTY_DBL(),
                   "The X value to search from (default 0)");
   declareProperty("RangeUpper", EMPTY_DBL(),
-                  "The X value to search to (default FindSXPeaks)");
+                  "The X value to search to (default total number of bins)");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
-                  "Start spectrum number (default 0)");
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
-                  "End spectrum number  (default FindSXPeaks)");
+                  "Start workspace index (default 0)");
+  declareProperty(
+      "EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
+      "End workspace index (default to total number of histograms)");
 
   // ---------------------------------------------------------------
   // Peak strategies + Threshold
