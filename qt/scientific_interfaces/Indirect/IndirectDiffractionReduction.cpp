@@ -592,8 +592,10 @@ void IndirectDiffractionReduction::instrumentSelected(
 
     // Disable sum files
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
-    m_uiForm.ckManualDRange->setToolTip("D-Ranges corresponding to numeric values can be found in the"
-                                        " OSIRIS user guide: https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf");
+    m_uiForm.ckManualDRange->setToolTip(
+        "D-Ranges corresponding to numeric values can be found in the"
+        " OSIRIS user guide: "
+        "https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf");
     m_uiForm.ckSumFiles->setEnabled(false);
     m_uiForm.ckSumFiles->setChecked(false);
 
