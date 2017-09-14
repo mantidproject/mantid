@@ -349,7 +349,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf
         self.declareProperty('DRange', defaultValue="", doc='Dranges to use when DetectDRange is disabled; a comma'
                                                             ' separated list should be provided. a-b can be used to'
-                                                            ' create a list of values in the range a-b, inclusively.')
+                                                            ' create a list of values in the range a-b, inclusively.'
+                                                            ' D-Ranges corresponding to numbers are outlined in the'
+                                                            ' OSIRIS user guide manual.')
 
         self._cal = None
         self._output_ws_name = None
