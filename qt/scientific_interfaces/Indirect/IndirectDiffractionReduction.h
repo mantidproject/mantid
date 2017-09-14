@@ -37,7 +37,7 @@ public slots:
   void runFilesChanged();
   void runFilesFinding();
   void runFilesFound();
-  void individualGroupingToggled(int state);
+  void manualGroupingToggled(int state);
   void algorithmComplete(bool error);
 
 private:
@@ -57,6 +57,7 @@ private:
 
   void runGenericReduction(QString instName, QString mode);
   void runOSIRISdiffonlyReduction();
+  void runManualGrouping();
 
 private:
   Ui::IndirectDiffractionReduction

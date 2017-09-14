@@ -81,9 +81,9 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
   m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
 
-  // Update the list of plot options when individual grouping is toggled
-  connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this,
-          SLOT(individualGroupingToggled(int)));
+  // Update the list of plot options when manual grouping is toggled
+  connect(m_uiForm.ckManualGrouping, SIGNAL(stateChanged(int)), this,
+          SLOT(manualGroupingToggled(int)));
 
   // Handle plotting
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotResults()));
@@ -379,8 +379,8 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   }
 
   // Add the property for grouping policy if needed
-  if (m_uiForm.ckIndividualGrouping->isChecked())
-    msgDiffReduction->setProperty("GroupingPolicy", "Individual");
+  if (m_uiForm.ckManualGrouping->isChecked())
+    msgDiffReduction->setProperty("GroupingPolicy", "Groups");
 
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
 
@@ -477,6 +477,10 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
           SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void IndirectDiffractionReduction::runManualGrouping() {
+
 }
 
 /**
@@ -585,10 +589,10 @@ void IndirectDiffractionReduction::instrumentSelected(
 
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable individual grouping
-    m_uiForm.ckIndividualGrouping->setToolTip(
+    m_uiForm.ckManualGrouping->setToolTip(
         "OSIRIS cannot group detectors individually in diffonly mode");
-    m_uiForm.ckIndividualGrouping->setEnabled(false);
-    m_uiForm.ckIndividualGrouping->setChecked(false);
+    m_uiForm.ckManualGrouping->setEnabled(false);
+    m_uiForm.ckManualGrouping->setChecked(false);
 
     // Disable sum files
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
@@ -602,8 +606,8 @@ void IndirectDiffractionReduction::instrumentSelected(
     m_uiForm.ckSumFiles->setChecked(true);
 
     // Re-enable individual grouping
-    m_uiForm.ckIndividualGrouping->setToolTip("");
-    m_uiForm.ckIndividualGrouping->setEnabled(true);
+    m_uiForm.ckManualGrouping->setToolTip("");
+    m_uiForm.ckManualGrouping->setEnabled(true);
 
     // Re-enable spectra range
     m_uiForm.spSpecMin->setEnabled(true);
@@ -785,11 +789,11 @@ void IndirectDiffractionReduction::runFilesFound() {
 }
 
 /**
- * Handles the user toggling the individual grouping check box.
+ * Handles the user toggling the manual grouping check box.
  *
  * @param state The selection state of the check box
  */
-void IndirectDiffractionReduction::individualGroupingToggled(int state) {
+void IndirectDiffractionReduction::manualGroupingToggled(int state) {
   int itemCount = m_uiForm.cbPlotType->count();
 
   switch (state) {

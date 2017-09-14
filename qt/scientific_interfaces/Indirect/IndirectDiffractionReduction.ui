@@ -542,7 +542,7 @@
        <item>
         <widget class="QCheckBox" name="ckManualGrouping">
          <property name="text">
-          <string>Manual Grouping</string>
+          <string>Use Manual Grouping</string>
          </property>
         </widget>
        </item>
