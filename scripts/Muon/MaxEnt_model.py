@@ -13,8 +13,8 @@ class MaxEntThread(QThread):
         self.alg=alg
 
     def __del__(self):
-         self.wait()
-		  
+        self.wait()
+
     def run(self):
         self.alg.execute()
         self.alg.output()
@@ -22,6 +22,7 @@ class MaxEntThread(QThread):
 
     def setInputs(self,inputs):
         self.alg.setInputs(inputs)
+
 
 class MaxEntModel(object):
     # A simple class to hold the MaxEnt algorithm
