@@ -24,7 +24,7 @@ masking_information = namedtuple("masking_information", "first, second, third")
 
 def load_and_mask_workspace(state, workspace_name):
     workspace_to_mask = load_workspace(state, workspace_name)
-    mask_workspace(state, workspace_name, workspace_to_mask)
+    return mask_workspace(state, workspace_name, workspace_to_mask)
 
 
 def load_workspace(state, workspace_name):
