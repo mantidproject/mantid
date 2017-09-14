@@ -1,0 +1,67 @@
+digraph DirectILLDiagnostics {
+  label = "DirectILLDiagnostics workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    beamStopThreshold [label="BeamStopThreshold"]
+    bkgExcludeWidth [label="NonBkgRegionInSigmas"]
+    bkgThresholds [label="Bkg thresholds"]
+    elasticPeakWidth [label="ElasticPeakWidthInSigmas"]
+    inputEPP [label="EPPWorkspace"]
+    inputWS [label="InputWorkspace"]
+    maskIndices [label="MaskedDetectors"]
+    maskComponents [label="MaskedComponents"]
+    outputDiagnostics [label="OutputWorkspace"]
+    peakThresholds [label="Peak thresholds"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    DiagnoseBkg [label="Diagnose flat backgrounds"]
+    DiagnosePeaks [label="Diagnose elastic peaks"]
+    DefineBeamStop [label="Define beam\nstop shadow"]
+    IntegrateBkg [label="Integrate\nbackgrounds"]
+    IntegrateIntensities [label="Integrate"]
+    IntegratePeaks [label="Integrate\nelastic peak"]
+    Plus [label="Plus"]
+  }
+
+  subgraph values {
+    $value_style
+    beamStopMask [label="Beam stop\nmask"]
+    beamStopSpectra [label="Beam stop spectra"]
+    bkgDiagnostics [label="Background diagnostics\nworkspace"]
+    defaultMask [label="Default mask\nfrom file"]
+    peakDiagnostics [label="Peak diagnostics\nworkspace"]
+  }
+
+  subgraph decisions {
+    $decision_style
+  }
+
+  inputWS -> IntegratePeaks
+  inputEPP -> IntegratePeaks
+  elasticPeakWidth -> IntegratePeaks
+  inputWS -> IntegrateBkg
+  inputEPP -> IntegrateBkg
+  bkgExcludeWidth -> IntegrateBkg
+  IntegratePeaks -> DiagnosePeaks
+  peakThresholds -> DiagnosePeaks
+  DiagnosePeaks -> peakDiagnostics
+  IntegrateBkg -> DiagnoseBkg
+  bkgThresholds -> DiagnoseBkg
+  DiagnoseBkg -> bkgDiagnostics
+  peakDiagnostics -> Plus
+  bkgDiagnostics -> Plus
+  beamStopSpectra -> IntegrateIntensities
+  inputWS -> IntegrateIntensities
+  IntegrateIntensities -> DefineBeamStop
+  beamStopThreshold -> DefineBeamStop
+  DefineBeamStop -> beamStopMask
+  beamStopMask -> Plus
+  maskIndices -> Plus
+  maskComponents -> Plus
+  defaultMask -> Plus
+  Plus -> outputDiagnostics
+}

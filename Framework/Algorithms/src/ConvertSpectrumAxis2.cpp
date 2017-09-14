@@ -217,12 +217,10 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
 
   MatrixWorkspace_sptr outputWorkspace = nullptr;
   NumericAxis *newAxis = nullptr;
-  size_t size;
   if (m_toOrder) {
     // Can not re-use the input one because the spectra are re-ordered.
-    size = m_indexMap.size();
     outputWorkspace = WorkspaceFactory::Instance().create(
-        inputWS, size, inputWS->x(0).size(), inputWS->y(0).size());
+        inputWS, m_indexMap.size(), inputWS->x(0).size(), inputWS->y(0).size());
     std::vector<double> axis;
     axis.reserve(m_indexMap.size());
     for (const auto &it : m_indexMap) {
@@ -231,7 +229,6 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     newAxis = new NumericAxis(std::move(axis));
   } else {
     // If there is no reordering we can simply clone.
-    size = m_axis.size();
     outputWorkspace = inputWS->clone();
     newAxis = new NumericAxis(m_axis);
   }
@@ -247,10 +244,9 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     newAxis->unit() = UnitFactory::Instance().create("QSquared");
   }
 
-  size_t currentIndex = 0;
-
   // Note that this is needed only for ordered case
   if (m_toOrder) {
+    size_t currentIndex = 0;
     std::multimap<double, size_t>::const_iterator it;
     for (it = m_indexMap.begin(); it != m_indexMap.end(); ++it) {
       // Copy over the data.

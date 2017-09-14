@@ -372,7 +372,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     bool good = readFile(filename, temp);
 
     // check if we have failed to open the file
-    if ((!good) || (temp == "")) {
+    if ((!good) || (temp.empty())) {
       if (filename == getUserPropertiesDir() + m_user_properties_file_name) {
         // write out a fresh file
         createUserPropertiesFile();
@@ -382,7 +382,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     }
 
     // store the property string
-    if ((append) && (m_PropertyString != "")) {
+    if ((append) && (!m_PropertyString.empty())) {
       m_PropertyString = m_PropertyString + "\n" + temp;
     } else {
       m_PropertyString = temp;
