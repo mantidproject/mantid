@@ -15064,7 +15064,7 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
   }
   bool success(false);
   if (async) {
-    m_iface_script->recursiveAsyncSetup();
+    const bool locked = m_iface_script->recursiveAsyncSetup();
     auto job = m_iface_script->executeAsync(ScriptCode(code));
     // Start a local event loop to keep processing events
     // while we are running the script. Inspired by the IPython
@@ -15077,7 +15077,7 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
       eventLoop.exec();
       timer.stop();
     }
-    m_iface_script->recursiveAsyncTeardown();
+    m_iface_script->recursiveAsyncTeardown(locked);
     success = job.result();
   } else {
     success = m_iface_script->execute(ScriptCode(code));
