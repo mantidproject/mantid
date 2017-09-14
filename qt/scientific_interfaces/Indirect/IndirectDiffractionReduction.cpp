@@ -119,6 +119,7 @@ void IndirectDiffractionReduction::run() {
       m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
     showInformationBox("Use Vanadium File checked but no vanadium files "
                        "have been supplied.");
+    return;
   }
 
   if (instName == "OSIRIS") {
