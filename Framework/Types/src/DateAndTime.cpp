@@ -1,4 +1,4 @@
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 
 #include <boost/date_time/date.hpp>
 #include <boost/date_time/time.hpp>
@@ -7,12 +7,13 @@
 #include <cmath>
 #include <exception>
 #include <limits>
+#include <math.h>
 #include <memory>
 #include <ostream>
 #include <stdexcept>
 
 namespace Mantid {
-namespace Kernel {
+namespace Types {
 
 const uint32_t DateAndTime::EPOCH_DIFF = 631152000;
 /// The epoch for GPS times.
@@ -361,12 +362,6 @@ DateAndTime DateAndTime::maximum() { return DateAndTime(MAX_NANOSECONDS); }
 
 /** Return the minimum time possible */
 DateAndTime DateAndTime::minimum() { return DateAndTime(MIN_NANOSECONDS); }
-
-/// A default date and time to use when time is not specified
-const DateAndTime &DateAndTime::defaultTime() {
-  static DateAndTime time("1970-01-01T00:00:00");
-  return time;
-}
 
 //------------------------------------------------------------------------------------------------
 /** Sets the date and time using an ISO8601-formatted string
@@ -867,50 +862,6 @@ std::ostream &operator<<(std::ostream &stream, const DateAndTime &t) {
   return stream;
 }
 
-TimeInterval::TimeInterval(const DateAndTime &from, const DateAndTime &to)
-    : m_begin(from) {
-  if (to > from)
-    m_end = to;
-  else
-    m_end = from;
-}
-
-/**  Returns an intersection of this interval with \a ti
-     @param ti :: Time interval
-     @return A valid time interval if this interval intersects with \a ti or
-             an empty interval otherwise.
- */
-TimeInterval TimeInterval::intersection(const TimeInterval &ti) const {
-  if (!isValid() || !ti.isValid())
-    return TimeInterval();
-
-  DateAndTime t1 = begin();
-  if (ti.begin() > t1)
-    t1 = ti.begin();
-
-  DateAndTime t2 = end();
-  if (ti.end() < t2)
-    t2 = ti.end();
-
-  return t1 < t2 ? TimeInterval(t1, t2) : TimeInterval();
-}
-
-/// String representation of the begin time
-std::string TimeInterval::begin_str() const {
-  return boost::posix_time::to_simple_string(this->m_begin.to_ptime());
-}
-
-/// String representation of the end time
-std::string TimeInterval::end_str() const {
-  return boost::posix_time::to_simple_string(this->m_end.to_ptime());
-}
-
-std::ostream &operator<<(std::ostream &s,
-                         const Mantid::Kernel::TimeInterval &t) {
-  s << t.begin().toSimpleString() << " - " << t.end().toSimpleString();
-  return s;
-}
-
-} // namespace Kernel
+} // namespace Types
 
 } // namespace Mantid
