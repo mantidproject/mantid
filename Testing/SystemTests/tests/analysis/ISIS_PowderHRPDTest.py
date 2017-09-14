@@ -96,7 +96,7 @@ def _compare_ws(reference_file_name, results):
     for (ws, ref) in zip(results, ref_ws):
         if not mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref):
             is_valid = False
-            print(ws.getName() + " was not equal to: " + ref.getName())
+            print("{} was not equal to {}".format(ws.getName(), ref.getName()))
 
     return is_valid
 
@@ -134,7 +134,7 @@ def run_vanadium_calibration():
 
     # Check the spline looks good and was saved
     if not os.path.exists(spline_path):
-        raise RuntimeError("Could not find output spline at the following path: " + spline_path)
+        raise RuntimeError("Could not find output spline at the following path: {}".format(spline_path))
     splined_ws = mantid.Load(Filename=spline_path)
 
     return splined_ws

@@ -68,4 +68,4 @@ def get_tof_window_dict(tof_window):
         return window_30_130_params
     if tof_window == HRPD_TOF_WINDOWS.window_100_200:
         return window_100_200_params
-    raise RuntimeError("Invalid time-of-flight window: " + str(tof_window))
+    raise RuntimeError("Invalid time-of-flight window: {}".format(tof_window))

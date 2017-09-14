@@ -5,7 +5,7 @@ from isis_powder.routines import common
 import math
 from mantid import logger
 
-property_err_string = "The following sample property was not passed as an argument: "
+property_err_string = "The following sample property was not passed as an argument: {}"
 
 
 class SampleDetails(object):
@@ -17,7 +17,7 @@ class SampleDetails(object):
             logger.warning(warning)
 
         center = common.dictionary_key_helper(dictionary=kwargs, key="center",
-                                              exception_msg=property_err_string + "center")
+                                              exception_msg=property_err_string.format("center"))
         SampleDetails._validate_center(center)
         self._center = [float(i) for i in center]  # List of X, Y, Z position
 
@@ -111,7 +111,7 @@ class SampleDetails(object):
         if self._shape_type == "cylinder":
             return self._shape.radius
         else:
-            raise RuntimeError("Radius is not applicable for the shape type \"" + self._shape_type + "\"")
+            raise RuntimeError("Radius is not applicable for the shape type \"{}\"".format(self._shape_type))
 
     def height(self):
         return self._shape.height
@@ -123,19 +123,19 @@ class SampleDetails(object):
         if self._shape_type == "slab":
             return self._shape.width
         else:
-            raise RuntimeError("Width is not applicable for the shape type \"" + self._shape_type + "\"")
+            raise RuntimeError("Width is not applicable for the shape type \"{}\"".format(self._shape_type))
 
     def angle(self):
         if self._shape_type == "slab":
             return self._shape.angle
         else:
-            raise RuntimeError("Angle is not applicable for the shape type \"" + self._shape_type + "\"")
+            raise RuntimeError("Angle is not applicable for the shape type \"{}\"".format(self._shape_type))
 
     def thickness(self):
         if self._shape_type == "slab":
             return self._shape.thickness
         else:
-            raise RuntimeError("Thickness is not applicable for the shape type \"" + self._shape_type + "\"")
+            raise RuntimeError("Thickness is not applicable for the shape type \"{}\"".format(self._shape_type))
 
 
 class _Material(object):
@@ -199,9 +199,9 @@ class _Cylinder(object):
     def __init__(self, kwargs):
         # By using kwargs we get a better error than "init takes n arguments"
         height = common.dictionary_key_helper(dictionary=kwargs, key="height",
-                                              exception_msg=property_err_string + "height")
+                                              exception_msg=property_err_string.format("height"))
         radius = common.dictionary_key_helper(dictionary=kwargs, key="radius",
-                                              exception_msg=property_err_string + "radius")
+                                              exception_msg=property_err_string.format("radius"))
 
         _Cylinder._validate_constructor_inputs(height=height, radius=radius)
         SampleDetails.validate_constructor_inputs({"height": height, "radius": radius})
@@ -229,13 +229,13 @@ class _Slab(object):
     def __init__(self, kwargs):
         # By using kwargs we get a better error than "init takes n arguments"
         thickness = common.dictionary_key_helper(dictionary=kwargs, key="thickness",
-                                                 exception_msg=property_err_string + "thickness")
+                                                 exception_msg=property_err_string.format("thickness"))
         width = common.dictionary_key_helper(dictionary=kwargs, key="width",
-                                             exception_msg=property_err_string + "width")
+                                             exception_msg=property_err_string.format("width"))
         height = common.dictionary_key_helper(dictionary=kwargs, key="height",
-                                              exception_msg=property_err_string + "height")
+                                              exception_msg=property_err_string.format("height"))
         angle = common.dictionary_key_helper(dictionary=kwargs, key="angle",
-                                             exception_msg=property_err_string + "angle")
+                                             exception_msg=property_err_string.format("angle"))
 
         SampleDetails.validate_constructor_inputs({"thickness": thickness, "width": width, "height": height,
                                                   "angle": angle})
@@ -254,16 +254,17 @@ def _check_value_is_physical(property_name, value):
     value = _check_can_convert_to_float(property_name=property_name, value=value)
 
     if value <= 0 or math.isnan(value):
-        raise ValueError("The value set for " + property_name + " was: " + str(original_value)
-                         + " which is impossible for a physical object")
+        raise ValueError("The value set for {} was: {} which is impossible for a physical object".format(property_name,
+                                                                                                          original_value
+                                                                                                          ))
 
 
 def _check_can_convert_to_float(property_name, value):
     original_value = value
     value = convert_to_float(value)
     if value is None:
-        raise ValueError("Could not convert the " + property_name + " to a number."
-                         " The input was: '" + str(original_value) + "'")
+        raise ValueError("Could not convert the {} to a number. The input was: '{}'".format(property_name,
+                                                                                            original_value))
     return value
 
 
