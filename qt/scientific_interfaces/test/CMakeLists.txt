@@ -46,7 +46,7 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( ScientificInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
   target_link_libraries( ScientificInterfacesTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidScientificInterfacesGeneralQt4
-            MantidScientificInterfacesMuon
+            MantidScientificInterfacesMuonQt4
             MantidScientificInterfacesISISReflectometryQt4
             MantidScientificInterfacesEnggDiffractionQt4
             MantidScientificInterfacesMultiDatasetFitQt4

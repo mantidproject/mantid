@@ -47,7 +47,6 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
                     PERECOMPILED PrecompiledHeader.h
                     LINK_LIBRARIES
                         ${TCMALLOC_LIBRARIES_LINKTIME}
-                        MantidScientificInterfacesMuon
                         ${CORE_MANTIDLIBS}
                         ${QT_LIBRARIES}
                         ${QWT_LIBRARIES}
@@ -56,6 +55,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
                         ${JSONCPP_LIBRARIES}
                     MTD_QT_LINK_LIBRARIES
                         MantidQtWidgetsCommon
+                        MantidScientificInterfacesMuon
                     INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
                     OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
 )
