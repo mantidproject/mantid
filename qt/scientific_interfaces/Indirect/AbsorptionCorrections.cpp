@@ -105,6 +105,7 @@ void AbsorptionCorrections::run() {
   QString outputBaseName = sampleWsName.left(nameCutIndex);
 
   QString outputWsName = outputBaseName + "_" + sampleShape + "_Corrections";
+  std::string outputWsNameStr = outputWsName.toStdString();
 
   monteCarloAbsCor->setProperty("CorrectionsWorkspace", 
     outputWsName.toStdString());
@@ -113,8 +114,9 @@ void AbsorptionCorrections::run() {
   m_batchAlgoRunner->addAlgorithm(monteCarloAbsCor);
 
   m_absCorAlgo = monteCarloAbsCor;
+
   // Run algorithm batch
-  m_batchAlgoRunner->executeBatchAsync();
+  m_batchAlgoRunner->executeBatch();
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsName.toStdString();
