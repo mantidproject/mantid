@@ -10,7 +10,7 @@ IndexTypeProperty::IndexTypeProperty(const std::string &name,
   if (indexType & IndexType::SpectrumNum)
     m_allowedValues.push_back("SpectrumNumber");
 
-  if (m_allowedValues.size() == 0)
+  if (m_allowedValues.empty())
     throw std::invalid_argument("Argument indexType incorrectly specified");
 
   m_value = m_allowedValues[0];

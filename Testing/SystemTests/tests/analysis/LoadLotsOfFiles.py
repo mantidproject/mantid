@@ -106,7 +106,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'TolueneLargerOrderAbins.out',
                 'TolueneScale.out',
                 'TolueneScratchAbins.out',
-                'SingleCrystalDiffuseReduction_UB.mat'
+                'SingleCrystalDiffuseReduction_UB.mat',
+                'Na2SiF6_DMOL3.outmol'
                 ]
 
 EXPECTED_EXT = '.expected'
