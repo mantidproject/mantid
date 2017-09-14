@@ -1,6 +1,7 @@
 #include <H5Cpp.h>
 
 #include "MantidKernel/make_unique.h"
+#include "MantidParallel/Communicator.h"
 #include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
@@ -12,10 +13,11 @@ namespace IO {
 EventLoader::EventLoader(const std::string &filename,
                          const std::string &groupName,
                          const std::vector<std::string> &bankNames,
-                         const std::vector<int32_t> &bankOffsets)
+                         const std::vector<int32_t> &bankOffsets,
+                         std::vector<std::vector<TofEvent> *> eventLists)
     : m_file(Kernel::make_unique<H5::H5File>(filename, H5F_ACC_RDONLY)),
       m_groupName(groupName), m_bankNames(bankNames),
-      m_bankOffsets(bankOffsets) {}
+      m_bankOffsets(bankOffsets), m_eventLists(std::move(eventLists)) {}
 
 EventLoader::~EventLoader() = default;
 
@@ -49,9 +51,9 @@ template <class TimeZeroType, class TimeOffsetType> void EventLoader::load() {
   // TODO automatically(?) determine good chunk size
   // TODO automatically(?) determine good number of ranks to use for load
   const size_t chunkSize = 1024 * 1024;
-  const auto &ranges = Chunker::determineLoadRanges(*m_file, m_groupName,
-                                                    m_bankNames, chunkSize);
-
+  Communicator comm;
+  const Chunker chunker(comm, *m_file, m_groupName, m_bankNames, chunkSize);
+  const auto &ranges = chunker.makeLoadRanges();
   std::vector<int32_t> event_id(2 * chunkSize);
   std::vector<TimeOffsetType> event_time_offset(2 * chunkSize);
 

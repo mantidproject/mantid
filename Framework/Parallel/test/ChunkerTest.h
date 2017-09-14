@@ -25,13 +25,13 @@ public:
   static ChunkerTest *createSuite() { return new ChunkerTest(); }
   static void destroySuite(ChunkerTest *suite) { delete suite; }
 
-  void test_determineLoadRanges_1_rank() {
+  void test_makeLoadRanges_1_rank() {
     const int ranks = 1;
     const int rank = 0;
     const std::vector<size_t> bankSizes{7, 2, 4, 1};
     const size_t chunkSize = 2;
-    const auto ranges =
-        Chunker::determineLoadRanges(ranks, rank, bankSizes, chunkSize);
+    const Chunker chunker(ranks, rank, bankSizes, chunkSize);
+    const auto ranges = chunker.makeLoadRanges();
     TS_ASSERT_EQUALS(ranges.size(), 1 + 1 + 2 + 4);
     size_t bank = 0;
     TS_ASSERT_EQUALS(ranges[0], (Chunker::LoadRange{bank, 0, 2}));
@@ -47,13 +47,13 @@ public:
     TS_ASSERT_EQUALS(ranges[7], (Chunker::LoadRange{bank, 0, 1}));
   }
 
-  void test_determineLoadRanges_2_ranks_rank0() {
+  void test_makeLoadRanges_2_ranks_rank0() {
     const int ranks = 2;
     const int rank = 0;
     const std::vector<size_t> bankSizes{6, 1, 4, 2};
     const size_t chunkSize = 2;
-    const auto ranges =
-        Chunker::determineLoadRanges(ranks, rank, bankSizes, chunkSize);
+    const Chunker chunker(ranks, rank, bankSizes, chunkSize);
+    const auto ranges = chunker.makeLoadRanges();
     TS_ASSERT_EQUALS(ranges.size(), 4);
     size_t bank = 0;
     TS_ASSERT_EQUALS(ranges[0], (Chunker::LoadRange{bank, 0, 2}));
@@ -65,13 +65,13 @@ public:
     TS_ASSERT_EQUALS(ranges[3], (Chunker::LoadRange{bank, 0, 1}));
   }
 
-  void test_determineLoadRanges_2_ranks_rank1() {
+  void test_makeLoadRanges_2_ranks_rank1() {
     const int ranks = 2;
     const int rank = 1;
     const std::vector<size_t> bankSizes{6, 1, 4, 2};
     const size_t chunkSize = 2;
-    const auto ranges =
-        Chunker::determineLoadRanges(ranks, rank, bankSizes, chunkSize);
+    const Chunker chunker(ranks, rank, bankSizes, chunkSize);
+    const auto ranges = chunker.makeLoadRanges();
     TS_ASSERT_EQUALS(ranges.size(), 4);
     size_t bank = 2;
     TS_ASSERT_EQUALS(ranges[0], (Chunker::LoadRange{bank, 0, 2}));
@@ -83,13 +83,13 @@ public:
     TS_ASSERT_EQUALS(ranges[3], (Chunker::LoadRange{bank, 0, 0}));
   }
 
-  void test_determineLoadRanges_4_ranks_rank1() {
+  void test_makeLoadRanges_4_ranks_rank1() {
     const int ranks = 4;
     const int rank = 1;
     const std::vector<size_t> bankSizes{6, 1, 4, 2};
     const size_t chunkSize = 2;
-    const auto ranges =
-        Chunker::determineLoadRanges(ranks, rank, bankSizes, chunkSize);
+    const Chunker chunker(ranks, rank, bankSizes, chunkSize);
+    const auto ranges = chunker.makeLoadRanges();
     TS_ASSERT_EQUALS(ranges.size(), 2);
     size_t bank = 0;
     TS_ASSERT_EQUALS(ranges[0], (Chunker::LoadRange{bank, 2, 2}));

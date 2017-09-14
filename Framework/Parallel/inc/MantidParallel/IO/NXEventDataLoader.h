@@ -15,6 +15,9 @@ namespace IO {
   event_time_offset. The class is templated such that the types of
   event_time_zero and event_time_offset can be set as required.
 
+  @author Simon Heybrock
+  @date 2017
+
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 

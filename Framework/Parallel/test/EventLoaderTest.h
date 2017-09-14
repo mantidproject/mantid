@@ -17,7 +17,8 @@ public:
   static void destroySuite(EventLoaderTest *suite) { delete suite; }
 
   void test_throws_if_file_does_not_exist() {
-    TS_ASSERT_THROWS(EventLoader("abcdefg", "", {}, {}), H5::FileIException);
+    TS_ASSERT_THROWS(EventLoader("abcdefg", "", {}, {}, {}),
+                     H5::FileIException);
   }
 };
 

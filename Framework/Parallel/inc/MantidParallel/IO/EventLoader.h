@@ -13,10 +13,15 @@ class H5File;
 }
 
 namespace Mantid {
+class TofEvent;
 namespace Parallel {
 namespace IO {
 
-/** EventLoader : TODO: DESCRIPTION
+/** Loader for event data from Nexus files with parallelism based on multiple
+  processes (MPI) for performance.
+
+  @author Simon Heybrock
+  @date 2017
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -43,7 +48,8 @@ class MANTID_PARALLEL_DLL EventLoader {
 public:
   EventLoader(const std::string &filename, const std::string &groupName,
               const std::vector<std::string> &bankNames,
-              const std::vector<int32_t> &bankOffsets);
+              const std::vector<int32_t> &bankOffsets,
+              std::vector<std::vector<TofEvent> *> eventLists);
   ~EventLoader();
 
   void load();
@@ -59,6 +65,7 @@ private:
   const std::string m_groupName;
   const std::vector<std::string> m_bankNames;
   const std::vector<int32_t> m_bankOffsets;
+  std::vector<std::vector<TofEvent> *> m_eventLists;
 };
 
 } // namespace IO
