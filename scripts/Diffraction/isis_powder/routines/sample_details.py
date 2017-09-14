@@ -13,8 +13,9 @@ class SampleDetails(object):
         self._shape_type = common.dictionary_key_helper(dictionary=kwargs, key="shape", throws=False)
         if self._shape_type is None:
             self._shape_type = "cylinder"
-            warning = "Failed to supply parameter \"shape\" - defaulting to \"cylinder\""
-            logger.warning(warning)
+            warning = "Failed to supply parameter \"shape\" to SampleDetails - defaulting to \"cylinder\""
+            print("WARNING: {}".format(warning))  # Show warning in script window
+            logger.warning(warning)               # Show warning in Mantid logging area
 
         center = common.dictionary_key_helper(dictionary=kwargs, key="center",
                                               exception_msg=property_err_string.format("center"))
