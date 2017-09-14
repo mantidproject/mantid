@@ -642,7 +642,7 @@ std::vector<Histogram> FindPeaks::calculateSecondDifference(
 
 //----------------------------------------------------------------------------------------------
 /** Smooth data for Mariscotti.
-  *  @param WS :: Vector of histograms to be smoothed (inplace).
+  *  @param histograms :: Vector of histograms to be smoothed (inplace).
   *  @param w ::  The number of data points which should contribute to each
  * smoothed point
   *  @param g_z :: The number of smoothing steps given by g_z (should be 5)
