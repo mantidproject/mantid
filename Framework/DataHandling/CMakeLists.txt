@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/DataBlock.cpp
 	src/DataBlockComposite.cpp
 	src/DataBlockGenerator.cpp
+	src/DefaultEventLoader.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
@@ -33,6 +34,7 @@ set ( SRC_FILES
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
 	src/LoadBBY.cpp
+	src/LoadBankFromDiskTask.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -50,7 +52,7 @@ set ( SRC_FILES
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
-        src/LoadILLDiffraction.cpp
+	src/LoadILLDiffraction.cpp
 	src/LoadILLIndirect2.cpp
 	src/LoadILLReflectometry.cpp
 	src/LoadILLSANS.cpp
@@ -93,8 +95,8 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
-	src/LoadSINQFocus.cpp
 	src/LoadSESANS.cpp
+	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
@@ -186,6 +188,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/DataBlock.h
 	inc/MantidDataHandling/DataBlockComposite.h
 	inc/MantidDataHandling/DataBlockGenerator.h
+	inc/MantidDataHandling/DefaultEventLoader.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
@@ -207,6 +210,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
 	inc/MantidDataHandling/LoadBBY.h
+	inc/MantidDataHandling/LoadBankFromDiskTask.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -224,7 +228,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
-        inc/MantidDataHandling/LoadILLDiffraction.h
+	inc/MantidDataHandling/LoadILLDiffraction.h
 	inc/MantidDataHandling/LoadILLIndirect2.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLSANS.h
@@ -394,7 +398,7 @@ set ( TEST_FILES
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLDiffractionTest.h
-        LoadILLIndirect2Test.h
+	LoadILLIndirect2Test.h
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
 	LoadILLTOF2Test.h
