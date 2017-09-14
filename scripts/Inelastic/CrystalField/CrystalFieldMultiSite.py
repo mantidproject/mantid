@@ -195,13 +195,18 @@ class CrystalFieldMultiSite(object):
             self.function.fixParameter(a)
 
 
-    def ties(self, **kwargs):
+    def ties(self, *args, **kwargs):
         """Set ties on the field parameters.
 
         @param kwargs: Ties as name=value pairs: name is a parameter name,
             the value is a tie string or a number. For example:
                 tie(B20 = 0.1, IB23 = '2*B23')
         """
+        for arg in args:
+            if isinstance(arg, dict):
+                kwargs.update(arg)
+            else:
+                raise TypeError("")
         for tie in kwargs:
             self.function.tie(tie, str(kwargs[tie]))
 
@@ -253,16 +258,35 @@ class CrystalFieldMultiSite(object):
 
 
     def _setBackground(self, peak=None, background=None):
+        """
+        Set background function(s).
+
+        Can provide one argument or both. Each argument can be a string or FunctionWrapper object.
+        Can also pass two functions as one argument by passing a single string or CompositeFunctionWrapper.
+
+        Examples:
+        setBackground(Gaussian())
+        setBackground(background=LinearBackground())
+        setBackground(peak='name=Gaussian,Height=1', background='name=LinearBackground')
+        setBackground(Gaussian(), 'name=LinearBackground')
+        setBackground(Gaussian() + LinearBackground())
+        setBackground('name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0')
+
+        @param peak: A function passed as the peak. Can be a string or FunctionWrapper e.g.
+                'name=Gaussian,Height=0,PeakCentre=1,Sigma=0' or Gaussian(PeakCentre=1)
+        @param background: A function passed as the background. Can be a string or FunctionWrapper e.g.
+                'name=LinearBackground,A0=1' or LinearBackground(A0=1)
+        """
         from CrystalField.function import Function
         from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 
         self._background = Function(self.function, prefix='bg.')
         property_name = "peak"
-        if background is not None and peak is None:
+        if background is not None and peak is None: #swap arguments, then do single arg case
             peak = background
             background = None
             property_name = "background"
-        if peak is not None and background is None:
+        if peak is not None and background is None: #single arg case
             if isinstance(peak, basestring):
                 number_of_functions = peak.count(';') + 1
                 if number_of_functions == 2:
@@ -271,17 +295,20 @@ class CrystalFieldMultiSite(object):
                     setattr(self._background, property_name, Function(self.function, prefix='bg.'))
                     self.function.setAttributeValue('Background', '%s' % peak)
                 else:
-                    raise ValueError("Composite function peak must be no more than two functions")
+                    raise ValueError("argument passed to background must have exactly 1 or 2 functions, got %s"
+                                     % number_of_functions)
+
             elif isinstance(peak, CompositeFunctionWrapper):
                 if len(peak) == 2:
                     peak, background = str(peak).split(';')
                 else:
-                    raise ValueError("Composite function peak must be no more than two functions")
+                    raise ValueError("composite function passed to background must have exactly 2 functions, got %s"
+                                     % len(peak))
             elif isinstance(peak, FunctionWrapper):
                 setattr(self._background, property_name, Function(self.function, prefix='bg.'))
                 self.function.setAttributeValue('Background', '%s' % peak)
             else:
-                raise TypeError("peak must be a string or function object")
+                raise TypeError("background argument(s) must be string or function object(s)")
 
         if background is not None and peak is not None:
             self._background.peak = Function(self.function, prefix='bg.f0.')

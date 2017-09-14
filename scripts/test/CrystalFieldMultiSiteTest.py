@@ -355,7 +355,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf.ties(B40='B20/2')
         cf.constraints('IntensityScaling > 0', 'B22 < 4')
         cf.constraints('pk0.FWHM < 2.2', 'pk1.FWHM >= 0.1')
-        cf.ties(**{'pk2.FWHM': '2*pk1.FWHM', 'pk3.FWHM': '2*pk2.FWHM'})
+        cf.ties({'pk2.FWHM': '2*pk1.FWHM', 'pk3.FWHM': '2*pk2.FWHM'})
         cf.background.peak.ties(Height=10.1)
         cf.background.peak.constraints('Sigma > 0')
         cf.background.background.ties(A0=0.1)
@@ -377,47 +377,67 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         fun = FunctionFactory.createInitialized(s)
         self.assertTrue(fun is not None)
 
-    # def test_constraints_multi_spectrum(self):
-    #     from CrystalField import CrystalField, CrystalFieldFit, Background, Function
-    #     from mantid.fitfunctions import FlatBackground, Gaussian
-    #     from mantid.simpleapi import FunctionFactory
-    #
-    #     # cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
-    #     #                   Temperature=[44.0, 50], FWHM=[1.1, 0.9])
-    #     # cf.PeakShape = 'Lorentzian'
-    #     # cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=0.3),
-    #     #                  background=Function('FlatBackground', A0=1.0))
-    #
-    #     cf = CrystalFieldMultiSite(Ions=['Ce'], Symmetries=['C2v'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
-    #                                Background=FlatBackground(), BackgroundPeak=Gaussian(Height=10, Sigma=0.3),
-    #                                B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
-    #
-    #     # cf.constraints('IntensityScaling0 > 0', '0 < IntensityScaling1 < 2', 'B22 < 4')
-    #
-    #     for x in range(cf.function.numParams()):
-    #         print cf.function.parameterName(x)
-    #
-    #     cf.background[0].peak.ties(Height=10.1)
-    #     cf.background[0].peak.constraints('Sigma > 0.1')
-    #     cf.background[1].peak.ties(Height=20.2)
-    #     cf.background[1].peak.constraints('Sigma > 0.2')
-    #
-    #     cf.peaks[1].ties({'f2.FWHM': '2*f1.FWHM', 'f3.FWHM': '2*f2.FWHM'})
-    #     cf.peaks[0].constraints('f1.FWHM < 2.2')
-    #     cf.peaks[1].constraints('f1.FWHM > 1.1', '1 < f4.FWHM < 2.2')
-    #
-    #     s = cf.makeMultiSpectrumFunction()
-    #
-    #     self.assertTrue('0<IntensityScaling0' in s)
-    #     self.assertTrue('IntensityScaling1<2' in s)
-    #     self.assertTrue('f0.f0.f0.Height=10.1' in s)
-    #     self.assertTrue('f1.f0.f0.Height=20.2' in s)
-    #     self.assertTrue('0.1<f0.f0.f0.Sigma' in s)
-    #     self.assertTrue('0.2<f1.f0.f0.Sigma' in s)
-    #     self.assertTrue('f0.f1.FWHM<2.2' in s)
-    #     self.assertTrue('1.1<f1.f1.FWHM' in s)
-    #     self.assertTrue('1<f1.f4.FWHM<2.2' in s)
-    #     self.assertTrue('f1.f2.FWHM=2*f1.f1.FWHM' in s)
-    #     self.assertTrue('f1.f3.FWHM=2*f1.f2.FWHM' in s)
-    #
-    #     fun = FunctionFactory.createInitialized(s)
+    def test_constraints_multi_spectrum(self):
+        from mantid.fitfunctions import FlatBackground, Gaussian
+        from mantid.simpleapi import FunctionFactory
+
+        cf = CrystalFieldMultiSite(Ions=['Ce'], Symmetries=['C2v'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
+                                   Background=FlatBackground(), BackgroundPeak=Gaussian(Height=10, Sigma=0.3),
+                                   B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+
+        cf.constraints('sp0.IntensityScaling > 0', '0 < sp1.IntensityScaling < 2', 'B22 < 4')
+
+        cf.ties({'sp0.bg.f0.Height': 10.1})
+        cf.constraints('sp0.bg.f0.Sigma > 0.1')
+        cf.ties({'sp1.bg.f0.Height': 20.2})
+        cf.constraints('sp1.bg.f0.Sigma > 0.2')
+
+        cf.ties({'sp1.pk2.FWHM': '2*sp1.pk1.FWHM', 'sp1.pk3.FWHM': '2*sp1.pk2.FWHM'})
+        cf.constraints('sp0.pk1.FWHM < 2.2')
+        cf.constraints('sp1.pk1.FWHM > 1.1', '1 < sp1.pk4.FWHM < 2.2')
+
+        s = str(cf.function)
+        self.assertTrue('0<sp0.IntensityScaling' in s)
+        self.assertTrue('sp1.IntensityScaling<2' in s)
+        self.assertTrue('sp0.bg.f0.Height=10.1' in s)
+        self.assertTrue('sp1.bg.f0.Height=20.2' in s)
+        self.assertTrue('0.1<sp0.bg.f0.Sigma' in s)
+        self.assertTrue('0.2<sp1.bg.f0.Sigma' in s)
+        self.assertTrue('sp0.pk1.FWHM<2.2' in s)
+        self.assertTrue('1.1<sp1.pk1.FWHM' in s)
+        self.assertTrue('1<sp1.pk4.FWHM<2.2' in s)
+        self.assertTrue('sp1.pk2.FWHM=2*sp1.pk1.FWHM' in s)
+        self.assertTrue('sp1.pk3.FWHM=2*sp1.pk2.FWHM' in s)
+
+    def test_constraints_multi_spectrum_and_ion(self):
+        from mantid.fitfunctions import FlatBackground, Gaussian
+
+        cf = CrystalFieldMultiSite(Ions=['Ce','Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
+                                   Background=FlatBackground(), BackgroundPeak=Gaussian(Height=10, Sigma=0.3),
+                                   parameters={'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787,
+                                               'ion1.B42':-0.11611, 'ion1.B44':-0.12544})
+
+        cf.constraints('sp0.IntensityScaling > 0', '0 < sp1.IntensityScaling < 2', 'ion0.B22 < 4')
+
+        cf.ties({'sp0.bg.f0.Height': 10.1})
+        cf.constraints('sp0.bg.f0.Sigma > 0.1')
+        cf.ties({'sp1.bg.f0.Height': 20.2})
+        cf.constraints('sp1.bg.f0.Sigma > 0.2')
+
+        cf.ties({'ion0.sp1.pk2.FWHM': '2*ion0.sp1.pk1.FWHM', 'ion1.sp1.pk3.FWHM': '2*ion1.sp1.pk2.FWHM'})
+        cf.constraints('ion0.sp0.pk1.FWHM < 2.2')
+        cf.constraints('ion0.sp1.pk1.FWHM > 1.1', '1 < ion0.sp1.pk4.FWHM < 2.2')
+
+        s = str(cf.function)
+        self.assertTrue('0<sp0.IntensityScaling' in s)
+        self.assertTrue('sp1.IntensityScaling<2' in s)
+        self.assertTrue('sp0.bg.f0.Height=10.1' in s)
+        self.assertTrue('sp1.bg.f0.Height=20.2' in s)
+        self.assertTrue('0.1<sp0.bg.f0.Sigma' in s)
+        self.assertTrue('0.2<sp1.bg.f0.Sigma' in s)
+        self.assertTrue('ion0.sp0.pk1.FWHM<2.2' in s)
+        self.assertTrue('1.1<ion0.sp1.pk1.FWHM' in s)
+        self.assertTrue('1<ion0.sp1.pk4.FWHM<2.2' in s)
+        self.assertTrue('ion0.sp1.pk2.FWHM=2*ion0.sp1.pk1.FWHM' in s)
+        self.assertTrue('ion1.sp1.pk3.FWHM=2*ion1.sp1.pk2.FWHM' in s)
+
