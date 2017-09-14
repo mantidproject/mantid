@@ -62,6 +62,7 @@ void RemoveLogs::exec() {
       localWorkspace->run().getLogData();
   std::vector<std::string> keepLogs = getProperty("KeepLogs");
   std::vector<std::string> logNames;
+  logNames.reserve(logData.size());
   for (const auto property : logData) {
     logNames.push_back(property->name());
   }

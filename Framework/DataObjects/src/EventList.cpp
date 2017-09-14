@@ -4403,7 +4403,7 @@ void EventList::splitByPulseTimeWithMatrix(
   }
 
   // Split
-  if (vec_target.size() == 0) {
+  if (vec_target.empty()) {
     // No splitter: copy all events to group workspace = -1
     (*outputs[-1]) = (*this);
   } else {
