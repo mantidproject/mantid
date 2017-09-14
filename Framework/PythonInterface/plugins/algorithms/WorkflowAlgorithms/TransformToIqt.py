@@ -286,7 +286,7 @@ class TransformToIqt(PythonAlgorithm):
         ReplaceSpecialValues(InputWorkspace=self._output_workspace,
                              OutputWorkspace=self._output_workspace,
                              InfinityValue=0.0,
-                             BigNumberThreshold=1.0,
+                             BigNumberThreshold=1.0001,
                              NaNValue=0.0)
 
         # Set Y axis unit and label
