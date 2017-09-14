@@ -200,8 +200,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                 XMax = min(XMax, newXMax)
             logger.notice("Using momentum range {} to {} A^-1".format(XMin, XMax))
             CropWorkspace(InputWorkspace='__flux',OutputWorkspace='__flux',XMin=XMin,XMax=XMax)
-            Y = mtd['__flux'].extractY()
-            mtd['__flux'] = (mtd['__flux']-Y.min())/(Y.max()-Y.min())
+            for spectrumNumber in range(mtd['__flux'].getNumberHistograms()):
+                Y = mtd['__flux'].readY(spectrumNumber)
+                mtd['__flux'].setY(spectrumNumber,(Y-Y.min())/(Y.max()-Y.min()))
 
         if _background:
             Load(Filename=self.getProperty("Background").value,
