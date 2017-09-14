@@ -36,9 +36,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 namespace Mantid {
 namespace Algorithms {
+namespace ApodizationFunctions {
 double lorentz(double time, double decayConstant);
 double gaussian(const double time, const double decayConstant);
 double none(const double, const double);
+}
 }
 }
 
