@@ -1,6 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
+import math
+
 from PyQt4 import QtCore, QtGui
+
+import mantid.simpleapi as mantid
+
 from Muon import table_utils
 
 
@@ -23,33 +28,34 @@ class MaxEntView(QtGui.QWidget):
         self.table.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
 
         # populate table
-        options=['test']
 
-        table_utils.setRowName(self.table,0,"Workspace")
-        self.ws= table_utils.addComboToTable(self.table,0,options)
-
-        table_utils.setRowName(self.table,1,"Complex Data")
-        self.complex_data_box= table_utils.addCheckBoxToTable(self.table,False,1)
+        table_utils.setRowName(self.table,0,"Complex Data")
+        self.complex_data_box= table_utils.addCheckBoxToTable(self.table,False,0)
         self.complex_data_box.setFlags(QtCore.Qt.ItemIsEnabled)
         # needs an even number of ws to work
         # so lets hide it for now
-        self.table.setRowHidden(1,True)
+        self.table.setRowHidden(0,True)
 
-        table_utils.setRowName(self.table,2,"Complex Image")
-        self.complex_image_box= table_utils.addCheckBoxToTable(self.table,True,2)
-        table_utils.setRowName(self.table,3,"Positive Image")
-        self.positive_image_box= table_utils.addCheckBoxToTable(self.table,False,3)
-        table_utils.setRowName(self.table,4,"Resolution")
-        self.resolution_box= table_utils.addSpinBoxToTable(self.table,1,4)
+        table_utils.setRowName(self.table,1,"Complex Image")
+        self.complex_image_box= table_utils.addCheckBoxToTable(self.table,True,1)
+        table_utils.setRowName(self.table,2,"Positive Image")
+        self.positive_image_box= table_utils.addCheckBoxToTable(self.table,False,2)
+        table_utils.setRowName(self.table,3,"Resolution")
+        self.resolution_box= table_utils.addSpinBoxToTable(self.table,1,3)
 
-        table_utils.setRowName(self.table,5,"Maximum entropy constant (A)")
-        self.AConst= table_utils.addDoubleToTable(self.table,0.4,5)
+        table_utils.setRowName(self.table,4,"Maximum entropy constant (A)")
+        self.AConst= table_utils.addDoubleToTable(self.table,0.4,4)
 
-        table_utils.setRowName(self.table, 6,"Auto shift")
-        self.shift_box= table_utils.addCheckBoxToTable(self.table,False,6)
+        table_utils.setRowName(self.table, 5,"Auto shift")
+        self.shift_box= table_utils.addCheckBoxToTable(self.table,False,5)
 
-        table_utils.setRowName(self.table, 7,"Raw")
-        self.raw_box= table_utils.addCheckBoxToTable(self.table,False,7)
+        table_utils.setRowName(self.table, 6,"Raw")
+        self.raw_box= table_utils.addCheckBoxToTable(self.table,False,6)
+
+        # this will be removed once maxEnt does a simultaneous fit
+        options=['test']
+        table_utils.setRowName(self.table,7,"Workspace")
+        self.ws= table_utils.addComboToTable(self.table,7,options)
 
         self.table.resizeRowsToContents()
 
@@ -114,7 +120,11 @@ class MaxEntView(QtGui.QWidget):
 
     def initMaxEntInput(self):
         inputs={}
+
+        #  this will be removed once maxEnt does a simultaneous fit
         inputs['InputWorkspace']=str( self.ws.currentText()).replace(";","; ")
+        # will use this instead of the above
+        #inputs['InputWorkspace']="MuonAnalysis"
         inputs['ComplexData']=  self.complex_data_box.checkState()
         inputs["ComplexImage"]=  self.complex_image_box.checkState()
         inputs['PositiveImage']=self.positive_image_box.checkState()
@@ -128,7 +138,13 @@ class MaxEntView(QtGui.QWidget):
         inputs["MaxIterations"]=int(self.max_iterations.text())
         inputs["AlphaChopIterations"]=int(self.chop.text())
 
+        tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
+        out=tmpWS.getInstrument().getName()+str(tmpWS.getRunNumber()).zfill(8)
+
+        # will remove this when sim maxent Works
         out=str( self.ws.currentText()).replace(";","; ")
+
+        inputs["Run"]=out
         inputs['EvolChi']=out+";EvolChi;MaxEnt"
         inputs['EvolAngle']=out+";EvolAngle;MaxEnt"
         inputs['ReconstructedImage']=out+";ReconstructedImage;MaxEnt"
