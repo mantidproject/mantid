@@ -457,19 +457,24 @@ void PythonScript::endStdoutRedirect() {
 /**
  * To be called from the main thread before an async call that is
  * recursive. See ApplicationWindow::runPythonScript
+ * @return True if the lock was released by this call, false otherwise
  */
-void PythonScript::recursiveAsyncSetup() {
+bool PythonScript::recursiveAsyncSetup() {
   if (gil().locked()) {
     gil().release();
+    return true;
   }
+  return false;
 }
 
 /**
  * To be called from the main thread immediately after an async call
  * that is recursive. See ApplicationWindow::runPythonScript
+ * @param relock If true then relock the GIL on this thread. This should use the
+ * value returned by recursiveAsyncSetup.
  */
-void PythonScript::recursiveAsyncTeardown() {
-  if (!gil().locked()) {
+void PythonScript::recursiveAsyncTeardown(bool relock) {
+  if (relock) {
     gil().acquire();
   }
 }
