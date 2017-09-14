@@ -596,7 +596,7 @@ void IndirectDiffractionReduction::instrumentSelected(
         "D-Ranges corresponding to numeric values can be found in the"
         " OSIRIS user guide: "
         "https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf");
-    
+    m_uiForm.spDRange->setToolTip(
       "D-Ranges corresponding to numeric values can be found in the"
       " OSIRIS user guide: "
       "https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf");
