@@ -24,13 +24,14 @@ namespace Mantid {
 namespace NexusGeometry {
 
 //Choose which derived instrumentAbstraction to use
-typedef std::weak_ptr<InstrumentGeometryAbstraction> iAbstractBuilder_wkpr;
+typedef InstrumentGeometryAbstraction iAbstractBuilder;
+typedef std::shared_ptr<iAbstractBuilder> iAbstractBuilder_sptr;
 
-class NexusGeometryParser
+class DLLExport NexusGeometryParser
 {
 public:
     /// Constructor // , std::weak_ptr<InstrumentHandler> iHandler
-    explicit NexusGeometryParser(const H5std_string &fileName);
+    explicit NexusGeometryParser(const H5std_string &fileName, iAbstractBuilder_sptr iAbsBuilder_sptr);
     
     /// Destructor
     ~NexusGeometryParser() = default;
@@ -43,7 +44,7 @@ private:
     H5::Group rootGroup;
     ParsingErrors exitStatus = NO_ERROR;
     ///Instrument abstraction builder
-    iAbstractBuilder_wkpr iBuilder_wkpr;
+    iAbstractBuilder_sptr iBuilder_sptr;
     /// Opens sub groups of current group
     std::vector<H5::Group> openSubGroups(H5::Group &parentGroup, H5std_string CLASS_TYPE);
     /// Opens all detector groups in a file

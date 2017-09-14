@@ -10,7 +10,7 @@ namespace Mantid{
 namespace NexusGeometry{
 
 ///Constructor
-InstrumentGeometryAbstraction::InstrumentGeometryAbstraction(std::string &instrumentName){
+InstrumentGeometryAbstraction::InstrumentGeometryAbstraction(const std::string &instrumentName){
     Geometry::Instrument_sptr inst_sptr(new Geometry::Instrument(instrumentName));
     this->instrument_sptr = inst_sptr;
 }

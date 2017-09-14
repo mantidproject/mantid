@@ -2,17 +2,16 @@ if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
   cxxtest_add_test ( NexusGeometryTest ${TEST_FILES})
-  target_link_libraries( NexusGeometryTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+
+  target_include_directories( NexusGeometryTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} )
+  target_link_libraries( NexusGeometryTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             NexusGeometry
             Geometry
-            Beamline
+            Nexus
             ${NEXUS_LIBRARIES}
-            ${GSL_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
-            ${GMOCK_LIBRARIES}
-            ${GTEST_LIBRARIES} )
-
+            ${HDF5_LIBRARIES}
+            ${HDF5_HL_LIBRARIES} )
+  add_dependencies ( NexusGeometryTest Geometry)
   add_dependencies ( FrameworkTests NexusGeometryTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET NexusGeometryTest PROPERTY FOLDER "UnitTests" )

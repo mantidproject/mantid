@@ -13,6 +13,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
     InstrumentGeometryAbstractionTest.h
+    NexusGeometryParserTest.h
         )
 
 if (COVERALLS)

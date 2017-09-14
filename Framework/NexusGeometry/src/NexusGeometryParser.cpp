@@ -40,7 +40,7 @@ namespace {
 
 /// Constructor opens the nexus file
 NexusGeometryParser::NexusGeometryParser(
-    const H5std_string &fileName) {
+    const H5std_string &fileName, iAbstractBuilder_sptr iAbsBuilder_sptr ) {
     
     // Disable automatic printing, so Load algorithm can deal with errors
     // appropriately
@@ -53,7 +53,8 @@ NexusGeometryParser::NexusGeometryParser(
     } catch (GroupIException e) {
         this->exitStatus = OPENING_ROOT_GROUP_ERROR;
     }
-    //this->iHandler = iHandler;
+    //Initialize the instrumentAbstractBuilder
+    this->iBuilder_sptr = iAbsBuilder_sptr;
 }
 
 /// OFF NEXUS GEOMETRY PARSER
@@ -68,7 +69,7 @@ ParsingErrors NexusGeometryParser::ParseNexusGeometry()
 }
 
 /// Open subgroups of parent group
-std::vector<Group> openSubGroups(Group &parentGroup, H5std_string CLASS_TYPE){
+std::vector<Group> NexusGeometryParser::openSubGroups(Group &parentGroup, H5std_string CLASS_TYPE){
     std::vector<Group> subGroups;
     
     //Iterate over children, and determine if a group
