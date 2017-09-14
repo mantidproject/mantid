@@ -1,8 +1,10 @@
 # pylint: disable=no-init,attribute-defined-outside-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import json
 from mantid.simpleapi import *
 from mantid.geometry import PointGroupFactory
+from six import iteritems
 
 
 class HKLStatisticsTestMixin(object):
@@ -35,7 +37,7 @@ class HKLStatisticsTestMixin(object):
             ub_parameters.update(
                 dict(
                     [(str(x), y if isinstance(y, float) else str(y))
-                     for x, y in raw_ub_parameters.iteritems()]
+                     for x, y in iteritems(raw_ub_parameters)]
                 ))
 
         return ub_parameters
@@ -69,7 +71,7 @@ class HKLStatisticsTestMixin(object):
         keys = lines[0].split()
         values = [float(x) for x in lines[2].split()[2:]]
 
-        overall_statistics = dict(zip(keys, values))
+        overall_statistics = dict(list(zip(keys, values)))
 
         completentess = float(lines[3].split()[-1].replace('%', ''))
         overall_statistics['Completeness'] = completentess
@@ -121,9 +123,9 @@ class SortHKLTest(HKLStatisticsTestMixin, stresstesting.MantidStressTest):
         return statistics.row(0), sorted_hkls
 
     def _compare_statistics(self, statistics, reference_statistics):
-        self.assertEquals(round(statistics['Multiplicity'], 1), round(reference_statistics['<N>'], 1))
-        self.assertEquals(round(statistics['Rpim'], 2), round(100.0 * reference_statistics['Rm'], 2))
-        self.assertEquals(statistics['No. of Unique Reflections'], int(reference_statistics['Nunique']))
+        self.assertEqual(round(statistics['Multiplicity'], 1), round(reference_statistics['<N>'], 1))
+        self.assertEqual(round(statistics['Rpim'], 2), round(100.0 * reference_statistics['Rm'], 2))
+        self.assertEqual(statistics['No. of Unique Reflections'], int(reference_statistics['Nunique']))
         self.assertDelta(round(statistics['Data Completeness'], 1), round(reference_statistics['Completeness'], 1),
                          0.5)
 
@@ -141,9 +143,9 @@ class SortHKLTest(HKLStatisticsTestMixin, stresstesting.MantidStressTest):
                 unique_map[unique].append(peak)
 
         # pylint: disable=unused-variable
-        for unique_hkl, equivalents in unique_map.iteritems():
+        for unique_hkl, equivalents in iteritems(unique_map):
             if len(equivalents) > 1:
                 reference_peak = equivalents[0]
                 for peak in equivalents[1:]:
-                    self.assertEquals(peak.getIntensity(), reference_peak.getIntensity())
-                    self.assertEquals(peak.getSigmaIntensity(), reference_peak.getSigmaIntensity())
+                    self.assertEqual(peak.getIntensity(), reference_peak.getIntensity())
+                    self.assertEqual(peak.getSigmaIntensity(), reference_peak.getSigmaIntensity())

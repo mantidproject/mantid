@@ -337,7 +337,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
   // First a quick check using the validator
   CommonBinsValidator sameBins;
   bool commonBoundaries = false;
-  if (sameBins.isValid(inputWS) == "") {
+  if (sameBins.isValid(inputWS).empty()) {
     commonBoundaries = WorkspaceHelpers::commonBoundaries(*inputWS);
     // Only do the full check if the quick one passes
     if (commonBoundaries) {

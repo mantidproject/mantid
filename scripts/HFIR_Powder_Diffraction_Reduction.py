@@ -2,6 +2,7 @@
 """
     Script used to start the DGS reduction GUI from MantidPlot
 """
+from __future__ import (absolute_import, division, print_function)
 import sys
 
 from HFIRPowderReduction import HfirPDReductionGUI
@@ -14,6 +15,7 @@ def qapp():
     else:
         _app = QtGui.QApplication(sys.argv)
     return _app
+
 
 app = qapp()
 

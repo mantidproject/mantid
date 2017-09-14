@@ -541,17 +541,23 @@ int DateAndTime::day() const { return to_ptime().date().day(); }
 /** Get the hour (0-24) of this time.
  * @return the hour
  */
-int DateAndTime::hour() const { return to_ptime().time_of_day().hours(); }
+int DateAndTime::hour() const {
+  return static_cast<int>(to_ptime().time_of_day().hours());
+}
 
 /** Get the minute (0-60) of this time.
  * @return the minute
  */
-int DateAndTime::minute() const { return to_ptime().time_of_day().minutes(); }
+int DateAndTime::minute() const {
+  return static_cast<int>(to_ptime().time_of_day().minutes());
+}
 
 /** Get the seconds (0-60) of this time.
  * @return the second
  */
-int DateAndTime::second() const { return to_ptime().time_of_day().seconds(); }
+int DateAndTime::second() const {
+  return static_cast<int>(to_ptime().time_of_day().seconds());
+}
 
 /** Get the nanoseconds (remainder, < 1 second) of this time.
  * @return the nanoseconds

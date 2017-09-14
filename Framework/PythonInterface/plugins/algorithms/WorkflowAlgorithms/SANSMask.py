@@ -244,4 +244,5 @@ class SANSMask(PythonAlgorithm):
                 for j in self.__get_ids_for_assembly(component[i]):
                     yield j
 
+
 AlgorithmFactory.subscribe(SANSMask())

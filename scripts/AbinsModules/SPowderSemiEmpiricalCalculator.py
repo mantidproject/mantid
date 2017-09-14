@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import AbinsModules
-import  gc
+import gc
 try:
     # noinspection PyUnresolvedReferences
     from pathos.multiprocessing import ProcessingPool
@@ -155,10 +155,10 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             max_threshold = AbinsModules.AbinsConstants.MAX_THRESHOLD
 
-            is_not_smaller = s_max - self._max_s_previous_order[atom] > small_s
-            max_attempts = self._s_current_threshold[atom] < max_threshold
+            is_not_smaller = s_max - self._max_s_previous_order[atom] > 1.3 * self._max_s_previous_order[atom]
+            allow_attempts = self._s_current_threshold[atom] < max_threshold
 
-            if is_not_smaller and max_attempts:
+            if is_not_smaller and allow_attempts:
 
                 msg = ("Numerical instability detected. Threshold for S has to be increased." +
                        " Current max S is {} and the previous is {} for order {}."
@@ -198,8 +198,11 @@ class SPowderSemiEmpiricalCalculator(object):
             if order == AbinsModules.AbinsConstants.FUNDAMENTALS:
                 previous_s_max = np.max(s_temp)
             else:
+
                 current_s_max = np.max(s_temp)
-                if previous_s_max <= current_s_max:
+                allow_attempts = np.median(self._s_current_threshold) < AbinsModules.AbinsConstants.MAX_THRESHOLD
+
+                if previous_s_max <= current_s_max and allow_attempts:
                     raise StabilityErrorAllAtoms(
                         "Numerical instability detected for all atoms for order {}".format(order))
                 else:
@@ -214,14 +217,20 @@ class SPowderSemiEmpiricalCalculator(object):
         intend = AbinsModules.AbinsConstants.S_THRESHOLD_CHANGE_INDENTATION
         if atom is None:
 
-            self._s_current_threshold = self._s_threshold_ref * 2.0 ** self._total_s_correction_num_attempt
+            self._s_current_threshold = self._s_threshold_ref * 2**self._total_s_correction_num_attempt
             self._report_progress(
                 intend + "Threshold for S has been changed to {} for all atoms."
                 .format(self._s_current_threshold[0]) + " S for all atoms will be calculated from scratch.")
 
         else:
 
-            self._s_current_threshold[atom] *= 2
+            self._s_current_threshold[atom] += self._s_threshold_ref[atom]
+
+            if self._s_current_threshold[atom] > AbinsModules.AbinsConstants.MAX_THRESHOLD:
+                raise StabilityErrorAllAtoms(
+                    "Numerical instability detected. To large threshold for the individual atom. Threshold for all "
+                    "atoms should be raised.")
+
             atom_symbol = self._atoms["atom_{}".format(atom)]["symbol"]
             self._report_progress(
                 intend + "Threshold for S has been changed to {} for atom {}  ({})."
@@ -309,9 +318,7 @@ class SPowderSemiEmpiricalCalculator(object):
             p_local = ProcessingPool(nodes=AbinsModules.AbinsParameters.threads)
             result = p_local.map(self._calculate_s_powder_one_atom, atoms)
         else:
-            result = []
-            for atom in atoms:
-                result.append(self._calculate_s_powder_one_atom(atom=atom))
+            result = [self._calculate_s_powder_one_atom(atom=atom) for atom in atoms]
 
         for atom in range(self._num_atoms):
             atoms_items["atom_%s" % atom] = {"s": result[atoms.index(atom)]}
@@ -367,6 +374,7 @@ class SPowderSemiEmpiricalCalculator(object):
                 s = self._calculate_s_powder_one_atom_core(atom=atom)
                 return s
             except StabilityError as e:
+
                 self._report_progress("{}".format(e))
                 self._s_threshold_up(atom=atom)
 
@@ -496,8 +504,9 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             rebined_broad_spectrum = self._fix_empty_array()
 
-        # multiply by k-point weight
-        rebined_broad_spectrum = rebined_broad_spectrum * self._weight / AbinsModules.AbinsParameters.bin_width
+        # multiply by k-point weight and scaling constant
+        factor = self._weight / AbinsModules.AbinsParameters.bin_width
+        rebined_broad_spectrum = rebined_broad_spectrum * factor
         return local_freq, local_coeff, rebined_broad_spectrum
 
     # noinspection PyUnusedLocal
@@ -527,7 +536,6 @@ class SPowderSemiEmpiricalCalculator(object):
                              b_tensor=None, b_trace=None):
         """
         Calculates S for the second order quantum event for one atom.
-
 
         @param q2: squared values of momentum transfer vectors
         @param frequencies: frequencies for which transitions occur
@@ -574,7 +582,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
                        np.einsum('kli, kil->k',
                        np.take(b_tensor, indices=indices[:, 1], axis=0),
-                       np.take(b_tensor, indices=indices[:, 0], axis=0))) / (15.0 * factor)
+                       np.take(b_tensor, indices=indices[:, 0], axis=0))) / (30.0 * factor)
 
         return s
 
@@ -594,7 +602,7 @@ class SPowderSemiEmpiricalCalculator(object):
         """
         coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
                              (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
-        s = 9.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
+        s = 9.0 / 1086.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
         return s
@@ -615,7 +623,7 @@ class SPowderSemiEmpiricalCalculator(object):
         """
         coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
                              (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
-        s = 27.0 / 9850.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
+        s = 27.0 / 49250.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
         return s
@@ -649,7 +657,7 @@ class SPowderSemiEmpiricalCalculator(object):
             output_array_x = self._frequencies
             output_array_y = np.asarray(
                 a=[array_y[inds == i].sum() for i in range(self._freq_size)],
-                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE) / AbinsModules.AbinsParameters.bin_width
 
         return output_array_x, output_array_y
 
