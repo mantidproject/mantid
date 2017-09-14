@@ -614,7 +614,14 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(result[0][0],1.0)
         self.assertAlmostEqual(result[0][1],5.0)
         self.assertAlmostEqual(result[1][0],31.0)
-        self.assertAlmostEqual(result[1][1],121.0)         
+        self.assertAlmostEqual(result[1][1],121.0)  
+
+    def test_evaluation_with_parameters_set(self):
+        p = Polynomial(n=2)
+        result = p([0,1,2],0.0,0.5,0.5)   
+        self.assertAlmostEqual(result[0],0.0)
+        self.assertAlmostEqual(result[1],1.0)
+        self.assertAlmostEqual(result[2],3.0)         
        
 if __name__ == '__main__':
     unittest.main()
