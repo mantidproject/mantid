@@ -62,37 +62,34 @@ public:
     ws1.reset(new WorkspaceTester);
     ws1->initialize(1, 10, 10);
     {
-      auto &x = ws1->dataX(0);
+      auto &x = ws1->mutableX(0);
       // Mantid::MantidVec& e = ws1->dataE(0);
       for (size_t i = 0; i < x.size(); ++i) {
         x[i] = 0.1 * static_cast<double>(i);
       }
-      auto &y = ws1->dataY(0);
-      std::fill(y.begin(), y.end(), 1.);
+      ws1->mutableY(0) = 1.;
     }
 
     ws2.reset(new WorkspaceTester);
     ws2->initialize(1, 10, 10);
     {
-      auto &x = ws2->dataX(0);
+      auto &x = ws2->mutableX(0);
       // Mantid::MantidVec& e = ws2->dataE(0);
       for (size_t i = 0; i < x.size(); ++i) {
         x[i] = 1. + 0.1 * static_cast<double>(i);
       }
-      auto &y = ws2->dataY(0);
-      std::fill(y.begin(), y.end(), 2.);
+      ws2->mutableY(0) = 2.;
     }
 
     ws3.reset(new WorkspaceTester);
     ws3->initialize(1, 10, 10);
     {
-      auto &x = ws3->dataX(0);
+      auto &x = ws3->mutableX(0);
       // Mantid::MantidVec& e = ws3->dataE(0);
       for (size_t i = 0; i < x.size(); ++i) {
         x[i] = 2. + 0.1 * static_cast<double>(i);
       }
-      auto &y = ws3->dataY(0);
-      std::fill(y.begin(), y.end(), 3.);
+      ws3->mutableY(0) = 3.;
     }
   }
 

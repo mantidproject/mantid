@@ -378,8 +378,8 @@ void MaxEnt::exec() {
 */
 std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
                                       size_t spec, bool errors) {
-
-  std::vector<double> result(inWS->blocksize() * 2);
+  const size_t numBins = inWS->blocksize();
+  std::vector<double> result(numBins * 2);
 
   if (inWS->getNumberHistograms() % 2)
     throw std::invalid_argument(
@@ -387,7 +387,6 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
 
   size_t nspec = inWS->getNumberHistograms() / 2;
 
-  const size_t numBins = inWS->blocksize();
   if (!errors) {
     for (size_t i = 0; i < numBins; i++) {
       result[2 * i] = inWS->y(spec)[i];

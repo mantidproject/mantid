@@ -247,9 +247,9 @@ public:
     TS_ASSERT_EQUALS(out->blocksize(), numBins);
 
     for (size_t wi = 0; wi < out->getNumberHistograms(); wi++) {
-      const auto &y = out->readY(wi);
-      for (size_t j = 0; j < y.size(); ++j)
-        TS_ASSERT_DELTA(y[j], 2.0, 1e-5);
+      const auto &y = out->y(wi);
+      for (const auto value : y)
+        TS_ASSERT_DELTA(value, 2.0, 1e-5);
     }
   }
 
