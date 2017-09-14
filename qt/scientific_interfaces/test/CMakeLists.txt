@@ -49,7 +49,7 @@ if ( CXXTEST_FOUND )
             MantidScientificInterfacesMuon
             MantidScientificInterfacesISISReflectometryQt4
             MantidScientificInterfacesEnggDiffractionQt4
-            MantidScientificInterfacesMultiDatasetFit
+            MantidScientificInterfacesMultiDatasetFitQt4
             MantidQtWidgetsCommonQt4
             API
             DataObjects
