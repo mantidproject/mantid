@@ -130,14 +130,16 @@ void OneLevelTreeManager::appendGroup() {
 Delete row(s) from the model
 */
 void OneLevelTreeManager::deleteRow() {
-
   auto selectedRows = m_presenter->selectedParents();
-
-  if (selectedRows.empty())
-    return;
-
-  for (const auto &row : selectedRows) {
+  while(!selectedRows.empty()) {
+    // Remove a row
+    auto row = *selectedRows.begin();
     m_model->removeRow(row);
+
+    // Once one row has been deleted the selcted row
+    // indices are not valid any longer. We need
+    // to update them again.
+    selectedRows = m_presenter->selectedParents();
   }
 }
 

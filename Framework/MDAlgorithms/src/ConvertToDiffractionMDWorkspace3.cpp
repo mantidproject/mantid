@@ -70,7 +70,7 @@ void ConvertToDiffractionMDWorkspace3::convertExtents(
       minVal[d] = Extents[2 * d + 0];
       maxVal[d] = Extents[2 * d + 1];
     }
-  } else if (Extents.size() == 0) {
+  } else if (Extents.empty()) {
     calculateExtentsFromData(minVal, maxVal);
   } else
     throw std::invalid_argument(

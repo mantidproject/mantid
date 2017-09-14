@@ -172,7 +172,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(manager.appendGroup());
   }
 
-  void test_delete_row() {
+  void test_delete_row_when_table_is_empty() {
     NiceMock<MockDataProcessorPresenter> presenter;
     OneLevelTreeManager manager(&presenter, reflWhitelist());
 

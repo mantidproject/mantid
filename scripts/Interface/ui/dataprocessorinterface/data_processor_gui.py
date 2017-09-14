@@ -4,11 +4,10 @@ try:
 except ImportError:
     canMantidPlot = False
 
-import ui_data_processor_window
 from PyQt4 import QtGui
-from mantid.simpleapi import *
 from mantidqtpython import MantidQt
 from ui.dataprocessorinterface.ui_data_processor_window import Ui_DataProcessorWindow
+
 
 canMantidPlot = True
 
@@ -64,7 +63,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
         self.gui.add_actions_to_menus(workspace_list)
 
 
-class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProcessorWindow):
+class DataProcessorGui(QtGui.QMainWindow, Ui_DataProcessorWindow):
 
     data_processor_table = None
     main_presenter = None

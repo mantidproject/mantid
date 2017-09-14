@@ -5,6 +5,7 @@ add_subdirectory( kernel )
 add_subdirectory( geometry )
 add_subdirectory( api )
 add_subdirectory( dataobjects )
+add_subdirectory( _plugins )
 
 set ( TEST_PY_FILES
   ImportModuleTest.py
@@ -12,6 +13,7 @@ set ( TEST_PY_FILES
   SimpleAPILoadTest.py
   SimpleAPIFitTest.py
   SimpleAPIRenameWorkspaceTest.py
+  FitFunctionsTest.py  
 )
 
 if ( MAKE_VATES )

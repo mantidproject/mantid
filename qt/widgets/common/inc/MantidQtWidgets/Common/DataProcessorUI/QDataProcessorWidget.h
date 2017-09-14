@@ -136,12 +136,31 @@ public:
   QString getClipboard() const override;
 
   DataProcessorPresenter *getPresenter() const override;
+  QString getCurrentInstrument() const override;
 
   // Forward a main presenter to this view's presenter
   void accept(DataProcessorMainPresenter *);
 
   // Force re-processing of rows
   void setForcedReProcessing(bool forceReProcessing) override;
+
+  // Get value in a cell
+  QString getCell(int row, int column, int parentRow = 0, int parentColumn = 0);
+  // Set value in a cell
+  void setCell(const QString &value, int row, int column, int parentRow = 0,
+               int parentColumn = 0);
+  int getNumberOfRows();
+  void clearTable();
+
+  // Methods to emit signals
+  void emitProcessClicked() override { emit processButtonClicked(); };
+
+  void emitProcessingFinished() override { emit processingFinished(); }
+
+signals:
+  void processButtonClicked();
+  void processingFinished();
+  void instrumentHasChanged();
 
 private:
   // initialise the interface

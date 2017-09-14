@@ -316,7 +316,19 @@ private:
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(const TreeData &data);
+<<<<<<< HEAD
   std::vector<std::unique_ptr<Command>> getTableList();
+=======
+  std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
+
+  // set/get values in the table
+  void setCell(int row, int column, int parentRow, int parentColumn,
+               const std::string &value) override;
+  std::string getCell(int row, int column, int parentRow,
+                      int parentColumn) override;
+  int getNumberOfRows() override;
+  void clearTable() override;
+>>>>>>> master
 };
 }
 }
