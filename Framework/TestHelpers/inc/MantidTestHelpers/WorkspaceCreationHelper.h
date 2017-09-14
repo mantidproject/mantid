@@ -231,6 +231,20 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
     const std::string &instrumentName = std::string("testInst"));
 
 /**
+ * Create a workspace as for create2DWorkspaceWithFullInstrument, but including
+ *time indexing, i.e. detector scans. Note that no positions or rotations are
+ *currently changed for the detector scan workspaces.
+ *
+ * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
+ */
+Mantid::API::MatrixWorkspace_sptr
+create2DDetectorScanWorkspaceWithFullInstrument(
+    int nhist, int nbins, size_t nTimeIndexes, size_t startTime = 0,
+    size_t firstInterval = 1, bool includeMonitors = false,
+    bool startYNegative = false, bool isHistogram = true,
+    const std::string &instrumentName = std::string("testInst"));
+
+/**
  * Create a test workspace with a Theta numeric axis instead of a spectrum axis
  * the values run from 1 to nhist
  * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0

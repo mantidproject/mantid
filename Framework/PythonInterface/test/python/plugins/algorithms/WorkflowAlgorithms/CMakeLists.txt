@@ -9,6 +9,12 @@ set ( TEST_PY_FILES
   BayesStretchTest.py
   CalculateMonteCarloAbsorptionTest.py
   DetectorFloodWeightingTest.py
+  DirectILLApplySelfShieldingTest.py
+  DirectILLCollectDataTest.py
+  DirectILLDiagnosticsTest.py
+  DirectILLIntegrateVanadiumTest.py
+  DirectILLReductionTest.py
+  DirectILLSelfShieldingTest.py
   EnergyWindowScanTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   IndirectAnnulusAbsorptionTest.py
