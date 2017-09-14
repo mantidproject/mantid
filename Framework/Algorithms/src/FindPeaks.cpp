@@ -626,6 +626,8 @@ std::vector<Histogram> FindPeaks::calculateSecondDifference(
   // Loop over spectra
   for (const auto i : m_indexSet) {
     diffed.push_back(input->histogram(i));
+    diffed.back().mutableY() = 0.0;
+    diffed.back().mutableE() = 0.0;
 
     const auto &Y = input->y(i);
     auto &S = diffed.back().mutableY();
