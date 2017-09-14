@@ -1,15 +1,16 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-import PyQt4.QtGui as QtGui
 import sys
+
+import PyQt4.QtGui as QtGui
 
 from Muon import FFT_presenter
 from Muon import FFT_view
 
 
-class frequencyDomainAnalysisGui(QtGui.QMainWindow):
+class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
     def __init__(self,parent=None):
-        super(frequencyDomainAnalysisGui,self).__init__(parent)
+        super(FrequencyDomainAnalysisGui,self).__init__(parent)
         view =FFT_view.FFTView(self)
         self.presenter =FFT_presenter.FFTPresenter(view) #the main ui class in this file is called MainWindow
         self.setCentralWidget(view)
@@ -24,7 +25,7 @@ def qapp():
     return _app
 
 app = qapp()
-ex= frequencyDomainAnalysisGui()
+ex= FrequencyDomainAnalysisGui()
 ex.resize(700,700)
 ex.show()
 app.exec_()
