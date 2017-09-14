@@ -558,7 +558,9 @@ def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
     assert isinstance(instrument_name, str)
     assert isinstance(exp_no, int) and isinstance(scan_no, int)
     assert isinstance(pt_list, list)
-    assert len(pt_list) > 0
+
+    if len(pt_list) == 0:
+        raise RuntimeError('Pt number list {0} cannot be empty.', pt_list)
 
     merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_MD' % (instrument_name, exp_no, scan_no,
                                                      pt_list[0], pt_list[-1])

@@ -32,6 +32,9 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         self.ui.checkBox_saveToDataServer.setChecked(True)
 
+        # initialize table
+        self.ui.tableView_scanProcessState.setup()
+
         # define event handling
         self.connect(self.ui.pushButton_browseOutputDir, QtCore.SIGNAL('clicked()'),
                      self.do_browse_output_dir)
@@ -45,7 +48,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
                      self.do_quit)
 
         # class variables
-        self._reductionController = None
+        self._myController = None
         self._myMergePeaksThread = None
         self._rowScanDict = dict()
 
@@ -114,12 +117,12 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         import multi_threads_helpers
 
         # check inputs
-        assert isinstance(self._reductionController, reduce4circleControl.CWSCDReductionControl), \
+        assert isinstance(self._myController, reduce4circleControl.CWSCDReductionControl), \
             'Reduction controller of type {0} is not accepted. It must be a CWSCDReductionControl instance.' \
-            ''.format(self._reductionController.__class__.__name__)
+            ''.format(self._myController.__class__.__name__)
 
         # check whether it is well setup for reduction
-        if self._reductionController is None:
+        if self._myController is None:
             raise RuntimeError('Reduction controller has not been set up yet.  It is required for pre-processing.')
 
         # get all the information
@@ -224,10 +227,10 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         :return:
         """
         # set up the experiment number if it is different
-        if exp_number != self._reductionController.get_experiment():
-            self._reductionController.set_exp_number(exp_number)
-            self._reductionController.set_default_detector_sample_distance()
-            self._reductionController.set_default_pixel_size()
+        if exp_number != self._myController.get_experiment():
+            self._myController.set_exp_number(exp_number)
+            self._myController.set_default_detector_sample_distance()
+            self._myController.set_default_pixel_size()
 
         # set up the calibration
         # wave length
@@ -235,7 +238,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         if len(user_wavelength_str) > 0:
             try:
                 user_wavelength = float(user_wavelength_str)
-                self._reductionController.set_user_wave_length(exp_number, user_wavelength)
+                self._myController.set_user_wave_length(exp_number, user_wavelength)
             except ValueError:
                 gui_util.show_message(self, '[ERROR] User-specified wave length {0} cannot be converted to float.'
                                             ''.format(user_wavelength_str))
@@ -252,7 +255,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
                 gui_util.show_message(self, 'Unable to parse detector center {0} due to {1}'
                                             ''.format(user_det_center_str, run_err))
                 return
-            self._reductionController.set_detector_center(exp_number, det_center[0], det_center[1])
+            self._myController.set_detector_center(exp_number, det_center[0], det_center[1])
         # END-IF
 
         # detector sample distance
@@ -263,7 +266,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             return
         user_det_sample_distance = ret_obj[0]
         if user_det_sample_distance is not None:
-            self._reductionController.set_default_detector_sample_distance(user_det_sample_distance)
+            self._myController.set_default_detector_sample_distance(user_det_sample_distance)
 
         # detector size
         curr_det_size_index = self.ui.comboBox_detSize.currentIndex()
@@ -272,7 +275,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
                                         ''.format(str(self.ui.comboBox_detSize.currentText())))
             return
         det_size = [256, 512][curr_det_size_index]
-        self._reductionController.set_detector_geometry(det_size, det_size)
+        self._myController.set_detector_geometry(det_size, det_size)
 
         return
 
@@ -336,7 +339,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             'Reduction controller must be an instance of reduce4circleControl.CWSCDReductionControl but not a {0}.' \
             ''.format(controller.__class__.__name__)
 
-        self._reductionController = controller
+        self._myController = controller
 
         return
 
@@ -344,6 +347,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         """update merged signal
 
         :param scan_number:
+        :param message:
         :return:
         """
         row_number = self._rowScanDict[scan_number]
@@ -361,6 +365,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         :return:
         """
         # blabla
+        # TODO/ISSUE/NOW - Make it work!
 
         return
 

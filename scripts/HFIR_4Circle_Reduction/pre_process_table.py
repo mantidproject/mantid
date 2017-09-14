@@ -35,7 +35,7 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         Init setup
         :return:
         """
-        self.init_setup(self.Table_Setup)
+        self.init_setup(self.TableSetup)
 
         # set columns' width
         self.setColumnWidth(0, 35)
@@ -71,7 +71,10 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
                 continue
 
             # append scan
-            self.append_row([scan_number, '', '', ''])
+            print '[DB...BAT] Append row for scan {0}'.format(scan_number)
+            status, msg = self.append_row([scan_number, '', '', ''])
+            if not status:
+                raise RuntimeError('Failed to append a new row due to {0}'.format(msg))
             num_rows = self.rowCount()
             self._scanRowDict[scan_number] = num_rows - 1
             part_dict[scan_number] = num_rows - 1

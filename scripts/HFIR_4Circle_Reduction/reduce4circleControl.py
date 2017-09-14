@@ -1745,11 +1745,13 @@ class CWSCDReductionControl(object):
 
         return True, out_hkl_name
 
-    def save_merged_scan(self, exp_number, scan_number, output):
+    def save_merged_scan(self, exp_number, scan_number, pt_number_list, merged_ws_name, output):
         """
 
         :param exp_number:
         :param scan_number:
+        :param pt_number_list:
+        :param merged_ws_name:
         :param output: output file path
         :return:
         """
@@ -1761,8 +1763,11 @@ class CWSCDReductionControl(object):
                                         ''.format(output, type(output))
 
         # get input workspace
-        md_q_sample_ws = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_list=list())
-        mantidsimple.SaveMD(InputWorkspace=md_q_sample_ws, Filename=output)
+
+        if merged_ws_name is None:
+            merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number,
+                                                pt_list=pt_number_list)
+        mantidsimple.SaveMD(InputWorkspace=merged_ws_name, Filename=output)
 
         return
 

@@ -410,7 +410,7 @@ class MergePeaksThread(QThread):
 
             # emit signal for run start (mode 0)
             # self.peakMergeSignal.emit(scan_number, 'In merging')
-            self.mergeMsgSignal.emit(scan_number, 'In merging')
+            self.mergeMsgSignal.emit(-1, scan_number, 0, 'In merging')
 
             # merge if not merged
             merged_ws_name = None
@@ -426,8 +426,11 @@ class MergePeaksThread(QThread):
 
                 # save
                 if save_file:
+                    # TODO/ISSUE/NOW - Use a property to replace
                     self._mainWindow._myController.save_merged_scan(exp_number=self._expNumber,
                                                                     scan_number=scan_number,
+                                                                    pt_number_list=pt_number_list,
+                                                                    merged_ws_name=merged_ws_name,
                                                                     output=self._outputMDFileList[index])
                 # END-IF-ELSE
 
@@ -443,7 +446,7 @@ class MergePeaksThread(QThread):
                 self.mergeMsgSignal.emit(scan_number, merged_ws_name)
             else:
                 # merging error
-                self.mergeMsgSignal.emit(self._expNumber, scan_number, 0, error_message)
+                self.mergeMsgSignal.emit(scan_number, error_message)
                 continue
                 # self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, 'Merged')
             # END-IF
