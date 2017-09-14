@@ -423,9 +423,23 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
     """
-    from mantid.simpleapi import (MaskDetectors, GroupDetectors)
+    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws)
+    mtd.addOrReplace(workspace_name, grouped_ws)
 
-    instrument = mtd[workspace_name].getInstrument()
+def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None):
+    """
+    Groups spectra in a given workspace according to the Workflow.GroupingMethod and
+    Workflow.GroupingFile parameters and GroupingPolicy property.
+
+    @param workspace Workspace to group spectra of
+    @param masked_detectors List of spectra numbers to mask
+    @param method Grouping method (IPF, All, Individual, File, Workspace)
+    @param group_file File for File method
+    @param group_ws Workspace for Workspace method
+    """
+    instrument = workspace.getInstrument()
+    group_detectors = AlgorithmManager.create("GroupDetectors")
+    group_detectors.setChild(True)
 
     # If grouping as per he IPF is desired
     if method == 'IPF':
@@ -439,7 +453,7 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
         # Otherwise use the value of GroupingPolicy
         grouping_method = method
 
-    logger.information('Grouping method for workspace %s is %s' % (workspace_name, grouping_method))
+    logger.information('Grouping method for workspace %s is %s' % (workspace.getName(), grouping_method))
 
     if grouping_method == 'Individual':
         # Nothing to do here
@@ -447,14 +461,13 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
 
     elif grouping_method == 'All':
         # Get a list of all spectra minus those which are masked
-        num_spec = mtd[workspace_name].getNumberHistograms()
+        num_spec = workspace.getNumberHistograms()
         spectra_list = [spec for spec in range(0, num_spec) if spec not in masked_detectors]
 
         # Apply the grouping
-        GroupDetectors(InputWorkspace=workspace_name,
-                       OutputWorkspace=workspace_name,
-                       Behaviour='Average',
-                       WorkspaceIndexList=spectra_list)
+        group_detectors(InputWorkspace=workspace,
+                        Behaviour='Average',
+                        WorkspaceIndexList=spectra_list)
 
     elif grouping_method == 'File':
         # Get the filename for the grouping file
@@ -476,24 +489,26 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
 
         # Mask detectors if required
         if len(masked_detectors) > 0:
-            MaskDetectors(Workspace=workspace_name,
-                          WorkspaceIndexList=masked_detectors)
+            mask_detectors = AlgorithmManager.create("MaskDetectors")
+            mask_detectors.setChild(True)
+            mask_detectors(Workspace=workspace,
+                           WorkspaceIndexList=masked_detectors)
 
         # Apply the grouping
-        GroupDetectors(InputWorkspace=workspace_name,
-                       OutputWorkspace=workspace_name,
-                       Behaviour='Average',
-                       MapFile=grouping_file)
+        group_detectors(InputWorkspace=workspace,
+                        Behaviour='Average',
+                        MapFile=grouping_file)
 
     elif grouping_method == 'Workspace':
         # Apply the grouping
-        GroupDetectors(InputWorkspace=workspace_name,
-                       OutputWorkspace=workspace_name,
-                       Behaviour='Average',
-                       CopyGroupingFromWorkspace=group_ws)
+        group_detectors(InputWorkspace=workspace,
+                        Behaviour='Average',
+                        CopyGroupingFromWorkspace=group_ws)
 
     else:
-        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace_name))
+        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))
+
+    return group_detectors.getProperty("OutputWorkspace").value
 
 
 # -------------------------------------------------------------------------------
