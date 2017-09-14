@@ -57,7 +57,8 @@ private:
 
   void runGenericReduction(QString instName, QString mode);
   void runOSIRISdiffonlyReduction();
-  void runManualGrouping();
+  void createGroupingWorkspace(const std::string& outputWsName);
+  void deleteWorkspace(const std::string& wsName);
 
 private:
   Ui::IndirectDiffractionReduction
