@@ -7,7 +7,6 @@
 #include <cmath>
 #include <exception>
 #include <limits>
-#include <math.h>
 #include <memory>
 #include <ostream>
 #include <stdexcept>
