@@ -98,8 +98,8 @@ void ConvertMDHistoToMatrixWorkspace::init() {
                                                    Direction::Output),
                   "An output Workspace2D.");
 
-  std::array<std::string, 3> normalizations =
-  { {"NoNormalization", "VolumeNormalization", "NumEventsNormalization"} };
+  std::array<std::string, 3> normalizations = {
+      {"NoNormalization", "VolumeNormalization", "NumEventsNormalization"}};
 
   declareProperty("Normalization", normalizations[0],
                   Kernel::IValidator_sptr(

@@ -65,8 +65,8 @@ void IntegratePeaksUsingClusters::init() {
                       "Threshold", 0, compositeValidator, Direction::Input),
                   "Threshold signal above which to consider peaks");
 
-  std::array<std::string, 3> normalizations = { {
-	  "NoNormalization", "VolumeNormalization", "NumEventsNormalization"} };
+  std::array<std::string, 3> normalizations = {
+      {"NoNormalization", "VolumeNormalization", "NumEventsNormalization"}};
 
   declareProperty("Normalization", normalizations[1],
                   Kernel::IValidator_sptr(

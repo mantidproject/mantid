@@ -76,8 +76,8 @@ void IFittingAlgorithm::init() {
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
 
-  std::array<std::string, 3> domainTypes 
-	  = { {"Simple", "Sequential", "Parallel"} };
+  std::array<std::string, 3> domainTypes = {
+      {"Simple", "Sequential", "Parallel"}};
   declareProperty(
       "DomainType", "Simple",
       Kernel::IValidator_sptr(
@@ -85,7 +85,7 @@ void IFittingAlgorithm::init() {
       "The type of function domain to use: Simple, Sequential, or Parallel.",
       Kernel::Direction::Input);
 
-  std::array<std::string, 2> evaluationTypes = { {"CentrePoint", "Histogram"} };
+  std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
   declareProperty("EvaluationType", "CentrePoint",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(evaluationTypes)),
