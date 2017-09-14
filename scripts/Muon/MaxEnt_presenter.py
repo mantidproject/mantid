@@ -10,7 +10,8 @@ class MaxEntPresenter(object):
         # set data
         self.getWorkspaceNames()
         #connect
-        #self.view.tableClickSignal.connect(self.tableClicked)
+        self.alg.started.connect(self.view.deactivateButton)
+        self.alg.finished.connect(self.view.activateButton)
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
 
     # only get ws that are groups or pairs
@@ -26,13 +27,9 @@ class MaxEntPresenter(object):
 
     #functions
     def handleMaxEntButton(self):
-        self.view.deactivateButton()
         inputs = self.get_MaxEnt_input()
         self.alg.setInputs(inputs)
-        self.alg.execute(self.activateButton)
-
-    def activateButton(self):
-        self.view.activateButton()
+        self.alg.start()
 
     def get_MaxEnt_input(self):
         inputs=self.view.initMaxEntInput()
