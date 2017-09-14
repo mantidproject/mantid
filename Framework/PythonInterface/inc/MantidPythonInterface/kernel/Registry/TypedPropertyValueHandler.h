@@ -98,7 +98,7 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
 template <typename T>
 struct DLLExport TypedPropertyValueHandler<
     boost::shared_ptr<T>,
-    std::enable_if<std::is_base_of<API::Workspace, T>::value>>
+    typename std::enable_if<std::is_base_of<API::Workspace, T>::value>::type>
     : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
   typedef boost::shared_ptr<T> HeldType;
