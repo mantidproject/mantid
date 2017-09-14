@@ -117,7 +117,6 @@ class FunctionWrapper(object):
           :param x: x value or list of x values
           :param *params list of parameter values
       """
-      from mantid.simpleapi import CreateWorkspace, EvaluateFunction
       import numpy as np
       
       if isinstance(x, Workspace):
