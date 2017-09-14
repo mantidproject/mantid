@@ -257,4 +257,5 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         if 1 < spectra <= 10:
             ax.legend()
 
+
 mantid.api.AlgorithmFactory.subscribe(SavePlot1D)

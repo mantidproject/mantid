@@ -1,8 +1,7 @@
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 from mantid.simpleapi import *
-from mantid import api
 import unittest
-import inspect
-import os, sys
 from DirectEnergyConversion import DirectEnergyConversion
 
 
@@ -16,12 +15,11 @@ class DirectEnergyConversionTest(unittest.TestCase):
         return super(DirectEnergyConversionTest, self).__init__(methodName)
 
     def setUp(self):
-        if self.reducer == None or type(self.reducer) != type(DirectEnergyConversion):
+        if self.reducer is None or type(self.reducer) != type(DirectEnergyConversion):
             self.reducer = DirectEnergyConversion("MAPS")
+
     def tearDown(self):
         pass
-
-
 
     def test_set_non_default_wrong_value(self):
         tReducer = self.reducer
@@ -58,8 +56,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(tReducer.det_cal_file,None)
         self.assertAlmostEqual(tReducer.van_sig,1.,7)
 
-
-
     def test_set_non_default_complex_value(self):
         tReducer = self.reducer
         # should do nothing as already initialized above, but if not will initiate the instrument
@@ -68,7 +64,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         range = tReducer.norm_mon_integration_range
         self.assertAlmostEqual(range[0],1000.,7," Default integration min range on MAPS should be as described in MAPS_Parameters.xml file")
         self.assertAlmostEqual(range[1],2000.,7," Default integration max range on MAPS should be as described in MAPS_Parameters.xml file")
-        self.assertEqual(tReducer.ei_mon_spectra,[41474,41475]," Default ei monitors on MAPS should be as described in MAPS_Parameters.xml file")
+        self.assertEqual(tReducer.ei_mon_spectra,[41474,41475],
+                         " Default ei monitors on MAPS should be as described in MAPS_Parameters.xml file")
 
         self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=1)
         self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=[10,100,100])
@@ -130,7 +127,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertAlmostEqual(bins[1],3)
         self.assertAlmostEqual(bins[2],10)
 
-
         tReducer.energy_bins=[-20,4,100]
         bins = tReducer.energy_bins
         self.assertAlmostEqual(bins[0],-20)
@@ -170,6 +166,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         keys_changed=['somethins_else1','somethins_else2']
         self.assertEqual(2,tReducer.check_abs_norm_defaults_changed(keys_changed))
+
     def test_do_white(self) :
         tReducer = self.reducer
         monovan = 1000
@@ -188,9 +185,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         param = tReducer.get_default_parameter('check_background')
         self.assertTrue(isinstance(param,bool))
 
-        print "Instr_type :",type(tReducer.instrument)
-
-
+        print("Instr_type :",type(tReducer.instrument))
 
     def test_save_formats(self):
         tReducer = self.reducer
@@ -203,10 +198,13 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # do nothing
         tReducer.save_results(pws,'test_path')
         tReducer.test_name=''
+
         def f_spe(workspace, filename):
             tReducer.test_name += (workspace.name()+'_file_spe_' + filename)
+
         def f_nxspe(workspace, filename):
             tReducer.test_name += (workspace.name()+'_file_nxspe_' + filename)
+
         def f_nxs(workspace, filename):
             tReducer.test_name += (workspace.name()+'_file_nxs_' + filename)
 
@@ -246,7 +244,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         format_list = ['.nxspe','.nxs','.spe']
         file_long_name = ''
         tReducer.save_format = format_list
-        for i in xrange(len(format_list)):
+        for i in range(len(format_list)):
             self.assertEqual(tReducer.save_format[i],format_list[i])
             end = len(format_list[i])
             file_long_name+=ws_name+'_file_'+format_list[i][1:end]+'_ofn'+format_list[i]
@@ -282,11 +280,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEquals(467,tReducer.spectra_to_monitors_list[0])
         self.assertEquals(444,tReducer.spectra_to_monitors_list[1])
 
-
-
-
     def test_process_copy_spectra_to_monitors(self):
         pass
+
     def test_set_get_ei_monitor(self):
         tReducer = self.reducer
 
@@ -297,7 +293,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
     #    tReducer.ei_mon_spectra[1]=100
     #    self.assertEqual(41474,tReducer.ei_mon_spectra[0])
     #    self.assertEqual(100,tReducer.ei_mon_spectra[1])
-
 
         tReducer.ei_mon_spectra=[100,200]
         self.assertEqual(100,tReducer.ei_mon_spectra[0])

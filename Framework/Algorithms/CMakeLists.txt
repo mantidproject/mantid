@@ -150,6 +150,7 @@ set ( SRC_FILES
 	src/GetEi.cpp
 	src/GetEi2.cpp
 	src/GetEiMonDet2.cpp
+	src/GetQsInQENSData.cpp
 	src/GetTimeSeriesLogInformation.cpp
 	src/GravitySANSHelper.cpp
 	src/GroupWorkspaces.cpp
@@ -158,6 +159,7 @@ set ( SRC_FILES
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
 	src/IntegrateByComponent.cpp
+	src/IntegrateEPP.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
 	src/InterpolationOption.cpp
@@ -469,6 +471,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GetEi.h
 	inc/MantidAlgorithms/GetEi2.h
 	inc/MantidAlgorithms/GetEiMonDet2.h
+	inc/MantidAlgorithms/GetQsInQENSData.h
 	inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
 	inc/MantidAlgorithms/GroupWorkspaces.h
@@ -477,6 +480,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
 	inc/MantidAlgorithms/IntegrateByComponent.h
+	inc/MantidAlgorithms/IntegrateEPP.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InterpolationOption.h
@@ -799,6 +803,7 @@ set ( TEST_FILES
 	GetEiMonDet2Test.h
 	GetEiTest.h
 	GetEiV1Test.h
+	GetQsInQENSDataTest.h
 	GetTimeSeriesLogInformationTest.h
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
@@ -806,6 +811,7 @@ set ( TEST_FILES
 	IQTransformTest.h
 	IdentifyNoisyDetectorsTest.h
 	IntegrateByComponentTest.h
+	IntegrateEPPTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h
 	InterpolationOptionTest.h

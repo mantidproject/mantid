@@ -148,7 +148,7 @@ DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
   // find where this Q vector should intersect with "extended" space
   const auto neighbours =
       m_detectorCacheSearch->findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 5);
-  if (neighbours.size() == 0)
+  if (neighbours.empty())
     return std::make_tuple(false, 0);
 
   const auto result = checkInteceptWithNeighbours(detectorDir, neighbours);

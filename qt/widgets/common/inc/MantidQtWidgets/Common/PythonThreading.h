@@ -5,6 +5,15 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 
 //------------------------------------------------------------------------------
+// Python Interpreter
+//------------------------------------------------------------------------------
+class EXPORT_OPT_MANTIDQT_COMMON PythonInterpreter {
+public:
+  static void initialize();
+  static void finalize();
+};
+
+//------------------------------------------------------------------------------
 // PythonGIL
 //------------------------------------------------------------------------------
 /**
@@ -13,15 +22,19 @@
  *
  */
 class EXPORT_OPT_MANTIDQT_COMMON PythonGIL {
+
+public:
+  static bool locked();
+
 public:
   PythonGIL();
+  PythonGIL(const PythonGIL &) = delete;
+  PythonGIL &operator=(const PythonGIL &) = delete;
 
   void acquire();
   void release();
 
 private:
-  PythonGIL(const PythonGIL &);
-  /// Current GIL state
   PyGILState_STATE m_state;
 };
 
@@ -51,15 +64,16 @@ private:
 
 /**
   * Acquires a lock in the constructor and releases it in the destructor.
+  * Modelled on std::lock_guard
   * @tparam T Templated on the lock type
   */
 template <typename T> class ScopedGIL {
 public:
-  ScopedGIL() : m_lock() { m_lock.acquire(); }
+  ScopedGIL(T &l) : m_lock(l) { m_lock.acquire(); }
   ~ScopedGIL() { m_lock.release(); }
 
 private:
-  T m_lock;
+  T &m_lock;
 };
 
 /// Typedef for scoped lock
