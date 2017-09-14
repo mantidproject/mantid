@@ -1,0 +1,92 @@
+digraph DirectILLCollectData {
+  label = "DirectILLCollectData workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    bkgScaling [label="FlatBkgScaling"]
+    inputFile [label="Run"]
+    inputWS [label="InputWorkspace"]
+    inputEPP [label="EPPWorkspace"]
+    inputBkg [label="FlatBkgWorkspace"]
+    inputEi [label="IncidentEnergyWorkspace"]
+    outputBkg [label="OutputFlatBkgWorkspace"]
+    outputEi [label="OutputIncidentEnergyWorkspace"]
+    outputEPP [label="OutputEPPWorkspace"]
+    outputRaw [label="OutputRawWorkspace"]
+    outputWS [label="OutputWorkspace"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    CalculateFlatBackground [label="CalculateFlatBackground"]
+    CalibrateEi [label="Calibrate incident energy"]
+    CorrectTOFAxis [label="CorrectTOFAxis"]
+    CorrectTOFAxisRaw [label="CorrectTOFAxis"]
+    ExtractMonitors [label="ExtractMonitors"]
+    FindEPP [label="FindEPP \n or \n CreateEPP"]
+    FindEPPAgain [label="FindEPP \n or \n CreateEPP"]
+    IntegrateMonitor [label="Integrate monitor"]
+    LoadILLTOF [label="LoadILLTOF"]
+    MergeRuns [label="MergeRuns"]
+    Normalize [label="Normalise to monitor/time"]
+    ScaleAfterNormalization [label="Scale"]
+    ScaleBkg [label="Scale"]
+    SubtractBkgDetector [label="Subtract flat background"]
+    SubtractBkgMonitor [label="Subtract flat background"]
+  }
+
+  subgraph values {
+    $value_style
+    detectors [label="Detector workspace"]
+    monitors [label="Monitor workspace"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    inputBkgGiven [label="FlatBkgWorkspace given?"]
+    inputEiGiven [label="IncidentEnergyWorkspace given?"]
+    inputEPPGiven [label="EPPWorkspace given?"]
+    inputFileGiven [label="Run given?"]
+  }
+
+  inputFileGiven -> inputFile [label="yes"]
+  inputFile -> LoadILLTOF
+  LoadILLTOF -> MergeRuns
+  MergeRuns -> ExtractMonitors
+  inputFileGiven -> inputWS [label="no"]
+  inputWS -> ExtractMonitors
+  ExtractMonitors -> monitors
+  monitors -> SubtractBkgMonitor
+  SubtractBkgMonitor -> IntegrateMonitor
+  IntegrateMonitor -> Normalize
+  ExtractMonitors -> detectors
+  detectors -> Normalize
+  detectors -> CorrectTOFAxisRaw
+  Normalize -> ScaleAfterNormalization
+  ScaleAfterNormalization -> inputBkgGiven
+  inputBkgGiven -> CalculateFlatBackground [label="no"]
+  CalculateFlatBackground -> outputBkg
+  CalculateFlatBackground -> ScaleBkg
+  inputBkgGiven -> inputBkg [label="yes"]
+  inputBkg -> ScaleBkg
+  bkgScaling -> ScaleBkg
+  ScaleBkg -> SubtractBkgDetector
+  ScaleAfterNormalization -> SubtractBkgDetector
+  inputEPPGiven -> FindEPP [label="no"]
+  SubtractBkgDetector -> FindEPP
+  FindEPP -> CalibrateEi
+  inputEPPGiven -> inputEPP [label="yes"]
+  inputEPP -> CalibrateEi
+  SubtractBkgDetector -> CalibrateEi
+  inputEiGiven -> inputEPPGiven [label="no"]
+  CalibrateEi -> outputEi
+  inputEiGiven -> inputEi [label="yes"]
+  inputEi -> CalibrateEi
+  CalibrateEi -> CorrectTOFAxis
+  CalibrateEi -> CorrectTOFAxisRaw [label="as reference workspace"]
+  CorrectTOFAxisRaw -> outputRaw
+  CorrectTOFAxis -> FindEPPAgain
+  CorrectTOFAxis ->outputWS
+  FindEPPAgain -> outputEPP
+}

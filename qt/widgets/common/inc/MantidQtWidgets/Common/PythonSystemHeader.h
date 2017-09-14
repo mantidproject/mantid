@@ -22,6 +22,7 @@
 #define TO_CSTRING _PyUnicode_AsString
 #define FROM_CSTRING PyUnicode_FromString
 #define CODE_OBJECT(x) x
+#define GET_CURRENT_THREADSTATE _PyThreadState_UncheckedGet()
 #else
 #define INT_CHECK PyInt_Check
 #define TO_LONG PyInt_AsLong
@@ -29,6 +30,7 @@
 #define TO_CSTRING PyString_AsString
 #define FROM_CSTRING PyString_FromString
 #define CODE_OBJECT(x) (PyCodeObject *) x
+#define GET_CURRENT_THREADSTATE _PyThreadState_Current
 #endif
 
 #endif // PYTHONSYSTEMHEADER_H_

@@ -93,7 +93,7 @@ struct MandatoryFirst {
   /// in the list
   bool operator()(const Property *p1, const Property *p2) const {
     // this is false, unless p1 is not valid and p2 is valid
-    return (p1->isValid() != "") && (p2->isValid() == "");
+    return (!p1->isValid().empty()) && (p2->isValid().empty());
   }
 };
 

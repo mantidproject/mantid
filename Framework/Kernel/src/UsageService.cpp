@@ -263,7 +263,7 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
       thisFeature["count"] = featureItem.second;
       features.append(thisFeature);
     }
-    if (features.size() > 0) {
+    if (!features.empty()) {
       message["features"] = features;
       return writer.write(message);
     }
