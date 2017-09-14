@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FitPeak.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -218,12 +219,13 @@ void FindPeaks::processAlgorithmProperties() {
   singleSpectrum = !isEmpty(m_wsIndex);
   if (singleSpectrum &&
       m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms())) {
-    g_log.warning() << "The value of WorkspaceIndex provided (" << m_wsIndex
-                    << ") is larger than the size of this workspace ("
-                    << m_dataWS->getNumberHistograms() << ")\n";
-    throw Kernel::Exception::IndexError(m_wsIndex,
-                                        m_dataWS->getNumberHistograms() - 1,
-                                        "FindPeaks WorkspaceIndex property");
+    std::stringstream errss;
+    errss << "FindPeaks WorkspaceIndex property: "
+          << "The value of WorkspaceIndex provided (" << m_wsIndex
+          << ") is larger than the size of this workspace ("
+          << m_dataWS->getNumberHistograms();
+    throw Kernel::Exception::IndexError(
+        m_wsIndex, m_dataWS->getNumberHistograms() - 1, errss.str());
   }
 
   // Peak width
@@ -426,15 +428,24 @@ void FindPeaks::findPeaksGivenStartingPoints(
 /** Use the Mariscotti method to find the start positions and fit gaussian peaks
   */
 void FindPeaks::findPeaksUsingMariscotti() {
-  // At this point the data has not been smoothed yet.
-  MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(m_dataWS);
-
   // The optimum number of points in the smoothing, according to Mariscotti, is
   // 0.6*fwhm
   int w = static_cast<int>(0.6 * m_inputPeakFWHM);
   // w must be odd
   if (!(w % 2))
     ++w;
+
+  // set up index set
+  if (singleSpectrum)
+    m_indexSet.push_back(m_wsIndex);
+  else {
+    m_indexSet.resize(m_dataWS->getNumberHistograms());
+    for (size_t i = 0; i < m_dataWS->getNumberHistograms(); ++i)
+      m_indexSet[i] = i;
+  }
+
+  // At this point the data has not been smoothed yet.
+  MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(m_dataWS);
 
   // Carry out the number of smoothing steps given by g_z (should be 5)
   for (int i = 0; i < g_z; ++i) {
@@ -461,9 +472,13 @@ void FindPeaks::findPeaksUsingMariscotti() {
   m_progress = make_unique<Progress>(this, 0.0, 1.0, end - start);
   const int blocksize = static_cast<int>(smoothedData->blocksize());
 
-  for (int k = start; k < end; ++k) {
-    const auto &S = smoothedData->y(k);
-    const auto &F = smoothedData->e(k);
+  for (size_t smoothed_ws_index = 0; smoothed_ws_index < m_indexSet.size();
+       ++smoothed_ws_index) {
+
+    int k = static_cast<int>(m_indexSet[smoothed_ws_index]);
+
+    const auto &S = smoothedData->y(smoothed_ws_index);
+    const auto &F = smoothedData->e(smoothed_ws_index);
 
     // This implements the flow chart given on page 320 of Mariscotti
     int i0 = 0, i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
@@ -629,23 +644,44 @@ void FindPeaks::findPeaksUsingMariscotti() {
   *  @param input :: The workspace to calculate the second difference of
   *  @return A workspace containing the second difference
   */
-API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
-    const API::MatrixWorkspace_const_sptr &input) {
+API::MatrixWorkspace_sptr
+FindPeaks::calculateSecondDifference(const API::MatrixWorkspace_sptr &input) {
   // We need a new workspace the same size as the input ont
-  MatrixWorkspace_sptr diffed = WorkspaceFactory::Instance().create(input);
+  MatrixWorkspace_sptr diffed = 0;
 
-  const size_t numHists = input->getNumberHistograms();
+  // create the MatrixWorkspace for derivatives
+  size_t numHists(1);
+  if (singleSpectrum) {
+    // single spectrum: only work on 1 spectrum. no need to calculate derivative
+    // to the other spectra.
+    size_t nvector = 1;
+    size_t xlength = input->sharedX(m_wsIndex)->size();
+    size_t ylength = input->sharedY(m_wsIndex)->size();
+
+    diffed = WorkspaceFactory::Instance().create("Workspace2D", nvector,
+                                                 xlength, ylength);
+  } else {
+    // all spectra: create a workspace from parent
+    //  diffed = Mantid::DataObjects::create<API::MatrixWorkspace>(input);
+    diffed = WorkspaceFactory::Instance().create(input);
+    numHists = input->getNumberHistograms();
+  }
+
+  // calculate derivative
   const size_t blocksize = input->blocksize();
+  for (size_t i = 0; i < numHists; ++i) {
+    size_t wsindex = m_indexSet[i];
 
-  // Loop over spectra
-  for (size_t i = 0; i < size_t(numHists); ++i) {
     // Copy over the X values
-    diffed->setSharedX(i, input->sharedX(i));
+    diffed->setSharedX(i, input->sharedX(wsindex));
 
-    const auto &Y = input->y(i);
+    // calculate derivatives
+    const auto &Y = input->y(wsindex);
     auto &S = diffed->mutableY(i);
-    // Go through each spectrum calculating the second difference at each point
-    // First and last points in each spectrum left as zero (you'd never be able
+    // Go through each spectrum calculating the second difference at each
+    // point
+    // First and last points in each spectrum left as zero (you'd never be
+    // able
     // to find peaks that close to the edge anyway)
     for (size_t j = 1; j < blocksize - 1; ++j) {
       S[j] = Y[j - 1] - 2 * Y[j] + Y[j + 1];
@@ -676,16 +712,16 @@ void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w) {
   WS = smooth->getProperty("OutputWorkspace");
 }
 
-//----------------------------------------------------------------------------------------------
-/** Calculates the statistical error on the smoothed data.
-  *  Uses Mariscotti equation (11), amended to use errors of input data rather
- * than sqrt(Y).
-  *  @param input ::    The input data to the algorithm
-  *  @param smoothed :: The smoothed dataBackgroud type is not supported in
- * FindPeak.cpp
-  *  @param w ::        The value of w (the size of the smoothing 'window')
-  *  @throw std::invalid_argument if w is greater than 19
-  */
+////----------------------------------------------------------------------------------------------
+///** Calculates the statistical error on the smoothed data.
+//  *  Uses Mariscotti equation (11), amended to use errors of input data rather
+// * than sqrt(Y).
+//  *  @param input ::    The input data to the algorithm
+//  *  @param smoothed :: The smoothed dataBackgroud type is not supported in
+// * FindPeak.cpp
+//  *  @param w ::        The value of w (the size of the smoothing 'window')
+//  *  @throw std::invalid_argument if w is greater than 19
+//  */
 void FindPeaks::calculateStandardDeviation(
     const API::MatrixWorkspace_const_sptr &input,
     const API::MatrixWorkspace_sptr &smoothed, const int &w) {
@@ -698,13 +734,20 @@ void FindPeaks::calculateStandardDeviation(
   const double constant =
       sqrt(static_cast<double>(this->computePhi(w))) / factor;
 
-  const size_t numHists = smoothed->getNumberHistograms();
-  for (size_t i = 0; i < size_t(numHists); ++i) {
-    smoothed->setSharedE(i, input->sharedE(i));
+  // determine the number of histogram in 2 ways
+  size_t numHists = smoothed->getNumberHistograms();
+  for (size_t i = 0; i < numHists; ++i) {
+    // set up the source workspace index
+    size_t iws = m_indexSet[i];
+
+    // set sharedE
+    smoothed->setSharedE(i, input->sharedE(iws));
     std::transform(smoothed->e(i).cbegin(), smoothed->e(i).cend(),
                    smoothed->mutableE(i).begin(),
                    std::bind2nd(std::multiplies<double>(), constant));
   }
+
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
