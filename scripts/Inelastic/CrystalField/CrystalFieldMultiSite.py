@@ -25,7 +25,20 @@ class CrystalFieldMultiSite(object):
 
     def __init__(self, Ions, Symmetries, **kwargs):
 
-        self._makeFunction(Ions, Symmetries)
+        self._makeFunction()
+        if 'Background' not in kwargs:
+            background = None
+        else:
+            background = kwargs['Background']
+            del kwargs['Background']
+        if 'BackgroundPeak' not in kwargs:
+            backgroundPeak = None
+        else:
+            backgroundPeak = kwargs['BackgroundPeak']
+            del kwargs['BackgroundPeak']
+        if background is not None or backgroundPeak is not None:
+            self._setBackground(backgroundPeak, background)
+
         self.Ions = Ions
         self.Symmetries = Symmetries
         self._plot_window = {}
@@ -70,10 +83,6 @@ class CrystalFieldMultiSite(object):
                 # Crystal field parameters
                 self.function.setParameter(key, kwargs[key])
                 free_parameters.append(key)
-        if not self._isMultiSite():
-            for param in CrystalFieldMultiSite.field_parameter_names:
-                if param not in free_parameters:
-                    self.function.fixParameter(param)
 
         if attribute_dict is not None:
             for name, value in attribute_dict.items():
@@ -94,7 +103,7 @@ class CrystalFieldMultiSite(object):
     def _isMultiSite(self):
         return len(self.Ions) > 1
 
-    def _makeFunction(self, ion, symmetry):
+    def _makeFunction(self):
         from mantid.simpleapi import FunctionFactory
         self.function = FunctionFactory.createFunction('CrystalFieldFunction')
 
@@ -181,6 +190,30 @@ class CrystalFieldMultiSite(object):
         """
         self.function = func
 
+    def fix(self, *args):
+        for a in args:
+            self.function.fixParameter(a)
+
+
+    def ties(self, **kwargs):
+        """Set ties on the field parameters.
+
+        @param kwargs: Ties as name=value pairs: name is a parameter name,
+            the value is a tie string or a number. For example:
+                tie(B20 = 0.1, IB23 = '2*B23')
+        """
+        for tie in kwargs:
+            self.function.tie(tie, str(kwargs[tie]))
+
+    def constraints(self, *args):
+        """
+        Set constraints for the field parameters.
+
+        @param args: A list of constraints. For example:
+                constraints('B00 > 0', '0.1 < B43 < 0.9')
+        """
+        self.function.addConstraints(','.join(args))
+
     def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
         from mantidplot import plotSpectrum
@@ -217,6 +250,56 @@ class CrystalFieldMultiSite(object):
             createWS.setProperty('OutputWorkspace', ws_name)
             createWS.execute()
             plotSpectrum(ws_name, 0)
+
+
+    def _setBackground(self, peak=None, background=None):
+        from CrystalField.function import Function
+        from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
+
+        self._background = Function(self.function, prefix='bg.')
+        property_name = "peak"
+        if background is not None and peak is None:
+            peak = background
+            background = None
+            property_name = "background"
+        if peak is not None and background is None:
+            if isinstance(peak, basestring):
+                number_of_functions = peak.count(';') + 1
+                if number_of_functions == 2:
+                    peak, background = peak.split(';')
+                elif number_of_functions == 1:
+                    setattr(self._background, property_name, Function(self.function, prefix='bg.'))
+                    self.function.setAttributeValue('Background', '%s' % peak)
+                else:
+                    raise ValueError("Composite function peak must be no more than two functions")
+            elif isinstance(peak, CompositeFunctionWrapper):
+                if len(peak) == 2:
+                    peak, background = str(peak).split(';')
+                else:
+                    raise ValueError("Composite function peak must be no more than two functions")
+            elif isinstance(peak, FunctionWrapper):
+                setattr(self._background, property_name, Function(self.function, prefix='bg.'))
+                self.function.setAttributeValue('Background', '%s' % peak)
+            else:
+                raise TypeError("peak must be a string or function object")
+
+        if background is not None and peak is not None:
+            self._background.peak = Function(self.function, prefix='bg.f0.')
+            self._background.background = Function(self.function, prefix='bg.f1.')
+            self.function.setAttributeValue('Background', '%s;%s' % (peak, background))
+
+    def __getitem__(self, item):
+        if self.function.hasAttribute(item):
+            return self.function.getAttributeValue(item)
+        else:
+            return self.function.getParameterValue(item)
+
+    def __setitem__(self, key, value):
+        self.function.setParameter(key, value)
+
+    @property
+    def background(self):
+        return self._background
 
     @property
     def Ions(self):
@@ -322,40 +405,3 @@ class CrystalFieldMultiSite(object):
     @NPeaks.setter
     def NPeaks(self, value):
         self.function.setAttributeValue('NPeaks', value)
-
-    def fix(self, *args):
-        for a in args:
-            self.function.fixParameter(a)
-
-    def __getitem__(self, item):
-        if self.function.hasAttribute(item):
-            return self.function.getAttributeValue(item)
-        else:
-            return self.function.getParameterValue(item)
-
-
-    def setBackground(self, *args, peak=None, other=None):
-
-        if len(args) > 0:
-            bg = FunctionFactory.createFunction(args[0])
-            if isComposite(bg):
-                f0 = bg[0]
-                if isPeak(f0):
-                    peak = f0
-            return
-
-        self._background = Function(self.function, prefix='bg.')
-        if peak and other:
-            self._background.peak = Function(self.function, prefix='bg.f0.')
-            self._background.background = Function(self.function, prefix='bg.f1.')
-            self.function.setAttributeValue('Background', '%s;%s' % (peak, other))
-        elif peak:
-            self.function.setAttributeValue('Background', '%s' % peak)
-        elif other:
-            self.function.setAttributeValue('Background', '%s' % other)
-        else:
-            raise RuntimeError('!!!')
-
-    @property
-    def background(self):
-        return self._background
