@@ -366,10 +366,7 @@ UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
   childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
 
   // Construct the vector that holds the rebin parameters and set the property
-  std::vector<double> paramArray;
-  paramArray.push_back(min);
-  paramArray.push_back(step);
-  paramArray.push_back(max);
+  std::vector<double> paramArray = {min, step, max};
   childAlg->setProperty<std::vector<double>>("Params", paramArray);
   g_log.debug() << "Rebinning unwrapped data into " << numBins
                 << " bins of width " << step << " Angstroms, running from "

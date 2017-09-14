@@ -171,8 +171,13 @@ const std::string MatrixWorkspace::toString() const {
   std::ostringstream os;
   os << id() << "\n"
      << "Title: " << getTitle() << "\n"
-     << "Histograms: " << getNumberHistograms() << "\n"
-     << "Bins: " << blocksize() << "\n";
+     << "Histograms: " << getNumberHistograms() << "\n";
+
+  try {
+    os << "Bins: " << blocksize() << "\n";
+  } catch (std::length_error) {
+    os << "Bins: variable\n"; // TODO shouldn't use try/catch
+  }
 
   if (isHistogramData())
     os << "Histogram\n";
@@ -931,7 +936,8 @@ void MatrixWorkspace::setDistribution(bool newValue) {
  *  @return whether the workspace contains histogram data
  */
 bool MatrixWorkspace::isHistogramData() const {
-  bool isHist = (readX(0).size() != blocksize());
+  // all spectra *should* have the same behavior
+  bool isHist = (readX(0).size() != readY(0).size());
   // TODOHIST temporary sanity check
   if (isHist) {
     if (getSpectrum(0).histogram().xMode() !=
@@ -957,11 +963,20 @@ bool MatrixWorkspace::isCommonBins() const {
   if (!m_isCommonBinsFlagSet) {
     m_isCommonBinsFlag = true;
 
+    const size_t numHist = getNumberHistograms();
+    bool oneNonEmpty = !readY(0).empty();
+    for (size_t i = 1; i < numHist; ++i) {
+      if (!readY(0).empty()) {
+        oneNonEmpty = true;
+        break;
+      }
+    }
+
     // there being only one or zero histograms is accepted as not being an error
-    if (blocksize() || getNumberHistograms() > 1) {
+    if (oneNonEmpty || numHist > 1) {
       // otherwise will compare some of the data, to save time just check two
       // the first and the last
-      const size_t lastSpec = getNumberHistograms() - 1;
+      const size_t lastSpec = numHist - 1;
       // Quickest check is to see if they are actually the same vector
       if (&(readX(0)[0]) != &(readX(lastSpec)[0])) {
         // Now check numerically
@@ -1008,8 +1023,8 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
         workspaceIndex, this->getNumberHistograms(),
         "MatrixWorkspace::maskBin,workspaceIndex");
   // Then check the bin index
-  if (binIndex >= this->blocksize())
-    throw Kernel::Exception::IndexError(binIndex, this->blocksize(),
+  if (binIndex >= readY(workspaceIndex).size())
+    throw Kernel::Exception::IndexError(binIndex, readY(workspaceIndex).size(),
                                         "MatrixWorkspace::maskBin,binIndex");
 
   // this function is marked parallel critical

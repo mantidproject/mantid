@@ -38,9 +38,8 @@ bool ConvertToHistogram::isProcessingRequired(
  * @param inputWS pointer to input workspace
  * @returns An integer giving the size of the new X vector
  */
-size_t
-ConvertToHistogram::getNewXSize(const MatrixWorkspace_sptr inputWS) const {
-  return (inputWS->blocksize() + 1);
+size_t ConvertToHistogram::getNewXSize(const std::size_t ySize) const {
+  return ySize + 1;
 }
 
 /**

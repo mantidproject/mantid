@@ -38,9 +38,8 @@ bool ConvertToPointData::isProcessingRequired(
  * @param inputWS pointer to input workspace
  * @returns An integer giving the size of the new X vector
  */
-size_t
-ConvertToPointData::getNewXSize(const MatrixWorkspace_sptr inputWS) const {
-  return static_cast<int>(inputWS->blocksize());
+size_t ConvertToPointData::getNewXSize(const std::size_t ySize) const {
+  return ySize;
 }
 
 /**
