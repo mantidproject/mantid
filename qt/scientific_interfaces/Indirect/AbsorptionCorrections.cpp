@@ -116,7 +116,7 @@ void AbsorptionCorrections::run() {
   m_absCorAlgo = monteCarloAbsCor;
 
   // Run algorithm batch
-  m_batchAlgoRunner->executeBatch();
+  m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsName.toStdString();

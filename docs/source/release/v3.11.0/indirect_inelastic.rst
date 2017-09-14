@@ -21,6 +21,11 @@ Data Analysis
 - Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
   convolution fitting into their own workspaces.
 
+AbsorptionCorrections
+~~~~~~~~~~~~~~~~~~~~~
+- Absorption Corrections interface replaced with Calculate Monte Carlo Absorption Corrections; using the new CalculateMonteCarloAbsorption
+  algorithm.
+
 Elwin
 ~~~~~
 
