@@ -49,8 +49,8 @@ void AbsorptionCorrections::run() {
   // Get correct corrections algorithm
   QString sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
 
-  IAlgorithm_sptr monteCarloAbsCor = 
-    AlgorithmManager::Instance().create("CalculateMonteCarloAbsorption");
+  IAlgorithm_sptr monteCarloAbsCor =
+      AlgorithmManager::Instance().create("CalculateMonteCarloAbsorption");
   monteCarloAbsCor->initialize();
 
   monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
@@ -64,11 +64,12 @@ void AbsorptionCorrections::run() {
   monteCarloAbsCor->setProperty(
       "SampleDensityType",
       m_uiForm.cbSampleDensity->currentText().toStdString());
-  monteCarloAbsCor->setProperty("SampleDensity", m_uiForm.spSampleDensity->value());
+  monteCarloAbsCor->setProperty("SampleDensity",
+                                m_uiForm.spSampleDensity->value());
 
   QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
   monteCarloAbsCor->setProperty("SampleChemicalFormula",
-                          sampleChemicalFormula.toStdString());
+                                sampleChemicalFormula.toStdString());
 
   // General details
   monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
@@ -85,14 +86,15 @@ void AbsorptionCorrections::run() {
         m_uiForm.dsCanInput->getCurrentDataName().toStdString();
     monteCarloAbsCor->setProperty("ContainerWorkspace", canWsName);
 
-    monteCarloAbsCor->setProperty("ContainerDensityType", 
-      m_uiForm.cbCanDensity->currentText().toStdString());
-    monteCarloAbsCor->setProperty("ContainerDensity", 
-      m_uiForm.spCanDensity->value());
+    monteCarloAbsCor->setProperty(
+        "ContainerDensityType",
+        m_uiForm.cbCanDensity->currentText().toStdString());
+    monteCarloAbsCor->setProperty("ContainerDensity",
+                                  m_uiForm.spCanDensity->value());
 
     QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
     monteCarloAbsCor->setProperty("ContainerChemicalFormula",
-      canChemicalFormula.toStdString());
+                                  canChemicalFormula.toStdString());
 
     addShapeSpecificCanOptions(monteCarloAbsCor, sampleShape);
   }
@@ -107,8 +109,8 @@ void AbsorptionCorrections::run() {
   QString outputWsName = outputBaseName + "_" + sampleShape + "_Corrections";
   std::string outputWsNameStr = outputWsName.toStdString();
 
-  monteCarloAbsCor->setProperty("CorrectionsWorkspace", 
-    outputWsName.toStdString());
+  monteCarloAbsCor->setProperty("CorrectionsWorkspace",
+                                outputWsName.toStdString());
 
   // Add correction algorithm to batch
   m_batchAlgoRunner->addAlgorithm(monteCarloAbsCor);
@@ -221,10 +223,10 @@ bool AbsorptionCorrections::validate() {
   if (useCan) {
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
 
-    if (uiv.checkFieldIsNotEmpty("Container Chemical Formula", 
-      m_uiForm.leCanChemicalFormula)) {
-      uiv.checkFieldIsValid("Container Chemical Formula", 
-        m_uiForm.leCanChemicalFormula);
+    if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
+                                 m_uiForm.leCanChemicalFormula)) {
+      uiv.checkFieldIsValid("Container Chemical Formula",
+                            m_uiForm.leCanChemicalFormula);
     }
   }
 
@@ -294,8 +296,8 @@ void AbsorptionCorrections::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 
-  std::string factorsWs = 
-    m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
+  std::string factorsWs =
+      m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
   if (checkADSForPlotSaveWorkspace(factorsWs, false))
     addSaveWorkspaceToQueue(QString::fromStdString(factorsWs));
 
@@ -312,15 +314,14 @@ void AbsorptionCorrections::plotClicked() {
   auto outputFactorsWsName =
       m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
 
-    QStringList plotCorr = {QString::fromStdString(outputFactorsWsName) +
-                            "_ass"};
-    if (m_uiForm.ckUseCan->isChecked()) {
-      plotCorr.push_back(QString::fromStdString(outputFactorsWsName) + "_acc");
-      QString shiftedWs = QString::fromStdString(
-          m_absCorAlgo->getPropertyValue("CanWorkspace"));
-      plotData.push_back(shiftedWs);
-    }
-    plotSpectrum(plotCorr, 0);
+  QStringList plotCorr = {QString::fromStdString(outputFactorsWsName) + "_ass"};
+  if (m_uiForm.ckUseCan->isChecked()) {
+    plotCorr.push_back(QString::fromStdString(outputFactorsWsName) + "_acc");
+    QString shiftedWs =
+        QString::fromStdString(m_absCorAlgo->getPropertyValue("CanWorkspace"));
+    plotData.push_back(shiftedWs);
+  }
+  plotSpectrum(plotCorr, 0);
 
   plotSpectrum(plotData, 0);
 }
