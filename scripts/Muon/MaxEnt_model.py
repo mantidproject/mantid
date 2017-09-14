@@ -1,44 +1,27 @@
 from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 import mantid.simpleapi as mantid
-import threading
+from PyQt4.QtCore import QThread
 
 
-class MaxEntThread(object):
-    # wrapper class for calling threaded
-    # MaxEnt algorithm.
-    # This is needed to enusre threads exit.
-    # Without this the GUI will hang for
-    # large data sets, at the cost of
-    # the algorithm being slower
-
-    def __init__(self,alg):
-        self.alg=alg
-
-    def execute(self, activateButton):
-        print ("MaxEnt calculation started (this may take a while)")
-        thread = MaxEntThreadWrapper(self.alg,activateButton)
-        thread.start()
-
-    def setInputs(self,inputs):
-        self.alg.setInputs(inputs)
-
-
-class MaxEntThreadWrapper(threading.Thread):
+class MaxEntThread(QThread):
     # a wrapper to allow threading with
     # the MaxEnt algorithm.
 
-    def __init__(self,alg,activateButton):
-        threading.Thread.__init__(self)
+    def __init__(self,alg):
+        QThread.__init__(self)
         self.alg=alg
-        self.activate=activateButton
 
+    def __del__(self):
+         self.wait()
+		  
     def run(self):
         self.alg.execute()
         self.alg.output()
-        self.activate()
         return
 
+    def setInputs(self,inputs):
+        self.alg.setInputs(inputs)
 
 class MaxEntModel(object):
     # A simple class to hold the MaxEnt algorithm
