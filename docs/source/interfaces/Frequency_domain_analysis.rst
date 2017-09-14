@@ -3,8 +3,9 @@
 Frequency Domain Analysis
 ==========================
 
-.. image::  ../images/MuonAnalysisHome3.6.jpg
+.. image::  ../images/FDAGHome.png
    :align: right
+   :height: 400px
 
 .. contents:: Table of Contents
   :local:
@@ -31,7 +32,8 @@ Default: Fast Fourier Transforms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. image::  ../images/FDAG_FFT.png
-   :align: right
+   :align: center
+   :height: 400px
 
 In this mode the interface displays two tables, FFT and Advanced options. The FFT table contains 
 all of the information required to produce a forward FFT. The Advanced Options table contains the information
@@ -44,12 +46,16 @@ The Calculate button will execute the :ref:`Padding and Apodization <algm-Paddin
 Maximum Entropy Method
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The maximum entropy method can be used to calculate the frequency domain spectrum. The xxx table contains 
-the basic quantitites used during the calculation. The advanced table contains variables for users that would
-like more control overt the calculation. 
+The maximum entropy method can be used to calculate the frequency domain spectrum. The MaxEnt Property table contains 
+the basic quantitites used during the calculation. The 
+Advanced property table contains variables for users that would
+like more control overt the calculation.
 
-.. image::  ../images/MuonAnalysisTFAsymm.png
-   :align: right
+For large calculations this interface can be slow, therefore the Calculate button is disabled until the current calculation is complete. 
+
+.. image::  ../images/FDAG_MaxEnt.png
+   :align: center
+   :height: 400px
 
 Feedback & Comments
 -------------------
