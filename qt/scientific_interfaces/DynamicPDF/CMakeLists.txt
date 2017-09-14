@@ -42,8 +42,6 @@ set ( UI_FILES
     SliceSelector.ui
 )
 
-#include_directories ( ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} )
-
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesDynamicPDF
                     SRC ${SRC_FILES}
                     MOC ${MOC_FILES}
