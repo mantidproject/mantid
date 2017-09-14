@@ -964,11 +964,14 @@ bool MatrixWorkspace::isCommonBins() const {
     m_isCommonBinsFlag = true;
 
     const size_t numHist = getNumberHistograms();
-    bool oneNonEmpty = !readY(0).empty();
-    for (size_t i = 1; i < numHist; ++i) {
-      if (!readY(0).empty()) {
-        oneNonEmpty = true;
-        break;
+    bool oneNonEmpty = false;
+    if (numHist > 1) {
+      !readY(0).empty();
+      for (size_t i = 1; i < numHist; ++i) {
+        if (!readY(0).empty()) {
+          oneNonEmpty = true;
+          break;
+        }
       }
     }
 
