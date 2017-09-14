@@ -1,8 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 
+import math
 import numpy as np
-from mantid.kernel import StringListValidator, Direction, PropertyMode
-from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty
+from mantid.kernel import StringListValidator, Direction, IntArrayBoundedValidator, IntArrayProperty, \
+    CompositeValidator, IntArrayLengthValidator, IntArrayOrderedPairsValidator
+from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode
 from mantid.simpleapi import *
 
 
@@ -16,6 +18,10 @@ class PowderILLCalibration(PythonAlgorithm):
     _scan_points = None
     _out_response = None
     _bin_offset = None
+    _n_det = None
+    _normalise_to = None
+    _first_pixel = None
+    _last_pixel = None
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -28,9 +34,6 @@ class PowderILLCalibration(PythonAlgorithm):
 
     def name(self):
         return "PowderILLCalibration"
-
-    def validateInputs(self):
-        return dict()
 
     def PyInit(self):
         self.declareProperty(FileProperty('CalibrationRun', '', action=FileAction.Load, extensions=['nxs']),
@@ -45,33 +48,73 @@ class PowderILLCalibration(PythonAlgorithm):
                              doc='The method of how the calibration constant of a '
                                  'pixel relative to the neighbouring one is derived.')
 
+        self.declareProperty(name='NormaliseTo',
+                             defaultValue='None',
+                             validator=StringListValidator(['None', 'Time', 'Monitor', 'ROI']),
+                             doc='Normalise to time, monitor or ROI counts before deriving the calibration.')
+
+        self.declareProperty(name='ROI', defaultValue='0,153.6',
+                             doc='Regions of interest for normalisation in scattering angle in degrees. E.g. -1.5,20,50,110')
+
+        self.declareProperty(name='ExcludedRange', defaultValue='',
+                             doc='2theta regions to exclude from the computation of relative calibration constants. '
+                                 'Provide in scattering angle in degrees. E.g. -1.5,5 '
+                                 'Can be used to mask the beam stop. ')
+
+        pixelRangeValidator = CompositeValidator()
+        greaterThanOne = IntArrayBoundedValidator()
+        greaterThanOne.setLower(1)
+        lengthTwo = IntArrayLengthValidator()
+        lengthTwo.setLength(2)
+        pixelRangeValidator.add(greaterThanOne)
+        pixelRangeValidator.add(lengthTwo)
+
+        self.declareProperty(IntArrayProperty(name='PixelRange', values=[1,3072], validator=pixelRangeValidator),
+                             doc='Range of the pixel numbers to compute the calibration factors for. '
+                                 'For the other pixels outside the range, the factor will be set to 1.')
+
         self.declareProperty(MatrixWorkspaceProperty('OutputResponseWorkspace', '',
-                                                     optional=PropertyMode.optional, direction=Direction.Output),
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='Output workspace containing the summed diffraction patterns of all the pixels.')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output),
                              doc='Output workspace containing the detector efficiencies for each pixel.')
 
-    def _sum_neighbours(self, ref_ws, ws, ws_cropped, factor):
-        # ws_theta_axis = mtd[ws].getAxis(1).extractValues()
-        ws_y = mtd[ws].extractY().flatten()[-1]
-        ws_e = mtd[ws].extractE().flatten()[-1]
+    def validateInputs(self):
+        issues = dict()
+        pixel_range = self.getProperty('PixelRange').value
+        if pixel_range[0] >= pixel_range[1]:
+            issues['PixelRange'] = 'Invalid range, provide , separated two pixel numbers'
+        return issues
+
+    def _update_reference(self, ws, cropped_ws, ref_ws, factor):
+        #TODO: take care of the optional output response
+
+        ws_y = mtd[ws].extractY().flatten()[-self._bin_offset]
+        ws_e = mtd[ws].extractE().flatten()[-self._bin_offset]
+        ws_x = np.zeros(self._bin_offset)
         ws_out = ref_ws + '_temp'
         ws_last = ref_ws + '_last'
-        if str(factor) != 'inf':
-            Mean(Workspaces=ref_ws + ',' + ws_cropped, OutputWorkspace=ws_out)
-        else:
+
+        if factor == 0. or str(factor) == 'nan':
+            CloneWorkspace(InputWorkspace=cropped_ws, OutputWorkspace=ws_out)
+        elif str(factor) == 'inf':
             CloneWorkspace(InputWorkspace=ref_ws, OutputWorkspace=ws_out)
-        CreateWorkspace(DataX=[0], DataY=[ws_y], DataE=[ws_e], NSpec=1, OutputWorkspace=ws_last)
+        else:
+            #TODO: compute inverse error weighted average instead of mean
+            Mean(Workspaces=ref_ws + ',' + cropped_ws, OutputWorkspace=ws_out)
+
+        CreateWorkspace(DataX=ws_x, DataY=ws_y, DataE=ws_e, NSpec=self._bin_offset, OutputWorkspace=ws_last)
         AppendSpectra(InputWorkspace1=ws_out, InputWorkspace2=ws_last, OutputWorkspace=ws_out, ValidateInputs=False)
         DeleteWorkspace(ws_last)
-        CropWorkspace(InputWorkspace=ws_out, OutputWorkspace=ws_out, StartWorkspaceIndex=1)
+        CropWorkspace(InputWorkspace=ws_out, OutputWorkspace=ws_out, StartWorkspaceIndex=self._bin_offset)
         RenameWorkspace(InputWorkspace=ws_out, OutputWorkspace=ref_ws)
         DeleteWorkspace(ws)
-        DeleteWorkspace(ws_cropped)
+        DeleteWorkspace(cropped_ws)
 
     def _compute_relative_factor(self, ratio):
+        #TODO: implement the masking of regions to exclude
         Transpose(InputWorkspace=ratio, OutputWorkspace=ratio)
         factor = 1.
         if self._method == 'Median':
@@ -79,91 +122,145 @@ class PowderILLCalibration(PythonAlgorithm):
         DeleteWorkspace(ratio)
         return factor
 
-    def PyExec(self):
-        self._input_file = self.getPropertyValue('CalibrationRun')
-        self._calib_file = self.getPropertyValue('CalibrationFile')
-        self._out_name = self.getPropertyValue('OutputWorkspace')
-        self._method = self.getPropertyValue('CalibrationMethod')
-        self._out_response = self.getPropertyValue('OutputResponseWorkspace')
-
-        raw_ws = self._hide('raw')
-        LoadILLDiffraction(Filename=self._input_file, OutputWorkspace=raw_ws)
-
+    def _validate_scan(self, scan_ws):
         is_scanned = False
         try:
-            mtd[raw_ws].detectorInfo().isMasked(0)
+            mtd[scan_ws].detectorInfo().isMasked(0)
         except RuntimeError:
             is_scanned = True
         if not is_scanned:
             raise RuntimeError('The input run does not correspond to a detector scan.')
 
+    def _calibrate(self, raw_ws):
+        calib_ws = self._hide('calib')
+        LoadNexusProcessed(Filename=self._calib_file, OutputWorkspace=calib_ws)
+
+        constants = mtd[calib_ws].extractY().flatten()
+        errors = mtd[calib_ws].extractE().flatten()
+        xaxis = np.zeros(self._n_det)
+
+        constants = np.repeat(constants, self._scan_points)
+        errors = np.repeat(errors, self._scan_points)
+        xaxis = np.repeat(xaxis, self._scan_points)
+
+        CreateWorkspace(DataX=xaxis, DataY=constants, DataE=errors,
+                        NSpec=self._scan_points * self._n_det, OutputWorkspace=calib_ws)
+        Multiply(LHSWorkspace=raw_ws, RHSWorkspace=calib_ws, OutputWorkspace=raw_ws)
+        DeleteWorkspace(calib_ws)
+
+    def _normalise_to_monitor(self, raw_ws, mon_ws):
+        mon_counts = mtd[mon_ws].extractY().flatten()
+        mon_errors = mtd[mon_ws].extractE().flatten()
+        xaxis = np.zeros(self._scan_points)
+
+        mon_counts = np.tile(mon_counts, self._n_det)
+        mon_errors = np.tile(mon_errors, self._n_det)
+        xaxis = np.tile(xaxis, self._n_det)
+
+        CreateWorkspace(DataX=xaxis, DataY=mon_counts, DataE=mon_errors,
+                        NSpec=self._scan_points * self._n_det, OutputWorkspace=mon_ws)
+
+        Divide(LHSWorkspace=raw_ws, RHSWorkspace=mon_ws, OutputWorkspace=raw_ws)
+        ReplaceSpecialValues(InputWorkspace=raw_ws, OutputWorkspace=raw_ws,
+                             NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
+
+    #TODO: think about ROI normalisation, time?
+
+    def PyExec(self):
+        self._input_file = self.getPropertyValue('CalibrationRun')
+        self._calib_file = self.getPropertyValue('CalibrationFile')
+        self._out_name = self.getPropertyValue('OutputWorkspace')
+        self._method = self.getPropertyValue('CalibrationMethod')
+        self._normalise_to = self.getPropertyValue('NormaliseTo')
+        self._out_response = self.getPropertyValue('OutputResponseWorkspace')
+        self._first_pixel = self.getProperty('PixelRange').value[0]
+        self._last_pixel = self.getProperty('PixelRange').value[1]
+
+        raw_ws = self._hide('raw')
+        ref_ws = self._hide('ref')
+        mon_ws = self._hide('mon')
+
+        LoadILLDiffraction(Filename=self._input_file, OutputWorkspace=raw_ws)
+        self._validate_scan(raw_ws)
+        ExtractMonitors(InputWorkspace=raw_ws, DetectorWorkspace=raw_ws, MonitorWorkspace=mon_ws)
         ConvertSpectrumAxis(InputWorkspace=raw_ws, OutputWorkspace=raw_ws, Target='SignedTheta', OrderAxis=False)
 
-        calib_ws = self._hide('calib')
+        self._scan_points = mtd[raw_ws].getRun().getLogData('ScanSteps').value
+        self.log().information('Number of scan steps is: ' + str(self._scan_points))
+        self._n_det = mtd[raw_ws].detectorInfo().size() - 1
+        self.log().information('Number of detector pixels is: ' + str(self._n_det))
+
+        if self._last_pixel > self._n_det:
+            self.log().warning('Last pixel number provided is larger than total number of pixels. '
+                               'Taking the last existing pixel.')
+            self._last_pixel = self._n_det
+
+        pixel_size = mtd[raw_ws].getRun().getLogData('PixelSize').value
+        theta_zeros = mtd[raw_ws].getRun().getLogData('2theta')
+        self._bin_offset = int(math.ceil((theta_zeros.nthValue(1) - theta_zeros.nthValue(0)) / pixel_size))
+        self.log().information('Bin offset is: ' + str(self._bin_offset))
+
+        if self._normalise_to == 'Monitor':
+            self._normalise_to_monitor(raw_ws, mon_ws)
+        DeleteWorkspace(mon_ws)
+
         if self._calib_file:
-            LoadNexusProcessed(Filename=self._calib_file, OutputWorkspace=calib_ws)
-
-        ref_ws = self._hide('ref')
-
-        self._scan_points = mtd[raw_ws].getRun().getLogData('2theta').size()
-
-        CropWorkspace(InputWorkspace=raw_ws, OutputWorkspace=ref_ws,
-                      StartWorkspaceIndex=self._scan_points, EndWorkspaceIndex=2 * self._scan_points - 1)
-        if self._calib_file:
-            Scale(InputWorkspace=ref_ws, Factor=mtd[calib_ws].readY(0)[0], OutputWorkspace=ref_ws)
-        CropWorkspace(InputWorkspace=ref_ws, OutputWorkspace=ref_ws, StartWorkspaceIndex=1)
-
-        n_det = mtd[raw_ws].detectorInfo().size()
-        zeros = np.zeros(n_det - 1)
-        ones = np.ones(n_det - 1)
-
-        out_temp = '__'+self._out_name
-        CreateWorkspace(DataX=zeros, DataY=ones, DataE=zeros, NSpec=n_det - 1, OutputWorkspace=out_temp)
-
-        self._progress = Progress(self, start=0.0, end=1.0, nreports=n_det)
+            self._calibrate(raw_ws)
 
         raw_y = mtd[raw_ws].extractY().flatten()
         raw_e = mtd[raw_ws].extractE().flatten()
-        raw_x = np.zeros(self._scan_points)
+        raw_x = mtd[raw_ws].extractX().flatten()
+        raw_t = mtd[raw_ws].getAxis(1).extractValues()
 
-        for det in range(2, n_det):
+        zeros = np.zeros(self._n_det)
+        constants = np.ones(self._n_det)
+
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=self._n_det)
+
+        for det in range(self._first_pixel, self._last_pixel + 1):
             ws = '__det_' + str(det)
-            start = det * self._scan_points
-            end = (det + 1) * self._scan_points
-            det_y = raw_y[ start : end ]
-            det_e = raw_e[ start : end ]
+            start = (det - 1) * self._scan_points
+            end = det * self._scan_points
+            det_y = raw_y[start:end]
+            det_e = raw_e[start:end]
+            det_x = raw_x[start:end]
+            det_t = raw_t[start:end]
 
-            CreateWorkspace(DataX=raw_x, DataY=det_y, DataE=det_e, NSpec=self._scan_points, OutputWorkspace=ws, ParentWorkspace=raw_ws)
+            CreateWorkspace(DataX=det_x, DataY=det_y, DataE=det_e, NSpec=self._scan_points,
+                            VerticalAxisValues=det_t, VerticalAxisUnit='Degrees', OutputWorkspace=ws)
 
-            if self._calib_file:
-                Scale(InputWorkspace=ws, Factor=mtd[calib_ws].readY(det - 1)[0], OutputWorkspace=ws)
-            ws_cropped = ws + '_cropped'
-            ratio = ws + '_ratio'
-            CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws_cropped,
-                          EndWorkspaceIndex=mtd[ws].getNumberHistograms() - 2)
-            Divide(LHSWorkspace=ref_ws, RHSWorkspace=ws_cropped, OutputWorkspace=ratio)
-            factor = self._compute_relative_factor(ratio)
-            self._progress.report()
+            if det is not 65:
+                ratio_ws = ws + '_ratio'
+                cropped_ws = ws + '_cropped'
+                CropWorkspace(InputWorkspace=ws, OutputWorkspace=cropped_ws,
+                              EndWorkspaceIndex=self._scan_points - self._bin_offset - 1)
+                Divide(LHSWorkspace=ref_ws, RHSWorkspace=cropped_ws, OutputWorkspace=ratio_ws)
+                factor = self._compute_relative_factor(ratio_ws)
+                self._progress.report()
+                if str(factor) == 'nan' or str(factor) == 'inf' or factor == 0.:
+                    self.log().warning('Factor is inf or nan or 0 for pixel #' + str(det))
+                else:
+                    self.log().debug('Factor derived for detector pixel #' + str(det) + ' is ' + str(factor))
+                    constants[det - 1] = factor
 
-            if str(factor) != 'inf':
-                self.log().debug('Factor derived for detector pixel #' + str(det) + ' is ' + str(factor))
-                mtd[out_temp].dataY(det - 1)[0] = factor
-                Scale(InputWorkspace=ws, Factor=factor, OutputWorkspace=ws)
-                Scale(InputWorkspace=ws_cropped, Factor=factor, OutputWorkspace=ws_cropped)
+                self._update_reference(ws, cropped_ws, ref_ws, factor)
             else:
-                self.log().warning('Factor is inf for pixel #' + str(det))
-            self._sum_neighbours(ref_ws, ws, ws_cropped, factor)
-
-        if self._calib_file:
-            DeleteWorkspace(calib_ws)
+                CropWorkspace(InputWorkspace=ws, OutputWorkspace=ref_ws, StartWorkspaceIndex=self._bin_offset)
+                #TODO: set first item of the optional response output
+                DeleteWorkspace(ws)
 
         DeleteWorkspace(ref_ws)
         DeleteWorkspace(raw_ws)
 
-        absolute_norm = np.median(mtd[out_temp].extractY())
+        absolute_norm = np.median(constants)
+        self.log().information('Absolute normalisation constant is: ' + str(absolute_norm))
+        out_temp = '__' + self._out_name
+        CreateWorkspace(DataX=zeros, DataY=constants, DataE=zeros, NSpec=self._n_det, OutputWorkspace=out_temp)
         Scale(InputWorkspace=out_temp, OutputWorkspace=out_temp, Factor=1./absolute_norm)
         RenameWorkspace(InputWorkspace=out_temp, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)
+
+        #TODO: set the optional response output
 
 #Register the algorithm with Mantid
 AlgorithmFactory.subscribe(PowderILLCalibration)
