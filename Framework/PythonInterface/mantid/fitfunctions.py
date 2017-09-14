@@ -1,4 +1,4 @@
-from mantid.api import FunctionFactory, Workspace
+from mantid.api import FunctionFactory, Workspace, AlgorithmManager
  
 class FunctionWrapper(object):
   """ Wrapper class for Fitting Function 
@@ -122,7 +122,7 @@ class FunctionWrapper(object):
       
       if isinstance(x, Workspace):
           # If the input is a workspace, simply return the output workspace.
-          return EvaluateFunction(str(self.fun), x, OutputWorkspace='out')
+          return self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=x)
        
       list_input = False
       numpy_input = False       
@@ -142,8 +142,8 @@ class FunctionWrapper(object):
       for i in range(len(params)):
           self.fun.setParameter(i, params[i])
       y = x_list[:]
-      ws = CreateWorkspace(x_list, y)
-      out = EvaluateFunction(str(self.fun), ws, OutputWorkspace='out')
+      ws = self._execute_algorithm('CreateWorkspace', DataX=x_list, DataY=y)
+      out = self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=ws)
       
       if numpy_input:
          oa = np.array(out.readY(1))
@@ -234,6 +234,17 @@ class FunctionWrapper(object):
       """ Return the name of the function
       """
       return self.fun.name()
+
+  def _execute_algorithm(self, name, **kwargs):
+    alg = AlgorithmManager.create(name)
+    alg.setChild(True)
+    alg.initialize()
+    for param in kwargs:
+        alg.setProperty(param, kwargs[param])
+    alg.setProperty('OutputWorkspace', 'none')
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
        
 class CompositeFunctionWrapper(FunctionWrapper):
     """ Wrapper class for Composite Fitting Function
