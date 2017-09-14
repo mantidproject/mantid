@@ -410,8 +410,8 @@ ReflectometryReductionOneAuto2::calculateTheta(const std::string &instructions,
   alg->setProperty("DetectorComponentName", detectorsOfInterest[0]);
   alg->execute();
   const double theta = alg->getProperty("TwoTheta");
-  // Take a factor of 0.5 of the detector position, which isexpected to be at 2
-  // * theta
+  // Take a factor of 0.5 of the detector position, which is expected to be at
+  // 2 * theta
   return theta * 0.5;
 }
 

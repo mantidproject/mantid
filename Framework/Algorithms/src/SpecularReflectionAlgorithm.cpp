@@ -213,9 +213,8 @@ double SpecularReflectionAlgorithm::calculateTwoTheta() const {
   IComponent_const_sptr detector =
       this->getDetectorComponent(inWS, analysisMode == pointDetectorAnalysis);
 
-  IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
-
-  const V3D detSample = detector->getPos() - sample->getPos();
+  const V3D detSample =
+      detector->getPos() - inWS->spectrumInfo().samplePosition();
 
   boost::shared_ptr<const ReferenceFrame> refFrame =
       instrument->getReferenceFrame();
@@ -224,7 +223,7 @@ double SpecularReflectionAlgorithm::calculateTwoTheta() const {
   const double beamoffset =
       refFrame->vecPointingAlongBeam().scalar_prod(detSample);
 
-  const double twoTheta = std::atan(upoffset / beamoffset) * 180 / M_PI;
+  const double twoTheta = std::atan2(upoffset, beamoffset) * 180 / M_PI;
 
   return twoTheta;
 }

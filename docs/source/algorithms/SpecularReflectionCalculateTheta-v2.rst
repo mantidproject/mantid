@@ -14,7 +14,7 @@ to calculate and return a corrected :math:`\theta_{In}`.
 
 .. math:: 
 
-   2\centerdot\theta = tan^{-1}\left(\frac{UpOffset}{BeamOffset}\right)
+   2\theta = \arctan\left(\frac{UpOffset}{BeamOffset}\right)
 
 The calculated :math:`2\theta` value in degrees is returned by the algorithm.
 
@@ -49,7 +49,7 @@ Usage
 
    # Calculate the two theta.
    two_theta = SpecularReflectionCalculateTheta(InputWorkspace=ws, DetectorComponentName='point-detector', AnalysisMode='PointDetectorAnalysis')
-   print two_theta
+   print(two_theta)
    
 Output:
 

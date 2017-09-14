@@ -60,10 +60,8 @@ void SpecularReflectionCalculateTheta2::exec() {
 
   const double twoTheta = calculateTwoTheta();
 
-  std::stringstream strstream;
-  strstream << "Recalculated two theta as: " << twoTheta;
-
-  this->g_log.information(strstream.str());
+  this->g_log.information("Recalculated two theta as: " +
+                          std::to_string(twoTheta));
 
   this->setProperty("TwoTheta", twoTheta);
 }
