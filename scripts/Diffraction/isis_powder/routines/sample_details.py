@@ -255,8 +255,8 @@ def _check_value_is_physical(property_name, value):
 
     if value <= 0 or math.isnan(value):
         raise ValueError("The value set for {} was: {} which is impossible for a physical object".format(property_name,
-                                                                                                          original_value
-                                                                                                          ))
+                                                                                                         original_value
+                                                                                                         ))
 
 
 def _check_can_convert_to_float(property_name, value):
