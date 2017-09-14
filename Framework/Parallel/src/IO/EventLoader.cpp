@@ -59,18 +59,36 @@ template <class TimeZeroType, class TimeOffsetType> void EventLoader::load() {
   std::vector<TimeOffsetType> event_time_offset(2 * chunkSize);
 
   std::unique_ptr<NXEventDataLoader<TimeZeroType, TimeOffsetType>> loader;
+  // TODO Create parser. Constructor arguments:
+  // - rankGroups (parser must insert events received from ranks within group
+  //   always in that order, to preserve pulse time ordering)
+  // - m_bankOffsets (use to translate from event_id to global spectrum index)
+  // - m_eventLists (index is workspace index)
+  // - Later: Pass something to translate (global spectrum index -> (rank,
+  //   workspace index))
   size_t previousBank = 0;
   for (const auto &range : ranges) {
     if (!loader || range.bankIndex != previousBank) {
       loader =
           Kernel::make_unique<NXEventDataLoader<TimeZeroType, TimeOffsetType>>(
               *m_file, m_groupName + "/" + m_bankNames[range.bankIndex]);
+      // TODO
+      // parser.setEventIndex(loader->eventIndex());
+      // parser.setEventTimeZero(loader->eventTimeZero());
     }
-    const auto &event_index = loader->eventIndex();
-    const auto &event_time_zero = loader->eventTimeZero();
+    // TODO use double buffer or something
+    // parser.wait()
+    // TODO use and manage bufferOffset
     loader->readEventID(event_id.data(), range.eventOffset, range.eventCount);
     loader->readEventTimeOffset(event_time_offset.data(), range.eventOffset,
                                 range.eventCount);
+    // TODO
+    // parser.startProcessChunk(event_id.data() + bufferOffset,
+    //                          event_time_offset.data() + bufferOffset,
+    //                          range.eventCount);
+    // parser can assume that event_index and event_time_zero stay the same and
+    // chunks are ordered, i.e., current position in event_index can be reused,
+    // no need to iterate in event_index from the start for every chunk.
   }
 }
 
