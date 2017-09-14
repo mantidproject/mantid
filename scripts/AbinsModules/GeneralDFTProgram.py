@@ -105,7 +105,7 @@ class GeneralDFTProgram(object):
 
           For more details about these fields please look at the documentation of IOmodule class.
 
-        @return: Method should return an object of type AbinsData.
+        :returns: Method should return an object of type AbinsData.
 
         """
         return None
@@ -113,7 +113,7 @@ class GeneralDFTProgram(object):
     def load_formatted_data(self):
         """
         Loads data from hdf file. After data is loaded it is put into AbinsData object.
-        @return:
+        :returns: object of type AbinsData
         """
         data = self._clerk.load(list_of_datasets=["frequencies", "weights", "k_vectors",
                                                   "atomic_displacements", "unit_cell", "atoms"])
@@ -134,7 +134,7 @@ class GeneralDFTProgram(object):
     def _recover_symmetry_points(self, data=None):
         """
         This method reconstructs symmetry equivalent k-points.
-        @param data: dictionary with the data for only symmetry inequivalent k-points. This methods
+        :param data: dictionary with the data for only symmetry inequivalent k-points. This methods
         adds to this dictionary phonon data for symmetry equivalent k-points.
         """
 
@@ -145,8 +145,8 @@ class GeneralDFTProgram(object):
         This method rearranges data read from phonon DFT file. It converts  masses and frequencies Hartree atomic units.
         It converts atomic displacements from atomic units to Angstroms
 
-        @param data: dictionary with the data to rearrange
-        @return: Returns an object of type AbinsData
+        :param data: dictionary with the data to rearrange
+        :returns: Returns an object of type AbinsData
         """
 
         k_points = AbinsModules.KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
