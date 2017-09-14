@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
 from mantid.kernel import StringListValidator, Direction, IntArrayBoundedValidator, IntArrayProperty, \
-    CompositeValidator, IntArrayLengthValidator, IntArrayOrderedPairsValidator
+    CompositeValidator, IntArrayLengthValidator, IntArrayOrderedPairsValidator, FloatArrayOrderedPairsValidator, \
+    FloatArrayProperty
 from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode
 from mantid.simpleapi import *
 
@@ -53,21 +54,24 @@ class PowderILLCalibration(PythonAlgorithm):
                              validator=StringListValidator(['None', 'Time', 'Monitor', 'ROI']),
                              doc='Normalise to time, monitor or ROI counts before deriving the calibration.')
 
-        self.declareProperty(name='ROI', defaultValue='0,153.6',
-                             doc='Regions of interest for normalisation in scattering angle in degrees. E.g. -1.5,20,50,110')
+        thetaRangeValidator = FloatArrayOrderedPairsValidator()
 
-        self.declareProperty(name='ExcludedRange', defaultValue='',
-                             doc='2theta regions to exclude from the computation of relative calibration constants. '
-                                 'Provide in scattering angle in degrees. E.g. -1.5,5 '
-                                 'Can be used to mask the beam stop. ')
+        self.declareProperty(FloatArrayProperty(name='ROI', values=[0,153.6], validator=thetaRangeValidator),
+                             doc='Regions of interest for normalisation [in scattering angle in degrees].')
+
+        self.declareProperty(FloatArrayProperty(name='ExcludedRange', values=[-3.2,0], validator=thetaRangeValidator),
+                             doc='2theta regions to exclude from the computation of relative calibration constants '
+                                 '[in scattering angle in degrees]. ')
 
         pixelRangeValidator = CompositeValidator()
         greaterThanOne = IntArrayBoundedValidator()
         greaterThanOne.setLower(1)
         lengthTwo = IntArrayLengthValidator()
         lengthTwo.setLength(2)
+        orderedPairsValidator = IntArrayOrderedPairsValidator()
         pixelRangeValidator.add(greaterThanOne)
         pixelRangeValidator.add(lengthTwo)
+        pixelRangeValidator.add(orderedPairsValidator )
 
         self.declareProperty(IntArrayProperty(name='PixelRange', values=[1,3072], validator=pixelRangeValidator),
                              doc='Range of the pixel numbers to compute the calibration factors for. '
@@ -83,10 +87,7 @@ class PowderILLCalibration(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        pixel_range = self.getProperty('PixelRange').value
-        if pixel_range[0] >= pixel_range[1]:
-            issues['PixelRange'] = 'Invalid range, provide , separated two pixel numbers'
-        return issues
+        return dict()
 
     def _update_reference(self, ws, cropped_ws, ref_ws, factor):
         #TODO: take care of the optional output response

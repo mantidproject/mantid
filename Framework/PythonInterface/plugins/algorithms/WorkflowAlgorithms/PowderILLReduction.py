@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 import numpy as np
-from mantid.kernel import StringListValidator, Direction
+from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
     FileAction, Progress, MatrixWorkspaceProperty
 from mantid.simpleapi import *
@@ -12,7 +12,7 @@ class PowderILLReduction(PythonAlgorithm):
 
     _calibration_file = None
     _normalise_option = None
-    _region_of_interest = None
+    _region_of_interest = []
     _observable = None
     _sort_x_axis = None
     _unit = None
@@ -36,11 +36,6 @@ class PowderILLReduction(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        if self.getPropertyValue('NormaliseTo') == 'ROI':
-            roi = self.getPropertyValue('ROI')
-            roi_valid = self._validate_roi(roi)
-            if roi_valid:
-                issues['ROI'] = roi_valid
         return issues
 
     def PyInit(self):
@@ -61,8 +56,10 @@ class PowderILLReduction(PythonAlgorithm):
                              validator=StringListValidator(['None', 'Time', 'Monitor', 'ROI']),
                              doc='Normalise to time, monitor or ROI counts.')
 
-        self.declareProperty(name='ROI', defaultValue='0-153.6',
-                             doc='Regions of interest in scattering angle in degrees. E.g. 1.5-20,50-110')
+        thetaRangeValidator = FloatArrayOrderedPairsValidator()
+
+        self.declareProperty(FloatArrayProperty(name='ROI', values=[0, 153.6], validator=thetaRangeValidator),
+                             doc='Regions of interest for normalisation [in scattering angle in degrees].')
 
         self.declareProperty(name='Observable',
                              defaultValue='sample.temperature',
@@ -91,7 +88,7 @@ class PowderILLReduction(PythonAlgorithm):
         self._calibration_file = self.getPropertyValue('CalibrationFile')
         self._unit = self.getPropertyValue('Unit')
         if self._normalise_option == 'ROI':
-            self._region_of_interest = self.getPropertyValue('ROI')
+            self._region_of_interest = self.getProperty('ROI').value
 
         to_group = []
         temp_ws = self._hide('temp')
@@ -188,47 +185,18 @@ class PowderILLReduction(PythonAlgorithm):
         Returns: roi as workspace indices, e.g. 7-20,100-123
         '''
         result = ''
-        axis = np.array(mtd[ws].getAxis(1).extractValues())
-        for range in self._region_of_interest.split(','):
-            edges = range.split('-')
-            start = float(edges[0])
-            end = float(edges[1])
-            start_index = np.argwhere(axis>start)
-            end_index = np.argwhere(axis<end)
+        axis = mtd[ws].getAxis(1).extractValues()
+        index = 0
+        while index < len(self._region_of_interest):
+            start = self._region_of_interest[index]
+            end = self._region_of_interest[index+1]
+            start_index = np.argwhere(axis > start)
+            end_index = np.argwhere(axis < end)
             result += str(start_index[0][0])+'-'+str(end_index[-1][0])
             result += ','
-        self.log().notice('ROI summing pattern is '+result[:-1])
+            index += 2
+        self.log().information('ROI summing pattern is '+result[:-1])
         return result[:-1]
-
-    def _validate_roi(self, roi):
-        '''
-        Validates the region of interest
-        Returns : Empty if valid, error message otherwise
-        '''
-        roi_valid = True
-
-        if roi:
-            for range in roi.split(','):
-                edges = range.split('-')
-                if len(edges) != 2:
-                    roi_valid = False
-                    break
-                else:
-                    try:
-                        if float(edges[0]) >= float(edges[1]):
-                            roi_valid = False
-                            break
-                    except ValueError:
-                        roi_valid = False
-                        break
-        else:
-            roi_valid = False
-
-        if not roi_valid:
-            return 'Invalid region of interest. Specify , separated list of - separated ranges.'
-        else:
-            return ''
-
 
 #Register the algorithm with Mantid
 AlgorithmFactory.subscribe(PowderILLReduction)
