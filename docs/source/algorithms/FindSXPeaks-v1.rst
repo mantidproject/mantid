@@ -17,12 +17,12 @@ d-spacing.
 
 Strongest peak mode:
 
--  The highest intensity bin is taken to be the peak, so the algorithm only
+- The highest intensity bin is taken to be the peak, so the algorithm only 
   finds one peak per spectra. In this case the background is calculated as the
   average of the start and end intensity multiplied by the provided
   SignalBackground parameter. Peaks that are not above the background are
   culled.  
--  This peak finding mode is mainly used with the ResolutionStrategy set to
+- This peak finding mode is mainly used with the ResolutionStrategy set to
   RelativeResolution.  In this case, the resolution parameter defines a
   tolerance which is compared to the absolute difference between the parameters
   :math:`\phi`, :math:`2\theta`, and :math:`t` of two found peaks.  If the
@@ -35,15 +35,15 @@ Strongest peak mode:
 
 All peaks mode:
 
--  All peaks in each spectra above a certain threshold are detected as peaks
+- All peaks in each spectra above a certain threshold are detected as peaks
   (see below for the threshold).  
--  In this case the user provides an absolute, global background/threshold
+- In this case the user provides an absolute, global background/threshold
   value which is set with the AbsoluteBackground parameter. Peaks that are not
   above the absolute background are culled. A good way of identifying the
   background is to inspect your data set in pick mode within the
   InstrumentView. Ensure that your absolute background has been set high
   enough, else the algorithm will pick up noise as peaks.  
--  This peak finding mode provides the best results when used with the
+- This peak finding mode provides the best results when used with the
   ResolutionStrategy set to AbsoluteResolution, which allows the user to set
   absolute resolution values for the XUnitResolution (either in units of TOF or
   d-spacing), PhiResolution and the TwoThetaResolution parameters. These
@@ -58,7 +58,7 @@ All peaks mode:
 
 General points:
 
--  Calculated Qlab follows the Busy, Levy 1967 convention.
+- Calculated Qlab follows the Busy, Levy 1967 convention.
 
 
 Usage
