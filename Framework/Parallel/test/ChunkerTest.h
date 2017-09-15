@@ -5,8 +5,6 @@
 
 #include <algorithm>
 
-#include <H5Cpp.h>
-
 #include "MantidParallel/IO/Chunker.h"
 
 using namespace Mantid::Parallel::IO;

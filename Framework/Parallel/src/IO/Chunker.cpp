@@ -1,5 +1,3 @@
-#include <H5Cpp.h>
-
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/IO/Chunker.h"
 
@@ -8,20 +6,6 @@ namespace Parallel {
 namespace IO {
 
 namespace {
-/// Read number of events in given banks from file.
-std::vector<size_t> readBankSizes(const H5::H5File &file,
-                                  const std::string &groupName,
-                                  const std::vector<std::string> &bankNames) {
-  std::vector<size_t> bankSizes;
-  for (const auto &bankName : bankNames) {
-    const H5::DataSet dataset =
-        file.openDataSet(groupName + "/" + bankName + "/event_id");
-    const H5::DataSpace dataSpace = dataset.getSpace();
-    bankSizes.push_back(dataSpace.getSelectNpoints());
-  }
-  return bankSizes;
-}
-
 /// Helper to build partition (subgroup of ranks with subgroup of banks).
 std::pair<size_t, std::vector<size_t>>
 buildPartition(const int totalWorkers, const size_t totalSize,
@@ -81,15 +65,7 @@ size_t taskSize(const std::pair<int, std::vector<size_t>> &partition,
 }
 }
 
-/// Create a chunker based on banks in given file and chunk size.
-Chunker::Chunker(const Communicator &comm, const H5::H5File &file,
-                 const std::string &groupName,
-                 const std::vector<std::string> &bankNames,
-                 const size_t chunkSize)
-    : Chunker(comm.size(), comm.rank(),
-              readBankSizes(file, groupName, bankNames), chunkSize) {}
-
-/// Create a chunker based on bank sizes and chunk size. Used for testing.
+/// Create a chunker based on bank sizes and chunk size.
 Chunker::Chunker(const int numRanks, const int rank,
                  const std::vector<size_t> &bankSizes, const size_t chunkSize)
     : m_rank(rank), m_chunkSize(chunkSize), m_bankSizes(bankSizes) {
@@ -151,7 +127,7 @@ std::vector<Chunker::LoadRange> Chunker::makeLoadRanges() const {
     while (current < m_bankSizes[bank]) {
       if (chunk % ranksSharingOurPartition ==
           (m_rank - firstRankSharingOurPartition)) {
-        hsize_t count =
+        size_t count =
             std::min(current + m_chunkSize, m_bankSizes[bank]) - current;
         ranges.push_back(LoadRange{bank, current, count});
       }

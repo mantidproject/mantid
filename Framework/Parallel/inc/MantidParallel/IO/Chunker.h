@@ -5,10 +5,6 @@
 
 #include "MantidParallel/DllConfig.h"
 
-namespace H5 {
-class H5File;
-}
-
 namespace Mantid {
 namespace Parallel {
 class Communicator;
@@ -47,9 +43,6 @@ public:
     size_t eventOffset;
     size_t eventCount;
   };
-  Chunker(const Communicator &comm, const H5::H5File &file,
-          const std::string &groupName,
-          const std::vector<std::string> &bankNames, const size_t chunkSize);
   Chunker(const int numRanks, const int rank,
           const std::vector<size_t> &bankSizes, const size_t chunkSize);
 

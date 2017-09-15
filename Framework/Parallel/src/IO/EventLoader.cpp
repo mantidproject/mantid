@@ -10,6 +10,22 @@ namespace Mantid {
 namespace Parallel {
 namespace IO {
 
+namespace {
+/// Read number of events in given banks from file.
+std::vector<size_t> readBankSizes(const H5::H5File &file,
+                                  const std::string &groupName,
+                                  const std::vector<std::string> &bankNames) {
+  std::vector<size_t> bankSizes;
+  for (const auto &bankName : bankNames) {
+    const H5::DataSet dataset =
+        file.openDataSet(groupName + "/" + bankName + "/event_id");
+    const H5::DataSpace dataSpace = dataset.getSpace();
+    bankSizes.push_back(dataSpace.getSelectNpoints());
+  }
+  return bankSizes;
+}
+}
+
 EventLoader::EventLoader(const std::string &filename,
                          const std::string &groupName,
                          const std::vector<std::string> &bankNames,
@@ -65,7 +81,9 @@ void EventLoader::load() {
   // TODO automatically(?) determine good number of ranks to use for load
   const size_t chunkSize = 1024 * 1024;
   Communicator comm;
-  const Chunker chunker(comm, *m_file, m_groupName, m_bankNames, chunkSize);
+  const Chunker chunker(comm.size(), comm.rank(),
+                        readBankSizes(*m_file, m_groupName, m_bankNames),
+                        chunkSize);
   const auto &ranges = chunker.makeLoadRanges();
   // const auto &rankGroups = chunker.makeRankGroups();
   std::vector<int32_t> event_id(2 * chunkSize);
