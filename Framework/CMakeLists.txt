@@ -70,6 +70,7 @@ add_dependencies ( check FrameworkTests )
 
 include_directories (Types/inc)
 add_subdirectory (Types)
+set ( MANTIDLIBS ${MANTIDLIBS} Types )
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
@@ -85,6 +86,7 @@ add_subdirectory (Indexing)
 
 include_directories (Beamline/inc)
 add_subdirectory (Beamline)
+
 
 set ( MANTIDLIBS ${MANTIDLIBS} Parallel )
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.

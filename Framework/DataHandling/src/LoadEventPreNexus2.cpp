@@ -16,7 +16,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/InstrumentInfo.h"
@@ -38,6 +38,8 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
+using Mantid::Types::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -991,7 +993,7 @@ void LoadEventPreNexus2::procEventsLinear(
 
   // Storages
   std::map<PixelType, size_t> local_pidindexmap;
-  std::vector<std::vector<Kernel::DateAndTime>> local_pulsetimes;
+  std::vector<std::vector<Mantid::Types::DateAndTime>> local_pulsetimes;
   std::vector<std::vector<double>> local_tofs;
   std::set<PixelType> local_wrongdetids;
 
@@ -1089,7 +1091,7 @@ void LoadEventPreNexus2::procEventsLinear(
         size_t newindex = local_pulsetimes.size();
         local_pidindexmap[pid] = newindex;
 
-        std::vector<Kernel::DateAndTime> tempvectime;
+        std::vector<Mantid::Types::DateAndTime> tempvectime;
         std::vector<double> temptofs;
         local_pulsetimes.push_back(tempvectime);
         local_tofs.push_back(temptofs);
@@ -1138,7 +1140,7 @@ void LoadEventPreNexus2::procEventsLinear(
         size_t newindex = this->wrongdetid_pulsetimes.size();
         this->wrongdetidmap[tmpid] = newindex;
 
-        std::vector<Kernel::DateAndTime> temppulsetimes;
+        std::vector<Mantid::Types::DateAndTime> temppulsetimes;
         std::vector<double> temptofs;
         this->wrongdetid_pulsetimes.push_back(temppulsetimes);
         this->wrongdetid_tofs.push_back(temptofs);

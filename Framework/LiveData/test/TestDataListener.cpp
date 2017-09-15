@@ -21,7 +21,7 @@ DECLARE_LISTENER(TestDataListener)
 TestDataListener::TestDataListener()
     : LiveListener(), m_buffer(),
       m_rand(new Kernel::MersenneTwister(
-          Kernel::DateAndTime::getCurrentTime().totalNanoseconds(), 40000,
+          Mantid::Types::DateAndTime::getCurrentTime().totalNanoseconds(), 40000,
           60000)),
       m_changeStatusAfter(0), m_newStatus(ILiveListener::EndRun) {
   // Set up the first workspace buffer
@@ -79,7 +79,7 @@ ILiveListener::RunStatus TestDataListener::runStatus() {
 int TestDataListener::runNumber() const { return 999; }
 
 void TestDataListener::start(
-    Kernel::DateAndTime /*startTime*/) // Ignore the start time
+    Mantid::Types::DateAndTime /*startTime*/) // Ignore the start time
 {}
 
 /** Create the default empty event workspace */

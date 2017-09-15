@@ -3,7 +3,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
@@ -211,8 +211,8 @@ protected:
   /// Overidden by child class.
   virtual bool validate() = 0;
 
-  Mantid::Kernel::DateAndTime m_tabStartTime;
-  Mantid::Kernel::DateAndTime m_tabEndTime;
+  Mantid::Types::DateAndTime m_tabStartTime;
+  Mantid::Types::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
 };
 } // namespace CustomInterfaces

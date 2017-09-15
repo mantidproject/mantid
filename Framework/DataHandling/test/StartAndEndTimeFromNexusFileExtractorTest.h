@@ -5,8 +5,10 @@
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include <string>
 
+using namespace Mantid::Types;
 using namespace Mantid::DataHandling;
 
 class StartAndEndTimeFromNexusFileExtractorTest : public CxxTest::TestSuite {
@@ -74,8 +76,10 @@ private:
     auto endTimeExtracted = extractEndTime(fullFilePath);
 
     // Assert
-    Mantid::Kernel::DateAndTime expectedStartTimeString(startTime.c_str());
-    Mantid::Kernel::DateAndTime expectedEndTimeString(endTime.c_str());
+    Mantid::Types::DateAndTime expectedStartTimeString =
+        DateAndTimeHelpers::createFromISO8601(startTime.c_str());
+    Mantid::Types::DateAndTime expectedEndTimeString =
+        DateAndTimeHelpers::createFromISO8601(endTime.c_str());
 
     TSM_ASSERT("Should have the same start time",
                startTimeExtracted == expectedStartTimeString);

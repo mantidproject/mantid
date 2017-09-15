@@ -1,19 +1,21 @@
 #include "MantidAlgorithms/ChangeTimeZero.h"
-#include "MantidAlgorithms/CloneWorkspace.h"
-#include "MantidAlgorithms/ChangePulsetime.h"
-#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/ChangePulsetime.h"
+#include "MantidAlgorithms/CloneWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/DateTimeValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/DateTimeValidator.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
+
+using namespace Mantid::Types;
 
 namespace Mantid {
 namespace Algorithms {
@@ -38,7 +40,7 @@ bool isTimeSeries(Mantid::Kernel::Property *prop) {
   }
   return isTimeSeries;
 }
-}
+} // namespace
 
 /** Initialize the algorithm's properties.
  */
@@ -133,8 +135,8 @@ double ChangeTimeZero::getTimeShift(API::MatrixWorkspace_sptr ws) const {
   // Check if we are dealing with an absolute time
   std::string timeOffset = getProperty("AbsoluteTimeOffset");
   if (isAbsoluteTimeShift(timeOffset)) {
-    DateAndTime desiredTime(timeOffset);
-    DateAndTime originalTime(getStartTimeFromWorkspace(ws));
+    DateAndTime desiredTime = DateAndTimeHelpers::createFromISO8601(timeOffset);
+    DateAndTime originalTime = getStartTimeFromWorkspace(ws);
     timeShift = DateAndTime::secondsFromDuration(desiredTime - originalTime);
   } else {
     timeShift = getProperty("RelativeTimeOffset");
@@ -196,7 +198,7 @@ void ChangeTimeZero::shiftTimeOfLogForStringProperty(
   // Parse the log entry and replace all ISO8601 strings with an adjusted value
   auto value = logEntry->value();
   if (checkForDateTime(value)) {
-    DateAndTime dateTime(value);
+    DateAndTime dateTime = DateAndTimeHelpers::createFromISO8601(value);
     DateAndTime shiftedTime = dateTime + timeShift;
     logEntry->setValue(shiftedTime.toISO8601String());
   }
@@ -356,5 +358,5 @@ bool ChangeTimeZero::isAbsoluteTimeShift(const std::string &offset) const {
   return offset != m_defaultAbsoluteTimeShift && checkForDateTime(offset);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

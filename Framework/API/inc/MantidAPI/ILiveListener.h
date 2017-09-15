@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/PropertyManager.h"
 #include <Poco/Net/SocketAddress.h>
 #include <string>
@@ -78,7 +78,7 @@ public:
    *      The value of 'start of run' is 1 second
    *      for compatibility with the SNS live stream and ISIS Kafka live stream.
    */
-  virtual void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) = 0;
+  virtual void start(Mantid::Types::DateAndTime startTime = Mantid::Types::DateAndTime()) = 0;
 
   /** Get the data that's been buffered since the last call to this method
    *  (or since start() was called).

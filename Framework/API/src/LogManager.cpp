@@ -3,8 +3,11 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 
 #include <nexus/NeXusFile.hpp>
+
+using namespace Mantid::Types;
 
 namespace Mantid {
 namespace API {
@@ -83,7 +86,7 @@ bool convertPropertyToDouble(const Property *property, double &value,
          convertPropertyToDouble<uint64_t>(property, value, function) ||
          convertPropertyToDouble<float>(property, value, function);
 }
-}
+} // namespace
 
 /// Name of the log entry containing the proton charge when retrieved using
 /// getProtonCharge
@@ -95,14 +98,17 @@ const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
 
 LogManager::LogManager()
     : m_manager(Kernel::make_unique<Kernel::PropertyManager>()),
-      m_singleValueCache(Kernel::make_unique<Kernel::Cache<
-          std::pair<std::string, Kernel::Math::StatisticType>, double>>()) {}
+      m_singleValueCache(
+          Kernel::make_unique<Kernel::Cache<
+              std::pair<std::string, Kernel::Math::StatisticType>, double>>()) {
+}
 
 LogManager::LogManager(const LogManager &other)
     : m_manager(Kernel::make_unique<Kernel::PropertyManager>(*other.m_manager)),
-      m_singleValueCache(Kernel::make_unique<Kernel::Cache<
-          std::pair<std::string, Kernel::Math::StatisticType>, double>>(
-          *other.m_singleValueCache)) {}
+      m_singleValueCache(
+          Kernel::make_unique<Kernel::Cache<
+              std::pair<std::string, Kernel::Math::StatisticType>, double>>(
+              *other.m_singleValueCache)) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 LogManager::~LogManager() = default;
@@ -116,12 +122,12 @@ LogManager &LogManager::operator=(const LogManager &other) {
 }
 
 /**
-* Set the run start and end
-* @param start :: The run start
-* @param end :: The run end
-*/
-void LogManager::setStartAndEndTime(const Kernel::DateAndTime &start,
-                                    const Kernel::DateAndTime &end) {
+ * Set the run start and end
+ * @param start :: The run start
+ * @param end :: The run end
+ */
+void LogManager::setStartAndEndTime(const Mantid::Types::DateAndTime &start,
+                                    const Mantid::Types::DateAndTime &end) {
   this->addProperty<std::string>("start_time", start.toISO8601String(), true);
   this->addProperty<std::string>("end_time", end.toISO8601String(), true);
 }
@@ -133,12 +139,12 @@ void LogManager::setStartAndEndTime(const Kernel::DateAndTime &start,
  *  @returns The start time of the run
  *  @throws std::runtime_error if neither property is defined
  */
-const Kernel::DateAndTime LogManager::startTime() const {
+const Mantid::Types::DateAndTime LogManager::startTime() const {
   const std::string start_prop("start_time");
   if (hasProperty(start_prop)) {
     try {
-      DateAndTime start_time(getProperty(start_prop)->value());
-      if (start_time != DateAndTime::GPS_EPOCH) {
+      DateAndTime start_time = DateAndTimeHelpers::createFromISO8601(getProperty(start_prop)->value());
+      if (start_time != DateAndTimeHelpers::GPS_EPOCH) {
         return start_time;
       }
     } catch (std::invalid_argument &) { /*Swallow and move on*/
@@ -148,8 +154,8 @@ const Kernel::DateAndTime LogManager::startTime() const {
   const std::string run_start_prop("run_start");
   if (hasProperty(run_start_prop)) {
     try {
-      DateAndTime start_time(getProperty(run_start_prop)->value());
-      if (start_time != DateAndTime::GPS_EPOCH) {
+      DateAndTime start_time = DateAndTimeHelpers::createFromISO8601(getProperty(run_start_prop)->value());
+      if (start_time != DateAndTimeHelpers::GPS_EPOCH) {
         return start_time;
       }
     } catch (std::invalid_argument &) { /*Swallow and move on*/
@@ -165,11 +171,11 @@ const Kernel::DateAndTime LogManager::startTime() const {
  *  @returns The end time of the run
  *  @throws std::runtime_error if neither property is defined
  */
-const Kernel::DateAndTime LogManager::endTime() const {
+const Mantid::Types::DateAndTime LogManager::endTime() const {
   const std::string end_prop("end_time");
   if (hasProperty(end_prop)) {
     try {
-      return DateAndTime(getProperty(end_prop)->value());
+      return DateAndTimeHelpers::createFromISO8601(getProperty(end_prop)->value());
     } catch (std::invalid_argument &) { /*Swallow and move on*/
     }
   }
@@ -177,7 +183,7 @@ const Kernel::DateAndTime LogManager::endTime() const {
   const std::string run_end_prop("run_end");
   if (hasProperty(run_end_prop)) {
     try {
-      return DateAndTime(getProperty(run_end_prop)->value());
+      return DateAndTimeHelpers::createFromISO8601(getProperty(run_end_prop)->value());
     } catch (std::invalid_argument &) { /*Swallow and move on*/
     }
   }
@@ -196,8 +202,8 @@ const Kernel::DateAndTime LogManager::endTime() const {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void LogManager::filterByTime(const Kernel::DateAndTime start,
-                              const Kernel::DateAndTime stop) {
+void LogManager::filterByTime(const Mantid::Types::DateAndTime start,
+                              const Mantid::Types::DateAndTime stop) {
   // The propery manager operator will make all timeseriesproperties filter.
   m_manager->filterByTime(start, stop);
 }
@@ -239,13 +245,13 @@ void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter) {
 
 //-----------------------------------------------------------------------------------------------
 /**
-  * Add data to the object in the form of a property
-  * @param prop :: A pointer to a property whose ownership is transferred to
+ * Add data to the object in the form of a property
+ * @param prop :: A pointer to a property whose ownership is transferred to
  * this
-  * object
-  * @param overwrite :: If true, a current value is overwritten. (Default:
+ * object
+ * @param overwrite :: If true, a current value is overwritten. (Default:
  * False)
-  */
+ */
 void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop,
                              bool overwrite) {
   // Make an exception for the proton charge
@@ -537,10 +543,10 @@ void LogManager::clearLogs() { m_manager->clear(); }
 /** @cond */
 /// Macro to instantiate concrete template members
 #define INSTANTIATE(TYPE)                                                      \
-  template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE> *                   \
-  LogManager::getTimeSeriesProperty(const std::string &) const;                \
-  template MANTID_API_DLL TYPE                                                 \
-  LogManager::getPropertyValueAsType(const std::string &) const;
+  template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE>                     \
+      *LogManager::getTimeSeriesProperty(const std::string &) const;           \
+  template MANTID_API_DLL TYPE LogManager::getPropertyValueAsType(             \
+      const std::string &) const;
 
 INSTANTIATE(double)
 INSTANTIATE(int32_t)
@@ -562,5 +568,5 @@ template MANTID_API_DLL std::vector<long>
 LogManager::getPropertyValueAsType(const std::string &) const;
 /** @endcond */
 
-} // API namespace
-}
+} // namespace API
+} // namespace Mantid

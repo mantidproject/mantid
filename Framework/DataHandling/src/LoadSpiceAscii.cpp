@@ -1,26 +1,28 @@
-#include <fstream>
 #include <boost/algorithm/string.hpp>
+#include <fstream>
 
-#include "MantidDataHandling/LoadSpiceAscii.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 
-#include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
+#include <boost/algorithm/string/iter_find.hpp>
 
 using namespace boost::algorithm;
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+
+using Mantid::Types::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -138,7 +140,7 @@ void LoadSpiceAscii::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Exec
-  */
+ */
 void LoadSpiceAscii::exec() {
   // Input properties and validate
   std::string filename = getPropertyValue("Filename");
@@ -441,8 +443,8 @@ void LoadSpiceAscii::setupRunStartTime(
   // Parse property vector
   if (datetimeprop.size() != 4) {
     g_log.warning() << "Run start date and time property must contain 4 "
-                       "strings.  User only specifies " << datetimeprop.size()
-                    << ".  Set up failed."
+                       "strings.  User only specifies "
+                    << datetimeprop.size() << ".  Set up failed."
                     << "\n";
     return;
   }
@@ -473,7 +475,8 @@ void LoadSpiceAscii::setupRunStartTime(
   std::string mtddatetimestr = mtddatestring + "T" + mtdtimestring;
 
   // Set up property
-  DateAndTime runstart(mtddatetimestr);
+  auto runstart =
+      Mantid::Types::DateAndTimeHelpers::createFromISO8601(mtddatetimestr);
   addProperty<std::string>(runinfows, "run_start", runstart.toISO8601String());
 }
 

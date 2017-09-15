@@ -73,10 +73,10 @@ void ProcessBankData::run() { // override {
   }
 
   // Default pulse time (if none are found)
-  Mantid::Kernel::DateAndTime pulsetime;
+  Mantid::Types::DateAndTime pulsetime;
   int periodNumber = 1;
   int periodIndex = 0;
-  Mantid::Kernel::DateAndTime lastpulsetime(0);
+  Mantid::Types::DateAndTime lastpulsetime(0);
 
   bool pulsetimesincreasing = true;
 

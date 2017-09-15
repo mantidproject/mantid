@@ -1,10 +1,13 @@
 #ifndef MANTID_ALGORITHMS_ADDTIMESERIESLOGTEST_H_
 #define MANTID_ALGORITHMS_ADDTIMESERIESLOGTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
+
+using namespace Mantid::Types;
 
 class AddTimeSeriesLogTest : public CxxTest::TestSuite {
 private:
@@ -153,7 +156,6 @@ private:
                                const std::string &logName,
                                const std::string &logTime, const T logValue,
                                const size_t position) {
-    using Mantid::Kernel::DateAndTime;
     using Mantid::Kernel::TimeSeriesProperty;
 
     const auto &run = testWS->run();
@@ -168,7 +170,8 @@ private:
     auto times = timeSeries->timesAsVector();
     TS_ASSERT(times.size() >= position + 1);
     auto values = timeSeries->valuesAsVector();
-    TS_ASSERT_EQUALS(DateAndTime(logTime), times[position]);
+    TS_ASSERT_EQUALS(DateAndTimeHelpers::createFromISO8601(logTime),
+                     times[position]);
 
     TS_ASSERT(values.size() >= position + 1);
     TS_ASSERT_EQUALS(logValue, values[position]);

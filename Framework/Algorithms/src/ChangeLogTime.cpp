@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/ChangeLogTime.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <sstream>
+
+using Mantid::Types::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {
@@ -92,5 +94,5 @@ void ChangeLogTime::exec() {
   outputWS->mutableRun().addProperty(newlog, true);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

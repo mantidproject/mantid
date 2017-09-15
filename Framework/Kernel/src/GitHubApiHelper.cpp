@@ -1,11 +1,11 @@
 #include "MantidKernel/GitHubApiHelper.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
-#include <Poco/StreamCopier.h>
-#include <Poco/URI.h>
+#include "MantidTypes/DateAndTime.h"
+#include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
-#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/StreamCopier.h>
+#include <Poco/URI.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -27,18 +27,18 @@ namespace {
 // anonymous namespace for some utility functions
 /// static Logger object
 Logger g_log("InternetHelper");
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 GitHubApiHelper::GitHubApiHelper() : InternetHelper() {
   addAuthenticationToken();
 }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy)
     : InternetHelper(proxy) {
   addAuthenticationToken();
@@ -58,7 +58,7 @@ void GitHubApiHelper::processResponseHeaders(
   // get github api rate limit information if available;
   int rateLimitRemaining = 0;
   int rateLimitLimit;
-  DateAndTime rateLimitReset;
+  Mantid::Types::DateAndTime rateLimitReset;
   try {
     rateLimitLimit =
         boost::lexical_cast<int>(res.get("X-RateLimit-Limit", "-1"));

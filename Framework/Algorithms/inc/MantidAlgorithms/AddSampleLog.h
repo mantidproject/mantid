@@ -85,7 +85,7 @@ private:
                          bool value_is_int);
 
   /// get run start time
-  Kernel::DateAndTime getRunStart(API::Run &run_obj);
+  Mantid::Types::DateAndTime getRunStart(API::Run &run_obj);
 
   /// get value vector of the integer TimeSeriesProperty entries
   std::vector<int> getIntValues(API::MatrixWorkspace_const_sptr dataws,
@@ -96,7 +96,7 @@ private:
                                    int workspace_index);
 
   /// get the vector of times of the TimeSeriesProperty entries
-  std::vector<Kernel::DateAndTime>
+  std::vector<Mantid::Types::DateAndTime>
   getTimes(API::MatrixWorkspace_const_sptr dataws, int workspace_index,
            bool is_epoch, bool is_second, API::Run &run_obj);
 

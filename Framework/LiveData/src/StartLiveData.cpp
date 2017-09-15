@@ -1,19 +1,22 @@
 #include "MantidLiveData/StartLiveData.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/System.h"
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidLiveData/MonitorLiveData.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/LiveListenerFactory.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
 
 #include <Poco/ActiveResult.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+
+using Mantid::Types::DateAndTime;
 
 namespace Mantid {
 namespace LiveData {
@@ -24,7 +27,7 @@ DECLARE_ALGORITHM(StartLiveData)
 namespace {
 /// name for a group of properties that get copied from the listener
 const char *listenerPropertyGroup = "ListenerProperties";
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -164,7 +167,8 @@ void StartLiveData::exec() {
     this->setPropertyValue("StartTime", "1990-01-01T00:00:01");
   else {
     // Validate the StartTime property.  Don't allow times from the future
-    DateAndTime reqStartTime(this->getPropertyValue("StartTime"));
+    auto reqStartTime = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
+        this->getPropertyValue("StartTime"));
     // DateAndTime will throw an exception if it can't interpret the string, so
     // we don't need to test for that condition.
 

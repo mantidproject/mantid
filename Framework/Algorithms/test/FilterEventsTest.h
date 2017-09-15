@@ -161,9 +161,9 @@ public:
             filteredws0->run().getProperty("splitter"));
     TS_ASSERT(splitter0);
     TS_ASSERT_EQUALS(splitter0->size(), 2);
-    TS_ASSERT_EQUALS(splitter0->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter0->nthTime(0), Mantid::Types::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
-    TS_ASSERT_EQUALS(splitter0->nthTime(1), Kernel::DateAndTime(20035000000));
+    TS_ASSERT_EQUALS(splitter0->nthTime(1), Mantid::Types::DateAndTime(20035000000));
     TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
 
     // Check Workspace group 1
@@ -181,11 +181,11 @@ public:
             filteredws1->run().getProperty("splitter"));
     TS_ASSERT(splitter1);
     TS_ASSERT_EQUALS(splitter1->size(), 3);
-    TS_ASSERT_EQUALS(splitter1->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter1->nthTime(0), Mantid::Types::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
-    TS_ASSERT_EQUALS(splitter1->nthTime(1), Kernel::DateAndTime(20035000000));
+    TS_ASSERT_EQUALS(splitter1->nthTime(1), Mantid::Types::DateAndTime(20035000000));
     TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
-    TS_ASSERT_EQUALS(splitter1->nthTime(2), Kernel::DateAndTime(20195000000));
+    TS_ASSERT_EQUALS(splitter1->nthTime(2), Mantid::Types::DateAndTime(20195000000));
     TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
 
     // Check Workspace group 2
@@ -218,22 +218,22 @@ public:
     TS_ASSERT(splitter2);
     TS_ASSERT_EQUALS(splitter2->size(), 7);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter2->nthTime(0), Mantid::Types::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(1), Kernel::DateAndTime(20200000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(1), Mantid::Types::DateAndTime(20200000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(2), Kernel::DateAndTime(20265000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(2), Mantid::Types::DateAndTime(20265000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(3), Kernel::DateAndTime(20300000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(3), Mantid::Types::DateAndTime(20300000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(3), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(4), Kernel::DateAndTime(20365000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(4), Mantid::Types::DateAndTime(20365000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(4), 0);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(5), Kernel::DateAndTime(20400000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(5), Mantid::Types::DateAndTime(20400000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(5), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(6), Kernel::DateAndTime(20465000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(6), Mantid::Types::DateAndTime(20465000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(6), 0);
 
     // Clean up
@@ -679,11 +679,11 @@ public:
             filteredws0->run().getProperty("splitter"));
     TS_ASSERT(splitter0);
     TS_ASSERT_EQUALS(splitter0->size(), 2);
-    TS_ASSERT_EQUALS(splitter0->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter0->nthTime(0), Mantid::Types::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
     TS_ASSERT_EQUALS(
         splitter0->nthTime(1).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() +
+        Mantid::Types::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
 
@@ -702,17 +702,17 @@ public:
     TS_ASSERT(splitter1);
     TS_ASSERT_EQUALS(splitter1->size(), 3);
 
-    TS_ASSERT_EQUALS(splitter1->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter1->nthTime(0), Mantid::Types::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
 
     TS_ASSERT_EQUALS(
         splitter1->nthTime(1).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() +
+        Mantid::Types::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
     TS_ASSERT_EQUALS(
         splitter1->nthTime(2).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
+        Mantid::Types::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
 
@@ -733,17 +733,17 @@ public:
     TS_ASSERT(splitter2);
     TS_ASSERT_EQUALS(splitter2->size(), 7);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter2->nthTime(0), Mantid::Types::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
 
     TS_ASSERT_EQUALS(
         splitter2->nthTime(1).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
+        Mantid::Types::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
     TS_ASSERT_EQUALS(
         splitter2->nthTime(2).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() +
+        Mantid::Types::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
 
@@ -872,11 +872,11 @@ public:
             filteredws0->run().getProperty("splitter"));
     TS_ASSERT(splitter0);
     TS_ASSERT_EQUALS(splitter0->size(), 2);
-    TS_ASSERT_EQUALS(splitter0->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter0->nthTime(0), Mantid::Types::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
     TS_ASSERT_EQUALS(
         splitter0->nthTime(1).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() +
+        Mantid::Types::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
 
@@ -895,17 +895,17 @@ public:
     TS_ASSERT(splitter1);
     TS_ASSERT_EQUALS(splitter1->size(), 3);
 
-    TS_ASSERT_EQUALS(splitter1->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter1->nthTime(0), Mantid::Types::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
 
     TS_ASSERT_EQUALS(
         splitter1->nthTime(1).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() +
+        Mantid::Types::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
     TS_ASSERT_EQUALS(
         splitter1->nthTime(2).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
+        Mantid::Types::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
 
@@ -924,17 +924,17 @@ public:
     TS_ASSERT(splitter2);
     TS_ASSERT_EQUALS(splitter2->size(), 7);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter2->nthTime(0), Mantid::Types::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
 
     TS_ASSERT_EQUALS(
         splitter2->nthTime(1).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
+        Mantid::Types::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
     TS_ASSERT_EQUALS(
         splitter2->nthTime(2).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() +
+        Mantid::Types::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
 
@@ -1138,7 +1138,7 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
                                                                         true);
 
-    Kernel::DateAndTime runstart(runstart_i64);
+    Mantid::Types::DateAndTime runstart(runstart_i64);
 
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(),
                                       true);
@@ -1152,7 +1152,7 @@ public:
 
       for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
         int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
-        Kernel::DateAndTime pulsetime(pulsetime_i64);
+        Mantid::Types::DateAndTime pulsetime(pulsetime_i64);
 
         // add pulse time to proton charge log once and only once
         if (i == 0) {
@@ -1188,7 +1188,7 @@ public:
         Kernel::make_unique<Kernel::TimeSeriesProperty<int>>("slow_int_log");
     int_tsp->setUnits("meter");
     for (size_t i = 0; i < 10; ++i) {
-      Kernel::DateAndTime log_time(runstart_i64 + 5 * pulsedt * i);
+      Mantid::Types::DateAndTime log_time(runstart_i64 + 5 * pulsedt * i);
       int log_value = static_cast<int>(i + 1) * 20;
       int_tsp->addValue(log_time, log_value);
     }
@@ -1218,7 +1218,7 @@ public:
     const auto &spectrumInfo = eventWS->spectrumInfo();
     double l1 = spectrumInfo.l1();
 
-    Kernel::DateAndTime runstart(runstart_i64);
+    Mantid::Types::DateAndTime runstart(runstart_i64);
 
     EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
 
@@ -1312,7 +1312,7 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
                                                                         true);
 
-    Kernel::DateAndTime runstart(runstart_i64);
+    Mantid::Types::DateAndTime runstart(runstart_i64);
 
     // Create 1000 events
     EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
@@ -1593,7 +1593,7 @@ public:
 
     for (int time = 0; time < 1000; time++) {
       // All pulse times from 0 to 999 in seconds
-      Kernel::DateAndTime pulsetime(
+      Mantid::Types::DateAndTime pulsetime(
           static_cast<int64_t>(time * pulselength + runstart));
       double tof = static_cast<double>(g1() % 1000);
       el += TofEvent(tof, pulsetime);

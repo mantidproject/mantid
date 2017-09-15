@@ -10,46 +10,48 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/regex.hpp>
-#include <boost/shared_array.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <Poco/Path.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Node.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
+#include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
 
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::NodeList;
 using Poco::XML::Node;
+using Poco::XML::NodeList;
 using Poco::XML::Text;
 
 namespace Mantid {
 namespace DataHandling {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
+using namespace Mantid::Types;
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -285,7 +287,8 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
 
     // 20160720: New wavelength will be a ratio
     // HUGLY HACK! Comparing dates...
-    DateAndTime changingDate("2016-06-13 00:00:00");
+    auto changingDate =
+        DateAndTimeHelpers::createFromISO8601("2016-06-13 00:00:00");
     if (m_startTime >= changingDate) {
       g_log.debug() << "Using wavelength spread as a ratio" << '\n';
       m_dwavelength = m_wavelength * m_dwavelength;
@@ -492,8 +495,8 @@ void LoadSpice2D::setTimes() {
   std::map<std::string, std::string> attributes =
       m_xmlHandler.get_attributes_from_tag("/");
 
-  m_startTime = DateAndTime(attributes["start_time"]);
-  m_endTime = DateAndTime(attributes["end_time"]);
+  m_startTime = DateAndTimeHelpers::createFromISO8601(attributes["start_time"]);
+  m_endTime = DateAndTimeHelpers::createFromISO8601(attributes["end_time"]);
 }
 
 void LoadSpice2D::setMetadataAsRunProperties(
@@ -763,5 +766,5 @@ void LoadSpice2D::setSansSpiceXmlFormatVersion(
   g_log.debug() << "Sans_spice_xml_format_version == "
                 << m_sansSpiceXmlFormatVersion << "\n";
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

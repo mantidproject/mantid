@@ -38,7 +38,7 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
 }
 
 /// @copydoc ILiveListener::start
-void KafkaEventListener::start(Kernel::DateAndTime startTime) {
+void KafkaEventListener::start(Mantid::Types::DateAndTime startTime) {
   bool startNow = true;
   // Workaround for existing LiveListener interface
   // startTime of 0 means start from now

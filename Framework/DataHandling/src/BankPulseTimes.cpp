@@ -1,6 +1,8 @@
 #include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Types;
 
 //===============================================================================================
 // BankPulseTimes
@@ -21,7 +23,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
   file.openData("event_time_zero");
   // Read the offset (time zero)
   file.getAttr("offset", startTime);
-  Mantid::Kernel::DateAndTime start(startTime);
+  Mantid::Types::DateAndTime start = DateAndTimeHelpers::createFromISO8601(startTime);
   // Load the seconds offsets
   std::vector<double> seconds;
   file.getData(seconds);

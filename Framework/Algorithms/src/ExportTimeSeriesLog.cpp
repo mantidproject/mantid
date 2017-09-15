@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -24,6 +25,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 using namespace std;
+
+using Mantid::Types::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {
@@ -73,9 +76,10 @@ void ExportTimeSeriesLog::init() {
       "NumberEntriesExport", EMPTY_INT(),
       "Number of entries of the log to be exported.  Default is all entries.");
 
-  declareProperty("IsEventWorkspace", true, "If set to true, output workspace "
-                                            "is EventWorkspace.  Otherwise, it "
-                                            "is Workspace2D.");
+  declareProperty("IsEventWorkspace", true,
+                  "If set to true, output workspace "
+                  "is EventWorkspace.  Otherwise, it "
+                  "is Workspace2D.");
 }
 
 /** Main execution
@@ -129,7 +133,7 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
                                     int numentries, bool cal_first_deriv) {
 
   // Get log, time, and etc.
-  std::vector<Kernel::DateAndTime> times;
+  std::vector<Mantid::Types::DateAndTime> times;
   std::vector<double> values;
 
   if (!logname.empty()) {
@@ -187,7 +191,8 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
   } else if (numentries <= 0) {
     stringstream errmsg;
     errmsg << "For Export Log, NumberEntriesExport must be greater than 0.  "
-              "Input = " << numentries;
+              "Input = "
+           << numentries;
     g_log.error(errmsg.str());
     throw std::runtime_error(errmsg.str());
   } else if (static_cast<size_t>(numentries) > times.size()) {
@@ -212,7 +217,7 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
  * @param start_index :: array index for the first log entry
  * @param stop_index :: array index for the last log entry
  * @param numentries :: number of log entries to output
- * @param times :: vector of Kernel::DateAndTime
+ * @param times :: vector of Mantid::Types::DateAndTime
  * @param values :: vector of log value in double
  * @param epochtime :: flag to output time in epoch time/absolute time
  * @param timeunitfactor :: conversion factor for various unit of time for
@@ -227,7 +232,7 @@ void ExportTimeSeriesLog::setupWorkspace2D(
   int64_t timeshift(0);
   if (!epochtime) {
     // relative time
-    Kernel::DateAndTime runstart(
+    auto runstart = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
         m_inputWS->run().getProperty("run_start")->value());
     timeshift = runstart.totalNanoseconds();
   }
@@ -275,14 +280,14 @@ void ExportTimeSeriesLog::setupWorkspace2D(
  * @param start_index
  * @param stop_index
  * @param numentries :: number of log entries to output
- * @param times :: vector of Kernel::DateAndTime
+ * @param times :: vector of Mantid::Types::DateAndTime
  * @param values :: vector of log value in double
  * @param epochtime :: boolean flag for output time is absolute time/epoch time.
  */
 void ExportTimeSeriesLog::setupEventWorkspace(
     const size_t &start_index, const size_t &stop_index, int numentries,
     vector<DateAndTime> &times, vector<double> values, const bool &epochtime) {
-  Kernel::DateAndTime runstart(
+  auto runstart = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
       m_inputWS->run().getProperty("run_start")->value());
 
   // Get some stuff from the input workspace
@@ -311,7 +316,7 @@ void ExportTimeSeriesLog::setupEventWorkspace(
   }
 
   for (size_t i = 0; i < outsize; i++) {
-    Kernel::DateAndTime tnow = times[i + start_index];
+    Mantid::Types::DateAndTime tnow = times[i + start_index];
     int64_t dt = tnow.totalNanoseconds() - time_shift_ns;
 
     // convert to microseconds
@@ -339,15 +344,15 @@ void ExportTimeSeriesLog::setupEventWorkspace(
  * second is 1E-9
  */
 bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
-    std::vector<Kernel::DateAndTime> &vec_times, const double &rel_start_time,
-    size_t &i_start, const double &rel_stop_time, size_t &i_stop,
-    const double &time_factor) {
+    std::vector<Mantid::Types::DateAndTime> &vec_times,
+    const double &rel_start_time, size_t &i_start, const double &rel_stop_time,
+    size_t &i_stop, const double &time_factor) {
   // Initialize if there is something wrong.
   i_start = 0;
   i_stop = vec_times.size() - 1;
 
   // Check existence of proton_charge as run start
-  Kernel::DateAndTime run_start(0);
+  Mantid::Types::DateAndTime run_start(0);
   if (m_inputWS->run().hasProperty("proton_charge")) {
     auto ts = dynamic_cast<TimeSeriesProperty<double> *>(
         m_inputWS->run().getProperty("proton_charge"));
@@ -369,7 +374,7 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
   if (rel_start_time != EMPTY_DBL()) {
     int64_t start_time_ns = run_start.totalNanoseconds() +
                             static_cast<int64_t>(rel_start_time / time_factor);
-    Kernel::DateAndTime start_time(start_time_ns);
+    Mantid::Types::DateAndTime start_time(start_time_ns);
     i_start = static_cast<size_t>(
         std::lower_bound(vec_times.begin(), vec_times.end(), start_time) -
         vec_times.begin());
@@ -382,7 +387,7 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
   if (rel_stop_time != EMPTY_DBL()) {
     int64_t stop_time_ns = run_start.totalNanoseconds() +
                            static_cast<int64_t>(rel_stop_time / time_factor);
-    Kernel::DateAndTime stop_time(stop_time_ns);
+    Mantid::Types::DateAndTime stop_time(stop_time_ns);
     i_stop = static_cast<size_t>(
         std::lower_bound(vec_times.begin(), vec_times.end(), stop_time) -
         vec_times.begin());
@@ -456,5 +461,5 @@ void ExportTimeSeriesLog::setupMetaData(const std::string &log_name,
   m_outWS->mutableRun().addProperty("IsEpochTime", is_epoch, true);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

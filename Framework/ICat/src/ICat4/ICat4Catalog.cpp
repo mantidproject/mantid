@@ -1,14 +1,13 @@
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidICat/ICat4/ICat4Catalog.h"
 #include "MantidAPI/CatalogFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h"
-#include "MantidICat/ICat4/ICat4Catalog.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
+#include "MantidTypes/DateAndTime.h"
 
 namespace Mantid {
 namespace ICat {
@@ -18,7 +17,7 @@ using namespace ICat4;
 namespace {
 /// static logger
 Logger g_log("ICat4Catalog");
-}
+} // namespace
 
 DECLARE_CATALOG(ICat4Catalog)
 
@@ -780,7 +779,7 @@ std::string ICat4Catalog::bytesToString(int64_t &fileSize) {
  */
 std::string ICat4Catalog::formatDateTime(const time_t &timestamp,
                                          const std::string &format) {
-  auto dateTime = DateAndTime(boost::posix_time::from_time_t(timestamp));
+  auto dateTime = Types::DateAndTime(boost::posix_time::from_time_t(timestamp));
   return (dateTime.toFormattedString(format));
 }
 
@@ -948,5 +947,5 @@ bool ICat4Catalog::isAccessAllowed(ns1__accessType accessType, T &bean) {
     throwErrorMessage(icat);
   return false;
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

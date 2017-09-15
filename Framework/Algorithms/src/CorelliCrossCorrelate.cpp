@@ -16,6 +16,8 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+using Mantid::Types::DateAndTime;
+
 namespace Mantid {
 namespace Algorithms {
 

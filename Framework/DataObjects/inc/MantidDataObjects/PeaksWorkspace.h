@@ -9,7 +9,7 @@
 #include "MantidDataObjects/PeakColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"

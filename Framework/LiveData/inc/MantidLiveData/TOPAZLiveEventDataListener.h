@@ -49,7 +49,7 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  void start(Mantid::Types::DateAndTime startTime = Mantid::Types::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   ILiveListener::RunStatus runStatus() override;
@@ -67,7 +67,7 @@ private:
   void initMonitorWorkspace();
 
   void appendEvent(uint32_t pixelId, double tof,
-                   const Mantid::Kernel::DateAndTime pulseTime);
+                   const Mantid::Types::DateAndTime pulseTime);
   // tof is "Time Of Flight" and is in units of microsecondss relative to the
   // start of the pulse.  (There's some documentation that says nanoseconds,
   // but Russell Taylor assures me it's really in microseconds!)

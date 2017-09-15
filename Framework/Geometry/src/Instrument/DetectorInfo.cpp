@@ -324,8 +324,8 @@ size_t DetectorInfo::scanCount(const size_t index) const {
 /** Returns the scan interval of the detector with given index.
  *
  * The interval start and end values would typically correspond to nanoseconds
- * since 1990, as in Kernel::DateAndTime. */
-std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
+ * since 1990, as in Mantid::Types::DateAndTime. */
+std::pair<Mantid::Types::DateAndTime, Mantid::Types::DateAndTime>
 DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
   const auto &interval = m_detectorInfo->scanInterval(index);
   return {interval.first, interval.second};
@@ -334,13 +334,13 @@ DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
 /** Set the scan interval of the detector with given detector index.
  *
  * The interval start and end values would typically correspond to nanoseconds
- * since 1990, as in Kernel::DateAndTime. Note that it is currently not possible
+ * since 1990, as in Mantid::Types::DateAndTime. Note that it is currently not possible
  * to modify scan intervals for a DetectorInfo with time-dependent detectors,
  * i.e., time intervals must be set with this method before merging individual
  * scans. */
 void DetectorInfo::setScanInterval(
     const size_t index,
-    const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval) {
+    const std::pair<Mantid::Types::DateAndTime, Mantid::Types::DateAndTime> &interval) {
   m_detectorInfo->setScanInterval(index, {interval.first.totalNanoseconds(),
                                           interval.second.totalNanoseconds()});
 }
@@ -350,7 +350,7 @@ void DetectorInfo::setScanInterval(
  * Prefer this over setting intervals for individual detectors since it enables
  * internal performance optimization. See also overload for other details. */
 void DetectorInfo::setScanInterval(
-    const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval) {
+    const std::pair<Mantid::Types::DateAndTime, Mantid::Types::DateAndTime> &interval) {
   m_detectorInfo->setScanInterval(
       {interval.first.totalNanoseconds(), interval.second.totalNanoseconds()});
 }

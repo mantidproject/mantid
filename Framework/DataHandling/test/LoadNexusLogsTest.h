@@ -1,16 +1,17 @@
 #ifndef LOADNEXUSLOGSTEST_H_
 #define LOADNEXUSLOGSTEST_H_
 
-#include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/TimeInterval.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -18,8 +19,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"
+#include <cxxtest/TestSuite.h>
 
 class LoadNexusLogsTest : public CxxTest::TestSuite {
 public:
@@ -64,9 +65,9 @@ public:
     TS_ASSERT_DELTA(tsp->nthValue(1), 13715.55, 2);
 
     // The time diff between the 0th and 1st entry is 0.328 seconds
-    TS_ASSERT_DELTA(
-        Kernel::DateAndTime::secondsFromDuration(tsp->nthInterval(0).length()),
-        0.328, 0.01);
+    TS_ASSERT_DELTA(Mantid::Types::DateAndTime::secondsFromDuration(
+                        tsp->nthInterval(0).length()),
+                    0.328, 0.01);
 
     // Now the stats
   }

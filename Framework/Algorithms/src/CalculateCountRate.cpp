@@ -263,12 +263,12 @@ void CalculateCountRate::calcRateLog(
   }
 
   // generate target log timing
-  std::vector<Kernel::DateAndTime> times(m_numLogSteps);
+  std::vector<Mantid::Types::DateAndTime> times(m_numLogSteps);
   double dt = (dTRangeMax - dTRangeMin) / static_cast<double>(m_numLogSteps);
   auto t0 = m_TRangeMin.totalNanoseconds();
   for (auto i = 0; i < m_numLogSteps; i++) {
     times[i] =
-        Kernel::DateAndTime(t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
+        Mantid::Types::DateAndTime(t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
   }
   // store calculated values within the target log.
   targLog->replaceValues(times, countRate);
@@ -389,11 +389,11 @@ void CalculateCountRate::setOutLogParameters(
   } //---------------------------------------------------------------------
   // find target log ranges and identify what normalization should be used
 
-  Kernel::DateAndTime runTMin, runTMax;
+  Mantid::Types::DateAndTime runTMin, runTMax;
   InputWorkspace->getPulseTimeMinMax(runTMin, runTMax);
   //
   if (useLogAccuracy) { // extract log times located inside the run time
-    Kernel::DateAndTime tLogMin, tLogMax;
+    Mantid::Types::DateAndTime tLogMin, tLogMax;
     if (m_useLogDerivative) { // derivative moves events to the bin centre,
                               // but we need initial range
       auto pSource =
@@ -478,7 +478,7 @@ void CalculateCountRate::setOutLogParameters(
         m_numLogSteps++;
         iTMax1 = iTMin + provDT * m_numLogSteps;
       }
-      m_TRangeMax = Kernel::DateAndTime(iTMax1);
+      m_TRangeMax = Mantid::Types::DateAndTime(iTMax1);
     }
   }
 

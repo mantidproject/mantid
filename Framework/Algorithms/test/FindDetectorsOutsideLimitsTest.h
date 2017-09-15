@@ -9,6 +9,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -17,8 +18,9 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::HistogramData::Counts;
+using namespace Mantid::Types;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 class FindDetectorsOutsideLimitsTest : public CxxTest::TestSuite {
 public:
@@ -159,11 +161,12 @@ public:
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(10);
     work_in->setInstrument(inst);
-    DateAndTime run_start("2010-01-01T00:00:00");
+    DateAndTime run_start =
+        DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00");
     // Add ten more at #10 so that it fails
     for (int i = 0; i < 10; i++)
-      work_in->getSpectrum(10)
-          .addEventQuickly(TofEvent((i + 0.5), run_start + double(i)));
+      work_in->getSpectrum(10).addEventQuickly(
+          TofEvent((i + 0.5), run_start + double(i)));
 
     AnalysisDataService::Instance().add("testdead_in", work_in);
 

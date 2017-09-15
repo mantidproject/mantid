@@ -97,8 +97,8 @@ PropertyManager &PropertyManager::operator+=(const PropertyManager &rhs) {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void PropertyManager::filterByTime(const Kernel::DateAndTime &start,
-                                   const Kernel::DateAndTime &stop) {
+void PropertyManager::filterByTime(const Mantid::Types::DateAndTime &start,
+                                   const Mantid::Types::DateAndTime &stop) {
   // Iterate through all properties
   PropertyMap::const_iterator it;
   for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it) {

@@ -2,7 +2,7 @@
 #define MANTID_KERNEL_IREMOTEJOBMANAGER_H
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 
 namespace Mantid {
 namespace API {
@@ -91,13 +91,13 @@ public:
     /// Date-time of submission. No particular format can be assumed
     /// from the specific remote job managers, and some of them may
     /// not provide this info
-    Mantid::Kernel::DateAndTime submitDate;
+    Mantid::Types::DateAndTime submitDate;
     /// Date-time the job actually started running.  No particular
     /// format can be assumed
-    Mantid::Kernel::DateAndTime startDate;
+    Mantid::Types::DateAndTime startDate;
     /// Date-time the job finished. No particular format can be
     /// assumed
-    Mantid::Kernel::DateAndTime completionTime;
+    Mantid::Types::DateAndTime completionTime;
     /// Command line for this job (when running a command ideally this
     /// would be provided by the underlying job scheduling
     /// mechanism). As examples, Platform LSF provides this. For the

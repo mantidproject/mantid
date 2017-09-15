@@ -52,7 +52,7 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  void start(Mantid::Types::DateAndTime startTime = Mantid::Types::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;

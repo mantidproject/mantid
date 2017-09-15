@@ -20,7 +20,7 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
@@ -37,6 +37,8 @@
 #include <map>
 #include <string>
 #include <vector>
+
+using Mantid::Types::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {

@@ -5,14 +5,16 @@
 
 #include <string>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/AddSampleLog.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace Mantid::Types;
 
 class AddSampleLogTest : public CxxTest::TestSuite {
 public:
@@ -60,8 +62,9 @@ public:
   void test_NumberSeries() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
-                                        DateAndTime("2013-12-18T13:42:00"));
+    ws->mutableRun().setStartAndEndTime(
+        DateAndTimeHelpers::createFromISO8601("2013-12-18T13:40:00"),
+        DateAndTimeHelpers::createFromISO8601("2013-12-18T13:42:00"));
     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "1.234", 1.234);
     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "2.456", 2.456);
     // Only double is allowed if using default type
@@ -74,8 +77,9 @@ public:
   void test_Units() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
-                                        DateAndTime("2013-12-18T13:42:00"));
+    ws->mutableRun().setStartAndEndTime(
+        DateAndTimeHelpers::createFromISO8601("2013-12-18T13:40:00"),
+        DateAndTimeHelpers::createFromISO8601("2013-12-18T13:42:00"));
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234, false,
                      "myUnit");
     ExecuteAlgorithm(ws, "My New Name", "Number", "963", 963, false,
@@ -87,8 +91,9 @@ public:
   void test_number_type() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
-                                        DateAndTime("2013-12-18T13:42:00"));
+    ws->mutableRun().setStartAndEndTime(
+        DateAndTimeHelpers::createFromISO8601("2013-12-18T13:40:00"),
+        DateAndTimeHelpers::createFromISO8601("2013-12-18T13:42:00"));
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234, false,
                      "myUnit", "Double");
     ExecuteAlgorithm(ws, "My New Name", "Number", "963", 963, false,
@@ -220,8 +225,9 @@ public:
     } else if (LogType == "Number Series") {
       auto testProp = dynamic_cast<TimeSeriesProperty<T> *>(prop);
       TS_ASSERT(testProp);
-      TS_ASSERT_EQUALS(testProp->firstTime(),
-                       DateAndTime("2013-12-18T13:40:00"));
+      TS_ASSERT_EQUALS(
+          testProp->firstTime(),
+          DateAndTimeHelpers::createFromISO8601("2013-12-18T13:40:00"));
       TS_ASSERT_DELTA(testProp->firstValue(), expectedValue, 1e-5);
     }
     // cleanup

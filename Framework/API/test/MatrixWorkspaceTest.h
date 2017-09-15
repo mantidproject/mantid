@@ -9,20 +9,21 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/make_cow.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
-#include "MantidTypes/SpectrumDefinition.h"
-#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/make_cow.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidTypes/SpectrumDefinition.h"
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -41,6 +42,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Indexing::IndexInfo;
+using namespace Mantid::Types;
 
 // Declare into the factory.
 DECLARE_WORKSPACE(WorkspaceTester)
@@ -98,7 +100,7 @@ void run_legacy_setting_spectrum_numbers_with_MPI(
     }
   }
 }
-}
+} // namespace
 
 class MatrixWorkspaceTest : public CxxTest::TestSuite {
 public:
@@ -1011,7 +1013,8 @@ public:
   void test_getFirstPulseTime_getLastPulseTime() {
     WorkspaceTester ws;
     auto proton_charge = new TimeSeriesProperty<double>("proton_charge");
-    DateAndTime startTime("2013-04-21T10:40:00");
+    DateAndTime startTime =
+        DateAndTimeHelpers::createFromISO8601("2013-04-21T10:40:00");
     proton_charge->addValue(startTime, 1.0E-7);
     proton_charge->addValue(startTime + 1.0, 2.0E-7);
     proton_charge->addValue(startTime + 2.0, 3.0E-7);
@@ -1025,7 +1028,8 @@ public:
   void test_getFirstPulseTime_getLastPulseTime_SNS1990bug() {
     WorkspaceTester ws;
     auto proton_charge = new TimeSeriesProperty<double>("proton_charge");
-    DateAndTime startTime("1990-12-31T23:59:00");
+    DateAndTime startTime =
+        DateAndTimeHelpers::createFromISO8601("1990-12-31T23:59:00");
     proton_charge->addValue(startTime, 1.0E-7);
     proton_charge->addValue(startTime + 1.0, 2.0E-7);
     ws.mutableRun().addLogData(proton_charge);
@@ -1037,8 +1041,9 @@ public:
     for (int i = 2; i < 62; ++i) {
       proton_charge->addValue(startTime + static_cast<double>(i), 1.0E-7);
     }
-    TS_ASSERT_EQUALS(ws.getFirstPulseTime(),
-                     DateAndTime("1991-01-01T00:00:00"));
+    TS_ASSERT_EQUALS(
+        ws.getFirstPulseTime(),
+        DateAndTimeHelpers::createFromISO8601("1991-01-01T00:00:00"));
   }
 
   void
@@ -1531,8 +1536,8 @@ public:
   }
 
   /**
-  * Test declaring an input workspace and retrieving as const_sptr or sptr
-  */
+   * Test declaring an input workspace and retrieving as const_sptr or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     MatrixWorkspace_sptr wsInput = boost::make_shared<WorkspaceTester>();
@@ -1587,8 +1592,9 @@ public:
     ws.setSharedDx(workspaceIndexWithDx[2], dxSpec2);
 
     // Assert
-    auto compareValue =
-        [&values](double data, size_t index) { return data == values[index]; };
+    auto compareValue = [&values](double data, size_t index) {
+      return data == values[index];
+    };
     for (auto &index : workspaceIndexWithDx) {
       TSM_ASSERT("Should have x resolution values", ws.hasDx(index));
       TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(index).size(),

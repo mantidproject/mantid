@@ -1,7 +1,7 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include <cmath>
 #include <functional>
@@ -15,7 +15,7 @@ using std::vector;
 namespace Mantid {
 namespace DataObjects {
 using Kernel::Exception::NotImplementedError;
-using Kernel::DateAndTime;
+using Mantid::Types::DateAndTime;
 
 //==========================================================================
 /// --------------------- TofEvent stuff ----------------------------------
@@ -108,7 +108,7 @@ WeightedEvent::WeightedEvent(double time_of_flight)
  * @param errorSquared: the square of the error on the event
  */
 WeightedEvent::WeightedEvent(double tof,
-                             const Mantid::Kernel::DateAndTime pulsetime,
+                             const Mantid::Types::DateAndTime pulsetime,
                              double weight, double errorSquared)
     : TofEvent(tof, pulsetime), m_weight(static_cast<float>(weight)),
       m_errorSquared(static_cast<float>(errorSquared)) {}
@@ -120,7 +120,7 @@ WeightedEvent::WeightedEvent(double tof,
  * @param errorSquared: the square of the error on the event
  */
 WeightedEvent::WeightedEvent(double tof,
-                             const Mantid::Kernel::DateAndTime pulsetime,
+                             const Mantid::Types::DateAndTime pulsetime,
                              float weight, float errorSquared)
     : TofEvent(tof, pulsetime), m_weight(weight), m_errorSquared(errorSquared) {
 }
@@ -238,7 +238,7 @@ WeightedEventNoTime::WeightedEventNoTime(double tof, float weight,
  * @param errorSquared: the square of the error on the event
  */
 WeightedEventNoTime::WeightedEventNoTime(double tof,
-                                         const Mantid::Kernel::DateAndTime,
+                                         const Mantid::Types::DateAndTime,
                                          double weight, double errorSquared)
     : m_tof(tof), m_weight(static_cast<float>(weight)),
       m_errorSquared(static_cast<float>(errorSquared)) {}
@@ -250,7 +250,7 @@ WeightedEventNoTime::WeightedEventNoTime(double tof,
  * @param errorSquared: the square of the error on the event
  */
 WeightedEventNoTime::WeightedEventNoTime(double tof,
-                                         const Mantid::Kernel::DateAndTime,
+                                         const Mantid::Types::DateAndTime,
                                          float weight, float errorSquared)
     : m_tof(tof), m_weight(weight), m_errorSquared(errorSquared) {}
 

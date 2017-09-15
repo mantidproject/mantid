@@ -1,19 +1,24 @@
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/TimeInterval.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/make_unique.h"
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/regex.hpp>
 
+using namespace Mantid::Types;
+using Mantid::Types::time_duration;
+
 namespace Mantid {
 namespace Kernel {
 namespace {
 /// static Logger definition
 Logger g_log("TimeSeriesProperty");
-}
+} // namespace
 
 /**
  * Constructor
@@ -55,13 +60,12 @@ TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
 }
 
 /** Return time series property, containing time derivative of current property.
-* The property itself and the returned time derivative become sorted by time and
-* the derivative is calculated in seconds^-1.
-* (e.g. dValue/dT where dT=t2-t1 is time difference in seconds
-* for subsequent time readings and dValue=Val1-Val2 is difference in
-* subsequent values)
-*
-*/
+ * The property itself and the returned time derivative become sorted by time
+ * and the derivative is calculated in seconds^-1. (e.g. dValue/dT where
+ * dT=t2-t1 is time difference in seconds for subsequent time readings and
+ * dValue=Val1-Val2 is difference in subsequent values)
+ *
+ */
 template <typename TYPE>
 std::unique_ptr<TimeSeriesProperty<double>>
 TimeSeriesProperty<TYPE>::getDerivative() const {
@@ -86,7 +90,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
     if (t1 != t0) {
       double deriv = 1.e+9 * (double(v1 - v0) / double(t1 - t0));
       int64_t tm = static_cast<int64_t>((t1 + t0) / 2);
-      timeSeriesDeriv->addValue(Kernel::DateAndTime(tm), deriv);
+      timeSeriesDeriv->addValue(Mantid::Types::DateAndTime(tm), deriv);
     }
     t0 = t1;
     v0 = v1;
@@ -257,8 +261,9 @@ void TimeSeriesProperty<TYPE>::setName(const std::string name) {
  *are kept.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
-                                            const Kernel::DateAndTime &stop) {
+void TimeSeriesProperty<TYPE>::filterByTime(
+    const Mantid::Types::DateAndTime &start,
+    const Mantid::Types::DateAndTime &stop) {
   // 0. Sort
   sortIfNecessary();
 
@@ -333,8 +338,8 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
 
   // 4. Create new
   for (const auto &splitter : splittervec) {
-    Kernel::DateAndTime t_start = splitter.start();
-    Kernel::DateAndTime t_stop = splitter.stop();
+    Mantid::Types::DateAndTime t_start = splitter.start();
+    Mantid::Types::DateAndTime t_stop = splitter.stop();
 
     int tstartindex = findIndex(t_start);
     if (tstartindex < 0) {
@@ -535,7 +540,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     errss << "Try to split TSP " << this->m_name
           << ": Input time vector's size " << splitter_time_vec.size()
           << " does not match (one more larger than) taget "
-             "workspace index vector's size " << target_vec.size() << "\n";
+             "workspace index vector's size "
+          << target_vec.size() << "\n";
     throw std::runtime_error(errss.str());
   }
   // return if the output vector TimeSeriesProperties is not defined
@@ -546,7 +552,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   sortIfNecessary();
 
   // work on m_values, m_size, and m_time
-  std::vector<Kernel::DateAndTime> tsp_time_vec = this->timesAsVector();
+  std::vector<Mantid::Types::DateAndTime> tsp_time_vec = this->timesAsVector();
 
   // go over both filter time vector and time series property time vector
   size_t index_splitter = 0;
@@ -977,11 +983,11 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::valuesAsVector() const {
 }
 
 /**
-  * Return the time series as a C++ multimap<DateAndTime, TYPE>. All values.
-  * This method is used in parsing the ISIS ICPevent log file: different
+ * Return the time series as a C++ multimap<DateAndTime, TYPE>. All values.
+ * This method is used in parsing the ISIS ICPevent log file: different
  * commands
-  * can be recorded against the same time stamp but all must be present.
-  */
+ * can be recorded against the same time stamp but all must be present.
+ */
 template <typename TYPE>
 std::multimap<DateAndTime, TYPE>
 TimeSeriesProperty<TYPE>::valueAsMultiMap() const {
@@ -1027,7 +1033,7 @@ std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds() const {
   std::vector<double> out;
   out.reserve(m_values.size());
 
-  Kernel::DateAndTime start = m_values[0].time();
+  Mantid::Types::DateAndTime start = m_values[0].time();
   for (size_t i = 0; i < m_values.size(); i++) {
     out.push_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
   }
@@ -1041,7 +1047,7 @@ std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds() const {
  *  @param value  The associated value
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::addValue(const Kernel::DateAndTime &time,
+void TimeSeriesProperty<TYPE>::addValue(const Mantid::Types::DateAndTime &time,
                                         const TYPE value) {
   TimeValueUnit<TYPE> newvalue(time, value);
   // Add the value to the back of the vector
@@ -1077,7 +1083,7 @@ void TimeSeriesProperty<TYPE>::addValue(const Kernel::DateAndTime &time,
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::addValue(const std::string &time,
                                         const TYPE value) {
-  return addValue(Kernel::DateAndTime(time), value);
+  return addValue(DateAndTimeHelpers::createFromISO8601(time), value);
 }
 
 /**
@@ -1089,7 +1095,7 @@ void TimeSeriesProperty<TYPE>::addValue(const std::string &time,
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::addValue(const std::time_t &time,
                                         const TYPE value) {
-  Kernel::DateAndTime dt;
+  Mantid::Types::DateAndTime dt;
   dt.set_from_time_t(time);
   return addValue(dt, value);
 }
@@ -1101,7 +1107,7 @@ void TimeSeriesProperty<TYPE>::addValue(const std::time_t &time,
  */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::addValues(
-    const std::vector<Kernel::DateAndTime> &times,
+    const std::vector<Mantid::Types::DateAndTime> &times,
     const std::vector<TYPE> &values) {
   size_t length = std::min(times.size(), values.size());
   m_size += static_cast<int>(length);
@@ -1115,12 +1121,12 @@ void TimeSeriesProperty<TYPE>::addValues(
 
 /** replace vectors of values to the map. First we clear the vectors
  * and then we run addValues
-*  @param times :: The time as a boost::posix_time::ptime value
-*  @param values :: The associated value
-*/
+ *  @param times :: The time as a boost::posix_time::ptime value
+ *  @param values :: The associated value
+ */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::replaceValues(
-    const std::vector<Kernel::DateAndTime> &times,
+    const std::vector<Mantid::Types::DateAndTime> &times,
     const std::vector<TYPE> &values) {
   clear();
   addValues(times, values);
@@ -1196,12 +1202,14 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
 
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::minValue() const {
   return std::min_element(m_values.begin(), m_values.end(),
-                          TimeValueUnit<TYPE>::valueCmp)->value();
+                          TimeValueUnit<TYPE>::valueCmp)
+      ->value();
 }
 
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::maxValue() const {
   return std::max_element(m_values.begin(), m_values.end(),
-                          TimeValueUnit<TYPE>::valueCmp)->value();
+                          TimeValueUnit<TYPE>::valueCmp)
+      ->value();
 }
 
 /// Returns the number of values at UNIQUE time intervals in the time series
@@ -1352,9 +1360,9 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
  *    Vector sizes must match.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::create(const Kernel::DateAndTime &start_time,
-                                      const std::vector<double> &time_sec,
-                                      const std::vector<TYPE> &new_values) {
+void TimeSeriesProperty<TYPE>::create(
+    const Mantid::Types::DateAndTime &start_time,
+    const std::vector<double> &time_sec, const std::vector<TYPE> &new_values) {
   if (time_sec.size() != new_values.size())
     throw std::invalid_argument("TimeSeriesProperty::create: mismatched size "
                                 "for the time and values vectors.");
@@ -1558,16 +1566,16 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
       // 2. n = size of the allowed region, duplicate the last one
       long ind_t1 = static_cast<long>(m_filterQuickRef.back().first);
       long ind_t2 = ind_t1 - 1;
-      Kernel::DateAndTime t1 = (m_values.begin() + ind_t1)->time();
-      Kernel::DateAndTime t2 = (m_values.begin() + ind_t2)->time();
+      Mantid::Types::DateAndTime t1 = (m_values.begin() + ind_t1)->time();
+      Mantid::Types::DateAndTime t2 = (m_values.begin() + ind_t2)->time();
       time_duration d = t1 - t2;
-      Kernel::DateAndTime t3 = t1 + d;
+      Mantid::Types::DateAndTime t3 = t1 + d;
       Kernel::TimeInterval dt(t1, t3);
       deltaT = dt;
     } else {
       // 3. n < size
-      Kernel::DateAndTime t0;
-      Kernel::DateAndTime tf;
+      Mantid::Types::DateAndTime t0;
+      Mantid::Types::DateAndTime tf;
 
       size_t refindex = this->findNthIndexFromQuickRef(n);
       if (refindex + 3 >= m_filterQuickRef.size())
@@ -1578,11 +1586,11 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
         throw std::logic_error("nthInterval:  diff cannot be less than 0.");
 
       // i) start time
-      Kernel::DateAndTime ftime0 =
+      Mantid::Types::DateAndTime ftime0 =
           m_filter[m_filterQuickRef[refindex].first].first;
       size_t iStartIndex =
           m_filterQuickRef[refindex + 1].first + static_cast<size_t>(diff);
-      Kernel::DateAndTime ltime0 = m_values[iStartIndex].time();
+      Mantid::Types::DateAndTime ltime0 = m_values[iStartIndex].time();
       if (iStartIndex == 0 && ftime0 < ltime0) {
         // a) Special case that True-filter time starts before log time
         t0 = ltime0;
@@ -1599,13 +1607,13 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
       size_t iStopIndex = iStartIndex + 1;
       if (iStopIndex >= m_values.size()) {
         // a) Last log entry is for the start
-        Kernel::DateAndTime ftimef =
+        Mantid::Types::DateAndTime ftimef =
             m_filter[m_filterQuickRef[refindex + 3].first].first;
         tf = ftimef;
       } else {
         // b) Using the earlier value of next log entry and next filter entry
-        Kernel::DateAndTime ltimef = m_values[iStopIndex].time();
-        Kernel::DateAndTime ftimef =
+        Mantid::Types::DateAndTime ltimef = m_values[iStopIndex].time();
+        Mantid::Types::DateAndTime ftimef =
             m_filter[m_filterQuickRef[refindex + 3].first].first;
         if (ltimef < ftimef)
           tf = ltimef;
@@ -1661,8 +1669,8 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
       value = m_values[ilog].value();
     } else {
       // 2. n < size
-      Kernel::DateAndTime t0;
-      Kernel::DateAndTime tf;
+      Mantid::Types::DateAndTime t0;
+      Mantid::Types::DateAndTime tf;
 
       size_t refindex = findNthIndexFromQuickRef(n);
       if (refindex + 3 >= m_filterQuickRef.size()) {
@@ -1684,7 +1692,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
  *  @return DateAndTime
  */
 template <typename TYPE>
-Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
+Mantid::Types::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
   sortIfNecessary();
 
   if (m_values.empty()) {
@@ -1730,7 +1738,7 @@ void TimeSeriesProperty<TYPE>::filterWith(
   }
 
   // 2. Construct mFilter
-  std::vector<Kernel::DateAndTime> filtertimes = filter->timesAsVector();
+  std::vector<Mantid::Types::DateAndTime> filtertimes = filter->timesAsVector();
   std::vector<bool> filtervalues = filter->valuesAsVector();
   assert(filtertimes.size() == filtervalues.size());
   const size_t nFilterTimes(filtertimes.size());
@@ -1889,9 +1897,9 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
 
   typename std::vector<TimeValueUnit<TYPE>>::iterator vit;
   vit = m_values.begin() + 1;
-  Kernel::DateAndTime prevtime = m_values.begin()->time();
+  Mantid::Types::DateAndTime prevtime = m_values.begin()->time();
   while (vit != m_values.end()) {
-    Kernel::DateAndTime currtime = vit->time();
+    Mantid::Types::DateAndTime currtime = vit->time();
     if (prevtime == currtime) {
       // Print out warning
       g_log.debug() << "Entry @ Time = " << prevtime
@@ -1964,7 +1972,7 @@ void TimeSeriesProperty<TYPE>::sortIfNecessary() const {
  *           if t is later (larger) than the ending time, return m_value.size
  */
 template <typename TYPE>
-int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const {
+int TimeSeriesProperty<TYPE>::findIndex(Mantid::Types::DateAndTime t) const {
   // 0. Return with an empty container
   if (m_values.empty())
     return 0;
@@ -1998,8 +2006,8 @@ int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const {
  *        mP.size():   exceeding upper bound
  */
 template <typename TYPE>
-int TimeSeriesProperty<TYPE>::upperBound(Kernel::DateAndTime t, int istart,
-                                         int iend) const {
+int TimeSeriesProperty<TYPE>::upperBound(Mantid::Types::DateAndTime t,
+                                         int istart, int iend) const {
   // 0. Check validity
   if (istart < 0) {
     throw std::invalid_argument("Start Index cannot be less than 0");
@@ -2292,19 +2300,19 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   file->closeGroup();
 }
 /** Calculate constant step histogram of the time series data.
-* @param tMin    -- minimal time to include in histogram
-* @param tMax    -- maximal time to constrain the histogram data
-* @param counts  -- vector of output histogrammed data.
-*   On input, the size of the vector defines the number of points in the
-*   histogram.
-*   On output, adds all property elements belonging to the time interval
-*  [tMin+n*dT;tMin+(n+1)*dT]
-*  to the initial values of each n-th element of the counts vector,
-*  where dT = (tMax-tMin)/counts.size()  */
+ * @param tMin    -- minimal time to include in histogram
+ * @param tMax    -- maximal time to constrain the histogram data
+ * @param counts  -- vector of output histogrammed data.
+ *   On input, the size of the vector defines the number of points in the
+ *   histogram.
+ *   On output, adds all property elements belonging to the time interval
+ *  [tMin+n*dT;tMin+(n+1)*dT]
+ *  to the initial values of each n-th element of the counts vector,
+ *  where dT = (tMax-tMin)/counts.size()  */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::histogramData(
-    const Kernel::DateAndTime &tMin, const Kernel::DateAndTime &tMax,
-    std::vector<double> &counts) const {
+    const Mantid::Types::DateAndTime &tMin,
+    const Mantid::Types::DateAndTime &tMax, std::vector<double> &counts) const {
 
   size_t nPoints = counts.size();
   if (nPoints == 0)
@@ -2329,8 +2337,8 @@ void TimeSeriesProperty<TYPE>::histogramData(
 
 template <>
 void TimeSeriesProperty<std::string>::histogramData(
-    const Kernel::DateAndTime &tMin, const Kernel::DateAndTime &tMax,
-    std::vector<double> &counts) const {
+    const Mantid::Types::DateAndTime &tMin,
+    const Mantid::Types::DateAndTime &tMax, std::vector<double> &counts) const {
   UNUSED_ARG(tMin);
   UNUSED_ARG(tMax);
   UNUSED_ARG(counts);
@@ -2377,7 +2385,7 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
  */
 template <typename TYPE>
 bool TimeSeriesProperty<TYPE>::isTimeFiltered(
-    const Kernel::DateAndTime &time) const {
+    const Mantid::Types::DateAndTime &time) const {
   if (m_filter.empty()) {
     return false; // no filter
   }
@@ -2389,8 +2397,10 @@ bool TimeSeriesProperty<TYPE>::isTimeFiltered(
   // Find which range it lives in
   auto filterEntry = std::lower_bound(
       m_filter.begin(), m_filter.end(), time,
-      [](const std::pair<Kernel::DateAndTime, bool> &filterEntry,
-         const Kernel::DateAndTime &t) { return filterEntry.first < t; });
+      [](const std::pair<Mantid::Types::DateAndTime, bool> &filterEntry,
+         const Mantid::Types::DateAndTime &t) {
+        return filterEntry.first < t;
+      });
 
   if (filterEntry != m_filter.begin()) {
     --filterEntry; // get the latest time BEFORE the given time
@@ -2514,5 +2524,5 @@ filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
   };
   return singleValue;
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

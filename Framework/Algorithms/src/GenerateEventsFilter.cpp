@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 
 #include <boost/math/special_functions/round.hpp>
 
@@ -14,6 +15,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 using namespace std;
+using Mantid::Types::DateAndTime;
+using Mantid::Types::time_duration;
 
 namespace Mantid {
 namespace Algorithms {
@@ -309,7 +312,7 @@ void GenerateEventsFilter::processInputTime() {
     m_startTime = runstarttime;
   } else if (instringformat) {
     // Time is absolute time in ISO format
-    m_startTime = DateAndTime(s_inpt0);
+    m_startTime = Mantid::Types::DateAndTimeHelpers::createFromISO8601(s_inpt0);
   } else {
     // Relative time in double.
     double inpt0 = std::stod(s_inpt0.c_str());
@@ -320,7 +323,7 @@ void GenerateEventsFilter::processInputTime() {
     }
     int64_t t0_ns = runstarttime.totalNanoseconds() +
                     static_cast<int64_t>(inpt0 * m_timeUnitConvertFactorToNS);
-    m_startTime = Kernel::DateAndTime(t0_ns);
+    m_startTime = Mantid::Types::DateAndTime(t0_ns);
   }
 
   // Set up run stop time
@@ -329,13 +332,13 @@ void GenerateEventsFilter::processInputTime() {
     m_stopTime = m_runEndTime;
   } else if (instringformat) {
     // Absolute time in ISO format
-    m_stopTime = DateAndTime(s_inptf);
+    m_stopTime = Mantid::Types::DateAndTimeHelpers::createFromISO8601(s_inptf);
   } else {
     // Relative time in double
     double inptf = std::stod(s_inptf.c_str());
     int64_t tf_ns = runstarttime.totalNanoseconds() +
                     static_cast<int64_t>(inptf * m_timeUnitConvertFactorToNS);
-    m_stopTime = Kernel::DateAndTime(tf_ns);
+    m_stopTime = Mantid::Types::DateAndTime(tf_ns);
   }
 
   // Check start/stop time
@@ -405,8 +408,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
         nexttime_ns = m_stopTime.totalNanoseconds();
 
       // Create splitter and information
-      Kernel::DateAndTime t0(curtime_ns);
-      Kernel::DateAndTime tf(nexttime_ns);
+      Mantid::Types::DateAndTime t0(curtime_ns);
+      Mantid::Types::DateAndTime tf(nexttime_ns);
       std::stringstream ss;
       ss << "Time.Interval.From." << t0 << ".to." << tf;
 
@@ -458,8 +461,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
         }
 
         // Create splitter and information
-        Kernel::DateAndTime t0(curtime_ns);
-        Kernel::DateAndTime tf(nexttime_ns);
+        Mantid::Types::DateAndTime t0(curtime_ns);
+        Mantid::Types::DateAndTime tf(nexttime_ns);
         std::stringstream ss;
         ss << "Time.Interval.From." << t0 << ".to." << tf;
 
@@ -809,7 +812,7 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
 void GenerateEventsFilter::makeFilterBySingleValue(
     double min, double max, double TimeTolerance, bool centre,
     bool filterIncrease, bool filterDecrease, DateAndTime startTime,
-    Kernel::DateAndTime stopTime, int wsindex) {
+    Mantid::Types::DateAndTime stopTime, int wsindex) {
   // Do nothing if the log is empty.
   if (m_dblLog->size() == 0) {
     g_log.warning() << "There is no entry in this property " << this->name()
@@ -902,9 +905,9 @@ void GenerateEventsFilter::makeFilterBySingleValue(
   *              with the old direction)
   */
 bool GenerateEventsFilter::identifyLogEntry(
-    const int &index, const Kernel::DateAndTime &currT, const bool &lastgood,
+    const int &index, const Mantid::Types::DateAndTime &currT, const bool &lastgood,
     const double &minvalue, const double &maxvalue,
-    const Kernel::DateAndTime &startT, const Kernel::DateAndTime &stopT,
+    const Mantid::Types::DateAndTime &startT, const Mantid::Types::DateAndTime &stopT,
     const bool &filterIncrease, const bool &filterDecrease) {
   double val = m_dblLog->nthValue(index);
 
@@ -1167,7 +1170,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
 /** Make filters by multiple log values of partial log
   */
 void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
-    int istart, int iend, std::vector<Kernel::DateAndTime> &vecSplitTime,
+    int istart, int iend, std::vector<Mantid::Types::DateAndTime> &vecSplitTime,
     std::vector<int> &vecSplitGroup, map<size_t, int> indexwsindexmap,
     const vector<double> &logvalueranges, time_duration tol,
     bool filterIncrease, bool filterDecrease, DateAndTime startTime,
@@ -1181,7 +1184,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
   int64_t tol_ns = tol.total_nanoseconds();
 
   // Define loop control parameters
-  const Kernel::DateAndTime ZeroTime(0);
+  const Mantid::Types::DateAndTime ZeroTime(0);
   int lastindex = -1;
   int currindex = -1;
   DateAndTime lastTime;
@@ -1652,7 +1655,7 @@ int GenerateEventsFilter::determineChangingDirection(int startindex) {
 /** Add a new splitter to vector of splitters.  It is used by FilterByTime only.
   */
 void GenerateEventsFilter::addNewTimeFilterSplitter(
-    Kernel::DateAndTime starttime, Kernel::DateAndTime stoptime, int wsindex,
+    Mantid::Types::DateAndTime starttime, Mantid::Types::DateAndTime stoptime, int wsindex,
     string info) {
   if (m_forFastLog) {
     // For MatrixWorkspace splitter
@@ -1694,9 +1697,9 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
   * This method will be called intensively.
   */
 DateAndTime GenerateEventsFilter::makeSplitterInVector(
-    std::vector<Kernel::DateAndTime> &vecSplitTime,
-    std::vector<int> &vecGroupIndex, Kernel::DateAndTime start,
-    Kernel::DateAndTime stop, int group, int64_t tol_ns, DateAndTime lasttime) {
+    std::vector<Mantid::Types::DateAndTime> &vecSplitTime,
+    std::vector<int> &vecGroupIndex, Mantid::Types::DateAndTime start,
+    Mantid::Types::DateAndTime stop, int group, int64_t tol_ns, DateAndTime lasttime) {
   DateAndTime starttime(start.totalNanoseconds() - tol_ns);
   DateAndTime stoptime(stop.totalNanoseconds() - tol_ns);
   // DateAndTime starttime = start-tolerance;
@@ -1857,7 +1860,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
     }
 
     if (protonchargelog->size() > 1) {
-      Kernel::DateAndTime tmpendtime = protonchargelog->lastTime();
+      Mantid::Types::DateAndTime tmpendtime = protonchargelog->lastTime();
       extended_ns = protonchargelog->nthTime(1).totalNanoseconds() -
                     protonchargelog->nthTime(0).totalNanoseconds();
       if (tmpendtime > runendtime) {

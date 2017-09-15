@@ -1,18 +1,21 @@
 #include "MantidDataHandling/LoadNexusLogs.h"
-#include <nexus/NeXusException.hpp>
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <locale>
+#include <nexus/NeXusException.hpp>
 
-#include <Poco/Path.h>
+#include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
-#include <Poco/DateTimeFormat.h>
+#include <Poco/Path.h>
 
-#include <boost/scoped_array.hpp>
 #include "MantidDataHandling/LoadTOFRawNexus.h"
+#include <boost/scoped_array.hpp>
+
+using Mantid::Types::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -20,10 +23,11 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadNexusLogs)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
+using namespace Types;
+using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
-using API::FileProperty;
+using API::WorkspaceProperty;
 using std::size_t;
 
 // Anonymous namespace
@@ -72,11 +76,11 @@ bool loadAndApplyMeasurementInfo(::NeXus::File *const file,
 }
 
 /**
-* @brief loadAndApplyRunTitle
-* @param file : Nexus::File pointer
-* @param workspace : Pointer to the workspace to set logs on
-* @return True only if reading and execution successful.
-*/
+ * @brief loadAndApplyRunTitle
+ * @param file : Nexus::File pointer
+ * @param workspace : Pointer to the workspace to set logs on
+ * @return True only if reading and execution successful.
+ */
 bool loadAndApplyRunTitle(::NeXus::File *const file,
                           API::MatrixWorkspace &workspace) {
 
@@ -95,18 +99,18 @@ bool loadAndApplyRunTitle(::NeXus::File *const file,
 }
 
 /**
-* Checks whether the specified character is invalid or a control
-* character. If it is invalid (i.e. negative) or a control character
-* the method returns true. If it is valid and not a control character
-* it returns false. Additionally if the character is invalid is
-* logs a warning with the property name so users are aware.
-*
-* @param c :: Character to check
-* @param propName :: The name of the property currently being checked for
-*logging
-* @param log :: Reference to logger to print out to
-* @return :: True if control character OR invalid. Else False
-*/
+ * Checks whether the specified character is invalid or a control
+ * character. If it is invalid (i.e. negative) or a control character
+ * the method returns true. If it is valid and not a control character
+ * it returns false. Additionally if the character is invalid is
+ * logs a warning with the property name so users are aware.
+ *
+ * @param c :: Character to check
+ * @param propName :: The name of the property currently being checked for
+ *logging
+ * @param log :: Reference to logger to print out to
+ * @return :: True if control character OR invalid. Else False
+ */
 bool isControlValue(const char &c, const std::string &propName,
                     Kernel::Logger &log) {
   // Have to check it falls within range accepted by c style check
@@ -148,12 +152,12 @@ void LoadNexusLogs::init() {
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
-*  the output workspace
-*
-*  @throw Exception::FileError If the Nexus file cannot be found/opened
-*  @throw std::invalid_argument If the optional properties are set to invalid
-*values
-*/
+ *  the output workspace
+ *
+ *  @throw Exception::FileError If the Nexus file cannot be found/opened
+ *  @throw std::invalid_argument If the optional properties are set to invalid
+ *values
+ */
 void LoadNexusLogs::exec() {
   std::string filename = getPropertyValue("Filename");
   MatrixWorkspace_sptr workspace = getProperty("Workspace");
@@ -282,10 +286,10 @@ void LoadNexusLogs::exec() {
       Kernel::TimeSeriesProperty<double> *pcharge =
           new Kernel::TimeSeriesProperty<double>("proton_charge");
       std::vector<double> pval;
-      std::vector<Mantid::Kernel::DateAndTime> ptime;
+      std::vector<Mantid::Types::DateAndTime> ptime;
       pval.reserve(event_frame_number.size());
       ptime.reserve(event_frame_number.size());
-      std::vector<Mantid::Kernel::DateAndTime> plogt = plog->timesAsVector();
+      std::vector<Mantid::Types::DateAndTime> plogt = plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
       for (auto number : event_frame_number) {
         ptime.push_back(plogt[number]);
@@ -299,10 +303,10 @@ void LoadNexusLogs::exec() {
   try {
     // Read the start and end time strings
     file.openData("start_time");
-    Kernel::DateAndTime start(file.getStrData());
+    auto start = DateAndTimeHelpers::createFromISO8601(file.getStrData());
     file.closeData();
     file.openData("end_time");
-    Kernel::DateAndTime end(file.getStrData());
+    auto end = DateAndTimeHelpers::createFromISO8601(file.getStrData());
     file.closeData();
     workspace->mutableRun().setStartAndEndTime(start, end);
   } catch (::NeXus::Exception &) {
@@ -356,7 +360,7 @@ void LoadNexusLogs::loadVetoPulses(
   // Load the start date/time as ISO8601 string.
   std::string start_time;
   file.getAttr("start_time", start_time);
-  DateAndTime start(start_time);
+  DateAndTime start = DateAndTimeHelpers::createFromISO8601(start_time);
 
   // Read the offsets
   std::vector<double> time_double;
@@ -607,7 +611,8 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
   }
 
   // Convert to date and time
-  Kernel::DateAndTime start_time = Kernel::DateAndTime(start);
+  Mantid::Types::DateAndTime start_time =
+      DateAndTimeHelpers::createFromISO8601(start);
   std::string time_units;
   file.getAttr("units", time_units);
   if (time_units.compare("second") < 0 && time_units != "s" &&
@@ -684,9 +689,10 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     }
     // The string may contain non-printable (i.e. control) characters, replace
     // these
-    std::replace_if(values.begin(), values.end(), [&](const char &c) {
-      return isControlValue(c, prop_name, g_log);
-    }, ' ');
+    std::replace_if(
+        values.begin(), values.end(),
+        [&](const char &c) { return isControlValue(c, prop_name, g_log); },
+        ' ');
     auto tsp = new TimeSeriesProperty<std::string>(prop_name);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);

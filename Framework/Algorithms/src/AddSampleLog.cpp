@@ -1,14 +1,14 @@
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
 
 #include <string>
 
@@ -21,7 +21,7 @@ static const std::string autoTypeOption = "AutoDetect";
 static const std::string stringLogOption = "String";
 static const std::string numberLogOption = "Number";
 static const std::string numberSeriesLogOption = "Number Series";
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -77,9 +77,10 @@ void AddSampleLog::init() {
   declareProperty("TimeUnit", "Second",
                   boost::make_shared<Kernel::StringListValidator>(time_units),
                   "The unit of the time of the input workspace");
-  declareProperty("RelativeTime", true, "If specified as True, then then the "
-                                        "time stamps are relative to the run "
-                                        "start time of the target workspace.");
+  declareProperty("RelativeTime", true,
+                  "If specified as True, then then the "
+                  "time stamps are relative to the run "
+                  "start time of the target workspace.");
 }
 
 /**
@@ -260,7 +261,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
 
   // create workspace
   // get run start
-  Kernel::DateAndTime startTime = getRunStart(run_obj);
+  Mantid::Types::DateAndTime startTime = getRunStart(run_obj);
 
   // initialze the TimeSeriesProperty and add unit
   if (is_int_series) {
@@ -318,7 +319,7 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
   bool is_second = timeunit == "Second";
 
   // convert the data in workspace to time series property value
-  std::vector<DateAndTime> time_vec =
+  std::vector<Types::DateAndTime> time_vec =
       getTimes(data_ws, ws_index, epochtime, is_second, run_obj);
   if (value_is_int) {
     // integer property
@@ -348,7 +349,7 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
  * @param run_obj
  * @return
  */
-std::vector<Kernel::DateAndTime>
+std::vector<Mantid::Types::DateAndTime>
 AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
                        int workspace_index, bool is_epoch, bool is_second,
                        API::Run &run_obj) {
@@ -356,19 +357,19 @@ AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
   int64_t timeshift(0);
   if (!is_epoch) {
     // get the run start time
-    Kernel::DateAndTime run_start_time = getRunStart(run_obj);
+    Mantid::Types::DateAndTime run_start_time = getRunStart(run_obj);
     timeshift = run_start_time.totalNanoseconds();
   }
 
   // set up the time vector
-  std::vector<Kernel::DateAndTime> timevec;
+  std::vector<Mantid::Types::DateAndTime> timevec;
   size_t vecsize = dataws->readX(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i) {
     double timedbl = dataws->readX(workspace_index)[i];
     if (is_second)
       timedbl *= 1.E9;
     int64_t entry_i64 = static_cast<int64_t>(timedbl);
-    Kernel::DateAndTime entry(timeshift + entry_i64);
+    Mantid::Types::DateAndTime entry(timeshift + entry_i64);
     timevec.push_back(entry);
   }
 
@@ -380,10 +381,10 @@ AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
  * @param run_obj
  * @return
  */
-Kernel::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
+Mantid::Types::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
   // TODO/ISSUE/NOW - data ws should be the target workspace with run_start or
   // proton_charge property!
-  Kernel::DateAndTime runstart(0);
+  Mantid::Types::DateAndTime runstart(0);
   try {
     runstart = run_obj.startTime();
   } catch (std::runtime_error &) {

@@ -13,8 +13,8 @@ set ( SRC_FILES
 	src/CompositeValidator.cpp
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
-	src/DataItem.cpp
-	src/DateAndTime.cpp
+	src/DateAndTimeHelpers.cpp
+    src/DataItem.cpp
 	src/DateAndTimeHelpers.cpp
 	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
@@ -109,6 +109,7 @@ set ( SRC_FILES
 	src/ThreadPool.cpp
 	src/ThreadPoolRunnable.cpp
 	src/ThreadSafeLogStream.cpp
+    src/TimeInterval.cpp
 	src/TimeSeriesProperty.cpp
 	src/TimeSplitter.cpp
 	src/Timer.cpp
@@ -162,9 +163,9 @@ set ( INC_FILES
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
+    inc/MantidKernel/DateAndTimeHelpers.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
-	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DateAndTimeHelpers.h
 	inc/MantidKernel/DateTimeValidator.h
 	inc/MantidKernel/DateValidator.h
@@ -286,7 +287,8 @@ set ( INC_FILES
 	inc/MantidKernel/ThreadSafeLogStream.h
 	inc/MantidKernel/ThreadScheduler.h
 	inc/MantidKernel/ThreadSchedulerMutexes.h
-	inc/MantidKernel/TimeSeriesProperty.h
+	inc/MantidKernel/TimeInterval.h
+    inc/MantidKernel/TimeSeriesProperty.h
 	inc/MantidKernel/TimeSplitter.h
 	inc/MantidKernel/Timer.h
 	inc/MantidKernel/Tolerance.h
@@ -336,8 +338,7 @@ set ( TEST_FILES
 	ConfigServiceTest.h
 	CowPtrTest.h
 	DataServiceTest.h
-	DateAndTimeHelpersTest.h
-	DateAndTimeTest.h
+    DateAndTimeHelpersTest.h
 	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
@@ -430,6 +431,7 @@ set ( TEST_FILES
 	ThreadPoolTest.h
 	ThreadSchedulerMutexesTest.h
 	ThreadSchedulerTest.h
+	TimeIntervalTest.h
 	TimeSeriesPropertyTest.h
 	TimeSplitterTest.h
 	TimerTest.h

@@ -13,7 +13,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -24,6 +24,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::Types::DateAndTime;
 
 namespace {
 /**

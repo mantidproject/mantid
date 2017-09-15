@@ -6,16 +6,18 @@
 #include <fstream>
 #include <numeric>
 
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/LogParser.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <Poco/File.h>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Types;
 
 class LogParserTest : public CxxTest::TestSuite {
 public:
@@ -241,14 +243,18 @@ public:
     // Check the size
     TS_ASSERT_EQUALS(4, timeseriesprop->size());
     // Check the exact time stamps
-    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:22:55"),
-                     timeseriesprop->nthTime(0));
-    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:08"),
-                     timeseriesprop->nthTime(1));
-    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:22"),
-                     timeseriesprop->nthTime(2));
-    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:37"),
-                     timeseriesprop->nthTime(3));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2000-09-05T12:22:55"),
+        timeseriesprop->nthTime(0));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2000-09-05T12:23:08"),
+        timeseriesprop->nthTime(1));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2000-09-05T12:23:22"),
+        timeseriesprop->nthTime(2));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2000-09-05T12:23:37"),
+        timeseriesprop->nthTime(3));
   }
 
   void testConstructionFromPropertyUsingICPVariant_CHANGE_PERIOD() {
@@ -273,14 +279,18 @@ public:
     // Check the size
     TS_ASSERT_EQUALS(4, timeseriesprop->size());
     // Check the exact time stamps
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00"),
-                     timeseriesprop->nthTime(0));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00"),
-                     timeseriesprop->nthTime(1));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00"),
-                     timeseriesprop->nthTime(2));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:18:00"),
-                     timeseriesprop->nthTime(3));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:15:00"),
+        timeseriesprop->nthTime(0));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:00"),
+        timeseriesprop->nthTime(1));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"),
+        timeseriesprop->nthTime(2));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"),
+        timeseriesprop->nthTime(3));
   }
 
   void testConstructionFromPropertyUsingICPVariant_CHANGE_SPACE_PERIOD() {
@@ -305,14 +315,18 @@ public:
     // Check the size
     TS_ASSERT_EQUALS(4, timeseriesprop->size());
     // Check the exact time stamps
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00"),
-                     timeseriesprop->nthTime(0));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00"),
-                     timeseriesprop->nthTime(1));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00"),
-                     timeseriesprop->nthTime(2));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:18:00"),
-                     timeseriesprop->nthTime(3));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:15:00"),
+        timeseriesprop->nthTime(0));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:00"),
+        timeseriesprop->nthTime(1));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"),
+        timeseriesprop->nthTime(2));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"),
+        timeseriesprop->nthTime(3));
   }
 
   // Check that periods that don't have a full "CHANGE PERIOD" flag are not
@@ -340,12 +354,15 @@ public:
     // Check the size
     TS_ASSERT_EQUALS(3, timeseriesprop->size());
     // Check the exact time stamps
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00"),
-                     timeseriesprop->nthTime(0));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00"),
-                     timeseriesprop->nthTime(1));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00"),
-                     timeseriesprop->nthTime(2));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:15:00"),
+        timeseriesprop->nthTime(0));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:00"),
+        timeseriesprop->nthTime(1));
+    TS_ASSERT_EQUALS(
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"),
+        timeseriesprop->nthTime(2));
   }
 
   void testCreatesCurrentPeriodLog() {
@@ -397,7 +414,8 @@ public:
     auto log = make_unique<TimeSeriesProperty<double>>("MydoubleLog");
     std::vector<double> values(logSize);
     std::iota(values.begin(), values.end(), 1);
-    DateAndTime firstTime("2007-11-30T16:17:00");
+    DateAndTime firstTime =
+        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
     std::vector<DateAndTime> times(logSize);
     std::generate(times.begin(), times.end(),
                   [&firstTime] { return firstTime += 10.0; });
@@ -498,14 +516,10 @@ public:
         {"2013-10-16T19:13:09", 1}};
 
     const std::vector<std::pair<std::string, bool>> checkRunning{
-        {"2013-10-16T19:04:48", true},
-        {"2013-10-16T19:06:53", false},
-        {"2013-10-16T19:06:53", true},
-        {"2013-10-16T19:08:58", false},
-        {"2013-10-16T19:08:59", true},
-        {"2013-10-16T19:11:03", false},
-        {"2013-10-16T19:11:04", true},
-        {"2013-10-16T19:13:09", false}};
+        {"2013-10-16T19:04:48", true}, {"2013-10-16T19:06:53", false},
+        {"2013-10-16T19:06:53", true}, {"2013-10-16T19:08:58", false},
+        {"2013-10-16T19:08:59", true}, {"2013-10-16T19:11:03", false},
+        {"2013-10-16T19:11:04", true}, {"2013-10-16T19:13:09", false}};
 
     const LogParser logparser(log.get());
 
@@ -622,18 +636,25 @@ public:
     auto log = make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
 
     // (This is a cut-down version of EMU66122)
-    const DateAndTime timeZero{"2016-10-01T10:01:44"};
+    const DateAndTime timeZero =
+        DateAndTimeHelpers::createFromISO8601("2016-10-01T10:01:44");
     const std::vector<DateAndTime> times{
         timeZero,        timeZero + 3.0,  timeZero + 3.0,   timeZero + 3.0,
         timeZero + 51.0, timeZero + 51.0, timeZero + 57.0,  timeZero + 60.0,
         timeZero + 60.0, timeZero + 60.0, timeZero + 111.0, timeZero + 111.0};
     const std::vector<std::string> values{
-        "CHANGE_PERIOD 1", "CHANGE_PERIOD 1",
-        "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000", "BEGIN",
+        "CHANGE_PERIOD 1",
+        "CHANGE_PERIOD 1",
+        "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000",
+        "BEGIN",
         "STOP_COLLECTION PERIOD 1 GF 1931 RF 1933 GUAH 0.000000 DUR 48",
-        "ABORT", "CHANGE_PERIOD 1", "CHANGE_PERIOD 1",
-        "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000", "BEGIN",
-        "STOP_COLLECTION PERIOD 1 GF 2062 RF 2064 GUAH 0.000000 DUR 51", "END"};
+        "ABORT",
+        "CHANGE_PERIOD 1",
+        "CHANGE_PERIOD 1",
+        "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000",
+        "BEGIN",
+        "STOP_COLLECTION PERIOD 1 GF 2062 RF 2064 GUAH 0.000000 DUR 51",
+        "END"};
     log->addValues(times, values);
 
     const std::multimap<DateAndTime, bool> expectedRunning{
@@ -660,7 +681,8 @@ public:
     auto log = make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
 
     // (This is a cut-down version of EMU66122, changed to "old style" commands)
-    const DateAndTime timeZero{"2016-10-01T10:01:44"};
+    const DateAndTime timeZero =
+        DateAndTimeHelpers::createFromISO8601("2016-10-01T10:01:44");
     const std::vector<DateAndTime> times{
         timeZero,        timeZero + 3.0,  timeZero + 3.0,  timeZero + 51.0,
         timeZero + 57.0, timeZero + 60.0, timeZero + 60.0, timeZero + 111.0};

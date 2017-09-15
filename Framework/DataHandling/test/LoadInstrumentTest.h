@@ -3,7 +3,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -11,8 +10,10 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
@@ -23,13 +24,14 @@
 #include <vector>
 
 using namespace Mantid;
+using namespace Mantid::Types;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using Mantid::HistogramData::Points;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::Points;
 
 class LoadInstrumentTest : public CxxTest::TestSuite {
 public:
@@ -163,8 +165,10 @@ public:
     TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), i);
 
     // Valid-from/to1951-01-01 00:00:01
-    Kernel::DateAndTime validFrom("1951-01-01T00:00:01");
-    Kernel::DateAndTime validTo("2100-01-31 23:59:59");
+    DateAndTime validFrom =
+        DateAndTimeHelpers::createFromISO8601("1951-01-01T00:00:01");
+    DateAndTime validTo =
+        DateAndTimeHelpers::createFromISO8601("2100-01-31 23:59:59");
     TS_ASSERT_EQUALS(i->getValidFromDate(), validFrom);
     TS_ASSERT_EQUALS(i->getValidToDate(), validTo);
 

@@ -1,15 +1,16 @@
 #ifndef WORKSPACEHISTORYTEST_H_
 #define WORKSPACEHISTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "Poco/File.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -100,10 +101,10 @@ public:
     simplesum2.execute();
 
     WorkspaceHistory history;
-    AlgorithmHistory alg1(&simplesum,
-                          Mantid::Kernel::DateAndTime::defaultTime(), 1.0, 0);
-    AlgorithmHistory alg2(&simplesum2,
-                          Mantid::Kernel::DateAndTime::defaultTime(), 1.0, 1);
+    AlgorithmHistory alg1(
+        &simplesum, Mantid::Types::DateAndTimeHelpers::defaultTime(), 1.0, 0);
+    AlgorithmHistory alg2(
+        &simplesum2, Mantid::Types::DateAndTimeHelpers::defaultTime(), 1.0, 1);
 
     history.addHistory(boost::make_shared<AlgorithmHistory>(alg1));
     history.addHistory(boost::make_shared<AlgorithmHistory>(alg2));

@@ -3,17 +3,19 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FilterByLogValue.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAlgorithms/FilterByLogValue.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTypes/DateAndTime.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Types;
 
 class FilterByLogValueTest : public CxxTest::TestSuite {
 public:
@@ -108,9 +110,10 @@ public:
     // Default Event Workspace with times from 0-99
     EventWorkspace_sptr ew = WorkspaceCreationHelper::createEventWorkspace2();
 
-    DateAndTime run_start("2010-01-01T00:00:00"); // NOTE This run_start is
-                                                  // hard-coded in
-                                                  // WorkspaceCreationHelper.
+    DateAndTime run_start = DateAndTimeHelpers::createFromISO8601(
+        "2010-01-01T00:00:00"); // NOTE This run_start is
+                                // hard-coded in
+                                // WorkspaceCreationHelper.
 
     TimeSeriesProperty<double> *temp;
     temp = new TimeSeriesProperty<double>("temp");

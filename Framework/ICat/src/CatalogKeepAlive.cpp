@@ -1,6 +1,6 @@
 #include "MantidICat/CatalogKeepAlive.h"
 #include "MantidAPI/CatalogManager.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 
 #include <Poco/Thread.h>
 
@@ -22,7 +22,7 @@ void CatalogKeepAlive::exec() {
   if (timePeriod <= 0)
     throw std::runtime_error("TimePeriod must be greater than zero.");
 
-  Kernel::DateAndTime lastTimeExecuted = Kernel::DateAndTime::getCurrentTime();
+  Mantid::Types::DateAndTime lastTimeExecuted = Mantid::Types::DateAndTime::getCurrentTime();
 
   // Keep going until cancelled
   while (true) {
@@ -31,14 +31,14 @@ void CatalogKeepAlive::exec() {
     // Exit if the user presses cancel
     this->interruption_point();
 
-    double secondsSinceExecuted = Kernel::DateAndTime::secondsFromDuration(
-        Kernel::DateAndTime::getCurrentTime() - lastTimeExecuted);
+    double secondsSinceExecuted = Mantid::Types::DateAndTime::secondsFromDuration(
+        Mantid::Types::DateAndTime::getCurrentTime() - lastTimeExecuted);
 
     if (secondsSinceExecuted > timePeriod) {
       API::CatalogManager::Instance()
           .getCatalog(getPropertyValue("Session"))
           ->keepAlive();
-      lastTimeExecuted = Kernel::DateAndTime::getCurrentTime();
+      lastTimeExecuted = Mantid::Types::DateAndTime::getCurrentTime();
     }
   }
 }

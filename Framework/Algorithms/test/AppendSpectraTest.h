@@ -7,6 +7,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -17,6 +18,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Types;
 
 class AppendSpectraTest : public CxxTest::TestSuite {
 public:
@@ -183,11 +185,13 @@ public:
                                                            "");
 
     auto ws1Log = new TimeSeriesProperty<std::string>("aLog");
-    ws1Log->addValue(DateAndTime("2014-06-19T16:40:00"), "Hello");
+    ws1Log->addValue(
+        DateAndTimeHelpers::createFromISO8601("2014-06-19T16:40:00"), "Hello");
     ws1->mutableRun().addLogData(ws1Log);
 
     auto ws2Log = new TimeSeriesProperty<std::string>("aLog");
-    ws2Log->addValue(DateAndTime("2014-06-19T16:40:10"), "World");
+    ws2Log->addValue(
+        DateAndTimeHelpers::createFromISO8601("2014-06-19T16:40:10"), "World");
     ws2->mutableRun().addLogData(ws2Log);
 
     AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
@@ -409,7 +413,7 @@ private:
     TS_ASSERT(appendSpectra->isExecuted());
   }
   /** Creates a 2D workspace with 5 histograms
-  */
+   */
   void createWorkspaceWithAxisAndLabel(const std::string outputName,
                                        const std::string &axisType,
                                        const std::string axisValue) {

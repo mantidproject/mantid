@@ -13,12 +13,15 @@
 #include <vector>
 
 namespace Mantid {
-namespace Kernel {
+namespace Types {
 class DateAndTime;
+}
+namespace Kernel {
+
 class SplittingInterval;
 typedef std::vector<SplittingInterval> TimeSplitterType;
 class Unit;
-}
+} // namespace Kernel
 namespace DataObjects {
 class EventWorkspaceMRU;
 
@@ -255,14 +258,14 @@ public:
   void getTofs(std::vector<double> &tofs) const override;
   double getTofMin() const override;
   double getTofMax() const override;
-  Mantid::Kernel::DateAndTime getPulseTimeMax() const override;
-  Mantid::Kernel::DateAndTime getPulseTimeMin() const override;
-  void getPulseTimeMinMax(Mantid::Kernel::DateAndTime &tMin,
-                          Mantid::Kernel::DateAndTime &tM) const;
-  Mantid::Kernel::DateAndTime
+  Mantid::Types::DateAndTime getPulseTimeMax() const override;
+  Mantid::Types::DateAndTime getPulseTimeMin() const override;
+  void getPulseTimeMinMax(Mantid::Types::DateAndTime &tMin,
+                          Mantid::Types::DateAndTime &tM) const;
+  Mantid::Types::DateAndTime
   getTimeAtSampleMax(const double &tofFactor,
                      const double &tofOffset) const override;
-  Mantid::Kernel::DateAndTime
+  Mantid::Types::DateAndTime
   getTimeAtSampleMin(const double &tofFactor,
                      const double &tofOffset) const override;
 
@@ -278,18 +281,19 @@ public:
   /// Return the list of event weight error values
   void getWeightErrors(std::vector<double> &weightErrors) const override;
 
-  std::vector<Mantid::Kernel::DateAndTime> getPulseTimes() const override;
+  std::vector<Mantid::Types::DateAndTime> getPulseTimes() const override;
 
   void setTofs(const MantidVec &tofs) override;
 
   void reverse();
 
-  void filterByPulseTime(Kernel::DateAndTime start, Kernel::DateAndTime stop,
+  void filterByPulseTime(Mantid::Types::DateAndTime start,
+                         Mantid::Types::DateAndTime stop,
                          EventList &output) const;
 
-  void filterByTimeAtSample(Kernel::DateAndTime start, Kernel::DateAndTime stop,
-                            double tofFactor, double tofOffset,
-                            EventList &output) const;
+  void filterByTimeAtSample(Mantid::Types::DateAndTime start,
+                            Mantid::Types::DateAndTime stop, double tofFactor,
+                            double tofOffset, EventList &output) const;
 
   void filterInPlace(Kernel::TimeSplitterType &splitter);
 
@@ -468,19 +472,21 @@ private:
   template <class T>
   static void
   getPulseTimesHelper(const std::vector<T> &events,
-                      std::vector<Mantid::Kernel::DateAndTime> &times);
+                      std::vector<Mantid::Types::DateAndTime> &times);
   template <class T>
   static void setTofsHelper(std::vector<T> &events,
                             const std::vector<double> &tofs);
   template <class T>
-  static void
-  filterByPulseTimeHelper(std::vector<T> &events, Kernel::DateAndTime start,
-                          Kernel::DateAndTime stop, std::vector<T> &output);
+  static void filterByPulseTimeHelper(std::vector<T> &events,
+                                      Mantid::Types::DateAndTime start,
+                                      Mantid::Types::DateAndTime stop,
+                                      std::vector<T> &output);
   template <class T>
-  static void
-  filterByTimeAtSampleHelper(std::vector<T> &events, Kernel::DateAndTime start,
-                             Kernel::DateAndTime stop, double tofFactor,
-                             double tofOffset, std::vector<T> &output);
+  static void filterByTimeAtSampleHelper(std::vector<T> &events,
+                                         Mantid::Types::DateAndTime start,
+                                         Mantid::Types::DateAndTime stop,
+                                         double tofFactor, double tofOffset,
+                                         std::vector<T> &output);
   template <class T>
   void filterInPlaceHelper(Kernel::TimeSplitterType &splitter,
                            typename std::vector<T> &events);
@@ -551,6 +557,6 @@ DLLExport void getEventsFrom(EventList &el,
 DLLExport void getEventsFrom(const EventList &el,
                              std::vector<WeightedEventNoTime> const *&events);
 
-} // DataObjects
-} // Mantid
+} // namespace DataObjects
+} // namespace Mantid
 #endif /// MANTID_DATAOBJECTS_EVENTLIST_H_

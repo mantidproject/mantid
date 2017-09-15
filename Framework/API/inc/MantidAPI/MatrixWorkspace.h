@@ -17,7 +17,7 @@ namespace Indexing {
 class IndexInfo;
 }
 
-namespace Kernel {
+namespace Types {
 class DateAndTime;
 }
 
@@ -153,8 +153,8 @@ public:
   /// Gets MatrixWorkspace title (same as Run object run_title property)
   const std::string getTitle() const override;
 
-  virtual Kernel::DateAndTime getFirstPulseTime() const;
-  Kernel::DateAndTime getLastPulseTime() const;
+  virtual Mantid::Types::DateAndTime getFirstPulseTime() const;
+  Mantid::Types::DateAndTime getLastPulseTime() const;
 
   /// Returns the bin index for a given X value of a given workspace index
   size_t binIndexOf(const double xValue, const std::size_t = 0) const;

@@ -18,6 +18,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -37,6 +38,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -928,7 +930,7 @@ void InstrumentDefinitionParser::setValidityRange(
         "<instrument> element must contain a valid-from tag", filename);
   } else {
     try {
-      DateAndTime d(pRootElem->getAttribute("valid-from"));
+      DateAndTime d = DateAndTimeHelpers::createFromISO8601(pRootElem->getAttribute("valid-from"));
       m_instrument->setValidFromDate(d);
     } catch (...) {
       throw Kernel::Exception::InstrumentDefinitionError(
@@ -944,7 +946,7 @@ void InstrumentDefinitionParser::setValidityRange(
     // must contain a valid-to tag", filename);
   } else {
     try {
-      DateAndTime d(pRootElem->getAttribute("valid-to"));
+      DateAndTime d = DateAndTimeHelpers::createFromISO8601(pRootElem->getAttribute("valid-to"));
       m_instrument->setValidToDate(d);
     } catch (...) {
       throw Kernel::Exception::InstrumentDefinitionError(

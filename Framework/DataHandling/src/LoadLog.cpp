@@ -6,6 +6,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -23,6 +24,8 @@
 #include <boost/regex.hpp>
 #include <fstream> // used to get ifstream
 #include <sstream>
+
+using Mantid::Types::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -201,7 +204,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
   std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>>
       dMap;
   std::map<std::string,
-           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>> sMap;
+           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>>
+      sMap;
   kind l_kind(LoadLog::empty);
   bool isNumeric(false);
 

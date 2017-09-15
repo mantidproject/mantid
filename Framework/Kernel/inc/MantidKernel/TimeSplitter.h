@@ -1,7 +1,8 @@
 #ifndef TIMESPLITTER_H
 #define TIMESPLITTER_H
 
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DllConfig.h"
+#include "MantidTypes/DateAndTime.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -20,11 +21,12 @@ public:
   /// Default constructor
   SplittingInterval();
 
-  SplittingInterval(const DateAndTime &start, const DateAndTime &stop,
+  SplittingInterval(const Mantid::Types::DateAndTime &start,
+                    const Mantid::Types::DateAndTime &stop,
                     const int index = 0);
 
-  DateAndTime start() const;
-  DateAndTime stop() const;
+  Mantid::Types::DateAndTime start() const;
+  Mantid::Types::DateAndTime stop() const;
 
   double duration() const;
 
@@ -41,9 +43,9 @@ public:
 
 private:
   /// begin
-  DateAndTime m_start;
+  Mantid::Types::DateAndTime m_start;
   /// end
-  DateAndTime m_stop;
+  Mantid::Types::DateAndTime m_stop;
   /// Index of the destination
   int m_index;
 };
@@ -56,12 +58,12 @@ private:
 typedef std::vector<SplittingInterval> TimeSplitterType;
 
 // -------------- Operators ---------------------
-MANTID_KERNEL_DLL TimeSplitterType
-operator+(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType
-operator&(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType
-operator|(const TimeSplitterType &a, const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator+(const TimeSplitterType &a,
+                                             const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator&(const TimeSplitterType &a,
+                                             const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator|(const TimeSplitterType &a,
+                                             const TimeSplitterType &b);
 MANTID_KERNEL_DLL TimeSplitterType operator~(const TimeSplitterType &a);
 
 } // Namespace Kernel

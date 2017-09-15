@@ -1,6 +1,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -81,8 +81,8 @@ boost::shared_ptr<Run> Run::clone() {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void Run::filterByTime(const Kernel::DateAndTime start,
-                       const Kernel::DateAndTime stop) {
+void Run::filterByTime(const Mantid::Types::DateAndTime start,
+                       const Mantid::Types::DateAndTime stop) {
   LogManager::filterByTime(start, stop);
   // Re-integrate proton charge
   this->integrateProtonCharge();

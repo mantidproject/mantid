@@ -1,18 +1,20 @@
 #ifndef WORKSPACEHISTORYIOTEST_H_
 #define WORKSPACEHISTORYIOTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Property.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "Poco/File.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types;
 
 class WorkspaceHistoryIOTest : public CxxTest::TestSuite {
 private:
@@ -205,7 +207,7 @@ public:
     WorkspaceHistory testHistory;
     for (int i = 1; i < 5; i++) {
       AlgorithmHistory algHist("History" + boost::lexical_cast<std::string>(i),
-                               1, DateAndTime::defaultTime(), -1.0, i);
+                               1, DateAndTimeHelpers::defaultTime(), -1.0, i);
       testHistory.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
     }
 
@@ -241,10 +243,10 @@ public:
 
   void test_SaveNexus_NestedHistory() {
     WorkspaceHistory testHistory;
-    AlgorithmHistory algHist("ParentHistory", 1, DateAndTime::defaultTime(),
-                             -1.0, 0);
-    AlgorithmHistory childHist("ChildHistory", 1, DateAndTime::defaultTime(),
-                               -1.0, 1);
+    AlgorithmHistory algHist("ParentHistory", 1,
+                             DateAndTimeHelpers::defaultTime(), -1.0, 0);
+    AlgorithmHistory childHist("ChildHistory", 1,
+                               DateAndTimeHelpers::defaultTime(), -1.0, 1);
 
     algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(childHist));
     testHistory.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
@@ -322,7 +324,8 @@ public:
 
     TS_ASSERT_EQUALS("LoadRaw", history->name());
     TS_ASSERT_EQUALS(3, history->version());
-    TS_ASSERT_EQUALS(DateAndTime("2009-10-09T16:56:54"),
+    TS_ASSERT_EQUALS(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
+                         "2009-10-09T16:56:54"),
                      history->executionDate());
     TS_ASSERT_EQUALS(2.3, history->executionDuration());
     loadhandle->close();

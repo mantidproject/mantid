@@ -1,29 +1,32 @@
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/MersenneTwister.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 #include <ctime>
 #include <numeric>
 #include <stdexcept>
+
+using namespace Mantid::Types;
 
 namespace Mantid {
 namespace Algorithms {
@@ -199,7 +202,8 @@ void CreateSampleWorkspace::exec() {
     // down
     binWidth = xMax - xMin;
     g_log.warning() << "The bin width is so large that there is less than one "
-                       "bin - it has been changed to " << binWidth << '\n';
+                       "bin - it has been changed to "
+                    << binWidth << '\n';
   }
 
   std::string functionString;
@@ -258,8 +262,8 @@ void CreateSampleWorkspace::exec() {
 
   ws->setYUnit("Counts");
   ws->setTitle("Test Workspace");
-  DateAndTime run_start("2010-01-01T00:00:00");
-  DateAndTime run_end("2010-01-01T01:00:00");
+  auto run_start = DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00");
+  auto run_end = DateAndTimeHelpers::createFromISO8601("2010-01-01T01:00:00");
   Run &theRun = ws->mutableRun();
   // belt and braces use both approaches for setting start and end times
   theRun.setStartAndEndTime(run_start, run_end);
@@ -337,7 +341,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
     timeRanges.push_back(double(i + 1));
   }
 
-  builder.setTimeRanges(Kernel::DateAndTime(0), timeRanges);
+  builder.setTimeRanges(Mantid::Types::DateAndTime(0), timeRanges);
   builder.setRelativeRotationsForScans(angles, inst->getSample()->getPos(),
                                        V3D(0, 1, 0));
 
@@ -357,7 +361,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     int numPixels, int numBins, int numMonitors, int numEvents, double x0,
     double binDelta, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
-  DateAndTime run_start("2010-01-01T00:00:00");
+  auto run_start = DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00");
 
   std::vector<SpectrumDefinition> specDefs(numPixels + numMonitors);
   for (int wi = 0; wi < numMonitors + numPixels; wi++)
@@ -557,8 +561,9 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
 
     testInst->add(bank);
     // Set the bank along the z-axis of the instrument, between the detectors.
-    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample *
-                                   (monitorNumber - monitorsStart + 0.5)));
+    bank->setPos(
+        V3D(0.0, 0.0,
+            bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)));
   }
 
   // Define a source component

@@ -2,19 +2,21 @@
 #define LOG_MANAGER_TEST_H_
 
 #include "MantidAPI/LogManager.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/NexusTestHelper.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::Types;
 
 // Helper class
 namespace {
@@ -52,7 +54,7 @@ void addTestTimeSeries(LogManager &run, const std::string &name) {
   timeSeries->addValue("2012-07-19T16:19:20", 24);
   run.addProperty(timeSeries);
 }
-}
+} // namespace
 
 void addTimeSeriesEntry(LogManager &runInfo, std::string name, double val) {
   TimeSeriesProperty<double> *tsp;
@@ -102,17 +104,20 @@ public:
     auto run_start_prop =
         new PropertyWithValue<std::string>("run_start", run_start);
     runInfo.addProperty(run_start_prop);
-    TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(run_start));
+    TS_ASSERT_EQUALS(runInfo.startTime(),
+                     DateAndTimeHelpers::createFromISO8601(run_start));
     // Add start_time and see that get picked up in preference
     const std::string start_time("2013-12-19T13:40:00");
     auto start_time_prop =
         new PropertyWithValue<std::string>("start_time", start_time);
     runInfo.addProperty(start_time_prop);
-    TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(start_time));
+    TS_ASSERT_EQUALS(runInfo.startTime(),
+                     DateAndTimeHelpers::createFromISO8601(start_time));
     // But get back run_start again if start_time is equal to the epoch
     const std::string epoch("1990-01-01T00:00:00");
     start_time_prop->setValue(epoch);
-    TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(run_start));
+    TS_ASSERT_EQUALS(runInfo.startTime(),
+                     DateAndTimeHelpers::createFromISO8601(run_start));
     // And back to failure if they're both that
     run_start_prop->setValue(epoch);
     TS_ASSERT_THROWS(runInfo.startTime(), std::runtime_error);
@@ -120,11 +125,13 @@ public:
     // Set run_start back to valid value and make start_time contain nonsense
     run_start_prop->setValue(run_start);
     start_time_prop->setValue("__");
-    TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(run_start));
+    TS_ASSERT_EQUALS(runInfo.startTime(),
+                     DateAndTimeHelpers::createFromISO8601(run_start));
     // Now make start_time a completely different property type
     runInfo.removeProperty("start_time");
     runInfo.addProperty(new PropertyWithValue<double>("start_time", 3.33));
-    TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(run_start));
+    TS_ASSERT_EQUALS(runInfo.startTime(),
+                     DateAndTimeHelpers::createFromISO8601(run_start));
     // Now make run_start something invalid
     run_start_prop->setValue("notADate");
     TS_ASSERT_THROWS(runInfo.startTime(), std::runtime_error);
@@ -142,22 +149,26 @@ public:
     const std::string run_end("2013-12-19T13:38:00");
     auto run_end_prop = new PropertyWithValue<std::string>("run_end", run_end);
     runInfo.addProperty(run_end_prop);
-    TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime(run_end));
+    TS_ASSERT_EQUALS(runInfo.endTime(),
+                     DateAndTimeHelpers::createFromISO8601(run_end));
     // Add end_time and see that get picked up in preference
     const std::string end_time("2013-12-19T13:40:00");
     auto end_time_prop =
         new PropertyWithValue<std::string>("end_time", end_time);
     runInfo.addProperty(end_time_prop);
-    TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime(end_time));
+    TS_ASSERT_EQUALS(runInfo.endTime(),
+                     DateAndTimeHelpers::createFromISO8601(end_time));
 
     // Set run_end back to valid value and make end_time contain nonsense
     run_end_prop->setValue(run_end);
     end_time_prop->setValue("__");
-    TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime(run_end));
+    TS_ASSERT_EQUALS(runInfo.endTime(),
+                     DateAndTimeHelpers::createFromISO8601(run_end));
     // Now make end_time a completely different property type
     runInfo.removeProperty("end_time");
     runInfo.addProperty(new PropertyWithValue<double>("end_time", 3.33));
-    TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime(run_end));
+    TS_ASSERT_EQUALS(runInfo.endTime(),
+                     DateAndTimeHelpers::createFromISO8601(run_end));
     // Now make run_end something invalid
     run_end_prop->setValue("notADate");
     TS_ASSERT_THROWS(runInfo.endTime(), std::runtime_error);

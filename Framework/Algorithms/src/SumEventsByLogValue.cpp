@@ -10,6 +10,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/TimeInterval.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <numeric>

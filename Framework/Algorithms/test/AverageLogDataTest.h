@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/AverageLogData.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -114,7 +115,8 @@ private:
     inputWS = "AverageLogDataTestWS";
     Mantid::DataObjects::Workspace2D_sptr w =
         WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    Mantid::Kernel::DateAndTime run_start("2010-01-01T00:00:00");
+    auto run_start = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
+        "2010-01-01T00:00:00");
     Mantid::Kernel::TimeSeriesProperty<double> *pc, *p1;
     pc = new Mantid::Kernel::TimeSeriesProperty<double>("proton_charge");
     pc->setUnits("picoCoulomb");

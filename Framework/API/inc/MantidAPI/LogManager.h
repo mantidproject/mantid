@@ -2,9 +2,9 @@
 #define MANTID_API_LOGMANAGER_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/make_unique.h"
 #include <memory>
 #include <vector>
 
@@ -13,14 +13,16 @@ class File;
 }
 
 namespace Mantid {
+namespace Types {
+class DateAndTime;
+}
 namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
 typedef std::vector<SplittingInterval> TimeSplitterType;
-class DateAndTime;
 class PropertyManager;
-}
+} // namespace Kernel
 
 namespace API {
 
@@ -63,17 +65,17 @@ public:
 
   //-------------------------------------------------------------
   /// Set the run start and end
-  void setStartAndEndTime(const Kernel::DateAndTime &start,
-                          const Kernel::DateAndTime &end);
+  void setStartAndEndTime(const Mantid::Types::DateAndTime &start,
+                          const Mantid::Types::DateAndTime &end);
   /// Return the run start time
-  const Kernel::DateAndTime startTime() const;
+  const Mantid::Types::DateAndTime startTime() const;
   /// Return the run end time
-  const Kernel::DateAndTime endTime() const;
+  const Mantid::Types::DateAndTime endTime() const;
   //-------------------------------------------------------------
 
   /// Filter the logs by time
-  virtual void filterByTime(const Kernel::DateAndTime start,
-                            const Kernel::DateAndTime stop);
+  virtual void filterByTime(const Mantid::Types::DateAndTime start,
+                            const Mantid::Types::DateAndTime stop);
   /// Split the logs based on the given intervals
   virtual void splitByTime(Kernel::TimeSplitterType &splitter,
                            std::vector<LogManager *> outputs) const;
@@ -241,7 +243,7 @@ void LogManager::addProperty(const std::string &name, const TYPE &value,
   newProp->setUnits(units);
   addProperty(std::move(newProp), overwrite);
 }
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTID_API_LOGMANAGER_H_

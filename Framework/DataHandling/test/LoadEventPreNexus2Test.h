@@ -20,7 +20,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <sys/stat.h>
@@ -32,12 +32,13 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::Types;
 using Mantid::HistogramData::HistogramX;
 
+using std::cout;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using std::cout;
 
 //==========================================================================================
 class LoadEventPreNexus2Test : public CxxTest::TestSuite {
@@ -130,7 +131,7 @@ public:
     std::map<DateAndTime, double> logMap = log->valueAsMap();
     std::map<DateAndTime, double>::iterator it, it2;
     it = logMap.begin();
-    Kernel::DateAndTime start = it->first;
+    Mantid::Types::DateAndTime start = it->first;
 
     std::vector<TofEvent> events1 = ew->getSpectrum(1000).getEvents();
     for (size_t i = 0; i < events1.size(); i++) {

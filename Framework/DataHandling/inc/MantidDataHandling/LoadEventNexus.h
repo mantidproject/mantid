@@ -150,9 +150,9 @@ public:
   int32_t m_specMax;
 
   /// Filter by start time
-  Kernel::DateAndTime filter_time_start;
+  Mantid::Types::DateAndTime filter_time_start;
   /// Filter by stop time
-  Kernel::DateAndTime filter_time_stop;
+  Mantid::Types::DateAndTime filter_time_stop;
   /// chunk number
   int chunk;
   /// number of chunks

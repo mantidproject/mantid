@@ -4,16 +4,18 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <unordered_set>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Types;
 
 namespace Mantid {
 namespace LiveData {
@@ -257,11 +259,11 @@ void LiveDataAlgorithm::setLiveListener(
 
 //----------------------------------------------------------------------------------------------
 /** @return the value of the StartTime property */
-Mantid::Kernel::DateAndTime LiveDataAlgorithm::getStartTime() const {
+Mantid::Types::DateAndTime LiveDataAlgorithm::getStartTime() const {
   std::string date = getPropertyValue("StartTime");
   if (date.empty())
     return DateAndTime();
-  return DateAndTime(date);
+  return DateAndTimeHelpers::createFromISO8601(date);
 }
 
 //----------------------------------------------------------------------------------------------

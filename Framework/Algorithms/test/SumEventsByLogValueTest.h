@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SumEventsByLogValue.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -11,6 +12,7 @@ using Mantid::Algorithms::SumEventsByLogValue;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types;
 
 class SumEventsByLogValueTest : public CxxTest::TestSuite {
 public:
@@ -148,7 +150,8 @@ private:
         WorkspaceCreationHelper::createEventWorkspace(3, 1);
     Run &run = ws->mutableRun();
 
-    DateAndTime run_start("2010-01-01T00:00:00");
+    DateAndTime run_start =
+        DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00");
 
     auto dblTSP = new TimeSeriesProperty<double>("doubleProp");
     dblTSP->addValue(run_start, 3.0);
@@ -191,7 +194,8 @@ public:
     std::vector<DateAndTime> times;
     std::vector<int> index;
     std::vector<double> dbl1, dbl2;
-    DateAndTime startTime("2010-01-01T00:00:00");
+    DateAndTime startTime =
+        DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00");
     for (int i = 0; i < 100; ++i) {
       times.push_back(startTime + i * 10.0);
       index.push_back(i);

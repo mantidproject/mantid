@@ -1,15 +1,17 @@
 #include "MantidAlgorithms/GeneratePythonScript.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ScriptBuilder.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
 
 #include <fstream>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Types;
 using namespace Mantid::API;
 
 namespace {
@@ -23,7 +25,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GeneratePythonScript)
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void GeneratePythonScript::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -59,7 +61,7 @@ void GeneratePythonScript::init() {
 }
 
 /** Execute the algorithm.
-*/
+ */
 void GeneratePythonScript::exec() {
   const Workspace_const_sptr ws = getProperty("InputWorkspace");
   const bool unrollAll = getProperty("UnrollAll");
@@ -82,9 +84,12 @@ void GeneratePythonScript::exec() {
   if (!startTime.empty()) {
     if (endTime.empty()) {
       // If no end time was given then filter up to now
-      view->filterBetweenExecDate(DateAndTime(startTime));
+      view->filterBetweenExecDate(
+          DateAndTimeHelpers::createFromISO8601(startTime));
     } else {
-      view->filterBetweenExecDate(DateAndTime(startTime), DateAndTime(endTime));
+      view->filterBetweenExecDate(
+          DateAndTimeHelpers::createFromISO8601(startTime),
+          DateAndTimeHelpers::createFromISO8601(endTime));
     }
   }
 

@@ -65,8 +65,8 @@ public:
   Run &operator+=(const Run &rhs);
 
   /// Filter the logs by time
-  void filterByTime(const Kernel::DateAndTime start,
-                    const Kernel::DateAndTime stop) override;
+  void filterByTime(const Mantid::Types::DateAndTime start,
+                    const Mantid::Types::DateAndTime stop) override;
   /// Split the logs based on the given intervals
   void splitByTime(Kernel::TimeSplitterType &splitter,
                    std::vector<LogManager *> outputs) const override;

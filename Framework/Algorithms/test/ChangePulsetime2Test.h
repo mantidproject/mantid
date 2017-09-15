@@ -8,11 +8,13 @@
 #include "MantidAlgorithms/ChangePulsetime2.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Types;
 
 namespace {
 EventWorkspace_sptr
@@ -77,11 +79,11 @@ public:
       double secs;
       secs = DateAndTime::secondsFromDuration(
           out_ws->getSpectrum(wi).getEvent(0).pulseTime() -
-          DateAndTime("2010-01-01T00:00:00"));
+          DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00"));
       TS_ASSERT_DELTA(secs, 1000.0, 1e-5);
       secs = DateAndTime::secondsFromDuration(
           out_ws->getSpectrum(wi).getEvent(2).pulseTime() -
-          DateAndTime("2010-01-01T00:00:00"));
+          DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00"));
       TS_ASSERT_DELTA(secs, 1001.0, 1e-5);
     }
 
@@ -90,11 +92,11 @@ public:
       double secs;
       secs = DateAndTime::secondsFromDuration(
           out_ws->getSpectrum(0).getEvent(2).pulseTime() -
-          DateAndTime("2010-01-01T00:00:00"));
+          DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00"));
       TS_ASSERT_DELTA(secs, 1.0, 1e-5);
       secs = DateAndTime::secondsFromDuration(
           out_ws->getSpectrum(30).getEvent(2).pulseTime() -
-          DateAndTime("2010-01-01T00:00:00"));
+          DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00"));
       TS_ASSERT_DELTA(secs, 1.0, 1e-5);
     }
 
@@ -103,7 +105,7 @@ public:
       double secs;
       secs = DateAndTime::secondsFromDuration(
           in_ws->getSpectrum(0).getEvent(2).pulseTime() -
-          DateAndTime("2010-01-01T00:00:00"));
+          DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00"));
       TS_ASSERT_DELTA(secs, 1.0, 1e-5);
     }
 

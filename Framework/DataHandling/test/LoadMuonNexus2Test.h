@@ -25,6 +25,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::Types::DateAndTime;
 using Mantid::detid_t;
 
 class LoadMuonNexus2Test : public CxxTest::TestSuite {

@@ -1,6 +1,6 @@
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
@@ -16,7 +16,7 @@ void exportStlContainers() {
   std_vector_exporter<double>::wrap("std_vector_dbl");
   std_vector_exporter<bool>::wrap("std_vector_bool");
   std_vector_exporter<std::string>::wrap("std_vector_str");
-  std_vector_exporter<Mantid::Kernel::DateAndTime>::wrap(
+  std_vector_exporter<Mantid::Types::DateAndTime>::wrap(
       "std_vector_dateandtime");
   std_vector_exporter<Mantid::Kernel::Quat>::wrap("std_vector_quat");
   std_vector_exporter<Mantid::Kernel::V3D>::wrap("std_vector_v3d");

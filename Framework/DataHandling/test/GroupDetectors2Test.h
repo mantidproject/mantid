@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -979,7 +979,7 @@ private:
       timeRanges.push_back(double(i + 1));
     }
 
-    builder.setTimeRanges(Mantid::Kernel::DateAndTime(0), timeRanges);
+    builder.setTimeRanges(Mantid::Types::DateAndTime(0), timeRanges);
     return builder.buildWorkspace();
   }
 

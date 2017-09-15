@@ -1,10 +1,13 @@
 #ifndef MANTID_ALGORITHMS_ADDNOTETEST_H_
 #define MANTID_ALGORITHMS_ADDNOTETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/AddNote.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
+
+using namespace Mantid::Types;
 
 class AddNoteTest : public CxxTest::TestSuite {
 
@@ -35,7 +38,7 @@ public:
     // Get Current Date Time
     namespace pt = boost::posix_time;
     auto dateTimeObj =
-        Mantid::Kernel::DateAndTime(pt::second_clock::local_time());
+        Mantid::Types::DateAndTime(pt::second_clock::local_time());
     std::string time = dateTimeObj.toISO8601String();
     std::string timeOffset = time;
     TS_ASSERT_THROWS_NOTHING(
@@ -109,7 +112,6 @@ private:
                                const int &logEndTime,
                                const std::string logValue,
                                const size_t position) {
-    using Mantid::Kernel::DateAndTime;
     using Mantid::Kernel::TimeSeriesProperty;
 
     const auto &run = testWS->run();
@@ -125,7 +127,8 @@ private:
     TS_ASSERT(times.size() >= position + 1);
     auto values = timeSeries->valuesAsVector();
     if (logEndTime == 0) {
-      TS_ASSERT_EQUALS(DateAndTime(logStartTime), times[position]);
+      TS_ASSERT_EQUALS(DateAndTimeHelpers::createFromISO8601(logStartTime),
+                       times[position]);
     } else {
       int logMinTime = 0, logMaxTime = 0;
       TS_ASSERT_THROWS_NOTHING(

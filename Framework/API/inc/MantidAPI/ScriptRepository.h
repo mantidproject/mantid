@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidAPI/DllConfig.h"
 #include <vector>
 
@@ -16,7 +16,7 @@ struct ScriptInfo {
   /// Identification of the author of the script.
   std::string author;
   /// Time of the last update of this file (remotelly)
-  Kernel::DateAndTime pub_date;
+  Mantid::Types::DateAndTime pub_date;
   /// Marked for auto update
   bool auto_update;
   /// Directory Flag to indicate if the entry is a directory.

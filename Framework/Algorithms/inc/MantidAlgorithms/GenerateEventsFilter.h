@@ -1,12 +1,12 @@
 #ifndef MANTID_ALGORITHMS_GENERATEEVENTSFILTER_H_
 #define MANTID_ALGORITHMS_GENERATEEVENTSFILTER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -101,50 +101,55 @@ private:
   void makeFilterBySingleValue(double min, double max, double TimeTolerance,
                                bool centre, bool filterIncrease,
                                bool filterDecrease,
-                               Kernel::DateAndTime startTime,
-                               Kernel::DateAndTime stopTime, int wsindex);
+                               Mantid::Types::DateAndTime startTime,
+                               Mantid::Types::DateAndTime stopTime,
+                               int wsindex);
 
   /// Make multiple-log-value filters in serial
   void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap,
                                    std::vector<double> logvalueranges,
                                    bool centre, bool filterIncrease,
                                    bool filterDecrease,
-                                   Kernel::DateAndTime startTime,
-                                   Kernel::DateAndTime stopTime);
+                                   Mantid::Types::DateAndTime startTime,
+                                   Mantid::Types::DateAndTime stopTime);
 
   /// Make multiple-log-value filters in serial in parallel
   void makeMultipleFiltersByValuesParallel(
       std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges,
       bool centre, bool filterIncrease, bool filterDecrease,
-      Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime);
+      Mantid::Types::DateAndTime startTime,
+      Mantid::Types::DateAndTime stopTime);
 
   /// Generate event splitters for partial sample log (serial)
   void makeMultipleFiltersByValuesPartialLog(
-      int istart, int iend, std::vector<Kernel::DateAndTime> &vecSplitTime,
+      int istart, int iend,
+      std::vector<Mantid::Types::DateAndTime> &vecSplitTime,
       std::vector<int> &vecSplitGroup, std::map<size_t, int> indexwsindexmap,
-      const std::vector<double> &logvalueranges, Kernel::time_duration tol,
-      bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime,
-      Kernel::DateAndTime stopTime);
+      const std::vector<double> &logvalueranges,
+      Mantid::Types::time_duration tol, bool filterIncrease,
+      bool filterDecrease, Mantid::Types::DateAndTime startTime,
+      Mantid::Types::DateAndTime stopTime);
 
   /// Generate event filters for integer sample log
   void processIntegerValueFilter(int minvalue, int maxvalue,
                                  bool filterIncrease, bool filterDecrease,
-                                 Kernel::DateAndTime runend);
+                                 Mantid::Types::DateAndTime runend);
 
   /// Search a value in a sorted vector
   size_t searchValue(const std::vector<double> &sorteddata, double value);
 
   /// Add a splitter
-  void addNewTimeFilterSplitter(Kernel::DateAndTime starttime,
-                                Kernel::DateAndTime stoptime, int wsindex,
-                                std::string info);
+  void addNewTimeFilterSplitter(Mantid::Types::DateAndTime starttime,
+                                Mantid::Types::DateAndTime stoptime,
+                                int wsindex, std::string info);
 
   /// Create a splitter and add to the vector of time splitters
-  Kernel::DateAndTime
-  makeSplitterInVector(std::vector<Kernel::DateAndTime> &vecSplitTime,
+  Mantid::Types::DateAndTime
+  makeSplitterInVector(std::vector<Mantid::Types::DateAndTime> &vecSplitTime,
                        std::vector<int> &vecGroupIndex,
-                       Kernel::DateAndTime start, Kernel::DateAndTime stop,
-                       int group, int64_t tol_ns, Kernel::DateAndTime lasttime);
+                       Mantid::Types::DateAndTime start,
+                       Mantid::Types::DateAndTime stop, int group,
+                       int64_t tol_ns, Mantid::Types::DateAndTime lasttime);
 
   /// Generate a matrix workspace containing splitters
   void generateSplittersInMatrixWorkspace();
@@ -156,18 +161,19 @@ private:
   void generateSplittersInSplitterWS();
 
   /// Identify the a sample log entry is within intended value and time region
-  bool identifyLogEntry(const int &index, const Kernel::DateAndTime &currT,
+  bool identifyLogEntry(const int &index,
+                        const Mantid::Types::DateAndTime &currT,
                         const bool &lastgood, const double &minvalue,
                         const double &maxvalue,
-                        const Kernel::DateAndTime &startT,
-                        const Kernel::DateAndTime &stopT,
+                        const Mantid::Types::DateAndTime &startT,
+                        const Mantid::Types::DateAndTime &stopT,
                         const bool &filterIncrease, const bool &filterDecrease);
 
   /// Determine the chaning direction of log value
   int determineChangingDirection(int startindex);
 
   /// Find the end of the run
-  Kernel::DateAndTime findRunEnd();
+  Mantid::Types::DateAndTime findRunEnd();
 
   DataObjects::EventWorkspace_const_sptr m_dataWS;
 
@@ -178,11 +184,11 @@ private:
 
   API::ITableWorkspace_sptr m_filterInfoWS;
 
-  Kernel::DateAndTime m_startTime;
-  Kernel::DateAndTime m_stopTime;
+  Mantid::Types::DateAndTime m_startTime;
+  Mantid::Types::DateAndTime m_stopTime;
 
   /// Run end time
-  Kernel::DateAndTime m_runEndTime;
+  Mantid::Types::DateAndTime m_runEndTime;
 
   double m_timeUnitConvertFactorToNS;
 
@@ -198,13 +204,13 @@ private:
   /// SplitterType
   Kernel::TimeSplitterType m_splitters;
   /// Vector as date and time
-  std::vector<Kernel::DateAndTime> m_vecSplitterTime;
+  std::vector<Mantid::Types::DateAndTime> m_vecSplitterTime;
   std::vector<int> m_vecSplitterGroup;
 
   /// Processing algorithm type
   bool m_useParallel;
 
-  std::vector<std::vector<Kernel::DateAndTime>> m_vecSplitterTimeSet;
+  std::vector<std::vector<Mantid::Types::DateAndTime>> m_vecSplitterTimeSet;
   std::vector<std::vector<int>> m_vecGroupIndexSet;
 };
 

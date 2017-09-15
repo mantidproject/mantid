@@ -13,7 +13,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Quat.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"

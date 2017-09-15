@@ -41,8 +41,8 @@ Kernel::SplittingInterval SplittersWorkspace::getSplitter(size_t index) {
   row >> stop;
   row >> wsgroup;
 
-  Kernel::SplittingInterval splitter(Kernel::DateAndTime(start),
-                                     Kernel::DateAndTime(stop), wsgroup);
+  Kernel::SplittingInterval splitter(Mantid::Types::DateAndTime(start),
+                                     Mantid::Types::DateAndTime(stop), wsgroup);
 
   return splitter;
 }

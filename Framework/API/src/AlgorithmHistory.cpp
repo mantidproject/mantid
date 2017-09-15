@@ -9,7 +9,7 @@ namespace Mantid {
 namespace API {
 
 using Kernel::Property;
-using Kernel::DateAndTime;
+using Mantid::Types::DateAndTime;
 using Kernel::PropertyHistory;
 using Kernel::PropertyHistory_sptr;
 using Kernel::PropertyHistory_const_sptr;
@@ -24,7 +24,7 @@ using Kernel::PropertyHistories;
  *  @param uexeccount :: an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
-                                   const Kernel::DateAndTime &start,
+                                   const Mantid::Types::DateAndTime &start,
                                    const double &duration,
                                    std::size_t uexeccount)
     : m_name(alg->name()), m_version(alg->version()), m_executionDate(start),
@@ -49,7 +49,7 @@ AlgorithmHistory::~AlgorithmHistory() = default;
    @param uexeccount ::  an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
-                                   const Kernel::DateAndTime &start,
+                                   const Mantid::Types::DateAndTime &start,
                                    const double &duration,
                                    std::size_t uexeccount)
     : m_name(name), m_version(vers), m_executionDate(start),
@@ -83,7 +83,7 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
  *  @param uexeccount :: an  unsigned int for algorithm execution order
  */
 void AlgorithmHistory::fillAlgorithmHistory(const Algorithm *const alg,
-                                            const Kernel::DateAndTime &start,
+                                            const Mantid::Types::DateAndTime &start,
                                             const double &duration,
                                             std::size_t uexeccount) {
   m_name = alg->name();

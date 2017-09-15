@@ -18,6 +18,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidParallel/Communicator.h"
@@ -28,7 +29,7 @@
 #include <functional>
 #include <numeric>
 
-using Mantid::Kernel::DateAndTime;
+using namespace Mantid::Types;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Strings::toString;
 
@@ -1158,12 +1159,12 @@ size_t MatrixWorkspace::getMemorySizeForXAxes() const {
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
  *be impossible)
  */
-Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
+Mantid::Types::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
   TimeSeriesProperty<double> *log =
       this->run().getTimeSeriesProperty<double>("proton_charge");
 
   DateAndTime startDate = log->firstTime();
-  DateAndTime reference("1991-01-01T00:00:00");
+  DateAndTime reference = DateAndTimeHelpers::createFromISO8601("1991-01-01T00:00:00");
 
   int i = 0;
   // Find the first pulse after 1991
@@ -1184,7 +1185,7 @@ Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
  *be impossible)
  */
-Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const {
+Mantid::Types::DateAndTime MatrixWorkspace::getLastPulseTime() const {
   TimeSeriesProperty<double> *log =
       this->run().getTimeSeriesProperty<double>("proton_charge");
   return log->lastTime();

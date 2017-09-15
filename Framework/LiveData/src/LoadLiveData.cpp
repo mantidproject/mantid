@@ -101,8 +101,8 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
       for (auto prop : proplist) {
         if ((prop->direction() == 0) && (!inputPropertyWorkspaceFound)) {
           if (boost::ends_with(prop->type(), "Workspace")) {
-            g_log.information() << "Using " << prop->name()
-                                << " as the input property.\n";
+            g_log.information()
+                << "Using " << prop->name() << " as the input property.\n";
             alg->setPropertyValue(prop->name(), inputName);
             inputPropertyWorkspaceFound = true;
           }
@@ -399,7 +399,7 @@ void LoadLiveData::exec() {
   }
 
   // TODO: Have the ILiveListener tell me exactly the time stamp
-  DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();
+  Types::DateAndTime lastTimeStamp = Types::DateAndTime::getCurrentTime();
   this->setPropertyValue("LastTimeStamp", lastTimeStamp.toISO8601String());
 
   // Now we process the chunk

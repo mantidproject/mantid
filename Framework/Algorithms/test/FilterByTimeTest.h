@@ -12,10 +12,11 @@
 
 #include "MantidAlgorithms/FilterByTime.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTypes/DateAndTime.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
@@ -38,9 +39,10 @@ public:
     TimeSeriesProperty<double> *pc =
         new TimeSeriesProperty<double>("proton_charge");
     pc->setUnits("picoCoulomb");
-    DateAndTime run_start("2010-01-01T00:00:00"); // NOTE This run_start is
-                                                  // hard-coded in
-                                                  // WorkspaceCreationHelper.
+    auto run_start = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
+        "2010-01-01T00:00:00"); // NOTE This run_start is
+                                // hard-coded in
+                                // WorkspaceCreationHelper.
     for (double i = 0; i < 100; i++)
       pc->addValue(run_start + i, 1.0);
     ws->mutableRun().addProperty(pc);

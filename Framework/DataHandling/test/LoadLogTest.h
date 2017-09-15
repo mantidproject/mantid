@@ -173,7 +173,7 @@ public:
     Property *prop = 0;
     TimeSeriesProperty<double> *tsp;
     std::vector<double> vals;
-    std::vector<DateAndTime> times;
+    std::vector<Mantid::Types::DateAndTime> times;
 
     TS_ASSERT_THROWS_NOTHING(prop = output->run().getLogData("Temp1"));
     tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);

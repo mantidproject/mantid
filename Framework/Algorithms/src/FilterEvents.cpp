@@ -14,8 +14,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -32,6 +32,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::Types;
 
 using namespace std;
 
@@ -92,9 +93,10 @@ void FilterEvents::init() {
                   "environment log.  This option can make execution of "
                   "algorithm faster.  But it lowers precision.");
 
-  declareProperty("GroupWorkspaces", false, "Option to group all the output "
-                                            "workspaces.  Group name will be "
-                                            "OutputWorkspaceBaseName.");
+  declareProperty("GroupWorkspaces", false,
+                  "Option to group all the output "
+                  "workspaces.  Group name will be "
+                  "OutputWorkspaceBaseName.");
 
   declareProperty("OutputWorkspaceIndexedFrom1", false,
                   "If selected, the minimum output workspace is indexed from 1 "
@@ -395,7 +397,8 @@ void FilterEvents::processAlgorithmProperties() {
   if (m_toGroupWS && m_outputWSNameBase.compare(m_eventWS->getName()) == 0) {
     std::stringstream errss;
     errss << "It is not allowed to group output workspaces into the same name "
-             "(i..e, OutputWorkspaceBaseName = " << m_outputWSNameBase
+             "(i..e, OutputWorkspaceBaseName = "
+          << m_outputWSNameBase
           << ") as the input workspace to filter events from.";
     throw std::invalid_argument(errss.str());
   }
@@ -448,7 +451,7 @@ void FilterEvents::processAlgorithmProperties() {
 
   // Get run start time from property 'run_start'
   if (m_eventWS->run().hasProperty("run_start")) {
-    Kernel::DateAndTime run_start_time(
+    DateAndTime run_start_time = DateAndTimeHelpers::createFromISO8601(
         m_eventWS->run().getProperty("run_start")->value());
     m_runStartTime = run_start_time;
   }
@@ -460,7 +463,8 @@ void FilterEvents::processAlgorithmProperties() {
     std::string start_time_str = getProperty("FilterStartTime");
     if (!start_time_str.empty()) {
       // User specifies the filter starting time
-      Kernel::DateAndTime temp_shift_time(start_time_str);
+      DateAndTime temp_shift_time =
+          DateAndTimeHelpers::createFromISO8601(start_time_str);
       m_filterStartTime = temp_shift_time;
     } else {
       // Retrieve filter starting time from property run_start as default
@@ -628,7 +632,7 @@ void FilterEvents::splitTimeSeriesLogs(
     const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
     const std::vector<TimeSeriesProperty<bool> *> &bool_tsp_vector) {
   // get split times by converting vector of int64 to Time
-  std::vector<Kernel::DateAndTime> split_datetime_vec;
+  std::vector<Mantid::Types::DateAndTime> split_datetime_vec;
 
   // convert splitters workspace to vectors used by TableWorkspace and
   // MatrixWorkspace splitters
@@ -696,7 +700,7 @@ void FilterEvents::splitTimeSeriesLogs(
 template <typename TYPE>
 void FilterEvents::splitTimeSeriesProperty(
     Kernel::TimeSeriesProperty<TYPE> *tsp,
-    std::vector<Kernel::DateAndTime> &split_datetime_vec,
+    std::vector<Mantid::Types::DateAndTime> &split_datetime_vec,
     const int max_target_index) {
   // skip the sample logs if they are specified
   // get property name and etc
@@ -1239,9 +1243,8 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     }
 
     // Update progress report
-    m_progress =
-        0.1 +
-        0.1 * static_cast<double>(wsgindex) / static_cast<double>(numoutputws);
+    m_progress = 0.1 + 0.1 * static_cast<double>(wsgindex) /
+                           static_cast<double>(numoutputws);
     progress(m_progress, "Creating output workspace");
     wsgindex += 1;
   } // END-FOR (wsgroup)
@@ -1329,9 +1332,8 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
     }
 
     // Update progress report
-    m_progress =
-        0.1 +
-        0.1 * static_cast<double>(wsgindex) / static_cast<double>(numoutputws);
+    m_progress = 0.1 + 0.1 * static_cast<double>(wsgindex) /
+                           static_cast<double>(numoutputws);
     progress(m_progress, "Creating output workspace");
     wsgindex += 1;
   } // END-FOR (wsgroup)
@@ -1344,11 +1346,11 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
 }
 
 /** Set up neutron event's TOF correction.
-  * It can be (1) parsed from TOF-correction table workspace to vectors,
-  * (2) created according to detector's position in instrument;
-  * (3) or no correction,i.e., correction value is equal to 1.
-  * Offset should be as F*TOF + B
-  */
+ * It can be (1) parsed from TOF-correction table workspace to vectors,
+ * (2) created according to detector's position in instrument;
+ * (3) or no correction,i.e., correction value is equal to 1.
+ * Offset should be as F*TOF + B
+ */
 void FilterEvents::setupDetectorTOFCalibration() {
   // Set output correction workspace and set to output
   const size_t numhist = m_eventWS->getNumberHistograms();
@@ -1419,12 +1421,12 @@ TimeAtSampleStrategy *FilterEvents::setupIndirectTOFCorrection() const {
 }
 
 /** Set up corrections with customized TOF correction input
-  * The first column must be either DetectorID or Spectrum (from 0... as
+ * The first column must be either DetectorID or Spectrum (from 0... as
  * workspace index)
-  * The second column must be Correction or CorrectFactor, a number between 0
+ * The second column must be Correction or CorrectFactor, a number between 0
  * and 1, i.e, [0, 1]
-  * The third column is optional as shift in unit of second
-  */
+ * The third column is optional as shift in unit of second
+ */
 void FilterEvents::setupCustomizedTOFCorrection() {
   // Check input workspace
   vector<string> colnames = m_detCorrectWorkspace->getColumnNames();
@@ -1567,7 +1569,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
 }
 
 /** Main filtering method
-  * Structure: per spectrum --> per workspace
+ * Structure: per spectrum --> per workspace
  */
 void FilterEvents::filterEventsBySplitters(double progressamount) {
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
@@ -1619,7 +1621,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 }
 
 /** Split events by splitters represented by vector
-  */
+ */
 void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
   // FIXME : consider to use vector to index workspace and event list
@@ -1627,8 +1629,8 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
   // Loop over the histograms (detector spectra) to do split from 1 event list
   // to N event list
   g_log.notice() << "Filter by vector splitters: Number of spectra in "
-                    "input/source EventWorkspace = " << numberOfSpectra
-                 << ".\n";
+                    "input/source EventWorkspace = "
+                 << numberOfSpectra << ".\n";
 
   // check for option FilterByTime
   if (m_filterByPulseTime) {
@@ -1639,9 +1641,11 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       std::stringstream errmsg;
       errmsg << "It is not proper to split fast event 'By PulseTime'', when "
                 "there are "
-                "more splitters (" << m_vecSplitterTime.size()
+                "more splitters ("
+             << m_vecSplitterTime.size()
              << ") than pulse time "
-                "log entries (" << num_proton_charges << ")";
+                "log entries ("
+             << num_proton_charges << ")";
       throw runtime_error(errmsg.str());
     } else
       g_log.warning("User should understand the inaccurancy to filter events "
@@ -1732,7 +1736,7 @@ void FilterEvents::generateSplitterTSP(
         new Kernel::TimeSeriesProperty<int>("splitter");
     split_tsp_vec.push_back(split_tsp);
     // add initial value if the first splitter time is after the run start time
-    split_tsp->addValue(Kernel::DateAndTime(m_runStartTime), 0);
+    split_tsp->addValue(Mantid::Types::DateAndTime(m_runStartTime), 0);
   }
 
   // start to go through  m_vecSplitterTime (int64) and m_vecSplitterGroup add
@@ -1901,5 +1905,5 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
   return lognames;
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

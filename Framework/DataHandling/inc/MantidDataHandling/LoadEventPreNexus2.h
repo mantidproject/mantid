@@ -124,7 +124,7 @@ private:
   std::vector<int64_t> spectra_list;               ///<the list of Spectra
 
   /// The times for each pulse.
-  std::vector<Kernel::DateAndTime> pulsetimes;
+  std::vector<Mantid::Types::DateAndTime> pulsetimes;
   /// The index of the first event in each pulse.
   std::vector<uint64_t> event_indices;
   /// The proton charge on a pulse by pulse basis.
@@ -153,7 +153,7 @@ private:
   /// detector IDs. Part of error events.
   std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
   std::map<PixelType, size_t> wrongdetidmap;
-  std::vector<std::vector<Kernel::DateAndTime>> wrongdetid_pulsetimes;
+  std::vector<std::vector<Mantid::Types::DateAndTime>> wrongdetid_pulsetimes;
   std::vector<std::vector<double>> wrongdetid_tofs;
 
   /// the number of events that were ignored (not loaded) because, e.g. of only

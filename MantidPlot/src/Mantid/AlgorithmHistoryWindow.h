@@ -5,7 +5,7 @@
 #include "MantidAPI/HistoryView.h"
 #include "MantidAPI/ScriptBuilder.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidQtWidgets/Common/MantidDialog.h"
 
@@ -91,7 +91,7 @@ public:
   AlgExecSummaryGrpBox(QString, QWidget *w);
   ~AlgExecSummaryGrpBox() override;
   void setData(const double execDuration,
-               const Mantid::Kernel::DateAndTime execDate);
+               const Mantid::Types::DateAndTime execDate);
 
 private:
   QLineEdit *getAlgExecDurationCtrl() const { return m_execDurationEdit; }

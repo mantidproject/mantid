@@ -1,18 +1,20 @@
 #ifndef MANTID_API_PROPERTYNEXUSTEST_H_
 #define MANTID_API_PROPERTYNEXUSTEST_H_
 
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include "MantidTypes/DateAndTime.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types;
 
 class PropertyNexusTest : public CxxTest::TestSuite {
 public:
@@ -49,20 +51,28 @@ public:
     pvd.saveProperty(th.file);
 
     TimeSeriesProperty<int> tspi("int_series");
-    tspi.addValue(DateAndTime("2011-01-01T00:00:01"), 1234);
-    tspi.addValue(DateAndTime("2011-01-01T00:01:02"), 4567);
+    tspi.addValue(DateAndTimeHelpers::createFromISO8601("2011-01-01T00:00:01"),
+                  1234);
+    tspi.addValue(DateAndTimeHelpers::createFromISO8601("2011-01-01T00:01:02"),
+                  4567);
 
     TimeSeriesProperty<double> tspd("double_series");
-    tspd.addValue(DateAndTime("2011-01-01T00:00:01"), 1234.5);
-    tspd.addValue(DateAndTime("2011-01-01T00:01:02"), 4567.8);
+    tspd.addValue(DateAndTimeHelpers::createFromISO8601("2011-01-01T00:00:01"),
+                  1234.5);
+    tspd.addValue(DateAndTimeHelpers::createFromISO8601("2011-01-01T00:01:02"),
+                  4567.8);
 
     TimeSeriesProperty<bool> tspb("bool_series");
-    tspb.addValue(DateAndTime("2011-01-01T00:00:01"), true);
-    tspb.addValue(DateAndTime("2011-01-01T00:01:02"), false);
+    tspb.addValue(DateAndTimeHelpers::createFromISO8601("2011-01-01T00:00:01"),
+                  true);
+    tspb.addValue(DateAndTimeHelpers::createFromISO8601("2011-01-01T00:01:02"),
+                  false);
 
     TimeSeriesProperty<std::string> tsps("string_series");
-    tsps.addValue(DateAndTime("2011-01-01T00:00:01"), "help me i");
-    tsps.addValue(DateAndTime("2011-01-01T00:01:02"), "am stuck in a NXS file");
+    tsps.addValue(DateAndTimeHelpers::createFromISO8601("2011-01-01T00:00:01"),
+                  "help me i");
+    tsps.addValue(DateAndTimeHelpers::createFromISO8601("2011-01-01T00:01:02"),
+                  "am stuck in a NXS file");
 
     tspi.saveProperty(th.file);
     tspd.saveProperty(th.file);

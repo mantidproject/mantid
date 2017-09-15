@@ -1,12 +1,13 @@
 #ifndef CHANGELOGTIMETEST_H_
 #define CHANGELOGTIMETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/ChangeLogTime.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/ChangeLogTime.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include <cxxtest/TestSuite.h>
 
 using std::string;
 using namespace Mantid::Algorithms;
@@ -47,7 +48,8 @@ private:
    * @param out_name Name of the output workspace.
    */
   void verify(const std::string in_name, const std::string out_name) {
-    DateAndTime start(start_str);
+    auto start =
+        Mantid::Types::DateAndTimeHelpers::createFromISO8601(start_str);
 
     // create a workspace to mess with
     Workspace2D_sptr testWorkspace(new Workspace2D);
