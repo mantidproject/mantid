@@ -66,6 +66,22 @@ public:
     TS_ASSERT_EQUALS(1, allowed2.size());
     TS_ASSERT_EQUALS("b2", *(allowed2.begin()));
   }
+
+  void
+  test_Given_TwoValidators_When_CheckIsValid_That_ValidValuesReturnValid() {
+    // Arrange
+    BoundedValidator<int> *val1 = new BoundedValidator<int>(1, 50);
+    BoundedValidator<int> *val2 = new BoundedValidator<int>(60, 100);
+
+    CompositeValidator comp(CompositeRelation::OR);
+    comp.add(IValidator_sptr(val1));
+    comp.add(IValidator_sptr(val2));
+
+    // Assert
+    TS_ASSERT_EQUALS(comp.isValid(30), "");  // In range of val1
+    TS_ASSERT_EQUALS(comp.isValid(70), "");  // In range of val2
+    TS_ASSERT_DIFFERS(comp.isValid(55), ""); // Not in range
+  }
 };
 
 #endif /* MANTID_KERNEL_COMPOSITEVALIDATORTEST_H_ */

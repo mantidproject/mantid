@@ -69,6 +69,9 @@ private:
   void saveNexus(std::string outputFile, API::MatrixWorkspace_sptr outputWS);
   /// Function to optimize L1
   void findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
+  /// Function to optimize L2
+  void findL2(boost::container::flat_set<std::string> MyBankNames,
+              DataObjects::PeaksWorkspace_sptr peaksWs);
   /// Function to optimize T0
   void findT0(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
 
