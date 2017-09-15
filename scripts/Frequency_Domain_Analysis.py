@@ -5,9 +5,8 @@ import sys
 import PyQt4.QtGui as QtGui
 
 from Muon import model_constructor
-
-from Muon import transform_view
 from Muon import transform_presenter
+from Muon import transform_view
 from Muon import view_constructor
 
 
