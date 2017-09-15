@@ -4,17 +4,6 @@
 #include "MantidTypes/DateAndTime.h"
 
 namespace Mantid {
-namespace DataObjects {
-class EventList;
-class WeightedEvent;
-class WeightedEventNoTime;
-class tofGreaterOrEqual;
-class tofGreater;
-} // namespace DataObjects
-
-namespace DataHandling {
-class LoadEventNexus;
-}
 namespace Types {
 //==========================================================================================
 /** Info about a single neutron detection event:
@@ -26,14 +15,14 @@ namespace Types {
 class _declspec(dllexport) TofEvent {
 
   /// EventList has the right to mess with TofEvent.
-  friend class Mantid::DataObjects::EventList;
-  friend class Mantid::DataObjects::WeightedEvent;
-  friend class Mantid::DataObjects::WeightedEventNoTime;
-  friend class Mantid::DataObjects::tofGreaterOrEqual;
-  friend class Mantid::DataObjects::tofGreater;
-  friend class Mantid::DataHandling::LoadEventNexus; // Needed while the ISIS
-                                                     // hack of spreading events
-                                                     // out in a bin remains
+  friend class EventList;
+  friend class WeightedEvent;
+  friend class WeightedEventNoTime;
+  friend class tofGreaterOrEqual;
+  friend class tofGreater;
+  friend class DataHandling::LoadEventNexus; // Needed while the ISIS hack of
+                                             // spreading events out in a bin
+                                             // remains
 
 protected:
   /** The 'x value' of the event. This will be in a unit available from the
