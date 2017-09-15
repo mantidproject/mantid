@@ -46,10 +46,7 @@ def open_file_dialog(line_edit, filter_text, directory):
 class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_SansDataProcessorWindow):
     data_processor_table = None
     INSTRUMENTS = None
-<<<<<<< HEAD
-=======
     VARIABLE = "Variable"
->>>>>>> master
 
     class RunTabListener(with_metaclass(ABCMeta, object)):
         """
@@ -1523,7 +1520,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.menuFile.clear()
 
         # Actions that go in the 'Edit' menu
-<<<<<<< HEAD
         self._create_action(MantidQt.MantidWidgets.DataProcessor.ProcessCommand(self.data_processor_table),
                             self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessor.PlotRowCommand(self.data_processor_table),
@@ -1555,6 +1551,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorExportTableCommand(self.data_processor_table),
                             self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessor.OptionsCommand(self.data_processor_table),
+                            self.menuFile)
 
     def _create_action(self, command, menu, workspace_list=None):
         """
@@ -1592,3 +1589,4 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         Re-emits 'runPytonScript' signal
         """
         mantidplot.runPythonScript(text, True)
+
