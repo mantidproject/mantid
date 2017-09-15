@@ -2,13 +2,13 @@
 #define TOFEVENTTEST_H_ 1
 
 #include <cxxtest/TestSuite.h>
-#include "MantidDataObjects/Events.h"
+#include "MantidTypes/TofEvent.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
+using namespace Mantid::Types
 
 using std::runtime_error;
 using std::size_t;
