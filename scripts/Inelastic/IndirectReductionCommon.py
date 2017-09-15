@@ -20,9 +20,11 @@ def _create_file_range_parser(sum_files, instrument):
                 if sum_files:
                     return instrument + bounds[0] + '-' + bounds[1]
                 else:
-                    return instrument + ",".join(range(bounds[0], bounds[1]))
-            except:
-                raise RuntimeError("Incorrectly formatted range supplied.")
+                    run_numbers = range(int(bounds[0]), int(bounds[1]))
+                    run_numbers = [str(run_number) for run_number in run_numbers]
+                    return instrument + ",".join(run_numbers)
+            except Exception as exc:
+                raise RuntimeError("Incorrectly formatted range supplied:\n" + str(exc))
         else:
             try:
                 int(file_range)

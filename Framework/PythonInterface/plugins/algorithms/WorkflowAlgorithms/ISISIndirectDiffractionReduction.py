@@ -331,7 +331,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         # Only enable sum files if we actually have more than one file
         sum_files = self.getProperty('SumFiles').value
-        self._sum_files = False
 
         if sum_files:
             num_raw_files = len(self._data_files)
