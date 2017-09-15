@@ -4,7 +4,7 @@ from mantid.simpleapi import logger
 import AbinsModules
 
 
-class AbinsLoadDMOL3Test(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
+class AbinsLoadDMOL3Test(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTester):
 
     def tearDown(self):
         AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadDMOL3"])
@@ -17,8 +17,8 @@ class AbinsLoadDMOL3Test(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
     _gamma_no_h_dmol3 = "Na2SiF6_LoadDMOL3"
 
     def test_gamma_dmol3(self):
-        self._check(name=self._gamma_dmol3, loader=AbinsModules.LoadDMOL3)
-        self._check(name=self._gamma_no_h_dmol3, loader=AbinsModules.LoadDMOL3)
+        self.check(name=self._gamma_dmol3, loader=AbinsModules.LoadDMOL3)
+        self.check(name=self._gamma_no_h_dmol3, loader=AbinsModules.LoadDMOL3)
 
 if __name__ == '__main__':
     unittest.main()

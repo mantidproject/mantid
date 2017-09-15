@@ -4,7 +4,7 @@ import json
 import numpy as np
 
 
-class GeneralLoadDFTTester(object):
+class GeneralLoadAbInitioTester(object):
 
     _loaders_extensions = {"LoadCASTEP": "phonon", "LoadCRYSTAL": "out", "LoadDMOL3": "outmol", "LoadGAUSSIAN": "log"}
 
@@ -60,18 +60,17 @@ class GeneralLoadDFTTester(object):
         # check attributes
         self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
-        self.assertEqual(correct_data["attributes"]["DFT_program"], data["attributes"]["DFT_program"])
+        self.assertEqual(correct_data["attributes"]["ab_initio_program"], data["attributes"]["ab_initio_program"])
         self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension),
                          data["attributes"]["filename"])
 
         # check datasets
         self.assertEqual(True, np.allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"]))
 
-    def _check_loader_data(self, correct_data=None, input_dft_filename=None, extension=None):
-
-        loader = AbinsModules.LoadDMOL3(
-            input_dft_filename=AbinsModules.AbinsTestHelpers.find_file(input_dft_filename + "." + extension))
-        loaded_data = loader.load_formatted_data().extract()
+    def _check_loader_data(self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None):
+        ab_initio_loader = loader(
+            input_ab_initio_filename=AbinsModules.AbinsTestHelpers.find_file(input_ab_initio_filename + "." + extension))
+        loaded_data = ab_initio_loader.load_formatted_data().extract()
 
         # k points
         correct_items = correct_data["datasets"]["k_points_data"]
@@ -96,7 +95,7 @@ class GeneralLoadDFTTester(object):
             self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
                                                atoms["atom_%s" % item]["coord"]))
 
-    def _check(self, name=None, loader=None):
+    def check(self, name=None, loader=None):
 
         extension = self._loaders_extensions[str(loader)]
 
@@ -110,35 +109,36 @@ class GeneralLoadDFTTester(object):
         self._check_reader_data(correct_data=correct_data, data=data, filename=name, extension=extension)
 
         # check loaded data
-        self._check_loader_data(correct_data=correct_data, input_dft_filename=name, extension=extension)
+        self._check_loader_data(correct_data=correct_data, input_ab_initio_filename=name, extension=extension,
+                                loader=loader)
 
     def _read_dft(self, loader=None, filename=None, extension=None):
         """
         Reads data from .{extension} file.
-        :param loader: DFT loader
+        :param loader: ab_initio loader
         :param filename: name of file with phonon data (name + extension)
         :returns: phonon data
         """
         # 1) Read data
         filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension)
-        dft_reader = loader(input_dft_filename=filename)
+        ab_initio_reader = loader(input_ab_initio_filename=filename)
 
-        data = self._get_reader_data(dft_reader=dft_reader)
+        data = self._get_reader_data(ab_initio_reader=ab_initio_reader)
 
         # test validData method
-        self.assertEqual(True, dft_reader._clerk._valid_hash())
+        self.assertEqual(True, ab_initio_reader._clerk._valid_hash())
 
         return data
 
     # noinspection PyMethodMayBeStatic
-    def _get_reader_data(self, dft_reader=None):
+    def _get_reader_data(self, ab_initio_reader=None):
         """
-        :param dft_reader: object of type  GeneralDFTProgram
+        :param ab_initio_reader: object of type  GeneralAbInitioProgram
         :returns: read data
         """
-        abins_type_data = dft_reader.read_phonon_file()
+        abins_type_data = ab_initio_reader.read_vibrational_data()
         data = {"datasets": abins_type_data.extract(),
-                "attributes": dft_reader._clerk._attributes
+                "attributes": ab_initio_reader._clerk._attributes
                 }
-        data["datasets"].update({"unit_cell": dft_reader._clerk._data["unit_cell"]})
+        data["datasets"].update({"unit_cell": ab_initio_reader._clerk._data["unit_cell"]})
         return data

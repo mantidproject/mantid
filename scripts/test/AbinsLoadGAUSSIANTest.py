@@ -4,7 +4,7 @@ from mantid.simpleapi import logger
 import AbinsModules
 
 
-class AbinsLoadGAUSSIANTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
+class AbinsLoadGAUSSIANTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTester):
 
     def tearDown(self):
         AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadGAUSSIAN"])
@@ -16,7 +16,7 @@ class AbinsLoadGAUSSIANTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester
     _molecule_gaussian = "C6H5Cl-LoadGAUSSIAN"
 
     def test_molecule_gaussian(self):
-        self._check(name=self._molecule_gaussian, loader=AbinsModules.LoadGAUSSIAN)
+        self.check(name=self._molecule_gaussian, loader=AbinsModules.LoadGAUSSIAN)
 
 if __name__ == '__main__':
     unittest.main()

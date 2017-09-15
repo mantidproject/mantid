@@ -4,30 +4,30 @@ import AbinsModules
 import six
 
 
-class GeneralDFTProgramName(type):
+class GeneralAbInitioProgramName(type):
     def __str__(self):
         return self.__name__
 
 
 # noinspection PyMethodMayBeStatic
-@six.add_metaclass(GeneralDFTProgramName)
-class GeneralDFTProgram(object):
+@six.add_metaclass(GeneralAbInitioProgramName)
+class GeneralAbInitioProgram(object):
     """
-    A general class which groups all methods which should be inherited or implemented by a DFT program used
+    A general class which groups all methods which should be inherited or implemented by a ab-initio program used
     in INS analysis.
     """
-    def __init__(self, input_dft_filename=None):
+    def __init__(self, input_ab_initio_filename=None):
 
         self._num_k = None
         self._num_atoms = None
         self._sample_form = None
-        self._dft_program = None
-        self._clerk = AbinsModules.IOmodule(input_filename=input_dft_filename,
+        self._ab_initio_program = None
+        self._clerk = AbinsModules.IOmodule(input_filename=input_ab_initio_filename,
                                             group_name=AbinsModules.AbinsParameters.dft_group)
 
-    def read_phonon_file(self):
+    def read_vibrational_data(self):
         """
-        This method is different for different DFT programs. It has to be overridden by inheriting class.
+        This method is different for different ab-initio programs. It has to be overridden by inheriting class.
         This method should do the following:
 
           1) Open file with phonon data (CASTEP: foo.phonon). Name of a file should be stored in self._input_filename.
@@ -98,10 +98,10 @@ class GeneralDFTProgram(object):
 
                         "hash"  - hash of a file with the phonon data. It should be a string representation of hash.
 
-                        "DFT_program" - name of the DFT program which was used to obtain phonon data (for CASTEP ->
+                        "ab-initio_program" - name of the ab-initio program which was used to obtain phonon data (for CASTEP ->
                                         CASTEP).
 
-                        "filename" - name of input DFT file
+                        "filename" - name of input ab-initio file
 
           For more details about these fields please look at the documentation of IOmodule class.
 
@@ -130,7 +130,7 @@ class GeneralDFTProgram(object):
 
         return self._rearrange_data(data=loaded_data)
 
-    # Protected methods which should be reused by classes which read DFT phonon data
+    # Protected methods which should be reused by classes which read ab-initio phonon data
     def _recover_symmetry_points(self, data=None):
         """
         This method reconstructs symmetry equivalent k-points.
@@ -142,7 +142,7 @@ class GeneralDFTProgram(object):
 
     def _rearrange_data(self, data=None):
         """
-        This method rearranges data read from phonon DFT file. It converts  masses and frequencies Hartree atomic units.
+        This method rearranges data read from phonon ab-initio file. It converts  masses and frequencies Hartree atomic units.
         It converts atomic displacements from atomic units to Angstroms
 
         :param data: dictionary with the data to rearrange
@@ -170,36 +170,36 @@ class GeneralDFTProgram(object):
         result_data.set(k_points_data=k_points, atoms_data=atoms)
         return result_data
 
-    def save_dft_data(self, data=None):
+    def save_ab_initio_data(self, data=None):
         """
-        Saves DFT data to an HDF5 file.
+        Saves ab-initio data to an HDF5 file.
         :param data: dictionary with data to be saved.
         """
         for name in data:
             self._clerk.add_data(name=name, value=data[name])
         self._clerk.add_file_attributes()
-        self._clerk.add_attribute("DFT_program", self._dft_program)
+        self._clerk.add_attribute("ab_initio_program", self._ab_initio_program)
         self._clerk.save()
 
     def get_formatted_data(self):
 
-        # try to load DFT data from *.hdf5 file
+        # try to load ab-initio data from *.hdf5 file
         try:
-            if self._dft_program != self._clerk.get_previous_dft_program():
-                raise ValueError("Different DFT program was used in the previous calculation. Data in the hdf file "
+            if self._ab_initio_program != self._clerk.get_previous_dft_program():
+                raise ValueError("Different ab-initio program was used in the previous calculation. Data in the hdf file "
                                  "will be erased.")
 
             self._clerk.check_previous_data()
 
-            dft_data = self.load_formatted_data()
-            logger.notice(str(dft_data) + " has been loaded from the HDF file.")
+            ab_initio_data = self.load_formatted_data()
+            logger.notice(str(ab_initio_data) + " has been loaded from the HDF file.")
 
-        # if loading from *.hdf5 file failed than read data directly from input DFT file and erase hdf file
+        # if loading from *.hdf5 file failed than read data directly from input ab-initio file and erase hdf file
         except (IOError, ValueError) as err:
 
             logger.notice(str(err))
             self._clerk.erase_hdf_file()
-            dft_data = self.read_phonon_file()
-            logger.notice(str(dft_data) + " from DFT input file has been loaded.")
+            ab_initio_data = self.read_vibrational_data()
+            logger.notice(str(ab_initio_data) + " from ab-initio input file has been loaded.")
 
-        return dft_data
+        return ab_initio_data

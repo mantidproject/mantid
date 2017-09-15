@@ -23,8 +23,8 @@ import AbinsModules
 # noinspection PyPep8Naming,PyMethodMayBeStatic
 class Abins(PythonAlgorithm):
 
-    _dft_program = None
-    _phonon_file = None
+    _ab_initio_program = None
+    _vibrational_data_file = None
     _experimental_file = None
     _temperature = None
     _scale = None
@@ -49,13 +49,13 @@ class Abins(PythonAlgorithm):
     def PyInit(self):
 
         # Declare all properties
-        self.declareProperty(name="DFTprogram",
+        self.declareProperty(name="AbInitioProgram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
                              validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN"]),
-                             doc="DFT program which was used for a phonon calculation.")
+                             doc="Ab-initio program which was used for a phonon calculation.")
 
-        self.declareProperty(FileProperty("PhononFile", "",
+        self.declareProperty(FileProperty("VibrationalDataFile", "",
                              action=FileAction.Load,
                              direction=Direction.Input,
                              extensions=["phonon", "out", "outmol", "log"]),
@@ -129,11 +129,11 @@ class Abins(PythonAlgorithm):
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
 
-        dft_program = self.getProperty("DFTprogram").value
-        phonon_filename = self.getProperty("PhononFile").value
+        dft_program = self.getProperty("AbInitioProgram").value
+        phonon_filename = self.getProperty("VibrationalDataFile").value
         output = input_file_validators[dft_program](filename_full_path=phonon_filename)
         if output["Invalid"]:
-            issues["PhononFile"] = output["Comment"]
+            issues["VibrationalDataFile"] = output["Comment"]
 
         workspace_name = self.getPropertyValue("OutputWorkspace")
         # list of special keywords which cannot be used in the name of workspace
@@ -168,12 +168,12 @@ class Abins(PythonAlgorithm):
         # 2) read DFT data
         dft_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
                        "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
-        dft_reader = dft_loaders[self._dft_program](input_dft_filename=self._phonon_file)
+        dft_reader = dft_loaders[self._ab_initio_program](input_ab_initio_filename=self._vibrational_data_file)
         dft_data = dft_reader.get_formatted_data()
         prog_reporter.report("Phonon data has been read.")
 
         # 3) calculate S
-        s_calculator = AbinsModules.CalculateS.init(filename=self._phonon_file, temperature=self._temperature,
+        s_calculator = AbinsModules.CalculateS.init(filename=self._vibrational_data_file, temperature=self._temperature,
                                                     sample_form=self._sample_form, abins_data=dft_data,
                                                     instrument=self._instrument,
                                                     quantum_order_num=self._num_quantum_order_events)
@@ -798,7 +798,7 @@ class Abins(PythonAlgorithm):
         :param expected_file_extension: file extension
         :returns: dictionary with error message
         """
-        dft_program = self.getProperty("DFTprogram").value
+        dft_program = self.getProperty("AbInitioProgram").value
         msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
@@ -914,8 +914,8 @@ class Abins(PythonAlgorithm):
         Loads all properties to object's attributes.
         """
 
-        self._dft_program = self.getProperty("DFTprogram").value
-        self._phonon_file = self.getProperty("PhononFile").value
+        self._ab_initio_program = self.getProperty("AbInitioProgram").value
+        self._vibrational_data_file = self.getProperty("VibrationalDataFile").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._temperature = self.getProperty("Temperature").value
         self._scale = self.getProperty("Scale").value

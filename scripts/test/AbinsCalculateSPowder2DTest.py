@@ -49,10 +49,10 @@ class AbinsCalculateSPowder2DTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
+        castep_reader = LoadCASTEP(input_ab_initio_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
         s_data = self._prepare_data(filename=AbinsTestHelpers.find_file(filename=filename + "_S.txt"))
 
-        return {"DFT": castep_reader.read_phonon_file(), "S": s_data}
+        return {"DFT": castep_reader.read_vibrational_data(), "S": s_data}
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):
