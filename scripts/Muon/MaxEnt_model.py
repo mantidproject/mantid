@@ -20,8 +20,8 @@ class MaxEntThread(QThread):
         self.alg.output()
         return
 
-    def setInputs(self,inputs):
-        self.alg.setInputs(inputs)
+    def setInputs(self,inputs,runName):
+        self.alg.setInputs(inputs,runName)
 
 
 class MaxEntModel(object):
@@ -32,13 +32,12 @@ class MaxEntModel(object):
         self.alg.initialize()
         self.alg.setChild(True)
 
-    def setInputs(self,inputs):
+    def setInputs(self,inputs,runName):
         self.inputs=inputs
         for name,value in iteritems(self.inputs):
-            if name != "Run":
-                self.alg.setProperty(name,value)
-            else:
-                self.run=value
+            self.alg.setProperty(name,value)
+
+        self.run=runName
 
     def execute(self):
         self.alg.execute()

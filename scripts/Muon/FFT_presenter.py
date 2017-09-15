@@ -12,6 +12,7 @@ class FFTPresenter(object):
         #connect
         self.view.tableClickSignal.connect(self.tableClicked)
         self.view.buttonSignal.connect(self.handleButton)
+        self.view.phaseCheckSignal.connect(self.phaseCheck)
 
     # only get ws that are groups or pairs
     # ignore raw
@@ -24,26 +25,41 @@ class FFTPresenter(object):
         self.view.addItems(final_options)
 
     #functions
+    def phaseCheck(self):
+        self.view.phaseQuadChanged()
+
     def tableClicked(self,row,col):
         if row == self.view.getImBoxRow() and col == 1:
             self.view.changedHideUnTick(self.view.getImBox(),self.view.getImBoxRow()+1)
         elif  row == self.view.getShiftBoxRow() and col == 1:
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
-    def handleButton(self):
-        self.alg.setRun(self.view.getRunName())
+    def handleButton(self):        
+        self.alg.setRun(self.load.getRunName())
+
         #do apodization and padding to real data
+
         preInputs=self.view.initAdvanced()
-        self.view.ReAdvanced(preInputs)
+
+        if self.view.getWS() == "PhaseQuad":
+            axis=self.view.getAxis()
+            self.alg.makePhaseQuadTable(axis,self.load.getInstrument())
+            self.alg.PhaseQuad()
+            self.view.RePhaseAdvanced(preInputs)
+        else:
+            self.view.ReAdvanced(preInputs)
+            if self.view.isRaw():
+                self.view.addRaw(preInputs,"InputWorkspace")
+            tmp=1
         self.alg.preAlg(preInputs)
-        if self.view.isRaw():
-            self.view.addRaw(preInputs,"InputWorkspace")
+
         #do apodization and padding to complex data
         if self.view.isComplex():
             self.view.ImAdvanced(preInputs)
-            self.alg.preAlg(preInputs)
             if self.view.isRaw():
                 self.view.addRaw(preInputs,"InputWorkspace")
+            self.alg.preAlg(preInputs)
+
         #do FFT to transformed data
         FFTInputs = self.get_FFT_input()
         if self.view.isRaw():

@@ -28,7 +28,8 @@ class MaxEntPresenter(object):
     #functions
     def handleMaxEntButton(self):
         inputs = self.get_MaxEnt_input()
-        self.alg.setInputs(inputs)
+        runName=self.load.getRunName()
+        self.alg.setInputs(inputs,runName)
         self.alg.start()
 
     def get_MaxEnt_input(self):

@@ -12,8 +12,14 @@ class LoadUtils(object):
             tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
         else:
             tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
-
-        self.runName=tmpWS.getInstrument().getName()+str(tmpWS.getRunNumber()).zfill(8)
+        self.instrument=tmpWS.getInstrument().getName()
+        self.runName=self.instrument+str(tmpWS.getRunNumber()).zfill(8)
 
     def getCurrentWS(self):
         return self.runName, self.options
+
+    def getRunName(self):
+	    return self.runName
+
+    def getInstrument(self):
+        return self.instrument

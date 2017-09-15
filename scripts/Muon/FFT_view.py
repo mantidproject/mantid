@@ -11,6 +11,7 @@ class FFTView(QtGui.QWidget):
     # signals
     buttonSignal = QtCore.pyqtSignal()
     tableClickSignal = QtCore.pyqtSignal(object,object)
+    phaseCheckSignal = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super(FFTView, self).__init__(parent)
@@ -19,7 +20,7 @@ class FFTView(QtGui.QWidget):
         #make table
         self.FFTTable = QtGui.QTableWidget(self)
         self.FFTTable.resize(800, 800)
-        self.FFTTable.setRowCount(6)
+        self.FFTTable.setRowCount(7)
         self.FFTTable.setColumnCount(2)
         self.FFTTable.setColumnWidth(0,300)
         self.FFTTable.setColumnWidth(1,300)
@@ -48,6 +49,10 @@ class FFTView(QtGui.QWidget):
 
         table_utils.setRowName(self.FFTTable,5,"Use Raw data")
         self.Raw_box= table_utils.addCheckBoxToTable(self.FFTTable,True,5)
+
+        options=['x','y','z']
+        table_utils.setRowName(self.FFTTable,6,"Axis")
+        self.axis= table_utils.addComboToTable(self.FFTTable,6,options)
 
         self.FFTTable.resizeRowsToContents()
         #make advanced table options
@@ -82,6 +87,7 @@ class FFTView(QtGui.QWidget):
         #connects
         self.FFTTable.cellClicked.connect(self.tableClick)
         self.button.clicked.connect(self.buttonClick)
+        self.ws.currentIndexChanged.connect(self.phaseCheck)
         # add to layout
         self.FFTTable.setMinimumSize(40,158)
         self.FFTTableA.setMinimumSize(40,127)
@@ -102,10 +108,15 @@ class FFTView(QtGui.QWidget):
     def addItems(self,options):
         self.ws.clear()
         self.ws.addItems(options)
+        self.ws.addItem("PhaseQuad")
         self.Im_ws.clear()
         self.Im_ws.addItems(options)
+        self.phaseQuadChanged()
 
     # connect signals
+    def phaseCheck(self):
+        self.phaseCheckSignal.emit()
+
     def tableClick(self,row,col):
         self.tableClickSignal.emit(row,col)
 
@@ -118,6 +129,12 @@ class FFTView(QtGui.QWidget):
 
     def changedHideUnTick(self,box,row ):
         self.FFTTable.setRowHidden(row, box.checkState() != QtCore.Qt.Checked)
+
+    def phaseQuadChanged(self):
+        #show axis
+        self.FFTTable.setRowHidden(6,self.getWS()!="PhaseQuad")
+        #hide complex ws
+        self.FFTTable.setRowHidden(2,self.getWS()=="PhaseQuad")
 
     def getRunName(self):
         if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
@@ -162,7 +179,18 @@ class FFTView(QtGui.QWidget):
         inputs['InputWorkspace']=str( self.Im_ws.currentText()).replace(";","; ")
         inputs['OutputWorkspace']="__ImTmp__"
 
+    def RePhaseAdvanced(self,inputs):
+        inputs['InputWorkspace']="__phaseQuad__"
+        inputs['OutputWorkspace']="__ReTmp__"
+
+    #def ImPhaseAdvanced(self,inputs):
+    #    inputs['InputWorkspace']="__phaseQuad__"
+    #    inputs['OutputWorkspace']="__ImTmp__"
+
     # get methods
+    def getWS(self):
+        return str( self.ws.currentText()).replace(";","; ")
+
     def isAutoShift(self):
         return self.shift_box.checkState() == QtCore.Qt.Checked
 
@@ -183,3 +211,6 @@ class FFTView(QtGui.QWidget):
 
     def getShiftBox(self):
         return self.shift_box
+
+    def getAxis(self):
+        return str( self.axis.currentText())

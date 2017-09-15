@@ -140,15 +140,6 @@ class MaxEntView(QtGui.QWidget):
         inputs["MaxIterations"]=int(self.max_iterations.text())
         inputs["AlphaChopIterations"]=int(self.chop.text())
 
-        # if periods get the info from the first period
-        if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
-            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
-        else:
-            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
-
-        out=tmpWS.getInstrument().getName()+str(tmpWS.getRunNumber()).zfill(8)
-        inputs["Run"]=out
-
         # will remove this when sim maxent Works
         out=str( self.ws.currentText()).replace(";","; ")
 
