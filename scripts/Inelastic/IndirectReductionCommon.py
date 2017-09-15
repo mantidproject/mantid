@@ -11,8 +11,18 @@ import numpy as np
 
 
 def _create_file_range_parser(sum_files, instrument):
+    """
+    Creates a parser for parsing file ranges in the format 'a-b' where a and
+    b are run numbers.
+
+    :param sum_files:   Whether a sum across each range will be taken
+    :param instrument:  The name of the instrument
+    :return:            A file range parse
+    """
 
     def parser(file_range):
+
+        # Check whether this is a range or single file
         if '-' in file_range:
             bounds = file_range.split('-')
 
@@ -27,6 +37,8 @@ def _create_file_range_parser(sum_files, instrument):
                 raise RuntimeError("Incorrectly formatted range supplied:\n" + str(exc))
         else:
             try:
+                # If a run number, add an instrument name to the front, for loading,
+                # else return (e.g. if a file path is given)
                 int(file_range)
                 return instrument + file_range
             except ValueError:
@@ -209,6 +221,16 @@ def chop_workspace(workspace, monitor_index):
 
 
 def crop_workspaces(workspace_names, spec_min, spec_max, extract_monitors=True, monitor_index=0):
+    """
+    Crops the workspaces with the specified workspace names, from the specified minimum
+    spectra to the specified maximum spectra.
+
+    :param workspace_names:     The names of the workspaces to crop
+    :param spec_min:            The minimum spectra of the cropping region
+    :param spec_max:            The maximum spectra of the cropping region
+    :param extract_monitors:    If True, extracts monitors from the workspaces
+    :param monitor_index:       The index of the monitors in the workspaces
+    """
     from mantid.simpleapi import ExtractSingleSpectrum, CropWorkspace
 
     for workspace_name in workspace_names:
