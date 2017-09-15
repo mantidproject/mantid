@@ -5,7 +5,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/variant/get.hpp>
 
 using namespace Mantid::Kernel;
