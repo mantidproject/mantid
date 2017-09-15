@@ -6,7 +6,6 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>

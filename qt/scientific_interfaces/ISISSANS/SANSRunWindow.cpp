@@ -35,7 +35,6 @@
 #include <Poco/Message.h>
 #include <Poco/StringTokenizer.h>
 
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 

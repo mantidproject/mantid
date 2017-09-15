@@ -51,7 +51,6 @@ using Mantid::Kernel::NetworkProxy;
 #include <Poco/DateTimeFormatter.h>
 
 // from boost
-#include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 

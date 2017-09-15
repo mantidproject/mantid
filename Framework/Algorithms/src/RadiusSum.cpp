@@ -15,8 +15,6 @@
 
 #include "MantidHistogramData/LinearGenerator.h"
 
-#include <boost/foreach.hpp>
-
 #include <array>
 #include <cmath>
 #include <limits>

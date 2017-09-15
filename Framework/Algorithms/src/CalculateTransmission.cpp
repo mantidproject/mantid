@@ -22,7 +22,6 @@
 #include <cmath>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {

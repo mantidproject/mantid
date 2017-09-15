@@ -4,8 +4,6 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
 
-#include <boost/foreach.hpp>
-
 #include <cmath>
 #include <climits>
 #include <cfloat>
@@ -40,15 +38,8 @@ double stringToRoundedNumber(const std::string &s) {
   // warning).
   const bool containsComma = s.find(",") != std::string::npos;
   if (containsComma)
-    throw std::runtime_error("");
-
-  std::istringstream i(s);
-  double roundedNumber;
-
-  if (!(i >> roundedNumber))
-    throw std::runtime_error("");
-
-  return roundedNumber;
+    throw std::runtime_error("string contains a comma");
+  return std::stod(s);
 }
 
 /**
