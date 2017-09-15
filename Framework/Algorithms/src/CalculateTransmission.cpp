@@ -187,7 +187,7 @@ void CalculateTransmission::exec() {
     beamMonitorIndex = getIndexFromDetectorID(*sampleWS, beamMonitorID);
     logIfNotMonitor(sampleWS, directWS, beamMonitorIndex);
 
-    BOOST_FOREACH (size_t transmissionIndex, transmissionIndices)
+    for (auto transmissionIndex : transmissionIndices)
       if (transmissionIndex == beamMonitorIndex)
         throw std::invalid_argument("The IncidentBeamMonitor UDET (" +
                                     std::to_string(transmissionIndex) +

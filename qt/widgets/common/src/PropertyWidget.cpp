@@ -232,7 +232,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
 
   std::vector<Info> labelOrder = {RESTORE, REPLACE, INVALID};
 
-  BOOST_FOREACH (const Info info, labelOrder) {
+  for (const Info &info : labelOrder) {
     const QString iconPath = pathsAndToolTips[info].first;
     const QString toolTip = pathsAndToolTips[info].second;
 

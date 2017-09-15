@@ -227,9 +227,9 @@ void RadiusSum::inputValidationSanityCheck() {
     throw std::invalid_argument(s.str());
   }
 
-  std::vector<double> boundary_limits = getBoundariesOfInputWorkspace();
+  const std::vector<double> boundary_limits = getBoundariesOfInputWorkspace();
   std::stringstream s;
-  BOOST_FOREACH (auto &value, boundary_limits)
+  for (const auto &value : boundary_limits)
     s << value << " , ";
   g_log.information() << "Boundary limits are: " << s.str() << '\n';
 
