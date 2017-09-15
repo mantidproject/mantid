@@ -9,6 +9,23 @@ import numpy as np
 
 # -------------------------------------------------------------------------------
 
+
+def _create_file_range_parser(sum_files, instrument):
+
+    def parser(file_range):
+        if '-' in file_range:
+            bounds = file_range.split('-')
+            special = '-' if sum_files else ':'
+            return instrument + bounds[0] + special + bounds[1]
+        else:
+            try:
+                int(file_range)
+                return instrument + file_range
+            except ValueError:
+                return file_range
+    return parser
+
+
 def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=True, load_logs=True, load_opts=None):
     """
     Loads a set of files from specified file ranges and extracts just the spectra we
@@ -24,9 +41,8 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
 
     @return List of loaded workspace names and flag indicating chopped data
     """
-
-    if not sum_files:
-        file_ranges = [file_range.replace('-', ':') for file_range in file_ranges]
+    file_range_parser = _create_file_range_parser(sum_files, ipf_filename.split('-')[0])
+    file_ranges = [file_range_parser(file_range) for file_range in file_ranges]
     return _load_files(file_ranges, ipf_filename, spec_min, spec_max, load_logs, load_opts)
 
 
