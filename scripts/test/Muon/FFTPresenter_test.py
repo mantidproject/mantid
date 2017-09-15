@@ -1,8 +1,12 @@
 import sys
+
+from  Muon import load_utils
 from  Muon import FFT_presenter
 from  Muon import FFT_view
 from  Muon import FFT_model
+
 import unittest
+
 if sys.version_info.major == 3:
     from unittest import mock
 else:
@@ -11,6 +15,8 @@ else:
 
 class FFTPresenterTest(unittest.TestCase):
     def setUp(self):
+        self.load=mock.create_autospec(load_utils.LoadUtils,spec_set=True)
+        self.load.getCurrentWS=mock.Mock(return_value=["TEST00000001",["fwd","bkwd"]])
         self.view=mock.create_autospec(FFT_view.FFTView,spec_set=True)
         #signals
         self.view.tableClickSignal=mock.Mock(return_value=[3,1])
@@ -32,7 +38,7 @@ class FFTPresenterTest(unittest.TestCase):
         self.model.FFTAlg = mock.Mock()
         self.model.preAlg=mock.Mock()
         #set presenter
-        self.presenter=FFT_presenter.FFTPresenter(self.view,self.model)
+        self.presenter=FFT_presenter.FFTPresenter(self.view,self.model,self.load)
 
     def sendSignal(self):
         row,col=self.view.tableClickSignal()
