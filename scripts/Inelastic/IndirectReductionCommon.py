@@ -437,6 +437,7 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws)
     mtd.addOrReplace(workspace_name, grouped_ws)
 
+
 def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
@@ -707,11 +708,11 @@ def save_reduction(workspace_names, formats, x_units='DeltaE'):
 
         if 'ascii' in formats:
             # Changed to version 2 to enable re-loading of files into mantid
-            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
-            saveAsciiAlg.initialize()
-            saveAsciiAlg.setProperty('InputWorkspace', workspace_name)
-            saveAsciiAlg.setProperty('Filename', workspace_name + '.dat')
-            saveAsciiAlg.execute()
+            save_ascii_alg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
+            save_ascii_alg.initialize()
+            save_ascii_alg.setProperty('InputWorkspace', workspace_name)
+            save_ascii_alg.setProperty('Filename', workspace_name + '.dat')
+            save_ascii_alg.execute()
 
         if 'aclimax' in formats:
             if x_units == 'DeltaE_inWavenumber':
