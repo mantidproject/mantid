@@ -172,6 +172,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                               load_logs=self._load_logs,
                                               load_opts=load_opts)
 
+            if len(self._workspace_names) > len(self._vanadium_runs):
+                raise RuntimeError("There cannot be more sample runs than vanadium runs.")
+
         for index, c_ws_name in enumerate(self._workspace_names):
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
 
