@@ -125,13 +125,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 logger.warning('type = ' + str(type(mode)))
                 issues['CalFile'] = 'Cal Files are currently only available for use in OSIRIS diffspec mode'
 
-        num_samples = len(input_files)
-        num_vanadium = len(self.getProperty('VanadiumFiles').value)
-        if num_samples != num_vanadium and num_vanadium != 0:
-            run_num_mismatch = 'You must input the same number of sample and vanadium runs'
-            issues['InputFiles'] = run_num_mismatch
-            issues['VanadiumFiles'] = run_num_mismatch
-
         return issues
 
     # ------------------------------------------------------------------------------
@@ -330,15 +323,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         logger.information('IPF filename is: %s' % self._ipf_filename)
 
         # Only enable sum files if we actually have more than one file
-        sum_files = self.getProperty('SumFiles').value
-
-        if sum_files:
-            num_raw_files = len(self._data_files)
-            if num_raw_files > 1:
-                self._sum_files = True
-                logger.information('Summing files enabled (have %d files)' % num_raw_files)
-            else:
-                logger.information('SumFiles options is ignored when only one file is provided')
+        self._sum_files = self.getProperty('SumFiles').value
 
     def _apply_calibration(self):
         """
