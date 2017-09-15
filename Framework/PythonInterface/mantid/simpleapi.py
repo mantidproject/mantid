@@ -763,6 +763,17 @@ def _is_workspace_property(prop):
         # Doesn't look like a workspace property
         return False
 
+def _is_function_property(prop):
+    """
+    Returns True if the property is a fit function
+    
+    :param prop: A property object
+    :type Property
+    :return:  True if the property is considered a fit function
+    """
+    if isinstance(prop, _api.FunctionProperty):
+        return True
+    return False
 
 def _get_args_from_lhs(lhs, algm_obj):
     """
@@ -873,6 +884,9 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
                     raise RuntimeError("Internal error. Output workspace property '%s' on "
                                        "algorithm '%s' has not been stored correctly."
                                        "Please contact development team." % (name,  algm_obj.name()))
+        elif _is_function_property(prop):
+            value_str = prop.valueAsStr
+            retvals[name] = FunctionWrapper(value_str)
         else:
             if hasattr(prop, 'value'):
                 retvals[name] = prop.value
