@@ -321,10 +321,10 @@ void LoadAscii::init() {
   // For the ListValidator
   std::array<std::string, 5> sepOptions;
   for (size_t i = 0; i < 5; ++i) {
-	  const auto &option = spacers[i][0];
-	  m_separatorIndex.insert(
-		  std::pair<std::string, std::string>(option, spacers[i][1]));
-	  sepOptions[i] = option;
+    const auto &option = spacers[i][0];
+    m_separatorIndex.insert(
+        std::pair<std::string, std::string>(option, spacers[i][1]));
+    sepOptions[i] = option;
   }
 
   declareProperty(

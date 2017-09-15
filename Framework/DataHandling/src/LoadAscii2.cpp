@@ -614,10 +614,10 @@ void LoadAscii2::init() {
   int sepOptionsIndex = 0;
 
   for (const auto &spacer : spacers) {
-	  const auto &option = spacer[0];
-	  m_separatorIndex.insert(
-		  std::pair<std::string, std::string>(option, spacer[1]));
-	  sepOptions[sepOptionsIndex++] = option;
+    const auto &option = spacer[0];
+    m_separatorIndex.insert(
+        std::pair<std::string, std::string>(option, spacer[1]));
+    sepOptions[sepOptionsIndex++] = option;
   }
 
   declareProperty("Separator", "Automatic",

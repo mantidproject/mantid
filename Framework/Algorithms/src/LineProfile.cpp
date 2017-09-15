@@ -314,8 +314,8 @@ void LineProfile::init() {
   declareProperty(PropertyNames::START, EMPTY_DBL(),
                   "Starting point of the line.");
   declareProperty(PropertyNames::END, EMPTY_DBL(), "End point of the line.");
-  const std::array<std::string, 2> modes{ModeChoices::AVERAGE, 
-	                                     ModeChoices::SUM};
+  const std::array<std::string, 2> modes{ModeChoices::AVERAGE,
+                                         ModeChoices::SUM};
   declareProperty(PropertyNames::MODE, ModeChoices::AVERAGE,
                   boost::make_shared<ListValidator<std::string>>(modes),
                   "How the profile is calculated over the line width.");

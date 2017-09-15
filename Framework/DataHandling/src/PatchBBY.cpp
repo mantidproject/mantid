@@ -115,7 +115,7 @@ void PatchBBY::init() {
 
     case TYPE_STR:
       if (std::strcmp(itr->Name, "FrameSource") == 0) {
-		std::array<std::string, 3> keys = {{"", EXTERNAL, INTERNAL}};
+        std::array<std::string, 3> keys = {{"", EXTERNAL, INTERNAL}};
         declareProperty(
             Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
                 itr->Name, "",
