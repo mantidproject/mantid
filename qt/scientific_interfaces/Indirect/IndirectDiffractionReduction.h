@@ -58,6 +58,8 @@ private:
   void runGenericReduction(QString instName, QString mode);
   void runOSIRISdiffonlyReduction();
   void createGroupingWorkspace(const std::string& outputWsName);
+  void addGrouping(const std::string& groupingWsName,
+                   Mantid::API::IAlgorithm_sptr msgDiffReduction);
   void deleteWorkspace(const std::string& wsName);
 
 private:

@@ -304,6 +304,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   QString rebinStart = "";
   QString rebinWidth = "";
   QString rebinEnd = "";
+  bool useManualGrouping = m_uiForm.ckManualDRange->isChecked();
 
   // Get rebin string
   if (mode == "diffspec") {
@@ -379,28 +380,17 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   }
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps diffRuntimeProps;
-  std::string groupingWs = "__Grouping";
+  std::string groupingWsName = "__Grouping";
   // Add the property for grouping policy if needed
-  if (m_uiForm.ckManualGrouping->isChecked()) {
-    msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
-    createGroupingWorkspace(groupingWs);
-    diffRuntimeProps["GroupingWorkspace"] = groupingWs;
+  if (useManualGrouping) {
+    addGrouping(groupingWsName, msgDiffReduction);
+    diffRuntimeProps["GroupingWorkspace"] = groupingWsName;
   }
-
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction, diffRuntimeProps);
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
-
-  if (m_uiForm.ckManualGrouping->isChecked()) {
-    auto deleter = [&, this]() {
-      this->deleteWorkspace(groupingWs);
-    };
-
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-      SLOT(deleter));
-  }
+    SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -491,6 +481,19 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
           SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void IndirectDiffractionReduction::addGrouping(const std::string& groupingWsName, 
+                                               IAlgorithm_sptr msgDiffReduction) {
+  msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
+  createGroupingWorkspace(groupingWsName);
+
+  auto deleter = [&, this]() {
+    this->deleteWorkspace(groupingWsName);
+  };
+
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+    SLOT(deleter));
 }
 
 void IndirectDiffractionReduction::createGroupingWorkspace(const std::string& outputWsName) {
