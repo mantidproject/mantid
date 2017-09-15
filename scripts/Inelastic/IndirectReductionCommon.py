@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import (Load, LoadVesuvio, LoadParameterFile, ChopData)
+from mantid.simpleapi import Load, LoadVesuvio
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -71,8 +71,6 @@ def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=Tru
 
     @return List of loaded workspace names and flag indicating chopped data
     """
-    from mantid.simpleapi import (ExtractSingleSpectrum, CropWorkspace,
-                                  DeleteWorkspace)
     delete_monitors = False
 
     if load_opts is None:
@@ -87,10 +85,10 @@ def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=Tru
     for file_specifier in file_specifiers:
         # The filename without path and extension will be the workspace name
         ws_name = os.path.splitext(os.path.basename(str(file_specifier)))[0]
-        workspace = mtd[ws_name]
         logger.debug('Loading file %s as workspace %s' % (file_specifier, ws_name))
 
         do_load(file_specifier, ws_name, ipf_filename, load_logs, load_opts)
+        workspace = mtd[ws_name]
 
         # Add the workspace to the list of workspaces
         workspace_names.append(ws_name)
@@ -100,24 +98,8 @@ def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=Tru
         monitor_index = int(instrument.getNumberParameter('Workflow.Monitor1-SpectrumNumber')[0])
         logger.debug('Workspace %s monitor 1 spectrum number :%d' % (ws_name, monitor_index))
 
-        workspaces, chopped_data = chop_workspace(workspace)
-
-        for chop_ws_name in workspaces:
-            # Get the monitor spectrum
-            monitor_ws_name = chop_ws_name + '_mon'
-            ExtractSingleSpectrum(InputWorkspace=chop_ws_name,
-                                  OutputWorkspace=monitor_ws_name,
-                                  WorkspaceIndex=monitor_index)
-
-            if delete_monitors:
-                DeleteWorkspace(Workspace=monitor_ws_name)
-
-            # Crop to the detectors required
-            chop_ws = mtd[chop_ws_name]
-            CropWorkspace(InputWorkspace=chop_ws_name,
-                          OutputWorkspace=chop_ws_name,
-                          StartWorkspaceIndex=chop_ws.getIndexFromSpectrumNumber(int(spec_min)),
-                          EndWorkspaceIndex=chop_ws.getIndexFromSpectrumNumber(int(spec_max)))
+        workspaces, chopped_data = chop_workspace(workspace, monitor_index)
+        crop_workspaces(workspace_names, spec_min, spec_max, not delete_monitors, monitor_index)
 
     logger.information('Loaded workspace names: %s' % (str(workspace_names)))
     logger.information('Chopped data: %s' % (str(chopped_data)))
@@ -141,16 +123,17 @@ def do_load(file_specifier, output_ws_name, ipf_filename, load_logs, load_opts):
     :param load_opts:       Additional loading options
     :param load_logs:       If True, load logs
     """
+    from mantid.simpleapi import LoadParameterFile
 
     if 'VESUVIO' in ipf_filename:
         # Load all spectra. They are cropped later
-        LoadVesuvio(Filename=str(filename),
-                    OutputWorkspace=ws_name,
+        LoadVesuvio(Filename=str(file_specifier),
+                    OutputWorkspace=output_ws_name,
                     SpectrumList='1-198',
                     **load_opts)
     else:
-        Load(Filename=filename,
-             OutputWorkspace=ws_name,
+        Load(Filename=file_specifier,
+             OutputWorkspace=output_ws_name,
              LoadLogFiles=load_logs,
              **load_opts)
 
@@ -162,15 +145,18 @@ def do_load(file_specifier, output_ws_name, ipf_filename, load_logs, load_opts):
 # -------------------------------------------------------------------------------
 
 
-def chop_workspace(workspace):
+def chop_workspace(workspace, monitor_index):
     """
     Chops the specified workspace if its maximum x-value exceeds its instrument
     parameter, 'Workflow.ChopDataIfGreaterThan'.
 
-    :param workspace:   The workspace to chop
-    :return:            A tuple of the list of output workspace names and a boolean
-                        specifying whether the workspace was chopped.
+    :param workspace:     The workspace to chop
+    :param monitor_index: The index of the monitor spectra in the workspace.
+    :return:              A tuple of the list of output workspace names and a boolean
+                          specifying whether the workspace was chopped.
     """
+    from mantid.simpleapi import ChopData
+
     workspace_name = workspace.getName()
 
     # Chop data if required
@@ -192,6 +178,29 @@ def chop_workspace(workspace):
         return workspace.getNames()
     else:
         return ([workspace_name], chopped_data)
+
+# -------------------------------------------------------------------------------
+
+
+def crop_workspaces(workspace_names, spec_min, spec_max, extract_monitors=True, monitor_index=0):
+    from mantid.simpleapi import ExtractSingleSpectrum, CropWorkspace
+
+    for workspace_name in workspace_names:
+
+        if extract_monitors:
+            # Get the monitor spectrum
+            monitor_ws_name = workspace_name + '_mon'
+            ExtractSingleSpectrum(InputWorkspace=workspace_name,
+                                  OutputWorkspace=monitor_ws_name,
+                                  WorkspaceIndex=monitor_index)
+
+        # Crop to the detectors required
+        workspace = mtd[workspace_name]
+
+        CropWorkspace(InputWorkspace=workspace_name,
+                      OutputWorkspace=workspace_name,
+                      StartWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_min)),
+                      EndWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_max)))
 
 
 # -------------------------------------------------------------------------------

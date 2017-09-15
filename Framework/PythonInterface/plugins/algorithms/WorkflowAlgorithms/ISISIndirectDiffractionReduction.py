@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-from IndirectReductionCommon import load_files
+from IndirectReductionCommon import load_files, load_file_ranges
 
 from mantid.simpleapi import *
 from mantid.api import *
@@ -100,6 +100,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         # Validate input files
         input_files = self.getProperty('InputFiles').value
+        logger.error("Input Files: " + str(input_files))
         if len(input_files) == 0:
             issues['InputFiles'] = 'InputFiles must contain at least one filename'
 
@@ -156,13 +157,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             load_opts['Mode'] = 'FoilOut'
             load_opts['LoadMonitors'] = True
 
-        self._workspace_names, self._chopped_data = load_files(self._data_files,
-                                                               self._ipf_filename,
-                                                               self._spectra_range[0],
-                                                               self._spectra_range[1],
-                                                               sum_files=self._sum_files,
-                                                               load_logs=self._load_logs,
-                                                               load_opts=load_opts)
+        self._workspace_names, self._chopped_data = load_file_ranges(self._data_files,
+                                                                     self._ipf_filename,
+                                                                     self._spectra_range[0],
+                                                                     self._spectra_range[1],
+                                                                     sum_files=self._sum_files,
+                                                                     load_logs=self._load_logs,
+                                                                     load_opts=load_opts)
 
         # applies the changes in the provided calibration file
         self._apply_calibration()
@@ -175,7 +176,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                               self._ipf_filename,
                                               self._spectra_range[0],
                                               self._spectra_range[1],
-                                              sum_files=self._sum_files,
                                               load_logs=self._load_logs,
                                               load_opts=load_opts)
 
@@ -298,7 +298,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         """
         Gets algorithm properties.
         """
-
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._data_files = self.getProperty('InputFiles').value
         self._container_data_files = self.getProperty('ContainerFiles').value
