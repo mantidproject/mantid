@@ -215,7 +215,7 @@ def chop_workspace(workspace, monitor_index):
                  NChops=5)
         return workspace.getNames()
     else:
-        return ([workspace_name], chopped_data)
+        return [workspace_name], chopped_data
 
 # -------------------------------------------------------------------------------
 
@@ -824,11 +824,11 @@ def save_reduction(workspace_names, formats, x_units='DeltaE'):
 
         if 'ascii' in formats:
             # Changed to version 2 to enable re-loading of files into mantid
-            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
-            saveAsciiAlg.initialize()
-            saveAsciiAlg.setProperty('InputWorkspace', workspace_name)
-            saveAsciiAlg.setProperty('Filename', workspace_name + '.dat')
-            saveAsciiAlg.execute()
+            save_ascii_alg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
+            save_ascii_alg.initialize()
+            save_ascii_alg.setProperty('InputWorkspace', workspace_name)
+            save_ascii_alg.setProperty('Filename', workspace_name + '.dat')
+            save_ascii_alg.execute()
 
         if 'aclimax' in formats:
             if x_units == 'DeltaE_inWavenumber':
