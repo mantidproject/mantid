@@ -143,8 +143,7 @@ void IndirectDiffractionReduction::run() {
  */
 void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
-  disconnect(m_batchAlgoRunner, 0, this,
-             SLOT(algorithmComplete(bool)));
+  disconnect(m_batchAlgoRunner, 0, this, SLOT(algorithmComplete(bool)));
 
   if (error) {
     showInformationBox(
@@ -390,7 +389,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-    SLOT(algorithmComplete(bool)));
+          SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -483,42 +482,37 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void IndirectDiffractionReduction::addGrouping(const std::string& groupingWsName, 
-                                               IAlgorithm_sptr msgDiffReduction) {
+void IndirectDiffractionReduction::addGrouping(
+    const std::string &groupingWsName, IAlgorithm_sptr msgDiffReduction) {
   msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
   createGroupingWorkspace(groupingWsName);
 
-  auto deleter = [&, this]() {
-    this->deleteWorkspace(groupingWsName);
-  };
+  auto deleter = [&, this]() { this->deleteWorkspace(groupingWsName); };
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-    SLOT(deleter));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(deleter));
 }
 
-void IndirectDiffractionReduction::createGroupingWorkspace(const std::string& outputWsName) {
+void IndirectDiffractionReduction::createGroupingWorkspace(
+    const std::string &outputWsName) {
   IAlgorithm_sptr groupingAlg =
-    AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+      AlgorithmManager::Instance().create("CreateGroupingWorkspace");
   groupingAlg->initialize();
 
   auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
 
-  groupingAlg->setProperty("FixedGroupCount",
-    m_uiForm.spNumberGroups->value());
-  groupingAlg->setProperty(
-    "InstrumentName",
-    instrumentConfig->getInstrumentName().toStdString());
-  groupingAlg->setProperty(
-    "ComponentName",
-    instrumentConfig->getAnalyserName().toStdString());
+  groupingAlg->setProperty("FixedGroupCount", m_uiForm.spNumberGroups->value());
+  groupingAlg->setProperty("InstrumentName",
+                           instrumentConfig->getInstrumentName().toStdString());
+  groupingAlg->setProperty("ComponentName",
+                           instrumentConfig->getAnalyserName().toStdString());
   groupingAlg->setProperty("OutputWorkspace", outputWsName);
 
   m_batchAlgoRunner->addAlgorithm(groupingAlg);
 }
 
-void IndirectDiffractionReduction::deleteWorkspace(const std::string& wsName) {
+void IndirectDiffractionReduction::deleteWorkspace(const std::string &wsName) {
   IAlgorithm_sptr deleteAlg =
-    AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+      AlgorithmManager::Instance().create("CreateGroupingWorkspace");
   deleteAlg->initialize();
   deleteAlg->setProperty("Workspace", wsName);
   deleteAlg->executeAsync();
