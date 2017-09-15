@@ -105,6 +105,9 @@ void MantidTable::fillTable() {
     Mantid::API::Column_sptr c = m_ws->getColumn(static_cast<int>(i));
     QString colName = QString::fromStdString(c->name());
     setColName(i, colName);
+    if (c->type() == "str") {
+      setColumnType(i, ColType::Text);
+    }
     // Make columns of ITableWorkspaces read only, if specified
     setReadOnlyColumn(i, c->getReadOnly());
 
@@ -294,14 +297,14 @@ void MantidTable::cellEdited(int row, int col) {
   // Have the column convert the text to a value internally
   int index = row;
   std::istringstream textStream(text);
-  const std::locale systemLocale("");
-  textStream.imbue(systemLocale);
-  c->read(index, textStream.str());
+  const std::locale applicationLocale(locale().name().toStdString());
+  textStream.imbue(applicationLocale);
+  c->read(index, textStream);
 
   // Set the table view to be the same text after editing.
   // That way, if the string was stupid, it will be reset to the old value.
   std::ostringstream s;
-  s.imbue(systemLocale);
+  s.imbue(applicationLocale);
 
   // Avoid losing precision for numeric data
   if (c->type() == "double") {
