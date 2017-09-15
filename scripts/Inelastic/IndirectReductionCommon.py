@@ -435,7 +435,9 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     @param group_ws Workspace for Workspace method
     """
     grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws)
-    mtd.addOrReplace(workspace_name, grouped_ws)
+
+    if grouped_ws is not None:
+        mtd.addOrReplace(workspace_name, grouped_ws)
 
 
 def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None):
@@ -471,7 +473,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
 
     if grouping_method == 'Individual':
         # Nothing to do here
-        return
+        return None
 
     elif grouping_method == 'All':
         # Get a list of all spectra minus those which are masked
