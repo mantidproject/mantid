@@ -35,7 +35,7 @@ bool ConvertToHistogram::isProcessingRequired(
 
 /**
  * Returns the size of the new X vector
- * @param inputWS pointer to input workspace
+ * @param ySize pointer to input workspace
  * @returns An integer giving the size of the new X vector
  */
 size_t ConvertToHistogram::getNewXSize(const std::size_t ySize) const {
