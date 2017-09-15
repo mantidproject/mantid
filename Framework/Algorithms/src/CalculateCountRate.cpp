@@ -269,8 +269,8 @@ void CalculateCountRate::calcRateLog(
   double dt = (dTRangeMax - dTRangeMin) / static_cast<double>(m_numLogSteps);
   auto t0 = m_TRangeMin.totalNanoseconds();
   for (auto i = 0; i < m_numLogSteps; i++) {
-    times[i] = Mantid::Types::DateAndTime(
-        t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
+    times[i] =
+        Mantid::Types::DateAndTime(t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
   }
   // store calculated values within the target log.
   targLog->replaceValues(times, countRate);

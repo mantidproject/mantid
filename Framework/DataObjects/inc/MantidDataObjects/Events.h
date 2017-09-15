@@ -6,6 +6,7 @@
 #endif
 #include "MantidAPI/MatrixWorkspace_fwd.h" // get MantidVec declaration
 #include "MantidKernel/System.h"
+#include "MantidTypes/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidTypes/DateAndTime.h"
@@ -181,9 +182,7 @@ inline double WeightedEventNoTime::tof() const { return m_tof; }
 /** Return the pulse time; this returns 0 since this
  *  type of Event has no time associated.
  */
-inline Mantid::Types::DateAndTime WeightedEventNoTime::pulseTime() const {
-  return 0;
-}
+inline Mantid::Types::DateAndTime WeightedEventNoTime::pulseTime() const { return 0; }
 
 /// Return the weight of the neutron, as a double (it is saved as a float).
 inline double WeightedEventNoTime::weight() const { return m_weight; }
